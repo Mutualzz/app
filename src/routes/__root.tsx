@@ -1,27 +1,34 @@
 import { createRootRoute, Outlet } from "@tanstack/react-router";
-import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
 
-// Theme
-import { CssVarsProvider, extendTheme } from "@mui/joy/styles";
+// Theme Imports
+import {
+    ThemeProvider,
+    createTheme,
+    StyledEngineProvider,
+} from "@mui/material/styles";
 
 // Dev tools
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { TanStackRouterDevtools } from "@tanstack/router-devtools";
+import { CssBaseline } from "@mui/material";
+import Navigation from "../components/Navigation.component";
 
-// Extended Theme
-const theme = extendTheme({
-    fontFamily: {
-        display: "Montserrat",
-        body: "Montserrat",
+// Theme
+const theme = createTheme({
+    palette: {
+        mode: "dark",
+    },
+    typography: {
+        fontFamily: "Montserrat, sans-serif",
     },
 });
 
-const queryClient = new QueryClient();
-
-export const Route = createRootRoute({
-    component: () => (
-        <CssVarsProvider theme={theme}>
-            <QueryClientProvider client={queryClient}>
+const RootComponent = () => {
+    return (
+        <StyledEngineProvider injectFirst>
+            <ThemeProvider theme={theme}>
+                <CssBaseline />
+                <Navigation />
                 <Outlet />
                 {import.meta.env.DEV && (
                     <>
@@ -29,7 +36,11 @@ export const Route = createRootRoute({
                         <TanStackRouterDevtools />
                     </>
                 )}
-            </QueryClientProvider>
-        </CssVarsProvider>
-    ),
+            </ThemeProvider>
+        </StyledEngineProvider>
+    );
+};
+
+export const Route = createRootRoute({
+    component: RootComponent,
 });
