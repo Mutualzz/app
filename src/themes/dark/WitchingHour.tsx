@@ -3,6 +3,7 @@ import { baseDarkTheme } from "./baseDark";
 
 export const witchingHourTheme: Theme = {
     ...baseDarkTheme,
+    id: "witching-hour",
     name: "Witching Hour",
     description: "Mystical, Arcane, and Enigmatic",
     colors: {
