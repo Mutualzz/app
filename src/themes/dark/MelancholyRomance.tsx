@@ -3,6 +3,7 @@ import { baseDarkTheme } from "./baseDark";
 
 export const melancholyRomanceTheme: Theme = {
     ...baseDarkTheme,
+    id: "melancholy-romance",
     name: "Melancholy Romance",
     description: "Dramatic, Vintage, and Elegant",
     colors: {

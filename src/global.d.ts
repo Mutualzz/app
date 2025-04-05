@@ -2,6 +2,7 @@ type HexString = `#${string}`;
 
 declare module "@emotion/react" {
     export interface Theme {
+        id: string;
         name: string;
         description: string;
         colors: {

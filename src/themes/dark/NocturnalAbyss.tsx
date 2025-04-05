@@ -3,6 +3,7 @@ import { baseDarkTheme } from "./baseDark";
 
 export const nocturnalAbyssTheme: Theme = {
     ...baseDarkTheme,
+    id: "nocturnal-abyss",
     name: "Nocturnal Abyss",
     description: "Deep, Mysterious, and Shadowy",
     colors: {

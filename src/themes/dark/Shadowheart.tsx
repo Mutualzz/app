@@ -3,6 +3,7 @@ import { baseDarkTheme } from "./baseDark";
 
 export const shadowheartTheme: Theme = {
     ...baseDarkTheme,
+    id: "shadowheart",
     name: "Shadowheart",
     description: "Dystopian, Sharp, and Industrial",
     colors: {
