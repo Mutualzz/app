@@ -1,4 +1,4 @@
-import { Theme } from "@emotion/react";
+import { type Theme } from "@emotion/react";
 import { baseDarkTheme } from "./baseDark";
 
 export const crimsonLamentTheme: Theme = {
@@ -12,6 +12,11 @@ export const crimsonLamentTheme: Theme = {
         secondary: "#401921",
         background: "#090606",
         surface: "#1A0E10",
+
+        error: "#B52B3F",
+        warning: "#D98E04",
+        info: "#4A90E2",
+        success: "#4CAF50",
 
         typography: {
             primary: "#E0D2D2",

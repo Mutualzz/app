@@ -1,4 +1,4 @@
-import { Theme } from "@emotion/react";
+import { type Theme } from "@emotion/react";
 import { baseDarkTheme } from "./baseDark";
 
 export const eternalMourningTheme: Theme = {
@@ -12,6 +12,11 @@ export const eternalMourningTheme: Theme = {
         secondary: "#4C3A54",
         background: "#0A080A",
         surface: "#151218",
+
+        error: "#9A16FA",
+        warning: "#C47E29",
+        info: "#5A8CAE",
+        success: "#4A7F4E",
 
         typography: {
             primary: "#E5E3E8",

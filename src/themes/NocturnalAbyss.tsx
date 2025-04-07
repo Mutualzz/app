@@ -1,4 +1,4 @@
-import { Theme } from "@emotion/react";
+import { type Theme } from "@emotion/react";
 import { baseDarkTheme } from "./baseDark";
 
 export const nocturnalAbyssTheme: Theme = {
@@ -12,6 +12,11 @@ export const nocturnalAbyssTheme: Theme = {
         secondary: "#3E2C41",
         background: "#090909",
         surface: "#131313",
+
+        error: "#C3073F",
+        warning: "#B07A29",
+        info: "#5A7A8C",
+        success: "#4A7F4E",
 
         typography: {
             primary: "#E0D6D6",

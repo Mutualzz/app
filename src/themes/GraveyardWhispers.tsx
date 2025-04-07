@@ -1,4 +1,4 @@
-import { Theme } from "@emotion/react";
+import { type Theme } from "@emotion/react";
 import { baseDarkTheme } from "./baseDark";
 
 export const graveyardWhispersTheme: Theme = {
@@ -12,6 +12,11 @@ export const graveyardWhispersTheme: Theme = {
         secondary: "#4B2E39",
         background: "#0D0D0D",
         surface: "#1A1A1A",
+
+        error: "#8F3A42",
+        warning: "#B07A1A",
+        info: "#5A7A8C",
+        success: "#4A6A4E",
 
         typography: {
             primary: "#D1D1D1",

@@ -1,4 +1,4 @@
-import { Theme } from "@emotion/react";
+import { type Theme } from "@emotion/react";
 import { baseDarkTheme } from "./baseDark";
 
 export const grungeIndustrialTheme: Theme = {
@@ -12,6 +12,11 @@ export const grungeIndustrialTheme: Theme = {
         secondary: "#5E3549",
         background: "#101010",
         surface: "#1E1E1E",
+
+        error: "#A54242",
+        warning: "#C49A29",
+        info: "#5A7A8C",
+        success: "#4A7F4E",
 
         typography: {
             primary: "#DFDFDF",

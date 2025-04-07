@@ -1,4 +1,4 @@
-import { Theme } from "@emotion/react";
+import { type Theme } from "@emotion/react";
 import { baseDarkTheme } from "./baseDark";
 
 export const witchingHourTheme: Theme = {
@@ -12,6 +12,11 @@ export const witchingHourTheme: Theme = {
         secondary: "#2B2B4F",
         background: "#0A0A12",
         surface: "#151526",
+
+        error: "#AD1457",
+        warning: "#D4A017",
+        info: "#5A7A8C",
+        success: "#4CAF50",
 
         typography: {
             primary: "#EAE5E5",
