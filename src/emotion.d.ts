@@ -2,8 +2,6 @@ import "@emotion/react";
 
 type HexString = `#${string}`;
 
-type ButtonStyle = {};
-
 declare module "@emotion/react" {
     export interface Theme {
         id: string;
