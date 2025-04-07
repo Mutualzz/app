@@ -1,13 +1,15 @@
-import { ThemeProvider as EmotionThemeProvder } from "@emotion/react";
+import {
+    ThemeProvider as EmotionThemeProvder,
+    type Theme,
+} from "@emotion/react";
 import {
     createContext,
-    PropsWithChildren,
+    type PropsWithChildren,
     useContext,
     useMemo,
     useState,
 } from "react";
-import { AllThemes, themes } from "../themes";
-import { Theme } from "@emotion/react";
+import { type AllThemes, themes } from "../themes";
 
 const ThemeContext = createContext<{
     theme: Theme;
@@ -26,14 +28,14 @@ export const ThemeProvider = ({ children }: PropsWithChildren) => {
         setTheme(theme);
     };
 
-    const themeObject = themes[theme as keyof typeof themes];
+    const themeObject = themes[theme];
 
     const value = useMemo(
         () => ({
             theme: themeObject,
             changeTheme,
         }),
-        [theme]
+        [theme],
     );
 
     return (
