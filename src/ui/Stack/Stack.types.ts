@@ -1,4 +1,6 @@
-export interface StackProps extends React.HTMLProps<HTMLDivElement> {
+import type { HTMLProps } from "react";
+
+export interface StackProps extends HTMLProps<HTMLDivElement> {
     display?: "flex" | "block" | "inline-block" | "grid";
     direction?: "row" | "column";
     wrap?: "nowrap" | "wrap" | "wrap-reverse";

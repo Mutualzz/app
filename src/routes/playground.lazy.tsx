@@ -5,6 +5,7 @@ import { Button } from "../ui/Button/Button";
 import { Stack } from "../ui/Stack/Stack";
 
 import chunk from "lodash/chunk";
+import { useState } from "react";
 import { type AllThemes } from "../themes";
 import {
     type ButtonColor,
@@ -17,6 +18,10 @@ export const Route = createLazyFileRoute("/playground")({
 
 function Playground() {
     const { changeTheme } = useTheme();
+    const [buttonSize, setButtonSize] = useState<
+        "xs" | "sm" | "md" | "lg" | "xl"
+    >("md");
+    const [buttonLoading, setButtonLoading] = useState(false);
 
     // all the button variants and colors
     const buttonVariants = [
@@ -43,6 +48,8 @@ function Playground() {
                     key={`${variant}-${color}`}
                     variant={variant}
                     color={color}
+                    size={buttonSize}
+                    loading={buttonLoading}
                 >
                     {`${variant} ${color}`}
                 </Button>,
@@ -59,7 +66,6 @@ function Playground() {
     return (
         <Stack direction="column">
             {buttons}
-
             <select onChange={(e) => changeTheme(e.target.value as AllThemes)}>
                 <option value="baseDark">Base Dark</option>
                 <option value="crimsonLament">Crimson Lament</option>
@@ -73,6 +79,28 @@ function Playground() {
                 <option value="shadowheart">Shadowheart</option>
                 <option value="witchingHour">Witching Hour</option>
             </select>
+            <select
+                onChange={(e) =>
+                    setButtonSize(
+                        e.target.value as "xs" | "sm" | "md" | "lg" | "xl",
+                    )
+                }
+                value={buttonSize}
+            >
+                <option value="xs">Extra Small</option>
+                <option value="sm">Small</option>
+                <option value="md">Medium</option>
+                <option value="lg">Large</option>
+                <option value="xl">Extra Large</option>
+            </select>
+            <Button
+                onClick={() => setButtonLoading((prev) => !prev)}
+                variant="contained"
+                color="primary"
+                size="md"
+            >
+                Toggle Loading
+            </Button>
         </Stack>
     );
 }

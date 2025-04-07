@@ -2,32 +2,11 @@ import { css, type Theme } from "@emotion/react";
 import styled from "@emotion/styled";
 import { type FC } from "react";
 import { useTheme } from "../../contexts/ThemeManager";
+import { sizeStyles } from "../../utils";
+import { Loader } from "../Loader/Loader";
 import { type ButtonColor, type ButtonProps } from "./Button.types";
 
-const sizeStyles = {
-    xs: css`
-        padding: 0.25rem 0.5rem;
-        font-size: 0.75rem;
-    `,
-    sm: css`
-        padding: 0.375rem 0.75rem;
-        font-size: 0.875rem;
-    `,
-    md: css`
-        padding: 0.5rem 1rem;
-        font-size: 1rem;
-    `,
-    lg: css`
-        padding: 0.75rem 1.5rem;
-        font-size: 1.125rem;
-    `,
-    xl: css`
-        padding: 1rem 2rem;
-        font-size: 1.25rem;
-    `,
-};
-
-const variantStyles = ({ colors }: Theme, buttonColor: ButtonColor) => ({
+const colorStyles = ({ colors }: Theme, buttonColor: ButtonColor) => ({
     contained: css`
         background-color: ${colors[buttonColor]};
         color: ${buttonColor === "warning"
@@ -106,7 +85,7 @@ const ButtonWrapper = styled.button<ButtonProps>`
     ${(props) => sizeStyles[props.size || "md"]};
 
     &:disabled {
-        cursor: not-allowed;
+        cursor: ${(props) => (props.loading ? "wait" : "not-allowed")};
     }
 `;
 
@@ -135,13 +114,14 @@ export const Button: FC<ButtonProps> = ({
             size={size}
             fullWidth={fullWidth}
             disabled={loading || disabled}
+            loading={loading}
             css={variantStyle}
             {...props}
         >
             {leftIcon && (
                 <span style={{ marginRight: "0.5rem" }}>{leftIcon}</span>
             )}
-            {children}
+            {loading ? <Loader /> : children}
             {rightIcon && (
                 <span style={{ marginLeft: "0.5rem" }}>{rightIcon}</span>
             )}
