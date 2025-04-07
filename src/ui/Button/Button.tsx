@@ -1,29 +1,8 @@
-import React from "react";
-import { css } from "@emotion/react";
+import { css, type Theme } from "@emotion/react";
 import styled from "@emotion/styled";
+import { type FC } from "react";
 import { useTheme } from "../../contexts/ThemeManager";
-import { Theme } from "@emotion/react";
-
-export type ButtonColor =
-    | "primary"
-    | "secondary"
-    | "success"
-    | "error"
-    | "warning"
-    | "info";
-
-export type ButtonVariant = "contained" | "outlined" | "text" | "subtle";
-
-interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-    variant?: ButtonVariant;
-    color?: ButtonColor;
-    size?: "xs" | "sm" | "md" | "lg" | "xl";
-    loading?: boolean;
-    fullWidth?: boolean;
-    disabled?: boolean;
-    leftIcon?: React.ReactNode;
-    rightIcon?: React.ReactNode;
-}
+import { type ButtonColor, type ButtonProps } from "./Button.types";
 
 const sizeStyles = {
     xs: css`
@@ -58,6 +37,10 @@ const variantStyles = ({ colors }: Theme, buttonColor: ButtonColor) => ({
         &:hover {
             background-color: ${colors[buttonColor]}aa;
         }
+        &:focus {
+            outline: none;
+            box-shadow: 0 0 0 4px ${colors[buttonColor]}aa;
+        }
         &:active {
             background-color: ${colors[buttonColor]}cc;
         }
@@ -69,6 +52,10 @@ const variantStyles = ({ colors }: Theme, buttonColor: ButtonColor) => ({
         &:hover {
             color: ${colors[buttonColor]}80;
         }
+        &:focus {
+            outline: none;
+            box-shadow: 0 0 0 4px ${colors[buttonColor]}aa;
+        }
         &:active {
             background-color: ${colors[buttonColor]}20;
         }
@@ -78,12 +65,14 @@ const variantStyles = ({ colors }: Theme, buttonColor: ButtonColor) => ({
         border: none;
         color: ${colors[buttonColor]};
         &:hover {
-            background-color: ${colors[buttonColor]}10;
-            color: ${colors.typography.primary};
+            color: ${colors[buttonColor]}80;
+        }
+        &:focus {
+            outline: none;
+            box-shadow: 0 0 0 4px ${colors[buttonColor]}aa;
         }
         &:active {
-            background-color: ${colors[buttonColor]}20;
-            color: ${colors.typography.primary};
+            color: ${colors[buttonColor]}50;
         }
     `,
     subtle: css`
@@ -91,7 +80,11 @@ const variantStyles = ({ colors }: Theme, buttonColor: ButtonColor) => ({
         color: ${colors[buttonColor]};
         border: none;
         &:hover {
-            background-color: ${colors[buttonColor]}15;
+            background-color: ${colors[buttonColor]}30;
+        }
+        &:focus {
+            outline: none;
+            box-shadow: 0 0 0 4px ${colors[buttonColor]}aa;
         }
         &:active {
             background-color: ${colors[buttonColor]}20;
@@ -117,7 +110,7 @@ const ButtonWrapper = styled.button<ButtonProps>`
     }
 `;
 
-export const Button: React.FC<ButtonProps> = ({
+export const Button: FC<ButtonProps> = ({
     variant = "contained",
     color = "primary",
     size = "md",
@@ -134,7 +127,6 @@ export const Button: React.FC<ButtonProps> = ({
     const variantStyle = css`
         ${variantStyles(theme, color)[variant]}
     `;
-    console.log("variantStyle", variantStyle);
 
     return (
         <ButtonWrapper
