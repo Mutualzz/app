@@ -14,4 +14,9 @@ export default [
     pluginReact.configs.flat.recommended,
     pluginRouter.configs.recommended,
     pluginQuery.configs.recommended,
+    {
+        rules: {
+            "react/no-unknown-property": ["error", { ignore: ["css"] }],
+        },
+    },
 ];

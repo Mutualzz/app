@@ -1,4 +1,8 @@
+import "@emotion/react";
+
 type HexString = `#${string}`;
+
+type ButtonStyle = {};
 
 declare module "@emotion/react" {
     export interface Theme {
@@ -6,10 +10,19 @@ declare module "@emotion/react" {
         name: string;
         description: string;
         colors: {
+            // Base Colors
             primary: HexString;
             secondary: HexString;
             background: HexString;
             surface: HexString;
+
+            // Feedback colors
+            error: HexString;
+            warning: HexString;
+            info: HexString;
+            success: HexString;
+
+            // Typography colors
             typography: {
                 primary: HexString;
                 secondary: HexString;
