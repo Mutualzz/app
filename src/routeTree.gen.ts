@@ -16,16 +16,16 @@ import { Route as rootRoute } from "./routes/__root"
 
 // Create Virtual Routes
 
-const PlaygroudLazyImport = createFileRoute("/playgroud")()
+const PlaygroundLazyImport = createFileRoute("/playground")()
 const IndexLazyImport = createFileRoute("/")()
 
 // Create/Update Routes
 
-const PlaygroudLazyRoute = PlaygroudLazyImport.update({
-  id: "/playgroud",
-  path: "/playgroud",
+const PlaygroundLazyRoute = PlaygroundLazyImport.update({
+  id: "/playground",
+  path: "/playground",
   getParentRoute: () => rootRoute,
-} as any).lazy(() => import("./routes/playgroud.lazy").then((d) => d.Route))
+} as any).lazy(() => import("./routes/playground.lazy").then((d) => d.Route))
 
 const IndexLazyRoute = IndexLazyImport.update({
   id: "/",
@@ -44,11 +44,11 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof IndexLazyImport
       parentRoute: typeof rootRoute
     }
-    "/playgroud": {
-      id: "/playgroud"
-      path: "/playgroud"
-      fullPath: "/playgroud"
-      preLoaderRoute: typeof PlaygroudLazyImport
+    "/playground": {
+      id: "/playground"
+      path: "/playground"
+      fullPath: "/playground"
+      preLoaderRoute: typeof PlaygroundLazyImport
       parentRoute: typeof rootRoute
     }
   }
@@ -58,37 +58,37 @@ declare module "@tanstack/react-router" {
 
 export interface FileRoutesByFullPath {
   "/": typeof IndexLazyRoute
-  "/playgroud": typeof PlaygroudLazyRoute
+  "/playground": typeof PlaygroundLazyRoute
 }
 
 export interface FileRoutesByTo {
   "/": typeof IndexLazyRoute
-  "/playgroud": typeof PlaygroudLazyRoute
+  "/playground": typeof PlaygroundLazyRoute
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
   "/": typeof IndexLazyRoute
-  "/playgroud": typeof PlaygroudLazyRoute
+  "/playground": typeof PlaygroundLazyRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: "/" | "/playgroud"
+  fullPaths: "/" | "/playground"
   fileRoutesByTo: FileRoutesByTo
-  to: "/" | "/playgroud"
-  id: "__root__" | "/" | "/playgroud"
+  to: "/" | "/playground"
+  id: "__root__" | "/" | "/playground"
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
   IndexLazyRoute: typeof IndexLazyRoute
-  PlaygroudLazyRoute: typeof PlaygroudLazyRoute
+  PlaygroundLazyRoute: typeof PlaygroundLazyRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexLazyRoute: IndexLazyRoute,
-  PlaygroudLazyRoute: PlaygroudLazyRoute,
+  PlaygroundLazyRoute: PlaygroundLazyRoute,
 }
 
 export const routeTree = rootRoute
@@ -102,14 +102,14 @@ export const routeTree = rootRoute
       "filePath": "__root.tsx",
       "children": [
         "/",
-        "/playgroud"
+        "/playground"
       ]
     },
     "/": {
       "filePath": "index.lazy.tsx"
     },
-    "/playgroud": {
-      "filePath": "playgroud.lazy.tsx"
+    "/playground": {
+      "filePath": "playground.lazy.tsx"
     }
   }
 }

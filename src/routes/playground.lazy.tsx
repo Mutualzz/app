@@ -1,13 +1,17 @@
 import { createLazyFileRoute } from "@tanstack/react-router";
 
 import { useTheme } from "../contexts/ThemeManager";
-import { Button, ButtonColor, ButtonVariant } from "../ui/Button/Button";
+import { Button } from "../ui/Button/Button";
 import { Stack } from "../ui/Stack/Stack";
 
 import chunk from "lodash/chunk";
-import { AllThemes } from "../themes";
+import { type AllThemes } from "../themes";
+import {
+    type ButtonColor,
+    type ButtonVariant,
+} from "../ui/Button/Button.types";
 
-export const Route = createLazyFileRoute("/playgroud")({
+export const Route = createLazyFileRoute("/playground")({
     component: Playground,
 });
 
@@ -41,7 +45,7 @@ function Playground() {
                     color={color}
                 >
                     {`${variant} ${color}`}
-                </Button>
+                </Button>,
             );
         }
     }

@@ -1,16 +1,16 @@
-import { midghtEleganceTheme } from "./MidnightElegance";
-import { hauntedAestheticTheme } from "./HauntedAesthetic";
-import { grungeIndustrialTheme } from "./GrungeIndustrial";
+import { type Theme } from "@emotion/react";
 import { crimsonLamentTheme } from "./CrimsonLament";
 import { eternalMourningTheme } from "./EternalMourning";
 import { fogOfDespairTheme } from "./FogOfDespair";
 import { graveyardWhispersTheme } from "./GraveyardWhispers";
+import { grungeIndustrialTheme } from "./GrungeIndustrial";
+import { hauntedAestheticTheme } from "./HauntedAesthetic";
 import { melancholyRomanceTheme } from "./MelancholyRomance";
+import { midghtEleganceTheme } from "./MidnightElegance";
 import { nocturnalAbyssTheme } from "./NocturnalAbyss";
 import { shadowheartTheme } from "./Shadowheart";
 import { witchingHourTheme } from "./WitchingHour";
 import { baseDarkTheme } from "./baseDark";
-import { Theme } from "@emotion/react";
 
 export const themes: Record<AllThemes, Theme> = {
     baseDark: baseDarkTheme,
