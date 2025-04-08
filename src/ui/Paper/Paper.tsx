@@ -1,7 +1,10 @@
-import { type FC } from "react";
-import { type StackProps } from "./Stack.types";
+import type { FC } from "react";
+import { useTheme } from "../../contexts/ThemeManager";
+import { dynamicElevation } from "../../utils";
+import type { StackProps } from "../Stack/Stack.types";
+import type { PaperProps } from "./Paper.types";
 
-export const Stack: FC<StackProps> = ({
+export const Paper: FC<StackProps & PaperProps> = ({
     display = "flex",
     direction = "row",
     wrap = "nowrap",
@@ -16,12 +19,21 @@ export const Stack: FC<StackProps> = ({
     basis,
     flex,
     alignSelf,
+    elevation = 0,
     children,
     ...props
 }) => {
+    if (elevation < 0 || elevation > 4)
+        throw new Error("Elevation must be between 0 and 4");
+    const { theme } = useTheme();
+
     return (
         <div
             css={{
+                background: dynamicElevation(theme.colors.surface, elevation),
+                boxShadow: `0 ${elevation + 1}px ${elevation * 2}px rgba(0,0,0,${elevation * 0.1})`,
+                borderRadius: "0.75rem",
+                transition: "all 0.2 ease",
                 display,
                 flexDirection: direction,
                 justifyContent,
@@ -35,7 +47,6 @@ export const Stack: FC<StackProps> = ({
                 flexShrink: shrink,
                 flexBasis: basis,
                 flex,
-                alignSelf,
             }}
             {...props}
         >

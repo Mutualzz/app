@@ -1,4 +1,5 @@
 import "@emotion/react";
+import type { ColorInstance } from "color";
 
 type HexString = `#${string}`;
 
@@ -9,22 +10,22 @@ declare module "@emotion/react" {
         description: string;
         colors: {
             // Base Colors
-            primary: HexString;
-            secondary: HexString;
-            background: HexString;
-            surface: HexString;
+            primary: ColorInstance;
+            secondary: ColorInstance;
+            background: ColorInstance;
+            surface: ColorInstance;
 
             // Feedback colors
-            error: HexString;
-            warning: HexString;
-            info: HexString;
-            success: HexString;
+            error: ColorInstance;
+            warning: ColorInstance;
+            info: ColorInstance;
+            success: ColorInstance;
 
             // Typography colors
             typography: {
-                primary: HexString;
-                secondary: HexString;
-                accent: HexString;
+                primary: ColorInstance;
+                secondary: ColorInstance;
+                accent: ColorInstance;
             };
         };
         typography: {

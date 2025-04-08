@@ -7,10 +7,8 @@ import { Stack } from "../ui/Stack/Stack";
 import chunk from "lodash/chunk";
 import { useState } from "react";
 import { type AllThemes } from "../themes";
-import {
-    type ButtonColor,
-    type ButtonVariant,
-} from "../ui/Button/Button.types";
+import type { ButtonColor, ButtonVariant } from "../ui/Button/Button.types";
+import { Paper } from "../ui/Paper/Paper";
 
 export const Route = createLazyFileRoute("/playground")({
     component: Playground,
@@ -64,43 +62,81 @@ function Playground() {
     ));
 
     return (
-        <Stack direction="column">
+        <Paper direction="column">
             {buttons}
-            <select onChange={(e) => changeTheme(e.target.value as AllThemes)}>
-                <option value="baseDark">Base Dark</option>
-                <option value="crimsonLament">Crimson Lament</option>
-                <option value="eternalMourning">Eternal Mourning</option>
-                <option value="fogOfDespair">Fog of Despair</option>
-                <option value="graveyardWhispers">Graveyard Whispers</option>
-                <option value="hauntedAesthetic">Haunted Aesthetic</option>
-                <option value="melancholyRomance">Melancholy Romance</option>
-                <option value="midnightElegance">Midnight Elegance</option>
-                <option value="nocturnalAbyss">Nocturnal Abyss</option>
-                <option value="shadowheart">Shadowheart</option>
-                <option value="witchingHour">Witching Hour</option>
-            </select>
-            <select
-                onChange={(e) =>
-                    setButtonSize(
-                        e.target.value as "xs" | "sm" | "md" | "lg" | "xl",
-                    )
-                }
-                value={buttonSize}
-            >
-                <option value="xs">Extra Small</option>
-                <option value="sm">Small</option>
-                <option value="md">Medium</option>
-                <option value="lg">Large</option>
-                <option value="xl">Extra Large</option>
-            </select>
-            <Button
-                onClick={() => setButtonLoading((prev) => !prev)}
-                variant="contained"
-                color="primary"
-                size="md"
-            >
-                Toggle Loading
-            </Button>
-        </Stack>
+            <Stack gap={10} padding={20} alignItems="center">
+                <Stack
+                    direction="column"
+                    justifyContent="center"
+                    alignItems="center"
+                >
+                    <label htmlFor="theme-select">Select Theme:</label>
+                    <select
+                        onChange={(e) =>
+                            changeTheme(e.target.value as AllThemes)
+                        }
+                    >
+                        <option value="baseDark">Base Dark</option>
+                        <option value="crimsonLament">Crimson Lament</option>
+                        <option value="eternalMourning">
+                            Eternal Mourning
+                        </option>
+                        <option value="fogOfDespair">Fog of Despair</option>
+                        <option value="graveyardWhispers">
+                            Graveyard Whispers
+                        </option>
+                        <option value="grungeIndustrial">
+                            Grunge & Industrial
+                        </option>
+                        <option value="hauntedAesthetic">
+                            Haunted Aesthetic
+                        </option>
+                        <option value="melancholyRomance">
+                            Melancholy Romance
+                        </option>
+                        <option value="midnightElegance">
+                            Midnight Elegance
+                        </option>
+                        <option value="nocturnalAbyss">Nocturnal Abyss</option>
+                        <option value="shadowheart">Shadowheart</option>
+                        <option value="witchingHour">Witching Hour</option>
+                    </select>
+                </Stack>
+                <Stack
+                    direction="column"
+                    justifyContent="center"
+                    alignItems="center"
+                >
+                    <label htmlFor="size-select">Select Button Size:</label>
+                    <select
+                        onChange={(e) =>
+                            setButtonSize(
+                                e.target.value as
+                                    | "xs"
+                                    | "sm"
+                                    | "md"
+                                    | "lg"
+                                    | "xl",
+                            )
+                        }
+                        value={buttonSize}
+                    >
+                        <option value="xs">Extra Small</option>
+                        <option value="sm">Small</option>
+                        <option value="md">Medium</option>
+                        <option value="lg">Large</option>
+                        <option value="xl">Extra Large</option>
+                    </select>
+                </Stack>
+                <Button
+                    onClick={() => setButtonLoading((prev) => !prev)}
+                    variant="contained"
+                    color="primary"
+                    size="md"
+                >
+                    Toggle Loading
+                </Button>
+            </Stack>
+        </Paper>
     );
 }

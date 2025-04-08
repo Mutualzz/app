@@ -1,4 +1,5 @@
 import { type Theme } from "@emotion/react";
+import Color from "color";
 import { baseDarkTheme } from "./baseDark";
 
 export const melancholyRomanceTheme: Theme = {
@@ -8,20 +9,20 @@ export const melancholyRomanceTheme: Theme = {
     description: "Dramatic, Vintage, and Elegant",
     colors: {
         ...baseDarkTheme.colors,
-        primary: "#5A1E1E",
-        secondary: "#413C58",
-        background: "#0A0608",
-        surface: "#171117",
+        primary: Color("#C84B3C"),
+        secondary: Color("#73678F"),
+        background: Color("#0A0608"),
+        surface: Color("#171117"),
 
-        error: "#7D1128",
-        warning: "#B07A29",
-        info: "#5A7A8C",
-        success: "#4A7F4E",
+        error: Color("#9C1123"),
+        warning: Color("#B07A29"),
+        info: Color("#5A7A8C"),
+        success: Color("#4A7F4E"),
 
         typography: {
-            primary: "#E3E3E3",
-            secondary: "#A79D9C",
-            accent: "#7D1128",
+            primary: Color("#E3E3E3"),
+            secondary: Color("#A79D9C"),
+            accent: Color("#7D1128"),
         },
     },
 };

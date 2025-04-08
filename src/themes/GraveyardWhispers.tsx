@@ -1,4 +1,5 @@
 import { type Theme } from "@emotion/react";
+import Color from "color";
 import { baseDarkTheme } from "./baseDark";
 
 export const graveyardWhispersTheme: Theme = {
@@ -8,20 +9,20 @@ export const graveyardWhispersTheme: Theme = {
     description: "Muted, Eerie, and Cold",
     colors: {
         ...baseDarkTheme.colors,
-        primary: "#2E4057",
-        secondary: "#4B2E39",
-        background: "#0D0D0D",
-        surface: "#1A1A1A",
+        primary: Color("#4A6076"),
+        secondary: Color("#7B4B53"),
+        background: Color("#0D0D0D"),
+        surface: Color("#1A1A1A"),
 
-        error: "#8F3A42",
-        warning: "#B07A1A",
-        info: "#5A7A8C",
-        success: "#4A6A4E",
+        error: Color("#8F3A42"),
+        warning: Color("#B07A1A"),
+        info: Color("#5A7A8C"),
+        success: Color("#4A6A4E"),
 
         typography: {
-            primary: "#D1D1D1",
-            secondary: "#939393",
-            accent: "#8F3A42",
+            primary: Color("#D1D1D1"),
+            secondary: Color("#939393"),
+            accent: Color("#8F3A42"),
         },
     },
 };

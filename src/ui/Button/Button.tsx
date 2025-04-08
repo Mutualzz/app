@@ -2,74 +2,102 @@ import { css, type Theme } from "@emotion/react";
 import styled from "@emotion/styled";
 import { type FC } from "react";
 import { useTheme } from "../../contexts/ThemeManager";
-import { sizeStyles } from "../../utils";
+
 import { Loader } from "../Loader/Loader";
 import { type ButtonColor, type ButtonProps } from "./Button.types";
 
-const colorStyles = ({ colors }: Theme, buttonColor: ButtonColor) => ({
-    contained: css`
-        background-color: ${colors[buttonColor]};
-        color: ${buttonColor === "warning"
-            ? colors.typography.accent
-            : colors.typography.primary};
-        border: none;
-        &:hover {
-            background-color: ${colors[buttonColor]}aa;
-        }
-        &:focus {
-            outline: none;
-            box-shadow: 0 0 0 4px ${colors[buttonColor]}aa;
-        }
-        &:active {
-            background-color: ${colors[buttonColor]}cc;
-        }
+const sizeStyles = {
+    xs: css`
+        padding: 0.25rem 0.5rem;
+        font-size: 0.75rem;
     `,
-    outlined: css`
-        background-color: transparent;
-        border: 1px solid ${colors[buttonColor]};
-        color: ${colors[buttonColor]};
-        &:hover {
-            color: ${colors[buttonColor]}80;
-        }
-        &:focus {
-            outline: none;
-            box-shadow: 0 0 0 4px ${colors[buttonColor]}aa;
-        }
-        &:active {
-            background-color: ${colors[buttonColor]}20;
-        }
+    sm: css`
+        padding: 0.375rem 0.75rem;
+        font-size: 0.875rem;
     `,
-    text: css`
-        background-color: transparent;
-        border: none;
-        color: ${colors[buttonColor]};
-        &:hover {
-            color: ${colors[buttonColor]}80;
-        }
-        &:focus {
-            outline: none;
-            box-shadow: 0 0 0 4px ${colors[buttonColor]}aa;
-        }
-        &:active {
-            color: ${colors[buttonColor]}50;
-        }
+    md: css`
+        padding: 0.5rem 1rem;
+        font-size: 1rem;
     `,
-    subtle: css`
-        background-color: ${colors[buttonColor]}50;
-        color: ${colors[buttonColor]};
-        border: none;
-        &:hover {
-            background-color: ${colors[buttonColor]}30;
-        }
-        &:focus {
-            outline: none;
-            box-shadow: 0 0 0 4px ${colors[buttonColor]}aa;
-        }
-        &:active {
-            background-color: ${colors[buttonColor]}20;
-        }
+    lg: css`
+        padding: 0.75rem 1.5rem;
+        font-size: 1.125rem;
     `,
-});
+    xl: css`
+        padding: 1rem 2rem;
+        font-size: 1.25rem;
+    `,
+};
+
+const colorStyles = ({ colors }: Theme, color: ButtonColor) => {
+    // Color to use for the buttons
+    const clr = colors[color].hex();
+
+    return {
+        contained: css`
+            background-color: ${clr};
+            color: ${color === "warning"
+                ? colors.typography.primary.negate().hex()
+                : colors.typography.primary.hex()};
+            border: none;
+            &:hover {
+                background-color: ${clr}aa;
+            }
+            &:focus {
+                outline: none;
+                box-shadow: 0 0 0 4px ${clr}aa;
+            }
+            &:active {
+                background-color: ${clr}cc;
+            }
+        `,
+        outlined: css`
+            background-color: transparent;
+            border: 1px solid ${clr};
+            color: ${clr};
+            &:hover {
+                color: ${clr}80;
+            }
+            &:focus {
+                outline: none;
+                box-shadow: 0 0 0 4px ${clr}aa;
+            }
+            &:active {
+                background-color: ${clr}20;
+            }
+        `,
+        text: css`
+            background-color: transparent;
+            border: none;
+            color: ${clr};
+            &:hover {
+                color: ${clr}80;
+            }
+            &:focus {
+                outline: none;
+                box-shadow: 0 0 0 4px ${clr}aa;
+            }
+            &:active {
+                color: ${clr}50;
+            }
+        `,
+        subtle: css`
+            background-color: ${clr}50;
+            color: ${clr};
+            border: none;
+            &:hover {
+                background-color: ${clr}30;
+            }
+            &:focus {
+                outline: none;
+                box-shadow: 0 0 0 4px ${clr}aa;
+            }
+            &:active {
+                background-color: ${clr}20;
+            }
+        `,
+    };
+};
 
 const ButtonWrapper = styled.button<ButtonProps>`
     display: inline-flex;
@@ -104,7 +132,7 @@ export const Button: FC<ButtonProps> = ({
     const { theme } = useTheme();
 
     const variantStyle = css`
-        ${variantStyles(theme, color)[variant]}
+        ${colorStyles(theme, color)[variant]}
     `;
 
     return (
@@ -121,7 +149,15 @@ export const Button: FC<ButtonProps> = ({
             {leftIcon && (
                 <span style={{ marginRight: "0.5rem" }}>{leftIcon}</span>
             )}
-            {loading ? <Loader /> : children}
+            {loading ? (
+                <Loader
+                    variant={variant === "contained" ? "text" : "contained"}
+                    color={color}
+                    size={size}
+                />
+            ) : (
+                children
+            )}
             {rightIcon && (
                 <span style={{ marginLeft: "0.5rem" }}>{rightIcon}</span>
             )}
