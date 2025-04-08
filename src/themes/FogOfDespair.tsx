@@ -10,7 +10,7 @@ export const fogOfDespairTheme: Theme = {
     colors: {
         ...baseDarkTheme.colors,
         primary: Color("#4A5A6A"),
-        secondary: Color("#7D8F99"),
+        neutral: Color("#7D8F99"),
         background: Color("#0B0D10"),
         surface: Color("#171C24"),
 
@@ -21,7 +21,7 @@ export const fogOfDespairTheme: Theme = {
 
         typography: {
             primary: Color("#E3E8EC"),
-            secondary: Color("#A2A9B1"),
+            neutral: Color("#A2A9B1"),
             accent: Color("#5C677D"),
         },
     },

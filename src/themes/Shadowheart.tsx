@@ -10,7 +10,7 @@ export const shadowheartTheme: Theme = {
     colors: {
         ...baseDarkTheme.colors,
         primary: Color("#4A5A64"),
-        secondary: Color("#6B4F59"),
+        neutral: Color("#6B4F59"),
         background: Color("#08090A"),
         surface: Color("#16171A"),
 
@@ -21,7 +21,7 @@ export const shadowheartTheme: Theme = {
 
         typography: {
             primary: Color("#DADADA"),
-            secondary: Color("#8A8D92"),
+            neutral: Color("#8A8D92"),
             accent: Color("#FF3D00"),
         },
     },

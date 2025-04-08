@@ -10,7 +10,7 @@ export const eternalMourningTheme: Theme = {
     colors: {
         ...baseDarkTheme.colors,
         primary: Color("#68589C"),
-        secondary: Color("#845159"),
+        neutral: Color("#845159"),
         background: Color("#0A080A"),
         surface: Color("#151218"),
 
@@ -21,7 +21,7 @@ export const eternalMourningTheme: Theme = {
 
         typography: {
             primary: Color("#E5E3E8"),
-            secondary: Color("#938B96"),
+            neutral: Color("#938B96"),
             accent: Color("#9A1F6A"),
         },
     },

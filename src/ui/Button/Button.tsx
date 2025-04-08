@@ -3,14 +3,9 @@ import styled from "@emotion/styled";
 import { type FC } from "react";
 import { useTheme } from "../../contexts/ThemeManager";
 
-import { Loader } from "../Loader/Loader";
 import { type ButtonColor, type ButtonProps } from "./Button.types";
 
 const sizeStyles = {
-    xs: css`
-        padding: 0.25rem 0.5rem;
-        font-size: 0.75rem;
-    `,
     sm: css`
         padding: 0.375rem 0.75rem;
         font-size: 0.875rem;
@@ -23,10 +18,6 @@ const sizeStyles = {
         padding: 0.75rem 1.5rem;
         font-size: 1.125rem;
     `,
-    xl: css`
-        padding: 1rem 2rem;
-        font-size: 1.25rem;
-    `,
 };
 
 const colorStyles = ({ colors }: Theme, color: ButtonColor) => {
@@ -34,7 +25,7 @@ const colorStyles = ({ colors }: Theme, color: ButtonColor) => {
     const clr = colors[color].hex();
 
     return {
-        contained: css`
+        solid: css`
             background-color: ${clr};
             color: ${color === "warning"
                 ? colors.typography.primary.negate().hex()
@@ -66,7 +57,7 @@ const colorStyles = ({ colors }: Theme, color: ButtonColor) => {
                 background-color: ${clr}20;
             }
         `,
-        text: css`
+        plain: css`
             background-color: transparent;
             border: none;
             color: ${clr};
@@ -81,7 +72,7 @@ const colorStyles = ({ colors }: Theme, color: ButtonColor) => {
                 color: ${clr}50;
             }
         `,
-        subtle: css`
+        soft: css`
             background-color: ${clr}50;
             color: ${clr};
             border: none;
@@ -118,7 +109,7 @@ const ButtonWrapper = styled.button<ButtonProps>`
 `;
 
 export const Button: FC<ButtonProps> = ({
-    variant = "contained",
+    variant = "solid",
     color = "primary",
     size = "md",
     loading = false,
@@ -149,15 +140,8 @@ export const Button: FC<ButtonProps> = ({
             {leftIcon && (
                 <span style={{ marginRight: "0.5rem" }}>{leftIcon}</span>
             )}
-            {loading ? (
-                <Loader
-                    variant={variant === "contained" ? "text" : "contained"}
-                    color={color}
-                    size={size}
-                />
-            ) : (
-                children
-            )}
+
+            {children}
             {rightIcon && (
                 <span style={{ marginLeft: "0.5rem" }}>{rightIcon}</span>
             )}

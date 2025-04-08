@@ -10,7 +10,7 @@ export const midghtEleganceTheme: Theme = {
     colors: {
         ...baseDarkTheme.colors,
         primary: Color("#8C3A46"),
-        secondary: Color("#5A4A69"),
+        neutral: Color("#5A4A69"),
         background: Color("#0A0A0A"),
         surface: Color("#161616"),
 
@@ -21,7 +21,7 @@ export const midghtEleganceTheme: Theme = {
 
         typography: {
             primary: Color("#E5E5E5"),
-            secondary: Color("#A09EA6"),
+            neutral: Color("#A09EA6"),
             accent: Color("#783937"),
         },
     },

@@ -10,7 +10,7 @@ export const grungeIndustrialTheme: Theme = {
     colors: {
         ...baseDarkTheme.colors,
         primary: Color("#56606A"),
-        secondary: Color("#7E4050"),
+        neutral: Color("#7E4050"),
         background: Color("#101010"),
         surface: Color("#1E1E1E"),
 
@@ -21,7 +21,7 @@ export const grungeIndustrialTheme: Theme = {
 
         typography: {
             primary: Color("#DFDFDF"),
-            secondary: Color("#9E9E9E"),
+            neutral: Color("#9E9E9E"),
             accent: Color("#6B5B4C"),
         },
     },

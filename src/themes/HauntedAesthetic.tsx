@@ -10,7 +10,7 @@ export const hauntedAestheticTheme: Theme = {
     colors: {
         ...baseDarkTheme.colors,
         primary: Color("#525C7D"),
-        secondary: Color("#6D4153"),
+        neutral: Color("#6D4153"),
         background: Color("#0C0C0C"),
         surface: Color("#171717"),
 
@@ -21,7 +21,7 @@ export const hauntedAestheticTheme: Theme = {
 
         typography: {
             primary: Color("#E0E0E0"),
-            secondary: Color("#8A8A8A"),
+            neutral: Color("#8A8A8A"),
             accent: Color("#6E4A68"),
         },
     },

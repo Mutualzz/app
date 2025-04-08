@@ -10,7 +10,7 @@ export const witchingHourTheme: Theme = {
     colors: {
         ...baseDarkTheme.colors,
         primary: Color("#9C4D73"),
-        secondary: Color("#2A4B76"),
+        neutral: Color("#2A4B76"),
         background: Color("#0A0A12"),
         surface: Color("#151526"),
 
@@ -21,7 +21,7 @@ export const witchingHourTheme: Theme = {
 
         typography: {
             primary: Color("#EAE5E5"),
-            secondary: Color("#8C7C96"),
+            neutral: Color("#8C7C96"),
             accent: Color("#AD60A1"),
         },
     },

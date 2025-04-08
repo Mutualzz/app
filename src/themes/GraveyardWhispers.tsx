@@ -10,7 +10,7 @@ export const graveyardWhispersTheme: Theme = {
     colors: {
         ...baseDarkTheme.colors,
         primary: Color("#4A6076"),
-        secondary: Color("#7B4B53"),
+        neutral: Color("#7B4B53"),
         background: Color("#0D0D0D"),
         surface: Color("#1A1A1A"),
 
@@ -21,7 +21,7 @@ export const graveyardWhispersTheme: Theme = {
 
         typography: {
             primary: Color("#D1D1D1"),
-            secondary: Color("#939393"),
+            neutral: Color("#939393"),
             accent: Color("#8F3A42"),
         },
     },

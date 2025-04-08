@@ -10,7 +10,7 @@ export const melancholyRomanceTheme: Theme = {
     colors: {
         ...baseDarkTheme.colors,
         primary: Color("#C84B3C"),
-        secondary: Color("#73678F"),
+        neutral: Color("#73678F"),
         background: Color("#0A0608"),
         surface: Color("#171117"),
 
@@ -21,7 +21,7 @@ export const melancholyRomanceTheme: Theme = {
 
         typography: {
             primary: Color("#E3E3E3"),
-            secondary: Color("#A79D9C"),
+            neutral: Color("#A79D9C"),
             accent: Color("#7D1128"),
         },
     },

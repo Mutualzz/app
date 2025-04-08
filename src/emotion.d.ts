@@ -11,7 +11,7 @@ declare module "@emotion/react" {
         colors: {
             // Base Colors
             primary: ColorInstance;
-            secondary: ColorInstance;
+            neutral: ColorInstance;
             background: ColorInstance;
             surface: ColorInstance;
 
@@ -24,28 +24,13 @@ declare module "@emotion/react" {
             // Typography colors
             typography: {
                 primary: ColorInstance;
-                secondary: ColorInstance;
+                neutral: ColorInstance;
                 accent: ColorInstance;
             };
         };
         typography: {
             fontFamily: string;
             fontSize: number;
-            fontWeight: number;
-            fontWeightBold: number;
-            fontWeightMedium: number;
-            h1: {
-                fontSize: number;
-                fontWeight: number;
-            };
-            h2: {
-                fontSize: number;
-                fontWeight: number;
-            };
-            h3: {
-                fontSize: number;
-                fontWeight: number;
-            };
             lineHeight: number;
         };
     }

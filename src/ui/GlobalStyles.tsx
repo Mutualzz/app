@@ -14,9 +14,8 @@ export const GlobalStyles = () => {
                     fontFamily: theme.typography.fontFamily,
                     fontSize: theme.typography.fontSize,
                     lineHeight: theme.typography.lineHeight,
-                    fontWeight: theme.typography.fontWeight,
-                    color: theme.colors.typography.primary.toString(),
-                    backgroundColor: theme.colors.background.toString(),
+                    color: theme.colors.typography.primary.hex(),
+                    backgroundColor: theme.colors.background.hex(),
                 },
             }}
         />

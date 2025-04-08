@@ -10,7 +10,7 @@ export const crimsonLamentTheme: Theme = {
     colors: {
         ...baseDarkTheme.colors,
         primary: Color("#6B1E28"),
-        secondary: Color("#5A3D4E"),
+        neutral: Color("#5A3D4E"),
         background: Color("#090606"),
         surface: Color("#1A0E10"),
 
@@ -21,7 +21,7 @@ export const crimsonLamentTheme: Theme = {
 
         typography: {
             primary: Color("#E0D2D2"),
-            secondary: Color("#8B7B7B"),
+            neutral: Color("#8B7B7B"),
             accent: Color("#B52B3F"),
         },
     },

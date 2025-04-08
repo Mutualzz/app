@@ -7,7 +7,11 @@ import { Stack } from "../ui/Stack/Stack";
 import chunk from "lodash/chunk";
 import { useState } from "react";
 import { type AllThemes } from "../themes";
-import type { ButtonColor, ButtonVariant } from "../ui/Button/Button.types";
+import type {
+    ButtonColor,
+    ButtonSize,
+    ButtonVariant,
+} from "../ui/Button/Button.types";
 import { Paper } from "../ui/Paper/Paper";
 import { type PaperElevation } from "../ui/Paper/Paper.types";
 
@@ -17,22 +21,20 @@ export const Route = createLazyFileRoute("/playground")({
 
 function Playground() {
     const { changeTheme } = useTheme();
-    const [buttonSize, setButtonSize] = useState<
-        "xs" | "sm" | "md" | "lg" | "xl"
-    >("md");
+    const [buttonSize, setButtonSize] = useState<ButtonSize>("md");
     const [buttonLoading, setButtonLoading] = useState(false);
     const [paperElevation, setPaperElevation] = useState<PaperElevation>(0);
 
     // all the button variants and colors
     const buttonVariants = [
-        "contained",
+        "solid",
         "outlined",
-        "text",
-        "subtle",
+        "plain",
+        "soft",
     ] as ButtonVariant[];
     const buttonColors = [
         "primary",
-        "secondary",
+        "neutral",
         "success",
         "error",
         "warning",
@@ -119,14 +121,7 @@ function Playground() {
                     <label htmlFor="size-select">Select Button Size</label>
                     <select
                         onChange={(e) =>
-                            setButtonSize(
-                                e.target.value as
-                                    | "xs"
-                                    | "sm"
-                                    | "md"
-                                    | "lg"
-                                    | "xl",
-                            )
+                            setButtonSize(e.target.value as ButtonSize)
                         }
                         value={buttonSize}
                     >
@@ -163,7 +158,7 @@ function Playground() {
                 </Stack>
                 <Button
                     onClick={() => setButtonLoading((prev) => !prev)}
-                    variant="contained"
+                    variant="solid"
                     color="primary"
                     size="md"
                 >
