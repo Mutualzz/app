@@ -30,7 +30,10 @@ export const Paper: FC<StackProps & PaperProps> = ({
     return (
         <div
             css={{
-                background: dynamicElevation(theme.colors.surface, elevation),
+                backgroundColor: dynamicElevation(
+                    theme.colors.surface,
+                    elevation,
+                ),
                 boxShadow: `0 ${elevation + 1}px ${elevation * 2}px rgba(0,0,0,${elevation * 0.1})`,
                 borderRadius: "0.75rem",
                 transition: "all 0.2 ease",

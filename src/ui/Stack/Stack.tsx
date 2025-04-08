@@ -22,6 +22,7 @@ export const Stack: FC<StackProps> = ({
     return (
         <div
             css={{
+                background: "transparent",
                 display,
                 flexDirection: direction,
                 justifyContent,

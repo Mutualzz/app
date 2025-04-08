@@ -9,6 +9,7 @@ import { useState } from "react";
 import { type AllThemes } from "../themes";
 import type { ButtonColor, ButtonVariant } from "../ui/Button/Button.types";
 import { Paper } from "../ui/Paper/Paper";
+import { type PaperElevation } from "../ui/Paper/Paper.types";
 
 export const Route = createLazyFileRoute("/playground")({
     component: Playground,
@@ -20,6 +21,7 @@ function Playground() {
         "xs" | "sm" | "md" | "lg" | "xl"
     >("md");
     const [buttonLoading, setButtonLoading] = useState(false);
+    const [paperElevation, setPaperElevation] = useState<PaperElevation>(0);
 
     // all the button variants and colors
     const buttonVariants = [
@@ -62,15 +64,21 @@ function Playground() {
     ));
 
     return (
-        <Paper direction="column">
+        <Paper elevation={paperElevation} direction="column">
             {buttons}
-            <Stack gap={10} padding={20} alignItems="center">
+            <Stack
+                gap="5rem"
+                padding={20}
+                justifyContent="center"
+                alignItems="center"
+            >
                 <Stack
                     direction="column"
                     justifyContent="center"
                     alignItems="center"
+                    gap={10}
                 >
-                    <label htmlFor="theme-select">Select Theme:</label>
+                    <label htmlFor="theme-select">Select Theme</label>
                     <select
                         onChange={(e) =>
                             changeTheme(e.target.value as AllThemes)
@@ -106,8 +114,9 @@ function Playground() {
                     direction="column"
                     justifyContent="center"
                     alignItems="center"
+                    gap={10}
                 >
-                    <label htmlFor="size-select">Select Button Size:</label>
+                    <label htmlFor="size-select">Select Button Size</label>
                     <select
                         onChange={(e) =>
                             setButtonSize(
@@ -126,6 +135,30 @@ function Playground() {
                         <option value="md">Medium</option>
                         <option value="lg">Large</option>
                         <option value="xl">Extra Large</option>
+                    </select>
+                </Stack>
+                <Stack
+                    direction="column"
+                    justifyContent="center"
+                    alignItems="center"
+                    gap={10}
+                >
+                    <label htmlFor="elevation-select">
+                        Select Paper Elevation
+                    </label>
+                    <select
+                        onChange={(e) =>
+                            setPaperElevation(
+                                parseInt(e.target.value) as PaperElevation,
+                            )
+                        }
+                        value={paperElevation}
+                    >
+                        <option value={0}>0</option>
+                        <option value={1}>1</option>
+                        <option value={2}>2</option>
+                        <option value={3}>3</option>
+                        <option value={4}>4</option>
                     </select>
                 </Stack>
                 <Button

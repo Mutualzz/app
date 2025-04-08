@@ -7,7 +7,7 @@ export const dynamicElevation = (
     elevation: PaperElevation,
 ) => {
     const baseLightness = color.lightness();
-    const increment = 4;
+    const increment = 2;
 
     const newLightness = Math.min(baseLightness + elevation * increment, 100);
 
