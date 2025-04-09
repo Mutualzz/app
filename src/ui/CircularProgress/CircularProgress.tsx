@@ -35,11 +35,11 @@ const thicknesses = (size: CircularProgressSize) =>
         lg: 6,
     })[size];
 
+// TODO: finish outlined variant
 export const CircularProgress: FC<CircularProgressProps> = ({
     size = "md",
     variant = "soft",
     color = "primary",
-
     determinate = false,
     value = 0,
     ...props
