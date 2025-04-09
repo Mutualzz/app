@@ -2,6 +2,7 @@ import type { FC } from "react";
 import { useTheme } from "../../contexts/ThemeManager";
 import type { CircularProgressProps } from "./CircularProgress.types";
 
+// TODO: finish this
 export const CircularProgress: FC<CircularProgressProps> = ({
     size = "md",
     variant = "solid",
