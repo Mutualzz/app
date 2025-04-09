@@ -18,14 +18,6 @@ export const GlobalStyles = () => {
                     fontSize: theme.typography.fontSize,
                     lineHeight: theme.typography.lineHeight,
                 },
-                "@keyframes spin": {
-                    "0%": {
-                        strokeDashoffset: 0,
-                    },
-                    "100%": {
-                        strokeDashoffset: 360,
-                    },
-                },
             }}
         />
     );
