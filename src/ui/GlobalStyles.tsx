@@ -10,12 +10,13 @@ export const GlobalStyles = () => {
                 "*": {
                     margin: 0,
                     padding: 0,
-                    boxSizing: "border-box",
+                },
+                body: {
+                    backgroundColor: theme.colors.background.hex(),
+                    color: theme.colors.typography.primary.hex(),
                     fontFamily: theme.typography.fontFamily,
                     fontSize: theme.typography.fontSize,
                     lineHeight: theme.typography.lineHeight,
-                    color: theme.colors.typography.primary.hex(),
-                    backgroundColor: theme.colors.background.hex(),
                 },
             }}
         />

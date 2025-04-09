@@ -1,9 +1,11 @@
-import type { HTMLProps } from "react";
+import type { BoxProps } from "../Box/Box.types";
 
-export interface StackProps extends HTMLProps<HTMLDivElement> {
-    display?: "flex" | "block" | "inline-block" | "grid";
+export type StackProps = BoxProps & {
+    display?: "flex" | "grid";
+
     direction?: "row" | "column";
     wrap?: "nowrap" | "wrap" | "wrap-reverse";
+
     justifyContent?:
         | "flex-start"
         | "flex-end"
@@ -20,7 +22,6 @@ export interface StackProps extends HTMLProps<HTMLDivElement> {
         | "space-around"
         | "stretch";
     gap?: string | number;
-    padding?: string | number;
 
     // These props apply only when its a child element of a flex container
     order?: number;
@@ -29,8 +30,4 @@ export interface StackProps extends HTMLProps<HTMLDivElement> {
     basis?: number;
     flex?: string | number;
     alignSelf?: "stretch" | "flex-start" | "flex-end" | "center" | "baseline";
-
-    // Neccessary
-    className?: string;
-    children: React.ReactNode;
-}
+};

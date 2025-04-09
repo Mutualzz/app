@@ -20,71 +20,71 @@ const sizeStyles = {
     `,
 };
 
-const colorStyles = ({ colors }: Theme, color: ButtonColor) => {
+const colorStyles = ({ colors }: Theme, buttonColor: ButtonColor) => {
     // Color to use for the buttons
-    const clr = colors[color].hex();
+    const color = colors[buttonColor].hex();
 
     return {
         solid: css`
-            background-color: ${clr};
+            background-color: ${color};
             color: ${color === "warning"
                 ? colors.typography.primary.negate().hex()
                 : colors.typography.primary.hex()};
             border: none;
             &:hover {
-                background-color: ${clr}aa;
+                background-color: ${color}aa;
             }
             &:focus {
                 outline: none;
-                box-shadow: 0 0 0 4px ${clr}aa;
+                box-shadow: 0 0 0 4px ${color}aa;
             }
             &:active {
-                background-color: ${clr}cc;
+                background-color: ${color}cc;
             }
         `,
         outlined: css`
             background-color: transparent;
-            border: 1px solid ${clr};
-            color: ${clr};
+            border: 1px solid ${color};
+            color: ${color};
             &:hover {
-                color: ${clr}80;
+                color: ${color}80;
             }
             &:focus {
                 outline: none;
-                box-shadow: 0 0 0 4px ${clr}aa;
+                box-shadow: 0 0 0 4px ${color}aa;
             }
             &:active {
-                background-color: ${clr}20;
+                background-color: ${color}20;
             }
         `,
         plain: css`
             background-color: transparent;
             border: none;
-            color: ${clr};
+            color: ${color};
             &:hover {
-                color: ${clr}80;
+                color: ${color}80;
             }
             &:focus {
                 outline: none;
-                box-shadow: 0 0 0 4px ${clr}aa;
+                box-shadow: 0 0 0 4px ${color}aa;
             }
             &:active {
-                color: ${clr}50;
+                color: ${color}50;
             }
         `,
         soft: css`
-            background-color: ${clr}50;
-            color: ${clr};
+            background-color: ${color}50;
+            color: ${color};
             border: none;
             &:hover {
-                background-color: ${clr}30;
+                background-color: ${color}30;
             }
             &:focus {
                 outline: none;
-                box-shadow: 0 0 0 4px ${clr}aa;
+                box-shadow: 0 0 0 4px ${color}aa;
             }
             &:active {
-                background-color: ${clr}20;
+                background-color: ${color}20;
             }
         `,
     };
