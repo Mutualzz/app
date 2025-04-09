@@ -13,6 +13,7 @@ import type {
     ButtonVariant,
 } from "../ui/Button/Button.types";
 import { CircularProgress } from "../ui/CircularProgress/CircularProgress";
+
 import { Paper } from "../ui/Paper/Paper";
 import { type PaperElevation } from "../ui/Paper/Paper.types";
 
@@ -25,6 +26,8 @@ function Playground() {
     const [size, setSize] = useState<ButtonSize>("md");
     const [buttonLoading, setButtonLoading] = useState(false);
     const [paperElevation, setPaperElevation] = useState<PaperElevation>(0);
+    const [determinate, setDeterminate] = useState(false);
+    const [determinateValue, setDeterminateValue] = useState(0);
 
     // all the button variants and colors
     const variants = ["solid", "outlined", "plain", "soft"] as ButtonVariant[];
@@ -44,7 +47,7 @@ function Playground() {
         for (const color of colors) {
             buttons.push(
                 <Button
-                    key={`${variant}-${color}`}
+                    key={`${variant}-${color}-button`}
                     variant={variant}
                     color={color}
                     size={size}
@@ -55,15 +58,17 @@ function Playground() {
             );
 
             progresses.push(
-                <CircularProgress
-                    key={`${variant}-${color}-progress`}
-                    variant={variant}
-                    color={color}
-                    size={size}
-                    thickness="medium"
-                    determinate
-                    value={50}
-                />,
+                <Stack direction="column" gap={10} key={`${variant}-${color}`}>
+                    <label>{`${variant} ${color}`}</label>
+                    <CircularProgress
+                        key={`${variant}-${color}-progress`}
+                        variant={variant}
+                        color={color}
+                        size={size}
+                        determinate={determinate}
+                        value={determinateValue}
+                    />
+                </Stack>,
             );
         }
     }
@@ -178,6 +183,27 @@ function Playground() {
                 >
                     Toggle Loading
                 </Button>
+                <Button
+                    onClick={() => setDeterminate((prev) => !prev)}
+                    variant="solid"
+                    color="primary"
+                    size="md"
+                >
+                    Toggle Determinate
+                </Button>
+                <Stack direction="row" gap={10}>
+                    <input
+                        type="range"
+                        min={0}
+                        max={100}
+                        value={determinateValue}
+                        onChange={(e) =>
+                            setDeterminateValue(parseInt(e.target.value))
+                        }
+                        disabled={!determinate}
+                    />
+                    <label>{`${determinateValue}%`}</label>
+                </Stack>
             </Stack>
         </Paper>
     );

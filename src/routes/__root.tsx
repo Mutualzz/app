@@ -2,7 +2,7 @@ import { createRootRoute, Outlet } from "@tanstack/react-router";
 
 // Dev tools
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import { TanStackRouterDevtools } from "@tanstack/router-devtools";
+import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import { ThemeProvider } from "../contexts/ThemeManager";
 import { GlobalStyles } from "../ui/GlobalStyles";
 
