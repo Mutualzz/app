@@ -1,10 +1,9 @@
 import type { FC } from "react";
 import { useTheme } from "../../contexts/ThemeManager";
 import { dynamicElevation } from "../../utils";
-import type { StackProps } from "../Stack/Stack.types";
 import type { PaperProps } from "./Paper.types";
 
-export const Paper: FC<StackProps & PaperProps> = ({
+export const Paper: FC<PaperProps> = ({
     display = "flex",
     direction = "row",
     wrap = "nowrap",

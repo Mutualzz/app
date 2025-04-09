@@ -104,7 +104,7 @@ const ButtonWrapper = styled.button<ButtonProps>`
     ${(props) => sizeStyles[props.size || "md"]};
 
     &:disabled {
-        cursor: ${(props) => (props.loading ? "wait" : "not-allowed")};
+        pointer-events: none;
     }
 `;
 
@@ -128,6 +128,7 @@ export const Button: FC<ButtonProps> = ({
 
     return (
         <ButtonWrapper
+            {...props}
             variant={variant}
             color={color}
             size={size}
@@ -135,7 +136,6 @@ export const Button: FC<ButtonProps> = ({
             disabled={loading || disabled}
             loading={loading}
             css={variantStyle}
-            {...props}
         >
             {leftIcon && (
                 <span style={{ marginRight: "0.5rem" }}>{leftIcon}</span>

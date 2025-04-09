@@ -12,6 +12,7 @@ import type {
     ButtonSize,
     ButtonVariant,
 } from "../ui/Button/Button.types";
+import { CircularProgress } from "../ui/CircularProgress/CircularProgress";
 import { Paper } from "../ui/Paper/Paper";
 import { type PaperElevation } from "../ui/Paper/Paper.types";
 
@@ -21,18 +22,13 @@ export const Route = createLazyFileRoute("/playground")({
 
 function Playground() {
     const { changeTheme } = useTheme();
-    const [buttonSize, setButtonSize] = useState<ButtonSize>("md");
+    const [size, setSize] = useState<ButtonSize>("md");
     const [buttonLoading, setButtonLoading] = useState(false);
     const [paperElevation, setPaperElevation] = useState<PaperElevation>(0);
 
     // all the button variants and colors
-    const buttonVariants = [
-        "solid",
-        "outlined",
-        "plain",
-        "soft",
-    ] as ButtonVariant[];
-    const buttonColors = [
+    const variants = ["solid", "outlined", "plain", "soft"] as ButtonVariant[];
+    const colors = [
         "primary",
         "neutral",
         "success",
@@ -42,19 +38,32 @@ function Playground() {
     ] as ButtonColor[];
 
     let buttons = [];
+    let progresses = [];
 
-    for (const variant of buttonVariants) {
-        for (const color of buttonColors) {
+    for (const variant of variants) {
+        for (const color of colors) {
             buttons.push(
                 <Button
                     key={`${variant}-${color}`}
                     variant={variant}
                     color={color}
-                    size={buttonSize}
+                    size={size}
                     loading={buttonLoading}
                 >
                     {`${variant} ${color}`}
                 </Button>,
+            );
+
+            progresses.push(
+                <CircularProgress
+                    key={`${variant}-${color}-progress`}
+                    variant={variant}
+                    color={color}
+                    size={size}
+                    thickness="medium"
+                    determinate
+                    value={50}
+                />,
             );
         }
     }
@@ -65,9 +74,18 @@ function Playground() {
         </Stack>
     ));
 
+    progresses = chunk(progresses, 6).map((row, index) => (
+        <Stack key={index} padding={20} gap={10}>
+            {row}
+        </Stack>
+    ));
+
     return (
         <Paper elevation={paperElevation} direction="column">
-            {buttons}
+            <Stack direction="row">
+                <Stack direction="column">{buttons}</Stack>
+                <Stack direction="column">{progresses}</Stack>
+            </Stack>
             <Stack
                 gap="5rem"
                 padding={20}
@@ -120,16 +138,12 @@ function Playground() {
                 >
                     <label htmlFor="size-select">Select Button Size</label>
                     <select
-                        onChange={(e) =>
-                            setButtonSize(e.target.value as ButtonSize)
-                        }
-                        value={buttonSize}
+                        onChange={(e) => setSize(e.target.value as ButtonSize)}
+                        value={size}
                     >
-                        <option value="xs">Extra Small</option>
                         <option value="sm">Small</option>
                         <option value="md">Medium</option>
                         <option value="lg">Large</option>
-                        <option value="xl">Extra Large</option>
                     </select>
                 </Stack>
                 <Stack

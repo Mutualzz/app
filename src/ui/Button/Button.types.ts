@@ -12,7 +12,7 @@ export type ButtonVariant = "plain" | "outlined" | "soft" | "solid";
 
 export type ButtonSize = "sm" | "md" | "lg";
 
-export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+export type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
     variant?: ButtonVariant;
     color?: ButtonColor;
     size?: ButtonSize;
@@ -21,4 +21,4 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
     disabled?: boolean;
     leftIcon?: React.ReactNode;
     rightIcon?: React.ReactNode;
-}
+};

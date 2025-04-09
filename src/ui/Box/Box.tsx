@@ -24,6 +24,7 @@ export const Box: FC<BoxProps> = ({
     ...props
 }) => (
     <div
+        {...props}
         css={{
             display,
             position,
@@ -44,7 +45,6 @@ export const Box: FC<BoxProps> = ({
             marginBottom,
             marginLeft,
         }}
-        {...props}
     >
         {children}
     </div>

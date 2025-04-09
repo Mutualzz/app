@@ -1,7 +1,7 @@
 import type { HTMLProps } from "react";
 
-export interface LottieProps extends HTMLProps<HTMLDivElement> {
+export type LottieProps = HTMLProps<HTMLDivElement> & {
     path: any;
     loop?: boolean;
     autoplay?: boolean;
-}
+};
