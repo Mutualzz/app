@@ -17,7 +17,7 @@ export const graveyardWhispersTheme: Theme = {
         error: Color("#8F3A42"),
         warning: Color("#B07A1A"),
         info: Color("#5A7A8C"),
-        success: Color("#4A6A4E"),
+        success: Color("#3C9D48"),
 
         typography: {
             primary: Color("#D1D1D1"),
