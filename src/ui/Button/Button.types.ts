@@ -12,7 +12,8 @@ export type ButtonVariant = "plain" | "outlined" | "soft" | "solid";
 
 export type ButtonSize = "sm" | "md" | "lg";
 
-export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+export interface ButtonProps
+    extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, "size"> {
     variant?: ButtonVariant;
     color?: ButtonColor;
     size?: ButtonSize;

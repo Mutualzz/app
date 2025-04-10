@@ -1,7 +1,6 @@
 import { css, type Theme } from "@emotion/react";
 import styled from "@emotion/styled";
 import { type FC } from "react";
-import { useTheme } from "../../contexts/ThemeManager";
 
 import { CircularProgress } from "../CircularProgress/CircularProgress";
 import { type ButtonColor, type ButtonProps } from "./Button.types";
@@ -106,7 +105,11 @@ const ButtonWrapper = styled.button<ButtonProps>`
     opacity: ${(props) => (props.disabled ? 0.5 : 1)};
     margin: 1;
 
-    ${(props) => sizeStyles[props.size || "md"]};
+    ${(props) => sizeStyles[props.size ?? "md"]};
+    ${(props) =>
+        colorStyles(props.theme, props.color ?? "primary")[
+            props.variant ?? "plain"
+        ]};
 
     &:disabled {
         pointer-events: none;
@@ -114,9 +117,9 @@ const ButtonWrapper = styled.button<ButtonProps>`
 `;
 
 export const Button: FC<ButtonProps> = ({
-    variant,
-    color,
-    size,
+    variant = "plain",
+    color = "primary",
+    size = "md",
     loading,
     startIcon,
     endIcon,
@@ -124,21 +127,14 @@ export const Button: FC<ButtonProps> = ({
     children,
     ...props
 }) => {
-    const { theme } = useTheme();
-
-    const variantStyle = css`
-        ${colorStyles(theme, color ?? "primary")[variant ?? "plain"]}
-    `;
-
     return (
         <ButtonWrapper
             {...props}
-            variant={variant ?? "plain"}
-            color={color ?? "primary"}
-            size={size ?? "md"}
+            variant={variant}
+            color={color}
+            size={size}
             disabled={loading || disabled}
             loading={loading ?? false}
-            css={variantStyle}
         >
             {startIcon && (
                 <span style={{ marginRight: "0.5rem" }}>{startIcon}</span>
@@ -150,7 +146,7 @@ export const Button: FC<ButtonProps> = ({
                             ? "plain"
                             : "soft"
                     }
-                    color={color ?? "primary"}
+                    color={color}
                     size={size}
                 />
             ) : (
