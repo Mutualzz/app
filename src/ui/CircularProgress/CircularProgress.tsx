@@ -16,7 +16,7 @@ const spin = keyframes`
 const variantColors = ({ colors }: Theme, color: CircularProgressColor) => {
     return {
         plain: "transparent",
-        solid: colors[color].alpha(0.5).hexa(),
+        solid: colors[color].alpha(0.4).hexa(),
         soft: colors[color].alpha(0.1).hexa(),
         outlined: "transparent",
     };
@@ -30,12 +30,11 @@ const sizes: Record<CircularProgressSize, number> = {
 
 const thicknesses = (size: CircularProgressSize) =>
     ({
-        sm: 2,
-        md: 4,
-        lg: 6,
+        sm: 4,
+        md: 6,
+        lg: 8,
     })[size];
 
-// TODO: finish outlined variant
 export const CircularProgress: FC<CircularProgressProps> = ({
     size = "md",
     variant = "soft",
@@ -49,12 +48,14 @@ export const CircularProgress: FC<CircularProgressProps> = ({
     const pixelSize = sizes[size];
 
     const outerStroke = variantColors(theme, color)[variant];
-    const innterStroke = theme.colors[color].hex();
+    const innerStroke = theme.colors[color].hex();
     const strokeWidth = thicknesses(size);
     const radius = (pixelSize - strokeWidth) / 2;
     const circumference = 2 * Math.PI * radius;
 
     const strokeDashOffset = ((100 - value) / 100) * circumference;
+
+    const outlinedStroke = theme.colors[color].alpha(0.6).hexa();
 
     return (
         <div
@@ -65,6 +66,31 @@ export const CircularProgress: FC<CircularProgressProps> = ({
                 height: pixelSize,
                 justifyContent: "center",
                 alignItems: "center",
+                alignSelf: "center",
+                ...(variant === "outlined" && {
+                    "::before": {
+                        content: '""',
+                        position: "absolute",
+                        top: strokeWidth / 2,
+                        left: strokeWidth / 2,
+                        right: strokeWidth / 2,
+                        bottom: strokeWidth / 2,
+                        borderRadius: "50%",
+                        border: `1px solid ${outlinedStroke}`,
+                        boxSizing: "border-box",
+                    },
+                    "::after": {
+                        content: '""',
+                        position: "absolute",
+                        top: -1,
+                        left: -1,
+                        right: -1,
+                        bottom: -1,
+                        borderRadius: "50%",
+                        border: `1px solid ${outlinedStroke}`,
+                        boxSizing: "border-box",
+                    },
+                }),
             }}
         >
             <svg
@@ -82,7 +108,7 @@ export const CircularProgress: FC<CircularProgressProps> = ({
                     cx={pixelSize / 2}
                     cy={pixelSize / 2}
                     r={radius}
-                    stroke={outerStroke}
+                    stroke={variant === "outlined" ? "tranparent" : outerStroke}
                     strokeWidth={strokeWidth}
                     fill="none"
                 />
@@ -90,7 +116,7 @@ export const CircularProgress: FC<CircularProgressProps> = ({
                     cx={pixelSize / 2}
                     cy={pixelSize / 2}
                     r={radius}
-                    stroke={innterStroke}
+                    stroke={innerStroke}
                     strokeWidth={strokeWidth}
                     fill="none"
                     strokeDasharray={

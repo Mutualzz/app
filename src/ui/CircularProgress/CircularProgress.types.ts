@@ -8,10 +8,10 @@ export type CircularProgressColor =
     | "warning"
     | "info";
 
-export type CircularProgressProps = {
+export interface CircularProgressProps {
     size?: CircularProgressSize;
     variant?: CircularProgressVariant;
     color?: CircularProgressColor;
     determinate?: boolean;
     value?: number;
-};
+}
