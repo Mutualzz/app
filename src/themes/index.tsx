@@ -29,7 +29,6 @@ export const themes: Record<AllThemes, Theme> = {
 
 export const themeNames = Object.keys(themes) as AllThemes[];
 
-
 export type AllThemes =
     | "baseDark"
     | "crimsonLament"
