@@ -100,7 +100,7 @@ export const CircularProgress: FC<CircularProgressProps> = ({
                 viewBox={`0 0 ${pixelSize} ${pixelSize}`}
                 css={{
                     animation: !determinate
-                        ? `${spin} 1.5s linear infinite`
+                        ? `${spin} 1s linear infinite`
                         : undefined,
                 }}
             >
