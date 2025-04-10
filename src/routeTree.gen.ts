@@ -16,22 +16,45 @@ import { Route as rootRoute } from "./routes/__root"
 
 // Create Virtual Routes
 
-const PlaygroundLazyImport = createFileRoute("/playground")()
+const UiLazyImport = createFileRoute("/ui")()
 const IndexLazyImport = createFileRoute("/")()
+const UiDividerLazyImport = createFileRoute("/ui/divider")()
+const UiCircularProgressLazyImport = createFileRoute("/ui/circular-progress")()
+const UiButtonLazyImport = createFileRoute("/ui/button")()
 
 // Create/Update Routes
 
-const PlaygroundLazyRoute = PlaygroundLazyImport.update({
-  id: "/playground",
-  path: "/playground",
+const UiLazyRoute = UiLazyImport.update({
+  id: "/ui",
+  path: "/ui",
   getParentRoute: () => rootRoute,
-} as any).lazy(() => import("./routes/playground.lazy").then((d) => d.Route))
+} as any).lazy(() => import("./routes/ui.lazy").then((d) => d.Route))
 
 const IndexLazyRoute = IndexLazyImport.update({
   id: "/",
   path: "/",
   getParentRoute: () => rootRoute,
 } as any).lazy(() => import("./routes/index.lazy").then((d) => d.Route))
+
+const UiDividerLazyRoute = UiDividerLazyImport.update({
+  id: "/divider",
+  path: "/divider",
+  getParentRoute: () => UiLazyRoute,
+} as any).lazy(() => import("./routes/ui/divider.lazy").then((d) => d.Route))
+
+const UiCircularProgressLazyRoute = UiCircularProgressLazyImport.update({
+  id: "/circular-progress",
+  path: "/circular-progress",
+  getParentRoute: () => UiLazyRoute,
+} as any).lazy(() =>
+  import("./routes/ui/circular-progress.lazy").then((d) => d.Route),
+)
+
+const UiButtonLazyRoute = UiButtonLazyImport.update({
+  id: "/button",
+  path: "/button",
+  getParentRoute: () => UiLazyRoute,
+} as any).lazy(() => import("./routes/ui/button.lazy").then((d) => d.Route))
 
 // Populate the FileRoutesByPath interface
 
@@ -44,51 +67,107 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof IndexLazyImport
       parentRoute: typeof rootRoute
     }
-    "/playground": {
-      id: "/playground"
-      path: "/playground"
-      fullPath: "/playground"
-      preLoaderRoute: typeof PlaygroundLazyImport
+    "/ui": {
+      id: "/ui"
+      path: "/ui"
+      fullPath: "/ui"
+      preLoaderRoute: typeof UiLazyImport
       parentRoute: typeof rootRoute
+    }
+    "/ui/button": {
+      id: "/ui/button"
+      path: "/button"
+      fullPath: "/ui/button"
+      preLoaderRoute: typeof UiButtonLazyImport
+      parentRoute: typeof UiLazyImport
+    }
+    "/ui/circular-progress": {
+      id: "/ui/circular-progress"
+      path: "/circular-progress"
+      fullPath: "/ui/circular-progress"
+      preLoaderRoute: typeof UiCircularProgressLazyImport
+      parentRoute: typeof UiLazyImport
+    }
+    "/ui/divider": {
+      id: "/ui/divider"
+      path: "/divider"
+      fullPath: "/ui/divider"
+      preLoaderRoute: typeof UiDividerLazyImport
+      parentRoute: typeof UiLazyImport
     }
   }
 }
 
 // Create and export the route tree
 
+interface UiLazyRouteChildren {
+  UiButtonLazyRoute: typeof UiButtonLazyRoute
+  UiCircularProgressLazyRoute: typeof UiCircularProgressLazyRoute
+  UiDividerLazyRoute: typeof UiDividerLazyRoute
+}
+
+const UiLazyRouteChildren: UiLazyRouteChildren = {
+  UiButtonLazyRoute: UiButtonLazyRoute,
+  UiCircularProgressLazyRoute: UiCircularProgressLazyRoute,
+  UiDividerLazyRoute: UiDividerLazyRoute,
+}
+
+const UiLazyRouteWithChildren =
+  UiLazyRoute._addFileChildren(UiLazyRouteChildren)
+
 export interface FileRoutesByFullPath {
   "/": typeof IndexLazyRoute
-  "/playground": typeof PlaygroundLazyRoute
+  "/ui": typeof UiLazyRouteWithChildren
+  "/ui/button": typeof UiButtonLazyRoute
+  "/ui/circular-progress": typeof UiCircularProgressLazyRoute
+  "/ui/divider": typeof UiDividerLazyRoute
 }
 
 export interface FileRoutesByTo {
   "/": typeof IndexLazyRoute
-  "/playground": typeof PlaygroundLazyRoute
+  "/ui": typeof UiLazyRouteWithChildren
+  "/ui/button": typeof UiButtonLazyRoute
+  "/ui/circular-progress": typeof UiCircularProgressLazyRoute
+  "/ui/divider": typeof UiDividerLazyRoute
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
   "/": typeof IndexLazyRoute
-  "/playground": typeof PlaygroundLazyRoute
+  "/ui": typeof UiLazyRouteWithChildren
+  "/ui/button": typeof UiButtonLazyRoute
+  "/ui/circular-progress": typeof UiCircularProgressLazyRoute
+  "/ui/divider": typeof UiDividerLazyRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: "/" | "/playground"
+  fullPaths:
+    | "/"
+    | "/ui"
+    | "/ui/button"
+    | "/ui/circular-progress"
+    | "/ui/divider"
   fileRoutesByTo: FileRoutesByTo
-  to: "/" | "/playground"
-  id: "__root__" | "/" | "/playground"
+  to: "/" | "/ui" | "/ui/button" | "/ui/circular-progress" | "/ui/divider"
+  id:
+    | "__root__"
+    | "/"
+    | "/ui"
+    | "/ui/button"
+    | "/ui/circular-progress"
+    | "/ui/divider"
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
   IndexLazyRoute: typeof IndexLazyRoute
-  PlaygroundLazyRoute: typeof PlaygroundLazyRoute
+  UiLazyRoute: typeof UiLazyRouteWithChildren
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexLazyRoute: IndexLazyRoute,
-  PlaygroundLazyRoute: PlaygroundLazyRoute,
+  UiLazyRoute: UiLazyRouteWithChildren,
 }
 
 export const routeTree = rootRoute
@@ -102,14 +181,31 @@ export const routeTree = rootRoute
       "filePath": "__root.tsx",
       "children": [
         "/",
-        "/playground"
+        "/ui"
       ]
     },
     "/": {
       "filePath": "index.lazy.tsx"
     },
-    "/playground": {
-      "filePath": "playground.lazy.tsx"
+    "/ui": {
+      "filePath": "ui.lazy.tsx",
+      "children": [
+        "/ui/button",
+        "/ui/circular-progress",
+        "/ui/divider"
+      ]
+    },
+    "/ui/button": {
+      "filePath": "ui/button.lazy.tsx",
+      "parent": "/ui"
+    },
+    "/ui/circular-progress": {
+      "filePath": "ui/circular-progress.lazy.tsx",
+      "parent": "/ui"
+    },
+    "/ui/divider": {
+      "filePath": "ui/divider.lazy.tsx",
+      "parent": "/ui"
     }
   }
 }

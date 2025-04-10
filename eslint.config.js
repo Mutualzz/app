@@ -65,7 +65,6 @@ export default [
             "@typescript-eslint/restrict-template-expressions": "off",
             "@typescript-eslint/prefer-for-of": "warn",
             "@typescript-eslint/prefer-optional-chain": "warn",
-            "@typescript-eslint/no-unsafe-assignment": "warn",
             "sonarjs/cognitive-complexity": "off",
             "sonarjs/no-nested-conditional": "off",
             "sonarjs/no-small-switch": "warn",

@@ -20,8 +20,17 @@
         "strict": true,
         "noUnusedLocals": true,
         "noUnusedParameters": true,
-        "noFallthroughCasesInSwitch": true
+        "noFallthroughCasesInSwitch": true,
+
+        "baseUrl": "./src",
+
+        "paths": {
+            "@contexts/*": ["contexts/*"],
+            "@components/*": ["components/*"],
+            "@ui/*": ["ui/*"],
+            "@themes/*": ["themes/*"]
+        }
     },
-    "include": ["src"],
+    "include": ["src/**/*"],
     "references": [{ "path": "./tsconfig.node.json" }]
 }

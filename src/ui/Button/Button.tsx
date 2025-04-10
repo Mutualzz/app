@@ -8,16 +8,19 @@ import { type ButtonColor, type ButtonProps } from "./Button.types";
 
 const sizeStyles = {
     sm: css`
-        padding: 0.25rem 0.5rem; // Reduced padding
-        font-size: 0.75rem; // Reduced font size
+        padding-inline: 0.75rem;
+        padding-block: 0.25rem;
+        font-size: 0.875rem;
     `,
     md: css`
-        padding: 0.375rem 0.75rem; // Reduced padding
-        font-size: 0.875rem; // Reduced font size
+        padding-inline: 1rem;
+        padding-block: 0.375rem;
+        font-size: 1rem;
     `,
     lg: css`
-        padding: 0.5rem 1.25rem; // Reduced padding
-        font-size: 1rem; // Reduced font size
+        padding-inline: 1.5rem;
+        padding-block: 0.5rem;
+        font-size: 1rem;
     `,
 };
 
@@ -95,12 +98,13 @@ const ButtonWrapper = styled.button<ButtonProps>`
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-weight: 500;
-    border-radius: 12px;
+    border: none;
+    border-radius: 6px;
     transition: all 0.3s;
     cursor: pointer;
+    user-select: none;
     opacity: ${(props) => (props.disabled ? 0.5 : 1)};
-    width: ${(props) => (props.fullWidth ? "100%" : "auto")};
+    margin: 1;
 
     ${(props) => sizeStyles[props.size || "md"]};
 
@@ -114,7 +118,6 @@ export const Button: FC<ButtonProps> = ({
     color,
     size,
     loading,
-    fullWidth,
     startIcon,
     endIcon,
     disabled,
@@ -133,7 +136,6 @@ export const Button: FC<ButtonProps> = ({
             variant={variant ?? "plain"}
             color={color ?? "primary"}
             size={size ?? "md"}
-            fullWidth={fullWidth ?? false}
             disabled={loading || disabled}
             loading={loading ?? false}
             css={variantStyle}

@@ -3,7 +3,6 @@ import { Global } from "@emotion/react";
 import { useTheme } from "../contexts/ThemeManager";
 
 const neededStyle = ({ colors, typography }: Theme): CSSObject => ({
-    maxWidth: "100%",
     overflowX: "hidden",
     boxSizing: "border-box",
     height: "100dvh",

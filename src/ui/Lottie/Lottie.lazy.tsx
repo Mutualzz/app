@@ -37,7 +37,6 @@ export const LazyLottie: FC<LottieProps> = ({
                 renderer: "svg",
                 loop,
                 autoplay,
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                 path,
             });
         }
