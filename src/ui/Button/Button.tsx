@@ -3,20 +3,21 @@ import styled from "@emotion/styled";
 import { type FC } from "react";
 import { useTheme } from "../../contexts/ThemeManager";
 
+import { CircularProgress } from "../CircularProgress/CircularProgress";
 import { type ButtonColor, type ButtonProps } from "./Button.types";
 
 const sizeStyles = {
     sm: css`
-        padding: 0.375rem 0.75rem;
-        font-size: 0.875rem;
+        padding: 0.25rem 0.5rem; // Reduced padding
+        font-size: 0.75rem; // Reduced font size
     `,
     md: css`
-        padding: 0.5rem 1rem;
-        font-size: 1rem;
+        padding: 0.375rem 0.75rem; // Reduced padding
+        font-size: 0.875rem; // Reduced font size
     `,
     lg: css`
-        padding: 0.75rem 1.5rem;
-        font-size: 1.125rem;
+        padding: 0.5rem 1.25rem; // Reduced padding
+        font-size: 1rem; // Reduced font size
     `,
 };
 
@@ -34,12 +35,12 @@ const colorStyles = ({ colors }: Theme, buttonColor: ButtonColor) => {
             &:hover {
                 background-color: ${color}aa;
             }
-            &:focus {
-                outline: none;
-                box-shadow: 0 0 0 4px ${color}aa;
-            }
             &:active {
                 background-color: ${color}cc;
+            }
+            &:disabled {
+                background-color: ${color}20;
+                color: ${color}50;
             }
         `,
         outlined: css`
@@ -47,14 +48,15 @@ const colorStyles = ({ colors }: Theme, buttonColor: ButtonColor) => {
             border: 1px solid ${color};
             color: ${color};
             &:hover {
-                color: ${color}80;
-            }
-            &:focus {
-                outline: none;
-                box-shadow: 0 0 0 4px ${color}aa;
+                background-color: ${color}20;
+                border: 0.1px solid ${color}20;
             }
             &:active {
                 background-color: ${color}20;
+            }
+            &:disabled {
+                color: ${color}50;
+                border: 1px solid ${color}50;
             }
         `,
         plain: css`
@@ -64,11 +66,10 @@ const colorStyles = ({ colors }: Theme, buttonColor: ButtonColor) => {
             &:hover {
                 color: ${color}80;
             }
-            &:focus {
-                outline: none;
-                box-shadow: 0 0 0 4px ${color}aa;
-            }
             &:active {
+                color: ${color}50;
+            }
+            &:disabled {
                 color: ${color}50;
             }
         `,
@@ -79,12 +80,12 @@ const colorStyles = ({ colors }: Theme, buttonColor: ButtonColor) => {
             &:hover {
                 background-color: ${color}30;
             }
-            &:focus {
-                outline: none;
-                box-shadow: 0 0 0 4px ${color}aa;
-            }
             &:active {
                 background-color: ${color}20;
+            }
+            &:disabled {
+                background-color: ${color}20;
+                color: ${color}50;
             }
         `,
     };
@@ -114,8 +115,8 @@ export const Button: FC<ButtonProps> = ({
     size,
     loading,
     fullWidth,
-    leftIcon,
-    rightIcon,
+    startIcon,
+    endIcon,
     disabled,
     children,
     ...props
@@ -137,14 +138,23 @@ export const Button: FC<ButtonProps> = ({
             loading={loading ?? false}
             css={variantStyle}
         >
-            {leftIcon && (
-                <span style={{ marginRight: "0.5rem" }}>{leftIcon}</span>
+            {startIcon && (
+                <span style={{ marginRight: "0.5rem" }}>{startIcon}</span>
             )}
-
-            {children}
-            {rightIcon && (
-                <span style={{ marginLeft: "0.5rem" }}>{rightIcon}</span>
+            {loading ? (
+                <CircularProgress
+                    variant={
+                        variant === "solid" || variant === "soft"
+                            ? "plain"
+                            : "soft"
+                    }
+                    color={color ?? "primary"}
+                    size={size}
+                />
+            ) : (
+                children
             )}
+            {endIcon && <span style={{ marginLeft: "0.5rem" }}>{endIcon}</span>}
         </ButtonWrapper>
     );
 };
