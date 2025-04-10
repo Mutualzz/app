@@ -19,6 +19,7 @@ function Index() {
                     });
                 }}
                 size="lg"
+                variant="solid"
             >
                 Go to the UI playground
             </Button>

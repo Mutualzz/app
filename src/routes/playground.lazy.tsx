@@ -29,6 +29,8 @@ function Playground() {
     const [paperElevation, setPaperElevation] = useState<PaperElevation>(0);
     const [determinate, setDeterminate] = useState(false);
     const [determinateValue, setDeterminateValue] = useState(0);
+    const [buttonFullWidth, setButtonFullWidth] = useState(false);
+    const [buttonDisabled, setButtonDisabled] = useState(false);
 
     // all the button variants and colors
     const variants = ["solid", "outlined", "plain", "soft"] as ButtonVariant[];
@@ -52,6 +54,8 @@ function Playground() {
                     variant={variant}
                     color={color}
                     size={size}
+                    fullWidth={buttonFullWidth}
+                    disabled={buttonDisabled}
                     loading={buttonLoading}
                 >
                     {`${capitalize(variant)} ${capitalize(color)}`}
@@ -121,16 +125,32 @@ function Playground() {
                     <Stack
                         justifyContent="center"
                         alignItems="center"
-                        direction="column"
+                        direction="row"
                         gap={30}
                     >
                         <Button
                             onClick={() => setButtonLoading((prev) => !prev)}
-                            variant="solid"
-                            color="primary"
+                            variant="soft"
+                            color={buttonLoading ? "error" : "success"}
                             size="md"
                         >
-                            Toggle Loading
+                            Turn {buttonLoading ? "Off" : "On"} Loading
+                        </Button>
+                        <Button
+                            onClick={() => setButtonFullWidth((prev) => !prev)}
+                            variant="soft"
+                            color={buttonFullWidth ? "error" : "success"}
+                            size="md"
+                        >
+                            Turn {buttonFullWidth ? "Off" : "On"} Full Width
+                        </Button>
+                        <Button
+                            onClick={() => setButtonDisabled((prev) => !prev)}
+                            variant="soft"
+                            color={buttonDisabled ? "error" : "success"}
+                            size="md"
+                        >
+                            Toggle Disabled
                         </Button>
                     </Stack>
                 </Paper>
@@ -139,6 +159,8 @@ function Playground() {
                     alignItems="center"
                     elevation={paperElevation}
                     padding={20}
+                    direction="column"
+                    gap={30}
                 >
                     <Stack
                         justifyContent="center"
@@ -152,15 +174,15 @@ function Playground() {
                         justifyContent="center"
                         alignItems="center"
                         direction="column"
-                        gap={30}
+                        gap={15}
                     >
                         <Button
                             onClick={() => setDeterminate((prev) => !prev)}
-                            variant="solid"
-                            color="primary"
+                            variant="soft"
+                            color={determinate ? "success" : "error"}
                             size="md"
                         >
-                            Toggle Determinate
+                            Turn {determinate ? "Off" : "On"} Determinate
                         </Button>
                         <Stack
                             justifyContent="center"
