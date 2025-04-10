@@ -1,5 +1,22 @@
+import type { CSSObject, Theme } from "@emotion/react";
 import { Global } from "@emotion/react";
 import { useTheme } from "../contexts/ThemeManager";
+
+const neededStyle = ({ colors, typography }: Theme): CSSObject => ({
+    maxWidth: "100%",
+    overflowX: "hidden",
+    boxSizing: "border-box",
+    height: "100dvh",
+    "-moz-box-sizing": "border-box",
+    "-webkit-box-sizing": "border-box",
+
+    // Theme based styles
+    backgroundColor: colors.background.hex(),
+    color: colors.typography.primary.hex(),
+    fontFamily: typography.fontFamily,
+    fontSize: typography.fontSize,
+    lineHeight: typography.lineHeight,
+});
 
 export const GlobalStyles = () => {
     const { theme } = useTheme();
@@ -8,16 +25,14 @@ export const GlobalStyles = () => {
         <Global
             styles={{
                 "*": {
+                    minWidth: 0,
                     margin: 0,
                     padding: 0,
+                    boxSizing: "border-box",
                 },
-                body: {
-                    backgroundColor: theme.colors.background.hex(),
-                    color: theme.colors.typography.primary.hex(),
-                    fontFamily: theme.typography.fontFamily,
-                    fontSize: theme.typography.fontSize,
-                    lineHeight: theme.typography.lineHeight,
-                },
+                html: neededStyle(theme),
+                body: neededStyle(theme),
+                "#app": neededStyle(theme),
             }}
         />
     );

@@ -1,6 +1,6 @@
 import type { BoxProps } from "../Box/Box.types";
 
-export type StackProps = BoxProps & {
+export interface StackProps extends Omit<BoxProps, "display"> {
     display?: "flex" | "grid";
 
     direction?: "row" | "column";
@@ -30,4 +30,4 @@ export type StackProps = BoxProps & {
     basis?: number;
     flex?: string | number;
     alignSelf?: "stretch" | "flex-start" | "flex-end" | "center" | "baseline";
-};
+}

@@ -109,32 +109,32 @@ const ButtonWrapper = styled.button<ButtonProps>`
 `;
 
 export const Button: FC<ButtonProps> = ({
-    variant = "solid",
-    color = "primary",
-    size = "md",
-    loading = false,
-    fullWidth = false,
+    variant,
+    color,
+    size,
+    loading,
+    fullWidth,
     leftIcon,
     rightIcon,
-    disabled = false,
+    disabled,
     children,
     ...props
 }) => {
     const { theme } = useTheme();
 
     const variantStyle = css`
-        ${colorStyles(theme, color)[variant]}
+        ${colorStyles(theme, color ?? "primary")[variant ?? "plain"]}
     `;
 
     return (
         <ButtonWrapper
             {...props}
-            variant={variant}
-            color={color}
-            size={size}
-            fullWidth={fullWidth}
+            variant={variant ?? "plain"}
+            color={color ?? "primary"}
+            size={size ?? "md"}
+            fullWidth={fullWidth ?? false}
             disabled={loading || disabled}
-            loading={loading}
+            loading={loading ?? false}
             css={variantStyle}
         >
             {leftIcon && (
