@@ -1,5 +1,4 @@
 import { type Theme } from "@emotion/react";
-import Color from "color";
 import { baseDarkTheme } from "./baseDark";
 
 export const fogOfDespairTheme: Theme = {
@@ -9,20 +8,20 @@ export const fogOfDespairTheme: Theme = {
     description: "Cold, Distant, and Ethereal",
     colors: {
         ...baseDarkTheme.colors,
-        primary: Color("#4A5A6A"),
-        neutral: Color("#7D8F99"),
-        background: Color("#0B0D10"),
-        surface: Color("#171C24"),
+        primary: "#4A5A6A",
+        neutral: "#7D8F99",
+        background: "#0B0D10",
+        surface: "#171C24",
 
-        error: Color("#A33E4C"),
-        warning: Color("#C47E29"),
-        info: Color("#5C8DB6"),
-        success: Color("#4A7F4E"),
+        error: "#A33E4C",
+        warning: "#C47E29",
+        info: "#5C8DB6",
+        success: "#4A7F4E",
 
         typography: {
-            primary: Color("#E3E8EC"),
-            neutral: Color("#A2A9B1"),
-            accent: Color("#5C677D"),
+            primary: "#E3E8EC",
+            neutral: "#A2A9B1",
+            accent: "#5C677D",
         },
     },
 };

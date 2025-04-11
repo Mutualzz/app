@@ -1,5 +1,5 @@
 import { type Theme } from "@emotion/react";
-import Color from "color";
+
 import { baseDarkTheme } from "./baseDark";
 
 export const witchingHourTheme: Theme = {
@@ -9,20 +9,20 @@ export const witchingHourTheme: Theme = {
     description: "Mystical, Arcane, and Enigmatic",
     colors: {
         ...baseDarkTheme.colors,
-        primary: Color("#9C4D73"),
-        neutral: Color("#2A4B76"),
-        background: Color("#0A0A12"),
-        surface: Color("#151526"),
+        primary: "#9C4D73",
+        neutral: "#2A4B76",
+        background: "#0A0A12",
+        surface: "#151526",
 
-        error: Color("#AD1457"),
-        warning: Color("#D4A017"),
-        info: Color("#3896D0"),
-        success: Color("#4CAF50"),
+        error: "#AD1457",
+        warning: "#D4A017",
+        info: "#3896D0",
+        success: "#4CAF50",
 
         typography: {
-            primary: Color("#EAE5E5"),
-            neutral: Color("#8C7C96"),
-            accent: Color("#AD60A1"),
+            primary: "#EAE5E5",
+            neutral: "#8C7C96",
+            accent: "#AD60A1",
         },
     },
 };

@@ -10,8 +10,8 @@ import type {
 const variantColors = ({ colors }: Theme, color: LinearProgressColor) => {
     return {
         plain: "transparent",
-        solid: colors[color].alpha(0.4).hexa(),
-        soft: colors[color].alpha(0.1).hexa(),
+        solid: Color(colors[color]).alpha(0.4).hexa(),
+        soft: Color(colors[color]).alpha(0.1).hexa(),
         outlined: "transparent",
     };
 };

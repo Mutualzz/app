@@ -1,5 +1,5 @@
 import { type Theme } from "@emotion/react";
-import Color from "color";
+
 import { baseDarkTheme } from "./baseDark";
 
 export const nocturnalAbyssTheme: Theme = {
@@ -9,20 +9,20 @@ export const nocturnalAbyssTheme: Theme = {
     description: "Deep, Mysterious, and Shadowy",
     colors: {
         ...baseDarkTheme.colors,
-        primary: Color("#7F4F9D"),
-        neutral: Color("#6A4F68"),
-        background: Color("#090909"),
-        surface: Color("#131313"),
+        primary: "#7F4F9D",
+        neutral: "#6A4F68",
+        background: "#090909",
+        surface: "#131313",
 
-        error: Color("#C3073F"),
-        warning: Color("#B07A29"),
-        info: Color("#5A7A8C"),
-        success: Color("#4A7F4E"),
+        error: "#C3073F",
+        warning: "#B07A29",
+        info: "#5A7A8C",
+        success: "#4A7F4E",
 
         typography: {
-            primary: Color("#E0D6D6"),
-            neutral: Color("#8C8294"),
-            accent: Color("#C3073F"),
+            primary: "#E0D6D6",
+            neutral: "#8C8294",
+            accent: "#C3073F",
         },
     },
 };

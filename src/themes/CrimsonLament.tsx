@@ -1,5 +1,4 @@
 import { type Theme } from "@emotion/react";
-import Color from "color";
 import { baseDarkTheme } from "./baseDark";
 
 export const crimsonLamentTheme: Theme = {
@@ -9,20 +8,20 @@ export const crimsonLamentTheme: Theme = {
     description: "Dark Romance & Tragedy",
     colors: {
         ...baseDarkTheme.colors,
-        primary: Color("#6B1E28"),
-        neutral: Color("#5A3D4E"),
-        background: Color("#090606"),
-        surface: Color("#1A0E10"),
+        primary: "#6B1E28",
+        neutral: "#5A3D4E",
+        background: "#090606",
+        surface: "#1A0E10",
 
-        error: Color("#B52B3F"),
-        warning: Color("#D98E04"),
-        info: Color("#4A90E2"),
-        success: Color("#4CAF50"),
+        error: "#B52B3F",
+        warning: "#D98E04",
+        info: "#4A90E2",
+        success: "#4CAF50",
 
         typography: {
-            primary: Color("#E0D2D2"),
-            neutral: Color("#8B7B7B"),
-            accent: Color("#B52B3F"),
+            primary: "#E0D2D2",
+            neutral: "#8B7B7B",
+            accent: "#B52B3F",
         },
     },
 };

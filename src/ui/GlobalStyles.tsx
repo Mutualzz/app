@@ -10,8 +10,8 @@ const neededStyle = ({ colors, typography }: Theme): CSSObject => ({
     "-webkit-box-sizing": "border-box",
 
     // Theme based styles
-    backgroundColor: colors.background.hex(),
-    color: colors.typography.primary.hex(),
+    backgroundColor: colors.background,
+    color: colors.typography.primary,
     fontFamily: typography.fontFamily,
     fontSize: typography.fontSize,
     lineHeight: typography.lineHeight,
@@ -29,9 +29,7 @@ export const GlobalStyles = () => {
                     padding: 0,
                     boxSizing: "border-box",
                 },
-                html: neededStyle(theme),
-                body: neededStyle(theme),
-                "#app": neededStyle(theme),
+                ":root": neededStyle(theme),
             }}
         />
     );

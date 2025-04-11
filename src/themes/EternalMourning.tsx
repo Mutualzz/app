@@ -1,5 +1,4 @@
 import { type Theme } from "@emotion/react";
-import Color from "color";
 import { baseDarkTheme } from "./baseDark";
 
 export const eternalMourningTheme: Theme = {
@@ -9,20 +8,20 @@ export const eternalMourningTheme: Theme = {
     description: "Melancholiic & Gothic Elegance",
     colors: {
         ...baseDarkTheme.colors,
-        primary: Color("#68589C"),
-        neutral: Color("#845159"),
-        background: Color("#0A080A"),
-        surface: Color("#151218"),
+        primary: "#68589C",
+        neutral: "#845159",
+        background: "#0A080A",
+        surface: "#151218",
 
-        error: Color("#9A16FA"),
-        warning: Color("#C47E29"),
-        info: Color("#5A8CAE"),
-        success: Color("#4A7F4E"),
+        error: "#9A16FA",
+        warning: "#C47E29",
+        info: "#5A8CAE",
+        success: "#4A7F4E",
 
         typography: {
-            primary: Color("#E5E3E8"),
-            neutral: Color("#938B96"),
-            accent: Color("#9A1F6A"),
+            primary: "#E5E3E8",
+            neutral: "#938B96",
+            accent: "#9A1F6A",
         },
     },
 };

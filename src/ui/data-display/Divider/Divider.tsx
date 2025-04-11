@@ -30,7 +30,7 @@ export const Divider: FC<DividerProps> = ({
         display: flex;
         align-items: center;
         flex-direction: ${isVertical ? "column" : "row"};
-        color: ${theme.colors.neutral.hex()};
+        color: ${theme.colors.neutral};
     `;
 
     const lineStyle = css`

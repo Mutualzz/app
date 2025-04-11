@@ -3,6 +3,7 @@ import styled from "@emotion/styled";
 import { type FC } from "react";
 
 import { CircularProgress } from "@ui/feedback/CircularProgress/CircularProgress";
+import Color from "color";
 import { type ButtonColor, type ButtonProps } from "./Button.types";
 
 const sizeStyles = {
@@ -25,14 +26,14 @@ const sizeStyles = {
 
 const colorStyles = ({ colors }: Theme, buttonColor: ButtonColor) => {
     // Color to use for the buttons
-    const color = colors[buttonColor].hex();
+    const color = colors[buttonColor];
 
     return {
         solid: css`
             background-color: ${color};
             color: ${color === "warning"
-                ? colors.typography.primary.negate().hex()
-                : colors.typography.primary.hex()};
+                ? Color(colors.typography.primary).negate().hex()
+                : colors.typography.primary};
             border: none;
             &:hover {
                 background-color: ${color}aa;

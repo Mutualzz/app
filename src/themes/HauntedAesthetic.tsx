@@ -1,5 +1,5 @@
 import { type Theme } from "@emotion/react";
-import Color from "color";
+
 import { baseDarkTheme } from "./baseDark";
 
 export const hauntedAestheticTheme: Theme = {
@@ -9,20 +9,20 @@ export const hauntedAestheticTheme: Theme = {
     description: "Ethereal, Erie, and Softly Dark",
     colors: {
         ...baseDarkTheme.colors,
-        primary: Color("#525C7D"),
-        neutral: Color("#6D4153"),
-        background: Color("#0C0C0C"),
-        surface: Color("#171717"),
+        primary: "#525C7D",
+        neutral: "#6D4153",
+        background: "#0C0C0C",
+        surface: "#171717",
 
-        error: Color("#8A3B4C"),
-        warning: Color("#B07A29"),
-        info: Color("#5A7A8C"),
-        success: Color("#4A7F4E"),
+        error: "#8A3B4C",
+        warning: "#B07A29",
+        info: "#5A7A8C",
+        success: "#4A7F4E",
 
         typography: {
-            primary: Color("#E0E0E0"),
-            neutral: Color("#8A8A8A"),
-            accent: Color("#6E4A68"),
+            primary: "#E0E0E0",
+            neutral: "#8A8A8A",
+            accent: "#6E4A68",
         },
     },
 };

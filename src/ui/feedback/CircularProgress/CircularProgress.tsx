@@ -2,6 +2,7 @@ import { useTheme } from "@contexts/ThemeManager";
 import type { FC } from "react";
 
 import { keyframes, type Theme } from "@emotion/react";
+import Color from "color";
 import type {
     CircularProgressColor,
     CircularProgressProps,
@@ -16,8 +17,8 @@ const spin = keyframes`
 const variantColors = ({ colors }: Theme, color: CircularProgressColor) => {
     return {
         plain: "transparent",
-        solid: colors[color].alpha(0.4).hexa(),
-        soft: colors[color].alpha(0.1).hexa(),
+        solid: Color(colors[color]).alpha(0.4).hexa(),
+        soft: Color([color]).alpha(0.1).hexa(),
         outlined: "transparent",
     };
 };
@@ -48,14 +49,14 @@ export const CircularProgress: FC<CircularProgressProps> = ({
     const pixelSize = sizes[size];
 
     const outerStroke = variantColors(theme, color)[variant];
-    const innerStroke = theme.colors[color].hex();
+    const innerStroke = theme.colors[color];
     const strokeWidth = thicknesses(size);
     const radius = (pixelSize - strokeWidth) / 2;
     const circumference = 2 * Math.PI * radius;
 
     const strokeDashOffset = ((100 - value) / 100) * circumference;
 
-    const outlinedStroke = theme.colors[color].alpha(0.6).hexa();
+    const outlinedStroke = Color(theme.colors[color]).alpha(0.6).hexa();
 
     return (
         <div

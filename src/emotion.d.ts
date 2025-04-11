@@ -1,7 +1,7 @@
 import "@emotion/react";
-import type { ColorInstance } from "color";
+import type { HexString } from "color";
 
-type HexString = `#${string}`;
+type HexString<Hex extends string = string> = `#${Hex}`;
 
 declare module "@emotion/react" {
     export interface Theme {
@@ -10,22 +10,22 @@ declare module "@emotion/react" {
         description: string;
         colors: {
             // Base Colors
-            primary: ColorInstance;
-            neutral: ColorInstance;
-            background: ColorInstance;
-            surface: ColorInstance;
+            primary: HexString;
+            neutral: HexString;
+            background: HexString;
+            surface: HexString;
 
             // Feedback colors
-            error: ColorInstance;
-            warning: ColorInstance;
-            info: ColorInstance;
-            success: ColorInstance;
+            error: HexString;
+            warning: HexString;
+            info: HexString;
+            success: HexString;
 
             // Typography colors
             typography: {
-                primary: ColorInstance;
-                neutral: ColorInstance;
-                accent: ColorInstance;
+                primary: HexString;
+                neutral: HexString;
+                accent: HexString;
             };
         };
         typography: {
