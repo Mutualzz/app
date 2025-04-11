@@ -2,7 +2,7 @@ import { css, type Theme } from "@emotion/react";
 import styled from "@emotion/styled";
 import { type FC } from "react";
 
-import { CircularProgress } from "../CircularProgress/CircularProgress";
+import { CircularProgress } from "@ui/feedback/CircularProgress/CircularProgress";
 import { type ButtonColor, type ButtonProps } from "./Button.types";
 
 const sizeStyles = {

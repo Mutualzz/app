@@ -1,7 +1,7 @@
 import { createLazyFileRoute } from "@tanstack/react-router";
-import { Divider } from "@ui/Divider/Divider";
-import { Paper } from "@ui/Paper/Paper";
-import { Stack } from "@ui/Stack/Stack";
+import { Divider } from "@ui/data-display/Divider/Divider";
+import { Stack } from "@ui/layout/Stack/Stack";
+import { Paper } from "@ui/surfaces/Paper/Paper";
 
 export const Route = createLazyFileRoute("/ui/divider")({
     component: PlaygroundDivider,

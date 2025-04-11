@@ -25,10 +25,12 @@
         "baseUrl": "./src",
 
         "paths": {
+            "@/": ["./*"],
             "@contexts/*": ["contexts/*"],
             "@components/*": ["components/*"],
             "@ui/*": ["ui/*"],
-            "@themes/*": ["themes/*"]
+            "@themes/*": ["themes/*"],
+            "@utils/*": ["utils.ts"]
         }
     },
     "include": ["src/**/*"],

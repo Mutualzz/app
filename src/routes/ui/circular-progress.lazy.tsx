@@ -1,13 +1,13 @@
 import { createLazyFileRoute } from "@tanstack/react-router";
-import { Button } from "@ui/Button/Button";
-import { CircularProgress } from "@ui/CircularProgress/CircularProgress";
+import { CircularProgress } from "@ui/feedback/CircularProgress/CircularProgress";
 import type {
     CircularProgressColor,
     CircularProgressSize,
     CircularProgressVariant,
-} from "@ui/CircularProgress/CircularProgress.types";
-import { Paper } from "@ui/Paper/Paper";
-import { Stack } from "@ui/Stack/Stack";
+} from "@ui/feedback/CircularProgress/CircularProgress.types";
+import { Button } from "@ui/inputs/Button/Button";
+import { Stack } from "@ui/layout/Stack/Stack";
+import { Paper } from "@ui/surfaces/Paper/Paper";
 import capitalize from "lodash/capitalize";
 import chunk from "lodash/chunk";
 import { useState } from "react";

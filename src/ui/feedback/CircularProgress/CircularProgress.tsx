@@ -1,5 +1,5 @@
+import { useTheme } from "@contexts/ThemeManager";
 import type { FC } from "react";
-import { useTheme } from "../../contexts/ThemeManager";
 
 import { keyframes, type Theme } from "@emotion/react";
 import type {

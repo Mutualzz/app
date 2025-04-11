@@ -1,12 +1,12 @@
 import { createLazyFileRoute } from "@tanstack/react-router";
-import { Button } from "@ui/Button/Button";
+import { Button } from "@ui/inputs/Button/Button";
 import type {
     ButtonColor,
     ButtonSize,
     ButtonVariant,
-} from "@ui/Button/Button.types";
-import { Paper } from "@ui/Paper/Paper";
-import { Stack } from "@ui/Stack/Stack";
+} from "@ui/inputs/Button/Button.types";
+import { Stack } from "@ui/layout/Stack/Stack";
+import { Paper } from "@ui/surfaces/Paper/Paper";
 import capitalize from "lodash/capitalize";
 import chunk from "lodash/chunk";
 import { useState } from "react";
