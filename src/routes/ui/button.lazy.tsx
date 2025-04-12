@@ -124,7 +124,7 @@ function PlaygroundButton() {
                                 type="text"
                                 value={size}
                                 onChange={(e) =>
-                                    setSize(e.target.value as ButtonSize)
+                                    setSize(e.target.value.trim() as ButtonSize)
                                 }
                                 placeholder="Custom size"
                                 style={{
@@ -138,7 +138,7 @@ function PlaygroundButton() {
                             <select
                                 value={size}
                                 onChange={(e) =>
-                                    setSize(e.target.value as ButtonSize)
+                                    setSize(e.target.value.trim() as ButtonSize)
                                 }
                                 style={{
                                     padding: 10,
@@ -161,7 +161,9 @@ function PlaygroundButton() {
                                 value={customColor ?? ""}
                                 placeholder="Input custom color"
                                 onChange={(e) =>
-                                    setCustomColor(e.target.value as ColorLike)
+                                    setCustomColor(
+                                        e.target.value.trim() as ColorLike,
+                                    )
                                 }
                                 style={{
                                     padding: 10,
@@ -177,7 +179,7 @@ function PlaygroundButton() {
                                 onClick={() => {
                                     if (!customColor) return;
                                     const color = Color(
-                                        customColor,
+                                        customColor.trim(),
                                     ).hex() as ColorLike;
                                     setCustomColors(
                                         (prev) =>
@@ -196,7 +198,7 @@ function PlaygroundButton() {
                                     value={colorToDelete ?? ""}
                                     onChange={(e) => {
                                         setColorToDelete(
-                                            e.target.value as ColorLike,
+                                            e.target.value.trim() as ColorLike,
                                         );
                                     }}
                                     style={{

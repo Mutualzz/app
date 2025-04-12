@@ -186,7 +186,7 @@ function PlaygroundLinearProgress() {
                             value={length}
                             onChange={(e) =>
                                 setLength(
-                                    e.target.value as LinearProgressLength,
+                                    e.target.value.trim() as LinearProgressLength,
                                 )
                             }
                             placeholder="Custom length"
@@ -202,7 +202,7 @@ function PlaygroundLinearProgress() {
                             value={length}
                             onChange={(e) =>
                                 setLength(
-                                    e.target.value as LinearProgressLength,
+                                    e.target.value.trim() as LinearProgressLength,
                                 )
                             }
                             style={{
@@ -242,7 +242,7 @@ function PlaygroundLinearProgress() {
                             value={thickness}
                             onChange={(e) =>
                                 setThickness(
-                                    e.target.value as LinearProgressThickness,
+                                    e.target.value.trim() as LinearProgressThickness,
                                 )
                             }
                             placeholder="Custom thickness"
@@ -258,7 +258,7 @@ function PlaygroundLinearProgress() {
                             value={thickness}
                             onChange={(e) =>
                                 setThickness(
-                                    e.target.value as LinearProgressThickness,
+                                    e.target.value.trim() as LinearProgressThickness,
                                 )
                             }
                             style={{
@@ -288,7 +288,9 @@ function PlaygroundLinearProgress() {
                             value={customColor ?? ""}
                             placeholder="Input custom color"
                             onChange={(e) =>
-                                setCustomColor(e.target.value as ColorLike)
+                                setCustomColor(
+                                    e.target.value.trim() as ColorLike,
+                                )
                             }
                             style={{
                                 padding: 10,
@@ -304,7 +306,7 @@ function PlaygroundLinearProgress() {
                             onClick={() => {
                                 if (!customColor) return;
                                 const color = Color(
-                                    customColor,
+                                    customColor.trim(),
                                 ).hex() as ColorLike;
                                 setCustomColors(
                                     (prev) => [...prev, color] as ColorLike[],
@@ -322,7 +324,7 @@ function PlaygroundLinearProgress() {
                                 value={colorToDelete ?? ""}
                                 onChange={(e) => {
                                     setColorToDelete(
-                                        e.target.value as ColorLike,
+                                        e.target.value.trim() as ColorLike,
                                     );
                                 }}
                                 style={{

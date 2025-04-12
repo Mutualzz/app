@@ -144,7 +144,9 @@ function PlaygroundCircularProgress() {
                             type="text"
                             value={size}
                             onChange={(e) =>
-                                setSize(e.target.value as CircularProgressSize)
+                                setSize(
+                                    e.target.value.trim() as CircularProgressSize,
+                                )
                             }
                             placeholder="Custom size"
                             style={{
@@ -158,7 +160,9 @@ function PlaygroundCircularProgress() {
                         <select
                             value={size}
                             onChange={(e) =>
-                                setSize(e.target.value as CircularProgressSize)
+                                setSize(
+                                    e.target.value.trim() as CircularProgressSize,
+                                )
                             }
                             style={{
                                 padding: 10,
@@ -186,7 +190,9 @@ function PlaygroundCircularProgress() {
                             value={customColor ?? ""}
                             placeholder="Input custom color"
                             onChange={(e) =>
-                                setCustomColor(e.target.value as ColorLike)
+                                setCustomColor(
+                                    e.target.value.trim() as ColorLike,
+                                )
                             }
                             style={{
                                 padding: 10,
@@ -202,7 +208,7 @@ function PlaygroundCircularProgress() {
                             onClick={() => {
                                 if (!customColor) return;
                                 const color = Color(
-                                    customColor,
+                                    customColor.trim(),
                                 ).hex() as ColorLike;
                                 setCustomColors(
                                     (prev) => [...prev, color] as ColorLike[],
