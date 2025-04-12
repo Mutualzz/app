@@ -5,7 +5,7 @@ export type DividerInset = "none" | "start" | "end" | "context";
 
 export interface DividerProps extends HTMLAttributes<HTMLHRElement> {
     orientation?: DividerOrientation;
-    inset?: "none" | "start" | "end" | "context";
+    inset?: DividerInset;
 
     children?: ReactNode;
 }
