@@ -30,6 +30,9 @@ export const GlobalStyles = () => {
                     boxSizing: "border-box",
                 },
                 ":root": neededStyle(theme),
+                html: neededStyle(theme),
+                body: neededStyle(theme),
+                "#app": neededStyle(theme),
             }}
         />
     );
