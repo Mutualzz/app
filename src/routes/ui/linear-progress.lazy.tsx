@@ -104,9 +104,17 @@ function PlaygroundLinearProgress() {
             <Paper direction="column" alignItems="center" padding={20} gap={5}>
                 <Stack direction="column">{progresses}</Stack>
             </Paper>
+
             <Paper direction="column" padding={20} gap={10}>
-                <Divider>Customization</Divider>
+                <h2
+                    css={{
+                        textAlign: "center",
+                    }}
+                >
+                    Customization
+                </h2>
                 <Stack justifyContent="center" direction="column" gap={10}>
+                    <Divider>States</Divider>
                     <Button
                         color={determinate ? "success" : "error"}
                         variant="soft"
@@ -266,9 +274,9 @@ function PlaygroundLinearProgress() {
                         </select>
                     )}
                 </Stack>
-                <Divider />
+
                 <Stack justifyContent="center" direction="column" gap={5}>
-                    <label css={{ textAlign: "center" }}>Custom Colors</label>
+                    <Divider>Custom Colors</Divider>
                     <Stack
                         justifyContent="center"
                         alignItems="center"
@@ -309,7 +317,7 @@ function PlaygroundLinearProgress() {
                         </Button>
                     </Stack>
                     {customColors.length > 0 && (
-                        <Stack direction="row" gap={10}>
+                        <Stack alignItems="center" direction="row" gap={10}>
                             <select
                                 value={colorToDelete ?? ""}
                                 onChange={(e) => {

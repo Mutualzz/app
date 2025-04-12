@@ -5,8 +5,8 @@ import { isThemeColor } from "@utils";
 import Color from "color";
 import {
     CircularProgressDefaults,
-    sizes,
-    thicknesses,
+    resolveCircularProgressSizes,
+    resolveCiruclarProgressThickness,
     variantColors,
 } from "./CircularProgress.helpers";
 import { spin } from "./CircularProgress.keyframes";
@@ -30,11 +30,11 @@ export const CircularProgress: FC<CircularProgressProps> = ({
 }) => {
     const { theme } = useTheme();
 
-    const pixelSize = sizes[size];
+    const pixelSize = resolveCircularProgressSizes(size);
 
     const outerStroke = variantColors(theme, color)[variant];
     const innerStroke = isThemeColor(color) ? theme.colors[color] : color;
-    const strokeWidth = thicknesses(size);
+    const strokeWidth = resolveCiruclarProgressThickness(size);
     const radius = (pixelSize - strokeWidth) / 2;
     const circumference = 2 * Math.PI * radius;
 

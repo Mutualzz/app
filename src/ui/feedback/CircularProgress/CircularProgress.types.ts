@@ -12,6 +12,8 @@ export type CircularProgressColor =
     | "info"
     | ColorLike;
 
+export type CircularProgressThickness = "sm" | "md" | "lg" | number;
+
 export interface CircularProgressProps {
     size?: CircularProgressSize;
     variant?: CircularProgressVariant;

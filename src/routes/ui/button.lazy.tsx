@@ -1,5 +1,6 @@
 import type { ColorLike } from "@mutualzz/theme";
 import { createLazyFileRoute } from "@tanstack/react-router";
+import { Divider } from "@ui/data-display/Divider/Divider";
 import { Button } from "@ui/inputs/Button/Button";
 import type {
     ButtonColor,
@@ -35,7 +36,7 @@ function PlaygroundButton() {
     const [customSize, setCustomSize] = useState(false);
     const [customColor, setCustomColor] = useState<ColorLike | null>(null);
 
-    const [customColors, setCustomColors] = useState<ButtonColor[]>([]);
+    const [customColors, setCustomColors] = useState<ColorLike[]>([]);
     const [colorToDelete, setColorToDelete] = useState<ColorLike | null>(null);
 
     let buttons = [];
@@ -75,7 +76,15 @@ function PlaygroundButton() {
                 <Stack direction="column">{buttons}</Stack>
             </Paper>
             <Paper direction="column" padding={20} gap={5}>
+                <h2
+                    css={{
+                        textAlign: "center",
+                    }}
+                >
+                    Customization
+                </h2>
                 <Stack justifyContent="center" direction="column" gap={10}>
+                    <Divider>States</Divider>
                     <Button
                         onClick={() => setLoading((prev) => !prev)}
                         variant="soft"
@@ -93,6 +102,7 @@ function PlaygroundButton() {
                         Turn {disabled ? "Off" : "On"} Disabled
                     </Button>
                     <Stack gap={5} justifyContent="center" direction="column">
+                        <Divider>Properties</Divider>
                         <Stack
                             direction="row"
                             gap={10}
@@ -143,19 +153,9 @@ function PlaygroundButton() {
                             </select>
                         )}
                     </Stack>
-                    <Stack
-                        justifyContent="center"
-                        alignItems="center"
-                        direction="column"
-                        gap={5}
-                    >
-                        <label>Custom Colors</label>
-                        <Stack
-                            justifyContent="center"
-                            alignItems="center"
-                            direction="row"
-                            gap={10}
-                        >
+                    <Stack justifyContent="center" direction="column" gap={5}>
+                        <Divider>Custom Colors</Divider>
+                        <Stack alignItems="center" gap={10}>
                             <input
                                 type="text"
                                 value={customColor ?? ""}
@@ -191,12 +191,7 @@ function PlaygroundButton() {
                             </Button>
                         </Stack>
                         {customColors.length > 0 && (
-                            <Stack
-                                justifyContent="center"
-                                alignItems="center"
-                                direction="row"
-                                gap={10}
-                            >
+                            <Stack alignItems="center" direction="row" gap={10}>
                                 <select
                                     value={colorToDelete ?? ""}
                                     onChange={(e) => {
