@@ -24,19 +24,3 @@ export const isThemeColor = (color: unknown): color is ThemeColor => {
         )
     );
 };
-
-export const parseResponsiveValue = (value: string): string | number => {
-    if (value.trim() === "") return value;
-
-    const cssUnitRegex =
-        /^[+-]?(?:\d+\.\d+|\d+|\.\d+)(px|%|rem|em|vw|vh|vmin|vmax|fr)$/;
-    const keywordSet = new Set(["sm", "md", "lg"]);
-
-    if (cssUnitRegex.test(value)) return value;
-    if (keywordSet.has(value)) return value;
-
-    const num = Number(value);
-    if (!isNaN(num)) return num;
-
-    return value;
-};
