@@ -53,6 +53,7 @@ const IconWrapper = styled.span<{ position: "start" | "end" }>`
     margin-right: ${({ position }) => (position === "start" ? "0.5rem" : "0")};
 `;
 
+// TODO: Add a support for custom text colors on the custom button, so when a user adds a custom button color they have a chance to have a custom text so it aligns with their needs
 export const Button: FC<ButtonProps> = ({
     variant = defaultVariant,
     color = defaultColor,
