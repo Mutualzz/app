@@ -1,5 +1,5 @@
 import { Global } from "@emotion/react";
-import { useTheme } from "../contexts/ThemeManager";
+import { useTheme } from "@hooks/useTheme";
 
 export const GlobalStyles = () => {
     const { theme } = useTheme();

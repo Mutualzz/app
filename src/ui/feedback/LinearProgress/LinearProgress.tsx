@@ -1,86 +1,37 @@
-import { useTheme } from "@contexts/ThemeManager";
-import { keyframes, type Theme } from "@emotion/react";
-import { isThemeColor } from "@utils/*";
+import { useTheme } from "@hooks/useTheme";
+import { isThemeColor } from "@utils";
 import Color from "color";
 import type { FC } from "react";
+import {
+    LinearProgressDefaults,
+    resolveLength,
+    resolveThickness,
+    variantColors,
+} from "./LinearProgress.helpers";
+import { bounce, scaleInOut, slide, wave } from "./LinearProgress.keyframes";
 import type {
     LinearProgressAnimation,
-    LinearProgressColor,
-    LinearProgressLength,
     LinearProgressProps,
-    LinearProgressThickness,
 } from "./LinearProgress.types";
 
-const slide = keyframes`
-    0% { left: -50%; }
-    50% { left: 25%; }
-    100% { left: 100%; }
-`;
-
-const wave = keyframes`
-  0% { transform: translateX(-100%) scaleX(0.8); opacity: 0.5; }
-  50% { transform: translateX(50%) scaleX(1); opacity: 1; }
-  100% { transform: translateX(100%) scaleX(0.8); opacity: 0.5; }
-`;
-
-const bounce = keyframes`
-  0%, 100% { left: 0; width: 30%; }
-  50% { left: 70%; width: 30%; }
-`;
-
-const scaleInOut = keyframes`
-  0%, 100% { transform: scaleX(0.5); opacity: 0.5; }
-  50% { transform: scaleX(1); opacity: 1; }
-`;
-
-const variantColors = ({ colors }: Theme, color: LinearProgressColor) => {
-    const isCustomColor = !isThemeColor(color);
-    const resolvedColor = isCustomColor ? Color(color).hexa() : colors[color];
-
-    return {
-        plain: "transparent",
-        solid: Color(resolvedColor).alpha(0.4).hexa(),
-        soft: Color(resolvedColor).alpha(0.1).hexa(),
-        outlined: "transparent",
-    };
-};
-
-const thicknessMap: Record<LinearProgressThickness, number> = {
-    sm: 4,
-    md: 6,
-    lg: 8,
-};
-
-const lengthMap: Record<LinearProgressThickness, number> = {
-    sm: 120,
-    md: 160,
-    lg: 200,
-};
-
-const resolveThickness = (
-    thickness: LinearProgressThickness,
-): string | number => {
-    if (thickness in thicknessMap) return thicknessMap[thickness];
-    if (typeof thickness === "number") return thickness;
-
-    return thickness;
-};
-
-const resolveLength = (length: LinearProgressLength): string | number => {
-    if (length in lengthMap) return lengthMap[length];
-    if (typeof length === "number") return length;
-
-    return length;
-};
+const {
+    defaultThickness,
+    defaultLength,
+    defaultVariant,
+    defaultColor,
+    defaultAnimation,
+    defaultDeterminate,
+    defaultValue,
+} = LinearProgressDefaults;
 
 export const LinearProgress: FC<LinearProgressProps> = ({
-    thickness = "md",
-    length = "md",
-    variant = "soft",
-    color = "primary",
-    animation = "bounce",
-    determinate = false,
-    value = 0,
+    thickness = defaultThickness,
+    length = defaultLength,
+    variant = defaultVariant,
+    color = defaultColor,
+    animation = defaultAnimation,
+    determinate = defaultDeterminate,
+    value = defaultValue,
 }) => {
     const { theme } = useTheme();
 

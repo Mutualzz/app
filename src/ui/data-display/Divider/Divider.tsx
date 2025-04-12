@@ -1,20 +1,8 @@
-import { useTheme } from "@contexts/ThemeManager";
 import { css } from "@emotion/react";
+import { useTheme } from "@hooks/useTheme";
 import type { FC } from "react";
+import { insetMap } from "./Divider.helpers";
 import type { DividerProps } from "./Divider.types";
-
-const insetMap = {
-    none: css``,
-    context: css`
-        margin: 0 0.5rem;
-    `,
-    start: css`
-        margin-left: 1rem;
-    `,
-    end: css`
-        margin-right: 1rem;
-    `,
-};
 
 export const Divider: FC<DividerProps> = ({
     orientation = "horizontal",

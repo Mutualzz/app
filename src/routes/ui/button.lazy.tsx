@@ -8,7 +8,7 @@ import type {
 } from "@ui/inputs/Button/Button.types";
 import { Stack } from "@ui/layout/Stack/Stack";
 import { Paper } from "@ui/surfaces/Paper/Paper";
-import { parseResponsiveValue } from "@utils/*";
+import Color from "color";
 import capitalize from "lodash/capitalize";
 import chunk from "lodash/chunk";
 import { useState } from "react";
@@ -114,11 +114,7 @@ function PlaygroundButton() {
                                 type="text"
                                 value={size}
                                 onChange={(e) =>
-                                    setSize(
-                                        parseResponsiveValue(
-                                            e.target.value,
-                                        ) as ButtonSize,
-                                    )
+                                    setSize(e.target.value as ButtonSize)
                                 }
                                 placeholder="Custom size"
                                 style={{
@@ -177,16 +173,18 @@ function PlaygroundButton() {
                             <Button
                                 variant="soft"
                                 color="primary"
+                                disabled={!customColor}
                                 onClick={() => {
+                                    if (!customColor) return;
+                                    const color = Color(
+                                        customColor,
+                                    ).hex() as ColorLike;
                                     setCustomColors(
                                         (prev) =>
-                                            [
-                                                ...prev,
-                                                customColor,
-                                            ] as ColorLike[],
+                                            [...prev, color] as ColorLike[],
                                     );
                                     setCustomColor(null);
-                                    setColorToDelete(customColor);
+                                    setColorToDelete(color);
                                 }}
                             >
                                 Add Color

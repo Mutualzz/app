@@ -19,3 +19,13 @@ export interface CircularProgressProps {
     determinate?: boolean;
     value?: number;
 }
+
+export interface CircularProgressDefaultsInterface {
+    minSize: number;
+    maxSize: number;
+    defaultSize: CircularProgressSize;
+    defaultColor: CircularProgressColor;
+    defaultVariant: CircularProgressVariant;
+    defaultDeterminate: boolean;
+    defaultValue: number;
+}

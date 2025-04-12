@@ -1,4 +1,4 @@
-import { useTheme } from "@contexts/ThemeManager";
+import { useTheme } from "@hooks/useTheme";
 import { useNavigate } from "@tanstack/react-router";
 import { themeNames, type AllThemes } from "@themes/index";
 import { Divider } from "@ui/data-display/Divider/Divider";

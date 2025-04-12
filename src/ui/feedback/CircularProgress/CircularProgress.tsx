@@ -1,45 +1,31 @@
-import { useTheme } from "@contexts/ThemeManager";
+import { useTheme } from "@hooks/useTheme";
 import type { FC } from "react";
 
-import { keyframes, type Theme } from "@emotion/react";
+import { isThemeColor } from "@utils";
 import Color from "color";
-import type {
-    CircularProgressColor,
-    CircularProgressProps,
-    CircularProgressSize,
-} from "./CircularProgress.types";
+import {
+    CircularProgressDefaults,
+    sizes,
+    thicknesses,
+    variantColors,
+} from "./CircularProgress.helpers";
+import { spin } from "./CircularProgress.keyframes";
+import type { CircularProgressProps } from "./CircularProgress.types";
 
-const spin = keyframes`
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-`;
-
-const variantColors = ({ colors }: Theme, color: CircularProgressColor) => ({
-    plain: "transparent",
-    solid: Color(colors[color]).alpha(0.4).hexa(),
-    soft: Color([color]).alpha(0.1).hexa(),
-    outlined: "transparent",
-});
-
-const sizes: Record<CircularProgressSize, number> = {
-    sm: 24,
-    md: 36,
-    lg: 48,
-};
-
-const thicknesses = (size: CircularProgressSize) =>
-    ({
-        sm: 4,
-        md: 6,
-        lg: 8,
-    })[size];
+const {
+    defaultSize,
+    defaultVariant,
+    defaultColor,
+    defaultDeterminate,
+    defaultValue,
+} = CircularProgressDefaults;
 
 export const CircularProgress: FC<CircularProgressProps> = ({
-    size = "md",
-    variant = "soft",
-    color = "primary",
-    determinate = false,
-    value = 0,
+    size = defaultSize,
+    variant = defaultVariant,
+    color = defaultColor,
+    determinate = defaultDeterminate,
+    value = defaultValue,
     ...props
 }) => {
     const { theme } = useTheme();
@@ -47,14 +33,18 @@ export const CircularProgress: FC<CircularProgressProps> = ({
     const pixelSize = sizes[size];
 
     const outerStroke = variantColors(theme, color)[variant];
-    const innerStroke = theme.colors[color];
+    const innerStroke = isThemeColor(color) ? theme.colors[color] : color;
     const strokeWidth = thicknesses(size);
     const radius = (pixelSize - strokeWidth) / 2;
     const circumference = 2 * Math.PI * radius;
 
     const strokeDashOffset = ((100 - value) / 100) * circumference;
 
-    const outlinedStroke = Color(theme.colors[color]).alpha(0.6).hexa();
+    const outlinedStroke = Color(
+        isThemeColor(color) ? theme.colors[color] : color,
+    )
+        .alpha(0.6)
+        .hexa();
 
     return (
         <div

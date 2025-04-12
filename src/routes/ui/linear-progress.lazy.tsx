@@ -12,7 +12,6 @@ import type {
 import { Button } from "@ui/inputs/Button/Button";
 import { Stack } from "@ui/layout/Stack/Stack";
 import { Paper } from "@ui/surfaces/Paper/Paper";
-import { parseResponsiveValue } from "@utils/*";
 import Color from "color";
 import capitalize from "lodash/capitalize";
 import chunk from "lodash/chunk";
@@ -64,31 +63,7 @@ function PlaygroundLinearProgress() {
 
     let progresses = [];
 
-    for (const color of colors) {
-        for (const variant of variants) {
-            progresses.push(
-                <Stack
-                    direction="column"
-                    gap={10}
-                    key={`${variant}-${color}-stack`}
-                >
-                    <label>{`${capitalize(variant)} ${capitalize(color)}`}</label>
-                    <LinearProgress
-                        key={`${variant}-${color}-progress`}
-                        variant={variant}
-                        color={color}
-                        length={length}
-                        thickness={thickness}
-                        animation={animation}
-                        value={value}
-                        determinate={determinate}
-                    />
-                </Stack>,
-            );
-        }
-    }
-
-    for (const color of customColors) {
+    for (const color of [...colors, ...customColors]) {
         for (const variant of variants) {
             progresses.push(
                 <Stack
@@ -203,9 +178,7 @@ function PlaygroundLinearProgress() {
                             value={length}
                             onChange={(e) =>
                                 setLength(
-                                    parseResponsiveValue(
-                                        e.target.value,
-                                    ) as LinearProgressLength,
+                                    e.target.value as LinearProgressLength,
                                 )
                             }
                             placeholder="Custom length"
@@ -221,9 +194,7 @@ function PlaygroundLinearProgress() {
                             value={length}
                             onChange={(e) =>
                                 setLength(
-                                    parseResponsiveValue(
-                                        e.target.value,
-                                    ) as LinearProgressLength,
+                                    e.target.value as LinearProgressLength,
                                 )
                             }
                             style={{
@@ -263,9 +234,7 @@ function PlaygroundLinearProgress() {
                             value={thickness}
                             onChange={(e) =>
                                 setThickness(
-                                    parseResponsiveValue(
-                                        e.target.value,
-                                    ) as LinearProgressThickness,
+                                    e.target.value as LinearProgressThickness,
                                 )
                             }
                             placeholder="Custom thickness"

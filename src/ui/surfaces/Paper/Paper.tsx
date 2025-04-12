@@ -1,4 +1,4 @@
-import { useTheme } from "@contexts/ThemeManager";
+import { useTheme } from "@hooks/useTheme";
 import type { FC } from "react";
 import { dynamicElevation } from "../../../utils";
 import type { PaperProps } from "./Paper.types";
@@ -70,22 +70,8 @@ export const Paper: FC<PaperProps> = ({
                 marginRight,
                 marginBottom,
                 marginLeft,
-                ...(paddingX && {
-                    paddingLeft: paddingX,
-                    paddingRight: paddingX,
-                }),
-                ...(paddingY && {
-                    paddingTop: paddingY,
-                    paddingBottom: paddingY,
-                }),
-                ...(marginX && {
-                    marginLeft: marginX,
-                    marginRight: marginX,
-                }),
-                ...(marginY && {
-                    marginTop: marginY,
-                    marginBottom: marginY,
-                }),
+                paddingBlock: paddingY,
+                paddingInline: paddingX,
             }}
             {...props}
         >
