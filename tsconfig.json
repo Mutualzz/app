@@ -22,14 +22,15 @@
         "noUnusedParameters": true,
         "noFallthroughCasesInSwitch": true,
 
-        "baseUrl": "./src",
+        "baseUrl": "src",
 
         "paths": {
+            "@hooks/*": ["hooks/*"],
             "@contexts/*": ["contexts/*"],
             "@components/*": ["components/*"],
             "@ui/*": ["ui/*"],
             "@themes/*": ["themes/*"],
-            "@utils/*": ["utils.ts"]
+            "@utils": ["utils.ts"]
         }
     },
     "include": ["src/**/*"],

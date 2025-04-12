@@ -8,6 +8,7 @@ const host = process.env.TAURI_DEV_HOST;
 // https://vitejs.dev/config/
 export default defineConfig(async () => ({
     plugins: [
+        tsconfigPaths(),
         TanStackRouterVite({
             target: "react",
             autoCodeSplitting: true,
@@ -16,7 +17,6 @@ export default defineConfig(async () => ({
             quoteStyle: "double",
         }),
         react(),
-        tsconfigPaths(),
     ],
 
     // Vite options tailored for Tauri development and only applied in `tauri dev` or `tauri build`
