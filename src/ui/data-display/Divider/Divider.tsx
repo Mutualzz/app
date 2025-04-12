@@ -31,7 +31,7 @@ export const Divider: FC<DividerProps> = ({
         margin: ${isVertical ? "0.5rem 0" : "0 0.75rem"};
         font-size: 0.875rem;
         white-space: nowrap;
-        color: inherit;
+        color: ${theme.colors.typography.neutral};
     `;
 
     return (
