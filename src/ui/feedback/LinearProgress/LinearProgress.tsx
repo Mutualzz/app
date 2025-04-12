@@ -35,7 +35,7 @@ const scaleInOut = keyframes`
 
 const variantColors = ({ colors }: Theme, color: LinearProgressColor) => {
     const isCustomColor = !isThemeColor(color);
-    const resolvedColor = isCustomColor ? color : colors[color];
+    const resolvedColor = isCustomColor ? Color(color).hexa() : colors[color];
 
     return {
         plain: "transparent",
@@ -88,10 +88,12 @@ export const LinearProgress: FC<LinearProgressProps> = ({
     const width = resolveLength(length);
 
     const background = variantColors(theme, color)[variant];
-    const barColor = isThemeColor(color) ? theme.colors[color] : color;
+    const barColor = isThemeColor(color)
+        ? theme.colors[color]
+        : Color(color).hexa();
     const outlinedColor = isThemeColor(color)
         ? Color(theme.colors[color]).alpha(0.6).hexa()
-        : color;
+        : Color(color).hexa();
 
     const baseBarStyle = {
         height: "100%",

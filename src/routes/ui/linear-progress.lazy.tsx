@@ -1,5 +1,6 @@
 import type { ColorLike } from "@mutualzz/theme";
 import { createLazyFileRoute } from "@tanstack/react-router";
+import { Divider } from "@ui/data-display/Divider/Divider";
 import { LinearProgress } from "@ui/feedback/LinearProgress/LinearProgress";
 import type {
     LinearProgressAnimation,
@@ -12,6 +13,7 @@ import { Button } from "@ui/inputs/Button/Button";
 import { Stack } from "@ui/layout/Stack/Stack";
 import { Paper } from "@ui/surfaces/Paper/Paper";
 import { parseResponsiveValue } from "@utils/*";
+import Color from "color";
 import capitalize from "lodash/capitalize";
 import chunk from "lodash/chunk";
 import { useState } from "react";
@@ -62,7 +64,31 @@ function PlaygroundLinearProgress() {
 
     let progresses = [];
 
-    for (const color of [...colors, ...customColors]) {
+    for (const color of colors) {
+        for (const variant of variants) {
+            progresses.push(
+                <Stack
+                    direction="column"
+                    gap={10}
+                    key={`${variant}-${color}-stack`}
+                >
+                    <label>{`${capitalize(variant)} ${capitalize(color)}`}</label>
+                    <LinearProgress
+                        key={`${variant}-${color}-progress`}
+                        variant={variant}
+                        color={color}
+                        length={length}
+                        thickness={thickness}
+                        animation={animation}
+                        value={value}
+                        determinate={determinate}
+                    />
+                </Stack>,
+            );
+        }
+    }
+
+    for (const color of customColors) {
         for (const variant of variants) {
             progresses.push(
                 <Stack
@@ -103,7 +129,8 @@ function PlaygroundLinearProgress() {
             <Paper direction="column" alignItems="center" padding={20} gap={5}>
                 <Stack direction="column">{progresses}</Stack>
             </Paper>
-            <Paper direction="column" padding={20} gap={5}>
+            <Paper direction="column" padding={20} gap={10}>
+                <Divider>Customization</Divider>
                 <Stack justifyContent="center" direction="column" gap={10}>
                     <Button
                         color={determinate ? "success" : "error"}
@@ -130,7 +157,7 @@ function PlaygroundLinearProgress() {
                     </Stack>
                 </Stack>
                 <Stack justifyContent="center" direction="column" gap={5}>
-                    <label>Animation</label>
+                    <Divider>Animation</Divider>
                     <select
                         value={animation}
                         onChange={(e) =>
@@ -152,6 +179,7 @@ function PlaygroundLinearProgress() {
                         ))}
                     </select>
                 </Stack>
+                <Divider />
                 <Stack gap={5} justifyContent="center" direction="column">
                     <Stack
                         justifyContent="center"
@@ -211,6 +239,7 @@ function PlaygroundLinearProgress() {
                         </select>
                     )}
                 </Stack>
+                <Divider />
                 <Stack gap={5} justifyContent="center" direction="column">
                     <Stack
                         justifyContent="center"
@@ -268,6 +297,7 @@ function PlaygroundLinearProgress() {
                         </select>
                     )}
                 </Stack>
+                <Divider />
                 <Stack
                     justifyContent="center"
                     alignItems="center"
@@ -298,13 +328,17 @@ function PlaygroundLinearProgress() {
                         <Button
                             variant="soft"
                             color="primary"
+                            disabled={!customColor}
                             onClick={() => {
+                                if (!customColor) return;
+                                const color = Color(
+                                    customColor,
+                                ).hex() as ColorLike;
                                 setCustomColors(
-                                    (prev) =>
-                                        [...prev, customColor] as ColorLike[],
+                                    (prev) => [...prev, color] as ColorLike[],
                                 );
                                 setCustomColor(null);
-                                setColorToDelete(customColor);
+                                setColorToDelete(color);
                             }}
                         >
                             Add Color
@@ -346,7 +380,7 @@ function PlaygroundLinearProgress() {
                                             (color) => color !== colorToDelete,
                                         ),
                                     );
-                                    setColorToDelete(null);
+                                    setColorToDelete(customColors[0]);
                                 }}
                             >
                                 Delete Color
