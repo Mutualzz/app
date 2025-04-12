@@ -74,6 +74,7 @@ export default [
             "sonarjs/unused-import": "warn",
             "sonarjs/todo-tag": "warn",
             "sonarjs/no-commented-code": "warn",
+            "sonarjs/function-return-type": "off",
             "import/no-cycle": "error",
         },
     },
