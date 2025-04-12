@@ -142,7 +142,7 @@ function PlaygroundCircularProgress() {
                     {customSize ? (
                         <input
                             type="text"
-                            value={length}
+                            value={size}
                             onChange={(e) =>
                                 setSize(e.target.value as CircularProgressSize)
                             }

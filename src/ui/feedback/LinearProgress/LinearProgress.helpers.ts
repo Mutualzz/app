@@ -69,11 +69,13 @@ export const resolveThickness = (
     if (thickness in thicknessMap && typeof thickness === "string")
         return thicknessMap[thickness];
 
-    const num = Number(thickness);
-    if (num < minThickness) return minThickness;
-    if (num > maxThickness) return maxThickness;
+    let base = thicknessMap[thickness] ?? thickness;
+    if (base < minThickness) base = minThickness;
+    if (base > maxThickness) base = maxThickness;
+    if (typeof base === "string") base = parseFloat(base);
+    if (isNaN(base)) base = thicknessMap.md;
 
-    return num;
+    return base;
 };
 
 export const resolveLength = (
@@ -82,9 +84,13 @@ export const resolveLength = (
     if (length in lengthMap && typeof length === "string")
         return lengthMap[length];
 
-    const num = Number(length);
-    if (num < minLength) return minLength;
-    if (num > maxLength) return maxLength;
+    let base = lengthMap[length] ?? length;
 
-    return num;
+    if (base < minLength) base = minLength;
+    if (base > maxLength) base = maxLength;
+
+    if (typeof base === "string") base = parseFloat(base);
+    if (isNaN(base)) base = lengthMap.md;
+
+    return base;
 };

@@ -34,7 +34,8 @@ export const resolveButtonStyles = (size: ButtonSize) => {
     if (base < minSize) base = minSize;
     if (base > maxSize) base = maxSize;
 
-    if (typeof base === "string") base = Number(base);
+    if (typeof base === "string") base = parseFloat(base);
+    if (isNaN(base)) base = baseSizeMap.md;
 
     return css({
         width: "auto",

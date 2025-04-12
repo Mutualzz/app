@@ -45,17 +45,6 @@ export const variantColors = (
     };
 };
 
-export const resolveCircularProgressSizes = (size: CircularProgressSize) => {
-    let base = sizes[size] ?? size;
-
-    if (base < minSize) base = minSize;
-    if (base > maxSize) base = maxSize;
-
-    if (typeof base === "string") base = Number(base);
-
-    return base;
-};
-
 export const sizes: Record<CircularProgressSize, number> = {
     sm: 24,
     md: 36,
@@ -68,6 +57,18 @@ export const thicknesses: Record<CircularProgressThickness, number> = {
     lg: 8,
 };
 
+export const resolveCircularProgressSizes = (size: CircularProgressSize) => {
+    let base = sizes[size] ?? size;
+
+    if (base < minSize) base = minSize;
+    if (base > maxSize) base = maxSize;
+
+    if (typeof base === "string") base = parseFloat(base);
+    if (isNaN(base)) base = sizes.md;
+
+    return base;
+};
+
 export const resolveCiruclarProgressThickness = (
     thickness: CircularProgressThickness,
 ) => {
@@ -76,7 +77,8 @@ export const resolveCiruclarProgressThickness = (
     if (base < minSizeThickness) base = minSizeThickness;
     if (base > maxSizeThickness) base = maxSizeThickness;
 
-    if (typeof base === "string") base = Number(base);
+    if (typeof base === "string") base = parseFloat(base);
+    if (isNaN(base)) base = thicknesses.md;
 
     return base;
 };
