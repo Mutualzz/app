@@ -5,7 +5,6 @@ import type {
     LinearProgressAnimation,
     LinearProgressColor,
     LinearProgressLength,
-    LinearProgressProps,
     LinearProgressThickness,
     LinearProgressVariant,
 } from "@ui/feedback/LinearProgress/LinearProgress.types";
@@ -45,8 +44,7 @@ const animations = [
 ] as LinearProgressAnimation[];
 
 function PlaygroundLinearProgress() {
-    const [thickness, setThickness] =
-        useState<LinearProgressProps["thickness"]>("md");
+    const [thickness, setThickness] = useState<LinearProgressThickness>("md");
     const [length, setLength] = useState<LinearProgressLength>("md");
     const [customColor, setCustomColor] = useState<ColorLike | null>(null);
 
@@ -89,13 +87,7 @@ function PlaygroundLinearProgress() {
     }
 
     progresses = chunk(progresses, variants.length).map((row, index) => (
-        <Stack
-            justifyContent="center"
-            alignItems="center"
-            key={index}
-            padding={20}
-            gap={50}
-        >
+        <Stack key={index} padding={20} gap={50}>
             {row}
         </Stack>
     ));
@@ -328,7 +320,6 @@ function PlaygroundLinearProgress() {
                             <select
                                 value={colorToDelete ?? ""}
                                 onChange={(e) => {
-                                    console.log("here");
                                     setColorToDelete(
                                         e.target.value as ColorLike,
                                     );

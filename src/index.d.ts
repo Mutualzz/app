@@ -7,7 +7,7 @@ declare module "@mutualzz/theme" {
 
     export type ColorLike = Hex | RGB | RGBA | HSL | HSLA;
 
-    export type CSSLength =
+    export type CSSResponsiveValue =
         | `${number}px`
         | `${number}%`
         | `${number}rem`

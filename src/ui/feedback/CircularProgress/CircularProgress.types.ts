@@ -1,12 +1,21 @@
+import type { ColorLike, CSSResponsiveValue } from "@mutualzz/theme";
+
 export type CircularProgressVariant = "plain" | "outlined" | "soft" | "solid";
-export type CircularProgressSize = "sm" | "md" | "lg";
+export type CircularProgressSize =
+    | "sm"
+    | "md"
+    | "lg"
+    | CSSResponsiveValue
+    | number;
+
 export type CircularProgressColor =
     | "primary"
     | "neutral"
     | "success"
     | "error"
     | "warning"
-    | "info";
+    | "info"
+    | ColorLike;
 
 export interface CircularProgressProps {
     size?: CircularProgressSize;

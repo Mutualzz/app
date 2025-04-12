@@ -1,10 +1,20 @@
-import type { ColorLike, CSSLength } from "@mutualzz/theme";
+import type { ColorLike, CSSResponsiveValue } from "@mutualzz/theme";
 
 export type LinearProgressVariant = "plain" | "outlined" | "soft" | "solid";
 
-export type LinearProgressLength = "sm" | "md" | "lg" | CSSLength | number;
+export type LinearProgressLength =
+    | "sm"
+    | "md"
+    | "lg"
+    | CSSResponsiveValue
+    | number;
 
-export type LinearProgressThickness = "sm" | "md" | "lg" | CSSLength | number;
+export type LinearProgressThickness =
+    | "sm"
+    | "md"
+    | "lg"
+    | CSSResponsiveValue
+    | number;
 
 export type LinearProgressColor =
     | "primary"

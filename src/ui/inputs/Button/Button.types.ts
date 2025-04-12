@@ -1,3 +1,4 @@
+import type { ColorLike, CSSResponsiveValue } from "@mutualzz/theme";
 import { type ButtonHTMLAttributes, type ReactNode } from "react";
 
 export type ButtonColor =
@@ -6,11 +7,12 @@ export type ButtonColor =
     | "success"
     | "error"
     | "warning"
-    | "info";
+    | "info"
+    | ColorLike;
 
 export type ButtonVariant = "plain" | "outlined" | "soft" | "solid";
 
-export type ButtonSize = "sm" | "md" | "lg";
+export type ButtonSize = "sm" | "md" | "lg" | CSSResponsiveValue | number;
 
 export interface ButtonProps
     extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, "size"> {
