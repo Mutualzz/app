@@ -26,6 +26,10 @@ export const Paper: FC<PaperProps> = ({
     marginRight,
     marginBottom,
     marginLeft,
+    paddingX,
+    paddingY,
+    marginX,
+    marginY,
     elevation = 0,
     children,
     ...props
@@ -66,6 +70,22 @@ export const Paper: FC<PaperProps> = ({
                 marginRight,
                 marginBottom,
                 marginLeft,
+                ...(paddingX && {
+                    paddingLeft: paddingX,
+                    paddingRight: paddingX,
+                }),
+                ...(paddingY && {
+                    paddingTop: paddingY,
+                    paddingBottom: paddingY,
+                }),
+                ...(marginX && {
+                    marginLeft: marginX,
+                    marginRight: marginX,
+                }),
+                ...(marginY && {
+                    marginTop: marginY,
+                    marginBottom: marginY,
+                }),
             }}
             {...props}
         >

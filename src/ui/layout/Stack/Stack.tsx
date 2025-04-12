@@ -32,6 +32,10 @@ export const Stack: FC<StackProps> = ({
     marginRight,
     marginBottom,
     marginLeft,
+    paddingX,
+    paddingY,
+    marginX,
+    marginY,
     children,
     ...props
 }) => (
@@ -67,6 +71,22 @@ export const Stack: FC<StackProps> = ({
             marginRight,
             marginBottom,
             marginLeft,
+            ...(paddingX && {
+                paddingLeft: paddingX,
+                paddingRight: paddingX,
+            }),
+            ...(paddingY && {
+                paddingTop: paddingY,
+                paddingBottom: paddingY,
+            }),
+            ...(marginX && {
+                marginLeft: marginX,
+                marginRight: marginX,
+            }),
+            ...(marginY && {
+                marginTop: marginY,
+                marginBottom: marginY,
+            }),
         }}
         {...props}
     >

@@ -18,6 +18,11 @@ export type BoxProps = HTMLProps<HTMLDivElement> & {
     paddingBottom?: string | number;
     paddingLeft?: string | number;
 
+    paddingX?: string | number;
+    paddingY?: string | number;
+    marginX?: string | number;
+    marginY?: string | number;
+
     marginTop?: string | number;
     marginRight?: string | number;
     marginBottom?: string | number;
