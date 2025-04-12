@@ -1,7 +1,5 @@
 import "@emotion/react";
-import type { HexString } from "color";
-
-type HexString<Hex extends string = string> = `#${Hex}`;
+import type { ColorLike } from "@mutualzz/theme";
 
 declare module "@emotion/react" {
     export interface Theme {
@@ -10,22 +8,22 @@ declare module "@emotion/react" {
         description: string;
         colors: {
             // Base Colors
-            primary: HexString;
-            neutral: HexString;
-            background: HexString;
-            surface: HexString;
+            primary: ColorLike;
+            neutral: ColorLike;
+            background: ColorLike;
+            surface: ColorLike;
 
             // Feedback colors
-            error: HexString;
-            warning: HexString;
-            info: HexString;
-            success: HexString;
+            error: ColorLike;
+            warning: ColorLike;
+            info: ColorLike;
+            success: ColorLike;
 
             // Typography colors
             typography: {
-                primary: HexString;
-                neutral: HexString;
-                accent: HexString;
+                primary: ColorLike;
+                neutral: ColorLike;
+                accent: ColorLike;
             };
         };
         typography: {
