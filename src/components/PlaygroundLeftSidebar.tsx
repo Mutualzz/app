@@ -24,6 +24,10 @@ export const PlaygrondLeftSidebar = () => {
             name: "Circular Progress",
             link: "/ui/circular-progress",
         },
+        {
+            name: "Linear Progress",
+            link: "/ui/linear-progress",
+        },
     ];
 
     const dataDisplayComponents = [

@@ -14,14 +14,12 @@ const spin = keyframes`
   100% { transform: rotate(360deg); }
 `;
 
-const variantColors = ({ colors }: Theme, color: CircularProgressColor) => {
-    return {
-        plain: "transparent",
-        solid: Color(colors[color]).alpha(0.4).hexa(),
-        soft: Color([color]).alpha(0.1).hexa(),
-        outlined: "transparent",
-    };
-};
+const variantColors = ({ colors }: Theme, color: CircularProgressColor) => ({
+    plain: "transparent",
+    solid: Color(colors[color]).alpha(0.4).hexa(),
+    soft: Color([color]).alpha(0.1).hexa(),
+    outlined: "transparent",
+});
 
 const sizes: Record<CircularProgressSize, number> = {
     sm: 24,

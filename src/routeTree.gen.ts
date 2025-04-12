@@ -18,6 +18,7 @@ import { Route as rootRoute } from "./routes/__root"
 
 const UiLazyImport = createFileRoute("/ui")()
 const IndexLazyImport = createFileRoute("/")()
+const UiLinearProgressLazyImport = createFileRoute("/ui/linear-progress")()
 const UiDividerLazyImport = createFileRoute("/ui/divider")()
 const UiCircularProgressLazyImport = createFileRoute("/ui/circular-progress")()
 const UiButtonLazyImport = createFileRoute("/ui/button")()
@@ -35,6 +36,14 @@ const IndexLazyRoute = IndexLazyImport.update({
   path: "/",
   getParentRoute: () => rootRoute,
 } as any).lazy(() => import("./routes/index.lazy").then((d) => d.Route))
+
+const UiLinearProgressLazyRoute = UiLinearProgressLazyImport.update({
+  id: "/linear-progress",
+  path: "/linear-progress",
+  getParentRoute: () => UiLazyRoute,
+} as any).lazy(() =>
+  import("./routes/ui/linear-progress.lazy").then((d) => d.Route),
+)
 
 const UiDividerLazyRoute = UiDividerLazyImport.update({
   id: "/divider",
@@ -95,6 +104,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof UiDividerLazyImport
       parentRoute: typeof UiLazyImport
     }
+    "/ui/linear-progress": {
+      id: "/ui/linear-progress"
+      path: "/linear-progress"
+      fullPath: "/ui/linear-progress"
+      preLoaderRoute: typeof UiLinearProgressLazyImport
+      parentRoute: typeof UiLazyImport
+    }
   }
 }
 
@@ -104,12 +120,14 @@ interface UiLazyRouteChildren {
   UiButtonLazyRoute: typeof UiButtonLazyRoute
   UiCircularProgressLazyRoute: typeof UiCircularProgressLazyRoute
   UiDividerLazyRoute: typeof UiDividerLazyRoute
+  UiLinearProgressLazyRoute: typeof UiLinearProgressLazyRoute
 }
 
 const UiLazyRouteChildren: UiLazyRouteChildren = {
   UiButtonLazyRoute: UiButtonLazyRoute,
   UiCircularProgressLazyRoute: UiCircularProgressLazyRoute,
   UiDividerLazyRoute: UiDividerLazyRoute,
+  UiLinearProgressLazyRoute: UiLinearProgressLazyRoute,
 }
 
 const UiLazyRouteWithChildren =
@@ -121,6 +139,7 @@ export interface FileRoutesByFullPath {
   "/ui/button": typeof UiButtonLazyRoute
   "/ui/circular-progress": typeof UiCircularProgressLazyRoute
   "/ui/divider": typeof UiDividerLazyRoute
+  "/ui/linear-progress": typeof UiLinearProgressLazyRoute
 }
 
 export interface FileRoutesByTo {
@@ -129,6 +148,7 @@ export interface FileRoutesByTo {
   "/ui/button": typeof UiButtonLazyRoute
   "/ui/circular-progress": typeof UiCircularProgressLazyRoute
   "/ui/divider": typeof UiDividerLazyRoute
+  "/ui/linear-progress": typeof UiLinearProgressLazyRoute
 }
 
 export interface FileRoutesById {
@@ -138,6 +158,7 @@ export interface FileRoutesById {
   "/ui/button": typeof UiButtonLazyRoute
   "/ui/circular-progress": typeof UiCircularProgressLazyRoute
   "/ui/divider": typeof UiDividerLazyRoute
+  "/ui/linear-progress": typeof UiLinearProgressLazyRoute
 }
 
 export interface FileRouteTypes {
@@ -148,8 +169,15 @@ export interface FileRouteTypes {
     | "/ui/button"
     | "/ui/circular-progress"
     | "/ui/divider"
+    | "/ui/linear-progress"
   fileRoutesByTo: FileRoutesByTo
-  to: "/" | "/ui" | "/ui/button" | "/ui/circular-progress" | "/ui/divider"
+  to:
+    | "/"
+    | "/ui"
+    | "/ui/button"
+    | "/ui/circular-progress"
+    | "/ui/divider"
+    | "/ui/linear-progress"
   id:
     | "__root__"
     | "/"
@@ -157,6 +185,7 @@ export interface FileRouteTypes {
     | "/ui/button"
     | "/ui/circular-progress"
     | "/ui/divider"
+    | "/ui/linear-progress"
   fileRoutesById: FileRoutesById
 }
 
@@ -192,7 +221,8 @@ export const routeTree = rootRoute
       "children": [
         "/ui/button",
         "/ui/circular-progress",
-        "/ui/divider"
+        "/ui/divider",
+        "/ui/linear-progress"
       ]
     },
     "/ui/button": {
@@ -205,6 +235,10 @@ export const routeTree = rootRoute
     },
     "/ui/divider": {
       "filePath": "ui/divider.lazy.tsx",
+      "parent": "/ui"
+    },
+    "/ui/linear-progress": {
+      "filePath": "ui/linear-progress.lazy.tsx",
       "parent": "/ui"
     }
   }
