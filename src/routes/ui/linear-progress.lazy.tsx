@@ -1,6 +1,7 @@
 import { createLazyFileRoute } from "@tanstack/react-router";
 import { LinearProgress } from "@ui/feedback/LinearProgress/LinearProgress";
 import type {
+    LinearProgressAnimation,
     LinearProgressColor,
     LinearProgressSize,
     LinearProgressVariant,
@@ -13,35 +14,38 @@ import chunk from "lodash/chunk";
 import { useState } from "react";
 
 export const Route = createLazyFileRoute("/ui/linear-progress")({
-    component: PlaygroundProgresses,
+    component: PlaygroundLinearProgress,
 });
 
-const sizeMap = {
-    sm: "Small",
-    md: "Medium",
-    lg: "Large",
-};
+const variants = [
+    "solid",
+    "outlined",
+    "plain",
+    "soft",
+] as LinearProgressVariant[];
 
-function PlaygroundProgresses() {
+const colors = [
+    "primary",
+    "neutral",
+    "success",
+    "error",
+    "warning",
+    "info",
+] as LinearProgressColor[];
+
+const animations = [
+    "bounce",
+    "scale-in-out",
+    "slide",
+    "wave",
+] as LinearProgressAnimation[];
+
+function PlaygroundLinearProgress() {
     const [size, setSize] = useState<LinearProgressSize>("md");
+    const [animation, setAnimation] =
+        useState<LinearProgressAnimation>("slide");
     const [determinate, setDeterminate] = useState(false);
     const [value, setValue] = useState(0);
-
-    const variants = [
-        "solid",
-        "outlined",
-        "plain",
-        "soft",
-    ] as LinearProgressVariant[];
-
-    const colors = [
-        "primary",
-        "neutral",
-        "success",
-        "error",
-        "warning",
-        "info",
-    ] as LinearProgressColor[];
 
     let progresses = [];
 
@@ -53,12 +57,13 @@ function PlaygroundProgresses() {
                     gap={10}
                     key={`${variant}-${color}-stack`}
                 >
-                    <label>{`${sizeMap[size]} ${capitalize(variant)} ${capitalize(color)}`}</label>
+                    <label>{`${capitalize(variant)} ${capitalize(color)}`}</label>
                     <LinearProgress
                         key={`${variant}-${color}-progress`}
                         variant={variant}
                         color={color}
                         size={size}
+                        animation={animation}
                         value={value}
                         determinate={determinate}
                     />
@@ -136,6 +141,26 @@ function PlaygroundProgresses() {
                         <option value="sm">Small</option>
                         <option value="md">Medium</option>
                         <option value="lg">Large</option>
+                    </select>
+                    <select
+                        value={animation}
+                        onChange={(e) =>
+                            setAnimation(
+                                e.target.value as LinearProgressAnimation,
+                            )
+                        }
+                        style={{
+                            padding: 10,
+                            borderRadius: 5,
+                            border: "1px solid #ccc",
+                            backgroundColor: "#f9f9f9",
+                        }}
+                    >
+                        {animations.map((animation) => (
+                            <option key={animation} value={animation}>
+                                {capitalize(animation)}
+                            </option>
+                        ))}
                     </select>
                 </Stack>
             </Paper>

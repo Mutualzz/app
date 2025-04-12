@@ -8,10 +8,17 @@ export type LinearProgressColor =
     | "warning"
     | "info";
 
+export type LinearProgressAnimation =
+    | "slide"
+    | "wave"
+    | "bounce"
+    | "scale-in-out";
+
 export interface LinearProgressProps {
     size?: LinearProgressSize;
     variant?: LinearProgressVariant;
     color?: LinearProgressColor;
+    animation?: LinearProgressAnimation;
     determinate?: boolean;
     value?: number;
 }
