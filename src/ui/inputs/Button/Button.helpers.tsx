@@ -37,11 +37,15 @@ export const resolveButtonStyles = (size: ButtonSize) => {
     if (typeof base === "string") base = parseFloat(base);
     if (isNaN(base)) base = baseSizeMap.md;
 
+    const verticalPadding = 10;
+    const horizontalPadding = 20;
+
     return css({
         width: "auto",
-        height: `${base + 16}px`,
+        height: `${base + verticalPadding * 2}px`,
         fontSize: base,
         lineHeight: 1,
+        padding: `0 ${horizontalPadding}px`,
     });
 };
 
@@ -64,7 +68,7 @@ export const variantColors = ({ colors }: Theme, color: ButtonColor) => {
             },
             "&:disabled": {
                 backgroundColor: resolvedColor.alpha(0.2).hexa(),
-                color: Color(colors.typography.primary).alpha(0.5).hexa(),
+                color: Color(colors.typography.primary).alpha(0.4).hexa(),
             },
         },
         outlined: {
@@ -79,8 +83,8 @@ export const variantColors = ({ colors }: Theme, color: ButtonColor) => {
                 backgroundColor: resolvedColor.alpha(0.2).hexa(),
             },
             "&:disabled": {
-                color: resolvedColor.alpha(0.5).hexa(),
-                border: `1px solid ${resolvedColor.alpha(0.5).hexa()}`,
+                color: resolvedColor.alpha(0.4).hexa(),
+                border: `1px solid ${resolvedColor.alpha(0.4).hexa()}`,
             },
         },
         plain: {
@@ -94,7 +98,7 @@ export const variantColors = ({ colors }: Theme, color: ButtonColor) => {
                 color: resolvedColor.alpha(0.5).hexa(),
             },
             "&:disabled": {
-                color: resolvedColor.alpha(0.5).hexa(),
+                color: resolvedColor.alpha(0.4).hexa(),
             },
         },
         soft: {
@@ -109,7 +113,7 @@ export const variantColors = ({ colors }: Theme, color: ButtonColor) => {
             },
             "&:disabled": {
                 backgroundColor: resolvedColor.alpha(0.2).hexa(),
-                color: resolvedColor.alpha(0.5).hexa(),
+                color: resolvedColor.alpha(0.4).hexa(),
             },
         },
     };

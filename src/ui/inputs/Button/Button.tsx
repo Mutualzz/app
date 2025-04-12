@@ -12,6 +12,7 @@ import { type ButtonProps } from "./Button.types";
 const { defaultSize, defaultColor, defaultVariant } = ButtonDefaults;
 
 const ButtonWrapper = styled.button<ButtonProps>`
+    position: relative;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -20,21 +21,36 @@ const ButtonWrapper = styled.button<ButtonProps>`
     transition: all 0.3s;
     cursor: pointer;
     user-select: none;
-    opacity: ${({ disabled }) => (disabled ? 0.5 : 1)};
+    overflow: hidden;
     padding: 0 1.25rem;
-    ${({ size = "md" }) => resolveButtonStyles(size)};
 
+    ${({ disabled }) => disabled && `opacity: 0.5; pointer-events: none;`}
+    ${({ size = "md" }) => resolveButtonStyles(size)};
     ${({ theme, color = "primary", variant = "plain" }) =>
         variantColors(theme, color)[variant]};
+`;
 
-    &:disabled {
-        pointer-events: none;
-    }
+const ButtonContent = styled.span<{ loading?: boolean }>`
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    visibility: ${({ loading }) => (loading ? "hidden" : "visible")};
+`;
 
-    & > span {
-        display: inline-flex;
-        align-items: center;
-    }
+const SpinnerOverlay = styled.span`
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+`;
+
+const IconWrapper = styled.span<{ position: "start" | "end" }>`
+    display: inline-flex;
+    align-items: center;
+    margin-left: ${({ position }) => (position === "end" ? "0.5rem" : "0")};
+    margin-right: ${({ position }) => (position === "start" ? "0.5rem" : "0")};
 `;
 
 export const Button: FC<ButtonProps> = ({
@@ -56,20 +72,26 @@ export const Button: FC<ButtonProps> = ({
         disabled={loading || disabled}
         loading={loading}
     >
-        {startIcon && (
-            <span style={{ marginRight: "0.5rem" }}>{startIcon}</span>
+        {loading && (
+            <SpinnerOverlay>
+                <CircularProgress
+                    variant={
+                        variant === "solid" || variant === "soft"
+                            ? "plain"
+                            : "soft"
+                    }
+                    color={color}
+                    size="sm"
+                />
+            </SpinnerOverlay>
         )}
-        {loading ? (
-            <CircularProgress
-                variant={
-                    variant === "solid" || variant === "soft" ? "plain" : "soft"
-                }
-                color={color}
-                size={size}
-            />
-        ) : (
-            children
-        )}
-        {endIcon && <span style={{ marginLeft: "0.5rem" }}>{endIcon}</span>}
+
+        <ButtonContent loading={loading}>
+            {startIcon && (
+                <IconWrapper position="start">{startIcon}</IconWrapper>
+            )}
+            {children}
+            {endIcon && <IconWrapper position="end">{endIcon}</IconWrapper>}
+        </ButtonContent>
     </ButtonWrapper>
 );
