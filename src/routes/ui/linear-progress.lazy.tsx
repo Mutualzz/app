@@ -102,11 +102,11 @@ function PlaygroundLinearProgress() {
 
     return (
         <Stack
+            paddingTop={40}
             width="100%"
             gap={20}
             direction="row"
             justifyContent="center"
-            paddingTop={40}
         >
             <Paper direction="column" alignItems="center" padding={20} gap={5}>
                 <Stack direction="column">{progresses}</Stack>
