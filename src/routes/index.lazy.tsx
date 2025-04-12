@@ -20,15 +20,11 @@ function Index() {
             justifyContent="center"
             alignItems="center"
             gap={10}
-            style={{
-                height: "100vh",
-                width: "100vw",
-                padding: 20,
-            }}
+            height="100%"
         >
             <h1>Website is currently under development</h1>
             <h2>The UI is being made</h2>
-            <Stack direction="row">
+            <Stack direction="row" alignItems="center" gap={5}>
                 <h2>Meanwhile you can,</h2>&nbsp;
                 <Button
                     onClick={() => {
