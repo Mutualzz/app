@@ -298,13 +298,8 @@ function PlaygroundLinearProgress() {
                     )}
                 </Stack>
                 <Divider />
-                <Stack
-                    justifyContent="center"
-                    alignItems="center"
-                    direction="column"
-                    gap={5}
-                >
-                    <label>Custom Colors</label>
+                <Stack justifyContent="center" direction="column" gap={5}>
+                    <label css={{ textAlign: "center" }}>Custom Colors</label>
                     <Stack
                         justifyContent="center"
                         alignItems="center"
@@ -345,12 +340,7 @@ function PlaygroundLinearProgress() {
                         </Button>
                     </Stack>
                     {customColors.length > 0 && (
-                        <Stack
-                            justifyContent="center"
-                            alignItems="center"
-                            direction="row"
-                            gap={10}
-                        >
+                        <Stack direction="row" gap={10}>
                             <select
                                 value={colorToDelete ?? ""}
                                 onChange={(e) => {
