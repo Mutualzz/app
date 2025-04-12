@@ -1,21 +1,5 @@
-import type { CSSObject, Theme } from "@emotion/react";
 import { Global } from "@emotion/react";
 import { useTheme } from "../contexts/ThemeManager";
-
-const neededStyle = ({ colors, typography }: Theme): CSSObject => ({
-    overflowX: "hidden",
-    boxSizing: "border-box",
-    height: "100dvh",
-    "-moz-box-sizing": "border-box",
-    "-webkit-box-sizing": "border-box",
-
-    // Theme based styles
-    backgroundColor: colors.background,
-    color: colors.typography.primary,
-    fontFamily: typography.fontFamily,
-    fontSize: typography.fontSize,
-    lineHeight: typography.lineHeight,
-});
 
 export const GlobalStyles = () => {
     const { theme } = useTheme();
@@ -23,16 +7,27 @@ export const GlobalStyles = () => {
     return (
         <Global
             styles={{
-                "*": {
-                    minWidth: 0,
+                "html, body, #app": {
+                    height: "100%", // needed for flex containers
+                    width: "100%",
                     margin: 0,
                     padding: 0,
-                    boxSizing: "border-box",
                 },
-                ":root": neededStyle(theme),
-                html: neededStyle(theme),
-                body: neededStyle(theme),
-                "#app": neededStyle(theme),
+                body: {
+                    display: "flex",
+                    flexDirection: "column",
+                    backgroundColor: theme.colors.background,
+                    color: theme.colors.typography.primary,
+                    fontFamily: theme.typography.fontFamily,
+                    fontSize: theme.typography.fontSize,
+                    lineHeight: theme.typography.lineHeight,
+                },
+                "#app": {
+                    flex: 1,
+                    display: "flex",
+                    flexDirection: "column",
+                    minHeight: "100vh", // ensures full view height
+                },
             }}
         />
     );
