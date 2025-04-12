@@ -12,30 +12,23 @@ import chunk from "lodash/chunk";
 import { useState } from "react";
 
 export const Route = createLazyFileRoute("/ui/button")({
-    component: PlaygroundButtons,
+    component: PlaygroundButton,
 });
 
-const sizeMap = {
-    sm: "Small",
-    md: "Medium",
-    lg: "Large",
-};
+const variants = ["solid", "outlined", "plain", "soft"] as ButtonVariant[];
+const colors = [
+    "primary",
+    "neutral",
+    "success",
+    "error",
+    "warning",
+    "info",
+] as ButtonColor[];
 
-function PlaygroundButtons() {
+function PlaygroundButton() {
     const [size, setSize] = useState<ButtonSize>("md");
     const [loading, setLoading] = useState(false);
     const [disabled, setDisabled] = useState(false);
-
-    // all the button variants and colors
-    const variants = ["solid", "outlined", "plain", "soft"] as ButtonVariant[];
-    const colors = [
-        "primary",
-        "neutral",
-        "success",
-        "error",
-        "warning",
-        "info",
-    ] as ButtonColor[];
 
     let buttons = [];
 
@@ -50,7 +43,7 @@ function PlaygroundButtons() {
                     loading={loading}
                     disabled={disabled}
                 >
-                    {`${sizeMap[size]} ${capitalize(variant)} ${capitalize(color)}`}
+                    {`${capitalize(variant)} ${capitalize(color)}`}
                 </Button>,
             );
         }

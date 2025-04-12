@@ -12,36 +12,30 @@ import capitalize from "lodash/capitalize";
 import chunk from "lodash/chunk";
 import { useState } from "react";
 
+const variants = [
+    "solid",
+    "outlined",
+    "plain",
+    "soft",
+] as CircularProgressVariant[];
+
+const colors = [
+    "primary",
+    "neutral",
+    "success",
+    "error",
+    "warning",
+    "info",
+] as CircularProgressColor[];
+
 export const Route = createLazyFileRoute("/ui/circular-progress")({
-    component: PlaygroundProgresses,
+    component: PlaygroundCircularProgress,
 });
 
-const sizeMap = {
-    sm: "Small",
-    md: "Medium",
-    lg: "Large",
-};
-
-function PlaygroundProgresses() {
+function PlaygroundCircularProgress() {
     const [size, setSize] = useState<CircularProgressSize>("md");
     const [determinate, setDeterminate] = useState(false);
     const [value, setValue] = useState(0);
-
-    const variants = [
-        "solid",
-        "outlined",
-        "plain",
-        "soft",
-    ] as CircularProgressVariant[];
-
-    const colors = [
-        "primary",
-        "neutral",
-        "success",
-        "error",
-        "warning",
-        "info",
-    ] as CircularProgressColor[];
 
     let progresses = [];
 
@@ -53,7 +47,7 @@ function PlaygroundProgresses() {
                     gap={10}
                     key={`${variant}-${color}-stack`}
                 >
-                    <label>{`${sizeMap[size]} ${capitalize(variant)} ${capitalize(color)}`}</label>
+                    <label>{`${capitalize(variant)} ${capitalize(color)}`}</label>
                     <CircularProgress
                         key={`${variant}-${color}-progress`}
                         variant={variant}
