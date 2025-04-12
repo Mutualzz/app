@@ -16,7 +16,7 @@ const variantColors = ({ colors }: Theme, color: LinearProgressColor) => {
     };
 };
 
-const sizes: Record<LinearProgressSize, number> = {
+const heights: Record<LinearProgressSize, number> = {
     sm: 4,
     md: 6,
     lg: 8,
