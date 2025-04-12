@@ -1,17 +1,19 @@
 import { useTheme } from "@contexts/ThemeManager";
 import { keyframes, type Theme } from "@emotion/react";
+import { isThemeColor } from "@utils/*";
 import Color from "color";
 import type { FC } from "react";
 import type {
     LinearProgressAnimation,
     LinearProgressColor,
+    LinearProgressLength,
     LinearProgressProps,
-    LinearProgressSize,
+    LinearProgressThickness,
 } from "./LinearProgress.types";
 
 const slide = keyframes`
-    0% { left: -40%; }
-    50% { left: 30%; }
+    0% { left: -50%; }
+    50% { left: 25%; }
     100% { left: 100%; }
 `;
 
@@ -22,8 +24,8 @@ const wave = keyframes`
 `;
 
 const bounce = keyframes`
-  0%, 100% { left: 0; width: 20%; }
-  50% { left: 80%; width: 20%; }
+  0%, 100% { left: 0; width: 30%; }
+  50% { left: 70%; width: 30%; }
 `;
 
 const scaleInOut = keyframes`
@@ -31,34 +33,65 @@ const scaleInOut = keyframes`
   50% { transform: scaleX(1); opacity: 1; }
 `;
 
-const variantColors = ({ colors }: Theme, color: LinearProgressColor) => ({
-    plain: "transparent",
-    solid: Color(colors[color]).alpha(0.4).hexa(),
-    soft: Color(colors[color]).alpha(0.1).hexa(),
-    outlined: "transparent",
-});
+const variantColors = ({ colors }: Theme, color: LinearProgressColor) => {
+    const isCustomColor = !isThemeColor(color);
+    const resolvedColor = isCustomColor ? color : colors[color];
 
-const thicknesses = (size: LinearProgressSize) =>
-    ({
-        sm: 4,
-        md: 6,
-        lg: 8,
-    })[size];
+    return {
+        plain: "transparent",
+        solid: Color(resolvedColor).alpha(0.4).hexa(),
+        soft: Color(resolvedColor).alpha(0.1).hexa(),
+        outlined: "transparent",
+    };
+};
+
+const thicknessMap: Record<LinearProgressThickness, number> = {
+    sm: 4,
+    md: 6,
+    lg: 8,
+};
+
+const lengthMap: Record<LinearProgressThickness, number> = {
+    sm: 120,
+    md: 160,
+    lg: 200,
+};
+
+const resolveThickness = (
+    thickness: LinearProgressThickness,
+): string | number => {
+    if (thickness in thicknessMap) return thicknessMap[thickness];
+    if (typeof thickness === "number") return thickness;
+
+    return thickness;
+};
+
+const resolveLength = (length: LinearProgressLength): string | number => {
+    if (length in lengthMap) return lengthMap[length];
+    if (typeof length === "number") return length;
+
+    return length;
+};
 
 export const LinearProgress: FC<LinearProgressProps> = ({
-    size = "md",
+    thickness = "md",
+    length = "md",
     variant = "soft",
     color = "primary",
-    animation = "slide",
+    animation = "bounce",
     determinate = false,
     value = 0,
 }) => {
     const { theme } = useTheme();
 
-    const height = thicknesses(size);
+    const height = resolveThickness(thickness);
+    const width = resolveLength(length);
+
     const background = variantColors(theme, color)[variant];
-    const barColor = theme.colors[color];
-    const outlinedColor = Color(theme.colors[color]).alpha(0.6).hexa();
+    const barColor = isThemeColor(color) ? theme.colors[color] : color;
+    const outlinedColor = isThemeColor(color)
+        ? Color(theme.colors[color]).alpha(0.6).hexa()
+        : color;
 
     const baseBarStyle = {
         height: "100%",
@@ -69,7 +102,7 @@ export const LinearProgress: FC<LinearProgressProps> = ({
     const animationStyles: Record<LinearProgressAnimation, any> = {
         slide: {
             position: "absolute",
-            width: "30%",
+            width: "50%",
             animation: `${slide} 1.5s infinite ease-in-out`,
         },
         wave: {
@@ -79,6 +112,7 @@ export const LinearProgress: FC<LinearProgressProps> = ({
         bounce: {
             position: "absolute",
             height: "100%",
+            width: "30%",
             background: barColor,
             borderRadius: "inherit",
             animation: `${bounce} 1.5s infinite ease-in-out`,
@@ -93,10 +127,10 @@ export const LinearProgress: FC<LinearProgressProps> = ({
         <div
             css={{
                 position: "relative",
-                width: "100%",
+                width,
                 height,
                 background,
-                borderRadius: height / 2,
+                borderRadius: "0.5rem",
                 overflow: "hidden",
                 ...(variant === "outlined" && {
                     border: `1px solid ${outlinedColor}`,
