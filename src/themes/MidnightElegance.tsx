@@ -4,6 +4,10 @@ export const midnightEleganceTheme = extendTheme({
     colorSchemes: {
         light: {
             palette: {
+                common: {
+                    black: "#0A0A0A",
+                    white: "#E5E5E5",
+                },
                 primary: {
                     50: "#f8f2f3",
                     100: "#f0e5e6",
@@ -86,6 +90,10 @@ export const midnightEleganceTheme = extendTheme({
         },
         dark: {
             palette: {
+                common: {
+                    black: "#0A0A0A",
+                    white: "#E5E5E5",
+                },
                 primary: {
                     50: "#f8f2f3",
                     100: "#f0e5e6",

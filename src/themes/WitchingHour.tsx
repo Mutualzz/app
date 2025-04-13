@@ -4,6 +4,10 @@ export const witchingHourTheme = extendTheme({
     colorSchemes: {
         light: {
             palette: {
+                common: {
+                    black: "#0A0A12",
+                    white: "#EAE5E5",
+                },
                 primary: {
                     50: "#f8f2f5",
                     100: "#f0e4ea",
@@ -86,6 +90,10 @@ export const witchingHourTheme = extendTheme({
         },
         dark: {
             palette: {
+                common: {
+                    black: "#0A0A12",
+                    white: "#EAE5E5",
+                },
                 primary: {
                     50: "#f8f2f5",
                     100: "#f0e4ea",

@@ -4,6 +4,10 @@ export const grungeIndustrialTheme = extendTheme({
     colorSchemes: {
         light: {
             palette: {
+                common: {
+                    black: "#101010",
+                    white: "#DFDFDF",
+                },
                 primary: {
                     50: "#f3f4f4",
                     100: "#e6e7e9",
@@ -86,6 +90,10 @@ export const grungeIndustrialTheme = extendTheme({
         },
         dark: {
             palette: {
+                common: {
+                    black: "#101010",
+                    white: "#DFDFDF",
+                },
                 primary: {
                     50: "#f3f4f4",
                     100: "#e6e7e9",

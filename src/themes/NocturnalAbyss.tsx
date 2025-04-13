@@ -4,6 +4,10 @@ export const nocturnalAbyssTheme = extendTheme({
     colorSchemes: {
         light: {
             palette: {
+                common: {
+                    black: "#090909",
+                    white: "#E0D6D6",
+                },
                 primary: {
                     50: "#f6f2f8",
                     100: "#ece5f0",
@@ -86,6 +90,10 @@ export const nocturnalAbyssTheme = extendTheme({
         },
         dark: {
             palette: {
+                common: {
+                    black: "#090909",
+                    white: "#E0D6D6",
+                },
                 primary: {
                     50: "#f6f2f8",
                     100: "#ece5f0",

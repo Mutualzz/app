@@ -4,6 +4,10 @@ export const eternalMourningTheme = extendTheme({
     colorSchemes: {
         light: {
             palette: {
+                common: {
+                    black: "#0A080A",
+                    white: "#E5E3E8",
+                },
                 primary: {
                     50: "#f4f3f8",
                     100: "#e8e6f0",
@@ -86,6 +90,10 @@ export const eternalMourningTheme = extendTheme({
         },
         dark: {
             palette: {
+                common: {
+                    black: "#0A080A",
+                    white: "#E5E3E8",
+                },
                 primary: {
                     50: "#f4f3f8",
                     100: "#e8e6f0",

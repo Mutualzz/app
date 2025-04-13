@@ -4,6 +4,10 @@ export const hauntedAestheticTheme = extendTheme({
     colorSchemes: {
         light: {
             palette: {
+                common: {
+                    black: "#0C0C0C",
+                    white: "#E0E0E0",
+                },
                 primary: {
                     50: "#f3f3f6",
                     100: "#e6e7ec",
@@ -86,6 +90,10 @@ export const hauntedAestheticTheme = extendTheme({
         },
         dark: {
             palette: {
+                common: {
+                    black: "#0C0C0C",
+                    white: "#E0E0E0",
+                },
                 primary: {
                     50: "#f3f3f6",
                     100: "#e6e7ec",

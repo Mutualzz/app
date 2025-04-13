@@ -5,28 +5,26 @@ import {
     useMemo,
     useState,
 } from "react";
-import { type AllThemes, themes } from "../themes";
+import { themes } from "../themes";
 
 export const ThemeContext = createContext<{
     theme: Theme;
-    changeTheme: (theme: AllThemes) => void;
+    changeTheme: (theme: Theme) => void;
 }>({
     theme: themes["base"],
-    changeTheme: (_theme: AllThemes) => {},
+    changeTheme: (_theme: Theme) => {},
 });
 
 export const ThemeProvider = ({ children }: PropsWithChildren) => {
-    const [theme, setTheme] = useState<AllThemes>("base");
+    const [theme, setTheme] = useState<Theme>(themes["base"]);
 
-    const changeTheme = (theme: AllThemes) => {
+    const changeTheme = (theme: Theme) => {
         setTheme(theme);
     };
 
-    const themeObject = themes[theme];
-
     const value = useMemo(
         () => ({
-            theme: themeObject,
+            theme,
             changeTheme,
         }),
         [theme],
@@ -34,7 +32,7 @@ export const ThemeProvider = ({ children }: PropsWithChildren) => {
 
     return (
         <ThemeContext.Provider value={value}>
-            <CssVarsProvider theme={themeObject}>{children}</CssVarsProvider>
+            <CssVarsProvider theme={theme}>{children}</CssVarsProvider>
         </ThemeContext.Provider>
     );
 };

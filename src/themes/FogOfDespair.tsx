@@ -4,6 +4,10 @@ export const fogOfDespairTheme = extendTheme({
     colorSchemes: {
         light: {
             palette: {
+                common: {
+                    black: "#0B0D10",
+                    white: "#E3E8EC",
+                },
                 primary: {
                     50: "#f2f4f5",
                     100: "#e5e7ea",
@@ -86,6 +90,10 @@ export const fogOfDespairTheme = extendTheme({
         },
         dark: {
             palette: {
+                common: {
+                    black: "#0B0D10",
+                    white: "#E3E8EC",
+                },
                 primary: {
                     50: "#f2f4f5",
                     100: "#e5e7ea",

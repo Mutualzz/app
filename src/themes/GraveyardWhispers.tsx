@@ -4,6 +4,10 @@ export const graveyardWhispersTheme = extendTheme({
     colorSchemes: {
         light: {
             palette: {
+                common: {
+                    black: "#0D0D0D",
+                    white: "#D1D1D1",
+                },
                 primary: {
                     50: "#f2f4f5",
                     100: "#e4e8eb",
@@ -86,6 +90,10 @@ export const graveyardWhispersTheme = extendTheme({
         },
         dark: {
             palette: {
+                common: {
+                    black: "#0D0D0D",
+                    white: "#D1D1D1",
+                },
                 primary: {
                     50: "#f2f4f5",
                     100: "#e4e8eb",

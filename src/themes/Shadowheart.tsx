@@ -4,6 +4,10 @@ export const shadowheartTheme = extendTheme({
     colorSchemes: {
         light: {
             palette: {
+                common: {
+                    black: "#08090A",
+                    white: "#DADADA",
+                },
                 primary: {
                     50: "#f3f4f4",
                     100: "#e5e7e9",
@@ -86,6 +90,10 @@ export const shadowheartTheme = extendTheme({
         },
         dark: {
             palette: {
+                common: {
+                    black: "#08090A",
+                    white: "#DADADA",
+                },
                 primary: {
                     50: "#f3f4f4",
                     100: "#e5e7e9",

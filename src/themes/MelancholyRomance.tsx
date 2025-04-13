@@ -4,6 +4,10 @@ export const melancholyRomanceTheme = extendTheme({
     colorSchemes: {
         light: {
             palette: {
+                common: {
+                    black: "#0A0608",
+                    white: "#E3E3E3",
+                },
                 primary: {
                     50: "#fbf1f0",
                     100: "#f6e3e1",
@@ -86,6 +90,10 @@ export const melancholyRomanceTheme = extendTheme({
         },
         dark: {
             palette: {
+                common: {
+                    black: "#0A0608",
+                    white: "#E3E3E3",
+                },
                 primary: {
                     50: "#fbf1f0",
                     100: "#f6e3e1",
