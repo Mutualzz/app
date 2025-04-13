@@ -1,17 +1,31 @@
-declare module "@mutualzz/theme" {
-    export type Hex = `#${string}`;
-    export type RGB = `rgb(${number}, ${number}, ${number})`;
-    export type RGBA = `rgba(${number}, ${number}, ${number}, ${number})`;
-    export type HSL = `hsl(${number}, ${number}%, ${number}%)`;
-    export type HSLA = `hsla(${number}, ${number}%, ${number}%, ${number})`;
+import type { PaletteRange } from "@mui/joy/styles";
 
-    export type ColorLike = Hex | RGB | RGBA | HSL | HSLA;
+declare module "@mui/joy/styles" {
+    interface ColorPalettePropOverrides {
+        info: true;
+    }
 
-    export type ThemeColor =
-        | "primary"
-        | "neutral"
-        | "success"
-        | "error"
-        | "warning"
-        | "info";
+    interface InfoPaletteRange extends PaletteRange {
+        950: string;
+    }
+
+    interface Palette {
+        info: InfoPaletteRange;
+    }
+
+    interface PalettePrimaryOverrides {
+        950: true;
+    }
+    interface PaletteNeutralOverrides {
+        950: true;
+    }
+    interface PaletteDangerOverrides {
+        950: true;
+    }
+    interface PaletteSuccessOverrides {
+        950: true;
+    }
+    interface PaletteWarningOverrides {
+        950: true;
+    }
 }

@@ -1,44 +1,18 @@
-import {
-    createLazyFileRoute,
-    Outlet,
-    useNavigate,
-} from "@tanstack/react-router";
-
-import { Button } from "@ui/inputs/Button/Button";
-import { Stack } from "@ui/layout/Stack/Stack";
+import { createLazyFileRoute, Outlet } from "@tanstack/react-router";
 
 export const Route = createLazyFileRoute("/")({
     component: Index,
 });
 
 function Index() {
-    const navigate = useNavigate();
-
     return (
-        <Stack
-            direction="column"
-            justifyContent="center"
-            alignItems="center"
-            gap={10}
-            height="100%"
-        >
+        <div>
             <h1>Website is currently under development</h1>
             <h2>The UI is being made</h2>
-            <Stack direction="row" alignItems="center" gap={5}>
-                <h2>Meanwhile you can,</h2>&nbsp;
-                <Button
-                    onClick={() => {
-                        navigate({
-                            to: "/ui",
-                        });
-                    }}
-                    size="lg"
-                    variant="solid"
-                >
-                    Go to the UI playground
-                </Button>
-            </Stack>
+            <div>
+                <h2>Meanwhile you can wait? idk :D :3</h2>
+            </div>
             <Outlet />
-        </Stack>
+        </div>
     );
 }

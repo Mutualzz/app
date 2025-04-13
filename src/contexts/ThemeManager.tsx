@@ -1,7 +1,4 @@
-import {
-    ThemeProvider as EmotionThemeProvder,
-    type Theme,
-} from "@emotion/react";
+import { CssVarsProvider, type Theme } from "@mui/joy/styles";
 import {
     createContext,
     type PropsWithChildren,
@@ -14,12 +11,12 @@ export const ThemeContext = createContext<{
     theme: Theme;
     changeTheme: (theme: AllThemes) => void;
 }>({
-    theme: themes["baseDark"],
+    theme: themes["base"],
     changeTheme: (_theme: AllThemes) => {},
 });
 
 export const ThemeProvider = ({ children }: PropsWithChildren) => {
-    const [theme, setTheme] = useState<AllThemes>("baseDark");
+    const [theme, setTheme] = useState<AllThemes>("base");
 
     const changeTheme = (theme: AllThemes) => {
         setTheme(theme);
@@ -37,9 +34,7 @@ export const ThemeProvider = ({ children }: PropsWithChildren) => {
 
     return (
         <ThemeContext.Provider value={value}>
-            <EmotionThemeProvder theme={themeObject}>
-                {children}
-            </EmotionThemeProvder>
+            <CssVarsProvider theme={themeObject}>{children}</CssVarsProvider>
         </ThemeContext.Provider>
     );
 };

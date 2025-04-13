@@ -1,5 +1,5 @@
 import "@fontsource/inter";
-import "@fontsource/manrope";
+import "@fontsource/poppins";
 import "@loadingio/loading.css/loading.min.css";
 import "@loadingio/transition.css/transition.min.css";
 
