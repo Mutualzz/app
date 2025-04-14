@@ -40,9 +40,7 @@ import {
     Tabs,
     Textarea,
     Typography,
-    useColorScheme,
     type ColorPaletteProp,
-    type Theme,
     type VariantProp,
 } from "@mui/joy";
 import { createLazyFileRoute } from "@tanstack/react-router";
@@ -62,7 +60,7 @@ const colors: ColorPaletteProp[] = [
 ];
 
 const ThemeToggle = () => {
-    const { mode, setMode } = useColorScheme();
+    const { mode, setMode } = useTheme();
     return (
         <Stack direction="row" spacing={2} alignItems="center">
             <Typography>Light/Dark Mode</Typography>
@@ -76,14 +74,14 @@ const ThemeToggle = () => {
 };
 
 const SelectTheme = () => {
-    const { theme, changeTheme } = useTheme();
+    const { theme, setTheme } = useTheme();
     return (
         <Stack direction="row" spacing={2} alignItems="center">
             <Typography>Theme</Typography>
             <Select
                 value={theme}
                 onChange={(_, val) => {
-                    changeTheme(val as Theme);
+                    setTheme(val);
                 }}
             >
                 {Object.values(themes).map((theme, i) => (

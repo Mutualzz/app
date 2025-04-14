@@ -1,38 +1,54 @@
 import { CssVarsProvider, type Theme } from "@mui/joy/styles";
+import type { Mode } from "@mui/system/cssVars/useCurrentColorScheme";
 import {
     createContext,
-    type PropsWithChildren,
     useMemo,
     useState,
+    type PropsWithChildren,
 } from "react";
 import { themes } from "../themes";
 
 export const ThemeContext = createContext<{
+    mode: Mode;
+    setMode: (mode: Mode | null) => void;
     theme: Theme;
-    changeTheme: (theme: Theme) => void;
+    setTheme: (theme: Theme | null) => void;
 }>({
+    mode: "system",
+    setMode: (_mode?: Mode | null) => {},
     theme: themes["base"],
-    changeTheme: (_theme: Theme) => {},
+    setTheme: (_theme: Theme | null) => {},
 });
 
 export const ThemeProvider = ({ children }: PropsWithChildren) => {
-    const [theme, setTheme] = useState<Theme>(themes["base"]);
+    const [theme, changeTheme] = useState<Theme>(themes["base"]);
+    const [mode, changeMode] = useState<Mode>("system");
 
-    const changeTheme = (theme: Theme) => {
-        setTheme(theme);
+    const setMode = (mode: Mode | null = "system") => {
+        if (!mode) return changeMode("system");
+        changeMode(mode);
+    };
+
+    const setTheme = (theme: Theme | null = themes["base"]) => {
+        if (!theme) return changeTheme(themes["base"]);
+        changeTheme(theme);
     };
 
     const value = useMemo(
         () => ({
+            mode,
+            setMode,
             theme,
-            changeTheme,
+            setTheme,
         }),
-        [theme],
+        [mode, theme],
     );
 
     return (
         <ThemeContext.Provider value={value}>
-            <CssVarsProvider theme={theme}>{children}</CssVarsProvider>
+            <CssVarsProvider defaultMode={mode} theme={theme}>
+                {children}
+            </CssVarsProvider>
         </ThemeContext.Provider>
     );
 };
