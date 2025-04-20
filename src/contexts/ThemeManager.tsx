@@ -1,4 +1,4 @@
-import { CssVarsProvider, type Theme } from "@mui/joy/styles";
+import { CssVarsProvider, useColorScheme, type Theme } from "@mui/joy/styles";
 import type { Mode } from "@mui/system/cssVars/useCurrentColorScheme";
 import {
     createContext,
@@ -6,49 +6,53 @@ import {
     useState,
     type PropsWithChildren,
 } from "react";
-import { themes } from "../themes";
+import { themes, type ThemeName } from "../themes";
 
 export const ThemeContext = createContext<{
+    themeName: ThemeName;
+    setThemeName: (key: ThemeName) => void;
     mode: Mode;
-    setMode: (mode: Mode | null) => void;
+    setMode: (mode: Mode) => void;
     theme: Theme;
-    setTheme: (theme: Theme | null) => void;
 }>({
+    themeName: "base",
+    setThemeName: () => {},
     mode: "system",
-    setMode: (_mode?: Mode | null) => {},
+    setMode: () => {},
     theme: themes["base"],
-    setTheme: (_theme: Theme | null) => {},
 });
 
 export const ThemeProvider = ({ children }: PropsWithChildren) => {
-    const [theme, changeTheme] = useState<Theme>(themes["base"]);
-    const [mode, changeMode] = useState<Mode>("system");
+    const [themeName, setThemeName] = useState<ThemeName>("base");
+    const [modeState, setModeState] = useState<Mode>("system");
 
-    const setMode = (mode: Mode | null = "system") => {
-        if (!mode) return changeMode("system");
-        changeMode(mode);
-    };
-
-    const setTheme = (theme: Theme | null = themes["base"]) => {
-        if (!theme) return changeTheme(themes["base"]);
-        changeTheme(theme);
-    };
-
-    const value = useMemo(
-        () => ({
-            mode,
-            setMode,
-            theme,
-            setTheme,
-        }),
-        [mode, theme],
-    );
+    const theme = useMemo(() => themes[themeName], [themeName]);
 
     return (
-        <ThemeContext.Provider value={value}>
-            <CssVarsProvider defaultMode={mode} theme={theme}>
+        <ThemeContext.Provider
+            value={{
+                themeName,
+                setThemeName,
+                mode: modeState,
+                setMode: setModeState,
+                theme,
+            }}
+        >
+            <CssVarsProvider
+                theme={theme}
+                defaultMode="system"
+                modeStorageKey="mz-mode"
+            >
+                <ModeBridge mode={modeState} />
                 {children}
             </CssVarsProvider>
         </ThemeContext.Provider>
     );
+};
+
+// Sets the actual mode Joy uses
+const ModeBridge = ({ mode }: { mode: Mode }) => {
+    const { setMode } = useColorScheme();
+    setMode(mode);
+    return null;
 };

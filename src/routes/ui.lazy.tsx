@@ -1,4 +1,4 @@
-import { useTheme } from "@hooks/useTheme";
+import { ThemeSwitcher } from "@components/ThemeSwitcher";
 import {
     AspectRatio,
     Avatar,
@@ -40,12 +40,11 @@ import {
     Tabs,
     Textarea,
     Typography,
+    useTheme,
     type ColorPaletteProp,
     type VariantProp,
 } from "@mui/joy";
 import { createLazyFileRoute } from "@tanstack/react-router";
-import { themeNames, themes } from "@themes/index";
-import startCase from "lodash/startCase";
 import { useState } from "react";
 import { MdMenu as MenuIcon } from "react-icons/md";
 import { useMediaQuery } from "usehooks-ts";
@@ -59,41 +58,6 @@ const colors: ColorPaletteProp[] = [
     "warning",
 ];
 
-const ThemeToggle = () => {
-    const { mode, setMode } = useTheme();
-    return (
-        <Stack direction="row" spacing={2} alignItems="center">
-            <Typography>Light/Dark Mode</Typography>
-            <Select value={mode} onChange={(_, val) => setMode(val)}>
-                <Option value="light">Light</Option>
-                <Option value="dark">Dark</Option>
-                <Option value="system">System</Option>
-            </Select>
-        </Stack>
-    );
-};
-
-const SelectTheme = () => {
-    const { theme, setTheme } = useTheme();
-    return (
-        <Stack direction="row" spacing={2} alignItems="center">
-            <Typography>Theme</Typography>
-            <Select
-                value={theme}
-                onChange={(_, val) => {
-                    setTheme(val);
-                }}
-            >
-                {Object.values(themes).map((theme, i) => (
-                    <Option key={i} value={theme}>
-                        {startCase(themeNames[i])}
-                    </Option>
-                ))}
-            </Select>
-        </Stack>
-    );
-};
-
 export default function Showcase() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedVariant, setSelectedVariant] =
@@ -101,7 +65,7 @@ export default function Showcase() {
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const toggleModal = () => setIsModalOpen((prev) => !prev);
     const toggleSidebar = () => setSidebarOpen((prev) => !prev);
-    const { theme } = useTheme();
+    const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
     const SidebarContent = (
@@ -147,10 +111,7 @@ export default function Showcase() {
                 justifyContent="space-between"
                 alignItems="center"
             >
-                <Stack spacing={10} direction="row">
-                    <ThemeToggle />
-                    <SelectTheme />
-                </Stack>
+                <ThemeSwitcher />
                 {isMobile && (
                     <IconButton onClick={toggleSidebar}>
                         <MenuIcon />

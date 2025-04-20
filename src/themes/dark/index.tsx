@@ -10,10 +10,8 @@ import { midnightEleganceTheme } from "./MidnightElegance";
 import { nocturnalAbyssTheme } from "./NocturnalAbyss";
 import { shadowheartTheme } from "./Shadowheart";
 import { witchingHourTheme } from "./WitchingHour";
-import { baseTheme } from "./base";
 
-export const themes: Record<AllThemes, Theme> = {
-    base: baseTheme,
+export const darkThemes: Record<DarkTheme, Theme> = {
     crimsonLament: crimsonLamentTheme,
     eternalMourning: eternalMourningTheme,
     fogOfDespair: fogOfDespairTheme,
@@ -27,10 +25,10 @@ export const themes: Record<AllThemes, Theme> = {
     midnightElegance: midnightEleganceTheme,
 };
 
-export const themeNames = Object.keys(themes) as AllThemes[];
+export const themeNames = Object.keys(darkThemes) as DarkTheme[];
+export const themeValues = Object.values(darkThemes);
 
-export type AllThemes =
-    | "base"
+export type DarkTheme =
     | "crimsonLament"
     | "eternalMourning"
     | "fogOfDespair"

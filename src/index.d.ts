@@ -1,6 +1,10 @@
 import type { PaletteRange } from "@mui/joy/styles";
 
 declare module "@mui/joy/styles" {
+    interface Theme {
+        name: string;
+        previewColor: string;
+    }
     interface ColorPalettePropOverrides {
         info: true;
     }
