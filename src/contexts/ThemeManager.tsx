@@ -1,7 +1,7 @@
 import { CssVarsProvider, useColorScheme, type Theme } from "@mui/joy/styles";
-import type { Mode } from "@mui/system/cssVars/useCurrentColorScheme";
 import {
     createContext,
+    useEffect,
     useMemo,
     useState,
     type PropsWithChildren,
@@ -11,30 +11,23 @@ import { themes, type ThemeName } from "../themes";
 export const ThemeContext = createContext<{
     themeName: ThemeName;
     setThemeName: (key: ThemeName) => void;
-    mode: Mode;
-    setMode: (mode: Mode) => void;
     theme: Theme;
 }>({
-    themeName: "base",
+    themeName: "baseDark",
     setThemeName: () => {},
-    mode: "system",
-    setMode: () => {},
-    theme: themes["base"],
+    theme: themes["baseDark"],
 });
 
 export const ThemeProvider = ({ children }: PropsWithChildren) => {
-    const [themeName, setThemeName] = useState<ThemeName>("base");
-    const [modeState, setModeState] = useState<Mode>("system");
+    const [themeName, setThemeName] = useState<ThemeName>("baseDark");
 
-    const theme = useMemo(() => themes[themeName], [themeName]);
+    const theme = useMemo(() => themes[themeName], [themeName]) as Theme;
 
     return (
         <ThemeContext.Provider
             value={{
                 themeName,
                 setThemeName,
-                mode: modeState,
-                setMode: setModeState,
                 theme,
             }}
         >
@@ -43,16 +36,26 @@ export const ThemeProvider = ({ children }: PropsWithChildren) => {
                 defaultMode="system"
                 modeStorageKey="mz-mode"
             >
-                <ModeBridge mode={modeState} />
+                <ModeBridge theme={theme} />
                 {children}
             </CssVarsProvider>
         </ThemeContext.Provider>
     );
 };
 
-// Sets the actual mode Joy uses
-const ModeBridge = ({ mode }: { mode: Mode }) => {
-    const { setMode } = useColorScheme();
-    setMode(mode);
+const ModeBridge = ({ theme }: { theme: Theme }) => {
+    const { mode, setMode } = useColorScheme();
+
+    useEffect(() => {
+        console.log(theme);
+        if ("dark" in theme && mode !== "dark") {
+            setMode("dark");
+        }
+
+        if ("light" in theme && mode !== "light") {
+            setMode("light");
+        }
+    }, [mode, setMode, theme]);
+
     return null;
 };

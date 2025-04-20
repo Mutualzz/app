@@ -1,26 +1,12 @@
 import { useTheme } from "@hooks/useTheme";
-import { Box, Divider, Option, Select, Stack, Typography } from "@mui/joy";
+import { Box, Option, Select, Stack, Typography } from "@mui/joy";
 import { themes } from "../themes";
 
 export const ThemeSwitcher = () => {
-    const { themeName, setThemeName, mode, setMode } = useTheme();
+    const { themeName, setThemeName } = useTheme();
 
     return (
         <Stack spacing={2}>
-            <Typography level="h4">App Theme</Typography>
-            <Select
-                defaultValue={mode}
-                onChange={(_, val) => {
-                    if (val) setMode(val);
-                }}
-            >
-                <Option value="light">Light</Option>
-                <Option value="dark">Dark</Option>
-                <Option value="system">System</Option>
-            </Select>
-
-            <Divider />
-
             <Typography level="h4">Color Scheme</Typography>
             <Select
                 defaultValue={themeName}
