@@ -9,8 +9,6 @@
         "@fontsource/inter": "^5.2.5",
         "@fontsource/manrope": "^5.2.5",
         "@fontsource/montserrat": "^5.2.5",
-        "@loadingio/loading.css": "^3.2.1",
-        "@loadingio/transition.css": "^3.0.0",
         "@tanstack/react-query": "^5.72.2",
         "@tanstack/react-query-devtools": "^5.72.2",
         "@tanstack/react-router": "^1.115.2",
@@ -219,10 +217,6 @@
     "@jridgewell/sourcemap-codec": ["@jridgewell/sourcemap-codec@1.5.0", "", {}, "sha512-gv3ZRaISU3fjPAgNsriBRqGWQL6quFx04YMPW/zD8XMLsU32mhCCbfbO6KZFLjvYpCZ8zyDEgqsgf+PwPaM7GQ=="],
 
     "@jridgewell/trace-mapping": ["@jridgewell/trace-mapping@0.3.25", "", { "dependencies": { "@jridgewell/resolve-uri": "^3.1.0", "@jridgewell/sourcemap-codec": "^1.4.14" } }, "sha512-vNk6aEwybGtawWmy/PzwnGDOjCkLWSD2wqvjGGAgOAwCGWySYXfYoxt00IJkTF+8Lb57DwOb3Aa0o9CApepiYQ=="],
-
-    "@loadingio/loading.css": ["@loadingio/loading.css@3.2.1", "", {}, "sha512-46JkEUe37EQWrCUNV2Cl0rCiCv/3MzI68ZwcjpQJw6RQriH4yQMghlbEWkTGYmj8lTdlPTNKxsPOXNhDA5kNxg=="],
-
-    "@loadingio/transition.css": ["@loadingio/transition.css@3.0.0", "", {}, "sha512-VETvwZU9I0kK/tqwOp0mWy3wbKSyI7KXDlYuvg8BCAIgB9UtHhN4821wv7C7NdT8/R7xOHTvdnCOAWnzFI8r8g=="],
 
     "@mutualzz/types": ["@mutualzz/types@1.2.8", "", { "peerDependencies": { "typescript": "^5.8.2" } }, "sha512-wLmbMu36ZkDOv9ZQyaMid6HklkgOeTekO1K+5Rb372JqfPFhwtGfhHF6MBRdyNci8j6X8Oc3DNxIlCFOyYokdg=="],
 
