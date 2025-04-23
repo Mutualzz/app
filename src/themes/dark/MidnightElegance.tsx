@@ -4,9 +4,10 @@ import { baseDarkTheme } from "./baseDark";
 
 export const midghtEleganceTheme: Theme = {
     ...baseDarkTheme,
-    id: "midnight-elegance",
+    id: "midnightElegance",
     name: "Midnight Elegance",
     description: "Dark Victorian Vibes",
+    type: "dark",
     colors: {
         ...baseDarkTheme.colors,
 

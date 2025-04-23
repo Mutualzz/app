@@ -6,6 +6,7 @@ declare module "@emotion/react" {
         id: string;
         name: string;
         description: string;
+        type: "light" | "dark";
         colors: {
             common: {
                 white: ColorLike;

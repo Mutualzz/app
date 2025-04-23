@@ -3,9 +3,10 @@ import { baseDarkTheme } from "./baseDark";
 
 export const fogOfDespairTheme: Theme = {
     ...baseDarkTheme,
-    id: "fog-of-despair",
+    id: "fogOfDespair",
     name: "Fog of Despair",
     description: "Cold, Distant, and Ethereal",
+    type: "dark",
     colors: {
         ...baseDarkTheme.colors,
 

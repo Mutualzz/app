@@ -3,9 +3,10 @@ import { baseDarkTheme } from "./baseDark";
 
 export const eternalMourningTheme: Theme = {
     ...baseDarkTheme,
-    id: "eternal-mourning",
+    id: "eternalMourning",
     name: "Eternal Mourning",
     description: "Melancholiic & Gothic Elegance",
+    type: "dark",
     colors: {
         ...baseDarkTheme.colors,
 

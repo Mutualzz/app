@@ -27,7 +27,6 @@ export const darkThemesObj: Record<DarkTheme, Theme> = {
     midnightElegance: midghtEleganceTheme,
 };
 
-export const darkThemeNames = Object.keys(darkThemesObj) as DarkTheme[];
 export const darkThemes = Object.values(darkThemesObj);
 
 export type DarkTheme =

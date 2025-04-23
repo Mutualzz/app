@@ -7,6 +7,7 @@ export const shadowheartTheme: Theme = {
     id: "shadowheart",
     name: "Shadowheart",
     description: "Dystopian, Sharp, and Industrial",
+    type: "dark",
     colors: {
         ...baseDarkTheme.colors,
 

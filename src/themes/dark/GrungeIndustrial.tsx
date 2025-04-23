@@ -4,9 +4,10 @@ import { baseDarkTheme } from "./baseDark";
 
 export const grungeIndustrialTheme: Theme = {
     ...baseDarkTheme,
-    id: "grunge-industrial",
+    id: "grungeIndustrial",
     name: "Grunde & Industrial",
     description: "90s Underground Aesthetic",
+    type: "dark",
     colors: {
         ...baseDarkTheme.colors,
 

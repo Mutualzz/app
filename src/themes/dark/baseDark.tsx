@@ -4,6 +4,8 @@ export const baseDarkTheme: Theme = {
     id: "baseDark",
     name: "Dark",
     description: "Default Dark Theme",
+    type: "dark",
+
     colors: {
         common: {
             white: "#FFFFFF",

@@ -3,9 +3,10 @@ import { baseDarkTheme } from "./baseDark";
 
 export const crimsonLamentTheme: Theme = {
     ...baseDarkTheme,
-    id: "crimson-lament",
+    id: "crimsonLament",
     name: "Crimson Lament",
     description: "Dark Romance & Tragedy",
+    type: "dark",
     colors: {
         ...baseDarkTheme.colors,
 

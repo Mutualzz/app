@@ -1,11 +1,12 @@
 import { useTheme } from "@hooks/useTheme";
 import { useNavigate } from "@tanstack/react-router";
-import { themeNames, type AllThemes } from "@themes/dark/index";
+import { themes, type Themes } from "@themes/index";
 import { Divider } from "@ui/data-display/Divider/Divider";
 import { Button } from "@ui/inputs/Button/Button";
 import { Stack } from "@ui/layout/Stack/Stack";
 import { Paper } from "@ui/surfaces/Paper/Paper";
-import startCase from "lodash/startCase";
+import { sortThemes } from "@utils/sortThemes";
+import capitalize from "lodash/capitalize";
 
 export const PlaygrondLeftSidebar = () => {
     const { changeTheme } = useTheme();
@@ -56,13 +57,17 @@ export const PlaygrondLeftSidebar = () => {
                     <h3>Theme</h3>
                     <select
                         onChange={(e) => {
-                            changeTheme(e.target.value as AllThemes);
+                            changeTheme(e.target.value as Themes);
                         }}
                         defaultValue="baseDark"
                     >
-                        {themeNames.map((theme) => (
-                            <option key={theme} value={theme}>
-                                {startCase(theme)}
+                        {sortThemes(themes).map((theme) => (
+                            <option key={theme.id} value={theme.id}>
+                                {theme.name}
+                                {theme.id !== "baseDark" &&
+                                theme.id !== "baseLight"
+                                    ? ` (${capitalize(theme.type)})`
+                                    : ""}
                             </option>
                         ))}
                     </select>

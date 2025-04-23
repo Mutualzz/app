@@ -4,9 +4,10 @@ import { baseDarkTheme } from "./baseDark";
 
 export const graveyardWhispersTheme: Theme = {
     ...baseDarkTheme,
-    id: "graveyard-whispers",
+    id: "graveyardWhispers",
     name: "Graveyard Whispers",
     description: "Muted, Eerie, and Cold",
+    type: "dark",
     colors: {
         ...baseDarkTheme.colors,
 
