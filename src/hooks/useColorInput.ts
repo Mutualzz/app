@@ -1,3 +1,4 @@
+import type { ColorLike } from "@mutualzz/theme";
 import { formatHex8, parse } from "culori";
 import { useState } from "react";
 
@@ -30,7 +31,7 @@ const isValidColorInput = (value: string): boolean =>
     isValidHsl(value) ||
     isValidHsla(value);
 
-export const useColorInput = (initialColor: string = "#ffffff") => {
+export const useColorInput = (initialColor: ColorLike = "#ffffff") => {
     const [inputValue, setInputValue] = useState<string>(initialColor);
     const [color, setColor] = useState<string>(initialColor);
     const [isInvalid, setIsInvalid] = useState<boolean>(false);

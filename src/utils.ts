@@ -1,4 +1,4 @@
-import type { Hex, ThemeColor } from "@mutualzz/theme";
+import type { ColorLike, Hex, ThemeColor } from "@mutualzz/theme";
 import type { PaperElevation } from "@ui/surfaces/Paper/Paper.types";
 import {
     formatHex8,
@@ -64,3 +64,5 @@ export const getReadableTextColor = (
 
 export const alpha = (base: Color, value: number) =>
     formatHex8({ ...base, alpha: value });
+
+export const parseThemeColor = (color: ColorLike) => parse(color);
