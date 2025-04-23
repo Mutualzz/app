@@ -1,5 +1,5 @@
 import { useColorInput } from "@hooks/useColorInput";
-import type { Hex } from "@mutualzz/theme";
+import type { ColorLike, Hex } from "@mutualzz/theme";
 import { createLazyFileRoute } from "@tanstack/react-router";
 import { Divider } from "@ui/data-display/Divider/Divider";
 import { Button } from "@ui/inputs/Button/Button";
@@ -36,11 +36,11 @@ function PlaygroundButton() {
 
     const [customSize, setCustomSize] = useState(false);
 
-    const [customColors, setCustomColors] = useState<Hex[]>([]);
-    const [colorToDelete, setColorToDelete] = useState<Hex | null>(null);
+    const [customColors, setCustomColors] = useState<ColorLike[]>([]);
+    const [colorToDelete, setColorToDelete] = useState<ColorLike | null>(null);
 
     const {
-        inputValue,
+        inputValue: inputColor,
         color: customColor,
         isInvalid,
         handleChange,
@@ -166,7 +166,7 @@ function PlaygroundButton() {
                         <Stack alignItems="center" gap={10}>
                             <input
                                 type="text"
-                                value={inputValue}
+                                value={inputColor}
                                 placeholder="Input custom color"
                                 onChange={(e) => handleChange(e.target.value)}
                                 onBlur={validate}
@@ -188,10 +188,13 @@ function PlaygroundButton() {
 
                                     setCustomColors(
                                         (prev) =>
-                                            [...prev, customColor] as Hex[],
+                                            [
+                                                ...prev,
+                                                customColor,
+                                            ] as ColorLike[],
                                     );
-                                    handleChange("");
-                                    setColorToDelete(customColor as Hex);
+                                    handleChange("#ffffff");
+                                    setColorToDelete(customColor as ColorLike);
                                 }}
                             >
                                 Add Color

@@ -1,4 +1,5 @@
-import type { ColorLike, Hex } from "@mutualzz/theme";
+import { useColorInput } from "@hooks/useColorInput";
+import type { ColorLike } from "@mutualzz/theme";
 import { createLazyFileRoute } from "@tanstack/react-router";
 import { Divider } from "@ui/data-display/Divider/Divider";
 import { CircularProgress } from "@ui/feedback/CircularProgress/CircularProgress";
@@ -10,7 +11,6 @@ import type {
 import { Button } from "@ui/inputs/Button/Button";
 import { Stack } from "@ui/layout/Stack/Stack";
 import { Paper } from "@ui/surfaces/Paper/Paper";
-import { formatHex8 } from "culori";
 
 import capitalize from "lodash/capitalize";
 import chunk from "lodash/chunk";
@@ -42,10 +42,17 @@ function PlaygroundCircularProgress() {
     const [value, setValue] = useState(0);
 
     const [customSize, setCustomSize] = useState(false);
-    const [customColor, setCustomColor] = useState<ColorLike | null>(null);
 
     const [customColors, setCustomColors] = useState<ColorLike[]>([]);
     const [colorToDelete, setColorToDelete] = useState<ColorLike | null>(null);
+
+    const {
+        inputValue: inputColor,
+        color: customColor,
+        isInvalid,
+        handleChange,
+        validate,
+    } = useColorInput();
 
     let progresses = [];
 
@@ -188,17 +195,16 @@ function PlaygroundCircularProgress() {
                     >
                         <input
                             type="text"
-                            value={customColor ?? ""}
+                            value={inputColor}
                             placeholder="Input custom color"
-                            onChange={(e) =>
-                                setCustomColor(
-                                    e.target.value.trim() as ColorLike,
-                                )
-                            }
+                            onChange={(e) => handleChange(e.target.value)}
+                            onBlur={validate}
                             style={{
                                 padding: 10,
                                 borderRadius: 5,
-                                border: "1px solid #ccc",
+                                border: isInvalid
+                                    ? "1px solid red"
+                                    : "1px solid #ccc",
                                 backgroundColor: "#f9f9f9",
                             }}
                         />
@@ -208,12 +214,13 @@ function PlaygroundCircularProgress() {
                             disabled={!customColor}
                             onClick={() => {
                                 if (!customColor) return;
-                                const color = formatHex8(customColor.trim());
+
                                 setCustomColors(
-                                    (prev) => [...prev, color] as Hex[],
+                                    (prev) =>
+                                        [...prev, customColor] as ColorLike[],
                                 );
-                                setCustomColor(null);
-                                setColorToDelete(color as Hex);
+                                handleChange("#ffffff");
+                                setColorToDelete(customColor as ColorLike);
                             }}
                         >
                             Add Color
