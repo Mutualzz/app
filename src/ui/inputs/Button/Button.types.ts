@@ -5,7 +5,7 @@ export type ButtonColor =
     | "primary"
     | "neutral"
     | "success"
-    | "error"
+    | "danger"
     | "warning"
     | "info"
     | ColorLike;

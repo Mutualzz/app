@@ -9,12 +9,18 @@ export const shadowheartTheme: Theme = {
     description: "Dystopian, Sharp, and Industrial",
     colors: {
         ...baseDarkTheme.colors,
+
+        common: {
+            white: "#E2E2E2",
+            black: "#121212",
+        },
+
         primary: "#4A5A64",
         neutral: "#6B4F59",
         background: "#08090A",
         surface: "#16171A",
 
-        error: "#FF3D00",
+        danger: "#FF3D00",
         warning: "#F2A900",
         info: "#5A7A8C",
         success: "#4CAF50",

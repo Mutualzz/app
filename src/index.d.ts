@@ -11,7 +11,7 @@ declare module "@mutualzz/theme" {
         | "primary"
         | "neutral"
         | "success"
-        | "error"
+        | "danger"
         | "warning"
         | "info";
 }

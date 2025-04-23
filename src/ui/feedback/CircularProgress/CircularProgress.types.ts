@@ -7,7 +7,7 @@ export type CircularProgressColor =
     | "primary"
     | "neutral"
     | "success"
-    | "error"
+    | "danger"
     | "warning"
     | "info"
     | ColorLike;

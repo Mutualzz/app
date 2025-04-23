@@ -9,12 +9,18 @@ export const nocturnalAbyssTheme: Theme = {
     description: "Deep, Mysterious, and Shadowy",
     colors: {
         ...baseDarkTheme.colors,
+
+        common: {
+            white: "#E8E0E0",
+            black: "#121212",
+        },
+
         primary: "#7F4F9D",
         neutral: "#6A4F68",
         background: "#090909",
         surface: "#131313",
 
-        error: "#C3073F",
+        danger: "#C3073F",
         warning: "#B07A29",
         info: "#5A7A8C",
         success: "#4A7F4E",

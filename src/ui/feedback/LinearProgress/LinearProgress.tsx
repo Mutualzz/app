@@ -1,6 +1,7 @@
 import { useTheme } from "@hooks/useTheme";
 import { isThemeColor } from "@utils";
-import Color from "color";
+
+import { formatHex8 } from "culori";
 import type { FC } from "react";
 import {
     LinearProgressDefaults,
@@ -41,10 +42,11 @@ export const LinearProgress: FC<LinearProgressProps> = ({
     const background = variantColors(theme, color)[variant];
     const barColor = isThemeColor(color)
         ? theme.colors[color]
-        : Color(color).hexa();
+        : formatHex8(color);
+
     const outlinedColor = isThemeColor(color)
-        ? Color(theme.colors[color]).alpha(0.6).hexa()
-        : Color(color).hexa();
+        ? formatHex8(theme.colors[color])
+        : formatHex8(color);
 
     const baseBarStyle = {
         height: "100%",

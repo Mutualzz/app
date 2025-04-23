@@ -12,7 +12,6 @@ export const Divider: FC<DividerProps> = ({
     const { theme } = useTheme();
 
     const isVertical = orientation === "vertical";
-    const hasContent = Boolean(children);
 
     const containerStyle = css`
         display: flex;
@@ -37,7 +36,7 @@ export const Divider: FC<DividerProps> = ({
     return (
         <div role="separator" css={[containerStyle, insetMap[inset]]}>
             <div css={lineStyle} aria-hidden="true" />
-            {hasContent && <span css={textStyle}>{children}</span>}
+            {children && <span css={textStyle}>{children}</span>}
             <div css={lineStyle} aria-hidden="true" />
         </div>
     );

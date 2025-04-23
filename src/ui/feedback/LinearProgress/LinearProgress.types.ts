@@ -10,7 +10,7 @@ export type LinearProgressColor =
     | "primary"
     | "neutral"
     | "success"
-    | "error"
+    | "danger"
     | "warning"
     | "info"
     | ColorLike;

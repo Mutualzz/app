@@ -1,6 +1,7 @@
 import { css, type Theme } from "@emotion/react";
-import { isThemeColor } from "@utils";
-import Color from "color";
+import { alpha, getReadableTextColor, isThemeColor } from "@utils";
+
+import { formatHex8, parse, rgb } from "culori";
 import type {
     ButtonColor,
     ButtonDefaultsInterface,
@@ -51,69 +52,79 @@ export const resolveButtonStyles = (size: ButtonSize) => {
 
 export const variantColors = ({ colors }: Theme, color: ButtonColor) => {
     const isCustomColor = !isThemeColor(color);
-    const resolvedColor = Color(isCustomColor ? color : colors[color]);
+    const resolvedColor = isCustomColor ? color : colors[color];
+
+    const parsedColor = parse(resolvedColor);
+    if (!parsedColor) throw new Error("Invalid color");
+
+    const typographyPrimary = rgb(colors.typography.primary);
+    if (!typographyPrimary) throw new Error("Invalid color");
+
+    const textColor = getReadableTextColor(
+        resolvedColor,
+        colors.common.white,
+        2.5,
+    );
 
     return {
         solid: {
-            backgroundColor: resolvedColor.hexa(),
-            color: Color(resolvedColor).isLight()
-                ? Color(colors.typography.primary).negate().hexa()
-                : colors.typography.primary,
+            backgroundColor: formatHex8(parsedColor),
+            color: textColor,
             border: "none",
             "&:hover": {
-                backgroundColor: resolvedColor.alpha(0.8).hexa(),
+                backgroundColor: alpha(parsedColor, 0.8),
             },
             "&:active": {
-                backgroundColor: resolvedColor.alpha(0.6).hexa(),
+                backgroundColor: alpha(parsedColor, 0.6),
             },
             "&:disabled": {
-                backgroundColor: resolvedColor.alpha(0.2).hexa(),
-                color: Color(colors.typography.primary).alpha(0.4).hexa(),
+                backgroundColor: alpha(parsedColor, 0.2),
+                color: alpha(typographyPrimary, 0.4),
             },
         },
         outlined: {
             backgroundColor: "transparent",
-            border: `1px solid ${resolvedColor}`,
-            color: resolvedColor.hexa(),
+            border: `1px solid ${formatHex8(parsedColor)}`,
+            color: formatHex8(parsedColor),
             "&:hover": {
-                backgroundColor: resolvedColor.alpha(0.2).hexa(),
-                border: `1px solid ${resolvedColor.alpha(0.2).hexa()}`,
+                backgroundColor: alpha(parsedColor, 0.2),
+                border: `1px solid ${alpha(parsedColor, 0.2)}`,
             },
             "&:active": {
-                backgroundColor: resolvedColor.alpha(0.2).hexa(),
+                backgroundColor: alpha(parsedColor, 0.2),
             },
             "&:disabled": {
-                color: resolvedColor.alpha(0.4).hexa(),
-                border: `1px solid ${resolvedColor.alpha(0.4).hexa()}`,
+                color: alpha(parsedColor, 0.4),
+                border: `1px solid ${alpha(parsedColor, 0.4)}`,
             },
         },
         plain: {
             backgroundColor: "transparent",
             border: "none",
-            color: resolvedColor.hexa(),
+            color: formatHex8(parsedColor),
             "&:hover": {
-                color: resolvedColor.alpha(0.8).hexa(),
+                color: alpha(parsedColor, 0.8),
             },
             "&:active": {
-                color: resolvedColor.alpha(0.5).hexa(),
+                color: alpha(parsedColor, 0.5),
             },
             "&:disabled": {
-                color: resolvedColor.alpha(0.4).hexa(),
+                color: alpha(parsedColor, 0.4),
             },
         },
         soft: {
-            backgroundColor: resolvedColor.alpha(0.5).hexa(),
-            color: resolvedColor.hexa(),
+            backgroundColor: alpha(parsedColor, 0.4),
+            color: formatHex8(parsedColor),
             border: "none",
             "&:hover": {
-                backgroundColor: resolvedColor.alpha(0.3).hexa(),
+                backgroundColor: alpha(parsedColor, 0.3),
             },
             "&:active": {
-                backgroundColor: resolvedColor.alpha(0.2).hexa(),
+                backgroundColor: alpha(parsedColor, 0.2),
             },
             "&:disabled": {
-                backgroundColor: resolvedColor.alpha(0.2).hexa(),
-                color: resolvedColor.alpha(0.4).hexa(),
+                backgroundColor: alpha(parsedColor, 0.2),
+                color: alpha(parsedColor, 0.4),
             },
         },
     };

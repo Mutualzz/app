@@ -2,7 +2,8 @@ import { useTheme } from "@hooks/useTheme";
 import type { FC } from "react";
 
 import { isThemeColor } from "@utils";
-import Color from "color";
+
+import { formatHex8 } from "culori";
 import {
     CircularProgressDefaults,
     resolveCircularProgressSizes,
@@ -40,11 +41,9 @@ export const CircularProgress: FC<CircularProgressProps> = ({
 
     const strokeDashOffset = ((100 - value) / 100) * circumference;
 
-    const outlinedStroke = Color(
+    const outlinedStroke = formatHex8(
         isThemeColor(color) ? theme.colors[color] : color,
-    )
-        .alpha(0.6)
-        .hexa();
+    );
 
     return (
         <div

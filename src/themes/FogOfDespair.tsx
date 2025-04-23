@@ -8,12 +8,18 @@ export const fogOfDespairTheme: Theme = {
     description: "Cold, Distant, and Ethereal",
     colors: {
         ...baseDarkTheme.colors,
+
+        common: {
+            white: "#E6EBF0",
+            black: "#131619",
+        },
+
         primary: "#4A5A6A",
         neutral: "#7D8F99",
         background: "#0B0D10",
         surface: "#171C24",
 
-        error: "#A33E4C",
+        danger: "#A33E4C",
         warning: "#C47E29",
         info: "#5C8DB6",
         success: "#4A7F4E",

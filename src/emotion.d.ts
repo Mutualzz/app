@@ -1,5 +1,5 @@
 import "@emotion/react";
-import type { ColorLike } from "@mutualzz/theme";
+import type { Hex } from "@mutualzz/theme";
 
 declare module "@emotion/react" {
     export interface Theme {
@@ -8,22 +8,27 @@ declare module "@emotion/react" {
         description: string;
         colors: {
             // Base Colors
-            primary: ColorLike;
-            neutral: ColorLike;
-            background: ColorLike;
-            surface: ColorLike;
+            primary: Hex;
+            neutral: Hex;
+            background: Hex;
+            surface: Hex;
 
             // Feedback colors
-            error: ColorLike;
-            warning: ColorLike;
-            info: ColorLike;
-            success: ColorLike;
+            danger: Hex;
+            warning: Hex;
+            info: Hex;
+            success: Hex;
 
             // Typography colors
             typography: {
-                primary: ColorLike;
-                neutral: ColorLike;
-                accent: ColorLike;
+                primary: Hex;
+                neutral: Hex;
+                accent: Hex;
+            };
+
+            common: {
+                white: Hex;
+                black: Hex;
             };
         };
         typography: {

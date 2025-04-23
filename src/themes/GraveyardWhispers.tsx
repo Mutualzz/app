@@ -9,12 +9,18 @@ export const graveyardWhispersTheme: Theme = {
     description: "Muted, Eerie, and Cold",
     colors: {
         ...baseDarkTheme.colors,
+
+        common: {
+            white: "#E0E0E0",
+            black: "#121212",
+        },
+
         primary: "#4A6076",
         neutral: "#7B4B53",
         background: "#0D0D0D",
         surface: "#1A1A1A",
 
-        error: "#8F3A42",
+        danger: "#8F3A42",
         warning: "#B07A1A",
         info: "#5A7A8C",
         success: "#3C9D48",

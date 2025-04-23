@@ -1,6 +1,6 @@
 import { type Theme } from "@emotion/react";
 import { isThemeColor } from "@utils";
-import Color from "color";
+import { formatHex8, parse } from "culori";
 import type {
     CircularProgressColor,
     CircularProgressDefaultsInterface,
@@ -37,10 +37,23 @@ export const variantColors = (
     const isCustomColor = !isThemeColor(color);
     const resolvedColor = isCustomColor ? color : colors[color];
 
+    const parsedColor = parse(resolvedColor);
+
+    if (!parsedColor)
+        return {
+            plain: "transparent",
+            solid: "transparent",
+            soft: "transparent",
+            outlined: "transparent",
+        };
+
+    const solid = { ...parsedColor, alpha: 0.4 };
+    const soft = { ...parsedColor, alpha: 0.2 };
+
     return {
         plain: "transparent",
-        solid: Color(resolvedColor).alpha(0.4).hexa(),
-        soft: Color(resolvedColor).alpha(0.1).hexa(),
+        solid: formatHex8(solid),
+        soft: formatHex8(soft),
         outlined: "transparent",
     };
 };

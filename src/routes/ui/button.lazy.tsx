@@ -1,4 +1,5 @@
-import type { ColorLike } from "@mutualzz/theme";
+import { useColorInput } from "@hooks/useColorInput";
+import type { Hex } from "@mutualzz/theme";
 import { createLazyFileRoute } from "@tanstack/react-router";
 import { Divider } from "@ui/data-display/Divider/Divider";
 import { Button } from "@ui/inputs/Button/Button";
@@ -9,7 +10,7 @@ import type {
 } from "@ui/inputs/Button/Button.types";
 import { Stack } from "@ui/layout/Stack/Stack";
 import { Paper } from "@ui/surfaces/Paper/Paper";
-import Color from "color";
+
 import capitalize from "lodash/capitalize";
 import chunk from "lodash/chunk";
 import { useState } from "react";
@@ -23,7 +24,7 @@ const colors = [
     "primary",
     "neutral",
     "success",
-    "error",
+    "danger",
     "warning",
     "info",
 ] as ButtonColor[];
@@ -34,10 +35,17 @@ function PlaygroundButton() {
     const [disabled, setDisabled] = useState(false);
 
     const [customSize, setCustomSize] = useState(false);
-    const [customColor, setCustomColor] = useState<ColorLike | null>(null);
 
-    const [customColors, setCustomColors] = useState<ColorLike[]>([]);
-    const [colorToDelete, setColorToDelete] = useState<ColorLike | null>(null);
+    const [customColors, setCustomColors] = useState<Hex[]>([]);
+    const [colorToDelete, setColorToDelete] = useState<Hex | null>(null);
+
+    const {
+        inputValue,
+        color: customColor,
+        isInvalid,
+        handleChange,
+        validate,
+    } = useColorInput();
 
     let buttons = [];
 
@@ -88,7 +96,7 @@ function PlaygroundButton() {
                     <Button
                         onClick={() => setLoading((prev) => !prev)}
                         variant="soft"
-                        color={loading ? "error" : "success"}
+                        color={loading ? "danger" : "success"}
                         size="md"
                     >
                         Turn {loading ? "Off" : "On"} Loading
@@ -96,7 +104,7 @@ function PlaygroundButton() {
                     <Button
                         onClick={() => setDisabled((prev) => !prev)}
                         variant="soft"
-                        color={disabled ? "error" : "success"}
+                        color={disabled ? "danger" : "success"}
                         size="md"
                     >
                         Turn {disabled ? "Off" : "On"} Disabled
@@ -158,17 +166,16 @@ function PlaygroundButton() {
                         <Stack alignItems="center" gap={10}>
                             <input
                                 type="text"
-                                value={customColor ?? ""}
+                                value={inputValue}
                                 placeholder="Input custom color"
-                                onChange={(e) =>
-                                    setCustomColor(
-                                        e.target.value.trim() as ColorLike,
-                                    )
-                                }
+                                onChange={(e) => handleChange(e.target.value)}
+                                onBlur={validate}
                                 style={{
                                     padding: 10,
                                     borderRadius: 5,
-                                    border: "1px solid #ccc",
+                                    border: isInvalid
+                                        ? "1px solid red"
+                                        : "1px solid #ccc",
                                     backgroundColor: "#f9f9f9",
                                 }}
                             />
@@ -178,15 +185,13 @@ function PlaygroundButton() {
                                 disabled={!customColor}
                                 onClick={() => {
                                     if (!customColor) return;
-                                    const color = Color(
-                                        customColor.trim(),
-                                    ).hex() as ColorLike;
+
                                     setCustomColors(
                                         (prev) =>
-                                            [...prev, color] as ColorLike[],
+                                            [...prev, customColor] as Hex[],
                                     );
-                                    setCustomColor(null);
-                                    setColorToDelete(color);
+                                    handleChange("");
+                                    setColorToDelete(customColor as Hex);
                                 }}
                             >
                                 Add Color
@@ -198,7 +203,7 @@ function PlaygroundButton() {
                                     value={colorToDelete ?? ""}
                                     onChange={(e) => {
                                         setColorToDelete(
-                                            e.target.value.trim() as ColorLike,
+                                            e.target.value.trim() as Hex,
                                         );
                                     }}
                                     style={{
@@ -216,7 +221,7 @@ function PlaygroundButton() {
                                 </select>
                                 <Button
                                     variant="soft"
-                                    color="error"
+                                    color="danger"
                                     onClick={() => {
                                         setCustomColors((prev) =>
                                             prev.filter(

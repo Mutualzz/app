@@ -5,12 +5,17 @@ export const baseDarkTheme: Theme = {
     name: "Dark",
     description: "Default Dark Theme",
     colors: {
+        common: {
+            white: "#FFFFFF",
+            black: "#000000",
+        },
+
         primary: "#F24C7B",
         neutral: "#5A5A5A",
         background: "#0B0B0B",
         surface: "#1A1A1A",
 
-        error: "#FF4D4D",
+        danger: "#FF4D4D",
         warning: "#FFC107",
         success: "#4CAF50",
         info: "#2196F3",

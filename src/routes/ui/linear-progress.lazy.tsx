@@ -1,4 +1,4 @@
-import type { ColorLike } from "@mutualzz/theme";
+import type { ColorLike, Hex } from "@mutualzz/theme";
 import { createLazyFileRoute } from "@tanstack/react-router";
 import { Divider } from "@ui/data-display/Divider/Divider";
 import { LinearProgress } from "@ui/feedback/LinearProgress/LinearProgress";
@@ -12,7 +12,8 @@ import type {
 import { Button } from "@ui/inputs/Button/Button";
 import { Stack } from "@ui/layout/Stack/Stack";
 import { Paper } from "@ui/surfaces/Paper/Paper";
-import Color from "color";
+import { formatHex8 } from "culori";
+
 import capitalize from "lodash/capitalize";
 import chunk from "lodash/chunk";
 import { useState } from "react";
@@ -32,7 +33,7 @@ const colors = [
     "primary",
     "neutral",
     "success",
-    "error",
+    "danger",
     "warning",
     "info",
 ] as LinearProgressColor[];
@@ -116,7 +117,7 @@ function PlaygroundLinearProgress() {
                 <Stack justifyContent="center" direction="column" gap={10}>
                     <Divider>States</Divider>
                     <Button
-                        color={determinate ? "success" : "error"}
+                        color={determinate ? "success" : "danger"}
                         variant="soft"
                         onClick={() => setDeterminate((prev) => !prev)}
                     >
@@ -305,14 +306,12 @@ function PlaygroundLinearProgress() {
                             disabled={!customColor}
                             onClick={() => {
                                 if (!customColor) return;
-                                const color = Color(
-                                    customColor.trim(),
-                                ).hex() as ColorLike;
+                                const color = formatHex8(customColor.trim());
                                 setCustomColors(
-                                    (prev) => [...prev, color] as ColorLike[],
+                                    (prev) => [...prev, color] as Hex[],
                                 );
                                 setCustomColor(null);
-                                setColorToDelete(color);
+                                setColorToDelete(color as Hex);
                             }}
                         >
                             Add Color
@@ -342,7 +341,7 @@ function PlaygroundLinearProgress() {
                             </select>
                             <Button
                                 variant="soft"
-                                color="error"
+                                color="danger"
                                 onClick={() => {
                                     setCustomColors((prev) =>
                                         prev.filter(

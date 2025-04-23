@@ -9,12 +9,18 @@ export const melancholyRomanceTheme: Theme = {
     description: "Dramatic, Vintage, and Elegant",
     colors: {
         ...baseDarkTheme.colors,
+
+        common: {
+            white: "#F2EAEA",
+            black: "#121212",
+        },
+
         primary: "#C84B3C",
         neutral: "#73678F",
         background: "#0A0608",
         surface: "#171117",
 
-        error: "#9C1123",
+        danger: "#9C1123",
         warning: "#B07A29",
         info: "#5A7A8C",
         success: "#4A7F4E",
