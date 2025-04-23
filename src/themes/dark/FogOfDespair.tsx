@@ -14,20 +14,20 @@ export const fogOfDespairTheme: Theme = {
             black: "#131619",
         },
 
-        primary: "#4A5A6A",
+        primary: "#496D89",
         neutral: "#7D8F99",
         background: "#0B0D10",
         surface: "#171C24",
 
-        danger: "#A33E4C",
-        warning: "#C47E29",
-        info: "#5C8DB6",
-        success: "#4A7F4E",
+        danger: "#BA4CFF",
+        warning: "#FFC045",
+        info: "#45A9F7",
+        success: "#6FD36F",
 
         typography: {
             primary: "#E3E8EC",
             neutral: "#A2A9B1",
-            accent: "#5C677D",
+            accent: "#BA4CFF",
         },
     },
 };

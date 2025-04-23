@@ -15,20 +15,20 @@ export const witchingHourTheme: Theme = {
             black: "#121212",
         },
 
-        primary: "#9C4D73",
+        primary: "#6D4B8D",
         neutral: "#2A4B76",
         background: "#0A0A12",
         surface: "#151526",
 
         danger: "#AD1457",
-        warning: "#D4A017",
-        info: "#3896D0",
-        success: "#4CAF50",
+        warning: "#FFC045",
+        info: "#45A9F7",
+        success: "#6FD36F",
 
         typography: {
             primary: "#EAE5E5",
             neutral: "#8C7C96",
-            accent: "#AD60A1",
+            accent: "#BA4CFF",
         },
     },
 };

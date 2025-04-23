@@ -15,20 +15,20 @@ export const melancholyRomanceTheme: Theme = {
             black: "#121212",
         },
 
-        primary: "#C84B3C",
+        primary: "#87485F",
         neutral: "#73678F",
         background: "#0A0608",
         surface: "#171117",
 
         danger: "#9C1123",
-        warning: "#B07A29",
-        info: "#5A7A8C",
-        success: "#4A7F4E",
+        warning: "#FFC045",
+        info: "#45A9F7",
+        success: "#6FD36F",
 
         typography: {
             primary: "#E3E3E3",
             neutral: "#A79D9C",
-            accent: "#7D1128",
+            accent: "#9C5050",
         },
     },
 };

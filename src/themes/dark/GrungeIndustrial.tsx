@@ -15,20 +15,20 @@ export const grungeIndustrialTheme: Theme = {
             black: "#151515",
         },
 
-        primary: "#56606A",
+        primary: "#5C5C5E",
         neutral: "#7E4050",
         background: "#101010",
         surface: "#1E1E1E",
 
         danger: "#A54242",
-        warning: "#C49A29",
-        info: "#5A7A8C",
-        success: "#4A7F4E",
+        warning: "#FFC045",
+        info: "#45A9F7",
+        success: "#6FD36F",
 
         typography: {
             primary: "#DFDFDF",
             neutral: "#9E9E9E",
-            accent: "#6B5B4C",
+            accent: "#C85668",
         },
     },
 };

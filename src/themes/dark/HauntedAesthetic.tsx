@@ -15,20 +15,20 @@ export const hauntedAestheticTheme: Theme = {
             black: "#121212",
         },
 
-        primary: "#525C7D",
+        primary: "#684389",
         neutral: "#6D4153",
         background: "#0C0C0C",
         surface: "#171717",
 
-        danger: "#8A3B4C",
-        warning: "#B07A29",
-        info: "#5A7A8C",
-        success: "#4A7F4E",
+        danger: "#BA4CFF",
+        warning: "#FFC045",
+        info: "#45A9F7",
+        success: "#6FD36F",
 
         typography: {
             primary: "#E0E0E0",
             neutral: "#8A8A8A",
-            accent: "#6E4A68",
+            accent: "#BA4CFF",
         },
     },
 };

@@ -14,20 +14,20 @@ export const eternalMourningTheme: Theme = {
             black: "#121212",
         },
 
-        primary: "#68589C",
+        primary: "#764099",
         neutral: "#845159",
         background: "#0A080A",
         surface: "#151218",
 
-        danger: "#9A16FA",
-        warning: "#C47E29",
-        info: "#5A8CAE",
-        success: "#4A7F4E",
+        danger: "#BA4CFF",
+        warning: "#FFC045",
+        info: "#45A9F7",
+        success: "#6FD36F",
 
         typography: {
             primary: "#E5E3E8",
             neutral: "#938B96",
-            accent: "#9A1F6A",
+            accent: "#BA4CFF",
         },
     },
 };

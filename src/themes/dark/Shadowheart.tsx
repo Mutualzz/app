@@ -15,20 +15,20 @@ export const shadowheartTheme: Theme = {
             black: "#121212",
         },
 
-        primary: "#4A5A64",
+        primary: "#784B75",
         neutral: "#6B4F59",
         background: "#08090A",
         surface: "#16171A",
 
-        danger: "#FF3D00",
-        warning: "#F2A900",
-        info: "#5A7A8C",
-        success: "#4CAF50",
+        danger: "#BA4CFF",
+        warning: "#FFC045",
+        info: "#45A9F7",
+        success: "#6FD36F",
 
         typography: {
             primary: "#DADADA",
             neutral: "#8A8D92",
-            accent: "#FF3D00",
+            accent: "#BA4CFF",
         },
     },
 };

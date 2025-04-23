@@ -1,6 +1,6 @@
 import { useTheme } from "@hooks/useTheme";
 import { useNavigate } from "@tanstack/react-router";
-import { themeNames, type AllThemes } from "@themes/index";
+import { themeNames, type AllThemes } from "@themes/dark/index";
 import { Divider } from "@ui/data-display/Divider/Divider";
 import { Button } from "@ui/inputs/Button/Button";
 import { Stack } from "@ui/layout/Stack/Stack";

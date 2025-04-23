@@ -15,20 +15,20 @@ export const graveyardWhispersTheme: Theme = {
             black: "#121212",
         },
 
-        primary: "#4A6076",
+        primary: "#5A5A5A",
         neutral: "#7B4B53",
         background: "#0D0D0D",
         surface: "#1A1A1A",
 
         danger: "#8F3A42",
-        warning: "#B07A1A",
-        info: "#5A7A8C",
-        success: "#3C9D48",
+        warning: "#FFC045",
+        info: "#45A9F7",
+        success: "#6FD36F",
 
         typography: {
             primary: "#D1D1D1",
             neutral: "#939393",
-            accent: "#8F3A42",
+            accent: "#9C5050",
         },
     },
 };
