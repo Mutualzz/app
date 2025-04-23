@@ -1,5 +1,5 @@
 import { useTheme } from "@hooks/useTheme";
-import { isThemeColor } from "@utils";
+import { isThemeColor } from "@utils/index";
 
 import { formatHex8 } from "culori";
 import type { FC } from "react";

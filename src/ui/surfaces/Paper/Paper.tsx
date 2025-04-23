@@ -1,6 +1,6 @@
 import { useTheme } from "@hooks/useTheme";
+import { dynamicElevation } from "@utils/dynamicElevation";
 import type { FC } from "react";
-import { dynamicElevation } from "../../../utils";
 import type { PaperProps } from "./Paper.types";
 
 export const Paper: FC<PaperProps> = ({

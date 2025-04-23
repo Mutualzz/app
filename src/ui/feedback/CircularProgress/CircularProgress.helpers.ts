@@ -1,5 +1,5 @@
 import { type Theme } from "@emotion/react";
-import { isThemeColor } from "@utils";
+import { isThemeColor } from "@utils/index";
 import { formatHex8, parse } from "culori";
 import type {
     CircularProgressColor,

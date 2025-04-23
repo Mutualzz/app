@@ -1,5 +1,5 @@
 import { css, type Theme } from "@emotion/react";
-import { alpha, getReadableTextColor, isThemeColor } from "@utils";
+import { alpha, isThemeColor, readableTextColor } from "@utils/index";
 
 import { formatHex8, parse, rgb } from "culori";
 import type {
@@ -60,7 +60,7 @@ export const variantColors = ({ colors }: Theme, color: ButtonColor) => {
     const typographyPrimary = rgb(colors.typography.primary);
     if (!typographyPrimary) throw new Error("Invalid color");
 
-    const textColor = getReadableTextColor(
+    const textColor = readableTextColor(
         resolvedColor,
         colors.common.white,
         2.5,
