@@ -258,8 +258,6 @@ function PlaygroundButton() {
                                 color="primary"
                                 disabled={!customColor}
                                 onClick={() => {
-                                    if (!customColor) return;
-
                                     setCustomColors(
                                         (prev) =>
                                             [
