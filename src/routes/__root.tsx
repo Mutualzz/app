@@ -1,10 +1,11 @@
 import { createRootRoute, Outlet } from "@tanstack/react-router";
 
+import { ThemeProvider } from "../contexts/ThemeManager";
+import { GlobalStyles } from "../ui/GlobalStyles";
+
 // Dev tools
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
-import { ThemeProvider } from "../contexts/ThemeManager";
-import { GlobalStyles } from "../ui/GlobalStyles";
 
 const RootComponent = () => {
     return (
