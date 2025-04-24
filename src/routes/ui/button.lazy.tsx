@@ -93,8 +93,8 @@ function PlaygroundButton() {
                     loading={loading}
                     disabled={disabled}
                     fullWidth={fullWidth}
-                    startIcon={SelectedIcon ? <SelectedIcon /> : undefined}
-                    endIcon={SelectedIcon ? <SelectedIcon /> : undefined}
+                    startIcon={SelectedIcon && <SelectedIcon />}
+                    endIcon={SelectedIcon && <SelectedIcon />}
                 >
                     {text ?? `${capitalize(variant)} ${capitalize(color)}`}
                 </Button>,
