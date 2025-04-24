@@ -18,6 +18,10 @@ export const PlaygrondLeftSidebar = () => {
             name: "Button",
             link: "/ui/button",
         },
+        {
+            name: "Checkbox",
+            link: "/ui/checkbox",
+        },
     ];
 
     const feedbackComponents = [

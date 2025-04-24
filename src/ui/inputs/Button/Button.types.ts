@@ -23,6 +23,7 @@ export interface ButtonProps
     disabled?: boolean;
     startIcon?: ReactNode;
     endIcon?: ReactNode;
+    fullWidth?: boolean;
 }
 
 export interface ButtonDefaultsInterface {

@@ -16,6 +16,10 @@ import capitalize from "lodash/capitalize";
 import chunk from "lodash/chunk";
 import { useState } from "react";
 
+import * as FaIcons from "react-icons/fa";
+import * as IoIcons from "react-icons/io";
+import * as MdIcons from "react-icons/md";
+
 export const Route = createLazyFileRoute("/ui/button")({
     component: PlaygroundButton,
 });
@@ -30,12 +34,39 @@ const colors = [
     "info",
 ] as ButtonColor[];
 
+const iconLibraries = {
+    fa: FaIcons,
+    md: MdIcons,
+    io: IoIcons,
+};
+
 function PlaygroundButton() {
     const [size, setSize] = useState<ButtonSize>("md");
     const [loading, setLoading] = useState(false);
     const [disabled, setDisabled] = useState(false);
+    const [fullWidth, setFullWidth] = useState(false);
+
+    const [selectedLibrary, setSelectedLibrary] = useState<
+        keyof typeof iconLibraries | null
+    >(null);
+    const [selectedIconName, setSelectedIconName] = useState<string | null>(
+        null,
+    );
+
+    const SelectedIcon =
+        selectedLibrary && selectedIconName
+            ? (
+                  iconLibraries[selectedLibrary] as Record<
+                      string,
+                      React.ComponentType<any>
+                  >
+              )[selectedIconName]
+            : null;
 
     const [customSize, setCustomSize] = useState(false);
+    const [customText, setCustomText] = useState(false);
+
+    const [text, setText] = useState<string | null>(null);
 
     const [customColors, setCustomColors] = useState<ColorLike[]>([]);
     const [colorToDelete, setColorToDelete] = useState<ColorLike | null>(null);
@@ -61,8 +92,11 @@ function PlaygroundButton() {
                     size={size}
                     loading={loading}
                     disabled={disabled}
+                    fullWidth={fullWidth}
+                    startIcon={SelectedIcon ? <SelectedIcon /> : undefined}
+                    endIcon={SelectedIcon ? <SelectedIcon /> : undefined}
                 >
-                    {`${capitalize(variant)} ${capitalize(color)}`}
+                    {text ?? `${capitalize(variant)} ${capitalize(color)}`}
                 </Button>,
             );
         }
@@ -111,8 +145,46 @@ function PlaygroundButton() {
                     >
                         Turn {disabled ? "Off" : "On"} Disabled
                     </Button>
+                    <Button
+                        onClick={() => setFullWidth((prev) => !prev)}
+                        variant="soft"
+                        color={fullWidth ? "danger" : "success"}
+                        size="md"
+                    >
+                        Turn {fullWidth ? "Off" : "On"} Full Width
+                    </Button>
                     <Stack gap={5} justifyContent="center" direction="column">
                         <Divider>Properties</Divider>
+                        <Stack
+                            direction="row"
+                            gap={10}
+                            justifyContent="center"
+                            alignItems="center"
+                        >
+                            <input
+                                type="checkbox"
+                                checked={customText}
+                                onChange={() => {
+                                    setCustomText((prev) => !prev);
+                                    setText(null);
+                                }}
+                            />
+                            <label>Custom Text</label>
+                        </Stack>
+
+                        <input
+                            type="text"
+                            value={text ?? ""}
+                            disabled={!customText}
+                            onChange={(e) => setText(e.target.value.trim())}
+                            placeholder="Custom text"
+                            style={{
+                                padding: 10,
+                                borderRadius: 5,
+                                border: "1px solid #ccc",
+                                backgroundColor: "#f9f9f9",
+                            }}
+                        />
                         <Stack
                             direction="row"
                             gap={10}
@@ -247,6 +319,60 @@ function PlaygroundButton() {
                                     Delete Color
                                 </Button>
                             </Stack>
+                        )}
+                    </Stack>
+                    <Divider>Button Icons</Divider>
+
+                    <Stack justifyContent="center" direction="column" gap={5}>
+                        <label>Choose Icon Library:</label>
+                        <select
+                            value={selectedLibrary ?? ""}
+                            onChange={(e) =>
+                                setSelectedLibrary(
+                                    e.target
+                                        .value as keyof typeof iconLibraries,
+                                )
+                            }
+                            style={{
+                                padding: 10,
+                                borderRadius: 5,
+                                border: "1px solid #ccc",
+                                backgroundColor: "#f9f9f9",
+                            }}
+                        >
+                            <option value="">None</option>
+                            {Object.keys(iconLibraries).map((lib) => (
+                                <option key={lib} value={lib}>
+                                    {capitalize(lib)}
+                                </option>
+                            ))}
+                        </select>
+
+                        {selectedLibrary && (
+                            <>
+                                <label>Choose Icon:</label>
+                                <select
+                                    value={selectedIconName ?? ""}
+                                    onChange={(e) =>
+                                        setSelectedIconName(e.target.value)
+                                    }
+                                    style={{
+                                        padding: 10,
+                                        borderRadius: 5,
+                                        border: "1px solid #ccc",
+                                        backgroundColor: "#f9f9f9",
+                                    }}
+                                >
+                                    <option value="">None</option>
+                                    {Object.keys(
+                                        iconLibraries[selectedLibrary],
+                                    ).map((iconName) => (
+                                        <option key={iconName} value={iconName}>
+                                            {iconName}
+                                        </option>
+                                    ))}
+                                </select>
+                            </>
                         )}
                     </Stack>
                 </Stack>

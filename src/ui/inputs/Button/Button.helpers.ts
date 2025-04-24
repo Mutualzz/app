@@ -42,7 +42,6 @@ export const resolveButtonStyles = (size: ButtonSize) => {
     const horizontalPadding = 20;
 
     return css({
-        width: "auto",
         height: `${base + verticalPadding * 2}px`,
         fontSize: base,
         lineHeight: 1,
