@@ -10,7 +10,6 @@ export const graveyardWhispersTheme: Theme = {
     type: "dark",
     colors: {
         ...baseDarkTheme.colors,
-
         common: {
             white: "#E0E0E0",
             black: "#121212",

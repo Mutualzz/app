@@ -10,7 +10,6 @@ export const grungeIndustrialTheme: Theme = {
     type: "dark",
     colors: {
         ...baseDarkTheme.colors,
-
         common: {
             white: "#E8E8E8",
             black: "#151515",

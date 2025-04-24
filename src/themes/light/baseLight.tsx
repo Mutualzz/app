@@ -11,20 +11,20 @@ export const baseLightTheme: Theme = {
             black: "#000000",
         },
 
-        primary: "#F24C7B", // Keeping the same since it's vibrant enough for light
-        neutral: "#5A5A5A", // Neutral is good on light backgrounds too
-        background: "#F5F5F5", // Light gray-white background
-        surface: "#FAFAFA", // Pure white surface elements (cards, modals)
+        primary: "#F24C7B",
+        neutral: "#5A5A5A",
+        background: "#F5F5F5",
+        surface: "#FAFAFA",
 
-        danger: "#FF4D4D", // Same, good contrast on light
-        warning: "#FFC107", // Same, works fine on light
-        success: "#4CAF50", // Still works well on light
-        info: "#2196F3", // Safe on light
+        danger: "#FF4D4D",
+        warning: "#FFC107",
+        success: "#4CAF50",
+        info: "#2196F3",
 
         typography: {
-            primary: "#202020", // Deep gray/near-black for body text
-            neutral: "#5A5A5A", // Slightly softer for secondary text
-            accent: "#A4243B", // Keeping the same accent (rich red), still readable
+            primary: "#202020",
+            neutral: "#5A5A5A",
+            accent: "#A4243B",
         },
     },
     typography: {

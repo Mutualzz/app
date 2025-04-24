@@ -10,7 +10,6 @@ export const melancholyRomanceTheme: Theme = {
     type: "dark",
     colors: {
         ...baseDarkTheme.colors,
-
         common: {
             white: "#F2EAEA",
             black: "#121212",

@@ -10,7 +10,6 @@ export const shadowheartTheme: Theme = {
     type: "dark",
     colors: {
         ...baseDarkTheme.colors,
-
         common: {
             white: "#E2E2E2",
             black: "#121212",

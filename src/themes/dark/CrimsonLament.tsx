@@ -9,7 +9,6 @@ export const crimsonLamentTheme: Theme = {
     type: "dark",
     colors: {
         ...baseDarkTheme.colors,
-
         common: {
             white: "#F0E8E8",
             black: "#121212",

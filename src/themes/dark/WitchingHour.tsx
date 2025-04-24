@@ -10,7 +10,6 @@ export const witchingHourTheme: Theme = {
     type: "dark",
     colors: {
         ...baseDarkTheme.colors,
-
         common: {
             white: "#F0E8F0",
             black: "#121212",

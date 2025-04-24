@@ -10,7 +10,6 @@ export const hauntedAestheticTheme: Theme = {
     type: "dark",
     colors: {
         ...baseDarkTheme.colors,
-
         common: {
             white: "#ECECEC",
             black: "#121212",

@@ -10,7 +10,6 @@ export const nocturnalAbyssTheme: Theme = {
     type: "dark",
     colors: {
         ...baseDarkTheme.colors,
-
         common: {
             white: "#E8E0E0",
             black: "#121212",

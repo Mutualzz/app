@@ -10,7 +10,6 @@ export const midghtEleganceTheme: Theme = {
     type: "dark",
     colors: {
         ...baseDarkTheme.colors,
-
         common: {
             white: "#EEECEC",
             black: "#121212",

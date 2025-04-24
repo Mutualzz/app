@@ -9,7 +9,6 @@ export const eternalMourningTheme: Theme = {
     type: "dark",
     colors: {
         ...baseDarkTheme.colors,
-
         common: {
             white: "#EEEAF0",
             black: "#121212",

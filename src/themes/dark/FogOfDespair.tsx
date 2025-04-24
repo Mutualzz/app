@@ -9,7 +9,6 @@ export const fogOfDespairTheme: Theme = {
     type: "dark",
     colors: {
         ...baseDarkTheme.colors,
-
         common: {
             white: "#E6EBF0",
             black: "#131619",
