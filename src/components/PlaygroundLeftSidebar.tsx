@@ -64,6 +64,12 @@ export const PlaygrondLeftSidebar = () => {
                             changeTheme(e.target.value as Themes);
                         }}
                         defaultValue="baseDark"
+                        style={{
+                            padding: 10,
+                            borderRadius: 5,
+                            border: "1px solid #ccc",
+                            backgroundColor: "#f9f9f9",
+                        }}
                     >
                         {sortThemes(themes).map((theme) => (
                             <option key={theme.id} value={theme.id}>
