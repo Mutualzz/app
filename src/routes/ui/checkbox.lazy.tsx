@@ -3,10 +3,10 @@ import { createLazyFileRoute } from "@tanstack/react-router";
 import type { ColorLike } from "@types";
 import { Divider } from "@ui/data-display/Divider/Divider";
 import { Button } from "@ui/inputs/Button/Button";
-import type { ButtonColor, ButtonSize } from "@ui/inputs/Button/Button.types";
 import { Checkbox } from "@ui/inputs/Checkbox/Checkbox";
 import type {
     CheckboxColor,
+    CheckboxSize,
     CheckboxVariant,
 } from "@ui/inputs/Checkbox/Checkbox.types";
 import { Stack } from "@ui/layout/Stack/Stack";
@@ -41,9 +41,8 @@ const iconLibraries = {
     io: IoIcons,
 };
 
-// TODO: fix icon problems :3 and add/fix them if not existent/working
 function PlaygroundCheckbox() {
-    const [size, setSize] = useState<ButtonSize>("md");
+    const [size, setSize] = useState<CheckboxSize>("md");
     const [disabled, setDisabled] = useState(false);
 
     const [customSize, setCustomSize] = useState(false);
@@ -55,6 +54,7 @@ function PlaygroundCheckbox() {
     const [colorToDelete, setColorToDelete] = useState<ColorLike | null>(null);
 
     const [checked, setChecked] = useState<true | undefined>();
+    const [indeterminate, setIndeterminate] = useState(false);
 
     const [checkedLibrary, setCheckLibrary] = useState<
         keyof typeof iconLibraries | null
@@ -67,6 +67,13 @@ function PlaygroundCheckbox() {
     const [uncheckedIconName, setUncheckedIconName] = useState<string | null>(
         null,
     );
+
+    const [indeterminateLibrary, setIndeterminateLibrary] = useState<
+        keyof typeof iconLibraries | null
+    >(null);
+    const [indeterminateIconName, setIndeterminateIconName] = useState<
+        string | null
+    >(null);
 
     const SelectedCheckedIcon =
         checkedLibrary && checkedIconName
@@ -88,6 +95,16 @@ function PlaygroundCheckbox() {
               )[uncheckedIconName]
             : null;
 
+    const SelectedIndeterminateIcon =
+        indeterminateLibrary && indeterminateIconName
+            ? (
+                  iconLibraries[indeterminateLibrary] as Record<
+                      string,
+                      React.ComponentType<any>
+                  >
+              )[indeterminateIconName]
+            : null;
+
     const {
         inputValue: inputColor,
         color: customColor,
@@ -95,29 +112,39 @@ function PlaygroundCheckbox() {
         handleChange,
         validate,
         setColorDirectly,
-    } = useColorInput<ButtonColor>();
+    } = useColorInput<CheckboxColor>();
 
-    let buttons = [];
+    let checkboxes = [];
 
     for (const color of [...colors, ...customColors]) {
         for (const variant of variants) {
-            buttons.push(
+            checkboxes.push(
                 <Checkbox
                     key={`${variant}-${color}-checkbox`}
                     variant={variant}
                     color={color}
                     checked={checked}
+                    indeterminate={indeterminate}
                     size={size}
                     label={
                         label ?? `${capitalize(variant)} ${capitalize(color)}`
                     }
                     disabled={disabled}
+                    checkedIcon={SelectedCheckedIcon && <SelectedCheckedIcon />}
+                    uncheckedIcon={
+                        SelectedUncheckedIcon && <SelectedUncheckedIcon />
+                    }
+                    indeterminateIcon={
+                        SelectedIndeterminateIcon && (
+                            <SelectedIndeterminateIcon />
+                        )
+                    }
                 />,
             );
         }
     }
 
-    buttons = chunk(buttons, variants.length).map((row, index) => (
+    checkboxes = chunk(checkboxes, variants.length).map((row, index) => (
         <Stack key={index} padding={20} gap={10}>
             {row}
         </Stack>
@@ -132,7 +159,7 @@ function PlaygroundCheckbox() {
             justifyContent="center"
         >
             <Paper direction="column" alignItems="center" padding={20} gap={5}>
-                <Stack direction="column">{buttons}</Stack>
+                <Stack direction="column">{checkboxes}</Stack>
             </Paper>
             <Paper direction="column" padding={20} gap={5}>
                 <h2
@@ -145,12 +172,24 @@ function PlaygroundCheckbox() {
                 <Stack justifyContent="center" direction="column" gap={10}>
                     <Divider>States</Divider>
                     <Button
-                        onClick={() => setChecked((prev) => prev ?? true)}
+                        onClick={() =>
+                            setChecked((prev) =>
+                                prev === undefined ? true : undefined,
+                            )
+                        }
                         variant="soft"
                         color={checked ? "danger" : "success"}
                         size="md"
                     >
                         {checked ? "Uncheck" : "Check"} Checkbox
+                    </Button>
+                    <Button
+                        onClick={() => setIndeterminate((prev) => !prev)}
+                        variant="soft"
+                        color={indeterminate ? "danger" : "success"}
+                        size="md"
+                    >
+                        Turn {indeterminate ? "Off" : "On"} Indeterminate
                     </Button>
                     <Button
                         onClick={() => setDisabled((prev) => !prev)}
@@ -213,7 +252,9 @@ function PlaygroundCheckbox() {
                                 type="text"
                                 value={size}
                                 onChange={(e) =>
-                                    setSize(e.target.value.trim() as ButtonSize)
+                                    setSize(
+                                        e.target.value.trim() as CheckboxSize,
+                                    )
                                 }
                                 placeholder="Custom size"
                                 style={{
@@ -227,7 +268,9 @@ function PlaygroundCheckbox() {
                             <select
                                 value={size}
                                 onChange={(e) =>
-                                    setSize(e.target.value.trim() as ButtonSize)
+                                    setSize(
+                                        e.target.value.trim() as CheckboxSize,
+                                    )
                                 }
                                 style={{
                                     padding: 10,
@@ -370,9 +413,7 @@ function PlaygroundCheckbox() {
                                 >
                                     <option value="">None</option>
                                     {Object.keys(
-                                        iconLibraries[
-                                            checkedIconName as keyof typeof iconLibraries
-                                        ],
+                                        iconLibraries[checkedLibrary],
                                     ).map((iconName) => (
                                         <option key={iconName} value={iconName}>
                                             {iconName}
@@ -426,9 +467,61 @@ function PlaygroundCheckbox() {
                                 >
                                     <option value="">None</option>
                                     {Object.keys(
-                                        iconLibraries[
-                                            uncheckedIconName as keyof typeof iconLibraries
-                                        ],
+                                        iconLibraries[uncheckedLibrary],
+                                    ).map((iconName) => (
+                                        <option key={iconName} value={iconName}>
+                                            {iconName}
+                                        </option>
+                                    ))}
+                                </select>
+                            </>
+                        )}
+                    </Stack>
+                    <Divider>Indeterminate Icon</Divider>
+
+                    <Stack justifyContent="center" direction="column" gap={5}>
+                        <label>Choose Icon Library:</label>
+                        <select
+                            value={indeterminateLibrary ?? ""}
+                            onChange={(e) =>
+                                setIndeterminateLibrary(
+                                    e.target
+                                        .value as keyof typeof iconLibraries,
+                                )
+                            }
+                            style={{
+                                padding: 10,
+                                borderRadius: 5,
+                                border: "1px solid #ccc",
+                                backgroundColor: "#f9f9f9",
+                            }}
+                        >
+                            <option value="">None</option>
+                            {Object.keys(iconLibraries).map((lib) => (
+                                <option key={lib} value={lib}>
+                                    {capitalize(lib)}
+                                </option>
+                            ))}
+                        </select>
+
+                        {indeterminateLibrary && (
+                            <>
+                                <label>Choose Icon:</label>
+                                <select
+                                    value={indeterminateIconName ?? ""}
+                                    onChange={(e) =>
+                                        setIndeterminateIconName(e.target.value)
+                                    }
+                                    style={{
+                                        padding: 10,
+                                        borderRadius: 5,
+                                        border: "1px solid #ccc",
+                                        backgroundColor: "#f9f9f9",
+                                    }}
+                                >
+                                    <option value="">None</option>
+                                    {Object.keys(
+                                        iconLibraries[indeterminateLibrary],
                                     ).map((iconName) => (
                                         <option key={iconName} value={iconName}>
                                             {iconName}

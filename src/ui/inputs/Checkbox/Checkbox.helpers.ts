@@ -40,7 +40,7 @@ export const variantColors = (
     const parsedColor = parse(resolvedColor);
     if (!parsedColor) throw new Error("Invalid color");
 
-    const softBg = alpha(parsedColor, checked ? 0.25 : 0.1); // Use your utility!
+    const softBg = alpha(parsedColor, checked ? 0.25 : 0.1);
 
     return {
         solid: {
@@ -81,4 +81,20 @@ export const variantColors = (
             "&:active": { color: alpha(parsedColor, 0.5) },
         },
     };
+};
+
+export const resolveIconScaling = (size: CheckboxSize) => {
+    let base = baseSizeMap[size] ?? size;
+
+    if (base < minSize) base = minSize;
+    if (base > maxSize) base = maxSize;
+    if (typeof base === "string") base = parseFloat(base);
+    if (isNaN(base)) base = baseSizeMap.md;
+
+    const scale = base * 0.6;
+
+    return css({
+        width: scale,
+        height: scale,
+    });
 };

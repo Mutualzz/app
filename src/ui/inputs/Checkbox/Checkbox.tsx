@@ -1,8 +1,12 @@
 import styled from "@emotion/styled";
 import { useTheme } from "@hooks/useTheme";
 import { useState, type ChangeEvent, type FC } from "react";
-import { resolveCheckboxStyles, variantColors } from "./Checkbox.helpers";
-import { type CheckboxProps } from "./Checkbox.types";
+import {
+    resolveCheckboxStyles,
+    resolveIconScaling,
+    variantColors,
+} from "./Checkbox.helpers";
+import { type CheckboxProps, type CheckboxSize } from "./Checkbox.types";
 
 const CheckboxWrapper = styled.label<CheckboxProps>`
     position: relative;
@@ -45,7 +49,18 @@ const CheckboxLabel = styled.span`
     margin-left: 0.5rem;
 `;
 
-// TODO: add indeterminate state, indeterminateIcon
+const IconWrapper = styled.span<{ size?: CheckboxSize }>`
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    ${({ size = "md" }) => resolveIconScaling(size)};
+
+    & > * {
+        width: 100%;
+        height: 100%;
+    }
+`;
+
 export const Checkbox: FC<CheckboxProps> = ({
     checked: controlledChecked,
     onChange,
@@ -56,6 +71,8 @@ export const Checkbox: FC<CheckboxProps> = ({
     size = "md",
     uncheckedIcon,
     checkedIcon,
+    indeterminate,
+    indeterminateIcon,
     ...props
 }) => {
     const { theme } = useTheme();
@@ -66,7 +83,7 @@ export const Checkbox: FC<CheckboxProps> = ({
 
     const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
         if (controlledChecked === undefined) {
-            setInternalChecked(e.target.checked); // ✅ this was flipped!
+            setInternalChecked(e.target.checked);
         }
         onChange?.(e);
     };
@@ -78,6 +95,11 @@ export const Checkbox: FC<CheckboxProps> = ({
                 checked={isChecked}
                 onChange={handleChange}
                 disabled={disabled}
+                ref={(el) => {
+                    if (el) {
+                        el.indeterminate = indeterminate ?? false;
+                    }
+                }}
             />
             <CheckboxBox
                 theme={theme}
@@ -90,22 +112,45 @@ export const Checkbox: FC<CheckboxProps> = ({
                 size={size}
                 {...props}
             >
-                {isChecked
-                    ? (checkedIcon ?? (
-                          <svg
-                              viewBox="2 2 20 20"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="3"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              width="60%"
-                              height="60%"
-                          >
-                              <polyline points="4 12 10 18 20 6" />
-                          </svg>
-                      ))
-                    : (uncheckedIcon ?? <></>)}
+                {indeterminate ? (
+                    indeterminateIcon ? (
+                        <IconWrapper size={size}>
+                            {indeterminateIcon}
+                        </IconWrapper>
+                    ) : (
+                        // Default indeterminate SVG
+                        <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="3"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            style={{ width: "60%", height: "60%" }}
+                        >
+                            <line x1="6" y1="12" x2="18" y2="12" />
+                        </svg>
+                    )
+                ) : isChecked ? (
+                    checkedIcon ? (
+                        <IconWrapper size={size}>{checkedIcon}</IconWrapper>
+                    ) : (
+                        <svg
+                            viewBox="2 2 20 20"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="3"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            width="60%"
+                            height="60%"
+                        >
+                            <polyline points="4 12 10 18 20 6" />
+                        </svg>
+                    )
+                ) : uncheckedIcon ? (
+                    <IconWrapper size={size}>{uncheckedIcon}</IconWrapper>
+                ) : null}
             </CheckboxBox>
             {label && <CheckboxLabel>{label}</CheckboxLabel>}
         </CheckboxWrapper>
