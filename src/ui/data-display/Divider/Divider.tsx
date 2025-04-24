@@ -1,12 +1,22 @@
 import { css } from "@emotion/react";
-import { useTheme } from "@hooks/useTheme";
 import type { FC } from "react";
+
+import styled from "@emotion/styled";
+import { useTheme } from "@hooks/useTheme";
 import {
     insetMap,
     resolveDividerColor,
     resolveDividerTextColor,
 } from "./Divider.helpers";
 import type { DividerProps } from "./Divider.types";
+
+const DividerWrapper = styled.div<{ isVertical: boolean }>`
+    display: flex;
+    flex-direction: ${({ isVertical }) => (isVertical ? "column" : "row")};
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+`;
 
 export const Divider: FC<DividerProps> = ({
     orientation = "horizontal",
@@ -19,16 +29,8 @@ export const Divider: FC<DividerProps> = ({
     const { theme } = useTheme();
 
     const isVertical = orientation === "vertical";
-
-    const resolvedLineColor = resolveDividerColor(theme, lineColor);
+    const resolvedColor = resolveDividerColor(theme, lineColor);
     const resolvedTextColor = resolveDividerTextColor(theme, textColor);
-
-    const containerStyle = css`
-        display: flex;
-        align-items: center;
-        flex-direction: ${isVertical ? "column" : "row"};
-        color: ${resolvedLineColor};
-    `;
 
     const lineStyle = css`
         flex-grow: 1;
@@ -40,35 +42,31 @@ export const Divider: FC<DividerProps> = ({
             width: 1px;
             height: 100%;
             ${variant === "dashed" && "border-left: 1px dashed currentColor;"}
-            ${variant === "dotted" && "border-left: 1px dotted currentColor;"}
             ${variant === "solid" && "border-left: 1px solid currentColor;"}
           `
             : `
             height: 1px;
             ${variant === "dashed" && "border-top: 1px dashed currentColor;"}
-            ${variant === "dotted" && "border-top: 1px dotted currentColor;"}
             ${variant === "solid" && "border-top: 1px solid currentColor;"}
-          `}
+          `};
     `;
 
     const textStyle = css`
-        margin: ${isVertical ? "0.75rem 0" : "0 0.75rem"};
+        ${isVertical ? "padding: 0.5rem 0;" : "padding: 0 0.5rem;"}
         font-size: 0.875rem;
-        white-space: nowrap;
         color: ${resolvedTextColor};
-        writing-mode: ${isVertical ? "vertical-rl" : "horizontal-tb"};
-        text-align: center;
     `;
 
     return (
-        <div
+        <DividerWrapper
+            isVertical={isVertical}
             role="separator"
             aria-orientation={isVertical ? "vertical" : "horizontal"}
-            css={[containerStyle, insetMap[inset]]}
+            css={[insetMap[inset], { color: resolvedColor }]}
         >
-            <div css={lineStyle} aria-hidden="true" />
+            <span css={lineStyle} />
             {children && <span css={textStyle}>{children}</span>}
-            <div css={lineStyle} aria-hidden="true" />
-        </div>
+            <span css={lineStyle} />
+        </DividerWrapper>
     );
 };
