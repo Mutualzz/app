@@ -4,7 +4,7 @@ import { baseDarkTheme } from "./baseDark";
 
 export const hauntedAestheticTheme: Theme = {
     ...baseDarkTheme,
-    id: "haunted-aesthetic",
+    id: "hauntedAesthetic",
     name: "Haunted Aesthetic",
     description: "Ethereal, Erie, and Softly Dark",
     type: "dark",
