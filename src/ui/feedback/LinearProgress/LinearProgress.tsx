@@ -4,7 +4,6 @@ import { isThemeColor } from "@utils/index";
 import { formatHex8 } from "culori";
 import type { FC } from "react";
 import {
-    LinearProgressDefaults,
     resolveLength,
     resolveThickness,
     variantColors,
@@ -15,24 +14,14 @@ import type {
     LinearProgressProps,
 } from "./LinearProgress.types";
 
-const {
-    defaultThickness,
-    defaultLength,
-    defaultVariant,
-    defaultColor,
-    defaultAnimation,
-    defaultDeterminate,
-    defaultValue,
-} = LinearProgressDefaults;
-
 export const LinearProgress: FC<LinearProgressProps> = ({
-    thickness = defaultThickness,
-    length = defaultLength,
-    variant = defaultVariant,
-    color = defaultColor,
-    animation = defaultAnimation,
-    determinate = defaultDeterminate,
-    value = defaultValue,
+    thickness = "md",
+    length = "md",
+    variant = "soft",
+    color = "primary",
+    animation = "bounce",
+    determinate = false,
+    value = 0,
 }) => {
     const { theme } = useTheme();
 

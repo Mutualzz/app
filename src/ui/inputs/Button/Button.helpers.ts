@@ -2,26 +2,10 @@ import { css, type Theme } from "@emotion/react";
 import { alpha, isThemeColor, readableTextColor } from "@utils/index";
 
 import { formatHex8, parse, rgb } from "culori";
-import type {
-    ButtonColor,
-    ButtonDefaultsInterface,
-    ButtonSize,
-    ButtonVariant,
-} from "./Button.types";
+import type { ButtonColor, ButtonSize } from "./Button.types";
 
 const minSize = 10,
     maxSize = 24;
-const defaultSize: ButtonSize = "md";
-const defaultColor: ButtonColor = "primary";
-const defaultVariant: ButtonVariant = "plain";
-
-export const ButtonDefaults: ButtonDefaultsInterface = {
-    minSize,
-    maxSize,
-    defaultSize,
-    defaultColor,
-    defaultVariant,
-};
 
 export const baseSizeMap: Record<ButtonSize, number> = {
     sm: 12,

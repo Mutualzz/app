@@ -73,6 +73,8 @@ export const Stack: FC<StackProps> = ({
             marginLeft,
             paddingBlock: paddingY,
             paddingInline: paddingX,
+            marginBlock: marginY,
+            marginInline: marginX,
         }}
         {...props}
     >

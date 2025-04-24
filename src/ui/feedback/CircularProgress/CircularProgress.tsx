@@ -5,7 +5,6 @@ import { isThemeColor } from "@utils/index";
 
 import { formatHex8 } from "culori";
 import {
-    CircularProgressDefaults,
     resolveCircularProgressSizes,
     resolveCiruclarProgressThickness,
     variantColors,
@@ -13,20 +12,12 @@ import {
 import { spin } from "./CircularProgress.keyframes";
 import type { CircularProgressProps } from "./CircularProgress.types";
 
-const {
-    defaultSize,
-    defaultVariant,
-    defaultColor,
-    defaultDeterminate,
-    defaultValue,
-} = CircularProgressDefaults;
-
 export const CircularProgress: FC<CircularProgressProps> = ({
-    size = defaultSize,
-    variant = defaultVariant,
-    color = defaultColor,
-    determinate = defaultDeterminate,
-    value = defaultValue,
+    size = "md",
+    variant = "soft",
+    color = "primary",
+    determinate = false,
+    value = 0,
     ...props
 }) => {
     const { theme } = useTheme();

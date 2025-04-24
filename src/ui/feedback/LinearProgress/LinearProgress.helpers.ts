@@ -3,39 +3,15 @@ import { isThemeColor } from "@utils/index";
 
 import { formatHex8, parse } from "culori";
 import type {
-    LinearProgressAnimation,
     LinearProgressColor,
-    LinearProgressDefaultsInterface,
     LinearProgressLength,
     LinearProgressThickness,
-    LinearProgressVariant,
 } from "./LinearProgress.types";
 
 const minLength = 80,
     maxLength = 240;
 const minThickness = 4,
     maxThickness = 16;
-const defaultLength: LinearProgressLength = "md",
-    defaultThickness: LinearProgressThickness = "md";
-const defaultColor: LinearProgressColor = "primary";
-const defaultVariant: LinearProgressVariant = "soft";
-const defaultAnimation: LinearProgressAnimation = "bounce";
-const defaultDeterminate = false;
-const defaultValue = 0;
-
-export const LinearProgressDefaults: LinearProgressDefaultsInterface = {
-    minLength,
-    maxLength,
-    minThickness,
-    maxThickness,
-    defaultLength,
-    defaultThickness,
-    defaultColor,
-    defaultVariant,
-    defaultAnimation,
-    defaultDeterminate,
-    defaultValue,
-};
 
 export const variantColors = (
     { colors }: Theme,

@@ -50,6 +50,8 @@ export const Box: FC<BoxProps> = ({
             marginLeft,
             paddingBlock: paddingY,
             paddingInline: paddingX,
+            marginBlock: marginY,
+            marginInline: marginX,
         }}
     >
         {children}

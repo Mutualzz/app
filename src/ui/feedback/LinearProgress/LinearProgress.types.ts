@@ -30,17 +30,3 @@ export interface LinearProgressProps {
     determinate?: boolean;
     value?: number;
 }
-
-export interface LinearProgressDefaultsInterface {
-    minLength: number;
-    maxLength: number;
-    minThickness: number;
-    maxThickness: number;
-    defaultLength: LinearProgressLength;
-    defaultThickness: LinearProgressThickness;
-    defaultColor: LinearProgressColor;
-    defaultAnimation: LinearProgressAnimation;
-    defaultVariant: LinearProgressVariant;
-    defaultDeterminate: boolean;
-    defaultValue: number;
-}

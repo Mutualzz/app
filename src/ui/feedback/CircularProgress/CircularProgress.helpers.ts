@@ -3,32 +3,15 @@ import { isThemeColor } from "@utils/index";
 import { formatHex8, parse } from "culori";
 import type {
     CircularProgressColor,
-    CircularProgressDefaultsInterface,
     CircularProgressSize,
     CircularProgressThickness,
-    CircularProgressVariant,
 } from "./CircularProgress.types";
 
 const minSize = 16,
     maxSize = 64;
-const defaultSize: CircularProgressSize = "md";
-const defaultColor: CircularProgressColor = "primary";
-const defaultVariant: CircularProgressVariant = "soft";
-const defaultDeterminate = false;
-const defaultValue = 0;
 
 const minSizeThickness = 2,
     maxSizeThickness = 10;
-
-export const CircularProgressDefaults: CircularProgressDefaultsInterface = {
-    minSize,
-    maxSize,
-    defaultSize,
-    defaultColor,
-    defaultVariant,
-    defaultDeterminate,
-    defaultValue,
-};
 
 export const variantColors = (
     { colors }: Theme,

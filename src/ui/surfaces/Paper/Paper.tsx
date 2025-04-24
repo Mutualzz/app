@@ -72,6 +72,8 @@ export const Paper: FC<PaperProps> = ({
                 marginLeft,
                 paddingBlock: paddingY,
                 paddingInline: paddingX,
+                marginBlock: marginY,
+                marginInline: marginX,
             }}
             {...props}
         >

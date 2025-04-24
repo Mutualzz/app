@@ -25,11 +25,3 @@ export interface ButtonProps
     endIcon?: ReactNode;
     fullWidth?: boolean;
 }
-
-export interface ButtonDefaultsInterface {
-    minSize: number;
-    maxSize: number;
-    defaultSize: ButtonSize;
-    defaultColor: ButtonColor;
-    defaultVariant: ButtonVariant;
-}
