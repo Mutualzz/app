@@ -1,5 +1,5 @@
 import "@emotion/react";
-import type { ColorLike } from "@mutualzz/theme";
+import type { ColorLike } from "@types";
 
 declare module "@emotion/react" {
     export interface Theme {

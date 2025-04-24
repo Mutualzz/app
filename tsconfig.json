@@ -30,7 +30,8 @@
             "@components/*": ["components/*"],
             "@ui/*": ["ui/*"],
             "@themes/*": ["themes/*"],
-            "@utils/*": ["utils/*"]
+            "@utils/*": ["utils/*"],
+            "@types": ["index.d.ts"]
         }
     },
     "include": ["src/**/*"],

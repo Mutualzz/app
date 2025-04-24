@@ -1,4 +1,4 @@
-import type { ColorLike } from "@mutualzz/theme";
+import type { ColorLike } from "@types";
 import type { PaperElevation } from "@ui/surfaces/Paper/Paper.types";
 import { formatHex8, oklch, parse } from "culori";
 

@@ -1,4 +1,4 @@
-import type { Hex } from "@mutualzz/theme";
+import type { Hex } from "@types";
 
 export const randomHexColor = (): Hex => {
     const array = new Uint8Array(3);

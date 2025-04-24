@@ -1,4 +1,4 @@
-import type { ColorLike } from "@mutualzz/theme";
+import type { ColorLike } from "@types";
 
 export type LinearProgressVariant = "plain" | "outlined" | "soft" | "solid";
 

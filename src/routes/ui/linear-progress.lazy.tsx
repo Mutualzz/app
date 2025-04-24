@@ -1,6 +1,6 @@
 import { useColorInput } from "@hooks/useColorInput";
-import type { ColorLike } from "@mutualzz/theme";
 import { createLazyFileRoute } from "@tanstack/react-router";
+import type { ColorLike } from "@types";
 import { Divider } from "@ui/data-display/Divider/Divider";
 import { LinearProgress } from "@ui/feedback/LinearProgress/LinearProgress";
 import type {
@@ -69,7 +69,7 @@ function PlaygroundLinearProgress() {
         handleChange,
         validate,
         setColorDirectly,
-    } = useColorInput();
+    } = useColorInput<LinearProgressColor>();
 
     let progresses = [];
 

@@ -1,6 +1,6 @@
 import { useColorInput } from "@hooks/useColorInput";
-import type { ColorLike } from "@mutualzz/theme";
 import { createLazyFileRoute } from "@tanstack/react-router";
+import type { ColorLike } from "@types";
 import { Divider } from "@ui/data-display/Divider/Divider";
 import { CircularProgress } from "@ui/feedback/CircularProgress/CircularProgress";
 import type {
@@ -54,7 +54,7 @@ function PlaygroundCircularProgress() {
         handleChange,
         validate,
         setColorDirectly,
-    } = useColorInput();
+    } = useColorInput<CircularProgressColor>();
 
     let progresses = [];
 

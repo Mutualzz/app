@@ -1,4 +1,4 @@
-import type { ThemeColor } from "@mutualzz/theme";
+import type { ThemeColor } from "@types";
 
 export const isThemeColor = (color: unknown): color is ThemeColor => {
     return (

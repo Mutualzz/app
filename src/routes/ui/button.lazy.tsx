@@ -1,6 +1,6 @@
 import { useColorInput } from "@hooks/useColorInput";
-import type { ColorLike, Hex } from "@mutualzz/theme";
 import { createLazyFileRoute } from "@tanstack/react-router";
+import type { ColorLike } from "@types";
 import { Divider } from "@ui/data-display/Divider/Divider";
 import { Button } from "@ui/inputs/Button/Button";
 import type {
@@ -78,7 +78,7 @@ function PlaygroundButton() {
         handleChange,
         validate,
         setColorDirectly,
-    } = useColorInput();
+    } = useColorInput<ButtonColor>();
 
     let buttons = [];
 
@@ -280,7 +280,7 @@ function PlaygroundButton() {
                                     value={colorToDelete ?? ""}
                                     onChange={(e) => {
                                         setColorToDelete(
-                                            e.target.value.trim() as Hex,
+                                            e.target.value.trim() as ColorLike,
                                         );
                                     }}
                                     style={{
