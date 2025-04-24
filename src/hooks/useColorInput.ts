@@ -1,4 +1,5 @@
 import type { ColorLike } from "@mutualzz/theme";
+import { randomHexColor } from "@utils/randomHexColor";
 import { formatHex8, parse } from "culori";
 import { useState } from "react";
 
@@ -31,7 +32,7 @@ const isValidColorInput = (value: string): boolean =>
     isValidHsl(value) ||
     isValidHsla(value);
 
-export const useColorInput = (initialColor: ColorLike = "#ffffff") => {
+export const useColorInput = (initialColor: ColorLike = randomHexColor()) => {
     const [inputValue, setInputValue] = useState<string>(initialColor);
     const [color, setColor] = useState<string>(initialColor);
     const [isInvalid, setIsInvalid] = useState<boolean>(false);
@@ -57,11 +58,23 @@ export const useColorInput = (initialColor: ColorLike = "#ffffff") => {
         setIsInvalid(true);
     };
 
+    const setColorDirectly = (color: string) => {
+        setInputValue(color); // Update input value directly
+        const parsed = parse(color); // Parse immediately
+        if (parsed) {
+            setColor(formatHex8(parsed));
+            setIsInvalid(false);
+        } else {
+            setIsInvalid(true);
+        }
+    };
+
     return {
         inputValue,
         color,
         isInvalid,
         handleChange,
         validate,
+        setColorDirectly,
     };
 };

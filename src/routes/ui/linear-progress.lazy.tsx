@@ -13,6 +13,7 @@ import type {
 import { Button } from "@ui/inputs/Button/Button";
 import { Stack } from "@ui/layout/Stack/Stack";
 import { Paper } from "@ui/surfaces/Paper/Paper";
+import { randomHexColor } from "@utils/randomHexColor";
 
 import capitalize from "lodash/capitalize";
 import chunk from "lodash/chunk";
@@ -67,6 +68,7 @@ function PlaygroundLinearProgress() {
         isInvalid,
         handleChange,
         validate,
+        setColorDirectly,
     } = useColorInput();
 
     let progresses = [];
@@ -317,7 +319,7 @@ function PlaygroundLinearProgress() {
                                     (prev) =>
                                         [...prev, customColor] as ColorLike[],
                                 );
-                                handleChange("#ffffff");
+                                setColorDirectly(randomHexColor());
                                 setColorToDelete(customColor as ColorLike);
                             }}
                         >
@@ -350,12 +352,17 @@ function PlaygroundLinearProgress() {
                                 variant="soft"
                                 color="danger"
                                 onClick={() => {
-                                    setCustomColors((prev) =>
-                                        prev.filter(
+                                    setCustomColors((prev) => {
+                                        const updated = prev.filter(
                                             (color) => color !== colorToDelete,
-                                        ),
-                                    );
-                                    setColorToDelete(customColors[0]);
+                                        );
+                                        setColorToDelete(
+                                            updated.length > 0
+                                                ? updated[updated.length - 1]
+                                                : null,
+                                        );
+                                        return updated;
+                                    });
                                 }}
                             >
                                 Delete Color
