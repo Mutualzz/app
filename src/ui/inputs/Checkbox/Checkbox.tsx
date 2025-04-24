@@ -45,6 +45,7 @@ const CheckboxLabel = styled.span`
     margin-left: 0.5rem;
 `;
 
+// TODO: add indeterminate state, indeterminateIcon
 export const Checkbox: FC<CheckboxProps> = ({
     checked: controlledChecked,
     onChange,
@@ -53,6 +54,8 @@ export const Checkbox: FC<CheckboxProps> = ({
     color = "primary",
     variant = "plain",
     size = "md",
+    uncheckedIcon,
+    checkedIcon,
     ...props
 }) => {
     const { theme } = useTheme();
@@ -87,20 +90,22 @@ export const Checkbox: FC<CheckboxProps> = ({
                 size={size}
                 {...props}
             >
-                {isChecked && (
-                    <svg
-                        viewBox="2 2 20 20"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="3"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        width="60%"
-                        height="60%"
-                    >
-                        <polyline points="4 12 10 18 20 6" />
-                    </svg>
-                )}
+                {isChecked
+                    ? (checkedIcon ?? (
+                          <svg
+                              viewBox="2 2 20 20"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="3"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              width="60%"
+                              height="60%"
+                          >
+                              <polyline points="4 12 10 18 20 6" />
+                          </svg>
+                      ))
+                    : (uncheckedIcon ?? <></>)}
             </CheckboxBox>
             {label && <CheckboxLabel>{label}</CheckboxLabel>}
         </CheckboxWrapper>
