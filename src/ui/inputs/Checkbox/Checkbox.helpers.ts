@@ -91,7 +91,7 @@ export const resolveIconScaling = (size: CheckboxSize) => {
     if (typeof base === "string") base = parseFloat(base);
     if (isNaN(base)) base = baseSizeMap.md;
 
-    const scale = base * 0.6;
+    const scale = base * 0.4;
 
     return css({
         width: scale,
