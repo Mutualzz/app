@@ -9,7 +9,6 @@ import { themes as allThemes } from "@themes/index";
 
 import { sortThemes } from "@mutualzz/ui/utils/sortThemes";
 import { useNavigate } from "@tanstack/react-router";
-import capitalize from "lodash/capitalize";
 
 export const PlaygrondLeftSidebar = () => {
     const { mode, changeMode, changeTheme } = useTheme();
@@ -97,6 +96,7 @@ export const PlaygrondLeftSidebar = () => {
                                 }}
                                 defaultValue="baseDark"
                                 style={{
+                                    width: "100%",
                                     padding: 10,
                                     borderRadius: 5,
                                     border: "1px solid #ccc",
@@ -106,10 +106,6 @@ export const PlaygrondLeftSidebar = () => {
                                 {sortThemes(themes).map((theme) => (
                                     <option key={theme.id} value={theme.id}>
                                         {theme.name}
-                                        {theme.id !== "baseDark" &&
-                                        theme.id !== "baseLight"
-                                            ? ` (${capitalize(theme.type)})`
-                                            : ""}
                                     </option>
                                 ))}
                             </select>
