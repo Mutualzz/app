@@ -40,8 +40,6 @@ export const variantColors = (
     const parsedColor = parse(resolvedColor);
     if (!parsedColor) throw new Error("Invalid color");
 
-    const softBg = alpha(parsedColor, checked ? 0.25 : 0.1);
-
     return {
         solid: {
             backgroundColor: resolvedColor,
@@ -53,16 +51,17 @@ export const variantColors = (
         outlined: {
             backgroundColor: "transparent",
             color: resolvedColor,
-            border: `1px solid ${alpha(parsedColor, 0.3)}`,
+            border: `1px solid ${alpha(parsedColor, 0.5)}`,
             "&:hover": {
                 backgroundColor: alpha(parsedColor, 0.3),
+                border: `1px solid ${alpha(parsedColor, 0.3)}`,
             },
             "&:active": {
                 backgroundColor: alpha(parsedColor, 0.15),
             },
         },
         soft: {
-            backgroundColor: softBg,
+            backgroundColor: alpha(parsedColor, checked ? 0.4 : 0.2),
             color: resolvedColor,
             border: "none",
             "&:hover": {
@@ -77,8 +76,7 @@ export const variantColors = (
             color: resolvedColor,
             border: "none",
             "&:hover": {
-                backgroundColor: alpha(parsedColor, 0.3),
-                color: alpha(parsedColor, 0.8),
+                backgroundColor: alpha(parsedColor, 0.5),
             },
             "&:active": { color: alpha(parsedColor, 0.5) },
         },
