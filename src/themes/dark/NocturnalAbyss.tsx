@@ -1,4 +1,4 @@
-import type { Theme } from "@mutualzz/ui/src/types";
+import type { Theme } from "@mutualzz/ui/types";
 
 import { baseDarkTheme } from "@mutualzz/ui/themes/baseDark";
 

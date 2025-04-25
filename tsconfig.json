@@ -28,7 +28,7 @@
             "@hooks/*": ["hooks/*"],
             "@contexts/*": ["contexts/*"],
             "@components/*": ["components/*"],
-            "@mutualzz/ui/*": ["ui/*"],
+            "@mutualzz/ui/*": ["ui/src/*"],
             "@themes/*": ["themes/*"],
             "@types": ["index.d.ts"]
         }

@@ -1,5 +1,5 @@
-import type { Theme } from "@mutualzz/ui/src/types";
 import { baseLightTheme } from "@mutualzz/ui/themes/baseLight";
+import type { Theme } from "@mutualzz/ui/types";
 
 export const rustRevivalTheme: Theme = {
     ...baseLightTheme,

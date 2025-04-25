@@ -1,8 +1,6 @@
-import type { Theme } from "@mutualzz/ui/src/types";
-import { darkThemesObj, type DarkTheme } from "./dark";
-import { lightThemesObj, type LightTheme } from "./light";
-
-export type Themes = DarkTheme | LightTheme;
+import type { Theme, Themes } from "@mutualzz/ui/types";
+import { darkThemesObj } from "./dark";
+import { lightThemesObj } from "./light";
 
 export const themesObj: Record<Themes, Theme> = {
     ...darkThemesObj,
