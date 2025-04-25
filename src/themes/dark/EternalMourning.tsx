@@ -1,5 +1,5 @@
+import type { Theme } from "@mutualzz/ui/src/types";
 import { baseDarkTheme } from "@mutualzz/ui/themes/baseDark";
-import type { Theme } from "@mutualzz/ui/types";
 
 export const eternalMourningTheme: Theme = {
     ...baseDarkTheme,
