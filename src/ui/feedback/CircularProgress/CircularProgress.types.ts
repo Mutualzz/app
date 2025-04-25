@@ -1,4 +1,4 @@
-import type { ColorLike } from "@types";
+import type { ColorLike } from "@mutualzz/ui/types";
 
 export type CircularProgressVariant = "plain" | "outlined" | "soft" | "solid";
 export type CircularProgressSize = "sm" | "md" | "lg" | number;

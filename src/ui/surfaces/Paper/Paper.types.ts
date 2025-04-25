@@ -1,4 +1,4 @@
-import type { StackProps } from "@ui/layout/Stack/Stack.types";
+import type { StackProps } from "../../layout/Stack/Stack.types";
 
 export type PaperElevation = 0 | 1 | 2 | 3 | 4;
 

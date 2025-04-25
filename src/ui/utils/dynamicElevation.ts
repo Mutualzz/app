@@ -1,5 +1,5 @@
-import type { ColorLike } from "@types";
-import type { PaperElevation } from "@ui/surfaces/Paper/Paper.types";
+import type { PaperElevation } from "@mutualzz/ui/surfaces/Paper/Paper.types";
+import type { ColorLike } from "@mutualzz/ui/types";
 import { formatHex8, oklch, parse } from "culori";
 
 export const dynamicElevation = (

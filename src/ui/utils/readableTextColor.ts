@@ -1,6 +1,6 @@
 import { formatHex8, parse, rgb, wcagContrast } from "culori";
 
-import { invertColor } from "@utils/invertColor";
+import { invertColor } from "@mutualzz/ui/utils/invertColor";
 
 export const readableTextColor = (
     background: string,

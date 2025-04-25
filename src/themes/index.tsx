@@ -1,4 +1,4 @@
-import type { Theme } from "@emotion/react";
+import type { Theme } from "@mutualzz/ui/types";
 import { darkThemesObj, type DarkTheme } from "./dark";
 import { lightThemesObj, type LightTheme } from "./light";
 

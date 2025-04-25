@@ -1,4 +1,4 @@
-import type { TypographyColor } from "@types";
+import type { TypographyColor } from "@mutualzz/ui/types";
 
 export const isTypographyColor = (color: unknown): color is TypographyColor => {
     return (

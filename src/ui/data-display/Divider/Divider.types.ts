@@ -1,4 +1,4 @@
-import type { ColorLike } from "@types";
+import type { ColorLike } from "@mutualzz/ui/types";
 import type { HTMLAttributes, ReactNode } from "react";
 
 export type DividerOrientation = "horizontal" | "vertical";

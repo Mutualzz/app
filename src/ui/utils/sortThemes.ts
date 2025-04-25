@@ -1,4 +1,4 @@
-import type { Theme } from "@emotion/react";
+import type { Theme } from "@mutualzz/ui/types";
 import type { Themes } from "@themes/index";
 
 export const sortThemes = (themes: Theme[]): Theme[] => {

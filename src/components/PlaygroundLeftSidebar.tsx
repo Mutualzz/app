@@ -1,11 +1,11 @@
-import { useTheme } from "@hooks/useTheme";
+import { Divider } from "@mutualzz/ui/data-display/Divider/Divider";
+import { useTheme } from "@mutualzz/ui/hooks/useTheme";
+import { Button } from "@mutualzz/ui/inputs/Button/Button";
+import { Stack } from "@mutualzz/ui/layout/Stack/Stack";
+import { Paper } from "@mutualzz/ui/surfaces/Paper/Paper";
+import { sortThemes } from "@mutualzz/ui/utils/sortThemes";
 import { useNavigate } from "@tanstack/react-router";
 import { themes, type Themes } from "@themes/index";
-import { Divider } from "@ui/data-display/Divider/Divider";
-import { Button } from "@ui/inputs/Button/Button";
-import { Stack } from "@ui/layout/Stack/Stack";
-import { Paper } from "@ui/surfaces/Paper/Paper";
-import { sortThemes } from "@utils/sortThemes";
 import capitalize from "lodash/capitalize";
 
 export const PlaygrondLeftSidebar = () => {

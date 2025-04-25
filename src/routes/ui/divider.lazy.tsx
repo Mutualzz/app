@@ -1,15 +1,15 @@
-import { useColorInput } from "@hooks/useColorInput";
-import { createLazyFileRoute } from "@tanstack/react-router";
-import { Divider } from "@ui/data-display/Divider/Divider";
+import { Divider } from "@mutualzz/ui/data-display/Divider/Divider";
 import type {
     DividerInset,
     DividerLineColor,
     DividerTextColor,
     DividerVariant,
-} from "@ui/data-display/Divider/Divider.types";
-import { Checkbox } from "@ui/inputs/Checkbox/Checkbox";
-import { Stack } from "@ui/layout/Stack/Stack";
-import { Paper } from "@ui/surfaces/Paper/Paper";
+} from "@mutualzz/ui/data-display/Divider/Divider.types";
+import { useColorInput } from "@mutualzz/ui/hooks/useColorInput";
+import { Checkbox } from "@mutualzz/ui/inputs/Checkbox/Checkbox";
+import { Stack } from "@mutualzz/ui/layout/Stack/Stack";
+import { Paper } from "@mutualzz/ui/surfaces/Paper/Paper";
+import { createLazyFileRoute } from "@tanstack/react-router";
 import capitalize from "lodash/capitalize";
 import { useState } from "react";
 

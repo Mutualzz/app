@@ -1,6 +1,6 @@
 import { createLazyFileRoute, Outlet } from "@tanstack/react-router";
 
-import { Stack } from "@ui/layout/Stack/Stack";
+import { Stack } from "@mutualzz/ui/layout/Stack/Stack";
 
 import { PlaygrondLeftSidebar } from "@components/PlaygroundLeftSidebar";
 

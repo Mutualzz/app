@@ -1,4 +1,5 @@
-import { type Theme } from "@emotion/react";
+import { baseDarkTheme } from "@mutualzz/ui/themes/baseDark";
+import type { Theme } from "@mutualzz/ui/types";
 import { crimsonLamentTheme } from "./CrimsonLament";
 import { eternalMourningTheme } from "./EternalMourning";
 import { fogOfDespairTheme } from "./FogOfDespair";
@@ -10,7 +11,6 @@ import { midghtEleganceTheme } from "./MidnightElegance";
 import { nocturnalAbyssTheme } from "./NocturnalAbyss";
 import { shadowheartTheme } from "./Shadowheart";
 import { witchingHourTheme } from "./WitchingHour";
-import { baseDarkTheme } from "./baseDark";
 
 export const darkThemesObj: Record<DarkTheme, Theme> = {
     baseDark: baseDarkTheme,

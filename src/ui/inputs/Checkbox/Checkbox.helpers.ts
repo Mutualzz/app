@@ -1,7 +1,8 @@
-import { css, type Theme } from "@emotion/react";
-import { isThemeColor } from "@utils/isThemeColor";
+import { css } from "@emotion/react";
+import { isThemeColor } from "@mutualzz/ui/utils/isThemeColor";
 
-import { alpha } from "@utils/alpha";
+import type { Theme } from "@mutualzz/ui/types";
+import { alpha } from "@mutualzz/ui/utils/alpha";
 import { parse } from "culori";
 import type { CheckboxColor, CheckboxSize } from "./Checkbox.types";
 

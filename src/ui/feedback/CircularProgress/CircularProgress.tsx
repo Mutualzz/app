@@ -1,7 +1,7 @@
-import { useTheme } from "@hooks/useTheme";
+import { useTheme } from "@mutualzz/ui/hooks/useTheme";
 import type { FC } from "react";
 
-import { isThemeColor } from "@utils/index";
+import { isThemeColor } from "@mutualzz/ui/utils/isThemeColor";
 
 import { formatHex8 } from "culori";
 import {

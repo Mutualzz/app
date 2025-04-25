@@ -1,7 +1,7 @@
-import type { ColorLike } from "@types";
-import { randomHexColor } from "@utils/randomHexColor";
+import { randomHexColor } from "@mutualzz/ui/utils/randomHexColor";
 import { formatHex8, parse } from "culori";
 import { useState } from "react";
+import type { ColorLike } from "../types";
 
 /**
  * Validates HEX, RGB, RGBA, HSL, HSLA formats.

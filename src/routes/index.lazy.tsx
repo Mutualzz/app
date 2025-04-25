@@ -4,8 +4,8 @@ import {
     useNavigate,
 } from "@tanstack/react-router";
 
-import { Button } from "@ui/inputs/Button/Button";
-import { Stack } from "@ui/layout/Stack/Stack";
+import { Button } from "@mutualzz/ui/inputs/Button/Button";
+import { Stack } from "@mutualzz/ui/layout/Stack/Stack";
 
 export const Route = createLazyFileRoute("/")({
     component: Index,

@@ -1,6 +1,6 @@
-import { type Theme } from "@emotion/react";
+import type { Theme } from "@mutualzz/ui/types";
 
-import { baseDarkTheme } from "./baseDark";
+import { baseDarkTheme } from "@mutualzz/ui/themes/baseDark";
 
 export const hauntedAestheticTheme: Theme = {
     ...baseDarkTheme,

@@ -1,17 +1,17 @@
-import { useColorInput } from "@hooks/useColorInput";
-import { createLazyFileRoute } from "@tanstack/react-router";
-import type { ColorLike } from "@types";
-import { Divider } from "@ui/data-display/Divider/Divider";
-import { Button } from "@ui/inputs/Button/Button";
-import { Checkbox } from "@ui/inputs/Checkbox/Checkbox";
+import { Divider } from "@mutualzz/ui/data-display/Divider/Divider";
+import { useColorInput } from "@mutualzz/ui/hooks/useColorInput";
+import { Button } from "@mutualzz/ui/inputs/Button/Button";
+import { Checkbox } from "@mutualzz/ui/inputs/Checkbox/Checkbox";
 import type {
     CheckboxColor,
     CheckboxSize,
     CheckboxVariant,
-} from "@ui/inputs/Checkbox/Checkbox.types";
-import { Stack } from "@ui/layout/Stack/Stack";
-import { Paper } from "@ui/surfaces/Paper/Paper";
-import { randomHexColor } from "@utils/randomHexColor";
+} from "@mutualzz/ui/inputs/Checkbox/Checkbox.types";
+import { Stack } from "@mutualzz/ui/layout/Stack/Stack";
+import { Paper } from "@mutualzz/ui/surfaces/Paper/Paper";
+import type { ColorLike } from "@mutualzz/ui/types";
+import { randomHexColor } from "@mutualzz/ui/utils/randomHexColor";
+import { createLazyFileRoute } from "@tanstack/react-router";
 
 import capitalize from "lodash/capitalize";
 import chunk from "lodash/chunk";

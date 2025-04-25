@@ -1,7 +1,7 @@
 import { createRootRoute, Outlet } from "@tanstack/react-router";
 
-import { ThemeProvider } from "../contexts/ThemeManager";
-import { GlobalStyles } from "../ui/GlobalStyles";
+import { GlobalStyles } from "@mutualzz/ui/GlobalStyles";
+import { ThemeProvider } from "@mutualzz/ui/ThemeManager";
 
 // Dev tools
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";

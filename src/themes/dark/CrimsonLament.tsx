@@ -1,5 +1,5 @@
-import { type Theme } from "@emotion/react";
-import { baseDarkTheme } from "./baseDark";
+import { baseDarkTheme } from "@mutualzz/ui/themes/baseDark";
+import type { Theme } from "@mutualzz/ui/types";
 
 export const crimsonLamentTheme: Theme = {
     ...baseDarkTheme,

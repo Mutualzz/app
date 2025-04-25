@@ -1,6 +1,6 @@
-import { type Theme } from "@emotion/react";
-import { isThemeColor } from "@utils/isThemeColor";
-import { isTypographyColor } from "@utils/isTypographyColor";
+import type { Theme } from "@mutualzz/ui/types";
+import { isThemeColor } from "@mutualzz/ui/utils/isThemeColor";
+import { isTypographyColor } from "@mutualzz/ui/utils/isTypographyColor";
 import { formatHex8, parse } from "culori";
 import type {
     DividerLineColor,

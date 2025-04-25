@@ -1,4 +1,4 @@
-import { type Theme } from "@emotion/react";
+import type { Theme } from "../types";
 
 export const baseLightTheme: Theme = {
     id: "baseLight",
