@@ -10,10 +10,10 @@ export const chromeVeilTheme: Theme = {
     colors: {
         ...baseLightTheme.colors,
         common: { white: "#FFFFFF", black: "#121212" },
-        primary: "#5AB1A1",
+        primary: "#448E81",
         neutral: "#6B4F59",
-        background: "#F3F6F5",
-        surface: "#FFFFFF",
+        background: "#EAEEED",
+        surface: "#F9F9F9",
         danger: "#8F3C74",
         warning: "#D4A033",
         success: "#4CAF50",

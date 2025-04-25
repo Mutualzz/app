@@ -10,10 +10,10 @@ export const roseRequiemTheme: Theme = {
     colors: {
         ...baseLightTheme.colors,
         common: { white: "#FFFFFF", black: "#121212" },
-        primary: "#B72C3F",
+        primary: "#9C2232",
         neutral: "#7B5A65",
-        background: "#F7F3F3",
-        surface: "#FFFFFF",
+        background: "#F2EEEE",
+        surface: "#F9F9F9",
         danger: "#A12B3D",
         warning: "#D4A033",
         success: "#4CAF50",

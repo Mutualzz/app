@@ -10,10 +10,10 @@ export const velvetLullabyTheme: Theme = {
     colors: {
         ...baseLightTheme.colors,
         common: { white: "#FFFFFF", black: "#121212" },
-        primary: "#BA837E",
+        primary: "#98625D",
         neutral: "#73678F",
-        background: "#F6F3F2",
-        surface: "#FFFFFF",
+        background: "#EDE9E8",
+        surface: "#F9F9F9",
         danger: "#9C5050",
         warning: "#D4A033",
         success: "#4CAF50",

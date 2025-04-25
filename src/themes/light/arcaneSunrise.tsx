@@ -10,10 +10,10 @@ export const arcaneSunriseTheme: Theme = {
     colors: {
         ...baseLightTheme.colors,
         common: { white: "#FFFFFF", black: "#121212" },
-        primary: "#60C297",
+        primary: "#4DA380",
         neutral: "#2A4B76",
-        background: "#EFF6F4",
-        surface: "#FFFFFF",
+        background: "#E8F0ED",
+        surface: "#F9F9F9",
         danger: "#AD1457",
         warning: "#D4A033",
         success: "#6FD36F",

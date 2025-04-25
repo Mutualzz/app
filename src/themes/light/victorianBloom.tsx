@@ -10,10 +10,10 @@ export const victorianBloomTheme: Theme = {
     colors: {
         ...baseLightTheme.colors,
         common: { white: "#FFFFFF", black: "#121212" },
-        primary: "#C2A05E",
+        primary: "#A6844F",
         neutral: "#5A4A69",
-        background: "#F4F2F0",
-        surface: "#FFFFFF",
+        background: "#EBE8E6",
+        surface: "#F9F9F9",
         danger: "#783937",
         warning: "#D4A033",
         success: "#6FD36F",

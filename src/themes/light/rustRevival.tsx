@@ -10,10 +10,10 @@ export const rustRevivalTheme: Theme = {
     colors: {
         ...baseLightTheme.colors,
         common: { white: "#FFFFFF", black: "#121212" },
-        primary: "#A3643D",
+        primary: "#81472F",
         neutral: "#7E4050",
-        background: "#F3F1ED",
-        surface: "#FFFFFF",
+        background: "#EAE7E3",
+        surface: "#F9F9F9",
         danger: "#A12B3D",
         warning: "#D4A033",
         success: "#4CAF50",

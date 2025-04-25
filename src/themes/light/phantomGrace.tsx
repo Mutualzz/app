@@ -10,10 +10,10 @@ export const phantomGraceTheme: Theme = {
     colors: {
         ...baseLightTheme.colors,
         common: { white: "#FFFFFF", black: "#121212" },
-        primary: "#AFAEC7",
+        primary: "#8F8EAD",
         neutral: "#6D4153",
-        background: "#F4F4F8",
-        surface: "#FFFFFF",
+        background: "#EBEBF1",
+        surface: "#F9F9F9",
         danger: "#8F3C74",
         warning: "#D4A033",
         success: "#6FD36F",

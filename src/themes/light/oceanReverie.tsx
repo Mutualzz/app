@@ -10,10 +10,10 @@ export const oceanReverieTheme: Theme = {
     colors: {
         ...baseLightTheme.colors,
         common: { white: "#FFFFFF", black: "#121212" },
-        primary: "#5E7A5F",
+        primary: "#49604A",
         neutral: "#6A4F68",
-        background: "#EEF3F1",
-        surface: "#FFFFFF",
+        background: "#E6ECEA",
+        surface: "#F9F9F9",
         danger: "#A12B3D",
         warning: "#D4A033",
         success: "#6FD36F",

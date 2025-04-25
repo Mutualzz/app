@@ -10,10 +10,10 @@ export const mistOfHopeTheme: Theme = {
     colors: {
         ...baseLightTheme.colors,
         common: { white: "#FFFFFF", black: "#121212" },
-        primary: "#88A2B2",
+        primary: "#6D8A9C",
         neutral: "#7D8F99",
-        background: "#F1F4F6",
-        surface: "#FFFFFF",
+        background: "#E9EFF2",
+        surface: "#F9F9F9",
         danger: "#8F3C74",
         warning: "#D4A033",
         success: "#6FD36F",
