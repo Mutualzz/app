@@ -8,23 +8,20 @@ export const baseLightTheme: Theme = {
     colors: {
         common: {
             white: "#FFFFFF",
-            black: "#000000",
+            black: "#121212",
         },
-
-        primary: "#F24C7B",
+        primary: "#E0577E",
         neutral: "#5A5A5A",
         background: "#F5F5F5",
         surface: "#FAFAFA",
-
-        danger: "#FF4D4D",
-        warning: "#FFC107",
+        danger: "#C7323F",
+        warning: "#D4A033",
         success: "#4CAF50",
-        info: "#2196F3",
-
+        info: "#5A84B1",
         typography: {
             primary: "#202020",
             neutral: "#5A5A5A",
-            accent: "#A4243B",
+            accent: "#B04A62",
         },
     },
     typography: {
