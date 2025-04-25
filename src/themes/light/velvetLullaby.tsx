@@ -13,10 +13,15 @@ export const velvetLullabyTheme: Theme = {
         primary: "#98625D",
         neutral: "#73678F",
         background: "#EDE9E8",
-        surface: "#F9F9F9",
+        surface: "#F7F5F5",
         danger: "#9C5050",
         warning: "#D4A033",
         success: "#4CAF50",
         info: "#607D8B",
+        typography: {
+            primary: "#121212",
+            neutral: "#5A5A5A",
+            accent: "#98625D",
+        },
     },
 };

@@ -12,7 +12,7 @@ import { twilightElegyTheme } from "./twilightElegy";
 import { velvetLullabyTheme } from "./velvetLullaby";
 import { victorianBloomTheme } from "./victorianBloom";
 
-export const lightThemesObj: Record<LightTheme, Theme> = {
+export const lightThemesObj: Record<string, Theme> = {
     baseLight: baseLightTheme,
     arcaneSunrise: arcaneSunriseTheme,
     cemeteryDawn: cemeteryDawnTheme,
@@ -28,17 +28,3 @@ export const lightThemesObj: Record<LightTheme, Theme> = {
 };
 
 export const lightThemes = Object.values(lightThemesObj);
-
-export type LightTheme =
-    | "baseLight"
-    | "arcaneSunrise"
-    | "cemeteryDawn"
-    | "chromeVeil"
-    | "mistOfHope"
-    | "oceanReverie"
-    | "phantomGrace"
-    | "roseRequiem"
-    | "rustRevival"
-    | "twilightElegy"
-    | "velvetLullaby"
-    | "victorianBloom";

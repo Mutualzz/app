@@ -6,10 +6,11 @@ import { ThemeProvider } from "@mutualzz/ui/ThemeManager";
 // Dev tools
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
+import { themesObj } from "@themes/index";
 
 const RootComponent = () => {
     return (
-        <ThemeProvider>
+        <ThemeProvider themes={themesObj}>
             <GlobalStyles />
             <Outlet />
             {import.meta.env.DEV && (

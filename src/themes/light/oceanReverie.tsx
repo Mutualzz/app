@@ -13,10 +13,15 @@ export const oceanReverieTheme: Theme = {
         primary: "#49604A",
         neutral: "#6A4F68",
         background: "#E6ECEA",
-        surface: "#F9F9F9",
+        surface: "#F5F7F6",
         danger: "#A12B3D",
         warning: "#D4A033",
         success: "#6FD36F",
         info: "#5A84B1",
+        typography: {
+            primary: "#121212",
+            neutral: "#5A5A5A",
+            accent: "#49604A",
+        },
     },
 };

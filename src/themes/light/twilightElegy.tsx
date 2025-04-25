@@ -13,10 +13,15 @@ export const twilightElegyTheme: Theme = {
         primary: "#743DA3",
         neutral: "#845159",
         background: "#ECEAF1",
-        surface: "#F9F9F9",
+        surface: "#F5F3F8",
         danger: "#8F3C74",
         warning: "#D4A033",
         success: "#6FD36F",
         info: "#607D8B",
+        typography: {
+            primary: "#121212",
+            neutral: "#5A5A5A",
+            accent: "#743DA3",
+        },
     },
 };

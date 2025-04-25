@@ -12,11 +12,16 @@ export const mistOfHopeTheme: Theme = {
         common: { white: "#FFFFFF", black: "#121212" },
         primary: "#6D8A9C",
         neutral: "#7D8F99",
-        background: "#E9EFF2",
-        surface: "#F9F9F9",
+        background: "#E8EFF3",
+        surface: "#F4F7F9",
         danger: "#8F3C74",
         warning: "#D4A033",
         success: "#6FD36F",
         info: "#5A84B1",
+        typography: {
+            primary: "#121212",
+            neutral: "#5A5A5A",
+            accent: "#6D8A9C",
+        },
     },
 };
