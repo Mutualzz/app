@@ -94,7 +94,6 @@ export const PlaygrondLeftSidebar = () => {
                                 onChange={(e) => {
                                     changeTheme(e.target.value);
                                 }}
-                                defaultValue="baseDark"
                                 style={{
                                     width: "100%",
                                     padding: 10,
