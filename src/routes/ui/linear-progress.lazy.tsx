@@ -11,6 +11,7 @@ import type {
     LinearProgressVariant,
 } from "@ui/feedback/LinearProgress/LinearProgress.types";
 import { Button } from "@ui/inputs/Button/Button";
+import { Checkbox } from "@ui/inputs/Checkbox/Checkbox";
 import { Stack } from "@ui/layout/Stack/Stack";
 import { Paper } from "@ui/surfaces/Paper/Paper";
 import { randomHexColor } from "@utils/randomHexColor";
@@ -173,23 +174,22 @@ function PlaygroundLinearProgress() {
                     </select>
                 </Stack>
                 <Divider />
-                <Stack gap={5} justifyContent="center" direction="column">
-                    <Stack
-                        justifyContent="center"
-                        alignItems="center"
-                        direction="row"
-                        gap={10}
-                    >
-                        <input
-                            type="checkbox"
-                            checked={customLength}
-                            onChange={() => {
-                                setCustomLength((prev) => !prev);
-                                setLength("md");
-                            }}
-                        />
-                        <label>Custom Length</label>
-                    </Stack>
+                <Stack
+                    gap={5}
+                    justifyContent="center"
+                    alignItems="center"
+                    direction="column"
+                >
+                    <Checkbox
+                        variant="outlined"
+                        label="Custom Length"
+                        checked={customLength}
+                        onChange={() => {
+                            setCustomLength((prev) => !prev);
+                            setLength("md");
+                        }}
+                    />
+
                     {customLength ? (
                         <input
                             type="text"
@@ -201,6 +201,7 @@ function PlaygroundLinearProgress() {
                             }
                             placeholder="Custom length"
                             style={{
+                                width: "100%",
                                 padding: 10,
                                 borderRadius: 5,
                                 border: "1px solid #ccc",
@@ -216,6 +217,7 @@ function PlaygroundLinearProgress() {
                                 )
                             }
                             style={{
+                                width: "100%",
                                 padding: 10,
                                 borderRadius: 5,
                                 border: "1px solid #ccc",
@@ -229,23 +231,22 @@ function PlaygroundLinearProgress() {
                     )}
                 </Stack>
                 <Divider />
-                <Stack gap={5} justifyContent="center" direction="column">
-                    <Stack
-                        justifyContent="center"
-                        alignItems="center"
-                        direction="row"
-                        gap={10}
-                    >
-                        <input
-                            type="checkbox"
-                            checked={customThickness}
-                            onChange={() => {
-                                setCustomThickness((prev) => !prev);
-                                setThickness("md");
-                            }}
-                        />
-                        <label>Custom Thickness</label>
-                    </Stack>
+                <Stack
+                    gap={5}
+                    justifyContent="center"
+                    alignItems="center"
+                    direction="column"
+                >
+                    <Checkbox
+                        variant="outlined"
+                        label="Custom Thickness"
+                        checked={customThickness}
+                        onChange={() => {
+                            setCustomThickness((prev) => !prev);
+                            setThickness("md");
+                        }}
+                    />
+
                     {customThickness ? (
                         <input
                             type="text"
@@ -257,6 +258,7 @@ function PlaygroundLinearProgress() {
                             }
                             placeholder="Custom thickness"
                             style={{
+                                width: "100%",
                                 padding: 10,
                                 borderRadius: 5,
                                 border: "1px solid #ccc",
@@ -272,6 +274,7 @@ function PlaygroundLinearProgress() {
                                 )
                             }
                             style={{
+                                width: "100%",
                                 padding: 10,
                                 borderRadius: 5,
                                 border: "1px solid #ccc",
@@ -313,8 +316,6 @@ function PlaygroundLinearProgress() {
                             color="primary"
                             disabled={!customColor}
                             onClick={() => {
-                                if (!customColor) return;
-
                                 setCustomColors(
                                     (prev) =>
                                         [...prev, customColor] as ColorLike[],

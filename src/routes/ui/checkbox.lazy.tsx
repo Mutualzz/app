@@ -199,54 +199,53 @@ function PlaygroundCheckbox() {
                     >
                         Turn {disabled ? "Off" : "On"} Disabled
                     </Button>
-                    <Stack gap={5} justifyContent="center" direction="column">
+                    <Stack
+                        gap={5}
+                        justifyContent="center"
+                        alignItems="center"
+                        direction="column"
+                    >
                         <Divider>Properties</Divider>
-                        <Stack
-                            direction="row"
-                            gap={10}
-                            justifyContent="center"
-                            alignItems="center"
-                        >
+                        <Checkbox
+                            variant="outlined"
+                            checked={customLabel}
+                            onChange={() => {
+                                setCustomLabel((prev) => !prev);
+                                setLabel(null);
+                            }}
+                            label="Custom Label"
+                        />
+
+                        {customLabel && (
                             <input
-                                type="checkbox"
-                                checked={customLabel}
-                                onChange={() => {
-                                    setCustomLabel((prev) => !prev);
-                                    setLabel(null);
+                                type="text"
+                                value={label ?? ""}
+                                disabled={!customLabel}
+                                onChange={(e) =>
+                                    setLabel(e.target.value.trim())
+                                }
+                                placeholder="Custom Label"
+                                style={{
+                                    width: "100%",
+                                    padding: 10,
+                                    borderRadius: 5,
+                                    border: "1px solid #ccc",
+                                    backgroundColor: "#f9f9f9",
                                 }}
                             />
-                            <label>Custom Label</label>
-                        </Stack>
+                        )}
 
-                        <input
-                            type="text"
-                            value={label ?? ""}
-                            disabled={!customLabel}
-                            onChange={(e) => setLabel(e.target.value.trim())}
-                            placeholder="Custom Label"
-                            style={{
-                                padding: 10,
-                                borderRadius: 5,
-                                border: "1px solid #ccc",
-                                backgroundColor: "#f9f9f9",
+                        {!customLabel && <Divider />}
+
+                        <Checkbox
+                            label="Custom Size"
+                            variant="outlined"
+                            checked={customSize}
+                            onChange={() => {
+                                setCustomSize((prev) => !prev);
+                                setSize("md");
                             }}
                         />
-                        <Stack
-                            direction="row"
-                            gap={10}
-                            justifyContent="center"
-                            alignItems="center"
-                        >
-                            <input
-                                type="checkbox"
-                                checked={customSize}
-                                onChange={() => {
-                                    setCustomSize((prev) => !prev);
-                                    setSize("md");
-                                }}
-                            />
-                            <label>Custom Size</label>
-                        </Stack>
                         {customSize ? (
                             <input
                                 type="text"
@@ -258,6 +257,7 @@ function PlaygroundCheckbox() {
                                 }
                                 placeholder="Custom size"
                                 style={{
+                                    width: "100%",
                                     padding: 10,
                                     borderRadius: 5,
                                     border: "1px solid #ccc",
@@ -273,6 +273,7 @@ function PlaygroundCheckbox() {
                                     )
                                 }
                                 style={{
+                                    width: "100%",
                                     padding: 10,
                                     borderRadius: 5,
                                     border: "1px solid #ccc",

@@ -7,6 +7,7 @@ import type {
     DividerTextColor,
     DividerVariant,
 } from "@ui/data-display/Divider/Divider.types";
+import { Checkbox } from "@ui/inputs/Checkbox/Checkbox";
 import { Stack } from "@ui/layout/Stack/Stack";
 import { Paper } from "@ui/surfaces/Paper/Paper";
 import capitalize from "lodash/capitalize";
@@ -326,31 +327,18 @@ function PlaygroundDivider() {
                         direction="column"
                     >
                         <Divider>Line Color</Divider>
-                        <Stack
-                            direction="row"
-                            gap={10}
-                            alignItems="center"
-                            justifyContent="space-between"
-                        >
-                            <label
-                                style={{
-                                    display: "flex",
-                                    alignItems: "center",
-                                    gap: 5,
-                                }}
-                            >
-                                <input
-                                    type="checkbox"
-                                    checked={customLineColorEnabled}
-                                    onChange={(e) =>
-                                        setCustomLineColorEnabled(
-                                            e.target.checked,
-                                        )
-                                    }
-                                />
-                                Custom Line Color
-                            </label>
-                        </Stack>
+
+                        <Checkbox
+                            label="Custom Line Color"
+                            variant="outlined"
+                            checked={customLineColorEnabled}
+                            onChange={(e) =>
+                                setCustomLineColorEnabled(
+                                    e.currentTarget.checked,
+                                )
+                            }
+                        />
+
                         {customLineColorEnabled ? (
                             <input
                                 type="text"
@@ -399,31 +387,16 @@ function PlaygroundDivider() {
                         direction="column"
                     >
                         <Divider>Text Color</Divider>
-                        <Stack
-                            direction="row"
-                            gap={10}
-                            alignItems="center"
-                            justifyContent="space-between"
-                        >
-                            <label
-                                style={{
-                                    display: "flex",
-                                    alignItems: "center",
-                                    gap: 5,
-                                }}
-                            >
-                                <input
-                                    type="checkbox"
-                                    checked={customTextColorEnabled}
-                                    onChange={(e) =>
-                                        setCustomTextColorEnabled(
-                                            e.target.checked,
-                                        )
-                                    }
-                                />
-                                Custom Text Color
-                            </label>
-                        </Stack>
+                        <Checkbox
+                            variant="outlined"
+                            label="Custom Text Color"
+                            checked={customTextColorEnabled}
+                            onChange={(e) =>
+                                setCustomTextColorEnabled(
+                                    e.currentTarget.checked,
+                                )
+                            }
+                        />
                         {customTextColorEnabled ? (
                             <input
                                 type="text"

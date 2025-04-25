@@ -9,6 +9,7 @@ import type {
     CircularProgressVariant,
 } from "@ui/feedback/CircularProgress/CircularProgress.types";
 import { Button } from "@ui/inputs/Button/Button";
+import { Checkbox } from "@ui/inputs/Checkbox/Checkbox";
 import { Stack } from "@ui/layout/Stack/Stack";
 import { Paper } from "@ui/surfaces/Paper/Paper";
 import { randomHexColor } from "@utils/randomHexColor";
@@ -131,24 +132,24 @@ function PlaygroundCircularProgress() {
                         <label>{value}%</label>
                     </Stack>
                 </Stack>
-                <Stack gap={5} justifyContent="center" direction="column">
+                <Stack
+                    gap={5}
+                    justifyContent="center"
+                    alignItems="center"
+                    direction="column"
+                >
                     <Divider>Properties</Divider>
-                    <Stack
-                        justifyContent="center"
-                        alignItems="center"
-                        direction="row"
-                        gap={10}
-                    >
-                        <input
-                            type="checkbox"
-                            checked={customSize}
-                            onChange={() => {
-                                setCustomSize((prev) => !prev);
-                                setSize("md");
-                            }}
-                        />
-                        <label>Custom Size</label>
-                    </Stack>
+
+                    <Checkbox
+                        label="Custom Size"
+                        variant="outlined"
+                        checked={customSize}
+                        onChange={() => {
+                            setCustomSize((prev) => !prev);
+                            setSize("md");
+                        }}
+                    />
+
                     {customSize ? (
                         <input
                             type="text"
@@ -160,6 +161,7 @@ function PlaygroundCircularProgress() {
                             }
                             placeholder="Custom size"
                             style={{
+                                width: "100%",
                                 padding: 10,
                                 borderRadius: 5,
                                 border: "1px solid #ccc",
@@ -175,6 +177,7 @@ function PlaygroundCircularProgress() {
                                 )
                             }
                             style={{
+                                width: "100%",
                                 padding: 10,
                                 borderRadius: 5,
                                 border: "1px solid #ccc",
