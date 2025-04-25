@@ -6,11 +6,11 @@ import { chromeVeilTheme } from "./chromeVeil";
 import { mistOfHopeTheme } from "./misftOfHope";
 import { oceanReverieTheme } from "./oceanReverie";
 import { phantomGraceTheme } from "./phantomGrace";
-import { roseRequiemTheme } from "./roseRequiem";
-import { rustRevivalTheme } from "./rustRevival";
-import { twilightElegyTheme } from "./twilightElegy";
-import { velvetLullabyTheme } from "./velvetLullaby";
-import { victorianBloomTheme } from "./victorianBloom";
+import { roseRequiemTheme } from "./RoseRequiem";
+import { rustRevivalTheme } from "./RustRevival";
+import { twilightElegyTheme } from "./TwilightElegy";
+import { velvetLullabyTheme } from "./VelvetLullaby";
+import { victorianBloomTheme } from "./VictorianBloom";
 
 export const lightThemesObj: Record<string, Theme> = {
     baseLight: baseLightTheme,

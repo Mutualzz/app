@@ -15,6 +15,7 @@
         "jsx": "react-jsx",
         "jsxImportSource": "@emotion/react",
         "verbatimModuleSyntax": true,
+        "forceConsistentCasingInFileNames": true,
 
         /* Linting */
         "strict": true,
