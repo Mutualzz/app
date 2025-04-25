@@ -25,13 +25,6 @@ export const GlobalStyles = () => {
                     line-height: ${theme.typography.lineHeight};
                     background-color: ${theme.colors.background};
                     color: ${theme.colors.typography.primary};
-
-                    transition:
-                        background-color 0.3s ease,
-                        color 0.3s ease,
-                        border-color 0.3s ease,
-                        fill 0.3s ease,
-                        stroke 0.3s ease;
                 }
 
                 #app {
