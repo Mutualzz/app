@@ -43,6 +43,21 @@ const CheckboxBox = styled.span<CheckboxProps>`
 
     ${({ theme, color = "primary", variant = "plain", checked }) =>
         variantColors(theme, color, checked)[variant]}
+
+    input[type="checkbox"]:hover + & {
+        ${({ theme, color = "primary", variant = "plain" }) =>
+            variantColors(theme, color, true)[variant]}
+    }
+
+    input[type="checkbox"]:active + & {
+        ${({ theme, color = "primary", variant = "plain" }) =>
+            variantColors(theme, color, true)[variant]}
+    }
+
+    input[type="checkbox"]:focus-visible + & {
+        box-shadow: 0 0 0 3px ${({ theme }) => theme.colors.typography.accent};
+        outline: none;
+    }
 `;
 
 const CheckboxLabel = styled.span`
@@ -118,7 +133,6 @@ export const Checkbox: FC<CheckboxProps> = ({
                             {indeterminateIcon}
                         </IconWrapper>
                     ) : (
-                        // Default indeterminate SVG
                         <svg
                             viewBox="0 0 24 24"
                             fill="none"

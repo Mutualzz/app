@@ -47,19 +47,18 @@ export const variantColors = (
             backgroundColor: resolvedColor,
             color: colors.typography.primary,
             border: "none",
-            "&:hover": { backgroundColor: resolvedColor },
+            "&:hover": { backgroundColor: alpha(parsedColor, 0.5) },
             "&:active": { backgroundColor: resolvedColor },
         },
         outlined: {
             backgroundColor: "transparent",
             color: resolvedColor,
-            border: `1px solid ${resolvedColor}`,
+            border: `1px solid ${alpha(parsedColor, 0.3)}`,
             "&:hover": {
-                backgroundColor: alpha(parsedColor, 0.1),
+                backgroundColor: alpha(parsedColor, 0.3),
             },
             "&:active": {
                 backgroundColor: alpha(parsedColor, 0.15),
-                color: colors.typography.primary,
             },
         },
         soft: {
@@ -67,7 +66,7 @@ export const variantColors = (
             color: resolvedColor,
             border: "none",
             "&:hover": {
-                backgroundColor: alpha(parsedColor, 0.25), // Stronger on hover
+                backgroundColor: alpha(parsedColor, 0.3), // Stronger on hover
             },
             "&:active": {
                 backgroundColor: alpha(parsedColor, 0.3), // Even stronger on active
@@ -77,7 +76,10 @@ export const variantColors = (
             backgroundColor: "transparent",
             color: resolvedColor,
             border: "none",
-            "&:hover": { color: alpha(parsedColor, 0.8) },
+            "&:hover": {
+                backgroundColor: alpha(parsedColor, 0.3),
+                color: alpha(parsedColor, 0.8),
+            },
             "&:active": { color: alpha(parsedColor, 0.5) },
         },
     };
