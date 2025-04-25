@@ -8,6 +8,7 @@ import type {
     ButtonSize,
     ButtonVariant,
 } from "@ui/inputs/Button/Button.types";
+import { Checkbox } from "@ui/inputs/Checkbox/Checkbox";
 import { Stack } from "@ui/layout/Stack/Stack";
 import { Paper } from "@ui/surfaces/Paper/Paper";
 import { randomHexColor } from "@utils/randomHexColor";
@@ -153,54 +154,52 @@ function PlaygroundButton() {
                     >
                         Turn {fullWidth ? "Off" : "On"} Full Width
                     </Button>
-                    <Stack gap={5} justifyContent="center" direction="column">
+                    <Stack
+                        gap={5}
+                        justifyContent="center"
+                        alignItems="center"
+                        direction="column"
+                    >
                         <Divider>Properties</Divider>
-                        <Stack
-                            direction="row"
-                            gap={10}
-                            justifyContent="center"
-                            alignItems="center"
-                        >
-                            <input
-                                type="checkbox"
-                                checked={customText}
-                                onChange={() => {
-                                    setCustomText((prev) => !prev);
-                                    setText(null);
-                                }}
-                            />
-                            <label>Custom Text</label>
-                        </Stack>
-
-                        <input
-                            type="text"
-                            value={text ?? ""}
-                            disabled={!customText}
-                            onChange={(e) => setText(e.target.value.trim())}
-                            placeholder="Custom text"
-                            style={{
-                                padding: 10,
-                                borderRadius: 5,
-                                border: "1px solid #ccc",
-                                backgroundColor: "#f9f9f9",
+                        <Checkbox
+                            variant="outlined"
+                            checked={customText}
+                            onChange={() => {
+                                setCustomText((prev) => !prev);
+                                setText(null);
                             }}
+                            label="Custom Text"
                         />
-                        <Stack
-                            direction="row"
-                            gap={10}
-                            justifyContent="center"
-                            alignItems="center"
-                        >
+
+                        {customText && (
                             <input
-                                type="checkbox"
-                                checked={customSize}
-                                onChange={() => {
-                                    setCustomSize((prev) => !prev);
-                                    setSize("md");
+                                type="text"
+                                value={text ?? ""}
+                                disabled={!customText}
+                                onChange={(e) => setText(e.target.value.trim())}
+                                placeholder="Custom text"
+                                style={{
+                                    width: "100%",
+                                    padding: 10,
+                                    borderRadius: 5,
+                                    border: "1px solid #ccc",
+                                    backgroundColor: "#f9f9f9",
                                 }}
                             />
-                            <label>Custom Size</label>
-                        </Stack>
+                        )}
+
+                        {!customText && <Divider />}
+
+                        <Checkbox
+                            variant="outlined"
+                            checked={customSize}
+                            onChange={() => {
+                                setCustomSize((prev) => !prev);
+                                setSize("md");
+                            }}
+                            label="Custom Size"
+                        />
+
                         {customSize ? (
                             <input
                                 type="text"
@@ -210,6 +209,7 @@ function PlaygroundButton() {
                                 }
                                 placeholder="Custom size"
                                 style={{
+                                    width: "100%",
                                     padding: 10,
                                     borderRadius: 5,
                                     border: "1px solid #ccc",
@@ -223,6 +223,7 @@ function PlaygroundButton() {
                                     setSize(e.target.value.trim() as ButtonSize)
                                 }
                                 style={{
+                                    width: "100%",
                                     padding: 10,
                                     borderRadius: 5,
                                     border: "1px solid #ccc",
