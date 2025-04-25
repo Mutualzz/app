@@ -1,11 +1,11 @@
 import { baseLightTheme } from "@mutualzz/ui/themes/baseLight";
 import type { Theme } from "@mutualzz/ui/types";
-import { arcaneSunriseTheme } from "./arcaneSunrise";
-import { cemeteryDawnTheme } from "./cemeteryDawn";
-import { chromeVeilTheme } from "./chromeVeil";
-import { mistOfHopeTheme } from "./misftOfHope";
-import { oceanReverieTheme } from "./oceanReverie";
-import { phantomGraceTheme } from "./phantomGrace";
+import { arcaneSunriseTheme } from "./ArcaneSunrise";
+import { cemeteryDawnTheme } from "./CemeteryDawn";
+import { chromeVeilTheme } from "./ChromeVeil";
+import { mistOfHopeTheme } from "./MisftOfHope";
+import { oceanReverieTheme } from "./OceanReverie";
+import { phantomGraceTheme } from "./PhantomGrace";
 import { roseRequiemTheme } from "./RoseRequiem";
 import { rustRevivalTheme } from "./RustRevival";
 import { twilightElegyTheme } from "./TwilightElegy";
