@@ -7,6 +7,8 @@
         "eslint": "eslint src --fix",
         "prettier": "prettier --write ./src",
         "build": "tsc && vite build",
+        "build-ui": "cd src/ui && bun build",
+        "publish-ui": "bun build-ui && cd src/ui && bun publish",
         "preview": "vite preview",
         "tauri": "tauri"
     },

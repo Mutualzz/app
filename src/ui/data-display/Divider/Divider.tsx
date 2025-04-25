@@ -22,7 +22,7 @@ const DividerWrapper = styled.div<{
     margin: ${({ isVertical }) => (isVertical ? "0 8px" : "8px 0")};
 `;
 
-export const DividerLine = styled.span<{
+const DividerLine = styled.span<{
     isVertical: boolean;
     lineColor: string;
     variant: DividerVariant;
