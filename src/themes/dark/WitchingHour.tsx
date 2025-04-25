@@ -10,25 +10,18 @@ export const witchingHourTheme: Theme = {
     type: "dark",
     colors: {
         ...baseDarkTheme.colors,
-        common: {
-            white: "#F0E8F0",
-            black: "#121212",
-        },
-
-        primary: "#6D4B8D",
+        primary: "#4F3C7E",
         neutral: "#2A4B76",
         background: "#0A0A12",
         surface: "#151526",
-
         danger: "#AD1457",
-        warning: "#FFC045",
-        info: "#45A9F7",
+        warning: "#D4A033",
+        info: "#60C297",
         success: "#6FD36F",
-
         typography: {
             primary: "#EAE5E5",
             neutral: "#8C7C96",
-            accent: "#BA4CFF",
+            accent: "#60C297",
         },
     },
 };

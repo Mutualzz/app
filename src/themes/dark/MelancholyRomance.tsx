@@ -10,25 +10,18 @@ export const melancholyRomanceTheme: Theme = {
     type: "dark",
     colors: {
         ...baseDarkTheme.colors,
-        common: {
-            white: "#F2EAEA",
-            black: "#121212",
-        },
-
-        primary: "#87485F",
+        primary: "#93656F",
         neutral: "#73678F",
         background: "#0A0608",
         surface: "#171117",
-
-        danger: "#9C1123",
-        warning: "#FFC045",
-        info: "#45A9F7",
-        success: "#6FD36F",
-
+        danger: "#9C5050",
+        warning: "#D4A033",
+        info: "#607D8B",
+        success: "#4CAF50",
         typography: {
             primary: "#E3E3E3",
             neutral: "#A79D9C",
-            accent: "#9C5050",
+            accent: "#BA837E",
         },
     },
 };

@@ -9,25 +9,18 @@ export const fogOfDespairTheme: Theme = {
     type: "dark",
     colors: {
         ...baseDarkTheme.colors,
-        common: {
-            white: "#E6EBF0",
-            black: "#131619",
-        },
-
-        primary: "#496D89",
+        primary: "#5D7688",
         neutral: "#7D8F99",
         background: "#0B0D10",
         surface: "#171C24",
-
-        danger: "#BA4CFF",
-        warning: "#FFC045",
-        info: "#45A9F7",
+        danger: "#8F3C74",
+        warning: "#D4A033",
+        info: "#88A2B2",
         success: "#6FD36F",
-
         typography: {
             primary: "#E3E8EC",
             neutral: "#A2A9B1",
-            accent: "#BA4CFF",
+            accent: "#88A2B2",
         },
     },
 };

@@ -43,7 +43,7 @@ export const variantColors = (
     return {
         solid: {
             backgroundColor: resolvedColor,
-            color: colors.typography.primary,
+            color: colors.common.white,
             border: "none",
             "&:hover": { backgroundColor: alpha(parsedColor, 0.5) },
             "&:active": { backgroundColor: resolvedColor },

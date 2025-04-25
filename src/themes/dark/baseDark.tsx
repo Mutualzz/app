@@ -7,24 +7,21 @@ export const baseDarkTheme: Theme = {
     type: "dark",
     colors: {
         common: {
-            white: "#FFFFFF",
-            black: "#000000",
+            white: "#E8E8E8",
+            black: "#121212",
         },
-
-        primary: "#F24C7B",
+        primary: "#6B425C",
         neutral: "#5A5A5A",
         background: "#0B0B0B",
         surface: "#1A1A1A",
-
-        danger: "#FF4D4D",
-        warning: "#FFC107",
+        danger: "#A12B3D",
+        warning: "#D4A033",
         success: "#4CAF50",
-        info: "#2196F3",
-
+        info: "#5A84B1",
         typography: {
-            primary: "#DADADA",
+            primary: "#C8C8C8",
             neutral: "#9A9A9A",
-            accent: "#A4243B",
+            accent: "#A84E68",
         },
     },
     typography: {

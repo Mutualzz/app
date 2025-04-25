@@ -9,25 +9,18 @@ export const crimsonLamentTheme: Theme = {
     type: "dark",
     colors: {
         ...baseDarkTheme.colors,
-        common: {
-            white: "#F0E8E8",
-            black: "#121212",
-        },
-
-        primary: "#8E2C3B",
+        primary: "#7E1C24",
         neutral: "#5A3D4E",
         background: "#090606",
         surface: "#1A0E10",
-
-        danger: "#B52B3F",
-        warning: "#FFC045",
-        info: "#45A9F7",
-        success: "#6FD36F",
-
+        danger: "#A12B3D",
+        warning: "#D4A033",
+        info: "#4682B4",
+        success: "#4CAF50",
         typography: {
             primary: "#E0D2D2",
             neutral: "#8B7B7B",
-            accent: "#C85668",
+            accent: "#B72C3F",
         },
     },
 };
