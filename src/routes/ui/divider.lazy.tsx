@@ -16,7 +16,7 @@ export const Route = createLazyFileRoute("/ui/divider")({
     component: PlaygroundDivider,
 });
 
-const variants = ["solid", "dashed"] as DividerVariant[];
+const variants = ["solid", "dashed", "dotted"] as DividerVariant[];
 const lineColors = [
     "primary",
     "neutral",
@@ -28,7 +28,7 @@ const lineColors = [
 
 const textColors = ["primary", "neutral", "accent"] as DividerTextColor[];
 
-const insets = ["none", "context", "start", "end"] as DividerInset[];
+const insets = ["none", "start", "end"] as DividerInset[];
 
 function PlaygroundDivider() {
     const [variant, setVariant] = useState<DividerVariant>("solid");

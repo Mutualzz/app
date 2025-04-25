@@ -2,7 +2,7 @@ import type { ColorLike } from "@types";
 import type { HTMLAttributes, ReactNode } from "react";
 
 export type DividerOrientation = "horizontal" | "vertical";
-export type DividerInset = "none" | "start" | "end" | "context";
+export type DividerInset = "none" | "start" | "end";
 
 export type DividerLineColor =
     | "primary"
@@ -15,7 +15,7 @@ export type DividerLineColor =
 
 export type DividerTextColor = "primary" | "neutral" | "accent" | ColorLike;
 
-export type DividerVariant = "solid" | "dashed";
+export type DividerVariant = "solid" | "dashed" | "dotted";
 
 export interface DividerProps extends HTMLAttributes<HTMLHRElement> {
     orientation?: DividerOrientation;
