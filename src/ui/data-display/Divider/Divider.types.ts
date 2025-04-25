@@ -15,7 +15,7 @@ export type DividerLineColor =
 
 export type DividerTextColor = "primary" | "neutral" | "accent" | ColorLike;
 
-export type DividerVariant = "solid" | "dashed" | "dotted";
+export type DividerVariant = "solid" | "dashed" | "dotted" | "double";
 
 export interface DividerProps extends HTMLAttributes<HTMLHRElement> {
     orientation?: DividerOrientation;

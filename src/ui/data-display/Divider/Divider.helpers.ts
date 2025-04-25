@@ -48,6 +48,10 @@ export const resolveDividerVariant = (
             return isVertical
                 ? `width: 1px; background-image: repeating-linear-gradient(to bottom,${lineColor},${lineColor} 1px,transparent 1px,transparent 4px);`
                 : `height: 1px; background-image: repeating-linear-gradient(to right,${lineColor},${lineColor} 1px,transparent 1px,transparent 4px);`;
+        case "double":
+            return isVertical
+                ? `width: 1px; border-left: 3px double ${lineColor}; background: none; box-sizing: content-box;`
+                : `height: 0; border-top: 3px double ${lineColor}; background: none; box-sizing: content-box;`;
         case "solid":
         default:
             return isVertical
