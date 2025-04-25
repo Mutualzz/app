@@ -3,16 +3,20 @@ import { useTheme } from "@mutualzz/ui/hooks/useTheme";
 import { Button } from "@mutualzz/ui/inputs/Button/Button";
 import { Stack } from "@mutualzz/ui/layout/Stack/Stack";
 import { Paper } from "@mutualzz/ui/surfaces/Paper/Paper";
-import type { Themes } from "@mutualzz/ui/types";
+import type { ThemeMode } from "@mutualzz/ui/types";
+
+import { themes as allThemes } from "@themes/index";
+
 import { sortThemes } from "@mutualzz/ui/utils/sortThemes";
 import { useNavigate } from "@tanstack/react-router";
-import { themes } from "@themes/index";
 import capitalize from "lodash/capitalize";
 
 export const PlaygrondLeftSidebar = () => {
-    const { changeTheme } = useTheme();
+    const { mode, changeMode, changeTheme } = useTheme();
 
     const navigate = useNavigate();
+
+    const themes = allThemes.filter((theme) => theme.type === mode);
 
     const inputComponents = [
         {
@@ -52,36 +56,65 @@ export const PlaygrondLeftSidebar = () => {
                 padding: 20,
             }}
         >
-            <Stack direction="column" gap={10}>
-                <Stack
-                    justifyContent="center"
-                    alignItems="center"
-                    direction="column"
-                    gap={10}
-                >
-                    <h3>Theme</h3>
-                    <select
-                        onChange={(e) => {
-                            changeTheme(e.target.value as Themes);
-                        }}
-                        defaultValue="baseDark"
-                        style={{
-                            padding: 10,
-                            borderRadius: 5,
-                            border: "1px solid #ccc",
-                            backgroundColor: "#f9f9f9",
-                        }}
+            <Stack direction="column" gap={20}>
+                <Stack direction="column" gap={10}>
+                    <Stack
+                        justifyContent="center"
+                        alignItems="center"
+                        direction="column"
+                        gap={10}
                     >
-                        {sortThemes(themes).map((theme) => (
-                            <option key={theme.id} value={theme.id}>
-                                {theme.name}
-                                {theme.id !== "baseDark" &&
-                                theme.id !== "baseLight"
-                                    ? ` (${capitalize(theme.type)})`
-                                    : ""}
-                            </option>
-                        ))}
-                    </select>
+                        <Divider>Color Mode</Divider>
+                        <select
+                            onChange={(e) => {
+                                changeMode(e.target.value as ThemeMode);
+                            }}
+                            defaultValue="system"
+                            style={{
+                                width: "100%",
+                                padding: 10,
+                                borderRadius: 5,
+                                border: "1px solid #ccc",
+                                backgroundColor: "#f9f9f9",
+                            }}
+                        >
+                            <option value="dark">Dark</option>
+                            <option value="light">Light</option>
+                            <option value="system">System</option>
+                        </select>
+                    </Stack>
+                    {themes.length > 1 && (
+                        <Stack
+                            justifyContent="center"
+                            alignItems="center"
+                            direction="column"
+                            gap={10}
+                        >
+                            <Divider>Color Scheme</Divider>
+                            <select
+                                onChange={(e) => {
+                                    changeTheme(e.target.value);
+                                }}
+                                defaultValue="baseDark"
+                                style={{
+                                    padding: 10,
+                                    borderRadius: 5,
+                                    border: "1px solid #ccc",
+                                    backgroundColor: "#f9f9f9",
+                                }}
+                            >
+                                {sortThemes(themes).map((theme) => (
+                                    <option key={theme.id} value={theme.id}>
+                                        {theme.name}
+                                        {theme.id !== "baseDark" &&
+                                        theme.id !== "baseLight"
+                                            ? ` (${capitalize(theme.type)})`
+                                            : ""}
+                                    </option>
+                                ))}
+                            </select>
+                        </Stack>
+                    )}
                 </Stack>
                 <Divider>Input</Divider>
                 <Stack direction="column" gap={10}>
