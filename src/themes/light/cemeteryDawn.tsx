@@ -1,5 +1,5 @@
-import { baseLightTheme } from "@mutualzz/ui/themes/baseLight";
-import type { Theme } from "@mutualzz/ui/types";
+import { baseLightTheme } from "@ui/themes/baseLight";
+import type { Theme } from "@ui/types";
 
 export const cemeteryDawnTheme: Theme = {
     ...baseLightTheme,

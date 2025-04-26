@@ -1,14 +1,14 @@
-import { Divider } from "@mutualzz/ui/data-display/Divider/Divider";
-import { useTheme } from "@mutualzz/ui/hooks/useTheme";
-import { Button } from "@mutualzz/ui/inputs/Button/Button";
-import { Stack } from "@mutualzz/ui/layout/Stack/Stack";
-import { Paper } from "@mutualzz/ui/surfaces/Paper/Paper";
-import type { ThemeMode } from "@mutualzz/ui/types";
+import { Divider } from "@ui/data-display/Divider/Divider";
+import { useTheme } from "@ui/hooks/useTheme";
+import { Button } from "@ui/inputs/Button/Button";
+import { Stack } from "@ui/layout/Stack/Stack";
+import { Paper } from "@ui/surfaces/Paper/Paper";
+import type { ThemeMode } from "@ui/types";
 
 import { themes as allThemes } from "@themes/index";
 
-import { sortThemes } from "@mutualzz/ui/utils/sortThemes";
 import { useNavigate } from "@tanstack/react-router";
+import { sortThemes } from "@ui/utils/sortThemes";
 
 export const PlaygrondLeftSidebar = () => {
     const { mode, changeMode, changeTheme } = useTheme();
@@ -55,13 +55,13 @@ export const PlaygrondLeftSidebar = () => {
                 padding: 20,
             }}
         >
-            <Stack direction="column" gap={20}>
-                <Stack direction="column" gap={10}>
+            <Stack direction="column" spacing={20}>
+                <Stack direction="column" spacing={10}>
                     <Stack
                         justifyContent="center"
                         alignItems="center"
                         direction="column"
-                        gap={10}
+                        spacing={10}
                     >
                         <Divider>Color Mode</Divider>
                         <select
@@ -87,7 +87,7 @@ export const PlaygrondLeftSidebar = () => {
                             justifyContent="center"
                             alignItems="center"
                             direction="column"
-                            gap={10}
+                            spacing={10}
                         >
                             <Divider>Color Scheme</Divider>
                             <select
@@ -112,7 +112,7 @@ export const PlaygrondLeftSidebar = () => {
                     )}
                 </Stack>
                 <Divider>Input</Divider>
-                <Stack direction="column" gap={10}>
+                <Stack direction="column" spacing={10}>
                     {inputComponents.map((button, i) => (
                         <Button
                             key={i}
@@ -130,7 +130,7 @@ export const PlaygrondLeftSidebar = () => {
                     ))}
                 </Stack>
                 <Divider>Feedback</Divider>
-                <Stack direction="column" gap={10}>
+                <Stack direction="column" spacing={10}>
                     {feedbackComponents.map((button, i) => (
                         <Button
                             key={i}
@@ -148,7 +148,7 @@ export const PlaygrondLeftSidebar = () => {
                     ))}
                 </Stack>
                 <Divider>Data Display</Divider>
-                <Stack direction="column" gap={10}>
+                <Stack direction="column" spacing={10}>
                     {dataDisplayComponents.map((button, i) => (
                         <Button
                             key={i}

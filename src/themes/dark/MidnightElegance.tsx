@@ -1,6 +1,6 @@
-import type { Theme } from "@mutualzz/ui/types";
+import type { Theme } from "@ui/types";
 
-import { baseDarkTheme } from "@mutualzz/ui/themes/baseDark";
+import { baseDarkTheme } from "@ui/themes/baseDark";
 
 export const midghtEleganceTheme: Theme = {
     ...baseDarkTheme,

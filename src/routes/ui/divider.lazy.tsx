@@ -1,15 +1,15 @@
-import { Divider } from "@mutualzz/ui/data-display/Divider/Divider";
+import { createLazyFileRoute } from "@tanstack/react-router";
+import { Divider } from "@ui/data-display/Divider/Divider";
 import type {
     DividerInset,
     DividerLineColor,
     DividerTextColor,
     DividerVariant,
-} from "@mutualzz/ui/data-display/Divider/Divider.types";
-import { useColorInput } from "@mutualzz/ui/hooks/useColorInput";
-import { Checkbox } from "@mutualzz/ui/inputs/Checkbox/Checkbox";
-import { Stack } from "@mutualzz/ui/layout/Stack/Stack";
-import { Paper } from "@mutualzz/ui/surfaces/Paper/Paper";
-import { createLazyFileRoute } from "@tanstack/react-router";
+} from "@ui/data-display/Divider/Divider.types";
+import { useColorInput } from "@ui/hooks/useColorInput";
+import { Checkbox } from "@ui/inputs/Checkbox/Checkbox";
+import { Stack } from "@ui/layout/Stack/Stack";
+import { Paper } from "@ui/surfaces/Paper/Paper";
 import capitalize from "lodash/capitalize";
 import { useState } from "react";
 
@@ -62,29 +62,29 @@ function PlaygroundDivider() {
 
     return (
         <Stack
-            paddingTop={40}
+            pt={40}
             width="100%"
-            gap={20}
+            spacing={20}
             direction="row"
             justifyContent="center"
         >
             <Paper
-                padding={20}
-                gap="3rem"
+                p={20}
+                spacing="3rem"
                 justifyContent="center"
                 alignItems="center"
                 direction="column"
             >
-                <Stack direction="row" gap={20}>
+                <Stack direction="row" spacing={20}>
                     <Paper
                         direction="column"
                         alignItems="center"
-                        gap={10}
-                        padding={20}
+                        spacing={10}
+                        p={20}
                         elevation={2}
                     >
                         <label>Vertical Divider</label>
-                        <Stack direction="row" gap={10}>
+                        <Stack direction="row" spacing={10}>
                             <Paper
                                 elevation={3}
                                 style={{
@@ -119,12 +119,12 @@ function PlaygroundDivider() {
                     <Paper
                         direction="column"
                         alignItems="center"
-                        gap={10}
-                        padding={20}
+                        spacing={10}
+                        p={20}
                         elevation={2}
                     >
                         <label>Vertical Divider with Text</label>
-                        <Stack direction="row" gap={10}>
+                        <Stack direction="row" spacing={10}>
                             <Paper
                                 elevation={3}
                                 style={{
@@ -159,16 +159,16 @@ function PlaygroundDivider() {
                         </Stack>
                     </Paper>
                 </Stack>
-                <Stack direction="row" gap={20} alignItems="baseline">
+                <Stack direction="row" spacing={20} alignItems="baseline">
                     <Paper
                         direction="column"
                         alignItems="center"
-                        gap={10}
-                        padding={20}
+                        spacing={10}
+                        p={20}
                         elevation={2}
                     >
                         <label>Horizontal Divider</label>
-                        <Stack direction="column" gap={10}>
+                        <Stack direction="column" spacing={10}>
                             <Paper
                                 elevation={3}
                                 style={{
@@ -203,12 +203,12 @@ function PlaygroundDivider() {
                     <Paper
                         direction="column"
                         alignItems="center"
-                        gap={10}
-                        padding={20}
+                        spacing={10}
+                        p={20}
                         elevation={2}
                     >
                         <label>Horizontal Divider with Text</label>
-                        <Stack direction="column" gap={10}>
+                        <Stack direction="column" spacing={10}>
                             <Paper
                                 elevation={3}
                                 style={{
@@ -244,13 +244,13 @@ function PlaygroundDivider() {
                     </Paper>
                 </Stack>
             </Paper>
-            <Paper direction="column" padding={20} gap={5}>
+            <Paper direction="column" p={20} spacing={5}>
                 <h2 css={{ textAlign: "center" }}>Customization</h2>
-                <Stack gap={5} justifyContent="center" direction="column">
+                <Stack spacing={5} justifyContent="center" direction="column">
                     <Stack
                         justifyContent="center"
                         alignItems="stretch"
-                        gap={5}
+                        spacing={5}
                         direction="column"
                     >
                         <Divider>Text</Divider>
@@ -269,7 +269,7 @@ function PlaygroundDivider() {
                     <Stack
                         justifyContent="center"
                         alignItems="stretch"
-                        gap={5}
+                        spacing={5}
                         direction="column"
                     >
                         <Divider>Inset</Divider>
@@ -296,7 +296,7 @@ function PlaygroundDivider() {
                     <Stack
                         justifyContent="center"
                         alignItems="stretch"
-                        gap={5}
+                        spacing={5}
                         direction="column"
                     >
                         <Divider>Variant</Divider>
@@ -323,7 +323,7 @@ function PlaygroundDivider() {
                     <Stack
                         justifyContent="center"
                         alignItems="stretch"
-                        gap={5}
+                        spacing={5}
                         direction="column"
                     >
                         <Divider>Line Color</Divider>
@@ -383,7 +383,7 @@ function PlaygroundDivider() {
                     <Stack
                         justifyContent="center"
                         alignItems="stretch"
-                        gap={5}
+                        spacing={5}
                         direction="column"
                     >
                         <Divider>Text Color</Divider>

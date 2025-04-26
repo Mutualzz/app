@@ -1,20 +1,20 @@
-import { Divider } from "@mutualzz/ui/data-display/Divider/Divider";
-import { LinearProgress } from "@mutualzz/ui/feedback/LinearProgress/LinearProgress";
+import { createLazyFileRoute } from "@tanstack/react-router";
+import { Divider } from "@ui/data-display/Divider/Divider";
+import { LinearProgress } from "@ui/feedback/LinearProgress/LinearProgress";
 import type {
     LinearProgressAnimation,
     LinearProgressColor,
     LinearProgressLength,
     LinearProgressThickness,
     LinearProgressVariant,
-} from "@mutualzz/ui/feedback/LinearProgress/LinearProgress.types";
-import { useColorInput } from "@mutualzz/ui/hooks/useColorInput";
-import { Button } from "@mutualzz/ui/inputs/Button/Button";
-import { Checkbox } from "@mutualzz/ui/inputs/Checkbox/Checkbox";
-import { Stack } from "@mutualzz/ui/layout/Stack/Stack";
-import { Paper } from "@mutualzz/ui/surfaces/Paper/Paper";
-import type { ColorLike } from "@mutualzz/ui/types";
-import { randomHexColor } from "@mutualzz/ui/utils/randomHexColor";
-import { createLazyFileRoute } from "@tanstack/react-router";
+} from "@ui/feedback/LinearProgress/LinearProgress.types";
+import { useColorInput } from "@ui/hooks/useColorInput";
+import { Button } from "@ui/inputs/Button/Button";
+import { Checkbox } from "@ui/inputs/Checkbox/Checkbox";
+import { Stack } from "@ui/layout/Stack/Stack";
+import { Paper } from "@ui/surfaces/Paper/Paper";
+import type { ColorLike } from "@ui/types";
+import { randomHexColor } from "@ui/utils/randomHexColor";
 
 import capitalize from "lodash/capitalize";
 import chunk from "lodash/chunk";
@@ -79,7 +79,7 @@ function PlaygroundLinearProgress() {
             progresses.push(
                 <Stack
                     direction="column"
-                    gap={10}
+                    spacing={10}
                     key={`${variant}-${color}-stack`}
                 >
                     <label>{`${capitalize(variant)} ${capitalize(color)}`}</label>
@@ -99,24 +99,24 @@ function PlaygroundLinearProgress() {
     }
 
     progresses = chunk(progresses, variants.length).map((row, index) => (
-        <Stack key={index} padding={20} gap={50}>
+        <Stack key={index} p={20} spacing={50}>
             {row}
         </Stack>
     ));
 
     return (
         <Stack
-            paddingTop={40}
+            pt={40}
             width="100%"
-            gap={20}
+            spacing={20}
             direction="row"
             justifyContent="center"
         >
-            <Paper direction="column" alignItems="center" padding={20} gap={5}>
+            <Paper direction="column" alignItems="center" p={20} spacing={5}>
                 <Stack direction="column">{progresses}</Stack>
             </Paper>
 
-            <Paper direction="column" padding={20} gap={10}>
+            <Paper direction="column" p={20} spacing={10}>
                 <h2
                     css={{
                         textAlign: "center",
@@ -124,7 +124,7 @@ function PlaygroundLinearProgress() {
                 >
                     Customization
                 </h2>
-                <Stack justifyContent="center" direction="column" gap={10}>
+                <Stack justifyContent="center" direction="column" spacing={10}>
                     <Divider>States</Divider>
                     <Button
                         color={determinate ? "success" : "danger"}
@@ -137,7 +137,7 @@ function PlaygroundLinearProgress() {
                         direction="row"
                         justifyContent="center"
                         alignItems="center"
-                        gap={5}
+                        spacing={5}
                     >
                         <input
                             type="range"
@@ -150,7 +150,7 @@ function PlaygroundLinearProgress() {
                         <label>{value}%</label>
                     </Stack>
                 </Stack>
-                <Stack justifyContent="center" direction="column" gap={5}>
+                <Stack justifyContent="center" direction="column" spacing={5}>
                     <Divider>Animation</Divider>
                     <select
                         value={animation}
@@ -175,7 +175,7 @@ function PlaygroundLinearProgress() {
                 </Stack>
                 <Divider />
                 <Stack
-                    gap={5}
+                    spacing={5}
                     justifyContent="center"
                     alignItems="center"
                     direction="column"
@@ -232,7 +232,7 @@ function PlaygroundLinearProgress() {
                 </Stack>
                 <Divider />
                 <Stack
-                    gap={5}
+                    spacing={5}
                     justifyContent="center"
                     alignItems="center"
                     direction="column"
@@ -288,13 +288,13 @@ function PlaygroundLinearProgress() {
                     )}
                 </Stack>
 
-                <Stack justifyContent="center" direction="column" gap={5}>
+                <Stack justifyContent="center" direction="column" spacing={5}>
                     <Divider>Custom Colors</Divider>
                     <Stack
                         justifyContent="center"
                         alignItems="center"
                         direction="row"
-                        gap={10}
+                        spacing={10}
                     >
                         <input
                             type="text"
@@ -328,7 +328,7 @@ function PlaygroundLinearProgress() {
                         </Button>
                     </Stack>
                     {customColors.length > 0 && (
-                        <Stack alignItems="center" direction="row" gap={10}>
+                        <Stack alignItems="center" direction="row" spacing={10}>
                             <select
                                 value={colorToDelete ?? ""}
                                 onChange={(e) => {

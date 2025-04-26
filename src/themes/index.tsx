@@ -1,4 +1,4 @@
-import type { Theme } from "@mutualzz/ui/types";
+import type { Theme } from "@ui/types";
 import { darkThemesObj } from "./dark";
 import { lightThemesObj } from "./light";
 

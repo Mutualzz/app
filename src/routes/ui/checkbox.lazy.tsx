@@ -1,17 +1,17 @@
-import { Divider } from "@mutualzz/ui/data-display/Divider/Divider";
-import { useColorInput } from "@mutualzz/ui/hooks/useColorInput";
-import { Button } from "@mutualzz/ui/inputs/Button/Button";
-import { Checkbox } from "@mutualzz/ui/inputs/Checkbox/Checkbox";
+import { createLazyFileRoute } from "@tanstack/react-router";
+import { Divider } from "@ui/data-display/Divider/Divider";
+import { useColorInput } from "@ui/hooks/useColorInput";
+import { Button } from "@ui/inputs/Button/Button";
+import { Checkbox } from "@ui/inputs/Checkbox/Checkbox";
 import type {
     CheckboxColor,
     CheckboxSize,
     CheckboxVariant,
-} from "@mutualzz/ui/inputs/Checkbox/Checkbox.types";
-import { Stack } from "@mutualzz/ui/layout/Stack/Stack";
-import { Paper } from "@mutualzz/ui/surfaces/Paper/Paper";
-import type { ColorLike } from "@mutualzz/ui/types";
-import { randomHexColor } from "@mutualzz/ui/utils/randomHexColor";
-import { createLazyFileRoute } from "@tanstack/react-router";
+} from "@ui/inputs/Checkbox/Checkbox.types";
+import { Stack } from "@ui/layout/Stack/Stack";
+import { Paper } from "@ui/surfaces/Paper/Paper";
+import type { ColorLike } from "@ui/types";
+import { randomHexColor } from "@ui/utils/randomHexColor";
 
 import capitalize from "lodash/capitalize";
 import chunk from "lodash/chunk";
@@ -145,23 +145,23 @@ function PlaygroundCheckbox() {
     }
 
     checkboxes = chunk(checkboxes, variants.length).map((row, index) => (
-        <Stack key={index} padding={20} gap={10}>
+        <Stack key={index} p={20} spacing={10}>
             {row}
         </Stack>
     ));
 
     return (
         <Stack
-            paddingTop={40}
+            pt={40}
             width="100%"
-            gap={20}
+            spacing={20}
             direction="row"
             justifyContent="center"
         >
-            <Paper direction="column" alignItems="center" padding={20} gap={5}>
+            <Paper direction="column" alignItems="center" p={20} spacing={5}>
                 <Stack direction="column">{checkboxes}</Stack>
             </Paper>
-            <Paper direction="column" padding={20} gap={5}>
+            <Paper direction="column" p={20} spacing={5}>
                 <h2
                     css={{
                         textAlign: "center",
@@ -169,7 +169,7 @@ function PlaygroundCheckbox() {
                 >
                     Customization
                 </h2>
-                <Stack justifyContent="center" direction="column" gap={10}>
+                <Stack justifyContent="center" direction="column" spacing={10}>
                     <Divider>States</Divider>
                     <Button
                         onClick={() =>
@@ -200,7 +200,7 @@ function PlaygroundCheckbox() {
                         Turn {disabled ? "Off" : "On"} Disabled
                     </Button>
                     <Stack
-                        gap={5}
+                        spacing={5}
                         justifyContent="center"
                         alignItems="center"
                         direction="column"
@@ -286,9 +286,13 @@ function PlaygroundCheckbox() {
                             </select>
                         )}
                     </Stack>
-                    <Stack justifyContent="center" direction="column" gap={5}>
+                    <Stack
+                        justifyContent="center"
+                        direction="column"
+                        spacing={5}
+                    >
                         <Divider>Custom Colors</Divider>
-                        <Stack alignItems="center" gap={10}>
+                        <Stack alignItems="center" spacing={10}>
                             <input
                                 type="text"
                                 value={inputColor}
@@ -324,7 +328,11 @@ function PlaygroundCheckbox() {
                             </Button>
                         </Stack>
                         {customColors.length > 0 && (
-                            <Stack alignItems="center" direction="row" gap={10}>
+                            <Stack
+                                alignItems="center"
+                                direction="row"
+                                spacing={10}
+                            >
                                 <select
                                     value={colorToDelete ?? ""}
                                     onChange={(e) => {
@@ -372,7 +380,11 @@ function PlaygroundCheckbox() {
                     </Stack>
                     <Divider>Checked Icon</Divider>
 
-                    <Stack justifyContent="center" direction="column" gap={5}>
+                    <Stack
+                        justifyContent="center"
+                        direction="column"
+                        spacing={5}
+                    >
                         <label>Choose Icon Library:</label>
                         <select
                             value={checkedLibrary ?? ""}
@@ -426,7 +438,11 @@ function PlaygroundCheckbox() {
                     </Stack>
                     <Divider>Unchecked Icon</Divider>
 
-                    <Stack justifyContent="center" direction="column" gap={5}>
+                    <Stack
+                        justifyContent="center"
+                        direction="column"
+                        spacing={5}
+                    >
                         <label>Choose Icon Library:</label>
                         <select
                             value={uncheckedLibrary ?? ""}
@@ -480,7 +496,11 @@ function PlaygroundCheckbox() {
                     </Stack>
                     <Divider>Indeterminate Icon</Divider>
 
-                    <Stack justifyContent="center" direction="column" gap={5}>
+                    <Stack
+                        justifyContent="center"
+                        direction="column"
+                        spacing={5}
+                    >
                         <label>Choose Icon Library:</label>
                         <select
                             value={indeterminateLibrary ?? ""}

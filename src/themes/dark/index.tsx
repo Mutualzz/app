@@ -1,5 +1,5 @@
-import { baseDarkTheme } from "@mutualzz/ui/themes/baseDark";
-import type { Theme } from "@mutualzz/ui/types";
+import { baseDarkTheme } from "@ui/themes/baseDark";
+import type { Theme } from "@ui/types";
 import { crimsonLamentTheme } from "./CrimsonLament";
 import { eternalMourningTheme } from "./EternalMourning";
 import { fogOfDespairTheme } from "./FogOfDespair";

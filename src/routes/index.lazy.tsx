@@ -4,8 +4,8 @@ import {
     useNavigate,
 } from "@tanstack/react-router";
 
-import { Button } from "@mutualzz/ui/inputs/Button/Button";
-import { Stack } from "@mutualzz/ui/layout/Stack/Stack";
+import { Button } from "@ui/inputs/Button/Button";
+import { Stack } from "@ui/layout/Stack/Stack";
 
 export const Route = createLazyFileRoute("/")({
     component: Index,
@@ -19,12 +19,12 @@ function Index() {
             direction="column"
             justifyContent="center"
             alignItems="center"
-            gap={10}
+            spacing={10}
             height="100%"
         >
             <h1>Website is currently under development</h1>
             <h2>The UI is being made</h2>
-            <Stack direction="row" alignItems="center" gap={5}>
+            <Stack direction="row" alignItems="center" spacing={5}>
                 <h2>Meanwhile you can,</h2>&nbsp;
                 <Button
                     onClick={() => {
