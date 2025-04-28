@@ -3,7 +3,7 @@ import type { Theme } from "@ui/types";
 import { arcaneSunriseTheme } from "./ArcaneSunrise";
 import { cemeteryDawnTheme } from "./CemeteryDawn";
 import { chromeVeilTheme } from "./ChromeVeil";
-import { mistOfHopeTheme } from "./MisftOfHope";
+import { mistOfHopeTheme } from "./MistOfHope";
 import { oceanReverieTheme } from "./OceanReverie";
 import { phantomGraceTheme } from "./PhantomGrace";
 import { roseRequiemTheme } from "./RoseRequiem";
