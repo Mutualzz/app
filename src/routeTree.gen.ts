@@ -8,242 +8,264 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router"
 
 // Import Routes
 
-import { Route as rootRoute } from "./routes/__root";
+import { Route as rootRoute } from "./routes/__root"
 
 // Create Virtual Routes
 
-const UiLazyImport = createFileRoute("/ui")();
-const IndexLazyImport = createFileRoute("/")();
-const UiIndexLazyImport = createFileRoute("/ui/")();
-const UiLinearProgressLazyImport = createFileRoute("/ui/linear-progress")();
-const UiDividerLazyImport = createFileRoute("/ui/divider")();
-const UiCircularProgressLazyImport = createFileRoute("/ui/circular-progress")();
-const UiCheckboxLazyImport = createFileRoute("/ui/checkbox")();
-const UiButtonLazyImport = createFileRoute("/ui/button")();
+const UiLazyImport = createFileRoute("/ui")()
+const IndexLazyImport = createFileRoute("/")()
+const UiIndexLazyImport = createFileRoute("/ui/")()
+const UiPaperLazyImport = createFileRoute("/ui/paper")()
+const UiLinearProgressLazyImport = createFileRoute("/ui/linear-progress")()
+const UiDividerLazyImport = createFileRoute("/ui/divider")()
+const UiCircularProgressLazyImport = createFileRoute("/ui/circular-progress")()
+const UiCheckboxLazyImport = createFileRoute("/ui/checkbox")()
+const UiButtonLazyImport = createFileRoute("/ui/button")()
 
 // Create/Update Routes
 
 const UiLazyRoute = UiLazyImport.update({
-    id: "/ui",
-    path: "/ui",
-    getParentRoute: () => rootRoute,
-} as any).lazy(() => import("./routes/ui.lazy").then((d) => d.Route));
+  id: "/ui",
+  path: "/ui",
+  getParentRoute: () => rootRoute,
+} as any).lazy(() => import("./routes/ui.lazy").then((d) => d.Route))
 
 const IndexLazyRoute = IndexLazyImport.update({
-    id: "/",
-    path: "/",
-    getParentRoute: () => rootRoute,
-} as any).lazy(() => import("./routes/index.lazy").then((d) => d.Route));
+  id: "/",
+  path: "/",
+  getParentRoute: () => rootRoute,
+} as any).lazy(() => import("./routes/index.lazy").then((d) => d.Route))
 
 const UiIndexLazyRoute = UiIndexLazyImport.update({
-    id: "/",
-    path: "/",
-    getParentRoute: () => UiLazyRoute,
-} as any).lazy(() => import("./routes/ui/index.lazy").then((d) => d.Route));
+  id: "/",
+  path: "/",
+  getParentRoute: () => UiLazyRoute,
+} as any).lazy(() => import("./routes/ui/index.lazy").then((d) => d.Route))
+
+const UiPaperLazyRoute = UiPaperLazyImport.update({
+  id: "/paper",
+  path: "/paper",
+  getParentRoute: () => UiLazyRoute,
+} as any).lazy(() => import("./routes/ui/paper.lazy").then((d) => d.Route))
 
 const UiLinearProgressLazyRoute = UiLinearProgressLazyImport.update({
-    id: "/linear-progress",
-    path: "/linear-progress",
-    getParentRoute: () => UiLazyRoute,
+  id: "/linear-progress",
+  path: "/linear-progress",
+  getParentRoute: () => UiLazyRoute,
 } as any).lazy(() =>
-    import("./routes/ui/linear-progress.lazy").then((d) => d.Route),
-);
+  import("./routes/ui/linear-progress.lazy").then((d) => d.Route),
+)
 
 const UiDividerLazyRoute = UiDividerLazyImport.update({
-    id: "/divider",
-    path: "/divider",
-    getParentRoute: () => UiLazyRoute,
-} as any).lazy(() => import("./routes/ui/divider.lazy").then((d) => d.Route));
+  id: "/divider",
+  path: "/divider",
+  getParentRoute: () => UiLazyRoute,
+} as any).lazy(() => import("./routes/ui/divider.lazy").then((d) => d.Route))
 
 const UiCircularProgressLazyRoute = UiCircularProgressLazyImport.update({
-    id: "/circular-progress",
-    path: "/circular-progress",
-    getParentRoute: () => UiLazyRoute,
+  id: "/circular-progress",
+  path: "/circular-progress",
+  getParentRoute: () => UiLazyRoute,
 } as any).lazy(() =>
-    import("./routes/ui/circular-progress.lazy").then((d) => d.Route),
-);
+  import("./routes/ui/circular-progress.lazy").then((d) => d.Route),
+)
 
 const UiCheckboxLazyRoute = UiCheckboxLazyImport.update({
-    id: "/checkbox",
-    path: "/checkbox",
-    getParentRoute: () => UiLazyRoute,
-} as any).lazy(() => import("./routes/ui/checkbox.lazy").then((d) => d.Route));
+  id: "/checkbox",
+  path: "/checkbox",
+  getParentRoute: () => UiLazyRoute,
+} as any).lazy(() => import("./routes/ui/checkbox.lazy").then((d) => d.Route))
 
 const UiButtonLazyRoute = UiButtonLazyImport.update({
-    id: "/button",
-    path: "/button",
-    getParentRoute: () => UiLazyRoute,
-} as any).lazy(() => import("./routes/ui/button.lazy").then((d) => d.Route));
+  id: "/button",
+  path: "/button",
+  getParentRoute: () => UiLazyRoute,
+} as any).lazy(() => import("./routes/ui/button.lazy").then((d) => d.Route))
 
 // Populate the FileRoutesByPath interface
 
 declare module "@tanstack/react-router" {
-    interface FileRoutesByPath {
-        "/": {
-            id: "/";
-            path: "/";
-            fullPath: "/";
-            preLoaderRoute: typeof IndexLazyImport;
-            parentRoute: typeof rootRoute;
-        };
-        "/ui": {
-            id: "/ui";
-            path: "/ui";
-            fullPath: "/ui";
-            preLoaderRoute: typeof UiLazyImport;
-            parentRoute: typeof rootRoute;
-        };
-        "/ui/button": {
-            id: "/ui/button";
-            path: "/button";
-            fullPath: "/ui/button";
-            preLoaderRoute: typeof UiButtonLazyImport;
-            parentRoute: typeof UiLazyImport;
-        };
-        "/ui/checkbox": {
-            id: "/ui/checkbox";
-            path: "/checkbox";
-            fullPath: "/ui/checkbox";
-            preLoaderRoute: typeof UiCheckboxLazyImport;
-            parentRoute: typeof UiLazyImport;
-        };
-        "/ui/circular-progress": {
-            id: "/ui/circular-progress";
-            path: "/circular-progress";
-            fullPath: "/ui/circular-progress";
-            preLoaderRoute: typeof UiCircularProgressLazyImport;
-            parentRoute: typeof UiLazyImport;
-        };
-        "/ui/divider": {
-            id: "/ui/divider";
-            path: "/divider";
-            fullPath: "/ui/divider";
-            preLoaderRoute: typeof UiDividerLazyImport;
-            parentRoute: typeof UiLazyImport;
-        };
-        "/ui/linear-progress": {
-            id: "/ui/linear-progress";
-            path: "/linear-progress";
-            fullPath: "/ui/linear-progress";
-            preLoaderRoute: typeof UiLinearProgressLazyImport;
-            parentRoute: typeof UiLazyImport;
-        };
-        "/ui/": {
-            id: "/ui/";
-            path: "/";
-            fullPath: "/ui/";
-            preLoaderRoute: typeof UiIndexLazyImport;
-            parentRoute: typeof UiLazyImport;
-        };
+  interface FileRoutesByPath {
+    "/": {
+      id: "/"
+      path: "/"
+      fullPath: "/"
+      preLoaderRoute: typeof IndexLazyImport
+      parentRoute: typeof rootRoute
     }
+    "/ui": {
+      id: "/ui"
+      path: "/ui"
+      fullPath: "/ui"
+      preLoaderRoute: typeof UiLazyImport
+      parentRoute: typeof rootRoute
+    }
+    "/ui/button": {
+      id: "/ui/button"
+      path: "/button"
+      fullPath: "/ui/button"
+      preLoaderRoute: typeof UiButtonLazyImport
+      parentRoute: typeof UiLazyImport
+    }
+    "/ui/checkbox": {
+      id: "/ui/checkbox"
+      path: "/checkbox"
+      fullPath: "/ui/checkbox"
+      preLoaderRoute: typeof UiCheckboxLazyImport
+      parentRoute: typeof UiLazyImport
+    }
+    "/ui/circular-progress": {
+      id: "/ui/circular-progress"
+      path: "/circular-progress"
+      fullPath: "/ui/circular-progress"
+      preLoaderRoute: typeof UiCircularProgressLazyImport
+      parentRoute: typeof UiLazyImport
+    }
+    "/ui/divider": {
+      id: "/ui/divider"
+      path: "/divider"
+      fullPath: "/ui/divider"
+      preLoaderRoute: typeof UiDividerLazyImport
+      parentRoute: typeof UiLazyImport
+    }
+    "/ui/linear-progress": {
+      id: "/ui/linear-progress"
+      path: "/linear-progress"
+      fullPath: "/ui/linear-progress"
+      preLoaderRoute: typeof UiLinearProgressLazyImport
+      parentRoute: typeof UiLazyImport
+    }
+    "/ui/paper": {
+      id: "/ui/paper"
+      path: "/paper"
+      fullPath: "/ui/paper"
+      preLoaderRoute: typeof UiPaperLazyImport
+      parentRoute: typeof UiLazyImport
+    }
+    "/ui/": {
+      id: "/ui/"
+      path: "/"
+      fullPath: "/ui/"
+      preLoaderRoute: typeof UiIndexLazyImport
+      parentRoute: typeof UiLazyImport
+    }
+  }
 }
 
 // Create and export the route tree
 
 interface UiLazyRouteChildren {
-    UiButtonLazyRoute: typeof UiButtonLazyRoute;
-    UiCheckboxLazyRoute: typeof UiCheckboxLazyRoute;
-    UiCircularProgressLazyRoute: typeof UiCircularProgressLazyRoute;
-    UiDividerLazyRoute: typeof UiDividerLazyRoute;
-    UiLinearProgressLazyRoute: typeof UiLinearProgressLazyRoute;
-    UiIndexLazyRoute: typeof UiIndexLazyRoute;
+  UiButtonLazyRoute: typeof UiButtonLazyRoute
+  UiCheckboxLazyRoute: typeof UiCheckboxLazyRoute
+  UiCircularProgressLazyRoute: typeof UiCircularProgressLazyRoute
+  UiDividerLazyRoute: typeof UiDividerLazyRoute
+  UiLinearProgressLazyRoute: typeof UiLinearProgressLazyRoute
+  UiPaperLazyRoute: typeof UiPaperLazyRoute
+  UiIndexLazyRoute: typeof UiIndexLazyRoute
 }
 
 const UiLazyRouteChildren: UiLazyRouteChildren = {
-    UiButtonLazyRoute: UiButtonLazyRoute,
-    UiCheckboxLazyRoute: UiCheckboxLazyRoute,
-    UiCircularProgressLazyRoute: UiCircularProgressLazyRoute,
-    UiDividerLazyRoute: UiDividerLazyRoute,
-    UiLinearProgressLazyRoute: UiLinearProgressLazyRoute,
-    UiIndexLazyRoute: UiIndexLazyRoute,
-};
+  UiButtonLazyRoute: UiButtonLazyRoute,
+  UiCheckboxLazyRoute: UiCheckboxLazyRoute,
+  UiCircularProgressLazyRoute: UiCircularProgressLazyRoute,
+  UiDividerLazyRoute: UiDividerLazyRoute,
+  UiLinearProgressLazyRoute: UiLinearProgressLazyRoute,
+  UiPaperLazyRoute: UiPaperLazyRoute,
+  UiIndexLazyRoute: UiIndexLazyRoute,
+}
 
 const UiLazyRouteWithChildren =
-    UiLazyRoute._addFileChildren(UiLazyRouteChildren);
+  UiLazyRoute._addFileChildren(UiLazyRouteChildren)
 
 export interface FileRoutesByFullPath {
-    "/": typeof IndexLazyRoute;
-    "/ui": typeof UiLazyRouteWithChildren;
-    "/ui/button": typeof UiButtonLazyRoute;
-    "/ui/checkbox": typeof UiCheckboxLazyRoute;
-    "/ui/circular-progress": typeof UiCircularProgressLazyRoute;
-    "/ui/divider": typeof UiDividerLazyRoute;
-    "/ui/linear-progress": typeof UiLinearProgressLazyRoute;
-    "/ui/": typeof UiIndexLazyRoute;
+  "/": typeof IndexLazyRoute
+  "/ui": typeof UiLazyRouteWithChildren
+  "/ui/button": typeof UiButtonLazyRoute
+  "/ui/checkbox": typeof UiCheckboxLazyRoute
+  "/ui/circular-progress": typeof UiCircularProgressLazyRoute
+  "/ui/divider": typeof UiDividerLazyRoute
+  "/ui/linear-progress": typeof UiLinearProgressLazyRoute
+  "/ui/paper": typeof UiPaperLazyRoute
+  "/ui/": typeof UiIndexLazyRoute
 }
 
 export interface FileRoutesByTo {
-    "/": typeof IndexLazyRoute;
-    "/ui/button": typeof UiButtonLazyRoute;
-    "/ui/checkbox": typeof UiCheckboxLazyRoute;
-    "/ui/circular-progress": typeof UiCircularProgressLazyRoute;
-    "/ui/divider": typeof UiDividerLazyRoute;
-    "/ui/linear-progress": typeof UiLinearProgressLazyRoute;
-    "/ui": typeof UiIndexLazyRoute;
+  "/": typeof IndexLazyRoute
+  "/ui/button": typeof UiButtonLazyRoute
+  "/ui/checkbox": typeof UiCheckboxLazyRoute
+  "/ui/circular-progress": typeof UiCircularProgressLazyRoute
+  "/ui/divider": typeof UiDividerLazyRoute
+  "/ui/linear-progress": typeof UiLinearProgressLazyRoute
+  "/ui/paper": typeof UiPaperLazyRoute
+  "/ui": typeof UiIndexLazyRoute
 }
 
 export interface FileRoutesById {
-    __root__: typeof rootRoute;
-    "/": typeof IndexLazyRoute;
-    "/ui": typeof UiLazyRouteWithChildren;
-    "/ui/button": typeof UiButtonLazyRoute;
-    "/ui/checkbox": typeof UiCheckboxLazyRoute;
-    "/ui/circular-progress": typeof UiCircularProgressLazyRoute;
-    "/ui/divider": typeof UiDividerLazyRoute;
-    "/ui/linear-progress": typeof UiLinearProgressLazyRoute;
-    "/ui/": typeof UiIndexLazyRoute;
+  __root__: typeof rootRoute
+  "/": typeof IndexLazyRoute
+  "/ui": typeof UiLazyRouteWithChildren
+  "/ui/button": typeof UiButtonLazyRoute
+  "/ui/checkbox": typeof UiCheckboxLazyRoute
+  "/ui/circular-progress": typeof UiCircularProgressLazyRoute
+  "/ui/divider": typeof UiDividerLazyRoute
+  "/ui/linear-progress": typeof UiLinearProgressLazyRoute
+  "/ui/paper": typeof UiPaperLazyRoute
+  "/ui/": typeof UiIndexLazyRoute
 }
 
 export interface FileRouteTypes {
-    fileRoutesByFullPath: FileRoutesByFullPath;
-    fullPaths:
-        | "/"
-        | "/ui"
-        | "/ui/button"
-        | "/ui/checkbox"
-        | "/ui/circular-progress"
-        | "/ui/divider"
-        | "/ui/linear-progress"
-        | "/ui/";
-    fileRoutesByTo: FileRoutesByTo;
-    to:
-        | "/"
-        | "/ui/button"
-        | "/ui/checkbox"
-        | "/ui/circular-progress"
-        | "/ui/divider"
-        | "/ui/linear-progress"
-        | "/ui";
-    id:
-        | "__root__"
-        | "/"
-        | "/ui"
-        | "/ui/button"
-        | "/ui/checkbox"
-        | "/ui/circular-progress"
-        | "/ui/divider"
-        | "/ui/linear-progress"
-        | "/ui/";
-    fileRoutesById: FileRoutesById;
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths:
+    | "/"
+    | "/ui"
+    | "/ui/button"
+    | "/ui/checkbox"
+    | "/ui/circular-progress"
+    | "/ui/divider"
+    | "/ui/linear-progress"
+    | "/ui/paper"
+    | "/ui/"
+  fileRoutesByTo: FileRoutesByTo
+  to:
+    | "/"
+    | "/ui/button"
+    | "/ui/checkbox"
+    | "/ui/circular-progress"
+    | "/ui/divider"
+    | "/ui/linear-progress"
+    | "/ui/paper"
+    | "/ui"
+  id:
+    | "__root__"
+    | "/"
+    | "/ui"
+    | "/ui/button"
+    | "/ui/checkbox"
+    | "/ui/circular-progress"
+    | "/ui/divider"
+    | "/ui/linear-progress"
+    | "/ui/paper"
+    | "/ui/"
+  fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
-    IndexLazyRoute: typeof IndexLazyRoute;
-    UiLazyRoute: typeof UiLazyRouteWithChildren;
+  IndexLazyRoute: typeof IndexLazyRoute
+  UiLazyRoute: typeof UiLazyRouteWithChildren
 }
 
 const rootRouteChildren: RootRouteChildren = {
-    IndexLazyRoute: IndexLazyRoute,
-    UiLazyRoute: UiLazyRouteWithChildren,
-};
+  IndexLazyRoute: IndexLazyRoute,
+  UiLazyRoute: UiLazyRouteWithChildren,
+}
 
 export const routeTree = rootRoute
-    ._addFileChildren(rootRouteChildren)
-    ._addFileTypes<FileRouteTypes>();
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
 
 /* ROUTE_MANIFEST_START
 {
@@ -266,6 +288,7 @@ export const routeTree = rootRoute
         "/ui/circular-progress",
         "/ui/divider",
         "/ui/linear-progress",
+        "/ui/paper",
         "/ui/"
       ]
     },
@@ -287,6 +310,10 @@ export const routeTree = rootRoute
     },
     "/ui/linear-progress": {
       "filePath": "ui/linear-progress.lazy.tsx",
+      "parent": "/ui"
+    },
+    "/ui/paper": {
+      "filePath": "ui/paper.lazy.tsx",
       "parent": "/ui"
     },
     "/ui/": {

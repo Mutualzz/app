@@ -8,7 +8,20 @@ import type { ThemeMode } from "@ui/types";
 import { themes as allThemes } from "@themes/index";
 
 import { useNavigate } from "@tanstack/react-router";
+import type { ButtonColor } from "@ui/inputs/Button/Button.types";
 import { sortThemes } from "@ui/utils/sortThemes";
+
+const colors = [
+    "primary",
+    "neutral",
+    "success",
+    "danger",
+    "warning",
+    "info",
+] as ButtonColor[];
+
+const randomColor = () =>
+    colors[crypto.getRandomValues(new Uint32Array(1))[0] % colors.length];
 
 export const PlaygrondLeftSidebar = () => {
     const { mode, changeMode, changeTheme } = useTheme();
@@ -36,6 +49,13 @@ export const PlaygrondLeftSidebar = () => {
         {
             name: "Linear Progress",
             link: "/ui/linear-progress",
+        },
+    ];
+
+    const surfaceComponents = [
+        {
+            name: "Paper",
+            link: "/ui/paper",
         },
     ];
 
@@ -117,7 +137,7 @@ export const PlaygrondLeftSidebar = () => {
                         <Button
                             key={i}
                             variant="solid"
-                            color="primary"
+                            color={randomColor()}
                             size="lg"
                             onClick={() => {
                                 navigate({
@@ -135,7 +155,7 @@ export const PlaygrondLeftSidebar = () => {
                         <Button
                             key={i}
                             variant="solid"
-                            color="primary"
+                            color={randomColor()}
                             size="lg"
                             onClick={() => {
                                 navigate({
@@ -153,7 +173,7 @@ export const PlaygrondLeftSidebar = () => {
                         <Button
                             key={i}
                             variant="solid"
-                            color="primary"
+                            color={randomColor()}
                             size="lg"
                             onClick={() => {
                                 navigate({
