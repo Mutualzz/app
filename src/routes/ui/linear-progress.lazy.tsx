@@ -1,18 +1,18 @@
 import { createLazyFileRoute } from "@tanstack/react-router";
-import { Divider } from "@ui/data-display/Divider/Divider";
-import { LinearProgress } from "@ui/feedback/LinearProgress/LinearProgress";
+import { Divider } from "@ui/components/data-display/Divider/Divider";
+import { LinearProgress } from "@ui/components/feedback/LinearProgress/LinearProgress";
 import type {
     LinearProgressAnimation,
     LinearProgressColor,
     LinearProgressLength,
     LinearProgressThickness,
     LinearProgressVariant,
-} from "@ui/feedback/LinearProgress/LinearProgress.types";
+} from "@ui/components/feedback/LinearProgress/LinearProgress.types";
+import { Button } from "@ui/components/inputs/Button/Button";
+import { Checkbox } from "@ui/components/inputs/Checkbox/Checkbox";
+import { Stack } from "@ui/components/layout/Stack/Stack";
+import { Paper } from "@ui/components/surfaces/Paper/Paper";
 import { useColorInput } from "@ui/hooks/useColorInput";
-import { Button } from "@ui/inputs/Button/Button";
-import { Checkbox } from "@ui/inputs/Checkbox/Checkbox";
-import { Stack } from "@ui/layout/Stack/Stack";
-import { Paper } from "@ui/surfaces/Paper/Paper";
 import type { ColorLike } from "@ui/types";
 import { randomHexColor } from "@ui/utils/randomHexColor";
 

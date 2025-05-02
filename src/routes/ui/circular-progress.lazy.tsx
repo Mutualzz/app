@@ -1,16 +1,16 @@
 import { createLazyFileRoute } from "@tanstack/react-router";
-import { Divider } from "@ui/data-display/Divider/Divider";
-import { CircularProgress } from "@ui/feedback/CircularProgress/CircularProgress";
+import { Divider } from "@ui/components/data-display/Divider/Divider";
+import { CircularProgress } from "@ui/components/feedback/CircularProgress/CircularProgress";
 import type {
     CircularProgressColor,
     CircularProgressSize,
     CircularProgressVariant,
-} from "@ui/feedback/CircularProgress/CircularProgress.types";
+} from "@ui/components/feedback/CircularProgress/CircularProgress.types";
+import { Button } from "@ui/components/inputs/Button/Button";
+import { Checkbox } from "@ui/components/inputs/Checkbox/Checkbox";
+import { Stack } from "@ui/components/layout/Stack/Stack";
+import { Paper } from "@ui/components/surfaces/Paper/Paper";
 import { useColorInput } from "@ui/hooks/useColorInput";
-import { Button } from "@ui/inputs/Button/Button";
-import { Checkbox } from "@ui/inputs/Checkbox/Checkbox";
-import { Stack } from "@ui/layout/Stack/Stack";
-import { Paper } from "@ui/surfaces/Paper/Paper";
 import type { ColorLike } from "@ui/types";
 import { randomHexColor } from "@ui/utils/randomHexColor";
 

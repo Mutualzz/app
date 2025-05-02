@@ -1,8 +1,8 @@
-import { Divider } from "@ui/data-display/Divider/Divider";
+import { Divider } from "@ui/components/data-display/Divider/Divider";
+import { Button } from "@ui/components/inputs/Button/Button";
+import { Stack } from "@ui/components/layout/Stack/Stack";
+import { Paper } from "@ui/components/surfaces/Paper/Paper";
 import { useTheme } from "@ui/hooks/useTheme";
-import { Button } from "@ui/inputs/Button/Button";
-import { Stack } from "@ui/layout/Stack/Stack";
-import { Paper } from "@ui/surfaces/Paper/Paper";
 import type { ThemeMode } from "@ui/types";
 
 import { themes as allThemes } from "@themes/index";
