@@ -19,6 +19,7 @@ import { Route as rootRoute } from "./routes/__root"
 const UiLazyImport = createFileRoute("/ui")()
 const IndexLazyImport = createFileRoute("/")()
 const UiIndexLazyImport = createFileRoute("/ui/")()
+const UiTypographyLazyImport = createFileRoute("/ui/typography")()
 const UiPaperLazyImport = createFileRoute("/ui/paper")()
 const UiLinearProgressLazyImport = createFileRoute("/ui/linear-progress")()
 const UiDividerLazyImport = createFileRoute("/ui/divider")()
@@ -45,6 +46,12 @@ const UiIndexLazyRoute = UiIndexLazyImport.update({
   path: "/",
   getParentRoute: () => UiLazyRoute,
 } as any).lazy(() => import("./routes/ui/index.lazy").then((d) => d.Route))
+
+const UiTypographyLazyRoute = UiTypographyLazyImport.update({
+  id: "/typography",
+  path: "/typography",
+  getParentRoute: () => UiLazyRoute,
+} as any).lazy(() => import("./routes/ui/typography.lazy").then((d) => d.Route))
 
 const UiPaperLazyRoute = UiPaperLazyImport.update({
   id: "/paper",
@@ -146,6 +153,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof UiPaperLazyImport
       parentRoute: typeof UiLazyImport
     }
+    "/ui/typography": {
+      id: "/ui/typography"
+      path: "/typography"
+      fullPath: "/ui/typography"
+      preLoaderRoute: typeof UiTypographyLazyImport
+      parentRoute: typeof UiLazyImport
+    }
     "/ui/": {
       id: "/ui/"
       path: "/"
@@ -165,6 +179,7 @@ interface UiLazyRouteChildren {
   UiDividerLazyRoute: typeof UiDividerLazyRoute
   UiLinearProgressLazyRoute: typeof UiLinearProgressLazyRoute
   UiPaperLazyRoute: typeof UiPaperLazyRoute
+  UiTypographyLazyRoute: typeof UiTypographyLazyRoute
   UiIndexLazyRoute: typeof UiIndexLazyRoute
 }
 
@@ -175,6 +190,7 @@ const UiLazyRouteChildren: UiLazyRouteChildren = {
   UiDividerLazyRoute: UiDividerLazyRoute,
   UiLinearProgressLazyRoute: UiLinearProgressLazyRoute,
   UiPaperLazyRoute: UiPaperLazyRoute,
+  UiTypographyLazyRoute: UiTypographyLazyRoute,
   UiIndexLazyRoute: UiIndexLazyRoute,
 }
 
@@ -190,6 +206,7 @@ export interface FileRoutesByFullPath {
   "/ui/divider": typeof UiDividerLazyRoute
   "/ui/linear-progress": typeof UiLinearProgressLazyRoute
   "/ui/paper": typeof UiPaperLazyRoute
+  "/ui/typography": typeof UiTypographyLazyRoute
   "/ui/": typeof UiIndexLazyRoute
 }
 
@@ -201,6 +218,7 @@ export interface FileRoutesByTo {
   "/ui/divider": typeof UiDividerLazyRoute
   "/ui/linear-progress": typeof UiLinearProgressLazyRoute
   "/ui/paper": typeof UiPaperLazyRoute
+  "/ui/typography": typeof UiTypographyLazyRoute
   "/ui": typeof UiIndexLazyRoute
 }
 
@@ -214,6 +232,7 @@ export interface FileRoutesById {
   "/ui/divider": typeof UiDividerLazyRoute
   "/ui/linear-progress": typeof UiLinearProgressLazyRoute
   "/ui/paper": typeof UiPaperLazyRoute
+  "/ui/typography": typeof UiTypographyLazyRoute
   "/ui/": typeof UiIndexLazyRoute
 }
 
@@ -228,6 +247,7 @@ export interface FileRouteTypes {
     | "/ui/divider"
     | "/ui/linear-progress"
     | "/ui/paper"
+    | "/ui/typography"
     | "/ui/"
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -238,6 +258,7 @@ export interface FileRouteTypes {
     | "/ui/divider"
     | "/ui/linear-progress"
     | "/ui/paper"
+    | "/ui/typography"
     | "/ui"
   id:
     | "__root__"
@@ -249,6 +270,7 @@ export interface FileRouteTypes {
     | "/ui/divider"
     | "/ui/linear-progress"
     | "/ui/paper"
+    | "/ui/typography"
     | "/ui/"
   fileRoutesById: FileRoutesById
 }
@@ -289,6 +311,7 @@ export const routeTree = rootRoute
         "/ui/divider",
         "/ui/linear-progress",
         "/ui/paper",
+        "/ui/typography",
         "/ui/"
       ]
     },
@@ -314,6 +337,10 @@ export const routeTree = rootRoute
     },
     "/ui/paper": {
       "filePath": "ui/paper.lazy.tsx",
+      "parent": "/ui"
+    },
+    "/ui/typography": {
+      "filePath": "ui/typography.lazy.tsx",
       "parent": "/ui"
     },
     "/ui/": {

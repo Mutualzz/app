@@ -44,6 +44,10 @@ export const PlaygrondLeftSidebar = () => {
                 name: "Divider",
                 link: "/ui/divider",
             },
+            {
+                name: "Typography",
+                link: "/ui/typography",
+            },
         ],
         surface: [
             {
