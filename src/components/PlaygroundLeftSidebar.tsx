@@ -9,6 +9,7 @@ import { themes as allThemes } from "@themes/index";
 
 import { useNavigate } from "@tanstack/react-router";
 import { sortThemes } from "@ui/utils/sortThemes";
+import { startCase } from "lodash";
 
 export const PlaygrondLeftSidebar = () => {
     const { mode, changeMode, changeTheme } = useTheme();
@@ -17,43 +18,49 @@ export const PlaygrondLeftSidebar = () => {
 
     const themes = allThemes.filter((theme) => theme.type === mode);
 
-    const inputComponents = [
-        {
-            name: "Button",
-            link: "/ui/button",
-        },
-        {
-            name: "Checkbox",
-            link: "/ui/checkbox",
-        },
-    ];
-
-    const feedbackComponents = [
-        {
-            name: "Circular Progress",
-            link: "/ui/circular-progress",
-        },
-        {
-            name: "Linear Progress",
-            link: "/ui/linear-progress",
-        },
-    ];
-
-    const dataDisplayComponents = [
-        {
-            name: "Divider",
-            link: "/ui/divider",
-        },
-    ];
+    const components = {
+        input: [
+            {
+                name: "Button",
+                link: "/ui/button",
+            },
+            {
+                name: "Checkbox",
+                link: "/ui/checkbox",
+            },
+        ],
+        feedback: [
+            {
+                name: "Circular Progress",
+                link: "/ui/circular-progress",
+            },
+            {
+                name: "Linear Progress",
+                link: "/ui/linear-progress",
+            },
+        ],
+        dataDisplay: [
+            {
+                name: "Divider",
+                link: "/ui/divider",
+            },
+        ],
+        surface: [
+            {
+                name: "Paper",
+                link: "/ui/paper",
+            },
+        ],
+    };
 
     return (
         <Paper
-            css={{
-                height: "100%",
-                width: 300,
-                justifyContent: "center",
-                padding: 20,
-            }}
+            p={20}
+            ml={20}
+            mt={40}
+            justifyContent="center"
+            height="100%"
+            width={300}
         >
             <Stack direction="column" spacing={20}>
                 <Stack direction="column" spacing={10}>
@@ -69,7 +76,7 @@ export const PlaygrondLeftSidebar = () => {
                                 changeMode(e.target.value as ThemeMode);
                             }}
                             defaultValue="system"
-                            style={{
+                            css={{
                                 width: "100%",
                                 padding: 10,
                                 borderRadius: 5,
@@ -111,60 +118,33 @@ export const PlaygrondLeftSidebar = () => {
                         </Stack>
                     )}
                 </Stack>
-                <Divider>Input</Divider>
-                <Stack direction="column" spacing={10}>
-                    {inputComponents.map((button, i) => (
-                        <Button
-                            key={i}
-                            variant="solid"
-                            color="neutral"
-                            size="lg"
-                            onClick={() => {
-                                navigate({
-                                    to: button.link,
-                                });
-                            }}
-                        >
-                            {button.name}
-                        </Button>
-                    ))}
-                </Stack>
-                <Divider>Feedback</Divider>
-                <Stack direction="column" spacing={10}>
-                    {feedbackComponents.map((button, i) => (
-                        <Button
-                            key={i}
-                            variant="solid"
-                            color="neutral"
-                            size="lg"
-                            onClick={() => {
-                                navigate({
-                                    to: button.link,
-                                });
-                            }}
-                        >
-                            {button.name}
-                        </Button>
-                    ))}
-                </Stack>
-                <Divider>Data Display</Divider>
-                <Stack direction="column" spacing={10}>
-                    {dataDisplayComponents.map((button, i) => (
-                        <Button
-                            key={i}
-                            variant="solid"
-                            color="neutral"
-                            size="lg"
-                            onClick={() => {
-                                navigate({
-                                    to: button.link,
-                                });
-                            }}
-                        >
-                            {button.name}
-                        </Button>
-                    ))}
-                </Stack>
+                {Object.entries(components).map(([key, value]) => (
+                    <Stack
+                        key={key}
+                        justifyContent="center"
+                        direction="column"
+                        spacing={10}
+                    >
+                        <Divider>{startCase(key)}</Divider>
+                        <Stack direction="column" spacing={10}>
+                            {value.map((button, i) => (
+                                <Button
+                                    key={i}
+                                    variant="solid"
+                                    color="neutral"
+                                    size="lg"
+                                    onClick={() => {
+                                        navigate({
+                                            to: button.link,
+                                        });
+                                    }}
+                                >
+                                    {button.name}
+                                </Button>
+                            ))}
+                        </Stack>
+                    </Stack>
+                ))}
             </Stack>
         </Paper>
     );
