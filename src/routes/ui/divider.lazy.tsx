@@ -17,7 +17,7 @@ export const Route = createLazyFileRoute("/ui/divider")({
 });
 
 const variants = ["solid", "dashed", "dotted", "double"] as DividerVariant[];
-const lineColors = [
+const colors = [
     "primary",
     "neutral",
     "success",
@@ -25,8 +25,6 @@ const lineColors = [
     "warning",
     "info",
 ] as Color[];
-
-const textColors = ["primary", "neutral", "accent"] as Color[];
 
 const insets = ["none", "start", "end"] as DividerInset[];
 
@@ -369,7 +367,7 @@ function PlaygroundDivider() {
                                     backgroundColor: "#f9f9f9",
                                 }}
                             >
-                                {lineColors.map((color) => (
+                                {colors.map((color) => (
                                     <option key={color} value={color}>
                                         {capitalize(color)}
                                     </option>
@@ -425,7 +423,7 @@ function PlaygroundDivider() {
                                     backgroundColor: "#f9f9f9",
                                 }}
                             >
-                                {textColors.map((color) => (
+                                {colors.map((color) => (
                                     <option key={color} value={color}>
                                         {capitalize(color)}
                                     </option>
