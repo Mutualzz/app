@@ -18,10 +18,5 @@ export const victorianBloomTheme: Theme = {
         warning: "#D4A033",
         success: "#6FD36F",
         info: "#607D8B",
-        typography: {
-            primary: "#121212",
-            neutral: "#5A5A5A",
-            accent: "#A6844F",
-        },
     },
 };

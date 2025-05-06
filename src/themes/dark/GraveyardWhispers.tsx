@@ -18,10 +18,5 @@ export const graveyardWhispersTheme: Theme = {
         warning: "#D4A033",
         info: "#88A2B2",
         success: "#6FD36F",
-        typography: {
-            primary: "#D1D1D1",
-            neutral: "#939393",
-            accent: "#8A6772",
-        },
     },
 };

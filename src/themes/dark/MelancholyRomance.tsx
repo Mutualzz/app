@@ -18,10 +18,5 @@ export const melancholyRomanceTheme: Theme = {
         warning: "#D4A033",
         info: "#607D8B",
         success: "#4CAF50",
-        typography: {
-            primary: "#E3E3E3",
-            neutral: "#A79D9C",
-            accent: "#BA837E",
-        },
     },
 };

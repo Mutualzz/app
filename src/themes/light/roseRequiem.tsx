@@ -18,10 +18,5 @@ export const roseRequiemTheme: Theme = {
         warning: "#D4A033",
         success: "#4CAF50",
         info: "#5A84B1",
-        typography: {
-            primary: "#121212",
-            neutral: "#5A5A5A",
-            accent: "#9C2232",
-        },
     },
 };

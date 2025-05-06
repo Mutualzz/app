@@ -17,10 +17,5 @@ export const fogOfDespairTheme: Theme = {
         warning: "#D4A033",
         info: "#88A2B2",
         success: "#6FD36F",
-        typography: {
-            primary: "#E3E8EC",
-            neutral: "#A2A9B1",
-            accent: "#88A2B2",
-        },
     },
 };

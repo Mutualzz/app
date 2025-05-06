@@ -18,10 +18,5 @@ export const velvetLullabyTheme: Theme = {
         warning: "#D4A033",
         success: "#4CAF50",
         info: "#607D8B",
-        typography: {
-            primary: "#121212",
-            neutral: "#5A5A5A",
-            accent: "#98625D",
-        },
     },
 };

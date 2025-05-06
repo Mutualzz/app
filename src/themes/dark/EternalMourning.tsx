@@ -17,10 +17,5 @@ export const eternalMourningTheme: Theme = {
         warning: "#D4A033",
         info: "#607D8B",
         success: "#6FD36F",
-        typography: {
-            primary: "#E5E3E8",
-            neutral: "#938B96",
-            accent: "#8F55B8",
-        },
     },
 };

@@ -18,10 +18,5 @@ export const witchingHourTheme: Theme = {
         warning: "#D4A033",
         info: "#60C297",
         success: "#6FD36F",
-        typography: {
-            primary: "#EAE5E5",
-            neutral: "#8C7C96",
-            accent: "#60C297",
-        },
     },
 };

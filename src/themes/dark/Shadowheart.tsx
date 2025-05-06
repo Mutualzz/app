@@ -18,10 +18,5 @@ export const shadowheartTheme: Theme = {
         warning: "#D4A033",
         info: "#5AB1A1",
         success: "#4CAF50",
-        typography: {
-            primary: "#DADADA",
-            neutral: "#8A8D92",
-            accent: "#5AB1A1",
-        },
     },
 };

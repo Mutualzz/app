@@ -18,10 +18,5 @@ export const chromeVeilTheme: Theme = {
         warning: "#D4A033",
         success: "#4CAF50",
         info: "#5AB1A1",
-        typography: {
-            primary: "#121212",
-            neutral: "#5A5A5A",
-            accent: "#448E81",
-        },
     },
 };

@@ -18,10 +18,5 @@ export const nocturnalAbyssTheme: Theme = {
         warning: "#D4A033",
         info: "#5E7A5F",
         success: "#6FD36F",
-        typography: {
-            primary: "#E0D6D6",
-            neutral: "#8C8294",
-            accent: "#5A7595",
-        },
     },
 };

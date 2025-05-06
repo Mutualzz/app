@@ -18,10 +18,5 @@ export const midghtEleganceTheme: Theme = {
         warning: "#D4A033",
         info: "#607D8B",
         success: "#6FD36F",
-        typography: {
-            primary: "#E5E5E5",
-            neutral: "#A09EA6",
-            accent: "#C2A05E",
-        },
     },
 };

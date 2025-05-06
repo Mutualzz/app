@@ -18,10 +18,5 @@ export const grungeIndustrialTheme: Theme = {
         warning: "#D4A033",
         info: "#607D8B",
         success: "#4CAF50",
-        typography: {
-            primary: "#DFDFDF",
-            neutral: "#9E9E9E",
-            accent: "#A3643D",
-        },
     },
 };

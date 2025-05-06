@@ -18,10 +18,5 @@ export const hauntedAestheticTheme: Theme = {
         warning: "#D4A033",
         info: "#88A2B2",
         success: "#6FD36F",
-        typography: {
-            primary: "#E0E0E0",
-            neutral: "#8A8A8A",
-            accent: "#AFAEC7",
-        },
     },
 };

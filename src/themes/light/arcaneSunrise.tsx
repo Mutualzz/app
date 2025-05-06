@@ -18,10 +18,5 @@ export const arcaneSunriseTheme: Theme = {
         warning: "#D4A033",
         success: "#6FD36F",
         info: "#60C297",
-        typography: {
-            primary: "#121212",
-            neutral: "#5A5A5A",
-            accent: "#4DA380",
-        },
     },
 };
