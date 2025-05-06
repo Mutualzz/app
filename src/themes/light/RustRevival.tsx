@@ -9,7 +9,6 @@ export const rustRevivalTheme: Theme = {
     type: "light",
     colors: {
         ...baseLightTheme.colors,
-        common: { white: "#FFFFFF", black: "#121212" },
         primary: "#81472F",
         neutral: "#7E4050",
         background: "#ECE8E5",
@@ -17,6 +16,15 @@ export const rustRevivalTheme: Theme = {
         danger: "#A12B3D",
         warning: "#D4A033",
         success: "#4CAF50",
-        info: "#607D8B",
+        info: "#486A8F",
+    },
+    typography: {
+        ...baseLightTheme.typography,
+        colors: {
+            primary: "#222222",
+            secondary: "#444444",
+            accent: "#81472F",
+            disabled: "#7E5F50",
+        },
     },
 };

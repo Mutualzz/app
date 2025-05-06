@@ -9,7 +9,6 @@ export const chromeVeilTheme: Theme = {
     type: "light",
     colors: {
         ...baseLightTheme.colors,
-        common: { white: "#FFFFFF", black: "#121212" },
         primary: "#448E81",
         neutral: "#6B4F59",
         background: "#EAEEED",
@@ -17,6 +16,15 @@ export const chromeVeilTheme: Theme = {
         danger: "#8F3C74",
         warning: "#D4A033",
         success: "#4CAF50",
-        info: "#5AB1A1",
+        info: "#486A8F",
+    },
+    typography: {
+        ...baseLightTheme.typography,
+        colors: {
+            primary: "#222222",
+            secondary: "#444444",
+            accent: "#448E81",
+            disabled: "#7E8A8A",
+        },
     },
 };

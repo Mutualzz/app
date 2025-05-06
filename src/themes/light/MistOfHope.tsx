@@ -9,7 +9,6 @@ export const mistOfHopeTheme: Theme = {
     type: "light",
     colors: {
         ...baseLightTheme.colors,
-        common: { white: "#FFFFFF", black: "#121212" },
         primary: "#6D8A9C",
         neutral: "#7D8F99",
         background: "#E8EFF3",
@@ -17,6 +16,15 @@ export const mistOfHopeTheme: Theme = {
         danger: "#8F3C74",
         warning: "#D4A033",
         success: "#6FD36F",
-        info: "#5A84B1",
+        info: "#486A8F",
+    },
+    typography: {
+        ...baseLightTheme.typography,
+        colors: {
+            primary: "#222222",
+            secondary: "#444444",
+            accent: "#6D8A9C",
+            disabled: "#7D8F99",
+        },
     },
 };

@@ -10,13 +10,22 @@ export const shadowheartTheme: Theme = {
     type: "dark",
     colors: {
         ...baseDarkTheme.colors,
-        primary: "#3A3D4A",
-        neutral: "#6B4F59",
+        primary: "#454854",
+        neutral: "#7A5B67",
         background: "#08090A",
-        surface: "#16171A",
-        danger: "#8F3C74",
+        surface: "#1A1B1E",
+        danger: "#9A3F78",
         warning: "#D4A033",
-        info: "#5AB1A1",
-        success: "#4CAF50",
+        success: "#5ACB68",
+        info: "#486A8F",
+    },
+    typography: {
+        ...baseDarkTheme.typography,
+        colors: {
+            primary: "#E8E8E8",
+            secondary: "#B5B5B5",
+            accent: "#7BA1AD",
+            disabled: "#6B4F59",
+        },
     },
 };

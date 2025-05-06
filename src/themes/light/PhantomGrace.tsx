@@ -9,7 +9,6 @@ export const phantomGraceTheme: Theme = {
     type: "light",
     colors: {
         ...baseLightTheme.colors,
-        common: { white: "#FFFFFF", black: "#121212" },
         primary: "#8F8EAD",
         neutral: "#6D4153",
         background: "#EBEBF1",
@@ -17,6 +16,15 @@ export const phantomGraceTheme: Theme = {
         danger: "#8F3C74",
         warning: "#D4A033",
         success: "#6FD36F",
-        info: "#5A84B1",
+        info: "#486A8F",
+    },
+    typography: {
+        ...baseLightTheme.typography,
+        colors: {
+            primary: "#222222",
+            secondary: "#444444",
+            accent: "#8F8EAD",
+            disabled: "#7A7A8A",
+        },
     },
 };

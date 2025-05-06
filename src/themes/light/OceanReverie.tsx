@@ -9,7 +9,6 @@ export const oceanReverieTheme: Theme = {
     type: "light",
     colors: {
         ...baseLightTheme.colors,
-        common: { white: "#FFFFFF", black: "#121212" },
         primary: "#49604A",
         neutral: "#6A4F68",
         background: "#E6ECEA",
@@ -17,6 +16,15 @@ export const oceanReverieTheme: Theme = {
         danger: "#A12B3D",
         warning: "#D4A033",
         success: "#6FD36F",
-        info: "#5A84B1",
+        info: "#486A8F",
+    },
+    typography: {
+        ...baseLightTheme.typography,
+        colors: {
+            primary: "#222222",
+            secondary: "#444444",
+            accent: "#49604A",
+            disabled: "#7B8A8A",
+        },
     },
 };

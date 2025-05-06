@@ -9,7 +9,6 @@ export const velvetLullabyTheme: Theme = {
     type: "light",
     colors: {
         ...baseLightTheme.colors,
-        common: { white: "#FFFFFF", black: "#121212" },
         primary: "#98625D",
         neutral: "#73678F",
         background: "#EDE9E8",
@@ -17,6 +16,15 @@ export const velvetLullabyTheme: Theme = {
         danger: "#9C5050",
         warning: "#D4A033",
         success: "#4CAF50",
-        info: "#607D8B",
+        info: "#486A8F",
+    },
+    typography: {
+        ...baseLightTheme.typography,
+        colors: {
+            primary: "#222222",
+            secondary: "#444444",
+            accent: "#98625D",
+            disabled: "#7B6A7A",
+        },
     },
 };

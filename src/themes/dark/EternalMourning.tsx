@@ -9,13 +9,22 @@ export const eternalMourningTheme: Theme = {
     type: "dark",
     colors: {
         ...baseDarkTheme.colors,
-        primary: "#5C3A82",
-        neutral: "#845159",
+        primary: "#684292",
+        neutral: "#8E5C68",
         background: "#0A080A",
-        surface: "#151218",
-        danger: "#8F3C74",
+        surface: "#18121D",
+        danger: "#9A477F",
         warning: "#D4A033",
-        info: "#607D8B",
-        success: "#6FD36F",
+        success: "#72D372",
+        info: "#486A8F",
+    },
+    typography: {
+        ...baseDarkTheme.typography,
+        colors: {
+            primary: "#ECECEC",
+            secondary: "#CAB8D8",
+            accent: "#A479D0",
+            disabled: "#7A668A",
+        },
     },
 };

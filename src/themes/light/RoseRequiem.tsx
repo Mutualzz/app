@@ -9,7 +9,6 @@ export const roseRequiemTheme: Theme = {
     type: "light",
     colors: {
         ...baseLightTheme.colors,
-        common: { white: "#FFFFFF", black: "#121212" },
         primary: "#9C2232",
         neutral: "#7B5A65",
         background: "#F2EEEE",
@@ -17,6 +16,15 @@ export const roseRequiemTheme: Theme = {
         danger: "#A12B3D",
         warning: "#D4A033",
         success: "#4CAF50",
-        info: "#5A84B1",
+        info: "#486A8F",
+    },
+    typography: {
+        ...baseLightTheme.typography,
+        colors: {
+            primary: "#222222",
+            secondary: "#444444",
+            accent: "#9C2232",
+            disabled: "#8A6A72",
+        },
     },
 };
