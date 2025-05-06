@@ -4,12 +4,9 @@ import { Button } from "@ui/components/inputs/Button/Button";
 import { Checkbox } from "@ui/components/inputs/Checkbox/Checkbox";
 import { Stack } from "@ui/components/layout/Stack/Stack";
 import { Paper } from "@ui/components/surfaces/Paper/Paper";
-import type {
-    PaperColor,
-    PaperVariant,
-} from "@ui/components/surfaces/Paper/Paper.types";
+import type { PaperVariant } from "@ui/components/surfaces/Paper/Paper.types";
 import { useColorInput } from "@ui/hooks/useColorInput";
-import type { ColorLike } from "@ui/types";
+import type { Color, ColorLike } from "@ui/types";
 import { randomHexColor } from "@ui/utils/randomHexColor";
 import { chunk } from "lodash";
 import { useState } from "react";
@@ -26,7 +23,7 @@ const colors = [
     "danger",
     "warning",
     "info",
-] as PaperColor[];
+] as Color[];
 
 function PlaygroundPaper() {
     const [customColors, setCustomColors] = useState<ColorLike[]>([]);
@@ -46,7 +43,7 @@ function PlaygroundPaper() {
         handleChange,
         validate,
         setColorDirectly,
-    } = useColorInput<PaperColor>();
+    } = useColorInput<Color | ColorLike>();
 
     let papersColored = [];
 

@@ -1,19 +1,13 @@
 import { createLazyFileRoute } from "@tanstack/react-router";
 import { Divider } from "@ui/components/data-display/Divider/Divider";
 import { LinearProgress } from "@ui/components/feedback/LinearProgress/LinearProgress";
-import type {
-    LinearProgressAnimation,
-    LinearProgressColor,
-    LinearProgressLength,
-    LinearProgressThickness,
-    LinearProgressVariant,
-} from "@ui/components/feedback/LinearProgress/LinearProgress.types";
+import type { LinearProgressAnimation } from "@ui/components/feedback/LinearProgress/LinearProgress.types";
 import { Button } from "@ui/components/inputs/Button/Button";
 import { Checkbox } from "@ui/components/inputs/Checkbox/Checkbox";
 import { Stack } from "@ui/components/layout/Stack/Stack";
 import { Paper } from "@ui/components/surfaces/Paper/Paper";
 import { useColorInput } from "@ui/hooks/useColorInput";
-import type { ColorLike } from "@ui/types";
+import type { Color, ColorLike, Size, Variant } from "@ui/types";
 import { randomHexColor } from "@ui/utils/randomHexColor";
 
 import capitalize from "lodash/capitalize";
@@ -24,12 +18,7 @@ export const Route = createLazyFileRoute("/ui/linear-progress")({
     component: PlaygroundLinearProgress,
 });
 
-const variants = [
-    "solid",
-    "outlined",
-    "plain",
-    "soft",
-] as LinearProgressVariant[];
+const variants = ["solid", "outlined", "plain", "soft"] as Variant[];
 
 const colors = [
     "primary",
@@ -38,7 +27,7 @@ const colors = [
     "danger",
     "warning",
     "info",
-] as LinearProgressColor[];
+] as Color[];
 
 const animations = [
     "bounce",
@@ -48,8 +37,8 @@ const animations = [
 ] as LinearProgressAnimation[];
 
 function PlaygroundLinearProgress() {
-    const [thickness, setThickness] = useState<LinearProgressThickness>("md");
-    const [length, setLength] = useState<LinearProgressLength>("md");
+    const [thickness, setThickness] = useState<Size>("md");
+    const [length, setLength] = useState<Size>("md");
 
     const [customLength, setCustomLength] = useState(false);
     const [customThickness, setCustomThickness] = useState(false);
@@ -70,7 +59,7 @@ function PlaygroundLinearProgress() {
         handleChange,
         validate,
         setColorDirectly,
-    } = useColorInput<LinearProgressColor>();
+    } = useColorInput<Color | ColorLike>();
 
     let progresses = [];
 
@@ -195,9 +184,7 @@ function PlaygroundLinearProgress() {
                             type="text"
                             value={length}
                             onChange={(e) =>
-                                setLength(
-                                    e.target.value.trim() as LinearProgressLength,
-                                )
+                                setLength(e.target.value.trim() as Size)
                             }
                             placeholder="Custom length"
                             style={{
@@ -212,9 +199,7 @@ function PlaygroundLinearProgress() {
                         <select
                             value={length}
                             onChange={(e) =>
-                                setLength(
-                                    e.target.value.trim() as LinearProgressLength,
-                                )
+                                setLength(e.target.value.trim() as Size)
                             }
                             style={{
                                 width: "100%",
@@ -252,9 +237,7 @@ function PlaygroundLinearProgress() {
                             type="text"
                             value={thickness}
                             onChange={(e) =>
-                                setThickness(
-                                    e.target.value.trim() as LinearProgressThickness,
-                                )
+                                setThickness(e.target.value.trim() as Size)
                             }
                             placeholder="Custom thickness"
                             style={{
@@ -269,9 +252,7 @@ function PlaygroundLinearProgress() {
                         <select
                             value={thickness}
                             onChange={(e) =>
-                                setThickness(
-                                    e.target.value.trim() as LinearProgressThickness,
-                                )
+                                setThickness(e.target.value.trim() as Size)
                             }
                             style={{
                                 width: "100%",

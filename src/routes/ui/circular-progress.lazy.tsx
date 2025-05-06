@@ -1,29 +1,20 @@
 import { createLazyFileRoute } from "@tanstack/react-router";
 import { Divider } from "@ui/components/data-display/Divider/Divider";
 import { CircularProgress } from "@ui/components/feedback/CircularProgress/CircularProgress";
-import type {
-    CircularProgressColor,
-    CircularProgressSize,
-    CircularProgressVariant,
-} from "@ui/components/feedback/CircularProgress/CircularProgress.types";
+
 import { Button } from "@ui/components/inputs/Button/Button";
 import { Checkbox } from "@ui/components/inputs/Checkbox/Checkbox";
 import { Stack } from "@ui/components/layout/Stack/Stack";
 import { Paper } from "@ui/components/surfaces/Paper/Paper";
 import { useColorInput } from "@ui/hooks/useColorInput";
-import type { ColorLike } from "@ui/types";
+import type { Color, ColorLike, Size, Variant } from "@ui/types";
 import { randomHexColor } from "@ui/utils/randomHexColor";
 
 import capitalize from "lodash/capitalize";
 import chunk from "lodash/chunk";
 import { useState } from "react";
 
-const variants = [
-    "solid",
-    "outlined",
-    "plain",
-    "soft",
-] as CircularProgressVariant[];
+const variants = ["solid", "outlined", "plain", "soft"] as Variant[];
 
 const colors = [
     "primary",
@@ -32,14 +23,14 @@ const colors = [
     "danger",
     "warning",
     "info",
-] as CircularProgressColor[];
+] as Color[];
 
 export const Route = createLazyFileRoute("/ui/circular-progress")({
     component: PlaygroundCircularProgress,
 });
 
 function PlaygroundCircularProgress() {
-    const [size, setSize] = useState<CircularProgressSize>("md");
+    const [size, setSize] = useState<Size>("md");
     const [determinate, setDeterminate] = useState(false);
     const [value, setValue] = useState(0);
 
@@ -55,7 +46,7 @@ function PlaygroundCircularProgress() {
         handleChange,
         validate,
         setColorDirectly,
-    } = useColorInput<CircularProgressColor>();
+    } = useColorInput<Color | ColorLike>();
 
     let progresses = [];
 
@@ -155,9 +146,7 @@ function PlaygroundCircularProgress() {
                             type="text"
                             value={size}
                             onChange={(e) =>
-                                setSize(
-                                    e.target.value.trim() as CircularProgressSize,
-                                )
+                                setSize(e.target.value.trim() as Size)
                             }
                             placeholder="Custom size"
                             style={{
@@ -172,9 +161,7 @@ function PlaygroundCircularProgress() {
                         <select
                             value={size}
                             onChange={(e) =>
-                                setSize(
-                                    e.target.value.trim() as CircularProgressSize,
-                                )
+                                setSize(e.target.value.trim() as Size)
                             }
                             style={{
                                 width: "100%",

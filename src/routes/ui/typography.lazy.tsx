@@ -1,12 +1,9 @@
 import { createLazyFileRoute } from "@tanstack/react-router";
-import {
-    type TypographyColor,
-    type TypographyVariant,
-} from "@ui/components/data-display/Typography/Typography.types";
+import { type TypographyVariant } from "@ui/components/data-display/Typography/Typography.types";
 import { Stack } from "@ui/components/layout/Stack/Stack";
 import { Paper } from "@ui/components/surfaces/Paper/Paper";
 import { useColorInput } from "@ui/hooks/useColorInput";
-import type { ColorLike } from "@ui/types";
+import type { Color, ColorLike } from "@ui/types";
 import { chunk } from "lodash";
 import { useState } from "react";
 import { Typography } from "../../ui/src/components/data-display/Typography/Typography";
@@ -15,7 +12,13 @@ export const Route = createLazyFileRoute("/ui/typography")({
     component: PlaygroundTypography,
 });
 
-const variants = ["solid", "outlined", "plain", "soft"] as TypographyVariant[];
+const variants = [
+    "solid",
+    "outlined",
+    "plain",
+    "soft",
+    "none",
+] as TypographyVariant[];
 const colors = [
     "primary",
     "neutral",
@@ -23,7 +26,7 @@ const colors = [
     "danger",
     "warning",
     "info",
-] as TypographyColor[];
+] as Color[];
 
 function PlaygroundTypography() {
     const [customText, setCustomText] = useState(false);
@@ -40,12 +43,12 @@ function PlaygroundTypography() {
         handleChange,
         validate,
         setColorDirectly,
-    } = useColorInput<TypographyColor>();
+    } = useColorInput<Color | ColorLike>();
 
     let typographies = [];
 
-    for (const color of [...colors, ...customColors]) {
-        for (const variant of variants) {
+    for (const variant of variants) {
+        for (const color of [...colors, ...customColors]) {
             typographies.push(
                 <Paper
                     key={`${color}-${variant}`}
@@ -61,11 +64,13 @@ function PlaygroundTypography() {
         }
     }
 
-    typographies = chunk(typographies, variants.length).map((row, index) => (
-        <Stack key={index} p={20} spacing={10}>
-            {row}
-        </Stack>
-    ));
+    typographies = chunk(typographies, [...colors, ...customColors].length).map(
+        (row, index) => (
+            <Stack key={index} p={20} spacing={10}>
+                {row}
+            </Stack>
+        ),
+    );
 
     return (
         <Stack

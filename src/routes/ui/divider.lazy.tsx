@@ -2,14 +2,13 @@ import { createLazyFileRoute } from "@tanstack/react-router";
 import { Divider } from "@ui/components/data-display/Divider/Divider";
 import type {
     DividerInset,
-    DividerLineColor,
-    DividerTextColor,
     DividerVariant,
 } from "@ui/components/data-display/Divider/Divider.types";
 import { Checkbox } from "@ui/components/inputs/Checkbox/Checkbox";
 import { Stack } from "@ui/components/layout/Stack/Stack";
 import { Paper } from "@ui/components/surfaces/Paper/Paper";
 import { useColorInput } from "@ui/hooks/useColorInput";
+import type { Color, ColorLike } from "@ui/types";
 import capitalize from "lodash/capitalize";
 import { useState } from "react";
 
@@ -25,9 +24,9 @@ const lineColors = [
     "danger",
     "warning",
     "info",
-] as DividerLineColor[];
+] as Color[];
 
-const textColors = ["primary", "neutral", "accent"] as DividerTextColor[];
+const textColors = ["primary", "neutral", "accent"] as Color[];
 
 const insets = ["none", "start", "end"] as DividerInset[];
 
@@ -38,8 +37,8 @@ function PlaygroundDivider() {
 
     const [text, setText] = useState<string>("Text");
 
-    const [lineColor, setLineColor] = useState<DividerLineColor>("neutral");
-    const [textColor, setTextColor] = useState<DividerTextColor>("neutral");
+    const [lineColor, setLineColor] = useState<Color>("neutral");
+    const [textColor, setTextColor] = useState<Color>("neutral");
 
     const [customLineColorEnabled, setCustomLineColorEnabled] = useState(false);
     const [customTextColorEnabled, setCustomTextColorEnabled] = useState(false);
@@ -50,7 +49,7 @@ function PlaygroundDivider() {
         isInvalid: lineColorInvalid,
         handleChange: handleLineColorChange,
         validate: validateLineColor,
-    } = useColorInput<DividerLineColor>();
+    } = useColorInput<Color | ColorLike>();
 
     const {
         inputValue: inputTextColor,
@@ -58,7 +57,7 @@ function PlaygroundDivider() {
         isInvalid: textColorInvalid,
         handleChange: handleTextColorChange,
         validate: validateTextColor,
-    } = useColorInput<DividerTextColor>();
+    } = useColorInput<Color | ColorLike>();
 
     return (
         <Stack
@@ -360,9 +359,7 @@ function PlaygroundDivider() {
                             <select
                                 value={lineColor}
                                 onChange={(e) =>
-                                    setLineColor(
-                                        e.target.value as DividerLineColor,
-                                    )
+                                    setLineColor(e.target.value as Color)
                                 }
                                 style={{
                                     width: "100%",
@@ -418,9 +415,7 @@ function PlaygroundDivider() {
                             <select
                                 value={textColor}
                                 onChange={(e) =>
-                                    setTextColor(
-                                        e.target.value as DividerTextColor,
-                                    )
+                                    setTextColor(e.target.value as Color)
                                 }
                                 style={{
                                     width: "100%",

@@ -2,15 +2,11 @@ import { createLazyFileRoute } from "@tanstack/react-router";
 import { Divider } from "@ui/components/data-display/Divider/Divider";
 import { Button } from "@ui/components/inputs/Button/Button";
 import { Checkbox } from "@ui/components/inputs/Checkbox/Checkbox";
-import type {
-    CheckboxColor,
-    CheckboxSize,
-    CheckboxVariant,
-} from "@ui/components/inputs/Checkbox/Checkbox.types";
+
 import { Stack } from "@ui/components/layout/Stack/Stack";
 import { Paper } from "@ui/components/surfaces/Paper/Paper";
 import { useColorInput } from "@ui/hooks/useColorInput";
-import type { ColorLike } from "@ui/types";
+import type { Color, ColorLike, Size, Variant } from "@ui/types";
 import { randomHexColor } from "@ui/utils/randomHexColor";
 
 import capitalize from "lodash/capitalize";
@@ -25,7 +21,7 @@ export const Route = createLazyFileRoute("/ui/checkbox")({
     component: PlaygroundCheckbox,
 });
 
-const variants = ["solid", "outlined", "plain", "soft"] as CheckboxVariant[];
+const variants = ["solid", "outlined", "plain", "soft"] as Variant[];
 const colors = [
     "primary",
     "neutral",
@@ -33,7 +29,7 @@ const colors = [
     "danger",
     "warning",
     "info",
-] as CheckboxColor[];
+] as Color[];
 
 const iconLibraries = {
     fa: FaIcons,
@@ -42,7 +38,7 @@ const iconLibraries = {
 };
 
 function PlaygroundCheckbox() {
-    const [size, setSize] = useState<CheckboxSize>("md");
+    const [size, setSize] = useState<Size>("md");
     const [disabled, setDisabled] = useState(false);
 
     const [customSize, setCustomSize] = useState(false);
@@ -112,7 +108,7 @@ function PlaygroundCheckbox() {
         handleChange,
         validate,
         setColorDirectly,
-    } = useColorInput<CheckboxColor>();
+    } = useColorInput<Color | ColorLike>();
 
     let checkboxes = [];
 
@@ -251,9 +247,7 @@ function PlaygroundCheckbox() {
                                 type="text"
                                 value={size}
                                 onChange={(e) =>
-                                    setSize(
-                                        e.target.value.trim() as CheckboxSize,
-                                    )
+                                    setSize(e.target.value.trim() as Size)
                                 }
                                 placeholder="Custom size"
                                 style={{
@@ -268,9 +262,7 @@ function PlaygroundCheckbox() {
                             <select
                                 value={size}
                                 onChange={(e) =>
-                                    setSize(
-                                        e.target.value.trim() as CheckboxSize,
-                                    )
+                                    setSize(e.target.value.trim() as Size)
                                 }
                                 style={{
                                     width: "100%",
