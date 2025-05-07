@@ -2,10 +2,8 @@ import { createLazyFileRoute } from "@tanstack/react-router";
 import { type TypographyVariant } from "@ui/components/data-display/Typography/Typography.types";
 import { Stack } from "@ui/components/layout/Stack/Stack";
 import { Paper } from "@ui/components/surfaces/Paper/Paper";
-import { useColorInput } from "@ui/hooks/useColorInput";
-import type { Color, ColorLike } from "@ui/types";
+import type { Color } from "@ui/types";
 import { chunk } from "lodash";
-import { useState } from "react";
 import { Typography } from "../../ui/src/components/data-display/Typography/Typography";
 
 export const Route = createLazyFileRoute("/ui/typography")({
@@ -29,26 +27,10 @@ const colors = [
 ] as Color[];
 
 function PlaygroundTypography() {
-    const [customText, setCustomText] = useState(false);
-
-    const [text, setText] = useState<string | null>(null);
-
-    const [customColors, setCustomColors] = useState<ColorLike[]>([]);
-    const [colorToDelete, setColorToDelete] = useState<ColorLike | null>(null);
-
-    const {
-        inputValue: inputColor,
-        color: customColor,
-        isInvalid,
-        handleChange,
-        validate,
-        setColorDirectly,
-    } = useColorInput<Color | ColorLike>();
-
     let typographies = [];
 
     for (const variant of variants) {
-        for (const color of [...colors, ...customColors]) {
+        for (const color of [...colors]) {
             typographies.push(
                 <Paper
                     key={`${color}-${variant}`}
@@ -57,20 +39,18 @@ function PlaygroundTypography() {
                     spacing={10}
                 >
                     <Typography level="body-md" color={color} variant={variant}>
-                        {text ?? `Typography ${color} ${variant}`}
+                        {`Typography ${color} ${variant}`}
                     </Typography>
                 </Paper>,
             );
         }
     }
 
-    typographies = chunk(typographies, [...colors, ...customColors].length).map(
-        (row, index) => (
-            <Stack key={index} p={20} spacing={10}>
-                {row}
-            </Stack>
-        ),
-    );
+    typographies = chunk(typographies, [...colors].length).map((row, index) => (
+        <Stack key={index} p={20} spacing={10}>
+            {row}
+        </Stack>
+    ));
 
     return (
         <Stack
