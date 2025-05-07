@@ -393,6 +393,7 @@ function PlaygroundButton() {
                                         setIcon(Icon);
                                     }}
                                     style={{
+                                        width: "100%",
                                         padding: 10,
                                         borderRadius: 5,
                                         border: "1px solid #ccc",
