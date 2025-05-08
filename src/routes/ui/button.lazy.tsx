@@ -115,7 +115,7 @@ function PlaygroundButton() {
             </Paper>
             <Paper width={300} alignItems="center" direction="column" p={20}>
                 <Divider>Playground</Divider>
-                <Stack direction="column" spacing={40}>
+                <Stack width="100%" direction="column" spacing={40}>
                     <Stack direction="column" spacing={10}>
                         <label>Variant</label>
                         <RadioButtonGroup
@@ -169,6 +169,7 @@ function PlaygroundButton() {
                                         ? "1px solid red"
                                         : "1px solid #ccc",
                                     backgroundColor: "#f9f9f9",
+                                    width: "100%",
                                 }}
                             />
                         ) : (
@@ -225,6 +226,7 @@ function PlaygroundButton() {
                                         ? "1px solid red"
                                         : "1px solid #ccc",
                                     backgroundColor: "#f9f9f9",
+                                    width: "100%",
                                 }}
                             />
                             <Button
@@ -263,6 +265,7 @@ function PlaygroundButton() {
                                         borderRadius: 5,
                                         border: "1px solid #ccc",
                                         backgroundColor: "#f9f9f9",
+                                        width: "100%",
                                     }}
                                 >
                                     {customColors.map((color) => (
@@ -313,6 +316,7 @@ function PlaygroundButton() {
                                 borderRadius: 5,
                                 border: "1px solid #ccc",
                                 backgroundColor: "#f9f9f9",
+                                width: "100%",
                             }}
                         />
                     </Stack>
