@@ -288,32 +288,7 @@ function PlaygroundDivider() {
                             ))}
                         </RadioButtonGroup>
                     </Stack>
-                    <Stack
-                        justifyContent="center"
-                        alignItems="stretch"
-                        spacing={5}
-                        direction="column"
-                    >
-                        <label>Text</label>
-                        <input
-                            type="text"
-                            value={text ?? ""}
-                            onChange={(e) =>
-                                setText(
-                                    e.target.value.trim() === ""
-                                        ? null
-                                        : e.target.value,
-                                )
-                            }
-                            style={{
-                                padding: 10,
-                                borderRadius: 5,
-                                border: "1px solid #ccc",
-                                backgroundColor: "#f9f9f9",
-                                width: "100%",
-                            }}
-                        />
-                    </Stack>
+
                     <Stack direction="column" spacing={5}>
                         <Stack
                             direction="row"
@@ -427,6 +402,32 @@ function PlaygroundDivider() {
                                 ))}
                             </select>
                         )}
+                    </Stack>
+                    <Stack
+                        justifyContent="center"
+                        alignItems="stretch"
+                        spacing={5}
+                        direction="column"
+                    >
+                        <label>Text</label>
+                        <input
+                            type="text"
+                            value={text ?? ""}
+                            onChange={(e) =>
+                                setText(
+                                    e.target.value.trim() === ""
+                                        ? null
+                                        : e.target.value,
+                                )
+                            }
+                            style={{
+                                padding: 10,
+                                borderRadius: 5,
+                                border: "1px solid #ccc",
+                                backgroundColor: "#f9f9f9",
+                                width: "100%",
+                            }}
+                        />
                     </Stack>
                 </Stack>
             </Paper>
