@@ -21,7 +21,7 @@ export const Route = createLazyFileRoute("/ui/button")({
     component: PlaygroundButton,
 });
 
-const variants = ["plain", "solid", "outlined", "soft"] as Variant[];
+const variants = ["solid", "outlined", "plain", "soft"] as Variant[];
 
 const colors = [
     "primary",
@@ -98,16 +98,14 @@ function PlaygroundButton() {
     return (
         <Stack
             pt={40}
-            width="100%"
             spacing={20}
             direction="row"
-            justifyContent="center"
+            justifyContent="space-around"
         >
             <Paper
                 direction="row"
                 alignItems="flex-start"
                 alignContent="flex-start"
-                justifyContent="center"
                 wrap="wrap"
                 p={20}
                 spacing={5}
