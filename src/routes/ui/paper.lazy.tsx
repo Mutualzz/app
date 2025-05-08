@@ -1,21 +1,30 @@
 import { createLazyFileRoute } from "@tanstack/react-router";
-import { Divider } from "@ui/components/data-display/Divider/Divider";
-import { Button } from "@ui/components/inputs/Button/Button";
-import { Checkbox } from "@ui/components/inputs/Checkbox/Checkbox";
-import { Stack } from "@ui/components/layout/Stack/Stack";
-import { Paper } from "@ui/components/surfaces/Paper/Paper";
 import type { PaperVariant } from "@ui/components/surfaces/Paper/Paper.types";
 import { useColorInput } from "@ui/hooks/useColorInput";
-import type { Color, ColorLike } from "@ui/types";
-import { randomHexColor } from "@ui/utils/randomHexColor";
-import { chunk } from "lodash";
+import {
+    Button,
+    Divider,
+    Paper,
+    RadioButton,
+    RadioButtonGroup,
+    randomHexColor,
+    Stack,
+} from "@ui/index";
+import { type Color, type ColorLike } from "@ui/types";
+import { capitalize } from "lodash";
 import { useState } from "react";
 
 export const Route = createLazyFileRoute("/ui/paper")({
     component: PlaygroundPaper,
 });
 
-const variants = ["solid", "outlined", "plain", "soft"] as PaperVariant[];
+const variants = [
+    "solid",
+    "outlined",
+    "plain",
+    "soft",
+    "elevation",
+] as PaperVariant[];
 const colors = [
     "primary",
     "neutral",
@@ -26,18 +35,15 @@ const colors = [
 ] as Color[];
 
 function PlaygroundPaper() {
+    const [variant, setVariant] = useState<PaperVariant>("solid");
+    const [text, setText] = useState<string | null>(null);
+    const [elevation, setElevation] = useState<number>(1);
+
     const [customColors, setCustomColors] = useState<ColorLike[]>([]);
     const [colorToDelete, setColorToDelete] = useState<ColorLike | null>(null);
 
-    const [customText, setCustomText] = useState(false);
-    const [showColored, setShowColored] = useState(true);
-
-    const [elevation, setElevation] = useState(1);
-
-    const [text, setText] = useState<string | null>(null);
-
     const {
-        inputValue: inputColor,
+        inputValue: inputColorValue,
         color: customColor,
         isInvalid,
         handleChange,
@@ -45,175 +51,88 @@ function PlaygroundPaper() {
         setColorDirectly,
     } = useColorInput<Color | ColorLike>();
 
-    let papersColored = [];
-
-    for (const color of [...colors, ...customColors]) {
-        for (const variant of variants) {
-            papersColored.push(
-                <Paper
-                    key={`${color}-${variant}`}
-                    variant={variant}
-                    color={color}
-                    width={200}
-                    height={100}
-                    m={10}
-                    justifyContent="center"
-                    alignItems="center"
-                >
-                    {text ?? `${color} ${variant}`}
-                </Paper>,
-            );
-        }
-    }
-
-    papersColored = chunk(papersColored, variants.length).map((row, index) => (
-        <Stack key={index} spacing={10}>
-            {row}
-        </Stack>
+    const papers = [...colors, ...customColors].map((color) => (
+        <Paper
+            key={`${variant}-${color}-button`}
+            variant={variant}
+            color={color}
+            width={150}
+            height={75}
+            justifyContent="center"
+            alignItems="center"
+        >
+            {text ?? `${capitalize(variant)} ${capitalize(color)}`}
+        </Paper>
     ));
 
     return (
         <Stack
             pt={40}
-            pr={20}
-            width="100%"
             spacing={20}
             direction="row"
-            justifyContent="center"
+            justifyContent="space-around"
         >
             <Paper
-                direction="column"
-                justifyContent="center"
-                alignItems="center"
+                direction="row"
+                alignItems={variant === "elevation" ? "center" : "flex-start"}
+                alignContent={variant === "elevation" ? "center" : "flex-start"}
+                wrap="wrap"
                 p={20}
                 spacing={5}
-                width="100%"
+                width={1200}
+                justifyContent={
+                    variant === "elevation" ? "center" : "flex-start"
+                }
             >
-                {showColored ? (
-                    papersColored
-                ) : (
+                {variant !== "elevation" && papers}
+                {variant === "elevation" && (
                     <Paper
-                        width={400}
+                        variant={variant}
+                        elevation={elevation}
+                        width={500}
                         height={400}
-                        m={10}
                         justifyContent="center"
                         alignItems="center"
-                        variant="elevation"
-                        elevation={elevation}
                     >
-                        {text ?? `Elevation ${elevation}`}
+                        {text ?? `${capitalize(variant)} ${elevation}`}
                     </Paper>
                 )}
             </Paper>
-            <Paper direction="column" p={20} spacing={5}>
-                <h2
-                    css={{
-                        textAlign: "center",
-                    }}
-                >
-                    Customization
-                </h2>
-                <Stack justifyContent="center" direction="column" spacing={10}>
-                    <Stack
-                        spacing={5}
-                        justifyContent="center"
-                        alignItems="center"
-                        direction="column"
-                    >
-                        <Divider>Properties</Divider>
-                        <Stack spacing={5} direction="column">
-                            <Checkbox
-                                variant="outlined"
-                                checked={showColored}
-                                onChange={() => {
-                                    setShowColored((prev) => !prev);
-                                    setText(null);
-                                }}
-                                label="Show Colored"
-                            />
-
-                            {!showColored && (
-                                <input
-                                    type="number"
-                                    value={elevation}
-                                    min={0}
-                                    max={4}
-                                    onChange={(e) =>
-                                        e.target.value.trim() === ""
-                                            ? setElevation(0)
-                                            : setElevation(
-                                                  Math.max(
-                                                      0,
-                                                      Math.min(
-                                                          4,
-                                                          parseInt(
-                                                              e.target.value,
-                                                          ),
-                                                      ),
-                                                  ),
-                                              )
-                                    }
-                                    placeholder="Elevation"
-                                    style={{
-                                        width: "100%",
-                                        padding: 10,
-                                        borderRadius: 5,
-                                        border: "1px solid #ccc",
-                                        backgroundColor: "#f9f9f9",
-                                    }}
-                                />
-                            )}
-                        </Stack>
-
-                        <Stack
-                            justifyContent="center"
-                            alignItems="center"
-                            direction="column"
-                            spacing={5}
-                            width="100%"
+            <Paper width={300} alignItems="center" direction="column" p={20}>
+                <Divider>Playground</Divider>
+                <Stack width="100%" direction="column" spacing={40}>
+                    <Stack direction="column" spacing={10}>
+                        <label>Variant</label>
+                        <RadioButtonGroup
+                            onChange={(_, vriant) =>
+                                setVariant(vriant as PaperVariant)
+                            }
+                            value={variant}
+                            name="variants"
                         >
-                            <Checkbox
-                                variant="outlined"
-                                checked={customText}
-                                onChange={() => {
-                                    setCustomText((prev) => !prev);
-                                    setText(null);
-                                }}
-                                label="Custom Text"
-                            />
-
-                            {customText && (
-                                <input
-                                    type="text"
-                                    value={text ?? ""}
-                                    disabled={!customText}
-                                    onChange={(e) =>
-                                        setText(e.target.value.trim())
-                                    }
-                                    placeholder="Custom text"
-                                    style={{
-                                        width: "100%",
-                                        padding: 10,
-                                        borderRadius: 5,
-                                        border: "1px solid #ccc",
-                                        backgroundColor: "#f9f9f9",
-                                    }}
+                            {variants.map((v) => (
+                                <RadioButton
+                                    key={v}
+                                    value={v}
+                                    label={capitalize(v)}
+                                    checked={variant === v}
+                                    color="neutral"
+                                    onChange={() => setVariant(v)}
                                 />
-                            )}
-                        </Stack>
+                            ))}
+                        </RadioButtonGroup>
                     </Stack>
-
-                    {showColored && (
-                        <Stack
-                            justifyContent="center"
-                            direction="column"
-                            spacing={5}
-                        >
-                            <Divider>Custom Colors</Divider>
-                            <Stack alignItems="center" spacing={10}>
+                    {variant !== "elevation" && (
+                        <Stack direction="column" spacing={10}>
+                            <label>Custom Color</label>
+                            <Stack
+                                alignContent="center"
+                                direction="row"
+                                spacing={5}
+                            >
                                 <input
                                     type="text"
-                                    value={inputColor}
+                                    value={inputColorValue}
                                     placeholder="Input custom color"
                                     onChange={(e) =>
                                         handleChange(e.target.value)
@@ -226,10 +145,10 @@ function PlaygroundPaper() {
                                             ? "1px solid red"
                                             : "1px solid #ccc",
                                         backgroundColor: "#f9f9f9",
+                                        width: "100%",
                                     }}
                                 />
                                 <Button
-                                    variant="soft"
                                     color="primary"
                                     disabled={!customColor}
                                     onClick={() => {
@@ -276,7 +195,6 @@ function PlaygroundPaper() {
                                         ))}
                                     </select>
                                     <Button
-                                        variant="soft"
                                         color="danger"
                                         onClick={() => {
                                             setCustomColors((prev) => {
@@ -301,6 +219,54 @@ function PlaygroundPaper() {
                             )}
                         </Stack>
                     )}
+                    {variant === "elevation" && (
+                        <Stack direction="column" spacing={10}>
+                            <label>Elevation</label>
+                            <input
+                                type="number"
+                                value={elevation}
+                                placeholder="Input elevation"
+                                min={1}
+                                max={5}
+                                onChange={(e) =>
+                                    setElevation(
+                                        e.target.value.trim() === ""
+                                            ? 0
+                                            : parseInt(e.target.value),
+                                    )
+                                }
+                                style={{
+                                    padding: 10,
+                                    borderRadius: 5,
+                                    border: "1px solid #ccc",
+                                    backgroundColor: "#f9f9f9",
+                                    width: "100%",
+                                }}
+                            />
+                        </Stack>
+                    )}
+                    <Stack direction="column" spacing={5}>
+                        <label>Text</label>
+                        <input
+                            type="text"
+                            value={text ?? ""}
+                            placeholder="Input button text"
+                            onChange={(e) =>
+                                setText(
+                                    e.target.value.trim() === ""
+                                        ? null
+                                        : e.target.value,
+                                )
+                            }
+                            style={{
+                                padding: 10,
+                                borderRadius: 5,
+                                border: "1px solid #ccc",
+                                backgroundColor: "#f9f9f9",
+                                width: "100%",
+                            }}
+                        />
+                    </Stack>
                 </Stack>
             </Paper>
         </Stack>
