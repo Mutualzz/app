@@ -10,12 +10,12 @@ import type { Color, ColorLike, Size, Variant } from "@ui/types";
 import capitalize from "lodash/capitalize";
 import { type ReactNode, useState } from "react";
 
+import { RadioButton } from "@ui/components/inputs/RadioButton/RadioButton";
+import { RadioButtonGroup } from "@ui/components/inputs/RadioButton/RadioButtonGroup";
 import { randomHexColor } from "@ui/utils";
 import * as AiIcons from "react-icons/ai";
 import * as FaIcons from "react-icons/fa";
 import * as MdIcons from "react-icons/md";
-import { RadioButton } from "../../ui/src/components/inputs/RadioButton/RadioButton";
-import { RadioButtonGroup } from "../../ui/src/components/inputs/RadioButton/RadioButtonGroup";
 
 export const Route = createLazyFileRoute("/ui/button")({
     component: PlaygroundButton,
