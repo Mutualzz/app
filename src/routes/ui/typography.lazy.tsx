@@ -159,7 +159,6 @@ function PlaygroundTypography() {
                                 <input
                                     type="text"
                                     value={inputColorValue}
-                                    placeholder="Input custom color"
                                     onChange={(e) =>
                                         handleChange(e.target.value)
                                     }

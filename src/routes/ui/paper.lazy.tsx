@@ -133,7 +133,6 @@ function PlaygroundPaper() {
                                 <input
                                     type="text"
                                     value={inputColorValue}
-                                    placeholder="Input custom color"
                                     onChange={(e) =>
                                         handleChange(e.target.value)
                                     }
@@ -225,7 +224,6 @@ function PlaygroundPaper() {
                             <input
                                 type="number"
                                 value={elevation}
-                                placeholder="Input elevation"
                                 min={1}
                                 max={5}
                                 onChange={(e) =>
@@ -250,7 +248,6 @@ function PlaygroundPaper() {
                         <input
                             type="text"
                             value={text ?? ""}
-                            placeholder="Input button text"
                             onChange={(e) =>
                                 setText(
                                     e.target.value.trim() === ""

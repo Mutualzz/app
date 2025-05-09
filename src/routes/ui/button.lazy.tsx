@@ -158,7 +158,6 @@ function PlaygroundButton() {
                                 value={size}
                                 min={10}
                                 max={24}
-                                placeholder="Input custom size"
                                 onChange={(e) =>
                                     setSize(Number(e.target.value))
                                 }
@@ -216,7 +215,6 @@ function PlaygroundButton() {
                             <input
                                 type="text"
                                 value={inputColorValue}
-                                placeholder="Input custom color"
                                 onChange={(e) => handleChange(e.target.value)}
                                 onBlur={validate}
                                 style={{
@@ -303,7 +301,6 @@ function PlaygroundButton() {
                         <input
                             type="text"
                             value={text ?? ""}
-                            placeholder="Input button text"
                             onChange={(e) =>
                                 setText(
                                     e.target.value.trim() === ""
