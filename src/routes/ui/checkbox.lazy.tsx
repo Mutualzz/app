@@ -1,21 +1,19 @@
 import { createLazyFileRoute } from "@tanstack/react-router";
-import { Divider } from "@ui/components/data-display/Divider/Divider";
-import { Button } from "@ui/components/inputs/Button/Button";
-import { Checkbox } from "@ui/components/inputs/Checkbox/Checkbox";
+import {
+    Button,
+    Checkbox,
+    Divider,
+    Paper,
+    RadioButton,
+    RadioButtonGroup,
+    randomHexColor,
+    Stack,
+    useColorInput,
+} from "@ui/index";
 
-import { Stack } from "@ui/components/layout/Stack/Stack";
-import { Paper } from "@ui/components/surfaces/Paper/Paper";
-import { useColorInput } from "@ui/hooks/useColorInput";
-import type { Color, ColorLike, Size, Variant } from "@ui/types";
-import { randomHexColor } from "@ui/utils/randomHexColor";
-
+import { type Color, type ColorLike, type Size, type Variant } from "@ui/types";
 import capitalize from "lodash/capitalize";
-import chunk from "lodash/chunk";
 import { useState } from "react";
-
-import * as FaIcons from "react-icons/fa";
-import * as IoIcons from "react-icons/io";
-import * as MdIcons from "react-icons/md";
 
 export const Route = createLazyFileRoute("/ui/checkbox")({
     component: PlaygroundCheckbox,
@@ -31,78 +29,29 @@ const colors = [
     "info",
 ] as Color[];
 
-const iconLibraries = {
-    fa: FaIcons,
-    md: MdIcons,
-    io: IoIcons,
+const sizeNames = {
+    sm: "Small",
+    md: "Medium",
+    lg: "Large",
 };
 
+// TODO: Work on adding icons
 function PlaygroundCheckbox() {
-    const [size, setSize] = useState<Size>("md");
+    const [variant, setVariant] = useState<Variant>("solid");
+    const [label, setLabel] = useState<string | null>(null);
+    const [size, setSize] = useState<Size | number>("md");
     const [disabled, setDisabled] = useState(false);
 
-    const [customSize, setCustomSize] = useState(false);
-    const [customLabel, setCustomLabel] = useState(false);
+    const [checked, setChecked] = useState(false);
+    const [indeterminate, setIndeterminate] = useState(false);
 
-    const [label, setLabel] = useState<string | null>(null);
+    const [customSizeToggle, setCustomSizeToggle] = useState(false);
 
     const [customColors, setCustomColors] = useState<ColorLike[]>([]);
     const [colorToDelete, setColorToDelete] = useState<ColorLike | null>(null);
 
-    const [checked, setChecked] = useState<true | undefined>();
-    const [indeterminate, setIndeterminate] = useState(false);
-
-    const [checkedLibrary, setCheckLibrary] = useState<
-        keyof typeof iconLibraries | null
-    >(null);
-    const [checkedIconName, setCheckedIconName] = useState<string | null>(null);
-
-    const [uncheckedLibrary, setUncheckedLibrary] = useState<
-        keyof typeof iconLibraries | null
-    >(null);
-    const [uncheckedIconName, setUncheckedIconName] = useState<string | null>(
-        null,
-    );
-
-    const [indeterminateLibrary, setIndeterminateLibrary] = useState<
-        keyof typeof iconLibraries | null
-    >(null);
-    const [indeterminateIconName, setIndeterminateIconName] = useState<
-        string | null
-    >(null);
-
-    const SelectedCheckedIcon =
-        checkedLibrary && checkedIconName
-            ? (
-                  iconLibraries[checkedLibrary] as Record<
-                      string,
-                      React.ComponentType<any>
-                  >
-              )[checkedIconName]
-            : null;
-
-    const SelectedUncheckedIcon =
-        uncheckedLibrary && uncheckedIconName
-            ? (
-                  iconLibraries[uncheckedLibrary] as Record<
-                      string,
-                      React.ComponentType<any>
-                  >
-              )[uncheckedIconName]
-            : null;
-
-    const SelectedIndeterminateIcon =
-        indeterminateLibrary && indeterminateIconName
-            ? (
-                  iconLibraries[indeterminateLibrary] as Record<
-                      string,
-                      React.ComponentType<any>
-                  >
-              )[indeterminateIconName]
-            : null;
-
     const {
-        inputValue: inputColor,
+        inputValue: inputColorValue,
         color: customColor,
         isInvalid,
         handleChange,
@@ -110,185 +59,143 @@ function PlaygroundCheckbox() {
         setColorDirectly,
     } = useColorInput<Color | ColorLike>();
 
-    let checkboxes = [];
-
-    for (const color of [...colors, ...customColors]) {
-        for (const variant of variants) {
-            checkboxes.push(
-                <Checkbox
-                    key={`${variant}-${color}-checkbox`}
-                    variant={variant}
-                    color={color}
-                    checked={checked}
-                    indeterminate={indeterminate}
-                    size={size}
-                    label={
-                        label ?? `${capitalize(variant)} ${capitalize(color)}`
-                    }
-                    disabled={disabled}
-                    checkedIcon={SelectedCheckedIcon && <SelectedCheckedIcon />}
-                    uncheckedIcon={
-                        SelectedUncheckedIcon && <SelectedUncheckedIcon />
-                    }
-                    indeterminateIcon={
-                        SelectedIndeterminateIcon && (
-                            <SelectedIndeterminateIcon />
-                        )
-                    }
-                />,
-            );
-        }
-    }
-
-    checkboxes = chunk(checkboxes, variants.length).map((row, index) => (
-        <Stack key={index} p={20} spacing={10}>
-            {row}
-        </Stack>
+    const checkboxes = [...colors, ...customColors].map((color) => (
+        <Checkbox
+            key={color}
+            label={label ?? `${capitalize(variant)} ${capitalize(color)}`}
+            checked={checked}
+            variant={variant}
+            color={color}
+            indeterminate={indeterminate}
+            size={size}
+            disabled={disabled}
+        />
     ));
 
     return (
         <Stack
             pt={40}
-            width="100%"
             spacing={20}
             direction="row"
-            justifyContent="center"
+            justifyContent="space-around"
         >
-            <Paper direction="column" alignItems="center" p={20} spacing={5}>
-                <Stack direction="column">{checkboxes}</Stack>
+            <Paper
+                direction="row"
+                alignItems="flex-start"
+                alignContent="flex-start"
+                wrap="wrap"
+                p={20}
+                spacing={5}
+                width={1200}
+            >
+                {checkboxes}
             </Paper>
-            <Paper direction="column" p={20} spacing={5}>
-                <h2
-                    css={{
-                        textAlign: "center",
-                    }}
-                >
-                    Customization
-                </h2>
-                <Stack justifyContent="center" direction="column" spacing={10}>
-                    <Divider>States</Divider>
-                    <Button
-                        onClick={() =>
-                            setChecked((prev) =>
-                                prev === undefined ? true : undefined,
-                            )
-                        }
-                        variant="soft"
-                        color={checked ? "danger" : "success"}
-                        size="md"
-                    >
-                        {checked ? "Uncheck" : "Check"} Checkbox
-                    </Button>
-                    <Button
-                        onClick={() => setIndeterminate((prev) => !prev)}
-                        variant="soft"
-                        color={indeterminate ? "danger" : "success"}
-                        size="md"
-                    >
-                        Turn {indeterminate ? "Off" : "On"} Indeterminate
-                    </Button>
-                    <Button
-                        onClick={() => setDisabled((prev) => !prev)}
-                        variant="soft"
-                        color={disabled ? "danger" : "success"}
-                        size="md"
-                    >
-                        Turn {disabled ? "Off" : "On"} Disabled
-                    </Button>
-                    <Stack
-                        spacing={5}
-                        justifyContent="center"
-                        alignItems="center"
-                        direction="column"
-                    >
-                        <Divider>Properties</Divider>
-                        <Checkbox
-                            variant="outlined"
-                            checked={customLabel}
-                            onChange={() => {
-                                setCustomLabel((prev) => !prev);
-                                setLabel(null);
-                            }}
-                            label="Custom Label"
-                        />
-
-                        {customLabel && (
-                            <input
-                                type="text"
-                                value={label ?? ""}
-                                disabled={!customLabel}
-                                onChange={(e) =>
-                                    setLabel(e.target.value.trim())
+            <Paper width={300} alignItems="center" direction="column" p={20}>
+                <Divider>Playground</Divider>
+                <Stack width="100%" direction="column" spacing={40}>
+                    <Stack direction="column" spacing={10}>
+                        <label>Variant</label>
+                        <RadioButtonGroup
+                            onChange={(_, vriant) =>
+                                setVariant(vriant as Variant)
+                            }
+                            value={variant}
+                            name="variants"
+                        >
+                            {variants.map((v) => (
+                                <RadioButton
+                                    key={v}
+                                    value={v}
+                                    label={capitalize(v)}
+                                    checked={variant === v}
+                                    color="neutral"
+                                    onChange={() => setVariant(v)}
+                                />
+                            ))}
+                        </RadioButtonGroup>
+                    </Stack>
+                    <Stack direction="column" spacing={5}>
+                        <Stack
+                            direction="row"
+                            justifyContent="space-between"
+                            spacing={5}
+                        >
+                            <label>Size</label>
+                            <Checkbox
+                                checked={customSizeToggle}
+                                label="Custom Size"
+                                onChange={() =>
+                                    setCustomSizeToggle((prev) => !prev)
                                 }
-                                placeholder="Custom Label"
-                                style={{
-                                    width: "100%",
-                                    padding: 10,
-                                    borderRadius: 5,
-                                    border: "1px solid #ccc",
-                                    backgroundColor: "#f9f9f9",
-                                }}
                             />
-                        )}
-
-                        {!customLabel && <Divider />}
-
-                        <Checkbox
-                            label="Custom Size"
-                            variant="outlined"
-                            checked={customSize}
-                            onChange={() => {
-                                setCustomSize((prev) => !prev);
-                                setSize("md");
-                            }}
-                        />
-                        {customSize ? (
+                        </Stack>
+                        {customSizeToggle ? (
                             <input
-                                type="text"
+                                type="number"
                                 value={size}
+                                min={10}
+                                max={24}
                                 onChange={(e) =>
-                                    setSize(e.target.value.trim() as Size)
+                                    setSize(Number(e.target.value))
                                 }
-                                placeholder="Custom size"
                                 style={{
-                                    width: "100%",
                                     padding: 10,
                                     borderRadius: 5,
-                                    border: "1px solid #ccc",
+                                    border: isInvalid
+                                        ? "1px solid red"
+                                        : "1px solid #ccc",
                                     backgroundColor: "#f9f9f9",
+                                    width: "100%",
                                 }}
                             />
                         ) : (
-                            <select
-                                value={size}
-                                onChange={(e) =>
-                                    setSize(e.target.value.trim() as Size)
-                                }
-                                style={{
-                                    width: "100%",
-                                    padding: 10,
-                                    borderRadius: 5,
-                                    border: "1px solid #ccc",
-                                    backgroundColor: "#f9f9f9",
-                                }}
+                            <RadioButtonGroup
+                                onChange={(_, size) => setSize(size as Size)}
+                                value={size as Size}
+                                name="sizes"
+                                row
                             >
-                                <option value="sm">Small</option>
-                                <option value="md">Medium</option>
-                                <option value="lg">Large</option>
-                            </select>
+                                {Object.keys(sizeNames).map((s) => (
+                                    <RadioButton
+                                        key={s}
+                                        value={s}
+                                        label={sizeNames[s as Size]}
+                                        checked={size === s}
+                                        color="neutral"
+                                        onChange={() => setSize(s as Size)}
+                                    />
+                                ))}
+                            </RadioButtonGroup>
                         )}
                     </Stack>
-                    <Stack
-                        justifyContent="center"
-                        direction="column"
-                        spacing={5}
-                    >
-                        <Divider>Custom Colors</Divider>
-                        <Stack alignItems="center" spacing={10}>
+                    <Stack direction="column" spacing={5}>
+                        <Checkbox
+                            checked={checked}
+                            label="Checked"
+                            onChange={() => setChecked((prev) => !prev)}
+                            disabled={disabled}
+                        />
+                        <Checkbox
+                            checked={indeterminate}
+                            label="Indeterminate"
+                            onChange={() => setIndeterminate((prev) => !prev)}
+                        />
+                        <Checkbox
+                            checked={disabled}
+                            label="Disabled"
+                            onChange={() => setDisabled((prev) => !prev)}
+                        />
+                    </Stack>
+                    <Stack direction="column" spacing={10}>
+                        <label>Custom Color</label>
+                        <Stack
+                            alignContent="center"
+                            direction="row"
+                            spacing={5}
+                        >
                             <input
                                 type="text"
-                                value={inputColor}
-                                placeholder="Input custom color"
+                                value={inputColorValue}
                                 onChange={(e) => handleChange(e.target.value)}
                                 onBlur={validate}
                                 style={{
@@ -298,10 +205,10 @@ function PlaygroundCheckbox() {
                                         ? "1px solid red"
                                         : "1px solid #ccc",
                                     backgroundColor: "#f9f9f9",
+                                    width: "100%",
                                 }}
                             />
                             <Button
-                                variant="soft"
                                 color="primary"
                                 disabled={!customColor}
                                 onClick={() => {
@@ -337,6 +244,7 @@ function PlaygroundCheckbox() {
                                         borderRadius: 5,
                                         border: "1px solid #ccc",
                                         backgroundColor: "#f9f9f9",
+                                        width: "100%",
                                     }}
                                 >
                                     {customColors.map((color) => (
@@ -346,7 +254,6 @@ function PlaygroundCheckbox() {
                                     ))}
                                 </select>
                                 <Button
-                                    variant="soft"
                                     color="danger"
                                     onClick={() => {
                                         setCustomColors((prev) => {
@@ -370,20 +277,16 @@ function PlaygroundCheckbox() {
                             </Stack>
                         )}
                     </Stack>
-                    <Divider>Checked Icon</Divider>
-
-                    <Stack
-                        justifyContent="center"
-                        direction="column"
-                        spacing={5}
-                    >
-                        <label>Choose Icon Library:</label>
-                        <select
-                            value={checkedLibrary ?? ""}
+                    <Stack direction="column" spacing={5}>
+                        <label>Label</label>
+                        <input
+                            type="text"
+                            value={label ?? ""}
                             onChange={(e) =>
-                                setCheckLibrary(
-                                    e.target
-                                        .value as keyof typeof iconLibraries,
+                                setLabel(
+                                    e.target.value.trim() === ""
+                                        ? null
+                                        : e.target.value,
                                 )
                             }
                             style={{
@@ -391,158 +294,9 @@ function PlaygroundCheckbox() {
                                 borderRadius: 5,
                                 border: "1px solid #ccc",
                                 backgroundColor: "#f9f9f9",
+                                width: "100%",
                             }}
-                        >
-                            <option value="">None</option>
-                            {Object.keys(iconLibraries).map((lib) => (
-                                <option key={lib} value={lib}>
-                                    {capitalize(lib)}
-                                </option>
-                            ))}
-                        </select>
-
-                        {checkedLibrary && (
-                            <>
-                                <label>Choose Icon:</label>
-                                <select
-                                    value={checkedIconName ?? ""}
-                                    onChange={(e) =>
-                                        setCheckedIconName(e.target.value)
-                                    }
-                                    style={{
-                                        padding: 10,
-                                        borderRadius: 5,
-                                        border: "1px solid #ccc",
-                                        backgroundColor: "#f9f9f9",
-                                    }}
-                                >
-                                    <option value="">None</option>
-                                    {Object.keys(
-                                        iconLibraries[checkedLibrary],
-                                    ).map((iconName) => (
-                                        <option key={iconName} value={iconName}>
-                                            {iconName}
-                                        </option>
-                                    ))}
-                                </select>
-                            </>
-                        )}
-                    </Stack>
-                    <Divider>Unchecked Icon</Divider>
-
-                    <Stack
-                        justifyContent="center"
-                        direction="column"
-                        spacing={5}
-                    >
-                        <label>Choose Icon Library:</label>
-                        <select
-                            value={uncheckedLibrary ?? ""}
-                            onChange={(e) =>
-                                setUncheckedLibrary(
-                                    e.target
-                                        .value as keyof typeof iconLibraries,
-                                )
-                            }
-                            style={{
-                                padding: 10,
-                                borderRadius: 5,
-                                border: "1px solid #ccc",
-                                backgroundColor: "#f9f9f9",
-                            }}
-                        >
-                            <option value="">None</option>
-                            {Object.keys(iconLibraries).map((lib) => (
-                                <option key={lib} value={lib}>
-                                    {capitalize(lib)}
-                                </option>
-                            ))}
-                        </select>
-
-                        {uncheckedLibrary && (
-                            <>
-                                <label>Choose Icon:</label>
-                                <select
-                                    value={uncheckedIconName ?? ""}
-                                    onChange={(e) =>
-                                        setUncheckedIconName(e.target.value)
-                                    }
-                                    style={{
-                                        padding: 10,
-                                        borderRadius: 5,
-                                        border: "1px solid #ccc",
-                                        backgroundColor: "#f9f9f9",
-                                    }}
-                                >
-                                    <option value="">None</option>
-                                    {Object.keys(
-                                        iconLibraries[uncheckedLibrary],
-                                    ).map((iconName) => (
-                                        <option key={iconName} value={iconName}>
-                                            {iconName}
-                                        </option>
-                                    ))}
-                                </select>
-                            </>
-                        )}
-                    </Stack>
-                    <Divider>Indeterminate Icon</Divider>
-
-                    <Stack
-                        justifyContent="center"
-                        direction="column"
-                        spacing={5}
-                    >
-                        <label>Choose Icon Library:</label>
-                        <select
-                            value={indeterminateLibrary ?? ""}
-                            onChange={(e) =>
-                                setIndeterminateLibrary(
-                                    e.target
-                                        .value as keyof typeof iconLibraries,
-                                )
-                            }
-                            style={{
-                                padding: 10,
-                                borderRadius: 5,
-                                border: "1px solid #ccc",
-                                backgroundColor: "#f9f9f9",
-                            }}
-                        >
-                            <option value="">None</option>
-                            {Object.keys(iconLibraries).map((lib) => (
-                                <option key={lib} value={lib}>
-                                    {capitalize(lib)}
-                                </option>
-                            ))}
-                        </select>
-
-                        {indeterminateLibrary && (
-                            <>
-                                <label>Choose Icon:</label>
-                                <select
-                                    value={indeterminateIconName ?? ""}
-                                    onChange={(e) =>
-                                        setIndeterminateIconName(e.target.value)
-                                    }
-                                    style={{
-                                        padding: 10,
-                                        borderRadius: 5,
-                                        border: "1px solid #ccc",
-                                        backgroundColor: "#f9f9f9",
-                                    }}
-                                >
-                                    <option value="">None</option>
-                                    {Object.keys(
-                                        iconLibraries[indeterminateLibrary],
-                                    ).map((iconName) => (
-                                        <option key={iconName} value={iconName}>
-                                            {iconName}
-                                        </option>
-                                    ))}
-                                </select>
-                            </>
-                        )}
+                        />
                     </Stack>
                 </Stack>
             </Paper>
