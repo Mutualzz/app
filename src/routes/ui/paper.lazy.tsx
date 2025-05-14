@@ -56,8 +56,7 @@ function PlaygroundPaper() {
             key={`${variant}-${color}-button`}
             variant={variant}
             color={color}
-            width={150}
-            height={75}
+            p={20}
             justifyContent="center"
             alignItems="center"
         >

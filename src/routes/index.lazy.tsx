@@ -3,6 +3,7 @@ import {
     Outlet,
     useNavigate,
 } from "@tanstack/react-router";
+import { Typography } from "@ui/components/data-display/Typography/Typography";
 
 import { Button } from "@ui/components/inputs/Button/Button";
 import { Stack } from "@ui/components/layout/Stack/Stack";
@@ -22,10 +23,13 @@ function Index() {
             spacing={10}
             height="100%"
         >
-            <h1>Website is currently under development</h1>
-            <h2>The UI is being made</h2>
+            <Typography level="h1">
+                Website is currently under development
+            </Typography>
+            <Typography level="h4">The UI is being made</Typography>
             <Stack direction="row" alignItems="center" spacing={5}>
-                <h2>Meanwhile you can,</h2>&nbsp;
+                <Typography level="h5">Meanwhile you can,</Typography>
+                &nbsp;
                 <Button
                     onClick={() => {
                         navigate({
