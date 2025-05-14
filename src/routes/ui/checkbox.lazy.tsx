@@ -15,6 +15,10 @@ import { type Color, type ColorLike, type Size, type Variant } from "@ui/types";
 import capitalize from "lodash/capitalize";
 import { useState } from "react";
 
+import * as FaIcons from "react-icons/fa";
+import * as IoIcons from "react-icons/io";
+import * as MdIcons from "react-icons/md";
+
 export const Route = createLazyFileRoute("/ui/checkbox")({
     component: PlaygroundCheckbox,
 });
@@ -35,7 +39,12 @@ const sizeNames = {
     lg: "Large",
 };
 
-// TODO: Work on adding icons
+const iconLibraries = {
+    fa: FaIcons,
+    md: MdIcons,
+    io: IoIcons,
+};
+
 function PlaygroundCheckbox() {
     const [variant, setVariant] = useState<Variant>("solid");
     const [label, setLabel] = useState<string | null>(null);
@@ -50,6 +59,55 @@ function PlaygroundCheckbox() {
     const [customColors, setCustomColors] = useState<ColorLike[]>([]);
     const [colorToDelete, setColorToDelete] = useState<ColorLike | null>(null);
 
+    const [checkedLibrary, setCheckLibrary] = useState<
+        keyof typeof iconLibraries | null
+    >(null);
+    const [checkedIconName, setCheckedIconName] = useState<string | null>(null);
+
+    const [uncheckedLibrary, setUncheckedLibrary] = useState<
+        keyof typeof iconLibraries | null
+    >(null);
+    const [uncheckedIconName, setUncheckedIconName] = useState<string | null>(
+        null,
+    );
+
+    const [indeterminateLibrary, setIndeterminateLibrary] = useState<
+        keyof typeof iconLibraries | null
+    >(null);
+    const [indeterminateIconName, setIndeterminateIconName] = useState<
+        string | null
+    >(null);
+
+    const SelectedCheckedIcon =
+        checkedLibrary && checkedIconName
+            ? (
+                  iconLibraries[checkedLibrary] as Record<
+                      string,
+                      React.ComponentType<any>
+                  >
+              )[checkedIconName]
+            : null;
+
+    const SelectedUncheckedIcon =
+        uncheckedLibrary && uncheckedIconName
+            ? (
+                  iconLibraries[uncheckedLibrary] as Record<
+                      string,
+                      React.ComponentType<any>
+                  >
+              )[uncheckedIconName]
+            : null;
+
+    const SelectedIndeterminateIcon =
+        indeterminateLibrary && indeterminateIconName
+            ? (
+                  iconLibraries[indeterminateLibrary] as Record<
+                      string,
+                      React.ComponentType<any>
+                  >
+              )[indeterminateIconName]
+            : null;
+
     const {
         inputValue: inputColorValue,
         color: customColor,
@@ -63,12 +121,17 @@ function PlaygroundCheckbox() {
         <Checkbox
             key={color}
             label={label ?? `${capitalize(variant)} ${capitalize(color)}`}
-            checked={checked}
+            checked={checked ? true : undefined}
             variant={variant}
             color={color}
             indeterminate={indeterminate}
             size={size}
             disabled={disabled}
+            checkedIcon={SelectedCheckedIcon && <SelectedCheckedIcon />}
+            uncheckedIcon={SelectedUncheckedIcon && <SelectedUncheckedIcon />}
+            indeterminateIcon={
+                SelectedIndeterminateIcon && <SelectedIndeterminateIcon />
+            }
         />
     ));
 
@@ -297,6 +360,180 @@ function PlaygroundCheckbox() {
                                 width: "100%",
                             }}
                         />
+                    </Stack>
+
+                    <Stack
+                        justifyContent="center"
+                        direction="column"
+                        spacing={5}
+                    >
+                        <Divider>Checked Icon</Divider>
+                        <label>Choose Icon Library:</label>
+                        <select
+                            value={checkedLibrary ?? ""}
+                            onChange={(e) =>
+                                setCheckLibrary(
+                                    e.target
+                                        .value as keyof typeof iconLibraries,
+                                )
+                            }
+                            style={{
+                                padding: 10,
+                                borderRadius: 5,
+                                border: "1px solid #ccc",
+                                backgroundColor: "#f9f9f9",
+                            }}
+                        >
+                            <option value="">None</option>
+                            {Object.keys(iconLibraries).map((lib) => (
+                                <option key={lib} value={lib}>
+                                    {capitalize(lib)}
+                                </option>
+                            ))}
+                        </select>
+
+                        {checkedLibrary && (
+                            <>
+                                <label>Choose Icon:</label>
+                                <select
+                                    value={checkedIconName ?? ""}
+                                    onChange={(e) =>
+                                        setCheckedIconName(e.target.value)
+                                    }
+                                    style={{
+                                        padding: 10,
+                                        borderRadius: 5,
+                                        border: "1px solid #ccc",
+                                        backgroundColor: "#f9f9f9",
+                                    }}
+                                >
+                                    <option value="">None</option>
+                                    {Object.keys(
+                                        iconLibraries[checkedLibrary],
+                                    ).map((iconName) => (
+                                        <option key={iconName} value={iconName}>
+                                            {iconName}
+                                        </option>
+                                    ))}
+                                </select>
+                            </>
+                        )}
+                    </Stack>
+
+                    <Stack
+                        justifyContent="center"
+                        direction="column"
+                        spacing={5}
+                    >
+                        <Divider>Unchecked Icon</Divider>
+                        <label>Choose Icon Library:</label>
+                        <select
+                            value={uncheckedLibrary ?? ""}
+                            onChange={(e) =>
+                                setUncheckedLibrary(
+                                    e.target
+                                        .value as keyof typeof iconLibraries,
+                                )
+                            }
+                            style={{
+                                padding: 10,
+                                borderRadius: 5,
+                                border: "1px solid #ccc",
+                                backgroundColor: "#f9f9f9",
+                            }}
+                        >
+                            <option value="">None</option>
+                            {Object.keys(iconLibraries).map((lib) => (
+                                <option key={lib} value={lib}>
+                                    {capitalize(lib)}
+                                </option>
+                            ))}
+                        </select>
+
+                        {uncheckedLibrary && (
+                            <>
+                                <label>Choose Icon:</label>
+                                <select
+                                    value={uncheckedIconName ?? ""}
+                                    onChange={(e) =>
+                                        setUncheckedIconName(e.target.value)
+                                    }
+                                    style={{
+                                        padding: 10,
+                                        borderRadius: 5,
+                                        border: "1px solid #ccc",
+                                        backgroundColor: "#f9f9f9",
+                                    }}
+                                >
+                                    <option value="">None</option>
+                                    {Object.keys(
+                                        iconLibraries[uncheckedLibrary],
+                                    ).map((iconName) => (
+                                        <option key={iconName} value={iconName}>
+                                            {iconName}
+                                        </option>
+                                    ))}
+                                </select>
+                            </>
+                        )}
+                    </Stack>
+
+                    <Stack
+                        justifyContent="center"
+                        direction="column"
+                        spacing={5}
+                    >
+                        <Divider>Indeterminate Icon</Divider>
+                        <label>Choose Icon Library:</label>
+                        <select
+                            value={indeterminateLibrary ?? ""}
+                            onChange={(e) =>
+                                setIndeterminateLibrary(
+                                    e.target
+                                        .value as keyof typeof iconLibraries,
+                                )
+                            }
+                            style={{
+                                padding: 10,
+                                borderRadius: 5,
+                                border: "1px solid #ccc",
+                                backgroundColor: "#f9f9f9",
+                            }}
+                        >
+                            <option value="">None</option>
+                            {Object.keys(iconLibraries).map((lib) => (
+                                <option key={lib} value={lib}>
+                                    {capitalize(lib)}
+                                </option>
+                            ))}
+                        </select>
+
+                        {indeterminateLibrary && (
+                            <>
+                                <label>Choose Icon:</label>
+                                <select
+                                    value={indeterminateIconName ?? ""}
+                                    onChange={(e) =>
+                                        setIndeterminateIconName(e.target.value)
+                                    }
+                                    style={{
+                                        padding: 10,
+                                        borderRadius: 5,
+                                        border: "1px solid #ccc",
+                                        backgroundColor: "#f9f9f9",
+                                    }}
+                                >
+                                    <option value="">None</option>
+                                    {Object.keys(
+                                        iconLibraries[indeterminateLibrary],
+                                    ).map((iconName) => (
+                                        <option key={iconName} value={iconName}>
+                                            {iconName}
+                                        </option>
+                                    ))}
+                                </select>
+                            </>
+                        )}
                     </Stack>
                 </Stack>
             </Paper>
