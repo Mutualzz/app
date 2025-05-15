@@ -14,8 +14,8 @@ import type { Color, ColorLike, Size, Variant } from "@ui/types";
 import capitalize from "lodash/capitalize";
 import { useState } from "react";
 
+import * as AiIcons from "react-icons/ai";
 import * as FaIcons from "react-icons/fa";
-import * as IoIcons from "react-icons/io";
 import * as MdIcons from "react-icons/md";
 
 export const Route = createLazyFileRoute("/ui/radio-button")({
@@ -41,7 +41,13 @@ const sizeNames = {
 const iconLibraries = {
     fa: FaIcons,
     md: MdIcons,
-    io: IoIcons,
+    ai: AiIcons,
+};
+
+const libNames = {
+    fa: "Font Awesome",
+    md: "Material Design",
+    ai: "Ant Design",
 };
 
 function PlaygroundRadioButton() {
@@ -57,20 +63,20 @@ function PlaygroundRadioButton() {
     const [customColors, setCustomColors] = useState<ColorLike[]>([]);
     const [colorToDelete, setColorToDelete] = useState<ColorLike | null>(null);
 
-    const [checkedLibrary, setCheckLibrary] = useState<
-        keyof typeof iconLibraries | null
-    >(null);
+    const [checkedLibrary, setCheckedLibrary] = useState<
+        keyof typeof iconLibraries | "none"
+    >("none");
     const [checkedIconName, setCheckedIconName] = useState<string | null>(null);
 
     const [uncheckedLibrary, setUncheckedLibrary] = useState<
-        keyof typeof iconLibraries | null
-    >(null);
+        keyof typeof iconLibraries | "none"
+    >("none");
     const [uncheckedIconName, setUncheckedIconName] = useState<string | null>(
         null,
     );
 
     const SelectedCheckedIcon =
-        checkedLibrary && checkedIconName
+        checkedLibrary !== "none" && checkedIconName
             ? (
                   iconLibraries[checkedLibrary] as Record<
                       string,
@@ -80,7 +86,7 @@ function PlaygroundRadioButton() {
             : null;
 
     const SelectedUncheckedIcon =
-        uncheckedLibrary && uncheckedIconName
+        uncheckedLibrary !== "none" && uncheckedIconName
             ? (
                   iconLibraries[uncheckedLibrary] as Record<
                       string,
@@ -343,34 +349,45 @@ function PlaygroundRadioButton() {
                         direction="column"
                         spacing={5}
                     >
-                        <Divider>Checked Icon</Divider>
-                        <label>Choose Icon Library:</label>
-                        <select
-                            value={checkedLibrary ?? ""}
-                            onChange={(e) =>
-                                setCheckLibrary(
-                                    e.target
-                                        .value as keyof typeof iconLibraries,
-                                )
-                            }
-                            style={{
-                                padding: 10,
-                                borderRadius: 5,
-                                border: "1px solid #ccc",
-                                backgroundColor: "#f9f9f9",
-                            }}
-                        >
-                            <option value="">None</option>
-                            {Object.keys(iconLibraries).map((lib) => (
-                                <option key={lib} value={lib}>
-                                    {capitalize(lib)}
-                                </option>
-                            ))}
-                        </select>
-
-                        {checkedLibrary && (
-                            <>
-                                <label>Choose Icon:</label>
+                        <label>Checked Icon</label>
+                        <Stack direction="column" spacing={10}>
+                            <RadioButtonGroup
+                                onChange={(_, library) =>
+                                    setCheckedLibrary(
+                                        library as keyof typeof iconLibraries,
+                                    )
+                                }
+                                value={checkedLibrary}
+                                name="libraries"
+                            >
+                                <RadioButton
+                                    key="none"
+                                    value="none"
+                                    label="None"
+                                    checked={checkedLibrary === "none"}
+                                    color="neutral"
+                                    onChange={() => setCheckedLibrary("none")}
+                                />
+                                {Object.keys(iconLibraries).map((lib) => (
+                                    <RadioButton
+                                        key={lib}
+                                        value={lib}
+                                        label={
+                                            libNames[
+                                                lib as keyof typeof libNames
+                                            ]
+                                        }
+                                        checked={checkedLibrary === lib}
+                                        color="neutral"
+                                        onChange={() =>
+                                            setCheckedLibrary(
+                                                lib as keyof typeof iconLibraries,
+                                            )
+                                        }
+                                    />
+                                ))}
+                            </RadioButtonGroup>
+                            {checkedLibrary !== "none" && (
                                 <select
                                     value={checkedIconName ?? ""}
                                     onChange={(e) =>
@@ -383,7 +400,7 @@ function PlaygroundRadioButton() {
                                         backgroundColor: "#f9f9f9",
                                     }}
                                 >
-                                    <option value="">None</option>
+                                    <option value="">Select an icon</option>
                                     {Object.keys(
                                         iconLibraries[checkedLibrary],
                                     ).map((iconName) => (
@@ -392,8 +409,8 @@ function PlaygroundRadioButton() {
                                         </option>
                                     ))}
                                 </select>
-                            </>
-                        )}
+                            )}
+                        </Stack>
                     </Stack>
 
                     <Stack
@@ -401,34 +418,45 @@ function PlaygroundRadioButton() {
                         direction="column"
                         spacing={5}
                     >
-                        <Divider>Unchecked Icon</Divider>
-                        <label>Choose Icon Library:</label>
-                        <select
-                            value={uncheckedLibrary ?? ""}
-                            onChange={(e) =>
-                                setUncheckedLibrary(
-                                    e.target
-                                        .value as keyof typeof iconLibraries,
-                                )
-                            }
-                            style={{
-                                padding: 10,
-                                borderRadius: 5,
-                                border: "1px solid #ccc",
-                                backgroundColor: "#f9f9f9",
-                            }}
-                        >
-                            <option value="">None</option>
-                            {Object.keys(iconLibraries).map((lib) => (
-                                <option key={lib} value={lib}>
-                                    {capitalize(lib)}
-                                </option>
-                            ))}
-                        </select>
-
-                        {uncheckedLibrary && (
-                            <>
-                                <label>Choose Icon:</label>
+                        <label>Unchecked Icon</label>
+                        <Stack direction="column" spacing={10}>
+                            <RadioButtonGroup
+                                onChange={(_, library) =>
+                                    setUncheckedLibrary(
+                                        library as keyof typeof iconLibraries,
+                                    )
+                                }
+                                value={uncheckedLibrary}
+                                name="libraries"
+                            >
+                                <RadioButton
+                                    key="none"
+                                    value="none"
+                                    label="None"
+                                    checked={uncheckedLibrary === "none"}
+                                    color="neutral"
+                                    onChange={() => setUncheckedLibrary("none")}
+                                />
+                                {Object.keys(iconLibraries).map((lib) => (
+                                    <RadioButton
+                                        key={lib}
+                                        value={lib}
+                                        label={
+                                            libNames[
+                                                lib as keyof typeof libNames
+                                            ]
+                                        }
+                                        checked={uncheckedLibrary === lib}
+                                        color="neutral"
+                                        onChange={() =>
+                                            setUncheckedLibrary(
+                                                lib as keyof typeof iconLibraries,
+                                            )
+                                        }
+                                    />
+                                ))}
+                            </RadioButtonGroup>
+                            {uncheckedLibrary !== "none" && (
                                 <select
                                     value={uncheckedIconName ?? ""}
                                     onChange={(e) =>
@@ -441,7 +469,7 @@ function PlaygroundRadioButton() {
                                         backgroundColor: "#f9f9f9",
                                     }}
                                 >
-                                    <option value="">None</option>
+                                    <option value="">Select an icon</option>
                                     {Object.keys(
                                         iconLibraries[uncheckedLibrary],
                                     ).map((iconName) => (
@@ -450,8 +478,8 @@ function PlaygroundRadioButton() {
                                         </option>
                                     ))}
                                 </select>
-                            </>
-                        )}
+                            )}
+                        </Stack>
                     </Stack>
                 </Stack>
             </Paper>
