@@ -15,8 +15,8 @@ import { type Color, type ColorLike, type Size, type Variant } from "@ui/types";
 import capitalize from "lodash/capitalize";
 import { useState } from "react";
 
+import * as AiIcons from "react-icons/ai";
 import * as FaIcons from "react-icons/fa";
-import * as IoIcons from "react-icons/io";
 import * as MdIcons from "react-icons/md";
 
 export const Route = createLazyFileRoute("/ui/checkbox")({
@@ -42,7 +42,13 @@ const sizeNames = {
 const iconLibraries = {
     fa: FaIcons,
     md: MdIcons,
-    io: IoIcons,
+    ai: AiIcons,
+};
+
+const libNames = {
+    fa: "Font Awesome",
+    md: "Material Design",
+    ai: "Ant Design",
 };
 
 function PlaygroundCheckbox() {
@@ -197,7 +203,7 @@ function PlaygroundCheckbox() {
                                 type="number"
                                 value={size}
                                 min={10}
-                                max={24}
+                                max={28}
                                 onChange={(e) =>
                                     setSize(Number(e.target.value))
                                 }
@@ -387,7 +393,7 @@ function PlaygroundCheckbox() {
                             <option value="">None</option>
                             {Object.keys(iconLibraries).map((lib) => (
                                 <option key={lib} value={lib}>
-                                    {capitalize(lib)}
+                                    {libNames[lib as keyof typeof libNames]}
                                 </option>
                             ))}
                         </select>
@@ -445,7 +451,7 @@ function PlaygroundCheckbox() {
                             <option value="">None</option>
                             {Object.keys(iconLibraries).map((lib) => (
                                 <option key={lib} value={lib}>
-                                    {capitalize(lib)}
+                                    {libNames[lib as keyof typeof libNames]}
                                 </option>
                             ))}
                         </select>
@@ -503,7 +509,7 @@ function PlaygroundCheckbox() {
                             <option value="">None</option>
                             {Object.keys(iconLibraries).map((lib) => (
                                 <option key={lib} value={lib}>
-                                    {capitalize(lib)}
+                                    {libNames[lib as keyof typeof libNames]}
                                 </option>
                             ))}
                         </select>
