@@ -355,7 +355,7 @@ function PlaygroundButton() {
                             />
                         </RadioButtonGroup>
                         {iconPosition !== "none" && (
-                            <>
+                            <Stack direction="column" spacing={10}>
                                 <RadioButtonGroup
                                     onChange={(_, library) =>
                                         setIconLibrary(
@@ -411,7 +411,7 @@ function PlaygroundButton() {
                                         </option>
                                     ))}
                                 </select>
-                            </>
+                            </Stack>
                         )}
                     </Stack>
                 </Stack>
