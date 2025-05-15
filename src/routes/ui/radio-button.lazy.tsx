@@ -188,7 +188,7 @@ function PlaygroundRadioButton() {
                                 type="number"
                                 value={size}
                                 min={10}
-                                max={24}
+                                max={28}
                                 onChange={(e) =>
                                     setSize(Number(e.target.value))
                                 }
