@@ -1,18 +1,26 @@
 import { createLazyFileRoute } from "@tanstack/react-router";
-import { Divider } from "@ui/components/data-display/Divider/Divider";
-import { CircularProgress } from "@ui/components/feedback/CircularProgress/CircularProgress";
+import { Typography } from "@ui/components/data-display/Typography/Typography";
 
-import { Button } from "@ui/components/inputs/Button/Button";
-import { Checkbox } from "@ui/components/inputs/Checkbox/Checkbox";
-import { Stack } from "@ui/components/layout/Stack/Stack";
-import { Paper } from "@ui/components/surfaces/Paper/Paper";
 import { useColorInput } from "@ui/hooks/useColorInput";
+import {
+    Button,
+    Checkbox,
+    CircularProgress,
+    Divider,
+    Paper,
+    RadioButton,
+    RadioButtonGroup,
+    randomHexColor,
+    Stack,
+} from "@ui/index";
 import type { Color, ColorLike, Size, Variant } from "@ui/types";
-import { randomHexColor } from "@ui/utils/randomHexColor";
+import { capitalize } from "lodash";
 
-import capitalize from "lodash/capitalize";
-import chunk from "lodash/chunk";
 import { useState } from "react";
+
+export const Route = createLazyFileRoute("/ui/circular-progress")({
+    component: PlaygroundCircularProgress,
+});
 
 const variants = ["solid", "outlined", "plain", "soft"] as Variant[];
 
@@ -25,22 +33,27 @@ const colors = [
     "info",
 ] as Color[];
 
-export const Route = createLazyFileRoute("/ui/circular-progress")({
-    component: PlaygroundCircularProgress,
-});
+const sizeNames = {
+    sm: "Small",
+    md: "Medium",
+    lg: "Large",
+};
 
 function PlaygroundCircularProgress() {
-    const [size, setSize] = useState<Size>("md");
+    const [variant, setVariant] = useState<Variant>("solid");
+    const [text, setText] = useState<string | null>(null);
+    const [size, setSize] = useState<Size | number>("md");
+
     const [determinate, setDeterminate] = useState(false);
     const [value, setValue] = useState(0);
 
-    const [customSize, setCustomSize] = useState(false);
+    const [customSizeToggle, setCustomSizeToggle] = useState(false);
 
     const [customColors, setCustomColors] = useState<ColorLike[]>([]);
     const [colorToDelete, setColorToDelete] = useState<ColorLike | null>(null);
 
     const {
-        inputValue: inputColor,
+        inputValue: inputColorValue,
         color: customColor,
         isInvalid,
         handleChange,
@@ -48,217 +61,275 @@ function PlaygroundCircularProgress() {
         setColorDirectly,
     } = useColorInput<Color | ColorLike>();
 
-    let progresses = [];
-
-    for (const color of [...colors, ...customColors]) {
-        for (const variant of variants) {
-            progresses.push(
-                <Stack
-                    direction="column"
-                    spacing={10}
-                    key={`${variant}-${color}-stack`}
+    const progresses = [...colors, ...customColors].map((color) => (
+        <Stack
+            justifyContent="center"
+            alignItems="center"
+            direction="column"
+            key={color}
+        >
+            <Typography level="body-md">
+                {capitalize(variant)} {capitalize(color)}{" "}
+            </Typography>
+            {text ? (
+                <CircularProgress
+                    key={color}
+                    size={size}
+                    variant={variant}
+                    color={color}
+                    determinate={determinate}
+                    value={value}
                 >
-                    <label>{`${capitalize(variant)} ${capitalize(color)}`}</label>
-                    <CircularProgress
-                        key={`${variant}-${color}-progress`}
-                        variant={variant}
-                        color={color}
-                        size={size}
-                        value={value}
-                        determinate={determinate}
-                    />
-                </Stack>,
-            );
-        }
-    }
-
-    progresses = chunk(progresses, variants.length).map((row, index) => (
-        <Stack key={index} p={20} spacing={50}>
-            {row}
+                    {text}
+                </CircularProgress>
+            ) : (
+                <CircularProgress
+                    key={color}
+                    size={size}
+                    variant={variant}
+                    color={color}
+                    determinate={determinate}
+                    value={value}
+                />
+            )}
         </Stack>
     ));
 
     return (
         <Stack
             pt={40}
-            width="100%"
             spacing={20}
             direction="row"
-            justifyContent="center"
+            justifyContent="space-around"
         >
-            <Paper direction="column" alignItems="center" p={20} spacing={5}>
-                <Stack direction="column">{progresses}</Stack>
+            <Paper
+                direction="row"
+                alignItems="flex-start"
+                alignContent="flex-start"
+                wrap="wrap"
+                p={20}
+                spacing={5}
+                width={1200}
+            >
+                {progresses}
             </Paper>
-            <Paper direction="column" p={20} spacing={10}>
-                <h2
-                    css={{
-                        textAlign: "center",
-                    }}
-                >
-                    Customization
-                </h2>
-                <Stack direction="column" p={20} spacing={10}>
-                    <Divider>States</Divider>
-                    <Button
-                        color={determinate ? "success" : "danger"}
-                        variant="soft"
-                        onClick={() => setDeterminate((prev) => !prev)}
-                    >
-                        Turn {determinate ? "off" : "on"} determinate
-                    </Button>
-                    <Stack
-                        direction="row"
-                        justifyContent="center"
-                        alignItems="center"
-                        spacing={5}
-                    >
-                        <input
-                            type="range"
-                            min={0}
-                            max={100}
-                            value={value}
-                            onChange={(e) => setValue(Number(e.target.value))}
-                            disabled={!determinate}
-                        />
-                        <label>{value}%</label>
-                    </Stack>
-                </Stack>
-                <Stack
-                    spacing={5}
-                    justifyContent="center"
-                    alignItems="center"
-                    direction="column"
-                >
-                    <Divider>Properties</Divider>
-
-                    <Checkbox
-                        label="Custom Size"
-                        variant="outlined"
-                        checked={customSize}
-                        onChange={() => {
-                            setCustomSize((prev) => !prev);
-                            setSize("md");
-                        }}
-                    />
-
-                    {customSize ? (
-                        <input
-                            type="text"
-                            value={size}
-                            onChange={(e) =>
-                                setSize(e.target.value.trim() as Size)
+            <Paper width={300} alignItems="center" direction="column" p={20}>
+                <Divider>Playground</Divider>
+                <Stack width="100%" direction="column" spacing={40}>
+                    <Stack direction="column" spacing={10}>
+                        <label>Variant</label>
+                        <RadioButtonGroup
+                            onChange={(_, vriant) =>
+                                setVariant(vriant as Variant)
                             }
-                            placeholder="Custom size"
-                            style={{
-                                width: "100%",
-                                padding: 10,
-                                borderRadius: 5,
-                                border: "1px solid #ccc",
-                                backgroundColor: "#f9f9f9",
-                            }}
-                        />
-                    ) : (
-                        <select
-                            value={size}
-                            onChange={(e) =>
-                                setSize(e.target.value.trim() as Size)
-                            }
-                            style={{
-                                width: "100%",
-                                padding: 10,
-                                borderRadius: 5,
-                                border: "1px solid #ccc",
-                                backgroundColor: "#f9f9f9",
-                            }}
+                            value={variant}
+                            name="variants"
                         >
-                            <option value="sm">Small</option>
-                            <option value="md">Medium</option>
-                            <option value="lg">Large</option>
-                        </select>
-                    )}
-                </Stack>
-                <Stack justifyContent="center" direction="column" spacing={5}>
-                    <Divider>Custom Colors</Divider>
-                    <Stack
-                        justifyContent="center"
-                        alignItems="center"
-                        direction="row"
-                        spacing={10}
-                    >
-                        <input
-                            type="text"
-                            value={inputColor}
-                            placeholder="Input custom color"
-                            onChange={(e) => handleChange(e.target.value)}
-                            onBlur={validate}
-                            style={{
-                                padding: 10,
-                                borderRadius: 5,
-                                border: isInvalid
-                                    ? "1px solid red"
-                                    : "1px solid #ccc",
-                                backgroundColor: "#f9f9f9",
-                            }}
-                        />
-                        <Button
-                            variant="soft"
-                            color="primary"
-                            disabled={!customColor}
-                            onClick={() => {
-                                setCustomColors(
-                                    (prev) =>
-                                        [...prev, customColor] as ColorLike[],
-                                );
-                                setColorDirectly(randomHexColor());
-                                setColorToDelete(customColor as ColorLike);
-                            }}
-                        >
-                            Add Color
-                        </Button>
+                            {variants.map((v) => (
+                                <RadioButton
+                                    key={v}
+                                    value={v}
+                                    label={capitalize(v)}
+                                    checked={variant === v}
+                                    color="neutral"
+                                    onChange={() => setVariant(v)}
+                                />
+                            ))}
+                        </RadioButtonGroup>
                     </Stack>
-                    {customColors.length > 0 && (
-                        <Stack alignItems="center" direction="row" spacing={10}>
-                            <select
-                                value={colorToDelete ?? ""}
-                                onChange={(e) => {
-                                    setColorToDelete(
-                                        e.target.value as ColorLike,
-                                    );
-                                }}
+                    <Stack direction="column" spacing={5}>
+                        <Stack
+                            direction="row"
+                            justifyContent="space-between"
+                            spacing={5}
+                        >
+                            <label>Size</label>
+                            <Checkbox
+                                checked={customSizeToggle}
+                                label="Custom Size"
+                                onChange={() =>
+                                    setCustomSizeToggle((prev) => !prev)
+                                }
+                            />
+                        </Stack>
+                        {customSizeToggle ? (
+                            <input
+                                type="number"
+                                value={size}
+                                min={10}
+                                max={24}
+                                onChange={(e) =>
+                                    setSize(Number(e.target.value))
+                                }
                                 style={{
                                     padding: 10,
                                     borderRadius: 5,
-                                    border: "1px solid #ccc",
+                                    border: isInvalid
+                                        ? "1px solid red"
+                                        : "1px solid #ccc",
                                     backgroundColor: "#f9f9f9",
+                                    width: "100%",
                                 }}
+                            />
+                        ) : (
+                            <RadioButtonGroup
+                                onChange={(_, size) => setSize(size as Size)}
+                                value={size as Size}
+                                name="sizes"
+                                row
                             >
-                                {customColors.map((color) => (
-                                    <option key={color} value={color}>
-                                        {color}
-                                    </option>
+                                {Object.keys(sizeNames).map((s) => (
+                                    <RadioButton
+                                        key={s}
+                                        value={s}
+                                        label={sizeNames[s as Size]}
+                                        checked={size === s}
+                                        color="neutral"
+                                        onChange={() => setSize(s as Size)}
+                                    />
                                 ))}
-                            </select>
+                            </RadioButtonGroup>
+                        )}
+                    </Stack>
+                    <Stack direction="column" spacing={5}>
+                        <Checkbox
+                            checked={determinate}
+                            label="Determinate"
+                            onChange={() => setDeterminate((prev) => !prev)}
+                        />
+                        {determinate && (
+                            <input
+                                type="range"
+                                value={value}
+                                min={0}
+                                max={100}
+                                onChange={(e) =>
+                                    setValue(Number(e.target.value))
+                                }
+                                style={{
+                                    padding: 10,
+                                    borderRadius: 5,
+                                    border: isInvalid
+                                        ? "1px solid red"
+                                        : "1px solid #ccc",
+                                    backgroundColor: "#f9f9f9",
+                                    width: "100%",
+                                }}
+                            />
+                        )}
+                    </Stack>
+                    <Stack direction="column" spacing={10}>
+                        <label>Custom Color</label>
+                        <Stack
+                            alignContent="center"
+                            direction="row"
+                            spacing={5}
+                        >
+                            <input
+                                type="text"
+                                value={inputColorValue}
+                                onChange={(e) => handleChange(e.target.value)}
+                                onBlur={validate}
+                                style={{
+                                    padding: 10,
+                                    borderRadius: 5,
+                                    border: isInvalid
+                                        ? "1px solid red"
+                                        : "1px solid #ccc",
+                                    backgroundColor: "#f9f9f9",
+                                    width: "100%",
+                                }}
+                            />
                             <Button
-                                variant="soft"
-                                color="danger"
+                                color="primary"
+                                disabled={!customColor}
                                 onClick={() => {
-                                    setCustomColors((prev) => {
-                                        const updated = prev.filter(
-                                            (color) => color !== colorToDelete,
-                                        );
-                                        setColorToDelete(
-                                            updated.length > 0
-                                                ? updated[updated.length - 1]
-                                                : null,
-                                        );
-                                        return updated;
-                                    });
+                                    setCustomColors(
+                                        (prev) =>
+                                            [
+                                                ...prev,
+                                                customColor,
+                                            ] as ColorLike[],
+                                    );
+                                    setColorDirectly(randomHexColor());
+                                    setColorToDelete(customColor as ColorLike);
                                 }}
                             >
-                                Delete Color
+                                Add Color
                             </Button>
                         </Stack>
-                    )}
+                        {customColors.length > 0 && (
+                            <Stack
+                                alignItems="center"
+                                direction="row"
+                                spacing={10}
+                            >
+                                <select
+                                    value={colorToDelete ?? ""}
+                                    onChange={(e) => {
+                                        setColorToDelete(
+                                            e.target.value.trim() as ColorLike,
+                                        );
+                                    }}
+                                    style={{
+                                        padding: 10,
+                                        borderRadius: 5,
+                                        border: "1px solid #ccc",
+                                        backgroundColor: "#f9f9f9",
+                                        width: "100%",
+                                    }}
+                                >
+                                    {customColors.map((color) => (
+                                        <option key={color} value={color}>
+                                            {color}
+                                        </option>
+                                    ))}
+                                </select>
+                                <Button
+                                    color="danger"
+                                    onClick={() => {
+                                        setCustomColors((prev) => {
+                                            const updated = prev.filter(
+                                                (color) =>
+                                                    color !== colorToDelete,
+                                            );
+                                            setColorToDelete(
+                                                updated.length > 0
+                                                    ? updated[
+                                                          updated.length - 1
+                                                      ]
+                                                    : null,
+                                            );
+                                            return updated;
+                                        });
+                                    }}
+                                >
+                                    Delete Color
+                                </Button>
+                            </Stack>
+                        )}
+                    </Stack>
+                    <Stack direction="column" spacing={5}>
+                        <label>Label</label>
+                        <input
+                            type="text"
+                            value={text ?? ""}
+                            onChange={(e) =>
+                                setText(
+                                    e.target.value.trim() === ""
+                                        ? null
+                                        : e.target.value,
+                                )
+                            }
+                            style={{
+                                padding: 10,
+                                borderRadius: 5,
+                                border: "1px solid #ccc",
+                                backgroundColor: "#f9f9f9",
+                                width: "100%",
+                            }}
+                        />
+                    </Stack>
                 </Stack>
             </Paper>
         </Stack>
