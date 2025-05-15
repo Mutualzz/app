@@ -146,7 +146,7 @@ function PlaygroundButton() {
                             <label>Size</label>
                             <Checkbox
                                 checked={customSizeToggle}
-                                label="Custom Size"
+                                label="Custom"
                                 onChange={() =>
                                     setCustomSizeToggle((prev) => !prev)
                                 }
@@ -317,7 +317,7 @@ function PlaygroundButton() {
                             }}
                         />
                     </Stack>
-                    <Stack direction="column" spacing={20}>
+                    <Stack direction="column" spacing={5}>
                         <label>Icon</label>
                         <RadioButtonGroup
                             onChange={(_, iconPosition) =>

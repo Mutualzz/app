@@ -249,7 +249,7 @@ function PlaygroundDivider() {
                         >
                             <label>Line Color</label>
                             <Checkbox
-                                label="Custom Color"
+                                label="Custom"
                                 checked={customLineColorEnabled}
                                 onChange={(e) =>
                                     setCustomLineColorEnabled(
@@ -307,7 +307,7 @@ function PlaygroundDivider() {
                         >
                             <label>Text Color</label>
                             <Checkbox
-                                label="Custom Color"
+                                label="Custom"
                                 checked={customTextColorEnabled}
                                 onChange={(e) =>
                                     setCustomTextColorEnabled(

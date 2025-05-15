@@ -170,7 +170,7 @@ function PlaygroundTypography() {
                             <label>Weight</label>
                             <Checkbox
                                 checked={customSizeToggle}
-                                label="Custom Weight"
+                                label="Custom"
                                 onChange={() =>
                                     setCustomSizeToggle((prev) => !prev)
                                 }

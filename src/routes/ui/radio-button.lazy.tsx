@@ -177,7 +177,7 @@ function PlaygroundRadioButton() {
                             <label>Size</label>
                             <Checkbox
                                 checked={customSizeToggle}
-                                label="Custom Size"
+                                label="Custom"
                                 onChange={() =>
                                     setCustomSizeToggle((prev) => !prev)
                                 }
