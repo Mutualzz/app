@@ -83,13 +83,7 @@ function PlaygroundDivider() {
                     >
                         <label>Vertical Divider</label>
                         <Stack direction="row" spacing={10}>
-                            <Paper
-                                elevation={3}
-                                style={{
-                                    width: 200,
-                                    height: 200,
-                                }}
-                            />
+                            <Paper elevation={3} p="7.5rem" />
                             <Divider
                                 lineColor={
                                     customLineColorEnabled
@@ -105,13 +99,7 @@ function PlaygroundDivider() {
                                 inset={inset}
                                 orientation="vertical"
                             />
-                            <Paper
-                                elevation={3}
-                                style={{
-                                    width: 200,
-                                    height: 200,
-                                }}
-                            />
+                            <Paper elevation={3} p="7.5rem" />
                         </Stack>
                     </Paper>
                     <Paper
@@ -123,13 +111,7 @@ function PlaygroundDivider() {
                     >
                         <label>Vertical Divider with Text</label>
                         <Stack direction="row" spacing={10}>
-                            <Paper
-                                elevation={3}
-                                style={{
-                                    width: 200,
-                                    height: 200,
-                                }}
-                            />
+                            <Paper elevation={3} p="7.5rem" />
                             <Divider
                                 lineColor={
                                     customLineColorEnabled
@@ -147,13 +129,7 @@ function PlaygroundDivider() {
                             >
                                 {text ?? "Text"}
                             </Divider>
-                            <Paper
-                                elevation={3}
-                                style={{
-                                    width: 200,
-                                    height: 200,
-                                }}
-                            />
+                            <Paper elevation={3} p="7.5rem" />
                         </Stack>
                     </Paper>
                 </Stack>
@@ -167,13 +143,7 @@ function PlaygroundDivider() {
                     >
                         <label>Horizontal Divider</label>
                         <Stack direction="column" spacing={10}>
-                            <Paper
-                                elevation={3}
-                                style={{
-                                    width: 200,
-                                    height: 200,
-                                }}
-                            />
+                            <Paper elevation={3} p="7.5rem" />
                             <Divider
                                 lineColor={
                                     customLineColorEnabled
@@ -189,13 +159,7 @@ function PlaygroundDivider() {
                                 inset={inset}
                                 orientation="horizontal"
                             />
-                            <Paper
-                                elevation={3}
-                                style={{
-                                    width: 200,
-                                    height: 200,
-                                }}
-                            />
+                            <Paper elevation={3} p="7.5rem" />
                         </Stack>
                     </Paper>
                     <Paper
@@ -207,13 +171,7 @@ function PlaygroundDivider() {
                     >
                         <label>Horizontal Divider with Text</label>
                         <Stack direction="column" spacing={10}>
-                            <Paper
-                                elevation={3}
-                                style={{
-                                    width: 200,
-                                    height: 200,
-                                }}
-                            />
+                            <Paper elevation={3} p="7.5rem" />
                             <Divider
                                 lineColor={
                                     customLineColorEnabled
@@ -231,13 +189,7 @@ function PlaygroundDivider() {
                             >
                                 {text ?? "Text"}
                             </Divider>
-                            <Paper
-                                elevation={3}
-                                style={{
-                                    width: 200,
-                                    height: 200,
-                                }}
-                            />
+                            <Paper elevation={3} p="7.5rem" />
                         </Stack>
                     </Paper>
                 </Stack>
