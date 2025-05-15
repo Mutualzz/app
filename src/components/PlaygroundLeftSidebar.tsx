@@ -28,6 +28,10 @@ export const PlaygrondLeftSidebar = () => {
                 name: "Checkbox",
                 link: "/ui/checkbox",
             },
+            {
+                name: "Radio Button",
+                link: "/ui/radio-button",
+            },
         ],
         feedback: [
             {
