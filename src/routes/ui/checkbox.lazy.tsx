@@ -376,7 +376,7 @@ function PlaygroundCheckbox() {
                         direction="column"
                         spacing={5}
                     >
-                        <Divider>Checked Icon</Divider>
+                        <label>Checked Icon</label>
                         <Stack direction="column" spacing={10}>
                             <RadioButtonGroup
                                 onChange={(_, library) =>
@@ -437,7 +437,7 @@ function PlaygroundCheckbox() {
                         direction="column"
                         spacing={5}
                     >
-                        <Divider>Unchecked Icon</Divider>
+                        <label>Unchecked Icon</label>
                         <Stack direction="column" spacing={10}>
                             <RadioButtonGroup
                                 onChange={(_, library) =>
@@ -498,7 +498,7 @@ function PlaygroundCheckbox() {
                         direction="column"
                         spacing={5}
                     >
-                        <Divider>Indeterminate Icon</Divider>
+                        <label>Indeterminate Icon</label>
                         <Stack direction="column" spacing={10}>
                             <RadioButtonGroup
                                 onChange={(_, library) =>
