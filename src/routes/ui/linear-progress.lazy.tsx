@@ -36,12 +36,18 @@ const animations = [
     "wave",
 ] as LinearProgressAnimation[];
 
-function PlaygroundLinearProgress() {
-    const [thickness, setThickness] = useState<Size>("md");
-    const [length, setLength] = useState<Size>("md");
+const sizeNames = {
+    sm: "Small",
+    md: "Medium",
+    lg: "Large",
+};
 
-    const [customLength, setCustomLength] = useState(false);
-    const [customThickness, setCustomThickness] = useState(false);
+function PlaygroundLinearProgress() {
+    const [thickness, setThickness] = useState<Size | number>("md");
+    const [length, setLength] = useState<Size | number>("md");
+
+    const [customLengthToggle, setCustomLengthToggle] = useState(false);
+    const [customThicknessToggle, setCustomThicknessToggle] = useState(false);
 
     const [animation, setAnimation] =
         useState<LinearProgressAnimation>("bounce");
@@ -172,14 +178,14 @@ function PlaygroundLinearProgress() {
                     <Checkbox
                         variant="outlined"
                         label="Custom Length"
-                        checked={customLength}
+                        checked={customLengthToggle}
                         onChange={() => {
-                            setCustomLength((prev) => !prev);
+                            setCustomLengthToggle((prev) => !prev);
                             setLength("md");
                         }}
                     />
 
-                    {customLength ? (
+                    {customLengthToggle ? (
                         <input
                             type="text"
                             value={length}
@@ -225,14 +231,14 @@ function PlaygroundLinearProgress() {
                     <Checkbox
                         variant="outlined"
                         label="Custom Thickness"
-                        checked={customThickness}
+                        checked={customThicknessToggle}
                         onChange={() => {
-                            setCustomThickness((prev) => !prev);
+                            setCustomThicknessToggle((prev) => !prev);
                             setThickness("md");
                         }}
                     />
 
-                    {customThickness ? (
+                    {customThicknessToggle ? (
                         <input
                             type="text"
                             value={thickness}
