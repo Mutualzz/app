@@ -148,16 +148,19 @@ function PlaygroundCircularProgress() {
                                 checked={customSizeToggle}
                                 label="Custom"
                                 onChange={() =>
-                                    setCustomSizeToggle((prev) => !prev)
+                                    setCustomSizeToggle((prev) => {
+                                        setSize("md");
+                                        return !prev;
+                                    })
                                 }
                             />
                         </Stack>
                         {customSizeToggle ? (
                             <input
-                                type="number"
+                                type="range"
                                 value={size}
-                                min={10}
-                                max={24}
+                                min={16}
+                                max={64}
                                 onChange={(e) =>
                                     setSize(Number(e.target.value))
                                 }

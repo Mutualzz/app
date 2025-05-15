@@ -66,7 +66,7 @@ function PlaygroundTypography() {
     const [weight, setWeight] = useState<FontWeight>("normal");
     const [text, setText] = useState<string | null>(null);
 
-    const [customSizeToggle, setCustomSizeToggle] = useState(false);
+    const [customWeightToggle, setCustomWeightToggle] = useState(false);
 
     const [customColors, setCustomColors] = useState<ColorLike[]>([]);
     const [colorToDelete, setColorToDelete] = useState<ColorLike | null>(null);
@@ -169,14 +169,17 @@ function PlaygroundTypography() {
                         >
                             <label>Weight</label>
                             <Checkbox
-                                checked={customSizeToggle}
+                                checked={customWeightToggle}
                                 label="Custom"
                                 onChange={() =>
-                                    setCustomSizeToggle((prev) => !prev)
+                                    setCustomWeightToggle((prev) => {
+                                        setWeight("normal");
+                                        return !prev;
+                                    })
                                 }
                             />
                         </Stack>
-                        {customSizeToggle ? (
+                        {customWeightToggle ? (
                             <input
                                 type="range"
                                 value={weight}

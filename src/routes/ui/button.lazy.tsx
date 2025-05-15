@@ -148,13 +148,16 @@ function PlaygroundButton() {
                                 checked={customSizeToggle}
                                 label="Custom"
                                 onChange={() =>
-                                    setCustomSizeToggle((prev) => !prev)
+                                    setCustomSizeToggle((prev) => {
+                                        setSize("md");
+                                        return !prev;
+                                    })
                                 }
                             />
                         </Stack>
                         {customSizeToggle ? (
                             <input
-                                type="number"
+                                type="range"
                                 value={size}
                                 min={10}
                                 max={24}
