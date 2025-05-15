@@ -66,26 +66,26 @@ function PlaygroundCheckbox() {
     const [colorToDelete, setColorToDelete] = useState<ColorLike | null>(null);
 
     const [checkedLibrary, setCheckedLibrary] = useState<
-        keyof typeof iconLibraries | null
-    >(null);
+        keyof typeof iconLibraries | "none"
+    >("none");
     const [checkedIconName, setCheckedIconName] = useState<string | null>(null);
 
     const [uncheckedLibrary, setUncheckedLibrary] = useState<
-        keyof typeof iconLibraries | null
-    >(null);
+        keyof typeof iconLibraries | "none"
+    >("none");
     const [uncheckedIconName, setUncheckedIconName] = useState<string | null>(
         null,
     );
 
     const [indeterminateLibrary, setIndeterminateLibrary] = useState<
-        keyof typeof iconLibraries | null
-    >(null);
+        keyof typeof iconLibraries | "none"
+    >("none");
     const [indeterminateIconName, setIndeterminateIconName] = useState<
         string | null
     >(null);
 
     const SelectedCheckedIcon =
-        checkedLibrary && checkedIconName
+        checkedLibrary !== "none" && checkedIconName
             ? (
                   iconLibraries[checkedLibrary] as Record<
                       string,
@@ -95,7 +95,7 @@ function PlaygroundCheckbox() {
             : null;
 
     const SelectedUncheckedIcon =
-        uncheckedLibrary && uncheckedIconName
+        uncheckedLibrary !== "none" && uncheckedIconName
             ? (
                   iconLibraries[uncheckedLibrary] as Record<
                       string,
@@ -105,7 +105,7 @@ function PlaygroundCheckbox() {
             : null;
 
     const SelectedIndeterminateIcon =
-        indeterminateLibrary && indeterminateIconName
+        indeterminateLibrary !== "none" && indeterminateIconName
             ? (
                   iconLibraries[indeterminateLibrary] as Record<
                       string,
@@ -384,9 +384,17 @@ function PlaygroundCheckbox() {
                                         library as keyof typeof iconLibraries,
                                     )
                                 }
-                                value={checkedLibrary ?? ""}
+                                value={checkedLibrary}
                                 name="libraries"
                             >
+                                <RadioButton
+                                    key="none"
+                                    value="none"
+                                    label="None"
+                                    checked={checkedLibrary === "none"}
+                                    color="neutral"
+                                    onChange={() => setCheckedLibrary("none")}
+                                />
                                 {Object.keys(iconLibraries).map((lib) => (
                                     <RadioButton
                                         key={lib}
@@ -406,7 +414,7 @@ function PlaygroundCheckbox() {
                                     />
                                 ))}
                             </RadioButtonGroup>
-                            {checkedLibrary && (
+                            {checkedLibrary !== "none" && (
                                 <select
                                     value={checkedIconName ?? ""}
                                     onChange={(e) =>
@@ -445,9 +453,17 @@ function PlaygroundCheckbox() {
                                         library as keyof typeof iconLibraries,
                                     )
                                 }
-                                value={uncheckedLibrary ?? ""}
+                                value={uncheckedLibrary}
                                 name="libraries"
                             >
+                                <RadioButton
+                                    key="none"
+                                    value="none"
+                                    label="None"
+                                    checked={uncheckedLibrary === "none"}
+                                    color="neutral"
+                                    onChange={() => setUncheckedLibrary("none")}
+                                />
                                 {Object.keys(iconLibraries).map((lib) => (
                                     <RadioButton
                                         key={lib}
@@ -467,7 +483,7 @@ function PlaygroundCheckbox() {
                                     />
                                 ))}
                             </RadioButtonGroup>
-                            {uncheckedLibrary && (
+                            {uncheckedLibrary !== "none" && (
                                 <select
                                     value={uncheckedIconName ?? ""}
                                     onChange={(e) =>
@@ -506,9 +522,19 @@ function PlaygroundCheckbox() {
                                         library as keyof typeof iconLibraries,
                                     )
                                 }
-                                value={indeterminateLibrary ?? ""}
+                                value={indeterminateLibrary}
                                 name="libraries"
                             >
+                                <RadioButton
+                                    key="none"
+                                    value="none"
+                                    label="None"
+                                    checked={indeterminateLibrary === "none"}
+                                    color="neutral"
+                                    onChange={() =>
+                                        setIndeterminateLibrary("none")
+                                    }
+                                />
                                 {Object.keys(iconLibraries).map((lib) => (
                                     <RadioButton
                                         key={lib}
@@ -528,7 +554,7 @@ function PlaygroundCheckbox() {
                                     />
                                 ))}
                             </RadioButtonGroup>
-                            {indeterminateLibrary && (
+                            {indeterminateLibrary !== "none" && (
                                 <select
                                     value={indeterminateIconName ?? ""}
                                     onChange={(e) =>
