@@ -5,6 +5,7 @@ import { Stack } from "@ui/components/layout/Stack/Stack";
 import { Paper } from "@ui/components/surfaces/Paper/Paper";
 import {
     Button,
+    Checkbox,
     Divider,
     RadioButton,
     RadioButtonGroup,
@@ -12,6 +13,7 @@ import {
     useColorInput,
 } from "@ui/index";
 import type { Color, ColorLike, TypographyLevel } from "@ui/types";
+import type { FontWeight } from "@ui/types/Typography.props";
 import { capitalize } from "lodash";
 import { useState } from "react";
 
@@ -47,6 +49,8 @@ const levels = [
     "body-xs",
 ] as TypographyLevel[];
 
+const weights = ["normal", "bold", "lighter", "bolder"] as FontWeight[];
+
 const colors = [
     "primary",
     "neutral",
@@ -59,7 +63,10 @@ const colors = [
 function PlaygroundTypography() {
     const [variant, setVariant] = useState<TypographyVariant>("solid");
     const [level, setLevel] = useState<TypographyLevel>("body-md");
+    const [weight, setWeight] = useState<FontWeight>("normal");
     const [text, setText] = useState<string | null>(null);
+
+    const [customSizeToggle, setCustomSizeToggle] = useState(false);
 
     const [customColors, setCustomColors] = useState<ColorLike[]>([]);
     const [colorToDelete, setColorToDelete] = useState<ColorLike | null>(null);
@@ -74,7 +81,13 @@ function PlaygroundTypography() {
     } = useColorInput<Color | ColorLike>();
 
     const typographies = [...colors, ...customColors].map((color) => (
-        <Typography key={color} level={level} variant={variant} color={color}>
+        <Typography
+            key={color}
+            level={level}
+            variant={variant}
+            weight={weight}
+            color={color}
+        >
             {text ?? `${capitalize(variant)} ${capitalize(color)}`}
         </Typography>
     ));
@@ -147,6 +160,63 @@ function PlaygroundTypography() {
                                 </option>
                             ))}
                         </select>
+                    </Stack>
+                    <Stack direction="column" spacing={10}>
+                        <Stack
+                            direction="row"
+                            justifyContent="space-between"
+                            spacing={10}
+                        >
+                            <label>Weight</label>
+                            <Checkbox
+                                checked={customSizeToggle}
+                                label="Custom Weight"
+                                onChange={() =>
+                                    setCustomSizeToggle((prev) => !prev)
+                                }
+                            />
+                        </Stack>
+                        {customSizeToggle ? (
+                            <input
+                                type="range"
+                                value={weight}
+                                step={100}
+                                min={100}
+                                max={1000}
+                                onChange={(e) =>
+                                    setWeight(Number(e.target.value))
+                                }
+                                style={{
+                                    padding: 10,
+                                    borderRadius: 5,
+                                    border: isInvalid
+                                        ? "1px solid red"
+                                        : "1px solid #ccc",
+                                    backgroundColor: "#f9f9f9",
+                                    width: "100%",
+                                }}
+                            />
+                        ) : (
+                            <select
+                                value={weight}
+                                onChange={(e) =>
+                                    setWeight(e.target.value as FontWeight)
+                                }
+                                style={{
+                                    width: "100%",
+                                    padding: 10,
+                                    borderRadius: 5,
+                                    border: "1px solid #ccc",
+                                    backgroundColor: "#f9f9f9",
+                                }}
+                            >
+                                {weights.map((w) => (
+                                    <option key={w} value={w}>
+                                        {w}
+                                    </option>
+                                ))}
+                            </select>
+                        )}
                     </Stack>
                     {variant !== "none" && (
                         <Stack direction="column" spacing={10}>
