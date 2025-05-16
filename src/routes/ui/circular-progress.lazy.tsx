@@ -68,8 +68,8 @@ function PlaygroundCircularProgress() {
             direction="column"
             key={color}
         >
-            <Typography level="body-md">
-                {capitalize(variant)} {capitalize(color)}{" "}
+            <Typography>
+                {capitalize(variant)} {capitalize(color)}
             </Typography>
             {text ? (
                 <CircularProgress
