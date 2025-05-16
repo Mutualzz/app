@@ -56,7 +56,7 @@ function PlaygroundButton() {
     const [size, setSize] = useState<Size | number>("md");
     const [loading, setLoading] = useState(false);
     const [disabled, setDisabled] = useState(false);
-    const [onlyIcon, setOnlyIcon] = useState(false);
+    const [iconOnly, setIconOnly] = useState(false);
 
     const [iconPosition, setIconPosition] = useState<"left" | "right" | "none">(
         "none",
@@ -82,7 +82,7 @@ function PlaygroundButton() {
     } = useColorInput<Color | ColorLike>();
 
     const buttons = [...colors, ...customColors].map((color) =>
-        onlyIcon ? (
+        iconOnly ? (
             <Button
                 key={`${variant}-${color}-button`}
                 variant={variant}
@@ -343,10 +343,10 @@ function PlaygroundButton() {
                             <label>Icon</label>
                             {icon && (
                                 <Checkbox
-                                    checked={onlyIcon}
-                                    label="Only Icon"
+                                    checked={iconOnly}
+                                    label="Icon Only"
                                     onChange={() =>
-                                        setOnlyIcon((prev) => !prev)
+                                        setIconOnly((prev) => !prev)
                                     }
                                     disabled={disabled}
                                 />
