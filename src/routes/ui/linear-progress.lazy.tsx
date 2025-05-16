@@ -1,17 +1,21 @@
 import { createLazyFileRoute } from "@tanstack/react-router";
 import { Divider } from "@ui/components/data-display/Divider/Divider";
+import { Typography } from "@ui/components/data-display/Typography/Typography";
 import { LinearProgress } from "@ui/components/feedback/LinearProgress/LinearProgress";
 import type { LinearProgressAnimation } from "@ui/components/feedback/LinearProgress/LinearProgress.types";
-import { Button } from "@ui/components/inputs/Button/Button";
-import { Checkbox } from "@ui/components/inputs/Checkbox/Checkbox";
 import { Stack } from "@ui/components/layout/Stack/Stack";
 import { Paper } from "@ui/components/surfaces/Paper/Paper";
 import { useColorInput } from "@ui/hooks/useColorInput";
+import {
+    Button,
+    Checkbox,
+    RadioButton,
+    RadioButtonGroup,
+    randomHexColor,
+} from "@ui/index";
 import type { Color, ColorLike, Size, Variant } from "@ui/types";
-import { randomHexColor } from "@ui/utils/randomHexColor";
 
 import capitalize from "lodash/capitalize";
-import chunk from "lodash/chunk";
 import { useState } from "react";
 
 export const Route = createLazyFileRoute("/ui/linear-progress")({
@@ -43,6 +47,8 @@ const sizeNames = {
 };
 
 function PlaygroundLinearProgress() {
+    const [variant, setVariant] = useState<Variant>("solid");
+
     const [thickness, setThickness] = useState<Size | number>("md");
     const [length, setLength] = useState<Size | number>("md");
 
@@ -51,15 +57,15 @@ function PlaygroundLinearProgress() {
 
     const [animation, setAnimation] =
         useState<LinearProgressAnimation>("bounce");
+
     const [determinate, setDeterminate] = useState(false);
     const [value, setValue] = useState(0);
 
     const [customColors, setCustomColors] = useState<ColorLike[]>([]);
-
     const [colorToDelete, setColorToDelete] = useState<ColorLike | null>(null);
 
     const {
-        inputValue: inputColor,
+        inputValue: inputColorValue,
         color: customColor,
         isInvalid,
         handleChange,
@@ -67,296 +73,331 @@ function PlaygroundLinearProgress() {
         setColorDirectly,
     } = useColorInput<Color | ColorLike>();
 
-    let progresses = [];
-
-    for (const color of [...colors, ...customColors]) {
-        for (const variant of variants) {
-            progresses.push(
-                <Stack
-                    direction="column"
-                    spacing={10}
-                    key={`${variant}-${color}-stack`}
-                >
-                    <label>{`${capitalize(variant)} ${capitalize(color)}`}</label>
-                    <LinearProgress
-                        key={`${variant}-${color}-progress`}
-                        variant={variant}
-                        color={color}
-                        length={length}
-                        thickness={thickness}
-                        animation={animation}
-                        value={value}
-                        determinate={determinate}
-                    />
-                </Stack>,
-            );
-        }
-    }
-
-    progresses = chunk(progresses, variants.length).map((row, index) => (
-        <Stack key={index} p={20} spacing={50}>
-            {row}
+    const progresses = [...colors, ...customColors].map((color) => (
+        <Stack
+            direction="column"
+            alignItems="center"
+            justifyContent="center"
+            key={color}
+        >
+            <Typography>
+                {capitalize(variant)} {capitalize(color)}
+            </Typography>
+            <LinearProgress
+                key={`${variant}-${color}-progress`}
+                variant={variant}
+                color={color}
+                length={length}
+                thickness={thickness}
+                animation={animation}
+                value={value}
+                determinate={determinate}
+            />
         </Stack>
     ));
 
     return (
         <Stack
             pt={40}
-            width="100%"
             spacing={20}
             direction="row"
-            justifyContent="center"
+            justifyContent="space-around"
         >
-            <Paper direction="column" alignItems="center" p={20} spacing={5}>
-                <Stack direction="column">{progresses}</Stack>
+            <Paper
+                direction="row"
+                alignItems="flex-start"
+                alignContent="flex-start"
+                wrap="wrap"
+                p={20}
+                spacing={25}
+                width={1200}
+            >
+                {progresses}
             </Paper>
 
-            <Paper direction="column" p={20} spacing={10}>
-                <h2
-                    css={{
-                        textAlign: "center",
-                    }}
-                >
-                    Customization
-                </h2>
-                <Stack justifyContent="center" direction="column" spacing={10}>
-                    <Divider>States</Divider>
-                    <Button
-                        color={determinate ? "success" : "danger"}
-                        variant="soft"
-                        onClick={() => setDeterminate((prev) => !prev)}
-                    >
-                        Turn {determinate ? "off" : "on"} determinate
-                    </Button>
-                    <Stack
-                        direction="row"
-                        justifyContent="center"
-                        alignItems="center"
-                        spacing={5}
-                    >
-                        <input
-                            type="range"
-                            min={0}
-                            max={100}
-                            value={value}
-                            onChange={(e) => setValue(Number(e.target.value))}
-                            disabled={!determinate}
-                        />
-                        <label>{value}%</label>
+            <Paper width={300} direction="column" p={20} spacing={10}>
+                <Divider>Playground</Divider>
+                <Stack width="100%" direction="column" spacing={40}>
+                    <Stack direction="column" spacing={10}>
+                        <label>Variant</label>
+                        <RadioButtonGroup
+                            onChange={(_, vriant) =>
+                                setVariant(vriant as Variant)
+                            }
+                            value={variant}
+                            name="variant"
+                        >
+                            {variants.map((v) => (
+                                <RadioButton
+                                    key={v}
+                                    value={v}
+                                    label={capitalize(v)}
+                                    checked={variant === v}
+                                    color="neutral"
+                                    onChange={() => setVariant(v)}
+                                />
+                            ))}
+                        </RadioButtonGroup>
                     </Stack>
-                </Stack>
-                <Stack justifyContent="center" direction="column" spacing={5}>
-                    <Divider>Animation</Divider>
-                    <select
-                        value={animation}
-                        onChange={(e) =>
-                            setAnimation(
-                                e.target.value as LinearProgressAnimation,
-                            )
-                        }
-                        style={{
-                            padding: 10,
-                            borderRadius: 5,
-                            border: "1px solid #ccc",
-                            backgroundColor: "#f9f9f9",
-                        }}
-                    >
-                        {animations.map((animation) => (
-                            <option key={animation} value={animation}>
-                                {capitalize(animation)}
-                            </option>
-                        ))}
-                    </select>
-                </Stack>
-                <Divider />
-                <Stack
-                    spacing={5}
-                    justifyContent="center"
-                    alignItems="center"
-                    direction="column"
-                >
-                    <Checkbox
-                        variant="outlined"
-                        label="Custom Length"
-                        checked={customLengthToggle}
-                        onChange={() => {
-                            setCustomLengthToggle((prev) => !prev);
-                            setLength("md");
-                        }}
-                    />
-
-                    {customLengthToggle ? (
-                        <input
-                            type="text"
-                            value={length}
-                            onChange={(e) =>
-                                setLength(e.target.value.trim() as Size)
+                    <Stack direction="column" spacing={10}>
+                        <label>Animation</label>
+                        <RadioButtonGroup
+                            onChange={(_, animation) =>
+                                setAnimation(
+                                    animation as LinearProgressAnimation,
+                                )
                             }
-                            placeholder="Custom length"
-                            style={{
-                                width: "100%",
-                                padding: 10,
-                                borderRadius: 5,
-                                border: "1px solid #ccc",
-                                backgroundColor: "#f9f9f9",
-                            }}
-                        />
-                    ) : (
-                        <select
-                            value={length}
-                            onChange={(e) =>
-                                setLength(e.target.value.trim() as Size)
-                            }
-                            style={{
-                                width: "100%",
-                                padding: 10,
-                                borderRadius: 5,
-                                border: "1px solid #ccc",
-                                backgroundColor: "#f9f9f9",
-                            }}
+                            value={animation}
+                            name="animation"
                         >
-                            <option value="sm">Small</option>
-                            <option value="md">Medium</option>
-                            <option value="lg">Large</option>
-                        </select>
-                    )}
-                </Stack>
-                <Divider />
-                <Stack
-                    spacing={5}
-                    justifyContent="center"
-                    alignItems="center"
-                    direction="column"
-                >
-                    <Checkbox
-                        variant="outlined"
-                        label="Custom Thickness"
-                        checked={customThicknessToggle}
-                        onChange={() => {
-                            setCustomThicknessToggle((prev) => !prev);
-                            setThickness("md");
-                        }}
-                    />
-
-                    {customThicknessToggle ? (
-                        <input
-                            type="text"
-                            value={thickness}
-                            onChange={(e) =>
-                                setThickness(e.target.value.trim() as Size)
-                            }
-                            placeholder="Custom thickness"
-                            style={{
-                                width: "100%",
-                                padding: 10,
-                                borderRadius: 5,
-                                border: "1px solid #ccc",
-                                backgroundColor: "#f9f9f9",
-                            }}
-                        />
-                    ) : (
-                        <select
-                            value={thickness}
-                            onChange={(e) =>
-                                setThickness(e.target.value.trim() as Size)
-                            }
-                            style={{
-                                width: "100%",
-                                padding: 10,
-                                borderRadius: 5,
-                                border: "1px solid #ccc",
-                                backgroundColor: "#f9f9f9",
-                            }}
-                        >
-                            <option value="sm">Small</option>
-                            <option value="md">Medium</option>
-                            <option value="lg">Large</option>
-                        </select>
-                    )}
-                </Stack>
-
-                <Stack justifyContent="center" direction="column" spacing={5}>
-                    <Divider>Custom Colors</Divider>
-                    <Stack
-                        justifyContent="center"
-                        alignItems="center"
-                        direction="row"
-                        spacing={10}
-                    >
-                        <input
-                            type="text"
-                            value={inputColor}
-                            placeholder="Input custom color"
-                            onChange={(e) => handleChange(e.target.value)}
-                            onBlur={validate}
-                            style={{
-                                padding: 10,
-                                borderRadius: 5,
-                                border: isInvalid
-                                    ? "1px solid red"
-                                    : "1px solid #ccc",
-                                backgroundColor: "#f9f9f9",
-                            }}
-                        />
-                        <Button
-                            variant="soft"
-                            color="primary"
-                            disabled={!customColor}
-                            onClick={() => {
-                                setCustomColors(
-                                    (prev) =>
-                                        [...prev, customColor] as ColorLike[],
-                                );
-                                setColorDirectly(randomHexColor());
-                                setColorToDelete(customColor as ColorLike);
-                            }}
-                        >
-                            Add Color
-                        </Button>
+                            {animations.map((a) => (
+                                <RadioButton
+                                    key={a}
+                                    value={a}
+                                    label={capitalize(a)}
+                                    checked={animation === a}
+                                    color="neutral"
+                                    onChange={() => setAnimation(a)}
+                                />
+                            ))}
+                        </RadioButtonGroup>
                     </Stack>
-                    {customColors.length > 0 && (
-                        <Stack alignItems="center" direction="row" spacing={10}>
-                            <select
-                                value={colorToDelete ?? ""}
-                                onChange={(e) => {
-                                    setColorToDelete(
-                                        e.target.value.trim() as ColorLike,
-                                    );
+                    <Stack direction="column" spacing={5}>
+                        <Stack
+                            direction="row"
+                            justifyContent="space-between"
+                            spacing={5}
+                        >
+                            <label>Length</label>
+                            <Checkbox
+                                checked={customLengthToggle}
+                                label="Custom"
+                                onChange={() => {
+                                    setCustomLengthToggle((prev) => {
+                                        setLength("md");
+                                        return !prev;
+                                    });
                                 }}
+                            />
+                        </Stack>
+                        {customLengthToggle ? (
+                            <input
+                                type="range"
+                                value={length}
+                                min={80}
+                                max={240}
+                                onChange={(e) =>
+                                    setLength(Number(e.target.value))
+                                }
                                 style={{
                                     padding: 10,
                                     borderRadius: 5,
-                                    border: "1px solid #ccc",
+                                    border: isInvalid
+                                        ? "1px solid red"
+                                        : "1px solid #ccc",
                                     backgroundColor: "#f9f9f9",
+                                    width: "100%",
                                 }}
+                            />
+                        ) : (
+                            <RadioButtonGroup
+                                onChange={(_, length) =>
+                                    setLength(length as Size)
+                                }
+                                value={length as Size}
+                                name="length"
+                                row
                             >
-                                {customColors.map((color) => (
-                                    <option key={color} value={color}>
-                                        {color}
-                                    </option>
+                                {Object.keys(sizeNames).map((s) => (
+                                    <RadioButton
+                                        key={s}
+                                        value={s}
+                                        label={sizeNames[s as Size]}
+                                        checked={length === s}
+                                        color="neutral"
+                                        onChange={() => setLength(s as Size)}
+                                    />
                                 ))}
-                            </select>
-                            <Button
-                                variant="soft"
-                                color="danger"
-                                onClick={() => {
-                                    setCustomColors((prev) => {
-                                        const updated = prev.filter(
-                                            (color) => color !== colorToDelete,
-                                        );
-                                        setColorToDelete(
-                                            updated.length > 0
-                                                ? updated[updated.length - 1]
-                                                : null,
-                                        );
-                                        return updated;
+                            </RadioButtonGroup>
+                        )}
+                    </Stack>
+                    <Stack direction="column" spacing={5}>
+                        <Stack
+                            direction="row"
+                            justifyContent="space-between"
+                            spacing={5}
+                        >
+                            <label>Thickness</label>
+                            <Checkbox
+                                checked={customThicknessToggle}
+                                label="Custom"
+                                onChange={() => {
+                                    setCustomThicknessToggle((prev) => {
+                                        setThickness("md");
+                                        return !prev;
                                     });
                                 }}
+                            />
+                        </Stack>
+                        {customThicknessToggle ? (
+                            <input
+                                type="range"
+                                value={thickness}
+                                min={4}
+                                max={16}
+                                onChange={(e) =>
+                                    setThickness(Number(e.target.value))
+                                }
+                                style={{
+                                    padding: 10,
+                                    borderRadius: 5,
+                                    border: isInvalid
+                                        ? "1px solid red"
+                                        : "1px solid #ccc",
+                                    backgroundColor: "#f9f9f9",
+                                    width: "100%",
+                                }}
+                            />
+                        ) : (
+                            <RadioButtonGroup
+                                onChange={(_, thickness) =>
+                                    setThickness(thickness as Size)
+                                }
+                                value={thickness as Size}
+                                name="thickness"
+                                row
                             >
-                                Delete Color
+                                {Object.keys(sizeNames).map((s) => (
+                                    <RadioButton
+                                        key={s}
+                                        value={s}
+                                        label={sizeNames[s as Size]}
+                                        checked={thickness === s}
+                                        color="neutral"
+                                        onChange={() => setThickness(s as Size)}
+                                    />
+                                ))}
+                            </RadioButtonGroup>
+                        )}
+                    </Stack>
+                    <Stack direction="column" spacing={5}>
+                        <Checkbox
+                            checked={determinate}
+                            label="Determinate"
+                            onChange={() => setDeterminate((prev) => !prev)}
+                        />
+                        {determinate && (
+                            <input
+                                type="range"
+                                value={value}
+                                min={0}
+                                max={100}
+                                onChange={(e) =>
+                                    setValue(Number(e.target.value))
+                                }
+                                style={{
+                                    padding: 10,
+                                    borderRadius: 5,
+                                    border: isInvalid
+                                        ? "1px solid red"
+                                        : "1px solid #ccc",
+                                    backgroundColor: "#f9f9f9",
+                                    width: "100%",
+                                }}
+                            />
+                        )}
+                    </Stack>
+                    <Stack direction="column" spacing={10}>
+                        <label>Custom Color</label>
+                        <Stack
+                            alignContent="center"
+                            direction="row"
+                            spacing={5}
+                        >
+                            <input
+                                type="text"
+                                value={inputColorValue}
+                                onChange={(e) => handleChange(e.target.value)}
+                                onBlur={validate}
+                                style={{
+                                    padding: 10,
+                                    borderRadius: 5,
+                                    border: isInvalid
+                                        ? "1px solid red"
+                                        : "1px solid #ccc",
+                                    backgroundColor: "#f9f9f9",
+                                    width: "100%",
+                                }}
+                            />
+                            <Button
+                                color="primary"
+                                disabled={!customColor}
+                                onClick={() => {
+                                    setCustomColors(
+                                        (prev) =>
+                                            [
+                                                ...prev,
+                                                customColor,
+                                            ] as ColorLike[],
+                                    );
+                                    setColorDirectly(randomHexColor());
+                                    setColorToDelete(customColor as ColorLike);
+                                }}
+                            >
+                                Add Color
                             </Button>
                         </Stack>
-                    )}
+                        {customColors.length > 0 && (
+                            <Stack
+                                alignItems="center"
+                                direction="row"
+                                spacing={10}
+                            >
+                                <select
+                                    value={colorToDelete ?? ""}
+                                    onChange={(e) => {
+                                        setColorToDelete(
+                                            e.target.value.trim() as ColorLike,
+                                        );
+                                    }}
+                                    style={{
+                                        padding: 10,
+                                        borderRadius: 5,
+                                        border: "1px solid #ccc",
+                                        backgroundColor: "#f9f9f9",
+                                        width: "100%",
+                                    }}
+                                >
+                                    {customColors.map((color) => (
+                                        <option key={color} value={color}>
+                                            {color}
+                                        </option>
+                                    ))}
+                                </select>
+                                <Button
+                                    color="danger"
+                                    onClick={() => {
+                                        setCustomColors((prev) => {
+                                            const updated = prev.filter(
+                                                (color) =>
+                                                    color !== colorToDelete,
+                                            );
+                                            setColorToDelete(
+                                                updated.length > 0
+                                                    ? updated[
+                                                          updated.length - 1
+                                                      ]
+                                                    : null,
+                                            );
+                                            return updated;
+                                        });
+                                    }}
+                                >
+                                    Delete Color
+                                </Button>
+                            </Stack>
+                        )}
+                    </Stack>
                 </Stack>
             </Paper>
         </Stack>
