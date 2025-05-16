@@ -56,6 +56,7 @@ function PlaygroundButton() {
     const [size, setSize] = useState<Size | number>("md");
     const [loading, setLoading] = useState(false);
     const [disabled, setDisabled] = useState(false);
+    const [onlyIcon, setOnlyIcon] = useState(false);
 
     const [iconPosition, setIconPosition] = useState<"left" | "right" | "none">(
         "none",
@@ -80,20 +81,33 @@ function PlaygroundButton() {
         setColorDirectly,
     } = useColorInput<Color | ColorLike>();
 
-    const buttons = [...colors, ...customColors].map((color) => (
-        <Button
-            key={`${variant}-${color}-button`}
-            variant={variant}
-            color={color}
-            size={size}
-            loading={loading}
-            disabled={disabled}
-            startIcon={iconPosition === "left" && icon ? icon : null}
-            endIcon={iconPosition === "right" && icon ? icon : null}
-        >
-            {text ?? `${capitalize(variant)} ${capitalize(color)}`}
-        </Button>
-    ));
+    const buttons = [...colors, ...customColors].map((color) =>
+        onlyIcon ? (
+            <Button
+                key={`${variant}-${color}-button`}
+                variant={variant}
+                color={color}
+                size={size}
+                loading={loading}
+                disabled={disabled}
+                startIcon={iconPosition === "left" && icon ? icon : null}
+                endIcon={iconPosition === "right" && icon ? icon : null}
+            />
+        ) : (
+            <Button
+                key={`${variant}-${color}-button`}
+                variant={variant}
+                color={color}
+                size={size}
+                loading={loading}
+                disabled={disabled}
+                startIcon={iconPosition === "left" && icon ? icon : null}
+                endIcon={iconPosition === "right" && icon ? icon : null}
+            >
+                {text ?? `${capitalize(variant)} ${capitalize(color)}`}
+            </Button>
+        ),
+    );
 
     return (
         <Stack
@@ -321,12 +335,33 @@ function PlaygroundButton() {
                         />
                     </Stack>
                     <Stack direction="column" spacing={5}>
-                        <label>Icon</label>
+                        <Stack
+                            direction="row"
+                            justifyContent="space-between"
+                            spacing={5}
+                        >
+                            <label>Icon</label>
+                            {icon && (
+                                <Checkbox
+                                    checked={onlyIcon}
+                                    label="Only Icon"
+                                    onChange={() =>
+                                        setOnlyIcon((prev) => !prev)
+                                    }
+                                    disabled={disabled}
+                                />
+                            )}
+                        </Stack>
                         <RadioButtonGroup
                             onChange={(_, iconPosition) =>
-                                setIconPosition(
-                                    iconPosition as "left" | "right" | "none",
-                                )
+                                setIconPosition(() => {
+                                    if (iconPosition === "none") setIcon(null);
+
+                                    return iconPosition as
+                                        | "left"
+                                        | "right"
+                                        | "none";
+                                })
                             }
                             value={iconPosition}
                             name="icon-position"
