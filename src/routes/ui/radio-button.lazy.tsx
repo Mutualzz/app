@@ -51,7 +51,7 @@ const libNames = {
 };
 
 function PlaygroundRadioButton() {
-    const [variant, setVariant] = useState<Variant>("solid");
+    const [variant, setVariant] = useState<Variant | "all">("solid");
     const [label, setLabel] = useState<string | null>(null);
     const [size, setSize] = useState<Size | number>("md");
     const [disabled, setDisabled] = useState(false);
@@ -104,13 +104,37 @@ function PlaygroundRadioButton() {
         setColorDirectly,
     } = useColorInput<Color | ColorLike>();
 
+    const allRadioButtons = [...colors, ...customColors].map((c) =>
+        variants.map((v) => (
+            <RadioButton
+                name={c}
+                checked={currentChecked === c}
+                key={c}
+                color={c}
+                variant={v}
+                size={size}
+                label={label ?? `${capitalize(variant)} ${capitalize(c)}`}
+                onChange={(e) => setCurrentChecked(e.target.value)}
+                disabled={disabled}
+                checkedIcon={
+                    SelectedCheckedIcon ? <SelectedCheckedIcon /> : undefined
+                }
+                uncheckedIcon={
+                    SelectedUncheckedIcon ? (
+                        <SelectedUncheckedIcon />
+                    ) : undefined
+                }
+                value={c}
+            />
+        )),
+    );
     const radioButtons = [...colors, ...customColors].map((color) => (
         <RadioButton
             name={color}
             checked={currentChecked === color}
             key={color}
             color={color}
-            variant={variant}
+            variant={variant as Variant}
             size={size}
             label={label ?? `${capitalize(variant)} ${capitalize(color)}`}
             onChange={(e) => setCurrentChecked(e.target.value)}
@@ -133,15 +157,21 @@ function PlaygroundRadioButton() {
             justifyContent="space-around"
         >
             <Paper
-                direction="row"
+                direction={variant === "all" ? "column" : "row"}
                 alignItems="flex-start"
                 alignContent="flex-start"
                 wrap="wrap"
                 p={20}
-                spacing={5}
+                spacing={variant === "all" ? 10 : 5}
                 width={1200}
             >
-                {radioButtons}
+                {variant === "all" &&
+                    allRadioButtons.map((radioButtons, i) => (
+                        <Stack direction="row" spacing={5} key={i}>
+                            {radioButtons}
+                        </Stack>
+                    ))}
+                {variant !== "all" && radioButtons}
             </Paper>
             <Paper width={300} alignItems="center" direction="column" p={20}>
                 <Divider>Playground</Divider>
@@ -155,6 +185,14 @@ function PlaygroundRadioButton() {
                             value={variant}
                             name="variants"
                         >
+                            <RadioButton
+                                key="all"
+                                value="all"
+                                label="All"
+                                checked={variant === "all"}
+                                color="neutral"
+                                onChange={() => setVariant("all")}
+                            />
                             {variants.map((v) => (
                                 <RadioButton
                                     key={v}

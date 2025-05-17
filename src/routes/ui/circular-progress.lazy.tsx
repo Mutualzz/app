@@ -40,7 +40,7 @@ const sizeNames = {
 };
 
 function PlaygroundCircularProgress() {
-    const [variant, setVariant] = useState<Variant>("solid");
+    const [variant, setVariant] = useState<Variant | "all">("solid");
     const [text, setText] = useState<string | null>(null);
     const [size, setSize] = useState<Size | number>("md");
 
@@ -61,6 +61,42 @@ function PlaygroundCircularProgress() {
         setColorDirectly,
     } = useColorInput<Color | ColorLike>();
 
+    const allProgresses = [...colors, ...customColors].map((c) =>
+        variants.map((v) => (
+            <Stack
+                justifyContent="center"
+                alignItems="center"
+                direction="column"
+                key={`${c}-${v}`}
+            >
+                <Typography>
+                    {capitalize(v)} {capitalize(c)}
+                </Typography>
+                {text ? (
+                    <CircularProgress
+                        key={c}
+                        size={size}
+                        variant={v}
+                        color={c}
+                        determinate={determinate}
+                        value={value}
+                    >
+                        {text}
+                    </CircularProgress>
+                ) : (
+                    <CircularProgress
+                        key={c}
+                        size={size}
+                        variant={v}
+                        color={c}
+                        determinate={determinate}
+                        value={value}
+                    />
+                )}
+            </Stack>
+        )),
+    );
+
     const progresses = [...colors, ...customColors].map((color) => (
         <Stack
             justifyContent="center"
@@ -75,7 +111,7 @@ function PlaygroundCircularProgress() {
                 <CircularProgress
                     key={color}
                     size={size}
-                    variant={variant}
+                    variant={variant as Variant}
                     color={color}
                     determinate={determinate}
                     value={value}
@@ -86,7 +122,7 @@ function PlaygroundCircularProgress() {
                 <CircularProgress
                     key={color}
                     size={size}
-                    variant={variant}
+                    variant={variant as Variant}
                     color={color}
                     determinate={determinate}
                     value={value}
@@ -103,15 +139,21 @@ function PlaygroundCircularProgress() {
             justifyContent="space-around"
         >
             <Paper
-                direction="row"
+                direction={variant === "all" ? "column" : "row"}
                 alignItems="flex-start"
                 alignContent="flex-start"
                 wrap="wrap"
                 p={20}
-                spacing={5}
+                spacing={variant === "all" ? 10 : 5}
                 width={1200}
             >
-                {progresses}
+                {variant === "all" &&
+                    allProgresses.map((progresses, i) => (
+                        <Stack direction="row" spacing={5} key={i}>
+                            {progresses}
+                        </Stack>
+                    ))}
+                {variant !== "all" && progresses}
             </Paper>
             <Paper width={300} alignItems="center" direction="column" p={20}>
                 <Divider>Playground</Divider>
@@ -125,6 +167,14 @@ function PlaygroundCircularProgress() {
                             value={variant}
                             name="variants"
                         >
+                            <RadioButton
+                                key="all"
+                                value="all"
+                                label="All"
+                                checked={variant === "all"}
+                                color="neutral"
+                                onChange={() => setVariant("all")}
+                            />
                             {variants.map((v) => (
                                 <RadioButton
                                     key={v}

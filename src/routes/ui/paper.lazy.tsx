@@ -35,7 +35,7 @@ const colors = [
 ] as Color[];
 
 function PlaygroundPaper() {
-    const [variant, setVariant] = useState<PaperVariant>("solid");
+    const [variant, setVariant] = useState<PaperVariant | "all">("solid");
     const [text, setText] = useState<string | null>(null);
     const [elevation, setElevation] = useState<number>(1);
 
@@ -51,10 +51,27 @@ function PlaygroundPaper() {
         setColorDirectly,
     } = useColorInput<Color | ColorLike>();
 
+    const allPapers = [...colors, ...customColors].map((c) =>
+        variants
+            .filter((v) => v !== "elevation")
+            .map((v) => (
+                <Paper
+                    key={`${v}-${c}-button`}
+                    variant={v}
+                    color={c}
+                    p={20}
+                    justifyContent="center"
+                    alignItems="center"
+                >
+                    {text ?? `${capitalize(v)} ${capitalize(c)}`}
+                </Paper>
+            )),
+    );
+
     const papers = [...colors, ...customColors].map((color) => (
         <Paper
             key={`${variant}-${color}-button`}
-            variant={variant}
+            variant={variant as PaperVariant}
             color={color}
             p={20}
             justifyContent="center"
@@ -72,7 +89,7 @@ function PlaygroundPaper() {
             justifyContent="space-around"
         >
             <Paper
-                direction="row"
+                direction={variant === "all" ? "column" : "row"}
                 alignItems={variant === "elevation" ? "center" : "flex-start"}
                 alignContent={variant === "elevation" ? "center" : "flex-start"}
                 wrap="wrap"
@@ -83,7 +100,7 @@ function PlaygroundPaper() {
                     variant === "elevation" ? "center" : "flex-start"
                 }
             >
-                {variant !== "elevation" && papers}
+                {variant !== "elevation" && variant !== "all" && papers}
                 {variant === "elevation" && (
                     <Paper
                         variant={variant}
@@ -96,6 +113,12 @@ function PlaygroundPaper() {
                         {text ?? `${capitalize(variant)} ${elevation}`}
                     </Paper>
                 )}
+                {variant === "all" &&
+                    allPapers.map((paper, i) => (
+                        <Stack direction="row" key={i} spacing={10}>
+                            {paper}
+                        </Stack>
+                    ))}
             </Paper>
             <Paper width={300} alignItems="center" direction="column" p={20}>
                 <Divider>Playground</Divider>
@@ -109,6 +132,14 @@ function PlaygroundPaper() {
                             value={variant}
                             name="variants"
                         >
+                            <RadioButton
+                                key="all"
+                                value="all"
+                                label="All"
+                                checked={variant === "all"}
+                                color="neutral"
+                                onChange={() => setVariant("all")}
+                            />
                             {variants.map((v) => (
                                 <RadioButton
                                     key={v}

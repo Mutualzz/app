@@ -47,7 +47,7 @@ const sizeNames = {
 };
 
 function PlaygroundLinearProgress() {
-    const [variant, setVariant] = useState<Variant>("solid");
+    const [variant, setVariant] = useState<Variant | "all">("solid");
 
     const [thickness, setThickness] = useState<Size | number>("md");
     const [length, setLength] = useState<Size | number>("md");
@@ -73,6 +73,31 @@ function PlaygroundLinearProgress() {
         setColorDirectly,
     } = useColorInput<Color | ColorLike>();
 
+    const allProgresses = [...colors, ...customColors].map((c) =>
+        variants.map((v) => (
+            <Stack
+                direction="column"
+                alignItems="center"
+                justifyContent="center"
+                key={`${v}-${c}`}
+            >
+                <Typography>
+                    {capitalize(v)} {capitalize(c)}
+                </Typography>
+                <LinearProgress
+                    key={`${v}-${c}-progress`}
+                    variant={v}
+                    color={c}
+                    length={length}
+                    thickness={thickness}
+                    animation={animation}
+                    value={value}
+                    determinate={determinate}
+                />
+            </Stack>
+        )),
+    );
+
     const progresses = [...colors, ...customColors].map((color) => (
         <Stack
             direction="column"
@@ -85,7 +110,7 @@ function PlaygroundLinearProgress() {
             </Typography>
             <LinearProgress
                 key={`${variant}-${color}-progress`}
-                variant={variant}
+                variant={variant as Variant}
                 color={color}
                 length={length}
                 thickness={thickness}
@@ -112,7 +137,13 @@ function PlaygroundLinearProgress() {
                 spacing={25}
                 width={1200}
             >
-                {progresses}
+                {variant === "all" &&
+                    allProgresses.map((progresses, i) => (
+                        <Stack direction="row" spacing={5} key={i}>
+                            {progresses}
+                        </Stack>
+                    ))}
+                {variant !== "all" && progresses}
             </Paper>
 
             <Paper width={300} direction="column" p={20} spacing={10}>
@@ -127,6 +158,14 @@ function PlaygroundLinearProgress() {
                             value={variant}
                             name="variant"
                         >
+                            <RadioButton
+                                key="all"
+                                value="all"
+                                label="All"
+                                checked={variant === "all"}
+                                color="neutral"
+                                onChange={() => setVariant("all")}
+                            />
                             {variants.map((v) => (
                                 <RadioButton
                                     key={v}

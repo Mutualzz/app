@@ -61,7 +61,7 @@ const colors = [
 ] as Color[];
 
 function PlaygroundTypography() {
-    const [variant, setVariant] = useState<TypographyVariant>("solid");
+    const [variant, setVariant] = useState<TypographyVariant | "all">("solid");
     const [level, setLevel] = useState<TypographyLevel>("body-md");
     const [weight, setWeight] = useState<FontWeight>("normal");
     const [text, setText] = useState<string | null>(null);
@@ -80,11 +80,27 @@ function PlaygroundTypography() {
         setColorDirectly,
     } = useColorInput<Color | ColorLike>();
 
+    const allTypographies = [...colors, ...customColors].map((c) =>
+        variants
+            .filter((v) => v !== "none")
+            .map((v) => (
+                <Typography
+                    key={`${v}-${c}`}
+                    level={level}
+                    variant={v as TypographyVariant}
+                    weight={weight}
+                    color={c}
+                >
+                    {text ?? `${capitalize(v)} ${capitalize(c)}`}
+                </Typography>
+            )),
+    );
+
     const typographies = [...colors, ...customColors].map((color) => (
         <Typography
             key={color}
             level={level}
-            variant={variant}
+            variant={variant as TypographyVariant}
             weight={weight}
             color={color}
         >
@@ -100,12 +116,12 @@ function PlaygroundTypography() {
             justifyContent="space-around"
         >
             <Paper
-                direction="row"
+                direction={variant === "all" ? "column" : "row"}
                 alignItems="flex-start"
                 alignContent="flex-start"
                 wrap="wrap"
                 p={20}
-                spacing={5}
+                spacing={variant === "all" ? 10 : 5}
                 width={1200}
             >
                 {variant === "none" && (
@@ -113,7 +129,13 @@ function PlaygroundTypography() {
                         {text ?? "No variant applied"}
                     </Typography>
                 )}
-                {variant !== "none" && typographies}
+                {variant === "all" &&
+                    allTypographies.map((typographies, i) => (
+                        <Stack direction="row" spacing={5} key={i}>
+                            {typographies}
+                        </Stack>
+                    ))}
+                {variant !== "none" && variant !== "all" && typographies}
             </Paper>
             <Paper width={300} alignItems="center" direction="column" p={20}>
                 <Divider>Playground</Divider>
@@ -127,6 +149,14 @@ function PlaygroundTypography() {
                             value={variant}
                             name="variant"
                         >
+                            <RadioButton
+                                key="all"
+                                value="all"
+                                label="All"
+                                checked={variant === "all"}
+                                color="neutral"
+                                onChange={() => setVariant("all")}
+                            />
                             {variants.map((v) => (
                                 <RadioButton
                                     key={v}

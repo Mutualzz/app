@@ -52,7 +52,7 @@ const libNames = {
 };
 
 function PlaygroundCheckbox() {
-    const [variant, setVariant] = useState<Variant>("solid");
+    const [variant, setVariant] = useState<Variant | "all">("solid");
     const [label, setLabel] = useState<string | null>(null);
     const [size, setSize] = useState<Size | number>("md");
     const [disabled, setDisabled] = useState(false);
@@ -123,12 +123,34 @@ function PlaygroundCheckbox() {
         setColorDirectly,
     } = useColorInput<Color | ColorLike>();
 
+    const allCheckboxes = [...colors, ...customColors].map((c) =>
+        variants.map((v) => (
+            <Checkbox
+                key={`${c}-${v}`}
+                label={label ?? `${capitalize(v)} ${capitalize(c)}`}
+                checked={checked ? true : undefined}
+                variant={v}
+                color={c}
+                indeterminate={indeterminate}
+                size={size}
+                disabled={disabled}
+                checkedIcon={SelectedCheckedIcon && <SelectedCheckedIcon />}
+                uncheckedIcon={
+                    SelectedUncheckedIcon && <SelectedUncheckedIcon />
+                }
+                indeterminateIcon={
+                    SelectedIndeterminateIcon && <SelectedIndeterminateIcon />
+                }
+            />
+        )),
+    );
+
     const checkboxes = [...colors, ...customColors].map((color) => (
         <Checkbox
             key={color}
             label={label ?? `${capitalize(variant)} ${capitalize(color)}`}
             checked={checked ? true : undefined}
-            variant={variant}
+            variant={variant as Variant}
             color={color}
             indeterminate={indeterminate}
             size={size}
@@ -149,15 +171,21 @@ function PlaygroundCheckbox() {
             justifyContent="space-around"
         >
             <Paper
-                direction="row"
+                direction={variant === "all" ? "column" : "row"}
                 alignItems="flex-start"
                 alignContent="flex-start"
                 wrap="wrap"
                 p={20}
-                spacing={5}
+                spacing={variant === "all" ? 10 : 5}
                 width={1200}
             >
-                {checkboxes}
+                {variant === "all" &&
+                    allCheckboxes.map((checkboxes, i) => (
+                        <Stack direction="row" spacing={5} key={i}>
+                            {checkboxes}
+                        </Stack>
+                    ))}
+                {variant !== "all" && checkboxes}
             </Paper>
             <Paper width={300} alignItems="center" direction="column" p={20}>
                 <Divider>Playground</Divider>
@@ -171,6 +199,13 @@ function PlaygroundCheckbox() {
                             value={variant}
                             name="variants"
                         >
+                            <RadioButton
+                                value="all"
+                                label="All"
+                                checked={variant === "all"}
+                                color="neutral"
+                                onChange={() => setVariant("all")}
+                            />
                             {variants.map((v) => (
                                 <RadioButton
                                     key={v}

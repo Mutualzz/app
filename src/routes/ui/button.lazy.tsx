@@ -51,7 +51,7 @@ const libNames = {
 };
 
 function PlaygroundButton() {
-    const [variant, setVariant] = useState<Variant>("solid");
+    const [variant, setVariant] = useState<Variant | "all">("solid");
     const [text, setText] = useState<string | null>(null);
     const [size, setSize] = useState<Size | number>("md");
     const [loading, setLoading] = useState(false);
@@ -81,11 +81,41 @@ function PlaygroundButton() {
         setColorDirectly,
     } = useColorInput<Color | ColorLike>();
 
+    const allButtons = [...colors, ...customColors].map((c) =>
+        variants.map((v) =>
+            iconOnly ? (
+                <Button
+                    key={`${v}-${c}-button`}
+                    variant={v}
+                    color={c}
+                    size={size}
+                    loading={loading}
+                    disabled={disabled}
+                    startIcon={iconPosition === "left" && icon ? icon : null}
+                    endIcon={iconPosition === "right" && icon ? icon : null}
+                />
+            ) : (
+                <Button
+                    key={`${v}-${c}-button`}
+                    variant={v}
+                    color={c}
+                    size={size}
+                    loading={loading}
+                    disabled={disabled}
+                    startIcon={iconPosition === "left" && icon ? icon : null}
+                    endIcon={iconPosition === "right" && icon ? icon : null}
+                >
+                    {text ?? `${capitalize(v)} ${capitalize(c)}`}
+                </Button>
+            ),
+        ),
+    );
+
     const buttons = [...colors, ...customColors].map((color) =>
         iconOnly ? (
             <Button
                 key={`${variant}-${color}-button`}
-                variant={variant}
+                variant={variant as Variant}
                 color={color}
                 size={size}
                 loading={loading}
@@ -96,7 +126,7 @@ function PlaygroundButton() {
         ) : (
             <Button
                 key={`${variant}-${color}-button`}
-                variant={variant}
+                variant={variant as Variant}
                 color={color}
                 size={size}
                 loading={loading}
@@ -117,15 +147,21 @@ function PlaygroundButton() {
             justifyContent="space-around"
         >
             <Paper
-                direction="row"
+                direction={variant === "all" ? "column" : "row"}
                 alignItems="flex-start"
                 alignContent="flex-start"
                 wrap="wrap"
                 p={20}
-                spacing={5}
+                spacing={variant === "all" ? 10 : 5}
                 width={1200}
             >
-                {buttons}
+                {variant === "all" &&
+                    allButtons.map((buttons, i) => (
+                        <Stack direction="row" spacing={5} key={i}>
+                            {buttons}
+                        </Stack>
+                    ))}
+                {variant !== "all" && buttons}
             </Paper>
             <Paper width={300} alignItems="center" direction="column" p={20}>
                 <Divider>Playground</Divider>
@@ -139,6 +175,13 @@ function PlaygroundButton() {
                             value={variant}
                             name="variants"
                         >
+                            <RadioButton
+                                value="all"
+                                label="All"
+                                checked={variant === "all"}
+                                color="neutral"
+                                onChange={() => setVariant("all")}
+                            />
                             {variants.map((v) => (
                                 <RadioButton
                                     key={v}
