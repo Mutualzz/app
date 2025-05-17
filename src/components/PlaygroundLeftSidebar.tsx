@@ -19,7 +19,7 @@ export const PlaygrondLeftSidebar = () => {
     const themes = allThemes.filter((theme) => theme.type === mode);
 
     const components = {
-        input: [
+        inputs: [
             {
                 name: "Button",
                 link: "/ui/button",
@@ -37,16 +37,6 @@ export const PlaygrondLeftSidebar = () => {
                 link: "/ui/radio-button",
             },
         ],
-        feedback: [
-            {
-                name: "Circular Progress",
-                link: "/ui/circular-progress",
-            },
-            {
-                name: "Linear Progress",
-                link: "/ui/linear-progress",
-            },
-        ],
         dataDisplay: [
             {
                 name: "Divider",
@@ -57,7 +47,17 @@ export const PlaygrondLeftSidebar = () => {
                 link: "/ui/typography",
             },
         ],
-        surface: [
+        feedback: [
+            {
+                name: "Circular Progress",
+                link: "/ui/circular-progress",
+            },
+            {
+                name: "Linear Progress",
+                link: "/ui/linear-progress",
+            },
+        ],
+        surfaces: [
             {
                 name: "Paper",
                 link: "/ui/paper",
