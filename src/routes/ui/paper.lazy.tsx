@@ -68,16 +68,16 @@ function PlaygroundPaper() {
             )),
     );
 
-    const papers = [...colors, ...customColors].map((color) => (
+    const papers = [...colors, ...customColors].map((c) => (
         <Paper
-            key={`${variant}-${color}-button`}
+            key={`${variant}-${c}-button`}
             variant={variant as PaperVariant}
-            color={color}
+            color={c}
             p={20}
             justifyContent="center"
             alignItems="center"
         >
-            {text ?? `${capitalize(variant)} ${capitalize(color)}`}
+            {text ?? `${capitalize(variant)} ${capitalize(c)}`}
         </Paper>
     ));
 

@@ -111,12 +111,12 @@ function PlaygroundButton() {
         ),
     );
 
-    const buttons = [...colors, ...customColors].map((color) =>
+    const buttons = [...colors, ...customColors].map((c) =>
         iconOnly ? (
             <Button
-                key={`${variant}-${color}-button`}
+                key={`${variant}-${c}-button`}
                 variant={variant as Variant}
-                color={color}
+                color={c}
                 size={size}
                 loading={loading}
                 disabled={disabled}
@@ -125,16 +125,16 @@ function PlaygroundButton() {
             />
         ) : (
             <Button
-                key={`${variant}-${color}-button`}
+                key={`${variant}-${c}-button`}
                 variant={variant as Variant}
-                color={color}
+                color={c}
                 size={size}
                 loading={loading}
                 disabled={disabled}
                 startIcon={iconPosition === "left" && icon ? icon : null}
                 endIcon={iconPosition === "right" && icon ? icon : null}
             >
-                {text ?? `${capitalize(variant)} ${capitalize(color)}`}
+                {text ?? `${capitalize(variant)} ${capitalize(c)}`}
             </Button>
         ),
     );

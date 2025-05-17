@@ -98,20 +98,20 @@ function PlaygroundLinearProgress() {
         )),
     );
 
-    const progresses = [...colors, ...customColors].map((color) => (
+    const progresses = [...colors, ...customColors].map((c) => (
         <Stack
             direction="column"
             alignItems="center"
             justifyContent="center"
-            key={color}
+            key={c}
         >
             <Typography>
-                {capitalize(variant)} {capitalize(color)}
+                {capitalize(variant)} {capitalize(c)}
             </Typography>
             <LinearProgress
-                key={`${variant}-${color}-progress`}
+                key={`${variant}-${c}-progress`}
                 variant={variant as Variant}
-                color={color}
+                color={c}
                 length={length}
                 thickness={thickness}
                 animation={animation}

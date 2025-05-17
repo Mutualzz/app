@@ -145,13 +145,13 @@ function PlaygroundCheckbox() {
         )),
     );
 
-    const checkboxes = [...colors, ...customColors].map((color) => (
+    const checkboxes = [...colors, ...customColors].map((c) => (
         <Checkbox
-            key={color}
-            label={label ?? `${capitalize(variant)} ${capitalize(color)}`}
+            key={c}
+            label={label ?? `${capitalize(variant)} ${capitalize(c)}`}
             checked={checked ? true : undefined}
             variant={variant as Variant}
-            color={color}
+            color={c}
             indeterminate={indeterminate}
             size={size}
             disabled={disabled}

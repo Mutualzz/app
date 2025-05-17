@@ -97,22 +97,22 @@ function PlaygroundCircularProgress() {
         )),
     );
 
-    const progresses = [...colors, ...customColors].map((color) => (
+    const progresses = [...colors, ...customColors].map((c) => (
         <Stack
             justifyContent="center"
             alignItems="center"
             direction="column"
-            key={color}
+            key={c}
         >
             <Typography>
-                {capitalize(variant)} {capitalize(color)}
+                {capitalize(variant)} {capitalize(c)}
             </Typography>
             {text ? (
                 <CircularProgress
-                    key={color}
+                    key={c}
                     size={size}
                     variant={variant as Variant}
-                    color={color}
+                    color={c}
                     determinate={determinate}
                     value={value}
                 >
@@ -120,10 +120,10 @@ function PlaygroundCircularProgress() {
                 </CircularProgress>
             ) : (
                 <CircularProgress
-                    key={color}
+                    key={c}
                     size={size}
                     variant={variant as Variant}
-                    color={color}
+                    color={c}
                     determinate={determinate}
                     value={value}
                 />

@@ -64,16 +64,16 @@ function PlaygroundButton() {
         setColorDirectly,
     } = useColorInput<Color | ColorLike>();
 
-    const allButtons = variants.map((variant) => (
+    const allButtons = variants.map((v) => (
         <Button
-            key={`${variant}-${color}-button`}
+            key={`${v}-${color}-button`}
             size={size}
             loading={loading}
             disabled={disabled}
             color={color}
-            variant={variant}
+            variant={v}
         >
-            {text ?? `${capitalize(variant)} ${capitalize(color)}`}
+            {text ?? `${capitalize(v)} ${capitalize(color)}`}
         </Button>
     ));
 

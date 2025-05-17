@@ -128,15 +128,15 @@ function PlaygroundRadioButton() {
             />
         )),
     );
-    const radioButtons = [...colors, ...customColors].map((color) => (
+    const radioButtons = [...colors, ...customColors].map((c) => (
         <RadioButton
-            name={color}
-            checked={currentChecked === color}
-            key={color}
-            color={color}
+            name={c}
+            checked={currentChecked === c}
+            key={c}
+            color={c}
             variant={variant as Variant}
             size={size}
-            label={label ?? `${capitalize(variant)} ${capitalize(color)}`}
+            label={label ?? `${capitalize(variant)} ${capitalize(c)}`}
             onChange={(e) => setCurrentChecked(e.target.value)}
             disabled={disabled}
             checkedIcon={
@@ -145,7 +145,7 @@ function PlaygroundRadioButton() {
             uncheckedIcon={
                 SelectedUncheckedIcon ? <SelectedUncheckedIcon /> : undefined
             }
-            value={color}
+            value={c}
         />
     ));
 

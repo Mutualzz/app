@@ -96,15 +96,15 @@ function PlaygroundTypography() {
             )),
     );
 
-    const typographies = [...colors, ...customColors].map((color) => (
+    const typographies = [...colors, ...customColors].map((c) => (
         <Typography
-            key={color}
+            key={c}
             level={level}
             variant={variant as TypographyVariant}
             weight={weight}
-            color={color}
+            color={c}
         >
-            {text ?? `${capitalize(variant)} ${capitalize(color)}`}
+            {text ?? `${capitalize(variant)} ${capitalize(c)}`}
         </Typography>
     ));
 
