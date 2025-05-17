@@ -26,6 +26,7 @@ const UiLinearProgressLazyImport = createFileRoute("/ui/linear-progress")()
 const UiDividerLazyImport = createFileRoute("/ui/divider")()
 const UiCircularProgressLazyImport = createFileRoute("/ui/circular-progress")()
 const UiCheckboxLazyImport = createFileRoute("/ui/checkbox")()
+const UiButtonGroupLazyImport = createFileRoute("/ui/button-group")()
 const UiButtonLazyImport = createFileRoute("/ui/button")()
 
 // Create/Update Routes
@@ -96,6 +97,14 @@ const UiCheckboxLazyRoute = UiCheckboxLazyImport.update({
   getParentRoute: () => UiLazyRoute,
 } as any).lazy(() => import("./routes/ui/checkbox.lazy").then((d) => d.Route))
 
+const UiButtonGroupLazyRoute = UiButtonGroupLazyImport.update({
+  id: "/button-group",
+  path: "/button-group",
+  getParentRoute: () => UiLazyRoute,
+} as any).lazy(() =>
+  import("./routes/ui/button-group.lazy").then((d) => d.Route),
+)
+
 const UiButtonLazyRoute = UiButtonLazyImport.update({
   id: "/button",
   path: "/button",
@@ -125,6 +134,13 @@ declare module "@tanstack/react-router" {
       path: "/button"
       fullPath: "/ui/button"
       preLoaderRoute: typeof UiButtonLazyImport
+      parentRoute: typeof UiLazyImport
+    }
+    "/ui/button-group": {
+      id: "/ui/button-group"
+      path: "/button-group"
+      fullPath: "/ui/button-group"
+      preLoaderRoute: typeof UiButtonGroupLazyImport
       parentRoute: typeof UiLazyImport
     }
     "/ui/checkbox": {
@@ -190,6 +206,7 @@ declare module "@tanstack/react-router" {
 
 interface UiLazyRouteChildren {
   UiButtonLazyRoute: typeof UiButtonLazyRoute
+  UiButtonGroupLazyRoute: typeof UiButtonGroupLazyRoute
   UiCheckboxLazyRoute: typeof UiCheckboxLazyRoute
   UiCircularProgressLazyRoute: typeof UiCircularProgressLazyRoute
   UiDividerLazyRoute: typeof UiDividerLazyRoute
@@ -202,6 +219,7 @@ interface UiLazyRouteChildren {
 
 const UiLazyRouteChildren: UiLazyRouteChildren = {
   UiButtonLazyRoute: UiButtonLazyRoute,
+  UiButtonGroupLazyRoute: UiButtonGroupLazyRoute,
   UiCheckboxLazyRoute: UiCheckboxLazyRoute,
   UiCircularProgressLazyRoute: UiCircularProgressLazyRoute,
   UiDividerLazyRoute: UiDividerLazyRoute,
@@ -219,6 +237,7 @@ export interface FileRoutesByFullPath {
   "/": typeof IndexLazyRoute
   "/ui": typeof UiLazyRouteWithChildren
   "/ui/button": typeof UiButtonLazyRoute
+  "/ui/button-group": typeof UiButtonGroupLazyRoute
   "/ui/checkbox": typeof UiCheckboxLazyRoute
   "/ui/circular-progress": typeof UiCircularProgressLazyRoute
   "/ui/divider": typeof UiDividerLazyRoute
@@ -232,6 +251,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   "/": typeof IndexLazyRoute
   "/ui/button": typeof UiButtonLazyRoute
+  "/ui/button-group": typeof UiButtonGroupLazyRoute
   "/ui/checkbox": typeof UiCheckboxLazyRoute
   "/ui/circular-progress": typeof UiCircularProgressLazyRoute
   "/ui/divider": typeof UiDividerLazyRoute
@@ -247,6 +267,7 @@ export interface FileRoutesById {
   "/": typeof IndexLazyRoute
   "/ui": typeof UiLazyRouteWithChildren
   "/ui/button": typeof UiButtonLazyRoute
+  "/ui/button-group": typeof UiButtonGroupLazyRoute
   "/ui/checkbox": typeof UiCheckboxLazyRoute
   "/ui/circular-progress": typeof UiCircularProgressLazyRoute
   "/ui/divider": typeof UiDividerLazyRoute
@@ -263,6 +284,7 @@ export interface FileRouteTypes {
     | "/"
     | "/ui"
     | "/ui/button"
+    | "/ui/button-group"
     | "/ui/checkbox"
     | "/ui/circular-progress"
     | "/ui/divider"
@@ -275,6 +297,7 @@ export interface FileRouteTypes {
   to:
     | "/"
     | "/ui/button"
+    | "/ui/button-group"
     | "/ui/checkbox"
     | "/ui/circular-progress"
     | "/ui/divider"
@@ -288,6 +311,7 @@ export interface FileRouteTypes {
     | "/"
     | "/ui"
     | "/ui/button"
+    | "/ui/button-group"
     | "/ui/checkbox"
     | "/ui/circular-progress"
     | "/ui/divider"
@@ -330,6 +354,7 @@ export const routeTree = rootRoute
       "filePath": "ui.lazy.tsx",
       "children": [
         "/ui/button",
+        "/ui/button-group",
         "/ui/checkbox",
         "/ui/circular-progress",
         "/ui/divider",
@@ -342,6 +367,10 @@ export const routeTree = rootRoute
     },
     "/ui/button": {
       "filePath": "ui/button.lazy.tsx",
+      "parent": "/ui"
+    },
+    "/ui/button-group": {
+      "filePath": "ui/button-group.lazy.tsx",
       "parent": "/ui"
     },
     "/ui/checkbox": {

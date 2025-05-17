@@ -25,6 +25,10 @@ export const PlaygrondLeftSidebar = () => {
                 link: "/ui/button",
             },
             {
+                name: "Button Group",
+                link: "/ui/button-group",
+            },
+            {
                 name: "Checkbox",
                 link: "/ui/checkbox",
             },
