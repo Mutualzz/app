@@ -94,7 +94,7 @@ function PlaygroundPaper() {
                 alignContent={variant === "elevation" ? "center" : "flex-start"}
                 wrap="wrap"
                 p={20}
-                spacing={5}
+                spacing={variant === "all" ? 10 : 5}
                 width={1200}
                 justifyContent={
                     variant === "elevation" ? "center" : "flex-start"
