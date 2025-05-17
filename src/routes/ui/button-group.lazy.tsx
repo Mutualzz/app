@@ -15,6 +15,9 @@ import { RadioButton } from "@ui/components/inputs/RadioButton/RadioButton";
 import { RadioButtonGroup } from "@ui/components/inputs/RadioButton/RadioButtonGroup";
 import { randomHexColor } from "@ui/utils";
 
+import numWords from "num-words";
+import { FaMinus, FaPlus } from "react-icons/fa";
+
 export const Route = createLazyFileRoute("/ui/button-group")({
     component: PlaygroundButton,
 });
@@ -36,8 +39,6 @@ const sizeNames = {
     lg: "Large",
 };
 
-const numbers = ["One", "Two", "Three", "Four"];
-
 function PlaygroundButton() {
     const [color, setColor] = useState<Color | ColorLike>("primary");
     const [variant, setVariant] = useState<Variant | "all">("all");
@@ -47,6 +48,8 @@ function PlaygroundButton() {
     const [spacing, setSpacing] = useState(0);
     const [loading, setLoading] = useState(false);
     const [disabled, setDisabled] = useState(false);
+
+    const [numberOfButtons, setNumberOfButtons] = useState(4);
 
     const [orientation, setOrientation] = useState<"horizontal" | "vertical">(
         "horizontal",
@@ -77,7 +80,7 @@ function PlaygroundButton() {
         </Button>
     ));
 
-    const buttons = new Array(4).fill(0).map((_, index) => (
+    const buttons = new Array(numberOfButtons).fill(0).map((_, index) => (
         <Button
             key={`${variant}-${color}-button-${index}`}
             size={size}
@@ -85,7 +88,7 @@ function PlaygroundButton() {
             disabled={disabled}
             color={color}
         >
-            {text ?? numbers[index]}
+            {text ?? capitalize(numWords(index + 1))}
         </Button>
     ));
 
@@ -100,7 +103,6 @@ function PlaygroundButton() {
                 direction="row"
                 alignItems="flex-start"
                 alignContent="flex-start"
-                wrap="wrap"
                 p={20}
                 spacing={5}
                 width={1200}
@@ -165,6 +167,35 @@ function PlaygroundButton() {
                             ))}
                         </RadioButtonGroup>
                     </Stack>
+                    {variant !== "all" && (
+                        <Stack direction="column" spacing={5}>
+                            <label>
+                                Number of Buttons: <b>{numberOfButtons}</b>
+                            </label>
+                            <Stack direction="row" spacing={5}>
+                                <Button
+                                    color="neutral"
+                                    variant="outlined"
+                                    onClick={() =>
+                                        setNumberOfButtons((prev) =>
+                                            prev > 4 ? prev - 1 : prev,
+                                        )
+                                    }
+                                >
+                                    <FaMinus />
+                                </Button>
+                                <Button
+                                    color="neutral"
+                                    variant="outlined"
+                                    onClick={() =>
+                                        setNumberOfButtons((prev) => prev + 1)
+                                    }
+                                >
+                                    <FaPlus />
+                                </Button>
+                            </Stack>
+                        </Stack>
+                    )}
                     <Stack direction="column" spacing={10}>
                         <Stack
                             direction="row"
