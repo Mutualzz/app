@@ -113,7 +113,7 @@ function PlaygroundRadioButton() {
                 color={c}
                 variant={v}
                 size={size}
-                label={label ?? `${capitalize(variant)} ${capitalize(c)}`}
+                label={label ?? `${capitalize(v)} ${capitalize(c)}`}
                 onChange={(e) => setCurrentChecked(e.target.value)}
                 disabled={disabled}
                 checkedIcon={
