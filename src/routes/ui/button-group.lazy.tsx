@@ -193,6 +193,13 @@ function PlaygroundButton() {
                                 >
                                     <FaPlus />
                                 </Button>
+                                <Button
+                                    color="neutral"
+                                    variant="outlined"
+                                    onClick={() => setNumberOfButtons(4)}
+                                >
+                                    Reset
+                                </Button>
                             </Stack>
                         </Stack>
                     )}
