@@ -50,7 +50,27 @@ const levels = [
     "body-xs",
 ] as TypographyLevel[];
 
-const weights = ["normal", "bold", "lighter", "bolder"] as FontWeight[];
+const levelsNames = [
+    "Display Large",
+    "Display Medium",
+    "Display Small",
+    "Display Extra Small",
+    "Heading 1",
+    "Heading 2",
+    "Heading 3",
+    "Heading 4",
+    "Heading 5",
+    "Heading 6",
+    "Title Large",
+    "Title Medium",
+    "Title Small",
+    "Body Large",
+    "Body Medium",
+    "Body Small",
+    "Body Extra Small",
+];
+
+const weights = ["lighter", "normal", "bold", "bolder"] as FontWeight[];
 
 const colors = [
     "primary",
@@ -185,9 +205,9 @@ function PlaygroundTypography() {
                                 backgroundColor: "#f9f9f9",
                             }}
                         >
-                            {levels.map((l) => (
+                            {levels.map((l, i) => (
                                 <option key={l} value={l}>
-                                    {l}
+                                    {levelsNames[i]}
                                 </option>
                             ))}
                         </select>
@@ -246,7 +266,7 @@ function PlaygroundTypography() {
                             >
                                 {weights.map((w) => (
                                     <option key={w} value={w}>
-                                        {w}
+                                        {capitalize(w as string)}
                                     </option>
                                 ))}
                             </select>
