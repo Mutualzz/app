@@ -126,7 +126,7 @@ function PlaygroundTypography() {
                 width={1200}
             >
                 {variant === "none" && (
-                    <Typography level={level} variant={variant}>
+                    <Typography level={level} weight={weight} variant={variant}>
                         {text ?? "No variant applied"}
                     </Typography>
                 )}
