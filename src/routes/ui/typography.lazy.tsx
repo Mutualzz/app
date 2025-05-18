@@ -14,7 +14,8 @@ import {
 } from "@ui/index";
 import type { Color, ColorLike, TypographyLevel } from "@ui/types";
 import type { FontWeight } from "@ui/types/Typography.props";
-import { capitalize } from "lodash";
+
+import capitalize from "lodash/capitalize";
 import { useState } from "react";
 
 export const Route = createLazyFileRoute("/ui/typography")({

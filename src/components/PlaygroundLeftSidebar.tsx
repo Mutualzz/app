@@ -9,7 +9,7 @@ import { themes as allThemes } from "@themes/index";
 
 import { useNavigate } from "@tanstack/react-router";
 import { sortThemes } from "@ui/utils/sortThemes";
-import { startCase } from "lodash";
+import startCase from "lodash/startCase";
 
 export const PlaygrondLeftSidebar = () => {
     const { mode, changeMode, changeTheme } = useTheme();

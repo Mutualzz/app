@@ -14,7 +14,7 @@ import {
     Stack,
 } from "@ui/index";
 import type { Color, ColorLike, Size, Variant } from "@ui/types";
-import { capitalize } from "lodash";
+import capitalize from "lodash/capitalize";
 
 import { useState } from "react";
 

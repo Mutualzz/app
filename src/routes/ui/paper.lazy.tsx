@@ -11,7 +11,7 @@ import {
     Stack,
 } from "@ui/index";
 import { type Color, type ColorLike } from "@ui/types";
-import { capitalize } from "lodash";
+import capitalize from "lodash/capitalize";
 import { useState } from "react";
 
 export const Route = createLazyFileRoute("/ui/paper")({
