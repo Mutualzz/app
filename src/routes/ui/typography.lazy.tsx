@@ -160,8 +160,8 @@ function PlaygroundTypography() {
             </Paper>
             <Paper width={300} alignItems="center" direction="column" p={20}>
                 <Divider>Playground</Divider>
-                <Stack width="100%" direction="column" spacing={40}>
-                    <Stack direction="column" spacing={10}>
+                <Stack width="100%" direction="column" spacing={5}>
+                    <Stack direction="column" spacing={5}>
                         <label>Variant</label>
                         <RadioButtonGroup
                             onChange={(_, vriant) =>
@@ -190,7 +190,8 @@ function PlaygroundTypography() {
                             ))}
                         </RadioButtonGroup>
                     </Stack>
-                    <Stack direction="column" spacing={10}>
+                    <Divider />
+                    <Stack direction="column" spacing={5}>
                         <label>Level</label>
                         <select
                             value={level}
@@ -212,11 +213,12 @@ function PlaygroundTypography() {
                             ))}
                         </select>
                     </Stack>
-                    <Stack direction="column" spacing={10}>
+                    <Divider />
+                    <Stack direction="column" spacing={5}>
                         <Stack
                             direction="row"
                             justifyContent="space-between"
-                            spacing={10}
+                            spacing={5}
                         >
                             <label>Weight</label>
                             <Checkbox
@@ -272,104 +274,113 @@ function PlaygroundTypography() {
                             </select>
                         )}
                     </Stack>
+                    <Divider />
                     {variant !== "none" && (
-                        <Stack direction="column" spacing={10}>
-                            <label>Custom Color</label>
-                            <Stack
-                                alignContent="center"
-                                direction="row"
-                                spacing={5}
-                            >
-                                <input
-                                    type="text"
-                                    value={inputColorValue}
-                                    onChange={(e) =>
-                                        handleChange(e.target.value)
-                                    }
-                                    onBlur={validate}
-                                    css={{
-                                        padding: 10,
-                                        borderRadius: 5,
-                                        border: isInvalid
-                                            ? "1px solid red"
-                                            : "1px solid #ccc",
-                                        backgroundColor: "#f9f9f9",
-                                        width: "100%",
-                                    }}
-                                />
-                                <Button
-                                    color="primary"
-                                    disabled={!customColor}
-                                    onClick={() => {
-                                        setCustomColors(
-                                            (prev) =>
-                                                [
-                                                    ...prev,
-                                                    customColor,
-                                                ] as ColorLike[],
-                                        );
-                                        setColorDirectly(randomHexColor());
-                                        setColorToDelete(
-                                            customColor as ColorLike,
-                                        );
-                                    }}
-                                >
-                                    Add Color
-                                </Button>
-                            </Stack>
-                            {customColors.length > 0 && (
+                        <>
+                            <Stack direction="column" spacing={5}>
+                                <label>Custom Color</label>
                                 <Stack
-                                    alignItems="center"
+                                    alignContent="center"
                                     direction="row"
-                                    spacing={10}
+                                    spacing={5}
                                 >
-                                    <select
-                                        value={colorToDelete ?? ""}
-                                        onChange={(e) => {
-                                            setColorToDelete(
-                                                e.target.value.trim() as ColorLike,
-                                            );
-                                        }}
+                                    <input
+                                        type="text"
+                                        value={inputColorValue}
+                                        onChange={(e) =>
+                                            handleChange(e.target.value)
+                                        }
+                                        onBlur={validate}
                                         css={{
                                             padding: 10,
                                             borderRadius: 5,
-                                            border: "1px solid #ccc",
+                                            border: isInvalid
+                                                ? "1px solid red"
+                                                : "1px solid #ccc",
                                             backgroundColor: "#f9f9f9",
                                             width: "100%",
                                         }}
-                                    >
-                                        {customColors.map((color) => (
-                                            <option key={color} value={color}>
-                                                {color}
-                                            </option>
-                                        ))}
-                                    </select>
+                                    />
                                     <Button
-                                        color="danger"
+                                        color="primary"
+                                        disabled={!customColor}
                                         onClick={() => {
-                                            setCustomColors((prev) => {
-                                                const updated = prev.filter(
-                                                    (color) =>
-                                                        color !== colorToDelete,
-                                                );
-                                                setColorToDelete(
-                                                    updated.length > 0
-                                                        ? updated[
-                                                              updated.length - 1
-                                                          ]
-                                                        : null,
-                                                );
-                                                return updated;
-                                            });
+                                            setCustomColors(
+                                                (prev) =>
+                                                    [
+                                                        ...prev,
+                                                        customColor,
+                                                    ] as ColorLike[],
+                                            );
+                                            setColorDirectly(randomHexColor());
+                                            setColorToDelete(
+                                                customColor as ColorLike,
+                                            );
                                         }}
                                     >
-                                        Delete Color
+                                        Add Color
                                     </Button>
                                 </Stack>
-                            )}
-                        </Stack>
+                                {customColors.length > 0 && (
+                                    <Stack
+                                        alignItems="center"
+                                        direction="row"
+                                        spacing={5}
+                                    >
+                                        <select
+                                            value={colorToDelete ?? ""}
+                                            onChange={(e) => {
+                                                setColorToDelete(
+                                                    e.target.value.trim() as ColorLike,
+                                                );
+                                            }}
+                                            css={{
+                                                padding: 10,
+                                                borderRadius: 5,
+                                                border: "1px solid #ccc",
+                                                backgroundColor: "#f9f9f9",
+                                                width: "100%",
+                                            }}
+                                        >
+                                            {customColors.map((color) => (
+                                                <option
+                                                    key={color}
+                                                    value={color}
+                                                >
+                                                    {color}
+                                                </option>
+                                            ))}
+                                        </select>
+                                        <Button
+                                            color="danger"
+                                            onClick={() => {
+                                                setCustomColors((prev) => {
+                                                    const updated = prev.filter(
+                                                        (color) =>
+                                                            color !==
+                                                            colorToDelete,
+                                                    );
+                                                    setColorToDelete(
+                                                        updated.length > 0
+                                                            ? updated[
+                                                                  updated.length -
+                                                                      1
+                                                              ]
+                                                            : null,
+                                                    );
+                                                    return updated;
+                                                });
+                                            }}
+                                        >
+                                            Delete Color
+                                        </Button>
+                                    </Stack>
+                                )}
+                            </Stack>
+                            <Divider />
+                        </>
                     )}
-                    <Stack direction="column" spacing={10}>
+                    <Stack direction="column" spacing={5}>
                         <label>Text</label>
                         <input
                             type="text"

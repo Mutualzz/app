@@ -115,15 +115,15 @@ function PlaygroundPaper() {
                 )}
                 {variant === "all" &&
                     allPapers.map((paper, i) => (
-                        <Stack direction="row" key={i} spacing={10}>
+                        <Stack direction="row" key={i} spacing={5}>
                             {paper}
                         </Stack>
                     ))}
             </Paper>
             <Paper width={300} alignItems="center" direction="column" p={20}>
                 <Divider>Playground</Divider>
-                <Stack width="100%" direction="column" spacing={40}>
-                    <Stack direction="column" spacing={10}>
+                <Stack width="100%" direction="column" spacing={5}>
+                    <Stack direction="column" spacing={5}>
                         <label>Variant</label>
                         <RadioButtonGroup
                             onChange={(_, vriant) =>
@@ -152,8 +152,9 @@ function PlaygroundPaper() {
                             ))}
                         </RadioButtonGroup>
                     </Stack>
+                    <Divider />
                     {variant !== "elevation" && (
-                        <Stack direction="column" spacing={10}>
+                        <Stack direction="column" spacing={5}>
                             <label>Custom Color</label>
                             <Stack
                                 alignContent="center"
@@ -201,7 +202,7 @@ function PlaygroundPaper() {
                                 <Stack
                                     alignItems="center"
                                     direction="row"
-                                    spacing={10}
+                                    spacing={5}
                                 >
                                     <select
                                         value={colorToDelete ?? ""}
@@ -249,7 +250,7 @@ function PlaygroundPaper() {
                         </Stack>
                     )}
                     {variant === "elevation" && (
-                        <Stack direction="column" spacing={10}>
+                        <Stack direction="column" spacing={5}>
                             <label>Elevation</label>
                             <input
                                 type="number"
@@ -273,6 +274,7 @@ function PlaygroundPaper() {
                             />
                         </Stack>
                     )}
+                    <Divider />
                     <Stack direction="column" spacing={5}>
                         <label>Text</label>
                         <input

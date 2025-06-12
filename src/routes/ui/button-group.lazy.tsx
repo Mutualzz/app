@@ -130,15 +130,9 @@ function PlaygroundButton() {
                     </ButtonGroup>
                 )}
             </Paper>
-            <Paper
-                width={300}
-                alignItems="center"
-                direction="column"
-                p={20}
-                spacing={5}
-            >
+            <Paper width={300} alignItems="center" direction="column" p={20}>
                 <Divider>Playground</Divider>
-                <Stack width="100%" direction="column" spacing={40}>
+                <Stack width="100%" direction="column" spacing={5}>
                     <Stack direction="column" spacing={5}>
                         <label>Variant</label>
                         <RadioButtonGroup
@@ -167,41 +161,47 @@ function PlaygroundButton() {
                             ))}
                         </RadioButtonGroup>
                     </Stack>
+                    <Divider />
                     {variant !== "all" && (
-                        <Stack direction="column" spacing={5}>
-                            <label>
-                                Number of Buttons: <b>{numberOfButtons}</b>
-                            </label>
-                            <Stack direction="row" spacing={5}>
-                                <Button
-                                    color="neutral"
-                                    variant="outlined"
-                                    onClick={() =>
-                                        setNumberOfButtons((prev) =>
-                                            prev > 4 ? prev - 1 : prev,
-                                        )
-                                    }
-                                >
-                                    <FaMinus />
-                                </Button>
-                                <Button
-                                    color="neutral"
-                                    variant="outlined"
-                                    onClick={() =>
-                                        setNumberOfButtons((prev) => prev + 1)
-                                    }
-                                >
-                                    <FaPlus />
-                                </Button>
-                                <Button
-                                    color="neutral"
-                                    variant="outlined"
-                                    onClick={() => setNumberOfButtons(4)}
-                                >
-                                    Reset
-                                </Button>
+                        <>
+                            <Stack direction="column" spacing={5}>
+                                <label>
+                                    Number of Buttons: <b>{numberOfButtons}</b>
+                                </label>
+                                <Stack direction="row" spacing={5}>
+                                    <Button
+                                        color="neutral"
+                                        variant="outlined"
+                                        onClick={() =>
+                                            setNumberOfButtons((prev) =>
+                                                prev > 4 ? prev - 1 : prev,
+                                            )
+                                        }
+                                    >
+                                        <FaMinus />
+                                    </Button>
+                                    <Button
+                                        color="neutral"
+                                        variant="outlined"
+                                        onClick={() =>
+                                            setNumberOfButtons(
+                                                (prev) => prev + 1,
+                                            )
+                                        }
+                                    >
+                                        <FaPlus />
+                                    </Button>
+                                    <Button
+                                        color="neutral"
+                                        variant="outlined"
+                                        onClick={() => setNumberOfButtons(4)}
+                                    >
+                                        Reset
+                                    </Button>
+                                </Stack>
                             </Stack>
-                        </Stack>
+                            <Divider />
+                        </>
                     )}
                     <Stack direction="column" spacing={10}>
                         <Stack
@@ -276,6 +276,7 @@ function PlaygroundButton() {
                             </RadioButtonGroup>
                         )}
                     </Stack>
+                    <Divider />
                     <Stack direction="column" spacing={5}>
                         <Stack
                             direction="row"
@@ -333,15 +334,16 @@ function PlaygroundButton() {
                             </RadioButtonGroup>
                         )}
                     </Stack>
+                    <Divider />
                     <Stack direction="column" spacing={5}>
                         <label>Orientation</label>
                         <RadioButtonGroup
+                            row
                             onChange={(_, orientation) =>
                                 setOrientation(orientation as "horizontal")
                             }
                             value={orientation}
                             name="orientation"
-                            row
                         >
                             <RadioButton
                                 value="horizontal"
@@ -359,6 +361,7 @@ function PlaygroundButton() {
                             />
                         </RadioButtonGroup>
                     </Stack>
+                    <Divider />
                     <Stack direction="column" spacing={5}>
                         <label>Spacing</label>
                         <input
@@ -376,21 +379,25 @@ function PlaygroundButton() {
                             }}
                         />
                     </Stack>
+                    <Divider />
                     <Stack direction="column" spacing={5}>
-                        <Checkbox
-                            checked={loading}
-                            label="Loading"
-                            onChange={() => setLoading((prev) => !prev)}
-                            disabled={disabled}
-                        />
-                        <Checkbox
-                            checked={disabled}
-                            label="Disabled"
-                            onChange={() => setDisabled((prev) => !prev)}
-                            disabled={loading}
-                        />
+                        <label>States</label>
+                        <Stack direction="row" spacing={10}>
+                            <Checkbox
+                                checked={loading}
+                                label="Loading"
+                                onChange={() => setLoading((prev) => !prev)}
+                                disabled={disabled}
+                            />
+                            <Checkbox
+                                checked={disabled}
+                                label="Disabled"
+                                onChange={() => setDisabled((prev) => !prev)}
+                                disabled={loading}
+                            />
+                        </Stack>
                     </Stack>
-
+                    <Divider />
                     <Stack direction="column" spacing={5}>
                         <label>Text</label>
                         <input

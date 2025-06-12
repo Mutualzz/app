@@ -175,8 +175,8 @@ function PlaygroundRadioButton() {
             </Paper>
             <Paper width={300} alignItems="center" direction="column" p={20}>
                 <Divider>Playground</Divider>
-                <Stack width="100%" direction="column" spacing={40}>
-                    <Stack direction="column" spacing={10}>
+                <Stack width="100%" direction="column" spacing={5}>
+                    <Stack direction="column" spacing={5}>
                         <label>Variant</label>
                         <RadioButtonGroup
                             onChange={(_, vriant) =>
@@ -205,13 +205,18 @@ function PlaygroundRadioButton() {
                             ))}
                         </RadioButtonGroup>
                     </Stack>
+                    <Divider />
                     <Stack direction="column" spacing={5}>
-                        <Checkbox
-                            checked={disabled}
-                            label="Disabled"
-                            onChange={() => setDisabled((prev) => !prev)}
-                        />
+                        <label>States</label>
+                        <Stack direction="row" spacing={5}>
+                            <Checkbox
+                                checked={disabled}
+                                label="Disabled"
+                                onChange={() => setDisabled((prev) => !prev)}
+                            />
+                        </Stack>
                     </Stack>
+                    <Divider />
                     <Stack direction="column" spacing={5}>
                         <Stack
                             direction="row"
@@ -269,7 +274,8 @@ function PlaygroundRadioButton() {
                             </RadioButtonGroup>
                         )}
                     </Stack>
-                    <Stack direction="column" spacing={10}>
+                    <Divider />
+                    <Stack direction="column" spacing={5}>
                         <label>Custom Color</label>
                         <Stack
                             alignContent="center"
@@ -313,7 +319,7 @@ function PlaygroundRadioButton() {
                             <Stack
                                 alignItems="center"
                                 direction="row"
-                                spacing={10}
+                                spacing={5}
                             >
                                 <select
                                     value={colorToDelete ?? ""}
@@ -360,6 +366,7 @@ function PlaygroundRadioButton() {
                             </Stack>
                         )}
                     </Stack>
+                    <Divider />
                     <Stack direction="column" spacing={5}>
                         <label>Label</label>
                         <input
@@ -381,14 +388,14 @@ function PlaygroundRadioButton() {
                             }}
                         />
                     </Stack>
-
+                    <Divider />
                     <Stack
                         justifyContent="center"
                         direction="column"
                         spacing={5}
                     >
                         <label>Checked Icon</label>
-                        <Stack direction="column" spacing={10}>
+                        <Stack direction="column" spacing={5}>
                             <RadioButtonGroup
                                 onChange={(_, library) =>
                                     setCheckedLibrary(
@@ -450,14 +457,14 @@ function PlaygroundRadioButton() {
                             )}
                         </Stack>
                     </Stack>
-
+                    <Divider />
                     <Stack
                         justifyContent="center"
                         direction="column"
                         spacing={5}
                     >
                         <label>Unchecked Icon</label>
-                        <Stack direction="column" spacing={10}>
+                        <Stack direction="column" spacing={5}>
                             <RadioButtonGroup
                                 onChange={(_, library) =>
                                     setUncheckedLibrary(

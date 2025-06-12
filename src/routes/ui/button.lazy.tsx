@@ -165,8 +165,8 @@ function PlaygroundButton() {
             </Paper>
             <Paper width={300} alignItems="center" direction="column" p={20}>
                 <Divider>Playground</Divider>
-                <Stack width="100%" direction="column" spacing={40}>
-                    <Stack direction="column" spacing={10}>
+                <Stack width="100%" direction="column" spacing={5}>
+                    <Stack direction="column" spacing={5}>
                         <label>Variant</label>
                         <RadioButtonGroup
                             onChange={(_, vriant) =>
@@ -194,6 +194,7 @@ function PlaygroundButton() {
                             ))}
                         </RadioButtonGroup>
                     </Stack>
+                    <Divider />
                     <Stack direction="column" spacing={5}>
                         <Stack
                             direction="row"
@@ -251,21 +252,26 @@ function PlaygroundButton() {
                             </RadioButtonGroup>
                         )}
                     </Stack>
-                    <Stack direction="row" spacing={5}>
-                        <Checkbox
-                            checked={loading}
-                            label="Loading"
-                            onChange={() => setLoading((prev) => !prev)}
-                            disabled={disabled}
-                        />
-                        <Checkbox
-                            checked={disabled}
-                            label="Disabled"
-                            onChange={() => setDisabled((prev) => !prev)}
-                            disabled={loading}
-                        />
+                    <Divider />
+                    <Stack direction="column" spacing={5}>
+                        <label>States</label>
+                        <Stack direction="row" spacing={5}>
+                            <Checkbox
+                                checked={loading}
+                                label="Loading"
+                                onChange={() => setLoading((prev) => !prev)}
+                                disabled={disabled}
+                            />
+                            <Checkbox
+                                checked={disabled}
+                                label="Disabled"
+                                onChange={() => setDisabled((prev) => !prev)}
+                                disabled={loading}
+                            />
+                        </Stack>
                     </Stack>
-                    <Stack direction="column" spacing={10}>
+                    <Divider />
+                    <Stack direction="column" spacing={5}>
                         <label>Custom Color</label>
                         <Stack
                             alignContent="center"
@@ -356,6 +362,7 @@ function PlaygroundButton() {
                             </Stack>
                         )}
                     </Stack>
+                    <Divider />
                     <Stack direction="column" spacing={5}>
                         <label>Text</label>
                         <input
@@ -377,6 +384,7 @@ function PlaygroundButton() {
                             }}
                         />
                     </Stack>
+                    <Divider />
                     <Stack direction="column" spacing={5}>
                         <Stack
                             direction="row"
