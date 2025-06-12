@@ -197,7 +197,7 @@ function SlderPlayground() {
             <Paper width={300} alignItems="center" direction="column" p={20}>
                 <Divider>Playground</Divider>
                 <Stack width="100%" spacing={5} direction="column">
-                    <Stack direction="column" spacing={2.5}>
+                    <Stack direction="column" spacing={5}>
                         <label>Variant</label>
                         <RadioButtonGroup
                             onChange={(_, vriant) =>
@@ -227,7 +227,7 @@ function SlderPlayground() {
                         </RadioButtonGroup>
                     </Stack>
                     <Divider />
-                    <Stack direction="column" spacing={2.5}>
+                    <Stack direction="column" spacing={5}>
                         <Stack direction="row" justifyContent="space-between">
                             <label>Size</label>
                             <Checkbox
@@ -281,7 +281,7 @@ function SlderPlayground() {
                         )}
                     </Stack>
                     <Divider />
-                    <Stack direction="column" spacing={2.5}>
+                    <Stack direction="column" spacing={5}>
                         <label>Orientation</label>
                         <RadioButtonGroup
                             onChange={(_, orientationValue) =>
