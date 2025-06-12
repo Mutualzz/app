@@ -221,7 +221,7 @@ function PlaygroundButton() {
                                 onChange={(e) =>
                                     setSize(Number(e.target.value))
                                 }
-                                style={{
+                                css={{
                                     padding: 10,
                                     borderRadius: 5,
                                     border: isInvalid
@@ -277,7 +277,7 @@ function PlaygroundButton() {
                                 value={inputColorValue}
                                 onChange={(e) => handleChange(e.target.value)}
                                 onBlur={validate}
-                                style={{
+                                css={{
                                     padding: 10,
                                     borderRadius: 5,
                                     border: isInvalid
@@ -318,7 +318,7 @@ function PlaygroundButton() {
                                             e.target.value.trim() as ColorLike,
                                         );
                                     }}
-                                    style={{
+                                    css={{
                                         padding: 10,
                                         borderRadius: 5,
                                         border: "1px solid #ccc",
@@ -368,7 +368,7 @@ function PlaygroundButton() {
                                         : e.target.value,
                                 )
                             }
-                            style={{
+                            css={{
                                 padding: 10,
                                 borderRadius: 5,
                                 border: "1px solid #ccc",
@@ -472,7 +472,7 @@ function PlaygroundButton() {
                                             ];
                                         setIcon(Icon);
                                     }}
-                                    style={{
+                                    css={{
                                         width: "100%",
                                         padding: 10,
                                         borderRadius: 5,

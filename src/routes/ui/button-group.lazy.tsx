@@ -236,7 +236,7 @@ function PlaygroundButton() {
                                         handleChange(e.target.value)
                                     }
                                     onBlur={validate}
-                                    style={{
+                                    css={{
                                         padding: 10,
                                         borderRadius: 5,
                                         border: isInvalid
@@ -303,7 +303,7 @@ function PlaygroundButton() {
                                 onChange={(e) =>
                                     setSize(Number(e.target.value))
                                 }
-                                style={{
+                                css={{
                                     padding: 10,
                                     borderRadius: 5,
                                     border: isInvalid
@@ -367,7 +367,7 @@ function PlaygroundButton() {
                             min={0}
                             max={100}
                             onChange={(e) => setSpacing(Number(e.target.value))}
-                            style={{
+                            css={{
                                 padding: 10,
                                 borderRadius: 5,
                                 border: "1px solid #ccc",
@@ -403,7 +403,7 @@ function PlaygroundButton() {
                                         : e.target.value,
                                 )
                             }
-                            style={{
+                            css={{
                                 padding: 10,
                                 borderRadius: 5,
                                 border: "1px solid #ccc",

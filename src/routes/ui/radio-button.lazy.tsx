@@ -239,7 +239,7 @@ function PlaygroundRadioButton() {
                                 onChange={(e) =>
                                     setSize(Number(e.target.value))
                                 }
-                                style={{
+                                css={{
                                     padding: 10,
                                     borderRadius: 5,
                                     border: isInvalid
@@ -281,7 +281,7 @@ function PlaygroundRadioButton() {
                                 value={inputColorValue}
                                 onChange={(e) => handleChange(e.target.value)}
                                 onBlur={validate}
-                                style={{
+                                css={{
                                     padding: 10,
                                     borderRadius: 5,
                                     border: isInvalid
@@ -322,7 +322,7 @@ function PlaygroundRadioButton() {
                                             e.target.value.trim() as ColorLike,
                                         );
                                     }}
-                                    style={{
+                                    css={{
                                         padding: 10,
                                         borderRadius: 5,
                                         border: "1px solid #ccc",
@@ -372,7 +372,7 @@ function PlaygroundRadioButton() {
                                         : e.target.value,
                                 )
                             }
-                            style={{
+                            css={{
                                 padding: 10,
                                 borderRadius: 5,
                                 border: "1px solid #ccc",
@@ -431,7 +431,7 @@ function PlaygroundRadioButton() {
                                     onChange={(e) =>
                                         setCheckedIconName(e.target.value)
                                     }
-                                    style={{
+                                    css={{
                                         padding: 10,
                                         borderRadius: 5,
                                         border: "1px solid #ccc",
@@ -500,7 +500,7 @@ function PlaygroundRadioButton() {
                                     onChange={(e) =>
                                         setUncheckedIconName(e.target.value)
                                     }
-                                    style={{
+                                    css={{
                                         padding: 10,
                                         borderRadius: 5,
                                         border: "1px solid #ccc",

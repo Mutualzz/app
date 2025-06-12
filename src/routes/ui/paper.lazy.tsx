@@ -167,7 +167,7 @@ function PlaygroundPaper() {
                                         handleChange(e.target.value)
                                     }
                                     onBlur={validate}
-                                    style={{
+                                    css={{
                                         padding: 10,
                                         borderRadius: 5,
                                         border: isInvalid
@@ -210,7 +210,7 @@ function PlaygroundPaper() {
                                                 e.target.value.trim() as ColorLike,
                                             );
                                         }}
-                                        style={{
+                                        css={{
                                             padding: 10,
                                             borderRadius: 5,
                                             border: "1px solid #ccc",
@@ -263,7 +263,7 @@ function PlaygroundPaper() {
                                             : parseInt(e.target.value),
                                     )
                                 }
-                                style={{
+                                css={{
                                     padding: 10,
                                     borderRadius: 5,
                                     border: "1px solid #ccc",
@@ -285,7 +285,7 @@ function PlaygroundPaper() {
                                         : e.target.value,
                                 )
                             }
-                            style={{
+                            css={{
                                 padding: 10,
                                 borderRadius: 5,
                                 border: "1px solid #ccc",

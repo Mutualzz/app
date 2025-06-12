@@ -228,7 +228,7 @@ function PlaygroundLinearProgress() {
                                 onChange={(e) =>
                                     setLength(Number(e.target.value))
                                 }
-                                style={{
+                                css={{
                                     padding: 10,
                                     borderRadius: 5,
                                     border: isInvalid
@@ -287,7 +287,7 @@ function PlaygroundLinearProgress() {
                                 onChange={(e) =>
                                     setThickness(Number(e.target.value))
                                 }
-                                style={{
+                                css={{
                                     padding: 10,
                                     borderRadius: 5,
                                     border: isInvalid
@@ -334,7 +334,7 @@ function PlaygroundLinearProgress() {
                                 onChange={(e) =>
                                     setValue(Number(e.target.value))
                                 }
-                                style={{
+                                css={{
                                     padding: 10,
                                     borderRadius: 5,
                                     border: isInvalid
@@ -358,7 +358,7 @@ function PlaygroundLinearProgress() {
                                 value={inputColorValue}
                                 onChange={(e) => handleChange(e.target.value)}
                                 onBlur={validate}
-                                style={{
+                                css={{
                                     padding: 10,
                                     borderRadius: 5,
                                     border: isInvalid
@@ -399,7 +399,7 @@ function PlaygroundLinearProgress() {
                                             e.target.value.trim() as ColorLike,
                                         );
                                     }}
-                                    style={{
+                                    css={{
                                         padding: 10,
                                         borderRadius: 5,
                                         border: "1px solid #ccc",

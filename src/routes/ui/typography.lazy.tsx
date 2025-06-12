@@ -197,7 +197,7 @@ function PlaygroundTypography() {
                             onChange={(e) =>
                                 setLevel(e.target.value as TypographyLevel)
                             }
-                            style={{
+                            css={{
                                 width: "100%",
                                 padding: 10,
                                 borderRadius: 5,
@@ -240,7 +240,7 @@ function PlaygroundTypography() {
                                 onChange={(e) =>
                                     setWeight(Number(e.target.value))
                                 }
-                                style={{
+                                css={{
                                     padding: 10,
                                     borderRadius: 5,
                                     border: isInvalid
@@ -256,7 +256,7 @@ function PlaygroundTypography() {
                                 onChange={(e) =>
                                     setWeight(e.target.value as FontWeight)
                                 }
-                                style={{
+                                css={{
                                     width: "100%",
                                     padding: 10,
                                     borderRadius: 5,
@@ -287,7 +287,7 @@ function PlaygroundTypography() {
                                         handleChange(e.target.value)
                                     }
                                     onBlur={validate}
-                                    style={{
+                                    css={{
                                         padding: 10,
                                         borderRadius: 5,
                                         border: isInvalid
@@ -330,7 +330,7 @@ function PlaygroundTypography() {
                                                 e.target.value.trim() as ColorLike,
                                             );
                                         }}
-                                        style={{
+                                        css={{
                                             padding: 10,
                                             borderRadius: 5,
                                             border: "1px solid #ccc",
@@ -379,7 +379,7 @@ function PlaygroundTypography() {
                                     ? setText(null)
                                     : setText(e.target.value)
                             }
-                            style={{
+                            css={{
                                 padding: 10,
                                 borderRadius: 5,
                                 border: isInvalid

@@ -267,7 +267,7 @@ function PlaygroundDivider() {
                                     handleLineColorChange(e.target.value)
                                 }
                                 onBlur={validateLineColor}
-                                style={{
+                                css={{
                                     padding: 10,
                                     borderRadius: 5,
                                     border: lineColorInvalid
@@ -283,7 +283,7 @@ function PlaygroundDivider() {
                                 onChange={(e) =>
                                     setLineColor(e.target.value as Color)
                                 }
-                                style={{
+                                css={{
                                     width: "100%",
                                     padding: 10,
                                     borderRadius: 5,
@@ -324,7 +324,7 @@ function PlaygroundDivider() {
                                     handleTextColorChange(e.target.value)
                                 }
                                 onBlur={validateTextColor}
-                                style={{
+                                css={{
                                     padding: 10,
                                     borderRadius: 5,
                                     border: textColorInvalid
@@ -339,7 +339,7 @@ function PlaygroundDivider() {
                                 onChange={(e) =>
                                     setTextColor(e.target.value as Color)
                                 }
-                                style={{
+                                css={{
                                     width: "100%",
                                     padding: 10,
                                     borderRadius: 5,
@@ -372,7 +372,7 @@ function PlaygroundDivider() {
                                         : e.target.value,
                                 )
                             }
-                            style={{
+                            css={{
                                 padding: 10,
                                 borderRadius: 5,
                                 border: "1px solid #ccc",
