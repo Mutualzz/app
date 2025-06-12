@@ -36,6 +36,10 @@ export const PlaygrondLeftSidebar = () => {
                 name: "Radio Button",
                 link: "/ui/radio-button",
             },
+            {
+                name: "Slider",
+                link: "/ui/slider",
+            },
         ],
         dataDisplay: [
             {
@@ -113,7 +117,7 @@ export const PlaygrondLeftSidebar = () => {
                                 onChange={(e) => {
                                     changeTheme(e.target.value);
                                 }}
-                                style={{
+                                css={{
                                     width: "100%",
                                     padding: 10,
                                     borderRadius: 5,

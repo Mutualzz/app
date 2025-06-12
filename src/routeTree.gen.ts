@@ -8,334 +8,358 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import { createFileRoute } from "@tanstack/react-router"
+import { createFileRoute } from "@tanstack/react-router";
 
 // Import Routes
 
-import { Route as rootRoute } from "./routes/__root"
+import { Route as rootRoute } from "./routes/__root";
 
 // Create Virtual Routes
 
-const UiLazyImport = createFileRoute("/ui")()
-const IndexLazyImport = createFileRoute("/")()
-const UiIndexLazyImport = createFileRoute("/ui/")()
-const UiTypographyLazyImport = createFileRoute("/ui/typography")()
-const UiRadioButtonLazyImport = createFileRoute("/ui/radio-button")()
-const UiPaperLazyImport = createFileRoute("/ui/paper")()
-const UiLinearProgressLazyImport = createFileRoute("/ui/linear-progress")()
-const UiDividerLazyImport = createFileRoute("/ui/divider")()
-const UiCircularProgressLazyImport = createFileRoute("/ui/circular-progress")()
-const UiCheckboxLazyImport = createFileRoute("/ui/checkbox")()
-const UiButtonGroupLazyImport = createFileRoute("/ui/button-group")()
-const UiButtonLazyImport = createFileRoute("/ui/button")()
+const UiLazyImport = createFileRoute("/ui")();
+const IndexLazyImport = createFileRoute("/")();
+const UiIndexLazyImport = createFileRoute("/ui/")();
+const UiTypographyLazyImport = createFileRoute("/ui/typography")();
+const UiSliderLazyImport = createFileRoute("/ui/slider")();
+const UiRadioButtonLazyImport = createFileRoute("/ui/radio-button")();
+const UiPaperLazyImport = createFileRoute("/ui/paper")();
+const UiLinearProgressLazyImport = createFileRoute("/ui/linear-progress")();
+const UiDividerLazyImport = createFileRoute("/ui/divider")();
+const UiCircularProgressLazyImport = createFileRoute("/ui/circular-progress")();
+const UiCheckboxLazyImport = createFileRoute("/ui/checkbox")();
+const UiButtonGroupLazyImport = createFileRoute("/ui/button-group")();
+const UiButtonLazyImport = createFileRoute("/ui/button")();
 
 // Create/Update Routes
 
 const UiLazyRoute = UiLazyImport.update({
-  id: "/ui",
-  path: "/ui",
-  getParentRoute: () => rootRoute,
-} as any).lazy(() => import("./routes/ui.lazy").then((d) => d.Route))
+    id: "/ui",
+    path: "/ui",
+    getParentRoute: () => rootRoute,
+} as any).lazy(() => import("./routes/ui.lazy").then((d) => d.Route));
 
 const IndexLazyRoute = IndexLazyImport.update({
-  id: "/",
-  path: "/",
-  getParentRoute: () => rootRoute,
-} as any).lazy(() => import("./routes/index.lazy").then((d) => d.Route))
+    id: "/",
+    path: "/",
+    getParentRoute: () => rootRoute,
+} as any).lazy(() => import("./routes/index.lazy").then((d) => d.Route));
 
 const UiIndexLazyRoute = UiIndexLazyImport.update({
-  id: "/",
-  path: "/",
-  getParentRoute: () => UiLazyRoute,
-} as any).lazy(() => import("./routes/ui/index.lazy").then((d) => d.Route))
+    id: "/",
+    path: "/",
+    getParentRoute: () => UiLazyRoute,
+} as any).lazy(() => import("./routes/ui/index.lazy").then((d) => d.Route));
 
 const UiTypographyLazyRoute = UiTypographyLazyImport.update({
-  id: "/typography",
-  path: "/typography",
-  getParentRoute: () => UiLazyRoute,
-} as any).lazy(() => import("./routes/ui/typography.lazy").then((d) => d.Route))
+    id: "/typography",
+    path: "/typography",
+    getParentRoute: () => UiLazyRoute,
+} as any).lazy(() =>
+    import("./routes/ui/typography.lazy").then((d) => d.Route),
+);
+
+const UiSliderLazyRoute = UiSliderLazyImport.update({
+    id: "/slider",
+    path: "/slider",
+    getParentRoute: () => UiLazyRoute,
+} as any).lazy(() => import("./routes/ui/slider.lazy").then((d) => d.Route));
 
 const UiRadioButtonLazyRoute = UiRadioButtonLazyImport.update({
-  id: "/radio-button",
-  path: "/radio-button",
-  getParentRoute: () => UiLazyRoute,
+    id: "/radio-button",
+    path: "/radio-button",
+    getParentRoute: () => UiLazyRoute,
 } as any).lazy(() =>
-  import("./routes/ui/radio-button.lazy").then((d) => d.Route),
-)
+    import("./routes/ui/radio-button.lazy").then((d) => d.Route),
+);
 
 const UiPaperLazyRoute = UiPaperLazyImport.update({
-  id: "/paper",
-  path: "/paper",
-  getParentRoute: () => UiLazyRoute,
-} as any).lazy(() => import("./routes/ui/paper.lazy").then((d) => d.Route))
+    id: "/paper",
+    path: "/paper",
+    getParentRoute: () => UiLazyRoute,
+} as any).lazy(() => import("./routes/ui/paper.lazy").then((d) => d.Route));
 
 const UiLinearProgressLazyRoute = UiLinearProgressLazyImport.update({
-  id: "/linear-progress",
-  path: "/linear-progress",
-  getParentRoute: () => UiLazyRoute,
+    id: "/linear-progress",
+    path: "/linear-progress",
+    getParentRoute: () => UiLazyRoute,
 } as any).lazy(() =>
-  import("./routes/ui/linear-progress.lazy").then((d) => d.Route),
-)
+    import("./routes/ui/linear-progress.lazy").then((d) => d.Route),
+);
 
 const UiDividerLazyRoute = UiDividerLazyImport.update({
-  id: "/divider",
-  path: "/divider",
-  getParentRoute: () => UiLazyRoute,
-} as any).lazy(() => import("./routes/ui/divider.lazy").then((d) => d.Route))
+    id: "/divider",
+    path: "/divider",
+    getParentRoute: () => UiLazyRoute,
+} as any).lazy(() => import("./routes/ui/divider.lazy").then((d) => d.Route));
 
 const UiCircularProgressLazyRoute = UiCircularProgressLazyImport.update({
-  id: "/circular-progress",
-  path: "/circular-progress",
-  getParentRoute: () => UiLazyRoute,
+    id: "/circular-progress",
+    path: "/circular-progress",
+    getParentRoute: () => UiLazyRoute,
 } as any).lazy(() =>
-  import("./routes/ui/circular-progress.lazy").then((d) => d.Route),
-)
+    import("./routes/ui/circular-progress.lazy").then((d) => d.Route),
+);
 
 const UiCheckboxLazyRoute = UiCheckboxLazyImport.update({
-  id: "/checkbox",
-  path: "/checkbox",
-  getParentRoute: () => UiLazyRoute,
-} as any).lazy(() => import("./routes/ui/checkbox.lazy").then((d) => d.Route))
+    id: "/checkbox",
+    path: "/checkbox",
+    getParentRoute: () => UiLazyRoute,
+} as any).lazy(() => import("./routes/ui/checkbox.lazy").then((d) => d.Route));
 
 const UiButtonGroupLazyRoute = UiButtonGroupLazyImport.update({
-  id: "/button-group",
-  path: "/button-group",
-  getParentRoute: () => UiLazyRoute,
+    id: "/button-group",
+    path: "/button-group",
+    getParentRoute: () => UiLazyRoute,
 } as any).lazy(() =>
-  import("./routes/ui/button-group.lazy").then((d) => d.Route),
-)
+    import("./routes/ui/button-group.lazy").then((d) => d.Route),
+);
 
 const UiButtonLazyRoute = UiButtonLazyImport.update({
-  id: "/button",
-  path: "/button",
-  getParentRoute: () => UiLazyRoute,
-} as any).lazy(() => import("./routes/ui/button.lazy").then((d) => d.Route))
+    id: "/button",
+    path: "/button",
+    getParentRoute: () => UiLazyRoute,
+} as any).lazy(() => import("./routes/ui/button.lazy").then((d) => d.Route));
 
 // Populate the FileRoutesByPath interface
 
 declare module "@tanstack/react-router" {
-  interface FileRoutesByPath {
-    "/": {
-      id: "/"
-      path: "/"
-      fullPath: "/"
-      preLoaderRoute: typeof IndexLazyImport
-      parentRoute: typeof rootRoute
+    interface FileRoutesByPath {
+        "/": {
+            id: "/";
+            path: "/";
+            fullPath: "/";
+            preLoaderRoute: typeof IndexLazyImport;
+            parentRoute: typeof rootRoute;
+        };
+        "/ui": {
+            id: "/ui";
+            path: "/ui";
+            fullPath: "/ui";
+            preLoaderRoute: typeof UiLazyImport;
+            parentRoute: typeof rootRoute;
+        };
+        "/ui/button": {
+            id: "/ui/button";
+            path: "/button";
+            fullPath: "/ui/button";
+            preLoaderRoute: typeof UiButtonLazyImport;
+            parentRoute: typeof UiLazyImport;
+        };
+        "/ui/button-group": {
+            id: "/ui/button-group";
+            path: "/button-group";
+            fullPath: "/ui/button-group";
+            preLoaderRoute: typeof UiButtonGroupLazyImport;
+            parentRoute: typeof UiLazyImport;
+        };
+        "/ui/checkbox": {
+            id: "/ui/checkbox";
+            path: "/checkbox";
+            fullPath: "/ui/checkbox";
+            preLoaderRoute: typeof UiCheckboxLazyImport;
+            parentRoute: typeof UiLazyImport;
+        };
+        "/ui/circular-progress": {
+            id: "/ui/circular-progress";
+            path: "/circular-progress";
+            fullPath: "/ui/circular-progress";
+            preLoaderRoute: typeof UiCircularProgressLazyImport;
+            parentRoute: typeof UiLazyImport;
+        };
+        "/ui/divider": {
+            id: "/ui/divider";
+            path: "/divider";
+            fullPath: "/ui/divider";
+            preLoaderRoute: typeof UiDividerLazyImport;
+            parentRoute: typeof UiLazyImport;
+        };
+        "/ui/linear-progress": {
+            id: "/ui/linear-progress";
+            path: "/linear-progress";
+            fullPath: "/ui/linear-progress";
+            preLoaderRoute: typeof UiLinearProgressLazyImport;
+            parentRoute: typeof UiLazyImport;
+        };
+        "/ui/paper": {
+            id: "/ui/paper";
+            path: "/paper";
+            fullPath: "/ui/paper";
+            preLoaderRoute: typeof UiPaperLazyImport;
+            parentRoute: typeof UiLazyImport;
+        };
+        "/ui/radio-button": {
+            id: "/ui/radio-button";
+            path: "/radio-button";
+            fullPath: "/ui/radio-button";
+            preLoaderRoute: typeof UiRadioButtonLazyImport;
+            parentRoute: typeof UiLazyImport;
+        };
+        "/ui/slider": {
+            id: "/ui/slider";
+            path: "/slider";
+            fullPath: "/ui/slider";
+            preLoaderRoute: typeof UiSliderLazyImport;
+            parentRoute: typeof UiLazyImport;
+        };
+        "/ui/typography": {
+            id: "/ui/typography";
+            path: "/typography";
+            fullPath: "/ui/typography";
+            preLoaderRoute: typeof UiTypographyLazyImport;
+            parentRoute: typeof UiLazyImport;
+        };
+        "/ui/": {
+            id: "/ui/";
+            path: "/";
+            fullPath: "/ui/";
+            preLoaderRoute: typeof UiIndexLazyImport;
+            parentRoute: typeof UiLazyImport;
+        };
     }
-    "/ui": {
-      id: "/ui"
-      path: "/ui"
-      fullPath: "/ui"
-      preLoaderRoute: typeof UiLazyImport
-      parentRoute: typeof rootRoute
-    }
-    "/ui/button": {
-      id: "/ui/button"
-      path: "/button"
-      fullPath: "/ui/button"
-      preLoaderRoute: typeof UiButtonLazyImport
-      parentRoute: typeof UiLazyImport
-    }
-    "/ui/button-group": {
-      id: "/ui/button-group"
-      path: "/button-group"
-      fullPath: "/ui/button-group"
-      preLoaderRoute: typeof UiButtonGroupLazyImport
-      parentRoute: typeof UiLazyImport
-    }
-    "/ui/checkbox": {
-      id: "/ui/checkbox"
-      path: "/checkbox"
-      fullPath: "/ui/checkbox"
-      preLoaderRoute: typeof UiCheckboxLazyImport
-      parentRoute: typeof UiLazyImport
-    }
-    "/ui/circular-progress": {
-      id: "/ui/circular-progress"
-      path: "/circular-progress"
-      fullPath: "/ui/circular-progress"
-      preLoaderRoute: typeof UiCircularProgressLazyImport
-      parentRoute: typeof UiLazyImport
-    }
-    "/ui/divider": {
-      id: "/ui/divider"
-      path: "/divider"
-      fullPath: "/ui/divider"
-      preLoaderRoute: typeof UiDividerLazyImport
-      parentRoute: typeof UiLazyImport
-    }
-    "/ui/linear-progress": {
-      id: "/ui/linear-progress"
-      path: "/linear-progress"
-      fullPath: "/ui/linear-progress"
-      preLoaderRoute: typeof UiLinearProgressLazyImport
-      parentRoute: typeof UiLazyImport
-    }
-    "/ui/paper": {
-      id: "/ui/paper"
-      path: "/paper"
-      fullPath: "/ui/paper"
-      preLoaderRoute: typeof UiPaperLazyImport
-      parentRoute: typeof UiLazyImport
-    }
-    "/ui/radio-button": {
-      id: "/ui/radio-button"
-      path: "/radio-button"
-      fullPath: "/ui/radio-button"
-      preLoaderRoute: typeof UiRadioButtonLazyImport
-      parentRoute: typeof UiLazyImport
-    }
-    "/ui/typography": {
-      id: "/ui/typography"
-      path: "/typography"
-      fullPath: "/ui/typography"
-      preLoaderRoute: typeof UiTypographyLazyImport
-      parentRoute: typeof UiLazyImport
-    }
-    "/ui/": {
-      id: "/ui/"
-      path: "/"
-      fullPath: "/ui/"
-      preLoaderRoute: typeof UiIndexLazyImport
-      parentRoute: typeof UiLazyImport
-    }
-  }
 }
 
 // Create and export the route tree
 
 interface UiLazyRouteChildren {
-  UiButtonLazyRoute: typeof UiButtonLazyRoute
-  UiButtonGroupLazyRoute: typeof UiButtonGroupLazyRoute
-  UiCheckboxLazyRoute: typeof UiCheckboxLazyRoute
-  UiCircularProgressLazyRoute: typeof UiCircularProgressLazyRoute
-  UiDividerLazyRoute: typeof UiDividerLazyRoute
-  UiLinearProgressLazyRoute: typeof UiLinearProgressLazyRoute
-  UiPaperLazyRoute: typeof UiPaperLazyRoute
-  UiRadioButtonLazyRoute: typeof UiRadioButtonLazyRoute
-  UiTypographyLazyRoute: typeof UiTypographyLazyRoute
-  UiIndexLazyRoute: typeof UiIndexLazyRoute
+    UiButtonLazyRoute: typeof UiButtonLazyRoute;
+    UiButtonGroupLazyRoute: typeof UiButtonGroupLazyRoute;
+    UiCheckboxLazyRoute: typeof UiCheckboxLazyRoute;
+    UiCircularProgressLazyRoute: typeof UiCircularProgressLazyRoute;
+    UiDividerLazyRoute: typeof UiDividerLazyRoute;
+    UiLinearProgressLazyRoute: typeof UiLinearProgressLazyRoute;
+    UiPaperLazyRoute: typeof UiPaperLazyRoute;
+    UiRadioButtonLazyRoute: typeof UiRadioButtonLazyRoute;
+    UiSliderLazyRoute: typeof UiSliderLazyRoute;
+    UiTypographyLazyRoute: typeof UiTypographyLazyRoute;
+    UiIndexLazyRoute: typeof UiIndexLazyRoute;
 }
 
 const UiLazyRouteChildren: UiLazyRouteChildren = {
-  UiButtonLazyRoute: UiButtonLazyRoute,
-  UiButtonGroupLazyRoute: UiButtonGroupLazyRoute,
-  UiCheckboxLazyRoute: UiCheckboxLazyRoute,
-  UiCircularProgressLazyRoute: UiCircularProgressLazyRoute,
-  UiDividerLazyRoute: UiDividerLazyRoute,
-  UiLinearProgressLazyRoute: UiLinearProgressLazyRoute,
-  UiPaperLazyRoute: UiPaperLazyRoute,
-  UiRadioButtonLazyRoute: UiRadioButtonLazyRoute,
-  UiTypographyLazyRoute: UiTypographyLazyRoute,
-  UiIndexLazyRoute: UiIndexLazyRoute,
-}
+    UiButtonLazyRoute: UiButtonLazyRoute,
+    UiButtonGroupLazyRoute: UiButtonGroupLazyRoute,
+    UiCheckboxLazyRoute: UiCheckboxLazyRoute,
+    UiCircularProgressLazyRoute: UiCircularProgressLazyRoute,
+    UiDividerLazyRoute: UiDividerLazyRoute,
+    UiLinearProgressLazyRoute: UiLinearProgressLazyRoute,
+    UiPaperLazyRoute: UiPaperLazyRoute,
+    UiRadioButtonLazyRoute: UiRadioButtonLazyRoute,
+    UiSliderLazyRoute: UiSliderLazyRoute,
+    UiTypographyLazyRoute: UiTypographyLazyRoute,
+    UiIndexLazyRoute: UiIndexLazyRoute,
+};
 
 const UiLazyRouteWithChildren =
-  UiLazyRoute._addFileChildren(UiLazyRouteChildren)
+    UiLazyRoute._addFileChildren(UiLazyRouteChildren);
 
 export interface FileRoutesByFullPath {
-  "/": typeof IndexLazyRoute
-  "/ui": typeof UiLazyRouteWithChildren
-  "/ui/button": typeof UiButtonLazyRoute
-  "/ui/button-group": typeof UiButtonGroupLazyRoute
-  "/ui/checkbox": typeof UiCheckboxLazyRoute
-  "/ui/circular-progress": typeof UiCircularProgressLazyRoute
-  "/ui/divider": typeof UiDividerLazyRoute
-  "/ui/linear-progress": typeof UiLinearProgressLazyRoute
-  "/ui/paper": typeof UiPaperLazyRoute
-  "/ui/radio-button": typeof UiRadioButtonLazyRoute
-  "/ui/typography": typeof UiTypographyLazyRoute
-  "/ui/": typeof UiIndexLazyRoute
+    "/": typeof IndexLazyRoute;
+    "/ui": typeof UiLazyRouteWithChildren;
+    "/ui/button": typeof UiButtonLazyRoute;
+    "/ui/button-group": typeof UiButtonGroupLazyRoute;
+    "/ui/checkbox": typeof UiCheckboxLazyRoute;
+    "/ui/circular-progress": typeof UiCircularProgressLazyRoute;
+    "/ui/divider": typeof UiDividerLazyRoute;
+    "/ui/linear-progress": typeof UiLinearProgressLazyRoute;
+    "/ui/paper": typeof UiPaperLazyRoute;
+    "/ui/radio-button": typeof UiRadioButtonLazyRoute;
+    "/ui/slider": typeof UiSliderLazyRoute;
+    "/ui/typography": typeof UiTypographyLazyRoute;
+    "/ui/": typeof UiIndexLazyRoute;
 }
 
 export interface FileRoutesByTo {
-  "/": typeof IndexLazyRoute
-  "/ui/button": typeof UiButtonLazyRoute
-  "/ui/button-group": typeof UiButtonGroupLazyRoute
-  "/ui/checkbox": typeof UiCheckboxLazyRoute
-  "/ui/circular-progress": typeof UiCircularProgressLazyRoute
-  "/ui/divider": typeof UiDividerLazyRoute
-  "/ui/linear-progress": typeof UiLinearProgressLazyRoute
-  "/ui/paper": typeof UiPaperLazyRoute
-  "/ui/radio-button": typeof UiRadioButtonLazyRoute
-  "/ui/typography": typeof UiTypographyLazyRoute
-  "/ui": typeof UiIndexLazyRoute
+    "/": typeof IndexLazyRoute;
+    "/ui/button": typeof UiButtonLazyRoute;
+    "/ui/button-group": typeof UiButtonGroupLazyRoute;
+    "/ui/checkbox": typeof UiCheckboxLazyRoute;
+    "/ui/circular-progress": typeof UiCircularProgressLazyRoute;
+    "/ui/divider": typeof UiDividerLazyRoute;
+    "/ui/linear-progress": typeof UiLinearProgressLazyRoute;
+    "/ui/paper": typeof UiPaperLazyRoute;
+    "/ui/radio-button": typeof UiRadioButtonLazyRoute;
+    "/ui/slider": typeof UiSliderLazyRoute;
+    "/ui/typography": typeof UiTypographyLazyRoute;
+    "/ui": typeof UiIndexLazyRoute;
 }
 
 export interface FileRoutesById {
-  __root__: typeof rootRoute
-  "/": typeof IndexLazyRoute
-  "/ui": typeof UiLazyRouteWithChildren
-  "/ui/button": typeof UiButtonLazyRoute
-  "/ui/button-group": typeof UiButtonGroupLazyRoute
-  "/ui/checkbox": typeof UiCheckboxLazyRoute
-  "/ui/circular-progress": typeof UiCircularProgressLazyRoute
-  "/ui/divider": typeof UiDividerLazyRoute
-  "/ui/linear-progress": typeof UiLinearProgressLazyRoute
-  "/ui/paper": typeof UiPaperLazyRoute
-  "/ui/radio-button": typeof UiRadioButtonLazyRoute
-  "/ui/typography": typeof UiTypographyLazyRoute
-  "/ui/": typeof UiIndexLazyRoute
+    __root__: typeof rootRoute;
+    "/": typeof IndexLazyRoute;
+    "/ui": typeof UiLazyRouteWithChildren;
+    "/ui/button": typeof UiButtonLazyRoute;
+    "/ui/button-group": typeof UiButtonGroupLazyRoute;
+    "/ui/checkbox": typeof UiCheckboxLazyRoute;
+    "/ui/circular-progress": typeof UiCircularProgressLazyRoute;
+    "/ui/divider": typeof UiDividerLazyRoute;
+    "/ui/linear-progress": typeof UiLinearProgressLazyRoute;
+    "/ui/paper": typeof UiPaperLazyRoute;
+    "/ui/radio-button": typeof UiRadioButtonLazyRoute;
+    "/ui/slider": typeof UiSliderLazyRoute;
+    "/ui/typography": typeof UiTypographyLazyRoute;
+    "/ui/": typeof UiIndexLazyRoute;
 }
 
 export interface FileRouteTypes {
-  fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths:
-    | "/"
-    | "/ui"
-    | "/ui/button"
-    | "/ui/button-group"
-    | "/ui/checkbox"
-    | "/ui/circular-progress"
-    | "/ui/divider"
-    | "/ui/linear-progress"
-    | "/ui/paper"
-    | "/ui/radio-button"
-    | "/ui/typography"
-    | "/ui/"
-  fileRoutesByTo: FileRoutesByTo
-  to:
-    | "/"
-    | "/ui/button"
-    | "/ui/button-group"
-    | "/ui/checkbox"
-    | "/ui/circular-progress"
-    | "/ui/divider"
-    | "/ui/linear-progress"
-    | "/ui/paper"
-    | "/ui/radio-button"
-    | "/ui/typography"
-    | "/ui"
-  id:
-    | "__root__"
-    | "/"
-    | "/ui"
-    | "/ui/button"
-    | "/ui/button-group"
-    | "/ui/checkbox"
-    | "/ui/circular-progress"
-    | "/ui/divider"
-    | "/ui/linear-progress"
-    | "/ui/paper"
-    | "/ui/radio-button"
-    | "/ui/typography"
-    | "/ui/"
-  fileRoutesById: FileRoutesById
+    fileRoutesByFullPath: FileRoutesByFullPath;
+    fullPaths:
+        | "/"
+        | "/ui"
+        | "/ui/button"
+        | "/ui/button-group"
+        | "/ui/checkbox"
+        | "/ui/circular-progress"
+        | "/ui/divider"
+        | "/ui/linear-progress"
+        | "/ui/paper"
+        | "/ui/radio-button"
+        | "/ui/slider"
+        | "/ui/typography"
+        | "/ui/";
+    fileRoutesByTo: FileRoutesByTo;
+    to:
+        | "/"
+        | "/ui/button"
+        | "/ui/button-group"
+        | "/ui/checkbox"
+        | "/ui/circular-progress"
+        | "/ui/divider"
+        | "/ui/linear-progress"
+        | "/ui/paper"
+        | "/ui/radio-button"
+        | "/ui/slider"
+        | "/ui/typography"
+        | "/ui";
+    id:
+        | "__root__"
+        | "/"
+        | "/ui"
+        | "/ui/button"
+        | "/ui/button-group"
+        | "/ui/checkbox"
+        | "/ui/circular-progress"
+        | "/ui/divider"
+        | "/ui/linear-progress"
+        | "/ui/paper"
+        | "/ui/radio-button"
+        | "/ui/slider"
+        | "/ui/typography"
+        | "/ui/";
+    fileRoutesById: FileRoutesById;
 }
 
 export interface RootRouteChildren {
-  IndexLazyRoute: typeof IndexLazyRoute
-  UiLazyRoute: typeof UiLazyRouteWithChildren
+    IndexLazyRoute: typeof IndexLazyRoute;
+    UiLazyRoute: typeof UiLazyRouteWithChildren;
 }
 
 const rootRouteChildren: RootRouteChildren = {
-  IndexLazyRoute: IndexLazyRoute,
-  UiLazyRoute: UiLazyRouteWithChildren,
-}
+    IndexLazyRoute: IndexLazyRoute,
+    UiLazyRoute: UiLazyRouteWithChildren,
+};
 
 export const routeTree = rootRoute
-  ._addFileChildren(rootRouteChildren)
-  ._addFileTypes<FileRouteTypes>()
+    ._addFileChildren(rootRouteChildren)
+    ._addFileTypes<FileRouteTypes>();
 
 /* ROUTE_MANIFEST_START
 {
@@ -361,6 +385,7 @@ export const routeTree = rootRoute
         "/ui/linear-progress",
         "/ui/paper",
         "/ui/radio-button",
+        "/ui/slider",
         "/ui/typography",
         "/ui/"
       ]
@@ -395,6 +420,10 @@ export const routeTree = rootRoute
     },
     "/ui/radio-button": {
       "filePath": "ui/radio-button.lazy.tsx",
+      "parent": "/ui"
+    },
+    "/ui/slider": {
+      "filePath": "ui/slider.lazy.tsx",
       "parent": "/ui"
     },
     "/ui/typography": {
