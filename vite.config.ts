@@ -1,4 +1,4 @@
-import { TanStackRouterVite } from "@tanstack/router-plugin/vite";
+import { tanstackRouter } from "@tanstack/router-plugin/vite";
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 import tsconfigPaths from "vite-tsconfig-paths";
@@ -9,12 +9,13 @@ const host = process.env.TAURI_DEV_HOST;
 export default defineConfig(async () => ({
     plugins: [
         tsconfigPaths(),
-        TanStackRouterVite({
+        tanstackRouter({
             target: "react",
             autoCodeSplitting: true,
             routesDirectory: "./src/routes",
             generatedRouteTree: "./src/routeTree.gen.ts",
             quoteStyle: "double",
+            verboseFileRoutes: false,
         }),
         react(),
     ],

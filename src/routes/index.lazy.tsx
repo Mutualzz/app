@@ -1,14 +1,10 @@
-import {
-    createLazyFileRoute,
-    Outlet,
-    useNavigate,
-} from "@tanstack/react-router";
+import { Outlet, useNavigate } from "@tanstack/react-router";
 import { Typography } from "@ui/components/data-display/Typography/Typography";
 
 import { Button } from "@ui/components/inputs/Button/Button";
 import { Stack } from "@ui/components/layout/Stack/Stack";
 
-export const Route = createLazyFileRoute("/")({
+export const Route = createLazyFileRoute({
     component: Index,
 });
 
@@ -22,14 +18,18 @@ function Index() {
             alignItems="center"
             spacing={10}
             height="100%"
+            mx="auto"
+            my="auto"
         >
             <Typography level="h1">
                 Website is currently under development
             </Typography>
-            <Typography level="h4">The UI is being made</Typography>
-            <Stack direction="row" alignItems="center" spacing={5}>
-                <Typography level="h5">Meanwhile you can,</Typography>
-                &nbsp;
+            <Typography level="h4">
+                The UI is being made from scratch
+            </Typography>
+            <Typography level="h5">It&apos;s open source too :3</Typography>
+            <Stack direction="row" alignItems="center">
+                <Typography level="h5">Meanwhile you can</Typography>
                 <Button
                     onClick={() => {
                         navigate({
@@ -38,6 +38,7 @@ function Index() {
                     }}
                     size="lg"
                     variant="solid"
+                    color="primary"
                 >
                     Go to the UI playground
                 </Button>

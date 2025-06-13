@@ -1,7 +1,6 @@
-import { createLazyFileRoute } from "@tanstack/react-router";
 import { Stack, Typography } from "@ui/index";
 
-export const Route = createLazyFileRoute("/ui/")({
+export const Route = createLazyFileRoute({
     component: PlaygroundIndexComponent,
 });
 

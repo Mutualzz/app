@@ -1,10 +1,10 @@
-import { createLazyFileRoute, Outlet } from "@tanstack/react-router";
+import { Outlet } from "@tanstack/react-router";
 
 import { Stack } from "@ui/components/layout/Stack/Stack";
 
 import { PlaygrondLeftSidebar } from "@components/PlaygroundLeftSidebar";
 
-export const Route = createLazyFileRoute("/ui")({
+export const Route = createLazyFileRoute({
     component: Playground,
 });
 

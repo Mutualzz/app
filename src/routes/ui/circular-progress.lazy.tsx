@@ -1,4 +1,3 @@
-import { createLazyFileRoute } from "@tanstack/react-router";
 import { Typography } from "@ui/components/data-display/Typography/Typography";
 
 import { useColorInput } from "@ui/hooks/useColorInput";
@@ -18,7 +17,7 @@ import capitalize from "lodash/capitalize";
 
 import { useState } from "react";
 
-export const Route = createLazyFileRoute("/ui/circular-progress")({
+export const Route = createLazyFileRoute({
     component: PlaygroundCircularProgress,
 });
 

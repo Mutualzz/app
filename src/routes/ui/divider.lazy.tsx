@@ -1,4 +1,3 @@
-import { createLazyFileRoute } from "@tanstack/react-router";
 import { Divider } from "@ui/components/data-display/Divider/Divider";
 import type {
     DividerInset,
@@ -13,7 +12,7 @@ import type { Color, ColorLike } from "@ui/types";
 import capitalize from "lodash/capitalize";
 import { useState } from "react";
 
-export const Route = createLazyFileRoute("/ui/divider")({
+export const Route = createLazyFileRoute({
     component: PlaygroundDivider,
 });
 

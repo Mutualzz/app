@@ -1,4 +1,3 @@
-import { createLazyFileRoute } from "@tanstack/react-router";
 import { Divider } from "@ui/components/data-display/Divider/Divider";
 import { Button } from "@ui/components/inputs/Button/Button";
 import { Checkbox } from "@ui/components/inputs/Checkbox/Checkbox";
@@ -18,7 +17,7 @@ import { randomHexColor } from "@ui/utils";
 import numWords from "num-words";
 import { FaMinus, FaPlus } from "react-icons/fa";
 
-export const Route = createLazyFileRoute("/ui/button-group")({
+export const Route = createLazyFileRoute({
     component: PlaygroundButton,
 });
 
