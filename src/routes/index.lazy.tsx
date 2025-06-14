@@ -14,15 +14,12 @@ function Index() {
     return (
         <Stack
             direction="column"
+            height="100%"
             justifyContent="center"
             alignItems="center"
-            spacing={10}
-            height="100%"
-            mx="auto"
-            my="auto"
         >
-            <Typography level="h1">
-                Website is currently under development
+            <Typography level="h2">
+                Website is currently under heavy development
             </Typography>
             <Typography level="h4">
                 The UI is being made from scratch
