@@ -88,7 +88,8 @@ function SlderPlayground() {
                 alignItems="center"
                 direction="column"
                 key={`${v}-${c}`}
-                width="100%"
+                width={orientation === "horizontal" ? 150 : "auto"}
+                height={orientation === "vertical" ? 150 : "auto"}
             >
                 <Typography>
                     {capitalize(v)} {capitalize(c)}
