@@ -66,7 +66,7 @@ function SlderPlayground() {
     const [customColors, setCustomColors] = useState<ColorLike[]>([]);
     const [colorToDelete, setColorToDelete] = useState<ColorLike | null>(null);
 
-    const [markToDelete, setMarkToDelete] = useState<SliderMark | null>(null);
+    const [markToDelete, setMarkToDelete] = useState<number | null>(null);
 
     const [valueInput, setValueInput] = useState<number | null>(null);
     const [labelInput, setLabelInput] = useState<string>("");
@@ -448,9 +448,13 @@ function SlderPlayground() {
                                                 ...prev,
                                                 {
                                                     value: valueInput,
-                                                    label: labelInput,
+                                                    label:
+                                                        labelInput.length > 0
+                                                            ? labelInput
+                                                            : undefined,
                                                 },
                                             ]);
+                                            setMarkToDelete(valueInput);
                                             setValueInput(null);
                                             setLabelInput("");
                                         }
@@ -466,20 +470,13 @@ function SlderPlayground() {
                                     >
                                         <select
                                             value={
-                                                markToDelete
-                                                    ? markToDelete.value
-                                                    : ""
+                                                markToDelete ? markToDelete : ""
                                             }
                                             onChange={(e) => {
                                                 const value = Number(
                                                     e.target.value,
                                                 );
-                                                setMarkToDelete(
-                                                    marks.find(
-                                                        (m) =>
-                                                            m.value === value,
-                                                    ) ?? null,
-                                                );
+                                                setMarkToDelete(value);
                                             }}
                                             css={{
                                                 padding: 10,
@@ -502,15 +499,23 @@ function SlderPlayground() {
                                         <Button
                                             color="danger"
                                             onClick={() => {
-                                                setMarks((prev) =>
-                                                    prev.filter(
+                                                setMarks((prev) => {
+                                                    const updated = prev.filter(
                                                         (m) =>
-                                                            m !== markToDelete,
-                                                    ),
-                                                );
-                                                setMarkToDelete(
-                                                    marks[0] ?? null,
-                                                );
+                                                            m.value !==
+                                                            markToDelete,
+                                                    );
+                                                    setMarkToDelete(
+                                                        updated.length > 0
+                                                            ? updated[
+                                                                  updated.length -
+                                                                      1
+                                                              ].value
+                                                            : null,
+                                                    );
+
+                                                    return updated;
+                                                });
                                             }}
                                         >
                                             Delete Mark
