@@ -10,7 +10,7 @@ export const Route = createLazyFileRoute({
 
 function Playground() {
     return (
-        <Stack height="100%" direction="row" spacing={20}>
+        <Stack height="100%" direction="row" spacing={10} p={20}>
             <PlaygrondLeftSidebar />
             <Outlet />
         </Stack>

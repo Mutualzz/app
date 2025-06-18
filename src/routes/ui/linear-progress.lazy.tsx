@@ -11,6 +11,7 @@ import {
     RadioButton,
     RadioButtonGroup,
     randomHexColor,
+    Slider,
 } from "@ui/index";
 import type { Color, ColorLike, Size, Variant } from "@ui/types";
 
@@ -121,20 +122,15 @@ function PlaygroundLinearProgress() {
     ));
 
     return (
-        <Stack
-            mt={40}
-            spacing={20}
-            direction="row"
-            justifyContent="space-around"
-        >
+        <Stack width="100%" spacing={10} direction="row">
             <Paper
+                width="100%"
                 direction={variant === "all" ? "column" : "row"}
                 alignItems="flex-start"
                 alignContent="flex-start"
                 wrap="wrap"
                 p={20}
                 spacing={25}
-                width={1200}
             >
                 {variant === "all" &&
                     allProgresses.map((progresses, i) => (
@@ -144,8 +140,7 @@ function PlaygroundLinearProgress() {
                     ))}
                 {variant !== "all" && progresses}
             </Paper>
-
-            <Paper width={300} direction="column" p={20} spacing={5}>
+            <Paper direction="column" p={20} spacing={5}>
                 <Divider>Playground</Divider>
                 <Stack width="100%" direction="column" spacing={5}>
                     <Stack direction="column" spacing={5}>
@@ -214,30 +209,26 @@ function PlaygroundLinearProgress() {
                                 label="Custom"
                                 onChange={() => {
                                     setCustomLengthToggle((prev) => {
-                                        setLength("md");
+                                        if (prev) setLength("md");
+                                        else
+                                            setLength(
+                                                Math.round((240 + 80) / 2),
+                                            );
                                         return !prev;
                                     });
                                 }}
                             />
                         </Stack>
                         {customLengthToggle ? (
-                            <input
-                                type="range"
-                                value={length}
+                            <Slider
+                                value={length as number}
                                 min={80}
                                 max={240}
                                 onChange={(e) =>
                                     setLength(Number(e.target.value))
                                 }
-                                css={{
-                                    padding: 10,
-                                    borderRadius: 5,
-                                    border: isInvalid
-                                        ? "1px solid red"
-                                        : "1px solid #ccc",
-                                    backgroundColor: "#f9f9f9",
-                                    width: "100%",
-                                }}
+                                valueLabelDisplay="auto"
+                                valueLabelFormat={(value) => `${value}px`}
                             />
                         ) : (
                             <RadioButtonGroup
@@ -274,30 +265,23 @@ function PlaygroundLinearProgress() {
                                 label="Custom"
                                 onChange={() => {
                                     setCustomThicknessToggle((prev) => {
-                                        setThickness("md");
+                                        if (prev) setThickness("md");
+                                        else setThickness((16 + 4) / 2);
                                         return !prev;
                                     });
                                 }}
                             />
                         </Stack>
                         {customThicknessToggle ? (
-                            <input
-                                type="range"
-                                value={thickness}
+                            <Slider
+                                value={thickness as number}
                                 min={4}
                                 max={16}
                                 onChange={(e) =>
                                     setThickness(Number(e.target.value))
                                 }
-                                css={{
-                                    padding: 10,
-                                    borderRadius: 5,
-                                    border: isInvalid
-                                        ? "1px solid red"
-                                        : "1px solid #ccc",
-                                    backgroundColor: "#f9f9f9",
-                                    width: "100%",
-                                }}
+                                valueLabelDisplay="auto"
+                                valueLabelFormat={(value) => `${value}px`}
                             />
                         ) : (
                             <RadioButtonGroup
@@ -330,23 +314,15 @@ function PlaygroundLinearProgress() {
                             onChange={() => setDeterminate((prev) => !prev)}
                         />
                         {determinate && (
-                            <input
-                                type="range"
+                            <Slider
                                 value={value}
                                 min={0}
                                 max={100}
                                 onChange={(e) =>
                                     setValue(Number(e.target.value))
                                 }
-                                css={{
-                                    padding: 10,
-                                    borderRadius: 5,
-                                    border: isInvalid
-                                        ? "1px solid red"
-                                        : "1px solid #ccc",
-                                    backgroundColor: "#f9f9f9",
-                                    width: "100%",
-                                }}
+                                valueLabelDisplay="auto"
+                                valueLabelFormat={(value) => `${value}%`}
                             />
                         )}
                     </Stack>

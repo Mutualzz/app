@@ -14,6 +14,7 @@ import { RadioButton } from "@ui/components/inputs/RadioButton/RadioButton";
 import { RadioButtonGroup } from "@ui/components/inputs/RadioButton/RadioButtonGroup";
 import { randomHexColor } from "@ui/utils";
 
+import { Slider } from "@ui/index";
 import numWords from "num-words";
 import { FaMinus, FaPlus } from "react-icons/fa";
 
@@ -92,19 +93,15 @@ function PlaygroundButton() {
     ));
 
     return (
-        <Stack
-            mt={40}
-            spacing={20}
-            direction="row"
-            justifyContent="space-around"
-        >
+        <Stack width="100%" spacing={10} direction="row">
             <Paper
+                width="100%"
                 direction="row"
                 alignItems="flex-start"
                 alignContent="flex-start"
+                wrap="wrap"
                 p={20}
                 spacing={5}
-                width={1200}
             >
                 {variant === "all" && (
                     <ButtonGroup
@@ -129,7 +126,7 @@ function PlaygroundButton() {
                     </ButtonGroup>
                 )}
             </Paper>
-            <Paper width={300} alignItems="center" direction="column" p={20}>
+            <Paper alignItems="center" direction="column" p={20}>
                 <Divider>Playground</Divider>
                 <Stack width="100%" direction="column" spacing={5}>
                     <Stack direction="column" spacing={5}>
@@ -169,8 +166,8 @@ function PlaygroundButton() {
                                 </label>
                                 <Stack direction="row" spacing={5}>
                                     <Button
-                                        color="neutral"
-                                        variant="outlined"
+                                        color="warning"
+                                        variant="soft"
                                         onClick={() =>
                                             setNumberOfButtons((prev) =>
                                                 prev > 4 ? prev - 1 : prev,
@@ -180,8 +177,8 @@ function PlaygroundButton() {
                                         <FaMinus />
                                     </Button>
                                     <Button
-                                        color="neutral"
-                                        variant="outlined"
+                                        color="success"
+                                        variant="soft"
                                         onClick={() =>
                                             setNumberOfButtons(
                                                 (prev) => prev + 1,
@@ -191,8 +188,8 @@ function PlaygroundButton() {
                                         <FaPlus />
                                     </Button>
                                     <Button
-                                        color="neutral"
-                                        variant="outlined"
+                                        color="danger"
+                                        variant="solid"
                                         onClick={() => setNumberOfButtons(4)}
                                     >
                                         Reset
@@ -288,30 +285,23 @@ function PlaygroundButton() {
                                 label="Custom"
                                 onChange={() =>
                                     setCustomSizeToggle((prev) => {
-                                        setSize("md");
+                                        if (prev) setSize("md");
+                                        else setSize(Math.round((24 + 10) / 2));
                                         return !prev;
                                     })
                                 }
                             />
                         </Stack>
                         {customSizeToggle ? (
-                            <input
-                                type="range"
-                                value={size}
+                            <Slider
+                                value={size as number}
                                 min={10}
                                 max={24}
                                 onChange={(e) =>
                                     setSize(Number(e.target.value))
                                 }
-                                css={{
-                                    padding: 10,
-                                    borderRadius: 5,
-                                    border: isInvalid
-                                        ? "1px solid red"
-                                        : "1px solid #ccc",
-                                    backgroundColor: "#f9f9f9",
-                                    width: "100%",
-                                }}
+                                valueLabelDisplay="auto"
+                                valueLabelFormat={(value) => `${value}px`}
                             />
                         ) : (
                             <RadioButtonGroup
@@ -363,19 +353,13 @@ function PlaygroundButton() {
                     <Divider />
                     <Stack direction="column" spacing={5}>
                         <label>Spacing</label>
-                        <input
-                            type="range"
+                        <Slider
                             value={spacing}
                             min={0}
                             max={100}
                             onChange={(e) => setSpacing(Number(e.target.value))}
-                            css={{
-                                padding: 10,
-                                borderRadius: 5,
-                                border: "1px solid #ccc",
-                                backgroundColor: "#f9f9f9",
-                                width: "100%",
-                            }}
+                            valueLabelDisplay="auto"
+                            valueLabelFormat={(value) => `${value}px`}
                         />
                     </Stack>
                     <Divider />

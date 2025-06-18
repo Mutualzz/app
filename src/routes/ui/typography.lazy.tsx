@@ -9,6 +9,7 @@ import {
     RadioButton,
     RadioButtonGroup,
     randomHexColor,
+    Slider,
     useColorInput,
 } from "@ui/index";
 import type { Color, ColorLike, TypographyLevel } from "@ui/types";
@@ -129,20 +130,15 @@ function PlaygroundTypography() {
     ));
 
     return (
-        <Stack
-            mt={40}
-            spacing={20}
-            direction="row"
-            justifyContent="space-around"
-        >
+        <Stack width="100%" spacing={10} direction="row">
             <Paper
+                width="100%"
                 direction={variant === "all" ? "column" : "row"}
                 alignItems="flex-start"
                 alignContent="flex-start"
                 wrap="wrap"
                 p={20}
                 spacing={variant === "all" ? 10 : 5}
-                width={1200}
             >
                 {variant === "none" && (
                     <Typography level={level} weight={weight} variant={variant}>
@@ -157,7 +153,7 @@ function PlaygroundTypography() {
                     ))}
                 {variant !== "none" && variant !== "all" && typographies}
             </Paper>
-            <Paper width={300} alignItems="center" direction="column" p={20}>
+            <Paper alignItems="center" direction="column" p={20}>
                 <Divider>Playground</Divider>
                 <Stack width="100%" direction="column" spacing={5}>
                     <Stack direction="column" spacing={5}>
@@ -232,24 +228,25 @@ function PlaygroundTypography() {
                             />
                         </Stack>
                         {customWeightToggle ? (
-                            <input
-                                type="range"
-                                value={weight}
-                                step={100}
+                            <Slider
+                                value={weight as number}
                                 min={100}
                                 max={1000}
                                 onChange={(e) =>
                                     setWeight(Number(e.target.value))
                                 }
-                                css={{
-                                    padding: 10,
-                                    borderRadius: 5,
-                                    border: isInvalid
-                                        ? "1px solid red"
-                                        : "1px solid #ccc",
-                                    backgroundColor: "#f9f9f9",
-                                    width: "100%",
-                                }}
+                                marks={[
+                                    { value: 100, label: "100" },
+                                    { value: 200, label: "200" },
+                                    { value: 300, label: "300" },
+                                    { value: 400, label: "400" },
+                                    { value: 500, label: "500" },
+                                    { value: 600, label: "600" },
+                                    { value: 700, label: "700" },
+                                    { value: 800, label: "800" },
+                                    { value: 900, label: "900" },
+                                    { value: 1000, label: "1k" },
+                                ]}
                             />
                         ) : (
                             <select

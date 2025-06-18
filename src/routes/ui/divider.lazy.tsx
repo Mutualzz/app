@@ -1,7 +1,8 @@
 import { Divider } from "@ui/components/data-display/Divider/Divider";
-import type {
-    DividerInset,
-    DividerVariant,
+import {
+    type DividerInset,
+    type DividerOrientation,
+    type DividerVariant,
 } from "@ui/components/data-display/Divider/Divider.types";
 import { Checkbox } from "@ui/components/inputs/Checkbox/Checkbox";
 import { Stack } from "@ui/components/layout/Stack/Stack";
@@ -32,6 +33,8 @@ function PlaygroundDivider() {
     const [variant, setVariant] = useState<DividerVariant>("solid");
 
     const [inset, setInset] = useState<DividerInset>("none");
+    const [orientation, setOrientation] =
+        useState<DividerOrientation>("horizontal");
 
     const [text, setText] = useState<string | null>(null);
 
@@ -57,143 +60,63 @@ function PlaygroundDivider() {
         validate: validateTextColor,
     } = useColorInput<Color | ColorLike>();
 
-    return (
-        <Stack
-            mt={40}
-            spacing={20}
-            direction="row"
-            justifyContent="space-around"
+    const divider = text ? (
+        <Divider
+            lineColor={customLineColorEnabled ? customLineColor : lineColor}
+            textColor={customTextColorEnabled ? customTextColor : textColor}
+            variant={variant}
+            inset={inset}
+            orientation={orientation}
         >
+            {text}
+        </Divider>
+    ) : (
+        <Divider
+            lineColor={customLineColorEnabled ? customLineColor : lineColor}
+            textColor={customTextColorEnabled ? customTextColor : textColor}
+            variant={variant}
+            inset={inset}
+            orientation={orientation}
+        />
+    );
+
+    return (
+        <Stack width="100%" spacing={10} direction="row">
             <Paper
+                width="100%"
                 p={20}
-                spacing={48}
                 justifyContent="center"
                 alignItems="center"
                 direction="column"
-                width={1200}
             >
-                <Stack direction="row" spacing={20}>
-                    <Paper
-                        direction="column"
-                        alignItems="center"
-                        spacing={5}
-                        p={20}
-                        elevation={2}
-                    >
-                        <label>Vertical Divider</label>
-                        <Stack direction="row" spacing={5}>
-                            <Paper elevation={3} p="7.5rem" />
-                            <Divider
-                                lineColor={
-                                    customLineColorEnabled
-                                        ? customLineColor
-                                        : lineColor
-                                }
-                                textColor={
-                                    customTextColorEnabled
-                                        ? customTextColor
-                                        : textColor
-                                }
-                                variant={variant}
-                                inset={inset}
-                                orientation="vertical"
-                            />
-                            <Paper elevation={3} p="7.5rem" />
-                        </Stack>
-                    </Paper>
-                    <Paper
-                        direction="column"
-                        alignItems="center"
-                        spacing={5}
-                        p={20}
-                        elevation={2}
-                    >
-                        <label>Vertical Divider with Text</label>
-                        <Stack direction="row" spacing={5}>
-                            <Paper elevation={3} p="7.5rem" />
-                            <Divider
-                                lineColor={
-                                    customLineColorEnabled
-                                        ? customLineColor
-                                        : lineColor
-                                }
-                                textColor={
-                                    customTextColorEnabled
-                                        ? customTextColor
-                                        : textColor
-                                }
-                                variant={variant}
-                                inset={inset}
-                                orientation="vertical"
-                            >
-                                {text ?? "Text"}
-                            </Divider>
-                            <Paper elevation={3} p="7.5rem" />
-                        </Stack>
-                    </Paper>
-                </Stack>
-                <Stack direction="row" spacing={20} alignItems="baseline">
-                    <Paper
-                        direction="column"
-                        alignItems="center"
-                        spacing={5}
-                        p={20}
-                        elevation={2}
-                    >
-                        <label>Horizontal Divider</label>
-                        <Stack direction="column" spacing={5}>
-                            <Paper elevation={3} p="7.5rem" />
-                            <Divider
-                                lineColor={
-                                    customLineColorEnabled
-                                        ? customLineColor
-                                        : lineColor
-                                }
-                                textColor={
-                                    customTextColorEnabled
-                                        ? customTextColor
-                                        : textColor
-                                }
-                                variant={variant}
-                                inset={inset}
-                                orientation="horizontal"
-                            />
-                            <Paper elevation={3} p="7.5rem" />
-                        </Stack>
-                    </Paper>
-                    <Paper
-                        direction="column"
-                        alignItems="center"
-                        spacing={5}
-                        p={20}
-                        elevation={2}
-                    >
-                        <label>Horizontal Divider with Text</label>
-                        <Stack direction="column" spacing={5}>
-                            <Paper elevation={3} p="7.5rem" />
-                            <Divider
-                                lineColor={
-                                    customLineColorEnabled
-                                        ? customLineColor
-                                        : lineColor
-                                }
-                                textColor={
-                                    customTextColorEnabled
-                                        ? customTextColor
-                                        : textColor
-                                }
-                                variant={variant}
-                                inset={inset}
-                                orientation="horizontal"
-                            >
-                                {text ?? "Text"}
-                            </Divider>
-                            <Paper elevation={3} p="7.5rem" />
-                        </Stack>
-                    </Paper>
-                </Stack>
+                {orientation === "horizontal" && (
+                    <Stack direction="column" spacing={20}>
+                        <Paper
+                            elevation={10}
+                            p={{ xs: "2.5rem", sm: "5rem", lg: "7.5rem" }}
+                        />
+                        {divider}
+                        <Paper
+                            elevation={10}
+                            p={{ xs: "2.5rem", sm: "5rem", lg: "7.5rem" }}
+                        />
+                    </Stack>
+                )}
+                {orientation === "vertical" && (
+                    <Stack direction="row" spacing={20}>
+                        <Paper
+                            elevation={10}
+                            p={{ xs: "2.5rem", sm: "5rem", lg: "7.5rem" }}
+                        />
+                        {divider}
+                        <Paper
+                            elevation={10}
+                            p={{ xs: "2.5rem", sm: "5rem", lg: "7.5rem" }}
+                        />
+                    </Stack>
+                )}
             </Paper>
-            <Paper width={300} alignItems="center" direction="column" p={20}>
+            <Paper alignItems="center" direction="column" p={20}>
                 <Divider>Playground</Divider>
                 <Stack width="100%" direction="column" spacing={5}>
                     <Stack direction="column" spacing={5}>
@@ -219,27 +142,87 @@ function PlaygroundDivider() {
                     </Stack>
                     <Divider />
                     <Stack direction="column" spacing={5}>
-                        <label>Inset</label>
+                        <label>Orientation</label>
                         <RadioButtonGroup
-                            onChange={(_, inst) =>
-                                setInset(inst as DividerInset)
+                            onChange={(_, orientation) =>
+                                setOrientation(
+                                    orientation as DividerOrientation,
+                                )
                             }
-                            value={inset}
-                            name="insets"
+                            value={orientation}
+                            name="orientations"
                             row
                         >
-                            {insets.map((i) => (
-                                <RadioButton
-                                    key={i}
-                                    value={i}
-                                    label={capitalize(i)}
-                                    checked={inset === i}
-                                    color="neutral"
-                                    onChange={() => setInset(i)}
-                                />
-                            ))}
+                            <RadioButton
+                                value="horizontal"
+                                label="Horizontal"
+                                checked={orientation === "horizontal"}
+                                color="neutral"
+                                onChange={() => setOrientation("horizontal")}
+                            />
+                            <RadioButton
+                                value="vertical"
+                                label="Vertical"
+                                checked={orientation === "vertical"}
+                                color="neutral"
+                                onChange={() => setOrientation("vertical")}
+                            />
                         </RadioButtonGroup>
                     </Stack>
+                    <Divider />
+                    <Stack
+                        justifyContent="center"
+                        alignItems="stretch"
+                        spacing={5}
+                        direction="column"
+                    >
+                        <label>Text</label>
+                        <input
+                            type="text"
+                            value={text ?? ""}
+                            onChange={(e) =>
+                                setText(
+                                    e.target.value.trim() === ""
+                                        ? null
+                                        : e.target.value,
+                                )
+                            }
+                            css={{
+                                padding: 10,
+                                borderRadius: 5,
+                                border: "1px solid #ccc",
+                                backgroundColor: "#f9f9f9",
+                                width: "100%",
+                            }}
+                        />
+                    </Stack>
+                    {text && (
+                        <>
+                            <Divider />
+                            <Stack direction="column" spacing={5}>
+                                <label>Inset</label>
+                                <RadioButtonGroup
+                                    onChange={(_, inst) =>
+                                        setInset(inst as DividerInset)
+                                    }
+                                    value={inset}
+                                    name="insets"
+                                    row
+                                >
+                                    {insets.map((i) => (
+                                        <RadioButton
+                                            key={i}
+                                            value={i}
+                                            label={capitalize(i)}
+                                            checked={inset === i}
+                                            color="neutral"
+                                            onChange={() => setInset(i)}
+                                        />
+                                    ))}
+                                </RadioButtonGroup>
+                            </Stack>
+                        </>
+                    )}
                     <Divider />
                     <Stack direction="column" spacing={5}>
                         <Stack
@@ -258,7 +241,6 @@ function PlaygroundDivider() {
                                 }
                             />
                         </Stack>
-
                         {customLineColorEnabled ? (
                             <input
                                 type="text"
@@ -355,33 +337,6 @@ function PlaygroundDivider() {
                                 ))}
                             </select>
                         )}
-                    </Stack>
-                    <Divider />
-                    <Stack
-                        justifyContent="center"
-                        alignItems="stretch"
-                        spacing={5}
-                        direction="column"
-                    >
-                        <label>Text</label>
-                        <input
-                            type="text"
-                            value={text ?? ""}
-                            onChange={(e) =>
-                                setText(
-                                    e.target.value.trim() === ""
-                                        ? null
-                                        : e.target.value,
-                                )
-                            }
-                            css={{
-                                padding: 10,
-                                borderRadius: 5,
-                                border: "1px solid #ccc",
-                                backgroundColor: "#f9f9f9",
-                                width: "100%",
-                            }}
-                        />
                     </Stack>
                 </Stack>
             </Paper>

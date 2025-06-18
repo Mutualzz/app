@@ -58,7 +58,7 @@ function PlaygroundPaper() {
                     key={`${v}-${c}-button`}
                     variant={v}
                     color={c}
-                    p={20}
+                    p={{ xs: 5, sm: 10, lg: 20 }}
                     justifyContent="center"
                     alignItems="center"
                 >
@@ -72,7 +72,7 @@ function PlaygroundPaper() {
             key={`${variant}-${c}-button`}
             variant={variant as PaperVariant}
             color={c}
-            p={20}
+            p={{ xs: 5, sm: 10, lg: 20 }}
             justifyContent="center"
             alignItems="center"
         >
@@ -81,20 +81,15 @@ function PlaygroundPaper() {
     ));
 
     return (
-        <Stack
-            mt={40}
-            spacing={20}
-            direction="row"
-            justifyContent="space-around"
-        >
+        <Stack width="100%" spacing={10} direction="row">
             <Paper
+                width="100%"
                 direction={variant === "all" ? "column" : "row"}
                 alignItems={variant === "elevation" ? "center" : "flex-start"}
                 alignContent={variant === "elevation" ? "center" : "flex-start"}
                 wrap="wrap"
                 p={20}
                 spacing={variant === "all" ? 10 : 5}
-                width={1200}
                 justifyContent={
                     variant === "elevation" ? "center" : "flex-start"
                 }
@@ -104,10 +99,9 @@ function PlaygroundPaper() {
                     <Paper
                         variant={variant}
                         elevation={elevation}
-                        width={500}
-                        height={400}
                         justifyContent="center"
                         alignItems="center"
+                        p={{ xs: "2.5rem", sm: "5rem", lg: "7.5rem" }}
                     >
                         {text ?? `${capitalize(variant)} ${elevation}`}
                     </Paper>
@@ -119,7 +113,7 @@ function PlaygroundPaper() {
                         </Stack>
                     ))}
             </Paper>
-            <Paper width={300} alignItems="center" direction="column" p={20}>
+            <Paper alignItems="center" direction="column" p={20}>
                 <Divider>Playground</Divider>
                 <Stack width="100%" direction="column" spacing={5}>
                     <Stack direction="column" spacing={5}>
@@ -254,8 +248,6 @@ function PlaygroundPaper() {
                             <input
                                 type="number"
                                 value={elevation}
-                                min={1}
-                                max={5}
                                 onChange={(e) =>
                                     setElevation(
                                         e.target.value.trim() === ""

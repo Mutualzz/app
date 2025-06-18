@@ -11,6 +11,7 @@ import { type ReactNode, useState } from "react";
 
 import { RadioButton } from "@ui/components/inputs/RadioButton/RadioButton";
 import { RadioButtonGroup } from "@ui/components/inputs/RadioButton/RadioButtonGroup";
+import { Slider } from "@ui/index";
 import { randomHexColor } from "@ui/utils";
 import * as AiIcons from "react-icons/ai";
 import * as FaIcons from "react-icons/fa";
@@ -139,20 +140,15 @@ function PlaygroundButton() {
     );
 
     return (
-        <Stack
-            mt={40}
-            spacing={20}
-            direction="row"
-            justifyContent="space-around"
-        >
+        <Stack width="100%" spacing={10} direction="row">
             <Paper
+                width="100%"
                 direction={variant === "all" ? "column" : "row"}
                 alignItems="flex-start"
                 alignContent="flex-start"
                 wrap="wrap"
                 p={20}
                 spacing={variant === "all" ? 10 : 5}
-                width={1200}
             >
                 {variant === "all" &&
                     allButtons.map((buttons, i) => (
@@ -162,7 +158,7 @@ function PlaygroundButton() {
                     ))}
                 {variant !== "all" && buttons}
             </Paper>
-            <Paper width={300} alignItems="center" direction="column" p={20}>
+            <Paper alignItems="center" direction="column" p={20}>
                 <Divider>Playground</Divider>
                 <Stack width="100%" direction="column" spacing={5}>
                     <Stack direction="column" spacing={5}>
@@ -206,30 +202,23 @@ function PlaygroundButton() {
                                 label="Custom"
                                 onChange={() =>
                                     setCustomSizeToggle((prev) => {
-                                        setSize("md");
+                                        if (prev) setSize("md");
+                                        else setSize(Math.round((24 + 10) / 2));
                                         return !prev;
                                     })
                                 }
                             />
                         </Stack>
                         {customSizeToggle ? (
-                            <input
-                                type="range"
-                                value={size}
+                            <Slider
+                                value={size as number}
                                 min={10}
                                 max={24}
                                 onChange={(e) =>
                                     setSize(Number(e.target.value))
                                 }
-                                css={{
-                                    padding: 10,
-                                    borderRadius: 5,
-                                    border: isInvalid
-                                        ? "1px solid red"
-                                        : "1px solid #ccc",
-                                    backgroundColor: "#f9f9f9",
-                                    width: "100%",
-                                }}
+                                valueLabelDisplay="auto"
+                                valueLabelFormat={(value) => `${value}px`}
                             />
                         ) : (
                             <RadioButtonGroup

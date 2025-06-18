@@ -45,6 +45,7 @@ function SlderPlayground() {
     const [variant, setVariant] = useState<Variant | "all">("solid");
     const [size, setSize] = useState<Size | number>("md");
     const [disabled, setDisabled] = useState(false);
+
     const [orientation, setOrientation] =
         useState<SliderOrientation>("horizontal");
 
@@ -87,6 +88,7 @@ function SlderPlayground() {
                 alignItems="center"
                 direction="column"
                 key={`${v}-${c}`}
+                width="100%"
             >
                 <Typography>
                     {capitalize(v)} {capitalize(c)}
@@ -132,6 +134,7 @@ function SlderPlayground() {
             alignItems="center"
             direction="column"
             key={c}
+            width={150}
         >
             <Typography>
                 {capitalize(variant)} {capitalize(c)}
@@ -170,30 +173,30 @@ function SlderPlayground() {
     ));
 
     return (
-        <Stack
-            mt={40}
-            spacing={20}
-            direction="row"
-            justifyContent="space-around"
-        >
+        <Stack width="100%" spacing={10} direction="row">
             <Paper
+                width="100%"
                 direction={variant === "all" ? "column" : "row"}
                 alignItems="flex-start"
                 alignContent="flex-start"
                 wrap="wrap"
                 p={20}
-                spacing={50}
-                width={1200}
+                spacing={25}
             >
                 {variant === "all" &&
                     allSliders.map((sliders, i) => (
-                        <Stack direction="row" spacing={50} key={i}>
+                        <Stack
+                            direction="row"
+                            spacing={50}
+                            key={i}
+                            width="100%"
+                        >
                             {sliders}
                         </Stack>
                     ))}
                 {variant !== "all" && sliders}
             </Paper>
-            <Paper width={300} alignItems="center" direction="column" p={20}>
+            <Paper alignItems="center" direction="column" p={20}>
                 <Divider>Playground</Divider>
                 <Stack width="100%" spacing={5} direction="column">
                     <Stack direction="column" spacing={5}>
@@ -234,30 +237,23 @@ function SlderPlayground() {
                                 label="Custom"
                                 onChange={() =>
                                     setCustomSizeToggle((prev) => {
-                                        setSize("md");
+                                        if (prev) setSize("md");
+                                        else setSize((24 + 10) / 2);
                                         return !prev;
                                     })
                                 }
                             />
                         </Stack>
                         {customSizeToggle ? (
-                            <input
-                                type="range"
-                                value={size}
+                            <Slider
+                                value={size as number}
                                 min={10}
                                 max={24}
                                 onChange={(e) =>
                                     setSize(Number(e.target.value))
                                 }
-                                css={{
-                                    padding: 10,
-                                    borderRadius: 5,
-                                    border: isInvalid
-                                        ? "1px solid red"
-                                        : "1px solid #ccc",
-                                    backgroundColor: "#f9f9f9",
-                                    width: "100%",
-                                }}
+                                valueLabelDisplay="auto"
+                                valueLabelFormat={(value) => `${value}px`}
                             />
                         ) : (
                             <RadioButtonGroup
@@ -339,19 +335,14 @@ function SlderPlayground() {
                             </Stack>
                         </Stack>
                         {controlled && !disabled && (
-                            <input
-                                type="number"
+                            <Slider
                                 value={controlledValue}
                                 onChange={(e) =>
                                     setControlledValue(Number(e.target.value))
                                 }
-                                css={{
-                                    padding: 10,
-                                    borderRadius: 5,
-                                    border: "1px solid #ccc",
-                                    backgroundColor: "#f9f9f9",
-                                    width: "100%",
-                                }}
+                                min={min}
+                                max={max}
+                                valueLabelDisplay="auto"
                             />
                         )}
                     </Stack>
