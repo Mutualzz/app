@@ -147,7 +147,7 @@ export const PlaygrondLeftSidebar = () => {
                                 variant="solid"
                                 color={
                                     pathname === button.link
-                                        ? "warning"
+                                        ? "success"
                                         : "primary"
                                 }
                                 onClick={() => {
