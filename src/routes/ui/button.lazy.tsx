@@ -50,6 +50,8 @@ const libNames = {
     ai: "Ant Design",
 };
 
+type IconPosition = "left" | "right" | "both" | "none";
+
 function PlaygroundButton() {
     const [variant, setVariant] = useState<Variant | "all">("solid");
     const [text, setText] = useState<string | null>(null);
@@ -58,9 +60,7 @@ function PlaygroundButton() {
     const [disabled, setDisabled] = useState(false);
     const [iconOnly, setIconOnly] = useState(false);
 
-    const [iconPosition, setIconPosition] = useState<
-        "left" | "right" | "both" | "none"
-    >("none");
+    const [iconPosition, setIconPosition] = useState<IconPosition>("none");
 
     const [iconLibrary, setIconLibrary] =
         useState<keyof typeof iconLibraries>("fa");
@@ -428,11 +428,7 @@ function PlaygroundButton() {
                                 setIconPosition(() => {
                                     if (iconPosition === "none") setIcon(null);
 
-                                    return iconPosition as
-                                        | "left"
-                                        | "right"
-                                        | "both"
-                                        | "none";
+                                    return iconPosition as IconPosition;
                                 })
                             }
                             value={iconPosition}
