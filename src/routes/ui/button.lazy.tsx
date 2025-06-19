@@ -58,9 +58,9 @@ function PlaygroundButton() {
     const [disabled, setDisabled] = useState(false);
     const [iconOnly, setIconOnly] = useState(false);
 
-    const [iconPosition, setIconPosition] = useState<"left" | "right" | "none">(
-        "none",
-    );
+    const [iconPosition, setIconPosition] = useState<
+        "left" | "right" | "both" | "none"
+    >("none");
 
     const [iconLibrary, setIconLibrary] =
         useState<keyof typeof iconLibraries>("fa");
@@ -107,10 +107,16 @@ function PlaygroundButton() {
                     loading={loading}
                     disabled={disabled}
                     startDecorator={
-                        iconPosition === "left" && icon ? icon : null
+                        (iconPosition === "left" || iconPosition === "both") &&
+                        icon
+                            ? icon
+                            : null
                     }
                     endDecorator={
-                        iconPosition === "right" && icon ? icon : null
+                        (iconPosition === "right" || iconPosition === "both") &&
+                        icon
+                            ? icon
+                            : null
                     }
                 >
                     {text ?? `${capitalize(v)} ${capitalize(c)}`}
@@ -128,8 +134,17 @@ function PlaygroundButton() {
                 size={size}
                 loading={loading}
                 disabled={disabled}
-                startDecorator={iconPosition === "left" && icon ? icon : null}
-                endDecorator={iconPosition === "right" && icon ? icon : null}
+                startDecorator={
+                    (iconPosition === "left" || iconPosition === "both") && icon
+                        ? icon
+                        : null
+                }
+                endDecorator={
+                    (iconPosition === "right" || iconPosition === "both") &&
+                    icon
+                        ? icon
+                        : null
+                }
             />
         ) : (
             <Button
@@ -139,8 +154,17 @@ function PlaygroundButton() {
                 size={size}
                 loading={loading}
                 disabled={disabled}
-                startDecorator={iconPosition === "left" && icon ? icon : null}
-                endDecorator={iconPosition === "right" && icon ? icon : null}
+                startDecorator={
+                    (iconPosition === "left" || iconPosition === "both") && icon
+                        ? icon
+                        : null
+                }
+                endDecorator={
+                    (iconPosition === "right" || iconPosition === "both") &&
+                    icon
+                        ? icon
+                        : null
+                }
             >
                 {text ?? `${capitalize(variant)} ${capitalize(c)}`}
             </Button>
@@ -388,7 +412,7 @@ function PlaygroundButton() {
                             spacing={5}
                         >
                             <label>Icon</label>
-                            {icon && (
+                            {icon && iconPosition !== "both" && (
                                 <Checkbox
                                     checked={iconOnly}
                                     label="Icon Only"
@@ -407,6 +431,7 @@ function PlaygroundButton() {
                                     return iconPosition as
                                         | "left"
                                         | "right"
+                                        | "both"
                                         | "none";
                                 })
                             }
@@ -434,6 +459,13 @@ function PlaygroundButton() {
                                 checked={iconPosition === "right"}
                                 color="neutral"
                                 onChange={() => setIconPosition("right")}
+                            />
+                            <Radio
+                                value="both"
+                                label="Both"
+                                checked={iconPosition === "both"}
+                                color="neutral"
+                                onChange={() => setIconPosition("both")}
                             />
                         </RadioGroup>
                         {iconPosition !== "none" && (
