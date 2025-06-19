@@ -91,8 +91,12 @@ function PlaygroundButton() {
                     size={size}
                     loading={loading}
                     disabled={disabled}
-                    startIcon={iconPosition === "left" && icon ? icon : null}
-                    endIcon={iconPosition === "right" && icon ? icon : null}
+                    startDecorator={
+                        iconPosition === "left" && icon ? icon : null
+                    }
+                    endDecorator={
+                        iconPosition === "right" && icon ? icon : null
+                    }
                 />
             ) : (
                 <Button
@@ -102,8 +106,12 @@ function PlaygroundButton() {
                     size={size}
                     loading={loading}
                     disabled={disabled}
-                    startIcon={iconPosition === "left" && icon ? icon : null}
-                    endIcon={iconPosition === "right" && icon ? icon : null}
+                    startDecorator={
+                        iconPosition === "left" && icon ? icon : null
+                    }
+                    endDecorator={
+                        iconPosition === "right" && icon ? icon : null
+                    }
                 >
                     {text ?? `${capitalize(v)} ${capitalize(c)}`}
                 </Button>
@@ -120,8 +128,8 @@ function PlaygroundButton() {
                 size={size}
                 loading={loading}
                 disabled={disabled}
-                startIcon={iconPosition === "left" && icon ? icon : null}
-                endIcon={iconPosition === "right" && icon ? icon : null}
+                startDecorator={iconPosition === "left" && icon ? icon : null}
+                endDecorator={iconPosition === "right" && icon ? icon : null}
             />
         ) : (
             <Button
@@ -131,8 +139,8 @@ function PlaygroundButton() {
                 size={size}
                 loading={loading}
                 disabled={disabled}
-                startIcon={iconPosition === "left" && icon ? icon : null}
-                endIcon={iconPosition === "right" && icon ? icon : null}
+                startDecorator={iconPosition === "left" && icon ? icon : null}
+                endDecorator={iconPosition === "right" && icon ? icon : null}
             >
                 {text ?? `${capitalize(variant)} ${capitalize(c)}`}
             </Button>
