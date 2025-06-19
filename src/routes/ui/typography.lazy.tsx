@@ -6,8 +6,8 @@ import {
     Button,
     Checkbox,
     Divider,
-    RadioButton,
-    RadioButtonGroup,
+    Radio,
+    RadioGroup,
     randomHexColor,
     Slider,
     useColorInput,
@@ -158,14 +158,14 @@ function PlaygroundTypography() {
                 <Stack width="100%" direction="column" spacing={5}>
                     <Stack direction="column" spacing={5}>
                         <label>Variant</label>
-                        <RadioButtonGroup
+                        <RadioGroup
                             onChange={(_, vriant) =>
                                 setVariant(vriant as TypographyVariant)
                             }
                             value={variant}
                             name="variant"
                         >
-                            <RadioButton
+                            <Radio
                                 key="all"
                                 value="all"
                                 label="All"
@@ -174,7 +174,7 @@ function PlaygroundTypography() {
                                 onChange={() => setVariant("all")}
                             />
                             {variants.map((v) => (
-                                <RadioButton
+                                <Radio
                                     key={v}
                                     value={v}
                                     label={capitalize(v)}
@@ -183,7 +183,7 @@ function PlaygroundTypography() {
                                     onChange={() => setVariant(v)}
                                 />
                             ))}
-                        </RadioButtonGroup>
+                        </RadioGroup>
                     </Stack>
                     <Divider />
                     <Stack direction="column" spacing={5}>

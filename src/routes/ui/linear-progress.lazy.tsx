@@ -8,8 +8,8 @@ import { useColorInput } from "@ui/hooks/useColorInput";
 import {
     Button,
     Checkbox,
-    RadioButton,
-    RadioButtonGroup,
+    Radio,
+    RadioGroup,
     randomHexColor,
     Slider,
 } from "@ui/index";
@@ -145,14 +145,14 @@ function PlaygroundLinearProgress() {
                 <Stack width="100%" direction="column" spacing={5}>
                     <Stack direction="column" spacing={5}>
                         <label>Variant</label>
-                        <RadioButtonGroup
+                        <RadioGroup
                             onChange={(_, vriant) =>
                                 setVariant(vriant as Variant)
                             }
                             value={variant}
                             name="variant"
                         >
-                            <RadioButton
+                            <Radio
                                 key="all"
                                 value="all"
                                 label="All"
@@ -161,7 +161,7 @@ function PlaygroundLinearProgress() {
                                 onChange={() => setVariant("all")}
                             />
                             {variants.map((v) => (
-                                <RadioButton
+                                <Radio
                                     key={v}
                                     value={v}
                                     label={capitalize(v)}
@@ -170,12 +170,12 @@ function PlaygroundLinearProgress() {
                                     onChange={() => setVariant(v)}
                                 />
                             ))}
-                        </RadioButtonGroup>
+                        </RadioGroup>
                     </Stack>
                     <Divider />
                     <Stack direction="column" spacing={5}>
                         <label>Animation</label>
-                        <RadioButtonGroup
+                        <RadioGroup
                             onChange={(_, animation) =>
                                 setAnimation(
                                     animation as LinearProgressAnimation,
@@ -185,7 +185,7 @@ function PlaygroundLinearProgress() {
                             name="animation"
                         >
                             {animations.map((a) => (
-                                <RadioButton
+                                <Radio
                                     key={a}
                                     value={a}
                                     label={capitalize(a)}
@@ -194,7 +194,7 @@ function PlaygroundLinearProgress() {
                                     onChange={() => setAnimation(a)}
                                 />
                             ))}
-                        </RadioButtonGroup>
+                        </RadioGroup>
                     </Stack>
                     <Divider />
                     <Stack direction="column" spacing={5}>
@@ -231,7 +231,7 @@ function PlaygroundLinearProgress() {
                                 valueLabelFormat={(value) => `${value}px`}
                             />
                         ) : (
-                            <RadioButtonGroup
+                            <RadioGroup
                                 onChange={(_, length) =>
                                     setLength(length as Size)
                                 }
@@ -240,7 +240,7 @@ function PlaygroundLinearProgress() {
                                 row
                             >
                                 {Object.keys(sizeNames).map((s) => (
-                                    <RadioButton
+                                    <Radio
                                         key={s}
                                         value={s}
                                         label={sizeNames[s as Size]}
@@ -249,7 +249,7 @@ function PlaygroundLinearProgress() {
                                         onChange={() => setLength(s as Size)}
                                     />
                                 ))}
-                            </RadioButtonGroup>
+                            </RadioGroup>
                         )}
                     </Stack>
                     <Divider />
@@ -284,7 +284,7 @@ function PlaygroundLinearProgress() {
                                 valueLabelFormat={(value) => `${value}px`}
                             />
                         ) : (
-                            <RadioButtonGroup
+                            <RadioGroup
                                 onChange={(_, thickness) =>
                                     setThickness(thickness as Size)
                                 }
@@ -293,7 +293,7 @@ function PlaygroundLinearProgress() {
                                 row
                             >
                                 {Object.keys(sizeNames).map((s) => (
-                                    <RadioButton
+                                    <Radio
                                         key={s}
                                         value={s}
                                         label={sizeNames[s as Size]}
@@ -302,7 +302,7 @@ function PlaygroundLinearProgress() {
                                         onChange={() => setThickness(s as Size)}
                                     />
                                 ))}
-                            </RadioButtonGroup>
+                            </RadioGroup>
                         )}
                     </Stack>
                     <Divider />

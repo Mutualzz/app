@@ -10,8 +10,8 @@ import {
     Checkbox,
     Divider,
     Paper,
-    RadioButton,
-    RadioButtonGroup,
+    Radio,
+    RadioGroup,
     randomHexColor,
     Stack,
     useColorInput,
@@ -203,14 +203,14 @@ function SlderPlayground() {
                 <Stack width="100%" spacing={5} direction="column">
                     <Stack direction="column" spacing={5}>
                         <label>Variant</label>
-                        <RadioButtonGroup
+                        <RadioGroup
                             onChange={(_, vriant) =>
                                 setVariant(vriant as Variant)
                             }
                             value={variant}
                             name="variants"
                         >
-                            <RadioButton
+                            <Radio
                                 key="all"
                                 value="all"
                                 label="All"
@@ -219,7 +219,7 @@ function SlderPlayground() {
                                 onChange={() => setVariant("all")}
                             />
                             {variants.map((v) => (
-                                <RadioButton
+                                <Radio
                                     key={v}
                                     value={v}
                                     label={capitalize(v)}
@@ -228,7 +228,7 @@ function SlderPlayground() {
                                     onChange={() => setVariant(v)}
                                 />
                             ))}
-                        </RadioButtonGroup>
+                        </RadioGroup>
                     </Stack>
                     <Divider />
                     <Stack direction="column" spacing={5}>
@@ -258,14 +258,14 @@ function SlderPlayground() {
                                 valueLabelFormat={(value) => `${value}px`}
                             />
                         ) : (
-                            <RadioButtonGroup
+                            <RadioGroup
                                 onChange={(_, size) => setSize(size as Size)}
                                 value={size as Size}
                                 name="sizes"
                                 row
                             >
                                 {Object.keys(sizeNames).map((s) => (
-                                    <RadioButton
+                                    <Radio
                                         key={s}
                                         value={s}
                                         label={sizeNames[s as Size]}
@@ -274,13 +274,13 @@ function SlderPlayground() {
                                         onChange={() => setSize(s as Size)}
                                     />
                                 ))}
-                            </RadioButtonGroup>
+                            </RadioGroup>
                         )}
                     </Stack>
                     <Divider />
                     <Stack direction="column" spacing={5}>
                         <label>Orientation</label>
-                        <RadioButtonGroup
+                        <RadioGroup
                             onChange={(_, orientationValue) =>
                                 setOrientation(
                                     orientationValue as SliderOrientation,
@@ -290,7 +290,7 @@ function SlderPlayground() {
                             name="orientation"
                             row
                         >
-                            <RadioButton
+                            <Radio
                                 value="horizontal"
                                 label="Horizontal"
                                 checked={orientation === "horizontal"}
@@ -301,7 +301,7 @@ function SlderPlayground() {
                                     )
                                 }
                             />
-                            <RadioButton
+                            <Radio
                                 value="vertical"
                                 label="Vertical"
                                 checked={orientation === "vertical"}
@@ -312,7 +312,7 @@ function SlderPlayground() {
                                     )
                                 }
                             />
-                        </RadioButtonGroup>
+                        </RadioGroup>
                     </Stack>
                     <Divider />
                     <Stack direction="column" spacing={10}>
@@ -351,7 +351,7 @@ function SlderPlayground() {
                     <Divider />
                     <Stack direction="column" spacing={10}>
                         <label>Marks</label>
-                        <RadioButtonGroup
+                        <RadioGroup
                             row
                             onChange={(_, markStateValue) =>
                                 setMarkState(
@@ -361,28 +361,28 @@ function SlderPlayground() {
                             value={markState}
                             name="markState"
                         >
-                            <RadioButton
+                            <Radio
                                 value="off"
                                 label="Off"
                                 checked={markState === "off"}
                                 color="neutral"
                                 onChange={() => setMarkState("off")}
                             />
-                            <RadioButton
+                            <Radio
                                 value="on"
                                 label="On"
                                 checked={markState === "on"}
                                 color="neutral"
                                 onChange={() => setMarkState("on")}
                             />
-                            <RadioButton
+                            <Radio
                                 value="custom"
                                 label="Custom"
                                 checked={markState === "custom"}
                                 color="neutral"
                                 onChange={() => setMarkState("custom")}
                             />
-                        </RadioButtonGroup>
+                        </RadioGroup>
                         {markState === "custom" && (
                             <Stack direction="column" spacing={10}>
                                 <Stack direction="row" spacing={5}>
@@ -521,7 +521,7 @@ function SlderPlayground() {
                     <Divider />
                     <Stack direction="column" spacing={10}>
                         <label>Value Display</label>
-                        <RadioButtonGroup
+                        <RadioGroup
                             row
                             onChange={(_, labelDisplayValue) =>
                                 setValueDisplay(
@@ -531,28 +531,28 @@ function SlderPlayground() {
                             value={valueDisplay}
                             name="labelDisplay"
                         >
-                            <RadioButton
+                            <Radio
                                 value="off"
                                 label="Off"
                                 checked={valueDisplay === "off"}
                                 color="neutral"
                                 onChange={() => setValueDisplay("off")}
                             />
-                            <RadioButton
+                            <Radio
                                 value="on"
                                 label="On"
                                 checked={valueDisplay === "on"}
                                 color="neutral"
                                 onChange={() => setValueDisplay("on")}
                             />
-                            <RadioButton
+                            <Radio
                                 value="auto"
                                 label="Auto"
                                 checked={valueDisplay === "auto"}
                                 color="neutral"
                                 onChange={() => setValueDisplay("auto")}
                             />
-                        </RadioButtonGroup>
+                        </RadioGroup>
                     </Stack>
                     <Divider />
                     <Stack direction="column" spacing={10}>

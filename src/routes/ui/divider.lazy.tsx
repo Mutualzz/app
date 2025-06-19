@@ -8,7 +8,7 @@ import { Checkbox } from "@ui/components/inputs/Checkbox/Checkbox";
 import { Stack } from "@ui/components/layout/Stack/Stack";
 import { Paper } from "@ui/components/surfaces/Paper/Paper";
 import { useColorInput } from "@ui/hooks/useColorInput";
-import { RadioButton, RadioButtonGroup } from "@ui/index";
+import { Radio, RadioGroup } from "@ui/index";
 import type { Color, ColorLike } from "@ui/types";
 import capitalize from "lodash/capitalize";
 import { useState } from "react";
@@ -121,7 +121,7 @@ function PlaygroundDivider() {
                 <Stack width="100%" direction="column" spacing={5}>
                     <Stack direction="column" spacing={5}>
                         <label>Variant</label>
-                        <RadioButtonGroup
+                        <RadioGroup
                             onChange={(_, vriant) =>
                                 setVariant(vriant as DividerVariant)
                             }
@@ -129,7 +129,7 @@ function PlaygroundDivider() {
                             name="variants"
                         >
                             {variants.map((v) => (
-                                <RadioButton
+                                <Radio
                                     key={v}
                                     value={v}
                                     label={capitalize(v)}
@@ -138,12 +138,12 @@ function PlaygroundDivider() {
                                     onChange={() => setVariant(v)}
                                 />
                             ))}
-                        </RadioButtonGroup>
+                        </RadioGroup>
                     </Stack>
                     <Divider />
                     <Stack direction="column" spacing={5}>
                         <label>Orientation</label>
-                        <RadioButtonGroup
+                        <RadioGroup
                             onChange={(_, orientation) =>
                                 setOrientation(
                                     orientation as DividerOrientation,
@@ -153,21 +153,21 @@ function PlaygroundDivider() {
                             name="orientations"
                             row
                         >
-                            <RadioButton
+                            <Radio
                                 value="horizontal"
                                 label="Horizontal"
                                 checked={orientation === "horizontal"}
                                 color="neutral"
                                 onChange={() => setOrientation("horizontal")}
                             />
-                            <RadioButton
+                            <Radio
                                 value="vertical"
                                 label="Vertical"
                                 checked={orientation === "vertical"}
                                 color="neutral"
                                 onChange={() => setOrientation("vertical")}
                             />
-                        </RadioButtonGroup>
+                        </RadioGroup>
                     </Stack>
                     <Divider />
                     <Stack
@@ -201,7 +201,7 @@ function PlaygroundDivider() {
                             <Divider />
                             <Stack direction="column" spacing={5}>
                                 <label>Inset</label>
-                                <RadioButtonGroup
+                                <RadioGroup
                                     onChange={(_, inst) =>
                                         setInset(inst as DividerInset)
                                     }
@@ -210,7 +210,7 @@ function PlaygroundDivider() {
                                     row
                                 >
                                     {insets.map((i) => (
-                                        <RadioButton
+                                        <Radio
                                             key={i}
                                             value={i}
                                             label={capitalize(i)}
@@ -219,7 +219,7 @@ function PlaygroundDivider() {
                                             onChange={() => setInset(i)}
                                         />
                                     ))}
-                                </RadioButtonGroup>
+                                </RadioGroup>
                             </Stack>
                         </>
                     )}

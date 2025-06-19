@@ -7,8 +7,8 @@ import {
     CircularProgress,
     Divider,
     Paper,
-    RadioButton,
-    RadioButtonGroup,
+    Radio,
+    RadioGroup,
     randomHexColor,
     Slider,
     Stack,
@@ -155,14 +155,14 @@ function PlaygroundCircularProgress() {
                 <Stack width="100%" direction="column" spacing={5}>
                     <Stack direction="column" spacing={5}>
                         <label>Variant</label>
-                        <RadioButtonGroup
+                        <RadioGroup
                             onChange={(_, vriant) =>
                                 setVariant(vriant as Variant)
                             }
                             value={variant}
                             name="variants"
                         >
-                            <RadioButton
+                            <Radio
                                 key="all"
                                 value="all"
                                 label="All"
@@ -171,7 +171,7 @@ function PlaygroundCircularProgress() {
                                 onChange={() => setVariant("all")}
                             />
                             {variants.map((v) => (
-                                <RadioButton
+                                <Radio
                                     key={v}
                                     value={v}
                                     label={capitalize(v)}
@@ -180,7 +180,7 @@ function PlaygroundCircularProgress() {
                                     onChange={() => setVariant(v)}
                                 />
                             ))}
-                        </RadioButtonGroup>
+                        </RadioGroup>
                     </Stack>
                     <Divider />
                     <Stack direction="column" spacing={5}>
@@ -214,14 +214,14 @@ function PlaygroundCircularProgress() {
                                 valueLabelFormat={(val) => `${val}px`}
                             />
                         ) : (
-                            <RadioButtonGroup
+                            <RadioGroup
                                 onChange={(_, size) => setSize(size as Size)}
                                 value={size as Size}
                                 name="sizes"
                                 row
                             >
                                 {Object.keys(sizeNames).map((s) => (
-                                    <RadioButton
+                                    <Radio
                                         key={s}
                                         value={s}
                                         label={sizeNames[s as Size]}
@@ -230,7 +230,7 @@ function PlaygroundCircularProgress() {
                                         onChange={() => setSize(s as Size)}
                                     />
                                 ))}
-                            </RadioButtonGroup>
+                            </RadioGroup>
                         )}
                     </Stack>
                     <Divider />

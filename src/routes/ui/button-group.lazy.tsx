@@ -10,8 +10,8 @@ import capitalize from "lodash/capitalize";
 import { useState } from "react";
 
 import { ButtonGroup } from "@ui/components/inputs/Button/ButtonGroup";
-import { RadioButton } from "@ui/components/inputs/RadioButton/RadioButton";
-import { RadioButtonGroup } from "@ui/components/inputs/RadioButton/RadioButtonGroup";
+import { Radio } from "@ui/components/inputs/Radio/Radio";
+import { RadioGroup } from "@ui/components/inputs/Radio/RadioGroup";
 import { randomHexColor } from "@ui/utils";
 
 import { Slider } from "@ui/index";
@@ -131,14 +131,14 @@ function PlaygroundButton() {
                 <Stack width="100%" direction="column" spacing={5}>
                     <Stack direction="column" spacing={5}>
                         <label>Variant</label>
-                        <RadioButtonGroup
+                        <RadioGroup
                             onChange={(_, vriant) =>
                                 setVariant(vriant as Variant)
                             }
                             value={variant}
                             name="variants"
                         >
-                            <RadioButton
+                            <Radio
                                 value="all"
                                 label="All"
                                 checked={variant === "all"}
@@ -146,7 +146,7 @@ function PlaygroundButton() {
                                 onChange={() => setVariant("all")}
                             />
                             {variants.map((v) => (
-                                <RadioButton
+                                <Radio
                                     key={v}
                                     value={v}
                                     label={capitalize(v)}
@@ -155,7 +155,7 @@ function PlaygroundButton() {
                                     onChange={() => setVariant(v)}
                                 />
                             ))}
-                        </RadioButtonGroup>
+                        </RadioGroup>
                     </Stack>
                     <Divider />
                     {variant !== "all" && (
@@ -254,13 +254,13 @@ function PlaygroundButton() {
                                 </Button>
                             </Stack>
                         ) : (
-                            <RadioButtonGroup
+                            <RadioGroup
                                 onChange={(_, clr) => setColor(clr as Color)}
                                 value={color}
                                 name="colors"
                             >
                                 {colors.map((c) => (
-                                    <RadioButton
+                                    <Radio
                                         key={c}
                                         value={c}
                                         label={capitalize(c)}
@@ -269,7 +269,7 @@ function PlaygroundButton() {
                                         onChange={() => setColor(c)}
                                     />
                                 ))}
-                            </RadioButtonGroup>
+                            </RadioGroup>
                         )}
                     </Stack>
                     <Divider />
@@ -304,14 +304,14 @@ function PlaygroundButton() {
                                 valueLabelFormat={(value) => `${value}px`}
                             />
                         ) : (
-                            <RadioButtonGroup
+                            <RadioGroup
                                 onChange={(_, size) => setSize(size as Size)}
                                 value={size as Size}
                                 name="sizes"
                                 row
                             >
                                 {Object.keys(sizeNames).map((s) => (
-                                    <RadioButton
+                                    <Radio
                                         key={s}
                                         value={s}
                                         label={sizeNames[s as Size]}
@@ -320,13 +320,13 @@ function PlaygroundButton() {
                                         onChange={() => setSize(s as Size)}
                                     />
                                 ))}
-                            </RadioButtonGroup>
+                            </RadioGroup>
                         )}
                     </Stack>
                     <Divider />
                     <Stack direction="column" spacing={5}>
                         <label>Orientation</label>
-                        <RadioButtonGroup
+                        <RadioGroup
                             row
                             onChange={(_, orientation) =>
                                 setOrientation(orientation as "horizontal")
@@ -334,21 +334,21 @@ function PlaygroundButton() {
                             value={orientation}
                             name="orientation"
                         >
-                            <RadioButton
+                            <Radio
                                 value="horizontal"
                                 label="Horizontal"
                                 checked={orientation === "horizontal"}
                                 color="neutral"
                                 onChange={() => setOrientation("horizontal")}
                             />
-                            <RadioButton
+                            <Radio
                                 value="vertical"
                                 label="Vertical"
                                 checked={orientation === "vertical"}
                                 color="neutral"
                                 onChange={() => setOrientation("vertical")}
                             />
-                        </RadioButtonGroup>
+                        </RadioGroup>
                     </Stack>
                     <Divider />
                     <Stack direction="column" spacing={5}>

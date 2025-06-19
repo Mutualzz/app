@@ -9,8 +9,8 @@ import type { Color, ColorLike, Size, Variant } from "@ui/types";
 import capitalize from "lodash/capitalize";
 import { type ReactNode, useState } from "react";
 
-import { RadioButton } from "@ui/components/inputs/RadioButton/RadioButton";
-import { RadioButtonGroup } from "@ui/components/inputs/RadioButton/RadioButtonGroup";
+import { Radio } from "@ui/components/inputs/Radio/Radio";
+import { RadioGroup } from "@ui/components/inputs/Radio/RadioGroup";
 import { Slider } from "@ui/index";
 import { randomHexColor } from "@ui/utils";
 import * as AiIcons from "react-icons/ai";
@@ -163,14 +163,14 @@ function PlaygroundButton() {
                 <Stack width="100%" direction="column" spacing={5}>
                     <Stack direction="column" spacing={5}>
                         <label>Variant</label>
-                        <RadioButtonGroup
+                        <RadioGroup
                             onChange={(_, vriant) =>
                                 setVariant(vriant as Variant)
                             }
                             value={variant}
                             name="variants"
                         >
-                            <RadioButton
+                            <Radio
                                 value="all"
                                 label="All"
                                 checked={variant === "all"}
@@ -178,7 +178,7 @@ function PlaygroundButton() {
                                 onChange={() => setVariant("all")}
                             />
                             {variants.map((v) => (
-                                <RadioButton
+                                <Radio
                                     key={v}
                                     value={v}
                                     label={capitalize(v)}
@@ -187,7 +187,7 @@ function PlaygroundButton() {
                                     onChange={() => setVariant(v)}
                                 />
                             ))}
-                        </RadioButtonGroup>
+                        </RadioGroup>
                     </Stack>
                     <Divider />
                     <Stack direction="column" spacing={5}>
@@ -221,14 +221,14 @@ function PlaygroundButton() {
                                 valueLabelFormat={(value) => `${value}px`}
                             />
                         ) : (
-                            <RadioButtonGroup
+                            <RadioGroup
                                 onChange={(_, size) => setSize(size as Size)}
                                 value={size as Size}
                                 name="sizes"
                                 row
                             >
                                 {Object.keys(sizeNames).map((s) => (
-                                    <RadioButton
+                                    <Radio
                                         key={s}
                                         value={s}
                                         label={sizeNames[s as Size]}
@@ -237,7 +237,7 @@ function PlaygroundButton() {
                                         onChange={() => setSize(s as Size)}
                                     />
                                 ))}
-                            </RadioButtonGroup>
+                            </RadioGroup>
                         )}
                     </Stack>
                     <Divider />
@@ -391,7 +391,7 @@ function PlaygroundButton() {
                                 />
                             )}
                         </Stack>
-                        <RadioButtonGroup
+                        <RadioGroup
                             onChange={(_, iconPosition) =>
                                 setIconPosition(() => {
                                     if (iconPosition === "none") setIcon(null);
@@ -406,31 +406,31 @@ function PlaygroundButton() {
                             name="icon-position"
                             row
                         >
-                            <RadioButton
+                            <Radio
                                 value="none"
                                 label="None"
                                 checked={iconPosition === "none"}
                                 color="neutral"
                                 onChange={() => setIconPosition("none")}
                             />
-                            <RadioButton
+                            <Radio
                                 value="left"
                                 label="Left"
                                 checked={iconPosition === "left"}
                                 color="neutral"
                                 onChange={() => setIconPosition("left")}
                             />
-                            <RadioButton
+                            <Radio
                                 value="right"
                                 label="Right"
                                 checked={iconPosition === "right"}
                                 color="neutral"
                                 onChange={() => setIconPosition("right")}
                             />
-                        </RadioButtonGroup>
+                        </RadioGroup>
                         {iconPosition !== "none" && (
                             <Stack direction="column" spacing={10}>
-                                <RadioButtonGroup
+                                <RadioGroup
                                     onChange={(_, library) =>
                                         setIconLibrary(
                                             library as keyof typeof iconLibraries,
@@ -440,7 +440,7 @@ function PlaygroundButton() {
                                     name="icon-library"
                                 >
                                     {Object.keys(iconLibraries).map((lib) => (
-                                        <RadioButton
+                                        <Radio
                                             key={lib}
                                             value={lib}
                                             label={
@@ -457,7 +457,7 @@ function PlaygroundButton() {
                                             }
                                         />
                                     ))}
-                                </RadioButtonGroup>
+                                </RadioGroup>
                                 <select
                                     name="icon-select"
                                     onChange={(e) => {
