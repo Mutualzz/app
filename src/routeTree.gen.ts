@@ -20,6 +20,7 @@ const UiSliderLazyRouteImport = createFileRoute("/ui/slider")()
 const UiRadioButtonLazyRouteImport = createFileRoute("/ui/radio-button")()
 const UiPaperLazyRouteImport = createFileRoute("/ui/paper")()
 const UiLinearProgressLazyRouteImport = createFileRoute("/ui/linear-progress")()
+const UiInputLazyRouteImport = createFileRoute("/ui/input")()
 const UiDividerLazyRouteImport = createFileRoute("/ui/divider")()
 const UiCircularProgressLazyRouteImport = createFileRoute(
   "/ui/circular-progress",
@@ -72,6 +73,11 @@ const UiLinearProgressLazyRoute = UiLinearProgressLazyRouteImport.update({
 } as any).lazy(() =>
   import("./routes/ui/linear-progress.lazy").then((d) => d.Route),
 )
+const UiInputLazyRoute = UiInputLazyRouteImport.update({
+  id: "/input",
+  path: "/input",
+  getParentRoute: () => UiLazyRoute,
+} as any).lazy(() => import("./routes/ui/input.lazy").then((d) => d.Route))
 const UiDividerLazyRoute = UiDividerLazyRouteImport.update({
   id: "/divider",
   path: "/divider",
@@ -110,6 +116,7 @@ export interface FileRoutesByFullPath {
   "/ui/checkbox": typeof UiCheckboxLazyRoute
   "/ui/circular-progress": typeof UiCircularProgressLazyRoute
   "/ui/divider": typeof UiDividerLazyRoute
+  "/ui/input": typeof UiInputLazyRoute
   "/ui/linear-progress": typeof UiLinearProgressLazyRoute
   "/ui/paper": typeof UiPaperLazyRoute
   "/ui/radio-button": typeof UiRadioButtonLazyRoute
@@ -124,6 +131,7 @@ export interface FileRoutesByTo {
   "/ui/checkbox": typeof UiCheckboxLazyRoute
   "/ui/circular-progress": typeof UiCircularProgressLazyRoute
   "/ui/divider": typeof UiDividerLazyRoute
+  "/ui/input": typeof UiInputLazyRoute
   "/ui/linear-progress": typeof UiLinearProgressLazyRoute
   "/ui/paper": typeof UiPaperLazyRoute
   "/ui/radio-button": typeof UiRadioButtonLazyRoute
@@ -140,6 +148,7 @@ export interface FileRoutesById {
   "/ui/checkbox": typeof UiCheckboxLazyRoute
   "/ui/circular-progress": typeof UiCircularProgressLazyRoute
   "/ui/divider": typeof UiDividerLazyRoute
+  "/ui/input": typeof UiInputLazyRoute
   "/ui/linear-progress": typeof UiLinearProgressLazyRoute
   "/ui/paper": typeof UiPaperLazyRoute
   "/ui/radio-button": typeof UiRadioButtonLazyRoute
@@ -157,6 +166,7 @@ export interface FileRouteTypes {
     | "/ui/checkbox"
     | "/ui/circular-progress"
     | "/ui/divider"
+    | "/ui/input"
     | "/ui/linear-progress"
     | "/ui/paper"
     | "/ui/radio-button"
@@ -171,6 +181,7 @@ export interface FileRouteTypes {
     | "/ui/checkbox"
     | "/ui/circular-progress"
     | "/ui/divider"
+    | "/ui/input"
     | "/ui/linear-progress"
     | "/ui/paper"
     | "/ui/radio-button"
@@ -186,6 +197,7 @@ export interface FileRouteTypes {
     | "/ui/checkbox"
     | "/ui/circular-progress"
     | "/ui/divider"
+    | "/ui/input"
     | "/ui/linear-progress"
     | "/ui/paper"
     | "/ui/radio-button"
@@ -250,6 +262,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof UiDividerLazyRouteImport
       parentRoute: typeof UiLazyRoute
     }
+    "/ui/input": {
+      id: "/ui/input"
+      path: "/input"
+      fullPath: "/ui/input"
+      preLoaderRoute: typeof UiInputLazyRouteImport
+      parentRoute: typeof UiLazyRoute
+    }
     "/ui/linear-progress": {
       id: "/ui/linear-progress"
       path: "/linear-progress"
@@ -346,6 +365,13 @@ declare module "@tanstack/react-router" {
       path: "/linear-progress"
       fullPath: "/ui/linear-progress"
       preLoaderRoute: typeof UiLinearProgressLazyRouteImport
+      parentRoute: typeof UiLazyRoute
+    }
+    "/ui/input": {
+      id: "/ui/input"
+      path: "/input"
+      fullPath: "/ui/input"
+      preLoaderRoute: typeof UiInputLazyRouteImport
       parentRoute: typeof UiLazyRoute
     }
     "/ui/divider": {
@@ -421,6 +447,11 @@ declare module "./routes/ui/divider.lazy" {
     FileRoutesByPath["/ui/divider"]["preLoaderRoute"]
   >
 }
+declare module "./routes/ui/input.lazy" {
+  const createLazyFileRoute: CreateLazyFileRoute<
+    FileRoutesByPath["/ui/input"]["preLoaderRoute"]
+  >
+}
 declare module "./routes/ui/linear-progress.lazy" {
   const createLazyFileRoute: CreateLazyFileRoute<
     FileRoutesByPath["/ui/linear-progress"]["preLoaderRoute"]
@@ -458,6 +489,7 @@ interface UiLazyRouteChildren {
   UiCheckboxLazyRoute: typeof UiCheckboxLazyRoute
   UiCircularProgressLazyRoute: typeof UiCircularProgressLazyRoute
   UiDividerLazyRoute: typeof UiDividerLazyRoute
+  UiInputLazyRoute: typeof UiInputLazyRoute
   UiLinearProgressLazyRoute: typeof UiLinearProgressLazyRoute
   UiPaperLazyRoute: typeof UiPaperLazyRoute
   UiRadioButtonLazyRoute: typeof UiRadioButtonLazyRoute
@@ -472,6 +504,7 @@ const UiLazyRouteChildren: UiLazyRouteChildren = {
   UiCheckboxLazyRoute: UiCheckboxLazyRoute,
   UiCircularProgressLazyRoute: UiCircularProgressLazyRoute,
   UiDividerLazyRoute: UiDividerLazyRoute,
+  UiInputLazyRoute: UiInputLazyRoute,
   UiLinearProgressLazyRoute: UiLinearProgressLazyRoute,
   UiPaperLazyRoute: UiPaperLazyRoute,
   UiRadioButtonLazyRoute: UiRadioButtonLazyRoute,

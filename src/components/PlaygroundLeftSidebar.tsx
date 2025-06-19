@@ -26,6 +26,11 @@ const links = {
             link: "/ui/checkbox",
         },
         {
+            name: "Input",
+            link: "/ui/input",
+        },
+
+        {
             name: "Radio Button",
             link: "/ui/radio-button",
         },
