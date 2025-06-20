@@ -1,4 +1,4 @@
-import type { Context } from "@netlify/types";
+import type { Config, Context } from "@netlify/edge-functions";
 import escape from "lodash/escape";
 
 const isBot = (ua: string) =>
@@ -13,6 +13,12 @@ type Meta = {
 const getMeta = (pathname: string): Meta => {
     if (pathname.startsWith("/ui")) {
         const uiComponent = pathname.split("/ui/")[1];
+        if (!uiComponent)
+            return {
+                title: "Mutualzz UI",
+                description: "Explore the Mutualzz UI components.",
+            };
+
         return {
             title: `Mutualzz UI - ${uiComponent}`,
             description: `Explore the ${uiComponent} component in Mutualzz UI.`,
@@ -26,7 +32,7 @@ const getMeta = (pathname: string): Meta => {
     };
 };
 
-export default async (req: Request, context: Context) => {
+export default (req: Request, context: Context) => {
     const userAgent = req.headers.get("user-agent") ?? "";
 
     if (!isBot(userAgent)) return context.next();
@@ -72,4 +78,8 @@ export default async (req: Request, context: Context) => {
         },
         status: 200,
     });
+};
+
+export const config: Config = {
+    path: "/*",
 };
