@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Input } from "@ui/components/inputs/Input/Input";
+import { type InputType } from "@ui/components/inputs/Input/Input.types";
 import {
     Button,
     Checkbox,
@@ -17,7 +18,7 @@ import {
     type Size,
     type Variant,
 } from "@ui/index";
-import { capitalize } from "lodash-es";
+import { capitalize, startCase } from "lodash-es";
 import { useState } from "react";
 import { seo } from "../../seo";
 
@@ -42,6 +43,21 @@ const colors = [
     "info",
 ] as Color[];
 
+const types = [
+    "date",
+    "datetime-local",
+    "email",
+    "month",
+    "number",
+    "password",
+    "search",
+    "tel",
+    "text",
+    "time",
+    "url",
+    "week",
+] as InputType[];
+
 const sizeNames = {
     sm: "Small",
     md: "Medium",
@@ -55,6 +71,7 @@ function InputPlayground() {
     const [fullWidth, setFullWidth] = useState(false);
 
     const [placeholder, setPlaceholder] = useState<string | null>(null);
+    const [type, setType] = useState<InputType>("text");
 
     const [value, setValue] = useState<string | null>(null);
 
@@ -97,6 +114,7 @@ function InputPlayground() {
                     }}
                     value={controlled ? (value ?? "") : undefined}
                     disabled={disabled}
+                    type={type}
                 />
             </Stack>
         )),
@@ -124,6 +142,7 @@ function InputPlayground() {
                 disabled={disabled}
                 color={c}
                 fullWidth={fullWidth}
+                type={type}
             />
         </Stack>
     ));
@@ -285,6 +304,29 @@ function InputPlayground() {
                                 width: "100%",
                             }}
                         />
+                    </Stack>
+                    <Divider />
+                    <Stack direction="column" spacing={5}>
+                        <label>Type</label>
+                        <select
+                            value={type}
+                            onChange={(e) =>
+                                setType(e.target.value as InputType)
+                            }
+                            css={{
+                                padding: 10,
+                                borderRadius: 5,
+                                border: "1px solid #ccc",
+                                backgroundColor: "#f9f9f9",
+                                width: "100%",
+                            }}
+                        >
+                            {types.map((t) => (
+                                <option key={t} value={t}>
+                                    {startCase(t)}
+                                </option>
+                            ))}
+                        </select>
                     </Stack>
                     <Divider />
                     <Stack direction="column" spacing={5}>
