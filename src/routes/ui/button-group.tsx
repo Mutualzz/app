@@ -20,7 +20,7 @@ import numWords from "num-words";
 import { FaMinus, FaPlus } from "react-icons/fa";
 
 export const Route = createFileRoute("/ui/button-group")({
-    component: PlaygroundButton,
+    component: PlaygroundButtonGroup,
 });
 
 const variants = ["solid", "outlined", "plain", "soft"] as Variant[];
@@ -40,7 +40,7 @@ const sizeNames = {
     lg: "Large",
 };
 
-function PlaygroundButton() {
+function PlaygroundButtonGroup() {
     const [color, setColor] = useState<Color | ColorLike>("primary");
     const [variant, setVariant] = useState<Variant | "all">("all");
 
