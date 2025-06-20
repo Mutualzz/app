@@ -1,4 +1,4 @@
-import { createLazyFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { Typography } from "@ui/components/data-display/Typography/Typography";
 import { Slider } from "@ui/components/inputs/Slider/Slider";
 import {
@@ -21,7 +21,7 @@ import { type Color, type ColorLike, type Size, type Variant } from "@ui/types";
 import { capitalize } from "lodash-es";
 import { useState } from "react";
 
-export const Route = createLazyFileRoute("/ui/slider")({
+export const Route = createFileRoute("/ui/slider")({
     component: SlderPlayground,
 });
 

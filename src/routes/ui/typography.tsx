@@ -1,4 +1,4 @@
-import { createLazyFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { Typography } from "@ui/components/data-display/Typography/Typography";
 import { type TypographyVariant } from "@ui/components/data-display/Typography/Typography.types";
 import { Stack } from "@ui/components/layout/Stack/Stack";
@@ -19,7 +19,7 @@ import type { FontWeight } from "@ui/types/Typography.props";
 import { capitalize } from "lodash-es";
 import { useState } from "react";
 
-export const Route = createLazyFileRoute("/ui/typography")({
+export const Route = createFileRoute("/ui/typography")({
     component: PlaygroundTypography,
 });
 

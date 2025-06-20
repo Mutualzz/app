@@ -1,4 +1,4 @@
-import { createLazyFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import type { PaperVariant } from "@ui/components/surfaces/Paper/Paper.types";
 import { useColorInput } from "@ui/hooks/useColorInput";
 import {
@@ -14,7 +14,7 @@ import { type Color, type ColorLike } from "@ui/types";
 import { capitalize } from "lodash-es";
 import { useState } from "react";
 
-export const Route = createLazyFileRoute("/ui/paper")({
+export const Route = createFileRoute("/ui/paper")({
     component: PlaygroundPaper,
 });
 

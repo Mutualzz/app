@@ -1,4 +1,4 @@
-import { createLazyFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { Divider } from "@ui/components/data-display/Divider/Divider";
 import { Typography } from "@ui/components/data-display/Typography/Typography";
 import { LinearProgress } from "@ui/components/feedback/LinearProgress/LinearProgress";
@@ -19,7 +19,7 @@ import type { Color, ColorLike, Size, Variant } from "@ui/types";
 import { capitalize } from "lodash-es";
 import { useState } from "react";
 
-export const Route = createLazyFileRoute("/ui/linear-progress")({
+export const Route = createFileRoute("/ui/linear-progress")({
     component: PlaygroundLinearProgress,
 });
 
