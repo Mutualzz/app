@@ -136,12 +136,7 @@ function PlaygroundButtonGroup() {
                     </ButtonGroup>
                 )}
             </Paper>
-            <Paper
-                overflowY="auto"
-                alignItems="center"
-                direction="column"
-                p={20}
-            >
+            <Paper alignItems="center" direction="column" p={20} shrink={1}>
                 <Divider>Playground</Divider>
                 <Stack width="100%" direction="column" spacing={5}>
                     <Stack direction="column" spacing={5}>
