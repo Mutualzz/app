@@ -164,7 +164,7 @@ function PlaygroundTypography() {
                 {variant !== "none" && variant !== "all" && typographies}
             </Paper>
             <Paper
-                overflowX="auto"
+                overflowY="auto"
                 alignItems="center"
                 direction="column"
                 p={20}

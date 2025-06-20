@@ -137,7 +137,7 @@ function PlaygroundButtonGroup() {
                 )}
             </Paper>
             <Paper
-                overflowX="auto"
+                overflowY="auto"
                 alignItems="center"
                 direction="column"
                 p={20}

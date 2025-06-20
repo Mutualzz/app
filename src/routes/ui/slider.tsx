@@ -209,7 +209,7 @@ function SlderPlayground() {
                 {variant !== "all" && sliders}
             </Paper>
             <Paper
-                overflowX="auto"
+                overflowY="auto"
                 alignItems="center"
                 direction="column"
                 p={20}
