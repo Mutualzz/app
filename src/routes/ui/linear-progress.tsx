@@ -150,7 +150,7 @@ function PlaygroundLinearProgress() {
                     ))}
                 {variant !== "all" && progresses}
             </Paper>
-            <Paper overflowY="auto" direction="column" p={20} spacing={5}>
+            <Paper alignItems="center" direction="column" p={20} spacing={5}>
                 <Divider>Playground</Divider>
                 <Stack width="100%" direction="column" spacing={5}>
                     <Stack direction="column" spacing={5}>
