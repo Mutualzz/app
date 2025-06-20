@@ -1,8 +1,16 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Stack, Typography } from "@ui/index";
+import { seo } from "../../seo";
 
 export const Route = createFileRoute("/ui/")({
     component: PlaygroundIndexComponent,
+    head: () => ({
+        meta: [
+            ...seo({
+                title: "Mutualzz UI",
+            }),
+        ],
+    }),
 });
 
 function PlaygroundIndexComponent() {

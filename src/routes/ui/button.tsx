@@ -17,9 +17,17 @@ import { randomHexColor } from "@ui/utils";
 import * as AiIcons from "react-icons/ai";
 import * as FaIcons from "react-icons/fa";
 import * as MdIcons from "react-icons/md";
+import { seo } from "../../seo";
 
 export const Route = createFileRoute("/ui/button")({
     component: PlaygroundButton,
+    head: () => ({
+        meta: [
+            ...seo({
+                title: "Mutualzz UI - Button",
+            }),
+        ],
+    }),
 });
 
 const variants = ["solid", "outlined", "plain", "soft"] as Variant[];

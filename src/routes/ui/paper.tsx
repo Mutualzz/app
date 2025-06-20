@@ -13,9 +13,17 @@ import {
 import { type Color, type ColorLike } from "@ui/types";
 import { capitalize } from "lodash-es";
 import { useState } from "react";
+import { seo } from "../../seo";
 
 export const Route = createFileRoute("/ui/paper")({
     component: PlaygroundPaper,
+    head: () => ({
+        meta: [
+            ...seo({
+                title: "Mutualzz UI - Paper",
+            }),
+        ],
+    }),
 });
 
 const variants = [

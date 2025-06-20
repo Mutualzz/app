@@ -18,9 +18,17 @@ import { randomHexColor } from "@ui/utils";
 import { Slider } from "@ui/index";
 import numWords from "num-words";
 import { FaMinus, FaPlus } from "react-icons/fa";
+import { seo } from "../../seo";
 
 export const Route = createFileRoute("/ui/button-group")({
     component: PlaygroundButtonGroup,
+    head: () => ({
+        meta: [
+            ...seo({
+                title: "Mutualzz UI - Button Group",
+            }),
+        ],
+    }),
 });
 
 const variants = ["solid", "outlined", "plain", "soft"] as Variant[];

@@ -20,9 +20,17 @@ import {
 import { type Color, type ColorLike, type Size, type Variant } from "@ui/types";
 import { capitalize } from "lodash-es";
 import { useState } from "react";
+import { seo } from "../../seo";
 
 export const Route = createFileRoute("/ui/slider")({
     component: SlderPlayground,
+    head: () => ({
+        meta: [
+            ...seo({
+                title: "Mutualzz UI - Slider",
+            }),
+        ],
+    }),
 });
 
 const variants = ["solid", "outlined", "plain", "soft"] as Variant[];

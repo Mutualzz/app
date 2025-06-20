@@ -18,9 +18,17 @@ import type { FontWeight } from "@ui/types/Typography.props";
 
 import { capitalize } from "lodash-es";
 import { useState } from "react";
+import { seo } from "../../seo";
 
 export const Route = createFileRoute("/ui/typography")({
     component: PlaygroundTypography,
+    head: () => ({
+        meta: [
+            ...seo({
+                title: "Mutualzz UI - Typography",
+            }),
+        ],
+    }),
 });
 
 const variants = [

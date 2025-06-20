@@ -19,9 +19,17 @@ import {
 } from "@ui/index";
 import { capitalize } from "lodash-es";
 import { useState } from "react";
+import { seo } from "../../seo";
 
 export const Route = createFileRoute("/ui/input")({
     component: InputPlayground,
+    head: () => ({
+        meta: [
+            ...seo({
+                title: "Mutualzz UI - Input",
+            }),
+        ],
+    }),
 });
 
 const variants = ["solid", "outlined", "plain", "soft"] as Variant[];

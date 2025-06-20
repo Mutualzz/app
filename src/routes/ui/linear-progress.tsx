@@ -18,9 +18,17 @@ import type { Color, ColorLike, Size, Variant } from "@ui/types";
 
 import { capitalize } from "lodash-es";
 import { useState } from "react";
+import { seo } from "../../seo";
 
 export const Route = createFileRoute("/ui/linear-progress")({
     component: PlaygroundLinearProgress,
+    head: () => ({
+        meta: [
+            ...seo({
+                title: "Mutualzz UI - Linear Progress",
+            }),
+        ],
+    }),
 });
 
 const variants = ["solid", "outlined", "plain", "soft"] as Variant[];

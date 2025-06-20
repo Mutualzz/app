@@ -13,9 +13,17 @@ import { Radio, RadioGroup } from "@ui/index";
 import type { Color, ColorLike } from "@ui/types";
 import { capitalize } from "lodash-es";
 import { useState } from "react";
+import { seo } from "../../seo";
 
 export const Route = createFileRoute("/ui/divider")({
     component: PlaygroundDivider,
+    head: () => ({
+        meta: [
+            ...seo({
+                title: "Mutualzz UI - Divider",
+            }),
+        ],
+    }),
 });
 
 const variants = ["solid", "dashed", "dotted", "double"] as DividerVariant[];

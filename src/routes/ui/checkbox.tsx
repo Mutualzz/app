@@ -19,9 +19,17 @@ import { useState } from "react";
 import * as AiIcons from "react-icons/ai";
 import * as FaIcons from "react-icons/fa";
 import * as MdIcons from "react-icons/md";
+import { seo } from "../../seo";
 
 export const Route = createFileRoute("/ui/checkbox")({
     component: PlaygroundCheckbox,
+    head: () => ({
+        meta: [
+            ...seo({
+                title: "Mutualzz UI - Checkbox",
+            }),
+        ],
+    }),
 });
 
 const variants = ["solid", "outlined", "plain", "soft"] as Variant[];
