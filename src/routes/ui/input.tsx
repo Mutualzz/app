@@ -56,6 +56,10 @@ function InputPlayground() {
 
     const [placeholder, setPlaceholder] = useState<string | null>(null);
 
+    const [value, setValue] = useState<string | null>(null);
+
+    const [controlled, setControlled] = useState(false);
+
     const [customSizeToggle, setCustomSizeToggle] = useState(false);
 
     const [customColors, setCustomColors] = useState<ColorLike[]>([]);
@@ -88,6 +92,10 @@ function InputPlayground() {
                     placeholder={placeholder ?? "Type something..."}
                     variant={v}
                     size={size}
+                    onChange={(e) => {
+                        if (controlled) setValue(e.target.value);
+                    }}
+                    value={controlled ? (value ?? "") : undefined}
                     disabled={disabled}
                 />
             </Stack>
@@ -109,6 +117,10 @@ function InputPlayground() {
                 variant={variant as Variant}
                 placeholder={placeholder ?? "Type something..."}
                 size={size}
+                onChange={(e) => {
+                    if (controlled) setValue(e.target.value);
+                }}
+                value={controlled ? (value ?? "") : undefined}
                 disabled={disabled}
                 color={c}
                 fullWidth={fullWidth}
@@ -220,7 +232,7 @@ function InputPlayground() {
                     <Divider />
                     <Stack direction="column" spacing={5}>
                         <label>States</label>
-                        <Stack direction="row" spacing={5}>
+                        <Stack direction="column" spacing={5}>
                             <Checkbox
                                 checked={fullWidth}
                                 label="Full Width"
@@ -231,6 +243,26 @@ function InputPlayground() {
                                 label="Disabled"
                                 onChange={() => setDisabled((prev) => !prev)}
                             />
+                            <Checkbox
+                                checked={controlled}
+                                label="Controlled"
+                                onChange={() => setControlled((prev) => !prev)}
+                            />
+                            {controlled && (
+                                <input
+                                    type="text"
+                                    value={value ?? ""}
+                                    onChange={(e) => setValue(e.target.value)}
+                                    placeholder="Controlled Input"
+                                    css={{
+                                        padding: 10,
+                                        borderRadius: 5,
+                                        border: "1px solid #ccc",
+                                        backgroundColor: "#f9f9f9",
+                                        width: "100%",
+                                    }}
+                                />
+                            )}
                         </Stack>
                     </Stack>
                     <Divider />
