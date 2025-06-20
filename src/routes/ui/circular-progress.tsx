@@ -25,7 +25,7 @@ export const Route = createFileRoute("/ui/circular-progress")({
     head: () => ({
         meta: [
             ...seo({
-                title: "Mutualzz UI - Circular Progress",
+                title: "Circular Progress - Mutualzz UI",
             }),
         ],
     }),

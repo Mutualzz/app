@@ -26,7 +26,7 @@ export const Route = createFileRoute("/ui/input")({
     head: () => ({
         meta: [
             ...seo({
-                title: "Mutualzz UI - Input",
+                title: "Input - Mutualzz UI",
             }),
         ],
     }),

@@ -26,7 +26,7 @@ export const Route = createFileRoute("/ui/checkbox")({
     head: () => ({
         meta: [
             ...seo({
-                title: "Mutualzz UI - Checkbox",
+                title: "Checkbox - Mutualzz UI",
             }),
         ],
     }),

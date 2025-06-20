@@ -27,7 +27,7 @@ export const Route = createFileRoute("/ui/slider")({
     head: () => ({
         meta: [
             ...seo({
-                title: "Mutualzz UI - Slider",
+                title: "Slider - Mutualzz UI",
             }),
         ],
     }),
