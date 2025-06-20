@@ -38,6 +38,8 @@
         "@emotion/css-prettifier": "^1.2.0",
         "@eslint/js": "^9.29.0",
         "@mutualzz/types": "^1.2.9",
+        "@netlify/edge-functions": "^2.15.1",
+        "@netlify/types": "^2.0.2",
         "@tanstack/eslint-plugin-query": "^5.78.0",
         "@tanstack/eslint-plugin-router": "^1.121.21",
         "@tanstack/react-router-devtools": "^1.121.21",

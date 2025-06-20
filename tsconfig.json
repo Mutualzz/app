@@ -34,7 +34,7 @@
             "@types": ["index.d.ts"]
         }
     },
-    "include": ["src/**/*"],
+    "include": ["src/**/*", "netlify/**/*"],
     "exclude": ["node_modules", "dist"],
     "references": [{ "path": "./tsconfig.node.json" }]
 }
