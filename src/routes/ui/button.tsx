@@ -10,6 +10,7 @@ import type { Color, ColorLike, Size, Variant } from "@ui/types";
 import { capitalize } from "lodash-es";
 import { type ReactNode, useState } from "react";
 
+import { Input } from "@ui/components/inputs/Input/Input";
 import { Radio } from "@ui/components/inputs/Radio/Radio";
 import { RadioGroup } from "@ui/components/inputs/Radio/RadioGroup";
 import { Slider } from "@ui/index";
@@ -199,7 +200,12 @@ function PlaygroundButton() {
                     ))}
                 {variant !== "all" && buttons}
             </Paper>
-            <Paper alignItems="center" direction="column" p={20}>
+            <Paper
+                overflowX="auto"
+                alignItems="center"
+                direction="column"
+                p={20}
+            >
                 <Divider>Playground</Divider>
                 <Stack width="100%" direction="column" spacing={5}>
                     <Stack direction="column" spacing={5}>
@@ -307,20 +313,16 @@ function PlaygroundButton() {
                             direction="row"
                             spacing={5}
                         >
-                            <input
-                                type="text"
+                            <Input
+                                variant="solid"
+                                size="lg"
+                                color="primary"
+                                placeholder="Enter a color (e.g., #ff0000)"
                                 value={inputColorValue}
+                                error={isInvalid}
                                 onChange={(e) => handleChange(e.target.value)}
                                 onBlur={validate}
-                                css={{
-                                    padding: 10,
-                                    borderRadius: 5,
-                                    border: isInvalid
-                                        ? "1px solid red"
-                                        : "1px solid #ccc",
-                                    backgroundColor: "#f9f9f9",
-                                    width: "100%",
-                                }}
+                                fullWidth
                             />
                             <Button
                                 color="primary"
@@ -394,8 +396,11 @@ function PlaygroundButton() {
                     <Divider />
                     <Stack direction="column" spacing={5}>
                         <label>Text</label>
-                        <input
-                            type="text"
+                        <Input
+                            variant="solid"
+                            size="lg"
+                            color="primary"
+                            placeholder="Enter button text"
                             value={text ?? ""}
                             onChange={(e) =>
                                 setText(
@@ -404,13 +409,7 @@ function PlaygroundButton() {
                                         : e.target.value,
                                 )
                             }
-                            css={{
-                                padding: 10,
-                                borderRadius: 5,
-                                border: "1px solid #ccc",
-                                backgroundColor: "#f9f9f9",
-                                width: "100%",
-                            }}
+                            fullWidth
                         />
                     </Stack>
                     <Divider />

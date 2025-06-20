@@ -16,6 +16,7 @@ import { type Color, type ColorLike, type Size, type Variant } from "@ui/types";
 import { capitalize } from "lodash-es";
 import { useState } from "react";
 
+import { Input } from "@ui/components/inputs/Input/Input";
 import * as AiIcons from "react-icons/ai";
 import * as FaIcons from "react-icons/fa";
 import * as MdIcons from "react-icons/md";
@@ -191,7 +192,12 @@ function PlaygroundCheckbox() {
                     ))}
                 {variant !== "all" && checkboxes}
             </Paper>
-            <Paper alignItems="center" direction="column" p={20}>
+            <Paper
+                overflowX="auto"
+                alignItems="center"
+                direction="column"
+                p={20}
+            >
                 <Divider>Playground</Divider>
                 <Stack width="100%" direction="column" spacing={5}>
                     <Stack direction="column" spacing={5}>
@@ -301,20 +307,16 @@ function PlaygroundCheckbox() {
                             direction="row"
                             spacing={5}
                         >
-                            <input
-                                type="text"
+                            <Input
+                                variant="solid"
+                                size="lg"
+                                color="primary"
+                                placeholder="Enter a color (e.g., #ff0000)"
+                                fullWidth
+                                error={isInvalid}
                                 value={inputColorValue}
                                 onChange={(e) => handleChange(e.target.value)}
                                 onBlur={validate}
-                                css={{
-                                    padding: 10,
-                                    borderRadius: 5,
-                                    border: isInvalid
-                                        ? "1px solid red"
-                                        : "1px solid #ccc",
-                                    backgroundColor: "#f9f9f9",
-                                    width: "100%",
-                                }}
                             />
                             <Button
                                 color="primary"
@@ -388,8 +390,11 @@ function PlaygroundCheckbox() {
                     <Divider />
                     <Stack direction="column" spacing={5}>
                         <label>Label</label>
-                        <input
-                            type="text"
+                        <Input
+                            variant="solid"
+                            size="lg"
+                            color="primary"
+                            fullWidth
                             value={label ?? ""}
                             onChange={(e) =>
                                 setLabel(
@@ -398,13 +403,6 @@ function PlaygroundCheckbox() {
                                         : e.target.value,
                                 )
                             }
-                            css={{
-                                padding: 10,
-                                borderRadius: 5,
-                                border: "1px solid #ccc",
-                                backgroundColor: "#f9f9f9",
-                                width: "100%",
-                            }}
                         />
                     </Stack>
                     <Divider />

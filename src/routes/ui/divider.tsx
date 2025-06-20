@@ -6,6 +6,7 @@ import {
     type DividerVariant,
 } from "@ui/components/data-display/Divider/Divider.types";
 import { Checkbox } from "@ui/components/inputs/Checkbox/Checkbox";
+import { Input } from "@ui/components/inputs/Input/Input";
 import { Stack } from "@ui/components/layout/Stack/Stack";
 import { Paper } from "@ui/components/surfaces/Paper/Paper";
 import { useColorInput } from "@ui/hooks/useColorInput";
@@ -125,7 +126,12 @@ function PlaygroundDivider() {
                     </Stack>
                 )}
             </Paper>
-            <Paper alignItems="center" direction="column" p={20}>
+            <Paper
+                overflowX="auto"
+                alignItems="center"
+                direction="column"
+                p={20}
+            >
                 <Divider>Playground</Divider>
                 <Stack width="100%" direction="column" spacing={5}>
                     <Stack direction="column" spacing={5}>
@@ -186,8 +192,11 @@ function PlaygroundDivider() {
                         direction="column"
                     >
                         <label>Text</label>
-                        <input
-                            type="text"
+                        <Input
+                            variant="solid"
+                            size="lg"
+                            color="primary"
+                            fullWidth
                             value={text ?? ""}
                             onChange={(e) =>
                                 setText(
@@ -196,13 +205,6 @@ function PlaygroundDivider() {
                                         : e.target.value,
                                 )
                             }
-                            css={{
-                                padding: 10,
-                                borderRadius: 5,
-                                border: "1px solid #ccc",
-                                backgroundColor: "#f9f9f9",
-                                width: "100%",
-                            }}
                         />
                     </Stack>
                     {text && (
@@ -251,22 +253,18 @@ function PlaygroundDivider() {
                             />
                         </Stack>
                         {customLineColorEnabled ? (
-                            <input
-                                type="text"
+                            <Input
+                                variant="solid"
+                                size="lg"
+                                color="primary"
+                                fullWidth
+                                error={lineColorInvalid}
+                                placeholder="Enter a color (e.g., #ff0000, red)"
                                 value={inputLineColor}
                                 onChange={(e) =>
                                     handleLineColorChange(e.target.value)
                                 }
                                 onBlur={validateLineColor}
-                                css={{
-                                    padding: 10,
-                                    borderRadius: 5,
-                                    border: lineColorInvalid
-                                        ? "1px solid red"
-                                        : "1px solid #ccc",
-                                    backgroundColor: "#f9f9f9",
-                                    width: "100%",
-                                }}
                             />
                         ) : (
                             <select
@@ -309,21 +307,18 @@ function PlaygroundDivider() {
                             />
                         </Stack>
                         {customTextColorEnabled ? (
-                            <input
-                                type="text"
+                            <Input
+                                variant="solid"
+                                size="lg"
+                                color="primary"
+                                fullWidth
+                                error={textColorInvalid}
+                                placeholder="Enter a color (e.g., #ff0000, red)"
                                 value={inputTextColor}
                                 onChange={(e) =>
                                     handleTextColorChange(e.target.value)
                                 }
                                 onBlur={validateTextColor}
-                                css={{
-                                    padding: 10,
-                                    borderRadius: 5,
-                                    border: textColorInvalid
-                                        ? "1px solid red"
-                                        : "1px solid #ccc",
-                                    backgroundColor: "#f9f9f9",
-                                }}
                             />
                         ) : (
                             <select

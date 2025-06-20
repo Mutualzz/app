@@ -16,6 +16,7 @@ import {
 import type { Color, ColorLike, TypographyLevel } from "@ui/types";
 import type { FontWeight } from "@ui/types/Typography.props";
 
+import { Input } from "@ui/components/inputs/Input/Input";
 import { capitalize } from "lodash-es";
 import { useState } from "react";
 import { seo } from "../../seo";
@@ -162,7 +163,12 @@ function PlaygroundTypography() {
                     ))}
                 {variant !== "none" && variant !== "all" && typographies}
             </Paper>
-            <Paper alignItems="center" direction="column" p={20}>
+            <Paper
+                overflowX="auto"
+                alignItems="center"
+                direction="column"
+                p={20}
+            >
                 <Divider>Playground</Divider>
                 <Stack width="100%" direction="column" spacing={5}>
                     <Stack direction="column" spacing={5}>
@@ -289,22 +295,17 @@ function PlaygroundTypography() {
                                     direction="row"
                                     spacing={5}
                                 >
-                                    <input
-                                        type="text"
+                                    <Input
+                                        variant="solid"
+                                        size="lg"
+                                        color="primary"
+                                        fullWidth
+                                        error={isInvalid}
                                         value={inputColorValue}
                                         onChange={(e) =>
                                             handleChange(e.target.value)
                                         }
                                         onBlur={validate}
-                                        css={{
-                                            padding: 10,
-                                            borderRadius: 5,
-                                            border: isInvalid
-                                                ? "1px solid red"
-                                                : "1px solid #ccc",
-                                            backgroundColor: "#f9f9f9",
-                                            width: "100%",
-                                        }}
                                     />
                                     <Button
                                         color="primary"
@@ -387,23 +388,17 @@ function PlaygroundTypography() {
                     )}
                     <Stack direction="column" spacing={5}>
                         <label>Text</label>
-                        <input
-                            type="text"
+                        <Input
+                            variant="solid"
+                            size="lg"
+                            color="primary"
+                            fullWidth
                             value={text ?? ""}
                             onChange={(e) =>
                                 e.target.value.trim() === ""
                                     ? setText(null)
                                     : setText(e.target.value)
                             }
-                            css={{
-                                padding: 10,
-                                borderRadius: 5,
-                                border: isInvalid
-                                    ? "1px solid red"
-                                    : "1px solid #ccc",
-                                backgroundColor: "#f9f9f9",
-                                width: "100%",
-                            }}
                         />
                     </Stack>
                 </Stack>

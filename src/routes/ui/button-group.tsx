@@ -15,6 +15,7 @@ import { Radio } from "@ui/components/inputs/Radio/Radio";
 import { RadioGroup } from "@ui/components/inputs/Radio/RadioGroup";
 import { randomHexColor } from "@ui/utils";
 
+import { Input } from "@ui/components/inputs/Input/Input";
 import { Slider } from "@ui/index";
 import numWords from "num-words";
 import { FaMinus, FaPlus } from "react-icons/fa";
@@ -135,7 +136,12 @@ function PlaygroundButtonGroup() {
                     </ButtonGroup>
                 )}
             </Paper>
-            <Paper alignItems="center" direction="column" p={20}>
+            <Paper
+                overflowX="auto"
+                alignItems="center"
+                direction="column"
+                p={20}
+            >
                 <Divider>Playground</Divider>
                 <Stack width="100%" direction="column" spacing={5}>
                     <Stack direction="column" spacing={5}>
@@ -234,22 +240,18 @@ function PlaygroundButtonGroup() {
                                 direction="row"
                                 spacing={5}
                             >
-                                <input
-                                    type="text"
+                                <Input
+                                    variant="solid"
+                                    size="lg"
+                                    color="primary"
+                                    fullWidth
+                                    placeholder="Enter color (e.g. #ff0000)"
                                     value={inputColorValue}
                                     onChange={(e) =>
                                         handleChange(e.target.value)
                                     }
                                     onBlur={validate}
-                                    css={{
-                                        padding: 10,
-                                        borderRadius: 5,
-                                        border: isInvalid
-                                            ? "1px solid red"
-                                            : "1px solid #ccc",
-                                        backgroundColor: "#f9f9f9",
-                                        width: "100%",
-                                    }}
+                                    error={isInvalid}
                                 />
                                 <Button
                                     color="primary"
@@ -392,8 +394,11 @@ function PlaygroundButtonGroup() {
                     <Divider />
                     <Stack direction="column" spacing={5}>
                         <label>Text</label>
-                        <input
-                            type="text"
+                        <Input
+                            variant="solid"
+                            size="lg"
+                            color="primary"
+                            placeholder="Enter button text"
                             value={text ?? ""}
                             onChange={(e) =>
                                 setText(
@@ -402,13 +407,7 @@ function PlaygroundButtonGroup() {
                                         : e.target.value,
                                 )
                             }
-                            css={{
-                                padding: 10,
-                                borderRadius: 5,
-                                border: "1px solid #ccc",
-                                backgroundColor: "#f9f9f9",
-                                width: "100%",
-                            }}
+                            fullWidth
                         />
                     </Stack>
                 </Stack>

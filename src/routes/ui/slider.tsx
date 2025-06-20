@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Typography } from "@ui/components/data-display/Typography/Typography";
+import { Input } from "@ui/components/inputs/Input/Input";
 import { Slider } from "@ui/components/inputs/Slider/Slider";
 import {
     type SliderMark,
@@ -207,7 +208,12 @@ function SlderPlayground() {
                     ))}
                 {variant !== "all" && sliders}
             </Paper>
-            <Paper alignItems="center" direction="column" p={20}>
+            <Paper
+                overflowX="auto"
+                alignItems="center"
+                direction="column"
+                p={20}
+            >
                 <Divider>Playground</Divider>
                 <Stack width="100%" spacing={5} direction="column">
                     <Stack direction="column" spacing={5}>
@@ -395,7 +401,11 @@ function SlderPlayground() {
                         {markState === "custom" && (
                             <Stack direction="column" spacing={10}>
                                 <Stack direction="row" spacing={5}>
-                                    <input
+                                    <Input
+                                        variant="solid"
+                                        size="lg"
+                                        color="primary"
+                                        fullWidth
                                         type="number"
                                         placeholder="Value"
                                         value={valueInput ?? ""}
@@ -406,28 +416,17 @@ function SlderPlayground() {
                                             if (value > max) value = max;
                                             setValueInput(value);
                                         }}
-                                        css={{
-                                            padding: 10,
-                                            borderRadius: 5,
-                                            border: "1px solid #ccc",
-                                            backgroundColor: "#f9f9f9",
-                                            width: "100%",
-                                        }}
                                     />
-                                    <input
-                                        type="text"
+                                    <Input
+                                        variant="solid"
+                                        size="lg"
+                                        color="primary"
+                                        fullWidth
                                         placeholder="Label (optional)"
                                         value={labelInput}
                                         onChange={(e) =>
                                             setLabelInput(e.target.value)
                                         }
-                                        css={{
-                                            padding: 10,
-                                            borderRadius: 5,
-                                            border: "1px solid #ccc",
-                                            backgroundColor: "#f9f9f9",
-                                            width: "100%",
-                                        }}
                                     />
                                 </Stack>
                                 <Button
@@ -584,7 +583,11 @@ function SlderPlayground() {
                             />
                         </Stack>
                         {step !== null && (
-                            <input
+                            <Input
+                                variant="solid"
+                                size="lg"
+                                color="primary"
+                                fullWidth
                                 type="number"
                                 value={step}
                                 onChange={(e) =>
@@ -594,13 +597,6 @@ function SlderPlayground() {
                                             : null,
                                     )
                                 }
-                                css={{
-                                    padding: 10,
-                                    borderRadius: 5,
-                                    border: "1px solid #ccc",
-                                    backgroundColor: "#f9f9f9",
-                                    width: "100%",
-                                }}
                             />
                         )}
                     </Stack>
@@ -608,32 +604,26 @@ function SlderPlayground() {
                     <Stack direction="row" spacing={5}>
                         <Stack direction="column" spacing={10}>
                             <label>Min</label>
-                            <input
+                            <Input
+                                variant="solid"
+                                size="lg"
+                                color="primary"
+                                fullWidth
                                 type="number"
                                 value={min}
                                 onChange={(e) => setMin(Number(e.target.value))}
-                                css={{
-                                    padding: 10,
-                                    borderRadius: 5,
-                                    border: "1px solid #ccc",
-                                    backgroundColor: "#f9f9f9",
-                                    width: "100%",
-                                }}
                             />
                         </Stack>
                         <Stack direction="column" spacing={10}>
                             <label>Max</label>
-                            <input
+                            <Input
+                                variant="solid"
+                                size="lg"
+                                color="primary"
+                                fullWidth
                                 type="number"
                                 value={max}
                                 onChange={(e) => setMax(Number(e.target.value))}
-                                css={{
-                                    padding: 10,
-                                    borderRadius: 5,
-                                    border: "1px solid #ccc",
-                                    backgroundColor: "#f9f9f9",
-                                    width: "100%",
-                                }}
                             />
                         </Stack>
                     </Stack>
@@ -645,20 +635,15 @@ function SlderPlayground() {
                             direction="row"
                             spacing={5}
                         >
-                            <input
-                                type="text"
+                            <Input
+                                variant="solid"
+                                size="lg"
+                                color="primary"
+                                fullWidth
+                                error={isInvalid}
                                 value={inputColorValue}
                                 onChange={(e) => handleChange(e.target.value)}
                                 onBlur={validate}
-                                css={{
-                                    padding: 10,
-                                    borderRadius: 5,
-                                    border: isInvalid
-                                        ? "1px solid red"
-                                        : "1px solid #ccc",
-                                    backgroundColor: "#f9f9f9",
-                                    width: "100%",
-                                }}
                             />
                             <Button
                                 color="primary"

@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { Input } from "@ui/components/inputs/Input/Input";
 import type { PaperVariant } from "@ui/components/surfaces/Paper/Paper.types";
 import { useColorInput } from "@ui/hooks/useColorInput";
 import {
@@ -122,7 +123,12 @@ function PlaygroundPaper() {
                         </Stack>
                     ))}
             </Paper>
-            <Paper alignItems="center" direction="column" p={20}>
+            <Paper
+                overflowX="auto"
+                alignItems="center"
+                direction="column"
+                p={20}
+            >
                 <Divider>Playground</Divider>
                 <Stack width="100%" direction="column" spacing={5}>
                     <Stack direction="column" spacing={5}>
@@ -163,22 +169,18 @@ function PlaygroundPaper() {
                                 direction="row"
                                 spacing={5}
                             >
-                                <input
-                                    type="text"
+                                <Input
+                                    variant="solid"
+                                    size="lg"
+                                    color="primary"
+                                    fullWidth
+                                    error={isInvalid}
+                                    placeholder="Enter a color (e.g., #ff0000)"
                                     value={inputColorValue}
                                     onChange={(e) =>
                                         handleChange(e.target.value)
                                     }
                                     onBlur={validate}
-                                    css={{
-                                        padding: 10,
-                                        borderRadius: 5,
-                                        border: isInvalid
-                                            ? "1px solid red"
-                                            : "1px solid #ccc",
-                                        backgroundColor: "#f9f9f9",
-                                        width: "100%",
-                                    }}
                                 />
                                 <Button
                                     color="primary"
@@ -254,7 +256,11 @@ function PlaygroundPaper() {
                     {variant === "elevation" && (
                         <Stack direction="column" spacing={5}>
                             <label>Elevation</label>
-                            <input
+                            <Input
+                                variant="solid"
+                                size="lg"
+                                color="primary"
+                                fullWidth
                                 type="number"
                                 value={elevation}
                                 onChange={(e) =>
@@ -264,20 +270,17 @@ function PlaygroundPaper() {
                                             : parseInt(e.target.value),
                                     )
                                 }
-                                css={{
-                                    padding: 10,
-                                    borderRadius: 5,
-                                    border: "1px solid #ccc",
-                                    backgroundColor: "#f9f9f9",
-                                    width: "100%",
-                                }}
                             />
                         </Stack>
                     )}
                     <Divider />
                     <Stack direction="column" spacing={5}>
                         <label>Text</label>
-                        <input
+                        <Input
+                            variant="solid"
+                            size="lg"
+                            color="primary"
+                            fullWidth
                             type="text"
                             value={text ?? ""}
                             onChange={(e) =>
@@ -287,13 +290,6 @@ function PlaygroundPaper() {
                                         : e.target.value,
                                 )
                             }
-                            css={{
-                                padding: 10,
-                                borderRadius: 5,
-                                border: "1px solid #ccc",
-                                backgroundColor: "#f9f9f9",
-                                width: "100%",
-                            }}
                         />
                     </Stack>
                 </Stack>

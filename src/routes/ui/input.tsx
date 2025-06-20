@@ -166,7 +166,12 @@ function InputPlayground() {
                     ))}
                 {variant !== "all" && inputs}
             </Paper>
-            <Paper alignItems="center" direction="column" p={20}>
+            <Paper
+                overflowX="auto"
+                alignItems="center"
+                direction="column"
+                p={20}
+            >
                 <Divider>Playground</Divider>
                 <Stack width="100%" direction="column" spacing={5}>
                     <Stack direction="column" spacing={5}>
@@ -268,18 +273,14 @@ function InputPlayground() {
                                 onChange={() => setControlled((prev) => !prev)}
                             />
                             {controlled && (
-                                <input
-                                    type="text"
+                                <Input
+                                    variant="solid"
+                                    size="lg"
+                                    color="primary"
+                                    fullWidth
                                     value={value ?? ""}
                                     onChange={(e) => setValue(e.target.value)}
-                                    placeholder="Controlled Input"
-                                    css={{
-                                        padding: 10,
-                                        borderRadius: 5,
-                                        border: "1px solid #ccc",
-                                        backgroundColor: "#f9f9f9",
-                                        width: "100%",
-                                    }}
+                                    placeholder="Controlled value"
                                 />
                             )}
                         </Stack>
@@ -287,8 +288,11 @@ function InputPlayground() {
                     <Divider />
                     <Stack direction="column" spacing={5}>
                         <label>Placeholder</label>
-                        <input
-                            type="text"
+                        <Input
+                            variant="solid"
+                            size="lg"
+                            color="primary"
+                            fullWidth
                             value={placeholder ?? ""}
                             onChange={(e) =>
                                 e.target.value === ""
@@ -296,13 +300,6 @@ function InputPlayground() {
                                     : setPlaceholder(e.target.value)
                             }
                             placeholder="Enter placeholder text"
-                            css={{
-                                padding: 10,
-                                borderRadius: 5,
-                                border: "1px solid #ccc",
-                                backgroundColor: "#f9f9f9",
-                                width: "100%",
-                            }}
                         />
                     </Stack>
                     <Divider />
@@ -336,20 +333,16 @@ function InputPlayground() {
                             direction="row"
                             spacing={5}
                         >
-                            <input
-                                type="text"
+                            <Input
+                                variant="solid"
+                                size="lg"
+                                color="primary"
+                                fullWidth
+                                placeholder="Enter a color (e.g., #ff0000, red)"
+                                error={isInvalid}
                                 value={inputColorValue}
                                 onChange={(e) => handleChange(e.target.value)}
                                 onBlur={validate}
-                                css={{
-                                    padding: 10,
-                                    borderRadius: 5,
-                                    border: isInvalid
-                                        ? "1px solid red"
-                                        : "1px solid #ccc",
-                                    backgroundColor: "#f9f9f9",
-                                    width: "100%",
-                                }}
                             />
                             <Button
                                 color="primary"

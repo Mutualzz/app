@@ -15,6 +15,7 @@ import type { Color, ColorLike, Size, Variant } from "@ui/types";
 import { capitalize } from "lodash-es";
 import { useState } from "react";
 
+import { Input } from "@ui/components/inputs/Input/Input";
 import * as AiIcons from "react-icons/ai";
 import * as FaIcons from "react-icons/fa";
 import * as MdIcons from "react-icons/md";
@@ -177,7 +178,12 @@ function PlaygroundRadio() {
                     ))}
                 {variant !== "all" && Radios}
             </Paper>
-            <Paper alignItems="center" direction="column" p={20}>
+            <Paper
+                overflowX="auto"
+                alignItems="center"
+                direction="column"
+                p={20}
+            >
                 <Divider>Playground</Divider>
                 <Stack width="100%" direction="column" spacing={5}>
                     <Stack direction="column" spacing={5}>
@@ -279,20 +285,16 @@ function PlaygroundRadio() {
                             direction="row"
                             spacing={5}
                         >
-                            <input
-                                type="text"
+                            <Input
+                                variant="solid"
+                                size="lg"
+                                color="primary"
+                                fullWidth
+                                error={isInvalid}
+                                placeholder="Enter a color (e.g., #ff0000)"
                                 value={inputColorValue}
                                 onChange={(e) => handleChange(e.target.value)}
                                 onBlur={validate}
-                                css={{
-                                    padding: 10,
-                                    borderRadius: 5,
-                                    border: isInvalid
-                                        ? "1px solid red"
-                                        : "1px solid #ccc",
-                                    backgroundColor: "#f9f9f9",
-                                    width: "100%",
-                                }}
                             />
                             <Button
                                 color="primary"
@@ -366,8 +368,11 @@ function PlaygroundRadio() {
                     <Divider />
                     <Stack direction="column" spacing={5}>
                         <label>Label</label>
-                        <input
-                            type="text"
+                        <Input
+                            variant="solid"
+                            size="lg"
+                            color="primary"
+                            fullWidth
                             value={label ?? ""}
                             onChange={(e) =>
                                 setLabel(
@@ -376,13 +381,6 @@ function PlaygroundRadio() {
                                         : e.target.value,
                                 )
                             }
-                            css={{
-                                padding: 10,
-                                borderRadius: 5,
-                                border: "1px solid #ccc",
-                                backgroundColor: "#f9f9f9",
-                                width: "100%",
-                            }}
                         />
                     </Stack>
                     <Divider />
