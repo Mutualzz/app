@@ -123,12 +123,7 @@ function PlaygroundPaper() {
                         </Stack>
                     ))}
             </Paper>
-            <Paper
-                overflowY="auto"
-                alignItems="center"
-                direction="column"
-                p={20}
-            >
+            <Paper alignItems="center" direction="column" p={20}>
                 <Divider>Playground</Divider>
                 <Stack width="100%" direction="column" spacing={5}>
                     <Stack direction="column" spacing={5}>
