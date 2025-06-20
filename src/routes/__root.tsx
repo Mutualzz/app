@@ -27,13 +27,7 @@ import { seo } from "seo";
 
 export const Route = createRootRoute({
     head: () => ({
-        meta: [
-            ...seo({
-                title: "Mutualzz (Under Development)",
-                description:
-                    "Connect with other people who share your interests. Currently under heavy development. UI is being made from scratch, so only UI playground is available. In the future there will be a lot fun on this website :3",
-            }),
-        ],
+        meta: [...seo()],
     }),
     component: RootComponent,
 });

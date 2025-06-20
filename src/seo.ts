@@ -1,11 +1,22 @@
 type SEO = {
-    title: string;
+    title?: string;
     description?: string;
     image?: string;
     keywords?: string | string[];
 };
 
-export const seo = ({ title, description, image, keywords }: SEO) => {
+const defaultTitle = "Mutualzz (Under Development)";
+const defaultDescription =
+    "Connect with other people who share your interests. Currently under heavy development. UI is being made from scratch, so only UI playground is available. In the future there will be a lot fun on this website :3";
+
+export const seo = (params?: SEO) => {
+    const {
+        title = defaultTitle,
+        description = defaultDescription,
+        image,
+        keywords,
+    } = params ?? {};
+
     const tags = [
         {
             charSet: "utf-8",
@@ -21,9 +32,7 @@ export const seo = ({ title, description, image, keywords }: SEO) => {
         },
         {
             name: "description",
-            content:
-                description ??
-                "Connect with other people who share your interests. Currently under heavy development. UI is being made from scratch, so only UI playground is available. In the future there will be a lot fun on this website :3",
+            content: description,
         },
         {
             name: "keywords",
@@ -39,7 +48,10 @@ export const seo = ({ title, description, image, keywords }: SEO) => {
         },
         { name: "author", content: "Mutualzz" },
         { name: "twitter:title", content: title },
-        { name: "twitter:description", content: description },
+        {
+            name: "twitter:description",
+            content: description,
+        },
         { name: "twitter:creator", content: "Mutualzz" },
         { name: "twitter:site", content: "Mutualzz" },
         { name: "og:type", content: "website" },
