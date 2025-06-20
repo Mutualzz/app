@@ -9,7 +9,7 @@ import { themes as allThemes } from "@themes/index";
 
 import { useLocation, useNavigate } from "@tanstack/react-router";
 import { sortThemes } from "@ui/utils/sortThemes";
-import startCase from "lodash/startCase";
+import { startCase } from "lodash-es";
 
 const links = {
     inputs: [

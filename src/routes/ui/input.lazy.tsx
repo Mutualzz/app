@@ -1,3 +1,4 @@
+import { createLazyFileRoute } from "@tanstack/react-router";
 import { Input } from "@ui/components/inputs/Input/Input";
 import {
     Button,
@@ -16,10 +17,10 @@ import {
     type Size,
     type Variant,
 } from "@ui/index";
-import { capitalize } from "lodash";
+import { capitalize } from "lodash-es";
 import { useState } from "react";
 
-export const Route = createLazyFileRoute({
+export const Route = createLazyFileRoute("/ui/input")({
     component: InputPlayground,
 });
 

@@ -1,3 +1,4 @@
+import { createLazyFileRoute } from "@tanstack/react-router";
 import {
     Button,
     Checkbox,
@@ -11,14 +12,14 @@ import {
     useColorInput,
 } from "@ui/index";
 import type { Color, ColorLike, Size, Variant } from "@ui/types";
-import capitalize from "lodash/capitalize";
+import { capitalize } from "lodash-es";
 import { useState } from "react";
 
 import * as AiIcons from "react-icons/ai";
 import * as FaIcons from "react-icons/fa";
 import * as MdIcons from "react-icons/md";
 
-export const Route = createLazyFileRoute({
+export const Route = createLazyFileRoute("/ui/radio-button")({
     component: PlaygroundRadio,
 });
 

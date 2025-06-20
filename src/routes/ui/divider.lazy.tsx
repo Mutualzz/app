@@ -1,3 +1,4 @@
+import { createLazyFileRoute } from "@tanstack/react-router";
 import { Divider } from "@ui/components/data-display/Divider/Divider";
 import {
     type DividerInset,
@@ -10,10 +11,10 @@ import { Paper } from "@ui/components/surfaces/Paper/Paper";
 import { useColorInput } from "@ui/hooks/useColorInput";
 import { Radio, RadioGroup } from "@ui/index";
 import type { Color, ColorLike } from "@ui/types";
-import capitalize from "lodash/capitalize";
+import { capitalize } from "lodash-es";
 import { useState } from "react";
 
-export const Route = createLazyFileRoute({
+export const Route = createLazyFileRoute("/ui/divider")({
     component: PlaygroundDivider,
 });
 

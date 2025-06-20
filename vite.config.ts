@@ -1,5 +1,4 @@
-import { tanstackRouter } from "@tanstack/router-plugin/vite";
-import react from "@vitejs/plugin-react";
+import { tanstackStart } from "@tanstack/react-start/plugin/vite";
 import { defineConfig } from "vite";
 import tsconfigPaths from "vite-tsconfig-paths";
 
@@ -8,16 +7,10 @@ const host = process.env.TAURI_DEV_HOST;
 // https://vitejs.dev/config/
 export default defineConfig(async () => ({
     plugins: [
-        tsconfigPaths(),
-        tanstackRouter({
-            target: "react",
-            autoCodeSplitting: true,
-            routesDirectory: "./src/routes",
-            generatedRouteTree: "./src/routeTree.gen.ts",
-            quoteStyle: "double",
-            verboseFileRoutes: false,
+        tsconfigPaths({
+            projects: ["./tsconfig.json", "./tsconfig.node.json"],
         }),
-        react(),
+        tanstackStart(),
     ],
 
     // Vite options tailored for Tauri development and only applied in `tauri dev` or `tauri build`

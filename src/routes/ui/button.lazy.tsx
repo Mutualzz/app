@@ -1,3 +1,4 @@
+import { createLazyFileRoute } from "@tanstack/react-router";
 import { Divider } from "@ui/components/data-display/Divider/Divider";
 import { Button } from "@ui/components/inputs/Button/Button";
 import { Checkbox } from "@ui/components/inputs/Checkbox/Checkbox";
@@ -6,7 +7,7 @@ import { Paper } from "@ui/components/surfaces/Paper/Paper";
 import { useColorInput } from "@ui/hooks/useColorInput";
 import type { Color, ColorLike, Size, Variant } from "@ui/types";
 
-import capitalize from "lodash/capitalize";
+import { capitalize } from "lodash-es";
 import { type ReactNode, useState } from "react";
 
 import { Radio } from "@ui/components/inputs/Radio/Radio";
@@ -17,7 +18,7 @@ import * as AiIcons from "react-icons/ai";
 import * as FaIcons from "react-icons/fa";
 import * as MdIcons from "react-icons/md";
 
-export const Route = createLazyFileRoute({
+export const Route = createLazyFileRoute("/ui/button")({
     component: PlaygroundButton,
 });
 

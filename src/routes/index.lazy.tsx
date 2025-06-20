@@ -1,10 +1,14 @@
-import { Outlet, useNavigate } from "@tanstack/react-router";
+import {
+    createLazyFileRoute,
+    Outlet,
+    useNavigate,
+} from "@tanstack/react-router";
 import { Typography } from "@ui/components/data-display/Typography/Typography";
 
 import { Button } from "@ui/components/inputs/Button/Button";
 import { Stack } from "@ui/components/layout/Stack/Stack";
 
-export const Route = createLazyFileRoute({
+export const Route = createLazyFileRoute("/")({
     component: Index,
 });
 
