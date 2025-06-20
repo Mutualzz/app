@@ -10,7 +10,9 @@ export default defineConfig(async () => ({
         tsconfigPaths({
             projects: ["./tsconfig.json", "./tsconfig.node.json"],
         }),
-        tanstackStart(),
+        tanstackStart({
+            target: "netlify",
+        }),
     ],
 
     // Vite options tailored for Tauri development and only applied in `tauri dev` or `tauri build`
