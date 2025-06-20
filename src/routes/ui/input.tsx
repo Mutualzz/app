@@ -46,16 +46,10 @@ const colors = [
 const types = [
     "date",
     "datetime-local",
-    "email",
-    "month",
     "number",
     "password",
-    "search",
-    "tel",
     "text",
     "time",
-    "url",
-    "week",
 ] as InputType[];
 
 const sizeNames = {
