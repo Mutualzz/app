@@ -8,335 +8,335 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import { Route as rootRouteImport } from "./routes/__root";
-import { Route as IndexRouteImport } from "./routes/index";
-import { Route as UiRouteImport } from "./routes/ui";
-import { Route as UiButtonRouteImport } from "./routes/ui/button";
-import { Route as UiButtonGroupRouteImport } from "./routes/ui/button-group";
-import { Route as UiCheckboxRouteImport } from "./routes/ui/checkbox";
-import { Route as UiCircularProgressRouteImport } from "./routes/ui/circular-progress";
-import { Route as UiDividerRouteImport } from "./routes/ui/divider";
-import { Route as UiIndexRouteImport } from "./routes/ui/index";
-import { Route as UiInputRouteImport } from "./routes/ui/input";
-import { Route as UiLinearProgressRouteImport } from "./routes/ui/linear-progress";
-import { Route as UiPaperRouteImport } from "./routes/ui/paper";
-import { Route as UiRadioButtonRouteImport } from "./routes/ui/radio-button";
-import { Route as UiSliderRouteImport } from "./routes/ui/slider";
-import { Route as UiTypographyRouteImport } from "./routes/ui/typography";
+import { Route as rootRouteImport } from './routes/__root'
+import { Route as UiRouteImport } from './routes/ui'
+import { Route as IndexRouteImport } from './routes/index'
+import { Route as UiIndexRouteImport } from './routes/ui/index'
+import { Route as UiTypographyRouteImport } from './routes/ui/typography'
+import { Route as UiSliderRouteImport } from './routes/ui/slider'
+import { Route as UiRadioButtonRouteImport } from './routes/ui/radio-button'
+import { Route as UiPaperRouteImport } from './routes/ui/paper'
+import { Route as UiLinearProgressRouteImport } from './routes/ui/linear-progress'
+import { Route as UiInputRouteImport } from './routes/ui/input'
+import { Route as UiDividerRouteImport } from './routes/ui/divider'
+import { Route as UiCircularProgressRouteImport } from './routes/ui/circular-progress'
+import { Route as UiCheckboxRouteImport } from './routes/ui/checkbox'
+import { Route as UiButtonGroupRouteImport } from './routes/ui/button-group'
+import { Route as UiButtonRouteImport } from './routes/ui/button'
 
 const UiRoute = UiRouteImport.update({
-    id: "/ui",
-    path: "/ui",
-    getParentRoute: () => rootRouteImport,
-} as any);
+  id: '/ui',
+  path: '/ui',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
-    id: "/",
-    path: "/",
-    getParentRoute: () => rootRouteImport,
-} as any);
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const UiIndexRoute = UiIndexRouteImport.update({
-    id: "/",
-    path: "/",
-    getParentRoute: () => UiRoute,
-} as any);
+  id: '/',
+  path: '/',
+  getParentRoute: () => UiRoute,
+} as any)
 const UiTypographyRoute = UiTypographyRouteImport.update({
-    id: "/typography",
-    path: "/typography",
-    getParentRoute: () => UiRoute,
-} as any);
+  id: '/typography',
+  path: '/typography',
+  getParentRoute: () => UiRoute,
+} as any)
 const UiSliderRoute = UiSliderRouteImport.update({
-    id: "/slider",
-    path: "/slider",
-    getParentRoute: () => UiRoute,
-} as any);
+  id: '/slider',
+  path: '/slider',
+  getParentRoute: () => UiRoute,
+} as any)
 const UiRadioButtonRoute = UiRadioButtonRouteImport.update({
-    id: "/radio-button",
-    path: "/radio-button",
-    getParentRoute: () => UiRoute,
-} as any);
+  id: '/radio-button',
+  path: '/radio-button',
+  getParentRoute: () => UiRoute,
+} as any)
 const UiPaperRoute = UiPaperRouteImport.update({
-    id: "/paper",
-    path: "/paper",
-    getParentRoute: () => UiRoute,
-} as any);
+  id: '/paper',
+  path: '/paper',
+  getParentRoute: () => UiRoute,
+} as any)
 const UiLinearProgressRoute = UiLinearProgressRouteImport.update({
-    id: "/linear-progress",
-    path: "/linear-progress",
-    getParentRoute: () => UiRoute,
-} as any);
+  id: '/linear-progress',
+  path: '/linear-progress',
+  getParentRoute: () => UiRoute,
+} as any)
 const UiInputRoute = UiInputRouteImport.update({
-    id: "/input",
-    path: "/input",
-    getParentRoute: () => UiRoute,
-} as any);
+  id: '/input',
+  path: '/input',
+  getParentRoute: () => UiRoute,
+} as any)
 const UiDividerRoute = UiDividerRouteImport.update({
-    id: "/divider",
-    path: "/divider",
-    getParentRoute: () => UiRoute,
-} as any);
+  id: '/divider',
+  path: '/divider',
+  getParentRoute: () => UiRoute,
+} as any)
 const UiCircularProgressRoute = UiCircularProgressRouteImport.update({
-    id: "/circular-progress",
-    path: "/circular-progress",
-    getParentRoute: () => UiRoute,
-} as any);
+  id: '/circular-progress',
+  path: '/circular-progress',
+  getParentRoute: () => UiRoute,
+} as any)
 const UiCheckboxRoute = UiCheckboxRouteImport.update({
-    id: "/checkbox",
-    path: "/checkbox",
-    getParentRoute: () => UiRoute,
-} as any);
+  id: '/checkbox',
+  path: '/checkbox',
+  getParentRoute: () => UiRoute,
+} as any)
 const UiButtonGroupRoute = UiButtonGroupRouteImport.update({
-    id: "/button-group",
-    path: "/button-group",
-    getParentRoute: () => UiRoute,
-} as any);
+  id: '/button-group',
+  path: '/button-group',
+  getParentRoute: () => UiRoute,
+} as any)
 const UiButtonRoute = UiButtonRouteImport.update({
-    id: "/button",
-    path: "/button",
-    getParentRoute: () => UiRoute,
-} as any);
+  id: '/button',
+  path: '/button',
+  getParentRoute: () => UiRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
-    "/": typeof IndexRoute;
-    "/ui": typeof UiRouteWithChildren;
-    "/ui/button": typeof UiButtonRoute;
-    "/ui/button-group": typeof UiButtonGroupRoute;
-    "/ui/checkbox": typeof UiCheckboxRoute;
-    "/ui/circular-progress": typeof UiCircularProgressRoute;
-    "/ui/divider": typeof UiDividerRoute;
-    "/ui/input": typeof UiInputRoute;
-    "/ui/linear-progress": typeof UiLinearProgressRoute;
-    "/ui/paper": typeof UiPaperRoute;
-    "/ui/radio-button": typeof UiRadioButtonRoute;
-    "/ui/slider": typeof UiSliderRoute;
-    "/ui/typography": typeof UiTypographyRoute;
-    "/ui/": typeof UiIndexRoute;
+  '/': typeof IndexRoute
+  '/ui': typeof UiRouteWithChildren
+  '/ui/button': typeof UiButtonRoute
+  '/ui/button-group': typeof UiButtonGroupRoute
+  '/ui/checkbox': typeof UiCheckboxRoute
+  '/ui/circular-progress': typeof UiCircularProgressRoute
+  '/ui/divider': typeof UiDividerRoute
+  '/ui/input': typeof UiInputRoute
+  '/ui/linear-progress': typeof UiLinearProgressRoute
+  '/ui/paper': typeof UiPaperRoute
+  '/ui/radio-button': typeof UiRadioButtonRoute
+  '/ui/slider': typeof UiSliderRoute
+  '/ui/typography': typeof UiTypographyRoute
+  '/ui/': typeof UiIndexRoute
 }
 export interface FileRoutesByTo {
-    "/": typeof IndexRoute;
-    "/ui/button": typeof UiButtonRoute;
-    "/ui/button-group": typeof UiButtonGroupRoute;
-    "/ui/checkbox": typeof UiCheckboxRoute;
-    "/ui/circular-progress": typeof UiCircularProgressRoute;
-    "/ui/divider": typeof UiDividerRoute;
-    "/ui/input": typeof UiInputRoute;
-    "/ui/linear-progress": typeof UiLinearProgressRoute;
-    "/ui/paper": typeof UiPaperRoute;
-    "/ui/radio-button": typeof UiRadioButtonRoute;
-    "/ui/slider": typeof UiSliderRoute;
-    "/ui/typography": typeof UiTypographyRoute;
-    "/ui": typeof UiIndexRoute;
+  '/': typeof IndexRoute
+  '/ui/button': typeof UiButtonRoute
+  '/ui/button-group': typeof UiButtonGroupRoute
+  '/ui/checkbox': typeof UiCheckboxRoute
+  '/ui/circular-progress': typeof UiCircularProgressRoute
+  '/ui/divider': typeof UiDividerRoute
+  '/ui/input': typeof UiInputRoute
+  '/ui/linear-progress': typeof UiLinearProgressRoute
+  '/ui/paper': typeof UiPaperRoute
+  '/ui/radio-button': typeof UiRadioButtonRoute
+  '/ui/slider': typeof UiSliderRoute
+  '/ui/typography': typeof UiTypographyRoute
+  '/ui': typeof UiIndexRoute
 }
 export interface FileRoutesById {
-    __root__: typeof rootRouteImport;
-    "/": typeof IndexRoute;
-    "/ui": typeof UiRouteWithChildren;
-    "/ui/button": typeof UiButtonRoute;
-    "/ui/button-group": typeof UiButtonGroupRoute;
-    "/ui/checkbox": typeof UiCheckboxRoute;
-    "/ui/circular-progress": typeof UiCircularProgressRoute;
-    "/ui/divider": typeof UiDividerRoute;
-    "/ui/input": typeof UiInputRoute;
-    "/ui/linear-progress": typeof UiLinearProgressRoute;
-    "/ui/paper": typeof UiPaperRoute;
-    "/ui/radio-button": typeof UiRadioButtonRoute;
-    "/ui/slider": typeof UiSliderRoute;
-    "/ui/typography": typeof UiTypographyRoute;
-    "/ui/": typeof UiIndexRoute;
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/ui': typeof UiRouteWithChildren
+  '/ui/button': typeof UiButtonRoute
+  '/ui/button-group': typeof UiButtonGroupRoute
+  '/ui/checkbox': typeof UiCheckboxRoute
+  '/ui/circular-progress': typeof UiCircularProgressRoute
+  '/ui/divider': typeof UiDividerRoute
+  '/ui/input': typeof UiInputRoute
+  '/ui/linear-progress': typeof UiLinearProgressRoute
+  '/ui/paper': typeof UiPaperRoute
+  '/ui/radio-button': typeof UiRadioButtonRoute
+  '/ui/slider': typeof UiSliderRoute
+  '/ui/typography': typeof UiTypographyRoute
+  '/ui/': typeof UiIndexRoute
 }
 export interface FileRouteTypes {
-    fileRoutesByFullPath: FileRoutesByFullPath;
-    fullPaths:
-        | "/"
-        | "/ui"
-        | "/ui/button"
-        | "/ui/button-group"
-        | "/ui/checkbox"
-        | "/ui/circular-progress"
-        | "/ui/divider"
-        | "/ui/input"
-        | "/ui/linear-progress"
-        | "/ui/paper"
-        | "/ui/radio-button"
-        | "/ui/slider"
-        | "/ui/typography"
-        | "/ui/";
-    fileRoutesByTo: FileRoutesByTo;
-    to:
-        | "/"
-        | "/ui/button"
-        | "/ui/button-group"
-        | "/ui/checkbox"
-        | "/ui/circular-progress"
-        | "/ui/divider"
-        | "/ui/input"
-        | "/ui/linear-progress"
-        | "/ui/paper"
-        | "/ui/radio-button"
-        | "/ui/slider"
-        | "/ui/typography"
-        | "/ui";
-    id:
-        | "__root__"
-        | "/"
-        | "/ui"
-        | "/ui/button"
-        | "/ui/button-group"
-        | "/ui/checkbox"
-        | "/ui/circular-progress"
-        | "/ui/divider"
-        | "/ui/input"
-        | "/ui/linear-progress"
-        | "/ui/paper"
-        | "/ui/radio-button"
-        | "/ui/slider"
-        | "/ui/typography"
-        | "/ui/";
-    fileRoutesById: FileRoutesById;
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths:
+    | '/'
+    | '/ui'
+    | '/ui/button'
+    | '/ui/button-group'
+    | '/ui/checkbox'
+    | '/ui/circular-progress'
+    | '/ui/divider'
+    | '/ui/input'
+    | '/ui/linear-progress'
+    | '/ui/paper'
+    | '/ui/radio-button'
+    | '/ui/slider'
+    | '/ui/typography'
+    | '/ui/'
+  fileRoutesByTo: FileRoutesByTo
+  to:
+    | '/'
+    | '/ui/button'
+    | '/ui/button-group'
+    | '/ui/checkbox'
+    | '/ui/circular-progress'
+    | '/ui/divider'
+    | '/ui/input'
+    | '/ui/linear-progress'
+    | '/ui/paper'
+    | '/ui/radio-button'
+    | '/ui/slider'
+    | '/ui/typography'
+    | '/ui'
+  id:
+    | '__root__'
+    | '/'
+    | '/ui'
+    | '/ui/button'
+    | '/ui/button-group'
+    | '/ui/checkbox'
+    | '/ui/circular-progress'
+    | '/ui/divider'
+    | '/ui/input'
+    | '/ui/linear-progress'
+    | '/ui/paper'
+    | '/ui/radio-button'
+    | '/ui/slider'
+    | '/ui/typography'
+    | '/ui/'
+  fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-    IndexRoute: typeof IndexRoute;
-    UiRoute: typeof UiRouteWithChildren;
+  IndexRoute: typeof IndexRoute
+  UiRoute: typeof UiRouteWithChildren
 }
 
-declare module "@tanstack/react-router" {
-    interface FileRoutesByPath {
-        "/ui": {
-            id: "/ui";
-            path: "/ui";
-            fullPath: "/ui";
-            preLoaderRoute: typeof UiRouteImport;
-            parentRoute: typeof rootRouteImport;
-        };
-        "/": {
-            id: "/";
-            path: "/";
-            fullPath: "/";
-            preLoaderRoute: typeof IndexRouteImport;
-            parentRoute: typeof rootRouteImport;
-        };
-        "/ui/": {
-            id: "/ui/";
-            path: "/";
-            fullPath: "/ui/";
-            preLoaderRoute: typeof UiIndexRouteImport;
-            parentRoute: typeof UiRoute;
-        };
-        "/ui/typography": {
-            id: "/ui/typography";
-            path: "/typography";
-            fullPath: "/ui/typography";
-            preLoaderRoute: typeof UiTypographyRouteImport;
-            parentRoute: typeof UiRoute;
-        };
-        "/ui/slider": {
-            id: "/ui/slider";
-            path: "/slider";
-            fullPath: "/ui/slider";
-            preLoaderRoute: typeof UiSliderRouteImport;
-            parentRoute: typeof UiRoute;
-        };
-        "/ui/radio-button": {
-            id: "/ui/radio-button";
-            path: "/radio-button";
-            fullPath: "/ui/radio-button";
-            preLoaderRoute: typeof UiRadioButtonRouteImport;
-            parentRoute: typeof UiRoute;
-        };
-        "/ui/paper": {
-            id: "/ui/paper";
-            path: "/paper";
-            fullPath: "/ui/paper";
-            preLoaderRoute: typeof UiPaperRouteImport;
-            parentRoute: typeof UiRoute;
-        };
-        "/ui/linear-progress": {
-            id: "/ui/linear-progress";
-            path: "/linear-progress";
-            fullPath: "/ui/linear-progress";
-            preLoaderRoute: typeof UiLinearProgressRouteImport;
-            parentRoute: typeof UiRoute;
-        };
-        "/ui/input": {
-            id: "/ui/input";
-            path: "/input";
-            fullPath: "/ui/input";
-            preLoaderRoute: typeof UiInputRouteImport;
-            parentRoute: typeof UiRoute;
-        };
-        "/ui/divider": {
-            id: "/ui/divider";
-            path: "/divider";
-            fullPath: "/ui/divider";
-            preLoaderRoute: typeof UiDividerRouteImport;
-            parentRoute: typeof UiRoute;
-        };
-        "/ui/circular-progress": {
-            id: "/ui/circular-progress";
-            path: "/circular-progress";
-            fullPath: "/ui/circular-progress";
-            preLoaderRoute: typeof UiCircularProgressRouteImport;
-            parentRoute: typeof UiRoute;
-        };
-        "/ui/checkbox": {
-            id: "/ui/checkbox";
-            path: "/checkbox";
-            fullPath: "/ui/checkbox";
-            preLoaderRoute: typeof UiCheckboxRouteImport;
-            parentRoute: typeof UiRoute;
-        };
-        "/ui/button-group": {
-            id: "/ui/button-group";
-            path: "/button-group";
-            fullPath: "/ui/button-group";
-            preLoaderRoute: typeof UiButtonGroupRouteImport;
-            parentRoute: typeof UiRoute;
-        };
-        "/ui/button": {
-            id: "/ui/button";
-            path: "/button";
-            fullPath: "/ui/button";
-            preLoaderRoute: typeof UiButtonRouteImport;
-            parentRoute: typeof UiRoute;
-        };
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/ui': {
+      id: '/ui'
+      path: '/ui'
+      fullPath: '/ui'
+      preLoaderRoute: typeof UiRouteImport
+      parentRoute: typeof rootRouteImport
     }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ui/': {
+      id: '/ui/'
+      path: '/'
+      fullPath: '/ui/'
+      preLoaderRoute: typeof UiIndexRouteImport
+      parentRoute: typeof UiRoute
+    }
+    '/ui/typography': {
+      id: '/ui/typography'
+      path: '/typography'
+      fullPath: '/ui/typography'
+      preLoaderRoute: typeof UiTypographyRouteImport
+      parentRoute: typeof UiRoute
+    }
+    '/ui/slider': {
+      id: '/ui/slider'
+      path: '/slider'
+      fullPath: '/ui/slider'
+      preLoaderRoute: typeof UiSliderRouteImport
+      parentRoute: typeof UiRoute
+    }
+    '/ui/radio-button': {
+      id: '/ui/radio-button'
+      path: '/radio-button'
+      fullPath: '/ui/radio-button'
+      preLoaderRoute: typeof UiRadioButtonRouteImport
+      parentRoute: typeof UiRoute
+    }
+    '/ui/paper': {
+      id: '/ui/paper'
+      path: '/paper'
+      fullPath: '/ui/paper'
+      preLoaderRoute: typeof UiPaperRouteImport
+      parentRoute: typeof UiRoute
+    }
+    '/ui/linear-progress': {
+      id: '/ui/linear-progress'
+      path: '/linear-progress'
+      fullPath: '/ui/linear-progress'
+      preLoaderRoute: typeof UiLinearProgressRouteImport
+      parentRoute: typeof UiRoute
+    }
+    '/ui/input': {
+      id: '/ui/input'
+      path: '/input'
+      fullPath: '/ui/input'
+      preLoaderRoute: typeof UiInputRouteImport
+      parentRoute: typeof UiRoute
+    }
+    '/ui/divider': {
+      id: '/ui/divider'
+      path: '/divider'
+      fullPath: '/ui/divider'
+      preLoaderRoute: typeof UiDividerRouteImport
+      parentRoute: typeof UiRoute
+    }
+    '/ui/circular-progress': {
+      id: '/ui/circular-progress'
+      path: '/circular-progress'
+      fullPath: '/ui/circular-progress'
+      preLoaderRoute: typeof UiCircularProgressRouteImport
+      parentRoute: typeof UiRoute
+    }
+    '/ui/checkbox': {
+      id: '/ui/checkbox'
+      path: '/checkbox'
+      fullPath: '/ui/checkbox'
+      preLoaderRoute: typeof UiCheckboxRouteImport
+      parentRoute: typeof UiRoute
+    }
+    '/ui/button-group': {
+      id: '/ui/button-group'
+      path: '/button-group'
+      fullPath: '/ui/button-group'
+      preLoaderRoute: typeof UiButtonGroupRouteImport
+      parentRoute: typeof UiRoute
+    }
+    '/ui/button': {
+      id: '/ui/button'
+      path: '/button'
+      fullPath: '/ui/button'
+      preLoaderRoute: typeof UiButtonRouteImport
+      parentRoute: typeof UiRoute
+    }
+  }
 }
 
 interface UiRouteChildren {
-    UiButtonRoute: typeof UiButtonRoute;
-    UiButtonGroupRoute: typeof UiButtonGroupRoute;
-    UiCheckboxRoute: typeof UiCheckboxRoute;
-    UiCircularProgressRoute: typeof UiCircularProgressRoute;
-    UiDividerRoute: typeof UiDividerRoute;
-    UiInputRoute: typeof UiInputRoute;
-    UiLinearProgressRoute: typeof UiLinearProgressRoute;
-    UiPaperRoute: typeof UiPaperRoute;
-    UiRadioButtonRoute: typeof UiRadioButtonRoute;
-    UiSliderRoute: typeof UiSliderRoute;
-    UiTypographyRoute: typeof UiTypographyRoute;
-    UiIndexRoute: typeof UiIndexRoute;
+  UiButtonRoute: typeof UiButtonRoute
+  UiButtonGroupRoute: typeof UiButtonGroupRoute
+  UiCheckboxRoute: typeof UiCheckboxRoute
+  UiCircularProgressRoute: typeof UiCircularProgressRoute
+  UiDividerRoute: typeof UiDividerRoute
+  UiInputRoute: typeof UiInputRoute
+  UiLinearProgressRoute: typeof UiLinearProgressRoute
+  UiPaperRoute: typeof UiPaperRoute
+  UiRadioButtonRoute: typeof UiRadioButtonRoute
+  UiSliderRoute: typeof UiSliderRoute
+  UiTypographyRoute: typeof UiTypographyRoute
+  UiIndexRoute: typeof UiIndexRoute
 }
 
 const UiRouteChildren: UiRouteChildren = {
-    UiButtonRoute: UiButtonRoute,
-    UiButtonGroupRoute: UiButtonGroupRoute,
-    UiCheckboxRoute: UiCheckboxRoute,
-    UiCircularProgressRoute: UiCircularProgressRoute,
-    UiDividerRoute: UiDividerRoute,
-    UiInputRoute: UiInputRoute,
-    UiLinearProgressRoute: UiLinearProgressRoute,
-    UiPaperRoute: UiPaperRoute,
-    UiRadioButtonRoute: UiRadioButtonRoute,
-    UiSliderRoute: UiSliderRoute,
-    UiTypographyRoute: UiTypographyRoute,
-    UiIndexRoute: UiIndexRoute,
-};
+  UiButtonRoute: UiButtonRoute,
+  UiButtonGroupRoute: UiButtonGroupRoute,
+  UiCheckboxRoute: UiCheckboxRoute,
+  UiCircularProgressRoute: UiCircularProgressRoute,
+  UiDividerRoute: UiDividerRoute,
+  UiInputRoute: UiInputRoute,
+  UiLinearProgressRoute: UiLinearProgressRoute,
+  UiPaperRoute: UiPaperRoute,
+  UiRadioButtonRoute: UiRadioButtonRoute,
+  UiSliderRoute: UiSliderRoute,
+  UiTypographyRoute: UiTypographyRoute,
+  UiIndexRoute: UiIndexRoute,
+}
 
-const UiRouteWithChildren = UiRoute._addFileChildren(UiRouteChildren);
+const UiRouteWithChildren = UiRoute._addFileChildren(UiRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
-    IndexRoute: IndexRoute,
-    UiRoute: UiRouteWithChildren,
-};
+  IndexRoute: IndexRoute,
+  UiRoute: UiRouteWithChildren,
+}
 export const routeTree = rootRouteImport
-    ._addFileChildren(rootRouteChildren)
-    ._addFileTypes<FileRouteTypes>();
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
