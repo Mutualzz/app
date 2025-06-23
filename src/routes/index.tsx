@@ -35,7 +35,7 @@ function Index() {
                     }}
                     size="lg"
                     variant="solid"
-                    color="primary"
+                    color="info"
                 >
                     Go to the UI playground
                 </Button>
