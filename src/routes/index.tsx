@@ -14,7 +14,7 @@ function Index() {
     return (
         <Stack
             direction="column"
-            height="100%"
+            height="100vh"
             justifyContent="center"
             alignItems="center"
         >
