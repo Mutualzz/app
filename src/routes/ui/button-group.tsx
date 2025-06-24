@@ -239,7 +239,6 @@ function PlaygroundButtonGroup() {
                                     variant="solid"
                                     size="lg"
                                     color="primary"
-                                    fullWidth
                                     placeholder="Enter color (e.g. #ff0000)"
                                     value={inputColorValue}
                                     onChange={(e) =>

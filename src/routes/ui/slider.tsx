@@ -601,8 +601,13 @@ function SlderPlayground() {
                         )}
                     </Stack>
                     <Divider />
-                    <Stack direction="row" spacing={5}>
-                        <Stack direction="column" spacing={10}>
+                    <Stack direction="row" spacing={5} wrap="wrap" width="100%">
+                        <Stack
+                            minWidth={0}
+                            flex={1}
+                            direction="column"
+                            spacing={10}
+                        >
                             <label>Min</label>
                             <Input
                                 variant="solid"
@@ -614,7 +619,12 @@ function SlderPlayground() {
                                 onChange={(e) => setMin(Number(e.target.value))}
                             />
                         </Stack>
-                        <Stack direction="column" spacing={10}>
+                        <Stack
+                            minWidth={0}
+                            direction="column"
+                            spacing={10}
+                            flex={1}
+                        >
                             <label>Max</label>
                             <Input
                                 variant="solid"

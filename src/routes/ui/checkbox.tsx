@@ -312,7 +312,6 @@ function PlaygroundCheckbox() {
                                 size="lg"
                                 color="primary"
                                 placeholder="Enter a color (e.g., #ff0000)"
-                                fullWidth
                                 error={isInvalid}
                                 value={inputColorValue}
                                 onChange={(e) => handleChange(e.target.value)}

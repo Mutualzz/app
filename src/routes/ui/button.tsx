@@ -317,7 +317,6 @@ function PlaygroundButton() {
                                 error={isInvalid}
                                 onChange={(e) => handleChange(e.target.value)}
                                 onBlur={validate}
-                                fullWidth
                             />
                             <Button
                                 color="primary"

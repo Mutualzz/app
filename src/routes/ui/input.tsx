@@ -245,7 +245,7 @@ function InputPlayground() {
                     <Divider />
                     <Stack direction="column" spacing={5}>
                         <label>States</label>
-                        <Stack direction="column" spacing={5}>
+                        <Stack direction="row" spacing={5}>
                             <Checkbox
                                 checked={fullWidth}
                                 label="Full Width"
@@ -261,18 +261,18 @@ function InputPlayground() {
                                 label="Controlled"
                                 onChange={() => setControlled((prev) => !prev)}
                             />
-                            {controlled && (
-                                <Input
-                                    variant="solid"
-                                    size="lg"
-                                    color="primary"
-                                    fullWidth
-                                    value={value ?? ""}
-                                    onChange={(e) => setValue(e.target.value)}
-                                    placeholder="Controlled value"
-                                />
-                            )}
                         </Stack>
+                        {controlled && (
+                            <Input
+                                variant="solid"
+                                size="lg"
+                                color="primary"
+                                fullWidth
+                                value={value ?? ""}
+                                onChange={(e) => setValue(e.target.value)}
+                                placeholder="Controlled value"
+                            />
+                        )}
                     </Stack>
                     <Divider />
                     <Stack direction="column" spacing={5}>
@@ -326,7 +326,6 @@ function InputPlayground() {
                                 variant="solid"
                                 size="lg"
                                 color="primary"
-                                fullWidth
                                 placeholder="Enter a color (e.g., #ff0000, red)"
                                 error={isInvalid}
                                 value={inputColorValue}
