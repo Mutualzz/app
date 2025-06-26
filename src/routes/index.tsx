@@ -25,7 +25,7 @@ function Index() {
                 The UI is being made from scratch
             </Typography>
             <Typography level="h5">It&apos;s open source too :3</Typography>
-            <Stack direction="row" alignItems="center">
+            <Stack spacing={10} direction="row" alignItems="center">
                 <Typography level="h5">Meanwhile you can</Typography>
                 <Button
                     onClick={() => {
