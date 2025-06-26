@@ -38,7 +38,11 @@ function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
             <head>
                 <HeadContent />
             </head>
-            <body>
+            <body
+                css={{
+                    minHeight: "100vh",
+                }}
+            >
                 {children}
                 <Scripts />
             </body>
