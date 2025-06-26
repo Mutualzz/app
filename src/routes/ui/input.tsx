@@ -245,7 +245,7 @@ function InputPlayground() {
                     <Divider />
                     <Stack direction="column" spacing={5}>
                         <label>States</label>
-                        <Stack direction="row" spacing={5}>
+                        <Stack direction="column" spacing={5}>
                             <Checkbox
                                 checked={fullWidth}
                                 label="Full Width"
