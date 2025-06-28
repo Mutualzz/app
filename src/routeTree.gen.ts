@@ -13,6 +13,7 @@ import { Route as UiRouteImport } from './routes/ui'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as UiIndexRouteImport } from './routes/ui/index'
 import { Route as UiTypographyRouteImport } from './routes/ui/typography'
+import { Route as UiTextareaRouteImport } from './routes/ui/textarea'
 import { Route as UiSliderRouteImport } from './routes/ui/slider'
 import { Route as UiRadioButtonRouteImport } from './routes/ui/radio-button'
 import { Route as UiPaperRouteImport } from './routes/ui/paper'
@@ -42,6 +43,11 @@ const UiIndexRoute = UiIndexRouteImport.update({
 const UiTypographyRoute = UiTypographyRouteImport.update({
   id: '/typography',
   path: '/typography',
+  getParentRoute: () => UiRoute,
+} as any)
+const UiTextareaRoute = UiTextareaRouteImport.update({
+  id: '/textarea',
+  path: '/textarea',
   getParentRoute: () => UiRoute,
 } as any)
 const UiSliderRoute = UiSliderRouteImport.update({
@@ -108,6 +114,7 @@ export interface FileRoutesByFullPath {
   '/ui/paper': typeof UiPaperRoute
   '/ui/radio-button': typeof UiRadioButtonRoute
   '/ui/slider': typeof UiSliderRoute
+  '/ui/textarea': typeof UiTextareaRoute
   '/ui/typography': typeof UiTypographyRoute
   '/ui/': typeof UiIndexRoute
 }
@@ -123,6 +130,7 @@ export interface FileRoutesByTo {
   '/ui/paper': typeof UiPaperRoute
   '/ui/radio-button': typeof UiRadioButtonRoute
   '/ui/slider': typeof UiSliderRoute
+  '/ui/textarea': typeof UiTextareaRoute
   '/ui/typography': typeof UiTypographyRoute
   '/ui': typeof UiIndexRoute
 }
@@ -140,6 +148,7 @@ export interface FileRoutesById {
   '/ui/paper': typeof UiPaperRoute
   '/ui/radio-button': typeof UiRadioButtonRoute
   '/ui/slider': typeof UiSliderRoute
+  '/ui/textarea': typeof UiTextareaRoute
   '/ui/typography': typeof UiTypographyRoute
   '/ui/': typeof UiIndexRoute
 }
@@ -158,6 +167,7 @@ export interface FileRouteTypes {
     | '/ui/paper'
     | '/ui/radio-button'
     | '/ui/slider'
+    | '/ui/textarea'
     | '/ui/typography'
     | '/ui/'
   fileRoutesByTo: FileRoutesByTo
@@ -173,6 +183,7 @@ export interface FileRouteTypes {
     | '/ui/paper'
     | '/ui/radio-button'
     | '/ui/slider'
+    | '/ui/textarea'
     | '/ui/typography'
     | '/ui'
   id:
@@ -189,6 +200,7 @@ export interface FileRouteTypes {
     | '/ui/paper'
     | '/ui/radio-button'
     | '/ui/slider'
+    | '/ui/textarea'
     | '/ui/typography'
     | '/ui/'
   fileRoutesById: FileRoutesById
@@ -226,6 +238,13 @@ declare module '@tanstack/react-router' {
       path: '/typography'
       fullPath: '/ui/typography'
       preLoaderRoute: typeof UiTypographyRouteImport
+      parentRoute: typeof UiRoute
+    }
+    '/ui/textarea': {
+      id: '/ui/textarea'
+      path: '/textarea'
+      fullPath: '/ui/textarea'
+      preLoaderRoute: typeof UiTextareaRouteImport
       parentRoute: typeof UiRoute
     }
     '/ui/slider': {
@@ -312,6 +331,7 @@ interface UiRouteChildren {
   UiPaperRoute: typeof UiPaperRoute
   UiRadioButtonRoute: typeof UiRadioButtonRoute
   UiSliderRoute: typeof UiSliderRoute
+  UiTextareaRoute: typeof UiTextareaRoute
   UiTypographyRoute: typeof UiTypographyRoute
   UiIndexRoute: typeof UiIndexRoute
 }
@@ -327,6 +347,7 @@ const UiRouteChildren: UiRouteChildren = {
   UiPaperRoute: UiPaperRoute,
   UiRadioButtonRoute: UiRadioButtonRoute,
   UiSliderRoute: UiSliderRoute,
+  UiTextareaRoute: UiTextareaRoute,
   UiTypographyRoute: UiTypographyRoute,
   UiIndexRoute: UiIndexRoute,
 }

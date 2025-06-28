@@ -29,7 +29,6 @@ const links = {
             name: "Input",
             link: "/ui/input",
         },
-
         {
             name: "Radio Button",
             link: "/ui/radio-button",
@@ -37,6 +36,10 @@ const links = {
         {
             name: "Slider",
             link: "/ui/slider",
+        },
+        {
+            name: "Textarea",
+            link: "/ui/textarea",
         },
     ],
     dataDisplay: [
