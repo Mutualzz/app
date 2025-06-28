@@ -1,4 +1,7 @@
 import type { CSSObject, Theme } from "@emotion/react";
+import type { Color, ColorLike } from "@ui/types";
+import { darken, lighten } from "@ui/utils";
+import { resolveColor } from "@ui/utils/resolveColor";
 import { formatHex8, parse } from "culori";
 import {
     Editor,
@@ -12,9 +15,6 @@ import {
     type TextUnit,
 } from "slate";
 import type { EmojiElement } from "../../types/slate";
-import type { Color, ColorLike } from "../../ui/src/types";
-import { darken, lighten } from "../../ui/src/utils";
-import { resolveColor } from "../../ui/src/utils/resolveColor";
 import type { getEmojiWithShortcode } from "../../utils/emojis";
 
 const SHORTCUTS: Record<string, Element["type"]> = {
@@ -166,7 +166,7 @@ export const withShortcuts = (editor: Editor) => {
                 editor.select(range);
 
                 if (!Range.isCollapsed(range)) {
-                    Transforms.delete(editor);
+                    editor.delete();
                 }
 
                 const newProperties: Partial<Element> = {
@@ -326,8 +326,8 @@ export const insertEmoji = (
     const { selection } = editor;
 
     if (selection) {
-        Transforms.insertNodes(editor, emojiElement);
+        editor.insertNodes(emojiElement);
         const pointAfterEmoji = editor.after(selection.focus);
-        if (pointAfterEmoji) Transforms.select(editor, pointAfterEmoji);
+        if (pointAfterEmoji) editor.select(pointAfterEmoji);
     }
 };

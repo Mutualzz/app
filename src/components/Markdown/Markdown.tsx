@@ -1,3 +1,4 @@
+import { useTheme } from "@ui/index";
 import { isKeyHotkey } from "is-hotkey";
 import { useCallback, useMemo, useState, type KeyboardEvent } from "react";
 import {
@@ -18,7 +19,6 @@ import {
     type RenderElementProps,
     type RenderLeafProps,
 } from "slate-react";
-import { useTheme } from "../../ui/src/hooks/useTheme";
 import { getEmojiWithShortcode } from "../../utils/emojis";
 import { Element } from "./Element";
 import { Leaf } from "./Leaf";
