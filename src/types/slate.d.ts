@@ -33,6 +33,7 @@ export type Text = {
     code?: boolean;
     underline?: boolean;
     strikethrough?: boolean;
+    isMarker?: boolean; // Used to mark ranges for markers like **bold** or *italic*
     text: string;
 };
 

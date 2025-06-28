@@ -2,21 +2,37 @@ import { Typography } from "@ui/index";
 import type { RenderLeafProps } from "slate-react";
 
 export const Leaf = ({ attributes, children, leaf }: RenderLeafProps) => {
+    const { bold, italic, underline, strikethrough, code } = leaf;
+
+    if (leaf.isMarker) {
+        return (
+            <Typography
+                {...attributes}
+                fontWeight="normal"
+                fontStyle="normal"
+                fontFamily="inherit"
+                textDecoration="none"
+            >
+                {children}
+            </Typography>
+        );
+    }
+
     return (
         <Typography
             {...attributes}
-            fontWeight={leaf.bold ? "bold" : undefined}
-            fontStyle={leaf.italic ? "italic" : undefined}
+            fontWeight={bold ? "bold" : undefined}
+            fontStyle={italic ? "italic" : undefined}
             textDecoration={
-                leaf.underline && leaf.strikethrough
+                underline && strikethrough
                     ? "underline line-through"
-                    : leaf.underline
+                    : underline
                       ? "underline"
-                      : leaf.strikethrough
+                      : strikethrough
                         ? "line-through"
                         : undefined
             }
-            fontFamily={leaf.code ? "monospace" : "inherit"}
+            fontFamily={code ? "monospace" : "inherit"}
         >
             {children}
         </Typography>

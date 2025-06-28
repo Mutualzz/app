@@ -25,6 +25,7 @@ import { Leaf } from "./Leaf";
 import {
     deseralizeFromMarkdown,
     insertEmoji,
+    parseMarkdownToRanges,
     resolveMarkdownStyles,
     serializeToMarkdown,
     withEmojis,
@@ -41,6 +42,8 @@ export const Markdown = ({
     placeholder,
     onEnter,
     value,
+
+    css,
 }: MarkdownProps) => {
     const { theme } = useTheme();
 
@@ -64,71 +67,78 @@ export const Markdown = ({
     );
 
     const decorate = useCallback(([node, path]: [Node, number[]]): Range[] => {
-        const ranges: Range[] = [];
+        if (!Text.isText(node)) return [];
 
-        if (Text.isText(node)) {
-            const { text } = node;
-
-            const patterns = [
-                { type: "bold", regex: /\*\*(.*?)\*\*/g }, // Bold (**bold**)
-                { type: "italic", regex: /\*(.*?)\*/g }, // Italic (*italic*)
-                { type: "strikethrough", regex: /~~(.*?)~~/g }, // Strikethrough (~~strikethrough~~)
-                { type: "underline", regex: /__(.*?)__/g }, // Underlined (__underlined__)
-            ];
-
-            // NOTE: This makes it so it doesn't include markers in the ranges.
-            // If you want to include the markers in the ranges, uncomment the following code block.
-            // patterns.forEach(({ regex, type }) => {
-            //     let match;
-            //     while ((match = regex.exec(text)) !== null) {
-            //         const fullMatch = match[0];
-            //         const innerText = match[1];
-            //         const markerLength =
-            //             (fullMatch.length - innerText.length) / 2;
-
-            //         const start = match.index + markerLength; // skip starting marker
-            //         const end = start + innerText.length;
-
-            //         ranges.push({
-            //             [type]: true,
-            //             anchor: { path, offset: start },
-            //             focus: { path, offset: end },
-            //         });
-            //     }
-            // });
-
-            // NOTE: This includes the markers in the ranges.
-            patterns.forEach(({ regex, type }) => {
-                let match;
-                while ((match = regex.exec(text)) !== null) {
-                    const start = match.index;
-                    const end = start + match[0].length; // Entire match, including markers
-
-                    ranges.push({
-                        [type]: true,
-                        anchor: { path, offset: start },
-                        focus: { path, offset: end },
-                    });
-                }
-            });
-
-            // Handle inline code (single backticks), but only if it's not inside a code block
-            const inlineCodeRegex = /`([^`]+)`/g;
-            let match;
-            while ((match = inlineCodeRegex.exec(text)) !== null) {
-                const start = match.index; // include the starting backtick
-                const end = start + match[0].length; // include ending backtick
-
-                ranges.push({
-                    code: true,
-                    anchor: { path, offset: start },
-                    focus: { path, offset: end },
-                });
-            }
-        }
-
-        return ranges;
+        return parseMarkdownToRanges(node.text, path);
     }, []);
+
+    // NOTE: Old decorate function
+    // const decorate = useCallback(([node, path]: [Node, number[]]): Range[] => {
+    //     const ranges: Range[] = [];
+
+    //     if (Text.isText(node)) {
+    //         const { text } = node;
+
+    // const patterns = [
+    //     { type: "bold", regex: /\*\*(.*?)\*\*/g }, // Bold (**bold**)
+    //     { type: "italic", regex: /\*(.*?)\*/g }, // Italic (*italic*)
+    //     { type: "strikethrough", regex: /~~(.*?)~~/g }, // Strikethrough (~~strikethrough~~)
+    //     { type: "underline", regex: /__(.*?)__/g }, // Underlined (__underlined__)
+    // ];
+
+    // NOTE: This makes it so it doesn't include markers in the ranges.
+    // If you want to include the markers in the ranges, uncomment the following code block.
+    // patterns.forEach(({ regex, type }) => {
+    //     let match;
+    //     while ((match = regex.exec(text)) !== null) {
+    //         const fullMatch = match[0];
+    //         const innerText = match[1];
+    //         const markerLength =
+    //             (fullMatch.length - innerText.length) / 2;
+
+    //         const start = match.index + markerLength; // skip starting marker
+    //         const end = start + innerText.length;
+
+    //         ranges.push({
+    //             [type]: true,
+    //             anchor: { path, offset: start },
+    //             focus: { path, offset: end },
+    //         });
+    //     }
+    // });
+
+    //         // NOTE: This includes the markers in the ranges.
+    //         patterns.forEach(({ regex, type }) => {
+    //             let match;
+    //             while ((match = regex.exec(text)) !== null) {
+    //                 const start = match.index;
+    //                 const end = start + match[0].length; // Entire match, including markers
+
+    //                 ranges.push({
+    //                     [type]: true,
+    //                     anchor: { path, offset: start },
+    //                     focus: { path, offset: end },
+    //                 });
+    //             }
+    //         });
+
+    //         // Handle inline code (single backticks), but only if it's not inside a code block
+    //         const inlineCodeRegex = /`([^`]+)`/g;
+    //         let match;
+    //         while ((match = inlineCodeRegex.exec(text)) !== null) {
+    //             const start = match.index; // include the starting backtick
+    //             const end = start + match[0].length; // include ending backtick
+
+    //             ranges.push({
+    //                 code: true,
+    //                 anchor: { path, offset: start },
+    //                 focus: { path, offset: end },
+    //             });
+    //         }
+    //     }
+
+    //     return ranges;
+    // }, []);
 
     const handleShiftEnter = (e: KeyboardEvent) => {
         const { selection } = editor;
@@ -296,6 +306,8 @@ export const Markdown = ({
                     display: "block",
                     position: "relative",
                     width: "100%",
+                    height: "100%",
+                    padding: "0.5em",
                     minWidth: 0,
                     boxSizing: "border-box",
                     ...resolveMarkdownStyles(theme, color)[variant],
@@ -303,6 +315,7 @@ export const Markdown = ({
                         opacity: 0.5,
                         pointerEvents: "none",
                     }),
+                    ...css,
                 }}
                 disabled={disabled}
                 disableDefaultStyles

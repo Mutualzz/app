@@ -30,6 +30,10 @@ const links = {
             link: "/ui/input",
         },
         {
+            name: "Markdown",
+            link: "/ui/markdown",
+        },
+        {
             name: "Radio Button",
             link: "/ui/radio-button",
         },

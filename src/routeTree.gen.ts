@@ -17,6 +17,7 @@ import { Route as UiTextareaRouteImport } from './routes/ui/textarea'
 import { Route as UiSliderRouteImport } from './routes/ui/slider'
 import { Route as UiRadioButtonRouteImport } from './routes/ui/radio-button'
 import { Route as UiPaperRouteImport } from './routes/ui/paper'
+import { Route as UiMarkdownRouteImport } from './routes/ui/markdown'
 import { Route as UiLinearProgressRouteImport } from './routes/ui/linear-progress'
 import { Route as UiInputRouteImport } from './routes/ui/input'
 import { Route as UiDividerRouteImport } from './routes/ui/divider'
@@ -65,6 +66,11 @@ const UiPaperRoute = UiPaperRouteImport.update({
   path: '/paper',
   getParentRoute: () => UiRoute,
 } as any)
+const UiMarkdownRoute = UiMarkdownRouteImport.update({
+  id: '/markdown',
+  path: '/markdown',
+  getParentRoute: () => UiRoute,
+} as any)
 const UiLinearProgressRoute = UiLinearProgressRouteImport.update({
   id: '/linear-progress',
   path: '/linear-progress',
@@ -111,6 +117,7 @@ export interface FileRoutesByFullPath {
   '/ui/divider': typeof UiDividerRoute
   '/ui/input': typeof UiInputRoute
   '/ui/linear-progress': typeof UiLinearProgressRoute
+  '/ui/markdown': typeof UiMarkdownRoute
   '/ui/paper': typeof UiPaperRoute
   '/ui/radio-button': typeof UiRadioButtonRoute
   '/ui/slider': typeof UiSliderRoute
@@ -127,6 +134,7 @@ export interface FileRoutesByTo {
   '/ui/divider': typeof UiDividerRoute
   '/ui/input': typeof UiInputRoute
   '/ui/linear-progress': typeof UiLinearProgressRoute
+  '/ui/markdown': typeof UiMarkdownRoute
   '/ui/paper': typeof UiPaperRoute
   '/ui/radio-button': typeof UiRadioButtonRoute
   '/ui/slider': typeof UiSliderRoute
@@ -145,6 +153,7 @@ export interface FileRoutesById {
   '/ui/divider': typeof UiDividerRoute
   '/ui/input': typeof UiInputRoute
   '/ui/linear-progress': typeof UiLinearProgressRoute
+  '/ui/markdown': typeof UiMarkdownRoute
   '/ui/paper': typeof UiPaperRoute
   '/ui/radio-button': typeof UiRadioButtonRoute
   '/ui/slider': typeof UiSliderRoute
@@ -164,6 +173,7 @@ export interface FileRouteTypes {
     | '/ui/divider'
     | '/ui/input'
     | '/ui/linear-progress'
+    | '/ui/markdown'
     | '/ui/paper'
     | '/ui/radio-button'
     | '/ui/slider'
@@ -180,6 +190,7 @@ export interface FileRouteTypes {
     | '/ui/divider'
     | '/ui/input'
     | '/ui/linear-progress'
+    | '/ui/markdown'
     | '/ui/paper'
     | '/ui/radio-button'
     | '/ui/slider'
@@ -197,6 +208,7 @@ export interface FileRouteTypes {
     | '/ui/divider'
     | '/ui/input'
     | '/ui/linear-progress'
+    | '/ui/markdown'
     | '/ui/paper'
     | '/ui/radio-button'
     | '/ui/slider'
@@ -268,6 +280,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof UiPaperRouteImport
       parentRoute: typeof UiRoute
     }
+    '/ui/markdown': {
+      id: '/ui/markdown'
+      path: '/markdown'
+      fullPath: '/ui/markdown'
+      preLoaderRoute: typeof UiMarkdownRouteImport
+      parentRoute: typeof UiRoute
+    }
     '/ui/linear-progress': {
       id: '/ui/linear-progress'
       path: '/linear-progress'
@@ -328,6 +347,7 @@ interface UiRouteChildren {
   UiDividerRoute: typeof UiDividerRoute
   UiInputRoute: typeof UiInputRoute
   UiLinearProgressRoute: typeof UiLinearProgressRoute
+  UiMarkdownRoute: typeof UiMarkdownRoute
   UiPaperRoute: typeof UiPaperRoute
   UiRadioButtonRoute: typeof UiRadioButtonRoute
   UiSliderRoute: typeof UiSliderRoute
@@ -344,6 +364,7 @@ const UiRouteChildren: UiRouteChildren = {
   UiDividerRoute: UiDividerRoute,
   UiInputRoute: UiInputRoute,
   UiLinearProgressRoute: UiLinearProgressRoute,
+  UiMarkdownRoute: UiMarkdownRoute,
   UiPaperRoute: UiPaperRoute,
   UiRadioButtonRoute: UiRadioButtonRoute,
   UiSliderRoute: UiSliderRoute,

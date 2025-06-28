@@ -1,6 +1,5 @@
 import type { CSSObject, Theme } from "@emotion/react";
 import { formatHex8, parse } from "culori";
-import type { CSSProperties } from "react";
 import {
     Editor,
     Element,
@@ -13,36 +12,86 @@ import {
     type TextUnit,
 } from "slate";
 import type { EmojiElement } from "../../types/slate";
-import type { Color, ColorLike, Size } from "../../ui/src/types";
+import type { Color, ColorLike } from "../../ui/src/types";
 import { darken, lighten } from "../../ui/src/utils";
 import { resolveColor } from "../../ui/src/utils/resolveColor";
-import { resolveSize } from "../../ui/src/utils/resolveSize";
 import type { getEmojiWithShortcode } from "../../utils/emojis";
 
 const SHORTCUTS: Record<string, Element["type"]> = {
     ">": "blockquote",
 };
 
-const baseSizeMap: Record<Size, number> = {
-    sm: 12,
-    md: 14,
-    lg: 16,
-};
+const tokenDefs = [
+    { symbol: "**", type: "bold" },
+    { symbol: "*", type: "italic" },
+    { symbol: "~~", type: "strikethrough" },
+    { symbol: "__", type: "underline" },
+    { symbol: "`", type: "code" },
+] as const;
 
-export const resolveMarkdownFontSize = (size: Size | number): number =>
-    resolveSize(size, -Infinity, Infinity, baseSizeMap);
+type TokenType = (typeof tokenDefs)[number]["type"];
 
-export const resolveMarkdownSize = (size: Size | number): CSSProperties => {
-    const sizeVal = resolveSize(size, -Infinity, Infinity, baseSizeMap);
-
-    return {
-        lineHeight: 1,
-        minHeight: sizeVal * 2,
-        paddingTop: sizeVal * 0.5,
-        paddingBottom: sizeVal * 0.5,
-        paddingInline: "0.5em",
-        boxSizing: "border-box",
+export const parseMarkdownToRanges = (
+    text: string,
+    path: number[],
+): Range[] => {
+    const ranges: Range[] = [];
+    const stacks: Record<TokenType, { offset: number; symbol: string }[]> = {
+        bold: [],
+        italic: [],
+        strikethrough: [],
+        underline: [],
+        code: [],
     };
+
+    let i = 0;
+    while (i < text.length) {
+        const match = tokenDefs.find(({ symbol }) =>
+            text.startsWith(symbol, i),
+        );
+        if (match) {
+            const { symbol, type } = match;
+            const stack = stacks[type];
+
+            if (stack.length > 0) {
+                const { offset: startOffset } = stack.pop()!;
+                const markerLength = symbol.length;
+                const contentStart = startOffset + markerLength;
+                const contentEnd = i;
+
+                if (contentEnd > contentStart) {
+                    // Add range for opening marker
+                    ranges.push({
+                        isMarker: true,
+                        anchor: { path, offset: startOffset },
+                        focus: { path, offset: startOffset + markerLength },
+                    });
+
+                    // Add decorated content range
+                    ranges.push({
+                        [type]: true,
+                        anchor: { path, offset: contentStart },
+                        focus: { path, offset: contentEnd },
+                    });
+
+                    // Add range for closing marker
+                    ranges.push({
+                        isMarker: true,
+                        anchor: { path, offset: contentEnd },
+                        focus: { path, offset: contentEnd + markerLength },
+                    });
+                }
+            } else {
+                stack.push({ offset: i, symbol });
+            }
+
+            i += symbol.length;
+        } else {
+            i++;
+        }
+    }
+
+    return ranges;
 };
 
 export const resolveMarkdownStyles = (
