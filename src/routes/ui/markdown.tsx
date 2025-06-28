@@ -1,9 +1,17 @@
 import { Markdown } from "@components/Markdown/Markdown";
 import { createFileRoute } from "@tanstack/react-router";
 import { Paper, Stack, Typography } from "@ui/index";
+import { seo } from "seo";
 
 export const Route = createFileRoute("/ui/markdown")({
     component: RouteComponent,
+    head: () => ({
+        meta: [
+            ...seo({
+                title: "Markdown Input - Mutualzz UI",
+            }),
+        ],
+    }),
 });
 
 function RouteComponent() {
