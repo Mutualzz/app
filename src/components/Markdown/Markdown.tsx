@@ -251,7 +251,7 @@ export const Markdown = ({
                         Transforms.select(editor, shortcodeRange);
                         Transforms.delete(editor);
 
-                        insertEmoji(editor, emoji);
+                        insertEmoji(editor, match[1], emoji);
                     }
                 }
             }

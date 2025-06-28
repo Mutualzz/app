@@ -24,6 +24,7 @@ export type EmojiElement = {
     name: string;
     url: string;
     unicode?: string;
+    shortcode?: string;
     children: EmptyText[];
 };
 

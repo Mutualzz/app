@@ -237,6 +237,17 @@ export const withEmojis = (editor: Editor) => {
         return element.type !== "emoji";
     };
 
+    editor.setFragmentData = (data: DataTransfer) => {
+        const { selection } = editor;
+
+        if (!selection) return;
+
+        const fragment = editor.fragment(selection);
+        const markdown = fragment.map(deseralizeNode).join("");
+
+        data.setData("text/plain", markdown);
+    };
+
     return editor;
 };
 
@@ -252,7 +263,7 @@ export const deseralizeNode = (node: Node): string => {
             case "blockquote":
                 return `> ${children}\n`;
             case "emoji":
-                return `:${node.id}:`;
+                return `:${node.shortcode ?? `${node.id}`}:`;
             case "heading": {
                 const hashtag = "#".repeat(node.level);
                 return `${hashtag} ${children}\n`;
@@ -295,16 +306,21 @@ export const serializeToMarkdown = (text: string): Descendant[] =>
 
 export const insertEmoji = (
     editor: Editor,
+    shortcode: string,
     emoji: ReturnType<typeof getEmojiWithShortcode>,
 ) => {
     if (!emoji) return;
     const emojiElement: EmojiElement = {
         type: "emoji",
-        id: emoji.hexcode.toLowerCase(),
+        id:
+            "id" in emoji
+                ? (emoji as any).id.toLowerCase()
+                : emoji.hexcode.toLowerCase(),
         name: emoji.emoji,
         url: `https://cdnjs.cloudflare.com/ajax/libs/twemoji/16.0.1/svg/${emoji.hexcode.toLowerCase()}.svg`,
         children: [{ text: "" }],
         unicode: emoji.hexcode,
+        shortcode: shortcode.toLowerCase(),
     };
 
     const { selection } = editor;
