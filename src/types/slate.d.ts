@@ -12,6 +12,16 @@ export type ParagraphElement = {
     children: Descendant[];
 };
 
+export type SubscriptElement = {
+    type: "subscript";
+    children: Descendant[];
+};
+
+export type SupbscriptElement = {
+    type: "supscript";
+    children: Descendant[];
+};
+
 export type HeadingElement = {
     type: "heading";
     level: 1 | 2 | 3;
@@ -46,7 +56,9 @@ export type Element =
     | BlockQuoteElement
     | ParagraphElement
     | HeadingElement
-    | EmojiElement;
+    | EmojiElement
+    | SubscriptElement
+    | SupbscriptElement;
 
 export type Editor = BaseEditor &
     ReactEditor &

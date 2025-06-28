@@ -59,6 +59,7 @@ export const Element = ({
                 </span>
             );
 
+        case "paragraph":
         default:
             return <div {...attributes}>{children}</div>;
     }
