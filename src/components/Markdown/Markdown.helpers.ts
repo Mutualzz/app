@@ -9,7 +9,6 @@ import {
     Point,
     Range,
     Text,
-    Transforms,
     type Descendant,
     type Node,
     type TextUnit,
@@ -165,9 +164,7 @@ export const withShortcuts = (editor: Editor) => {
             if (type) {
                 editor.select(range);
 
-                if (!Range.isCollapsed(range)) {
-                    editor.delete();
-                }
+                if (!Range.isCollapsed(range)) editor.delete();
 
                 const newProperties: Partial<Element> = {
                     type,
@@ -205,7 +202,7 @@ export const withShortcuts = (editor: Editor) => {
                     const newProperties: Partial<Element> = {
                         type: "paragraph",
                     };
-                    Transforms.setNodes(editor, newProperties);
+                    editor.setNodes(newProperties);
 
                     return;
                 }

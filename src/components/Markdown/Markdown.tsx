@@ -7,7 +7,6 @@ import {
     Range,
     Element as SlateElement,
     Text,
-    Transforms,
     type Descendant,
     type Node,
 } from "slate";
@@ -170,14 +169,12 @@ export const Markdown = ({
 
     const onKeyDown = useCallback(
         (e: KeyboardEvent) => {
-            if (e.key === "Enter" && e.shiftKey) {
-                handleShiftEnter(e);
-            }
+            if (e.key === "Enter" && e.shiftKey) handleShiftEnter(e);
 
             if (e.key === "Enter" && !e.shiftKey) {
                 if (onEnter) {
                     e.preventDefault();
-                    Transforms.select(editor, editor.start([]));
+                    editor.select(editor.start([]));
                     onEnter();
                     editor.children = [
                         {
@@ -195,7 +192,7 @@ export const Markdown = ({
 
                 if (isKeyHotkey("left", nativeEvent)) {
                     e.preventDefault();
-                    Transforms.move(editor, {
+                    editor.move({
                         unit: "offset",
                         reverse: true,
                     });
@@ -203,7 +200,7 @@ export const Markdown = ({
 
                 if (isKeyHotkey("right", nativeEvent)) {
                     e.preventDefault();
-                    Transforms.move(editor, {
+                    editor.move({
                         unit: "offset",
                         reverse: false,
                     });
@@ -248,8 +245,8 @@ export const Markdown = ({
                             focus: selection.anchor,
                         };
 
-                        Transforms.select(editor, shortcodeRange);
-                        Transforms.delete(editor);
+                        editor.select(shortcodeRange);
+                        editor.delete();
 
                         insertEmoji(editor, match[1], emoji);
                     }
