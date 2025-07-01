@@ -94,6 +94,7 @@ function RouteComponent() {
                             ))}
                         </RadioGroup>
                     </Stack>
+                    <Divider />
                     <Stack direction="column" spacing={5}>
                         <Stack
                             direction="row"
