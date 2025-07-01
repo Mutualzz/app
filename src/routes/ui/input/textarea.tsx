@@ -21,9 +21,9 @@ import {
 } from "@ui/index";
 import { capitalize } from "lodash-es";
 import { useState } from "react";
-import { seo } from "../../seo";
+import { seo } from "../../../seo";
 
-export const Route = createFileRoute("/ui/textarea")({
+export const Route = createFileRoute("/ui/input/textarea")({
     component: TextareaPlayground,
     head: () => ({
         meta: [

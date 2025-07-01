@@ -1,57 +1,54 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Input } from "@ui/components/inputs/Input/Input";
-import { type InputType } from "@ui/components/inputs/Input/Input.types";
+import { Divider } from "@ui/components/data-display/Divider/Divider";
+import { Typography } from "@ui/components/data-display/Typography/Typography";
+import { LinearProgress } from "@ui/components/feedback/LinearProgress/LinearProgress";
+import type { LinearProgressAnimation } from "@ui/components/feedback/LinearProgress/LinearProgress.types";
+import { Stack } from "@ui/components/layout/Stack/Stack";
+import { Paper } from "@ui/components/surfaces/Paper/Paper";
+import { useColorInput } from "@ui/hooks/useColorInput";
 import {
     Button,
     Checkbox,
-    Divider,
-    Paper,
     Radio,
     RadioGroup,
     randomHexColor,
     Slider,
-    Stack,
-    Typography,
-    useColorInput,
-    type Color,
-    type ColorLike,
-    type Size,
-    type TypographyColor,
-    type Variant,
 } from "@ui/index";
-import { capitalize, startCase } from "lodash-es";
-import { useState } from "react";
-import { seo } from "../../seo";
+import type { Color, ColorLike, Size, Variant } from "@ui/types";
 
-export const Route = createFileRoute("/ui/input")({
-    component: InputPlayground,
+import { Input } from "@ui/components/inputs/Input/Input";
+import { capitalize } from "lodash-es";
+import { useState } from "react";
+import { seo } from "../../../seo";
+
+export const Route = createFileRoute("/ui/feedback/linear-progress")({
+    component: PlaygroundLinearProgress,
     head: () => ({
         meta: [
             ...seo({
-                title: "Input - Mutualzz UI",
+                title: "Linear Progress - Mutualzz UI",
             }),
         ],
     }),
 });
 
 const variants = ["solid", "outlined", "plain", "soft"] as Variant[];
+
 const colors = [
     "primary",
     "neutral",
-    "danger",
     "success",
+    "danger",
     "warning",
     "info",
 ] as Color[];
 
-const types = [
-    "date",
-    "datetime-local",
-    "number",
-    "password",
-    "text",
-    "time",
-] as InputType[];
+const animations = [
+    "bounce",
+    "scale-in-out",
+    "slide",
+    "wave",
+] as LinearProgressAnimation[];
 
 const sizeNames = {
     sm: "Small",
@@ -59,34 +56,20 @@ const sizeNames = {
     lg: "Large",
 };
 
-const textColors = [
-    "primary",
-    "secondary",
-    "accent",
-    "disabled",
-    "inherit",
-] as (TypographyColor | "inherit")[];
+function PlaygroundLinearProgress() {
+    const [variant, setVariant] = useState<Variant | "all">("solid");
 
-function InputPlayground() {
-    const [variant, setVariant] = useState<Variant | "all">("outlined");
-    const [size, setSize] = useState<Size | number>("md");
-    const [disabled, setDisabled] = useState(false);
-    const [fullWidth, setFullWidth] = useState(false);
+    const [thickness, setThickness] = useState<Size | number>("md");
+    const [length, setLength] = useState<Size | number>("md");
 
-    const [textColor, setTextColor] = useState<TypographyColor | "inherit">(
-        "inherit",
-    );
+    const [customLengthToggle, setCustomLengthToggle] = useState(false);
+    const [customThicknessToggle, setCustomThicknessToggle] = useState(false);
 
-    const [customTextColorEnabled, setCustomTextColorEnabled] = useState(false);
+    const [animation, setAnimation] =
+        useState<LinearProgressAnimation>("bounce");
 
-    const [placeholder, setPlaceholder] = useState<string | null>(null);
-    const [type, setType] = useState<InputType>("text");
-
-    const [value, setValue] = useState<string | null>(null);
-
-    const [controlled, setControlled] = useState(false);
-
-    const [customSizeToggle, setCustomSizeToggle] = useState(false);
+    const [determinate, setDeterminate] = useState(false);
+    const [value, setValue] = useState(0);
 
     const [customColors, setCustomColors] = useState<ColorLike[]>([]);
     const [colorToDelete, setColorToDelete] = useState<ColorLike | null>(null);
@@ -100,71 +83,50 @@ function InputPlayground() {
         setColorDirectly,
     } = useColorInput<Color | ColorLike>();
 
-    const {
-        inputValue: inputTextColorValue,
-        color: customTextColor,
-        isInvalid: isTextColorInvalid,
-        handleChange: handleTextColorChange,
-        setColorDirectly: setTextColorDirectly,
-        validate: validateTextColor,
-    } = useColorInput<TypographyColor>();
-
-    const allInputs = [...colors, ...customColors].map((c) =>
+    const allProgresses = [...colors, ...customColors].map((c) =>
         variants.map((v) => (
             <Stack
                 direction="column"
-                justifyContent="center"
                 alignItems="center"
+                justifyContent="center"
                 key={`${v}-${c}`}
             >
                 <Typography>
                     {capitalize(v)} {capitalize(c)}
                 </Typography>
-                <Input
-                    key={`${v}-${c}-input`}
-                    fullWidth={fullWidth}
-                    color={c}
-                    textColor={
-                        customTextColorEnabled ? customTextColor : textColor
-                    }
-                    placeholder={placeholder ?? "Type something..."}
+                <LinearProgress
+                    key={`${v}-${c}-progress`}
                     variant={v}
-                    size={size}
-                    onChange={(e) => {
-                        if (controlled) setValue(e.target.value);
-                    }}
-                    value={controlled ? (value ?? "") : undefined}
-                    disabled={disabled}
-                    type={type}
+                    color={c}
+                    length={length}
+                    thickness={thickness}
+                    animation={animation}
+                    value={value}
+                    determinate={determinate}
                 />
             </Stack>
         )),
     );
 
-    const inputs = [...colors, ...customColors].map((c) => (
+    const progresses = [...colors, ...customColors].map((c) => (
         <Stack
-            justifyContent="center"
-            alignItems="center"
             direction="column"
+            alignItems="center"
+            justifyContent="center"
             key={c}
         >
             <Typography>
                 {capitalize(variant)} {capitalize(c)}
             </Typography>
-            <Input
-                key={`${variant}-${c}-input`}
+            <LinearProgress
+                key={`${variant}-${c}-progress`}
                 variant={variant as Variant}
-                placeholder={placeholder ?? "Type something..."}
-                size={size}
-                onChange={(e) => {
-                    if (controlled) setValue(e.target.value);
-                }}
-                value={controlled ? (value ?? "") : undefined}
-                disabled={disabled}
                 color={c}
-                textColor={customTextColorEnabled ? customTextColor : textColor}
-                fullWidth={fullWidth}
-                type={type}
+                length={length}
+                thickness={thickness}
+                animation={animation}
+                value={value}
+                determinate={determinate}
             />
         </Stack>
     ));
@@ -178,17 +140,17 @@ function InputPlayground() {
                 alignContent="flex-start"
                 wrap="wrap"
                 p={20}
-                spacing={variant === "all" ? 10 : 5}
+                spacing={25}
             >
                 {variant === "all" &&
-                    allInputs.map((inputs, i) => (
-                        <Stack wrap="wrap" direction="row" spacing={5} key={i}>
-                            {inputs}
+                    allProgresses.map((progresses, i) => (
+                        <Stack direction="row" spacing={5} key={i}>
+                            {progresses}
                         </Stack>
                     ))}
-                {variant !== "all" && inputs}
+                {variant !== "all" && progresses}
             </Paper>
-            <Paper alignItems="center" direction="column" p={20}>
+            <Paper alignItems="center" direction="column" p={20} spacing={5}>
                 <Divider>Playground</Divider>
                 <Stack width="100%" direction="column" spacing={5}>
                     <Stack direction="column" spacing={5}>
@@ -198,9 +160,10 @@ function InputPlayground() {
                                 setVariant(vriant as Variant)
                             }
                             value={variant}
-                            name="variants"
+                            name="variant"
                         >
                             <Radio
+                                key="all"
                                 value="all"
                                 label="All"
                                 checked={variant === "all"}
@@ -221,40 +184,69 @@ function InputPlayground() {
                     </Stack>
                     <Divider />
                     <Stack direction="column" spacing={5}>
+                        <label>Animation</label>
+                        <RadioGroup
+                            onChange={(_, animation) =>
+                                setAnimation(
+                                    animation as LinearProgressAnimation,
+                                )
+                            }
+                            value={animation}
+                            name="animation"
+                        >
+                            {animations.map((a) => (
+                                <Radio
+                                    key={a}
+                                    value={a}
+                                    label={capitalize(a)}
+                                    checked={animation === a}
+                                    color="neutral"
+                                    onChange={() => setAnimation(a)}
+                                />
+                            ))}
+                        </RadioGroup>
+                    </Stack>
+                    <Divider />
+                    <Stack direction="column" spacing={5}>
                         <Stack
                             direction="row"
                             justifyContent="space-between"
                             spacing={5}
                         >
-                            <label>Size</label>
+                            <label>Length</label>
                             <Checkbox
-                                checked={customSizeToggle}
+                                checked={customLengthToggle}
                                 label="Custom"
-                                onChange={() =>
-                                    setCustomSizeToggle((prev) => {
-                                        if (prev) setSize("md");
-                                        else setSize(Math.round((24 + 10) / 2));
+                                onChange={() => {
+                                    setCustomLengthToggle((prev) => {
+                                        if (prev) setLength("md");
+                                        else
+                                            setLength(
+                                                Math.round((240 + 80) / 2),
+                                            );
                                         return !prev;
-                                    })
-                                }
+                                    });
+                                }}
                             />
                         </Stack>
-                        {customSizeToggle ? (
+                        {customLengthToggle ? (
                             <Slider
-                                value={size as number}
-                                min={6}
-                                max={24}
+                                value={length as number}
+                                min={80}
+                                max={240}
                                 onChange={(e) =>
-                                    setSize(Number(e.target.value))
+                                    setLength(Number(e.target.value))
                                 }
                                 valueLabelDisplay="auto"
                                 valueLabelFormat={(value) => `${value}px`}
                             />
                         ) : (
                             <RadioGroup
-                                onChange={(_, size) => setSize(size as Size)}
-                                value={size as Size}
-                                name="sizes"
+                                onChange={(_, length) =>
+                                    setLength(length as Size)
+                                }
+                                value={length as Size}
+                                name="length"
                                 row
                             >
                                 {Object.keys(sizeNames).map((s) => (
@@ -262,9 +254,9 @@ function InputPlayground() {
                                         key={s}
                                         value={s}
                                         label={sizeNames[s as Size]}
-                                        checked={size === s}
+                                        checked={length === s}
                                         color="neutral"
-                                        onChange={() => setSize(s as Size)}
+                                        onChange={() => setLength(s as Size)}
                                     />
                                 ))}
                             </RadioGroup>
@@ -277,62 +269,47 @@ function InputPlayground() {
                             justifyContent="space-between"
                             spacing={5}
                         >
-                            <label>Text Color</label>
+                            <label>Thickness</label>
                             <Checkbox
+                                checked={customThicknessToggle}
                                 label="Custom"
-                                checked={customTextColorEnabled}
-                                onChange={(e) =>
-                                    setCustomTextColorEnabled(e.target.checked)
-                                }
+                                onChange={() => {
+                                    setCustomThicknessToggle((prev) => {
+                                        if (prev) setThickness("md");
+                                        else setThickness((16 + 4) / 2);
+                                        return !prev;
+                                    });
+                                }}
                             />
                         </Stack>
-                        {customTextColorEnabled ? (
-                            <Stack direction="row" spacing={5}>
-                                <Input
-                                    variant="solid"
-                                    size="lg"
-                                    color="primary"
-                                    fullWidth
-                                    error={isTextColorInvalid}
-                                    placeholder="Enter a text color (e.g. #ff0000)"
-                                    value={inputTextColorValue}
-                                    onChange={(e) => {
-                                        handleTextColorChange(e.target.value);
-                                    }}
-                                    onBlur={validateTextColor}
-                                />
-                                <Button
-                                    variant="solid"
-                                    color="neutral"
-                                    onClick={() => {
-                                        setTextColorDirectly(randomHexColor());
-                                    }}
-                                >
-                                    Random
-                                </Button>
-                            </Stack>
+                        {customThicknessToggle ? (
+                            <Slider
+                                value={thickness as number}
+                                min={4}
+                                max={16}
+                                onChange={(e) =>
+                                    setThickness(Number(e.target.value))
+                                }
+                                valueLabelDisplay="auto"
+                                valueLabelFormat={(value) => `${value}px`}
+                            />
                         ) : (
                             <RadioGroup
-                                onChange={(_, textColor) =>
-                                    setTextColor(
-                                        textColor as
-                                            | TypographyColor
-                                            | "inherit",
-                                    )
+                                onChange={(_, thickness) =>
+                                    setThickness(thickness as Size)
                                 }
-                                value={textColor}
-                                name="textColors"
+                                value={thickness as Size}
+                                name="thickness"
+                                row
                             >
-                                {textColors.map((c) => (
+                                {Object.keys(sizeNames).map((s) => (
                                     <Radio
-                                        key={c}
-                                        value={c}
-                                        label={capitalize(c)}
-                                        checked={textColor === c}
+                                        key={s}
+                                        value={s}
+                                        label={sizeNames[s as Size]}
+                                        checked={thickness === s}
                                         color="neutral"
-                                        onChange={() =>
-                                            setTextColor(c as TypographyColor)
-                                        }
+                                        onChange={() => setThickness(s as Size)}
                                     />
                                 ))}
                             </RadioGroup>
@@ -341,74 +318,23 @@ function InputPlayground() {
                     <Divider />
                     <Stack direction="column" spacing={5}>
                         <label>States</label>
-                        <Stack direction="column" spacing={5}>
-                            <Checkbox
-                                checked={fullWidth}
-                                label="Full Width"
-                                onChange={() => setFullWidth((prev) => !prev)}
-                            />
-                            <Checkbox
-                                checked={disabled}
-                                label="Disabled"
-                                onChange={() => setDisabled((prev) => !prev)}
-                            />
-                            <Checkbox
-                                checked={controlled}
-                                label="Controlled"
-                                onChange={() => setControlled((prev) => !prev)}
-                            />
-                        </Stack>
-                        {controlled && (
-                            <Input
-                                variant="solid"
-                                size="lg"
-                                color="primary"
-                                fullWidth
-                                value={value ?? ""}
-                                onChange={(e) => setValue(e.target.value)}
-                                placeholder="Controlled value"
+                        <Checkbox
+                            checked={determinate}
+                            label="Determinate"
+                            onChange={() => setDeterminate((prev) => !prev)}
+                        />
+                        {determinate && (
+                            <Slider
+                                value={value}
+                                min={0}
+                                max={100}
+                                onChange={(e) =>
+                                    setValue(Number(e.target.value))
+                                }
+                                valueLabelDisplay="auto"
+                                valueLabelFormat={(value) => `${value}%`}
                             />
                         )}
-                    </Stack>
-                    <Divider />
-                    <Stack direction="column" spacing={5}>
-                        <label>Placeholder</label>
-                        <Input
-                            variant="solid"
-                            size="lg"
-                            color="primary"
-                            fullWidth
-                            value={placeholder ?? ""}
-                            onChange={(e) =>
-                                e.target.value === ""
-                                    ? setPlaceholder(null)
-                                    : setPlaceholder(e.target.value)
-                            }
-                            placeholder="Enter placeholder text"
-                        />
-                    </Stack>
-                    <Divider />
-                    <Stack direction="column" spacing={5}>
-                        <label>Type</label>
-                        <select
-                            value={type}
-                            onChange={(e) =>
-                                setType(e.target.value as InputType)
-                            }
-                            css={{
-                                padding: 10,
-                                borderRadius: 5,
-                                border: "1px solid #ccc",
-                                backgroundColor: "#f9f9f9",
-                                width: "100%",
-                            }}
-                        >
-                            {types.map((t) => (
-                                <option key={t} value={t}>
-                                    {startCase(t)}
-                                </option>
-                            ))}
-                        </select>
                     </Stack>
                     <Divider />
                     <Stack direction="column" spacing={5}>
@@ -422,8 +348,9 @@ function InputPlayground() {
                                 variant="solid"
                                 size="lg"
                                 color="primary"
-                                placeholder="Enter a color (e.g., #ff0000, red)"
+                                fullWidth
                                 error={isInvalid}
+                                placeholder="Enter a color (e.g., #ff0000)"
                                 value={inputColorValue}
                                 onChange={(e) => handleChange(e.target.value)}
                                 onBlur={validate}
@@ -450,7 +377,7 @@ function InputPlayground() {
                             <Stack
                                 alignItems="center"
                                 direction="row"
-                                spacing={10}
+                                spacing={5}
                             >
                                 <select
                                     value={colorToDelete ?? ""}

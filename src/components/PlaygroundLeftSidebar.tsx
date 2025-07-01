@@ -15,61 +15,61 @@ const links = {
     inputs: [
         {
             name: "Button",
-            link: "/ui/button",
+            link: "/ui/input/button",
         },
         {
             name: "Button Group",
-            link: "/ui/button-group",
+            link: "/ui/input/button-group",
         },
         {
             name: "Checkbox",
-            link: "/ui/checkbox",
+            link: "/ui/input/checkbox",
         },
         {
             name: "Input",
-            link: "/ui/input",
+            link: "/ui/input/input",
         },
         {
             name: "Markdown",
-            link: "/ui/markdown-input",
+            link: "/ui/input/markdown-input",
         },
         {
             name: "Radio Button",
-            link: "/ui/radio-button",
+            link: "/ui/input/radio-button",
         },
         {
             name: "Slider",
-            link: "/ui/slider",
+            link: "/ui/input/slider",
         },
         {
             name: "Textarea",
-            link: "/ui/textarea",
+            link: "/ui/input/textarea",
         },
     ],
     dataDisplay: [
         {
             name: "Divider",
-            link: "/ui/divider",
+            link: "/ui/data-display/divider",
         },
         {
             name: "Typography",
-            link: "/ui/typography",
+            link: "/ui/data-display/typography",
         },
     ],
     feedback: [
         {
             name: "Circular Progress",
-            link: "/ui/circular-progress",
+            link: "/ui/feedback/circular-progress",
         },
         {
             name: "Linear Progress",
-            link: "/ui/linear-progress",
+            link: "/ui/feedback/linear-progress",
         },
     ],
     surfaces: [
         {
             name: "Paper",
-            link: "/ui/paper",
+            link: "/ui/surface/paper",
         },
     ],
 };

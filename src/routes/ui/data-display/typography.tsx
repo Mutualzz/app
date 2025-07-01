@@ -19,9 +19,9 @@ import type { FontWeight } from "@ui/types/Typography.props";
 import { Input } from "@ui/components/inputs/Input/Input";
 import { capitalize } from "lodash-es";
 import { useState } from "react";
-import { seo } from "../../seo";
+import { seo } from "../../../seo";
 
-export const Route = createFileRoute("/ui/typography")({
+export const Route = createFileRoute("/ui/data-display/typography")({
     component: PlaygroundTypography,
     head: () => ({
         meta: [

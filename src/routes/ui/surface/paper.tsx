@@ -14,9 +14,9 @@ import {
 import { type Color, type ColorLike } from "@ui/types";
 import { capitalize } from "lodash-es";
 import { useState } from "react";
-import { seo } from "../../seo";
+import { seo } from "../../../seo";
 
-export const Route = createFileRoute("/ui/paper")({
+export const Route = createFileRoute("/ui/surface/paper")({
     component: PlaygroundPaper,
     head: () => ({
         meta: [

@@ -19,9 +19,9 @@ import { Input } from "@ui/components/inputs/Input/Input";
 import { Slider } from "@ui/index";
 import numWords from "num-words";
 import { FaMinus, FaPlus } from "react-icons/fa";
-import { seo } from "../../seo";
+import { seo } from "../../../seo";
 
-export const Route = createFileRoute("/ui/button-group")({
+export const Route = createFileRoute("/ui/input/button-group")({
     component: PlaygroundButtonGroup,
     head: () => ({
         meta: [

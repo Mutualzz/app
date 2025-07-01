@@ -20,9 +20,9 @@ import { Input } from "@ui/components/inputs/Input/Input";
 import * as AiIcons from "react-icons/ai";
 import * as FaIcons from "react-icons/fa";
 import * as MdIcons from "react-icons/md";
-import { seo } from "../../seo";
+import { seo } from "../../../seo";
 
-export const Route = createFileRoute("/ui/checkbox")({
+export const Route = createFileRoute("/ui/input/checkbox")({
     component: PlaygroundCheckbox,
     head: () => ({
         meta: [

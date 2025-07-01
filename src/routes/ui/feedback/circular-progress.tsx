@@ -1,32 +1,32 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Divider } from "@ui/components/data-display/Divider/Divider";
 import { Typography } from "@ui/components/data-display/Typography/Typography";
-import { LinearProgress } from "@ui/components/feedback/LinearProgress/LinearProgress";
-import type { LinearProgressAnimation } from "@ui/components/feedback/LinearProgress/LinearProgress.types";
-import { Stack } from "@ui/components/layout/Stack/Stack";
-import { Paper } from "@ui/components/surfaces/Paper/Paper";
+
 import { useColorInput } from "@ui/hooks/useColorInput";
 import {
     Button,
     Checkbox,
+    CircularProgress,
+    Divider,
+    Paper,
     Radio,
     RadioGroup,
     randomHexColor,
     Slider,
+    Stack,
 } from "@ui/index";
 import type { Color, ColorLike, Size, Variant } from "@ui/types";
+import { capitalize } from "lodash-es";
 
 import { Input } from "@ui/components/inputs/Input/Input";
-import { capitalize } from "lodash-es";
 import { useState } from "react";
-import { seo } from "../../seo";
+import { seo } from "../../../seo";
 
-export const Route = createFileRoute("/ui/linear-progress")({
-    component: PlaygroundLinearProgress,
+export const Route = createFileRoute("/ui/feedback/circular-progress")({
+    component: PlaygroundCircularProgress,
     head: () => ({
         meta: [
             ...seo({
-                title: "Linear Progress - Mutualzz UI",
+                title: "Circular Progress - Mutualzz UI",
             }),
         ],
     }),
@@ -43,33 +43,21 @@ const colors = [
     "info",
 ] as Color[];
 
-const animations = [
-    "bounce",
-    "scale-in-out",
-    "slide",
-    "wave",
-] as LinearProgressAnimation[];
-
 const sizeNames = {
     sm: "Small",
     md: "Medium",
     lg: "Large",
 };
 
-function PlaygroundLinearProgress() {
+function PlaygroundCircularProgress() {
     const [variant, setVariant] = useState<Variant | "all">("solid");
-
-    const [thickness, setThickness] = useState<Size | number>("md");
-    const [length, setLength] = useState<Size | number>("md");
-
-    const [customLengthToggle, setCustomLengthToggle] = useState(false);
-    const [customThicknessToggle, setCustomThicknessToggle] = useState(false);
-
-    const [animation, setAnimation] =
-        useState<LinearProgressAnimation>("bounce");
+    const [text, setText] = useState<string | null>(null);
+    const [size, setSize] = useState<Size | number>("md");
 
     const [determinate, setDeterminate] = useState(false);
     const [value, setValue] = useState(0);
+
+    const [customSizeToggle, setCustomSizeToggle] = useState(false);
 
     const [customColors, setCustomColors] = useState<ColorLike[]>([]);
     const [colorToDelete, setColorToDelete] = useState<ColorLike | null>(null);
@@ -86,48 +74,70 @@ function PlaygroundLinearProgress() {
     const allProgresses = [...colors, ...customColors].map((c) =>
         variants.map((v) => (
             <Stack
-                direction="column"
-                alignItems="center"
                 justifyContent="center"
-                key={`${v}-${c}`}
+                alignItems="center"
+                direction="column"
+                key={`${c}-${v}`}
             >
                 <Typography>
                     {capitalize(v)} {capitalize(c)}
                 </Typography>
-                <LinearProgress
-                    key={`${v}-${c}-progress`}
-                    variant={v}
-                    color={c}
-                    length={length}
-                    thickness={thickness}
-                    animation={animation}
-                    value={value}
-                    determinate={determinate}
-                />
+                {text ? (
+                    <CircularProgress
+                        key={c}
+                        size={size}
+                        variant={v}
+                        color={c}
+                        determinate={determinate}
+                        value={value}
+                    >
+                        {text}
+                    </CircularProgress>
+                ) : (
+                    <CircularProgress
+                        key={c}
+                        size={size}
+                        variant={v}
+                        color={c}
+                        determinate={determinate}
+                        value={value}
+                    />
+                )}
             </Stack>
         )),
     );
 
     const progresses = [...colors, ...customColors].map((c) => (
         <Stack
-            direction="column"
-            alignItems="center"
             justifyContent="center"
+            alignItems="center"
+            direction="column"
             key={c}
         >
             <Typography>
                 {capitalize(variant)} {capitalize(c)}
             </Typography>
-            <LinearProgress
-                key={`${variant}-${c}-progress`}
-                variant={variant as Variant}
-                color={c}
-                length={length}
-                thickness={thickness}
-                animation={animation}
-                value={value}
-                determinate={determinate}
-            />
+            {text ? (
+                <CircularProgress
+                    key={c}
+                    size={size}
+                    variant={variant as Variant}
+                    color={c}
+                    determinate={determinate}
+                    value={value}
+                >
+                    {text}
+                </CircularProgress>
+            ) : (
+                <CircularProgress
+                    key={c}
+                    size={size}
+                    variant={variant as Variant}
+                    color={c}
+                    determinate={determinate}
+                    value={value}
+                />
+            )}
         </Stack>
     ));
 
@@ -140,7 +150,7 @@ function PlaygroundLinearProgress() {
                 alignContent="flex-start"
                 wrap="wrap"
                 p={20}
-                spacing={25}
+                spacing={variant === "all" ? 10 : 5}
             >
                 {variant === "all" &&
                     allProgresses.map((progresses, i) => (
@@ -150,7 +160,7 @@ function PlaygroundLinearProgress() {
                     ))}
                 {variant !== "all" && progresses}
             </Paper>
-            <Paper alignItems="center" direction="column" p={20} spacing={5}>
+            <Paper alignItems="center" direction="column" p={20}>
                 <Divider>Playground</Divider>
                 <Stack width="100%" direction="column" spacing={5}>
                     <Stack direction="column" spacing={5}>
@@ -160,7 +170,7 @@ function PlaygroundLinearProgress() {
                                 setVariant(vriant as Variant)
                             }
                             value={variant}
-                            name="variant"
+                            name="variants"
                         >
                             <Radio
                                 key="all"
@@ -184,69 +194,40 @@ function PlaygroundLinearProgress() {
                     </Stack>
                     <Divider />
                     <Stack direction="column" spacing={5}>
-                        <label>Animation</label>
-                        <RadioGroup
-                            onChange={(_, animation) =>
-                                setAnimation(
-                                    animation as LinearProgressAnimation,
-                                )
-                            }
-                            value={animation}
-                            name="animation"
-                        >
-                            {animations.map((a) => (
-                                <Radio
-                                    key={a}
-                                    value={a}
-                                    label={capitalize(a)}
-                                    checked={animation === a}
-                                    color="neutral"
-                                    onChange={() => setAnimation(a)}
-                                />
-                            ))}
-                        </RadioGroup>
-                    </Stack>
-                    <Divider />
-                    <Stack direction="column" spacing={5}>
                         <Stack
                             direction="row"
                             justifyContent="space-between"
                             spacing={5}
                         >
-                            <label>Length</label>
+                            <label>Size</label>
                             <Checkbox
-                                checked={customLengthToggle}
+                                checked={customSizeToggle}
                                 label="Custom"
-                                onChange={() => {
-                                    setCustomLengthToggle((prev) => {
-                                        if (prev) setLength("md");
-                                        else
-                                            setLength(
-                                                Math.round((240 + 80) / 2),
-                                            );
+                                onChange={() =>
+                                    setCustomSizeToggle((prev) => {
+                                        if (prev) setSize("md");
+                                        else setSize((64 + 16) / 2);
                                         return !prev;
-                                    });
-                                }}
+                                    })
+                                }
                             />
                         </Stack>
-                        {customLengthToggle ? (
+                        {customSizeToggle ? (
                             <Slider
-                                value={length as number}
-                                min={80}
-                                max={240}
+                                value={size as number}
+                                min={16}
+                                max={64}
                                 onChange={(e) =>
-                                    setLength(Number(e.target.value))
+                                    setSize(Number(e.target.value))
                                 }
                                 valueLabelDisplay="auto"
-                                valueLabelFormat={(value) => `${value}px`}
+                                valueLabelFormat={(val) => `${val}px`}
                             />
                         ) : (
                             <RadioGroup
-                                onChange={(_, length) =>
-                                    setLength(length as Size)
-                                }
-                                value={length as Size}
-                                name="length"
+                                onChange={(_, size) => setSize(size as Size)}
+                                value={size as Size}
+                                name="sizes"
                                 row
                             >
                                 {Object.keys(sizeNames).map((s) => (
@@ -254,62 +235,9 @@ function PlaygroundLinearProgress() {
                                         key={s}
                                         value={s}
                                         label={sizeNames[s as Size]}
-                                        checked={length === s}
+                                        checked={size === s}
                                         color="neutral"
-                                        onChange={() => setLength(s as Size)}
-                                    />
-                                ))}
-                            </RadioGroup>
-                        )}
-                    </Stack>
-                    <Divider />
-                    <Stack direction="column" spacing={5}>
-                        <Stack
-                            direction="row"
-                            justifyContent="space-between"
-                            spacing={5}
-                        >
-                            <label>Thickness</label>
-                            <Checkbox
-                                checked={customThicknessToggle}
-                                label="Custom"
-                                onChange={() => {
-                                    setCustomThicknessToggle((prev) => {
-                                        if (prev) setThickness("md");
-                                        else setThickness((16 + 4) / 2);
-                                        return !prev;
-                                    });
-                                }}
-                            />
-                        </Stack>
-                        {customThicknessToggle ? (
-                            <Slider
-                                value={thickness as number}
-                                min={4}
-                                max={16}
-                                onChange={(e) =>
-                                    setThickness(Number(e.target.value))
-                                }
-                                valueLabelDisplay="auto"
-                                valueLabelFormat={(value) => `${value}px`}
-                            />
-                        ) : (
-                            <RadioGroup
-                                onChange={(_, thickness) =>
-                                    setThickness(thickness as Size)
-                                }
-                                value={thickness as Size}
-                                name="thickness"
-                                row
-                            >
-                                {Object.keys(sizeNames).map((s) => (
-                                    <Radio
-                                        key={s}
-                                        value={s}
-                                        label={sizeNames[s as Size]}
-                                        checked={thickness === s}
-                                        color="neutral"
-                                        onChange={() => setThickness(s as Size)}
+                                        onChange={() => setSize(s as Size)}
                                     />
                                 ))}
                             </RadioGroup>
@@ -332,7 +260,7 @@ function PlaygroundLinearProgress() {
                                     setValue(Number(e.target.value))
                                 }
                                 valueLabelDisplay="auto"
-                                valueLabelFormat={(value) => `${value}%`}
+                                valueLabelFormat={(val) => `${val}%`}
                             />
                         )}
                     </Stack>
@@ -349,8 +277,8 @@ function PlaygroundLinearProgress() {
                                 size="lg"
                                 color="primary"
                                 fullWidth
+                                placeholder="Enter a color (e.g., #ff0000, red)"
                                 error={isInvalid}
-                                placeholder="Enter a color (e.g., #ff0000)"
                                 value={inputColorValue}
                                 onChange={(e) => handleChange(e.target.value)}
                                 onBlur={validate}
@@ -423,6 +351,24 @@ function PlaygroundLinearProgress() {
                                 </Button>
                             </Stack>
                         )}
+                    </Stack>
+                    <Divider />
+                    <Stack direction="column" spacing={5}>
+                        <label>Label</label>
+                        <Input
+                            variant="solid"
+                            size="lg"
+                            color="primary"
+                            fullWidth
+                            value={text ?? ""}
+                            onChange={(e) =>
+                                setText(
+                                    e.target.value.trim() === ""
+                                        ? null
+                                        : e.target.value,
+                                )
+                            }
+                        />
                     </Stack>
                 </Stack>
             </Paper>

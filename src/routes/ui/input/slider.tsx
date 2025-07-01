@@ -21,9 +21,9 @@ import {
 import { type Color, type ColorLike, type Size, type Variant } from "@ui/types";
 import { capitalize } from "lodash-es";
 import { useState } from "react";
-import { seo } from "../../seo";
+import { seo } from "../../../seo";
 
-export const Route = createFileRoute("/ui/slider")({
+export const Route = createFileRoute("/ui/input/slider")({
     component: SlderPlayground,
     head: () => ({
         meta: [

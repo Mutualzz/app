@@ -14,9 +14,9 @@ import { Button, Radio, RadioGroup, randomHexColor } from "@ui/index";
 import type { Color, ColorLike } from "@ui/types";
 import { capitalize } from "lodash-es";
 import { useState } from "react";
-import { seo } from "../../seo";
+import { seo } from "../../../seo";
 
-export const Route = createFileRoute("/ui/divider")({
+export const Route = createFileRoute("/ui/data-display/divider")({
     component: PlaygroundDivider,
     head: () => ({
         meta: [

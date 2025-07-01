@@ -1,38 +1,38 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Divider } from "@ui/components/data-display/Divider/Divider";
-import { Button } from "@ui/components/inputs/Button/Button";
-import { Checkbox } from "@ui/components/inputs/Checkbox/Checkbox";
-import { Stack } from "@ui/components/layout/Stack/Stack";
-import { Paper } from "@ui/components/surfaces/Paper/Paper";
-import { useColorInput } from "@ui/hooks/useColorInput";
+import {
+    Button,
+    Checkbox,
+    Divider,
+    Paper,
+    Radio,
+    RadioGroup,
+    randomHexColor,
+    Slider,
+    Stack,
+    useColorInput,
+} from "@ui/index";
 import type { Color, ColorLike, Size, Variant } from "@ui/types";
-
 import { capitalize } from "lodash-es";
-import { type ReactNode, useState } from "react";
+import { useState } from "react";
 
 import { Input } from "@ui/components/inputs/Input/Input";
-import { Radio } from "@ui/components/inputs/Radio/Radio";
-import { RadioGroup } from "@ui/components/inputs/Radio/RadioGroup";
-import { Slider } from "@ui/index";
-import { randomHexColor } from "@ui/utils";
 import * as AiIcons from "react-icons/ai";
 import * as FaIcons from "react-icons/fa";
 import * as MdIcons from "react-icons/md";
-import { seo } from "../../seo";
+import { seo } from "../../../seo";
 
-export const Route = createFileRoute("/ui/button")({
-    component: PlaygroundButton,
+export const Route = createFileRoute("/ui/input/radio-button")({
+    component: PlaygroundRadio,
     head: () => ({
         meta: [
             ...seo({
-                title: "Button - Mutualzz UI",
+                title: "Radio Button - Mutualzz UI",
             }),
         ],
     }),
 });
 
 const variants = ["solid", "outlined", "plain", "soft"] as Variant[];
-
 const colors = [
     "primary",
     "neutral",
@@ -42,16 +42,16 @@ const colors = [
     "info",
 ] as Color[];
 
-const iconLibraries = {
-    fa: FaIcons,
-    md: MdIcons,
-    ai: AiIcons,
-};
-
 const sizeNames = {
     sm: "Small",
     md: "Medium",
     lg: "Large",
+};
+
+const iconLibraries = {
+    fa: FaIcons,
+    md: MdIcons,
+    ai: AiIcons,
 };
 
 const libNames = {
@@ -60,27 +60,50 @@ const libNames = {
     ai: "Ant Design",
 };
 
-type IconPosition = "left" | "right" | "both" | "none";
-
-function PlaygroundButton() {
+function PlaygroundRadio() {
     const [variant, setVariant] = useState<Variant | "all">("solid");
-    const [text, setText] = useState<string | null>(null);
+    const [label, setLabel] = useState<string | null>(null);
     const [size, setSize] = useState<Size | number>("md");
-    const [loading, setLoading] = useState(false);
     const [disabled, setDisabled] = useState(false);
-    const [iconOnly, setIconOnly] = useState(false);
 
-    const [iconPosition, setIconPosition] = useState<IconPosition>("none");
-
-    const [iconLibrary, setIconLibrary] =
-        useState<keyof typeof iconLibraries>("fa");
-
-    const [icon, setIcon] = useState<ReactNode | null>(null);
+    const [currentChecked, setCurrentChecked] = useState<string>("primary");
 
     const [customSizeToggle, setCustomSizeToggle] = useState(false);
 
     const [customColors, setCustomColors] = useState<ColorLike[]>([]);
     const [colorToDelete, setColorToDelete] = useState<ColorLike | null>(null);
+
+    const [checkedLibrary, setCheckedLibrary] = useState<
+        keyof typeof iconLibraries | "none"
+    >("none");
+    const [checkedIconName, setCheckedIconName] = useState<string | null>(null);
+
+    const [uncheckedLibrary, setUncheckedLibrary] = useState<
+        keyof typeof iconLibraries | "none"
+    >("none");
+    const [uncheckedIconName, setUncheckedIconName] = useState<string | null>(
+        null,
+    );
+
+    const SelectedCheckedIcon =
+        checkedLibrary !== "none" && checkedIconName
+            ? (
+                  iconLibraries[checkedLibrary] as Record<
+                      string,
+                      React.ComponentType<any>
+                  >
+              )[checkedIconName]
+            : null;
+
+    const SelectedUncheckedIcon =
+        uncheckedLibrary !== "none" && uncheckedIconName
+            ? (
+                  iconLibraries[uncheckedLibrary] as Record<
+                      string,
+                      React.ComponentType<any>
+                  >
+              )[uncheckedIconName]
+            : null;
 
     const {
         inputValue: inputColorValue,
@@ -91,95 +114,50 @@ function PlaygroundButton() {
         setColorDirectly,
     } = useColorInput<Color | ColorLike>();
 
-    const allButtons = [...colors, ...customColors].map((c) =>
-        variants.map((v) =>
-            iconOnly ? (
-                <Button
-                    key={`${v}-${c}-button`}
-                    variant={v}
-                    color={c}
-                    size={size}
-                    loading={loading}
-                    disabled={disabled}
-                    startDecorator={
-                        iconPosition === "left" && icon ? icon : null
-                    }
-                    endDecorator={
-                        iconPosition === "right" && icon ? icon : null
-                    }
-                />
-            ) : (
-                <Button
-                    key={`${v}-${c}-button`}
-                    variant={v}
-                    color={c}
-                    size={size}
-                    loading={loading}
-                    disabled={disabled}
-                    startDecorator={
-                        (iconPosition === "left" || iconPosition === "both") &&
-                        icon
-                            ? icon
-                            : null
-                    }
-                    endDecorator={
-                        (iconPosition === "right" || iconPosition === "both") &&
-                        icon
-                            ? icon
-                            : null
-                    }
-                >
-                    {text ?? `${capitalize(v)} ${capitalize(c)}`}
-                </Button>
-            ),
-        ),
-    );
-
-    const buttons = [...colors, ...customColors].map((c) =>
-        iconOnly ? (
-            <Button
-                key={`${variant}-${c}-button`}
-                variant={variant as Variant}
+    const allRadios = [...colors, ...customColors].map((c) =>
+        variants.map((v) => (
+            <Radio
+                name={c}
+                checked={currentChecked === c}
+                key={c}
                 color={c}
+                variant={v}
                 size={size}
-                loading={loading}
+                label={label ?? `${capitalize(v)} ${capitalize(c)}`}
+                onChange={(e) => setCurrentChecked(e.target.value)}
                 disabled={disabled}
-                startDecorator={
-                    (iconPosition === "left" || iconPosition === "both") && icon
-                        ? icon
-                        : null
+                checkedIcon={
+                    SelectedCheckedIcon ? <SelectedCheckedIcon /> : undefined
                 }
-                endDecorator={
-                    (iconPosition === "right" || iconPosition === "both") &&
-                    icon
-                        ? icon
-                        : null
+                uncheckedIcon={
+                    SelectedUncheckedIcon ? (
+                        <SelectedUncheckedIcon />
+                    ) : undefined
                 }
+                value={c}
             />
-        ) : (
-            <Button
-                key={`${variant}-${c}-button`}
-                variant={variant as Variant}
-                color={c}
-                size={size}
-                loading={loading}
-                disabled={disabled}
-                startDecorator={
-                    (iconPosition === "left" || iconPosition === "both") && icon
-                        ? icon
-                        : null
-                }
-                endDecorator={
-                    (iconPosition === "right" || iconPosition === "both") &&
-                    icon
-                        ? icon
-                        : null
-                }
-            >
-                {text ?? `${capitalize(variant)} ${capitalize(c)}`}
-            </Button>
-        ),
+        )),
     );
+    const Radios = [...colors, ...customColors].map((c) => (
+        <Radio
+            name={c}
+            checked={currentChecked === c}
+            key={c}
+            color={c}
+            variant={variant as Variant}
+            size={size}
+            label={label ?? `${capitalize(variant)} ${capitalize(c)}`}
+            onChange={(e) => setCurrentChecked(e.target.value)}
+            disabled={disabled}
+            checkedIcon={
+                SelectedCheckedIcon ? <SelectedCheckedIcon /> : undefined
+            }
+            uncheckedIcon={
+                SelectedUncheckedIcon ? <SelectedUncheckedIcon /> : undefined
+            }
+            value={c}
+        />
+    ));
 
     return (
         <Stack width="100%" spacing={10} direction="row">
@@ -193,14 +171,19 @@ function PlaygroundButton() {
                 spacing={variant === "all" ? 10 : 5}
             >
                 {variant === "all" &&
-                    allButtons.map((buttons, i) => (
+                    allRadios.map((Radios, i) => (
                         <Stack direction="row" spacing={5} key={i}>
-                            {buttons}
+                            {Radios}
                         </Stack>
                     ))}
-                {variant !== "all" && buttons}
+                {variant !== "all" && Radios}
             </Paper>
-            <Paper alignItems="center" direction="column" p={20}>
+            <Paper
+                overflowY="auto"
+                alignItems="center"
+                direction="column"
+                p={20}
+            >
                 <Divider>Playground</Divider>
                 <Stack width="100%" direction="column" spacing={5}>
                     <Stack direction="column" spacing={5}>
@@ -213,6 +196,7 @@ function PlaygroundButton() {
                             name="variants"
                         >
                             <Radio
+                                key="all"
                                 value="all"
                                 label="All"
                                 checked={variant === "all"}
@@ -233,6 +217,17 @@ function PlaygroundButton() {
                     </Stack>
                     <Divider />
                     <Stack direction="column" spacing={5}>
+                        <label>States</label>
+                        <Stack direction="row" spacing={5}>
+                            <Checkbox
+                                checked={disabled}
+                                label="Disabled"
+                                onChange={() => setDisabled((prev) => !prev)}
+                            />
+                        </Stack>
+                    </Stack>
+                    <Divider />
+                    <Stack direction="column" spacing={5}>
                         <Stack
                             direction="row"
                             justifyContent="space-between"
@@ -245,7 +240,7 @@ function PlaygroundButton() {
                                 onChange={() =>
                                     setCustomSizeToggle((prev) => {
                                         if (prev) setSize("md");
-                                        else setSize(Math.round((24 + 10) / 2));
+                                        else setSize((28 + 10) / 2);
                                         return !prev;
                                     })
                                 }
@@ -255,7 +250,7 @@ function PlaygroundButton() {
                             <Slider
                                 value={size as number}
                                 min={10}
-                                max={24}
+                                max={28}
                                 onChange={(e) =>
                                     setSize(Number(e.target.value))
                                 }
@@ -284,24 +279,6 @@ function PlaygroundButton() {
                     </Stack>
                     <Divider />
                     <Stack direction="column" spacing={5}>
-                        <label>States</label>
-                        <Stack direction="row" spacing={5}>
-                            <Checkbox
-                                checked={loading}
-                                label="Loading"
-                                onChange={() => setLoading((prev) => !prev)}
-                                disabled={disabled}
-                            />
-                            <Checkbox
-                                checked={disabled}
-                                label="Disabled"
-                                onChange={() => setDisabled((prev) => !prev)}
-                                disabled={loading}
-                            />
-                        </Stack>
-                    </Stack>
-                    <Divider />
-                    <Stack direction="column" spacing={5}>
                         <label>Custom Color</label>
                         <Stack
                             alignContent="center"
@@ -312,9 +289,10 @@ function PlaygroundButton() {
                                 variant="solid"
                                 size="lg"
                                 color="primary"
+                                fullWidth
+                                error={isInvalid}
                                 placeholder="Enter a color (e.g., #ff0000)"
                                 value={inputColorValue}
-                                error={isInvalid}
                                 onChange={(e) => handleChange(e.target.value)}
                                 onBlur={validate}
                             />
@@ -340,7 +318,7 @@ function PlaygroundButton() {
                             <Stack
                                 alignItems="center"
                                 direction="row"
-                                spacing={10}
+                                spacing={5}
                             >
                                 <select
                                     value={colorToDelete ?? ""}
@@ -389,125 +367,73 @@ function PlaygroundButton() {
                     </Stack>
                     <Divider />
                     <Stack direction="column" spacing={5}>
-                        <label>Text</label>
+                        <label>Label</label>
                         <Input
                             variant="solid"
                             size="lg"
                             color="primary"
-                            placeholder="Enter button text"
-                            value={text ?? ""}
+                            fullWidth
+                            value={label ?? ""}
                             onChange={(e) =>
-                                setText(
+                                setLabel(
                                     e.target.value.trim() === ""
                                         ? null
                                         : e.target.value,
                                 )
                             }
-                            fullWidth
                         />
                     </Stack>
                     <Divider />
-                    <Stack direction="column" spacing={5}>
-                        <Stack
-                            direction="row"
-                            justifyContent="space-between"
-                            spacing={5}
-                        >
-                            <label>Icon</label>
-                            {icon && iconPosition !== "both" && (
-                                <Checkbox
-                                    checked={iconOnly}
-                                    label="Icon Only"
-                                    onChange={() =>
-                                        setIconOnly((prev) => !prev)
-                                    }
-                                    disabled={disabled}
+                    <Stack
+                        justifyContent="center"
+                        direction="column"
+                        spacing={5}
+                    >
+                        <label>Checked Icon</label>
+                        <Stack direction="column" spacing={5}>
+                            <RadioGroup
+                                onChange={(_, library) =>
+                                    setCheckedLibrary(
+                                        library as keyof typeof iconLibraries,
+                                    )
+                                }
+                                value={checkedLibrary}
+                                name="libraries"
+                            >
+                                <Radio
+                                    key="none"
+                                    value="none"
+                                    label="None"
+                                    checked={checkedLibrary === "none"}
+                                    color="neutral"
+                                    onChange={() => setCheckedLibrary("none")}
                                 />
-                            )}
-                        </Stack>
-                        <RadioGroup
-                            onChange={(_, iconPosition) =>
-                                setIconPosition(() => {
-                                    if (iconPosition === "none") setIcon(null);
-
-                                    return iconPosition as IconPosition;
-                                })
-                            }
-                            value={iconPosition}
-                            name="icon-position"
-                            row
-                        >
-                            <Radio
-                                value="none"
-                                label="None"
-                                checked={iconPosition === "none"}
-                                color="neutral"
-                                onChange={() => setIconPosition("none")}
-                            />
-                            <Radio
-                                value="left"
-                                label="Left"
-                                checked={iconPosition === "left"}
-                                color="neutral"
-                                onChange={() => setIconPosition("left")}
-                            />
-                            <Radio
-                                value="right"
-                                label="Right"
-                                checked={iconPosition === "right"}
-                                color="neutral"
-                                onChange={() => setIconPosition("right")}
-                            />
-                            <Radio
-                                value="both"
-                                label="Both"
-                                checked={iconPosition === "both"}
-                                color="neutral"
-                                onChange={() => setIconPosition("both")}
-                            />
-                        </RadioGroup>
-                        {iconPosition !== "none" && (
-                            <Stack direction="column" spacing={10}>
-                                <RadioGroup
-                                    onChange={(_, library) =>
-                                        setIconLibrary(
-                                            library as keyof typeof iconLibraries,
-                                        )
-                                    }
-                                    value={iconLibrary}
-                                    name="icon-library"
-                                >
-                                    {Object.keys(iconLibraries).map((lib) => (
-                                        <Radio
-                                            key={lib}
-                                            value={lib}
-                                            label={
-                                                libNames[
-                                                    lib as keyof typeof libNames
-                                                ]
-                                            }
-                                            checked={iconLibrary === lib}
-                                            color="neutral"
-                                            onChange={() =>
-                                                setIconLibrary(
-                                                    lib as keyof typeof iconLibraries,
-                                                )
-                                            }
-                                        />
-                                    ))}
-                                </RadioGroup>
+                                {Object.keys(iconLibraries).map((lib) => (
+                                    <Radio
+                                        key={lib}
+                                        value={lib}
+                                        label={
+                                            libNames[
+                                                lib as keyof typeof libNames
+                                            ]
+                                        }
+                                        checked={checkedLibrary === lib}
+                                        color="neutral"
+                                        onChange={() =>
+                                            setCheckedLibrary(
+                                                lib as keyof typeof iconLibraries,
+                                            )
+                                        }
+                                    />
+                                ))}
+                            </RadioGroup>
+                            {checkedLibrary !== "none" && (
                                 <select
-                                    name="icon-select"
-                                    onChange={(e) => {
-                                        const Icon =
-                                            iconLibraries[iconLibrary][
-                                                e.target
-                                                    .value as keyof (typeof iconLibraries)[typeof iconLibrary]
-                                            ];
-                                        setIcon(Icon);
-                                    }}
+                                    value={checkedIconName ?? ""}
+                                    onChange={(e) =>
+                                        setCheckedIconName(e.target.value)
+                                    }
                                     css={{
-                                        width: "100%",
                                         padding: 10,
                                         borderRadius: 5,
                                         border: "1px solid #ccc",
@@ -516,15 +442,84 @@ function PlaygroundButton() {
                                 >
                                     <option value="">Select an icon</option>
                                     {Object.keys(
-                                        iconLibraries[iconLibrary],
-                                    ).map((icon) => (
-                                        <option key={icon} value={icon}>
-                                            {icon}
+                                        iconLibraries[checkedLibrary],
+                                    ).map((iconName) => (
+                                        <option key={iconName} value={iconName}>
+                                            {iconName}
                                         </option>
                                     ))}
                                 </select>
-                            </Stack>
-                        )}
+                            )}
+                        </Stack>
+                    </Stack>
+                    <Divider />
+                    <Stack
+                        justifyContent="center"
+                        direction="column"
+                        spacing={5}
+                    >
+                        <label>Unchecked Icon</label>
+                        <Stack direction="column" spacing={5}>
+                            <RadioGroup
+                                onChange={(_, library) =>
+                                    setUncheckedLibrary(
+                                        library as keyof typeof iconLibraries,
+                                    )
+                                }
+                                value={uncheckedLibrary}
+                                name="libraries"
+                            >
+                                <Radio
+                                    key="none"
+                                    value="none"
+                                    label="None"
+                                    checked={uncheckedLibrary === "none"}
+                                    color="neutral"
+                                    onChange={() => setUncheckedLibrary("none")}
+                                />
+                                {Object.keys(iconLibraries).map((lib) => (
+                                    <Radio
+                                        key={lib}
+                                        value={lib}
+                                        label={
+                                            libNames[
+                                                lib as keyof typeof libNames
+                                            ]
+                                        }
+                                        checked={uncheckedLibrary === lib}
+                                        color="neutral"
+                                        onChange={() =>
+                                            setUncheckedLibrary(
+                                                lib as keyof typeof iconLibraries,
+                                            )
+                                        }
+                                    />
+                                ))}
+                            </RadioGroup>
+                            {uncheckedLibrary !== "none" && (
+                                <select
+                                    value={uncheckedIconName ?? ""}
+                                    onChange={(e) =>
+                                        setUncheckedIconName(e.target.value)
+                                    }
+                                    css={{
+                                        padding: 10,
+                                        borderRadius: 5,
+                                        border: "1px solid #ccc",
+                                        backgroundColor: "#f9f9f9",
+                                    }}
+                                >
+                                    <option value="">Select an icon</option>
+                                    {Object.keys(
+                                        iconLibraries[uncheckedLibrary],
+                                    ).map((iconName) => (
+                                        <option key={iconName} value={iconName}>
+                                            {iconName}
+                                        </option>
+                                    ))}
+                                </select>
+                            )}
+                        </Stack>
                     </Stack>
                 </Stack>
             </Paper>

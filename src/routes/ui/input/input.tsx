@@ -1,11 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Typography } from "@ui/components/data-display/Typography/Typography";
-
-import { useColorInput } from "@ui/hooks/useColorInput";
+import { Input } from "@ui/components/inputs/Input/Input";
+import { type InputType } from "@ui/components/inputs/Input/Input.types";
 import {
     Button,
     Checkbox,
-    CircularProgress,
     Divider,
     Paper,
     Radio,
@@ -13,35 +11,47 @@ import {
     randomHexColor,
     Slider,
     Stack,
+    Typography,
+    useColorInput,
+    type Color,
+    type ColorLike,
+    type Size,
+    type TypographyColor,
+    type Variant,
 } from "@ui/index";
-import type { Color, ColorLike, Size, Variant } from "@ui/types";
-import { capitalize } from "lodash-es";
-
-import { Input } from "@ui/components/inputs/Input/Input";
+import { capitalize, startCase } from "lodash-es";
 import { useState } from "react";
-import { seo } from "../../seo";
+import { seo } from "../../../seo";
 
-export const Route = createFileRoute("/ui/circular-progress")({
-    component: PlaygroundCircularProgress,
+export const Route = createFileRoute("/ui/input/input")({
+    component: InputPlayground,
     head: () => ({
         meta: [
             ...seo({
-                title: "Circular Progress - Mutualzz UI",
+                title: "Input - Mutualzz UI",
             }),
         ],
     }),
 });
 
 const variants = ["solid", "outlined", "plain", "soft"] as Variant[];
-
 const colors = [
     "primary",
     "neutral",
-    "success",
     "danger",
+    "success",
     "warning",
     "info",
 ] as Color[];
+
+const types = [
+    "date",
+    "datetime-local",
+    "number",
+    "password",
+    "text",
+    "time",
+] as InputType[];
 
 const sizeNames = {
     sm: "Small",
@@ -49,13 +59,32 @@ const sizeNames = {
     lg: "Large",
 };
 
-function PlaygroundCircularProgress() {
-    const [variant, setVariant] = useState<Variant | "all">("solid");
-    const [text, setText] = useState<string | null>(null);
-    const [size, setSize] = useState<Size | number>("md");
+const textColors = [
+    "primary",
+    "secondary",
+    "accent",
+    "disabled",
+    "inherit",
+] as (TypographyColor | "inherit")[];
 
-    const [determinate, setDeterminate] = useState(false);
-    const [value, setValue] = useState(0);
+function InputPlayground() {
+    const [variant, setVariant] = useState<Variant | "all">("outlined");
+    const [size, setSize] = useState<Size | number>("md");
+    const [disabled, setDisabled] = useState(false);
+    const [fullWidth, setFullWidth] = useState(false);
+
+    const [textColor, setTextColor] = useState<TypographyColor | "inherit">(
+        "inherit",
+    );
+
+    const [customTextColorEnabled, setCustomTextColorEnabled] = useState(false);
+
+    const [placeholder, setPlaceholder] = useState<string | null>(null);
+    const [type, setType] = useState<InputType>("text");
+
+    const [value, setValue] = useState<string | null>(null);
+
+    const [controlled, setControlled] = useState(false);
 
     const [customSizeToggle, setCustomSizeToggle] = useState(false);
 
@@ -71,43 +100,48 @@ function PlaygroundCircularProgress() {
         setColorDirectly,
     } = useColorInput<Color | ColorLike>();
 
-    const allProgresses = [...colors, ...customColors].map((c) =>
+    const {
+        inputValue: inputTextColorValue,
+        color: customTextColor,
+        isInvalid: isTextColorInvalid,
+        handleChange: handleTextColorChange,
+        setColorDirectly: setTextColorDirectly,
+        validate: validateTextColor,
+    } = useColorInput<TypographyColor>();
+
+    const allInputs = [...colors, ...customColors].map((c) =>
         variants.map((v) => (
             <Stack
+                direction="column"
                 justifyContent="center"
                 alignItems="center"
-                direction="column"
-                key={`${c}-${v}`}
+                key={`${v}-${c}`}
             >
                 <Typography>
                     {capitalize(v)} {capitalize(c)}
                 </Typography>
-                {text ? (
-                    <CircularProgress
-                        key={c}
-                        size={size}
-                        variant={v}
-                        color={c}
-                        determinate={determinate}
-                        value={value}
-                    >
-                        {text}
-                    </CircularProgress>
-                ) : (
-                    <CircularProgress
-                        key={c}
-                        size={size}
-                        variant={v}
-                        color={c}
-                        determinate={determinate}
-                        value={value}
-                    />
-                )}
+                <Input
+                    key={`${v}-${c}-input`}
+                    fullWidth={fullWidth}
+                    color={c}
+                    textColor={
+                        customTextColorEnabled ? customTextColor : textColor
+                    }
+                    placeholder={placeholder ?? "Type something..."}
+                    variant={v}
+                    size={size}
+                    onChange={(e) => {
+                        if (controlled) setValue(e.target.value);
+                    }}
+                    value={controlled ? (value ?? "") : undefined}
+                    disabled={disabled}
+                    type={type}
+                />
             </Stack>
         )),
     );
 
-    const progresses = [...colors, ...customColors].map((c) => (
+    const inputs = [...colors, ...customColors].map((c) => (
         <Stack
             justifyContent="center"
             alignItems="center"
@@ -117,27 +151,21 @@ function PlaygroundCircularProgress() {
             <Typography>
                 {capitalize(variant)} {capitalize(c)}
             </Typography>
-            {text ? (
-                <CircularProgress
-                    key={c}
-                    size={size}
-                    variant={variant as Variant}
-                    color={c}
-                    determinate={determinate}
-                    value={value}
-                >
-                    {text}
-                </CircularProgress>
-            ) : (
-                <CircularProgress
-                    key={c}
-                    size={size}
-                    variant={variant as Variant}
-                    color={c}
-                    determinate={determinate}
-                    value={value}
-                />
-            )}
+            <Input
+                key={`${variant}-${c}-input`}
+                variant={variant as Variant}
+                placeholder={placeholder ?? "Type something..."}
+                size={size}
+                onChange={(e) => {
+                    if (controlled) setValue(e.target.value);
+                }}
+                value={controlled ? (value ?? "") : undefined}
+                disabled={disabled}
+                color={c}
+                textColor={customTextColorEnabled ? customTextColor : textColor}
+                fullWidth={fullWidth}
+                type={type}
+            />
         </Stack>
     ));
 
@@ -153,12 +181,12 @@ function PlaygroundCircularProgress() {
                 spacing={variant === "all" ? 10 : 5}
             >
                 {variant === "all" &&
-                    allProgresses.map((progresses, i) => (
-                        <Stack direction="row" spacing={5} key={i}>
-                            {progresses}
+                    allInputs.map((inputs, i) => (
+                        <Stack wrap="wrap" direction="row" spacing={5} key={i}>
+                            {inputs}
                         </Stack>
                     ))}
-                {variant !== "all" && progresses}
+                {variant !== "all" && inputs}
             </Paper>
             <Paper alignItems="center" direction="column" p={20}>
                 <Divider>Playground</Divider>
@@ -173,7 +201,6 @@ function PlaygroundCircularProgress() {
                             name="variants"
                         >
                             <Radio
-                                key="all"
                                 value="all"
                                 label="All"
                                 checked={variant === "all"}
@@ -206,7 +233,7 @@ function PlaygroundCircularProgress() {
                                 onChange={() =>
                                     setCustomSizeToggle((prev) => {
                                         if (prev) setSize("md");
-                                        else setSize((64 + 16) / 2);
+                                        else setSize(Math.round((24 + 10) / 2));
                                         return !prev;
                                     })
                                 }
@@ -215,13 +242,13 @@ function PlaygroundCircularProgress() {
                         {customSizeToggle ? (
                             <Slider
                                 value={size as number}
-                                min={16}
-                                max={64}
+                                min={6}
+                                max={24}
                                 onChange={(e) =>
                                     setSize(Number(e.target.value))
                                 }
                                 valueLabelDisplay="auto"
-                                valueLabelFormat={(val) => `${val}px`}
+                                valueLabelFormat={(value) => `${value}px`}
                             />
                         ) : (
                             <RadioGroup
@@ -245,24 +272,143 @@ function PlaygroundCircularProgress() {
                     </Stack>
                     <Divider />
                     <Stack direction="column" spacing={5}>
-                        <label>States</label>
-                        <Checkbox
-                            checked={determinate}
-                            label="Determinate"
-                            onChange={() => setDeterminate((prev) => !prev)}
-                        />
-                        {determinate && (
-                            <Slider
-                                value={value}
-                                min={0}
-                                max={100}
+                        <Stack
+                            direction="row"
+                            justifyContent="space-between"
+                            spacing={5}
+                        >
+                            <label>Text Color</label>
+                            <Checkbox
+                                label="Custom"
+                                checked={customTextColorEnabled}
                                 onChange={(e) =>
-                                    setValue(Number(e.target.value))
+                                    setCustomTextColorEnabled(e.target.checked)
                                 }
-                                valueLabelDisplay="auto"
-                                valueLabelFormat={(val) => `${val}%`}
+                            />
+                        </Stack>
+                        {customTextColorEnabled ? (
+                            <Stack direction="row" spacing={5}>
+                                <Input
+                                    variant="solid"
+                                    size="lg"
+                                    color="primary"
+                                    fullWidth
+                                    error={isTextColorInvalid}
+                                    placeholder="Enter a text color (e.g. #ff0000)"
+                                    value={inputTextColorValue}
+                                    onChange={(e) => {
+                                        handleTextColorChange(e.target.value);
+                                    }}
+                                    onBlur={validateTextColor}
+                                />
+                                <Button
+                                    variant="solid"
+                                    color="neutral"
+                                    onClick={() => {
+                                        setTextColorDirectly(randomHexColor());
+                                    }}
+                                >
+                                    Random
+                                </Button>
+                            </Stack>
+                        ) : (
+                            <RadioGroup
+                                onChange={(_, textColor) =>
+                                    setTextColor(
+                                        textColor as
+                                            | TypographyColor
+                                            | "inherit",
+                                    )
+                                }
+                                value={textColor}
+                                name="textColors"
+                            >
+                                {textColors.map((c) => (
+                                    <Radio
+                                        key={c}
+                                        value={c}
+                                        label={capitalize(c)}
+                                        checked={textColor === c}
+                                        color="neutral"
+                                        onChange={() =>
+                                            setTextColor(c as TypographyColor)
+                                        }
+                                    />
+                                ))}
+                            </RadioGroup>
+                        )}
+                    </Stack>
+                    <Divider />
+                    <Stack direction="column" spacing={5}>
+                        <label>States</label>
+                        <Stack direction="column" spacing={5}>
+                            <Checkbox
+                                checked={fullWidth}
+                                label="Full Width"
+                                onChange={() => setFullWidth((prev) => !prev)}
+                            />
+                            <Checkbox
+                                checked={disabled}
+                                label="Disabled"
+                                onChange={() => setDisabled((prev) => !prev)}
+                            />
+                            <Checkbox
+                                checked={controlled}
+                                label="Controlled"
+                                onChange={() => setControlled((prev) => !prev)}
+                            />
+                        </Stack>
+                        {controlled && (
+                            <Input
+                                variant="solid"
+                                size="lg"
+                                color="primary"
+                                fullWidth
+                                value={value ?? ""}
+                                onChange={(e) => setValue(e.target.value)}
+                                placeholder="Controlled value"
                             />
                         )}
+                    </Stack>
+                    <Divider />
+                    <Stack direction="column" spacing={5}>
+                        <label>Placeholder</label>
+                        <Input
+                            variant="solid"
+                            size="lg"
+                            color="primary"
+                            fullWidth
+                            value={placeholder ?? ""}
+                            onChange={(e) =>
+                                e.target.value === ""
+                                    ? setPlaceholder(null)
+                                    : setPlaceholder(e.target.value)
+                            }
+                            placeholder="Enter placeholder text"
+                        />
+                    </Stack>
+                    <Divider />
+                    <Stack direction="column" spacing={5}>
+                        <label>Type</label>
+                        <select
+                            value={type}
+                            onChange={(e) =>
+                                setType(e.target.value as InputType)
+                            }
+                            css={{
+                                padding: 10,
+                                borderRadius: 5,
+                                border: "1px solid #ccc",
+                                backgroundColor: "#f9f9f9",
+                                width: "100%",
+                            }}
+                        >
+                            {types.map((t) => (
+                                <option key={t} value={t}>
+                                    {startCase(t)}
+                                </option>
+                            ))}
+                        </select>
                     </Stack>
                     <Divider />
                     <Stack direction="column" spacing={5}>
@@ -276,7 +422,6 @@ function PlaygroundCircularProgress() {
                                 variant="solid"
                                 size="lg"
                                 color="primary"
-                                fullWidth
                                 placeholder="Enter a color (e.g., #ff0000, red)"
                                 error={isInvalid}
                                 value={inputColorValue}
@@ -305,7 +450,7 @@ function PlaygroundCircularProgress() {
                             <Stack
                                 alignItems="center"
                                 direction="row"
-                                spacing={5}
+                                spacing={10}
                             >
                                 <select
                                     value={colorToDelete ?? ""}
@@ -351,24 +496,6 @@ function PlaygroundCircularProgress() {
                                 </Button>
                             </Stack>
                         )}
-                    </Stack>
-                    <Divider />
-                    <Stack direction="column" spacing={5}>
-                        <label>Label</label>
-                        <Input
-                            variant="solid"
-                            size="lg"
-                            color="primary"
-                            fullWidth
-                            value={text ?? ""}
-                            onChange={(e) =>
-                                setText(
-                                    e.target.value.trim() === ""
-                                        ? null
-                                        : e.target.value,
-                                )
-                            }
-                        />
                     </Stack>
                 </Stack>
             </Paper>
