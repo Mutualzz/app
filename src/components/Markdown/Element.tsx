@@ -1,7 +1,5 @@
+import { Typography, useTheme, type TypographyHeadingKey } from "@ui/index";
 import type { RenderElementProps } from "slate-react";
-import { Typography } from "../../ui/src/components/data-display/Typography/Typography";
-import { useTheme } from "../../ui/src/hooks/useTheme";
-import type { TypographyHeadingKey } from "../../ui/src/types";
 
 export const Element = ({
     attributes,
