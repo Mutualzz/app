@@ -14,6 +14,7 @@ import {
     useColorInput,
     type Color,
     type ColorLike,
+    type TypographyColor,
     type Variant,
 } from "@ui/index";
 import capitalize from "lodash-es/capitalize";
@@ -41,11 +42,23 @@ const colors = [
     "info",
 ] as Color[];
 
+const textColors = [
+    "primary",
+    "secondary",
+    "accent",
+    "disabled",
+    "inherit",
+] as (TypographyColor | "inherit")[];
+
 function RouteComponent() {
     const [variant, setVariant] = useState<Variant>("outlined");
     const [color, setColor] = useState<Color>("primary");
+    const [textColor, setTextColor] = useState<TypographyColor | "inherit">(
+        "inherit",
+    );
 
     const [customColorEnabled, setCustomColorEnabled] = useState(false);
+    const [customTextColorEnabled, setCustomTextColorEnabled] = useState(false);
 
     const {
         inputValue: inputColorValue,
@@ -56,16 +69,28 @@ function RouteComponent() {
         validate,
     } = useColorInput<Color | ColorLike>();
 
+    const {
+        inputValue: inputTextColorValue,
+        color: customTextColor,
+        isInvalid: isTextColorInvalid,
+        handleChange: handleTextColorChange,
+        setColorDirectly: setTextColorDirectly,
+        validate: validateTextColor,
+    } = useColorInput<TypographyColor>();
+
     return (
         <Stack direction="row" spacing={10} width="100%" gap={2}>
-            <Paper width="100%" direction="column" pt={4}>
+            <Paper width="100%" direction="column" pt={8}>
                 <Typography color="danger" level="title-lg" textAlign="center">
-                    This markdown editor is experimental and not fully
+                    This markdown editor is in early development and not fully
                     functional yet.
                 </Typography>
                 <Stack height="100%" p={12}>
                     <Markdown
                         color={customColorEnabled ? customColor : color}
+                        textColor={
+                            customTextColorEnabled ? customTextColor : textColor
+                        }
                         variant={variant}
                     />
                 </Stack>
@@ -151,6 +176,74 @@ function RouteComponent() {
                                         checked={color === c}
                                         color="neutral"
                                         onChange={() => setColor(c)}
+                                    />
+                                ))}
+                            </RadioGroup>
+                        )}
+                    </Stack>
+                    <Divider />
+                    <Stack direction="column" spacing={5}>
+                        <Stack
+                            direction="row"
+                            justifyContent="space-between"
+                            spacing={5}
+                        >
+                            <label>Text Color</label>
+                            <Checkbox
+                                label="Custom"
+                                checked={customTextColorEnabled}
+                                onChange={(e) =>
+                                    setCustomTextColorEnabled(e.target.checked)
+                                }
+                            />
+                        </Stack>
+                        {customTextColorEnabled ? (
+                            <Stack direction="row" spacing={5}>
+                                <Input
+                                    variant="solid"
+                                    size="lg"
+                                    color="primary"
+                                    fullWidth
+                                    error={isTextColorInvalid}
+                                    placeholder="Enter a text color (e.g. #ff0000)"
+                                    value={inputTextColorValue}
+                                    onChange={(e) => {
+                                        handleTextColorChange(e.target.value);
+                                    }}
+                                    onBlur={validateTextColor}
+                                />
+                                <Button
+                                    variant="solid"
+                                    color="neutral"
+                                    onClick={() => {
+                                        setTextColorDirectly(randomHexColor());
+                                    }}
+                                >
+                                    Random
+                                </Button>
+                            </Stack>
+                        ) : (
+                            <RadioGroup
+                                onChange={(_, textColor) =>
+                                    setTextColor(
+                                        textColor as
+                                            | TypographyColor
+                                            | "inherit",
+                                    )
+                                }
+                                value={textColor}
+                                name="textColors"
+                            >
+                                {textColors.map((c) => (
+                                    <Radio
+                                        key={c}
+                                        value={c}
+                                        label={capitalize(c)}
+                                        checked={textColor === c}
+                                        color="neutral"
+                                        onChange={() =>
+                                            setTextColor(c as TypographyColor)
+                                        }
                                     />
                                 ))}
                             </RadioGroup>

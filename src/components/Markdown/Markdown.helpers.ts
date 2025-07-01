@@ -1,7 +1,7 @@
 import type { CSSObject, Theme } from "@emotion/react";
-import type { Color, ColorLike } from "@ui/types";
+import type { Color, ColorLike, TypographyColor } from "@ui/types";
 import { darken, lighten } from "@ui/utils";
-import { resolveColor } from "@ui/utils/resolveColor";
+import { resolveColor, resolveTypographyColor } from "@ui/utils/resolveColor";
 import { formatHex8, parse } from "culori";
 import {
     Editor,
@@ -96,14 +96,21 @@ export const parseMarkdownToRanges = (
 export const resolveMarkdownStyles = (
     theme: Theme,
     color: Color | ColorLike,
+    textColor: TypographyColor | "inherit",
 ): Record<string, CSSObject> => {
     const parsedColor = parse(resolveColor(color, theme));
     if (!parsedColor) throw new Error("Invalid color");
 
+    const parsedTextColor =
+        textColor === "inherit"
+            ? parsedColor
+            : parse(resolveTypographyColor(textColor, theme));
+    if (!parsedTextColor) throw new Error("Invalid text color");
+
     return {
         outlined: {
             background: "transparent",
-            color: formatHex8(lighten(parsedColor, 0.5)),
+            color: formatHex8(lighten(parsedTextColor, 0.5)),
             border: `1px solid ${formatHex8(parsedColor)}`,
             borderRadius: 8,
             ":focus": {
@@ -112,7 +119,7 @@ export const resolveMarkdownStyles = (
         },
         solid: {
             background: formatHex8(parsedColor),
-            color: formatHex8(lighten(parsedColor, 0.75)),
+            color: formatHex8(lighten(parsedTextColor, 0.75)),
             border: "none",
             borderRadius: 8,
             ":focus": {
@@ -121,7 +128,7 @@ export const resolveMarkdownStyles = (
         },
         plain: {
             background: "transparent",
-            color: formatHex8(lighten(parsedColor, 0.25)),
+            color: formatHex8(lighten(parsedTextColor, 0.25)),
             border: "none",
             borderRadius: 8,
             ":focus": {
@@ -130,7 +137,7 @@ export const resolveMarkdownStyles = (
         },
         soft: {
             background: formatHex8(darken(parsedColor, 0.5)),
-            color: formatHex8(lighten(parsedColor, 0.5)),
+            color: formatHex8(lighten(parsedTextColor, 0.5)),
             border: "none",
             borderRadius: 8,
             ":focus": {

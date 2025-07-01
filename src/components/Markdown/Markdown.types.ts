@@ -1,8 +1,9 @@
 import type { CSSObject } from "@emotion/react";
-import type { Color, ColorLike, Variant } from "@ui/index";
+import type { Color, ColorLike, TypographyColor, Variant } from "@ui/index";
 
 export interface MarkdownProps {
     color?: Color | ColorLike;
+    textColor?: TypographyColor | "inherit";
     variant?: Variant;
 
     disabled?: boolean;

@@ -34,6 +34,7 @@ import type { MarkdownProps } from "./Markdown.types";
 
 export const Markdown = ({
     color = "neutral",
+    textColor = "inherit",
     variant = "outlined",
     disabled = false,
 
@@ -307,7 +308,7 @@ export const Markdown = ({
                     padding: "0.5em",
                     minWidth: 0,
                     boxSizing: "border-box",
-                    ...resolveMarkdownStyles(theme, color)[variant],
+                    ...resolveMarkdownStyles(theme, color, textColor)[variant],
                     ...(disabled && {
                         opacity: 0.5,
                         pointerEvents: "none",
