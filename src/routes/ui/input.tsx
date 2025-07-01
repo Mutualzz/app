@@ -16,6 +16,7 @@ import {
     type Color,
     type ColorLike,
     type Size,
+    type TypographyColor,
     type Variant,
 } from "@ui/index";
 import { capitalize, startCase } from "lodash-es";
@@ -58,11 +59,25 @@ const sizeNames = {
     lg: "Large",
 };
 
+const textColors = [
+    "primary",
+    "secondary",
+    "accent",
+    "disabled",
+    "inherit",
+] as (TypographyColor | "inherit")[];
+
 function InputPlayground() {
     const [variant, setVariant] = useState<Variant | "all">("outlined");
     const [size, setSize] = useState<Size | number>("md");
     const [disabled, setDisabled] = useState(false);
     const [fullWidth, setFullWidth] = useState(false);
+
+    const [textColor, setTextColor] = useState<TypographyColor | "inherit">(
+        "inherit",
+    );
+
+    const [customTextColorEnabled, setCustomTextColorEnabled] = useState(false);
 
     const [placeholder, setPlaceholder] = useState<string | null>(null);
     const [type, setType] = useState<InputType>("text");
@@ -85,6 +100,15 @@ function InputPlayground() {
         setColorDirectly,
     } = useColorInput<Color | ColorLike>();
 
+    const {
+        inputValue: inputTextColorValue,
+        color: customTextColor,
+        isInvalid: isTextColorInvalid,
+        handleChange: handleTextColorChange,
+        setColorDirectly: setTextColorDirectly,
+        validate: validateTextColor,
+    } = useColorInput<TypographyColor>();
+
     const allInputs = [...colors, ...customColors].map((c) =>
         variants.map((v) => (
             <Stack
@@ -100,6 +124,9 @@ function InputPlayground() {
                     key={`${v}-${c}-input`}
                     fullWidth={fullWidth}
                     color={c}
+                    textColor={
+                        customTextColorEnabled ? customTextColor : textColor
+                    }
                     placeholder={placeholder ?? "Type something..."}
                     variant={v}
                     size={size}
@@ -135,6 +162,7 @@ function InputPlayground() {
                 value={controlled ? (value ?? "") : undefined}
                 disabled={disabled}
                 color={c}
+                textColor={customTextColorEnabled ? customTextColor : textColor}
                 fullWidth={fullWidth}
                 type={type}
             />
@@ -237,6 +265,74 @@ function InputPlayground() {
                                         checked={size === s}
                                         color="neutral"
                                         onChange={() => setSize(s as Size)}
+                                    />
+                                ))}
+                            </RadioGroup>
+                        )}
+                    </Stack>
+                    <Divider />
+                    <Stack direction="column" spacing={5}>
+                        <Stack
+                            direction="row"
+                            justifyContent="space-between"
+                            spacing={5}
+                        >
+                            <label>Text Color</label>
+                            <Checkbox
+                                label="Custom"
+                                checked={customTextColorEnabled}
+                                onChange={(e) =>
+                                    setCustomTextColorEnabled(e.target.checked)
+                                }
+                            />
+                        </Stack>
+                        {customTextColorEnabled ? (
+                            <Stack direction="row" spacing={5}>
+                                <Input
+                                    variant="solid"
+                                    size="lg"
+                                    color="primary"
+                                    fullWidth
+                                    error={isTextColorInvalid}
+                                    placeholder="Enter a text color (e.g. #ff0000)"
+                                    value={inputTextColorValue}
+                                    onChange={(e) => {
+                                        handleTextColorChange(e.target.value);
+                                    }}
+                                    onBlur={validateTextColor}
+                                />
+                                <Button
+                                    variant="solid"
+                                    color="neutral"
+                                    onClick={() => {
+                                        setTextColorDirectly(randomHexColor());
+                                    }}
+                                >
+                                    Random
+                                </Button>
+                            </Stack>
+                        ) : (
+                            <RadioGroup
+                                onChange={(_, textColor) =>
+                                    setTextColor(
+                                        textColor as
+                                            | TypographyColor
+                                            | "inherit",
+                                    )
+                                }
+                                value={textColor}
+                                name="textColors"
+                            >
+                                {textColors.map((c) => (
+                                    <Radio
+                                        key={c}
+                                        value={c}
+                                        label={capitalize(c)}
+                                        checked={textColor === c}
+                                        color="neutral"
+                                        onChange={() =>
+                                            setTextColor(c as TypographyColor)
+                                        }
                                     />
                                 ))}
                             </RadioGroup>
