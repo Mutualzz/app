@@ -16,10 +16,6 @@ import {
 import type { EmojiElement } from "../../types/slate";
 import type { getEmojiWithShortcode } from "../../utils/emojis";
 
-const SHORTCUTS: Record<string, Element["type"]> = {
-    ">": "blockquote",
-};
-
 const tokenDefs = [
     { symbol: "**", type: "bold" },
     { symbol: "*", type: "italic" },
@@ -29,6 +25,7 @@ const tokenDefs = [
 ] as const;
 
 type TokenType = (typeof tokenDefs)[number]["type"];
+type HeadingLevel = 1 | 2 | 3;
 
 export const parseMarkdownToRanges = (
     text: string,
@@ -148,40 +145,69 @@ export const resolveMarkdownStyles = (
 };
 
 export const withShortcuts = (editor: Editor) => {
-    const { deleteBackward, insertText } = editor;
+    const { insertText, deleteBackward, normalizeNode } = editor;
 
     editor.insertText = (text: string) => {
         const { selection } = editor;
 
-        if (text.endsWith(" ") && selection && Range.isCollapsed(selection)) {
-            const { anchor } = selection;
-            const block = editor.above({
+        if (selection && Range.isCollapsed(selection)) {
+            const blockEntry = editor.above({
                 match: (n) => Element.isElement(n) && editor.isBlock(n),
             });
 
-            const path = block ? block[1] : [];
-            const start = editor.start(path);
-            const range: Range = {
-                anchor,
-                focus: start,
-            };
-            const beforeText = editor.string(range) + text.slice(0, -1);
-            const type = SHORTCUTS[beforeText] as Element["type"] | undefined;
+            if (blockEntry) {
+                const [blockNode, blockPath] = blockEntry;
 
-            if (type) {
-                editor.select(range);
-
-                if (!Range.isCollapsed(range)) editor.delete();
-
-                const newProperties: Partial<Element> = {
-                    type,
+                const range: Range = {
+                    anchor: selection.anchor,
+                    focus: editor.start(blockPath),
                 };
 
-                editor.setNodes(newProperties, {
-                    match: (n) => Element.isElement(n) && editor.isBlock(n),
-                });
+                const beforeText = editor.string(range) + text;
 
-                return;
+                if (/^>\s/.test(beforeText)) {
+                    editor.select(range);
+                    if (!Range.isCollapsed(range)) editor.delete();
+
+                    editor.setNodes(
+                        { type: "blockquote" },
+                        {
+                            match: (n) =>
+                                Element.isElement(n) && editor.isBlock(n),
+                        },
+                    );
+
+                    return;
+                }
+
+                const headingMatch = /^(#{1,3})(\s|$)/.exec(beforeText);
+                const level = headingMatch?.[1].length;
+
+                if (level) {
+                    if (
+                        Element.isElement(blockNode) &&
+                        blockNode.type === "heading"
+                    ) {
+                        if (blockNode.level !== level) {
+                            editor.setNodes(
+                                { level: level as HeadingLevel },
+                                {
+                                    match: (n) =>
+                                        Element.isElement(n) &&
+                                        n.type === "heading",
+                                },
+                            );
+                        }
+                    } else {
+                        editor.setNodes(
+                            { type: "heading", level: level as HeadingLevel },
+                            {
+                                match: (n) =>
+                                    Element.isElement(n) && editor.isBlock(n),
+                            },
+                        );
+                    }
+                }
             }
         }
 
@@ -193,23 +219,20 @@ export const withShortcuts = (editor: Editor) => {
 
         if (selection && Range.isCollapsed(selection)) {
             const match = editor.above({
-                match: (n) => Element.isElement(n) && editor.isBlock(n),
+                match: (n) => Element.isElement(n) && n.type === "blockquote",
             });
 
             if (match) {
-                const [block, path] = match;
+                const [, path] = match;
                 const start = editor.start(path);
 
-                if (
-                    !Editor.isEditor(block) &&
-                    Element.isElement(block) &&
-                    block.type !== "paragraph" &&
-                    Point.equals(selection.anchor, start)
-                ) {
-                    const newProperties: Partial<Element> = {
-                        type: "paragraph",
-                    };
-                    editor.setNodes(newProperties);
+                if (Point.equals(selection.anchor, start)) {
+                    editor.setNodes(
+                        {
+                            type: "paragraph",
+                        },
+                        { at: path },
+                    );
 
                     return;
                 }
@@ -217,6 +240,24 @@ export const withShortcuts = (editor: Editor) => {
         }
 
         deleteBackward(unit);
+    };
+
+    editor.normalizeNode = ([node, path]) => {
+        if (
+            Element.isElement(node) &&
+            editor.isBlock(node) &&
+            node.type === "heading"
+        ) {
+            const text = Editor.string(editor, path);
+            if (!text.startsWith("#")) {
+                editor.withoutNormalizing(() => {
+                    editor.setNodes({ type: "paragraph" }, { at: path });
+                });
+                return;
+            }
+        }
+
+        normalizeNode([node, path]);
     };
 
     return editor;
@@ -272,6 +313,7 @@ export const deseralizeNode = (node: Node): string => {
                 const hashtag = "#".repeat(node.level);
                 return `${hashtag} ${children}\n`;
             }
+
             default:
                 return children;
         }

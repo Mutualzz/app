@@ -34,6 +34,7 @@ export const Leaf = ({ attributes, children, leaf }: RenderLeafProps) => {
                         : undefined
             }
             fontFamily={code ? "monospace" : "inherit"}
+            fontSize="inherit"
             whiteSpace="pre-wrap"
         >
             {children}

@@ -26,7 +26,18 @@ export const Element = ({
             );
 
         case "heading": {
-            const level = `h${element.level}` as TypographyHeadingKey;
+            let level: TypographyHeadingKey | null = null;
+            switch (element.level) {
+                case 1:
+                    level = "h1";
+                    break;
+                case 2:
+                    level = "h3";
+                    break;
+                case 3:
+                    level = "h4";
+                    break;
+            }
             return (
                 <Typography {...attributes} display="block" level={level}>
                     {children}
