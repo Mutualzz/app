@@ -3,16 +3,7 @@ import type { Color, ColorLike, TypographyColor } from "@ui/types";
 import { darken, lighten } from "@ui/utils";
 import { resolveColor, resolveTypographyColor } from "@ui/utils/resolveColor";
 import { formatHex8, parse } from "culori";
-import {
-    Editor,
-    Element,
-    Point,
-    Range,
-    Text,
-    type Descendant,
-    type Node,
-    type TextUnit,
-} from "slate";
+import { Editor, Element, Point, Range, type TextUnit } from "slate";
 import type { EmojiElement } from "../../types/slate";
 import type { getEmojiWithShortcode } from "../../utils/emojis";
 
@@ -282,73 +273,8 @@ export const withEmojis = (editor: Editor) => {
         return element.type !== "emoji";
     };
 
-    editor.setFragmentData = (data: DataTransfer) => {
-        const { selection } = editor;
-
-        if (!selection) return;
-
-        const fragment = editor.fragment(selection);
-        const markdown = fragment.map(deseralizeNode).join("");
-
-        data.setData("text/plain", markdown);
-    };
-
     return editor;
 };
-
-export const deseralizeNode = (node: Node): string => {
-    if (Text.isText(node)) return node.text;
-
-    if (Element.isElement(node)) {
-        const children = node.children.map((n) => deseralizeNode(n)).join("");
-
-        switch (node.type) {
-            case "paragraph":
-                return `${children}`;
-            case "blockquote":
-                return `> ${children}\n`;
-            case "emoji":
-                return `:${node.shortcode ?? `${node.id}`}:`;
-            case "heading": {
-                const hashtag = "#".repeat(node.level);
-                return `${hashtag} ${children}\n`;
-            }
-
-            default:
-                return children;
-        }
-    }
-
-    return "";
-};
-
-export const serializeNode = (line: string): Descendant => {
-    if (line.startsWith("> "))
-        return {
-            type: "blockquote",
-            children: [{ text: line.slice(2) }],
-        };
-
-    if (line.startsWith("#")) {
-        const level = RegExp(/^#+/).exec(line)?.[0].length ?? 1;
-        return {
-            type: "heading",
-            level: Math.min(level, 3) as 1 | 2 | 3,
-            children: [{ text: line.slice(level + 1) }],
-        };
-    }
-
-    return {
-        type: "paragraph",
-        children: [{ text: line }],
-    };
-};
-
-export const deseralizeFromMarkdown = (nodes: Node[]): string =>
-    nodes.map(deseralizeNode).join("");
-
-export const serializeToMarkdown = (text: string): Descendant[] =>
-    text.split("\n").map((line) => serializeNode(line));
 
 export const insertEmoji = (
     editor: Editor,

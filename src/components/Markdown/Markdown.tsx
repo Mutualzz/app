@@ -1,6 +1,6 @@
 import { useTheme } from "@ui/index";
 import { isKeyHotkey } from "is-hotkey";
-import { useCallback, useMemo, useState, type KeyboardEvent } from "react";
+import { useCallback, useMemo, type KeyboardEvent } from "react";
 import {
     createEditor,
     Path,
@@ -22,15 +22,20 @@ import { getEmojiWithShortcode } from "../../utils/emojis";
 import { Element } from "./Element";
 import { Leaf } from "./Leaf";
 import {
-    deseralizeFromMarkdown,
     insertEmoji,
     parseMarkdownToRanges,
     resolveMarkdownStyles,
-    serializeToMarkdown,
     withEmojis,
     withShortcuts,
 } from "./Markdown.helpers";
 import type { MarkdownProps } from "./Markdown.types";
+
+const initialValue: Descendant[] = [
+    {
+        type: "paragraph",
+        children: [{ text: "" }],
+    },
+];
 
 export const Markdown = ({
     color = "neutral",
@@ -41,15 +46,10 @@ export const Markdown = ({
     onChange,
     placeholder,
     onEnter,
-    value,
 
     css,
 }: MarkdownProps) => {
     const { theme } = useTheme();
-
-    const [editorValue, setEditorValue] = useState<Descendant[]>(() =>
-        serializeToMarkdown(value ?? ""),
-    );
 
     const editor = useMemo(
         () => withShortcuts(withEmojis(withHistory(withReact(createEditor())))),
@@ -144,7 +144,7 @@ export const Markdown = ({
     );
 
     const handleChange = useCallback(
-        (newValue: Descendant[]) => {
+        (_newValue: Descendant[]) => {
             const { selection } = editor;
 
             if (selection && Range.isCollapsed(selection)) {
@@ -186,19 +186,15 @@ export const Markdown = ({
                 }
             }
 
-            if (onChange) {
-                const markdown = deseralizeFromMarkdown(newValue);
-                onChange(markdown);
-            }
+            if (onChange) onChange("");
         },
         [editor, onChange],
     );
 
     return (
         <Slate
-            initialValue={editorValue}
+            initialValue={initialValue}
             onChange={(newValue) => {
-                setEditorValue(newValue);
                 handleChange(newValue);
             }}
             editor={editor}
