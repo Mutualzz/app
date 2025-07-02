@@ -38,18 +38,19 @@ export const Element = ({
             return (
                 <span
                     {...attributes}
+                    aria-label={element.name}
+                    role="img"
+                    title={element.name}
                     css={{
+                        display: "inline-block",
+                        width: "1.375em",
+                        height: "1.375em",
+                        verticalAlign: "middle",
                         userSelect: "none",
                     }}
                     contentEditable={false}
                 >
                     <img
-                        css={{
-                            display: "inline-block",
-                            width: "1.375em",
-                            height: "1.375em",
-                            verticalAlign: "middle",
-                        }}
                         src={element.url}
                         draggable={false}
                         alt={element.name}
