@@ -16,7 +16,7 @@ export const Element = ({
                     css={{
                         display: "block",
                         margin: 0,
-                        paddingLeft: "0.725em",
+                        paddingLeft: "0.5em",
                         borderLeft: `4px solid ${theme.typography.colors.disabled}`,
                         color: theme.typography.colors.primary,
                     }}
