@@ -158,12 +158,9 @@ export const PlaygrondLeftSidebar = () => {
                             <Button
                                 key={i}
                                 variant="solid"
-                                color={
-                                    pathname === button.link
-                                        ? "success"
-                                        : "primary"
-                                }
+                                color="primary"
                                 onClick={() => {
+                                    if (pathname === button.link) return;
                                     navigate({
                                         to: button.link,
                                     });
