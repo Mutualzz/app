@@ -52,6 +52,10 @@ const links = {
             link: "/ui/data-display/divider",
         },
         {
+            name: "Markdown",
+            link: "/ui/data-display/markdown-renderer",
+        },
+        {
             name: "Typography",
             link: "/ui/data-display/typography",
         },

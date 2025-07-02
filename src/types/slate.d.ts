@@ -18,10 +18,15 @@ export type HeadingElement = {
     children: Descendant[];
 };
 
+export type LinkElement = {
+    type: "link";
+    url: string;
+    children: Descendant[];
+};
+
 export type EmojiElement = {
     type: "emoji";
     id: string;
-    name: string;
     url: string;
     unicode?: string;
     shortcode?: string;
@@ -46,7 +51,8 @@ export type Element =
     | BlockQuoteElement
     | ParagraphElement
     | HeadingElement
-    | EmojiElement;
+    | EmojiElement
+    | LinkElement;
 
 export type Editor = BaseEditor &
     ReactEditor &

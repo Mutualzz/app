@@ -1,7 +1,7 @@
 import type { CSSObject } from "@emotion/react";
 import type { Color, ColorLike, TypographyColor, Variant } from "@ui/index";
 
-export interface MarkdownProps {
+export interface MarkdownInputProps {
     color?: Color | ColorLike;
     textColor?: TypographyColor | "inherit";
     variant?: Variant;
@@ -12,6 +12,12 @@ export interface MarkdownProps {
     onChange?: (value: string) => void;
     placeholder?: string;
     onEnter?: () => void;
+
+    css?: CSSObject;
+}
+
+export interface MarkdownRendererProps {
+    value: string;
 
     css?: CSSObject;
 }

@@ -24,6 +24,7 @@ import { Route as UiInputButtonRouteImport } from './routes/ui/input/button'
 import { Route as UiFeedbackLinearProgressRouteImport } from './routes/ui/feedback/linear-progress'
 import { Route as UiFeedbackCircularProgressRouteImport } from './routes/ui/feedback/circular-progress'
 import { Route as UiDataDisplayTypographyRouteImport } from './routes/ui/data-display/typography'
+import { Route as UiDataDisplayMarkdownRendererRouteImport } from './routes/ui/data-display/markdown-renderer'
 import { Route as UiDataDisplayDividerRouteImport } from './routes/ui/data-display/divider'
 
 const UiRoute = UiRouteImport.update({
@@ -103,6 +104,12 @@ const UiDataDisplayTypographyRoute = UiDataDisplayTypographyRouteImport.update({
   path: '/data-display/typography',
   getParentRoute: () => UiRoute,
 } as any)
+const UiDataDisplayMarkdownRendererRoute =
+  UiDataDisplayMarkdownRendererRouteImport.update({
+    id: '/data-display/markdown-renderer',
+    path: '/data-display/markdown-renderer',
+    getParentRoute: () => UiRoute,
+  } as any)
 const UiDataDisplayDividerRoute = UiDataDisplayDividerRouteImport.update({
   id: '/data-display/divider',
   path: '/data-display/divider',
@@ -114,6 +121,7 @@ export interface FileRoutesByFullPath {
   '/ui': typeof UiRouteWithChildren
   '/ui/': typeof UiIndexRoute
   '/ui/data-display/divider': typeof UiDataDisplayDividerRoute
+  '/ui/data-display/markdown-renderer': typeof UiDataDisplayMarkdownRendererRoute
   '/ui/data-display/typography': typeof UiDataDisplayTypographyRoute
   '/ui/feedback/circular-progress': typeof UiFeedbackCircularProgressRoute
   '/ui/feedback/linear-progress': typeof UiFeedbackLinearProgressRoute
@@ -131,6 +139,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/ui': typeof UiIndexRoute
   '/ui/data-display/divider': typeof UiDataDisplayDividerRoute
+  '/ui/data-display/markdown-renderer': typeof UiDataDisplayMarkdownRendererRoute
   '/ui/data-display/typography': typeof UiDataDisplayTypographyRoute
   '/ui/feedback/circular-progress': typeof UiFeedbackCircularProgressRoute
   '/ui/feedback/linear-progress': typeof UiFeedbackLinearProgressRoute
@@ -150,6 +159,7 @@ export interface FileRoutesById {
   '/ui': typeof UiRouteWithChildren
   '/ui/': typeof UiIndexRoute
   '/ui/data-display/divider': typeof UiDataDisplayDividerRoute
+  '/ui/data-display/markdown-renderer': typeof UiDataDisplayMarkdownRendererRoute
   '/ui/data-display/typography': typeof UiDataDisplayTypographyRoute
   '/ui/feedback/circular-progress': typeof UiFeedbackCircularProgressRoute
   '/ui/feedback/linear-progress': typeof UiFeedbackLinearProgressRoute
@@ -170,6 +180,7 @@ export interface FileRouteTypes {
     | '/ui'
     | '/ui/'
     | '/ui/data-display/divider'
+    | '/ui/data-display/markdown-renderer'
     | '/ui/data-display/typography'
     | '/ui/feedback/circular-progress'
     | '/ui/feedback/linear-progress'
@@ -187,6 +198,7 @@ export interface FileRouteTypes {
     | '/'
     | '/ui'
     | '/ui/data-display/divider'
+    | '/ui/data-display/markdown-renderer'
     | '/ui/data-display/typography'
     | '/ui/feedback/circular-progress'
     | '/ui/feedback/linear-progress'
@@ -205,6 +217,7 @@ export interface FileRouteTypes {
     | '/ui'
     | '/ui/'
     | '/ui/data-display/divider'
+    | '/ui/data-display/markdown-renderer'
     | '/ui/data-display/typography'
     | '/ui/feedback/circular-progress'
     | '/ui/feedback/linear-progress'
@@ -331,6 +344,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof UiDataDisplayTypographyRouteImport
       parentRoute: typeof UiRoute
     }
+    '/ui/data-display/markdown-renderer': {
+      id: '/ui/data-display/markdown-renderer'
+      path: '/data-display/markdown-renderer'
+      fullPath: '/ui/data-display/markdown-renderer'
+      preLoaderRoute: typeof UiDataDisplayMarkdownRendererRouteImport
+      parentRoute: typeof UiRoute
+    }
     '/ui/data-display/divider': {
       id: '/ui/data-display/divider'
       path: '/data-display/divider'
@@ -344,6 +364,7 @@ declare module '@tanstack/react-router' {
 interface UiRouteChildren {
   UiIndexRoute: typeof UiIndexRoute
   UiDataDisplayDividerRoute: typeof UiDataDisplayDividerRoute
+  UiDataDisplayMarkdownRendererRoute: typeof UiDataDisplayMarkdownRendererRoute
   UiDataDisplayTypographyRoute: typeof UiDataDisplayTypographyRoute
   UiFeedbackCircularProgressRoute: typeof UiFeedbackCircularProgressRoute
   UiFeedbackLinearProgressRoute: typeof UiFeedbackLinearProgressRoute
@@ -361,6 +382,7 @@ interface UiRouteChildren {
 const UiRouteChildren: UiRouteChildren = {
   UiIndexRoute: UiIndexRoute,
   UiDataDisplayDividerRoute: UiDataDisplayDividerRoute,
+  UiDataDisplayMarkdownRendererRoute: UiDataDisplayMarkdownRendererRoute,
   UiDataDisplayTypographyRoute: UiDataDisplayTypographyRoute,
   UiFeedbackCircularProgressRoute: UiFeedbackCircularProgressRoute,
   UiFeedbackLinearProgressRoute: UiFeedbackLinearProgressRoute,

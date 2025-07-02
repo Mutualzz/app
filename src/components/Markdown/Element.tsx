@@ -38,9 +38,7 @@ export const Element = ({
             return (
                 <span
                     {...attributes}
-                    aria-label={element.name}
                     role="img"
-                    title={element.name}
                     css={{
                         display: "inline-block",
                         width: "1.375em",
@@ -50,11 +48,7 @@ export const Element = ({
                     }}
                     contentEditable={false}
                 >
-                    <img
-                        src={element.url}
-                        draggable={false}
-                        alt={element.name}
-                    />
+                    <img src={element.url} draggable={false} />
                 </span>
             );
 

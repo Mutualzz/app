@@ -1,5 +1,6 @@
 import emojiData from "emojibase-data/en/data.json";
 import shortcodesEmojiBase from "emojibase-data/en/shortcodes/emojibase.json";
+import shortcodesGithub from "emojibase-data/en/shortcodes/github.json";
 import shortcodesJoyPixels from "emojibase-data/en/shortcodes/joypixels.json";
 
 import type { EmojiSuggestion } from "@ui/index";
@@ -8,6 +9,7 @@ import { mergeAppendAnything } from "./index";
 const shortcodes = mergeAppendAnything(
     shortcodesEmojiBase,
     shortcodesJoyPixels,
+    shortcodesGithub,
 );
 
 const emojiMap = emojiData.map((em) => ({
@@ -25,6 +27,16 @@ export function getEmojiWithShortcode(shortcode: string) {
 
     const target =
         emoji?.skins?.find((s) => s.shortcodes?.includes(shortcode)) ?? emoji;
+
+    return target;
+}
+
+export function getEmojiWithUnicode(unicode: string) {
+    const emoji = emojiMap.find(
+        (e) => e.emoji === unicode || e.skins?.some((s) => s.emoji === unicode),
+    );
+
+    const target = emoji?.skins?.find((s) => s.emoji === unicode) ?? emoji;
 
     return target;
 }

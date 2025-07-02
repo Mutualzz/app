@@ -1,4 +1,4 @@
-import { Markdown } from "@components/Markdown/Markdown";
+import { MarkdownInput } from "@components/Markdown/MarkdownInput";
 import { createFileRoute } from "@tanstack/react-router";
 import { Input } from "@ui/components/inputs/Input/Input";
 import {
@@ -81,12 +81,12 @@ function RouteComponent() {
     return (
         <Stack direction="row" spacing={10} width="100%" gap={2}>
             <Paper width="100%" direction="column" pt={8}>
-                <Typography color="danger" level="title-lg" textAlign="center">
+                <Typography level="title-lg" textAlign="center">
                     This markdown editor is in early development and not fully
                     functional yet.
                 </Typography>
                 <Stack height="100%" p={12}>
-                    <Markdown
+                    <MarkdownInput
                         color={customColorEnabled ? customColor : color}
                         textColor={
                             customTextColorEnabled ? customTextColor : textColor

@@ -1,6 +1,6 @@
 import { useTheme } from "@ui/index";
 import { isKeyHotkey } from "is-hotkey";
-import { useCallback, useMemo, type KeyboardEvent } from "react";
+import { useCallback, useMemo, useState, type KeyboardEvent } from "react";
 import {
     createEditor,
     Path,
@@ -18,26 +18,19 @@ import {
     type RenderElementProps,
     type RenderLeafProps,
 } from "slate-react";
-import { getEmojiWithShortcode } from "../../utils/emojis";
+import type { MarkdownInputProps } from "../../routes/ui/data-display/Markdown.types";
+import { markdownToSlate } from "../../utils/markdownToSlate";
+import { slateToMarkdown } from "../../utils/slateToMarkdown";
 import { Element } from "./Element";
 import { Leaf } from "./Leaf";
 import {
-    insertEmoji,
     parseMarkdownToRanges,
     resolveMarkdownStyles,
     withEmojis,
     withShortcuts,
 } from "./Markdown.helpers";
-import type { MarkdownProps } from "./Markdown.types";
 
-const initialValue: Descendant[] = [
-    {
-        type: "paragraph",
-        children: [{ text: "" }],
-    },
-];
-
-export const Markdown = ({
+export const MarkdownInput = ({
     color = "neutral",
     textColor = "inherit",
     variant = "outlined",
@@ -46,10 +39,15 @@ export const Markdown = ({
     onChange,
     placeholder,
     onEnter,
+    value,
 
     css,
-}: MarkdownProps) => {
+}: MarkdownInputProps) => {
     const { theme } = useTheme();
+
+    const [editorValue, setEditorValue] = useState(
+        markdownToSlate(value ?? ""),
+    );
 
     const editor = useMemo(
         () => withShortcuts(withEmojis(withHistory(withReact(createEditor())))),
@@ -144,57 +142,20 @@ export const Markdown = ({
     );
 
     const handleChange = useCallback(
-        (_newValue: Descendant[]) => {
-            const { selection } = editor;
-
-            if (selection && Range.isCollapsed(selection)) {
-                const block = editor.above({
-                    match: (n) =>
-                        SlateElement.isElement(n) && editor.isBlock(n),
-                });
-
-                if (block) {
-                    const path = block[1];
-                    const start = editor.start(path);
-                    const end = editor.end(path);
-
-                    const blockRange: Range = {
-                        anchor: start,
-                        focus: end,
-                    };
-                    const blockText = editor.string(blockRange);
-                    const match = /:(\w+):$/.exec(blockText);
-                    if (match) {
-                        const emoji = getEmojiWithShortcode(match[1]);
-                        const shortcodeStart = editor.before(selection, {
-                            unit: "character",
-                            distance: match[0].length,
-                        });
-
-                        if (!shortcodeStart || !emoji) return;
-
-                        const shortcodeRange: Range = {
-                            anchor: shortcodeStart,
-                            focus: selection.anchor,
-                        };
-
-                        editor.select(shortcodeRange);
-                        editor.delete();
-
-                        insertEmoji(editor, match[1], emoji);
-                    }
-                }
+        (newValue: Descendant[]) => {
+            if (onChange) {
+                const markdown = slateToMarkdown(newValue);
+                onChange(markdown);
             }
-
-            if (onChange) onChange("");
         },
         [editor, onChange],
     );
 
     return (
         <Slate
-            initialValue={initialValue}
+            initialValue={editorValue}
             onChange={(newValue) => {
+                setEditorValue(newValue);
                 handleChange(newValue);
             }}
             editor={editor}

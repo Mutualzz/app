@@ -5,7 +5,7 @@ import { resolveColor, resolveTypographyColor } from "@ui/utils/resolveColor";
 import { formatHex8, parse } from "culori";
 import { Editor, Element, Point, Range, type TextUnit } from "slate";
 import type { EmojiElement } from "../../types/slate";
-import type { getEmojiWithShortcode } from "../../utils/emojis";
+import { getEmojiWithShortcode } from "../../utils/emojis";
 
 const tokenDefs = [
     { symbol: "**", type: "bold" },
@@ -172,9 +172,9 @@ export const withShortcuts = (editor: Editor) => {
                 }
 
                 const headingMatch = /^(#{1,3})(\s|$)/.exec(beforeText);
-                const level = headingMatch?.[1].length;
 
-                if (level) {
+                if (headingMatch) {
+                    const level = headingMatch[1].length;
                     if (
                         Element.isElement(blockNode) &&
                         blockNode.type === "heading"
@@ -255,7 +255,7 @@ export const withShortcuts = (editor: Editor) => {
 };
 
 export const withEmojis = (editor: Editor) => {
-    const { isInline, isVoid, markableVoid } = editor;
+    const { isInline, isVoid, markableVoid, insertText } = editor;
 
     editor.isInline = (element: Element) => {
         return element.type === "emoji" ? true : isInline(element);
@@ -273,6 +273,54 @@ export const withEmojis = (editor: Editor) => {
         return element.type !== "emoji";
     };
 
+    editor.insertText = (text: string) => {
+        const { selection } = editor;
+
+        if (selection && Range.isCollapsed(selection)) {
+            const block = editor.above({
+                match: (n) => Element.isElement(n) && editor.isBlock(n),
+            });
+
+            if (block) {
+                const path = block[1];
+                const start = editor.start(path);
+                const end = editor.end(path);
+
+                const blockRange: Range = {
+                    anchor: start,
+                    focus: end,
+                };
+                const blockText = editor.string(blockRange) + text;
+                const match = /:(\w+):$/.exec(blockText);
+                if (match) {
+                    const emoji = getEmojiWithShortcode(match[1]);
+                    const shortcodeStart = editor.before(selection, {
+                        unit: "character",
+                        distance: match[0].length - 1,
+                    });
+
+                    if (!shortcodeStart || !emoji) {
+                        insertText(text);
+                        return;
+                    }
+
+                    const shortcodeRange: Range = {
+                        anchor: shortcodeStart,
+                        focus: selection.anchor,
+                    };
+
+                    editor.select(shortcodeRange);
+                    editor.delete();
+
+                    insertEmoji(editor, match[1], emoji);
+                    return;
+                }
+            }
+        }
+
+        insertText(text);
+    };
+
     return editor;
 };
 
@@ -284,15 +332,11 @@ export const insertEmoji = (
     if (!emoji) return;
     const emojiElement: EmojiElement = {
         type: "emoji",
-        id:
-            "id" in emoji
-                ? (emoji as any).id.toLowerCase()
-                : emoji.hexcode.toLowerCase(),
-        name: emoji.emoji,
+        id: shortcode,
         url: `https://cdnjs.cloudflare.com/ajax/libs/twemoji/16.0.1/svg/${emoji.hexcode.toLowerCase()}.svg`,
         children: [{ text: "" }],
         unicode: emoji.hexcode,
-        shortcode: shortcode.toLowerCase(),
+        shortcode,
     };
 
     const { selection } = editor;
