@@ -18,12 +18,9 @@ function serializeNode(node: Descendant): string {
                 .split("\n")
                 .map((line) => `> ${line}`)
                 .join("\n");
-        case "emoji": {
-            const emoji = element.shortcode?.toLowerCase() ?? element.id;
-            return `:${emoji}:`;
-        }
-        case "paragraph":
-            return children;
+        case "emoji":
+            return `:${element.name.toLowerCase()}:`;
+        case "line":
         default:
             return children;
     }

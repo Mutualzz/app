@@ -1,42 +1,43 @@
 import emojiData from "emojibase-data/en/data.json";
+import shortcodesCldrNative from "emojibase-data/en/shortcodes/cldr-native.json";
+import shortcodesCldr from "emojibase-data/en/shortcodes/cldr.json";
 import shortcodesEmojiBase from "emojibase-data/en/shortcodes/emojibase.json";
 import shortcodesGithub from "emojibase-data/en/shortcodes/github.json";
+import shortcodesIamcal from "emojibase-data/en/shortcodes/iamcal.json";
 import shortcodesJoyPixels from "emojibase-data/en/shortcodes/joypixels.json";
 
 import type { EmojiSuggestion } from "@ui/index";
-import { mergeAppendAnything } from "./index";
+import { joinShortcodes } from "emojibase";
 
-const shortcodes = mergeAppendAnything(
+const shortcodes = [
     shortcodesEmojiBase,
     shortcodesJoyPixels,
+    shortcodesCldrNative,
     shortcodesGithub,
-);
+    shortcodesIamcal,
+    shortcodesCldr,
+];
 
-const emojiMap = emojiData.map((em) => ({
-    ...em,
-    shortcodes: shortcodes[em.hexcode] ?? [],
-}));
+const emojis = joinShortcodes(emojiData, shortcodes);
 
-export function getEmojiWithShortcode(shortcode: string) {
-    const emoji = emojiMap.find(
+export function getEmoji(shortcode: string) {
+    const emoji = emojis.find(
         (e) =>
-            e.shortcodes.includes(shortcode) ||
+            e.shortcodes?.includes(shortcode) ||
             e.emoji === shortcode ||
-            e.skins?.some((s) => s.shortcodes?.includes(shortcode)),
+            e.skins?.some(
+                (skin) =>
+                    skin.shortcodes?.includes(shortcode) ||
+                    skin.emoji === shortcode,
+            ),
     );
 
     const target =
-        emoji?.skins?.find((s) => s.shortcodes?.includes(shortcode)) ?? emoji;
-
-    return target;
-}
-
-export function getEmojiWithUnicode(unicode: string) {
-    const emoji = emojiMap.find(
-        (e) => e.emoji === unicode || e.skins?.some((s) => s.emoji === unicode),
-    );
-
-    const target = emoji?.skins?.find((s) => s.emoji === unicode) ?? emoji;
+        emoji?.skins?.find(
+            (skin) =>
+                skin.shortcodes?.includes(shortcode) ||
+                skin.emoji === shortcode,
+        ) ?? emoji;
 
     return target;
 }

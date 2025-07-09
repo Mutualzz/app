@@ -2,13 +2,13 @@ import type { Literal } from "mdast";
 
 export interface EmojiNode extends Literal {
     type: "emoji";
-    id: string;
-    shortcode: string;
+    name: string;
     url: string;
+    unicode: string;
 }
 
 declare module "mdast" {
-    interface StaticPhrasingContentMap {
+    interface PhrasingContentMap {
         emoji: EmojiNode;
     }
 }

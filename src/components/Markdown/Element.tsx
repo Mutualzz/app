@@ -44,15 +44,29 @@ export const Element = ({
                         width: "1.375em",
                         height: "1.375em",
                         verticalAlign: "middle",
+                        pointerEvents: "none",
                         userSelect: "none",
                     }}
+                    aria-label={`:${element.name}:`}
                     contentEditable={false}
+                    data-slate-void
+                    data-slate-inline
                 >
-                    <img src={element.url} draggable={false} />
+                    <img
+                        css={{
+                            width: "100%",
+                            height: "100%",
+                            objectFit: "contain",
+                        }}
+                        src={element.url}
+                        alt={element.unicode}
+                        aria-label={`:${element.name}:`}
+                        draggable={false}
+                    />
                 </span>
             );
 
-        case "paragraph":
+        case "line":
         default:
             return <div {...attributes}>{children}</div>;
     }

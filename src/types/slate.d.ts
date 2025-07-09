@@ -1,14 +1,14 @@
 import type { BaseEditor, BaseRange, Descendant } from "slate";
-import type { HistoryEditor } from "slate-history";
-import type { ReactEditor } from "slate-react";
+import { type HistoryEditor } from "slate-history";
+import { type ReactEditor } from "slate-react";
 
 export type BlockQuoteElement = {
     type: "blockquote";
     children: Descendant[];
 };
 
-export type ParagraphElement = {
-    type: "paragraph";
+export type LineElement = {
+    type: "line";
     children: Descendant[];
 };
 
@@ -26,10 +26,9 @@ export type LinkElement = {
 
 export type EmojiElement = {
     type: "emoji";
-    id: string;
     url: string;
-    unicode?: string;
-    shortcode?: string;
+    unicode: string;
+    name: string;
     children: EmptyText[];
 };
 
@@ -49,7 +48,7 @@ export type EmptyText = {
 
 export type Element =
     | BlockQuoteElement
-    | ParagraphElement
+    | LineElement
     | HeadingElement
     | EmojiElement
     | LinkElement;

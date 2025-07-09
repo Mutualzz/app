@@ -1,12 +1,13 @@
+import * as Sentry from "@sentry/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createRouter as createTanStackRouter } from "@tanstack/react-router";
 
-import { routeTree } from "routeTree.gen";
+import { routeTree } from "./routeTree.gen";
 
 export function createRouter() {
     const queryClient = new QueryClient();
 
-    return createTanStackRouter({
+    const router = createTanStackRouter({
         routeTree,
         context: { queryClient },
         defaultPreload: "intent",
@@ -18,6 +19,22 @@ export function createRouter() {
             </QueryClientProvider>
         ),
     });
+
+    Sentry.init({
+        dsn: import.meta.env.VITE_SENTRY_DSN,
+        sendDefaultPii: true,
+        integrations: [
+            Sentry.tanstackRouterBrowserTracingIntegration(router),
+            Sentry.browserTracingIntegration(),
+            Sentry.replayIntegration(),
+        ],
+        tracesSampleRate: 1.0,
+        tracePropagationTargets: ["https://mutualzz.com", "localhost"],
+        replaysSessionSampleRate: import.meta.env.DEV ? 1.0 : 0.1,
+        replaysOnErrorSampleRate: 1.0,
+    });
+
+    return router;
 }
 
 declare module "@tanstack/react-router" {

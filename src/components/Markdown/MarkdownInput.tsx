@@ -18,7 +18,7 @@ import {
     type RenderElementProps,
     type RenderLeafProps,
 } from "slate-react";
-import type { MarkdownInputProps } from "../../routes/ui/data-display/Markdown.types";
+
 import { markdownToSlate } from "../../utils/markdownToSlate";
 import { slateToMarkdown } from "../../utils/slateToMarkdown";
 import { Element } from "./Element";
@@ -26,9 +26,10 @@ import { Leaf } from "./Leaf";
 import {
     parseMarkdownToRanges,
     resolveMarkdownStyles,
-    withEmojis,
-    withShortcuts,
 } from "./Markdown.helpers";
+import type { MarkdownInputProps } from "./Markdown.types";
+import { withEmojis } from "./plugins/withEmojis";
+import { withShortcuts } from "./plugins/withShortcuts";
 
 export const MarkdownInput = ({
     color = "neutral",
@@ -87,7 +88,7 @@ export const MarkdownInput = ({
 
                 editor.insertNode(
                     {
-                        type: "paragraph",
+                        type: "line",
                         children: [{ text: "" }],
                     },
                     { at: newPath },
@@ -103,16 +104,14 @@ export const MarkdownInput = ({
             if (e.key === "Enter" && e.shiftKey) handleShiftEnter(e);
 
             if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
                 if (onEnter) {
-                    e.preventDefault();
-                    editor.select(editor.start([]));
+                    editor.select({
+                        anchor: editor.start([]),
+                        focus: editor.end([]),
+                    });
+                    editor.delete();
                     onEnter();
-                    editor.children = [
-                        {
-                            type: "paragraph",
-                            children: [{ text: "" }],
-                        },
-                    ];
                 }
             }
 

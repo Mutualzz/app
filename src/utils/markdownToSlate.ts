@@ -1,5 +1,6 @@
+import shortcodeRegex from "emojibase-regex/shortcode";
 import type { Descendant, Text } from "slate";
-import { getEmojiWithShortcode } from "./emojis";
+import { getEmoji } from "./emojis";
 
 export function markdownToSlate(markdown: string): Descendant[] {
     const lines = markdown.split(/\r?\n/);
@@ -9,7 +10,7 @@ export function markdownToSlate(markdown: string): Descendant[] {
         const trimmed = line.trim();
 
         if (trimmed === "") {
-            result.push({ type: "paragraph", children: [{ text: "" }] });
+            result.push({ type: "line", children: [{ text: "" }] });
             continue;
         }
 
@@ -29,7 +30,7 @@ export function markdownToSlate(markdown: string): Descendant[] {
                 type: "blockquote",
                 children: [
                     {
-                        type: "paragraph",
+                        type: "line",
                         children: parseInlineMarkdown(
                             trimmed.replace(/^>\s?/, ""),
                         ),
@@ -40,12 +41,10 @@ export function markdownToSlate(markdown: string): Descendant[] {
         }
 
         result.push({
-            type: "paragraph",
+            type: "line",
             children: parseInlineMarkdown(trimmed),
         });
     }
-
-    //console.log(result);
 
     return result;
 }
@@ -97,19 +96,19 @@ function parseInlineMarkdown(input: string): Descendant[] {
             }
         }
 
-        const emojiMatch = RegExp(/:([a-z0-9_+-]+):/i).exec(text);
+        const emojiMatch = shortcodeRegex.exec(text);
         if (emojiMatch) {
             const before = text.slice(0, emojiMatch.index);
-            const shortcode = emojiMatch[1].toLowerCase();
+            const shortcode = emojiMatch[0].toLowerCase().replaceAll(/:/g, "");
             const after = text.slice(emojiMatch.index + emojiMatch[0].length);
 
-            const emoji = getEmojiWithShortcode(shortcode);
+            const emoji = getEmoji(shortcode);
             const emojiNode: Descendant = emoji
                 ? {
                       type: "emoji",
-                      id: shortcode,
-                      shortcode,
-                      url: `https://cdnjs.cloudflare.com/ajax/libs/twemoji/16.0.1/svg/${emoji.hexcode.toLowerCase()}.svg`,
+                      name: `:${emoji.shortcodes[0]}:`,
+                      url: `/assets/emojis/${emoji.hexcode.toLowerCase()}.png`,
+                      unicode: emoji.emoji,
                       children: [{ text: "" }],
                   }
                 : { text: `:${shortcode}:` };

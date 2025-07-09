@@ -1,17 +1,16 @@
 import { Typography, useTheme } from "@ui/index";
+import type { ReactElement } from "react";
 import ReactMarkdown, {
     type Components as MarkdownComponents,
 } from "react-markdown";
 import rehypeRaw from "rehype-raw";
 import remarkBreaks from "remark-breaks";
 import remarkParse from "remark-parse";
-import type { MarkdownRendererProps } from "../../routes/ui/data-display/Markdown.types";
-
-import type { ReactElement } from "react";
 import remarkRehype from "remark-rehype";
-import type { EmojiNode } from "../../types/mdast";
-import { remarkEmoji } from "../../utils/remark/remarkEmoji";
-import { remarkLimitHeading } from "../../utils/remark/remarkLimitHeading";
+import type { EmojiNode } from "types/mdast";
+import type { MarkdownRendererProps } from "./Markdown.types";
+import { remarkEmoji } from "./remark/remarkEmoji";
+import { remarkLimitHeading } from "./remark/remarkLimitHeading";
 
 interface Components extends MarkdownComponents {
     emoji: (props: EmojiNode) => ReactElement;
@@ -102,25 +101,30 @@ export const MarkdownRenderer = ({ value }: MarkdownRendererProps) => {
                         </Typography>
                     ),
 
-                    emoji: ({ url, shortcode, value: emojiChar }) => (
+                    emoji: ({ name, url, unicode }) => (
                         <span
                             role="button"
-                            tabIndex={0}
-                            aria-label={emojiChar}
-                            title={`:${shortcode}:`}
+                            aria-label={`:${name}:`}
+                            contentEditable={false}
+                            title={`:${name}:`}
                             css={{
                                 display: "inline-block",
+                                width: "1.375em",
+                                height: "1.375em",
+                                verticalAlign: "middle",
+                                pointerEvents: "none",
+                                userSelect: "none",
                             }}
                         >
                             <img
                                 src={url}
-                                alt={emojiChar}
+                                alt={unicode}
                                 draggable={false}
-                                aria-label={emojiChar}
+                                aria-label={`:${name}:`}
                                 css={{
-                                    width: "1.375em",
-                                    height: "1.375em",
-                                    verticalAlign: "middle",
+                                    width: "100%",
+                                    height: "100%",
+                                    objectFit: "contain",
                                 }}
                             />
                         </span>

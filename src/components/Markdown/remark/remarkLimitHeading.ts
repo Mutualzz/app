@@ -1,4 +1,4 @@
-import type { Heading, Paragraph, Root, Text } from "mdast";
+import type { Heading, Paragraph, Root } from "mdast";
 import type { Plugin } from "unified";
 import { visit } from "unist-util-visit";
 
@@ -12,7 +12,7 @@ export const remarkLimitHeading: Plugin<[], Root> = () => (tree) => {
                     {
                         type: "text",
                         value: hashes,
-                    } as Text,
+                    },
                     ...node.children,
                 ],
             };
