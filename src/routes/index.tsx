@@ -39,16 +39,6 @@ function Index() {
                 >
                     Go to the UI playground
                 </Button>
-                <Button
-                    onClick={() => {
-                        throw Error("This is a test error");
-                    }}
-                    size="lg"
-                    variant="solid"
-                    color="danger"
-                >
-                    Throw a test error
-                </Button>
             </Stack>
             <Outlet />
         </Stack>
