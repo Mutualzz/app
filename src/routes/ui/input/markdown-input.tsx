@@ -57,6 +57,8 @@ function RouteComponent() {
         "inherit",
     );
 
+    const [emoticons, setEmoticons] = useState(true);
+
     const [customColorEnabled, setCustomColorEnabled] = useState(false);
     const [customTextColorEnabled, setCustomTextColorEnabled] = useState(false);
 
@@ -91,6 +93,7 @@ function RouteComponent() {
                         textColor={
                             customTextColorEnabled ? customTextColor : textColor
                         }
+                        emoticons={emoticons}
                         variant={variant}
                     />
                 </Stack>
@@ -248,6 +251,16 @@ function RouteComponent() {
                                 ))}
                             </RadioGroup>
                         )}
+                    </Stack>
+                    <Divider />
+                    <Stack direction="column" spacing={5}>
+                        <Checkbox
+                            label="Emoticons"
+                            checked={emoticons}
+                            onChange={(e) => {
+                                setEmoticons(e.target.checked);
+                            }}
+                        />
                     </Stack>
                 </Stack>
             </Paper>

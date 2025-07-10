@@ -6,6 +6,8 @@ export interface MarkdownInputProps {
     textColor?: TypographyColor | "inherit";
     variant?: Variant;
 
+    emoticons?: boolean;
+
     disabled?: boolean;
 
     value?: string;

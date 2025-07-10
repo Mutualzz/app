@@ -57,6 +57,7 @@ export type Editor = BaseEditor &
     ReactEditor &
     HistoryEditor & {
         nodeToDecorations?: Map<Element, Range[]>;
+        enableEmoticons?: boolean;
     };
 
 declare module "slate" {

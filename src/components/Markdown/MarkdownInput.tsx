@@ -1,6 +1,12 @@
 import { useTheme } from "@ui/index";
 import { isKeyHotkey } from "is-hotkey";
-import { useCallback, useMemo, useState, type KeyboardEvent } from "react";
+import {
+    useCallback,
+    useEffect,
+    useMemo,
+    useState,
+    type KeyboardEvent,
+} from "react";
 import {
     createEditor,
     Path,
@@ -37,6 +43,8 @@ export const MarkdownInput = ({
     variant = "outlined",
     disabled = false,
 
+    emoticons = true,
+
     onChange,
     placeholder,
     onEnter,
@@ -54,6 +62,10 @@ export const MarkdownInput = ({
         () => withShortcuts(withEmojis(withHistory(withReact(createEditor())))),
         [],
     );
+
+    useEffect(() => {
+        editor.enableEmoticons = emoticons;
+    }, [editor, emoticons]);
 
     const renderElement = useCallback(
         (props: RenderElementProps) => <Element {...props} />,
