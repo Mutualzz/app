@@ -11,6 +11,7 @@ const tokenDefs = [
     { symbol: "~~", type: "strikethrough" },
     { symbol: "__", type: "underline" },
     { symbol: "`", type: "code" },
+    { symbol: "||", type: "spoiler" },
 ] as const;
 
 type TokenType = (typeof tokenDefs)[number]["type"];
@@ -25,6 +26,7 @@ export const parseMarkdownToRanges = (
         italic: [],
         strikethrough: [],
         underline: [],
+        spoiler: [],
         code: [],
     };
 

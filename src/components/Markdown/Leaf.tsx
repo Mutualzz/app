@@ -1,8 +1,10 @@
-import { Typography } from "@ui/index";
+import { Paper, Typography, useTheme } from "@ui/index";
 import type { RenderLeafProps } from "slate-react";
 
 export const Leaf = ({ attributes, children, leaf }: RenderLeafProps) => {
-    const { bold, italic, underline, strikethrough, code } = leaf;
+    const { theme } = useTheme();
+
+    const { bold, italic, underline, strikethrough, code, spoiler } = leaf;
 
     if (leaf.isMarker) {
         return (
@@ -13,11 +15,65 @@ export const Leaf = ({ attributes, children, leaf }: RenderLeafProps) => {
                 fontFamily="inherit"
                 textDecoration="none"
                 whiteSpace="pre-wrap"
+                color={theme.typography.colors.secondary}
+                variant="plain"
             >
                 {children}
             </Typography>
         );
     }
+
+    if (code)
+        return (
+            <Paper {...attributes} display="inline" elevation={5} px={5}>
+                <Typography
+                    {...attributes}
+                    fontWeight={bold ? "bold" : undefined}
+                    fontStyle={italic ? "italic" : undefined}
+                    textDecoration={
+                        underline && strikethrough
+                            ? "underline line-through"
+                            : underline
+                              ? "underline"
+                              : strikethrough
+                                ? "line-through"
+                                : undefined
+                    }
+                    fontFamily="monospace"
+                    fontSize="inherit"
+                    whiteSpace="pre-wrap"
+                >
+                    {children}
+                </Typography>
+            </Paper>
+        );
+
+    if (spoiler)
+        return (
+            <Paper {...attributes} display="inline" elevation={5} px={2}>
+                <Typography
+                    {...attributes}
+                    fontWeight={bold ? "bold" : undefined}
+                    fontStyle={italic ? "italic" : undefined}
+                    textDecoration={
+                        underline && strikethrough
+                            ? "underline line-through"
+                            : underline
+                              ? "underline"
+                              : strikethrough
+                                ? "line-through"
+                                : undefined
+                    }
+                    fontFamily="inherit"
+                    fontSize="inherit"
+                    whiteSpace="pre-wrap"
+                    color={theme.typography.colors.secondary}
+                    variant="plain"
+                >
+                    {children}
+                </Typography>
+            </Paper>
+        );
 
     return (
         <Typography
@@ -33,7 +89,7 @@ export const Leaf = ({ attributes, children, leaf }: RenderLeafProps) => {
                         ? "line-through"
                         : undefined
             }
-            fontFamily={code ? "monospace" : "inherit"}
+            fontFamily="inherit"
             fontSize="inherit"
             whiteSpace="pre-wrap"
         >

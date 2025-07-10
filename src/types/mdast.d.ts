@@ -7,8 +7,14 @@ export interface EmojiNode extends Literal {
     unicode: string;
 }
 
+export interface SpoilerNode extends Literal {
+    type: "spoiler";
+    text: string;
+}
+
 declare module "mdast" {
     interface PhrasingContentMap {
         emoji: EmojiNode;
+        spoiler: SpoilerNode;
     }
 }

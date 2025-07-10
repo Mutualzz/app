@@ -34,6 +34,7 @@ function serializeText(textNode: Text): string {
     if (textNode.italic) text = `*${text}*`;
     if (textNode.underline) text = `__${text}__`;
     if (textNode.strikethrough) text = `~~${text}~~`;
+    if (textNode.spoiler) text = `||${text}||`;
 
     return text;
 }
