@@ -18,7 +18,7 @@ const combinedPattern = `(?:${baseEmoticonRegex.source}|${escapedCustom})`;
 const emoticonRegex = new RegExp(`(${combinedPattern})(?=\\s)`, "g");
 
 export const withEmojis = (editor: Editor) => {
-    const { isInline, isVoid, markableVoid, insertText, insertData } = editor;
+    const { isInline, isVoid, markableVoid, insertText } = editor;
 
     editor.isInline = (element: Element) => {
         return element.type === "emoji" ? true : isInline(element);
@@ -140,15 +140,36 @@ export const withEmojis = (editor: Editor) => {
 
     editor.insertData = (data: DataTransfer) => {
         const text = data.getData("text/plain");
-        const shortcodeMatch = shortcodeRegex.exec(text);
-        if (shortcodeMatch) {
-            const emoji = getEmoji(shortcodeMatch[0].replace(/:/g, ""));
-            if (emoji) {
-                insertEmoji(editor, emoji);
-                return;
-            }
+        const parts: any[] = [];
+        let lastIndex = 0;
+
+        const localRegex = new RegExp(shortcodeRegex.source, "g");
+
+        let match;
+        while ((match = localRegex.exec(text)) !== null) {
+            const before = text.slice(lastIndex, match.index);
+            const shortcode = match[0];
+            const emoji = getEmoji(shortcode.slice(1, -1));
+
+            if (before) parts.push({ type: "text", text: before });
+
+            if (emoji)
+                parts.push({
+                    type: "emoji",
+                    emoji,
+                });
+            else parts.push({ type: "text", text: shortcode });
+
+            lastIndex = localRegex.lastIndex;
         }
-        insertData(data);
+
+        const after = text.slice(lastIndex);
+        if (after) parts.push({ type: "text", text: after });
+
+        for (const part of parts) {
+            if (part.type === "text") editor.insertText(part.text);
+            else if (part.type === "emoji") insertEmoji(editor, part.emoji);
+        }
     };
 
     editor.setFragmentData = (data: DataTransfer) => {
