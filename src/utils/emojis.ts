@@ -6,7 +6,6 @@ import shortcodesGithub from "emojibase-data/en/shortcodes/github.json";
 import shortcodesIamcal from "emojibase-data/en/shortcodes/iamcal.json";
 import shortcodesJoyPixels from "emojibase-data/en/shortcodes/joypixels.json";
 
-import type { EmojiSuggestion } from "@ui/index";
 import { joinShortcodes, type Emoji } from "emojibase";
 
 const shortcodes = [
@@ -44,36 +43,4 @@ export function getEmoji(
         ) ?? emoji;
 
     return target;
-}
-
-export function getEmojiSuggestions(
-    query: string,
-    limit = 10,
-): EmojiSuggestion[] {
-    if (query.length < 1) return [];
-
-    const lowerQuery = query.toLowerCase();
-    const results: EmojiSuggestion[] = [];
-
-    for (const emoji of emojiData) {
-        if (emoji.shortcodes?.some((s) => s.startsWith(lowerQuery))) {
-            results.push({
-                emoji: emoji.emoji,
-                shortcode: emoji.shortcodes[0],
-            });
-        }
-
-        for (const skin of emoji.skins ?? []) {
-            if (skin.shortcodes?.some((s) => s.startsWith(lowerQuery))) {
-                results.push({
-                    emoji: skin.emoji,
-                    shortcode: skin.shortcodes[0],
-                });
-            }
-        }
-
-        if (results.length >= limit) break;
-    }
-
-    return results;
 }
