@@ -1,4 +1,6 @@
+import { wrapVinxiConfigWithSentry } from "@sentry/tanstackstart-react";
 import { tanstackStart } from "@tanstack/react-start/plugin/vite";
+import viteReact from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 import tsconfigPaths from "vite-tsconfig-paths";
 
@@ -7,11 +9,20 @@ const host = process.env.TAURI_DEV_HOST;
 // https://vitejs.dev/config/
 export default defineConfig(async () => ({
     plugins: [
+        wrapVinxiConfigWithSentry(
+            tanstackStart({
+                target: "netlify",
+                customViteReactPlugin: true,
+            }),
+            {
+                org: "mutualzz",
+                project: "mutualzz-app",
+                authToken: process.env.SENTRY_AUTH_TOKEN,
+            },
+        ),
+        viteReact(),
         tsconfigPaths({
             projects: ["./tsconfig.json", "./tsconfig.node.json"],
-        }),
-        tanstackStart({
-            target: "netlify",
         }),
     ],
 

@@ -19,13 +19,14 @@ import { CssBaseline } from "@ui/CssBaseline";
 import { ThemeProvider } from "@ui/ThemeProvider";
 
 // Dev tools
+import { wrapCreateRootRouteWithSentry } from "@sentry/tanstackstart-react";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import { themesObj } from "@themes/index";
-import type { ReactNode } from "react";
+import { type ReactNode } from "react";
 import { seo } from "seo";
 
-export const Route = createRootRoute({
+export const Route = wrapCreateRootRouteWithSentry(createRootRoute)({
     head: () => ({
         meta: [...seo()],
     }),
