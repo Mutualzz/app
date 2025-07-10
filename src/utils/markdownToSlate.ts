@@ -106,7 +106,7 @@ function parseInlineMarkdown(input: string): Descendant[] {
             const emojiNode: Descendant = emoji
                 ? {
                       type: "emoji",
-                      name: `:${emoji.shortcodes[0]}:`,
+                      name: `:${emoji.shortcodes?.[0]}:`,
                       url: `/assets/emojis/${emoji.hexcode.toLowerCase()}.png`,
                       unicode: emoji.emoji,
                       children: [{ text: "" }],
