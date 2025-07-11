@@ -4,9 +4,10 @@ import type { RenderLeafProps } from "slate-react";
 export const Leaf = ({ attributes, children, leaf }: RenderLeafProps) => {
     const { theme } = useTheme();
 
-    const { bold, italic, underline, strikethrough, code, spoiler } = leaf;
+    const { bold, italic, underline, strikethrough, code, spoiler, isMarker } =
+        leaf;
 
-    if (leaf.isMarker) {
+    if (isMarker) {
         return (
             <Typography
                 {...attributes}

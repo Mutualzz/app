@@ -1,0 +1,122 @@
+import type {
+    Code,
+    Effects,
+    Extension,
+    State,
+    TokenizeContext,
+    Tokenizer,
+} from "micromark-util-types";
+
+export const spoilerSyntax = function (): Extension {
+    return {
+        text: {
+            124: {
+                name: "spoiler",
+                tokenize: tokenizeSpoiler,
+            },
+        },
+    };
+};
+
+const lookaheadConstruct = {
+    partial: true,
+    /** If the next two characters are `||`, run `ok`, else `nok`. */
+    tokenize(effects: Effects, ok: State, nok: State): State {
+        return start;
+
+        function start(code: Code) {
+            // match first symbol `|`
+            if (code !== 124) return nok(code);
+            effects.consume(code);
+            return lookaheadAt;
+        }
+
+        function lookaheadAt(code: Code) {
+            // match second symbol `|`
+            if (code !== 124) return nok(code);
+            effects.consume(code);
+            return ok(code);
+        }
+    },
+};
+const tokenizeSpoiler: Tokenizer = function (
+    this: TokenizeContext,
+    effects: Effects,
+    ok: State,
+    nok: State,
+): State {
+    return start;
+
+    function start(code: Code): State | undefined {
+        if (code === 124) {
+            effects.enter("spoiler");
+            effects.enter("spoilerMarker");
+            effects.consume(code);
+            return secondStart;
+        }
+
+        return nok(code);
+    }
+
+    function secondStart(code: Code): State | undefined {
+        if (code === 124) {
+            effects.consume(code);
+            effects.exit("spoilerMarker");
+            effects.enter("data");
+
+            return consumeContent;
+        }
+
+        return nok(code);
+    }
+
+    function consumeContent(code: Code): State | undefined {
+        // match first ending '|'
+        if (code === 124) {
+            return effects.check(
+                lookaheadConstruct as any,
+                firstEnd,
+                consumeAsText,
+            )(code);
+        }
+
+        if (code === null) return nok(code);
+
+        effects.consume(code);
+
+        return consumeContent;
+    }
+
+    function consumeAsText(code: Code): State | undefined {
+        if (code === null) return nok(code);
+
+        effects.consume(code);
+        return consumeContent;
+    }
+
+    function firstEnd(code: Code): State | undefined {
+        // match first ending '|'
+        if (code === 124) {
+            effects.exit("data");
+            effects.enter("spoilerMarker");
+            effects.consume(code);
+            return secondEnd;
+        }
+
+        // invalid character
+        return nok(code);
+    }
+
+    function secondEnd(code: Code): State | undefined {
+        // match second ending '|'
+        if (code === 124) {
+            effects.consume(code);
+            effects.exit("spoilerMarker");
+            effects.exit("spoiler");
+            return ok;
+        }
+
+        // invalid character
+        return nok(code);
+    }
+};

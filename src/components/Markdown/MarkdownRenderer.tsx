@@ -1,17 +1,17 @@
-import { dynamicElevation, Typography, useTheme } from "@ui/index";
+import { Typography, useTheme } from "@ui/index";
+
 import { useState, type ReactElement } from "react";
 import ReactMarkdown, {
     type Components as MarkdownComponents,
 } from "react-markdown";
-import rehypeRaw from "rehype-raw";
 import remarkBreaks from "remark-breaks";
 import remarkParse from "remark-parse";
-import remarkRehype from "remark-rehype";
+import { spoilerStyles } from "../../css/spoilerStyles";
 import type { EmojiNode, SpoilerNode } from "../../types/mdast";
 import type { MarkdownRendererProps } from "./Markdown.types";
 import { remarkEmoji } from "./remark/remarkEmoji";
 import { remarkLimitHeading } from "./remark/remarkLimitHeading";
-import { remarkSpoiler } from "./remark/remarkSpoiler";
+import { remarkSpoiler } from "./remark/spoiler/remarkSpoiler";
 
 interface Components extends MarkdownComponents {
     emoji: (props: EmojiNode) => ReactElement;
@@ -25,29 +25,39 @@ export const MarkdownRenderer = ({ value }: MarkdownRendererProps) => {
         <ReactMarkdown
             remarkPlugins={[
                 remarkBreaks,
-                remarkParse,
-                remarkEmoji,
-                remarkSpoiler,
                 remarkLimitHeading,
-                remarkRehype,
+                remarkSpoiler,
+                remarkEmoji,
+                remarkParse,
             ]}
-            rehypePlugins={[rehypeRaw]}
             components={
                 {
                     h1: ({ children }) => (
-                        <Typography level="h3" display="block">
+                        <Typography
+                            level="h3"
+                            fontWeight="bold"
+                            display="block"
+                        >
                             {children}
                         </Typography>
                     ),
 
                     h2: ({ children }) => (
-                        <Typography level="h4" display="block">
+                        <Typography
+                            level="h4"
+                            fontWeight="bold"
+                            display="block"
+                        >
                             {children}
                         </Typography>
                     ),
 
                     h3: ({ children }) => (
-                        <Typography level="h5" display="block">
+                        <Typography
+                            level="h5"
+                            fontWeight="bold"
+                            display="block"
+                        >
                             {children}
                         </Typography>
                     ),
@@ -115,8 +125,6 @@ export const MarkdownRenderer = ({ value }: MarkdownRendererProps) => {
                                 width: "1.375em",
                                 height: "1.375em",
                                 verticalAlign: "middle",
-                                pointerEvents: "none",
-                                userSelect: "none",
                             }}
                         >
                             <img
@@ -133,40 +141,17 @@ export const MarkdownRenderer = ({ value }: MarkdownRendererProps) => {
                         </span>
                     ),
 
-                    spoiler: ({ text }) => {
-                        const [isOpen, setIsOpen] = useState(false);
+                    spoiler: ({ children }) => {
+                        const [revealed, setRevealed] = useState(false);
+
                         return (
                             <span
-                                role={isOpen ? "button" : "presentation"}
-                                contentEditable={false}
-                                css={{
-                                    display: "inline-block",
-                                    verticalAlign: "middle",
-                                    borderRadius: 4,
-                                    paddingInline: "1px",
-                                    ...(!isOpen
-                                        ? {
-                                              backgroundColor:
-                                                  theme.typography.colors
-                                                      .disabled,
-                                              color: "transparent",
-                                              cursor: "pointer",
-                                              userSelect: "none",
-                                          }
-                                        : {
-                                              backgroundColor: dynamicElevation(
-                                                  theme.colors.surface,
-                                                  5,
-                                              ),
-                                          }),
-                                    transition:
-                                        "background-color 0.2s; color 5s",
-                                }}
+                                css={spoilerStyles(revealed, theme)}
                                 onClick={() => {
-                                    setIsOpen(true);
+                                    setRevealed(true);
                                 }}
                             >
-                                {text}
+                                {children}
                             </span>
                         );
                     },
