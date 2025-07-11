@@ -21,7 +21,7 @@ import {
 import capitalize from "lodash-es/capitalize";
 import { useState } from "react";
 
-export const Route = createFileRoute("/ui/input/markdown-input")({
+export const Route = createFileRoute("/ui/inputs/markdown-input")({
     component: RouteComponent,
     head: () => ({
         meta: [

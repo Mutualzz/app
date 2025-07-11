@@ -24,7 +24,7 @@ import {
 import capitalize from "lodash-es/capitalize";
 import { useState } from "react";
 
-export const Route = createFileRoute("/ui/input/slider")({
+export const Route = createFileRoute("/ui/inputs/slider")({
     component: SlderPlayground,
     head: () => ({
         meta: [

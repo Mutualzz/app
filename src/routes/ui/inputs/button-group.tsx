@@ -23,7 +23,7 @@ import numWords from "num-words";
 import { useState } from "react";
 import { FaMinus, FaPlus } from "react-icons/fa";
 
-export const Route = createFileRoute("/ui/input/button-group")({
+export const Route = createFileRoute("/ui/inputs/button-group")({
     component: PlaygroundButtonGroup,
     head: () => ({
         meta: [

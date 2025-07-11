@@ -11,24 +11,25 @@ import {
     randomHexColor,
     Slider,
     Stack,
-    Textarea,
     Typography,
     useColorInput,
     type Color,
     type ColorLike,
+    type InputType,
     type Size,
     type TypographyColor,
     type Variant,
 } from "@ui";
 import capitalize from "lodash-es/capitalize";
+import startCase from "lodash-es/startCase";
 import { useState } from "react";
 
-export const Route = createFileRoute("/ui/input/textarea")({
-    component: TextareaPlayground,
+export const Route = createFileRoute("/ui/inputs/input")({
+    component: InputPlayground,
     head: () => ({
         meta: [
             ...seo({
-                title: "Textarea - Mutualzz UI",
+                title: "Input - Mutualzz UI",
             }),
         ],
     }),
@@ -44,6 +45,15 @@ const colors = [
     "info",
 ] as Color[];
 
+const types = [
+    "date",
+    "datetime-local",
+    "number",
+    "password",
+    "text",
+    "time",
+] as InputType[];
+
 const sizeNames = {
     sm: "Small",
     md: "Medium",
@@ -58,21 +68,20 @@ const textColors = [
     "inherit",
 ] as (TypographyColor | "inherit")[];
 
-function TextareaPlayground() {
+function InputPlayground() {
     const [variant, setVariant] = useState<Variant | "all">("outlined");
     const [size, setSize] = useState<Size | number>("md");
     const [disabled, setDisabled] = useState(false);
-
-    const [resizable, setResizable] = useState(false);
-    const [minRows, setMinRows] = useState(1);
-    const [maxRows, setMaxRows] = useState<number | null>(null);
+    const [fullWidth, setFullWidth] = useState(false);
 
     const [textColor, setTextColor] = useState<TypographyColor | "inherit">(
         "inherit",
     );
+
     const [customTextColorEnabled, setCustomTextColorEnabled] = useState(false);
 
     const [placeholder, setPlaceholder] = useState<string | null>(null);
+    const [type, setType] = useState<InputType>("text");
 
     const [value, setValue] = useState<string | null>(null);
 
@@ -101,7 +110,7 @@ function TextareaPlayground() {
         validate: validateTextColor,
     } = useColorInput<TypographyColor>();
 
-    const allTextareas = [...colors, ...customColors].map((c) =>
+    const allInputs = [...colors, ...customColors].map((c) =>
         variants.map((v) => (
             <Stack
                 direction="column"
@@ -112,8 +121,9 @@ function TextareaPlayground() {
                 <Typography>
                     {capitalize(v)} {capitalize(c)}
                 </Typography>
-                <Textarea
-                    key={`${v}-${c}-textarea`}
+                <Input
+                    key={`${v}-${c}-input`}
+                    fullWidth={fullWidth}
                     color={c}
                     textColor={
                         customTextColorEnabled ? customTextColor : textColor
@@ -126,15 +136,13 @@ function TextareaPlayground() {
                     }}
                     value={controlled ? (value ?? "") : undefined}
                     disabled={disabled}
-                    resizable={resizable}
-                    minRows={minRows}
-                    maxRows={maxRows ?? undefined}
+                    type={type}
                 />
             </Stack>
         )),
     );
 
-    const textareas = [...colors, ...customColors].map((c) => (
+    const inputs = [...colors, ...customColors].map((c) => (
         <Stack
             justifyContent="center"
             alignItems="center"
@@ -144,8 +152,8 @@ function TextareaPlayground() {
             <Typography>
                 {capitalize(variant)} {capitalize(c)}
             </Typography>
-            <Textarea
-                key={`${variant}-${c}-textarea`}
+            <Input
+                key={`${variant}-${c}-input`}
                 variant={variant as Variant}
                 placeholder={placeholder ?? "Type something..."}
                 size={size}
@@ -156,10 +164,8 @@ function TextareaPlayground() {
                 disabled={disabled}
                 color={c}
                 textColor={customTextColorEnabled ? customTextColor : textColor}
-                startDecorator
-                resizable={resizable}
-                minRows={minRows}
-                maxRows={maxRows ?? undefined}
+                fullWidth={fullWidth}
+                type={type}
             />
         </Stack>
     ));
@@ -176,22 +182,14 @@ function TextareaPlayground() {
                 spacing={variant === "all" ? 10 : 5}
             >
                 {variant === "all" &&
-                    allTextareas.map((textareas, i) => (
+                    allInputs.map((inputs, i) => (
                         <Stack wrap="wrap" direction="row" spacing={5} key={i}>
-                            {textareas}
+                            {inputs}
                         </Stack>
                     ))}
-                {variant !== "all" && textareas}
+                {variant !== "all" && inputs}
             </Paper>
-            <Paper
-                alignItems="center"
-                direction="column"
-                p={20}
-                flexShrink={1}
-                flexGrow={1}
-                maxWidth="min(100%, 360px)"
-                minWidth={0}
-            >
+            <Paper alignItems="center" direction="column" p={20}>
                 <Divider>Playground</Divider>
                 <Stack width="100%" direction="column" spacing={5}>
                     <Stack direction="column" spacing={5}>
@@ -346,9 +344,9 @@ function TextareaPlayground() {
                         <label>States</label>
                         <Stack direction="column" spacing={5}>
                             <Checkbox
-                                checked={resizable}
-                                label="Resizable"
-                                onChange={() => setResizable((prev) => !prev)}
+                                checked={fullWidth}
+                                label="Full Width"
+                                onChange={() => setFullWidth((prev) => !prev)}
                             />
                             <Checkbox
                                 checked={disabled}
@@ -391,47 +389,27 @@ function TextareaPlayground() {
                         />
                     </Stack>
                     <Divider />
-                    <Stack direction="row" spacing={5}>
-                        <Stack direction="column" spacing={5}>
-                            <label>Min Rows</label>
-                            <Input
-                                type="number"
-                                variant="solid"
-                                size="lg"
-                                color="primary"
-                                value={minRows}
-                                min={1}
-                                onChange={(e) => {
-                                    const value = Number(e.target.value);
-                                    if (!isNaN(value) && value >= 1) {
-                                        setMinRows(value);
-                                    }
-                                }}
-                                placeholder="Enter min rows"
-                            />
-                        </Stack>
-                        <Stack direction="column" spacing={5}>
-                            <label>Max Rows</label>
-                            <Input
-                                type="number"
-                                variant="solid"
-                                size="lg"
-                                color="primary"
-                                min={1}
-                                value={maxRows ?? undefined}
-                                onChange={(e) => {
-                                    const value = Number(e.target.value);
-                                    if (value >= 1 || e.target.value === "") {
-                                        setMaxRows(
-                                            e.target.value === ""
-                                                ? null
-                                                : value,
-                                        );
-                                    }
-                                }}
-                                placeholder="Enter max rows (optional)"
-                            />
-                        </Stack>
+                    <Stack direction="column" spacing={5}>
+                        <label>Type</label>
+                        <select
+                            value={type}
+                            onChange={(e) =>
+                                setType(e.target.value as InputType)
+                            }
+                            css={{
+                                padding: 10,
+                                borderRadius: 5,
+                                border: "1px solid #ccc",
+                                backgroundColor: "#f9f9f9",
+                                width: "100%",
+                            }}
+                        >
+                            {types.map((t) => (
+                                <option key={t} value={t}>
+                                    {startCase(t)}
+                                </option>
+                            ))}
+                        </select>
                     </Stack>
                     <Divider />
                     <Stack direction="column" spacing={5}>

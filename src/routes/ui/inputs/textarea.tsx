@@ -11,25 +11,24 @@ import {
     randomHexColor,
     Slider,
     Stack,
+    Textarea,
     Typography,
     useColorInput,
     type Color,
     type ColorLike,
-    type InputType,
     type Size,
     type TypographyColor,
     type Variant,
 } from "@ui";
 import capitalize from "lodash-es/capitalize";
-import startCase from "lodash-es/startCase";
 import { useState } from "react";
 
-export const Route = createFileRoute("/ui/input/input")({
-    component: InputPlayground,
+export const Route = createFileRoute("/ui/inputs/textarea")({
+    component: TextareaPlayground,
     head: () => ({
         meta: [
             ...seo({
-                title: "Input - Mutualzz UI",
+                title: "Textarea - Mutualzz UI",
             }),
         ],
     }),
@@ -45,15 +44,6 @@ const colors = [
     "info",
 ] as Color[];
 
-const types = [
-    "date",
-    "datetime-local",
-    "number",
-    "password",
-    "text",
-    "time",
-] as InputType[];
-
 const sizeNames = {
     sm: "Small",
     md: "Medium",
@@ -68,20 +58,21 @@ const textColors = [
     "inherit",
 ] as (TypographyColor | "inherit")[];
 
-function InputPlayground() {
+function TextareaPlayground() {
     const [variant, setVariant] = useState<Variant | "all">("outlined");
     const [size, setSize] = useState<Size | number>("md");
     const [disabled, setDisabled] = useState(false);
-    const [fullWidth, setFullWidth] = useState(false);
+
+    const [resizable, setResizable] = useState(false);
+    const [minRows, setMinRows] = useState(1);
+    const [maxRows, setMaxRows] = useState<number | null>(null);
 
     const [textColor, setTextColor] = useState<TypographyColor | "inherit">(
         "inherit",
     );
-
     const [customTextColorEnabled, setCustomTextColorEnabled] = useState(false);
 
     const [placeholder, setPlaceholder] = useState<string | null>(null);
-    const [type, setType] = useState<InputType>("text");
 
     const [value, setValue] = useState<string | null>(null);
 
@@ -110,7 +101,7 @@ function InputPlayground() {
         validate: validateTextColor,
     } = useColorInput<TypographyColor>();
 
-    const allInputs = [...colors, ...customColors].map((c) =>
+    const allTextareas = [...colors, ...customColors].map((c) =>
         variants.map((v) => (
             <Stack
                 direction="column"
@@ -121,9 +112,8 @@ function InputPlayground() {
                 <Typography>
                     {capitalize(v)} {capitalize(c)}
                 </Typography>
-                <Input
-                    key={`${v}-${c}-input`}
-                    fullWidth={fullWidth}
+                <Textarea
+                    key={`${v}-${c}-textarea`}
                     color={c}
                     textColor={
                         customTextColorEnabled ? customTextColor : textColor
@@ -136,13 +126,15 @@ function InputPlayground() {
                     }}
                     value={controlled ? (value ?? "") : undefined}
                     disabled={disabled}
-                    type={type}
+                    resizable={resizable}
+                    minRows={minRows}
+                    maxRows={maxRows ?? undefined}
                 />
             </Stack>
         )),
     );
 
-    const inputs = [...colors, ...customColors].map((c) => (
+    const textareas = [...colors, ...customColors].map((c) => (
         <Stack
             justifyContent="center"
             alignItems="center"
@@ -152,8 +144,8 @@ function InputPlayground() {
             <Typography>
                 {capitalize(variant)} {capitalize(c)}
             </Typography>
-            <Input
-                key={`${variant}-${c}-input`}
+            <Textarea
+                key={`${variant}-${c}-textarea`}
                 variant={variant as Variant}
                 placeholder={placeholder ?? "Type something..."}
                 size={size}
@@ -164,8 +156,10 @@ function InputPlayground() {
                 disabled={disabled}
                 color={c}
                 textColor={customTextColorEnabled ? customTextColor : textColor}
-                fullWidth={fullWidth}
-                type={type}
+                startDecorator
+                resizable={resizable}
+                minRows={minRows}
+                maxRows={maxRows ?? undefined}
             />
         </Stack>
     ));
@@ -182,14 +176,22 @@ function InputPlayground() {
                 spacing={variant === "all" ? 10 : 5}
             >
                 {variant === "all" &&
-                    allInputs.map((inputs, i) => (
+                    allTextareas.map((textareas, i) => (
                         <Stack wrap="wrap" direction="row" spacing={5} key={i}>
-                            {inputs}
+                            {textareas}
                         </Stack>
                     ))}
-                {variant !== "all" && inputs}
+                {variant !== "all" && textareas}
             </Paper>
-            <Paper alignItems="center" direction="column" p={20}>
+            <Paper
+                alignItems="center"
+                direction="column"
+                p={20}
+                flexShrink={1}
+                flexGrow={1}
+                maxWidth="min(100%, 360px)"
+                minWidth={0}
+            >
                 <Divider>Playground</Divider>
                 <Stack width="100%" direction="column" spacing={5}>
                     <Stack direction="column" spacing={5}>
@@ -344,9 +346,9 @@ function InputPlayground() {
                         <label>States</label>
                         <Stack direction="column" spacing={5}>
                             <Checkbox
-                                checked={fullWidth}
-                                label="Full Width"
-                                onChange={() => setFullWidth((prev) => !prev)}
+                                checked={resizable}
+                                label="Resizable"
+                                onChange={() => setResizable((prev) => !prev)}
                             />
                             <Checkbox
                                 checked={disabled}
@@ -389,27 +391,47 @@ function InputPlayground() {
                         />
                     </Stack>
                     <Divider />
-                    <Stack direction="column" spacing={5}>
-                        <label>Type</label>
-                        <select
-                            value={type}
-                            onChange={(e) =>
-                                setType(e.target.value as InputType)
-                            }
-                            css={{
-                                padding: 10,
-                                borderRadius: 5,
-                                border: "1px solid #ccc",
-                                backgroundColor: "#f9f9f9",
-                                width: "100%",
-                            }}
-                        >
-                            {types.map((t) => (
-                                <option key={t} value={t}>
-                                    {startCase(t)}
-                                </option>
-                            ))}
-                        </select>
+                    <Stack direction="row" spacing={5}>
+                        <Stack direction="column" spacing={5}>
+                            <label>Min Rows</label>
+                            <Input
+                                type="number"
+                                variant="solid"
+                                size="lg"
+                                color="primary"
+                                value={minRows}
+                                min={1}
+                                onChange={(e) => {
+                                    const value = Number(e.target.value);
+                                    if (!isNaN(value) && value >= 1) {
+                                        setMinRows(value);
+                                    }
+                                }}
+                                placeholder="Enter min rows"
+                            />
+                        </Stack>
+                        <Stack direction="column" spacing={5}>
+                            <label>Max Rows</label>
+                            <Input
+                                type="number"
+                                variant="solid"
+                                size="lg"
+                                color="primary"
+                                min={1}
+                                value={maxRows ?? undefined}
+                                onChange={(e) => {
+                                    const value = Number(e.target.value);
+                                    if (value >= 1 || e.target.value === "") {
+                                        setMaxRows(
+                                            e.target.value === ""
+                                                ? null
+                                                : value,
+                                        );
+                                    }
+                                }}
+                                placeholder="Enter max rows (optional)"
+                            />
+                        </Stack>
                     </Stack>
                     <Divider />
                     <Stack direction="column" spacing={5}>

@@ -12,15 +12,15 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as UiRouteImport } from './routes/ui'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as UiIndexRouteImport } from './routes/ui/index'
-import { Route as UiSurfacePaperRouteImport } from './routes/ui/surface/paper'
-import { Route as UiInputTextareaRouteImport } from './routes/ui/input/textarea'
-import { Route as UiInputSliderRouteImport } from './routes/ui/input/slider'
-import { Route as UiInputRadioButtonRouteImport } from './routes/ui/input/radio-button'
-import { Route as UiInputMarkdownInputRouteImport } from './routes/ui/input/markdown-input'
-import { Route as UiInputInputRouteImport } from './routes/ui/input/input'
-import { Route as UiInputCheckboxRouteImport } from './routes/ui/input/checkbox'
-import { Route as UiInputButtonGroupRouteImport } from './routes/ui/input/button-group'
-import { Route as UiInputButtonRouteImport } from './routes/ui/input/button'
+import { Route as UiSurfacesPaperRouteImport } from './routes/ui/surfaces/paper'
+import { Route as UiInputsTextareaRouteImport } from './routes/ui/inputs/textarea'
+import { Route as UiInputsSliderRouteImport } from './routes/ui/inputs/slider'
+import { Route as UiInputsRadioButtonRouteImport } from './routes/ui/inputs/radio-button'
+import { Route as UiInputsMarkdownInputRouteImport } from './routes/ui/inputs/markdown-input'
+import { Route as UiInputsInputRouteImport } from './routes/ui/inputs/input'
+import { Route as UiInputsCheckboxRouteImport } from './routes/ui/inputs/checkbox'
+import { Route as UiInputsButtonGroupRouteImport } from './routes/ui/inputs/button-group'
+import { Route as UiInputsButtonRouteImport } from './routes/ui/inputs/button'
 import { Route as UiFeedbackLinearProgressRouteImport } from './routes/ui/feedback/linear-progress'
 import { Route as UiFeedbackCircularProgressRouteImport } from './routes/ui/feedback/circular-progress'
 import { Route as UiDataDisplayTypographyRouteImport } from './routes/ui/data-display/typography'
@@ -42,49 +42,49 @@ const UiIndexRoute = UiIndexRouteImport.update({
   path: '/',
   getParentRoute: () => UiRoute,
 } as any)
-const UiSurfacePaperRoute = UiSurfacePaperRouteImport.update({
-  id: '/surface/paper',
-  path: '/surface/paper',
+const UiSurfacesPaperRoute = UiSurfacesPaperRouteImport.update({
+  id: '/surfaces/paper',
+  path: '/surfaces/paper',
   getParentRoute: () => UiRoute,
 } as any)
-const UiInputTextareaRoute = UiInputTextareaRouteImport.update({
-  id: '/input/textarea',
-  path: '/input/textarea',
+const UiInputsTextareaRoute = UiInputsTextareaRouteImport.update({
+  id: '/inputs/textarea',
+  path: '/inputs/textarea',
   getParentRoute: () => UiRoute,
 } as any)
-const UiInputSliderRoute = UiInputSliderRouteImport.update({
-  id: '/input/slider',
-  path: '/input/slider',
+const UiInputsSliderRoute = UiInputsSliderRouteImport.update({
+  id: '/inputs/slider',
+  path: '/inputs/slider',
   getParentRoute: () => UiRoute,
 } as any)
-const UiInputRadioButtonRoute = UiInputRadioButtonRouteImport.update({
-  id: '/input/radio-button',
-  path: '/input/radio-button',
+const UiInputsRadioButtonRoute = UiInputsRadioButtonRouteImport.update({
+  id: '/inputs/radio-button',
+  path: '/inputs/radio-button',
   getParentRoute: () => UiRoute,
 } as any)
-const UiInputMarkdownInputRoute = UiInputMarkdownInputRouteImport.update({
-  id: '/input/markdown-input',
-  path: '/input/markdown-input',
+const UiInputsMarkdownInputRoute = UiInputsMarkdownInputRouteImport.update({
+  id: '/inputs/markdown-input',
+  path: '/inputs/markdown-input',
   getParentRoute: () => UiRoute,
 } as any)
-const UiInputInputRoute = UiInputInputRouteImport.update({
-  id: '/input/input',
-  path: '/input/input',
+const UiInputsInputRoute = UiInputsInputRouteImport.update({
+  id: '/inputs/input',
+  path: '/inputs/input',
   getParentRoute: () => UiRoute,
 } as any)
-const UiInputCheckboxRoute = UiInputCheckboxRouteImport.update({
-  id: '/input/checkbox',
-  path: '/input/checkbox',
+const UiInputsCheckboxRoute = UiInputsCheckboxRouteImport.update({
+  id: '/inputs/checkbox',
+  path: '/inputs/checkbox',
   getParentRoute: () => UiRoute,
 } as any)
-const UiInputButtonGroupRoute = UiInputButtonGroupRouteImport.update({
-  id: '/input/button-group',
-  path: '/input/button-group',
+const UiInputsButtonGroupRoute = UiInputsButtonGroupRouteImport.update({
+  id: '/inputs/button-group',
+  path: '/inputs/button-group',
   getParentRoute: () => UiRoute,
 } as any)
-const UiInputButtonRoute = UiInputButtonRouteImport.update({
-  id: '/input/button',
-  path: '/input/button',
+const UiInputsButtonRoute = UiInputsButtonRouteImport.update({
+  id: '/inputs/button',
+  path: '/inputs/button',
   getParentRoute: () => UiRoute,
 } as any)
 const UiFeedbackLinearProgressRoute =
@@ -125,15 +125,15 @@ export interface FileRoutesByFullPath {
   '/ui/data-display/typography': typeof UiDataDisplayTypographyRoute
   '/ui/feedback/circular-progress': typeof UiFeedbackCircularProgressRoute
   '/ui/feedback/linear-progress': typeof UiFeedbackLinearProgressRoute
-  '/ui/input/button': typeof UiInputButtonRoute
-  '/ui/input/button-group': typeof UiInputButtonGroupRoute
-  '/ui/input/checkbox': typeof UiInputCheckboxRoute
-  '/ui/input/input': typeof UiInputInputRoute
-  '/ui/input/markdown-input': typeof UiInputMarkdownInputRoute
-  '/ui/input/radio-button': typeof UiInputRadioButtonRoute
-  '/ui/input/slider': typeof UiInputSliderRoute
-  '/ui/input/textarea': typeof UiInputTextareaRoute
-  '/ui/surface/paper': typeof UiSurfacePaperRoute
+  '/ui/inputs/button': typeof UiInputsButtonRoute
+  '/ui/inputs/button-group': typeof UiInputsButtonGroupRoute
+  '/ui/inputs/checkbox': typeof UiInputsCheckboxRoute
+  '/ui/inputs/input': typeof UiInputsInputRoute
+  '/ui/inputs/markdown-input': typeof UiInputsMarkdownInputRoute
+  '/ui/inputs/radio-button': typeof UiInputsRadioButtonRoute
+  '/ui/inputs/slider': typeof UiInputsSliderRoute
+  '/ui/inputs/textarea': typeof UiInputsTextareaRoute
+  '/ui/surfaces/paper': typeof UiSurfacesPaperRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -143,15 +143,15 @@ export interface FileRoutesByTo {
   '/ui/data-display/typography': typeof UiDataDisplayTypographyRoute
   '/ui/feedback/circular-progress': typeof UiFeedbackCircularProgressRoute
   '/ui/feedback/linear-progress': typeof UiFeedbackLinearProgressRoute
-  '/ui/input/button': typeof UiInputButtonRoute
-  '/ui/input/button-group': typeof UiInputButtonGroupRoute
-  '/ui/input/checkbox': typeof UiInputCheckboxRoute
-  '/ui/input/input': typeof UiInputInputRoute
-  '/ui/input/markdown-input': typeof UiInputMarkdownInputRoute
-  '/ui/input/radio-button': typeof UiInputRadioButtonRoute
-  '/ui/input/slider': typeof UiInputSliderRoute
-  '/ui/input/textarea': typeof UiInputTextareaRoute
-  '/ui/surface/paper': typeof UiSurfacePaperRoute
+  '/ui/inputs/button': typeof UiInputsButtonRoute
+  '/ui/inputs/button-group': typeof UiInputsButtonGroupRoute
+  '/ui/inputs/checkbox': typeof UiInputsCheckboxRoute
+  '/ui/inputs/input': typeof UiInputsInputRoute
+  '/ui/inputs/markdown-input': typeof UiInputsMarkdownInputRoute
+  '/ui/inputs/radio-button': typeof UiInputsRadioButtonRoute
+  '/ui/inputs/slider': typeof UiInputsSliderRoute
+  '/ui/inputs/textarea': typeof UiInputsTextareaRoute
+  '/ui/surfaces/paper': typeof UiSurfacesPaperRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -163,15 +163,15 @@ export interface FileRoutesById {
   '/ui/data-display/typography': typeof UiDataDisplayTypographyRoute
   '/ui/feedback/circular-progress': typeof UiFeedbackCircularProgressRoute
   '/ui/feedback/linear-progress': typeof UiFeedbackLinearProgressRoute
-  '/ui/input/button': typeof UiInputButtonRoute
-  '/ui/input/button-group': typeof UiInputButtonGroupRoute
-  '/ui/input/checkbox': typeof UiInputCheckboxRoute
-  '/ui/input/input': typeof UiInputInputRoute
-  '/ui/input/markdown-input': typeof UiInputMarkdownInputRoute
-  '/ui/input/radio-button': typeof UiInputRadioButtonRoute
-  '/ui/input/slider': typeof UiInputSliderRoute
-  '/ui/input/textarea': typeof UiInputTextareaRoute
-  '/ui/surface/paper': typeof UiSurfacePaperRoute
+  '/ui/inputs/button': typeof UiInputsButtonRoute
+  '/ui/inputs/button-group': typeof UiInputsButtonGroupRoute
+  '/ui/inputs/checkbox': typeof UiInputsCheckboxRoute
+  '/ui/inputs/input': typeof UiInputsInputRoute
+  '/ui/inputs/markdown-input': typeof UiInputsMarkdownInputRoute
+  '/ui/inputs/radio-button': typeof UiInputsRadioButtonRoute
+  '/ui/inputs/slider': typeof UiInputsSliderRoute
+  '/ui/inputs/textarea': typeof UiInputsTextareaRoute
+  '/ui/surfaces/paper': typeof UiSurfacesPaperRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -184,15 +184,15 @@ export interface FileRouteTypes {
     | '/ui/data-display/typography'
     | '/ui/feedback/circular-progress'
     | '/ui/feedback/linear-progress'
-    | '/ui/input/button'
-    | '/ui/input/button-group'
-    | '/ui/input/checkbox'
-    | '/ui/input/input'
-    | '/ui/input/markdown-input'
-    | '/ui/input/radio-button'
-    | '/ui/input/slider'
-    | '/ui/input/textarea'
-    | '/ui/surface/paper'
+    | '/ui/inputs/button'
+    | '/ui/inputs/button-group'
+    | '/ui/inputs/checkbox'
+    | '/ui/inputs/input'
+    | '/ui/inputs/markdown-input'
+    | '/ui/inputs/radio-button'
+    | '/ui/inputs/slider'
+    | '/ui/inputs/textarea'
+    | '/ui/surfaces/paper'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -202,15 +202,15 @@ export interface FileRouteTypes {
     | '/ui/data-display/typography'
     | '/ui/feedback/circular-progress'
     | '/ui/feedback/linear-progress'
-    | '/ui/input/button'
-    | '/ui/input/button-group'
-    | '/ui/input/checkbox'
-    | '/ui/input/input'
-    | '/ui/input/markdown-input'
-    | '/ui/input/radio-button'
-    | '/ui/input/slider'
-    | '/ui/input/textarea'
-    | '/ui/surface/paper'
+    | '/ui/inputs/button'
+    | '/ui/inputs/button-group'
+    | '/ui/inputs/checkbox'
+    | '/ui/inputs/input'
+    | '/ui/inputs/markdown-input'
+    | '/ui/inputs/radio-button'
+    | '/ui/inputs/slider'
+    | '/ui/inputs/textarea'
+    | '/ui/surfaces/paper'
   id:
     | '__root__'
     | '/'
@@ -221,15 +221,15 @@ export interface FileRouteTypes {
     | '/ui/data-display/typography'
     | '/ui/feedback/circular-progress'
     | '/ui/feedback/linear-progress'
-    | '/ui/input/button'
-    | '/ui/input/button-group'
-    | '/ui/input/checkbox'
-    | '/ui/input/input'
-    | '/ui/input/markdown-input'
-    | '/ui/input/radio-button'
-    | '/ui/input/slider'
-    | '/ui/input/textarea'
-    | '/ui/surface/paper'
+    | '/ui/inputs/button'
+    | '/ui/inputs/button-group'
+    | '/ui/inputs/checkbox'
+    | '/ui/inputs/input'
+    | '/ui/inputs/markdown-input'
+    | '/ui/inputs/radio-button'
+    | '/ui/inputs/slider'
+    | '/ui/inputs/textarea'
+    | '/ui/surfaces/paper'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -260,67 +260,67 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof UiIndexRouteImport
       parentRoute: typeof UiRoute
     }
-    '/ui/surface/paper': {
-      id: '/ui/surface/paper'
-      path: '/surface/paper'
-      fullPath: '/ui/surface/paper'
-      preLoaderRoute: typeof UiSurfacePaperRouteImport
+    '/ui/surfaces/paper': {
+      id: '/ui/surfaces/paper'
+      path: '/surfaces/paper'
+      fullPath: '/ui/surfaces/paper'
+      preLoaderRoute: typeof UiSurfacesPaperRouteImport
       parentRoute: typeof UiRoute
     }
-    '/ui/input/textarea': {
-      id: '/ui/input/textarea'
-      path: '/input/textarea'
-      fullPath: '/ui/input/textarea'
-      preLoaderRoute: typeof UiInputTextareaRouteImport
+    '/ui/inputs/textarea': {
+      id: '/ui/inputs/textarea'
+      path: '/inputs/textarea'
+      fullPath: '/ui/inputs/textarea'
+      preLoaderRoute: typeof UiInputsTextareaRouteImport
       parentRoute: typeof UiRoute
     }
-    '/ui/input/slider': {
-      id: '/ui/input/slider'
-      path: '/input/slider'
-      fullPath: '/ui/input/slider'
-      preLoaderRoute: typeof UiInputSliderRouteImport
+    '/ui/inputs/slider': {
+      id: '/ui/inputs/slider'
+      path: '/inputs/slider'
+      fullPath: '/ui/inputs/slider'
+      preLoaderRoute: typeof UiInputsSliderRouteImport
       parentRoute: typeof UiRoute
     }
-    '/ui/input/radio-button': {
-      id: '/ui/input/radio-button'
-      path: '/input/radio-button'
-      fullPath: '/ui/input/radio-button'
-      preLoaderRoute: typeof UiInputRadioButtonRouteImport
+    '/ui/inputs/radio-button': {
+      id: '/ui/inputs/radio-button'
+      path: '/inputs/radio-button'
+      fullPath: '/ui/inputs/radio-button'
+      preLoaderRoute: typeof UiInputsRadioButtonRouteImport
       parentRoute: typeof UiRoute
     }
-    '/ui/input/markdown-input': {
-      id: '/ui/input/markdown-input'
-      path: '/input/markdown-input'
-      fullPath: '/ui/input/markdown-input'
-      preLoaderRoute: typeof UiInputMarkdownInputRouteImport
+    '/ui/inputs/markdown-input': {
+      id: '/ui/inputs/markdown-input'
+      path: '/inputs/markdown-input'
+      fullPath: '/ui/inputs/markdown-input'
+      preLoaderRoute: typeof UiInputsMarkdownInputRouteImport
       parentRoute: typeof UiRoute
     }
-    '/ui/input/input': {
-      id: '/ui/input/input'
-      path: '/input/input'
-      fullPath: '/ui/input/input'
-      preLoaderRoute: typeof UiInputInputRouteImport
+    '/ui/inputs/input': {
+      id: '/ui/inputs/input'
+      path: '/inputs/input'
+      fullPath: '/ui/inputs/input'
+      preLoaderRoute: typeof UiInputsInputRouteImport
       parentRoute: typeof UiRoute
     }
-    '/ui/input/checkbox': {
-      id: '/ui/input/checkbox'
-      path: '/input/checkbox'
-      fullPath: '/ui/input/checkbox'
-      preLoaderRoute: typeof UiInputCheckboxRouteImport
+    '/ui/inputs/checkbox': {
+      id: '/ui/inputs/checkbox'
+      path: '/inputs/checkbox'
+      fullPath: '/ui/inputs/checkbox'
+      preLoaderRoute: typeof UiInputsCheckboxRouteImport
       parentRoute: typeof UiRoute
     }
-    '/ui/input/button-group': {
-      id: '/ui/input/button-group'
-      path: '/input/button-group'
-      fullPath: '/ui/input/button-group'
-      preLoaderRoute: typeof UiInputButtonGroupRouteImport
+    '/ui/inputs/button-group': {
+      id: '/ui/inputs/button-group'
+      path: '/inputs/button-group'
+      fullPath: '/ui/inputs/button-group'
+      preLoaderRoute: typeof UiInputsButtonGroupRouteImport
       parentRoute: typeof UiRoute
     }
-    '/ui/input/button': {
-      id: '/ui/input/button'
-      path: '/input/button'
-      fullPath: '/ui/input/button'
-      preLoaderRoute: typeof UiInputButtonRouteImport
+    '/ui/inputs/button': {
+      id: '/ui/inputs/button'
+      path: '/inputs/button'
+      fullPath: '/ui/inputs/button'
+      preLoaderRoute: typeof UiInputsButtonRouteImport
       parentRoute: typeof UiRoute
     }
     '/ui/feedback/linear-progress': {
@@ -368,15 +368,15 @@ interface UiRouteChildren {
   UiDataDisplayTypographyRoute: typeof UiDataDisplayTypographyRoute
   UiFeedbackCircularProgressRoute: typeof UiFeedbackCircularProgressRoute
   UiFeedbackLinearProgressRoute: typeof UiFeedbackLinearProgressRoute
-  UiInputButtonRoute: typeof UiInputButtonRoute
-  UiInputButtonGroupRoute: typeof UiInputButtonGroupRoute
-  UiInputCheckboxRoute: typeof UiInputCheckboxRoute
-  UiInputInputRoute: typeof UiInputInputRoute
-  UiInputMarkdownInputRoute: typeof UiInputMarkdownInputRoute
-  UiInputRadioButtonRoute: typeof UiInputRadioButtonRoute
-  UiInputSliderRoute: typeof UiInputSliderRoute
-  UiInputTextareaRoute: typeof UiInputTextareaRoute
-  UiSurfacePaperRoute: typeof UiSurfacePaperRoute
+  UiInputsButtonRoute: typeof UiInputsButtonRoute
+  UiInputsButtonGroupRoute: typeof UiInputsButtonGroupRoute
+  UiInputsCheckboxRoute: typeof UiInputsCheckboxRoute
+  UiInputsInputRoute: typeof UiInputsInputRoute
+  UiInputsMarkdownInputRoute: typeof UiInputsMarkdownInputRoute
+  UiInputsRadioButtonRoute: typeof UiInputsRadioButtonRoute
+  UiInputsSliderRoute: typeof UiInputsSliderRoute
+  UiInputsTextareaRoute: typeof UiInputsTextareaRoute
+  UiSurfacesPaperRoute: typeof UiSurfacesPaperRoute
 }
 
 const UiRouteChildren: UiRouteChildren = {
@@ -386,15 +386,15 @@ const UiRouteChildren: UiRouteChildren = {
   UiDataDisplayTypographyRoute: UiDataDisplayTypographyRoute,
   UiFeedbackCircularProgressRoute: UiFeedbackCircularProgressRoute,
   UiFeedbackLinearProgressRoute: UiFeedbackLinearProgressRoute,
-  UiInputButtonRoute: UiInputButtonRoute,
-  UiInputButtonGroupRoute: UiInputButtonGroupRoute,
-  UiInputCheckboxRoute: UiInputCheckboxRoute,
-  UiInputInputRoute: UiInputInputRoute,
-  UiInputMarkdownInputRoute: UiInputMarkdownInputRoute,
-  UiInputRadioButtonRoute: UiInputRadioButtonRoute,
-  UiInputSliderRoute: UiInputSliderRoute,
-  UiInputTextareaRoute: UiInputTextareaRoute,
-  UiSurfacePaperRoute: UiSurfacePaperRoute,
+  UiInputsButtonRoute: UiInputsButtonRoute,
+  UiInputsButtonGroupRoute: UiInputsButtonGroupRoute,
+  UiInputsCheckboxRoute: UiInputsCheckboxRoute,
+  UiInputsInputRoute: UiInputsInputRoute,
+  UiInputsMarkdownInputRoute: UiInputsMarkdownInputRoute,
+  UiInputsRadioButtonRoute: UiInputsRadioButtonRoute,
+  UiInputsSliderRoute: UiInputsSliderRoute,
+  UiInputsTextareaRoute: UiInputsTextareaRoute,
+  UiSurfacesPaperRoute: UiSurfacesPaperRoute,
 }
 
 const UiRouteWithChildren = UiRoute._addFileChildren(UiRouteChildren)

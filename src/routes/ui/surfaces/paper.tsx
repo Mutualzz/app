@@ -17,7 +17,7 @@ import {
 import capitalize from "lodash-es/capitalize";
 import { useState } from "react";
 
-export const Route = createFileRoute("/ui/surface/paper")({
+export const Route = createFileRoute("/ui/surfaces/paper")({
     component: PlaygroundPaper,
     head: () => ({
         meta: [
