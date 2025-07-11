@@ -25,6 +25,7 @@ import {
     type RenderLeafProps,
 } from "slate-react";
 
+import { HoveringToolbar } from "@components/HoveringToolbar/HoveringToolbar";
 import { markdownToSlate } from "../../utils/markdownToSlate";
 import { slateToMarkdown } from "../../utils/slateToMarkdown";
 import { Element } from "./Element";
@@ -171,6 +172,7 @@ export const MarkdownInput = ({
             }}
             editor={editor}
         >
+            <HoveringToolbar />
             <Editable
                 decorate={decorate}
                 renderElement={renderElement}

@@ -47,6 +47,8 @@ export type EmptyText = {
     text: string;
 };
 
+export type FormatKey = keyof Omit<Text, "text" | "isMarker"> | "blockquote";
+
 export type Element =
     | BlockQuoteElement
     | LineElement
