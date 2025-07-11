@@ -61,6 +61,7 @@ export type Editor = BaseEditor &
     HistoryEditor & {
         nodeToDecorations?: Map<Element, Range[]>;
         enableEmoticons?: boolean;
+        enableHoverToolbar?: boolean;
     };
 
 declare module "slate" {

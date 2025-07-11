@@ -58,6 +58,7 @@ function RouteComponent() {
     );
 
     const [emoticons, setEmoticons] = useState(true);
+    const [hoverToolbar, setHoverToolbar] = useState(true);
 
     const [customColorEnabled, setCustomColorEnabled] = useState(false);
     const [customTextColorEnabled, setCustomTextColorEnabled] = useState(false);
@@ -94,6 +95,7 @@ function RouteComponent() {
                             customTextColorEnabled ? customTextColor : textColor
                         }
                         emoticons={emoticons}
+                        hoverToolbar={hoverToolbar}
                         variant={variant}
                     />
                 </Stack>
@@ -259,6 +261,13 @@ function RouteComponent() {
                             checked={emoticons}
                             onChange={(e) => {
                                 setEmoticons(e.target.checked);
+                            }}
+                        />
+                        <Checkbox
+                            label="Hover Toolbar"
+                            checked={hoverToolbar}
+                            onChange={(e) => {
+                                setHoverToolbar(e.target.checked);
                             }}
                         />
                     </Stack>

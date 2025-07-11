@@ -45,6 +45,7 @@ export const MarkdownInput = ({
     disabled = false,
 
     emoticons = true,
+    hoverToolbar = true,
 
     onChange,
     placeholder,
@@ -66,7 +67,8 @@ export const MarkdownInput = ({
 
     useEffect(() => {
         editor.enableEmoticons = emoticons;
-    }, [editor, emoticons]);
+        editor.enableHoverToolbar = hoverToolbar;
+    }, [editor, emoticons, hoverToolbar]);
 
     const renderElement = useCallback(
         (props: RenderElementProps) => <Element {...props} />,

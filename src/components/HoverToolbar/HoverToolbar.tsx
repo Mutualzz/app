@@ -37,10 +37,11 @@ export const HoverToolbar = () => {
         const { selection } = editor;
 
         if (
+            !editor.enableHoverToolbar ||
             !selection ||
             !inFocus ||
             Range.isCollapsed(selection) ||
-            editor.selection === null
+            !editor.selection
         ) {
             setVisible(false);
             return;
@@ -63,7 +64,7 @@ export const HoverToolbar = () => {
         el.style.left = `${left}px`;
 
         setVisible(true);
-    }, [editor.selection, inFocus]);
+    }, [editor.selection, inFocus, editor.enableHoverToolbar]);
 
     useEffect(() => {
         if (!inFocus) {

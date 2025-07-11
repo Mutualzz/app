@@ -7,6 +7,7 @@ export interface MarkdownInputProps {
     variant?: Variant;
 
     emoticons?: boolean;
+    hoverToolbar?: boolean;
 
     disabled?: boolean;
 
