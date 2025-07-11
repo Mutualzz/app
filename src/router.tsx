@@ -11,6 +11,7 @@ export function createRouter() {
         context: { queryClient },
         defaultPreload: "intent",
         defaultPreloadStaleTime: 0,
+        scrollRestoration: true,
 
         // eslint-disable-next-line react/prop-types
         Wrap: ({ children }) => (
