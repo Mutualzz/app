@@ -77,7 +77,7 @@ function parseInlineMarkdown(input: string): Descendant[] {
             [/~~(.*?)~~/s, { strikethrough: true }],
             [/`(.*?)`/s, { code: true }],
             [/__([^_]+)__/s, { underline: true }],
-            // TODO: handle spoilers
+            [/\|\|(.+?)\|\|/s, { spoiler: true }],
         ];
 
         for (const [pattern, mark] of patterns) {
