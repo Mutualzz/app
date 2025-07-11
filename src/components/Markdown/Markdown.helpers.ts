@@ -1,6 +1,11 @@
 import type { CSSObject, Theme } from "@emotion/react";
-import type { Color, ColorLike, TypographyColor } from "@ui/types";
-import { darken, lighten } from "@ui/utils";
+import {
+    darken,
+    lighten,
+    type Color,
+    type ColorLike,
+    type TypographyColor,
+} from "@ui";
 import { resolveColor, resolveTypographyColor } from "@ui/utils/resolveColor";
 import { formatHex8, parse } from "culori";
 import { type Range } from "slate";

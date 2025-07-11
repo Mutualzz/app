@@ -1,8 +1,10 @@
+import { seo } from "@seo";
 import { createFileRoute } from "@tanstack/react-router";
 import {
     Button,
     Checkbox,
     Divider,
+    Input,
     Paper,
     Radio,
     RadioGroup,
@@ -10,16 +12,16 @@ import {
     Slider,
     Stack,
     useColorInput,
-} from "@ui/index";
-import type { Color, ColorLike, Size, Variant } from "@ui/types";
-import { capitalize } from "lodash-es";
+    type Color,
+    type ColorLike,
+    type Size,
+    type Variant,
+} from "@ui";
+import capitalize from "lodash-es/capitalize";
 import { useState } from "react";
-
-import { Input } from "@ui/components/inputs/Input/Input";
 import * as AiIcons from "react-icons/ai";
 import * as FaIcons from "react-icons/fa";
 import * as MdIcons from "react-icons/md";
-import { seo } from "../../../seo";
 
 export const Route = createFileRoute("/ui/input/radio-button")({
     component: PlaygroundRadio,

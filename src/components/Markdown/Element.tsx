@@ -1,4 +1,4 @@
-import { Typography, useTheme, type TypographyHeadingKey } from "@ui/index";
+import { Typography, useTheme, type TypographyHeadingKey } from "@ui";
 import type { RenderElementProps } from "slate-react";
 
 export const Element = ({

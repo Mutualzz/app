@@ -1,10 +1,10 @@
+import { seo } from "@seo";
 import { createFileRoute } from "@tanstack/react-router";
-import { Input } from "@ui/components/inputs/Input/Input";
-import { type InputType } from "@ui/components/inputs/Input/Input.types";
 import {
     Button,
     Checkbox,
     Divider,
+    Input,
     Paper,
     Radio,
     RadioGroup,
@@ -15,13 +15,14 @@ import {
     useColorInput,
     type Color,
     type ColorLike,
+    type InputType,
     type Size,
     type TypographyColor,
     type Variant,
-} from "@ui/index";
-import { capitalize, startCase } from "lodash-es";
+} from "@ui";
+import capitalize from "lodash-es/capitalize";
+import startCase from "lodash-es/startCase";
 import { useState } from "react";
-import { seo } from "../../../seo";
 
 export const Route = createFileRoute("/ui/input/input")({
     component: InputPlayground,

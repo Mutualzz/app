@@ -31,10 +31,15 @@
             "@contexts/*": ["contexts/*"],
             "@components/*": ["components/*"],
             "@ui/*": ["ui/src/*"],
+            "@ui": ["ui/src/index.ts"],
             "@editor/*": ["editor/*"],
             "@utils/*": ["utils/*"],
             "@themes/*": ["themes/*"],
-            "@types": ["index.d.ts"]
+            "@themes": ["themes/index.ts"],
+            "@mz-types/*": ["types/*"],
+            "@mz-types": ["types/index.d.ts"],
+            "@css/*": ["css/*"],
+            "@seo": ["seo.ts"]
         }
     },
     "include": ["src/**/*"],

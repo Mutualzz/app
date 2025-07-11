@@ -1,27 +1,28 @@
+import { seo } from "@seo";
 import { createFileRoute } from "@tanstack/react-router";
-import { Typography } from "@ui/components/data-display/Typography/Typography";
-import { Input } from "@ui/components/inputs/Input/Input";
-import { Slider } from "@ui/components/inputs/Slider/Slider";
-import {
-    type SliderMark,
-    type SliderOrientation,
-    type SliderValueLabelDisplay,
-} from "@ui/components/inputs/Slider/Slider.types";
 import {
     Button,
     Checkbox,
     Divider,
+    Input,
     Paper,
     Radio,
     RadioGroup,
     randomHexColor,
+    Slider,
     Stack,
+    Typography,
     useColorInput,
-} from "@ui/index";
-import { type Color, type ColorLike, type Size, type Variant } from "@ui/types";
-import { capitalize } from "lodash-es";
+    type Color,
+    type ColorLike,
+    type Size,
+    type SliderMark,
+    type SliderOrientation,
+    type SliderValueLabelDisplay,
+    type Variant,
+} from "@ui";
+import capitalize from "lodash-es/capitalize";
 import { useState } from "react";
-import { seo } from "../../../seo";
 
 export const Route = createFileRoute("/ui/input/slider")({
     component: SlderPlayground,

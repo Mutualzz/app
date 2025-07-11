@@ -1,25 +1,27 @@
+import { seo } from "@seo";
 import { createFileRoute } from "@tanstack/react-router";
-import { Divider } from "@ui/components/data-display/Divider/Divider";
-import { Typography } from "@ui/components/data-display/Typography/Typography";
-import { LinearProgress } from "@ui/components/feedback/LinearProgress/LinearProgress";
-import type { LinearProgressAnimation } from "@ui/components/feedback/LinearProgress/LinearProgress.types";
-import { Stack } from "@ui/components/layout/Stack/Stack";
-import { Paper } from "@ui/components/surfaces/Paper/Paper";
-import { useColorInput } from "@ui/hooks/useColorInput";
 import {
     Button,
     Checkbox,
+    Divider,
+    Input,
+    LinearProgress,
+    Paper,
     Radio,
     RadioGroup,
     randomHexColor,
     Slider,
-} from "@ui/index";
-import type { Color, ColorLike, Size, Variant } from "@ui/types";
-
-import { Input } from "@ui/components/inputs/Input/Input";
-import { capitalize } from "lodash-es";
+    Stack,
+    Typography,
+    useColorInput,
+    type Color,
+    type ColorLike,
+    type LinearProgressAnimation,
+    type Size,
+    type Variant,
+} from "@ui";
+import capitalize from "lodash-es/capitalize";
 import { useState } from "react";
-import { seo } from "../../../seo";
 
 export const Route = createFileRoute("/ui/feedback/linear-progress")({
     component: PlaygroundLinearProgress,

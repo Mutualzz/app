@@ -1,6 +1,6 @@
+import { seo } from "@seo";
 import { createFileRoute } from "@tanstack/react-router";
-import { Stack, Typography } from "@ui/index";
-import { seo } from "../../seo";
+import { Stack, Typography } from "@ui";
 
 export const Route = createFileRoute("/ui/")({
     component: PlaygroundIndexComponent,

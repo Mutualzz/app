@@ -1,8 +1,5 @@
 import { createFileRoute, Outlet, useNavigate } from "@tanstack/react-router";
-import { Typography } from "@ui/components/data-display/Typography/Typography";
-
-import { Button } from "@ui/components/inputs/Button/Button";
-import { Stack } from "@ui/components/layout/Stack/Stack";
+import { Button, Stack, Typography } from "@ui";
 
 export const Route = createFileRoute("/")({
     component: Index,

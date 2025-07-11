@@ -1,7 +1,7 @@
 /* eslint-disable sonarjs/no-nested-functions */
 import type { JSX } from "@emotion/react/jsx-runtime";
+import { loadHighlighter } from "@utils/loadHighlighter";
 import { useEffect, useState } from "react";
-import { loadHighlighter } from "../../utils/loadHighlighter";
 import type { CodeBlockProps } from "./CodeBlock.types";
 
 export const CodeBlock = ({ code, language = "plaintext" }: CodeBlockProps) => {

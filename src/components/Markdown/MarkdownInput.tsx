@@ -1,4 +1,7 @@
-import { useTheme } from "@ui/index";
+import { HoverToolbar } from "@components/HoverToolbar/HoverToolbar";
+import { useTheme } from "@ui";
+import { markdownToSlate } from "@utils/markdownToSlate";
+import { slateToMarkdown } from "@utils/slateToMarkdown";
 import { isKeyHotkey } from "is-hotkey";
 import {
     useCallback,
@@ -24,10 +27,6 @@ import {
     type RenderElementProps,
     type RenderLeafProps,
 } from "slate-react";
-
-import { HoverToolbar } from "@components/HoverToolbar/HoverToolbar";
-import { markdownToSlate } from "../../utils/markdownToSlate";
-import { slateToMarkdown } from "../../utils/slateToMarkdown";
 import { Element } from "./Element";
 import { Leaf } from "./Leaf";
 import {

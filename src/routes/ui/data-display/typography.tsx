@@ -1,25 +1,27 @@
+import { seo } from "@seo";
 import { createFileRoute } from "@tanstack/react-router";
-import { Typography } from "@ui/components/data-display/Typography/Typography";
-import { type TypographyVariant } from "@ui/components/data-display/Typography/Typography.types";
-import { Stack } from "@ui/components/layout/Stack/Stack";
-import { Paper } from "@ui/components/surfaces/Paper/Paper";
 import {
     Button,
     Checkbox,
     Divider,
+    Input,
+    Paper,
     Radio,
     RadioGroup,
     randomHexColor,
     Slider,
+    Stack,
+    Typography,
     useColorInput,
-} from "@ui/index";
-import type { Color, ColorLike, TypographyLevel } from "@ui/types";
-import type { FontWeight } from "@ui/types/Typography.props";
+    type Color,
+    type ColorLike,
+    type TypographyLevel,
+    type TypographyVariant,
+} from "@ui";
 
-import { Input } from "@ui/components/inputs/Input/Input";
-import { capitalize } from "lodash-es";
+import type { FontWeight } from "@ui/types/Typography.props";
+import capitalize from "lodash-es/capitalize";
 import { useState } from "react";
-import { seo } from "../../../seo";
 
 export const Route = createFileRoute("/ui/data-display/typography")({
     component: PlaygroundTypography,
@@ -118,7 +120,7 @@ function PlaygroundTypography() {
                 <Typography
                     key={`${v}-${c}`}
                     level={level}
-                    variant={v as TypographyVariant}
+                    variant={v}
                     weight={weight}
                     color={c}
                 >

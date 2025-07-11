@@ -1,20 +1,24 @@
+import { seo } from "@seo";
 import { createFileRoute } from "@tanstack/react-router";
-import { Divider } from "@ui/components/data-display/Divider/Divider";
 import {
+    Button,
+    Checkbox,
+    Divider,
+    Input,
+    Paper,
+    Radio,
+    RadioGroup,
+    randomHexColor,
+    Stack,
+    useColorInput,
+    type Color,
+    type ColorLike,
     type DividerInset,
     type DividerOrientation,
     type DividerVariant,
-} from "@ui/components/data-display/Divider/Divider.types";
-import { Checkbox } from "@ui/components/inputs/Checkbox/Checkbox";
-import { Input } from "@ui/components/inputs/Input/Input";
-import { Stack } from "@ui/components/layout/Stack/Stack";
-import { Paper } from "@ui/components/surfaces/Paper/Paper";
-import { useColorInput } from "@ui/hooks/useColorInput";
-import { Button, Radio, RadioGroup, randomHexColor } from "@ui/index";
-import type { Color, ColorLike } from "@ui/types";
-import { capitalize } from "lodash-es";
+} from "@ui";
+import capitalize from "lodash-es/capitalize";
 import { useState } from "react";
-import { seo } from "../../../seo";
 
 export const Route = createFileRoute("/ui/data-display/divider")({
     component: PlaygroundDivider,

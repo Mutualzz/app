@@ -1,4 +1,4 @@
-import { Paper, Typography, useTheme } from "@ui/index";
+import { Paper, Typography, useTheme } from "@ui";
 import type { RenderLeafProps } from "slate-react";
 
 export const Leaf = ({ attributes, children, leaf }: RenderLeafProps) => {

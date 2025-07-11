@@ -1,10 +1,11 @@
 import { MarkdownInput } from "@components/Markdown/MarkdownInput";
+import { seo } from "@seo";
 import { createFileRoute } from "@tanstack/react-router";
-import { Input } from "@ui/components/inputs/Input/Input";
 import {
     Button,
     Checkbox,
     Divider,
+    Input,
     Paper,
     Radio,
     RadioGroup,
@@ -16,10 +17,9 @@ import {
     type ColorLike,
     type TypographyColor,
     type Variant,
-} from "@ui/index";
+} from "@ui";
 import capitalize from "lodash-es/capitalize";
 import { useState } from "react";
-import { seo } from "seo";
 
 export const Route = createFileRoute("/ui/input/markdown-input")({
     component: RouteComponent,

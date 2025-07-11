@@ -1,24 +1,27 @@
+import { seo } from "@seo";
 import { createFileRoute } from "@tanstack/react-router";
-import { Divider } from "@ui/components/data-display/Divider/Divider";
-import { Button } from "@ui/components/inputs/Button/Button";
-import { Checkbox } from "@ui/components/inputs/Checkbox/Checkbox";
-import { Stack } from "@ui/components/layout/Stack/Stack";
-import { Paper } from "@ui/components/surfaces/Paper/Paper";
-import { useColorInput } from "@ui/hooks/useColorInput";
-import type { Color, ColorLike, Size, Variant } from "@ui/types";
-
-import { capitalize } from "lodash-es";
-import { type ReactNode, useState } from "react";
-
-import { Input } from "@ui/components/inputs/Input/Input";
-import { Radio } from "@ui/components/inputs/Radio/Radio";
-import { RadioGroup } from "@ui/components/inputs/Radio/RadioGroup";
-import { Slider } from "@ui/index";
+import {
+    Button,
+    Checkbox,
+    type Color,
+    type ColorLike,
+    Divider,
+    Input,
+    Paper,
+    Radio,
+    RadioGroup,
+    type Size,
+    Slider,
+    Stack,
+    useColorInput,
+    type Variant,
+} from "@ui";
 import { randomHexColor } from "@ui/utils";
+import capitalize from "lodash-es/capitalize";
+import { type ReactNode, useState } from "react";
 import * as AiIcons from "react-icons/ai";
 import * as FaIcons from "react-icons/fa";
 import * as MdIcons from "react-icons/md";
-import { seo } from "../../../seo";
 
 export const Route = createFileRoute("/ui/input/button")({
     component: PlaygroundButton,

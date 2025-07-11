@@ -1,5 +1,4 @@
 import type { Root } from "hast";
-
 import remarkParse from "remark-parse";
 import { unified, type Plugin } from "unified";
 import { visit } from "unist-util-visit";

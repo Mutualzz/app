@@ -1,16 +1,17 @@
+import { seo } from "@seo";
 import { createFileRoute } from "@tanstack/react-router";
-import { Input } from "@ui/components/inputs/Input/Input";
-import { Textarea } from "@ui/components/inputs/Textarea/Textarea";
 import {
     Button,
     Checkbox,
     Divider,
+    Input,
     Paper,
     Radio,
     RadioGroup,
     randomHexColor,
     Slider,
     Stack,
+    Textarea,
     Typography,
     useColorInput,
     type Color,
@@ -18,10 +19,9 @@ import {
     type Size,
     type TypographyColor,
     type Variant,
-} from "@ui/index";
-import { capitalize } from "lodash-es";
+} from "@ui";
+import capitalize from "lodash-es/capitalize";
 import { useState } from "react";
-import { seo } from "../../../seo";
 
 export const Route = createFileRoute("/ui/input/textarea")({
     component: TextareaPlayground,

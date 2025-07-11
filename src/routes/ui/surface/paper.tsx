@@ -1,20 +1,21 @@
+import { seo } from "@seo";
 import { createFileRoute } from "@tanstack/react-router";
-import { Input } from "@ui/components/inputs/Input/Input";
-import type { PaperVariant } from "@ui/components/surfaces/Paper/Paper.types";
-import { useColorInput } from "@ui/hooks/useColorInput";
 import {
     Button,
     Divider,
+    Input,
     Paper,
     Radio,
     RadioGroup,
     randomHexColor,
     Stack,
-} from "@ui/index";
-import { type Color, type ColorLike } from "@ui/types";
-import { capitalize } from "lodash-es";
+    useColorInput,
+    type Color,
+    type ColorLike,
+    type PaperVariant,
+} from "@ui";
+import capitalize from "lodash-es/capitalize";
 import { useState } from "react";
-import { seo } from "../../../seo";
 
 export const Route = createFileRoute("/ui/surface/paper")({
     component: PlaygroundPaper,
@@ -34,6 +35,7 @@ const variants = [
     "soft",
     "elevation",
 ] as PaperVariant[];
+
 const colors = [
     "primary",
     "neutral",

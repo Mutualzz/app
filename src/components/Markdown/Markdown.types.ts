@@ -1,5 +1,5 @@
 import type { CSSObject } from "@emotion/react";
-import type { Color, ColorLike, TypographyColor, Variant } from "@ui/index";
+import type { Color, ColorLike, TypographyColor, Variant } from "@ui";
 
 export interface MarkdownInputProps {
     color?: Color | ColorLike;

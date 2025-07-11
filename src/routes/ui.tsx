@@ -1,8 +1,7 @@
 import { Outlet, createFileRoute } from "@tanstack/react-router";
 
-import { Stack } from "@ui/components/layout/Stack/Stack";
-
 import { PlaygrondLeftSidebar } from "@components/PlaygroundLeftSidebar";
+import { Stack } from "@ui";
 
 export const Route = createFileRoute("/ui")({
     component: Playground,

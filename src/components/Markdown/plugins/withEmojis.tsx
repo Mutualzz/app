@@ -1,6 +1,5 @@
 import { getEmoji } from "@utils/emojis";
 import { slateToMarkdown } from "@utils/slateToMarkdown";
-
 import emojiRegex from "emojibase-regex";
 import baseEmoticonRegex from "emojibase-regex/emoticon";
 import shortcodeRegex from "emojibase-regex/shortcode";

@@ -1,5 +1,9 @@
-import { Portal } from "@ui/components/utils/Portal/Portal";
-import { Button, ButtonGroup, Divider, Paper, useTheme } from "@ui/index";
+import { Button, ButtonGroup, Divider, Paper, Portal, useTheme } from "@ui";
+import {
+    getActiveFormats,
+    isBlockActive,
+    toggleBlockquote,
+} from "@utils/markdownUtils";
 import { wrapSelectionWith } from "@utils/wrapSelectionWith";
 import { type MouseEvent, useEffect, useRef, useState } from "react";
 import {
@@ -14,11 +18,6 @@ import {
 } from "react-icons/fa";
 import { Range } from "slate";
 import { useFocused, useSlate } from "slate-react";
-import {
-    getActiveFormats,
-    isBlockActive,
-    toggleBlockquote,
-} from "../../utils/markdownUtils";
 
 export const HoverToolbar = () => {
     const { theme } = useTheme();

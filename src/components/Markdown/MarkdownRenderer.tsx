@@ -1,13 +1,13 @@
-import { Paper, Typography, useTheme } from "@ui/index";
+import { Paper, Typography, useTheme } from "@ui";
 
+import { spoilerStyles } from "@css/spoilerStyles";
+import type { EmojiNode, SpoilerNode } from "@mz-types/mdast";
 import { useState, type ReactElement } from "react";
 import ReactMarkdown, {
     type Components as MarkdownComponents,
 } from "react-markdown";
 import remarkBreaks from "remark-breaks";
 import remarkParse from "remark-parse";
-import { spoilerStyles } from "../../css/spoilerStyles";
-import type { EmojiNode, SpoilerNode } from "../../types/mdast";
 import type { MarkdownRendererProps } from "./Markdown.types";
 import { remarkEmoji } from "./remark/remarkEmoji";
 import { remarkLimitHeading } from "./remark/remarkLimitHeading";
