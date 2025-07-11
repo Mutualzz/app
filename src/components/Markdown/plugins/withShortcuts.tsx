@@ -55,6 +55,18 @@ export const withShortcuts = (editor: Editor) => {
                                         n.type === "heading",
                                 },
                             );
+                        } else {
+                            editor.setNodes(
+                                {
+                                    type: "heading",
+                                    level: level as HeadingLevel,
+                                },
+                                {
+                                    match: (n) =>
+                                        Element.isElement(n) &&
+                                        editor.isBlock(n),
+                                },
+                            );
                         }
                     } else {
                         editor.setNodes(
@@ -65,14 +77,6 @@ export const withShortcuts = (editor: Editor) => {
                             },
                         );
                     }
-                } else {
-                    editor.setNodes(
-                        { type: "line" },
-                        {
-                            match: (n) =>
-                                Element.isElement(n) && editor.isBlock(n),
-                        },
-                    );
                 }
             }
         }
@@ -84,12 +88,12 @@ export const withShortcuts = (editor: Editor) => {
         const { selection } = editor;
 
         if (selection && Range.isCollapsed(selection)) {
-            const match = editor.above({
+            const blockquoteMatch = editor.above({
                 match: (n) => Element.isElement(n) && n.type === "blockquote",
             });
 
-            if (match) {
-                const [, path] = match;
+            if (blockquoteMatch) {
+                const [, path] = blockquoteMatch;
                 const start = editor.start(path);
 
                 if (Point.equals(selection.anchor, start)) {
@@ -101,6 +105,23 @@ export const withShortcuts = (editor: Editor) => {
                     );
 
                     return;
+                }
+            }
+
+            const headingMatch = editor.above({
+                match: (n) => Element.isElement(n) && n.type === "heading",
+            });
+
+            if (headingMatch) {
+                const [headingNode, path] = headingMatch;
+
+                if (headingNode.level > 1) {
+                    editor.setNodes(
+                        { level: (headingNode.level - 1) as HeadingLevel },
+                        { at: path },
+                    );
+                } else {
+                    editor.setNodes({ type: "line" }, { at: path });
                 }
             }
         }
