@@ -67,6 +67,7 @@ function PlaygroundCheckbox() {
     const [label, setLabel] = useState<string | null>(null);
     const [size, setSize] = useState<Size | number>("md");
     const [disabled, setDisabled] = useState(false);
+    const [rtl, setRtl] = useState(false);
 
     const [checked, setChecked] = useState(false);
     const [indeterminate, setIndeterminate] = useState(false);
@@ -141,6 +142,7 @@ function PlaygroundCheckbox() {
                 label={label ?? `${capitalize(v)} ${capitalize(c)}`}
                 checked={checked ? true : undefined}
                 variant={v}
+                rtl={rtl}
                 color={c}
                 indeterminate={indeterminate}
                 size={size}
@@ -165,6 +167,7 @@ function PlaygroundCheckbox() {
             color={c}
             indeterminate={indeterminate}
             size={size}
+            rtl={rtl}
             disabled={disabled}
             checkedIcon={SelectedCheckedIcon && <SelectedCheckedIcon />}
             uncheckedIcon={SelectedUncheckedIcon && <SelectedUncheckedIcon />}
@@ -298,6 +301,11 @@ function PlaygroundCheckbox() {
                             checked={disabled}
                             label="Disabled"
                             onChange={() => setDisabled((prev) => !prev)}
+                        />
+                        <Checkbox
+                            checked={rtl}
+                            label="Right to Left"
+                            onChange={() => setRtl((prev) => !prev)}
                         />
                     </Stack>
                     <Divider />
