@@ -1,4 +1,4 @@
-import { Typography, useTheme } from "@ui/index";
+import { Paper, Typography, useTheme } from "@ui/index";
 
 import { useState, type ReactElement } from "react";
 import ReactMarkdown, {
@@ -18,157 +18,174 @@ interface Components extends MarkdownComponents {
     spoiler: (props: SpoilerNode) => ReactElement;
 }
 
-export const MarkdownRenderer = ({ value }: MarkdownRendererProps) => {
+export const MarkdownRenderer = ({
+    color = "neutral",
+    textColor = "primary",
+    variant = "outlined",
+    value,
+}: MarkdownRendererProps) => {
     const { theme } = useTheme();
 
     return (
-        <ReactMarkdown
-            remarkPlugins={[
-                remarkBreaks,
-                remarkLimitHeading,
-                remarkSpoiler,
-                remarkEmoji,
-                remarkParse,
-            ]}
-            components={
-                {
-                    h1: ({ children }) => (
-                        <Typography
-                            level="h3"
-                            fontWeight="bold"
-                            display="block"
-                        >
-                            {children}
-                        </Typography>
-                    ),
+        <Paper
+            color={color}
+            textColor={textColor}
+            variant={variant}
+            display="block"
+            height="100%"
+            p={12}
+            mt={10}
+        >
+            <ReactMarkdown
+                remarkPlugins={[
+                    remarkBreaks,
+                    remarkLimitHeading,
+                    remarkSpoiler,
+                    remarkEmoji,
+                    remarkParse,
+                ]}
+                components={
+                    {
+                        h1: ({ children }) => (
+                            <Typography
+                                level="h3"
+                                fontWeight="bold"
+                                display="block"
+                            >
+                                {children}
+                            </Typography>
+                        ),
 
-                    h2: ({ children }) => (
-                        <Typography
-                            level="h4"
-                            fontWeight="bold"
-                            display="block"
-                        >
-                            {children}
-                        </Typography>
-                    ),
+                        h2: ({ children }) => (
+                            <Typography
+                                level="h4"
+                                fontWeight="bold"
+                                display="block"
+                            >
+                                {children}
+                            </Typography>
+                        ),
 
-                    h3: ({ children }) => (
-                        <Typography
-                            level="h5"
-                            fontWeight="bold"
-                            display="block"
-                        >
-                            {children}
-                        </Typography>
-                    ),
+                        h3: ({ children }) => (
+                            <Typography
+                                level="h5"
+                                fontWeight="bold"
+                                display="block"
+                            >
+                                {children}
+                            </Typography>
+                        ),
 
-                    p: ({ children }) => (
-                        <Typography fontSize="inherit">{children}</Typography>
-                    ),
+                        p: ({ children }) => (
+                            <Typography fontSize="inherit">
+                                {children}
+                            </Typography>
+                        ),
 
-                    blockquote: ({ children }) => (
-                        <blockquote
-                            css={{
-                                display: "block",
-                                margin: 0,
-                                paddingLeft: "0.5em",
-                                borderLeft: `4px solid ${theme.typography.colors.disabled}`,
-                                color: theme.typography.colors.primary,
-                            }}
-                        >
-                            {children}
-                        </blockquote>
-                    ),
-
-                    strong: ({ children }) => (
-                        <Typography fontSize="inherit" fontWeight="bold">
-                            {children}
-                        </Typography>
-                    ),
-
-                    em: ({ children }) => (
-                        <Typography fontSize="inherit" fontStyle="italic">
-                            {children}
-                        </Typography>
-                    ),
-
-                    del: ({ children }) => (
-                        <Typography
-                            fontSize="inherit"
-                            textDecoration="line-through"
-                        >
-                            {children}
-                        </Typography>
-                    ),
-
-                    u: ({ children }) => (
-                        <Typography
-                            fontSize="inherit"
-                            textDecoration="underline"
-                        >
-                            {children}
-                        </Typography>
-                    ),
-
-                    code: ({ children }) => (
-                        <Typography
-                            fontFamily="monospace"
-                            fontSize="inherit"
-                            css={{
-                                background: "rgba(255,255,255,0.05)",
-                                padding: "0.2em 0.4em",
-                                borderRadius: 4,
-                            }}
-                        >
-                            {children}
-                        </Typography>
-                    ),
-
-                    emoji: ({ name, url, unicode }) => (
-                        <span
-                            role="button"
-                            aria-label={`:${name}:`}
-                            contentEditable={false}
-                            title={`:${name}:`}
-                            css={{
-                                display: "inline-block",
-                                width: "1.375em",
-                                height: "1.375em",
-                                verticalAlign: "middle",
-                            }}
-                        >
-                            <img
-                                src={url}
-                                alt={unicode}
-                                draggable={false}
-                                aria-label={`:${name}:`}
+                        blockquote: ({ children }) => (
+                            <blockquote
                                 css={{
-                                    width: "100%",
-                                    height: "100%",
-                                    objectFit: "contain",
-                                }}
-                            />
-                        </span>
-                    ),
-
-                    spoiler: ({ children }) => {
-                        const [revealed, setRevealed] = useState(false);
-
-                        return (
-                            <span
-                                css={spoilerStyles(revealed, theme)}
-                                onClick={() => {
-                                    setRevealed(true);
+                                    display: "block",
+                                    margin: 0,
+                                    paddingLeft: "0.5em",
+                                    borderLeft: `4px solid ${theme.typography.colors.disabled}`,
+                                    color: theme.typography.colors.primary,
                                 }}
                             >
                                 {children}
+                            </blockquote>
+                        ),
+
+                        strong: ({ children }) => (
+                            <Typography fontSize="inherit" fontWeight="bold">
+                                {children}
+                            </Typography>
+                        ),
+
+                        em: ({ children }) => (
+                            <Typography fontSize="inherit" fontStyle="italic">
+                                {children}
+                            </Typography>
+                        ),
+
+                        del: ({ children }) => (
+                            <Typography
+                                fontSize="inherit"
+                                textDecoration="line-through"
+                            >
+                                {children}
+                            </Typography>
+                        ),
+
+                        u: ({ children }) => (
+                            <Typography
+                                fontSize="inherit"
+                                textDecoration="underline"
+                            >
+                                {children}
+                            </Typography>
+                        ),
+
+                        code: ({ children }) => (
+                            <Typography
+                                fontFamily="monospace"
+                                fontSize="inherit"
+                                css={{
+                                    background: "rgba(255,255,255,0.05)",
+                                    padding: "0.2em 0.4em",
+                                    borderRadius: 4,
+                                }}
+                            >
+                                {children}
+                            </Typography>
+                        ),
+
+                        emoji: ({ name, url, unicode }) => (
+                            <span
+                                role="button"
+                                aria-label={`:${name}:`}
+                                contentEditable={false}
+                                title={`:${name}:`}
+                                css={{
+                                    display: "inline-block",
+                                    width: "1.375em",
+                                    height: "1.375em",
+                                    verticalAlign: "middle",
+                                }}
+                            >
+                                <img
+                                    src={url}
+                                    alt={unicode}
+                                    draggable={false}
+                                    aria-label={`:${name}:`}
+                                    css={{
+                                        width: "100%",
+                                        height: "100%",
+                                        objectFit: "contain",
+                                    }}
+                                />
                             </span>
-                        );
-                    },
-                } as Components
-            }
-        >
-            {value}
-        </ReactMarkdown>
+                        ),
+
+                        spoiler: ({ children }) => {
+                            const [revealed, setRevealed] = useState(false);
+
+                            return (
+                                <span
+                                    css={spoilerStyles(revealed, theme)}
+                                    onClick={() => {
+                                        setRevealed(true);
+                                    }}
+                                >
+                                    {children}
+                                </span>
+                            );
+                        },
+                    } as Components
+                }
+            >
+                {value}
+            </ReactMarkdown>
+        </Paper>
     );
 };

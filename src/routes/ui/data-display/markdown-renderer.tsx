@@ -105,19 +105,19 @@ function RouteComponent() {
                 <Typography level="title-sm" textAlign="center">
                     Markdown Renderer
                 </Typography>
-                <Paper
+                <MarkdownRenderer
                     color={customColorEnabled ? customColor : color}
                     textColor={
                         customTextColorEnabled ? customTextColor : textColor
                     }
                     variant={variant}
-                    display="block"
-                    height="100%"
-                    p={12}
-                    mt={10}
-                >
-                    <MarkdownRenderer value={markdown} />
-                </Paper>
+                    value={markdown}
+                    css={{
+                        height: "100%",
+                        p: 12,
+                        mt: 10,
+                    }}
+                />
             </Paper>
             <Paper direction="column" p={20}>
                 <Divider>Playground</Divider>

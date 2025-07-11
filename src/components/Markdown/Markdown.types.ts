@@ -22,5 +22,9 @@ export interface MarkdownInputProps {
 export interface MarkdownRendererProps {
     value: string;
 
+    color?: Color | ColorLike;
+    textColor?: TypographyColor | "inherit";
+    variant?: Variant;
+
     css?: CSSObject;
 }
