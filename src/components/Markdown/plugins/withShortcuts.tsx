@@ -15,17 +15,12 @@ export const withShortcuts = (editor: Editor) => {
 
             if (blockEntry) {
                 const [blockNode, blockPath] = blockEntry;
-
-                const range: Range = {
-                    anchor: selection.anchor,
-                    focus: editor.start(blockPath),
-                };
-
+                const start = editor.start(blockPath);
+                const range = { anchor: start, focus: selection.anchor };
                 const beforeText = editor.string(range) + text;
 
                 if (/^>\s/.test(beforeText)) {
-                    editor.select(range);
-                    if (!Range.isCollapsed(range)) editor.delete();
+                    editor.delete({ at: range });
 
                     editor.setNodes(
                         { type: "blockquote" },

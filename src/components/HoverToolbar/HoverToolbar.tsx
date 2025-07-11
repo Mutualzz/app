@@ -1,23 +1,32 @@
 import { Portal } from "@ui/components/utils/Portal/Portal";
-import { Button, ButtonGroup, Paper, useTheme } from "@ui/index";
+import { Button, ButtonGroup, Divider, Paper, useTheme } from "@ui/index";
 import { wrapSelectionWith } from "@utils/wrapSelectionWith";
-import { type MouseEvent, useEffect, useRef } from "react";
+import { type MouseEvent, useEffect, useRef, useState } from "react";
 import {
     FaBold,
     FaCode,
+    FaEye,
+    FaEyeSlash,
     FaItalic,
+    FaQuoteLeft,
     FaStrikethrough,
     FaUnderline,
 } from "react-icons/fa";
 import { Range } from "slate";
 import { useFocused, useSlate } from "slate-react";
-import { getActiveFormats } from "../../utils/markdownUtils";
+import {
+    getActiveFormats,
+    isBlockActive,
+    toggleBlockquote,
+} from "../../utils/markdownUtils";
 
 export const HoverToolbar = () => {
     const { theme } = useTheme();
     const ref = useRef<HTMLDivElement>(null);
     const editor = useSlate();
     const inFocus = useFocused();
+
+    const [visible, setVisible] = useState(false);
 
     const formats = getActiveFormats(editor, editor.selection);
 
@@ -27,25 +36,43 @@ export const HoverToolbar = () => {
 
         const { selection } = editor;
 
-        if (!selection || !inFocus || Range.isCollapsed(selection)) {
-            el.removeAttribute("style");
+        if (
+            !selection ||
+            !inFocus ||
+            Range.isCollapsed(selection) ||
+            editor.selection === null
+        ) {
+            setVisible(false);
             return;
         }
 
         const domSelection = window.getSelection();
         if (!domSelection || domSelection.rangeCount === 0) {
-            el.removeAttribute("style");
+            setVisible(false);
             return;
         }
+
         const domRange = domSelection.getRangeAt(0);
         const rect = domRange.getBoundingClientRect();
 
-        el.style.position = "absolute";
-        el.style.top = `${rect.top + window.pageYOffset - el.offsetHeight}px`;
-        el.style.left = `${
-            rect.left + window.pageXOffset - el.offsetWidth / 2 + rect.width / 2
-        }px`;
+        const top = rect.top + window.scrollY - el.offsetHeight - 8;
+        const left =
+            rect.left + window.scrollX + rect.width / 2 - el.offsetWidth / 2;
+
+        el.style.top = `${top}px`;
+        el.style.left = `${left}px`;
+
+        setVisible(true);
     }, [editor.selection, inFocus]);
+
+    useEffect(() => {
+        if (!inFocus) {
+            const timeout = setTimeout(() => setVisible(false), 500);
+            return () => clearTimeout(timeout);
+        } else {
+            setVisible(true);
+        }
+    }, [inFocus]);
 
     const textFormat = (e: MouseEvent<HTMLButtonElement>, syntax: string) => {
         e.preventDefault();
@@ -58,49 +85,73 @@ export const HoverToolbar = () => {
                 elevation={5}
                 ref={ref}
                 onMouseDown={(e) => e.preventDefault()}
-                top={-1000}
-                left={-1000}
                 css={{
-                    transition: "opacity 0.2s ease-in-out",
+                    position: "absolute",
+                    opacity: visible ? 1 : 0,
+                    transform: visible ? "scale(1)" : "scale(0.95)",
+                    transition:
+                        "opacity 150ms ease-out, transform 150ms ease-out",
+                    zIndex: theme.zIndex.tooltip,
+                    boxShadow: theme.shadows[5],
+                    pointerEvents: visible ? "auto" : "none",
                 }}
-                zIndex={theme.zIndex.tooltip}
-                boxShadow={theme.shadows[5]}
             >
-                <ButtonGroup variant="soft">
+                <ButtonGroup variant="plain" size="lg">
                     <Button
-                        variant="soft"
+                        title="Bold"
                         color={formats.includes("**") ? "success" : "neutral"}
                         onClick={(e) => textFormat(e, "**")}
                     >
                         <FaBold />
                     </Button>
                     <Button
-                        variant="soft"
+                        title="Italic"
                         color={formats.includes("*") ? "success" : "neutral"}
                         onClick={(e) => textFormat(e, "*")}
                     >
                         <FaItalic />
                     </Button>
                     <Button
-                        variant="soft"
+                        title="Underline"
                         color={formats.includes("__") ? "success" : "neutral"}
                         onClick={(e) => textFormat(e, "__")}
                     >
                         <FaUnderline />
                     </Button>
                     <Button
-                        variant="soft"
+                        title="Strikethrough"
                         color={formats.includes("~~") ? "success" : "neutral"}
                         onClick={(e) => textFormat(e, "~~")}
                     >
                         <FaStrikethrough />
                     </Button>
+                </ButtonGroup>
+                <Divider orientation="vertical" />
+                <ButtonGroup variant="plain" size="lg">
                     <Button
-                        variant="soft"
+                        title="Blockquote"
+                        color={
+                            isBlockActive(editor, "blockquote")
+                                ? "success"
+                                : "neutral"
+                        }
+                        onClick={() => toggleBlockquote(editor)}
+                    >
+                        <FaQuoteLeft />
+                    </Button>
+                    <Button
+                        title="Code"
                         color={formats.includes("`") ? "success" : "neutral"}
                         onClick={(e) => textFormat(e, "`")}
                     >
                         <FaCode />
+                    </Button>
+                    <Button
+                        title="Spoiler"
+                        color={formats.includes("||") ? "success" : "neutral"}
+                        onClick={(e) => textFormat(e, "||")}
+                    >
+                        {formats.includes("||") ? <FaEyeSlash /> : <FaEye />}
                     </Button>
                 </ButtonGroup>
             </Paper>

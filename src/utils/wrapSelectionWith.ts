@@ -51,6 +51,7 @@ export function wrapSelectionWith(
             focus: { path: blockPath, offset: right },
         },
     });
+
     editor.insertText(wrapped, { at: { path: blockPath, offset: left } });
 
     // Selection is always just inside all the wrappers

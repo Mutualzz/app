@@ -51,6 +51,7 @@ export const getActiveFormats = (
         { marker: "__", type: "underline" },
         { marker: "~~", type: "strikethrough" },
         { marker: "`", type: "code" },
+        { marker: "||", type: "spoiler" },
     ];
     const markers: { pos: number; marker: string; type: string }[] = [];
     for (const { marker, type } of MARKERS) {
