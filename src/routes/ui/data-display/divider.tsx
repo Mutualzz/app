@@ -19,6 +19,7 @@ import {
 } from "@ui";
 import capitalize from "lodash-es/capitalize";
 import { useState } from "react";
+import type { TypographyColor } from "ui/dist";
 
 export const Route = createFileRoute("/ui/data-display/divider")({
     component: PlaygroundDivider,
@@ -39,7 +40,10 @@ const colors = [
     "danger",
     "warning",
     "info",
-] as Color[];
+    "secondary",
+    "accent",
+    "disabled",
+] as Color[] | TypographyColor[];
 
 const insets = ["none", "start", "end"] as DividerInset[];
 
