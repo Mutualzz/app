@@ -18,7 +18,7 @@ import {
     Scripts,
 } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
-import { themesObj } from "@themes";
+import { themesObj } from "@themes/index";
 import { CssBaseline } from "@ui/CssBaseline";
 import { ThemeProvider } from "@ui/ThemeProvider";
 import { type ReactNode } from "react";

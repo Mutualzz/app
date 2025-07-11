@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from "@tanstack/react-router";
-import { themes as allThemes } from "@themes";
+import { themes as allThemes } from "@themes/index";
 import { Button, Divider, Paper, Stack, useTheme, type ThemeMode } from "@ui";
 import { sortThemes } from "@ui/utils/sortThemes";
 import startCase from "lodash-es/startCase";
@@ -8,35 +8,35 @@ const links = {
     inputs: [
         {
             name: "Button",
-            link: "/ui/input/button",
+            link: "/ui/inputs/button",
         },
         {
             name: "Button Group",
-            link: "/ui/input/button-group",
+            link: "/ui/inputs/button-group",
         },
         {
             name: "Checkbox",
-            link: "/ui/input/checkbox",
+            link: "/ui/inputs/checkbox",
         },
         {
             name: "Input",
-            link: "/ui/input/input",
+            link: "/ui/inputs/input",
         },
         {
             name: "Markdown",
-            link: "/ui/input/markdown-input",
+            link: "/ui/inputs/markdown-input",
         },
         {
             name: "Radio Button",
-            link: "/ui/input/radio-button",
+            link: "/ui/inputs/radio-button",
         },
         {
             name: "Slider",
-            link: "/ui/input/slider",
+            link: "/ui/inputs/slider",
         },
         {
             name: "Textarea",
-            link: "/ui/input/textarea",
+            link: "/ui/inputs/textarea",
         },
     ],
     dataDisplay: [
@@ -66,7 +66,7 @@ const links = {
     surfaces: [
         {
             name: "Paper",
-            link: "/ui/surface/paper",
+            link: "/ui/surfaces/paper",
         },
     ],
 };
