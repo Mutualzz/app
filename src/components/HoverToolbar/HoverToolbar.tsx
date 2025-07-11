@@ -13,7 +13,7 @@ import { Range } from "slate";
 import { useFocused, useSlate } from "slate-react";
 import { getActiveFormats } from "../../utils/markdownUtils";
 
-export const HoveringToolbar = () => {
+export const HoverToolbar = () => {
     const { theme } = useTheme();
     const ref = useRef<HTMLDivElement>(null);
     const editor = useSlate();
