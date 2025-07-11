@@ -53,6 +53,9 @@ const sizeNames = {
 
 function PlaygroundButtonGroup() {
     const [color, setColor] = useState<Color | ColorLike>("primary");
+    const [separatorColor, setSeparatorColor] = useState<
+        Color | ColorLike | "none"
+    >("none");
     const [variant, setVariant] = useState<Variant | "all">("all");
 
     const [text, setText] = useState<string | null>(null);
@@ -70,6 +73,9 @@ function PlaygroundButtonGroup() {
     const [customSizeToggle, setCustomSizeToggle] = useState(false);
     const [customColorToggle, setCustomColorToggle] = useState(false);
 
+    const [customSeparatorColorToggle, setCustomSeparatorColorToggle] =
+        useState(false);
+
     const {
         inputValue: inputColorValue,
         color: customColor,
@@ -77,6 +83,15 @@ function PlaygroundButtonGroup() {
         handleChange,
         validate,
         setColorDirectly,
+    } = useColorInput<Color | ColorLike>();
+
+    const {
+        inputValue: inputSeparatorColorValue,
+        color: customSeparatorColor,
+        isInvalid: isSeparatorColorInvalid,
+        handleChange: handleSeparatorColorChange,
+        validate: validateSeparatorColor,
+        setColorDirectly: setSeparatorColorDirectly,
     } = useColorInput<Color | ColorLike>();
 
     const allButtons = variants.map((v) => (
@@ -120,6 +135,11 @@ function PlaygroundButtonGroup() {
                         orientation={orientation}
                         spacing={spacing}
                         color={color}
+                        separatorColor={
+                            separatorColor !== "none"
+                                ? separatorColor
+                                : undefined
+                        }
                     >
                         {allButtons}
                     </ButtonGroup>
@@ -133,6 +153,11 @@ function PlaygroundButtonGroup() {
                         size={size}
                         disabled={disabled}
                         loading={loading}
+                        separatorColor={
+                            separatorColor !== "none"
+                                ? separatorColor
+                                : undefined
+                        }
                     >
                         {buttons}
                     </ButtonGroup>
@@ -276,6 +301,92 @@ function PlaygroundButtonGroup() {
                                         onChange={() => setColor(c)}
                                     />
                                 ))}
+                            </RadioGroup>
+                        )}
+                    </Stack>
+                    <Divider />
+                    <Stack direction="column" spacing={10}>
+                        <Stack
+                            direction="row"
+                            justifyContent="space-between"
+                            spacing={5}
+                        >
+                            <label>
+                                {customSeparatorColorToggle
+                                    ? "Custom Separator Color"
+                                    : "Separator Color"}
+                            </label>
+                            <Checkbox
+                                checked={customSeparatorColorToggle}
+                                label="Custom"
+                                onChange={() =>
+                                    setCustomSeparatorColorToggle((prev) => {
+                                        setColor("primary");
+                                        return !prev;
+                                    })
+                                }
+                            />
+                        </Stack>
+                        {customSeparatorColorToggle ? (
+                            <Stack
+                                alignContent="center"
+                                direction="row"
+                                spacing={5}
+                            >
+                                <Input
+                                    variant="solid"
+                                    size="lg"
+                                    color="primary"
+                                    placeholder="Enter color (e.g. #ff0000)"
+                                    value={inputSeparatorColorValue}
+                                    onChange={(e) =>
+                                        handleSeparatorColorChange(
+                                            e.target.value,
+                                        )
+                                    }
+                                    onBlur={validateSeparatorColor}
+                                    error={isSeparatorColorInvalid}
+                                />
+                                <Button
+                                    color="primary"
+                                    disabled={!customSeparatorColor}
+                                    onClick={() => {
+                                        setSeparatorColor(
+                                            customSeparatorColor as ColorLike,
+                                        );
+                                        setSeparatorColorDirectly(
+                                            randomHexColor(),
+                                        );
+                                    }}
+                                >
+                                    Set Color
+                                </Button>
+                            </Stack>
+                        ) : (
+                            <RadioGroup
+                                onChange={(_, clr) =>
+                                    setSeparatorColor(clr as Color)
+                                }
+                                value={separatorColor}
+                                name="separator-colors"
+                            >
+                                {colors.map((c) => (
+                                    <Radio
+                                        key={c}
+                                        value={c}
+                                        label={capitalize(c)}
+                                        checked={separatorColor === c}
+                                        color="neutral"
+                                        onChange={() => setSeparatorColor(c)}
+                                    />
+                                ))}
+                                <Radio
+                                    value="none"
+                                    label="None"
+                                    checked={separatorColor === "none"}
+                                    color="neutral"
+                                    onChange={() => setSeparatorColor("none")}
+                                />
                             </RadioGroup>
                         )}
                     </Stack>
