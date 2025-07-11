@@ -63,7 +63,7 @@ export const MarkdownRenderer = ({ value }: MarkdownRendererProps) => {
                     ),
 
                     p: ({ children }) => (
-                        <Typography level="body-md">{children}</Typography>
+                        <Typography fontSize="inherit">{children}</Typography>
                     ),
 
                     blockquote: ({ children }) => (
@@ -81,21 +81,31 @@ export const MarkdownRenderer = ({ value }: MarkdownRendererProps) => {
                     ),
 
                     strong: ({ children }) => (
-                        <Typography fontWeight="bold">{children}</Typography>
+                        <Typography fontSize="inherit" fontWeight="bold">
+                            {children}
+                        </Typography>
                     ),
 
                     em: ({ children }) => (
-                        <Typography fontStyle="italic">{children}</Typography>
+                        <Typography fontSize="inherit" fontStyle="italic">
+                            {children}
+                        </Typography>
                     ),
 
                     del: ({ children }) => (
-                        <Typography textDecoration="line-through">
+                        <Typography
+                            fontSize="inherit"
+                            textDecoration="line-through"
+                        >
                             {children}
                         </Typography>
                     ),
 
                     u: ({ children }) => (
-                        <Typography textDecoration="underline">
+                        <Typography
+                            fontSize="inherit"
+                            textDecoration="underline"
+                        >
                             {children}
                         </Typography>
                     ),

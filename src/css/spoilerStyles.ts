@@ -6,9 +6,9 @@ import { formatHex8 } from "culori";
 export const spoilerStyles = (revealed: boolean, theme: Theme) =>
     css({
         display: "inline-block",
-        verticalAlign: "middle",
         borderRadius: 4,
         paddingInline: 1,
+        fontSize: "inherit",
 
         backgroundColor: revealed
             ? dynamicElevation(theme.colors.surface, 5)
