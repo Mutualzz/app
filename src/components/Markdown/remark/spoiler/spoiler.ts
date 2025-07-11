@@ -62,12 +62,18 @@ const tokenizeSpoiler: Tokenizer = function (
         if (code === 124) {
             effects.consume(code);
             effects.exit("spoilerMarker");
-            effects.enter("data");
 
-            return consumeContent;
+            return checkEmpty;
         }
 
         return nok(code);
+    }
+
+    function checkEmpty(code: Code): State | undefined {
+        if (code === 124 || code === null) return nok(code);
+
+        effects.enter("data");
+        return consumeContent(code);
     }
 
     function consumeContent(code: Code): State | undefined {
@@ -83,7 +89,6 @@ const tokenizeSpoiler: Tokenizer = function (
         if (code === null) return nok(code);
 
         effects.consume(code);
-
         return consumeContent;
     }
 
@@ -103,7 +108,6 @@ const tokenizeSpoiler: Tokenizer = function (
             return secondEnd;
         }
 
-        // invalid character
         return nok(code);
     }
 
