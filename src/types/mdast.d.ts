@@ -16,25 +16,38 @@ export interface SpoilerNode extends Parent {
     };
 }
 
+export interface UnderlineNode extends Parent {
+    type: "underline";
+    children: any[];
+    data?: {
+        hName?: string;
+        hProperties?: Record<string, any>;
+    };
+}
+
 declare module "mdast" {
     interface RootContentMap {
         emoji: EmojiNode;
         spoiler: SpoilerNode;
+        underline: UnderlineNode;
     }
 
     interface ContentMap {
         emoji: EmojiNode;
         spoiler: SpoilerNode;
+        underline: UnderlineNode;
     }
 
     interface PhrasingContentMap {
         emoji: EmojiNode;
         spoiler: SpoilerNode;
+        underline: UnderlineNode;
     }
 
     interface StaticPhrasingContentMap {
         emoji: EmojiNode;
         spoiler: SpoilerNode;
+        underline: UnderlineNode;
     }
 }
 
@@ -42,5 +55,7 @@ declare module "micromark-util-types" {
     interface TokenTypeMap {
         spoiler: "spoiler";
         spoilerMarker: "spoilerMarker";
+        underline: "underline";
+        underlineMarker: "underlineMarker";
     }
 }

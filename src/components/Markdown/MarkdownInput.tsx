@@ -35,7 +35,7 @@ import {
 } from "./Markdown.helpers";
 import type { MarkdownInputProps } from "./Markdown.types";
 import { withEmojis } from "./plugins/withEmojis";
-import { withShortcuts } from "./plugins/withShortcuts";
+import { withSyntax } from "./plugins/withSyntax";
 
 export const MarkdownInput = ({
     color = "neutral",
@@ -60,7 +60,7 @@ export const MarkdownInput = ({
     );
 
     const editor = useMemo(
-        () => withShortcuts(withEmojis(withHistory(withReact(createEditor())))),
+        () => withSyntax(withEmojis(withHistory(withReact(createEditor())))),
         [],
     );
 

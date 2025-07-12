@@ -74,6 +74,7 @@ function parseInlineMarkdown(input: string): Descendant[] {
         const patterns: [RegExp, Partial<Text>][] = [
             [/\*\*(.*?)\*\*/s, { bold: true }],
             [/\*(.*?)\*/s, { italic: true }],
+            [/_(.*?)_/s, { italic: true }],
             [/~~(.*?)~~/s, { strikethrough: true }],
             [/`(.*?)`/s, { code: true }],
             [/__([^_]+)__/s, { underline: true }],

@@ -13,6 +13,7 @@ import { type Range } from "slate";
 const tokenDefs = [
     { symbol: "**", type: "bold" },
     { symbol: "*", type: "italic" },
+    { symbol: "_", type: "italic" },
     { symbol: "~~", type: "strikethrough" },
     { symbol: "__", type: "underline" },
     { symbol: "`", type: "code" },

@@ -2,7 +2,7 @@ import { type Editor, Element, Point, Range, type TextUnit } from "slate";
 
 type HeadingLevel = 1 | 2 | 3;
 
-export const withShortcuts = (editor: Editor) => {
+export const withSyntax = (editor: Editor) => {
     const { insertText, deleteBackward } = editor;
 
     editor.insertText = (text: string) => {

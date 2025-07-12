@@ -1,21 +1,24 @@
 import { Paper, Typography, useTheme } from "@ui";
 
 import { spoilerStyles } from "@css/spoilerStyles";
-import type { EmojiNode, SpoilerNode } from "@mz-types/mdast";
+import type { EmojiNode, SpoilerNode, UnderlineNode } from "@mz-types/mdast";
 import { useState, type ReactElement } from "react";
 import ReactMarkdown, {
     type Components as MarkdownComponents,
 } from "react-markdown";
 import remarkBreaks from "remark-breaks";
+import remarkGfm from "remark-gfm";
 import remarkParse from "remark-parse";
 import type { MarkdownRendererProps } from "./Markdown.types";
 import { remarkEmoji } from "./remark/remarkEmoji";
 import { remarkLimitHeading } from "./remark/remarkLimitHeading";
 import { remarkSpoiler } from "./remark/spoiler/remarkSpoiler";
+import { remarkUnderline } from "./remark/underline/remarkUnderline";
 
 interface Components extends MarkdownComponents {
     emoji: (props: EmojiNode) => ReactElement;
     spoiler: (props: SpoilerNode) => ReactElement;
+    underline: (props: UnderlineNode) => ReactElement;
 }
 
 export const MarkdownRenderer = ({
@@ -41,7 +44,9 @@ export const MarkdownRenderer = ({
                     remarkBreaks,
                     remarkLimitHeading,
                     remarkSpoiler,
+                    remarkUnderline,
                     remarkEmoji,
+                    remarkGfm,
                     remarkParse,
                 ]}
                 components={
@@ -117,14 +122,16 @@ export const MarkdownRenderer = ({
                             </Typography>
                         ),
 
-                        u: ({ children }) => (
-                            <Typography
-                                fontSize="inherit"
-                                textDecoration="underline"
-                            >
-                                {children}
-                            </Typography>
-                        ),
+                        underline: ({ children }) => {
+                            return (
+                                <Typography
+                                    fontSize="inherit"
+                                    textDecoration="underline"
+                                >
+                                    {children}
+                                </Typography>
+                            );
+                        },
 
                         code: ({ children }) => (
                             <Typography
