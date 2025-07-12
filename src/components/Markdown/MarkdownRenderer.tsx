@@ -1,24 +1,30 @@
 import { Paper, Typography, useTheme } from "@ui";
 
 import { spoilerStyles } from "@css/spoilerStyles";
-import type { EmojiNode, SpoilerNode, UnderlineNode } from "@mz-types/mdast";
+import type {
+    EmojiNode,
+    SpoilerNode,
+    StrikethroughNode,
+    UnderlineNode,
+} from "@mz-types/mdast";
 import { useState, type ReactElement } from "react";
 import ReactMarkdown, {
     type Components as MarkdownComponents,
 } from "react-markdown";
 import remarkBreaks from "remark-breaks";
-import remarkGfm from "remark-gfm";
 import remarkParse from "remark-parse";
 import type { MarkdownRendererProps } from "./Markdown.types";
 import { remarkEmoji } from "./remark/remarkEmoji";
 import { remarkLimitHeading } from "./remark/remarkLimitHeading";
 import { remarkSpoiler } from "./remark/spoiler/remarkSpoiler";
+import { remarkStrikethrough } from "./remark/strikethrough/remarkStrikethrough";
 import { remarkUnderline } from "./remark/underline/remarkUnderline";
 
 interface Components extends MarkdownComponents {
     emoji: (props: EmojiNode) => ReactElement;
     spoiler: (props: SpoilerNode) => ReactElement;
     underline: (props: UnderlineNode) => ReactElement;
+    strikethrough: (props: StrikethroughNode) => ReactElement;
 }
 
 export const MarkdownRenderer = ({
@@ -45,8 +51,8 @@ export const MarkdownRenderer = ({
                     remarkLimitHeading,
                     remarkSpoiler,
                     remarkUnderline,
+                    remarkStrikethrough,
                     remarkEmoji,
-                    remarkGfm,
                     remarkParse,
                 ]}
                 components={
@@ -113,7 +119,7 @@ export const MarkdownRenderer = ({
                             </Typography>
                         ),
 
-                        del: ({ children }) => (
+                        strikethrough: ({ children }) => (
                             <Typography
                                 fontSize="inherit"
                                 textDecoration="line-through"
