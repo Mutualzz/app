@@ -154,7 +154,6 @@ export const withShortcuts = (editor: Editor) => {
                 }
             }
         }
-
         deleteBackward(unit);
     };
 
