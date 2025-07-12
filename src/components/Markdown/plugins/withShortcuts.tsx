@@ -35,7 +35,7 @@ export const withShortcuts = (editor: Editor) => {
 
                 const headingMatch = /^(#{1,3})(\s|$)/.exec(beforeText);
 
-                if (headingMatch) {
+                if (headingMatch && headingMatch[2] === " ") {
                     const level = headingMatch[1].length;
                     if (
                         Element.isElement(blockNode) &&
@@ -83,40 +83,74 @@ export const withShortcuts = (editor: Editor) => {
         const { selection } = editor;
 
         if (selection && Range.isCollapsed(selection)) {
-            const blockquoteMatch = editor.above({
-                match: (n) => Element.isElement(n) && n.type === "blockquote",
+            const blockEntry = editor.above({
+                match: (n) => Element.isElement(n) && editor.isBlock(n),
             });
 
-            if (blockquoteMatch) {
-                const [, path] = blockquoteMatch;
-                const start = editor.start(path);
+            if (blockEntry) {
+                const [blockNode, blockPath] = blockEntry;
+                const start = editor.start(blockPath);
 
                 if (Point.equals(selection.anchor, start)) {
-                    editor.setNodes(
-                        {
-                            type: "line",
-                        },
-                        { at: path },
-                    );
-
-                    return;
+                    if (
+                        Element.isElement(blockNode) &&
+                        blockNode.type === "blockquote"
+                    ) {
+                        editor.setNodes({ type: "line" }, { at: blockPath });
+                        return;
+                    }
                 }
-            }
 
-            const headingMatch = editor.above({
-                match: (n) => Element.isElement(n) && n.type === "heading",
-            });
+                if (
+                    Element.isElement(blockNode) &&
+                    blockNode.type === "heading"
+                ) {
+                    const currentText = editor.string(blockPath);
+                    const cursorOffset = selection.anchor.offset;
 
-            if (headingMatch) {
-                const [headingNode, path] = headingMatch;
+                    if (
+                        cursorOffset > 0 &&
+                        currentText[cursorOffset - 1] === "#"
+                    ) {
+                        const hashtagMatch = /^(#{1,3})/.exec(currentText);
 
-                if (headingNode.level > 1) {
-                    editor.setNodes(
-                        { level: (headingNode.level - 1) as HeadingLevel },
-                        { at: path },
-                    );
-                } else {
-                    editor.setNodes({ type: "line" }, { at: path });
+                        if (hashtagMatch) {
+                            const currentHashtagCount = hashtagMatch[1].length;
+
+                            // Check if we're deleting the last hashtag in the sequence
+                            const hashtagsBeforeCursor = currentText.substring(
+                                0,
+                                cursorOffset,
+                            );
+                            const consecutiveHashtags = /^(#{1,3})$/.exec(
+                                hashtagsBeforeCursor,
+                            );
+
+                            if (
+                                consecutiveHashtags &&
+                                consecutiveHashtags[1].length ===
+                                    currentHashtagCount
+                            ) {
+                                if (currentHashtagCount > 1) {
+                                    editor.setNodes(
+                                        {
+                                            level: (currentHashtagCount -
+                                                1) as HeadingLevel,
+                                        },
+                                        { at: blockPath },
+                                    );
+                                } else {
+                                    editor.setNodes(
+                                        { type: "line" },
+                                        { at: blockPath },
+                                    );
+                                }
+
+                                deleteBackward(unit);
+                                return;
+                            }
+                        }
+                    }
                 }
             }
         }
