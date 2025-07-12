@@ -79,7 +79,7 @@ const tokenizeStrikethrough: Tokenizer = function (
     }
 
     function consumeContent(code: Code): State | undefined {
-        // match first ending '|'
+        // match first ending '~'
         if (code === codes.tilde) {
             return effects.check(
                 lookaheadConstruct as any,
@@ -102,7 +102,7 @@ const tokenizeStrikethrough: Tokenizer = function (
     }
 
     function firstEnd(code: Code): State | undefined {
-        // match first ending '|'
+        // match first ending '~'
         if (code === codes.tilde) {
             effects.exit("data");
             effects.enter("strikethroughMarker");
@@ -114,7 +114,7 @@ const tokenizeStrikethrough: Tokenizer = function (
     }
 
     function secondEnd(code: Code): State | undefined {
-        // match second ending '|'
+        // match second ending '~'
         if (code === codes.tilde) {
             effects.consume(code);
             effects.exit("strikethroughMarker");

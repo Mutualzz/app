@@ -79,7 +79,7 @@ const tokenizeUnderline: Tokenizer = function (
     }
 
     function consumeContent(code: Code): State | undefined {
-        // match first ending '|'
+        // match first ending '_'
         if (code === codes.underscore) {
             return effects.check(
                 lookaheadConstruct as any,
@@ -102,7 +102,7 @@ const tokenizeUnderline: Tokenizer = function (
     }
 
     function firstEnd(code: Code): State | undefined {
-        // match first ending '|'
+        // match first ending '_'
         if (code === codes.underscore) {
             effects.exit("data");
             effects.enter("underlineMarker");
@@ -114,7 +114,7 @@ const tokenizeUnderline: Tokenizer = function (
     }
 
     function secondEnd(code: Code): State | undefined {
-        // match second ending '|'
+        // match second ending '_'
         if (code === codes.underscore) {
             effects.consume(code);
             effects.exit("underlineMarker");
