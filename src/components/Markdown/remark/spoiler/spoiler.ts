@@ -1,3 +1,4 @@
+import { codes } from "micromark-util-symbol";
 import type {
     Code,
     Effects,
@@ -10,7 +11,7 @@ import type {
 export const spoilerSyntax = function (): Extension {
     return {
         text: {
-            124: {
+            [codes.verticalBar]: {
                 name: "spoiler",
                 tokenize: tokenizeSpoiler,
             },
@@ -26,14 +27,14 @@ const lookaheadConstruct = {
 
         function start(code: Code) {
             // match first symbol `|`
-            if (code !== 124) return nok(code);
+            if (code !== codes.verticalBar) return nok(code);
             effects.consume(code);
             return lookaheadAt;
         }
 
         function lookaheadAt(code: Code) {
             // match second symbol `|`
-            if (code !== 124) return nok(code);
+            if (code !== codes.verticalBar) return nok(code);
             effects.consume(code);
             return ok(code);
         }
@@ -48,7 +49,7 @@ const tokenizeSpoiler: Tokenizer = function (
     return start;
 
     function start(code: Code): State | undefined {
-        if (code === 124) {
+        if (code === codes.verticalBar) {
             effects.enter("spoiler");
             effects.enter("spoilerMarker");
             effects.consume(code);
@@ -59,7 +60,7 @@ const tokenizeSpoiler: Tokenizer = function (
     }
 
     function secondStart(code: Code): State | undefined {
-        if (code === 124) {
+        if (code === codes.verticalBar) {
             effects.consume(code);
             effects.exit("spoilerMarker");
 
@@ -70,7 +71,7 @@ const tokenizeSpoiler: Tokenizer = function (
     }
 
     function checkEmpty(code: Code): State | undefined {
-        if (code === 124 || code === null) return nok(code);
+        if (code === codes.verticalBar || code === null) return nok(code);
 
         effects.enter("data");
         return consumeContent(code);
@@ -78,7 +79,7 @@ const tokenizeSpoiler: Tokenizer = function (
 
     function consumeContent(code: Code): State | undefined {
         // match first ending '|'
-        if (code === 124) {
+        if (code === codes.verticalBar) {
             return effects.check(
                 lookaheadConstruct as any,
                 firstEnd,
@@ -101,7 +102,7 @@ const tokenizeSpoiler: Tokenizer = function (
 
     function firstEnd(code: Code): State | undefined {
         // match first ending '|'
-        if (code === 124) {
+        if (code === codes.verticalBar) {
             effects.exit("data");
             effects.enter("spoilerMarker");
             effects.consume(code);
@@ -113,7 +114,7 @@ const tokenizeSpoiler: Tokenizer = function (
 
     function secondEnd(code: Code): State | undefined {
         // match second ending '|'
-        if (code === 124) {
+        if (code === codes.verticalBar) {
             effects.consume(code);
             effects.exit("spoilerMarker");
             effects.exit("spoiler");
