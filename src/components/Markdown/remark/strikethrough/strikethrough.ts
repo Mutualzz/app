@@ -22,19 +22,19 @@ export const strikethroughSyntax = function (): Extension {
 
 const lookaheadConstruct = {
     partial: true,
-    /** If the next two characters are `__`, run `ok`, else `nok`. */
+    /** If the next two characters are `~~`, run `ok`, else `nok`. */
     tokenize(effects: Effects, ok: State, nok: State): State {
         return start;
 
         function start(code: Code) {
-            // match first symbol `_`
+            // match first symbol `~`
             if (code !== codes.tilde) return nok(code);
             effects.consume(code);
             return lookaheadAt;
         }
 
         function lookaheadAt(code: Code) {
-            // match second symbol `_`
+            // match second symbol `~`
             if (code !== codes.tilde) return nok(code);
             effects.consume(code);
             return ok(code);
