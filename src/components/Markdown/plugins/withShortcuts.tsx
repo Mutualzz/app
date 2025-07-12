@@ -3,7 +3,7 @@ import { type Editor, Element, Point, Range, type TextUnit } from "slate";
 type HeadingLevel = 1 | 2 | 3;
 
 export const withShortcuts = (editor: Editor) => {
-    const { insertText, deleteBackward, normalizeNode } = editor;
+    const { insertText, deleteBackward } = editor;
 
     editor.insertText = (text: string) => {
         const { selection } = editor;
@@ -122,24 +122,6 @@ export const withShortcuts = (editor: Editor) => {
         }
 
         deleteBackward(unit);
-    };
-
-    editor.normalizeNode = ([node, path]) => {
-        if (
-            Element.isElement(node) &&
-            editor.isBlock(node) &&
-            node.type === "heading"
-        ) {
-            const text = editor.string(path);
-            if (!text.startsWith("#")) {
-                editor.withoutNormalizing(() => {
-                    editor.setNodes({ type: "line" }, { at: path });
-                });
-                return;
-            }
-        }
-
-        normalizeNode([node, path]);
     };
 
     return editor;
