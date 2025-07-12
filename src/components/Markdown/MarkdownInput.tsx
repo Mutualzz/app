@@ -115,6 +115,15 @@ export const MarkdownInput = ({
 
     const onKeyDown = useCallback(
         (e: KeyboardEvent) => {
+            if (isKeyHotkey("Control+a", e.nativeEvent)) {
+                e.preventDefault();
+                editor.select({
+                    anchor: editor.start([]),
+                    focus: editor.end([]),
+                });
+                return;
+            }
+
             if (e.key === "Backspace") {
                 const { selection } = editor;
 
@@ -129,19 +138,14 @@ export const MarkdownInput = ({
 
                         if (
                             SlateElement.isElement(blockNode) &&
-                            blockNode.type === "blockquote"
+                            (blockNode.type === "heading" ||
+                                blockNode.type === "blockquote")
                         ) {
-                            const blockStart = editor.start(blockPath);
-                            const blockEnd = editor.end(blockPath);
+                            const blockText = editor.string(blockPath);
+                            const selectedText = editor.string(selection);
 
-                            // Check if selection covers the entire block
-                            const isEntireBlockSelected =
-                                Range.includes(selection, blockStart) &&
-                                Range.includes(selection, blockEnd);
-
-                            if (isEntireBlockSelected) {
+                            if (blockText === selectedText) {
                                 e.preventDefault();
-                                // Delete content and convert to line
                                 editor.delete();
                                 editor.setNodes(
                                     { type: "line" },
