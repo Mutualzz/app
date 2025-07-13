@@ -76,8 +76,8 @@
     "private": true,
     "scripts": {
         "build": "tsc && vite build",
+        "check-types": "tsc --noEmit",
         "dev": "vite",
-        "eslint": "eslint src --fix",
         "preview": "vite preview",
         "tauri": "tauri"
     },
