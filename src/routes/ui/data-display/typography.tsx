@@ -13,12 +13,12 @@ import {
     useColorInput,
     type Color,
     type ColorLike,
-    type FontWeight,
     type TypographyLevel,
     type TypographyVariant,
 } from "@mutualzz/ui";
 import { seo } from "@seo";
 import { createFileRoute } from "@tanstack/react-router";
+import type { Properties } from "csstype";
 
 import capitalize from "lodash-es/capitalize";
 import { useState } from "react";
@@ -81,6 +81,8 @@ const levelsNames = [
     "Body Small",
     "Body Extra Small",
 ];
+
+type FontWeight = Properties["fontWeight"];
 
 const weights = ["lighter", "normal", "bold", "bolder"] as FontWeight[];
 
