@@ -1,4 +1,4 @@
-import type { Theme } from "@mutualzz/ui";
+import type { Theme } from "@emotion/react";
 
 import { baseDarkTheme } from "@mutualzz/ui";
 
