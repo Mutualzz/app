@@ -3,7 +3,7 @@
     "tasks": {
         "build": {
             "env": ["VITE_*", "SENTRY_*"],
-            "outputs": [".vercel/**"]
+            "outputs": ["dist/**"]
         }
     }
 }
