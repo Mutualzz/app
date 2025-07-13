@@ -14,7 +14,7 @@ export default defineConfig(async () => ({
     plugins: [
         wrapVinxiConfigWithSentry(
             tanstackStart({
-                target: "netlify",
+                target: "vercel",
                 customViteReactPlugin: true,
             }),
             {
