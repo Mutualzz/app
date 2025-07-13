@@ -1,9 +1,4 @@
 import { MarkdownInput } from "@components/Markdown/MarkdownInput";
-<<<<<<< HEAD
-=======
-import { seo } from "@seo";
-import { createFileRoute } from "@tanstack/react-router";
->>>>>>> c64b18b0ba63d0fb8b9fb255c9575caf8f81ea36
 import {
     Button,
     Checkbox,
@@ -20,13 +15,9 @@ import {
     type ColorLike,
     type TypographyColor,
     type Variant,
-<<<<<<< HEAD
 } from "@mutualzz/ui";
 import { seo } from "@seo";
 import { createFileRoute } from "@tanstack/react-router";
-=======
-} from "@ui";
->>>>>>> c64b18b0ba63d0fb8b9fb255c9575caf8f81ea36
 import capitalize from "lodash-es/capitalize";
 import { useState } from "react";
 
