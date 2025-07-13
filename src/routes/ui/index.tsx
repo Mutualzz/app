@@ -1,6 +1,12 @@
+<<<<<<< HEAD
 import { Stack, Typography } from "@mutualzz/ui";
 import { seo } from "@seo";
 import { createFileRoute } from "@tanstack/react-router";
+=======
+import { seo } from "@seo";
+import { createFileRoute } from "@tanstack/react-router";
+import { Stack, Typography } from "@ui";
+>>>>>>> c64b18b0ba63d0fb8b9fb255c9575caf8f81ea36
 
 export const Route = createFileRoute("/ui/")({
     component: PlaygroundIndexComponent,

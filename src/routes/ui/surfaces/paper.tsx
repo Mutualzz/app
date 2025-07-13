@@ -1,3 +1,8 @@
+<<<<<<< HEAD
+=======
+import { seo } from "@seo";
+import { createFileRoute } from "@tanstack/react-router";
+>>>>>>> c64b18b0ba63d0fb8b9fb255c9575caf8f81ea36
 import {
     Button,
     Divider,
@@ -11,9 +16,13 @@ import {
     type Color,
     type ColorLike,
     type PaperVariant,
+<<<<<<< HEAD
 } from "@mutualzz/ui";
 import { seo } from "@seo";
 import { createFileRoute } from "@tanstack/react-router";
+=======
+} from "@ui";
+>>>>>>> c64b18b0ba63d0fb8b9fb255c9575caf8f81ea36
 import capitalize from "lodash-es/capitalize";
 import { useState } from "react";
 
@@ -82,7 +91,11 @@ function PlaygroundPaper() {
     const papers = [...colors, ...customColors].map((c) => (
         <Paper
             key={`${variant}-${c}-button`}
+<<<<<<< HEAD
             variant={variant}
+=======
+            variant={variant as PaperVariant}
+>>>>>>> c64b18b0ba63d0fb8b9fb255c9575caf8f81ea36
             color={c}
             p={{ xs: 5, sm: 10, lg: 20 }}
             justifyContent="center"

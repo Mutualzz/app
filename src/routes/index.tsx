@@ -1,5 +1,10 @@
+<<<<<<< HEAD
 import { Button, Stack, Typography } from "@mutualzz/ui";
 import { createFileRoute, Outlet, useNavigate } from "@tanstack/react-router";
+=======
+import { createFileRoute, Outlet, useNavigate } from "@tanstack/react-router";
+import { Button, Stack, Typography } from "@ui";
+>>>>>>> c64b18b0ba63d0fb8b9fb255c9575caf8f81ea36
 
 export const Route = createFileRoute("/")({
     component: Index,

@@ -8,7 +8,10 @@ import "@fontsource/inter/700";
 import "@fontsource/inter/800";
 import "@fontsource/inter/900";
 
+<<<<<<< HEAD
 import { CssBaseline, ThemeProvider } from "@mutualzz/ui";
+=======
+>>>>>>> c64b18b0ba63d0fb8b9fb255c9575caf8f81ea36
 import { wrapCreateRootRouteWithSentry } from "@sentry/tanstackstart-react";
 import { seo } from "@seo";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
@@ -20,6 +23,11 @@ import {
 } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import { themesObj } from "@themes/index";
+<<<<<<< HEAD
+=======
+import { CssBaseline } from "@ui/CssBaseline";
+import { ThemeProvider } from "@ui/ThemeProvider";
+>>>>>>> c64b18b0ba63d0fb8b9fb255c9575caf8f81ea36
 import { type ReactNode } from "react";
 
 export const Route = wrapCreateRootRouteWithSentry(createRootRoute)({

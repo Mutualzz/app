@@ -1,5 +1,5 @@
-import { css } from "@emotion/react";
-import type { Theme } from "@mutualzz/ui";
+import { css, type Theme } from "@emotion/react";
+
 import { darken, dynamicElevation } from "@mutualzz/ui";
 import { formatHex8 } from "culori";
 
