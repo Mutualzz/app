@@ -1,0 +1,46 @@
+{
+    "compilerOptions": {
+        "target": "es2024",
+        "useDefineForClassFields": true,
+        "lib": ["ES2024", "DOM", "DOM.Iterable"],
+        "types": ["vite/client"],
+        "module": "ESNext",
+        "skipLibCheck": true,
+
+        /* Bundler mode */
+        "moduleResolution": "bundler",
+        "allowImportingTsExtensions": true,
+        "resolveJsonModule": true,
+        "isolatedModules": true,
+        "noEmit": true,
+        "jsx": "react-jsx",
+        "jsxImportSource": "@emotion/react",
+        "verbatimModuleSyntax": true,
+        "forceConsistentCasingInFileNames": true,
+
+        /* Linting */
+        "strict": true,
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
+        "noFallthroughCasesInSwitch": true,
+
+        "baseUrl": "src",
+
+        "paths": {
+            "@hooks/*": ["hooks/*"],
+            "@contexts/*": ["contexts/*"],
+            "@components/*": ["components/*"],
+            "@editor/*": ["editor/*"],
+            "@utils/*": ["utils/*"],
+            "@themes/*": ["themes/*"],
+            "@themes": ["themes/index.ts"],
+            "@app-types/*": ["types/*"],
+            "@app-types": ["types/index.d.ts"],
+            "@css/*": ["css/*"],
+            "@seo": ["seo.ts"]
+        }
+    },
+    "include": ["src/**/*"],
+    "exclude": ["node_modules", "dist"],
+    "references": [{ "path": "./tsconfig.node.json" }]
+}
