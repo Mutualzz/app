@@ -1,7 +1,5 @@
-import type { Data } from "mdast";
 import "micromark-util-types";
-
-interface UnderlineData extends Data {}
+import type { Parent } from "unist";
 
 declare module "micromark-util-types" {
     interface TokenTypeMap {
@@ -9,16 +7,27 @@ declare module "micromark-util-types" {
         underlineSequence: "underlineSequence";
         underlineText: "underlineText";
 
-        blankLine: "blankLine";
-        blankLineBreak: "blankLineBreak";
-
-        multipleBlankLines: "multipleBlankLines";
+        emoji: "emoji";
+        emojiSequence: "emojiSequence";
+        emojiText: "emojiText";
     }
+
+    interface UnderlineData extends Data {}
 
     interface Underline extends Parent {
         type: "underline";
         children: PhrasingContent[];
         data?: UnderlineData;
+    }
+
+    interface EmojiData extends Data {}
+
+    interface Emoji extends Parent {
+        type: "emoji";
+        name: string;
+        url: string;
+        unicode: string;
+        data?: EmojiData;
     }
 
     interface Extension {
