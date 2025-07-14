@@ -97,27 +97,24 @@ export const MarkdownRenderer = ({
                         </Typography>
                     ),
 
-                    // strikethrough: ({ children }) => (
-                    //     <Typography
-                    //         fontSize="inherit"
-                    //         textDecoration="line-through"
-                    //     >
-                    //         {children}
-                    //     </Typography>
-                    // ),
+                    del: ({ children }) => (
+                        <Typography
+                            fontSize="inherit"
+                            textDecoration="line-through"
+                        >
+                            {children}
+                        </Typography>
+                    ),
 
-                    u: ({ children }) => {
-                        console.log(`"${children}"`);
-                        return (
-                            <Typography
-                                whiteSpace="pre-wrap"
-                                fontSize="inherit"
-                                textDecoration="underline"
-                            >
-                                {children}
-                            </Typography>
-                        );
-                    },
+                    u: ({ children }) => (
+                        <Typography
+                            whiteSpace="pre-wrap"
+                            fontSize="inherit"
+                            textDecoration="underline"
+                        >
+                            {children}
+                        </Typography>
+                    ),
 
                     code: ({ children }) => (
                         <Typography

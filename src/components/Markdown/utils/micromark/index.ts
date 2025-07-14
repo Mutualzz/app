@@ -40,6 +40,7 @@ import { codes, constants, types } from "micromark-util-symbol";
 import type {
     Encoding,
     Event,
+    Strikethrough,
     Token,
     Underline,
     Value,
@@ -128,6 +129,7 @@ function compiler(options: Options | null | undefined) {
             resourceTitleString: buffer,
             setextHeading: opener(heading),
             strong: opener(strong),
+            strikethrough: opener(strikethrough as any),
             underline: opener(underline as any),
             thematicBreak: opener(thematicBreak),
         },
@@ -180,6 +182,7 @@ function compiler(options: Options | null | undefined) {
             setextHeadingLineSequence: onexitsetextheadinglinesequence,
             setextHeadingText: onexitsetextheadingtext,
             strong: closer(),
+            strikethrough: closer(),
             underline: closer(),
             thematicBreak: closer(),
         },
@@ -1036,13 +1039,21 @@ function compiler(options: Options | null | undefined) {
         return { type: "strong", children: [] };
     }
 
+    function strikethrough(): Strikethrough {
+        return {
+            type: "strikethrough",
+            children: [],
+            data: {
+                hName: "del",
+            },
+        };
+    }
+
     function underline(): Underline {
         return {
             type: "underline",
             children: [],
-            data: {
-                hName: "u",
-            },
+            data: { hName: "u" },
         };
     }
 

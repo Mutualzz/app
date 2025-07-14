@@ -7,9 +7,9 @@ declare module "micromark-util-types" {
         underlineSequence: "underlineSequence";
         underlineText: "underlineText";
 
-        emoji: "emoji";
-        emojiSequence: "emojiSequence";
-        emojiText: "emojiText";
+        strikethrough: "strikethrough";
+        strikethroughSequence: "strikethroughSequence";
+        strikethroughText: "strikethroughText";
     }
 
     interface UnderlineData extends Data {}
@@ -18,6 +18,13 @@ declare module "micromark-util-types" {
         type: "underline";
         children: PhrasingContent[];
         data?: UnderlineData;
+    }
+
+    interface StrikethroughData extends Data {}
+    interface Strikethrough extends Parent {
+        type: "strikethrough";
+        children: PhrasingContent[];
+        data?: StrikethroughData;
     }
 
     interface EmojiData extends Data {}
@@ -31,10 +38,11 @@ declare module "micromark-util-types" {
     }
 
     interface Extension {
-        underlineMarkers?:
-            | {
-                  null: Code[] | undefined;
-              }
-            | undefined;
+        underlineMarkers?: {
+            null: Code[] | undefined;
+        };
+        strikethroughMarkers?: {
+            null: Code[] | undefined;
+        };
     }
 }
