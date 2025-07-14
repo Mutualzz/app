@@ -55,19 +55,19 @@ function resolveAllStrikethrough(
 
                     // Check if content between contains tildes
                     const contentEvents = events.slice(open + 1, index);
-                    let hasUnderscore = false;
+                    let hasTilde = false;
 
                     for (const event of contentEvents) {
                         if (event[1].type === "data") {
                             const content = context.sliceSerialize(event[1]);
-                            if (content.includes("_")) {
-                                hasUnderscore = true;
+                            if (content.includes("~")) {
+                                hasTilde = true;
                                 break;
                             }
                         }
                     }
 
-                    if (hasUnderscore) {
+                    if (hasTilde) {
                         continue;
                     }
 
