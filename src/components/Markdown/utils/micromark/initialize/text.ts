@@ -85,12 +85,6 @@ function initializeFactory(field: "string" | "text"): InitialConstruct {
     }
 }
 
-/**
- * @param {Resolver | undefined} [extraResolver]
- *   Resolver.
- * @returns {Resolver}
- *   Resolver.
- */
 function createResolver(
     extraResolver: Resolver | undefined = undefined,
 ): Resolver {

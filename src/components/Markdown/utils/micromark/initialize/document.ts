@@ -82,7 +82,6 @@ function initializeDocument(this: TokenizeContext, effects: Effects): State {
             // algorithm when dealing with lazy lines in `writeToChild`.
             const indexBeforeExits = self.events.length;
             let indexBeforeFlow = indexBeforeExits;
-            /** @type {Point | undefined} */
             let point: Point | undefined;
 
             // Find the flow chunk.
@@ -313,9 +312,7 @@ function initializeDocument(this: TokenizeContext, effects: Effects): State {
             // algorithm when closing flow in `documentContinue`.
             const indexBeforeExits = self.events.length;
             let indexBeforeFlow = indexBeforeExits;
-            /** @type {boolean | undefined} */
             let seen: boolean | undefined;
-            /** @type {Point | undefined} */
             let point: Point | undefined;
 
             // Find the previous chunk (the one before the lazy line).

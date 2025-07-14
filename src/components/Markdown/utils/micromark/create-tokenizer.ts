@@ -46,7 +46,6 @@ export function createTokenizer(
     initialize: InitialConstruct,
     from: Omit<Point, "_bufferIndex" | "_index"> | undefined,
 ): TokenizeContext {
-    /** @type {Point} */
     let point: Point = {
         _bufferIndex: -1,
         _index: 0,
@@ -344,7 +343,6 @@ export function createTokenizer(
             returnState: State,
             bogusState: State | undefined,
         ): State {
-            /** @type {ReadonlyArray<Construct>} */
             let listOfConstructs: ReadonlyArray<Construct>;
             let constructIndex: number;
             let currentConstruct: Construct;
@@ -364,7 +362,6 @@ export function createTokenizer(
             function handleMapOfConstructs(map: ConstructRecord): State {
                 return start;
 
-                /** @type {State} */
                 function start(code: Code) {
                     const left = code !== null && map[code];
                     const all = code !== null && map.null;
@@ -382,10 +379,6 @@ export function createTokenizer(
             /**
              * Handle a list of construct.
              *
-             * @param {ReadonlyArray<Construct>} list
-             *   Constructs.
-             * @returns {State}
-             *   State.
              */
             function handleListOfConstructs(
                 list: ReadonlyArray<Construct>,
@@ -403,16 +396,10 @@ export function createTokenizer(
 
             /**
              * Handle a single construct.
-             *
-             * @param {Construct} construct
-             *   Construct.
-             * @returns {State}
-             *   State.
              */
             function handleConstruct(construct: Construct): State {
                 return start;
 
-                /** @type {State} */
                 function start(code: Code) {
                     // To do: not needed to store if there is no bogus state, probably?
                     // Currently doesn’t work because `inspect` in document does a check
@@ -454,7 +441,6 @@ export function createTokenizer(
                 }
             }
 
-            /** @type {State} */
             function ok(code: Code) {
                 assert(code === expectedCode, "expected code");
                 consumed = true;
@@ -462,7 +448,6 @@ export function createTokenizer(
                 return returnState;
             }
 
-            /** @type {State} */
             function nok(code: Code) {
                 assert(code === expectedCode, "expected code");
                 consumed = true;
@@ -477,14 +462,6 @@ export function createTokenizer(
         }
     }
 
-    /**
-     * @param {Construct} construct
-     *   Construct.
-     * @param {number} from
-     *   From.
-     * @returns {undefined}
-     *   Nothing.
-     */
     function addResult(construct: Construct, from: number): undefined {
         if (construct.resolveAll && !resolveAllConstructs.includes(construct)) {
             resolveAllConstructs.push(construct);
@@ -514,8 +491,6 @@ export function createTokenizer(
     /**
      * Store state.
      *
-     * @returns {Info}
-     *   Info.
      */
     function store(): Info {
         const startPoint = now();
@@ -528,9 +503,6 @@ export function createTokenizer(
 
         /**
          * Restore state.
-         *
-         * @returns {undefined}
-         *   Nothing.
          */
         function restore(): undefined {
             point = startPoint;
@@ -546,9 +518,6 @@ export function createTokenizer(
     /**
      * Move the current point a bit forward in the line when it’s on a column
      * skip.
-     *
-     * @returns {undefined}
-     *   Nothing.
      */
     function accountForPotentialSkip(): undefined {
         if (point.line in columnStart && point.column < 2) {
@@ -560,13 +529,6 @@ export function createTokenizer(
 
 /**
  * Get the chunks from a slice of chunks in the range of a token.
- *
- * @param {ReadonlyArray<Chunk>} chunks
- *   Chunks.
- * @param {Pick<Token, 'end' | 'start'>} token
- *   Token.
- * @returns {Array<Chunk>}
- *   Chunks.
  */
 function sliceChunks(
     chunks: ReadonlyArray<Chunk>,
@@ -576,7 +538,6 @@ function sliceChunks(
     const startBufferIndex = token.start._bufferIndex;
     const endIndex = token.end._index;
     const endBufferIndex = token.end._bufferIndex;
-    /** @type {Array<Chunk>} */
     let view: Array<Chunk>;
 
     if (startIndex === endIndex) {
@@ -615,27 +576,17 @@ function sliceChunks(
 
 /**
  * Get the string value of a slice of chunks.
- *
- * @param {ReadonlyArray<Chunk>} chunks
- *   Chunks.
- * @param {boolean | undefined} [expandTabs=false]
- *   Whether to expand tabs (default: `false`).
- * @returns {string}
- *   Result.
  */
 function serializeChunks(
     chunks: ReadonlyArray<Chunk>,
     expandTabs: boolean | undefined,
 ): string {
     let index = -1;
-    /** @type {Array<string>} */
     const result: Array<string> = [];
-    /** @type {boolean | undefined} */
     let atTab: boolean | undefined;
 
     while (++index < chunks.length) {
         const chunk = chunks[index];
-        /** @type {string} */
         let value: string;
 
         if (typeof chunk === "string") {

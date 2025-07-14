@@ -1,20 +1,3 @@
-/**
- * @import {Chunk, Code, Encoding, Value} from 'micromark-util-types'
- */
-
-/**
- * @callback Preprocessor
- *   Preprocess a value.
- * @param {Value} value
- *   Value.
- * @param {Encoding | null | undefined} [encoding]
- *   Encoding when `value` is a typed array (optional).
- * @param {boolean | null | undefined} [end=false]
- *   Whether this is the last chunk (default: `false`).
- * @returns {Array<Chunk>}
- *   Chunks.
- */
-
 import { codes, constants } from "micromark-util-symbol";
 import type { Chunk, Code, Encoding, Value } from "micromark-util-types";
 
