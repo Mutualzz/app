@@ -33,7 +33,6 @@ import type {
     ThematicBreak,
 } from "mdast";
 import { toString } from "mdast-util-to-string";
-import { parse, postprocess, preprocess } from "micromark";
 import { decodeNumericCharacterReference } from "micromark-util-decode-numeric-character-reference";
 import { decodeString } from "micromark-util-decode-string";
 import { normalizeIdentifier } from "micromark-util-normalize-identifier";
@@ -41,6 +40,9 @@ import { codes, constants, types } from "micromark-util-symbol";
 import type { Encoding, Event, Token, Value } from "micromark-util-types";
 import type { Point } from "unist";
 import { stringifyPosition } from "unist-util-stringify-position";
+import { parse } from "./parse";
+import { postprocess } from "./postprocess";
+import { preprocess } from "./preprocess";
 
 const own = {}.hasOwnProperty;
 
@@ -49,13 +51,15 @@ const own = {}.hasOwnProperty;
  */
 export function micromark(
     value: Value,
-    encoding: Encoding | null | undefined,
-    options: Options | null | undefined,
+    encoding?: Encoding | null | undefined,
+    options?: Options | null | undefined,
 ): Root {
     if (typeof encoding !== "string") {
         options = encoding;
         encoding = undefined;
     }
+
+    console.log("micromark", value, encoding, options);
 
     return compiler(options)(
         postprocess(
