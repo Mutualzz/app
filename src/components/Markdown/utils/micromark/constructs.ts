@@ -2,30 +2,22 @@ import { codes } from "micromark-util-symbol";
 import type { Extension } from "micromark-util-types";
 import { resolver as resolveText } from "./initialize/text";
 
-import { attention } from "./marks/attention.js";
-import { autolink } from "./marks/autolink.js";
-import { blockQuote } from "./marks/blockQuote.js";
-import { characterEscape } from "./marks/characterEscape.js";
-import { characterReference } from "./marks/characterReference.js";
-import { codeFenced } from "./marks/codeFenced.js";
-import { codeIndented } from "./marks/codeIndented.js";
-import { codeText } from "./marks/codeText.js";
-import { definition } from "./marks/definition.js";
-import { hardBreakEscape } from "./marks/hardBreakEscape.js";
-import { headingAtx } from "./marks/headingAtx.js";
-import { htmlFlow } from "./marks/htmlFlow.js";
-import { htmlText } from "./marks/htmlText.js";
-import { labelEnd } from "./marks/labelEnd.js";
-import { labelStartImage } from "./marks/labelStartImage.js";
-import { labelStartLink } from "./marks/labelStartLink.js";
-import { lineEnding } from "./marks/lineEnding.js";
-import { list } from "./marks/list.js";
-import { setextUnderline } from "./marks/setextUnderline.js";
-import { thematicBreak } from "./marks/thematicBreak.js";
-import { underline } from "./marks/underline.js";
+import { attention } from "./marks/attention";
+import { blockQuote } from "./marks/blockQuote";
+import { characterEscape } from "./marks/characterEscape";
+import { codeFenced } from "./marks/codeFenced";
+import { codeIndented } from "./marks/codeIndented";
+import { codeText } from "./marks/codeText";
+import { hardBreakEscape } from "./marks/hardBreakEscape";
+import { headingAtx } from "./marks/headingAtx";
+import { labelEnd } from "./marks/labelEnd";
+import { labelStartLink } from "./marks/labelStartLink";
+import { lineEnding } from "./marks/lineEnding";
+import { list } from "./marks/list";
+import { thematicBreak } from "./marks/thematicBreak";
+import { underline } from "./marks/underline";
 
 export const document: Extension["document"] = {
-    [codes.asterisk]: list,
     [codes.plusSign]: list,
     [codes.dash]: list,
     [codes.digit0]: list,
@@ -41,9 +33,7 @@ export const document: Extension["document"] = {
     [codes.greaterThan]: blockQuote,
 };
 
-export const contentInitial: Extension["contentInitial"] = {
-    [codes.leftSquareBracket]: definition,
-};
+export const contentInitial: Extension["contentInitial"] = {};
 
 export const flowInitial: Extension["flowInitial"] = {
     [codes.horizontalTab]: codeIndented,
@@ -54,16 +44,13 @@ export const flowInitial: Extension["flowInitial"] = {
 export const flow: Extension["flow"] = {
     [codes.numberSign]: headingAtx,
     [codes.asterisk]: thematicBreak,
-    [codes.dash]: [setextUnderline, thematicBreak],
-    [codes.lessThan]: htmlFlow,
-    [codes.equalsTo]: setextUnderline,
+    [codes.dash]: thematicBreak,
     [codes.underscore]: thematicBreak,
     [codes.graveAccent]: codeFenced,
     [codes.tilde]: codeFenced,
 };
 
 export const string: Extension["string"] = {
-    [codes.ampersand]: characterReference,
     [codes.backslash]: characterEscape,
 };
 
@@ -71,10 +58,7 @@ export const text: Extension["text"] = {
     [codes.carriageReturn]: lineEnding,
     [codes.lineFeed]: lineEnding,
     [codes.carriageReturnLineFeed]: lineEnding,
-    [codes.exclamationMark]: labelStartImage,
-    [codes.ampersand]: characterReference,
     [codes.asterisk]: attention,
-    [codes.lessThan]: [autolink, htmlText],
     [codes.leftSquareBracket]: labelStartLink,
     [codes.backslash]: [hardBreakEscape, characterEscape],
     [codes.rightSquareBracket]: labelEnd,

@@ -1,5 +1,18 @@
-import { ok as assert } from "devlop";
+/**
+ * @import {
+ *   Code,
+ *   Construct,
+ *   Event,
+ *   Point,
+ *   Resolver,
+ *   State,
+ *   TokenizeContext,
+ *   Tokenizer,
+ *   Token
+ * } from 'micromark-util-types'
+ */
 
+import { ok as assert } from "devlop";
 import { push, splice } from "micromark-util-chunked";
 import { classifyCharacter } from "micromark-util-classify-character";
 import { resolveAll } from "micromark-util-resolve-all";
@@ -21,10 +34,12 @@ export const attention: Construct = {
     tokenize: tokenizeAttention,
 };
 
-function resolveAllAttention(
-    events: Event[],
-    context: TokenizeContext,
-): Event[] {
+/**
+ * Take all events and resolve attention to emphasis or strong.
+ *
+ */
+// eslint-disable-next-line complexity
+function resolveAllAttention(events: Event[], context: TokenizeContext) {
     let index = -1;
     let open: number;
     let group: Token;
@@ -32,7 +47,7 @@ function resolveAllAttention(
     let openingSequence: Token;
     let closingSequence: Token;
     let use: number;
-    let nextEvents: Event[];
+    let nextEvents: Array<Event>;
     let offset: number;
 
     // Walk through all events.
@@ -221,7 +236,6 @@ function tokenizeAttention(this: TokenizeContext, effects: Effects, ok: State) {
      * > | **
      *     ^
      * ```
-     *
      */
     function start(code: Code) {
         assert(
@@ -267,8 +281,12 @@ function tokenizeAttention(this: TokenizeContext, effects: Effects, ok: State) {
             (before === constants.characterGroupPunctuation && after) ||
             attentionMarkers.includes(previous);
 
-        token._open = Boolean(open);
-        token._close = Boolean(close);
+        token._open = Boolean(
+            marker === codes.asterisk ? open : open && (before || !close),
+        );
+        token._close = Boolean(
+            marker === codes.asterisk ? close : close && (after || !open),
+        );
         return ok(code);
     }
 }
