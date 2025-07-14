@@ -126,10 +126,7 @@ function tokenizeHeadingAtx(
      *
      */
     function sequenceOpen(code: Code) {
-        if (
-            code === codes.numberSign &&
-            size++ < constants.atxHeadingOpeningFenceSizeMax
-        ) {
+        if (code === codes.numberSign && size++ < 3) {
             effects.consume(code);
             return sequenceOpen;
         }
@@ -161,7 +158,7 @@ function tokenizeHeadingAtx(
         if (code === codes.eof || markdownLineEnding(code)) {
             effects.exit(types.atxHeading);
             // To do: interrupt like `markdown-rs`.
-            // // Feel free to interrupt.
+            // Feel free to interrupt.
             // tokenizer.interrupt = false
             return ok(code);
         }
