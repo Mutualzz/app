@@ -54,7 +54,13 @@ export const MarkdownRenderer = ({
                     ),
 
                     p: ({ children }) => (
-                        <Typography fontSize="inherit">{children}</Typography>
+                        <Typography
+                            whiteSpace="break-spaces"
+                            fontSize="inherit"
+                            display="inline"
+                        >
+                            {children}
+                        </Typography>
                     ),
 
                     blockquote: ({ children }) => (
