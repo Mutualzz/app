@@ -40,6 +40,7 @@ import { codes, constants, types } from "micromark-util-symbol";
 import type {
     Encoding,
     Event,
+    Spoiler,
     Strikethrough,
     Token,
     Underline,
@@ -128,6 +129,7 @@ function compiler(options: Options | null | undefined) {
             resourceDestinationString: buffer,
             resourceTitleString: buffer,
             setextHeading: opener(heading),
+            spoiler: opener(spoiler as any),
             strong: opener(strong),
             strikethrough: opener(strikethrough as any),
             underline: opener(underline as any),
@@ -181,6 +183,7 @@ function compiler(options: Options | null | undefined) {
             setextHeading: closer(onexitsetextheading),
             setextHeadingLineSequence: onexitsetextheadinglinesequence,
             setextHeadingText: onexitsetextheadingtext,
+            spoiler: closer(),
             strong: closer(),
             strikethrough: closer(),
             underline: closer(),
@@ -1033,6 +1036,16 @@ function compiler(options: Options | null | undefined) {
 
     function paragraph(): Paragraph {
         return { type: "paragraph", children: [] };
+    }
+
+    function spoiler(): Spoiler {
+        return {
+            type: "spoiler",
+            children: [],
+            data: {
+                hName: "spoiler",
+            },
+        };
     }
 
     function strong(): Strong {

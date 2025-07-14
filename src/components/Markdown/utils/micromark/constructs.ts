@@ -14,6 +14,7 @@ import { labelEnd } from "./marks/labelEnd";
 import { labelStartLink } from "./marks/labelStartLink";
 import { lineEnding } from "./marks/lineEnding";
 import { list } from "./marks/list";
+import { spoiler } from "./marks/spoiler";
 import { strikethrough } from "./marks/strikethrough";
 import { thematicBreak } from "./marks/thematicBreak";
 import { underline } from "./marks/underline";
@@ -66,6 +67,7 @@ export const text: Extension["text"] = {
     [codes.graveAccent]: codeText,
     [codes.underscore]: [underline, attention],
     [codes.tilde]: strikethrough,
+    [codes.verticalBar]: spoiler,
 };
 
 export const insideSpan: Extension["insideSpan"] = {
@@ -82,6 +84,10 @@ export const underlineMarkers: Extension["underlineMarkers"] = {
 
 export const strikethroughMarkers: Extension["strikethroughMarkers"] = {
     null: [codes.tilde],
+};
+
+export const spoilerMarkers: Extension["spoilerMarkers"] = {
+    null: [codes.verticalBar],
 };
 
 export const disable: Extension["disable"] = { null: [] };

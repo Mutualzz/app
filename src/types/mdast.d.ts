@@ -10,6 +10,25 @@ declare module "micromark-util-types" {
         strikethrough: "strikethrough";
         strikethroughSequence: "strikethroughSequence";
         strikethroughText: "strikethroughText";
+
+        spoiler: "spoiler";
+        spoilerSequence: "spoilerSequence";
+        spoilerText: "spoilerText";
+    }
+
+    interface SpoilerData extends Data {}
+
+    interface Spoiler extends Parent {
+        type: "spoiler";
+        children: PhrasingContent[];
+        data?: SpoilerData;
+    }
+
+    interface StrikethroughData extends Data {}
+    interface Strikethrough extends Parent {
+        type: "strikethrough";
+        children: PhrasingContent[];
+        data?: StrikethroughData;
     }
 
     interface UnderlineData extends Data {}
@@ -18,13 +37,6 @@ declare module "micromark-util-types" {
         type: "underline";
         children: PhrasingContent[];
         data?: UnderlineData;
-    }
-
-    interface StrikethroughData extends Data {}
-    interface Strikethrough extends Parent {
-        type: "strikethrough";
-        children: PhrasingContent[];
-        data?: StrikethroughData;
     }
 
     interface EmojiData extends Data {}
@@ -42,6 +54,9 @@ declare module "micromark-util-types" {
             null: Code[] | undefined;
         };
         strikethroughMarkers?: {
+            null: Code[] | undefined;
+        };
+        spoilerMarkers?: {
             null: Code[] | undefined;
         };
     }

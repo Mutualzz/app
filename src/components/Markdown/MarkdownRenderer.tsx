@@ -1,5 +1,7 @@
 import { Paper, Typography, useTheme } from "@mutualzz/ui";
 
+import { spoilerStyles } from "@css/spoilerStyles";
+import { useState } from "react";
 import { Markdown } from "./Markdown";
 import type { MarkdownRendererProps } from "./Markdown.types";
 
@@ -157,20 +159,20 @@ export const MarkdownRenderer = ({
                         </span>
                     ),
 
-                    // spoiler: ({ children }) => {
-                    //     const [revealed, setRevealed] = useState(false);
+                    spoiler: ({ children }) => {
+                        const [revealed, setRevealed] = useState(false);
 
-                    //     return (
-                    //         <span
-                    //             css={spoilerStyles(revealed, theme)}
-                    //             onClick={() => {
-                    //                 setRevealed(true);
-                    //             }}
-                    //         >
-                    //             {children}
-                    //         </span>
-                    //     );
-                    // },
+                        return (
+                            <span
+                                css={spoilerStyles(revealed, theme)}
+                                onClick={() => {
+                                    setRevealed(true);
+                                }}
+                            >
+                                {children}
+                            </span>
+                        );
+                    },
                 }}
             >
                 {value}

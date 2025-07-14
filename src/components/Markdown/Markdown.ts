@@ -2,7 +2,7 @@ import { unreachable } from "devlop";
 import type { Element, Nodes, Parents, Root } from "hast";
 import { toJsxRuntime } from "hast-util-to-jsx-runtime";
 import { urlAttributes } from "html-url-attributes";
-import type { Emoji } from "micromark-util-types";
+import type { Emoji, Spoiler } from "micromark-util-types";
 import {
     useEffect,
     useMemo,
@@ -38,6 +38,7 @@ type Components = {
 } & {
     underline?: ComponentType<JSX.IntrinsicElements["u"] & ExtraProps>;
     emoji?: ComponentType<Emoji>;
+    spoiler?: ComponentType<Spoiler>;
 };
 
 export type Options = {
