@@ -133,32 +133,32 @@ export const MarkdownRenderer = ({
                         </Typography>
                     ),
 
-                    // emoji: ({ name, url, unicode }) => (
-                    //     <span
-                    //         role="button"
-                    //         aria-label={`:${name}:`}
-                    //         contentEditable={false}
-                    //         title={`:${name}:`}
-                    //         css={{
-                    //             display: "inline-block",
-                    //             width: "1.375em",
-                    //             height: "1.375em",
-                    //             verticalAlign: "middle",
-                    //         }}
-                    //     >
-                    //         <img
-                    //             src={url}
-                    //             alt={unicode}
-                    //             draggable={false}
-                    //             aria-label={`:${name}:`}
-                    //             css={{
-                    //                 width: "100%",
-                    //                 height: "100%",
-                    //                 objectFit: "contain",
-                    //             }}
-                    //         />
-                    //     </span>
-                    // ),
+                    emoji: ({ name, url, unicode }) => (
+                        <span
+                            role="button"
+                            aria-label={`:${name}:`}
+                            contentEditable={false}
+                            title={`:${name}:`}
+                            css={{
+                                display: "inline-block",
+                                width: "1.375em",
+                                height: "1.375em",
+                                verticalAlign: "middle",
+                            }}
+                        >
+                            <img
+                                src={url}
+                                alt={unicode}
+                                draggable={false}
+                                aria-label={`:${name}:`}
+                                css={{
+                                    width: "100%",
+                                    height: "100%",
+                                    objectFit: "contain",
+                                }}
+                            />
+                        </span>
+                    ),
 
                     // spoiler: ({ children }) => {
                     //     const [revealed, setRevealed] = useState(false);

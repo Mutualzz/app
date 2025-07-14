@@ -2,6 +2,7 @@ import { unreachable } from "devlop";
 import type { Element, Nodes, Parents, Root } from "hast";
 import { toJsxRuntime } from "hast-util-to-jsx-runtime";
 import { urlAttributes } from "html-url-attributes";
+import type { Emoji } from "micromark-util-types";
 import {
     useEffect,
     useMemo,
@@ -17,6 +18,7 @@ import remarkRehype, {
 import { unified, type PluggableList } from "unified";
 import { visit } from "unist-util-visit";
 import { VFile } from "vfile";
+import { remarkEmoji } from "./remark/remarkEmoji";
 import { remarkParse } from "./remark/remarkParse";
 
 type AllowElement = (
@@ -35,6 +37,7 @@ type Components = {
         | keyof JSX.IntrinsicElements;
 } & {
     underline?: ComponentType<JSX.IntrinsicElements["u"] & ExtraProps>;
+    emoji?: ComponentType<Emoji>;
 };
 
 export type Options = {
@@ -129,6 +132,7 @@ function createProcessor(options: Readonly<Options>) {
 
     const processor = unified()
         .use(remarkParse)
+        .use(remarkEmoji)
         .use(remarkRehype, remarkRehypeOptions);
 
     return processor;
