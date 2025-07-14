@@ -23,7 +23,9 @@ export default defineConfig(async () => ({
                 authToken: process.env.SENTRY_AUTH_TOKEN,
             },
         ),
-        viteReact(),
+        viteReact({
+            jsxImportSource: "@emotion/react",
+        }),
         tsconfigPaths(),
     ],
 
