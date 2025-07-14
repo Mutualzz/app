@@ -8,6 +8,11 @@ declare module "micromark-util-types" {
         underline: "underline";
         underlineSequence: "underlineSequence";
         underlineText: "underlineText";
+
+        blankLine: "blankLine";
+        blankLineBreak: "blankLineBreak";
+
+        multipleBlankLines: "multipleBlankLines";
     }
 
     interface Underline extends Parent {
