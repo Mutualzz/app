@@ -72,13 +72,21 @@ export const MarkdownRenderer = ({
                     ),
 
                     strong: ({ children }) => (
-                        <Typography fontSize="inherit" fontWeight="bold">
+                        <Typography
+                            whiteSpace="pre-wrap"
+                            fontSize="inherit"
+                            fontWeight="bold"
+                        >
                             {children}
                         </Typography>
                     ),
 
                     em: ({ children }) => (
-                        <Typography fontSize="inherit" fontStyle="italic">
+                        <Typography
+                            whiteSpace="pre-wrap"
+                            fontSize="inherit"
+                            fontStyle="italic"
+                        >
                             {children}
                         </Typography>
                     ),
@@ -93,8 +101,10 @@ export const MarkdownRenderer = ({
                     // ),
 
                     u: ({ children }) => {
+                        console.log(`"${children}"`);
                         return (
                             <Typography
+                                whiteSpace="pre-wrap"
                                 fontSize="inherit"
                                 textDecoration="underline"
                             >

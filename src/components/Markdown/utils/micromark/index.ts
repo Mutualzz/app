@@ -37,7 +37,13 @@ import { decodeNumericCharacterReference } from "micromark-util-decode-numeric-c
 import { decodeString } from "micromark-util-decode-string";
 import { normalizeIdentifier } from "micromark-util-normalize-identifier";
 import { codes, constants, types } from "micromark-util-symbol";
-import type { Encoding, Event, Token, Value } from "micromark-util-types";
+import type {
+    Encoding,
+    Event,
+    Token,
+    Underline,
+    Value,
+} from "micromark-util-types";
 import type { Point } from "unist";
 import { stringifyPosition } from "unist-util-stringify-position";
 import { parse } from "./parse";
@@ -58,8 +64,6 @@ export function micromark(
         options = encoding;
         encoding = undefined;
     }
-
-    console.log("micromark", value, encoding, options);
 
     return compiler(options)(
         postprocess(
@@ -124,6 +128,7 @@ function compiler(options: Options | null | undefined) {
             resourceTitleString: buffer,
             setextHeading: opener(heading),
             strong: opener(strong),
+            underline: opener(underline as any),
             thematicBreak: opener(thematicBreak),
         },
         exit: {
@@ -175,6 +180,7 @@ function compiler(options: Options | null | undefined) {
             setextHeadingLineSequence: onexitsetextheadinglinesequence,
             setextHeadingText: onexitsetextheadingtext,
             strong: closer(),
+            underline: closer(),
             thematicBreak: closer(),
         },
     };
@@ -1028,6 +1034,16 @@ function compiler(options: Options | null | undefined) {
 
     function strong(): Strong {
         return { type: "strong", children: [] };
+    }
+
+    function underline(): Underline {
+        return {
+            type: "underline",
+            children: [],
+            data: {
+                hName: "u",
+            },
+        };
     }
 
     function text(): Text {

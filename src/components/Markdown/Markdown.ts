@@ -33,6 +33,8 @@ type Components = {
     [Key in keyof JSX.IntrinsicElements]?:
         | ComponentType<JSX.IntrinsicElements[Key] & ExtraProps>
         | keyof JSX.IntrinsicElements;
+} & {
+    underline?: ComponentType<JSX.IntrinsicElements["u"] & ExtraProps>;
 };
 
 export type Options = {

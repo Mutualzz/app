@@ -1,6 +1,7 @@
 import { codes } from "micromark-util-symbol";
 import type { Extension } from "micromark-util-types";
 import { resolver as resolveText } from "./initialize/text";
+
 import { attention } from "./marks/attention.js";
 import { autolink } from "./marks/autolink.js";
 import { blockQuote } from "./marks/blockQuote.js";
@@ -21,6 +22,7 @@ import { lineEnding } from "./marks/lineEnding.js";
 import { list } from "./marks/list.js";
 import { setextUnderline } from "./marks/setextUnderline.js";
 import { thematicBreak } from "./marks/thematicBreak.js";
+import { underline } from "./marks/underline.js";
 
 export const document: Extension["document"] = {
     [codes.asterisk]: list,
@@ -77,14 +79,19 @@ export const text: Extension["text"] = {
     [codes.backslash]: [hardBreakEscape, characterEscape],
     [codes.rightSquareBracket]: labelEnd,
     [codes.graveAccent]: codeText,
+    [codes.underscore]: [underline, attention],
 };
 
 export const insideSpan: Extension["insideSpan"] = {
-    null: [attention, resolveText],
+    null: [attention, underline, resolveText],
 };
 
 export const attentionMarkers: Extension["attentionMarkers"] = {
     null: [codes.asterisk],
+};
+
+export const underlineMarkers: Extension["underlineMarkers"] = {
+    null: [codes.underscore],
 };
 
 export const disable: Extension["disable"] = { null: [] };

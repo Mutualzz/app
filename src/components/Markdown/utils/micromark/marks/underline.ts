@@ -1,19 +1,17 @@
 import { ok as assert } from "devlop";
 
-import { push, splice } from "micromark-util-chunked";
-import { classifyCharacter } from "micromark-util-classify-character";
+import { splice } from "micromark-util-chunked";
 import { resolveAll } from "micromark-util-resolve-all";
-import { codes, constants } from "micromark-util-symbol";
+import { codes } from "micromark-util-symbol";
 import type {
     Code,
     Construct,
     Effects,
     Event,
-    Point,
     State,
-    Token,
     TokenizeContext,
 } from "micromark-util-types";
+2;
 
 export const underline: Construct = {
     name: "underline",
@@ -26,170 +24,96 @@ function resolveAllUnderline(
     context: TokenizeContext,
 ): Event[] {
     let index = -1;
-    let open: number;
-    let group: Token;
-    let text: Token;
-    let openingSequence: Token;
-    let closingSequence: Token;
-    let use: number;
-    let nextEvents: Event[];
-    let offset: number;
 
-    // Walk through all events.
-    //
-    // Note: performance of this is fine on an mb of normal markdown, but it’s
-    // a bottleneck for malicious stuff.
     while (++index < events.length) {
-        // Find a token that can close.
         if (
             events[index][0] === "enter" &&
             events[index][1].type === "underlineSequence" &&
             events[index][1]._close
         ) {
-            open = index;
+            let open = index;
 
-            // Now walk back to find an opener.
             while (open--) {
-                // Find a token that can open the closer.
                 if (
                     events[open][0] === "exit" &&
                     events[open][1].type === "underlineSequence" &&
                     events[open][1]._open &&
-                    // If the markers are the same:
                     context.sliceSerialize(events[open][1]).charCodeAt(0) ===
                         context.sliceSerialize(events[index][1]).charCodeAt(0)
                 ) {
-                    // If the opening can close or the closing can open,
-                    // and the close size *is not* a multiple of three,
-                    // but the sum of the opening and closing size *is* multiple of three,
-                    // then don’t match.
-                    if (
-                        (events[open][1]._close || events[index][1]._open) &&
-                        (events[index][1].end.offset -
-                            events[index][1].start.offset) %
-                            3 &&
-                        !(
-                            (events[open][1].end.offset -
-                                events[open][1].start.offset +
-                                events[index][1].end.offset -
-                                events[index][1].start.offset) %
-                            3
-                        )
-                    ) {
+                    // Check if both sequences are exactly 2 underscores
+                    const openingContent = context.sliceSerialize(
+                        events[open][1],
+                    );
+                    const closingContent = context.sliceSerialize(
+                        events[index][1],
+                    );
+
+                    if (openingContent !== "__" || closingContent !== "__") {
                         continue;
                     }
 
-                    // Number of markers to use from the sequence.
-                    use =
-                        events[open][1].end.offset -
-                            events[open][1].start.offset >
-                            1 &&
-                        events[index][1].end.offset -
-                            events[index][1].start.offset >
-                            1
-                            ? 2
-                            : 1;
+                    // Check if content between contains underscores
+                    const contentEvents = events.slice(open + 1, index);
+                    let hasUnderscore = false;
 
-                    const start = { ...events[open][1].end };
-                    const end = { ...events[index][1].start };
-                    movePoint(start, -use);
-                    movePoint(end, use);
+                    for (const event of contentEvents) {
+                        if (event[1].type === "data") {
+                            const content = context.sliceSerialize(event[1]);
+                            if (content.includes("_")) {
+                                hasUnderscore = true;
+                                break;
+                            }
+                        }
+                    }
 
-                    openingSequence = {
+                    if (hasUnderscore) {
+                        continue;
+                    }
+
+                    const openingSequence = {
                         type: "underlineSequence",
-                        start,
+                        start: { ...events[open][1].start },
                         end: { ...events[open][1].end },
                     };
-                    closingSequence = {
+
+                    const closingSequence = {
                         type: "underlineSequence",
                         start: { ...events[index][1].start },
-                        end,
+                        end: { ...events[index][1].end },
                     };
-                    text = {
+                    const text = {
                         type: "underlineText",
                         start: { ...events[open][1].end },
                         end: { ...events[index][1].start },
                     };
-                    group = {
+                    const group = {
                         type: "underline",
                         start: { ...openingSequence.start },
                         end: { ...closingSequence.end },
                     };
 
-                    events[open][1].end = { ...openingSequence.start };
-                    events[index][1].start = { ...closingSequence.end };
-
-                    nextEvents = [];
-
-                    // If there are more markers in the opening, add them before.
-                    if (
-                        events[open][1].end.offset -
-                        events[open][1].start.offset
-                    ) {
-                        nextEvents = push(nextEvents, [
-                            ["enter", events[open][1], context],
-                            ["exit", events[open][1], context],
-                        ]);
-                    }
-
-                    // Opening.
-                    nextEvents = push(nextEvents, [
+                    const nextEvents = [
                         ["enter", group, context],
-                        ["enter", openingSequence, context],
-                        ["exit", openingSequence, context],
                         ["enter", text, context],
-                    ]);
-
-                    // Always populated by defaults.
-                    assert(
-                        context.parser.constructs.insideSpan.null,
-                        "expected `insideSpan` to be populated",
-                    );
-
-                    // Between.
-                    nextEvents = push(
-                        nextEvents,
-                        resolveAll(
-                            context.parser.constructs.insideSpan.null,
+                        ...resolveAll(
+                            context.parser.constructs.insideSpan.null as any,
                             events.slice(open + 1, index),
                             context,
                         ),
-                    );
-
-                    // Closing.
-                    nextEvents = push(nextEvents, [
                         ["exit", text, context],
-                        ["enter", closingSequence, context],
-                        ["exit", closingSequence, context],
                         ["exit", group, context],
-                    ]);
-
-                    // If there are more markers in the closing, add them after.
-                    if (
-                        events[index][1].end.offset -
-                        events[index][1].start.offset
-                    ) {
-                        offset = 2;
-                        nextEvents = push(nextEvents, [
-                            ["enter", events[index][1], context],
-                            ["exit", events[index][1], context],
-                        ]);
-                    } else {
-                        offset = 0;
-                    }
+                    ];
 
                     splice(events, open - 1, index - open + 3, nextEvents);
-
-                    index = open + nextEvents.length - offset - 2;
+                    index = open + nextEvents.length - 2;
                     break;
                 }
             }
         }
     }
 
-    // Remove remaining sequences.
     index = -1;
-
     while (++index < events.length) {
         if (events[index][1].type === "underlineSequence") {
             events[index][1].type = "data";
@@ -199,75 +123,55 @@ function resolveAllUnderline(
     return events;
 }
 
-function tokenizeUnderline(this: TokenizeContext, effects: Effects, ok: State) {
+function tokenizeUnderline(
+    this: TokenizeContext,
+    effects: Effects,
+    ok: State,
+    nok: State,
+) {
     const underlineMarkers = this.parser.constructs.underlineMarkers.null;
-    const previous = this.previous;
-    const before = classifyCharacter(previous);
-
     let marker: NonNullable<Code>;
+    let count = 0;
 
     return start;
 
-    /**
-     * Before a sequence.
-     *
-     * ```markdown
-     * > | __
-     *     ^
-     * ```
-     *
-     */
     function start(code: Code) {
-        assert(code === codes.asterisk, "expected asterisk");
+        assert(code === codes.underscore, "expected underscore");
         marker = code;
         effects.enter("underlineSequence");
-        return inside(code);
+        effects.consume(code);
+        count = 1;
+        return inside;
     }
 
-    /**
-     * In a sequence.
-     *
-     * ```markdown
-     * > | __
-     *     ^^
-     * ```
-     *
-     */
     function inside(code: Code) {
-        if (code === marker) {
+        if (code === marker && count === 1) {
+            // Second underscore
             effects.consume(code);
-            return inside;
+            count = 2;
+            return checkEnd;
         }
 
+        // Not a second underscore - this is not a valid underline sequence
+        // Exit the sequence and return nok to let it be handled as regular text
+        effects.exit("underlineSequence");
+        return nok(code);
+    }
+
+    function checkEnd(code: Code) {
+        if (code === marker) {
+            // Third underscore - not valid for our 2-underscore pattern
+            effects.exit("underlineSequence");
+            return nok(code);
+        }
+
+        // Exactly 2 underscores, check if valid
         const token = effects.exit("underlineSequence");
 
-        // To do: next major: move this to resolver, just like `markdown-rs`.
-        const after = classifyCharacter(code);
-
-        // Always populated by defaults.
         assert(underlineMarkers, "expected `underlineMarkers` to be populated");
 
-        const open =
-            !after ||
-            (after === constants.characterGroupPunctuation && before) ||
-            underlineMarkers.includes(code);
-        const close =
-            !before ||
-            (before === constants.characterGroupPunctuation && after) ||
-            underlineMarkers.includes(previous);
-
-        token._open = Boolean(
-            marker === codes.underscore ? open : open && (before || !close),
-        );
-        token._close = Boolean(
-            marker === codes.underscore ? close : close && (after || !open),
-        );
+        token._open = true;
+        token._close = true;
         return ok(code);
     }
-}
-
-function movePoint(point: Point, offset: number) {
-    point.column += offset;
-    point.offset += offset;
-    point._bufferIndex += offset;
 }

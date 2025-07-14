@@ -224,7 +224,10 @@ function tokenizeAttention(this: TokenizeContext, effects: Effects, ok: State) {
      *
      */
     function start(code: Code) {
-        assert(code === codes.asterisk, "expected asterisk");
+        assert(
+            code === codes.asterisk || code === codes.underscore,
+            "expected asterisk or underscore",
+        );
         marker = code;
         effects.enter("attentionSequence");
         return inside(code);
@@ -255,24 +258,28 @@ function tokenizeAttention(this: TokenizeContext, effects: Effects, ok: State) {
 
         const open =
             !after ||
+            after === constants.characterGroupWhitespace || // Allow whitespace after opener
             (after === constants.characterGroupPunctuation && before) ||
             attentionMarkers.includes(code);
         const close =
             !before ||
+            before === constants.characterGroupWhitespace || // Allow whitespace before closer
             (before === constants.characterGroupPunctuation && after) ||
             attentionMarkers.includes(previous);
 
-        token._open = Boolean(
-            marker === codes.asterisk ? open : open && (before || !close),
-        );
-        token._close = Boolean(
-            marker === codes.asterisk ? close : close && (after || !open),
-        );
+        token._open = Boolean(open);
+        token._close = Boolean(close);
         return ok(code);
     }
 }
 
-function movePoint(point: Point, offset: number) {
+/**
+ * Move a point a bit.
+ *
+ * Note: `move` only works inside lines! It’s not possible to move past other
+ * chunks (replacement characters, tabs, or line endings).
+ */
+function movePoint(point: Point, offset: number): undefined {
     point.column += offset;
     point.offset += offset;
     point._bufferIndex += offset;
