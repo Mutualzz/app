@@ -136,243 +136,235 @@ function PlaygroundDivider() {
                     </Stack>
                 )}
             </Paper>
-            <Paper alignItems="center" direction="column" p={20}>
+            <Paper width="25%" overflowY="auto" direction="column" p={20}>
                 <Divider>Playground</Divider>
-                <Stack width="100%" direction="column" spacing={5}>
-                    <Stack direction="column" spacing={5}>
-                        <label>Variant</label>
-                        <RadioGroup
-                            onChange={(_, vriant) =>
-                                setVariant(vriant as DividerVariant)
-                            }
-                            value={variant}
-                            name="variants"
-                        >
-                            {variants.map((v) => (
-                                <Radio
-                                    key={v}
-                                    value={v}
-                                    label={capitalize(v)}
-                                    checked={variant === v}
-                                    color="neutral"
-                                    onChange={() => setVariant(v)}
-                                />
-                            ))}
-                        </RadioGroup>
-                    </Stack>
-                    <Divider />
-                    <Stack direction="column" spacing={5}>
-                        <label>Orientation</label>
-                        <RadioGroup
-                            onChange={(_, orientation) =>
-                                setOrientation(
-                                    orientation as DividerOrientation,
-                                )
-                            }
-                            value={orientation}
-                            name="orientations"
-                            row
-                        >
-                            <Radio
-                                value="horizontal"
-                                label="Horizontal"
-                                checked={orientation === "horizontal"}
-                                color="neutral"
-                                onChange={() => setOrientation("horizontal")}
-                            />
-                            <Radio
-                                value="vertical"
-                                label="Vertical"
-                                checked={orientation === "vertical"}
-                                color="neutral"
-                                onChange={() => setOrientation("vertical")}
-                            />
-                        </RadioGroup>
-                    </Stack>
-                    <Divider />
-                    <Stack
-                        justifyContent="center"
-                        alignItems="stretch"
-                        spacing={5}
-                        direction="column"
+                <Stack direction="column" spacing={5}>
+                    <label>Variant</label>
+                    <RadioGroup
+                        onChange={(_, vriant) =>
+                            setVariant(vriant as DividerVariant)
+                        }
+                        value={variant}
+                        name="variants"
                     >
-                        <label>Text</label>
-                        <Input
-                            variant="solid"
-                            size="lg"
-                            color="primary"
-                            fullWidth
-                            value={text ?? ""}
+                        {variants.map((v) => (
+                            <Radio
+                                key={v}
+                                value={v}
+                                label={capitalize(v)}
+                                checked={variant === v}
+                                color="neutral"
+                                onChange={() => setVariant(v)}
+                            />
+                        ))}
+                    </RadioGroup>
+                </Stack>
+                <Divider />
+                <Stack direction="column" spacing={5}>
+                    <label>Orientation</label>
+                    <RadioGroup
+                        onChange={(_, orientation) =>
+                            setOrientation(orientation as DividerOrientation)
+                        }
+                        value={orientation}
+                        name="orientations"
+                        row
+                    >
+                        <Radio
+                            value="horizontal"
+                            label="Horizontal"
+                            checked={orientation === "horizontal"}
+                            color="neutral"
+                            onChange={() => setOrientation("horizontal")}
+                        />
+                        <Radio
+                            value="vertical"
+                            label="Vertical"
+                            checked={orientation === "vertical"}
+                            color="neutral"
+                            onChange={() => setOrientation("vertical")}
+                        />
+                    </RadioGroup>
+                </Stack>
+                <Divider />
+                <Stack
+                    justifyContent="center"
+                    alignItems="stretch"
+                    spacing={5}
+                    direction="column"
+                >
+                    <label>Text</label>
+                    <Input
+                        variant="solid"
+                        size="lg"
+                        color="primary"
+                        fullWidth
+                        value={text ?? ""}
+                        onChange={(e) =>
+                            setText(
+                                e.target.value.trim() === ""
+                                    ? null
+                                    : e.target.value,
+                            )
+                        }
+                    />
+                </Stack>
+                {text && (
+                    <>
+                        <Divider />
+                        <Stack direction="column" spacing={5}>
+                            <label>Inset</label>
+                            <RadioGroup
+                                onChange={(_, inst) =>
+                                    setInset(inst as DividerInset)
+                                }
+                                value={inset}
+                                name="insets"
+                                row
+                            >
+                                {insets.map((i) => (
+                                    <Radio
+                                        key={i}
+                                        value={i}
+                                        label={capitalize(i)}
+                                        checked={inset === i}
+                                        color="neutral"
+                                        onChange={() => setInset(i)}
+                                    />
+                                ))}
+                            </RadioGroup>
+                        </Stack>
+                    </>
+                )}
+                <Divider />
+                <Stack direction="column" spacing={5}>
+                    <Stack
+                        direction="row"
+                        justifyContent="space-between"
+                        spacing={5}
+                    >
+                        <label>Line Color</label>
+                        <Checkbox
+                            label="Custom"
+                            checked={customLineColorEnabled}
                             onChange={(e) =>
-                                setText(
-                                    e.target.value.trim() === ""
-                                        ? null
-                                        : e.target.value,
+                                setCustomLineColorEnabled(
+                                    e.currentTarget.checked,
                                 )
                             }
                         />
                     </Stack>
-                    {text && (
-                        <>
-                            <Divider />
-                            <Stack direction="column" spacing={5}>
-                                <label>Inset</label>
-                                <RadioGroup
-                                    onChange={(_, inst) =>
-                                        setInset(inst as DividerInset)
-                                    }
-                                    value={inset}
-                                    name="insets"
-                                    row
-                                >
-                                    {insets.map((i) => (
-                                        <Radio
-                                            key={i}
-                                            value={i}
-                                            label={capitalize(i)}
-                                            checked={inset === i}
-                                            color="neutral"
-                                            onChange={() => setInset(i)}
-                                        />
-                                    ))}
-                                </RadioGroup>
-                            </Stack>
-                        </>
+                    {customLineColorEnabled ? (
+                        <Stack direction="row" spacing={5}>
+                            <Input
+                                variant="solid"
+                                size="lg"
+                                color="primary"
+                                fullWidth
+                                error={lineColorInvalid}
+                                placeholder="Enter a color (e.g., #ff0000, red)"
+                                value={inputLineColor}
+                                onChange={(e) =>
+                                    handleLineColorChange(e.target.value)
+                                }
+                                onBlur={validateLineColor}
+                            />
+                            <Button
+                                variant="solid"
+                                color="neutral"
+                                onClick={() => {
+                                    setColorDirectlyLineColor(randomHexColor());
+                                }}
+                            >
+                                Random
+                            </Button>
+                        </Stack>
+                    ) : (
+                        <select
+                            value={lineColor}
+                            onChange={(e) =>
+                                setLineColor(e.target.value as Color)
+                            }
+                            css={{
+                                width: "100%",
+                                padding: 10,
+                                borderRadius: 5,
+                                border: "1px solid #ccc",
+                                backgroundColor: "#f9f9f9",
+                            }}
+                        >
+                            {colors.map((color) => (
+                                <option key={color} value={color}>
+                                    {capitalize(color)}
+                                </option>
+                            ))}
+                        </select>
                     )}
-                    <Divider />
-                    <Stack direction="column" spacing={5}>
-                        <Stack
-                            direction="row"
-                            justifyContent="space-between"
-                            spacing={5}
-                        >
-                            <label>Line Color</label>
-                            <Checkbox
-                                label="Custom"
-                                checked={customLineColorEnabled}
+                </Stack>
+                <Divider />
+                <Stack spacing={5} direction="column">
+                    <Stack
+                        justifyContent="space-between"
+                        direction="row"
+                        spacing={5}
+                    >
+                        <label>Text Color</label>
+                        <Checkbox
+                            label="Custom"
+                            checked={customTextColorEnabled}
+                            onChange={(e) =>
+                                setCustomTextColorEnabled(
+                                    e.currentTarget.checked,
+                                )
+                            }
+                        />
+                    </Stack>
+                    {customTextColorEnabled ? (
+                        <Stack direction="row" spacing={5}>
+                            <Input
+                                variant="solid"
+                                size="lg"
+                                color="primary"
+                                fullWidth
+                                error={textColorInvalid}
+                                placeholder="Enter a color (e.g., #ff0000, red)"
+                                value={inputTextColor}
                                 onChange={(e) =>
-                                    setCustomLineColorEnabled(
-                                        e.currentTarget.checked,
-                                    )
+                                    handleTextColorChange(e.target.value)
                                 }
+                                onBlur={validateTextColor}
                             />
-                        </Stack>
-                        {customLineColorEnabled ? (
-                            <Stack direction="row" spacing={5}>
-                                <Input
-                                    variant="solid"
-                                    size="lg"
-                                    color="primary"
-                                    fullWidth
-                                    error={lineColorInvalid}
-                                    placeholder="Enter a color (e.g., #ff0000, red)"
-                                    value={inputLineColor}
-                                    onChange={(e) =>
-                                        handleLineColorChange(e.target.value)
-                                    }
-                                    onBlur={validateLineColor}
-                                />
-                                <Button
-                                    variant="solid"
-                                    color="neutral"
-                                    onClick={() => {
-                                        setColorDirectlyLineColor(
-                                            randomHexColor(),
-                                        );
-                                    }}
-                                >
-                                    Random
-                                </Button>
-                            </Stack>
-                        ) : (
-                            <select
-                                value={lineColor}
-                                onChange={(e) =>
-                                    setLineColor(e.target.value as Color)
-                                }
-                                css={{
-                                    width: "100%",
-                                    padding: 10,
-                                    borderRadius: 5,
-                                    border: "1px solid #ccc",
-                                    backgroundColor: "#f9f9f9",
+                            <Button
+                                variant="solid"
+                                color="neutral"
+                                onClick={() => {
+                                    setColorDirectlyTextColor(randomHexColor());
                                 }}
                             >
-                                {colors.map((color) => (
-                                    <option key={color} value={color}>
-                                        {capitalize(color)}
-                                    </option>
-                                ))}
-                            </select>
-                        )}
-                    </Stack>
-                    <Divider />
-                    <Stack spacing={5} direction="column">
-                        <Stack
-                            justifyContent="space-between"
-                            direction="row"
-                            spacing={5}
-                        >
-                            <label>Text Color</label>
-                            <Checkbox
-                                label="Custom"
-                                checked={customTextColorEnabled}
-                                onChange={(e) =>
-                                    setCustomTextColorEnabled(
-                                        e.currentTarget.checked,
-                                    )
-                                }
-                            />
+                                Random
+                            </Button>
                         </Stack>
-                        {customTextColorEnabled ? (
-                            <Stack direction="row" spacing={5}>
-                                <Input
-                                    variant="solid"
-                                    size="lg"
-                                    color="primary"
-                                    fullWidth
-                                    error={textColorInvalid}
-                                    placeholder="Enter a color (e.g., #ff0000, red)"
-                                    value={inputTextColor}
-                                    onChange={(e) =>
-                                        handleTextColorChange(e.target.value)
-                                    }
-                                    onBlur={validateTextColor}
-                                />
-                                <Button
-                                    variant="solid"
-                                    color="neutral"
-                                    onClick={() => {
-                                        setColorDirectlyTextColor(
-                                            randomHexColor(),
-                                        );
-                                    }}
-                                >
-                                    Random
-                                </Button>
-                            </Stack>
-                        ) : (
-                            <select
-                                value={textColor}
-                                onChange={(e) =>
-                                    setTextColor(e.target.value as Color)
-                                }
-                                css={{
-                                    width: "100%",
-                                    padding: 10,
-                                    borderRadius: 5,
-                                    border: "1px solid #ccc",
-                                    backgroundColor: "#f9f9f9",
-                                }}
-                            >
-                                {colors.map((color) => (
-                                    <option key={color} value={color}>
-                                        {capitalize(color)}
-                                    </option>
-                                ))}
-                            </select>
-                        )}
-                    </Stack>
+                    ) : (
+                        <select
+                            value={textColor}
+                            onChange={(e) =>
+                                setTextColor(e.target.value as Color)
+                            }
+                            css={{
+                                width: "100%",
+                                padding: 10,
+                                borderRadius: 5,
+                                border: "1px solid #ccc",
+                                backgroundColor: "#f9f9f9",
+                            }}
+                        >
+                            {colors.map((color) => (
+                                <option key={color} value={color}>
+                                    {capitalize(color)}
+                                </option>
+                            ))}
+                        </select>
+                    )}
                 </Stack>
             </Paper>
         </Stack>

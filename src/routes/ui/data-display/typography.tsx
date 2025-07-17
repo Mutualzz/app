@@ -150,9 +150,10 @@ function PlaygroundTypography() {
                 direction={variant === "all" ? "column" : "row"}
                 alignItems="flex-start"
                 alignContent="flex-start"
-                wrap="wrap"
+                wrap={variant === "all" ? "nowrap" : "wrap"}
                 p={20}
                 spacing={variant === "all" ? 10 : 5}
+                overflowY="auto"
             >
                 {variant === "none" && (
                     <Typography level={level} weight={weight} variant={variant}>
@@ -167,45 +168,103 @@ function PlaygroundTypography() {
                     ))}
                 {variant !== "none" && variant !== "all" && typographies}
             </Paper>
-            <Paper alignItems="center" direction="column" p={20}>
+            <Paper width="25%" overflowY="auto" direction="column" p={20}>
                 <Divider>Playground</Divider>
-                <Stack width="100%" direction="column" spacing={5}>
-                    <Stack direction="column" spacing={5}>
-                        <label>Variant</label>
-                        <RadioGroup
-                            onChange={(_, vriant) =>
-                                setVariant(vriant as TypographyVariant)
-                            }
-                            value={variant}
-                            name="variant"
-                        >
+                <Stack direction="column" spacing={5}>
+                    <label>Variant</label>
+                    <RadioGroup
+                        onChange={(_, vriant) =>
+                            setVariant(vriant as TypographyVariant)
+                        }
+                        value={variant}
+                        name="variant"
+                    >
+                        <Radio
+                            key="all"
+                            value="all"
+                            label="All"
+                            checked={variant === "all"}
+                            color="neutral"
+                            onChange={() => setVariant("all")}
+                        />
+                        {variants.map((v) => (
                             <Radio
-                                key="all"
-                                value="all"
-                                label="All"
-                                checked={variant === "all"}
+                                key={v}
+                                value={v}
+                                label={capitalize(v)}
+                                checked={variant === v}
                                 color="neutral"
-                                onChange={() => setVariant("all")}
+                                onChange={() => setVariant(v)}
                             />
-                            {variants.map((v) => (
-                                <Radio
-                                    key={v}
-                                    value={v}
-                                    label={capitalize(v)}
-                                    checked={variant === v}
-                                    color="neutral"
-                                    onChange={() => setVariant(v)}
-                                />
-                            ))}
-                        </RadioGroup>
+                        ))}
+                    </RadioGroup>
+                </Stack>
+                <Divider />
+                <Stack direction="column" spacing={5}>
+                    <label>Level</label>
+                    <select
+                        value={level}
+                        onChange={(e) =>
+                            setLevel(e.target.value as TypographyLevel)
+                        }
+                        css={{
+                            width: "100%",
+                            padding: 10,
+                            borderRadius: 5,
+                            border: "1px solid #ccc",
+                            backgroundColor: "#f9f9f9",
+                        }}
+                    >
+                        {levels.map((l, i) => (
+                            <option key={l} value={l}>
+                                {levelsNames[i]}
+                            </option>
+                        ))}
+                    </select>
+                </Stack>
+                <Divider />
+                <Stack direction="column" spacing={5}>
+                    <Stack
+                        direction="row"
+                        justifyContent="space-between"
+                        spacing={5}
+                    >
+                        <label>Weight</label>
+                        <Checkbox
+                            checked={customWeightToggle}
+                            label="Custom"
+                            onChange={() =>
+                                setCustomWeightToggle((prev) => {
+                                    setWeight("normal");
+                                    return !prev;
+                                })
+                            }
+                        />
                     </Stack>
-                    <Divider />
-                    <Stack direction="column" spacing={5}>
-                        <label>Level</label>
+                    {customWeightToggle ? (
+                        <Slider
+                            value={weight as number}
+                            min={100}
+                            max={1000}
+                            onChange={(e) => setWeight(Number(e.target.value))}
+                            marks={[
+                                { value: 100, label: "100" },
+                                { value: 200, label: "200" },
+                                { value: 300, label: "300" },
+                                { value: 400, label: "400" },
+                                { value: 500, label: "500" },
+                                { value: 600, label: "600" },
+                                { value: 700, label: "700" },
+                                { value: 800, label: "800" },
+                                { value: 900, label: "900" },
+                                { value: 1000, label: "1k" },
+                            ]}
+                        />
+                    ) : (
                         <select
-                            value={level}
+                            value={weight}
                             onChange={(e) =>
-                                setLevel(e.target.value as TypographyLevel)
+                                setWeight(e.target.value as FontWeight)
                             }
                             css={{
                                 width: "100%",
@@ -215,191 +274,124 @@ function PlaygroundTypography() {
                                 backgroundColor: "#f9f9f9",
                             }}
                         >
-                            {levels.map((l, i) => (
-                                <option key={l} value={l}>
-                                    {levelsNames[i]}
+                            {weights.map((w) => (
+                                <option key={w} value={w}>
+                                    {capitalize(w as string)}
                                 </option>
                             ))}
                         </select>
-                    </Stack>
-                    <Divider />
-                    <Stack direction="column" spacing={5}>
-                        <Stack
-                            direction="row"
-                            justifyContent="space-between"
-                            spacing={5}
-                        >
-                            <label>Weight</label>
-                            <Checkbox
-                                checked={customWeightToggle}
-                                label="Custom"
-                                onChange={() =>
-                                    setCustomWeightToggle((prev) => {
-                                        setWeight("normal");
-                                        return !prev;
-                                    })
-                                }
-                            />
-                        </Stack>
-                        {customWeightToggle ? (
-                            <Slider
-                                value={weight as number}
-                                min={100}
-                                max={1000}
-                                onChange={(e) =>
-                                    setWeight(Number(e.target.value))
-                                }
-                                marks={[
-                                    { value: 100, label: "100" },
-                                    { value: 200, label: "200" },
-                                    { value: 300, label: "300" },
-                                    { value: 400, label: "400" },
-                                    { value: 500, label: "500" },
-                                    { value: 600, label: "600" },
-                                    { value: 700, label: "700" },
-                                    { value: 800, label: "800" },
-                                    { value: 900, label: "900" },
-                                    { value: 1000, label: "1k" },
-                                ]}
-                            />
-                        ) : (
-                            <select
-                                value={weight}
-                                onChange={(e) =>
-                                    setWeight(e.target.value as FontWeight)
-                                }
-                                css={{
-                                    width: "100%",
-                                    padding: 10,
-                                    borderRadius: 5,
-                                    border: "1px solid #ccc",
-                                    backgroundColor: "#f9f9f9",
-                                }}
+                    )}
+                </Stack>
+                <Divider />
+                {variant !== "none" && (
+                    <>
+                        <Stack direction="column" spacing={5}>
+                            <label>Custom Color</label>
+                            <Stack
+                                alignContent="center"
+                                direction="row"
+                                spacing={5}
                             >
-                                {weights.map((w) => (
-                                    <option key={w} value={w}>
-                                        {capitalize(w as string)}
-                                    </option>
-                                ))}
-                            </select>
-                        )}
-                    </Stack>
-                    <Divider />
-                    {variant !== "none" && (
-                        <>
-                            <Stack direction="column" spacing={5}>
-                                <label>Custom Color</label>
+                                <Input
+                                    variant="solid"
+                                    size="lg"
+                                    color="primary"
+                                    fullWidth
+                                    error={isInvalid}
+                                    value={inputColorValue}
+                                    onChange={(e) =>
+                                        handleChange(e.target.value)
+                                    }
+                                    onBlur={validate}
+                                />
+                                <Button
+                                    color="primary"
+                                    disabled={!customColor}
+                                    onClick={() => {
+                                        setCustomColors(
+                                            (prev) =>
+                                                [
+                                                    ...prev,
+                                                    customColor,
+                                                ] as ColorLike[],
+                                        );
+                                        setColorDirectly(randomHexColor());
+                                        setColorToDelete(
+                                            customColor as ColorLike,
+                                        );
+                                    }}
+                                >
+                                    Add Color
+                                </Button>
+                            </Stack>
+                            {customColors.length > 0 && (
                                 <Stack
-                                    alignContent="center"
+                                    alignItems="center"
                                     direction="row"
                                     spacing={5}
                                 >
-                                    <Input
-                                        variant="solid"
-                                        size="lg"
-                                        color="primary"
-                                        fullWidth
-                                        error={isInvalid}
-                                        value={inputColorValue}
-                                        onChange={(e) =>
-                                            handleChange(e.target.value)
-                                        }
-                                        onBlur={validate}
-                                    />
-                                    <Button
-                                        color="primary"
-                                        disabled={!customColor}
-                                        onClick={() => {
-                                            setCustomColors(
-                                                (prev) =>
-                                                    [
-                                                        ...prev,
-                                                        customColor,
-                                                    ] as ColorLike[],
-                                            );
-                                            setColorDirectly(randomHexColor());
+                                    <select
+                                        value={colorToDelete ?? ""}
+                                        onChange={(e) => {
                                             setColorToDelete(
-                                                customColor as ColorLike,
+                                                e.target.value.trim() as ColorLike,
                                             );
                                         }}
+                                        css={{
+                                            padding: 10,
+                                            borderRadius: 5,
+                                            border: "1px solid #ccc",
+                                            backgroundColor: "#f9f9f9",
+                                            width: "100%",
+                                        }}
                                     >
-                                        Add Color
+                                        {customColors.map((color) => (
+                                            <option key={color} value={color}>
+                                                {color}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    <Button
+                                        color="danger"
+                                        onClick={() => {
+                                            setCustomColors((prev) => {
+                                                const updated = prev.filter(
+                                                    (color) =>
+                                                        color !== colorToDelete,
+                                                );
+                                                setColorToDelete(
+                                                    updated.length > 0
+                                                        ? updated[
+                                                              updated.length - 1
+                                                          ]
+                                                        : null,
+                                                );
+                                                return updated;
+                                            });
+                                        }}
+                                    >
+                                        Delete Color
                                     </Button>
                                 </Stack>
-                                {customColors.length > 0 && (
-                                    <Stack
-                                        alignItems="center"
-                                        direction="row"
-                                        spacing={5}
-                                    >
-                                        <select
-                                            value={colorToDelete ?? ""}
-                                            onChange={(e) => {
-                                                setColorToDelete(
-                                                    e.target.value.trim() as ColorLike,
-                                                );
-                                            }}
-                                            css={{
-                                                padding: 10,
-                                                borderRadius: 5,
-                                                border: "1px solid #ccc",
-                                                backgroundColor: "#f9f9f9",
-                                                width: "100%",
-                                            }}
-                                        >
-                                            {customColors.map((color) => (
-                                                <option
-                                                    key={color}
-                                                    value={color}
-                                                >
-                                                    {color}
-                                                </option>
-                                            ))}
-                                        </select>
-                                        <Button
-                                            color="danger"
-                                            onClick={() => {
-                                                setCustomColors((prev) => {
-                                                    const updated = prev.filter(
-                                                        (color) =>
-                                                            color !==
-                                                            colorToDelete,
-                                                    );
-                                                    setColorToDelete(
-                                                        updated.length > 0
-                                                            ? updated[
-                                                                  updated.length -
-                                                                      1
-                                                              ]
-                                                            : null,
-                                                    );
-                                                    return updated;
-                                                });
-                                            }}
-                                        >
-                                            Delete Color
-                                        </Button>
-                                    </Stack>
-                                )}
-                            </Stack>
-                            <Divider />
-                        </>
-                    )}
-                    <Stack direction="column" spacing={5}>
-                        <label>Text</label>
-                        <Input
-                            variant="solid"
-                            size="lg"
-                            color="primary"
-                            fullWidth
-                            value={text ?? ""}
-                            onChange={(e) =>
-                                e.target.value.trim() === ""
-                                    ? setText(null)
-                                    : setText(e.target.value)
-                            }
-                        />
-                    </Stack>
+                            )}
+                        </Stack>
+                        <Divider />
+                    </>
+                )}
+                <Stack direction="column" spacing={5}>
+                    <label>Text</label>
+                    <Input
+                        variant="solid"
+                        size="lg"
+                        color="primary"
+                        fullWidth
+                        value={text ?? ""}
+                        onChange={(e) =>
+                            e.target.value.trim() === ""
+                                ? setText(null)
+                                : setText(e.target.value)
+                        }
+                    />
                 </Stack>
             </Paper>
         </Stack>

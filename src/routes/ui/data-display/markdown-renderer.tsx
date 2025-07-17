@@ -101,7 +101,7 @@ function RouteComponent() {
                     />
                 </Stack>
             </Paper>
-            <Paper direction="column" pt={8} width="50%">
+            <Paper direction="column" p={12} pt={8} width="50%">
                 <Typography level="title-sm" textAlign="center">
                     Markdown Renderer
                 </Typography>
@@ -119,177 +119,169 @@ function RouteComponent() {
                     }}
                 />
             </Paper>
-            <Paper direction="column" p={20}>
+            <Paper width="25%" overflowY="auto" direction="column" p={20}>
                 <Divider>Playground</Divider>
-                <Stack width="100%" direction="column" spacing={5}>
-                    <Stack direction="column" spacing={5}>
-                        <label>Variant</label>
-                        <RadioGroup
-                            onChange={(_, vriant) =>
-                                setVariant(vriant as Variant)
+                <Stack direction="column" spacing={5}>
+                    <label>Variant</label>
+                    <RadioGroup
+                        onChange={(_, vriant) => setVariant(vriant as Variant)}
+                        value={variant}
+                        name="variants"
+                    >
+                        {variants.map((v) => (
+                            <Radio
+                                key={v}
+                                value={v}
+                                label={capitalize(v)}
+                                checked={variant === v}
+                                color="neutral"
+                                onChange={() => setVariant(v)}
+                            />
+                        ))}
+                    </RadioGroup>
+                </Stack>
+                <Divider />
+                <Stack direction="column" spacing={5}>
+                    <Stack
+                        direction="row"
+                        justifyContent="space-between"
+                        spacing={5}
+                    >
+                        <label>Color</label>
+                        <Checkbox
+                            label="Custom"
+                            checked={customColorEnabled}
+                            onChange={(e) =>
+                                setCustomColorEnabled(e.target.checked)
                             }
-                            value={variant}
-                            name="variants"
+                        />
+                    </Stack>
+                    {customColorEnabled ? (
+                        <Stack direction="row" spacing={5}>
+                            <Input
+                                variant="solid"
+                                size="lg"
+                                color="primary"
+                                fullWidth
+                                error={isInvalid}
+                                placeholder="Enter a color (e.g. #ff0000)"
+                                value={inputColorValue}
+                                onChange={(e) => {
+                                    handleChange(e.target.value);
+                                }}
+                                onBlur={validate}
+                            />
+                            <Button
+                                variant="solid"
+                                color="neutral"
+                                onClick={() => {
+                                    setColorDirectly(randomHexColor());
+                                }}
+                            >
+                                Random
+                            </Button>
+                        </Stack>
+                    ) : (
+                        <RadioGroup
+                            onChange={(_, color) => setColor(color as Color)}
+                            value={color}
+                            name="colors"
                         >
-                            {variants.map((v) => (
+                            {colors.map((c) => (
                                 <Radio
-                                    key={v}
-                                    value={v}
-                                    label={capitalize(v)}
-                                    checked={variant === v}
+                                    key={c}
+                                    value={c}
+                                    label={capitalize(c)}
+                                    checked={color === c}
                                     color="neutral"
-                                    onChange={() => setVariant(v)}
+                                    onChange={() => setColor(c)}
                                 />
                             ))}
                         </RadioGroup>
-                    </Stack>
-                    <Divider />
-                    <Stack direction="column" spacing={5}>
-                        <Stack
-                            direction="row"
-                            justifyContent="space-between"
-                            spacing={5}
-                        >
-                            <label>Color</label>
-                            <Checkbox
-                                label="Custom"
-                                checked={customColorEnabled}
-                                onChange={(e) =>
-                                    setCustomColorEnabled(e.target.checked)
-                                }
-                            />
-                        </Stack>
-                        {customColorEnabled ? (
-                            <Stack direction="row" spacing={5}>
-                                <Input
-                                    variant="solid"
-                                    size="lg"
-                                    color="primary"
-                                    fullWidth
-                                    error={isInvalid}
-                                    placeholder="Enter a color (e.g. #ff0000)"
-                                    value={inputColorValue}
-                                    onChange={(e) => {
-                                        handleChange(e.target.value);
-                                    }}
-                                    onBlur={validate}
-                                />
-                                <Button
-                                    variant="solid"
-                                    color="neutral"
-                                    onClick={() => {
-                                        setColorDirectly(randomHexColor());
-                                    }}
-                                >
-                                    Random
-                                </Button>
-                            </Stack>
-                        ) : (
-                            <RadioGroup
-                                onChange={(_, color) =>
-                                    setColor(color as Color)
-                                }
-                                value={color}
-                                name="colors"
-                            >
-                                {colors.map((c) => (
-                                    <Radio
-                                        key={c}
-                                        value={c}
-                                        label={capitalize(c)}
-                                        checked={color === c}
-                                        color="neutral"
-                                        onChange={() => setColor(c)}
-                                    />
-                                ))}
-                            </RadioGroup>
-                        )}
-                    </Stack>
-                    <Divider />
-                    <Stack direction="column" spacing={5}>
-                        <Stack
-                            direction="row"
-                            justifyContent="space-between"
-                            spacing={5}
-                        >
-                            <label>Text Color</label>
-                            <Checkbox
-                                label="Custom"
-                                checked={customTextColorEnabled}
-                                onChange={(e) =>
-                                    setCustomTextColorEnabled(e.target.checked)
-                                }
-                            />
-                        </Stack>
-                        {customTextColorEnabled ? (
-                            <Stack direction="row" spacing={5}>
-                                <Input
-                                    variant="solid"
-                                    size="lg"
-                                    color="primary"
-                                    fullWidth
-                                    error={isTextColorInvalid}
-                                    placeholder="Enter a text color (e.g. #ff0000)"
-                                    value={inputTextColorValue}
-                                    onChange={(e) => {
-                                        handleTextColorChange(e.target.value);
-                                    }}
-                                    onBlur={validateTextColor}
-                                />
-                                <Button
-                                    variant="solid"
-                                    color="neutral"
-                                    onClick={() => {
-                                        setTextColorDirectly(randomHexColor());
-                                    }}
-                                >
-                                    Random
-                                </Button>
-                            </Stack>
-                        ) : (
-                            <RadioGroup
-                                onChange={(_, textColor) =>
-                                    setTextColor(
-                                        textColor as
-                                            | TypographyColor
-                                            | "inherit",
-                                    )
-                                }
-                                value={textColor}
-                                name="textColors"
-                            >
-                                {textColors.map((c) => (
-                                    <Radio
-                                        key={c}
-                                        value={c}
-                                        label={capitalize(c)}
-                                        checked={textColor === c}
-                                        color="neutral"
-                                        onChange={() =>
-                                            setTextColor(c as TypographyColor)
-                                        }
-                                    />
-                                ))}
-                            </RadioGroup>
-                        )}
-                    </Stack>
-                    <Divider />
-                    <Stack direction="column" spacing={5}>
+                    )}
+                </Stack>
+                <Divider />
+                <Stack direction="column" spacing={5}>
+                    <Stack
+                        direction="row"
+                        justifyContent="space-between"
+                        spacing={5}
+                    >
+                        <label>Text Color</label>
                         <Checkbox
-                            label="Emoticons"
-                            checked={emoticons}
-                            onChange={(e) => {
-                                setEmoticons(e.target.checked);
-                            }}
-                        />
-                        <Checkbox
-                            label="Hover Toolbar"
-                            checked={hoverToolbar}
-                            onChange={(e) => {
-                                setHoverToolbar(e.target.checked);
-                            }}
+                            label="Custom"
+                            checked={customTextColorEnabled}
+                            onChange={(e) =>
+                                setCustomTextColorEnabled(e.target.checked)
+                            }
                         />
                     </Stack>
+                    {customTextColorEnabled ? (
+                        <Stack direction="row" spacing={5}>
+                            <Input
+                                variant="solid"
+                                size="lg"
+                                color="primary"
+                                fullWidth
+                                error={isTextColorInvalid}
+                                placeholder="Enter a text color (e.g. #ff0000)"
+                                value={inputTextColorValue}
+                                onChange={(e) => {
+                                    handleTextColorChange(e.target.value);
+                                }}
+                                onBlur={validateTextColor}
+                            />
+                            <Button
+                                variant="solid"
+                                color="neutral"
+                                onClick={() => {
+                                    setTextColorDirectly(randomHexColor());
+                                }}
+                            >
+                                Random
+                            </Button>
+                        </Stack>
+                    ) : (
+                        <RadioGroup
+                            onChange={(_, textColor) =>
+                                setTextColor(
+                                    textColor as TypographyColor | "inherit",
+                                )
+                            }
+                            value={textColor}
+                            name="textColors"
+                        >
+                            {textColors.map((c) => (
+                                <Radio
+                                    key={c}
+                                    value={c}
+                                    label={capitalize(c)}
+                                    checked={textColor === c}
+                                    color="neutral"
+                                    onChange={() =>
+                                        setTextColor(c as TypographyColor)
+                                    }
+                                />
+                            ))}
+                        </RadioGroup>
+                    )}
+                </Stack>
+                <Divider />
+                <Stack direction="column" spacing={5}>
+                    <Checkbox
+                        label="Emoticons"
+                        checked={emoticons}
+                        onChange={(e) => {
+                            setEmoticons(e.target.checked);
+                        }}
+                    />
+                    <Checkbox
+                        label="Hover Toolbar"
+                        checked={hoverToolbar}
+                        onChange={(e) => {
+                            setHoverToolbar(e.target.checked);
+                        }}
+                    />
                 </Stack>
             </Paper>
         </Stack>

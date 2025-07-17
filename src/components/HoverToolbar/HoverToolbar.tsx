@@ -94,6 +94,8 @@ export const HoverToolbar = () => {
                 onMouseDown={(e) => e.preventDefault()}
                 css={{
                     position: "absolute",
+                    top: visible ? undefined : "-9999px",
+                    left: visible ? undefined : "-9999px",
                     opacity: visible ? 1 : 0,
                     transform: visible ? "scale(1)" : "scale(0.95)",
                     transition:

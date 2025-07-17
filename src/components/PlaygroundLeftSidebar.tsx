@@ -95,7 +95,6 @@ export const PlaygrondLeftSidebar = () => {
             direction="column"
             p={40}
             justifyContent="flex-start"
-            height="100%"
             overflowY="auto"
         >
             <Stack direction="column" spacing={25}>

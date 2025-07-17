@@ -171,9 +171,10 @@ function TextareaPlayground() {
                 direction={variant === "all" ? "column" : "row"}
                 alignItems="flex-start"
                 alignContent="flex-start"
-                wrap="wrap"
+                wrap={variant === "all" ? "nowrap" : "wrap"}
                 p={20}
                 spacing={variant === "all" ? 10 : 5}
+                overflowY="auto"
             >
                 {variant === "all" &&
                     allTextareas.map((textareas, i) => (
@@ -183,343 +184,311 @@ function TextareaPlayground() {
                     ))}
                 {variant !== "all" && textareas}
             </Paper>
-            <Paper
-                alignItems="center"
-                direction="column"
-                p={20}
-                flexShrink={1}
-                flexGrow={1}
-                maxWidth="min(100%, 360px)"
-                minWidth={0}
-            >
+            <Paper width="25%" overflowY="auto" direction="column" p={20}>
                 <Divider>Playground</Divider>
-                <Stack width="100%" direction="column" spacing={5}>
-                    <Stack direction="column" spacing={5}>
-                        <label>Variant</label>
-                        <RadioGroup
-                            onChange={(_, vriant) =>
-                                setVariant(vriant as Variant)
-                            }
-                            value={variant}
-                            name="variants"
-                        >
+                <Stack direction="column" spacing={5}>
+                    <label>Variant</label>
+                    <RadioGroup
+                        onChange={(_, vriant) => setVariant(vriant as Variant)}
+                        value={variant}
+                        name="variants"
+                    >
+                        <Radio
+                            value="all"
+                            label="All"
+                            checked={variant === "all"}
+                            color="neutral"
+                            onChange={() => setVariant("all")}
+                        />
+                        {variants.map((v) => (
                             <Radio
-                                value="all"
-                                label="All"
-                                checked={variant === "all"}
+                                key={v}
+                                value={v}
+                                label={capitalize(v)}
+                                checked={variant === v}
                                 color="neutral"
-                                onChange={() => setVariant("all")}
+                                onChange={() => setVariant(v)}
                             />
-                            {variants.map((v) => (
+                        ))}
+                    </RadioGroup>
+                </Stack>
+                <Divider />
+                <Stack direction="column" spacing={5}>
+                    <Stack
+                        direction="row"
+                        justifyContent="space-between"
+                        spacing={5}
+                    >
+                        <label>Size</label>
+                        <Checkbox
+                            checked={customSizeToggle}
+                            label="Custom"
+                            onChange={() =>
+                                setCustomSizeToggle((prev) => {
+                                    if (prev) setSize("md");
+                                    else setSize(Math.round((24 + 10) / 2));
+                                    return !prev;
+                                })
+                            }
+                        />
+                    </Stack>
+                    {customSizeToggle ? (
+                        <Slider
+                            value={size as number}
+                            min={6}
+                            max={24}
+                            onChange={(e) => setSize(Number(e.target.value))}
+                            valueLabelDisplay="auto"
+                            valueLabelFormat={(value) => `${value}px`}
+                        />
+                    ) : (
+                        <RadioGroup
+                            onChange={(_, size) => setSize(size as Size)}
+                            value={size as Size}
+                            name="sizes"
+                            row
+                        >
+                            {Object.keys(sizeNames).map((s) => (
                                 <Radio
-                                    key={v}
-                                    value={v}
-                                    label={capitalize(v)}
-                                    checked={variant === v}
+                                    key={s}
+                                    value={s}
+                                    label={sizeNames[s as Size]}
+                                    checked={size === s}
                                     color="neutral"
-                                    onChange={() => setVariant(v)}
+                                    onChange={() => setSize(s as Size)}
                                 />
                             ))}
                         </RadioGroup>
+                    )}
+                </Stack>
+                <Divider />
+                <Stack direction="column" spacing={5}>
+                    <Stack
+                        direction="row"
+                        justifyContent="space-between"
+                        spacing={5}
+                    >
+                        <label>Text Color</label>
+                        <Checkbox
+                            label="Custom"
+                            checked={customTextColorEnabled}
+                            onChange={(e) =>
+                                setCustomTextColorEnabled(e.target.checked)
+                            }
+                        />
                     </Stack>
-                    <Divider />
-                    <Stack direction="column" spacing={5}>
-                        <Stack
-                            direction="row"
-                            justifyContent="space-between"
-                            spacing={5}
-                        >
-                            <label>Size</label>
-                            <Checkbox
-                                checked={customSizeToggle}
-                                label="Custom"
-                                onChange={() =>
-                                    setCustomSizeToggle((prev) => {
-                                        if (prev) setSize("md");
-                                        else setSize(Math.round((24 + 10) / 2));
-                                        return !prev;
-                                    })
-                                }
-                            />
-                        </Stack>
-                        {customSizeToggle ? (
-                            <Slider
-                                value={size as number}
-                                min={6}
-                                max={24}
-                                onChange={(e) =>
-                                    setSize(Number(e.target.value))
-                                }
-                                valueLabelDisplay="auto"
-                                valueLabelFormat={(value) => `${value}px`}
-                            />
-                        ) : (
-                            <RadioGroup
-                                onChange={(_, size) => setSize(size as Size)}
-                                value={size as Size}
-                                name="sizes"
-                                row
-                            >
-                                {Object.keys(sizeNames).map((s) => (
-                                    <Radio
-                                        key={s}
-                                        value={s}
-                                        label={sizeNames[s as Size]}
-                                        checked={size === s}
-                                        color="neutral"
-                                        onChange={() => setSize(s as Size)}
-                                    />
-                                ))}
-                            </RadioGroup>
-                        )}
-                    </Stack>
-                    <Divider />
-                    <Stack direction="column" spacing={5}>
-                        <Stack
-                            direction="row"
-                            justifyContent="space-between"
-                            spacing={5}
-                        >
-                            <label>Text Color</label>
-                            <Checkbox
-                                label="Custom"
-                                checked={customTextColorEnabled}
-                                onChange={(e) =>
-                                    setCustomTextColorEnabled(e.target.checked)
-                                }
-                            />
-                        </Stack>
-                        {customTextColorEnabled ? (
-                            <Stack direction="row" spacing={5}>
-                                <Input
-                                    variant="solid"
-                                    size="lg"
-                                    color="primary"
-                                    fullWidth
-                                    error={isTextColorInvalid}
-                                    placeholder="Enter a text color (e.g. #ff0000)"
-                                    value={inputTextColorValue}
-                                    onChange={(e) => {
-                                        handleTextColorChange(e.target.value);
-                                    }}
-                                    onBlur={validateTextColor}
-                                />
-                                <Button
-                                    variant="solid"
-                                    color="neutral"
-                                    onClick={() => {
-                                        setTextColorDirectly(randomHexColor());
-                                    }}
-                                >
-                                    Random
-                                </Button>
-                            </Stack>
-                        ) : (
-                            <RadioGroup
-                                onChange={(_, textColor) =>
-                                    setTextColor(
-                                        textColor as
-                                            | TypographyColor
-                                            | "inherit",
-                                    )
-                                }
-                                value={textColor}
-                                name="textColors"
-                            >
-                                {textColors.map((c) => (
-                                    <Radio
-                                        key={c}
-                                        value={c}
-                                        label={capitalize(c)}
-                                        checked={textColor === c}
-                                        color="neutral"
-                                        onChange={() =>
-                                            setTextColor(c as TypographyColor)
-                                        }
-                                    />
-                                ))}
-                            </RadioGroup>
-                        )}
-                    </Stack>
-                    <Divider />
-                    <Stack direction="column" spacing={5}>
-                        <label>States</label>
-                        <Stack direction="column" spacing={5}>
-                            <Checkbox
-                                checked={resizable}
-                                label="Resizable"
-                                onChange={() => setResizable((prev) => !prev)}
-                            />
-                            <Checkbox
-                                checked={disabled}
-                                label="Disabled"
-                                onChange={() => setDisabled((prev) => !prev)}
-                            />
-                            <Checkbox
-                                checked={controlled}
-                                label="Controlled"
-                                onChange={() => setControlled((prev) => !prev)}
-                            />
-                        </Stack>
-                        {controlled && (
+                    {customTextColorEnabled ? (
+                        <Stack direction="row" spacing={5}>
                             <Input
                                 variant="solid"
                                 size="lg"
                                 color="primary"
                                 fullWidth
-                                value={value ?? ""}
-                                onChange={(e) => setValue(e.target.value)}
-                                placeholder="Controlled value"
+                                error={isTextColorInvalid}
+                                placeholder="Enter a text color (e.g. #ff0000)"
+                                value={inputTextColorValue}
+                                onChange={(e) => {
+                                    handleTextColorChange(e.target.value);
+                                }}
+                                onBlur={validateTextColor}
                             />
-                        )}
-                    </Stack>
-                    <Divider />
+                            <Button
+                                variant="solid"
+                                color="neutral"
+                                onClick={() => {
+                                    setTextColorDirectly(randomHexColor());
+                                }}
+                            >
+                                Random
+                            </Button>
+                        </Stack>
+                    ) : (
+                        <RadioGroup
+                            onChange={(_, textColor) =>
+                                setTextColor(
+                                    textColor as TypographyColor | "inherit",
+                                )
+                            }
+                            value={textColor}
+                            name="textColors"
+                        >
+                            {textColors.map((c) => (
+                                <Radio
+                                    key={c}
+                                    value={c}
+                                    label={capitalize(c)}
+                                    checked={textColor === c}
+                                    color="neutral"
+                                    onChange={() =>
+                                        setTextColor(c as TypographyColor)
+                                    }
+                                />
+                            ))}
+                        </RadioGroup>
+                    )}
+                </Stack>
+                <Divider />
+                <Stack direction="column" spacing={5}>
+                    <label>States</label>
                     <Stack direction="column" spacing={5}>
-                        <label>Placeholder</label>
+                        <Checkbox
+                            checked={resizable}
+                            label="Resizable"
+                            onChange={() => setResizable((prev) => !prev)}
+                        />
+                        <Checkbox
+                            checked={disabled}
+                            label="Disabled"
+                            onChange={() => setDisabled((prev) => !prev)}
+                        />
+                        <Checkbox
+                            checked={controlled}
+                            label="Controlled"
+                            onChange={() => setControlled((prev) => !prev)}
+                        />
+                    </Stack>
+                    {controlled && (
                         <Input
                             variant="solid"
                             size="lg"
                             color="primary"
                             fullWidth
-                            value={placeholder ?? ""}
-                            onChange={(e) =>
-                                e.target.value === ""
-                                    ? setPlaceholder(null)
-                                    : setPlaceholder(e.target.value)
-                            }
-                            placeholder="Enter placeholder text"
+                            value={value ?? ""}
+                            onChange={(e) => setValue(e.target.value)}
+                            placeholder="Controlled value"
+                        />
+                    )}
+                </Stack>
+                <Divider />
+                <Stack direction="column" spacing={5}>
+                    <label>Placeholder</label>
+                    <Input
+                        variant="solid"
+                        size="lg"
+                        color="primary"
+                        fullWidth
+                        value={placeholder ?? ""}
+                        onChange={(e) =>
+                            e.target.value === ""
+                                ? setPlaceholder(null)
+                                : setPlaceholder(e.target.value)
+                        }
+                        placeholder="Enter placeholder text"
+                    />
+                </Stack>
+                <Divider />
+                <Stack direction="row" spacing={5}>
+                    <Stack direction="column" spacing={5}>
+                        <label>Min Rows</label>
+                        <Input
+                            type="number"
+                            variant="solid"
+                            size="lg"
+                            color="primary"
+                            value={minRows}
+                            min={1}
+                            onChange={(e) => {
+                                const value = Number(e.target.value);
+                                if (!isNaN(value) && value >= 1) {
+                                    setMinRows(value);
+                                }
+                            }}
+                            placeholder="Enter min rows"
                         />
                     </Stack>
-                    <Divider />
-                    <Stack direction="row" spacing={5}>
-                        <Stack direction="column" spacing={5}>
-                            <label>Min Rows</label>
-                            <Input
-                                type="number"
-                                variant="solid"
-                                size="lg"
-                                color="primary"
-                                value={minRows}
-                                min={1}
-                                onChange={(e) => {
-                                    const value = Number(e.target.value);
-                                    if (!isNaN(value) && value >= 1) {
-                                        setMinRows(value);
-                                    }
-                                }}
-                                placeholder="Enter min rows"
-                            />
-                        </Stack>
-                        <Stack direction="column" spacing={5}>
-                            <label>Max Rows</label>
-                            <Input
-                                type="number"
-                                variant="solid"
-                                size="lg"
-                                color="primary"
-                                min={1}
-                                value={maxRows ?? undefined}
-                                onChange={(e) => {
-                                    const value = Number(e.target.value);
-                                    if (value >= 1 || e.target.value === "") {
-                                        setMaxRows(
-                                            e.target.value === ""
-                                                ? null
-                                                : value,
-                                        );
-                                    }
-                                }}
-                                placeholder="Enter max rows (optional)"
-                            />
-                        </Stack>
-                    </Stack>
-                    <Divider />
                     <Stack direction="column" spacing={5}>
-                        <label>Custom Color</label>
-                        <Stack
-                            alignContent="center"
-                            direction="row"
-                            spacing={5}
-                        >
-                            <Input
-                                variant="solid"
-                                size="lg"
-                                color="primary"
-                                placeholder="Enter a color (e.g., #ff0000, red)"
-                                error={isInvalid}
-                                value={inputColorValue}
-                                onChange={(e) => handleChange(e.target.value)}
-                                onBlur={validate}
-                            />
-                            <Button
-                                color="primary"
-                                disabled={!customColor}
-                                onClick={() => {
-                                    setCustomColors(
-                                        (prev) =>
-                                            [
-                                                ...prev,
-                                                customColor,
-                                            ] as ColorLike[],
+                        <label>Max Rows</label>
+                        <Input
+                            type="number"
+                            variant="solid"
+                            size="lg"
+                            color="primary"
+                            min={1}
+                            value={maxRows ?? undefined}
+                            onChange={(e) => {
+                                const value = Number(e.target.value);
+                                if (value >= 1 || e.target.value === "") {
+                                    setMaxRows(
+                                        e.target.value === "" ? null : value,
                                     );
-                                    setColorDirectly(randomHexColor());
-                                    setColorToDelete(customColor as ColorLike);
+                                }
+                            }}
+                            placeholder="Enter max rows (optional)"
+                        />
+                    </Stack>
+                </Stack>
+                <Divider />
+                <Stack direction="column" spacing={5}>
+                    <label>Custom Color</label>
+                    <Stack alignContent="center" direction="row" spacing={5}>
+                        <Input
+                            variant="solid"
+                            size="lg"
+                            color="primary"
+                            placeholder="Enter a color (e.g., #ff0000, red)"
+                            error={isInvalid}
+                            value={inputColorValue}
+                            onChange={(e) => handleChange(e.target.value)}
+                            onBlur={validate}
+                        />
+                        <Button
+                            color="primary"
+                            disabled={!customColor}
+                            onClick={() => {
+                                setCustomColors(
+                                    (prev) =>
+                                        [...prev, customColor] as ColorLike[],
+                                );
+                                setColorDirectly(randomHexColor());
+                                setColorToDelete(customColor as ColorLike);
+                            }}
+                        >
+                            Add Color
+                        </Button>
+                    </Stack>
+                    {customColors.length > 0 && (
+                        <Stack alignItems="center" direction="row" spacing={10}>
+                            <select
+                                value={colorToDelete ?? ""}
+                                onChange={(e) => {
+                                    setColorToDelete(
+                                        e.target.value.trim() as ColorLike,
+                                    );
+                                }}
+                                css={{
+                                    padding: 10,
+                                    borderRadius: 5,
+                                    border: "1px solid #ccc",
+                                    backgroundColor: "#f9f9f9",
+                                    width: "100%",
                                 }}
                             >
-                                Add Color
+                                {customColors.map((color) => (
+                                    <option key={color} value={color}>
+                                        {color}
+                                    </option>
+                                ))}
+                            </select>
+                            <Button
+                                color="danger"
+                                onClick={() => {
+                                    setCustomColors((prev) => {
+                                        const updated = prev.filter(
+                                            (color) => color !== colorToDelete,
+                                        );
+                                        setColorToDelete(
+                                            updated.length > 0
+                                                ? updated[updated.length - 1]
+                                                : null,
+                                        );
+                                        return updated;
+                                    });
+                                }}
+                            >
+                                Delete Color
                             </Button>
                         </Stack>
-                        {customColors.length > 0 && (
-                            <Stack
-                                alignItems="center"
-                                direction="row"
-                                spacing={10}
-                            >
-                                <select
-                                    value={colorToDelete ?? ""}
-                                    onChange={(e) => {
-                                        setColorToDelete(
-                                            e.target.value.trim() as ColorLike,
-                                        );
-                                    }}
-                                    css={{
-                                        padding: 10,
-                                        borderRadius: 5,
-                                        border: "1px solid #ccc",
-                                        backgroundColor: "#f9f9f9",
-                                        width: "100%",
-                                    }}
-                                >
-                                    {customColors.map((color) => (
-                                        <option key={color} value={color}>
-                                            {color}
-                                        </option>
-                                    ))}
-                                </select>
-                                <Button
-                                    color="danger"
-                                    onClick={() => {
-                                        setCustomColors((prev) => {
-                                            const updated = prev.filter(
-                                                (color) =>
-                                                    color !== colorToDelete,
-                                            );
-                                            setColorToDelete(
-                                                updated.length > 0
-                                                    ? updated[
-                                                          updated.length - 1
-                                                      ]
-                                                    : null,
-                                            );
-                                            return updated;
-                                        });
-                                    }}
-                                >
-                                    Delete Color
-                                </Button>
-                            </Stack>
-                        )}
-                    </Stack>
+                    )}
                 </Stack>
             </Paper>
         </Stack>
