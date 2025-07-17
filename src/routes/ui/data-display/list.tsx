@@ -20,6 +20,7 @@ import {
     type Size,
     type Variant,
 } from "@mutualzz/ui";
+import { seo } from "@seo";
 import { createFileRoute } from "@tanstack/react-router";
 import capitalize from "lodash-es/capitalize";
 import startCase from "lodash-es/startCase";
@@ -27,6 +28,13 @@ import { useState } from "react";
 
 export const Route = createFileRoute("/ui/data-display/list")({
     component: RouteComponent,
+    head: () => ({
+        meta: [
+            ...seo({
+                title: "List - Mutualzz UI",
+            }),
+        ],
+    }),
 });
 
 const variants = ["solid", "outlined", "plain", "soft"] as Variant[];
