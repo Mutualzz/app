@@ -1,5 +1,6 @@
 import {
     allowedListStyleTypes,
+    Button,
     Checkbox,
     Divider,
     Input,
@@ -9,11 +10,14 @@ import {
     Paper,
     Radio,
     RadioGroup,
+    randomHexColor,
     Slider,
     Stack,
     Typography,
+    useColorInput,
     type AllowedListStyleTypes,
     type Color,
+    type ColorLike,
     type ListItemButtonProps,
     type ListItemProps,
     type Orientation,
@@ -25,6 +29,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import capitalize from "lodash-es/capitalize";
 import startCase from "lodash-es/startCase";
 import { useState } from "react";
+import { FaMinus, FaPlus } from "react-icons/fa";
 
 export const Route = createFileRoute("/ui/data-display/list")({
     component: RouteComponent,
@@ -54,49 +59,43 @@ const sizeNames = {
     lg: "Large",
 };
 
-const dummyListItems = [
-    "Item 1",
-    "Item 2",
-    "Item 3",
-    "Item 4",
-    "Item 5",
-    "Item 6",
-    "Item 7",
-    "Item 8",
-];
-
 function RouteComponent() {
     const [variant, setVariant] = useState<Variant | "all">("outlined");
     const [size, setSize] = useState<Size | number>("md");
     const [marker, setMarker] = useState<string | undefined>();
     const [orientation, setOrientation] = useState<Orientation>("vertical");
 
+    const [numberOfItems, setNumberOfItems] = useState(5);
+
     const [listItemMode, setListItemMode] = useState<"default" | "button">(
         "button",
     );
-    const ListItemComponent = ({
-        color,
-        variant,
-        size,
-        ...props
-    }: ListItemButtonProps | ListItemProps) => {
-        if (listItemMode === "button") {
-            return (
-                <ListItemButton
-                    color={color}
-                    variant={variant}
-                    size={size}
-                    {...(props as ListItemButtonProps)}
-                />
-            );
-        }
-        return <ListItem {...(props as ListItemProps)} />;
-    };
 
     const [customSizeToggle, setCustomSizeToggle] = useState(false);
     const [customMarkerToggle, setCustomMarkerToggle] = useState(false);
 
-    const allLists = [...colors].map((c) =>
+    const [customColors, setCustomColors] = useState<ColorLike[]>([]);
+    const [colorToDelete, setColorToDelete] = useState<ColorLike | null>(null);
+
+    const {
+        inputValue: inputColorValue,
+        color: customColor,
+        isInvalid,
+        handleChange,
+        validate,
+        setColorDirectly,
+    } = useColorInput<Color | ColorLike>();
+
+    const ListItemComponent = ({
+        ...props
+    }: ListItemButtonProps | ListItemProps) => {
+        if (listItemMode === "button") {
+            return <ListItemButton {...(props as ListItemButtonProps)} />;
+        }
+        return <ListItem {...(props as ListItemProps)} />;
+    };
+
+    const allLists = [...colors, ...customColors].map((c) =>
         variants.map((v) => (
             <Stack
                 direction="column"
@@ -114,14 +113,14 @@ function RouteComponent() {
                     orientation={orientation}
                     size={size}
                 >
-                    {dummyListItems.map((item, index) => (
+                    {new Array(numberOfItems).fill(0).map((_, index) => (
                         <ListItemComponent
                             color={c}
                             variant={v}
                             size={size}
-                            key={`${item}-${index}`}
+                            key={`item-${index}`}
                         >
-                            {item}
+                            {`Item ${index + 1}`}
                         </ListItemComponent>
                     ))}
                 </List>
@@ -129,7 +128,7 @@ function RouteComponent() {
         )),
     );
 
-    const lists = [...colors].map((c) => (
+    const lists = [...colors, ...customColors].map((c) => (
         <Stack
             direction="column"
             alignItems="center"
@@ -147,14 +146,14 @@ function RouteComponent() {
                 orientation={orientation}
                 marker={marker}
             >
-                {dummyListItems.map((item, index) => (
+                {new Array(numberOfItems).fill(0).map((_, index) => (
                     <ListItemComponent
-                        key={`${item}-${index}`}
+                        key={`item-${index}`}
                         color={c}
                         variant={variant as Variant}
                         size={size}
                     >
-                        <Typography>{item}</Typography>
+                        <Typography>{`Item ${index + 1}`}</Typography>
                     </ListItemComponent>
                 ))}
             </List>
@@ -344,6 +343,112 @@ function RouteComponent() {
                             onChange={() => setListItemMode("button")}
                         />
                     </Stack>
+                </Stack>
+                <Divider />
+                <Stack direction="column" spacing={5}>
+                    <label>
+                        Number of Items: <b>{numberOfItems}</b>
+                    </label>
+                    <Stack direction="row" spacing={5}>
+                        <Button
+                            color="warning"
+                            variant="soft"
+                            onClick={() =>
+                                setNumberOfItems((prev) =>
+                                    prev > 5 ? prev - 1 : prev,
+                                )
+                            }
+                        >
+                            <FaMinus />
+                        </Button>
+                        <Button
+                            color="success"
+                            variant="soft"
+                            onClick={() => setNumberOfItems((prev) => prev + 1)}
+                        >
+                            <FaPlus />
+                        </Button>
+                        <Button
+                            color="danger"
+                            variant="solid"
+                            onClick={() => setNumberOfItems(5)}
+                        >
+                            Reset
+                        </Button>
+                    </Stack>
+                </Stack>
+                <Divider />
+                <Stack direction="column" spacing={5}>
+                    <label>Custom Color</label>
+                    <Stack alignContent="center" direction="row" spacing={5}>
+                        <Input
+                            variant="solid"
+                            size="lg"
+                            color="primary"
+                            placeholder="Enter a color (e.g., #ff0000)"
+                            value={inputColorValue}
+                            error={isInvalid}
+                            onChange={(e) => handleChange(e.target.value)}
+                            onBlur={validate}
+                        />
+                        <Button
+                            color="primary"
+                            disabled={!customColor}
+                            onClick={() => {
+                                setCustomColors(
+                                    (prev) =>
+                                        [...prev, customColor] as ColorLike[],
+                                );
+                                setColorDirectly(randomHexColor());
+                                setColorToDelete(customColor as ColorLike);
+                            }}
+                        >
+                            Add Color
+                        </Button>
+                    </Stack>
+                    {customColors.length > 0 && (
+                        <Stack alignItems="center" direction="row" spacing={10}>
+                            <select
+                                value={colorToDelete ?? ""}
+                                onChange={(e) => {
+                                    setColorToDelete(
+                                        e.target.value.trim() as ColorLike,
+                                    );
+                                }}
+                                css={{
+                                    padding: 10,
+                                    borderRadius: 5,
+                                    border: "1px solid #ccc",
+                                    backgroundColor: "#f9f9f9",
+                                    width: "100%",
+                                }}
+                            >
+                                {customColors.map((color) => (
+                                    <option key={color} value={color}>
+                                        {color}
+                                    </option>
+                                ))}
+                            </select>
+                            <Button
+                                color="danger"
+                                onClick={() => {
+                                    setCustomColors((prev) => {
+                                        const updated = prev.filter(
+                                            (color) => color !== colorToDelete,
+                                        );
+                                        setColorToDelete(
+                                            updated.length > 0
+                                                ? updated[updated.length - 1]
+                                                : null,
+                                        );
+                                        return updated;
+                                    });
+                                }}
+                            >
+                                Delete Color
+                            </Button>
+                        </Stack>
+                    )}
                 </Stack>
             </Paper>
         </Stack>
