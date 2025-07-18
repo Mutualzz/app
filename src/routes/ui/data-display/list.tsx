@@ -259,56 +259,64 @@ function RouteComponent() {
                     )}
                 </Stack>
                 <Divider />
-                <Stack direction="column" spacing={5}>
-                    <Stack direction="row" justifyContent="space-between">
-                        <label>Marker</label>
-                        <Checkbox
-                            checked={customMarkerToggle}
-                            label="Custom"
-                            onChange={() =>
-                                setCustomMarkerToggle((prev) => {
-                                    if (prev) setMarker(undefined);
-                                    else setMarker("");
-                                    return !prev;
-                                })
-                            }
-                        />
-                    </Stack>
-                    {customMarkerToggle ? (
-                        <Input
-                            variant="solid"
-                            value={marker ?? ""}
-                            onChange={(e) => setMarker(e.target.value)}
-                            placeholder="Enter custom marker"
-                        />
-                    ) : (
-                        <select
-                            value={marker}
-                            onChange={(e) =>
-                                setMarker(
-                                    e.target.value as AllowedListStyleTypes,
-                                )
-                            }
-                            style={{
-                                width: "100%",
-                                padding: 10,
-                                borderRadius: 5,
-                                border: "1px solid #ccc",
-                                backgroundColor: "#f9f9f9",
-                            }}
-                        >
-                            <option value="">None</option>
-                            {allowedListStyleTypes
-                                .filter((m) => m !== "none")
-                                .map((m) => (
-                                    <option key={m} value={m}>
-                                        {startCase(m)}
-                                    </option>
-                                ))}
-                        </select>
-                    )}
-                </Stack>
-                <Divider />
+                {listItemMode === "default" && (
+                    <>
+                        <Stack direction="column" spacing={5}>
+                            <Stack
+                                direction="row"
+                                justifyContent="space-between"
+                            >
+                                <label>Marker</label>
+                                <Checkbox
+                                    checked={customMarkerToggle}
+                                    label="Custom"
+                                    onChange={() =>
+                                        setCustomMarkerToggle((prev) => {
+                                            if (prev) setMarker(undefined);
+                                            else setMarker("");
+                                            return !prev;
+                                        })
+                                    }
+                                />
+                            </Stack>
+                            {customMarkerToggle ? (
+                                <Input
+                                    variant="solid"
+                                    value={marker ?? ""}
+                                    onChange={(e) => setMarker(e.target.value)}
+                                    placeholder="Enter custom marker"
+                                />
+                            ) : (
+                                <select
+                                    value={marker}
+                                    onChange={(e) =>
+                                        setMarker(
+                                            e.target
+                                                .value as AllowedListStyleTypes,
+                                        )
+                                    }
+                                    style={{
+                                        width: "100%",
+                                        padding: 10,
+                                        borderRadius: 5,
+                                        border: "1px solid #ccc",
+                                        backgroundColor: "#f9f9f9",
+                                    }}
+                                >
+                                    <option value="">None</option>
+                                    {allowedListStyleTypes
+                                        .filter((m) => m !== "none")
+                                        .map((m) => (
+                                            <option key={m} value={m}>
+                                                {startCase(m)}
+                                            </option>
+                                        ))}
+                                </select>
+                            )}
+                        </Stack>
+                        <Divider />
+                    </>
+                )}
                 <Stack direction="column" spacing={5}>
                     <label>Orientation</label>
                     <Stack direction="row" spacing={5}>
