@@ -14,11 +14,11 @@ import { type Range } from "slate";
 const tokenDefs = [
     { symbol: "**", type: "bold" },
     { symbol: "*", type: "italic" },
-    { symbol: "_", type: "italic" },
-    { symbol: "~~", type: "strikethrough" },
     { symbol: "__", type: "underline" },
+    { symbol: "~~", type: "strikethrough" },
     { symbol: "`", type: "code" },
     { symbol: "||", type: "spoiler" },
+    { symbol: "_", type: "italic" },
 ] as const;
 
 type TokenType = (typeof tokenDefs)[number]["type"];
@@ -42,6 +42,7 @@ export const parseMarkdownToRanges = (
         const match = tokenDefs.find(({ symbol }) =>
             text.startsWith(symbol, i),
         );
+        console.log(match);
         if (match) {
             const { symbol, type } = match;
             const stack = stacks[type];
