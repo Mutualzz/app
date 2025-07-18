@@ -5,7 +5,7 @@ export type Preprocessor = (
     value: Value,
     encoding?: Encoding | null | undefined,
     end?: boolean | null | undefined,
-) => Array<Chunk>;
+) => Chunk[];
 
 const search = /[\0\t\n\r]/g;
 
@@ -22,7 +22,7 @@ export function preprocess(): Preprocessor {
         encoding: Encoding | null | undefined,
         end: boolean | null | undefined,
     ) {
-        const chunks: Array<Chunk> = [];
+        const chunks: Chunk[] = [];
         let match: RegExpMatchArray | null;
         let next: number;
         let startPosition: number;

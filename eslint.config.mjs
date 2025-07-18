@@ -9,5 +9,9 @@ export default [
                 tsconfigRootDir: import.meta.dirname,
             },
         },
+        rules: {
+            "@typescript-eslint/no-unnecessary-condition": "off",
+            "@typescript-eslint/no-this-alias": "off",
+        },
     },
 ];

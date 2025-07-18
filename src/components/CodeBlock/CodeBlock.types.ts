@@ -1,6 +1,6 @@
 import type { BundledLanguage } from "shiki";
 
-export type CodeBlockProps = {
+export interface CodeBlockProps {
     code: string;
     language?: BundledLanguage | "plaintext";
-};
+}

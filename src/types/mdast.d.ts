@@ -1,3 +1,4 @@
+import type { Data, PhrasingContent } from "mdast";
 import "micromark-util-types";
 import type { Parent } from "unist";
 
@@ -16,37 +17,30 @@ declare module "micromark-util-types" {
         spoilerText: "spoilerText";
     }
 
-    interface SpoilerData extends Data {}
-
     interface Spoiler extends Parent {
         type: "spoiler";
         children: PhrasingContent[];
-        data?: SpoilerData;
+        data?: Data;
     }
 
-    interface StrikethroughData extends Data {}
     interface Strikethrough extends Parent {
         type: "strikethrough";
         children: PhrasingContent[];
-        data?: StrikethroughData;
+        data?: Data;
     }
-
-    interface UnderlineData extends Data {}
 
     interface Underline extends Parent {
         type: "underline";
         children: PhrasingContent[];
-        data?: UnderlineData;
+        data?: Data;
     }
-
-    interface EmojiData extends Data {}
 
     interface Emoji extends Parent {
         type: "emoji";
         name: string;
         url: string;
         unicode: string;
-        data?: EmojiData;
+        data?: Data;
     }
 
     interface Extension {

@@ -54,9 +54,9 @@ export function createTokenizer(
         offset: (from && from.offset) || 0,
     };
     const columnStart: Record<string, number> = {};
-    const resolveAllConstructs: Array<Construct> = [];
-    let chunks: Array<Chunk> = [];
-    let stack: Array<Token> = [];
+    const resolveAllConstructs: Construct[] = [];
+    let chunks: Chunk[] = [];
+    let stack: Token[] = [];
     let consumed: boolean | undefined = true;
 
     /**
@@ -107,7 +107,7 @@ export function createTokenizer(
 
     return context;
 
-    function write(slice: Array<Chunk>): Array<Event> {
+    function write(slice: Chunk[]): Event[] {
         chunks = push(chunks, slice);
 
         main();
@@ -140,7 +140,7 @@ export function createTokenizer(
         return serializeChunks(sliceStream(token), expandTabs);
     }
 
-    function sliceStream(token: PickedToken): Array<Chunk> {
+    function sliceStream(token: PickedToken): Chunk[] {
         return sliceChunks(chunks, token);
     }
 
@@ -339,11 +339,11 @@ export function createTokenizer(
          * constructs, or a single construct.
          */
         function hook(
-            constructs: Array<Construct> | ConstructRecord | Construct,
+            constructs: Construct[] | ConstructRecord | Construct,
             returnState: State,
             bogusState: State | undefined,
         ): State {
-            let listOfConstructs: ReadonlyArray<Construct>;
+            let listOfConstructs: readonly Construct[];
             let constructIndex: number;
             let currentConstruct: Construct;
             let info: Info;
@@ -380,9 +380,7 @@ export function createTokenizer(
              * Handle a list of construct.
              *
              */
-            function handleListOfConstructs(
-                list: ReadonlyArray<Construct>,
-            ): State {
+            function handleListOfConstructs(list: readonly Construct[]): State {
                 listOfConstructs = list;
                 constructIndex = 0;
 
@@ -531,14 +529,14 @@ export function createTokenizer(
  * Get the chunks from a slice of chunks in the range of a token.
  */
 function sliceChunks(
-    chunks: ReadonlyArray<Chunk>,
+    chunks: readonly Chunk[],
     token: Pick<Token, "end" | "start">,
-): Array<Chunk> {
+): Chunk[] {
     const startIndex = token.start._index;
     const startBufferIndex = token.start._bufferIndex;
     const endIndex = token.end._index;
     const endBufferIndex = token.end._bufferIndex;
-    let view: Array<Chunk>;
+    let view: Chunk[];
 
     if (startIndex === endIndex) {
         assert(endBufferIndex > -1, "expected non-negative end buffer index");
@@ -578,11 +576,11 @@ function sliceChunks(
  * Get the string value of a slice of chunks.
  */
 function serializeChunks(
-    chunks: ReadonlyArray<Chunk>,
+    chunks: readonly Chunk[],
     expandTabs: boolean | undefined,
 ): string {
     let index = -1;
-    const result: Array<string> = [];
+    const result: string[] = [];
     let atTab: boolean | undefined;
 
     while (++index < chunks.length) {

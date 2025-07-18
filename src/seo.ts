@@ -1,9 +1,9 @@
-type SEO = {
+interface SEO {
     title?: string;
     description?: string;
     image?: string;
     keywords?: string | string[];
-};
+}
 
 const defaultTitle = "Mutualzz (Under Development)";
 const defaultDescription =

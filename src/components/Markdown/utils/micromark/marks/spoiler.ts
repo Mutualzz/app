@@ -11,7 +11,6 @@ import type {
     State,
     TokenizeContext,
 } from "micromark-util-types";
-2;
 
 export const spoiler: Construct = {
     name: "spoiler",

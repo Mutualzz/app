@@ -23,7 +23,7 @@ const containerConstruct: Construct = { tokenize: tokenizeContainer };
 
 function initializeDocument(this: TokenizeContext, effects: Effects): State {
     const self = this;
-    const stack: Array<StackItem> = [];
+    const stack: StackItem[] = [];
     let continued = 0;
     let childFlow: TokenizeContext | undefined;
     let childToken: Token | undefined;

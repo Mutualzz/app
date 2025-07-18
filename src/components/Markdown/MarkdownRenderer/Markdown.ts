@@ -27,9 +27,9 @@ type AllowElement = (
     parent: Readonly<Parents> | undefined,
 ) => boolean | null | undefined;
 
-type ExtraProps = {
+interface ExtraProps {
     node?: Element;
-};
+}
 
 type Components = {
     [Key in keyof JSX.IntrinsicElements]?:
@@ -41,24 +41,24 @@ type Components = {
     spoiler?: ComponentType<Spoiler>;
 };
 
-export type Options = {
+export interface Options {
     allowElement?: AllowElement | null;
-    allowedElements?: ReadonlyArray<string> | null;
+    allowedElements?: readonly string[] | null;
     children?: string | null;
     components?: Components | null;
-    disallowedElements?: ReadonlyArray<string> | null;
+    disallowedElements?: readonly string[] | null;
     rehypePlugins?: PluggableList | null;
     remarkPlugins?: PluggableList | null;
     remarkRehypeOptions?: Readonly<RemarkRehypeOptions> | null;
     skipHtml?: boolean | null;
     unwrapDisallowed?: boolean | null;
     urlTransform?: UrlTransform | null;
-};
+}
 
-type HooksOptionsOnly = {
+interface HooksOptionsOnly {
     /** Content to render while the processor is processing the markdown (optional). */
     fallback?: ReactNode | null;
-};
+}
 
 type HooksOptions = Options & HooksOptionsOnly;
 

@@ -29,7 +29,7 @@ export const getActiveFormats = (
         at: selection,
         match: (n) => Element.isElement(n) && editor.isBlock(n),
     });
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+
     if (!blockEntry) return [];
 
     const [, blockPath] = blockEntry;
@@ -74,7 +74,6 @@ export const getActiveFormats = (
         while (m < markers.length && markers[m].pos === i) {
             const top = stack[stack.length - 1];
             if (
-                // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
                 top &&
                 top.marker === markers[m].marker &&
                 top.type === markers[m].type

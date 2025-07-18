@@ -2,37 +2,37 @@ import type { BaseEditor, BaseRange, Descendant } from "slate";
 import { type HistoryEditor } from "slate-history";
 import { type ReactEditor } from "slate-react";
 
-export type BlockQuoteElement = {
+export interface BlockQuoteElement {
     type: "blockquote";
     children: Descendant[];
-};
+}
 
-export type LineElement = {
+export interface LineElement {
     type: "line";
     children: Descendant[];
-};
+}
 
-export type HeadingElement = {
+export interface HeadingElement {
     type: "heading";
     level: 1 | 2 | 3;
     children: Descendant[];
-};
+}
 
-export type LinkElement = {
+export interface LinkElement {
     type: "link";
     url: string;
     children: Descendant[];
-};
+}
 
-export type EmojiElement = {
+export interface EmojiElement {
     type: "emoji";
     url: string;
     unicode: string;
     name: string;
     children: EmptyText[];
-};
+}
 
-export type Text = {
+export interface Text {
     bold?: boolean;
     italic?: boolean;
     code?: boolean;
@@ -41,11 +41,11 @@ export type Text = {
     spoiler?: boolean;
     isMarker?: boolean; // Used to mark ranges for markers like **bold** or *italic*
     text: string;
-};
+}
 
-export type EmptyText = {
+export interface EmptyText {
     text: string;
-};
+}
 
 export type FormatKey = keyof Omit<Text, "text" | "isMarker"> | "blockquote";
 
@@ -67,8 +67,6 @@ declare module "slate" {
         Editor: Editor;
         Element: Element;
         Text: Text;
-        Range: BaseRange & {
-            [key: string]: any;
-        };
+        Range: BaseRange & Record<string, any>;
     }
 }

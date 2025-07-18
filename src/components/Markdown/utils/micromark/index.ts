@@ -200,7 +200,7 @@ function compiler(options: Options | null | undefined) {
     /**
      * Turn micromark events into an mdast tree.
      */
-    function compile(events: Array<Event>): Root {
+    function compile(events: Event[]): Root {
         let tree: Root = { type: "root", children: [] };
         const context: Omit<CompileContext, "sliceSerialize"> = {
             stack: [tree],
@@ -212,7 +212,7 @@ function compiler(options: Options | null | undefined) {
             resume,
             data,
         };
-        const listStack: Array<number> = [];
+        const listStack: number[] = [];
         let index = -1;
 
         while (++index < events.length) {
@@ -282,7 +282,7 @@ function compiler(options: Options | null | undefined) {
     }
 
     function prepareList(
-        events: Array<Event>,
+        events: Event[],
         start: number,
         length: number,
     ): number {
@@ -461,7 +461,7 @@ function compiler(options: Options | null | undefined) {
         const parent = this.stack[this.stack.length - 1];
         assert(parent, "expected `parent`");
         assert("children" in parent, "expected `parent`");
-        const siblings: Array<Nodes> = parent.children;
+        const siblings: Nodes[] = parent.children;
         siblings.push(node);
         this.stack.push(node);
         this.tokenStack.push([token, errorHandler || undefined]);
@@ -672,7 +672,7 @@ function compiler(options: Options | null | undefined) {
         assert(node, "expected node on stack");
         assert("children" in node, "expected parent on stack");
 
-        const siblings: Array<Nodes> = node.children;
+        const siblings: Nodes[] = node.children;
 
         let tail = siblings[siblings.length - 1];
 
@@ -843,7 +843,7 @@ function compiler(options: Options | null | undefined) {
         this.data.inReference = true;
 
         if (node.type === "link") {
-            const children: Array<PhrasingContent> = fragment.children;
+            const children: PhrasingContent[] = fragment.children;
 
             node.children = children;
         } else {
@@ -1088,7 +1088,7 @@ function point(d: Point): Point {
 
 function configure(
     combined: Config,
-    extensions: Array<Array<Extension> | Extension>,
+    extensions: (Extension[] | Extension)[],
 ): undefined {
     let index = -1;
 

@@ -38,7 +38,7 @@ export const attention: Construct = {
  * Take all events and resolve attention to emphasis or strong.
  *
  */
-// eslint-disable-next-line complexity
+
 function resolveAllAttention(events: Event[], context: TokenizeContext) {
     let index = -1;
     let open: number;
@@ -47,7 +47,7 @@ function resolveAllAttention(events: Event[], context: TokenizeContext) {
     let openingSequence: Token;
     let closingSequence: Token;
     let use: number;
-    let nextEvents: Array<Event>;
+    let nextEvents: Event[];
     let offset: number;
 
     // Walk through all events.

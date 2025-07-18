@@ -1,4 +1,3 @@
-/* eslint-disable sonarjs/no-nested-functions */
 import type { JSX } from "@emotion/react/jsx-runtime";
 import { loadHighlighter } from "@utils/loadHighlighter";
 import { useEffect, useState } from "react";

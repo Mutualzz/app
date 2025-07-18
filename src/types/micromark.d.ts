@@ -17,11 +17,11 @@ export interface CompileContext {
     /**
      * Stack of nodes.
      */
-    stack: Array<Fragment | Nodes>;
+    stack: (Fragment | Nodes)[];
     /**
      * Stack of tokens.
      */
-    tokenStack: Array<TokenTuple>;
+    tokenStack: TokenTuple[];
 
     /**
      * Capture some of the output data.
@@ -162,7 +162,7 @@ export interface Config {
     /**
      * Token types where line endings are used.
      */
-    canContainEols: Array<string>;
+    canContainEols: string[];
     /**
      * Opening handles.
      */
@@ -174,7 +174,7 @@ export interface Config {
     /**
      * Tree transforms.
      */
-    transforms: Array<Transform>;
+    transforms: Transform[];
 }
 
 /**
@@ -184,7 +184,7 @@ export interface Extension {
     /**
      * Token types where line endings are used.
      */
-    canContainEols?: Array<string> | null | undefined;
+    canContainEols?: string[] | null | undefined;
     /**
      * Opening handles.
      */
@@ -196,7 +196,7 @@ export interface Extension {
     /**
      * Tree transforms.
      */
-    transforms?: Array<Transform> | null | undefined;
+    transforms?: Transform[] | null | undefined;
 }
 
 /**
@@ -210,7 +210,7 @@ export interface Fragment extends Parent {
     /**
      * Children.
      */
-    children: Array<PhrasingContent>;
+    children: PhrasingContent[];
 }
 
 /**
@@ -275,7 +275,7 @@ export interface Options extends ParseOptions {
     /**
      * Extensions for this utility to change how tokens are turned into a tree.
      */
-    mdastExtensions?: Array<Extension | Array<Extension>> | null | undefined;
+    mdastExtensions?: (Extension | Extension[])[] | null | undefined;
 }
 
 /**

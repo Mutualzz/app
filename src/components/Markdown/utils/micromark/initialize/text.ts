@@ -91,9 +91,9 @@ function createResolver(
     return resolveAllText;
 
     function resolveAllText(
-        events: Array<Event>,
+        events: Event[],
         context: TokenizeContext,
-    ): Array<Event> {
+    ): Event[] {
         let index = -1;
         let enter: number | undefined;
 
@@ -132,9 +132,9 @@ function createResolver(
  *
  */
 function resolveAllLineSuffixes(
-    events: Array<Event>,
+    events: Event[],
     context: TokenizeContext,
-): Array<Event> {
+): Event[] {
     let eventIndex = 0; // Skip first.
 
     while (++eventIndex <= events.length) {
