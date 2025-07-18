@@ -122,10 +122,10 @@ export const MarkdownRenderer = ({
                         <Typography
                             fontFamily="monospace"
                             fontSize="inherit"
+                            padding="0.2em 0.4em"
+                            borderRadius={4}
                             css={{
                                 background: "rgba(255,255,255,0.05)",
-                                padding: "0.2em 0.4em",
-                                borderRadius: 4,
                             }}
                         >
                             {children}
@@ -163,14 +163,14 @@ export const MarkdownRenderer = ({
                         const [revealed, setRevealed] = useState(false);
 
                         return (
-                            <span
+                            <Typography
                                 css={spoilerStyles(revealed, theme)}
                                 onClick={() => {
                                     setRevealed(true);
                                 }}
                             >
                                 {children}
-                            </span>
+                            </Typography>
                         );
                     },
                 }}

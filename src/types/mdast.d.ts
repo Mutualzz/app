@@ -1,5 +1,6 @@
 import type { Data, PhrasingContent } from "mdast";
 import "micromark-util-types";
+import type { ReactNode } from "react";
 import type { Parent } from "unist";
 
 declare module "micromark-util-types" {
@@ -19,7 +20,7 @@ declare module "micromark-util-types" {
 
     interface Spoiler extends Parent {
         type: "spoiler";
-        children: PhrasingContent[];
+        children: ReactNode[];
         data?: Data;
     }
 
