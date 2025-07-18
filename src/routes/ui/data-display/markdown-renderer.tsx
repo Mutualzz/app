@@ -1,5 +1,5 @@
-import { MarkdownInput } from "@components/Markdown/MarkdownInput";
-import { MarkdownRenderer } from "@components/Markdown/MarkdownRenderer";
+import { MarkdownInput } from "@components/Markdown/MarkdownInput/MarkdownInput";
+import { MarkdownRenderer } from "@components/Markdown/MarkdownRenderer/MarkdownRenderer";
 import {
     Button,
     Checkbox,

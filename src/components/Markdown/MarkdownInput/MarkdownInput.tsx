@@ -1,8 +1,10 @@
 import { HoverToolbar } from "@components/HoverToolbar/HoverToolbar";
 import { useTheme } from "@mutualzz/ui";
 import { markdownToSlate } from "@utils/markdownToSlate";
+import { getActiveFormats } from "@utils/markdownUtils";
 import { slateToMarkdown } from "@utils/slateToMarkdown";
-import { isKeyHotkey } from "is-hotkey";
+import { wrapSelectionWith } from "@utils/wrapSelectionWith";
+import isHotkey from "is-hotkey";
 import {
     useCallback,
     useEffect,
@@ -29,11 +31,12 @@ import {
 } from "slate-react";
 import { Element } from "./Element";
 import { Leaf } from "./Leaf";
+import { MarkdownInputContext } from "./MarkdownInput.context";
 import {
     parseMarkdownToRanges,
     resolveMarkdownStyles,
-} from "./Markdown.helpers";
-import type { MarkdownInputProps } from "./Markdown.types";
+} from "./MarkdownInput.helpers";
+import type { MarkdownInputProps } from "./MarkdownInput.types";
 import { withEmojis } from "./plugins/withEmojis";
 import { withSyntax } from "./plugins/withSyntax";
 
@@ -64,10 +67,11 @@ export const MarkdownInput = ({
         [],
     );
 
+    const formats = getActiveFormats(editor, editor.selection);
+
     useEffect(() => {
         editor.enableEmoticons = emoticons;
-        editor.enableHoverToolbar = hoverToolbar;
-    }, [editor, emoticons, hoverToolbar]);
+    }, [editor, emoticons]);
 
     const renderElement = useCallback(
         (props: RenderElementProps) => <Element {...props} />,
@@ -115,12 +119,36 @@ export const MarkdownInput = ({
 
     const onKeyDown = useCallback(
         (e: KeyboardEvent) => {
-            if (isKeyHotkey("Control+a", e.nativeEvent)) {
+            if (isHotkey("mod+a", e)) {
                 e.preventDefault();
                 editor.select({
                     anchor: editor.start([]),
                     focus: editor.end([]),
                 });
+                return;
+            }
+
+            if (isHotkey("mod+b", e)) {
+                e.preventDefault();
+                wrapSelectionWith(editor, "**", formats);
+                return;
+            }
+
+            if (isHotkey("mod+i", e)) {
+                e.preventDefault();
+                wrapSelectionWith(editor, "*", formats);
+                return;
+            }
+
+            if (isHotkey("mod+u", e)) {
+                e.preventDefault();
+                wrapSelectionWith(editor, "__", formats);
+                return;
+            }
+
+            if (isHotkey("mod+s", e)) {
+                e.preventDefault();
+                wrapSelectionWith(editor, "~~", formats);
                 return;
             }
 
@@ -175,9 +203,7 @@ export const MarkdownInput = ({
             const { selection } = editor;
 
             if (selection && Range.isCollapsed(selection)) {
-                const { nativeEvent } = e;
-
-                if (isKeyHotkey("left", nativeEvent)) {
+                if (isHotkey("left", e)) {
                     e.preventDefault();
                     editor.move({
                         unit: "offset",
@@ -185,7 +211,7 @@ export const MarkdownInput = ({
                     });
                 }
 
-                if (isKeyHotkey("right", nativeEvent)) {
+                if (isHotkey("right", e)) {
                     e.preventDefault();
                     editor.move({
                         unit: "offset",
@@ -194,7 +220,7 @@ export const MarkdownInput = ({
                 }
             }
         },
-        [editor, onEnter, handleShiftEnter],
+        [editor, onEnter, handleShiftEnter, formats],
     );
 
     const handleChange = useCallback(
@@ -208,63 +234,73 @@ export const MarkdownInput = ({
     );
 
     return (
-        <Slate
-            initialValue={editorValue}
-            onChange={(newValue) => {
-                setEditorValue(newValue);
-                handleChange(newValue);
+        <MarkdownInputContext.Provider
+            value={{
+                activeFormats: formats,
+                enableEmoticons: emoticons,
+                enableHoverToolbar: hoverToolbar,
             }}
-            editor={editor}
         >
-            <HoverToolbar />
-            <Editable
-                decorate={decorate}
-                renderElement={renderElement}
-                renderLeaf={renderLeaf}
-                onKeyDown={onKeyDown}
-                placeholder={placeholder}
-                renderPlaceholder={({
-                    children,
-                    attributes: { style, ...attributes },
-                }) => (
-                    <span
-                        {...attributes}
-                        css={{
-                            pointerEvents: "none",
-                            userSelect: "none",
-                            lineHeight: 1,
-                            opacity: 0.3,
-                            display: "block",
-                            position: "absolute",
-                            top: "0.5em",
-                            left: "0.5em",
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                            whiteSpace: "nowrap",
-                        }}
-                    >
-                        {children}
-                    </span>
-                )}
-                css={{
-                    display: "block",
-                    position: "relative",
-                    width: "100%",
-                    height: "100%",
-                    padding: "0.5em",
-                    minWidth: 0,
-                    boxSizing: "border-box",
-                    ...resolveMarkdownStyles(theme, color, textColor)[variant],
-                    ...(disabled && {
-                        opacity: 0.5,
-                        pointerEvents: "none",
-                    }),
-                    ...css,
+            <Slate
+                initialValue={editorValue}
+                onChange={(newValue) => {
+                    setEditorValue(newValue);
+                    handleChange(newValue);
                 }}
-                disabled={disabled}
-                disableDefaultStyles
-                spellCheck
-            />
-        </Slate>
+                editor={editor}
+            >
+                <HoverToolbar />
+                <Editable
+                    decorate={decorate}
+                    renderElement={renderElement}
+                    renderLeaf={renderLeaf}
+                    onKeyDown={onKeyDown}
+                    placeholder={placeholder}
+                    renderPlaceholder={({
+                        children,
+                        attributes: { style, ...attributes },
+                    }) => (
+                        <span
+                            {...attributes}
+                            css={{
+                                pointerEvents: "none",
+                                userSelect: "none",
+                                lineHeight: 1,
+                                opacity: 0.3,
+                                display: "block",
+                                position: "absolute",
+                                top: "0.5em",
+                                left: "0.5em",
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                                whiteSpace: "nowrap",
+                            }}
+                        >
+                            {children}
+                        </span>
+                    )}
+                    css={{
+                        display: "block",
+                        position: "relative",
+                        width: "100%",
+                        height: "100%",
+                        padding: "0.5em",
+                        minWidth: 0,
+                        boxSizing: "border-box",
+                        ...resolveMarkdownStyles(theme, color, textColor)[
+                            variant
+                        ],
+                        ...(disabled && {
+                            opacity: 0.5,
+                            pointerEvents: "none",
+                        }),
+                        ...css,
+                    }}
+                    disabled={disabled}
+                    disableDefaultStyles
+                    spellCheck
+                />
+            </Slate>
+        </MarkdownInputContext.Provider>
     );
 };

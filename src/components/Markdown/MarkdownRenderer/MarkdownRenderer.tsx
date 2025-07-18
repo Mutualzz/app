@@ -3,7 +3,7 @@ import { Paper, Typography, useTheme } from "@mutualzz/ui";
 import { spoilerStyles } from "@css/spoilerStyles";
 import { useState } from "react";
 import { Markdown } from "./Markdown";
-import type { MarkdownRendererProps } from "./Markdown.types";
+import type { MarkdownRendererProps } from "./MarkdownRenderer.types";
 
 export const MarkdownRenderer = ({
     color = "neutral",

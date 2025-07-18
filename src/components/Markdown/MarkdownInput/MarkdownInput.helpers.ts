@@ -42,7 +42,6 @@ export const parseMarkdownToRanges = (
         const match = tokenDefs.find(({ symbol }) =>
             text.startsWith(symbol, i),
         );
-        console.log(match);
         if (match) {
             const { symbol, type } = match;
             const stack = stacks[type];

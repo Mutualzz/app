@@ -1,4 +1,4 @@
-import { MarkdownInput } from "@components/Markdown/MarkdownInput";
+import { MarkdownInput } from "@components/Markdown/MarkdownInput/MarkdownInput";
 import {
     Button,
     Checkbox,

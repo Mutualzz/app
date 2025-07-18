@@ -18,13 +18,3 @@ export interface MarkdownInputProps {
 
     css?: CSSObject;
 }
-
-export interface MarkdownRendererProps {
-    value: string;
-
-    color?: Color | ColorLike;
-    textColor?: TypographyColor | "inherit";
-    variant?: Variant;
-
-    css?: CSSObject;
-}

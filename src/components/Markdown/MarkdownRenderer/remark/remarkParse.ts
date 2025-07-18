@@ -2,7 +2,7 @@ import type { Root } from "mdast";
 
 import type { Options as FromMarkdownOptions } from "@app-types/micromark";
 import type { Plugin } from "unified";
-import { micromark } from "../utils/micromark/index";
+import { micromark } from "../../utils/micromark";
 
 type Options = Omit<FromMarkdownOptions, "extensions" | "mdastExtensions">;
 
