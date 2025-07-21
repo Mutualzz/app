@@ -11,9 +11,11 @@ export const remarkParse: Plugin<
     string,
     Root
 > = function (this: any, options?: Readonly<Options> | null) {
-    this.parser = function (document: string) {
+    const self = this;
+
+    self.parser = function (document: string) {
         return micromark(document, "utf-8", {
-            ...this.data("settings"),
+            ...self.data("settings"),
             ...options,
         });
     };
