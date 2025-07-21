@@ -49,7 +49,6 @@ export const Element = ({
                         width: "1.375em",
                         height: "1.375em",
                         verticalAlign: "middle",
-                        pointerEvents: "none",
                         userSelect: "none",
                     }}
                     aria-label={`:${element.name}:`}
