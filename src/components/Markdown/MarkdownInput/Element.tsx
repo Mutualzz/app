@@ -50,6 +50,7 @@ export const Element = ({
                         height: "1.375em",
                         verticalAlign: "middle",
                         userSelect: "none",
+                        pointerEvents: "none",
                     }}
                     aria-label={`:${element.name}:`}
                     contentEditable={false}
