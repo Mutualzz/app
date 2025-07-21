@@ -90,7 +90,11 @@ function RouteComponent() {
         ...props
     }: ListItemButtonProps | ListItemProps) => {
         if (listItemMode === "button") {
-            return <ListItemButton {...(props as ListItemButtonProps)} />;
+            return (
+                <ListItem {...(props as ListItemProps)}>
+                    <ListItemButton {...(props as ListItemButtonProps)} />
+                </ListItem>
+            );
         }
         return <ListItem {...(props as ListItemProps)} />;
     };
@@ -348,7 +352,11 @@ function RouteComponent() {
                             label="Button"
                             value="button"
                             checked={listItemMode === "button"}
-                            onChange={() => setListItemMode("button")}
+                            onChange={() => {
+                                setMarker(undefined);
+                                setCustomMarkerToggle(false);
+                                setListItemMode("button");
+                            }}
                         />
                     </Stack>
                 </Stack>
