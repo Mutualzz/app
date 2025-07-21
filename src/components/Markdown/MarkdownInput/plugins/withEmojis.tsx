@@ -16,6 +16,7 @@ const combinedPattern = `(?:${baseEmoticonRegex.source}|${escapedCustom})`;
 
 const emoticonRegex = new RegExp(`(${combinedPattern})(?=\\s)`, "g");
 
+// TODO: Still need to fix editor cursor being lost upon deleting an emoji (when theres another emoji before it)
 export const withEmojis = (editor: Editor) => {
     const { isInline, isVoid, markableVoid, insertText } = editor;
 
