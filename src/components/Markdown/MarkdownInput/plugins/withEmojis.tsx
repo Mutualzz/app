@@ -4,7 +4,7 @@ import { slateToMarkdown } from "@utils/slateToMarkdown";
 import emojiRegex from "emojibase-regex";
 import baseEmoticonRegex from "emojibase-regex/emoticon";
 import shortcodeRegex from "emojibase-regex/shortcode";
-import { Range, Text, type Editor, type Element } from "slate";
+import { Range, Text, type Editor, type Element, type TextUnit } from "slate";
 
 const extendedEmoticons = [":3", ">.<", "T^T", "T_T", "x_x"];
 
@@ -16,9 +16,9 @@ const combinedPattern = `(?:${baseEmoticonRegex.source}|${escapedCustom})`;
 
 const emoticonRegex = new RegExp(`(${combinedPattern})(?=\\s)`, "g");
 
-// TODO: Still need to fix editor cursor being lost upon deleting an emoji (when theres another emoji before it)
 export const withEmojis = (editor: Editor) => {
-    const { isInline, isVoid, markableVoid, insertText } = editor;
+    const { deleteBackward, isInline, isVoid, markableVoid, insertText } =
+        editor;
 
     editor.isInline = (element: Element) => {
         return element.type === "emoji" ? true : isInline(element);
@@ -136,6 +136,21 @@ export const withEmojis = (editor: Editor) => {
         }
 
         insertText(text);
+    };
+
+    editor.deleteBackward = (unit: TextUnit) => {
+        const { selection } = editor;
+
+        if (selection && Range.isCollapsed(selection)) {
+            const pointBefore = editor.before(selection);
+            if (pointBefore) {
+                deleteBackward(unit);
+                editor.select(pointBefore);
+                return;
+            }
+        }
+
+        deleteBackward(unit);
     };
 
     editor.insertData = (data: DataTransfer) => {
