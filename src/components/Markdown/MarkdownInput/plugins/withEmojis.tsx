@@ -1,10 +1,10 @@
+import type { EmojiElement } from "@app-types/slate";
 import { getEmoji } from "@utils/emojis";
 import { slateToMarkdown } from "@utils/slateToMarkdown";
 import emojiRegex from "emojibase-regex";
 import baseEmoticonRegex from "emojibase-regex/emoticon";
 import shortcodeRegex from "emojibase-regex/shortcode";
 import { Range, Text, type Editor, type Element } from "slate";
-import type { EmojiElement } from "types/slate";
 
 const extendedEmoticons = [":3", ">.<", "T^T", "T_T", "x_x"];
 
