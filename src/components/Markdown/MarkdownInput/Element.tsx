@@ -53,7 +53,6 @@ export const Element = ({
                         pointerEvents: "none",
                     }}
                     aria-label={`:${element.name}:`}
-                    contentEditable={false}
                     data-slate-void
                     data-slate-inline
                 >
