@@ -4,7 +4,7 @@ import { slateToMarkdown } from "@utils/slateToMarkdown";
 import emojiRegex from "emojibase-regex";
 import baseEmoticonRegex from "emojibase-regex/emoticon";
 import shortcodeRegex from "emojibase-regex/shortcode";
-import { Range, Text, type Editor, type Element, type TextUnit } from "slate";
+import { Element, Path, Range, Text, type Editor, type TextUnit } from "slate";
 
 const extendedEmoticons = [":3", ">.<", "T^T", "T_T", "x_x"];
 
@@ -17,8 +17,14 @@ const combinedPattern = `(?:${baseEmoticonRegex.source}|${escapedCustom})`;
 const emoticonRegex = new RegExp(`(${combinedPattern})(?=\\s)`, "g");
 
 export const withEmojis = (editor: Editor) => {
-    const { deleteBackward, isInline, isVoid, markableVoid, insertText } =
-        editor;
+    const {
+        deleteBackward,
+        deleteForward,
+        isInline,
+        isVoid,
+        markableVoid,
+        insertText,
+    } = editor;
 
     editor.isInline = (element: Element) => {
         return element.type === "emoji" ? true : isInline(element);
@@ -138,15 +144,42 @@ export const withEmojis = (editor: Editor) => {
         insertText(text);
     };
 
-    editor.deleteBackward = (unit: TextUnit) => {
+    editor.deleteForward = (unit: TextUnit) => {
         const { selection } = editor;
 
         if (selection && Range.isCollapsed(selection)) {
-            const pointBefore = editor.before(selection);
-            if (pointBefore) {
-                deleteBackward(unit);
-                editor.select(pointBefore);
+            const { path } = selection.anchor;
+            const [node] = editor.node(path);
+
+            if (Element.isElement(node) && node.type === "emoji") {
+                editor.removeNodes({ at: path });
                 return;
+            }
+        }
+
+        deleteForward(unit);
+    };
+
+    editor.deleteBackward = (unit: TextUnit) => {
+        const { selection } = editor;
+
+        if (selection && Range.isCollapsed(selection) && unit === "character") {
+            const { path, offset } = selection.anchor;
+
+            if (offset === 0) {
+                const prevPath = Path.previous(path);
+
+                if (prevPath) {
+                    const [prevNode] = editor.node(prevPath);
+
+                    if (
+                        Element.isElement(prevNode) &&
+                        prevNode.type === "emoji"
+                    ) {
+                        editor.removeNodes({ at: prevPath });
+                        return;
+                    }
+                }
             }
         }
 
