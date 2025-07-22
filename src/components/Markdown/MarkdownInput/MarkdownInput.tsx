@@ -46,6 +46,7 @@ export const MarkdownInput = ({
     variant = "outlined",
     disabled = false,
 
+    autoFocus = false,
     emoticons = true,
     hoverToolbar = true,
 
@@ -251,6 +252,7 @@ export const MarkdownInput = ({
             >
                 <HoverToolbar />
                 <Editable
+                    autoFocus={autoFocus}
                     decorate={decorate}
                     renderElement={renderElement}
                     renderLeaf={renderLeaf}
