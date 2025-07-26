@@ -1,4 +1,4 @@
-import { GatewayOpcodes } from "@mutualzz/types";
+import { GatewayEvents, GatewayOpcodes } from "@mutualzz/types";
 import { makeAutoObservable } from "mobx";
 import { Logger } from "../Logger";
 import type { AppStore } from "./App.store";
@@ -8,7 +8,7 @@ const logger = new Logger({
     level: "debug",
 });
 
-const ignoredEvents = new Set(["ACK", "READY", "RESUMED"]);
+const ignoredEvents = new Set(["ACK", "READY", "RESUME"]);
 
 // TODO: You left off at trying to debug if all the events are being sent correctly
 // and if the session is being resumed correctly.
@@ -70,15 +70,15 @@ export class GatewayStore {
                         localStorage.setItem("gatewaySeq", s.toString());
                     }
 
-                    if (t === "READY") {
+                    if (t === GatewayEvents.Ready) {
                         this.sessionId = d.sessionId;
                         localStorage.setItem("gatewaySessionId", d.sessionId);
 
                         logger.info(`[READY] Session: ${d.sessionId}`);
                     }
 
-                    if (t === "RESUMED")
-                        logger.info(`[RESUMED] Session: ${d.sessionId}`);
+                    if (t === GatewayEvents.Resume)
+                        logger.info(`[RESUME] Session: ${d.sessionId}`);
 
                     if (!ignoredEvents.has(t)) {
                         this.events.push({ t, d, s: this.seq });
