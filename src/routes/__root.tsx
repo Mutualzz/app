@@ -7,6 +7,7 @@ import "@fontsource/inter/600";
 import "@fontsource/inter/700";
 import "@fontsource/inter/800";
 import "@fontsource/inter/900";
+import { useStores } from "@hooks/useStores.hook";
 
 import { CssBaseline, ThemeProvider } from "@mutualzz/ui";
 import { wrapCreateRootRouteWithSentry } from "@sentry/tanstackstart-react";
@@ -20,7 +21,7 @@ import {
 } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import { themesObj } from "@themes/index";
-import { type ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 
 export const Route = wrapCreateRootRouteWithSentry(createRootRoute)({
     head: () => ({
@@ -48,6 +49,12 @@ function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
 }
 
 function RootComponent() {
+    const { appStore } = useStores();
+
+    useEffect(() => {
+        appStore.gatewayStore.connect();
+    }, []);
+
     return (
         <RootDocument>
             <ThemeProvider themes={themesObj}>
