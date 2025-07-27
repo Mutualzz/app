@@ -93,7 +93,7 @@
     "scripts": {
         "build": "tsc --noEmit && vite build",
         "check-types": "tsc --noEmit",
-        "dev": "tauri dev",
+        "dev": "vite",
         "preview": "vite preview",
         "tauri": "tauri",
         "vite:dev": "vite"
