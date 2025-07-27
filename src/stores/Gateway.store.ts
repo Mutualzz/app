@@ -30,8 +30,8 @@ export class GatewayStore {
         this.app = app;
 
         if (typeof window !== "undefined") {
-            this.sessionId = localStorage.getItem("gatewaySessionId");
-            this.seq = parseInt(localStorage.getItem("gatewaySeq") ?? "0");
+            this.sessionId = localStorage.getItem("_sessionId");
+            this.seq = parseInt(localStorage.getItem("_seq") ?? "0");
         }
     }
 
@@ -67,12 +67,12 @@ export class GatewayStore {
                 case GatewayOpcodes.Dispatch: {
                     if (s) {
                         this.seq = s;
-                        localStorage.setItem("gatewaySeq", s.toString());
+                        localStorage.setItem("_seq", s.toString());
                     }
 
                     if (t === GatewayEvents.Ready) {
                         this.sessionId = d.sessionId;
-                        localStorage.setItem("gatewaySessionId", d.sessionId);
+                        localStorage.setItem("_sessionId", d.sessionId);
 
                         logger.info(`[READY] Session: ${d.sessionId}`);
                     }
@@ -92,8 +92,8 @@ export class GatewayStore {
                     logger.error("[INVALID_SESSION]", d.reason);
                     this.sessionId = null;
                     this.seq = 0;
-                    localStorage.removeItem("gatewaySessionId");
-                    localStorage.removeItem("gatewaySeq");
+                    localStorage.removeItem("_sessionId");
+                    localStorage.removeItem("_seq");
                     if (this.token) this.identify();
                     break;
                 }
