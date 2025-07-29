@@ -1,32 +1,31 @@
 import { GatewayEvents, GatewayOpcodes } from "@mutualzz/types";
-import { makeAutoObservable } from "mobx";
+import { action, makeAutoObservable, observable } from "mobx";
 import { Logger } from "../Logger";
 import type { AppStore } from "./App.store";
 
-const logger = new Logger({
-    tag: "GatewayStore",
-    level: "debug",
-});
-
-const ignoredEvents = new Set(["ACK", "READY", "RESUME"]);
-
-// TODO: You left off at trying to debug if all the events are being sent correctly
-// and if the session is being resumed correctly.
 export class GatewayStore {
-    private ws?: WebSocket;
-    app: AppStore;
+    @observable private ws?: WebSocket;
+    private readonly logger = new Logger({
+        tag: "GatewayStore",
+        level: "debug",
+    });
+    private readonly ignoredEvents = new Set(["ACK", "READY", "RESUME"]);
 
-    connected = false;
-    sessionId: string | null = null;
-    seq = 0;
-    heartbeatInterval?: NodeJS.Timeout;
-    lastHeartbeatAck = true;
-    token: string | null = null;
+    private readonly app: AppStore;
 
-    events: { t: string; d: any; s: number }[] = [];
+    @observable private token: string | null = null;
+
+    @observable public status: number = WebSocket.CLOSED;
+    @observable private sessionId: string | null = null;
+    @observable private seq = 0;
+
+    @observable private heartbeatInterval?: NodeJS.Timeout;
+    @observable private lastHeartbeatAck = true;
+
+    @observable public events: { t: string; d: any; s: number }[] = [];
 
     constructor(app: AppStore) {
-        makeAutoObservable(this, { app: false });
+        makeAutoObservable(this);
         this.app = app;
 
         if (typeof window !== "undefined") {
@@ -35,107 +34,118 @@ export class GatewayStore {
         }
     }
 
+    @action
+    private onOpen = () => {
+        this.status = WebSocket.OPEN;
+        this.logger.debug("Gateway connected");
+    };
+
+    @action
+    private onClose = () => {
+        this.status = WebSocket.CLOSED;
+        clearInterval(this.heartbeatInterval);
+        this.logger.warn(
+            "Gateway disconnected, attempting to reconnect in 3s...",
+        );
+        setTimeout(() => {
+            this.connect(this.token ?? undefined);
+        }, 3000);
+    };
+
+    @action
+    private onMessage = (event: MessageEvent) => {
+        const { op, t, s, d } = JSON.parse(event.data);
+
+        switch (op) {
+            case GatewayOpcodes.Hello: {
+                this.logger.info("[HELLO] Starting heartbeat");
+                this.startHeartbeat(d.heartbeatInterval);
+                if (this.token) {
+                    if (this.sessionId) this.resume();
+                    else this.identify();
+                    return;
+                }
+                break;
+            }
+
+            case GatewayOpcodes.HeartbeatAck:
+                this.logger.debug("[HEARTBEAT_ACK] Heartbeat acknowledged");
+                this.lastHeartbeatAck = true;
+                break;
+
+            case GatewayOpcodes.Dispatch: {
+                if (s) {
+                    this.seq = s;
+                    localStorage.setItem("_seq", s.toString());
+                }
+
+                if (t === GatewayEvents.Ready) {
+                    this.sessionId = d.sessionId;
+                    localStorage.setItem("_sessionId", d.sessionId);
+
+                    this.logger.info(`[READY] Session: ${d.sessionId}`);
+                }
+
+                if (t === GatewayEvents.Resume)
+                    this.logger.info(`[RESUME] Session: ${d.sessionId}`);
+
+                if (!this.ignoredEvents.has(t)) {
+                    this.events.push({ t, d, s: this.seq });
+                    this.handleDispatch(t, d);
+                }
+
+                break;
+            }
+
+            case GatewayOpcodes.InvalidSession: {
+                this.logger.error("[INVALID_SESSION]", d.reason);
+                this.sessionId = null;
+                this.seq = 0;
+                localStorage.removeItem("_sessionId");
+                localStorage.removeItem("_seq");
+                if (this.token) this.identify();
+                break;
+            }
+        }
+    };
+
+    @action
     connect(token?: string) {
-        this.token = token ?? this.token;
+        this.token = token ?? this.app.token ?? null;
         this.ws = new WebSocket(import.meta.env.VITE_WS_URL);
 
-        this.ws.onopen = () => {
-            this.connected = true;
-            logger.debug("Gateway connected");
-        };
-
-        this.ws.onmessage = (event) => {
-            const { op, t, s, d } = JSON.parse(event.data);
-
-            switch (op) {
-                case GatewayOpcodes.Hello: {
-                    logger.info("[HELLO] Starting heartbeat");
-                    this.startHeartbeat(d.heartbeatInterval);
-                    if (this.token) {
-                        if (this.sessionId) this.resume();
-                        else this.identify();
-                        return;
-                    }
-                    break;
-                }
-
-                case GatewayOpcodes.HeartbeatAck:
-                    logger.debug("[HEARTBEAT_ACK] Heartbeat acknowledged");
-                    this.lastHeartbeatAck = true;
-                    break;
-
-                case GatewayOpcodes.Dispatch: {
-                    if (s) {
-                        this.seq = s;
-                        localStorage.setItem("_seq", s.toString());
-                    }
-
-                    if (t === GatewayEvents.Ready) {
-                        this.sessionId = d.sessionId;
-                        localStorage.setItem("_sessionId", d.sessionId);
-
-                        logger.info(`[READY] Session: ${d.sessionId}`);
-                    }
-
-                    if (t === GatewayEvents.Resume)
-                        logger.info(`[RESUME] Session: ${d.sessionId}`);
-
-                    if (!ignoredEvents.has(t)) {
-                        this.events.push({ t, d, s: this.seq });
-                        this.handleDispatch(t, d);
-                    }
-
-                    break;
-                }
-
-                case GatewayOpcodes.InvalidSession: {
-                    logger.error("[INVALID_SESSION]", d.reason);
-                    this.sessionId = null;
-                    this.seq = 0;
-                    localStorage.removeItem("_sessionId");
-                    localStorage.removeItem("_seq");
-                    if (this.token) this.identify();
-                    break;
-                }
-            }
-        };
-
-        this.ws.onclose = () => {
-            this.connected = false;
-            clearInterval(this.heartbeatInterval);
-            logger.warn(
-                "Gateway disconnected, attempting to reconnect in 3s...",
-            );
-            setTimeout(() => {
-                this.connect(this.token ?? undefined);
-            }, 3000);
-        };
+        this.ws.onopen = this.onOpen;
+        this.ws.onmessage = this.onMessage;
+        this.ws.onclose = this.onClose;
     }
 
-    startHeartbeat(interval: number) {
+    @action
+    private startHeartbeat(interval: number) {
         clearInterval(this.heartbeatInterval);
         this.heartbeatInterval = setInterval(() => {
             if (!this.lastHeartbeatAck) {
-                logger.warn("Missed heartbeat, closing connection");
+                this.logger.warn("Missed heartbeat, closing connection");
                 this.ws?.close(4000, "Missed heartbeat");
                 return;
             }
 
             this.lastHeartbeatAck = false;
-            logger.debug("Sending heartbeat");
+            this.logger.debug("Sending heartbeat");
             this.send("Heartbeat", { s: this.seq });
         }, interval);
     }
 
-    identify() {
+    @action
+    private identify() {
         if (!this.token) return;
-        logger.info("[IDENTIFY] Identifying user");
+        this.logger.info("[IDENTIFY] Identifying user");
         this.send("Identify", { token: this.token });
     }
 
-    resume() {
+    @action
+    private resume() {
         if (!this.token || !this.sessionId) return;
-        logger.info(
+        this.logger.info(
             "[RESUME] Resuming session",
             this.sessionId,
             "seq:",
@@ -147,7 +157,8 @@ export class GatewayStore {
         });
     }
 
-    send(op: keyof typeof GatewayOpcodes, d: any = {}) {
+    @action
+    private send(op: keyof typeof GatewayOpcodes, d: any = {}) {
         this.ws?.send(
             JSON.stringify({
                 op: GatewayOpcodes[op],
@@ -156,11 +167,12 @@ export class GatewayStore {
         );
     }
 
-    handleDispatch(t: string, d: any) {
-        logger.debug(`[DISPATCH] Event: ${t}`, d);
+    @action
+    private handleDispatch(t: string, d: any) {
+        this.logger.debug(`[DISPATCH] Event: ${t}`, d);
         switch (t) {
             default:
-                logger.warn(`[DISPATCH] Unhandled event type: ${t}`);
+                this.logger.warn(`[DISPATCH] Unhandled event type: ${t}`);
         }
     }
 }
