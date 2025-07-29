@@ -1,6 +1,6 @@
 import { wrapVinxiConfigWithSentry } from "@sentry/tanstackstart-react";
 import { tanstackStart } from "@tanstack/react-start/plugin/vite";
-import viteReact from "@vitejs/plugin-react";
+import viteReact from "@vitejs/plugin-react-swc";
 import { defineConfig } from "vite";
 import tsconfigPaths from "vite-tsconfig-paths";
 
@@ -25,6 +25,7 @@ export default defineConfig(async () => ({
         ),
         viteReact({
             jsxImportSource: "@emotion/react",
+            tsDecorators: true,
         }),
         tsconfigPaths(),
     ],
