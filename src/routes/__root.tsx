@@ -27,6 +27,7 @@ export const Route = wrapCreateRootRouteWithSentry(createRootRoute)({
     head: () => ({
         meta: [...seo()],
     }),
+    ssr: "data-only",
     component: RootComponent,
 });
 

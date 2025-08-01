@@ -1,6 +1,5 @@
 import { GatewayEvents, GatewayOpcodes } from "@mutualzz/types";
 import { makeAutoObservable } from "mobx";
-import { WebSocket } from "ws";
 import { Logger } from "../Logger";
 import type { AppStore } from "./App.store";
 
@@ -51,8 +50,8 @@ export class GatewayStore {
         }, 3000);
     };
 
-    private onMessage = (event: WebSocket.MessageEvent) => {
-        const { op, t, s, d } = JSON.parse(event.data as string);
+    private onMessage = (event: MessageEvent) => {
+        const { op, t, s, d } = JSON.parse(event.data);
 
         switch (op) {
             case GatewayOpcodes.Hello: {
