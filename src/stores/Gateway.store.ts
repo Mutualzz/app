@@ -1,10 +1,10 @@
 import { GatewayEvents, GatewayOpcodes } from "@mutualzz/types";
-import { action, makeAutoObservable, observable } from "mobx";
+import { makeAutoObservable } from "mobx";
 import { Logger } from "../Logger";
 import type { AppStore } from "./App.store";
 
 export class GatewayStore {
-    @observable private accessor ws: WebSocket | null = null;
+    private ws: WebSocket | null = null;
     private readonly logger = new Logger({
         tag: "GatewayStore",
         level: "debug",
@@ -13,17 +13,16 @@ export class GatewayStore {
 
     private readonly app: AppStore;
 
-    @observable private accessor token: string | null = null;
+    private token: string | null = null;
 
-    @observable public accessor status: number = WebSocket.CLOSED;
-    @observable private accessor sessionId: string | null = null;
-    @observable private accessor seq = 0;
+    public status: number = WebSocket.CLOSED;
+    private sessionId: string | null = null;
+    private seq = 0;
 
-    @observable private accessor heartbeatInterval: NodeJS.Timeout | null =
-        null;
-    @observable private accessor lastHeartbeatAck = true;
+    private heartbeatInterval: NodeJS.Timeout | null = null;
+    private lastHeartbeatAck = true;
 
-    @observable public accessor events: { t: string; d: any; s: number }[] = [];
+    public events: { t: string; d: any; s: number }[] = [];
 
     constructor(app: AppStore) {
         makeAutoObservable(this);
@@ -35,13 +34,11 @@ export class GatewayStore {
         }
     }
 
-    @action
     private onOpen = () => {
         this.status = WebSocket.OPEN;
         this.logger.debug("Gateway connected");
     };
 
-    @action
     private onClose = () => {
         this.status = WebSocket.CLOSED;
         if (this.heartbeatInterval) clearInterval(this.heartbeatInterval);
@@ -53,7 +50,6 @@ export class GatewayStore {
         }, 3000);
     };
 
-    @action
     private onMessage = (event: MessageEvent) => {
         const { op, t, s, d } = JSON.parse(event.data);
 
@@ -110,7 +106,6 @@ export class GatewayStore {
         }
     };
 
-    @action
     connect(token?: string) {
         this.token = token ?? this.app.token ?? null;
         this.ws = new WebSocket(import.meta.env.VITE_WS_URL);
@@ -120,7 +115,6 @@ export class GatewayStore {
         this.ws.onclose = this.onClose;
     }
 
-    @action
     private startHeartbeat(interval: number) {
         if (this.heartbeatInterval) clearInterval(this.heartbeatInterval);
         this.heartbeatInterval = setInterval(() => {
@@ -136,14 +130,12 @@ export class GatewayStore {
         }, interval);
     }
 
-    @action
     private identify() {
         if (!this.token) return;
         this.logger.info("[IDENTIFY] Identifying user");
         this.send("Identify", { token: this.token });
     }
 
-    @action
     private resume() {
         if (!this.token || !this.sessionId) return;
         this.logger.info(
@@ -158,7 +150,6 @@ export class GatewayStore {
         });
     }
 
-    @action
     private send(op: keyof typeof GatewayOpcodes, d: any = {}) {
         this.ws?.send(
             JSON.stringify({
@@ -168,7 +159,6 @@ export class GatewayStore {
         );
     }
 
-    @action
     private handleDispatch(t: string, d: any) {
         this.logger.debug(`[DISPATCH] Event: ${t}`, d);
         switch (t) {

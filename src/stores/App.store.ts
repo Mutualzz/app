@@ -1,10 +1,10 @@
-import { makeAutoObservable, observable } from "mobx";
+import { makeAutoObservable } from "mobx";
 import { GatewayStore } from "./Gateway.store";
 
 export class AppStore {
     gatewayStore: GatewayStore;
 
-    @observable accessor token: string | null = null;
+    token: string | null = null;
 
     constructor() {
         makeAutoObservable(this);
