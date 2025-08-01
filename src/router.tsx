@@ -5,7 +5,7 @@ import { Provider } from "mobx-react";
 import { AppStore } from "stores/App.store";
 import { routeTree } from "./routeTree.gen";
 
-export function createRouter() {
+export function createRouter(window: Window | undefined = globalThis.window) {
     const queryClient = new QueryClient();
     const appStore = new AppStore();
 
@@ -19,7 +19,11 @@ export function createRouter() {
         // eslint-disable-next-line react/prop-types
         Wrap: ({ children }) => (
             <QueryClientProvider client={queryClient}>
-                <Provider appStore={appStore}>{children}</Provider>
+                {window ? (
+                    <Provider appStore={appStore}>{children}</Provider>
+                ) : (
+                    children
+                )}
             </QueryClientProvider>
         ),
     });
