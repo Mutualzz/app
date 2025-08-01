@@ -83,6 +83,9 @@ function InputPlayground() {
     const [placeholder, setPlaceholder] = useState<string | null>(null);
     const [type, setType] = useState<InputType>("text");
 
+    const [min, setMin] = useState<number>(-Infinity);
+    const [max, setMax] = useState<number>(Infinity);
+
     const [value, setValue] = useState<string | null>(null);
 
     const [controlled, setControlled] = useState(false);
@@ -131,6 +134,8 @@ function InputPlayground() {
                     placeholder={placeholder ?? "Type something..."}
                     variant={v}
                     size={size}
+                    min={min}
+                    max={max}
                     onChange={(e) => {
                         if (controlled) setValue(e.target.value);
                     }}
@@ -157,6 +162,8 @@ function InputPlayground() {
                 variant={variant as Variant}
                 placeholder={placeholder ?? "Type something..."}
                 size={size}
+                min={min}
+                max={max}
                 onChange={(e) => {
                     if (controlled) setValue(e.target.value);
                 }}
@@ -404,6 +411,56 @@ function InputPlayground() {
                     </select>
                 </Stack>
                 <Divider />
+                {type === "number" && (
+                    <>
+                        <Stack
+                            direction="row"
+                            spacing={5}
+                            wrap="wrap"
+                            width="100%"
+                        >
+                            <Stack
+                                minWidth={0}
+                                flex={1}
+                                direction="column"
+                                spacing={10}
+                            >
+                                <label>Min</label>
+                                <Input
+                                    variant="solid"
+                                    size="lg"
+                                    color="primary"
+                                    fullWidth
+                                    type="number"
+                                    value={min}
+                                    onChange={(e) =>
+                                        setMin(Number(e.target.value))
+                                    }
+                                />
+                            </Stack>
+                            <Stack
+                                minWidth={0}
+                                direction="column"
+                                spacing={10}
+                                flex={1}
+                            >
+                                <label>Max</label>
+                                <Input
+                                    variant="solid"
+                                    size="lg"
+                                    color="primary"
+                                    fullWidth
+                                    type="number"
+                                    value={max}
+                                    onChange={(e) =>
+                                        setMax(Number(e.target.value))
+                                    }
+                                />
+                            </Stack>
+                        </Stack>
+                        <Divider />
+                    </>
+                )}
                 <Stack direction="column" spacing={5}>
                     <label>Custom Color</label>
                     <Stack alignContent="center" direction="row" spacing={5}>
