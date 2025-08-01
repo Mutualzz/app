@@ -107,6 +107,12 @@ export class GatewayStore {
     };
 
     connect(token?: string) {
+        if (typeof window === "undefined") {
+            this.logger.warn(
+                "WebSocket connection attempted during SSR — ignoring.",
+            );
+            return;
+        }
         this.token = token ?? this.app.token ?? null;
         this.ws = new WebSocket(import.meta.env.VITE_WS_URL);
 
