@@ -4,7 +4,7 @@ import { GatewayStore } from "./Gateway.store";
 export class AppStore {
     gatewayStore: GatewayStore;
 
-    @observable token: string | null = null;
+    @observable accessor token: string | null = null;
 
     constructor() {
         makeAutoObservable(this);

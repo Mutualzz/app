@@ -4,7 +4,7 @@ import { Logger } from "../Logger";
 import type { AppStore } from "./App.store";
 
 export class GatewayStore {
-    @observable private ws?: WebSocket;
+    @observable private accessor ws: WebSocket | null = null;
     private readonly logger = new Logger({
         tag: "GatewayStore",
         level: "debug",
@@ -13,16 +13,17 @@ export class GatewayStore {
 
     private readonly app: AppStore;
 
-    @observable private token: string | null = null;
+    @observable private accessor token: string | null = null;
 
-    @observable public status: number = WebSocket.CLOSED;
-    @observable private sessionId: string | null = null;
-    @observable private seq = 0;
+    @observable public accessor status: number = WebSocket.CLOSED;
+    @observable private accessor sessionId: string | null = null;
+    @observable private accessor seq = 0;
 
-    @observable private heartbeatInterval?: NodeJS.Timeout;
-    @observable private lastHeartbeatAck = true;
+    @observable private accessor heartbeatInterval: NodeJS.Timeout | null =
+        null;
+    @observable private accessor lastHeartbeatAck = true;
 
-    @observable public events: { t: string; d: any; s: number }[] = [];
+    @observable public accessor events: { t: string; d: any; s: number }[] = [];
 
     constructor(app: AppStore) {
         makeAutoObservable(this);
@@ -43,7 +44,7 @@ export class GatewayStore {
     @action
     private onClose = () => {
         this.status = WebSocket.CLOSED;
-        clearInterval(this.heartbeatInterval);
+        if (this.heartbeatInterval) clearInterval(this.heartbeatInterval);
         this.logger.warn(
             "Gateway disconnected, attempting to reconnect in 3s...",
         );
@@ -121,7 +122,7 @@ export class GatewayStore {
 
     @action
     private startHeartbeat(interval: number) {
-        clearInterval(this.heartbeatInterval);
+        if (this.heartbeatInterval) clearInterval(this.heartbeatInterval);
         this.heartbeatInterval = setInterval(() => {
             if (!this.lastHeartbeatAck) {
                 this.logger.warn("Missed heartbeat, closing connection");
