@@ -4,7 +4,7 @@ import { Logger } from "../Logger";
 import type { AppStore } from "./App.store";
 
 export class GatewayStore {
-    private ws: WebSocket | null = null;
+    private ws: any | null = null;
     private readonly logger = new Logger({
         tag: "GatewayStore",
         level: "debug",
@@ -15,7 +15,8 @@ export class GatewayStore {
 
     private token: string | null = null;
 
-    public status: number = WebSocket.CLOSED;
+    // public status: number = WebSocket.CLOSED;
+    public status = 3; // Start in connecting state
     private sessionId: string | null = null;
     private seq = 0;
 
@@ -107,12 +108,6 @@ export class GatewayStore {
     };
 
     connect(token?: string) {
-        if (typeof window === "undefined") {
-            this.logger.warn(
-                "WebSocket connection attempted during SSR — ignoring.",
-            );
-            return;
-        }
         this.token = token ?? this.app.token ?? null;
         this.ws = new WebSocket(import.meta.env.VITE_WS_URL);
 

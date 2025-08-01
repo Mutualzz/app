@@ -2,11 +2,12 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createRouter as createTanStackRouter } from "@tanstack/react-router";
 import { Provider } from "mobx-react";
 
+import { AppStore } from "stores/App.store";
 import { routeTree } from "./routeTree.gen";
-import { appStore } from "./stores/App.store";
 
 export function createRouter() {
     const queryClient = new QueryClient();
+    const appStore = new AppStore();
 
     return createTanStackRouter({
         routeTree,
