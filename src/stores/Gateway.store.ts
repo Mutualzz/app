@@ -7,7 +7,7 @@ export class GatewayStore {
     private ws: WebSocket | null = null;
     private readonly logger = new Logger({
         tag: "GatewayStore",
-        level: "debug",
+        level: import.meta.env.DEV ? "debug" : "info",
     });
     private readonly ignoredEvents = new Set(["ACK", "READY", "RESUME"]);
 
