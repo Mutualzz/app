@@ -3,6 +3,18 @@ import { makeAutoObservable } from "mobx";
 import { Logger } from "../Logger";
 import type { AppStore } from "./App.store";
 
+// We have to create our own GatewayStatus "enum" to avoid issues with SSR
+// since WebSocket is not available in the server environment.
+// If someone has a better solution, please let me know. lol
+export const GatewayStatus = {
+    CONNECTING: 0,
+    OPEN: 1,
+    CLOSING: 2,
+    CLOSED: 3,
+} as const;
+
+export type GatewayStatus = (typeof GatewayStatus)[keyof typeof GatewayStatus];
+
 export class GatewayStore {
     private ws: WebSocket | null = null;
     private readonly logger = new Logger({
@@ -15,7 +27,7 @@ export class GatewayStore {
 
     private token: string | null = null;
 
-    public status: number = WebSocket.CLOSED;
+    public status: GatewayStatus = GatewayStatus.CLOSED;
     private sessionId: string | null = null;
     private seq = 0;
 
