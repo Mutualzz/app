@@ -11,7 +11,7 @@ export function createRouter() {
 
     return createTanStackRouter({
         routeTree,
-        context: { queryClient },
+        context: { queryClient, appStore },
         defaultPreload: "intent",
         defaultPreloadStaleTime: 0,
         scrollRestoration: true,
