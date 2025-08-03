@@ -8,7 +8,7 @@ import {
     type ColorLike,
     type TypographyColor,
 } from "@mutualzz/ui";
-import { formatHex8, parse } from "culori";
+import { formatHex8 } from "culori";
 import { type Range } from "slate";
 
 const tokenDefs = [
@@ -92,50 +92,48 @@ export const resolveMarkdownStyles = (
     color: Color | ColorLike,
     textColor: TypographyColor | "inherit",
 ): Record<string, CSSObject> => {
-    const parsedColor = parse(resolveColor(color, theme));
-    if (!parsedColor) throw new Error("Invalid color");
+    const resolvedColor = resolveColor(color, theme);
 
-    const parsedTextColor =
+    const resolvedTextColor =
         textColor === "inherit"
-            ? parsedColor
-            : parse(resolveTypographyColor(textColor, theme));
-    if (!parsedTextColor) throw new Error("Invalid text color");
+            ? resolvedColor
+            : resolveTypographyColor(textColor, theme);
 
     return {
         outlined: {
             background: "transparent",
-            color: formatHex8(lighten(parsedTextColor, 0.5)),
-            border: `1px solid ${formatHex8(parsedColor)}`,
+            color: formatHex8(lighten(resolvedTextColor, 0.5)),
+            border: `1px solid ${formatHex8(resolvedColor)}`,
             borderRadius: 8,
             ":focus": {
-                outline: `2px solid ${formatHex8(parsedColor)}`,
+                outline: `2px solid ${formatHex8(resolvedColor)}`,
             },
         },
         solid: {
-            background: formatHex8(parsedColor),
-            color: formatHex8(lighten(parsedTextColor, 0.75)),
+            background: formatHex8(resolvedColor),
+            color: formatHex8(lighten(resolvedTextColor, 0.75)),
             border: "none",
             borderRadius: 8,
             ":focus": {
-                outline: `2px solid ${formatHex8(parsedColor)}`,
+                outline: `2px solid ${formatHex8(resolvedColor)}`,
             },
         },
         plain: {
             background: "transparent",
-            color: formatHex8(lighten(parsedTextColor, 0.25)),
+            color: formatHex8(lighten(resolvedTextColor, 0.25)),
             border: "none",
             borderRadius: 8,
             ":focus": {
-                outline: `2px solid ${formatHex8(parsedColor)}`,
+                outline: `2px solid ${formatHex8(resolvedColor)}`,
             },
         },
         soft: {
-            background: formatHex8(darken(parsedColor, 0.5)),
-            color: formatHex8(lighten(parsedTextColor, 0.5)),
+            background: formatHex8(darken(resolvedColor, 0.5)),
+            color: formatHex8(lighten(resolvedTextColor, 0.5)),
             border: "none",
             borderRadius: 8,
             ":focus": {
-                outline: `2px solid ${formatHex8(parsedColor)}`,
+                outline: `2px solid ${formatHex8(resolvedColor)}`,
             },
         },
     };
