@@ -1,6 +1,6 @@
 import { wrapVinxiConfigWithSentry } from "@sentry/tanstackstart-react";
 import { tanstackStart } from "@tanstack/react-start/plugin/vite";
-import viteReact from "@vitejs/plugin-react-swc";
+import viteReact from "@vitejs/plugin-react-oxc";
 import { defineConfig } from "vite";
 import tsconfigPaths from "vite-tsconfig-paths";
 
@@ -11,11 +11,17 @@ export default defineConfig(async () => ({
     build: {
         sourcemap: import.meta.dev,
     },
+
     plugins: [
+        tsconfigPaths(),
         wrapVinxiConfigWithSentry(
             tanstackStart({
                 target: "netlify",
                 customViteReactPlugin: true,
+                tsr: {
+                    quoteStyle: "double",
+                    semicolons: true,
+                },
             }),
             {
                 org: "mutualzz",
@@ -25,9 +31,7 @@ export default defineConfig(async () => ({
         ),
         viteReact({
             jsxImportSource: "@emotion/react",
-            tsDecorators: true,
         }),
-        tsconfigPaths(),
     ],
 
     // Vite options tailored for Tauri development and only applied in `tauri dev` or `tauri build`
