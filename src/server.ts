@@ -8,9 +8,7 @@ import { createRouter } from "./router";
 Sentry.init({
     dsn: import.meta.env.VITE_SENTRY_DSN,
     sendDefaultPii: true,
-    tunnel: import.meta.env.DEV
-        ? "http://localhost:4000/v1/sentry"
-        : "https://api.mutualzz.com/v1/sentry",
+    tunnel: import.meta.env.VITE_API_URL + "/v1/sentry",
     tracesSampleRate: 1.0,
     tracePropagationTargets: ["https://mutualzz.com", "localhost"],
     environment: import.meta.env.DEV ? "development" : "production",

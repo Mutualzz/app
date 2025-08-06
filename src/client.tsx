@@ -13,9 +13,7 @@ Sentry.init({
         Sentry.browserTracingIntegration(),
         Sentry.replayIntegration(),
     ],
-    tunnel: import.meta.env.DEV
-        ? "http://localhost:4000/v1/sentry"
-        : "https://api.mutualzz.com/v1/sentry",
+    tunnel: import.meta.env.VITE_API_URL + "/v1/sentry",
     environment: import.meta.env.DEV ? "development" : "production",
     tracesSampleRate: 1.0,
     tracePropagationTargets: ["https://mutualzz.com", "localhost"],
