@@ -73,6 +73,7 @@ function InputPlayground() {
     const [size, setSize] = useState<Size | number>("md");
     const [disabled, setDisabled] = useState(false);
     const [fullWidth, setFullWidth] = useState(false);
+    const [error, setError] = useState(false);
 
     const [textColor, setTextColor] = useState<TypographyColor | "inherit">(
         "inherit",
@@ -134,6 +135,7 @@ function InputPlayground() {
                     placeholder={placeholder ?? "Type something..."}
                     variant={v}
                     size={size}
+                    error={error}
                     min={min}
                     max={max}
                     onChange={(e) => {
@@ -163,6 +165,7 @@ function InputPlayground() {
                 placeholder={placeholder ?? "Type something..."}
                 size={size}
                 min={min}
+                error={error}
                 max={max}
                 onChange={(e) => {
                     if (controlled) setValue(e.target.value);
@@ -358,6 +361,11 @@ function InputPlayground() {
                             checked={controlled}
                             label="Controlled"
                             onChange={() => setControlled((prev) => !prev)}
+                        />
+                        <Checkbox
+                            checked={error}
+                            label="Error"
+                            onChange={() => setError((prev) => !prev)}
                         />
                     </Stack>
                     {controlled && (
