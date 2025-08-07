@@ -91,7 +91,7 @@
     "private": true,
     "scripts": {
         "build": "tsc --noEmit && vite build",
-        "check-types": "tsc --noEmit",
+        "typecheck": "tsc --noEmit",
         "dev": "vite --force",
         "preview": "vite preview",
         "tauri": "tauri",
