@@ -45,8 +45,6 @@ function Register() {
         },
     });
 
-    console.log(passwordVisible);
-
     return (
         <Stack height="100vh" justifyContent="center" alignItems="center">
             <Paper
