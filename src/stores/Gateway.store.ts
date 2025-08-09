@@ -1,4 +1,8 @@
-import { GatewayDispatchEvents, GatewayOpcodes } from "@mutualzz/types";
+import {
+    GatewayCloseCodes,
+    GatewayDispatchEvents,
+    GatewayOpcodes,
+} from "@mutualzz/types";
 import { makeAutoObservable } from "mobx";
 import { Logger } from "../Logger";
 import type { AppStore } from "./App.store";
@@ -18,7 +22,7 @@ export type GatewayStatus = (typeof GatewayStatus)[keyof typeof GatewayStatus];
 const RECONNECT_TIMEOUT = 10000;
 
 export class GatewayStore {
-    private socket: WebSocket | null = null;
+    socket: WebSocket | null = null;
     private readonly logger = new Logger({
         tag: "GatewayStore",
     });
@@ -107,7 +111,13 @@ export class GatewayStore {
         this.readyState = GatewayStatus.OPEN;
         this.reconnectTimeout = 0;
 
-        this.handleIdentify();
+        if (this.sessionId) {
+            this.logger.debug("[Gateway] Resuming session:", this.sessionId);
+            this.handleResume();
+        } else {
+            this.logger.debug("[Gateway] Identifying");
+            this.handleIdentify();
+        }
     };
 
     private onMessage = (e: MessageEvent) => {
@@ -189,7 +199,10 @@ export class GatewayStore {
         this.cleanup();
 
         this.logger.debug(`Received invalid session; Can Resume: ${resumable}`);
-        if (!resumable) return;
+        if (!resumable) {
+            this.handleIdentify();
+            return;
+        }
 
         this.handleResume();
     };
@@ -202,8 +215,8 @@ export class GatewayStore {
     }
 
     private handleResume() {
-        if (!this.app.token) {
-            this.logger.error("Cannot resume, token is not set");
+        if (!this.app.token || !this.sessionId) {
+            this.logger.error("Cannot resume, token or sessionId is not set");
             return;
         }
 
@@ -226,7 +239,7 @@ export class GatewayStore {
         this.heartbeatInterval = data.heartbeatInterval;
         this.reconnectTimeout = this.heartbeatInterval!;
         this.logger.info(
-            `[Hello] heartbeat interval: ${data.heartbeat_interval} (took ${Date.now() - this.connectionStartTime!}ms)`,
+            `[Hello] heartbeat interval: ${data.heartbeatInterval} (took ${Date.now() - this.connectionStartTime!}ms)`,
         );
         this.startHeartbeater();
     }
@@ -234,7 +247,7 @@ export class GatewayStore {
     private handleClose = (code?: number) => {
         this.cleanup();
 
-        if (code === 1001) return;
+        if (code === GatewayCloseCodes.NotAuthenticated) return;
 
         if (this.reconnectTimeout === 0)
             this.reconnectTimeout = RECONNECT_TIMEOUT;
@@ -342,7 +355,7 @@ export class GatewayStore {
     };
 
     private onResume = () => {
-        this.logger.debug("Resumed");
+        this.logger.debug("[Resume] Session:", this.sessionId);
     };
 
     private onReady = (data: any) => {
