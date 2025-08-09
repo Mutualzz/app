@@ -9,6 +9,7 @@ import {
     type InputProps,
 } from "@mutualzz/ui";
 import { validateRegister } from "@mutualzz/validators";
+import { seo } from "@seo";
 import {
     revalidateLogic,
     useForm,
@@ -22,6 +23,13 @@ import { useState } from "react";
 
 export const Route = createFileRoute("/register")({
     component: observer(Register),
+    head: () => ({
+        meta: [
+            ...seo({
+                title: "Mutualzz - Register",
+            }),
+        ],
+    }),
 });
 
 interface ApiErrors {
