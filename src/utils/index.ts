@@ -1,5 +1,7 @@
 import mergeWith from "lodash-es/mergeWith";
 
+import type { Theme } from "@emotion/react";
+
 export function mergeAppendAnything(
     ...objects: Record<string, string | string[]>[]
 ): Record<string, string[]> {
@@ -60,3 +62,16 @@ export function detectBrowser(): string {
 export const isTauri =
     // @ts-expect-error no types
     typeof window !== "undefined" && !!window.__TAURI_INTERNALS__;
+
+export const sortThemes = (themes: Theme[]): Theme[] => {
+    const priorityOrder: string[] = ["baseDark", "baseLight"];
+
+    const priorityThemes = themes.filter((theme) =>
+        priorityOrder.includes(theme.id),
+    );
+    const otherThemes = themes
+        .filter((theme) => !priorityOrder.includes(theme.id))
+        .sort((a, b) => a.name.localeCompare(b.name));
+
+    return [...priorityThemes, ...otherThemes];
+};
