@@ -16,11 +16,15 @@ export function mergeAppendAnything(
         return undefined;
     });
 }
+const getNavigator = () => {
+    if (typeof window === "undefined") return null;
+    if (typeof window.navigator === "undefined") return null;
+    return window.navigator;
+};
 
 export function detectOS(): string {
-    if (typeof window === "undefined") return "Other";
-    if (typeof window.navigator === "undefined") return "Other";
-    const navigator = window.navigator;
+    const navigator = getNavigator();
+    if (!navigator) return "Other";
     if ("userAgentData" in navigator) {
         return (navigator as any).userAgentData.platform ?? "Other";
     }
@@ -34,6 +38,9 @@ export function detectOS(): string {
 }
 
 export function detectBrowser(): string {
+    const navigator = getNavigator();
+    if (!navigator) return "Other";
+
     if ("userAgentData" in navigator) {
         return (navigator as any).userAgentData.brands?.[0]?.brand ?? "Other";
     }
