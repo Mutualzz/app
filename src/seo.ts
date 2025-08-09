@@ -59,7 +59,7 @@ export const seo = (params?: SEO) => {
         { name: "og:description", content: description },
         {
             name: "theme-color",
-            content: "#B22222",
+            content: "#121212",
         },
         {
             name: "application-name",
