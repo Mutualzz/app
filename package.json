@@ -116,5 +116,6 @@
         "typecheck": "tsc --noEmit",
         "vite:dev": "vite"
     },
-    "type": "module"
+    "type": "module",
+    "version": "1.3.0"
 }
