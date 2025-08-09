@@ -19,6 +19,8 @@ export function mergeAppendAnything(
 
 export function detectOS(): string {
     if (typeof window === "undefined") return "Other";
+    if (typeof window.navigator === "undefined") return "Other";
+    const navigator = window.navigator;
     if ("userAgentData" in navigator) {
         return (navigator as any).userAgentData.platform ?? "Other";
     }
