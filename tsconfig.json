@@ -34,9 +34,11 @@
             "@utils/*": ["utils/*"],
             "@themes/*": ["themes/*"],
             "@themes": ["themes/index.ts"],
+            "@stores/*": ["stores/*"],
             "@app-types/*": ["types/*"],
             "@app-types": ["types/index.d.ts"],
             "@css/*": ["css/*"],
+            "@logger": ["Logger.ts"],
             "@seo": ["seo.ts"],
             "@api": ["api.ts"]
         }

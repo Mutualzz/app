@@ -43,3 +43,10 @@ export function detectBrowser(): string {
     if (ua.includes("OPR") || ua.includes("Opera")) return "Opera";
     return "Other";
 }
+
+/**
+ * Returns a boolan indicating if we are running in a tauri context
+ */
+export const isTauri =
+    // @ts-expect-error no types
+    typeof window !== "undefined" && !!window.__TAURI_INTERNALS__;

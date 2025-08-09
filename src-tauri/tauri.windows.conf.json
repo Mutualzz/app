@@ -1,0 +1,22 @@
+{
+    "app": {
+        "windows": [
+            {
+                "center": true,
+                "decorations": false,
+                "height": 400,
+                "label": "splashscreen",
+                "url": "splashscreen.html",
+                "width": 400
+            },
+            {
+                "fullscreen": false,
+                "label": "main",
+                "maximized": true,
+                "resizable": true,
+                "title": "Mutualzz",
+                "visible": false
+            }
+        ]
+    }
+}

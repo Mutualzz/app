@@ -1,3 +1,5 @@
+import { useAppStore } from "@hooks/useAppStore";
+import type { APIUser, HttpException } from "@mutualzz/types";
 import {
     Button,
     Input,
@@ -6,60 +8,133 @@ import {
     Typography,
     type InputProps,
 } from "@mutualzz/ui";
-import { useForm } from "@tanstack/react-form";
-import { createFileRoute } from "@tanstack/react-router";
+import { validateRegister } from "@mutualzz/validators";
+import {
+    revalidateLogic,
+    useForm,
+    type AnyFieldApi,
+} from "@tanstack/react-form";
+import { useMutation } from "@tanstack/react-query";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { observer } from "mobx-react";
+import { motion } from "motion/react";
 import { useState } from "react";
 
 export const Route = createFileRoute("/register")({
-    component: Register,
+    component: observer(Register),
 });
 
+interface ApiErrors {
+    email?: string;
+    globalName?: string;
+    username?: string;
+    password?: string;
+    confirmPassword?: string;
+    dateOfBirth?: string;
+}
+
 const InputWithLabel = ({
+    apiErrors,
+    field,
     label,
     ...props
-}: InputProps & { label: string }) => {
-    return (
-        <Stack direction="column" spacing={5} width="100%">
-            <Typography fontWeight={500} level="body-md">
-                {label}{" "}
-                {props.required && (
-                    <Typography css={{ color: "red" }}>*</Typography>
-                )}
+}: InputProps & {
+    field: AnyFieldApi;
+    label: string;
+    apiErrors: ApiErrors;
+}) => (
+    <Stack direction="column" spacing={5} width="100%">
+        <Typography fontWeight={500} level="body-md">
+            {label}{" "}
+            {props.required && (
+                <Typography css={{ color: "red" }}>*</Typography>
+            )}
+        </Typography>
+        <Input size="lg" {...props} />
+        {!field.state.meta.isValid && field.state.meta.isTouched && (
+            <Typography variant="plain" color="danger" level="body-sm">
+                {field.state.meta.errors[0].message}
             </Typography>
-            <Input size="lg" {...props} />
-        </Stack>
-    );
-};
+        )}
+        {apiErrors[field.name as keyof ApiErrors] && (
+            <Typography variant="plain" color="danger" level="body-sm">
+                {apiErrors[field.name as keyof ApiErrors]}
+            </Typography>
+        )}
+    </Stack>
+);
+
+const RegisterForm = motion.create(Paper);
 
 function Register() {
+    const navigate = useNavigate();
+    const app = useAppStore();
+    const { rest } = app;
     const [passwordVisible, setPasswordVisible] = useState(false);
+    const [apiErrors, setApiErrors] = useState<ApiErrors>({});
+
+    const mutation = useMutation({
+        mutationFn: async (values: any) => {
+            const response = await rest.post<any, APIUser & { token: string }>(
+                "auth/register",
+                values,
+            );
+
+            return response;
+        },
+        onSuccess: ({ token, ...user }: APIUser & { token: string }) => {
+            app.setToken(token);
+            app.setUser(user);
+        },
+        onError: (error: HttpException) => {
+            error.errors.forEach((err) => {
+                setApiErrors({
+                    [err.path]: err.message,
+                });
+            });
+        },
+    });
 
     const form = useForm({
         defaultValues: {
             email: "",
-            globalName: "",
+            globalName: undefined as string | undefined,
             username: "",
             password: "",
             confirmPassword: "",
             dateOfBirth: "",
         },
+        validationLogic: revalidateLogic(),
+        validators: {
+            onDynamic: validateRegister as any, // TypeScript workaround for dynamic validation
+        },
+        onSubmit: ({ value }) => {
+            mutation.mutate(value);
+        },
     });
+
+    if (app.token) {
+        navigate({ to: "/", replace: true });
+        return <></>;
+    }
 
     return (
         <Stack height="100vh" justifyContent="center" alignItems="center">
-            <Paper
+            <RegisterForm
                 direction="column"
                 justifyContent="center"
                 alignItems="center"
                 width="100%"
-                maxWidth="500px"
+                maxWidth="550px"
                 py="2rem"
                 px="2rem"
                 borderRadius={7.6}
                 spacing="1rem"
                 boxShadow={5}
+                initial={{ opacity: 0, y: -200 }}
+                animate={{ opacity: 1, y: 0 }}
             >
-                <Typography level="h3">Create an account</Typography>
+                <Typography level="h4">Create an account</Typography>
                 <form
                     css={{
                         width: "100%",
@@ -75,6 +150,9 @@ function Register() {
                             name="email"
                             children={(field) => (
                                 <InputWithLabel
+                                    apiErrors={apiErrors}
+                                    field={field}
+                                    name="email"
                                     label="Email"
                                     onChange={(e) =>
                                         field.handleChange(e.target.value)
@@ -89,12 +167,19 @@ function Register() {
                             name="globalName"
                             children={(field) => (
                                 <InputWithLabel
-                                    label="Global Name"
+                                    apiErrors={apiErrors}
+                                    field={field}
+                                    name="globalName"
+                                    label="Display Name"
                                     onChange={(e) =>
-                                        field.handleChange(e.target.value)
+                                        field.handleChange(
+                                            e.target.value.length > 0
+                                                ? e.target.value
+                                                : undefined,
+                                        )
                                     }
                                     onBlur={field.handleBlur}
-                                    value={field.state.value}
+                                    value={field.state.value ?? ""}
                                 />
                             )}
                         />
@@ -102,6 +187,9 @@ function Register() {
                             name="username"
                             children={(field) => (
                                 <InputWithLabel
+                                    apiErrors={apiErrors}
+                                    field={field}
+                                    name="username"
                                     label="Username"
                                     onChange={(e) =>
                                         field.handleChange(e.target.value)
@@ -116,6 +204,9 @@ function Register() {
                             name="password"
                             children={(field) => (
                                 <InputWithLabel
+                                    apiErrors={apiErrors}
+                                    field={field}
+                                    name="password"
                                     label="Password"
                                     onChange={(e) =>
                                         field.handleChange(e.target.value)
@@ -135,6 +226,9 @@ function Register() {
                             name="confirmPassword"
                             children={(field) => (
                                 <InputWithLabel
+                                    apiErrors={apiErrors}
+                                    field={field}
+                                    name="confirmPassword"
                                     label="Confirm Password"
                                     onChange={(e) =>
                                         field.handleChange(e.target.value)
@@ -154,6 +248,9 @@ function Register() {
                             name="dateOfBirth"
                             children={(field) => (
                                 <InputWithLabel
+                                    apiErrors={apiErrors}
+                                    field={field}
+                                    name="dateOfBirth"
                                     label="Date Of Birth"
                                     onChange={(e) =>
                                         field.handleChange(e.target.value)
@@ -182,7 +279,26 @@ function Register() {
                         />
                     </Stack>
                 </form>
-            </Paper>
+                <Typography
+                    onClick={() => {
+                        navigate({ to: "/login" });
+                    }}
+                    css={{
+                        cursor: "pointer",
+                    }}
+                    level="body-sm"
+                >
+                    Already have an account?{" "}
+                    <Typography
+                        color="info"
+                        textDecoration="underline"
+                        variant="plain"
+                        level="body-sm"
+                    >
+                        Login
+                    </Typography>
+                </Typography>
+            </RegisterForm>
         </Stack>
     );
 }

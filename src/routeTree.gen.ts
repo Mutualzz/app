@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from "./routes/__root";
 import { Route as UiRouteImport } from "./routes/ui";
 import { Route as RegisterRouteImport } from "./routes/register";
+import { Route as LoginRouteImport } from "./routes/login";
 import { Route as IndexRouteImport } from "./routes/index";
 import { Route as UiIndexRouteImport } from "./routes/ui/index";
 import { Route as UiSurfacesPaperRouteImport } from "./routes/ui/surfaces/paper";
@@ -37,6 +38,11 @@ const UiRoute = UiRouteImport.update({
 const RegisterRoute = RegisterRouteImport.update({
   id: "/register",
   path: "/register",
+  getParentRoute: () => rootRouteImport,
+} as any);
+const LoginRoute = LoginRouteImport.update({
+  id: "/login",
+  path: "/login",
   getParentRoute: () => rootRouteImport,
 } as any);
 const IndexRoute = IndexRouteImport.update({
@@ -130,6 +136,7 @@ const UiDataDisplayDividerRoute = UiDataDisplayDividerRouteImport.update({
 
 export interface FileRoutesByFullPath {
   "/": typeof IndexRoute;
+  "/login": typeof LoginRoute;
   "/register": typeof RegisterRoute;
   "/ui": typeof UiRouteWithChildren;
   "/ui/": typeof UiIndexRoute;
@@ -151,6 +158,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   "/": typeof IndexRoute;
+  "/login": typeof LoginRoute;
   "/register": typeof RegisterRoute;
   "/ui": typeof UiIndexRoute;
   "/ui/data-display/divider": typeof UiDataDisplayDividerRoute;
@@ -172,6 +180,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport;
   "/": typeof IndexRoute;
+  "/login": typeof LoginRoute;
   "/register": typeof RegisterRoute;
   "/ui": typeof UiRouteWithChildren;
   "/ui/": typeof UiIndexRoute;
@@ -195,6 +204,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath;
   fullPaths:
     | "/"
+    | "/login"
     | "/register"
     | "/ui"
     | "/ui/"
@@ -216,6 +226,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo;
   to:
     | "/"
+    | "/login"
     | "/register"
     | "/ui"
     | "/ui/data-display/divider"
@@ -236,6 +247,7 @@ export interface FileRouteTypes {
   id:
     | "__root__"
     | "/"
+    | "/login"
     | "/register"
     | "/ui"
     | "/ui/"
@@ -258,6 +270,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute;
+  LoginRoute: typeof LoginRoute;
   RegisterRoute: typeof RegisterRoute;
   UiRoute: typeof UiRouteWithChildren;
 }
@@ -276,6 +289,13 @@ declare module "@tanstack/react-router" {
       path: "/register";
       fullPath: "/register";
       preLoaderRoute: typeof RegisterRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/login": {
+      id: "/login";
+      path: "/login";
+      fullPath: "/login";
+      preLoaderRoute: typeof LoginRouteImport;
       parentRoute: typeof rootRouteImport;
     };
     "/": {
@@ -442,6 +462,7 @@ const UiRouteWithChildren = UiRoute._addFileChildren(UiRouteChildren);
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  LoginRoute: LoginRoute,
   RegisterRoute: RegisterRoute,
   UiRoute: UiRouteWithChildren,
 };

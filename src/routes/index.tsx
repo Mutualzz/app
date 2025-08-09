@@ -1,11 +1,15 @@
+import { useAppStore } from "@hooks/useAppStore";
 import { Button, Stack, Typography } from "@mutualzz/ui";
-import { createFileRoute, Outlet, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { observer } from "mobx-react";
 
 export const Route = createFileRoute("/")({
-    component: Index,
+    component: observer(Index),
 });
 
 function Index() {
+    const app = useAppStore();
+    const { account } = app;
     const navigate = useNavigate();
 
     return (
@@ -15,6 +19,7 @@ function Index() {
             justifyContent="center"
             alignItems="center"
         >
+            <img css={{ width: 128, height: 128 }} src="/logo.png" alt="Logo" />
             <Typography level="h2">
                 Website is currently under heavy development
             </Typography>
@@ -37,7 +42,37 @@ function Index() {
                     Go to the UI playground
                 </Button>
             </Stack>
-            <Outlet />
+            {account && (
+                <Stack
+                    justifyContent="center"
+                    alignItems="center"
+                    mt="2rem"
+                    direction="column"
+                >
+                    <Typography level="body-lg">
+                        How the hell did you login? :0
+                    </Typography>
+                    <Typography level="body-lg">
+                        Hi {account.globalName ?? account.username} :3
+                    </Typography>
+                    <Typography my="1em" level="body-sm">
+                        I mean you can logout if you want to
+                    </Typography>
+                    <Button
+                        onClick={() => {
+                            app.logout();
+                            navigate({
+                                to: "/",
+                            });
+                        }}
+                        size="sm"
+                        variant="solid"
+                        color="danger"
+                    >
+                        Logout
+                    </Button>
+                </Stack>
+            )}
         </Stack>
     );
 }

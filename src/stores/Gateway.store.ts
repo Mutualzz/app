@@ -1,4 +1,4 @@
-import { GatewayEvents, GatewayOpcodes } from "@mutualzz/types";
+import { GatewayDispatchEvents, GatewayOpcodes } from "@mutualzz/types";
 import { makeAutoObservable } from "mobx";
 import { Logger } from "../Logger";
 import type { AppStore } from "./App.store";
@@ -15,167 +15,345 @@ export const GatewayStatus = {
 
 export type GatewayStatus = (typeof GatewayStatus)[keyof typeof GatewayStatus];
 
+const RECONNECT_TIMEOUT = 10000;
+
 export class GatewayStore {
-    private ws: WebSocket | null = null;
+    private socket: WebSocket | null = null;
     private readonly logger = new Logger({
         tag: "GatewayStore",
-        level: import.meta.env.DEV ? "debug" : "info",
     });
-    private readonly ignoredEvents = new Set(["ACK", "READY", "RESUME"]);
 
     private readonly app: AppStore;
 
-    private token: string | null = null;
-
-    public status: GatewayStatus = GatewayStatus.CLOSED;
+    public readyState: GatewayStatus = GatewayStatus.CLOSED;
     private sessionId: string | null = null;
-    private seq = 0;
+    private sequence = 0;
 
-    private heartbeatInterval: NodeJS.Timeout | null = null;
-    private lastHeartbeatAck = true;
+    private heartbeatInterval: number | null = null;
+    private heartbeater: NodeJS.Timeout | null = null;
+    private initialHeartbeatTimeout: NodeJS.Timeout | null = null;
+    private heartbeatAck = true;
+    private url?: string;
+
+    private connectionStartTime?: number;
+    private identifyStartTime?: number;
+    private reconnectTimeout = 0;
+
+    private reconnecting = false;
 
     public events: { t: string; d: any; s: number }[] = [];
 
+    private readonly dispatchHandlers = new Map<
+        string,
+        (...args: any[]) => any
+    >();
+
     constructor(app: AppStore) {
-        makeAutoObservable(this);
         this.app = app;
 
-        if (typeof window !== "undefined") {
-            this.sessionId = localStorage.getItem("_sessionId");
-            this.seq = parseInt(localStorage.getItem("_seq") ?? "0");
+        makeAutoObservable(this);
+    }
+
+    async connect(url: string = import.meta.env.VITE_WS_URL) {
+        if (!this.url) {
+            const newUrl = new URL(url);
+            this.url = newUrl.href;
         }
+
+        this.logger.debug(`[Connect] Gateway URL ${this.url}`);
+        this.connectionStartTime = Date.now();
+        this.socket = new WebSocket(this.url);
+        this.readyState = GatewayStatus.CONNECTING;
+
+        this.setupListeners();
+        this.setupDispatchHandlers();
+    }
+
+    async disconnect(code?: number, reason?: string) {
+        if (!this.socket) return;
+
+        this.readyState = GatewayStatus.CLOSING;
+        this.logger.debug(`[Disconnect] ${this.url}`);
+        this.socket.close(code, reason);
+    }
+
+    startReconnect() {
+        if (this.reconnecting) return;
+
+        this.reconnecting = true;
+        setTimeout(() => {
+            this.reconnecting = false;
+            this.logger.debug(`[Reconnect] ${this.url}`);
+            this.connect(this.url);
+        }, this.reconnectTimeout);
+    }
+
+    private setupListeners() {
+        this.socket!.onopen = this.onOpen;
+        this.socket!.onmessage = this.onMessage;
+        this.socket!.onerror = this.onError;
+        this.socket!.onclose = this.onClose;
+    }
+
+    private setupDispatchHandlers() {
+        this.dispatchHandlers.set(GatewayDispatchEvents.Ready, this.onReady);
+        this.dispatchHandlers.set(GatewayDispatchEvents.Resume, this.onResume);
     }
 
     private onOpen = () => {
-        this.status = WebSocket.OPEN;
-        this.logger.debug("Gateway connected");
-    };
-
-    private onClose = () => {
-        this.status = WebSocket.CLOSED;
-        if (this.heartbeatInterval) clearInterval(this.heartbeatInterval);
-        this.logger.warn(
-            "Gateway disconnected, attempting to reconnect in 3s...",
+        this.logger.debug(
+            `[Connected] ${this.url} (took ${Date.now() - this.connectionStartTime!}ms)`,
         );
-        setTimeout(() => {
-            this.connect(this.token ?? undefined);
-        }, 3000);
+        this.readyState = GatewayStatus.OPEN;
+        this.reconnectTimeout = 0;
+
+        this.handleIdentify();
     };
 
-    private onMessage = (event: MessageEvent) => {
-        const { op, t, s, d } = JSON.parse(event.data);
+    private onMessage = (e: MessageEvent) => {
+        const payload = JSON.parse(e.data);
+        if (payload.op !== GatewayOpcodes.Dispatch) {
+            this.logger.debug(`[Gateway] -> ${payload.op}`, payload);
+        }
 
-        switch (op) {
-            case GatewayOpcodes.Hello: {
-                this.logger.info("[HELLO] Starting heartbeat");
-                this.startHeartbeat(d.heartbeatInterval);
-                if (this.token) {
-                    if (this.sessionId) this.resume();
-                    else this.identify();
-                    return;
-                }
+        switch (payload.op) {
+            case GatewayOpcodes.Dispatch:
+                this.handleDispatch(payload);
                 break;
-            }
-
+            case GatewayOpcodes.Heartbeat:
+                this.sendHeartbeat();
+                break;
+            case GatewayOpcodes.Reconnect:
+                this.handleReconnect();
+                break;
+            case GatewayOpcodes.InvalidSession:
+                this.handleInvalidSession(payload.d);
+                break;
+            case GatewayOpcodes.Hello:
+                this.handleHello(payload.d);
+                break;
             case GatewayOpcodes.HeartbeatAck:
-                this.logger.debug("[HEARTBEAT_ACK] Heartbeat acknowledged");
-                this.lastHeartbeatAck = true;
+                this.handleHeartbeatAck();
                 break;
-
-            case GatewayOpcodes.Dispatch: {
-                if (s) {
-                    this.seq = s;
-                    localStorage.setItem("_seq", s.toString());
-                }
-
-                if (t === GatewayEvents.Ready) {
-                    this.sessionId = d.sessionId;
-                    localStorage.setItem("_sessionId", d.sessionId);
-
-                    this.logger.info(`[READY] Session: ${d.sessionId}`);
-                }
-
-                if (t === GatewayEvents.Resume)
-                    this.logger.info(`[RESUME] Session: ${d.sessionId}`);
-
-                if (!this.ignoredEvents.has(t)) {
-                    this.events.push({ t, d, s: this.seq });
-                    this.handleDispatch(t, d);
-                }
-
+            default:
+                this.logger.debug("Received unknown opcode");
                 break;
-            }
-
-            case GatewayOpcodes.InvalidSession: {
-                this.logger.error("[INVALID_SESSION]", d.reason);
-                this.sessionId = null;
-                this.seq = 0;
-                localStorage.removeItem("_sessionId");
-                localStorage.removeItem("_seq");
-                if (this.token) this.identify();
-                break;
-            }
         }
     };
 
-    connect(token?: string) {
-        this.token = token ?? this.app.token ?? null;
-        this.ws = new WebSocket(import.meta.env.VITE_WS_URL);
+    private onError = (e: Event) => {
+        this.logger.error(`[Socket Error]`, e);
+    };
 
-        this.ws.onopen = this.onOpen;
-        this.ws.onmessage = this.onMessage;
-        this.ws.onclose = this.onClose;
+    private onClose = (e: CloseEvent) => {
+        this.readyState = GatewayStatus.CLOSED;
+        this.handleClose(e.code);
+    };
+
+    private sendJson = (payload: any) => {
+        if (!this.socket) {
+            this.logger.error("Socket is not open");
+            return;
+        }
+
+        if (this.socket.readyState !== WebSocket.OPEN) {
+            this.logger.error(
+                `Socket is not open; readyState: ${this.socket.readyState}`,
+            );
+            return;
+        }
+
+        this.logger.debug(`[Gateway] <- ${payload.op}`, payload);
+        this.socket.send(JSON.stringify(payload));
+    };
+
+    private handleIdentify() {
+        if (!this.app.token) {
+            this.logger.error("Cannot identify, token is not set");
+            return;
+        }
+
+        this.identifyStartTime = Date.now();
+
+        const payload = {
+            op: GatewayOpcodes.Identify,
+            d: {
+                token: this.app.token,
+            },
+        };
+
+        this.sendJson(payload);
     }
 
-    private startHeartbeat(interval: number) {
-        if (this.heartbeatInterval) clearInterval(this.heartbeatInterval);
-        this.heartbeatInterval = setInterval(() => {
-            if (!this.lastHeartbeatAck) {
-                this.logger.warn("Missed heartbeat, closing connection");
-                this.ws?.close(4000, "Missed heartbeat");
-                return;
-            }
+    private handleInvalidSession = (resumable: boolean) => {
+        this.cleanup();
 
-            this.lastHeartbeatAck = false;
-            this.logger.debug("Sending heartbeat");
-            this.send("Heartbeat", { s: this.seq });
-        }, interval);
+        this.logger.debug(`Received invalid session; Can Resume: ${resumable}`);
+        if (!resumable) return;
+
+        this.handleResume();
+    };
+
+    private handleReconnect() {
+        this.cleanup();
+
+        this.logger.debug(`[Gateway] -> Reconnect`);
+        this.startReconnect();
     }
 
-    private identify() {
-        if (!this.token) return;
-        this.logger.info("[IDENTIFY] Identifying user");
-        this.send("Identify", { token: this.token });
-    }
+    private handleResume() {
+        if (!this.app.token) {
+            this.logger.error("Cannot resume, token is not set");
+            return;
+        }
 
-    private resume() {
-        if (!this.token || !this.sessionId) return;
-        this.logger.info(
-            "[RESUME] Resuming session",
-            this.sessionId,
-            "seq:",
-            this.seq,
-        );
-        this.send("Resume", {
+        this.sendJson({
+            op: GatewayOpcodes.Resume,
+            d: {
+                token: this.app.token,
+                sessionId: this.sessionId,
+                seq: this.sequence,
+            },
+        });
+
+        this.logger.debug(`[Gateway] -> ${GatewayOpcodes.Resume}`, {
             sessionId: this.sessionId,
-            seq: this.seq,
+            seq: this.sequence,
         });
     }
 
-    private send(op: keyof typeof GatewayOpcodes, d: any = {}) {
-        this.ws?.send(
-            JSON.stringify({
-                op: GatewayOpcodes[op],
-                d,
-            }),
+    private handleHello(data: any) {
+        this.heartbeatInterval = data.heartbeatInterval;
+        this.reconnectTimeout = this.heartbeatInterval!;
+        this.logger.info(
+            `[Hello] heartbeat interval: ${data.heartbeat_interval} (took ${Date.now() - this.connectionStartTime!}ms)`,
         );
+        this.startHeartbeater();
     }
 
-    private handleDispatch(t: string, d: any) {
-        this.logger.debug(`[DISPATCH] Event: ${t}`, d);
-        switch (t) {
-            default:
-                this.logger.warn(`[DISPATCH] Unhandled event type: ${t}`);
+    private handleClose = (code?: number) => {
+        this.cleanup();
+
+        if (code === 1001) return;
+
+        if (this.reconnectTimeout === 0)
+            this.reconnectTimeout = RECONNECT_TIMEOUT;
+        else this.reconnectTimeout += RECONNECT_TIMEOUT;
+
+        this.logger.debug(
+            `Websocket closed with code ${code}; Will reconnect in ${(
+                this.reconnectTimeout / 1000
+            ).toFixed(2)} seconds.`,
+        );
+
+        this.startReconnect();
+    };
+
+    private reset = () => {
+        this.sessionId = null;
+        this.sequence = 0;
+        this.readyState = GatewayStatus.CLOSED;
+    };
+
+    private startHeartbeater = () => {
+        if (this.heartbeater) {
+            clearInterval(this.heartbeater);
+            this.heartbeater = null;
         }
-    }
+
+        const heartbeaterFn = () => {
+            if (this.heartbeatAck) {
+                this.heartbeatAck = false;
+                this.sendHeartbeat();
+            } else {
+                this.handleHeartbeatTimeout();
+            }
+        };
+
+        this.initialHeartbeatTimeout = setTimeout(
+            () => {
+                this.initialHeartbeatTimeout = null;
+                this.heartbeater = setInterval(
+                    heartbeaterFn,
+                    this.heartbeatInterval!,
+                );
+                heartbeaterFn();
+            },
+            Math.floor(Math.random() * this.heartbeatInterval!),
+        );
+    };
+
+    private stopHeartbeater = () => {
+        if (this.heartbeater) {
+            clearInterval(this.heartbeater);
+            this.heartbeater = null;
+        }
+
+        if (this.initialHeartbeatTimeout) {
+            clearTimeout(this.initialHeartbeatTimeout);
+            this.initialHeartbeatTimeout = null;
+        }
+    };
+
+    private handleHeartbeatTimeout = () => {
+        this.logger.warn(
+            `[Heartbeat ACK Timeout] should reconnect in ${(RECONNECT_TIMEOUT / 1000).toFixed(2)} seconds`,
+        );
+
+        this.socket?.close(4009);
+
+        this.cleanup();
+        this.reset();
+
+        this.startReconnect();
+    };
+
+    private sendHeartbeat = () => {
+        const payload = {
+            op: GatewayOpcodes.Heartbeat,
+            d: this.sequence,
+        };
+        this.logger.debug("Sending heartbeat");
+        this.sendJson(payload);
+    };
+
+    private cleanup = () => {
+        this.logger.debug("Cleaning up");
+        this.stopHeartbeater();
+        this.socket = null;
+    };
+
+    private handleHeartbeatAck = () => {
+        this.logger.debug("Received heartbeat ack");
+        this.heartbeatAck = true;
+    };
+
+    private handleDispatch = (data: any) => {
+        const { d, t, s } = data;
+        this.logger.debug(`[Gateway] -> ${t}`, d);
+        this.sequence = s;
+        const handler = this.dispatchHandlers.get(t);
+        if (!handler) {
+            this.logger.debug(`No handler for dispatch event ${t}`);
+            return;
+        }
+
+        handler(d);
+    };
+
+    private onResume = () => {
+        this.logger.debug("Resumed");
+    };
+
+    private onReady = (data: any) => {
+        this.logger.info(
+            `[Ready] took ${Date.now() - this.identifyStartTime!}ms`,
+        );
+        const { sessionId, user } = data;
+        this.sessionId = sessionId;
+        this.app.setUser(user);
+
+        this.reconnectTimeout = 0;
+        this.app.setGatewayReady(true);
+    };
 }

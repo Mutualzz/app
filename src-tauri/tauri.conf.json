@@ -1,19 +1,24 @@
 {
     "$schema": "https://schema.tauri.app/config/2",
     "app": {
-        "security": {
-            "csp": null
-        },
         "windows": [
             {
                 "height": 600,
-                "maximized": true,
-                "minHeight": 600,
-                "minWidth": 800,
+                "label": "main",
                 "title": "Mutualzz",
+                "visible": false,
                 "width": 800
+            },
+            {
+                "decorations": false,
+                "height": 400,
+                "label": "splashscreen",
+                "resizable": false,
+                "url": "splashscreen.html",
+                "width": 400
             }
-        ]
+        ],
+        "withGlobalTauri": true
     },
     "build": {
         "beforeBuildCommand": "pnpm build",
@@ -23,6 +28,8 @@
     },
     "bundle": {
         "active": true,
+        "category": "SocialNetworking",
+        "createUpdaterArtifacts": true,
         "icon": [
             "icons/32x32.png",
             "icons/128x128.png",
@@ -30,9 +37,31 @@
             "icons/icon.icns",
             "icons/icon.ico"
         ],
-        "targets": "all"
+        "publisher": "Mutualzz",
+        "shortDescription": "Mutualzz is a social media platform that connects people with similar interests.",
+        "targets": ["deb", "rpm", "appimage", "nsis", "app", "dmg"],
+        "windows": {
+            "nsis": {
+                "installerIcon": "./icons/icon.ico"
+            }
+        }
     },
     "identifier": "com.mutualzz.app",
+    "plugins": {
+        "shell": {
+            "open": true
+        },
+        "updater": {
+            "active": "true",
+            "endpoints": [
+                "https://github.com/mutualzz/app/releases/download/latest/latest.json"
+            ],
+            "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEJCNzEzNTBGQUM5N0RFNTYKUldSVzNwZXNEelZ4dTFpYjJiK1IyQy9yd05ibnA3elI2VnJLR25rTG5kQlpZWlNvSnJGaUlBeDcK",
+            "windows": {
+                "installMode": "passive"
+            }
+        }
+    },
     "productName": "Mutualzz",
-    "version": "1.0.0"
+    "version": "./version.json"
 }

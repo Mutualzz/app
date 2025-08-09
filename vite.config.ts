@@ -1,18 +1,76 @@
+/* eslint-disable no-console */
+import replace from "@rollup/plugin-replace";
 import { wrapVinxiConfigWithSentry } from "@sentry/tanstackstart-react";
 import { tanstackStart } from "@tanstack/react-start/plugin/vite";
-import viteReact from "@vitejs/plugin-react-oxc";
+import viteReact from "@vitejs/plugin-react-swc";
+import { readFileSync } from "fs";
 import { defineConfig } from "vite";
+import cleanPlugin from "vite-plugin-clean";
+import progress from "vite-plugin-progress";
+import svgr from "vite-plugin-svgr";
 import tsconfigPaths from "vite-tsconfig-paths";
 
+function getGitRevision() {
+    try {
+        const rev = readFileSync(".git/HEAD").toString().trim();
+        if (rev.indexOf(":") === -1) {
+            return rev;
+        }
+
+        return readFileSync(`.git/${rev.substring(5)}`)
+            .toString()
+            .trim();
+    } catch {
+        console.error("Failed to get Git revision.");
+        return "?";
+    }
+}
+
+function getGitBranch() {
+    try {
+        const rev = readFileSync(".git/HEAD").toString().trim();
+        if (rev.indexOf(":") === -1) {
+            return "DETACHED";
+        }
+
+        return rev.split("/").pop();
+    } catch {
+        console.error("Failed to get Git branch.");
+        return "?";
+    }
+}
+
+function getVersion() {
+    return JSON.parse(readFileSync("package.json").toString()).version;
+}
+
 const host = process.env.TAURI_DEV_HOST;
+const isDevBuild = !!process.env.VITE_ENV_DEV || !!process.env.TAURI_ENV_DEBUG;
+
+console.log(`Sourcemaps: ${isDevBuild}`);
+console.log(`Minification: ${isDevBuild ? false : "esbuild"}`);
+console.log(
+    `Target: ${
+        process.env.TAURI_ENV_PLATFORM !== undefined
+            ? process.env.TAURI_ENV_PLATFORM == "windows"
+                ? "chrome105"
+                : "safari13"
+            : "modules"
+    }`,
+);
 
 // https://vitejs.dev/config/
 export default defineConfig(async () => ({
-    build: {
-        sourcemap: import.meta.dev,
-    },
-
     plugins: [
+        cleanPlugin(),
+        svgr(),
+        progress(),
+        replace({
+            __GIT_REVISION__: getGitRevision(),
+            __GIT_BRANCH__: getGitBranch(),
+            __APP_VERSION__: getVersion(),
+            preventAssignment: true,
+        }),
         tsconfigPaths(),
         wrapVinxiConfigWithSentry(
             tanstackStart({
@@ -31,6 +89,7 @@ export default defineConfig(async () => ({
         ),
         viteReact({
             jsxImportSource: "@emotion/react",
+            tsDecorators: true,
         }),
     ],
 
@@ -55,4 +114,6 @@ export default defineConfig(async () => ({
             ignored: ["**/src-tauri/**"],
         },
     },
+
+    envPrefix: ["VITE_", "TAURI_"],
 }));
