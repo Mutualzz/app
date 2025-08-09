@@ -5,8 +5,6 @@ import { tanstackStart } from "@tanstack/react-start/plugin/vite";
 import viteReact from "@vitejs/plugin-react-swc";
 import { readFileSync } from "fs";
 import { defineConfig } from "vite";
-import cleanPlugin from "vite-plugin-clean";
-import progress from "vite-plugin-progress";
 import svgr from "vite-plugin-svgr";
 import tsconfigPaths from "vite-tsconfig-paths";
 
@@ -60,11 +58,10 @@ console.log(
 );
 
 // https://vitejs.dev/config/
-export default defineConfig(async () => ({
+export default defineConfig({
     plugins: [
-        cleanPlugin(),
+        // cleanPlugin(),
         svgr(),
-        progress(),
         replace({
             __GIT_REVISION__: getGitRevision(),
             __GIT_BRANCH__: getGitBranch(),
@@ -116,4 +113,4 @@ export default defineConfig(async () => ({
     },
 
     envPrefix: ["VITE_", "TAURI_"],
-}));
+});
