@@ -24,7 +24,7 @@ export const cemeteryDawnTheme: Theme = {
             primary: "#222222",
             secondary: "#444444",
             accent: "#70515C",
-            disabled: "#7B4B53",
+            muted: "#7B4B53",
         },
     },
 };

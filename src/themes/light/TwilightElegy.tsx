@@ -24,7 +24,7 @@ export const twilightElegyTheme: Theme = {
             primary: "#222222",
             secondary: "#444444",
             accent: "#743DA3",
-            disabled: "#7B5A7A",
+            muted: "#7B5A7A",
         },
     },
 };

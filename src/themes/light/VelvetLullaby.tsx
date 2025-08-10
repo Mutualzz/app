@@ -24,7 +24,7 @@ export const velvetLullabyTheme: Theme = {
             primary: "#222222",
             secondary: "#444444",
             accent: "#98625D",
-            disabled: "#7B6A7A",
+            muted: "#7B6A7A",
         },
     },
 };

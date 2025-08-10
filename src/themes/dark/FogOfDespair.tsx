@@ -24,7 +24,7 @@ export const fogOfDespairTheme: Theme = {
             primary: "#F0F0F0",
             secondary: "#BFD0D9",
             accent: "#AAC4D1",
-            disabled: "#8EA0AA",
+            muted: "#8EA0AA",
         },
     },
 };

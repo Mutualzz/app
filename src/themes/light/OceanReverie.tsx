@@ -24,7 +24,7 @@ export const oceanReverieTheme: Theme = {
             primary: "#222222",
             secondary: "#444444",
             accent: "#49604A",
-            disabled: "#7B8A8A",
+            muted: "#7B8A8A",
         },
     },
 };

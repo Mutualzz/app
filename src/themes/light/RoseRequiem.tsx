@@ -24,7 +24,7 @@ export const roseRequiemTheme: Theme = {
             primary: "#222222",
             secondary: "#444444",
             accent: "#9C2232",
-            disabled: "#8A6A72",
+            muted: "#8A6A72",
         },
     },
 };

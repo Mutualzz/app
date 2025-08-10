@@ -25,7 +25,7 @@ export const midnightEleganceTheme: Theme = {
             primary: "#E6E6E6",
             secondary: "#B5B5B5",
             accent: "#8885B2",
-            disabled: "#5A4A69",
+            muted: "#5A4A69",
         },
     },
 };

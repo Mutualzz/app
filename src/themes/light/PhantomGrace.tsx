@@ -24,7 +24,7 @@ export const phantomGraceTheme: Theme = {
             primary: "#222222",
             secondary: "#444444",
             accent: "#8F8EAD",
-            disabled: "#7A7A8A",
+            muted: "#7A7A8A",
         },
     },
 };

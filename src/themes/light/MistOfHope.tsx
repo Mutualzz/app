@@ -24,7 +24,7 @@ export const mistOfHopeTheme: Theme = {
             primary: "#222222",
             secondary: "#444444",
             accent: "#6D8A9C",
-            disabled: "#7D8F99",
+            muted: "#7D8F99",
         },
     },
 };

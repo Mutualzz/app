@@ -24,7 +24,7 @@ export const arcaneSunriseTheme: Theme = {
             primary: "#222222",
             secondary: "#444444",
             accent: "#4DA380",
-            disabled: "#7D8F99",
+            muted: "#7D8F99",
         },
     },
 };

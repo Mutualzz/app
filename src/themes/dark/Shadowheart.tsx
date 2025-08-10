@@ -25,7 +25,7 @@ export const shadowheartTheme: Theme = {
             primary: "#E8E8E8",
             secondary: "#B5B5B5",
             accent: "#7BA1AD",
-            disabled: "#6B4F59",
+            muted: "#6B4F59",
         },
     },
 };

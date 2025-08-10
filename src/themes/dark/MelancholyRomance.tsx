@@ -25,7 +25,7 @@ export const melancholyRomanceTheme: Theme = {
             primary: "#E8E8E8",
             secondary: "#C0A5AF",
             accent: "#B37C88",
-            disabled: "#73678F",
+            muted: "#73678F",
         },
     },
 };

@@ -24,7 +24,7 @@ export const eternalMourningTheme: Theme = {
             primary: "#ECECEC",
             secondary: "#CAB8D8",
             accent: "#A479D0",
-            disabled: "#7A668A",
+            muted: "#7A668A",
         },
     },
 };

@@ -25,7 +25,7 @@ export const witchingHourTheme: Theme = {
             primary: "#EDEDED",
             secondary: "#B8B8D0",
             accent: "#9D82D0",
-            disabled: "#5A4A72",
+            muted: "#5A4A72",
         },
     },
 };

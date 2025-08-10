@@ -24,7 +24,7 @@ export const crimsonLamentTheme: Theme = {
             primary: "#F0F0F0",
             secondary: "#C8A5A5",
             accent: "#B84D58",
-            disabled: "#6B4352",
+            muted: "#6B4352",
         },
     },
 };

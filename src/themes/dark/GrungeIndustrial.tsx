@@ -25,7 +25,7 @@ export const grungeIndustrialTheme: Theme = {
             primary: "#E6E6E6",
             secondary: "#C5B6AA",
             accent: "#A2785C",
-            disabled: "#7E5F4A",
+            muted: "#7E5F4A",
         },
     },
 };

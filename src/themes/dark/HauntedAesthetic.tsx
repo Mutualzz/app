@@ -25,7 +25,7 @@ export const hauntedAestheticTheme: Theme = {
             primary: "#E8E8E8",
             secondary: "#B5B5B5",
             accent: "#A07BA3",
-            disabled: "#7B4F5F",
+            muted: "#7B4F5F",
         },
     },
 };

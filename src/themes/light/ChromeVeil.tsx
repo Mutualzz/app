@@ -24,7 +24,7 @@ export const chromeVeilTheme: Theme = {
             primary: "#222222",
             secondary: "#444444",
             accent: "#448E81",
-            disabled: "#7E8A8A",
+            muted: "#7E8A8A",
         },
     },
 };

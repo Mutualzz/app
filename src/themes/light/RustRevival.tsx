@@ -24,7 +24,7 @@ export const rustRevivalTheme: Theme = {
             primary: "#222222",
             secondary: "#444444",
             accent: "#81472F",
-            disabled: "#7E5F50",
+            muted: "#7E5F50",
         },
     },
 };

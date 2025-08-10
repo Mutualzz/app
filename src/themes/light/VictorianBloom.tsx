@@ -24,7 +24,7 @@ export const victorianBloomTheme: Theme = {
             primary: "#222222",
             secondary: "#444444",
             accent: "#A6844F",
-            disabled: "#7B6A6A",
+            muted: "#7B6A6A",
         },
     },
 };

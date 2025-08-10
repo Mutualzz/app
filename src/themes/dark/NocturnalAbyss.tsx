@@ -25,7 +25,7 @@ export const nocturnalAbyssTheme: Theme = {
             primary: "#E6E6E6",
             secondary: "#B5B5B5",
             accent: "#8AB1C6",
-            disabled: "#6A4F68",
+            muted: "#6A4F68",
         },
     },
 };

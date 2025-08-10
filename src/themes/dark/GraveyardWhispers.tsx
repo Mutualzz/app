@@ -25,7 +25,7 @@ export const graveyardWhispersTheme: Theme = {
             primary: "#EDEDED",
             secondary: "#C2C2C2",
             accent: "#B191A3",
-            disabled: "#8A5660",
+            muted: "#8A5660",
         },
     },
 };
