@@ -12,6 +12,7 @@ Sentry.init({
     tracesSampleRate: 1.0,
     tracePropagationTargets: ["https://mutualzz.com", "localhost"],
     environment: import.meta.env.DEV ? "development" : "production",
+    enabled: !import.meta.env.DEV,
     // debug: import.meta.env.DEV,
 });
 

@@ -19,6 +19,7 @@ Sentry.init({
     tracePropagationTargets: ["https://mutualzz.com", "localhost"],
     replaysSessionSampleRate: import.meta.env.DEV ? 1.0 : 0.1,
     replaysOnErrorSampleRate: 1.0,
+    enabled: !import.meta.env.DEV,
     // debug: import.meta.env.DEV,
 });
 
