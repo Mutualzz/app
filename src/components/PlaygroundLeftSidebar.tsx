@@ -1,14 +1,14 @@
+import { useAppStore } from "@hooks/useStores";
 import {
     Button,
     Divider,
     Paper,
-    sortThemes,
     Stack,
     useTheme,
     type ThemeMode,
 } from "@mutualzz/ui";
 import { useLocation, useNavigate } from "@tanstack/react-router";
-import { themes as allThemes } from "@themes/index";
+import { sortThemes } from "@utils/index";
 import startCase from "lodash-es/startCase";
 
 const links = {
@@ -85,18 +85,27 @@ const links = {
 export const PlaygrondLeftSidebar = () => {
     const { mode, changeMode, changeTheme } = useTheme();
     const navigate = useNavigate();
+    const { theme } = useAppStore();
     const { pathname } = useLocation();
 
-    const themes = allThemes.filter((theme) => theme.type === mode);
+    const themes = Array.from(theme.themes.values()).filter(
+        (theme) => theme.type === mode,
+    );
 
     return (
         <Paper
-            spacing={25}
+            spacing={5}
             direction="column"
-            p={40}
             justifyContent="flex-start"
             overflowY="auto"
+            width="12.5rem"
+            borderRadius="2rem"
+            p={20}
         >
+            <img
+                src="/logo.png"
+                css={{ width: 64, height: 64, alignSelf: "center" }}
+            />
             <Stack direction="column" spacing={25}>
                 <Stack
                     justifyContent="center"
@@ -146,6 +155,7 @@ export const PlaygrondLeftSidebar = () => {
                             {sortThemes(themes).map((theme) => (
                                 <option key={theme.id} value={theme.id}>
                                     {theme.name}
+                                    {theme.createdBy ? ` (by You)` : ""}
                                 </option>
                             ))}
                         </select>
