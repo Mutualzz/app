@@ -65,6 +65,8 @@ function RootComponent() {
         tag: "App",
     });
 
+    const networkState = useNetworkState();
+
     useEffect(() => {
         const dispose = reaction(
             () => app.token,
@@ -134,37 +136,33 @@ function RootComponent() {
         <RootDocument>
             <AppTheme>
                 <CssBaseline />
-                {app.isAppLoading ? <></> : <App />}
+                {app.isAppLoading ? (
+                    <></>
+                ) : (
+                    <ModalProvider>
+                        {!networkState.online && (
+                            <Paper
+                                alignItems="center"
+                                justifyContent="center"
+                                variant="solid"
+                                color="danger"
+                            >
+                                <Typography level="body-lg">
+                                    You are currently offline
+                                </Typography>
+                            </Paper>
+                        )}
+
+                        <Outlet />
+                        {import.meta.env.DEV && (
+                            <>
+                                <ReactQueryDevtools />
+                                <TanStackRouterDevtools />
+                            </>
+                        )}
+                    </ModalProvider>
+                )}
             </AppTheme>
         </RootDocument>
     );
 }
-
-const App = observer(() => {
-    const networkState = useNetworkState();
-
-    return (
-        <ModalProvider>
-            {!networkState.online && (
-                <Paper
-                    alignItems="center"
-                    justifyContent="center"
-                    variant="solid"
-                    color="danger"
-                >
-                    <Typography level="body-lg">
-                        You are currently offline
-                    </Typography>
-                </Paper>
-            )}
-
-            <Outlet />
-            {import.meta.env.DEV && (
-                <>
-                    <ReactQueryDevtools />
-                    <TanStackRouterDevtools />
-                </>
-            )}
-        </ModalProvider>
-    );
-});
