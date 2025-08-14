@@ -71,7 +71,7 @@ export const MarkdownRenderer = ({
                                 display: "block",
                                 margin: 0,
                                 paddingLeft: "0.5em",
-                                borderLeft: `4px solid ${theme.typography.colors.disabled}`,
+                                borderLeft: `4px solid ${theme.typography.colors.muted}`,
                                 color: theme.typography.colors.primary,
                             }}
                         >
