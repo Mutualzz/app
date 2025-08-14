@@ -14,16 +14,23 @@ export const AppTheme = observer(({ children }: PropsWithChildren) => {
     const themeProviderRef = useRef<ThemeProviderRef>(null);
 
     useEffect(() => {
+        let isInitialLoad = true;
+
         const modeDispose = reaction(
             () => themeStore.currentMode,
             (mode) => {
                 themeProviderRef?.current?.changeMode(mode);
 
-                const defaulTheme =
-                    mode === "dark" ? baseDarkTheme : baseLightTheme;
-                themeProviderRef.current?.changeTheme(defaulTheme);
-                themeStore.setCurrentTheme(defaulTheme.id);
+                if (!isInitialLoad) {
+                    const defaulTheme =
+                        mode === "dark" ? baseDarkTheme : baseLightTheme;
+                    themeProviderRef.current?.changeTheme(defaulTheme);
+                    themeStore.setCurrentTheme(defaulTheme.id);
+                }
+
+                isInitialLoad = false;
             },
+
             { fireImmediately: true },
         );
 
