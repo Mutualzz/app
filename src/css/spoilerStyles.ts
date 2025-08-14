@@ -12,7 +12,7 @@ export const spoilerStyles = (revealed: boolean, theme: Theme) =>
 
         backgroundColor: revealed
             ? dynamicElevation(theme.colors.surface, 5)
-            : theme.typography.colors.disabled,
+            : theme.typography.colors.muted,
         color: revealed ? "inherit" : "transparent",
         cursor: revealed ? "text" : "pointer",
         userSelect: revealed ? "text" : "none",
@@ -26,7 +26,7 @@ export const spoilerStyles = (revealed: boolean, theme: Theme) =>
 
         "&:hover": {
             backgroundColor: !revealed
-                ? formatHex8(darken(theme.typography.colors.disabled, 0.1))
+                ? formatHex8(darken(theme.typography.colors.muted, 0.1))
                 : undefined,
         },
     });
