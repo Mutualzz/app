@@ -1,4 +1,4 @@
-import type { APIUser } from "@mutualzz/types";
+import type { APITheme, APIUser } from "@mutualzz/types";
 import { makeAutoObservable } from "mobx";
 
 export class AccountStore {
@@ -6,6 +6,7 @@ export class AccountStore {
     username: string;
     globalName?: string | null = null;
     email?: string | null = null;
+    themes?: APITheme[] | null = null;
     createdAt: Date;
     createdTimestamp: number;
 
@@ -16,6 +17,7 @@ export class AccountStore {
         this.username = user.username;
         this.globalName = user.globalName ?? null;
         this.email = user.email ?? null;
+        this.themes = user.themes ?? null;
         this.createdAt = user.createdAt;
         this.createdTimestamp = user.createdTimestamp;
 
