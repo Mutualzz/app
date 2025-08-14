@@ -1,4 +1,3 @@
-import type { Theme } from "@emotion/react";
 import { baseDarkTheme } from "@mutualzz/ui";
 import { crimsonLamentTheme } from "./CrimsonLament";
 import { eternalMourningTheme } from "./EternalMourning";
@@ -12,19 +11,17 @@ import { nocturnalAbyssTheme } from "./NocturnalAbyss";
 import { shadowheartTheme } from "./Shadowheart";
 import { witchingHourTheme } from "./WitchingHour";
 
-export const darkThemesObj: Record<string, Theme> = {
-    baseDark: baseDarkTheme,
-    crimsonLament: crimsonLamentTheme,
-    eternalMourning: eternalMourningTheme,
-    fogOfDespair: fogOfDespairTheme,
-    graveyardWhispers: graveyardWhispersTheme,
-    grungeIndustrial: grungeIndustrialTheme,
-    hauntedAesthetic: hauntedAestheticTheme,
-    melancholyRomance: melancholyRomanceTheme,
-    nocturnalAbyss: nocturnalAbyssTheme,
-    shadowheart: shadowheartTheme,
-    witchingHour: witchingHourTheme,
-    midnightElegance: midnightEleganceTheme,
-};
-
-export const darkThemes = Object.values(darkThemesObj);
+export const darkThemes = [
+    baseDarkTheme,
+    crimsonLamentTheme,
+    eternalMourningTheme,
+    fogOfDespairTheme,
+    graveyardWhispersTheme,
+    grungeIndustrialTheme,
+    hauntedAestheticTheme,
+    melancholyRomanceTheme,
+    nocturnalAbyssTheme,
+    shadowheartTheme,
+    witchingHourTheme,
+    midnightEleganceTheme,
+];
