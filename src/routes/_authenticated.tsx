@@ -1,4 +1,4 @@
-import { useAppStore } from "@hooks/useAppStore";
+import { useAppStore } from "@hooks/useStores";
 import { createFileRoute, Outlet, useNavigate } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_authenticated")({
@@ -7,9 +7,9 @@ export const Route = createFileRoute("/_authenticated")({
 
 function AuthenticatedRoute() {
     const navigate = useNavigate();
-    const app = useAppStore();
+    const { account } = useAppStore();
 
-    if (!app.token) {
+    if (!account) {
         navigate({ to: "/login", replace: true });
         return null;
     }
