@@ -1,3 +1,5 @@
+import { AppTheme } from "@contexts/AppTheme.context";
+import { ModalProvider } from "@contexts/Modal.context";
 import "@fontsource/inter/100";
 import "@fontsource/inter/200";
 import "@fontsource/inter/300";
@@ -7,10 +9,10 @@ import "@fontsource/inter/600";
 import "@fontsource/inter/700";
 import "@fontsource/inter/800";
 import "@fontsource/inter/900";
-import { useAppStore } from "@hooks/useAppStore";
+import { useAppStore } from "@hooks/useStores";
 import { Logger } from "@logger";
 import { GatewayCloseCodes } from "@mutualzz/types";
-import { CssBaseline, Paper, ThemeProvider, Typography } from "@mutualzz/ui";
+import { CssBaseline, Paper, Typography } from "@mutualzz/ui";
 import { useNetworkState } from "@react-hookz/web";
 import { wrapCreateRootRouteWithSentry } from "@sentry/tanstackstart-react";
 import { seo } from "@seo";
@@ -25,7 +27,6 @@ import {
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import { getTauriVersion, getVersion } from "@tauri-apps/api/app";
 import { arch, locale, platform, version } from "@tauri-apps/plugin-os";
-import { themesObj } from "@themes/index";
 import { isTauri } from "@utils/index";
 import { reaction } from "mobx";
 import { observer } from "mobx-react";
@@ -59,21 +60,20 @@ function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
 
 function RootComponent() {
     const app = useAppStore();
+    const { gateway, rest } = app;
     const logger = new Logger({
         tag: "App",
     });
-
-    const networkState = useNetworkState();
 
     useEffect(() => {
         const dispose = reaction(
             () => app.token,
             (value) => {
                 if (value) {
-                    app.rest.setToken(value);
-                    if (app.gateway.readyState === GatewayStatus.CLOSED) {
+                    rest.setToken(value);
+                    if (gateway.readyState === GatewayStatus.CLOSED) {
                         app.setGatewayReady(false);
-                        app.gateway.connect();
+                        gateway.connect();
                     } else {
                         logger.debug(
                             "Gateway connect called but socket is not closed",
@@ -81,14 +81,15 @@ function RootComponent() {
                     }
                 } else {
                     logger.debug("user no longer authenticated");
-                    if (app.gateway.readyState === WebSocket.OPEN) {
-                        app.gateway.disconnect(
+                    if (gateway.readyState === WebSocket.OPEN) {
+                        gateway.disconnect(
                             GatewayCloseCodes.NotAuthenticated,
                             "user is no longer authenticated",
                         );
                     }
                 }
             },
+            { fireImmediately: true },
         );
 
         const loadAsyncGlobals = async () => {
@@ -131,28 +132,39 @@ function RootComponent() {
 
     return (
         <RootDocument>
-            <ThemeProvider themes={themesObj}>
+            <AppTheme>
                 <CssBaseline />
-                {!networkState.online && (
-                    <Paper
-                        alignItems="center"
-                        justifyContent="center"
-                        variant="solid"
-                        color="danger"
-                    >
-                        <Typography level="body-lg">
-                            You are currently offline
-                        </Typography>
-                    </Paper>
-                )}
-                <Outlet />
-                {import.meta.env.DEV && (
-                    <>
-                        <ReactQueryDevtools />
-                        <TanStackRouterDevtools />
-                    </>
-                )}
-            </ThemeProvider>
+                {app.isAppLoading ? <></> : <App />}
+            </AppTheme>
         </RootDocument>
     );
 }
+
+const App = observer(() => {
+    const networkState = useNetworkState();
+
+    return (
+        <ModalProvider>
+            {!networkState.online && (
+                <Paper
+                    alignItems="center"
+                    justifyContent="center"
+                    variant="solid"
+                    color="danger"
+                >
+                    <Typography level="body-lg">
+                        You are currently offline
+                    </Typography>
+                </Paper>
+            )}
+
+            <Outlet />
+            {import.meta.env.DEV && (
+                <>
+                    <ReactQueryDevtools />
+                    <TanStackRouterDevtools />
+                </>
+            )}
+        </ModalProvider>
+    );
+});
