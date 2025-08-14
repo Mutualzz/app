@@ -10,6 +10,9 @@ import {
 import { useLocation, useNavigate } from "@tanstack/react-router";
 import { sortThemes } from "@utils/index";
 import startCase from "lodash-es/startCase";
+import { observer } from "mobx-react";
+import { motion } from "motion/react";
+import { Logo } from "./Logo";
 
 const links = {
     inputs: [
@@ -82,15 +85,27 @@ const links = {
     ],
 };
 
-export const PlaygrondLeftSidebar = () => {
-    const { mode, changeMode, changeTheme } = useTheme();
+const AnimatedLogo = motion.create(Logo);
+
+export const PlaygrondLeftSidebar = observer(() => {
     const navigate = useNavigate();
-    const { theme } = useAppStore();
+    const { theme: themeStore } = useAppStore();
+    const { mode, theme, changeTheme, changeMode } = useTheme();
     const { pathname } = useLocation();
 
-    const themes = Array.from(theme.themes.values()).filter(
+    const themes = Array.from(themeStore.themes.values()).filter(
         (theme) => theme.type === mode,
     );
+
+    const handleThemeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const changeTo = themes.find((theme) => theme.id === e.target.value);
+        if (!changeTo) {
+            e.preventDefault();
+            return;
+        }
+
+        changeTheme(changeTo);
+    };
 
     return (
         <Paper
@@ -102,9 +117,22 @@ export const PlaygrondLeftSidebar = () => {
             borderRadius="2rem"
             p={20}
         >
-            <img
-                src="/logo.png"
-                css={{ width: 64, height: 64, alignSelf: "center" }}
+            <AnimatedLogo
+                css={{
+                    width: 64,
+                    height: 64,
+                    alignSelf: "center",
+                    cursor: "pointer",
+                }}
+                onClick={() => {
+                    navigate({
+                        to: "/",
+                        replace: true,
+                    });
+                }}
+                whileHover={{
+                    scale: 1.1,
+                }}
             />
             <Stack direction="column" spacing={25}>
                 <Stack
@@ -115,10 +143,10 @@ export const PlaygrondLeftSidebar = () => {
                 >
                     <Divider>Color Mode</Divider>
                     <select
-                        onChange={(e) => {
-                            changeMode(e.target.value as ThemeMode);
-                        }}
-                        defaultValue="system"
+                        onChange={(e) =>
+                            changeMode(e.target.value as ThemeMode)
+                        }
+                        value={mode}
                         css={{
                             width: "100%",
                             padding: 10,
@@ -141,9 +169,7 @@ export const PlaygrondLeftSidebar = () => {
                     >
                         <Divider>Color Scheme</Divider>
                         <select
-                            onChange={(e) => {
-                                changeTheme(e.target.value);
-                            }}
+                            onChange={handleThemeChange}
                             css={{
                                 width: "100%",
                                 padding: 10,
@@ -151,6 +177,7 @@ export const PlaygrondLeftSidebar = () => {
                                 border: "1px solid #ccc",
                                 backgroundColor: "#f9f9f9",
                             }}
+                            value={theme.id}
                         >
                             {sortThemes(themes).map((theme) => (
                                 <option key={theme.id} value={theme.id}>
@@ -193,4 +220,4 @@ export const PlaygrondLeftSidebar = () => {
             ))}
         </Paper>
     );
-};
+});
