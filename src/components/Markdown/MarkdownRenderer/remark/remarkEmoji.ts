@@ -4,12 +4,12 @@ import type { Root } from "mdast";
 import type { Plugin } from "unified";
 import { visit } from "unist-util-visit";
 
+const regex = new RegExp(shortcodeRegex.source, "g");
+
 export const remarkEmoji: Plugin<[], Root> = () => {
     return (tree) => {
         visit(tree, "text", (node, index, parent) => {
             const value = node.value;
-
-            const regex = new RegExp(shortcodeRegex.source, "g");
 
             let match;
             let lastIndex = 0;
