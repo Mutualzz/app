@@ -90,7 +90,7 @@ export const parseMarkdownToRanges = (
 export const resolveMarkdownStyles = (
     theme: Theme,
     color: Color | ColorLike,
-    textColor: TypographyColor | "inherit",
+    textColor: TypographyColor | ColorLike | "inherit",
 ): Record<string, CSSObject> => {
     const resolvedColor = resolveColor(color, theme);
 

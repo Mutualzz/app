@@ -3,7 +3,7 @@ import type { Color, ColorLike, TypographyColor, Variant } from "@mutualzz/ui";
 
 export interface MarkdownInputProps {
     color?: Color | ColorLike;
-    textColor?: TypographyColor | "inherit";
+    textColor?: TypographyColor | ColorLike | "inherit";
     variant?: Variant;
 
     autoFocus?: boolean;
