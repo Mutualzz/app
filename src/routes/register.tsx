@@ -1,5 +1,5 @@
-import { useAppStore } from "@hooks/useAppStore";
-import type { APIUser, HttpException } from "@mutualzz/types";
+import { useAppStore } from "@hooks/useStores";
+import type { HttpException } from "@mutualzz/types";
 import {
     Button,
     Input,
@@ -55,7 +55,9 @@ const InputWithLabel = ({
         <Typography fontWeight={500} level="body-md">
             {label}{" "}
             {props.required && (
-                <Typography css={{ color: "red" }}>*</Typography>
+                <Typography variant="plain" color="danger">
+                    *
+                </Typography>
             )}
         </Typography>
         <Input size="lg" {...props} />
@@ -77,22 +79,21 @@ const RegisterForm = motion.create(Paper);
 function Register() {
     const navigate = useNavigate();
     const app = useAppStore();
-    const { rest } = app;
+    const { account, rest } = app;
     const [passwordVisible, setPasswordVisible] = useState(false);
     const [apiErrors, setApiErrors] = useState<ApiErrors>({});
 
     const mutation = useMutation({
         mutationFn: async (values: any) => {
-            const response = await rest.post<any, APIUser & { token: string }>(
+            const response = await rest.post<any, { token: string }>(
                 "auth/register",
                 values,
             );
 
             return response;
         },
-        onSuccess: ({ token, ...user }: APIUser & { token: string }) => {
+        onSuccess: ({ token }) => {
             app.setToken(token);
-            app.setUser(user);
         },
         onError: (error: HttpException) => {
             error.errors.forEach((err) => {
@@ -121,7 +122,7 @@ function Register() {
         },
     });
 
-    if (app.token) {
+    if (account) {
         navigate({ to: "/", replace: true });
         return <></>;
     }
@@ -158,6 +159,7 @@ function Register() {
                             name="email"
                             children={(field) => (
                                 <InputWithLabel
+                                    type="text"
                                     apiErrors={apiErrors}
                                     field={field}
                                     name="email"
@@ -175,6 +177,7 @@ function Register() {
                             name="globalName"
                             children={(field) => (
                                 <InputWithLabel
+                                    type="text"
                                     apiErrors={apiErrors}
                                     field={field}
                                     name="globalName"
@@ -195,6 +198,7 @@ function Register() {
                             name="username"
                             children={(field) => (
                                 <InputWithLabel
+                                    type="text"
                                     apiErrors={apiErrors}
                                     field={field}
                                     name="username"

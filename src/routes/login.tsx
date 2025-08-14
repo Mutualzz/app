@@ -1,6 +1,6 @@
-import { useAppStore } from "@hooks/useAppStore";
+import { useAppStore } from "@hooks/useStores";
 
-import type { APIUser, HttpException } from "@mutualzz/types";
+import type { HttpException } from "@mutualzz/types";
 import {
     Button,
     Input,
@@ -41,7 +41,9 @@ const InputWithLabel = ({
         <Typography fontWeight={500} level="body-md">
             {label}{" "}
             {props.required && (
-                <Typography css={{ color: "red" }}>*</Typography>
+                <Typography variant="plain" color="danger">
+                    *
+                </Typography>
             )}
         </Typography>
         <Input size="lg" {...props} />
@@ -58,7 +60,7 @@ const LoginForm = motion.create(Paper);
 function Login() {
     const navigate = useNavigate();
     const app = useAppStore();
-    const { rest } = app;
+    const { account, rest } = app;
     const [error, setError] = useState<string | null>(null);
 
     const mutation = useMutation({
@@ -71,16 +73,15 @@ function Login() {
                 requestBody.email = values.usernameOrEmail;
             else requestBody.username = values.usernameOrEmail;
 
-            const response = await rest.post<any, APIUser & { token: string }>(
+            const response = await rest.post<any, { token: string }>(
                 "auth/login",
                 requestBody,
             );
 
             return response;
         },
-        onSuccess: ({ token, ...user }) => {
+        onSuccess: ({ token }) => {
             app.setToken(token);
-            app.setUser(user);
         },
         onError: (error: HttpException) => {
             setError(error.message);
@@ -97,7 +98,7 @@ function Login() {
         },
     });
 
-    if (app.token) {
+    if (account) {
         navigate({ to: "/", replace: true });
         return <></>;
     }
@@ -139,6 +140,7 @@ function Login() {
                             name="usernameOrEmail"
                             children={(field) => (
                                 <InputWithLabel
+                                    type="text"
                                     label="Username or Email"
                                     onChange={(e) =>
                                         field.handleChange(e.target.value)
