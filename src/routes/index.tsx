@@ -1,4 +1,7 @@
-import { useAppStore } from "@hooks/useAppStore";
+import { Logo } from "@components/Logo";
+import { ThemeCreator } from "@components/ThemeCreator";
+import { useModal } from "@contexts/Modal.context";
+import { useAppStore } from "@hooks/useStores";
 import { Button, Stack, Typography } from "@mutualzz/ui";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { observer } from "mobx-react";
@@ -11,6 +14,7 @@ function Index() {
     const app = useAppStore();
     const { account } = app;
     const navigate = useNavigate();
+    const { openModal } = useModal();
 
     return (
         <Stack
@@ -18,8 +22,9 @@ function Index() {
             height="100vh"
             justifyContent="center"
             alignItems="center"
+            spacing="1rem"
         >
-            <img css={{ width: 128, height: 128 }} src="/logo.png" alt="Logo" />
+            <Logo css={{ width: 128, height: 128 }} />
             <Typography level="h2">
                 Website is currently under heavy development
             </Typography>
@@ -41,6 +46,23 @@ function Index() {
                 >
                     Go to the UI playground
                 </Button>
+                {!account && (
+                    <>
+                        or
+                        <Button
+                            onClick={() => {
+                                navigate({
+                                    to: "/login",
+                                });
+                            }}
+                            size="md"
+                            variant="solid"
+                            color="success"
+                        >
+                            Go to the Login page
+                        </Button>
+                    </>
+                )}
             </Stack>
             {account && (
                 <Stack
@@ -50,27 +72,36 @@ function Index() {
                     direction="column"
                 >
                     <Typography level="body-lg">
-                        How the hell did you login? :0
-                    </Typography>
-                    <Typography level="body-lg">
                         Hi {account.globalName ?? account.username} :3
                     </Typography>
-                    <Typography my="1em" level="body-sm">
-                        I mean you can logout if you want to
-                    </Typography>
-                    <Button
-                        onClick={() => {
-                            app.logout();
-                            navigate({
-                                to: "/",
-                            });
-                        }}
-                        size="sm"
-                        variant="solid"
-                        color="danger"
+                    <Stack
+                        spacing={10}
+                        justifyContent="center"
+                        alignItems="center"
                     >
-                        Logout
-                    </Button>
+                        <Typography>For now you can either</Typography>
+                        <Button
+                            onClick={() => {
+                                app.logout();
+                            }}
+                            size="lg"
+                            variant="solid"
+                            color="danger"
+                        >
+                            Logout
+                        </Button>
+                        or
+                        <Button
+                            onClick={() => {
+                                openModal("theme-maker", <ThemeCreator />);
+                            }}
+                            size="lg"
+                            variant="solid"
+                            color="primary"
+                        >
+                            Create themes
+                        </Button>
+                    </Stack>
                 </Stack>
             )}
         </Stack>
