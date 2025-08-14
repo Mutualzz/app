@@ -7,6 +7,7 @@ import {
     RadioGroup,
     randomColor,
     Stack,
+    Typography,
     type Color,
     type ColorLike,
     type PaperVariant,
@@ -122,7 +123,7 @@ function PlaygroundPaper() {
                 <Divider>Playground</Divider>
 
                 <Stack direction="column" spacing={5}>
-                    <label>Variant</label>
+                    <Typography>Variant</Typography>
                     <RadioGroup
                         onChange={(_, vriant) =>
                             setVariant(vriant as PaperVariant)
@@ -153,7 +154,7 @@ function PlaygroundPaper() {
                 <Divider />
                 {variant !== "elevation" && (
                     <Stack direction="column" spacing={5}>
-                        <label>Custom Color</label>
+                        <Typography>Custom Color</Typography>
                         <Stack
                             alignContent="center"
                             direction="row"
@@ -240,7 +241,7 @@ function PlaygroundPaper() {
                 )}
                 {variant === "elevation" && (
                     <Stack direction="column" spacing={5}>
-                        <label>Elevation</label>
+                        <Typography>Elevation</Typography>
                         <Input
                             variant="solid"
                             size="lg"
@@ -260,7 +261,7 @@ function PlaygroundPaper() {
                 )}
                 <Divider />
                 <Stack direction="column" spacing={5}>
-                    <label>Text</label>
+                    <Typography>Text</Typography>
                     <Input
                         variant="solid"
                         size="lg"

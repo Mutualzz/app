@@ -12,6 +12,7 @@ import {
     type Size,
     Slider,
     Stack,
+    Typography,
     type Variant,
 } from "@mutualzz/ui";
 import { seo } from "@seo";
@@ -198,7 +199,7 @@ function PlaygroundButton() {
             <Paper direction="column" overflowY="auto" width="25%" p={20}>
                 <Divider>Playground</Divider>
                 <Stack direction="column" spacing={5}>
-                    <label>Variant</label>
+                    <Typography>Variant</Typography>
                     <RadioGroup
                         onChange={(_, vriant) => setVariant(vriant as Variant)}
                         value={variant}
@@ -230,7 +231,7 @@ function PlaygroundButton() {
                         justifyContent="space-between"
                         spacing={5}
                     >
-                        <label>Size</label>
+                        <Typography>Size</Typography>
                         <Checkbox
                             checked={customSizeToggle}
                             label="Custom"
@@ -274,7 +275,7 @@ function PlaygroundButton() {
                 </Stack>
                 <Divider />
                 <Stack direction="column" spacing={5}>
-                    <label>States</label>
+                    <Typography>States</Typography>
                     <Stack direction="row" spacing={5}>
                         <Checkbox
                             checked={loading}
@@ -292,7 +293,7 @@ function PlaygroundButton() {
                 </Stack>
                 <Divider />
                 <Stack direction="column" spacing={5}>
-                    <label>Custom Color</label>
+                    <Typography>Custom Color</Typography>
                     <Stack alignContent="center" direction="row" spacing={5}>
                         <Input
                             type="color"
@@ -364,7 +365,7 @@ function PlaygroundButton() {
                 </Stack>
                 <Divider />
                 <Stack direction="column" spacing={5}>
-                    <label>Text</label>
+                    <Typography>Text</Typography>
                     <Input
                         type="text"
                         variant="solid"
@@ -389,7 +390,7 @@ function PlaygroundButton() {
                         justifyContent="space-between"
                         spacing={5}
                     >
-                        <label>Icon</label>
+                        <Typography>Icon</Typography>
                         {icon && iconPosition !== "both" && (
                             <Checkbox
                                 checked={iconOnly}

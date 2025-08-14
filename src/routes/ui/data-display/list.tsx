@@ -179,7 +179,7 @@ function RouteComponent() {
             <Paper width="25%" overflowY="auto" direction="column" p={20}>
                 <Divider>Playground</Divider>
                 <Stack direction="column" spacing={5}>
-                    <label>Variant</label>
+                    <Typography>Variant</Typography>
                     <RadioGroup
                         onChange={(_, vriant) => setVariant(vriant as Variant)}
                         value={variant}
@@ -212,7 +212,7 @@ function RouteComponent() {
                         justifyContent="space-between"
                         spacing={5}
                     >
-                        <label>Size</label>
+                        <Typography>Size</Typography>
                         <Checkbox
                             checked={customSizeToggle}
                             label="Custom"
@@ -262,7 +262,7 @@ function RouteComponent() {
                                 direction="row"
                                 justifyContent="space-between"
                             >
-                                <label>Marker</label>
+                                <Typography>Marker</Typography>
                                 <Checkbox
                                     checked={customMarkerToggle}
                                     label="Custom"
@@ -315,7 +315,7 @@ function RouteComponent() {
                     </>
                 )}
                 <Stack direction="column" spacing={5}>
-                    <label>Orientation</label>
+                    <Typography>Orientation</Typography>
                     <Stack direction="row" spacing={5}>
                         <Radio
                             label="Vertical"
@@ -333,7 +333,7 @@ function RouteComponent() {
                 </Stack>
                 <Divider />
                 <Stack direction="column" spacing={5}>
-                    <label>List Item Mode</label>
+                    <Typography>List Item Mode</Typography>
                     <Stack direction="row" spacing={5}>
                         <Radio
                             label="Default"
@@ -355,9 +355,12 @@ function RouteComponent() {
                 </Stack>
                 <Divider />
                 <Stack direction="column" spacing={5}>
-                    <label>
-                        Number of Items: <b>{numberOfItems}</b>
-                    </label>
+                    <Typography>
+                        Number of Items:{" "}
+                        <Typography fontWeight="bold">
+                            {numberOfItems}
+                        </Typography>
+                    </Typography>
                     <Stack direction="row" spacing={5}>
                         <Button
                             color="warning"
@@ -388,7 +391,7 @@ function RouteComponent() {
                 </Stack>
                 <Divider />
                 <Stack direction="column" spacing={5}>
-                    <label>Custom Color</label>
+                    <Typography>Custom Color</Typography>
                     <Stack alignContent="center" direction="row" spacing={5}>
                         <Input
                             type="color"

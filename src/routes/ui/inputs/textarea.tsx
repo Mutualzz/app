@@ -172,7 +172,7 @@ function TextareaPlayground() {
             <Paper width="25%" overflowY="auto" direction="column" p={20}>
                 <Divider>Playground</Divider>
                 <Stack direction="column" spacing={5}>
-                    <label>Variant</label>
+                    <Typography>Variant</Typography>
                     <RadioGroup
                         onChange={(_, vriant) => setVariant(vriant as Variant)}
                         value={variant}
@@ -204,7 +204,7 @@ function TextareaPlayground() {
                         justifyContent="space-between"
                         spacing={5}
                     >
-                        <label>Size</label>
+                        <Typography>Size</Typography>
                         <Checkbox
                             checked={customSizeToggle}
                             label="Custom"
@@ -253,7 +253,7 @@ function TextareaPlayground() {
                         justifyContent="space-between"
                         spacing={5}
                     >
-                        <label>Text Color</label>
+                        <Typography>Text Color</Typography>
                         <Checkbox
                             label="Custom"
                             checked={customTextColorEnabled}
@@ -311,7 +311,7 @@ function TextareaPlayground() {
                 </Stack>
                 <Divider />
                 <Stack direction="column" spacing={5}>
-                    <label>States</label>
+                    <Typography>States</Typography>
                     <Stack direction="column" spacing={5}>
                         <Checkbox
                             checked={resizable}
@@ -344,7 +344,7 @@ function TextareaPlayground() {
                 </Stack>
                 <Divider />
                 <Stack direction="column" spacing={5}>
-                    <label>Placeholder</label>
+                    <Typography>Placeholder</Typography>
                     <Input
                         type="text"
                         variant="solid"
@@ -363,7 +363,7 @@ function TextareaPlayground() {
                 <Divider />
                 <Stack direction="row" spacing={5}>
                     <Stack direction="column" spacing={5}>
-                        <label>Min Rows</label>
+                        <Typography>Min Rows</Typography>
                         <Input
                             type="number"
                             variant="solid"
@@ -381,7 +381,7 @@ function TextareaPlayground() {
                         />
                     </Stack>
                     <Stack direction="column" spacing={5}>
-                        <label>Max Rows</label>
+                        <Typography>Max Rows</Typography>
                         <Input
                             type="number"
                             variant="solid"
@@ -403,7 +403,7 @@ function TextareaPlayground() {
                 </Stack>
                 <Divider />
                 <Stack direction="column" spacing={5}>
-                    <label>Custom Color</label>
+                    <Typography>Custom Color</Typography>
                     <Stack alignContent="center" direction="row" spacing={5}>
                         <Input
                             type="color"

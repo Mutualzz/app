@@ -163,7 +163,7 @@ function PlaygroundTypography() {
             <Paper width="25%" overflowY="auto" direction="column" p={20}>
                 <Divider>Playground</Divider>
                 <Stack direction="column" spacing={5}>
-                    <label>Variant</label>
+                    <Typography>Variant</Typography>
                     <RadioGroup
                         onChange={(_, vriant) =>
                             setVariant(vriant as TypographyVariant)
@@ -193,7 +193,7 @@ function PlaygroundTypography() {
                 </Stack>
                 <Divider />
                 <Stack direction="column" spacing={5}>
-                    <label>Level</label>
+                    <Typography>Level</Typography>
                     <select
                         value={level}
                         onChange={(e) =>
@@ -221,7 +221,7 @@ function PlaygroundTypography() {
                         justifyContent="space-between"
                         spacing={5}
                     >
-                        <label>Weight</label>
+                        <Typography>Weight</Typography>
                         <Checkbox
                             checked={customWeightToggle}
                             label="Custom"
@@ -278,7 +278,7 @@ function PlaygroundTypography() {
                 {variant !== "none" && (
                     <>
                         <Stack direction="column" spacing={5}>
-                            <label>Custom Color</label>
+                            <Typography>Custom Color</Typography>
                             <Stack
                                 alignContent="center"
                                 direction="row"
@@ -366,7 +366,7 @@ function PlaygroundTypography() {
                     </>
                 )}
                 <Stack direction="column" spacing={5}>
-                    <label>Text</label>
+                    <Typography>Text</Typography>
                     <Input
                         type="text"
                         variant="solid"

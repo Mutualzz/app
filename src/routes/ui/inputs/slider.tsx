@@ -205,7 +205,7 @@ function SlderPlayground() {
             <Paper width="25%" overflowY="auto" direction="column" p={20}>
                 <Divider>Playground</Divider>
                 <Stack direction="column" spacing={5}>
-                    <label>Variant</label>
+                    <Typography>Variant</Typography>
                     <RadioGroup
                         onChange={(_, vriant) => setVariant(vriant as Variant)}
                         value={variant}
@@ -234,7 +234,7 @@ function SlderPlayground() {
                 <Divider />
                 <Stack direction="column" spacing={5}>
                     <Stack direction="row" justifyContent="space-between">
-                        <label>Size</label>
+                        <Typography>Size</Typography>
                         <Checkbox
                             checked={customSizeToggle}
                             label="Custom"
@@ -278,7 +278,7 @@ function SlderPlayground() {
                 </Stack>
                 <Divider />
                 <Stack direction="column" spacing={5}>
-                    <label>Orientation</label>
+                    <Typography>Orientation</Typography>
                     <RadioGroup
                         onChange={(_, orientationValue) =>
                             setOrientation(
@@ -314,7 +314,7 @@ function SlderPlayground() {
                 <Divider />
                 <Stack direction="column" spacing={10}>
                     <Stack direction="column" spacing={10}>
-                        <label>States</label>
+                        <Typography>States</Typography>
                         <Stack direction="row" spacing={5}>
                             <Checkbox
                                 checked={disabled}
@@ -343,7 +343,7 @@ function SlderPlayground() {
                 </Stack>
                 <Divider />
                 <Stack direction="column" spacing={10}>
-                    <label>Marks</label>
+                    <Typography>Marks</Typography>
                     <RadioGroup
                         row
                         onChange={(_, markStateValue) =>
@@ -503,7 +503,7 @@ function SlderPlayground() {
                 </Stack>
                 <Divider />
                 <Stack direction="column" spacing={10}>
-                    <label>Value Display</label>
+                    <Typography>Value Display</Typography>
                     <RadioGroup
                         row
                         onChange={(_, labelDisplayValue) =>
@@ -544,7 +544,7 @@ function SlderPlayground() {
                         direction="row"
                         spacing={5}
                     >
-                        <label>Step</label>
+                        <Typography>Step</Typography>
                         <Checkbox
                             checked={step === null}
                             label={
@@ -583,7 +583,7 @@ function SlderPlayground() {
                         direction="column"
                         spacing={10}
                     >
-                        <label>Min</label>
+                        <Typography>Min</Typography>
                         <Input
                             variant="solid"
                             size="lg"
@@ -600,7 +600,7 @@ function SlderPlayground() {
                         spacing={10}
                         flex={1}
                     >
-                        <label>Max</label>
+                        <Typography>Max</Typography>
                         <Input
                             variant="solid"
                             size="lg"
@@ -614,7 +614,7 @@ function SlderPlayground() {
                 </Stack>
                 <Divider />
                 <Stack direction="column" spacing={10}>
-                    <label>Custom Color</label>
+                    <Typography>Custom Color</Typography>
                     <Stack alignContent="center" direction="row" spacing={5}>
                         <Input
                             type="color"

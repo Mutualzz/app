@@ -109,7 +109,7 @@ function RouteComponent() {
             <Paper width="25%" overflowY="auto" direction="column" p={20}>
                 <Divider>Playground</Divider>
                 <Stack direction="column" spacing={5}>
-                    <label>Variant</label>
+                    <Typography>Variant</Typography>
                     <RadioGroup
                         onChange={(_, vriant) => setVariant(vriant as Variant)}
                         value={variant}
@@ -134,7 +134,7 @@ function RouteComponent() {
                         justifyContent="space-between"
                         spacing={5}
                     >
-                        <label>Color</label>
+                        <Typography>Color</Typography>
                         <Checkbox
                             label="Custom"
                             checked={customColorEnabled}
@@ -191,7 +191,7 @@ function RouteComponent() {
                         justifyContent="space-between"
                         spacing={5}
                     >
-                        <label>Text Color</label>
+                        <Typography>Text Color</Typography>
                         <Checkbox
                             label="Custom"
                             checked={customTextColorEnabled}

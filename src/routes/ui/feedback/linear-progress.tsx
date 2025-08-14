@@ -147,7 +147,7 @@ function PlaygroundLinearProgress() {
             <Paper width="25%" overflowY="auto" direction="column" p={20}>
                 <Divider>Playground</Divider>
                 <Stack direction="column" spacing={5}>
-                    <label>Variant</label>
+                    <Typography>Variant</Typography>
                     <RadioGroup
                         onChange={(_, vriant) => setVariant(vriant as Variant)}
                         value={variant}
@@ -175,7 +175,7 @@ function PlaygroundLinearProgress() {
                 </Stack>
                 <Divider />
                 <Stack direction="column" spacing={5}>
-                    <label>Animation</label>
+                    <Typography>Animation</Typography>
                     <RadioGroup
                         onChange={(_, animation) =>
                             setAnimation(animation as LinearProgressAnimation)
@@ -202,7 +202,7 @@ function PlaygroundLinearProgress() {
                         justifyContent="space-between"
                         spacing={5}
                     >
-                        <label>Length</label>
+                        <Typography>Length</Typography>
                         <Checkbox
                             checked={customLengthToggle}
                             label="Custom"
@@ -251,7 +251,7 @@ function PlaygroundLinearProgress() {
                         justifyContent="space-between"
                         spacing={5}
                     >
-                        <label>Thickness</label>
+                        <Typography>Thickness</Typography>
                         <Checkbox
                             checked={customThicknessToggle}
                             label="Custom"
@@ -299,7 +299,7 @@ function PlaygroundLinearProgress() {
                 </Stack>
                 <Divider />
                 <Stack direction="column" spacing={5}>
-                    <label>States</label>
+                    <Typography>States</Typography>
                     <Checkbox
                         checked={determinate}
                         label="Determinate"
@@ -318,7 +318,7 @@ function PlaygroundLinearProgress() {
                 </Stack>
                 <Divider />
                 <Stack direction="column" spacing={5}>
-                    <label>Custom Color</label>
+                    <Typography>Custom Color</Typography>
                     <Stack alignContent="center" direction="row" spacing={5}>
                         <Input
                             type="color"

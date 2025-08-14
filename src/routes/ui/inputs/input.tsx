@@ -210,7 +210,7 @@ function InputPlayground() {
             <Paper width="25%" overflowY="auto" direction="column" p={20}>
                 <Divider>Playground</Divider>
                 <Stack direction="column" spacing={5}>
-                    <label>Variant</label>
+                    <Typography>Variant</Typography>
                     <RadioGroup
                         onChange={(_, vriant) => setVariant(vriant as Variant)}
                         value={variant}
@@ -242,7 +242,7 @@ function InputPlayground() {
                         justifyContent="space-between"
                         spacing={5}
                     >
-                        <label>Size</label>
+                        <Typography>Size</Typography>
                         <Checkbox
                             checked={customSizeToggle}
                             label="Custom"
@@ -291,7 +291,7 @@ function InputPlayground() {
                         justifyContent="space-between"
                         spacing={5}
                     >
-                        <label>Text Color</label>
+                        <Typography>Text Color</Typography>
                         <Checkbox
                             label="Custom"
                             checked={customTextColorEnabled}
@@ -349,7 +349,7 @@ function InputPlayground() {
                 </Stack>
                 <Divider />
                 <Stack direction="column" spacing={5}>
-                    <label>States</label>
+                    <Typography>States</Typography>
                     <Stack direction="column" spacing={5}>
                         <Checkbox
                             checked={fullWidth}
@@ -387,7 +387,7 @@ function InputPlayground() {
                 </Stack>
                 <Divider />
                 <Stack direction="column" spacing={5}>
-                    <label>Placeholder</label>
+                    <Typography>Placeholder</Typography>
                     <Input
                         type="text"
                         variant="solid"
@@ -405,7 +405,7 @@ function InputPlayground() {
                 </Stack>
                 <Divider />
                 <Stack direction="column" spacing={5}>
-                    <label>Type</label>
+                    <Typography>Type</Typography>
                     <select
                         value={type}
                         onChange={(e) => setType(e.target.value as InputType)}
@@ -439,7 +439,7 @@ function InputPlayground() {
                                 direction="column"
                                 spacing={10}
                             >
-                                <label>Min</label>
+                                <Typography>Min</Typography>
                                 <Input
                                     variant="solid"
                                     size="lg"
@@ -458,7 +458,7 @@ function InputPlayground() {
                                 spacing={10}
                                 flex={1}
                             >
-                                <label>Max</label>
+                                <Typography>Max</Typography>
                                 <Input
                                     variant="solid"
                                     size="lg"
@@ -476,7 +476,7 @@ function InputPlayground() {
                     </>
                 )}
                 <Stack direction="column" spacing={5}>
-                    <label>Custom Color</label>
+                    <Typography>Custom Color</Typography>
                     <Stack alignContent="center" direction="row" spacing={5}>
                         <Input
                             type="color"

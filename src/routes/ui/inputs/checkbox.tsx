@@ -9,6 +9,7 @@ import {
     randomColor,
     Slider,
     Stack,
+    Typography,
     type Color,
     type ColorLike,
     type Size,
@@ -191,7 +192,7 @@ function PlaygroundCheckbox() {
             <Paper overflowY="auto" width="25%" direction="column" p={20}>
                 <Divider>Playground</Divider>
                 <Stack direction="column" spacing={5}>
-                    <label>Variant</label>
+                    <Typography>Variant</Typography>
                     <RadioGroup
                         onChange={(_, vriant) => setVariant(vriant as Variant)}
                         value={variant}
@@ -223,7 +224,7 @@ function PlaygroundCheckbox() {
                         justifyContent="space-between"
                         spacing={5}
                     >
-                        <label>Size</label>
+                        <Typography>Size</Typography>
                         <Checkbox
                             checked={customSizeToggle}
                             label="Custom"
@@ -267,7 +268,7 @@ function PlaygroundCheckbox() {
                 </Stack>
                 <Divider />
                 <Stack direction="column" spacing={5}>
-                    <label>States</label>
+                    <Typography>States</Typography>
                     <Checkbox
                         checked={checked}
                         label="Checked"
@@ -292,7 +293,7 @@ function PlaygroundCheckbox() {
                 </Stack>
                 <Divider />
                 <Stack direction="column" spacing={5}>
-                    <label>Custom Color</label>
+                    <Typography>Custom Color</Typography>
                     <Stack alignContent="center" direction="row" spacing={5}>
                         <Input
                             type="color"
@@ -364,7 +365,7 @@ function PlaygroundCheckbox() {
                 </Stack>
                 <Divider />
                 <Stack direction="column" spacing={5}>
-                    <label>Label</label>
+                    <Typography>Label</Typography>
                     <Input
                         type="text"
                         variant="solid"
@@ -383,7 +384,7 @@ function PlaygroundCheckbox() {
                 </Stack>
                 <Divider />
                 <Stack justifyContent="center" direction="column" spacing={5}>
-                    <label>Checked Icon</label>
+                    <Typography>Checked Icon</Typography>
                     <Stack direction="column" spacing={5}>
                         <RadioGroup
                             onChange={(_, library) =>
@@ -446,7 +447,7 @@ function PlaygroundCheckbox() {
                 </Stack>
                 <Divider />
                 <Stack justifyContent="center" direction="column" spacing={5}>
-                    <label>Unchecked Icon</label>
+                    <Typography>Unchecked Icon</Typography>
                     <Stack direction="column" spacing={5}>
                         <RadioGroup
                             onChange={(_, library) =>
@@ -509,7 +510,7 @@ function PlaygroundCheckbox() {
                 </Stack>
                 <Divider />
                 <Stack justifyContent="center" direction="column" spacing={5}>
-                    <label>Indeterminate Icon</label>
+                    <Typography>Indeterminate Icon</Typography>
                     <Stack direction="column" spacing={5}>
                         <RadioGroup
                             onChange={(_, library) =>

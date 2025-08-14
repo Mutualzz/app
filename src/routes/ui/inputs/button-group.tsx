@@ -13,6 +13,7 @@ import {
     type Size,
     Slider,
     Stack,
+    Typography,
     type Variant,
 } from "@mutualzz/ui";
 import { seo } from "@seo";
@@ -160,7 +161,7 @@ function PlaygroundButtonGroup() {
             <Paper p={20} overflowY="auto" width="25%" direction="column">
                 <Divider>Playground</Divider>
                 <Stack direction="column" spacing={5}>
-                    <label>Variant</label>
+                    <Typography>Variant</Typography>
                     <RadioGroup
                         onChange={(_, vriant) => setVariant(vriant as Variant)}
                         value={variant}
@@ -189,9 +190,12 @@ function PlaygroundButtonGroup() {
                 {variant !== "all" && (
                     <>
                         <Stack direction="column" spacing={5}>
-                            <label>
-                                Number of Buttons: <b>{numberOfButtons}</b>
-                            </label>
+                            <Typography>
+                                Number of Buttons:{" "}
+                                <Typography fontWeight="bold">
+                                    {numberOfButtons}
+                                </Typography>
+                            </Typography>
                             <Stack direction="row" spacing={5}>
                                 <Button
                                     color="warning"
@@ -231,9 +235,9 @@ function PlaygroundButtonGroup() {
                         justifyContent="space-between"
                         spacing={5}
                     >
-                        <label>
+                        <Typography>
                             {customColorToggle ? "Custom Color" : "Color"}
-                        </label>
+                        </Typography>
                         <Checkbox
                             checked={customColorToggle}
                             label="Custom"
@@ -296,11 +300,11 @@ function PlaygroundButtonGroup() {
                         justifyContent="space-between"
                         spacing={5}
                     >
-                        <label>
+                        <Typography>
                             {customSeparatorColorToggle
                                 ? "Custom Separator Color"
                                 : "Separator Color"}
-                        </label>
+                        </Typography>
                         <Checkbox
                             checked={customSeparatorColorToggle}
                             label="Custom"
@@ -372,7 +376,7 @@ function PlaygroundButtonGroup() {
                         justifyContent="space-between"
                         spacing={5}
                     >
-                        <label>Size</label>
+                        <Typography>Size</Typography>
                         <Checkbox
                             checked={customSizeToggle}
                             label="Custom"
@@ -416,7 +420,7 @@ function PlaygroundButtonGroup() {
                 </Stack>
                 <Divider />
                 <Stack direction="column" spacing={5}>
-                    <label>Orientation</label>
+                    <Typography>Orientation</Typography>
                     <RadioGroup
                         row
                         onChange={(_, orientation) =>
@@ -443,7 +447,7 @@ function PlaygroundButtonGroup() {
                 </Stack>
                 <Divider />
                 <Stack direction="column" spacing={5}>
-                    <label>Spacing</label>
+                    <Typography>Spacing</Typography>
                     <Slider
                         value={spacing}
                         min={0}
@@ -455,7 +459,7 @@ function PlaygroundButtonGroup() {
                 </Stack>
                 <Divider />
                 <Stack direction="column" spacing={5}>
-                    <label>States</label>
+                    <Typography>States</Typography>
                     <Stack direction="row" spacing={10}>
                         <Checkbox
                             checked={loading}
@@ -473,7 +477,7 @@ function PlaygroundButtonGroup() {
                 </Stack>
                 <Divider />
                 <Stack direction="column" spacing={5}>
-                    <label>Text</label>
+                    <Typography>Text</Typography>
                     <Input
                         type="text"
                         variant="solid"

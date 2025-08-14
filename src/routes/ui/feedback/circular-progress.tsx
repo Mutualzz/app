@@ -156,7 +156,7 @@ function PlaygroundCircularProgress() {
             <Paper width="25%" overflowY="auto" direction="column" p={20}>
                 <Divider>Playground</Divider>
                 <Stack direction="column" spacing={5}>
-                    <label>Variant</label>
+                    <Typography>Variant</Typography>
                     <RadioGroup
                         onChange={(_, vriant) => setVariant(vriant as Variant)}
                         value={variant}
@@ -189,7 +189,7 @@ function PlaygroundCircularProgress() {
                         justifyContent="space-between"
                         spacing={5}
                     >
-                        <label>Size</label>
+                        <Typography>Size</Typography>
                         <Checkbox
                             checked={customSizeToggle}
                             label="Custom"
@@ -233,7 +233,7 @@ function PlaygroundCircularProgress() {
                 </Stack>
                 <Divider />
                 <Stack direction="column" spacing={5}>
-                    <label>States</label>
+                    <Typography>States</Typography>
                     <Checkbox
                         checked={determinate}
                         label="Determinate"
@@ -252,7 +252,7 @@ function PlaygroundCircularProgress() {
                 </Stack>
                 <Divider />
                 <Stack direction="column" spacing={5}>
-                    <label>Custom Color</label>
+                    <Typography>Custom Color</Typography>
                     <Stack alignContent="center" direction="row" spacing={5}>
                         <Input
                             type="color"
@@ -325,7 +325,7 @@ function PlaygroundCircularProgress() {
                 </Stack>
                 <Divider />
                 <Stack direction="column" spacing={5}>
-                    <label>Label</label>
+                    <Typography>Label</Typography>
                     <Input
                         type="text"
                         variant="solid"

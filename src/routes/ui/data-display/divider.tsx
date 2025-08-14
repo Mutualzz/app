@@ -9,6 +9,7 @@ import {
     RadioGroup,
     randomColor,
     Stack,
+    Typography,
     type Color,
     type ColorLike,
     type DividerInset,
@@ -127,7 +128,7 @@ function PlaygroundDivider() {
             <Paper width="25%" overflowY="auto" direction="column" p={20}>
                 <Divider>Playground</Divider>
                 <Stack direction="column" spacing={5}>
-                    <label>Variant</label>
+                    <Typography>Variant</Typography>
                     <RadioGroup
                         onChange={(_, vriant) =>
                             setVariant(vriant as DividerVariant)
@@ -149,7 +150,7 @@ function PlaygroundDivider() {
                 </Stack>
                 <Divider />
                 <Stack direction="column" spacing={5}>
-                    <label>Orientation</label>
+                    <Typography>Orientation</Typography>
                     <RadioGroup
                         onChange={(_, orientation) =>
                             setOrientation(orientation as DividerOrientation)
@@ -181,7 +182,7 @@ function PlaygroundDivider() {
                     spacing={5}
                     direction="column"
                 >
-                    <label>Text</label>
+                    <Typography>Text</Typography>
                     <Input
                         type="text"
                         variant="solid"
@@ -202,7 +203,7 @@ function PlaygroundDivider() {
                     <>
                         <Divider />
                         <Stack direction="column" spacing={5}>
-                            <label>Inset</label>
+                            <Typography>Inset</Typography>
                             <RadioGroup
                                 onChange={(_, inst) =>
                                     setInset(inst as DividerInset)
@@ -232,7 +233,7 @@ function PlaygroundDivider() {
                         justifyContent="space-between"
                         spacing={5}
                     >
-                        <label>Line Color</label>
+                        <Typography>Line Color</Typography>
                         <Checkbox
                             label="Custom"
                             checked={customLineColorEnabled}
@@ -294,7 +295,7 @@ function PlaygroundDivider() {
                         direction="row"
                         spacing={5}
                     >
-                        <label>Text Color</label>
+                        <Typography>Text Color</Typography>
                         <Checkbox
                             label="Custom"
                             checked={customTextColorEnabled}

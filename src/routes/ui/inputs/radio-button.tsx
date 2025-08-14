@@ -9,6 +9,7 @@ import {
     randomColor,
     Slider,
     Stack,
+    Typography,
     type Color,
     type ColorLike,
     type Size,
@@ -175,7 +176,7 @@ function PlaygroundRadio() {
             <Paper width="25%" overflowY="auto" direction="column" p={20}>
                 <Divider>Playground</Divider>
                 <Stack direction="column" spacing={5}>
-                    <label>Variant</label>
+                    <Typography>Variant</Typography>
                     <RadioGroup
                         onChange={(_, vriant) => setVariant(vriant as Variant)}
                         value={variant}
@@ -203,7 +204,7 @@ function PlaygroundRadio() {
                 </Stack>
                 <Divider />
                 <Stack direction="column" spacing={5}>
-                    <label>States</label>
+                    <Typography>States</Typography>
                     <Stack direction="row" spacing={5}>
                         <Checkbox
                             checked={disabled}
@@ -219,7 +220,7 @@ function PlaygroundRadio() {
                         justifyContent="space-between"
                         spacing={5}
                     >
-                        <label>Size</label>
+                        <Typography>Size</Typography>
                         <Checkbox
                             checked={customSizeToggle}
                             label="Custom"
@@ -263,7 +264,7 @@ function PlaygroundRadio() {
                 </Stack>
                 <Divider />
                 <Stack direction="column" spacing={5}>
-                    <label>Custom Color</label>
+                    <Typography>Custom Color</Typography>
                     <Stack alignContent="center" direction="row" spacing={5}>
                         <Input
                             type="color"
@@ -336,7 +337,7 @@ function PlaygroundRadio() {
                 </Stack>
                 <Divider />
                 <Stack direction="column" spacing={5}>
-                    <label>Label</label>
+                    <Typography>Label</Typography>
                     <Input
                         type="text"
                         variant="solid"
@@ -355,7 +356,7 @@ function PlaygroundRadio() {
                 </Stack>
                 <Divider />
                 <Stack justifyContent="center" direction="column" spacing={5}>
-                    <label>Checked Icon</label>
+                    <Typography>Checked Icon</Typography>
                     <Stack direction="column" spacing={5}>
                         <RadioGroup
                             onChange={(_, library) =>
@@ -418,7 +419,7 @@ function PlaygroundRadio() {
                 </Stack>
                 <Divider />
                 <Stack justifyContent="center" direction="column" spacing={5}>
-                    <label>Unchecked Icon</label>
+                    <Typography>Unchecked Icon</Typography>
                     <Stack direction="column" spacing={5}>
                         <RadioGroup
                             onChange={(_, library) =>
