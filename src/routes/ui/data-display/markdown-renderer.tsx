@@ -61,6 +61,7 @@ function RouteComponent() {
 
     const [emoticons, setEmoticons] = useState(true);
     const [hoverToolbar, setHoverToolbar] = useState(true);
+    const [enlargeEmojiOnly, setEnlargeEmojiOnly] = useState(true);
 
     const [customColorEnabled, setCustomColorEnabled] = useState(false);
     const [customTextColorEnabled, setCustomTextColorEnabled] = useState(false);
@@ -97,6 +98,7 @@ function RouteComponent() {
                     }
                     variant={variant}
                     value={markdown}
+                    enlargeEmojiOnly={enlargeEmojiOnly}
                     css={{
                         height: "100%",
                         p: 12,
@@ -247,6 +249,7 @@ function RouteComponent() {
                 </Stack>
                 <Divider />
                 <Stack direction="column" spacing={5}>
+                    <Typography level="body-sm">Editor Options</Typography>
                     <Checkbox
                         label="Emoticons"
                         checked={emoticons}
@@ -260,6 +263,15 @@ function RouteComponent() {
                         onChange={(e) => {
                             setHoverToolbar(e.target.checked);
                         }}
+                    />
+                </Stack>
+                <Divider />
+                <Stack direction="column" spacing={5}>
+                    <Typography level="body-sm">Renderer Options</Typography>
+                    <Checkbox
+                        checked={enlargeEmojiOnly}
+                        onChange={(e) => setEnlargeEmojiOnly(e.target.checked)}
+                        label="Enlarge Emojis Only"
                     />
                 </Stack>
             </Paper>

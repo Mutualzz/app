@@ -9,4 +9,6 @@ export interface MarkdownRendererProps {
     variant?: Variant;
 
     css?: CSSObject;
+
+    enlargeEmojiOnly?: boolean;
 }

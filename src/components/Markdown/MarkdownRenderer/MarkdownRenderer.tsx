@@ -1,17 +1,33 @@
 import { Paper, Typography, useTheme } from "@mutualzz/ui";
 
 import { spoilerStyles } from "@css/spoilerStyles";
-import { useState } from "react";
+import emojiRegexOrig from "emojibase-regex";
+import shortcodeRegexOrig from "emojibase-regex/shortcode";
+import { useMemo, useState } from "react";
 import { Markdown } from "./Markdown";
 import type { MarkdownRendererProps } from "./MarkdownRenderer.types";
+
+const shortcodeRegex = new RegExp(shortcodeRegexOrig.source, "g");
+const emojiRegex = new RegExp(emojiRegexOrig.source, "gu");
 
 export const MarkdownRenderer = ({
     color = "neutral",
     textColor = "primary",
     variant = "outlined",
+    enlargeEmojiOnly = true,
     value,
 }: MarkdownRendererProps) => {
     const { theme } = useTheme();
+
+    const isEmojiOnly = useMemo(() => {
+        if (!value || !enlargeEmojiOnly) return false;
+
+        const textWithoutEmojis = value
+            .replace(shortcodeRegex, "")
+            .replace(emojiRegex, "");
+
+        return textWithoutEmojis.trim().length === 0 && value.trim().length > 0;
+    }, [value, enlargeEmojiOnly]);
 
     return (
         <Paper
@@ -140,8 +156,8 @@ export const MarkdownRenderer = ({
                             title={`:${name}:`}
                             css={{
                                 display: "inline-block",
-                                width: "1.375em",
-                                height: "1.375em",
+                                width: isEmojiOnly ? "2.25em" : "1.375em",
+                                height: isEmojiOnly ? "2.25em" : "1.375em",
                                 verticalAlign: "middle",
                             }}
                         >
