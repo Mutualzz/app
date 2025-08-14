@@ -40,7 +40,7 @@ export default class REST {
 
     public setToken(token: string | null) {
         if (token) {
-            this.headers.Authorization = token;
+            this.headers.Authorization = `Bearer ${token}`;
         } else {
             delete this.headers.Authorization;
         }
@@ -69,11 +69,11 @@ export default class REST {
         return url.toString();
     }
 
-    public async get<T>(
+    public async get<Data>(
         path: string,
 
         queryParams: Record<string, any> = {},
-    ): Promise<T> {
+    ): Promise<Data> {
         return new Promise((resolve, reject) => {
             const url = REST.makeAPIUrl(path, queryParams);
             this.logger.debug(`GET ${url}`);
@@ -101,13 +101,13 @@ export default class REST {
         });
     }
 
-    public async post<T, U>(
+    public async post<Body, Data>(
         path: string,
-        body?: T,
+        body?: Body,
 
         queryParams: Record<string, any> = {},
         headers: Record<string, string> = {},
-    ): Promise<U> {
+    ): Promise<Data> {
         return new Promise((resolve, reject) => {
             const url = REST.makeAPIUrl(path, queryParams);
             this.logger.debug(`POST ${url}; payload:`, body);
@@ -136,24 +136,24 @@ export default class REST {
                     // if theres content, handle text
                     if (res.headers.get("content-length") !== "0") {
                         const data = await res.text();
-                        if (res.ok) return resolve(data as U);
-                        else return reject(data as U);
+                        if (res.ok) return resolve(data as Data);
+                        else return reject(data);
                     }
 
-                    if (res.ok) return resolve(res.status as U);
+                    if (res.ok) return resolve(res.status as Data);
                     else return reject(res.statusText);
                 })
                 .catch(reject);
         });
     }
 
-    public async put<T, U>(
+    public async put<Body, Data>(
         path: string,
-        body?: T,
+        body?: Body,
 
         queryParams: Record<string, any> = {},
         headers: Record<string, string> = {},
-    ): Promise<U> {
+    ): Promise<Data> {
         return new Promise((resolve, reject) => {
             const url = REST.makeAPIUrl(path, queryParams);
             this.logger.debug(`PUT ${url}; payload:`, body);
@@ -182,11 +182,11 @@ export default class REST {
                     // if theres content, handle text
                     if (res.headers.get("content-length") !== "0") {
                         const data = await res.text();
-                        if (res.ok) return resolve(data as U);
-                        else return reject(data as U);
+                        if (res.ok) return resolve(data as Data);
+                        else return reject(data as Data);
                     }
 
-                    if (res.ok) return resolve(res.status as U);
+                    if (res.ok) return resolve(res.status as Data);
                     else return reject(res.statusText);
                 })
                 .catch(reject);
@@ -239,14 +239,14 @@ export default class REST {
         });
     }
 
-    public async postFormData<U>(
+    public async postFormData<Data>(
         path: string,
         body: FormData,
 
         queryParams: Record<string, any> = {},
         headers: Record<string, string> = {},
         msg?: any,
-    ): Promise<U> {
+    ): Promise<Data> {
         return new Promise((resolve, reject) => {
             const url = REST.makeAPIUrl(path, queryParams);
             this.logger.debug(`POST ${url}; payload:`, body);
@@ -290,12 +290,11 @@ export default class REST {
         });
     }
 
-    public async delete(
+    public async delete<Data>(
         path: string,
-
         queryParams: Record<string, any> = {},
         headers: Record<string, string> = {},
-    ): Promise<void> {
+    ): Promise<Data> {
         return new Promise((resolve, reject) => {
             const url = REST.makeAPIUrl(path, queryParams);
             this.logger.debug(`DELETE ${url}`);
@@ -307,8 +306,26 @@ export default class REST {
                 },
                 mode: "cors",
             })
-                .then((res) => res.json())
-                .then(() => resolve())
+                .then(async (res) => {
+                    if (
+                        res.headers
+                            .get("content-type")
+                            ?.includes("application/json")
+                    ) {
+                        const data = await res.json();
+                        if (res.ok) return resolve(data);
+                        else return reject(data);
+                    }
+
+                    if (res.headers.get("content-length") !== "0") {
+                        const data = await res.text();
+                        if (res.ok) return resolve(data as Data);
+                        else return reject(data as Data);
+                    }
+
+                    if (res.ok) return resolve(res.status as Data);
+                    else return reject(res.statusText);
+                })
                 .catch(reject);
         });
     }
