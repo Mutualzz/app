@@ -1,6 +1,5 @@
+import type { MzTheme } from "@app-types/theme";
 import mergeWith from "lodash-es/mergeWith";
-
-import type { Theme } from "@emotion/react";
 
 export function mergeAppendAnything(
     ...objects: Record<string, string | string[]>[]
@@ -56,14 +55,16 @@ export function detectBrowser(): string {
     return "Other";
 }
 
+export const isSSR = typeof window === "undefined";
+
 /**
  * Returns a boolan indicating if we are running in a tauri context
  */
 export const isTauri =
     // @ts-expect-error no types
-    typeof window !== "undefined" && !!window.__TAURI_INTERNALS__;
+    !isSSR && !!window.__TAURI_INTERNALS__;
 
-export const sortThemes = (themes: Theme[]): Theme[] => {
+export const sortThemes = (themes: MzTheme[]): MzTheme[] => {
     const priorityOrder: string[] = ["baseDark", "baseLight"];
 
     const priorityThemes = themes.filter((theme) =>
