@@ -47,6 +47,7 @@
         "micromark-util-types": "^2.0.2",
         "mobx": "^6.13.7",
         "mobx-persist": "^0.4.1",
+        "mobx-persist-store": "^1.1.8",
         "mobx-react": "^9.2.0",
         "motion": "^12.23.12",
         "num-words": "^1.2.3",
