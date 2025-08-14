@@ -335,6 +335,7 @@ export class GatewayStore {
         this.logger.debug("Cleaning up");
         this.stopHeartbeater();
         this.socket = null;
+        this.sessionId = null;
     };
 
     private handleHeartbeatAck = () => {
