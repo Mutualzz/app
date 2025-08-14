@@ -3,12 +3,12 @@ import {
     Checkbox,
     Divider,
     Input,
+    InputColor,
     Paper,
     Radio,
     RadioGroup,
-    randomHexColor,
+    randomColor,
     Stack,
-    useColorInput,
     type Color,
     type ColorLike,
     type DividerInset,
@@ -42,7 +42,7 @@ const colors = [
     "info",
     "secondary",
     "accent",
-    "disabled",
+    "muted",
 ] as Color[] | TypographyColor[];
 
 const insets = ["none", "start", "end"] as DividerInset[];
@@ -59,26 +59,14 @@ function PlaygroundDivider() {
     const [lineColor, setLineColor] = useState<Color>("neutral");
     const [textColor, setTextColor] = useState<Color>("neutral");
 
+    const [customLineColor, setCustomLineColor] =
+        useState<ColorLike>(randomColor());
+
+    const [customTextColor, setCustomTextColor] =
+        useState<ColorLike>(randomColor());
+
     const [customLineColorEnabled, setCustomLineColorEnabled] = useState(false);
     const [customTextColorEnabled, setCustomTextColorEnabled] = useState(false);
-
-    const {
-        inputValue: inputLineColor,
-        color: customLineColor,
-        isInvalid: lineColorInvalid,
-        handleChange: handleLineColorChange,
-        validate: validateLineColor,
-        setColorDirectly: setColorDirectlyLineColor,
-    } = useColorInput<Color | ColorLike>();
-
-    const {
-        inputValue: inputTextColor,
-        color: customTextColor,
-        isInvalid: textColorInvalid,
-        handleChange: handleTextColorChange,
-        validate: validateTextColor,
-        setColorDirectly: setColorDirectlyTextColor,
-    } = useColorInput<Color | ColorLike>();
 
     const divider = text ? (
         <Divider
@@ -195,6 +183,7 @@ function PlaygroundDivider() {
                 >
                     <label>Text</label>
                     <Input
+                        type="text"
                         variant="solid"
                         size="lg"
                         color="primary"
@@ -256,24 +245,21 @@ function PlaygroundDivider() {
                     </Stack>
                     {customLineColorEnabled ? (
                         <Stack direction="row" spacing={5}>
-                            <Input
-                                variant="solid"
+                            <InputColor
+                                type="color"
+                                variant="outlined"
                                 size="lg"
                                 color="primary"
                                 fullWidth
-                                error={lineColorInvalid}
                                 placeholder="Enter a color (e.g., #ff0000, red)"
-                                value={inputLineColor}
-                                onChange={(e) =>
-                                    handleLineColorChange(e.target.value)
-                                }
-                                onBlur={validateLineColor}
+                                value={customLineColor}
+                                onChange={(color) => setCustomLineColor(color)}
                             />
                             <Button
                                 variant="solid"
                                 color="neutral"
                                 onClick={() => {
-                                    setColorDirectlyLineColor(randomHexColor());
+                                    setCustomLineColor(randomColor());
                                 }}
                             >
                                 Random
@@ -321,24 +307,20 @@ function PlaygroundDivider() {
                     </Stack>
                     {customTextColorEnabled ? (
                         <Stack direction="row" spacing={5}>
-                            <Input
+                            <InputColor
                                 variant="solid"
                                 size="lg"
                                 color="primary"
                                 fullWidth
-                                error={textColorInvalid}
                                 placeholder="Enter a color (e.g., #ff0000, red)"
-                                value={inputTextColor}
-                                onChange={(e) =>
-                                    handleTextColorChange(e.target.value)
-                                }
-                                onBlur={validateTextColor}
+                                value={customTextColor}
+                                onChange={(color) => setCustomTextColor(color)}
                             />
                             <Button
                                 variant="solid"
                                 color="neutral"
                                 onClick={() => {
-                                    setColorDirectlyTextColor(randomHexColor());
+                                    setCustomTextColor(randomColor());
                                 }}
                             >
                                 Random

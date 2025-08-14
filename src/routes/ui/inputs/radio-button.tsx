@@ -6,10 +6,9 @@ import {
     Paper,
     Radio,
     RadioGroup,
-    randomHexColor,
+    randomColor,
     Slider,
     Stack,
-    useColorInput,
     type Color,
     type ColorLike,
     type Size,
@@ -86,6 +85,7 @@ function PlaygroundRadio() {
     const [uncheckedIconName, setUncheckedIconName] = useState<string | null>(
         null,
     );
+    const [customColor, setCustomColor] = useState<ColorLike>(randomColor());
 
     const SelectedCheckedIcon =
         checkedLibrary !== "none" && checkedIconName
@@ -106,15 +106,6 @@ function PlaygroundRadio() {
                   >
               )[uncheckedIconName]
             : null;
-
-    const {
-        inputValue: inputColorValue,
-        color: customColor,
-        isInvalid,
-        handleChange,
-        validate,
-        setColorDirectly,
-    } = useColorInput<Color | ColorLike>();
 
     const allRadios = [...colors, ...customColors].map((c) =>
         variants.map((v) => (
@@ -275,15 +266,14 @@ function PlaygroundRadio() {
                     <label>Custom Color</label>
                     <Stack alignContent="center" direction="row" spacing={5}>
                         <Input
+                            type="color"
                             variant="solid"
                             size="lg"
                             color="primary"
                             fullWidth
-                            error={isInvalid}
                             placeholder="Enter a color (e.g., #ff0000)"
-                            value={inputColorValue}
-                            onChange={(e) => handleChange(e.target.value)}
-                            onBlur={validate}
+                            value={customColor}
+                            onChange={setCustomColor}
                         />
                         <Button
                             color="primary"
@@ -293,8 +283,8 @@ function PlaygroundRadio() {
                                     (prev) =>
                                         [...prev, customColor] as ColorLike[],
                                 );
-                                setColorDirectly(randomHexColor());
-                                setColorToDelete(customColor as ColorLike);
+                                setCustomColor(randomColor());
+                                setColorToDelete(customColor);
                             }}
                         >
                             Add Color
@@ -348,6 +338,7 @@ function PlaygroundRadio() {
                 <Stack direction="column" spacing={5}>
                     <label>Label</label>
                     <Input
+                        type="text"
                         variant="solid"
                         size="lg"
                         color="primary"

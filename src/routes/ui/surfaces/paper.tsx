@@ -5,9 +5,8 @@ import {
     Paper,
     Radio,
     RadioGroup,
-    randomHexColor,
+    randomColor,
     Stack,
-    useColorInput,
     type Color,
     type ColorLike,
     type PaperVariant,
@@ -53,14 +52,7 @@ function PlaygroundPaper() {
     const [customColors, setCustomColors] = useState<ColorLike[]>([]);
     const [colorToDelete, setColorToDelete] = useState<ColorLike | null>(null);
 
-    const {
-        inputValue: inputColorValue,
-        color: customColor,
-        isInvalid,
-        handleChange,
-        validate,
-        setColorDirectly,
-    } = useColorInput<Color | ColorLike>();
+    const [customColor, setCustomColor] = useState<ColorLike>(randomColor());
 
     const allPapers = [...colors, ...customColors].map((c) =>
         variants
@@ -168,15 +160,14 @@ function PlaygroundPaper() {
                             spacing={5}
                         >
                             <Input
+                                type="color"
                                 variant="solid"
                                 size="lg"
                                 color="primary"
                                 fullWidth
-                                error={isInvalid}
                                 placeholder="Enter a color (e.g., #ff0000)"
-                                value={inputColorValue}
-                                onChange={(e) => handleChange(e.target.value)}
-                                onBlur={validate}
+                                value={customColor}
+                                onChange={setCustomColor}
                             />
                             <Button
                                 color="primary"
@@ -189,8 +180,8 @@ function PlaygroundPaper() {
                                                 customColor,
                                             ] as ColorLike[],
                                     );
-                                    setColorDirectly(randomHexColor());
-                                    setColorToDelete(customColor as ColorLike);
+                                    setCustomColor(randomColor());
+                                    setColorToDelete(customColor);
                                 }}
                             >
                                 Add Color

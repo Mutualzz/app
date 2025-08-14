@@ -10,11 +10,10 @@ import {
     Paper,
     Radio,
     RadioGroup,
-    randomHexColor,
+    randomColor,
     Slider,
     Stack,
     Typography,
-    useColorInput,
     type AllowedListStyleTypes,
     type Color,
     type ColorLike,
@@ -71,20 +70,13 @@ function RouteComponent() {
         "button",
     );
 
+    const [customColor, setCustomColor] = useState<ColorLike>(randomColor());
+
     const [customSizeToggle, setCustomSizeToggle] = useState(false);
     const [customMarkerToggle, setCustomMarkerToggle] = useState(false);
 
     const [customColors, setCustomColors] = useState<ColorLike[]>([]);
     const [colorToDelete, setColorToDelete] = useState<ColorLike | null>(null);
-
-    const {
-        inputValue: inputColorValue,
-        color: customColor,
-        isInvalid,
-        handleChange,
-        validate,
-        setColorDirectly,
-    } = useColorInput<Color | ColorLike>();
 
     const ListItemComponent = ({
         ...props
@@ -285,6 +277,7 @@ function RouteComponent() {
                             </Stack>
                             {customMarkerToggle ? (
                                 <Input
+                                    type="text"
                                     variant="solid"
                                     value={marker ?? ""}
                                     onChange={(e) => setMarker(e.target.value)}
@@ -398,14 +391,13 @@ function RouteComponent() {
                     <label>Custom Color</label>
                     <Stack alignContent="center" direction="row" spacing={5}>
                         <Input
+                            type="color"
                             variant="solid"
                             size="lg"
                             color="primary"
                             placeholder="Enter a color (e.g., #ff0000)"
-                            value={inputColorValue}
-                            error={isInvalid}
-                            onChange={(e) => handleChange(e.target.value)}
-                            onBlur={validate}
+                            value={customColor}
+                            onChange={setCustomColor}
                         />
                         <Button
                             color="primary"
@@ -415,8 +407,8 @@ function RouteComponent() {
                                     (prev) =>
                                         [...prev, customColor] as ColorLike[],
                                 );
-                                setColorDirectly(randomHexColor());
-                                setColorToDelete(customColor as ColorLike);
+                                setCustomColor(randomColor());
+                                setColorToDelete(customColor);
                             }}
                         >
                             Add Color

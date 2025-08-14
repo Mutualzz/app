@@ -9,11 +9,10 @@ import {
     Paper,
     Radio,
     RadioGroup,
-    randomHexColor,
+    randomColor,
     type Size,
     Slider,
     Stack,
-    useColorInput,
     type Variant,
 } from "@mutualzz/ui";
 import { seo } from "@seo";
@@ -52,10 +51,10 @@ const sizeNames = {
 };
 
 function PlaygroundButtonGroup() {
-    const [color, setColor] = useState<Color | ColorLike>("primary");
-    const [separatorColor, setSeparatorColor] = useState<
-        Color | ColorLike | "none"
-    >("none");
+    const [color, setColor] = useState<Color>("primary");
+    const [separatorColor, setSeparatorColor] = useState<Color | "none">(
+        "none",
+    );
     const [variant, setVariant] = useState<Variant | "all">("all");
 
     const [text, setText] = useState<string | null>(null);
@@ -76,23 +75,9 @@ function PlaygroundButtonGroup() {
     const [customSeparatorColorToggle, setCustomSeparatorColorToggle] =
         useState(false);
 
-    const {
-        inputValue: inputColorValue,
-        color: customColor,
-        isInvalid,
-        handleChange,
-        validate,
-        setColorDirectly,
-    } = useColorInput<Color | ColorLike>();
-
-    const {
-        inputValue: inputSeparatorColorValue,
-        color: customSeparatorColor,
-        isInvalid: isSeparatorColorInvalid,
-        handleChange: handleSeparatorColorChange,
-        validate: validateSeparatorColor,
-        setColorDirectly: setSeparatorColorDirectly,
-    } = useColorInput<Color | ColorLike>();
+    const [customColor, setCustomColor] = useState<ColorLike>(randomColor());
+    const [customSeparatorColor, setCustomSeparatorColor] =
+        useState<ColorLike>(randomColor());
 
     const allButtons = variants.map((v) => (
         <Button
@@ -100,7 +85,7 @@ function PlaygroundButtonGroup() {
             size={size}
             loading={loading}
             disabled={disabled}
-            color={color}
+            color={customColorToggle ? customColor : color}
             variant={v}
         >
             {text ?? `${capitalize(v)} ${capitalize(color)}`}
@@ -113,7 +98,7 @@ function PlaygroundButtonGroup() {
             size={size}
             loading={loading}
             disabled={disabled}
-            color={color}
+            color={customColorToggle ? customColor : color}
         >
             {text ?? capitalize(numWords(index + 1))}
         </Button>
@@ -137,9 +122,11 @@ function PlaygroundButtonGroup() {
                         spacing={spacing}
                         color={color}
                         separatorColor={
-                            separatorColor !== "none"
-                                ? separatorColor
-                                : undefined
+                            customSeparatorColorToggle
+                                ? customSeparatorColor
+                                : separatorColor !== "none"
+                                  ? separatorColor
+                                  : undefined
                         }
                     >
                         {allButtons}
@@ -149,7 +136,13 @@ function PlaygroundButtonGroup() {
                     <ButtonGroup
                         orientation={orientation}
                         spacing={spacing}
-                        color={color}
+                        color={
+                            customSeparatorColorToggle
+                                ? customSeparatorColor
+                                : separatorColor !== "none"
+                                  ? separatorColor
+                                  : undefined
+                        }
                         variant={variant}
                         size={size}
                         disabled={disabled}
@@ -259,24 +252,22 @@ function PlaygroundButtonGroup() {
                             spacing={5}
                         >
                             <Input
+                                type="color"
                                 variant="solid"
                                 size="lg"
                                 color="primary"
                                 placeholder="Enter color (e.g. #ff0000)"
-                                value={inputColorValue}
-                                onChange={(e) => handleChange(e.target.value)}
-                                onBlur={validate}
-                                error={isInvalid}
+                                value={customColor}
+                                onChange={setCustomColor}
                             />
                             <Button
                                 color="primary"
                                 disabled={!customColor}
                                 onClick={() => {
-                                    setColor(customColor as ColorLike);
-                                    setColorDirectly(randomHexColor());
+                                    setCustomColor(randomColor());
                                 }}
                             >
-                                Set Color
+                                Random
                             </Button>
                         </Stack>
                     ) : (
@@ -328,28 +319,22 @@ function PlaygroundButtonGroup() {
                             spacing={5}
                         >
                             <Input
+                                type="color"
                                 variant="solid"
                                 size="lg"
                                 color="primary"
                                 placeholder="Enter color (e.g. #ff0000)"
-                                value={inputSeparatorColorValue}
-                                onChange={(e) =>
-                                    handleSeparatorColorChange(e.target.value)
-                                }
-                                onBlur={validateSeparatorColor}
-                                error={isSeparatorColorInvalid}
+                                value={customSeparatorColor}
+                                onChange={setCustomSeparatorColor}
                             />
                             <Button
                                 color="primary"
                                 disabled={!customSeparatorColor}
                                 onClick={() => {
-                                    setSeparatorColor(
-                                        customSeparatorColor as ColorLike,
-                                    );
-                                    setSeparatorColorDirectly(randomHexColor());
+                                    setCustomSeparatorColor(randomColor());
                                 }}
                             >
-                                Set Color
+                                Random
                             </Button>
                         </Stack>
                     ) : (
@@ -490,6 +475,7 @@ function PlaygroundButtonGroup() {
                 <Stack direction="column" spacing={5}>
                     <label>Text</label>
                     <Input
+                        type="text"
                         variant="solid"
                         size="lg"
                         color="primary"

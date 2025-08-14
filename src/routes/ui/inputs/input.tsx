@@ -6,11 +6,10 @@ import {
     Paper,
     Radio,
     RadioGroup,
-    randomHexColor,
+    randomColor,
     Slider,
     Stack,
     Typography,
-    useColorInput,
     type Color,
     type ColorLike,
     type InputType,
@@ -22,7 +21,7 @@ import { seo } from "@seo";
 import { createFileRoute } from "@tanstack/react-router";
 import capitalize from "lodash-es/capitalize";
 import startCase from "lodash-es/startCase";
-import { useState } from "react";
+import { useState, type ChangeEvent } from "react";
 
 export const Route = createFileRoute("/ui/inputs/input")({
     component: InputPlayground,
@@ -48,6 +47,7 @@ const colors = [
 const types = [
     "date",
     "datetime-local",
+    "color",
     "number",
     "password",
     "text",
@@ -75,9 +75,9 @@ function InputPlayground() {
     const [fullWidth, setFullWidth] = useState(false);
     const [error, setError] = useState(false);
 
-    const [textColor, setTextColor] = useState<TypographyColor | "inherit">(
-        "inherit",
-    );
+    const [textColor, setTextColor] = useState<
+        TypographyColor | ColorLike | "inherit"
+    >("inherit");
 
     const [customTextColorEnabled, setCustomTextColorEnabled] = useState(false);
 
@@ -96,23 +96,9 @@ function InputPlayground() {
     const [customColors, setCustomColors] = useState<ColorLike[]>([]);
     const [colorToDelete, setColorToDelete] = useState<ColorLike | null>(null);
 
-    const {
-        inputValue: inputColorValue,
-        color: customColor,
-        isInvalid,
-        handleChange,
-        validate,
-        setColorDirectly,
-    } = useColorInput<Color | ColorLike>();
-
-    const {
-        inputValue: inputTextColorValue,
-        color: customTextColor,
-        isInvalid: isTextColorInvalid,
-        handleChange: handleTextColorChange,
-        setColorDirectly: setTextColorDirectly,
-        validate: validateTextColor,
-    } = useColorInput<TypographyColor>();
+    const [customColor, setCustomColor] = useState<ColorLike>(randomColor());
+    const [customTextColor, setCustomTextColor] =
+        useState<ColorLike>(randomColor());
 
     const allInputs = [...colors, ...customColors].map((c) =>
         variants.map((v) => (
@@ -138,8 +124,20 @@ function InputPlayground() {
                     error={error}
                     min={min}
                     max={max}
-                    onChange={(e) => {
-                        if (controlled) setValue(e.target.value);
+                    onChange={(
+                        e: ColorLike | ChangeEvent<HTMLInputElement>,
+                    ) => {
+                        if (controlled) {
+                            if (type === "color") {
+                                setValue(e as ColorLike);
+                                return;
+                            }
+
+                            setValue(
+                                (e as ChangeEvent<HTMLInputElement>).target
+                                    .value,
+                            );
+                        }
                     }}
                     value={controlled ? (value ?? "") : undefined}
                     disabled={disabled}
@@ -167,8 +165,17 @@ function InputPlayground() {
                 min={min}
                 error={error}
                 max={max}
-                onChange={(e) => {
-                    if (controlled) setValue(e.target.value);
+                onChange={(e: ColorLike | ChangeEvent<HTMLInputElement>) => {
+                    if (controlled) {
+                        if (type === "color") {
+                            setValue(e as ColorLike);
+                            return;
+                        }
+
+                        setValue(
+                            (e as ChangeEvent<HTMLInputElement>).target.value,
+                        );
+                    }
                 }}
                 value={controlled ? (value ?? "") : undefined}
                 disabled={disabled}
@@ -296,23 +303,20 @@ function InputPlayground() {
                     {customTextColorEnabled ? (
                         <Stack direction="row" spacing={5}>
                             <Input
+                                type="color"
                                 variant="solid"
                                 size="lg"
                                 color="primary"
                                 fullWidth
-                                error={isTextColorInvalid}
                                 placeholder="Enter a text color (e.g. #ff0000)"
-                                value={inputTextColorValue}
-                                onChange={(e) => {
-                                    handleTextColorChange(e.target.value);
-                                }}
-                                onBlur={validateTextColor}
+                                value={customTextColor}
+                                onChange={setCustomTextColor}
                             />
                             <Button
                                 variant="solid"
                                 color="neutral"
                                 onClick={() => {
-                                    setTextColorDirectly(randomHexColor());
+                                    setCustomTextColor(randomColor());
                                 }}
                             >
                                 Random
@@ -370,6 +374,7 @@ function InputPlayground() {
                     </Stack>
                     {controlled && (
                         <Input
+                            type="text"
                             variant="solid"
                             size="lg"
                             color="primary"
@@ -384,6 +389,7 @@ function InputPlayground() {
                 <Stack direction="column" spacing={5}>
                     <label>Placeholder</label>
                     <Input
+                        type="text"
                         variant="solid"
                         size="lg"
                         color="primary"
@@ -473,14 +479,13 @@ function InputPlayground() {
                     <label>Custom Color</label>
                     <Stack alignContent="center" direction="row" spacing={5}>
                         <Input
+                            type="color"
                             variant="solid"
                             size="lg"
                             color="primary"
                             placeholder="Enter a color (e.g., #ff0000, red)"
-                            error={isInvalid}
-                            value={inputColorValue}
-                            onChange={(e) => handleChange(e.target.value)}
-                            onBlur={validate}
+                            value={customColor}
+                            onChange={setCustomColor}
                         />
                         <Button
                             color="primary"
@@ -490,8 +495,8 @@ function InputPlayground() {
                                     (prev) =>
                                         [...prev, customColor] as ColorLike[],
                                 );
-                                setColorDirectly(randomHexColor());
-                                setColorToDelete(customColor as ColorLike);
+                                setCustomColor(randomColor());
+                                setColorToDelete(customColor);
                             }}
                         >
                             Add Color

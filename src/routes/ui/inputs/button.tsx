@@ -8,11 +8,10 @@ import {
     Paper,
     Radio,
     RadioGroup,
-    randomHexColor,
+    randomColor,
     type Size,
     Slider,
     Stack,
-    useColorInput,
     type Variant,
 } from "@mutualzz/ui";
 import { seo } from "@seo";
@@ -82,17 +81,9 @@ function PlaygroundButton() {
 
     const [customSizeToggle, setCustomSizeToggle] = useState(false);
 
+    const [customColor, setCustomColor] = useState<ColorLike>(randomColor());
     const [customColors, setCustomColors] = useState<ColorLike[]>([]);
     const [colorToDelete, setColorToDelete] = useState<ColorLike | null>(null);
-
-    const {
-        inputValue: inputColorValue,
-        color: customColor,
-        isInvalid,
-        handleChange,
-        validate,
-        setColorDirectly,
-    } = useColorInput<Color | ColorLike>();
 
     const allButtons = [...colors, ...customColors].map((c) =>
         variants.map((v) =>
@@ -304,14 +295,13 @@ function PlaygroundButton() {
                     <label>Custom Color</label>
                     <Stack alignContent="center" direction="row" spacing={5}>
                         <Input
+                            type="color"
                             variant="solid"
                             size="lg"
                             color="primary"
                             placeholder="Enter a color (e.g., #ff0000)"
-                            value={inputColorValue}
-                            error={isInvalid}
-                            onChange={(e) => handleChange(e.target.value)}
-                            onBlur={validate}
+                            value={customColor}
+                            onChange={setCustomColor}
                         />
                         <Button
                             color="primary"
@@ -321,8 +311,8 @@ function PlaygroundButton() {
                                     (prev) =>
                                         [...prev, customColor] as ColorLike[],
                                 );
-                                setColorDirectly(randomHexColor());
-                                setColorToDelete(customColor as ColorLike);
+                                setCustomColor(randomColor());
+                                setColorToDelete(customColor);
                             }}
                         >
                             Add Color
@@ -376,6 +366,7 @@ function PlaygroundButton() {
                 <Stack direction="column" spacing={5}>
                     <label>Text</label>
                     <Input
+                        type="text"
                         variant="solid"
                         size="lg"
                         color="primary"

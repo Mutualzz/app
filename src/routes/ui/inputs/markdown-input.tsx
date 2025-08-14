@@ -7,10 +7,9 @@ import {
     Paper,
     Radio,
     RadioGroup,
-    randomHexColor,
+    randomColor,
     Stack,
     Typography,
-    useColorInput,
     type Color,
     type ColorLike,
     type TypographyColor,
@@ -62,24 +61,9 @@ function RouteComponent() {
 
     const [customColorEnabled, setCustomColorEnabled] = useState(false);
     const [customTextColorEnabled, setCustomTextColorEnabled] = useState(false);
-
-    const {
-        inputValue: inputColorValue,
-        color: customColor,
-        isInvalid,
-        handleChange,
-        setColorDirectly,
-        validate,
-    } = useColorInput<Color | ColorLike>();
-
-    const {
-        inputValue: inputTextColorValue,
-        color: customTextColor,
-        isInvalid: isTextColorInvalid,
-        handleChange: handleTextColorChange,
-        setColorDirectly: setTextColorDirectly,
-        validate: validateTextColor,
-    } = useColorInput<TypographyColor>();
+    const [customColor, setCustomColor] = useState<ColorLike>(randomColor());
+    const [customTextColor, setCustomTextColor] =
+        useState<ColorLike>(randomColor());
 
     return (
         <Stack direction="row" spacing={10} width="100%" gap={2}>
@@ -140,23 +124,20 @@ function RouteComponent() {
                     {customColorEnabled ? (
                         <Stack direction="row" spacing={5}>
                             <Input
+                                type="color"
                                 variant="solid"
                                 size="lg"
                                 color="primary"
                                 fullWidth
-                                error={isInvalid}
                                 placeholder="Enter a color (e.g. #ff0000)"
-                                value={inputColorValue}
-                                onChange={(e) => {
-                                    handleChange(e.target.value);
-                                }}
-                                onBlur={validate}
+                                value={customColor}
+                                onChange={setCustomColor}
                             />
                             <Button
                                 variant="solid"
                                 color="neutral"
                                 onClick={() => {
-                                    setColorDirectly(randomHexColor());
+                                    setCustomColor(randomColor());
                                 }}
                             >
                                 Random
@@ -200,23 +181,20 @@ function RouteComponent() {
                     {customTextColorEnabled ? (
                         <Stack direction="row" spacing={5}>
                             <Input
+                                type="color"
                                 variant="solid"
                                 size="lg"
                                 color="primary"
                                 fullWidth
-                                error={isTextColorInvalid}
                                 placeholder="Enter a text color (e.g. #ff0000)"
-                                value={inputTextColorValue}
-                                onChange={(e) => {
-                                    handleTextColorChange(e.target.value);
-                                }}
-                                onBlur={validateTextColor}
+                                value={customTextColor}
+                                onChange={setCustomTextColor}
                             />
                             <Button
                                 variant="solid"
                                 color="neutral"
                                 onClick={() => {
-                                    setTextColorDirectly(randomHexColor());
+                                    setCustomTextColor(randomColor());
                                 }}
                             >
                                 Random

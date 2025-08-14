@@ -6,11 +6,10 @@ import {
     Paper,
     Radio,
     RadioGroup,
-    randomHexColor,
+    randomColor,
     Slider,
     Stack,
     Typography,
-    useColorInput,
     type Color,
     type ColorLike,
     type Size,
@@ -83,14 +82,7 @@ function SlderPlayground() {
     const [valueInput, setValueInput] = useState<number | null>(null);
     const [labelInput, setLabelInput] = useState<string>("");
 
-    const {
-        inputValue: inputColorValue,
-        color: customColor,
-        isInvalid,
-        handleChange,
-        validate,
-        setColorDirectly,
-    } = useColorInput<Color | ColorLike>();
+    const [customColor, setCustomColor] = useState<ColorLike>(randomColor());
 
     const allSliders = [...colors, ...customColors].map((c) =>
         variants.map((v) => (
@@ -404,6 +396,7 @@ function SlderPlayground() {
                                     }}
                                 />
                                 <Input
+                                    type="text"
                                     variant="solid"
                                     size="lg"
                                     color="primary"
@@ -624,14 +617,13 @@ function SlderPlayground() {
                     <label>Custom Color</label>
                     <Stack alignContent="center" direction="row" spacing={5}>
                         <Input
+                            type="color"
                             variant="solid"
                             size="lg"
                             color="primary"
                             fullWidth
-                            error={isInvalid}
-                            value={inputColorValue}
-                            onChange={(e) => handleChange(e.target.value)}
-                            onBlur={validate}
+                            value={customColor}
+                            onChange={setCustomColor}
                         />
                         <Button
                             color="primary"
@@ -641,8 +633,8 @@ function SlderPlayground() {
                                     (prev) =>
                                         [...prev, customColor] as ColorLike[],
                                 );
-                                setColorDirectly(randomHexColor());
-                                setColorToDelete(customColor as ColorLike);
+                                setCustomColor(randomColor());
+                                setColorToDelete(customColor);
                             }}
                         >
                             Add Color

@@ -6,11 +6,10 @@ import {
     Paper,
     Radio,
     RadioGroup,
-    randomHexColor,
+    randomColor,
     Slider,
     Stack,
     Typography,
-    useColorInput,
     type Color,
     type ColorLike,
     type TypographyLevel,
@@ -106,14 +105,7 @@ function PlaygroundTypography() {
     const [customColors, setCustomColors] = useState<ColorLike[]>([]);
     const [colorToDelete, setColorToDelete] = useState<ColorLike | null>(null);
 
-    const {
-        inputValue: inputColorValue,
-        color: customColor,
-        isInvalid,
-        handleChange,
-        validate,
-        setColorDirectly,
-    } = useColorInput<Color | ColorLike>();
+    const [customColor, setCustomColor] = useState<ColorLike>(randomColor());
 
     const allTypographies = [...colors, ...customColors].map((c) =>
         variants
@@ -293,16 +285,13 @@ function PlaygroundTypography() {
                                 spacing={5}
                             >
                                 <Input
+                                    type="color"
                                     variant="solid"
                                     size="lg"
                                     color="primary"
                                     fullWidth
-                                    error={isInvalid}
-                                    value={inputColorValue}
-                                    onChange={(e) =>
-                                        handleChange(e.target.value)
-                                    }
-                                    onBlur={validate}
+                                    value={customColor}
+                                    onChange={setCustomColor}
                                 />
                                 <Button
                                     color="primary"
@@ -315,10 +304,8 @@ function PlaygroundTypography() {
                                                     customColor,
                                                 ] as ColorLike[],
                                         );
-                                        setColorDirectly(randomHexColor());
-                                        setColorToDelete(
-                                            customColor as ColorLike,
-                                        );
+                                        setCustomColor(randomColor());
+                                        setColorToDelete(customColor);
                                     }}
                                 >
                                     Add Color
@@ -381,6 +368,7 @@ function PlaygroundTypography() {
                 <Stack direction="column" spacing={5}>
                     <label>Text</label>
                     <Input
+                        type="text"
                         variant="solid"
                         size="lg"
                         color="primary"
