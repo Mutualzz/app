@@ -1,10 +1,14 @@
 import type { APIUser } from "@mutualzz/types";
+import { isSSR } from "@utils/index";
 import REST from "@utils/REST";
+import { secureStorageAdapter } from "@utils/secureStorageAdapter";
 import { Logger } from "Logger";
 import { makeAutoObservable } from "mobx";
+import { makePersistable } from "mobx-persist-store";
 import secureLocalStorage from "react-secure-storage";
 import { AccountStore } from "./Account.store";
 import { GatewayStore } from "./Gateway.store";
+import { ThemeStore } from "./Theme.store";
 
 export class AppStore {
     private readonly logger = new Logger({
@@ -17,11 +21,20 @@ export class AppStore {
     token: string | null = null;
 
     account: AccountStore | null = null;
-    gateway: GatewayStore = new GatewayStore(this);
+    gateway = new GatewayStore(this);
+    theme = new ThemeStore();
     rest = new REST();
 
     constructor() {
         makeAutoObservable(this);
+
+        if (isSSR) return;
+
+        makePersistable(this, {
+            name: "AppStore",
+            properties: ["token"],
+            storage: secureStorageAdapter,
+        });
     }
 
     setUser(user: APIUser) {
@@ -42,15 +55,12 @@ export class AppStore {
 
     setToken(token: string) {
         this.token = token;
-        secureLocalStorage.setItem("token", token);
         this.logger.debug("Token saved to the storage");
     }
 
     loadToken() {
-        const token = secureLocalStorage.getItem("token") as string | null;
-
-        if (token) {
-            this.setToken(token);
+        if (this.token) {
+            this.setToken(this.token);
             this.logger.debug("Token loaded from the storage");
         } else {
             this.logger.warn("No token found in the storage");
@@ -63,10 +73,12 @@ export class AppStore {
         this.isAppLoading = false;
         this.isGatewayReady = true;
         this.account = null;
+        this.rest.setToken(null);
         secureLocalStorage.clear();
     }
 
     loadSettings() {
+        this.theme.loadDefaultThemes();
         this.loadToken();
     }
 }
