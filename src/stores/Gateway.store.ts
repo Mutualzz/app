@@ -2,6 +2,7 @@ import {
     GatewayCloseCodes,
     GatewayDispatchEvents,
     GatewayOpcodes,
+    type GatewayReadyPayload,
 } from "@mutualzz/types";
 import { makeAutoObservable } from "mobx";
 import { Logger } from "../Logger";
@@ -358,13 +359,14 @@ export class GatewayStore {
         this.logger.debug("[Resume] Session:", this.sessionId);
     };
 
-    private onReady = (data: any) => {
+    private onReady = (payload: GatewayReadyPayload) => {
         this.logger.info(
             `[Ready] took ${Date.now() - this.identifyStartTime!}ms`,
         );
-        const { sessionId, user } = data;
+        const { sessionId, user } = payload;
         this.sessionId = sessionId;
         this.app.setUser(user);
+        this.app.theme.loadUserThemes(user);
 
         this.reconnectTimeout = 0;
         this.app.setGatewayReady(true);
