@@ -5,7 +5,7 @@ export interface MarkdownRendererProps {
     value: string;
 
     color?: Color | ColorLike;
-    textColor?: TypographyColor | "inherit";
+    textColor?: TypographyColor | ColorLike | "inherit";
     variant?: Variant;
 
     css?: CSSObject;
