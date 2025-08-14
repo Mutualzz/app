@@ -10,7 +10,7 @@ import { observer } from "mobx-react";
 import { useEffect, useRef, type PropsWithChildren } from "react";
 export const AppTheme = observer(({ children }: PropsWithChildren) => {
     const app = useAppStore();
-    const { theme: themeStore } = app;
+    const { theme: themeStore, account } = app;
     const themeProviderRef = useRef<ThemeProviderRef>(null);
 
     useEffect(() => {
@@ -18,15 +18,33 @@ export const AppTheme = observer(({ children }: PropsWithChildren) => {
             () => themeStore.currentMode,
             (mode) => {
                 themeProviderRef?.current?.changeMode(mode);
+
+                const defaulTheme =
+                    mode === "dark" ? baseDarkTheme : baseLightTheme;
+                themeProviderRef.current?.changeTheme(defaulTheme);
+                themeStore.setCurrentTheme(defaulTheme.id);
             },
             { fireImmediately: true },
         );
 
         const themeDispose = reaction(
-            () => themeStore.currentTheme,
-            (theme) => {
-                if (theme) {
-                    themeProviderRef.current?.changeTheme(theme);
+            () => ({
+                storeTheme: themeStore.currentTheme,
+                userTheme: account?.settings.currentTheme,
+            }),
+            ({ storeTheme, userTheme }) => {
+                let themeToUse = null;
+
+                if (userTheme) {
+                    themeToUse = themeStore.themes.find(
+                        (theme) => theme.id === userTheme.id,
+                    );
+                } else if (storeTheme) {
+                    themeToUse = storeTheme;
+                }
+
+                if (themeToUse) {
+                    themeProviderRef.current?.changeTheme(themeToUse);
                 } else {
                     const defaultTheme =
                         themeStore.currentMode === "dark"
