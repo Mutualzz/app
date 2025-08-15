@@ -10,7 +10,7 @@ import { makePersistable } from "mobx-persist-store";
 
 export class ThemeStore {
     private readonly logger = new Logger({
-        tag: "ThemeStore'",
+        tag: "ThemeStore",
     });
 
     themes: MzTheme[] = [];
