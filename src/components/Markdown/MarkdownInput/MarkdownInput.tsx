@@ -295,6 +295,7 @@ export const MarkdownInput = ({
                         ...(disabled && {
                             opacity: 0.5,
                             pointerEvents: "none",
+                            cursor: "not-allowed",
                         }),
                         ...css,
                     }}
