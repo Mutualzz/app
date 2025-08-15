@@ -6,8 +6,10 @@ import {
     ButtonGroup,
     Divider,
     Input,
+    Option,
     Paper,
     randomColor,
+    Select,
     Stack,
     Typography,
     type InputProps,
@@ -423,47 +425,36 @@ export const ThemeCreator = observer(() => {
                                         <Typography level="body-sm">
                                             Pick a preset
                                         </Typography>
-                                        <select
-                                            onChange={(e) => {
+                                        <Select
+                                            variant="solid"
+                                            color="primary"
+                                            onValueChange={(value) => {
                                                 loadAndUpdate(
-                                                    e.target.value,
+                                                    value as string,
                                                     "preset",
                                                 );
                                             }}
                                             value={presetSelectValue}
-                                            css={{
-                                                width: "100%",
-                                                padding: 10,
-                                                borderRadius: 5,
-                                                border: "1px solid #ccc",
-                                                backgroundColor: "#f9f9f9",
-                                            }}
+                                            placeholder="Pick a preset"
                                             disabled={
                                                 isSubmitting ||
                                                 putPending ||
                                                 deletePending
                                             }
                                         >
-                                            <option
-                                                key="default"
-                                                disabled
-                                                value=""
-                                            >
-                                                Pick a preset
-                                            </option>
                                             {sortThemes(allDefaultThemes).map(
                                                 (theme) => (
-                                                    <option
+                                                    <Option
                                                         key={theme.id}
                                                         value={theme.id}
                                                     >
                                                         {theme.name} (
                                                         {capitalize(theme.type)}
                                                         )
-                                                    </option>
+                                                    </Option>
                                                 ),
                                             )}
-                                        </select>
+                                        </Select>
                                     </Stack>
                                     <Divider />
                                     <Stack
@@ -474,59 +465,36 @@ export const ThemeCreator = observer(() => {
                                         <Typography level="body-sm">
                                             Pick your drafts
                                         </Typography>
-                                        <select
-                                            onChange={(e) => {
+                                        <Select
+                                            onValueChange={(value) => {
                                                 loadAndUpdate(
-                                                    e.target.value,
+                                                    value as string,
                                                     "draft",
                                                 );
                                             }}
                                             value={draftSelectValue}
-                                            css={{
-                                                width: "100%",
-                                                padding: 10,
-                                                borderRadius: 5,
-                                                border: "1px solid #ccc",
-                                                backgroundColor: "#f9f9f9",
-                                            }}
+                                            placeholder={
+                                                allDrafts.length === 0
+                                                    ? "No drafts available"
+                                                    : "Pick a draft"
+                                            }
                                             disabled={
                                                 isSubmitting ||
                                                 putPending ||
-                                                deletePending
+                                                deletePending ||
+                                                allDrafts.length === 0
                                             }
                                         >
-                                            {allDrafts.length === 0 ? (
-                                                <option
-                                                    key="no-drafts"
-                                                    disabled
-                                                    value=""
+                                            {allDrafts.map((theme) => (
+                                                <Option
+                                                    key={theme.name}
+                                                    value={theme.name}
                                                 >
-                                                    No drafts available
-                                                </option>
-                                            ) : (
-                                                <>
-                                                    <option
-                                                        key="default"
-                                                        disabled
-                                                        value=""
-                                                    >
-                                                        Pick a draft
-                                                    </option>
-                                                    {allDrafts.map((theme) => (
-                                                        <option
-                                                            key={theme.name}
-                                                            value={theme.name}
-                                                        >
-                                                            {theme.name} (
-                                                            {capitalize(
-                                                                theme.type,
-                                                            )}
-                                                            )
-                                                        </option>
-                                                    ))}
-                                                </>
-                                            )}
-                                        </select>
+                                                    {theme.name} (
+                                                    {capitalize(theme.type)})
+                                                </Option>
+                                            ))}
+                                        </Select>
                                         {loadedDraft && (
                                             <Button
                                                 onClick={() => {
@@ -555,61 +523,36 @@ export const ThemeCreator = observer(() => {
                                         <Typography level="body-sm">
                                             Pick your theme
                                         </Typography>
-                                        <select
-                                            onChange={(e) => {
+                                        <Select
+                                            onValueChange={(value) => {
                                                 loadAndUpdate(
-                                                    e.target.value,
+                                                    value as string,
                                                     "userTheme",
                                                 );
                                             }}
+                                            placeholder={
+                                                allUserThemes.length === 0
+                                                    ? "No themes available"
+                                                    : "Pick your theme"
+                                            }
                                             value={userThemeSelectValue}
-                                            css={{
-                                                width: "100%",
-                                                padding: 10,
-                                                borderRadius: 5,
-                                                border: "1px solid #ccc",
-                                                backgroundColor: "#f9f9f9",
-                                            }}
                                             disabled={
                                                 isSubmitting ||
                                                 putPending ||
-                                                deletePending
+                                                deletePending ||
+                                                allUserThemes.length === 0
                                             }
                                         >
-                                            {allUserThemes.length === 0 ? (
-                                                <option
-                                                    key="no-user-themes"
-                                                    disabled
-                                                    value=""
+                                            {allUserThemes.map((theme) => (
+                                                <Option
+                                                    key={theme.id}
+                                                    value={theme.id}
                                                 >
-                                                    No themes available
-                                                </option>
-                                            ) : (
-                                                <>
-                                                    <option
-                                                        key="default"
-                                                        disabled
-                                                        value=""
-                                                    >
-                                                        Pick your theme
-                                                    </option>
-                                                    {allUserThemes.map(
-                                                        (theme) => (
-                                                            <option
-                                                                key={theme.id}
-                                                                value={theme.id}
-                                                            >
-                                                                {theme.name} (
-                                                                {capitalize(
-                                                                    theme.type,
-                                                                )}
-                                                                )
-                                                            </option>
-                                                        ),
-                                                    )}
-                                                </>
-                                            )}
-                                        </select>
+                                                    {theme.name} (
+                                                    {capitalize(theme.type)})
+                                                </Option>
+                                            ))}
+                                        </Select>
                                         {loadedUserTheme && (
                                             <Button
                                                 onClick={() => {
