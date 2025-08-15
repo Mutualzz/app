@@ -2,10 +2,12 @@ import { useModal } from "@contexts/Modal.context";
 import { Modal } from "@mutualzz/ui";
 
 export const ModalRoot = () => {
-    const { activeId, modalContent, closeModal, modalLayout } = useModal();
+    const { open, modalContent, closeModal, modalProps } = useModal();
+
+    if (!open || !modalContent) return null;
 
     return (
-        <Modal open={!!activeId} onClose={closeModal} layout={modalLayout}>
+        <Modal open={open} onClose={closeModal} {...modalProps}>
             {modalContent}
         </Modal>
     );
