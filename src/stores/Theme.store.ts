@@ -1,5 +1,4 @@
 import type { MzTheme, ThemeDraft } from "@app-types/theme";
-import { usePrefersDark } from "@hooks/usePrefersDark";
 import { Logger } from "@logger";
 import type { APITheme, APIUser } from "@mutualzz/types";
 import { baseDarkTheme, baseLightTheme, type ThemeMode } from "@mutualzz/ui";
@@ -17,7 +16,11 @@ export class ThemeStore {
     themeDrafts: ThemeDraft[] = [];
 
     currentTheme: string | null = null;
+
     currentMode: ThemeMode = "system";
+
+    defaultThemesLoaded = false;
+    userThemesLoaded = false;
 
     constructor() {
         makeAutoObservable(this);
@@ -30,45 +33,18 @@ export class ThemeStore {
         });
     }
 
-    setCurrentTheme(themeId: string) {
-        let theme = this.themes.find((theme) => theme.id === themeId);
-        if (!theme) theme = this.themes[0];
-        this.currentTheme = theme?.id;
-    }
-
-    setInitialTheme() {
-        if (!this.currentTheme && this.themes.length > 0) {
-            // Set default theme based on current mode
-            const prefersDark = usePrefersDark();
-
-            let defaultTheme: MzTheme | undefined;
-
-            const darkTheme = this.themes.find(
-                (theme) => theme.id === "baseDark",
-            );
-            const lightTheme = this.themes.find(
-                (theme) => theme.id === "baseLight",
-            );
-
-            switch (this.currentMode) {
-                case "dark":
-                    defaultTheme = darkTheme;
-                    break;
-                case "light":
-                    defaultTheme = lightTheme;
-                    break;
-                case "system":
-                default:
-                    defaultTheme = prefersDark ? darkTheme : lightTheme;
-                    break;
-            }
-
-            if (defaultTheme) this.currentTheme = defaultTheme.id;
-        }
+    setCurrentTheme(themeId: string | null) {
+        this.currentTheme = themeId;
     }
 
     setCurrentMode(mode: ThemeMode) {
         this.currentMode = mode;
+    }
+
+    reset() {
+        const defaultThemeIds = defaultThemes.map((t) => t.id);
+        this.themes = this.themes.filter((t) => defaultThemeIds.includes(t.id));
+        this.userThemesLoaded = false;
     }
 
     loadDefaultThemes() {
@@ -84,6 +60,7 @@ export class ThemeStore {
             this.addTheme(themeWithMetadata);
         });
 
+        this.defaultThemesLoaded = true;
         this.logger.debug("Default themes loaded");
     }
 
@@ -111,6 +88,10 @@ export class ThemeStore {
         };
 
         this.themes = [...this.themes, newTheme];
+    }
+
+    loadThemes() {
+        this.loadDefaultThemes();
     }
 
     updateTheme(theme: APITheme) {
@@ -148,9 +129,14 @@ export class ThemeStore {
     }
 
     loadUserThemes(user: APIUser) {
-        // Load user-specific themes
         const userThemes = user.themes ?? [];
+        if (userThemes.length === 0) {
+            this.logger.debug("No user themes found");
+            this.userThemesLoaded = true; // Set to true even if none found
+            return;
+        }
         userThemes.forEach((theme) => this.addTheme(theme));
+        this.userThemesLoaded = true;
         this.logger.debug("User themes loaded");
     }
 

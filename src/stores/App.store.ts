@@ -76,12 +76,11 @@ export class AppStore {
         this.account = null;
         this.rest.setToken(null);
         secureLocalStorage.clear();
+        this.theme.reset();
     }
 
     loadSettings() {
-        this.theme.loadDefaultThemes();
         this.loadToken();
-
-        this.theme.setInitialTheme();
+        this.theme.loadDefaultThemes();
     }
 }

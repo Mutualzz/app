@@ -17,29 +17,72 @@ export const AppTheme = observer(({ children }: PropsWithChildren) => {
     useEffect(() => {
         const dispose = reaction(
             () => ({
-                storeTheme: themeStore.currentTheme,
-                userTheme: account?.settings.currentTheme,
+                theme: themeStore.currentTheme,
+                userThemeRemote: account?.settings.currentTheme,
                 mode: themeStore.currentMode,
-                length: themeStore.themes.length,
+                defaultThemesLoaded: themeStore.defaultThemesLoaded,
+                userThemesLoaded: themeStore.userThemesLoaded,
+                isLoggedIn: app.token,
             }),
-            ({ storeTheme, userTheme, mode }) => {
+            ({
+                theme,
+                userThemeRemote,
+                mode,
+                defaultThemesLoaded,
+                userThemesLoaded,
+                isLoggedIn,
+            }) => {
                 themeProviderRef?.current?.changeMode(mode);
-                const prefersDark = usePrefersDark();
+                let selectedTheme;
+
+                // Only proceed if themes are loaded
                 if (mode === "system") {
-                    themeProviderRef?.current?.changeTheme(
-                        prefersDark ? baseDarkTheme : baseLightTheme,
-                    );
-                    return;
+                    const prefersDark = usePrefersDark();
+                    selectedTheme = prefersDark
+                        ? baseDarkTheme
+                        : baseLightTheme;
+                } else if (isLoggedIn) {
+                    // Wait for both to be loaded
+                    if (!defaultThemesLoaded || !userThemesLoaded) return;
+
+                    // Prioritize user themes
+                    if (theme) {
+                        selectedTheme =
+                            themeStore.themes.find(
+                                (t) => t.id === theme && t.type === mode,
+                            ) ?? themeStore.themes.find((t) => t.type === mode);
+                    } else if (userThemeRemote) {
+                        selectedTheme =
+                            themeStore.themes.find(
+                                (t) =>
+                                    t.id === userThemeRemote.id &&
+                                    t.type === mode,
+                            ) ?? themeStore.themes.find((t) => t.type === mode);
+                    } else {
+                        selectedTheme = themeStore.themes.find(
+                            (t) => t.type === mode,
+                        );
+                    }
+                } else if (defaultThemesLoaded) {
+                    // Not logged in, just use default themes
+                    if (theme) {
+                        selectedTheme =
+                            themeStore.themes.find(
+                                (t) => t.id === theme && t.type === mode,
+                            ) ?? themeStore.themes.find((t) => t.type === mode);
+                    } else {
+                        selectedTheme = themeStore.themes.find(
+                            (t) => t.type === mode,
+                        );
+                    }
+                } else {
+                    selectedTheme =
+                        mode === "dark" ? baseDarkTheme : baseLightTheme;
                 }
 
-                const themeId = userTheme?.id ?? storeTheme;
-                let theme = themeStore.themes.find((t) => t.id === themeId);
-                if (!theme || theme.type !== mode)
-                    theme = themeStore.themes.find((t) => t.type === mode);
-
-                if (theme) themeProviderRef?.current?.changeTheme(theme);
+                if (selectedTheme)
+                    themeProviderRef?.current?.changeTheme(selectedTheme);
             },
-            { fireImmediately: true },
         );
 
         return dispose;
@@ -49,15 +92,14 @@ export const AppTheme = observer(({ children }: PropsWithChildren) => {
         <ThemeProvider
             ref={themeProviderRef}
             onThemeChange={(theme) => {
-                if (theme.id !== themeStore.currentTheme) {
+                if (theme.id !== themeStore.currentTheme)
                     themeStore.setCurrentTheme(theme.id);
-                }
             }}
             onModeChange={(mode) => {
-                if (mode !== themeStore.currentMode) {
+                if (mode !== themeStore.currentMode)
                     themeStore.setCurrentMode(mode);
-                }
             }}
+            disableDefaultThemeOnModeChange
         >
             {children}
         </ThemeProvider>
