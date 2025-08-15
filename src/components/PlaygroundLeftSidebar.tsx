@@ -113,7 +113,7 @@ export const PlaygrondLeftSidebar = observer(() => {
             direction="column"
             justifyContent="flex-start"
             overflowY="auto"
-            width="12.5rem"
+            width="14rem"
             borderRadius="2rem"
             p={20}
         >
