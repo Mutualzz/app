@@ -93,7 +93,9 @@ function Index() {
                         or
                         <Button
                             onClick={() => {
-                                openModal("theme-maker", <ThemeCreator />);
+                                openModal("theme-maker", <ThemeCreator />, {
+                                    disableBackdropClick: true,
+                                });
                             }}
                             size="lg"
                             variant="solid"
