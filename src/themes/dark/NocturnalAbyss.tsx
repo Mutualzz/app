@@ -11,7 +11,7 @@ export const nocturnalAbyssTheme: Theme = {
     colors: {
         ...baseDarkTheme.colors,
         primary: "#5A7C8A",
-        neutral: "#3A4A5A",
+        neutral: "#7A8A9A",
         background: "#151515",
         surface: "#23232A",
         danger: "#B85C5C",
@@ -25,7 +25,7 @@ export const nocturnalAbyssTheme: Theme = {
             primary: "#F4F4F4",
             secondary: "#B5B5B5",
             accent: "#5A7C8A",
-            muted: "#3A4A5A",
+            muted: "#7A8A9A",
         },
     },
 };
