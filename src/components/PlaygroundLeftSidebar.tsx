@@ -109,7 +109,7 @@ export const PlaygrondLeftSidebar = observer(() => {
 
     return (
         <Paper
-            spacing={5}
+            spacing={25}
             direction="column"
             justifyContent="flex-start"
             overflowY="auto"
