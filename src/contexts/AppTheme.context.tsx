@@ -1,3 +1,4 @@
+import { usePrefersDark } from "@hooks/usePrefersDark";
 import { useAppStore } from "@hooks/useStores";
 import {
     baseDarkTheme,
@@ -14,66 +15,38 @@ export const AppTheme = observer(({ children }: PropsWithChildren) => {
     const themeProviderRef = useRef<ThemeProviderRef>(null);
 
     useEffect(() => {
-        let isInitialLoad = true;
-
-        const modeDispose = reaction(
-            () => themeStore.currentMode,
-            (mode) => {
-                themeProviderRef?.current?.changeMode(mode);
-
-                if (!isInitialLoad) {
-                    const defaulTheme =
-                        mode === "dark" ? baseDarkTheme : baseLightTheme;
-                    themeProviderRef.current?.changeTheme(defaulTheme);
-                    themeStore.setCurrentTheme(defaulTheme.id);
-                }
-
-                isInitialLoad = false;
-            },
-
-            { fireImmediately: true },
-        );
-
-        const themeDispose = reaction(
+        const dispose = reaction(
             () => ({
                 storeTheme: themeStore.currentTheme,
                 userTheme: account?.settings.currentTheme,
+                mode: themeStore.currentMode,
+                length: themeStore.themes.length,
             }),
-            ({ storeTheme, userTheme }) => {
-                let themeToUse = null;
-
-                if (userTheme) {
-                    themeToUse = themeStore.themes.find(
-                        (theme) => theme.id === userTheme.id,
+            ({ storeTheme, userTheme, mode }) => {
+                themeProviderRef?.current?.changeMode(mode);
+                const prefersDark = usePrefersDark();
+                if (mode === "system") {
+                    themeProviderRef?.current?.changeTheme(
+                        prefersDark ? baseDarkTheme : baseLightTheme,
                     );
-                } else if (storeTheme) {
-                    themeToUse = storeTheme;
+                    return;
                 }
 
-                if (themeToUse) {
-                    themeProviderRef.current?.changeTheme(themeToUse);
-                } else {
-                    const defaultTheme =
-                        themeStore.currentMode === "dark"
-                            ? baseDarkTheme
-                            : baseLightTheme;
-                    themeProviderRef.current?.changeTheme(defaultTheme);
-                }
+                const themeId = userTheme?.id ?? storeTheme;
+                const theme = themeStore.themes.find((t) => t.id === themeId);
+                if (theme) themeProviderRef?.current?.changeTheme(theme);
             },
             { fireImmediately: true },
         );
 
-        return () => {
-            modeDispose();
-            themeDispose();
-        };
+        return dispose;
     }, []);
 
     return (
         <ThemeProvider
             ref={themeProviderRef}
             onThemeChange={(theme) => {
-                if (theme.id !== themeStore.currentTheme?.id) {
+                if (theme.id !== themeStore.currentTheme) {
                     themeStore.setCurrentTheme(theme.id);
                 }
             }}
