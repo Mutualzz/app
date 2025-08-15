@@ -170,7 +170,7 @@ export const PlaygrondLeftSidebar = observer(() => {
                             variant="solid"
                             color="info"
                             onValueChange={(value) =>
-                                handleThemeChange(value as string)
+                                handleThemeChange(value.toString())
                             }
                             value={theme.id}
                         >

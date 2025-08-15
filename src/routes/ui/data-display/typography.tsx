@@ -3,10 +3,12 @@ import {
     Checkbox,
     Divider,
     Input,
+    Option,
     Paper,
     Radio,
     RadioGroup,
     randomColor,
+    Select,
     Slider,
     Stack,
     Typography,
@@ -81,7 +83,7 @@ const levelsNames = [
     "Body Extra Small",
 ];
 
-type FontWeight = Properties["fontWeight"];
+type FontWeight = NonNullable<Properties["fontWeight"]>;
 
 const weights = ["lighter", "normal", "bold", "bolder"] as FontWeight[];
 
@@ -194,25 +196,18 @@ function PlaygroundTypography() {
                 <Divider />
                 <Stack direction="column" spacing={5}>
                     <Typography>Level</Typography>
-                    <select
+                    <Select
                         value={level}
-                        onChange={(e) =>
-                            setLevel(e.target.value as TypographyLevel)
+                        onValueChange={(value) =>
+                            setLevel(value as TypographyLevel)
                         }
-                        css={{
-                            width: "100%",
-                            padding: 10,
-                            borderRadius: 5,
-                            border: "1px solid #ccc",
-                            backgroundColor: "#f9f9f9",
-                        }}
                     >
                         {levels.map((l, i) => (
-                            <option key={l} value={l}>
+                            <Option key={l} value={l}>
                                 {levelsNames[i]}
-                            </option>
+                            </Option>
                         ))}
-                    </select>
+                    </Select>
                 </Stack>
                 <Divider />
                 <Stack direction="column" spacing={5}>
@@ -253,25 +248,18 @@ function PlaygroundTypography() {
                             ]}
                         />
                     ) : (
-                        <select
+                        <Select
                             value={weight}
-                            onChange={(e) =>
-                                setWeight(e.target.value as FontWeight)
+                            onValueChange={(value) =>
+                                setWeight(value as FontWeight)
                             }
-                            css={{
-                                width: "100%",
-                                padding: 10,
-                                borderRadius: 5,
-                                border: "1px solid #ccc",
-                                backgroundColor: "#f9f9f9",
-                            }}
                         >
                             {weights.map((w) => (
-                                <option key={w} value={w}>
-                                    {capitalize(w as string)}
-                                </option>
+                                <Option key={w} value={w}>
+                                    {capitalize(w.toString())}
+                                </Option>
                             ))}
-                        </select>
+                        </Select>
                     )}
                 </Stack>
                 <Divider />
@@ -317,27 +305,20 @@ function PlaygroundTypography() {
                                     direction="row"
                                     spacing={5}
                                 >
-                                    <select
+                                    <Select
                                         value={colorToDelete ?? ""}
-                                        onChange={(e) => {
+                                        onValueChange={(value) => {
                                             setColorToDelete(
-                                                e.target.value.trim() as ColorLike,
+                                                value as ColorLike,
                                             );
-                                        }}
-                                        css={{
-                                            padding: 10,
-                                            borderRadius: 5,
-                                            border: "1px solid #ccc",
-                                            backgroundColor: "#f9f9f9",
-                                            width: "100%",
                                         }}
                                     >
                                         {customColors.map((color) => (
-                                            <option key={color} value={color}>
+                                            <Option key={color} value={color}>
                                                 {color}
-                                            </option>
+                                            </Option>
                                         ))}
-                                    </select>
+                                    </Select>
                                     <Button
                                         color="danger"
                                         onClick={() => {

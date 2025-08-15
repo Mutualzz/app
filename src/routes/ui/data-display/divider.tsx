@@ -4,10 +4,12 @@ import {
     Divider,
     Input,
     InputColor,
+    Option,
     Paper,
     Radio,
     RadioGroup,
     randomColor,
+    Select,
     Stack,
     Typography,
     type Color,
@@ -267,25 +269,18 @@ function PlaygroundDivider() {
                             </Button>
                         </Stack>
                     ) : (
-                        <select
+                        <Select
                             value={lineColor}
-                            onChange={(e) =>
-                                setLineColor(e.target.value as Color)
+                            onValueChange={(value) =>
+                                setLineColor(value as Color)
                             }
-                            css={{
-                                width: "100%",
-                                padding: 10,
-                                borderRadius: 5,
-                                border: "1px solid #ccc",
-                                backgroundColor: "#f9f9f9",
-                            }}
                         >
                             {colors.map((color) => (
-                                <option key={color} value={color}>
+                                <Option key={color} value={color}>
                                     {capitalize(color)}
-                                </option>
+                                </Option>
                             ))}
-                        </select>
+                        </Select>
                     )}
                 </Stack>
                 <Divider />
@@ -328,25 +323,18 @@ function PlaygroundDivider() {
                             </Button>
                         </Stack>
                     ) : (
-                        <select
+                        <Select
                             value={textColor}
-                            onChange={(e) =>
-                                setTextColor(e.target.value as Color)
+                            onValueChange={(value) =>
+                                setTextColor(value as Color)
                             }
-                            css={{
-                                width: "100%",
-                                padding: 10,
-                                borderRadius: 5,
-                                border: "1px solid #ccc",
-                                backgroundColor: "#f9f9f9",
-                            }}
                         >
                             {colors.map((color) => (
-                                <option key={color} value={color}>
+                                <Option key={color} value={color}>
                                     {capitalize(color)}
-                                </option>
+                                </Option>
                             ))}
-                        </select>
+                        </Select>
                     )}
                 </Stack>
             </Paper>

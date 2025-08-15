@@ -7,10 +7,12 @@ import {
     List,
     ListItem,
     ListItemButton,
+    Option,
     Paper,
     Radio,
     RadioGroup,
     randomColor,
+    Select,
     Slider,
     Stack,
     Typography,
@@ -284,31 +286,23 @@ function RouteComponent() {
                                     placeholder="Enter custom marker"
                                 />
                             ) : (
-                                <select
+                                <Select
                                     value={marker}
-                                    onChange={(e) =>
+                                    onValueChange={(value) =>
                                         setMarker(
-                                            e.target
-                                                .value as AllowedListStyleTypes,
+                                            value as AllowedListStyleTypes,
                                         )
                                     }
-                                    style={{
-                                        width: "100%",
-                                        padding: 10,
-                                        borderRadius: 5,
-                                        border: "1px solid #ccc",
-                                        backgroundColor: "#f9f9f9",
-                                    }}
                                 >
-                                    <option value="">None</option>
+                                    <Option value="">None</Option>
                                     {allowedListStyleTypes
                                         .filter((m) => m !== "none")
                                         .map((m) => (
-                                            <option key={m} value={m}>
+                                            <Option key={m} value={m}>
                                                 {startCase(m)}
-                                            </option>
+                                            </Option>
                                         ))}
-                                </select>
+                                </Select>
                             )}
                         </Stack>
                         <Divider />
@@ -419,27 +413,20 @@ function RouteComponent() {
                     </Stack>
                     {customColors.length > 0 && (
                         <Stack alignItems="center" direction="row" spacing={10}>
-                            <select
+                            <Select
                                 value={colorToDelete ?? ""}
-                                onChange={(e) => {
+                                onValueChange={(value) => {
                                     setColorToDelete(
-                                        e.target.value.trim() as ColorLike,
+                                        value.toString().trim() as ColorLike,
                                     );
-                                }}
-                                css={{
-                                    padding: 10,
-                                    borderRadius: 5,
-                                    border: "1px solid #ccc",
-                                    backgroundColor: "#f9f9f9",
-                                    width: "100%",
                                 }}
                             >
                                 {customColors.map((color) => (
-                                    <option key={color} value={color}>
+                                    <Option key={color} value={color}>
                                         {color}
-                                    </option>
+                                    </Option>
                                 ))}
-                            </select>
+                            </Select>
                             <Button
                                 color="danger"
                                 onClick={() => {

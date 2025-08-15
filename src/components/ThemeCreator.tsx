@@ -430,7 +430,7 @@ export const ThemeCreator = observer(() => {
                                             color="primary"
                                             onValueChange={(value) => {
                                                 loadAndUpdate(
-                                                    value as string,
+                                                    value.toString(),
                                                     "preset",
                                                 );
                                             }}
@@ -468,7 +468,7 @@ export const ThemeCreator = observer(() => {
                                         <Select
                                             onValueChange={(value) => {
                                                 loadAndUpdate(
-                                                    value as string,
+                                                    value.toString(),
                                                     "draft",
                                                 );
                                             }}
@@ -526,7 +526,7 @@ export const ThemeCreator = observer(() => {
                                         <Select
                                             onValueChange={(value) => {
                                                 loadAndUpdate(
-                                                    value as string,
+                                                    value.toString(),
                                                     "userTheme",
                                                 );
                                             }}

@@ -4,10 +4,12 @@ import {
     Divider,
     Input,
     LinearProgress,
+    Option,
     Paper,
     Radio,
     RadioGroup,
     randomColor,
+    Select,
     Slider,
     Stack,
     Typography,
@@ -347,27 +349,20 @@ function PlaygroundLinearProgress() {
                     </Stack>
                     {customColors.length > 0 && (
                         <Stack alignItems="center" direction="row" spacing={5}>
-                            <select
+                            <Select
                                 value={colorToDelete ?? ""}
-                                onChange={(e) => {
+                                onValueChange={(value) => {
                                     setColorToDelete(
-                                        e.target.value.trim() as ColorLike,
+                                        value.toString().trim() as ColorLike,
                                     );
-                                }}
-                                css={{
-                                    padding: 10,
-                                    borderRadius: 5,
-                                    border: "1px solid #ccc",
-                                    backgroundColor: "#f9f9f9",
-                                    width: "100%",
                                 }}
                             >
                                 {customColors.map((color) => (
-                                    <option key={color} value={color}>
+                                    <Option key={color} value={color}>
                                         {color}
-                                    </option>
+                                    </Option>
                                 ))}
-                            </select>
+                            </Select>
                             <Button
                                 color="danger"
                                 onClick={() => {

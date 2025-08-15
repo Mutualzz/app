@@ -3,10 +3,12 @@ import {
     Checkbox,
     Divider,
     Input,
+    Option,
     Paper,
     Radio,
     RadioGroup,
     randomColor,
+    Select,
     Slider,
     Stack,
     Typography,
@@ -321,27 +323,20 @@ function PlaygroundCheckbox() {
                     </Stack>
                     {customColors.length > 0 && (
                         <Stack alignItems="center" direction="row" spacing={5}>
-                            <select
+                            <Select
                                 value={colorToDelete ?? ""}
-                                onChange={(e) => {
+                                onValueChange={(value) => {
                                     setColorToDelete(
-                                        e.target.value.trim() as ColorLike,
+                                        value.toString().trim() as ColorLike,
                                     );
-                                }}
-                                css={{
-                                    padding: 10,
-                                    borderRadius: 5,
-                                    border: "1px solid #ccc",
-                                    backgroundColor: "#f9f9f9",
-                                    width: "100%",
                                 }}
                             >
                                 {customColors.map((color) => (
-                                    <option key={color} value={color}>
+                                    <Option key={color} value={color}>
                                         {color}
-                                    </option>
+                                    </Option>
                                 ))}
-                            </select>
+                            </Select>
                             <Button
                                 color="danger"
                                 onClick={() => {
@@ -421,27 +416,22 @@ function PlaygroundCheckbox() {
                             ))}
                         </RadioGroup>
                         {checkedLibrary !== "none" && (
-                            <select
+                            <Select
                                 value={checkedIconName ?? ""}
-                                onChange={(e) =>
-                                    setCheckedIconName(e.target.value)
+                                onValueChange={(value) =>
+                                    setCheckedIconName(value.toString())
                                 }
-                                css={{
-                                    padding: 10,
-                                    borderRadius: 5,
-                                    border: "1px solid #ccc",
-                                    backgroundColor: "#f9f9f9",
-                                }}
+                                placeholder="Select an icon"
                             >
-                                <option value="">Select an icon</option>
+                                <Option value="">None</Option>
                                 {Object.keys(iconLibraries[checkedLibrary]).map(
                                     (iconName) => (
-                                        <option key={iconName} value={iconName}>
+                                        <Option key={iconName} value={iconName}>
                                             {iconName}
-                                        </option>
+                                        </Option>
                                     ),
                                 )}
-                            </select>
+                            </Select>
                         )}
                     </Stack>
                 </Stack>
@@ -484,27 +474,22 @@ function PlaygroundCheckbox() {
                             ))}
                         </RadioGroup>
                         {uncheckedLibrary !== "none" && (
-                            <select
+                            <Select
                                 value={uncheckedIconName ?? ""}
-                                onChange={(e) =>
-                                    setUncheckedIconName(e.target.value)
+                                onValueChange={(value) =>
+                                    setUncheckedIconName(value.toString())
                                 }
-                                css={{
-                                    padding: 10,
-                                    borderRadius: 5,
-                                    border: "1px solid #ccc",
-                                    backgroundColor: "#f9f9f9",
-                                }}
+                                placeholder="Select an icon"
                             >
-                                <option value="">Select an icon</option>
+                                <Option value="">None</Option>
                                 {Object.keys(
                                     iconLibraries[uncheckedLibrary],
                                 ).map((iconName) => (
-                                    <option key={iconName} value={iconName}>
+                                    <Option key={iconName} value={iconName}>
                                         {iconName}
-                                    </option>
+                                    </Option>
                                 ))}
-                            </select>
+                            </Select>
                         )}
                     </Stack>
                 </Stack>
@@ -547,27 +532,22 @@ function PlaygroundCheckbox() {
                             ))}
                         </RadioGroup>
                         {indeterminateLibrary !== "none" && (
-                            <select
+                            <Select
                                 value={indeterminateIconName ?? ""}
-                                onChange={(e) =>
-                                    setIndeterminateIconName(e.target.value)
+                                onValueChange={(value) =>
+                                    setIndeterminateIconName(value.toString())
                                 }
-                                css={{
-                                    padding: 10,
-                                    borderRadius: 5,
-                                    border: "1px solid #ccc",
-                                    backgroundColor: "#f9f9f9",
-                                }}
+                                placeholder="Select an icon"
                             >
-                                <option value="">Select an icon</option>
+                                <Option value="">None</Option>
                                 {Object.keys(
                                     iconLibraries[indeterminateLibrary],
                                 ).map((iconName) => (
-                                    <option key={iconName} value={iconName}>
+                                    <Option key={iconName} value={iconName}>
                                         {iconName}
-                                    </option>
+                                    </Option>
                                 ))}
-                            </select>
+                            </Select>
                         )}
                     </Stack>
                 </Stack>

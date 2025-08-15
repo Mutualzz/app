@@ -5,10 +5,12 @@ import {
     type ColorLike,
     Divider,
     Input,
+    Option,
     Paper,
     Radio,
     RadioGroup,
     randomColor,
+    Select,
     type Size,
     Slider,
     Stack,
@@ -321,27 +323,20 @@ function PlaygroundButton() {
                     </Stack>
                     {customColors.length > 0 && (
                         <Stack alignItems="center" direction="row" spacing={10}>
-                            <select
+                            <Select
                                 value={colorToDelete ?? ""}
-                                onChange={(e) => {
+                                onValueChange={(value) => {
                                     setColorToDelete(
-                                        e.target.value.trim() as ColorLike,
+                                        value.toString().trim() as ColorLike,
                                     );
-                                }}
-                                css={{
-                                    padding: 10,
-                                    borderRadius: 5,
-                                    border: "1px solid #ccc",
-                                    backgroundColor: "#f9f9f9",
-                                    width: "100%",
                                 }}
                             >
                                 {customColors.map((color) => (
-                                    <option key={color} value={color}>
+                                    <Option key={color} value={color}>
                                         {color}
-                                    </option>
+                                    </Option>
                                 ))}
-                            </select>
+                            </Select>
                             <Button
                                 color="danger"
                                 onClick={() => {
@@ -471,33 +466,25 @@ function PlaygroundButton() {
                                     />
                                 ))}
                             </RadioGroup>
-                            <select
-                                name="icon-select"
-                                onChange={(e) => {
+                            <Select
+                                onValueChange={(value) => {
                                     const Icon =
                                         iconLibraries[iconLibrary][
-                                            e.target
-                                                .value as keyof (typeof iconLibraries)[typeof iconLibrary]
+                                            value as keyof (typeof iconLibraries)[typeof iconLibrary]
                                         ];
                                     setIcon(Icon);
                                 }}
-                                css={{
-                                    width: "100%",
-                                    padding: 10,
-                                    borderRadius: 5,
-                                    border: "1px solid #ccc",
-                                    backgroundColor: "#f9f9f9",
-                                }}
+                                placeholder="Select an icon"
                             >
-                                <option value="">Select an icon</option>
+                                <Option value="">None</Option>
                                 {Object.keys(iconLibraries[iconLibrary]).map(
                                     (icon) => (
-                                        <option key={icon} value={icon}>
+                                        <Option key={icon} value={icon}>
                                             {icon}
-                                        </option>
+                                        </Option>
                                     ),
                                 )}
-                            </select>
+                            </Select>
                         </Stack>
                     )}
                 </Stack>
