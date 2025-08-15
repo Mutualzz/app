@@ -147,7 +147,6 @@ export const PlaygrondLeftSidebar = observer(() => {
                     <Divider>Color Mode</Divider>
                     <Select
                         variant="solid"
-                        color="info"
                         onValueChange={(modeToSet) => {
                             changeMode(modeToSet as ThemeMode);
                         }}
@@ -168,7 +167,6 @@ export const PlaygrondLeftSidebar = observer(() => {
                         <Divider>Color Scheme</Divider>
                         <Select
                             variant="solid"
-                            color="info"
                             onValueChange={(value) =>
                                 handleThemeChange(value.toString())
                             }
