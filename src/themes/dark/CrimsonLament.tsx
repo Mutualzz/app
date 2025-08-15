@@ -9,22 +9,22 @@ export const crimsonLamentTheme: Theme = {
     type: "dark",
     colors: {
         ...baseDarkTheme.colors,
-        primary: "#8B1F2C",
-        neutral: "#6B4352",
-        background: "#090606",
-        surface: "#1C1012",
-        danger: "#B03045",
-        warning: "#D4A033",
-        success: "#57C768",
-        info: "#486A8F",
+        primary: "#A23A4F",
+        neutral: "#A88A9A", // lighter, romantic mauve
+        background: "#18161A", // deep muted burgundy-black
+        surface: "#23141A", // muted wine, distinct from background
+        danger: "#B85C5C",
+        warning: "#E6C463",
+        success: "#5CA88A",
+        info: "#5C7FA8",
     },
     typography: {
         ...baseDarkTheme.typography,
         colors: {
-            primary: "#F0F0F0",
-            secondary: "#C8A5A5",
-            accent: "#B84D58",
-            muted: "#6B4352",
+            primary: "#F4F4F4", // softer white
+            secondary: "#E0B0B0",
+            accent: "#A23A4F", // match primary
+            muted: "#A88A9A", // harmonized, matches neutral
         },
     },
 };

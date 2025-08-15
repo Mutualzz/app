@@ -10,22 +10,22 @@ export const hauntedAestheticTheme: Theme = {
     type: "dark",
     colors: {
         ...baseDarkTheme.colors,
-        primary: "#66739B",
-        neutral: "#7B4F5F",
-        background: "#0C0C0C",
-        surface: "#191919",
-        danger: "#9A406E",
-        warning: "#D4A033",
-        success: "#6FD36F",
-        info: "#486A8F",
+        primary: "#6A7CA8", // softer, less saturated
+        neutral: "#7A8A9A", // lighter, ethereal blue-gray
+        background: "#191919", // harmonized with base
+        surface: "#23232A", // harmonized with base
+        danger: "#B85C5C", // softer red
+        warning: "#E6C463", // softer yellow
+        success: "#5CA88A", // softer green
+        info: "#5C7FA8", // softer blue
     },
     typography: {
         ...baseDarkTheme.typography,
         colors: {
-            primary: "#E8E8E8",
+            primary: "#F4F4F4", // harmonized
             secondary: "#B5B5B5",
-            accent: "#A07BA3",
-            muted: "#7B4F5F",
+            accent: "#6A7CA8", // match primary
+            muted: "#7A8A9A", // harmonized, matches neutral
         },
     },
 };

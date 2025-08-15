@@ -10,22 +10,22 @@ export const grungeIndustrialTheme: Theme = {
     type: "dark",
     colors: {
         ...baseDarkTheme.colors,
-        primary: "#7A6450",
-        neutral: "#8A4D5C",
-        background: "#0E0E0E",
-        surface: "#212121",
-        danger: "#B2693D",
-        warning: "#D4A033",
-        success: "#50B660",
-        info: "#486A8F",
+        primary: "#A87C5A",
+        neutral: "#A89A7A", // lighter, industrial taupe
+        background: "#19171A", // deeper, muted rust-black
+        surface: "#23241A", // distinct, layered rust
+        danger: "#B85C5C",
+        warning: "#E6C463",
+        success: "#5CA88A",
+        info: "#5C7FA8",
     },
     typography: {
         ...baseDarkTheme.typography,
         colors: {
-            primary: "#E6E6E6",
+            primary: "#F4F4F4", // harmonized
             secondary: "#C5B6AA",
-            accent: "#A2785C",
-            muted: "#7E5F4A",
+            accent: "#A87C5A", // match primary
+            muted: "#A89A7A", // harmonized, matches neutral
         },
     },
 };

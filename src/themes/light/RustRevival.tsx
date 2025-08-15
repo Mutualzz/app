@@ -9,22 +9,22 @@ export const rustRevivalTheme: Theme = {
     type: "light",
     colors: {
         ...baseLightTheme.colors,
-        primary: "#81472F",
-        neutral: "#7E4050",
-        background: "#ECE8E5",
-        surface: "#F6F4F2",
-        danger: "#A12B3D",
-        warning: "#D4A033",
-        success: "#4CAF50",
-        info: "#486A8F",
+        primary: "#A87C5A", // softer, less saturated
+        neutral: "#A89A7A", // lighter, warm taupe
+        background: "#F7F5F3", // muted rust-gray
+        surface: "#EDE6E3", // distinct, slightly rust
+        danger: "#B85C5C", // softer red
+        warning: "#E6C463", // softer yellow
+        success: "#5CA88A", // softer green
+        info: "#5C7FA8", // softer blue
     },
     typography: {
         ...baseLightTheme.typography,
         colors: {
-            primary: "#222222",
-            secondary: "#444444",
-            accent: "#81472F",
-            muted: "#7E5F50",
+            primary: "#222222", // harmonized
+            secondary: "#333333",
+            accent: "#A87C5A", // match primary
+            muted: "#5A4A3A", // harmonized
         },
     },
 };

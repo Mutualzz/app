@@ -10,22 +10,22 @@ export const midnightEleganceTheme: Theme = {
     type: "dark",
     colors: {
         ...baseDarkTheme.colors,
-        primary: "#565B85",
-        neutral: "#6B5A7D",
-        background: "#0A0A0A",
-        surface: "#181818",
-        danger: "#894444",
-        warning: "#D4A033",
-        success: "#5DC472",
-        info: "#486A8F",
+        primary: "#6A4A8A",
+        neutral: "#8A7CA8", // lighter, elegant indigo-gray
+        background: "#18161C", // deeper, muted violet-black
+        surface: "#23203A", // distinct, layered indigo
+        danger: "#B85C5C",
+        warning: "#E6C463",
+        success: "#5CA88A",
+        info: "#5C7FA8",
     },
     typography: {
         ...baseDarkTheme.typography,
         colors: {
-            primary: "#E6E6E6",
+            primary: "#F4F4F4", // harmonized
             secondary: "#B5B5B5",
-            accent: "#8885B2",
-            muted: "#5A4A69",
+            accent: "#6A4A8A", // match primary
+            muted: "#8A7CA8", // harmonized, matches neutral
         },
     },
 };

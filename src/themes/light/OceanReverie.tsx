@@ -9,22 +9,22 @@ export const oceanReverieTheme: Theme = {
     type: "light",
     colors: {
         ...baseLightTheme.colors,
-        primary: "#49604A",
-        neutral: "#6A4F68",
-        background: "#E6ECEA",
-        surface: "#F5F7F6",
-        danger: "#A12B3D",
-        warning: "#D4A033",
-        success: "#6FD36F",
-        info: "#486A8F",
+        primary: "#3A5A4A",
+        neutral: "#7A8A8A", // lighter, seafoam gray
+        background: "#F3F5F4", // muted green-gray
+        surface: "#E2E6E4", // distinct, slightly greenish
+        danger: "#B85C5C",
+        warning: "#E6C463",
+        success: "#5CA88A",
+        info: "#5C7FA8",
     },
     typography: {
         ...baseLightTheme.typography,
         colors: {
-            primary: "#222222",
-            secondary: "#444444",
-            accent: "#49604A",
-            muted: "#7B8A8A",
+            primary: "#222222", // harmonized
+            secondary: "#333333",
+            accent: "#3A5A4A", // match primary
+            muted: "#3A3A3A", // harmonized
         },
     },
 };

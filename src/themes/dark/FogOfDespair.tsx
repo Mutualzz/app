@@ -9,22 +9,22 @@ export const fogOfDespairTheme: Theme = {
     type: "dark",
     colors: {
         ...baseDarkTheme.colors,
-        primary: "#688BA0",
-        neutral: "#8EA0AA",
-        background: "#0B0D10",
-        surface: "#192028",
-        danger: "#9F477F",
-        warning: "#D4A033",
-        success: "#75D97A",
-        info: "#486A8F",
+        primary: "#5A7C8A", // softer, less saturated
+        neutral: "#3A4A5A", // more neutral
+        background: "#181A1D", // harmonized with base
+        surface: "#23232A", // harmonized with base
+        danger: "#B85C5C", // softer red
+        warning: "#E6C463", // softer yellow
+        success: "#5CA88A", // softer green
+        info: "#5C7FA8", // softer blue
     },
     typography: {
         ...baseDarkTheme.typography,
         colors: {
-            primary: "#F0F0F0",
+            primary: "#F4F4F4", // harmonized
             secondary: "#BFD0D9",
-            accent: "#AAC4D1",
-            muted: "#8EA0AA",
+            accent: "#5A7C8A", // match primary
+            muted: "#3A4A5A", // harmonized
         },
     },
 };

@@ -9,22 +9,22 @@ export const twilightElegyTheme: Theme = {
     type: "light",
     colors: {
         ...baseLightTheme.colors,
-        primary: "#743DA3",
-        neutral: "#845159",
-        background: "#ECEAF1",
-        surface: "#F5F3F8",
-        danger: "#8F3C74",
-        warning: "#D4A033",
-        success: "#6FD36F",
-        info: "#486A8F",
+        primary: "#6A7CA8", // muted blue
+        neutral: "#A8A8C0", // lighter, soft lavender-gray
+        background: "#F4F5F8", // muted blue-gray
+        surface: "#E6E8EE", // distinct, slightly blue
+        danger: "#B85C5C", // softer red
+        warning: "#E6C463", // softer yellow
+        success: "#5CA88A", // softer green
+        info: "#5C7FA8", // softer blue
     },
     typography: {
         ...baseLightTheme.typography,
         colors: {
-            primary: "#222222",
-            secondary: "#444444",
-            accent: "#743DA3",
-            muted: "#7B5A7A",
+            primary: "#222222", // harmonized
+            secondary: "#333333",
+            accent: "#6A4A8A", // match primary
+            muted: "#3A3A5A", // harmonized
         },
     },
 };

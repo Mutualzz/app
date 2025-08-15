@@ -9,22 +9,22 @@ export const roseRequiemTheme: Theme = {
     type: "light",
     colors: {
         ...baseLightTheme.colors,
-        primary: "#9C2232",
-        neutral: "#7B5A65",
-        background: "#F2EEEE",
-        surface: "#F8F5F5",
-        danger: "#A12B3D",
-        warning: "#D4A033",
-        success: "#4CAF50",
-        info: "#486A8F",
+        primary: "#A23A4F",
+        neutral: "#A88A9A", // lighter, romantic mauve
+        background: "#F6F4F6", // muted rose-gray
+        surface: "#EDE6EC", // distinct, slightly pinkish
+        danger: "#B85C5C",
+        warning: "#E6C463",
+        success: "#5CA88A",
+        info: "#5C7FA8",
     },
     typography: {
         ...baseLightTheme.typography,
         colors: {
-            primary: "#222222",
-            secondary: "#444444",
-            accent: "#9C2232",
-            muted: "#8A6A72",
+            primary: "#222222", // harmonized
+            secondary: "#333333",
+            accent: "#A23A4F", // match primary
+            muted: "#A88A9A", // harmonized, matches neutral
         },
     },
 };

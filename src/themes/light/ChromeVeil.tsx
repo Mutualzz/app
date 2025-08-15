@@ -9,22 +9,22 @@ export const chromeVeilTheme: Theme = {
     type: "light",
     colors: {
         ...baseLightTheme.colors,
-        primary: "#448E81",
-        neutral: "#6B4F59",
-        background: "#EAEEED",
-        surface: "#F5F7F6",
-        danger: "#8F3C74",
-        warning: "#D4A033",
-        success: "#4CAF50",
-        info: "#486A8F",
+        primary: "#4A6A5A",
+        neutral: "#8A8A8A", // lighter, silvery neutral
+        background: "#F3F4F5", // muted cool gray
+        surface: "#E2E4E6", // distinct, slightly metallic
+        danger: "#B85C5C",
+        warning: "#E6C463",
+        success: "#5CA88A",
+        info: "#5C7FA8",
     },
     typography: {
         ...baseLightTheme.typography,
         colors: {
-            primary: "#222222",
-            secondary: "#444444",
-            accent: "#448E81",
-            muted: "#7E8A8A",
+            primary: "#222222", // harmonized
+            secondary: "#333333",
+            accent: "#4A6A5A", // match primary
+            muted: "#3A3A3A", // harmonized
         },
     },
 };

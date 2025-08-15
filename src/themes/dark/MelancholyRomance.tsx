@@ -10,22 +10,22 @@ export const melancholyRomanceTheme: Theme = {
     type: "dark",
     colors: {
         ...baseDarkTheme.colors,
-        primary: "#9E6D78",
-        neutral: "#7F70A2",
-        background: "#0A0608",
-        surface: "#181218",
-        danger: "#B05454",
-        warning: "#D4A033",
-        success: "#58B96A",
-        info: "#486A8F",
+        primary: "#A86A7A", // softer, less saturated
+        neutral: "#B8A8B8", // lighter, vintage plum-gray
+        background: "#181218", // harmonized with base
+        surface: "#23232A", // harmonized with base
+        danger: "#B85C5C", // softer red
+        warning: "#E6C463", // softer yellow
+        success: "#5CA88A", // softer green
+        info: "#5C7FA8", // softer blue
     },
     typography: {
         ...baseDarkTheme.typography,
         colors: {
-            primary: "#E8E8E8",
+            primary: "#F4F4F4", // harmonized
             secondary: "#C0A5AF",
-            accent: "#B37C88",
-            muted: "#73678F",
+            accent: "#A86A7A", // match primary
+            muted: "#B8A8B8", // harmonized, matches neutral
         },
     },
 };

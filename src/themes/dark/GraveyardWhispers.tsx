@@ -10,22 +10,22 @@ export const graveyardWhispersTheme: Theme = {
     type: "dark",
     colors: {
         ...baseDarkTheme.colors,
-        primary: "#6B676B",
-        neutral: "#8A5660",
-        background: "#0D0D0D",
-        surface: "#1D1D1D",
-        danger: "#9C4850",
-        warning: "#D4A033",
-        success: "#75D97A",
-        info: "#486A8F",
+        primary: "#7A7A8A",
+        neutral: "#7A8A9A", // lighter, cold blue-gray
+        background: "#19171D", // deeper, muted blue-black
+        surface: "#23243A", // distinct, layered blue-gray
+        danger: "#B85C5C",
+        warning: "#E6C463",
+        success: "#5CA88A",
+        info: "#5C7FA8",
     },
     typography: {
         ...baseDarkTheme.typography,
         colors: {
-            primary: "#EDEDED",
+            primary: "#F4F4F4", // harmonized
             secondary: "#C2C2C2",
-            accent: "#B191A3",
-            muted: "#8A5660",
+            accent: "#7A7A8A", // match primary
+            muted: "#7A8A9A", // harmonized, matches neutral
         },
     },
 };

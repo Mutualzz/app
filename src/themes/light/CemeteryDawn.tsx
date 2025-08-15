@@ -9,22 +9,22 @@ export const cemeteryDawnTheme: Theme = {
     type: "light",
     colors: {
         ...baseLightTheme.colors,
-        primary: "#70515C",
-        neutral: "#7B4B53",
-        background: "#F0F0F0",
-        surface: "#F5F5F5",
-        danger: "#8F3A42",
-        warning: "#D4A033",
-        success: "#6FD36F",
-        info: "#486A8F",
+        primary: "#7A5A5A",
+        neutral: "#8A7A7A", // lighter, misty neutral
+        background: "#F6F6F7", // more muted, layered gray
+        surface: "#E6E6EA", // cooler, more distinct from background
+        danger: "#B85C5C",
+        warning: "#E6C463",
+        success: "#5CA88A",
+        info: "#5C7FA8",
     },
     typography: {
         ...baseLightTheme.typography,
         colors: {
-            primary: "#222222",
-            secondary: "#444444",
-            accent: "#70515C",
-            muted: "#7B4B53",
+            primary: "#222222", // harmonized
+            secondary: "#333333",
+            accent: "#7A5A5A", // match primary
+            muted: "#4A3A3A", // harmonized
         },
     },
 };

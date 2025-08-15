@@ -9,22 +9,22 @@ export const arcaneSunriseTheme: Theme = {
     type: "light",
     colors: {
         ...baseLightTheme.colors,
-        primary: "#4DA380",
-        neutral: "#2A4B76",
-        background: "#E4ECE9",
-        surface: "#F4F7F6",
-        danger: "#AD1457",
-        warning: "#D4A033",
-        success: "#6FD36F",
-        info: "#486A8F",
+        primary: "#3A7C6A",
+        neutral: "#7A6A5A", // lighter, mystical taupe
+        background: "#F7F5F3", // muted gold-gray
+        surface: "#EDE9E6", // distinct, slightly golden
+        danger: "#B85C5C",
+        warning: "#E6C463",
+        success: "#5CA88A",
+        info: "#5C7FA8",
     },
     typography: {
         ...baseLightTheme.typography,
         colors: {
-            primary: "#222222",
-            secondary: "#444444",
-            accent: "#4DA380",
-            muted: "#7D8F99",
+            primary: "#222222", // harmonized
+            secondary: "#333333",
+            accent: "#3A7C6A", // match primary
+            muted: "#3A4A5A", // harmonized
         },
     },
 };

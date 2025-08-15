@@ -9,22 +9,22 @@ export const eternalMourningTheme: Theme = {
     type: "dark",
     colors: {
         ...baseDarkTheme.colors,
-        primary: "#684292",
-        neutral: "#8E5C68",
-        background: "#0A080A",
-        surface: "#18121D",
-        danger: "#9A477F",
-        warning: "#D4A033",
-        success: "#72D372",
-        info: "#486A8F",
+        primary: "#6A4A8A", // softer, less saturated
+        neutral: "#3A3A5A", // more neutral
+        background: "#18121D", // harmonized with base
+        surface: "#23232A", // harmonized with base
+        danger: "#B85C5C", // softer red
+        warning: "#E6C463", // softer yellow
+        success: "#5CA88A", // softer green
+        info: "#5C7FA8", // softer blue
     },
     typography: {
         ...baseDarkTheme.typography,
         colors: {
-            primary: "#ECECEC",
+            primary: "#F4F4F4", // harmonized
             secondary: "#CAB8D8",
-            accent: "#A479D0",
-            muted: "#7A668A",
+            accent: "#6A4A8A", // match primary
+            muted: "#3A3A5A", // harmonized
         },
     },
 };
