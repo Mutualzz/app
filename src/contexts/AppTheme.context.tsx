@@ -33,7 +33,10 @@ export const AppTheme = observer(({ children }: PropsWithChildren) => {
                 }
 
                 const themeId = userTheme?.id ?? storeTheme;
-                const theme = themeStore.themes.find((t) => t.id === themeId);
+                let theme = themeStore.themes.find((t) => t.id === themeId);
+                if (!theme || theme.type !== mode)
+                    theme = themeStore.themes.find((t) => t.type === mode);
+
                 if (theme) themeProviderRef?.current?.changeTheme(theme);
             },
             { fireImmediately: true },
