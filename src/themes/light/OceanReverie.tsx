@@ -10,9 +10,9 @@ export const oceanReverieTheme: Theme = {
     colors: {
         ...baseLightTheme.colors,
         primary: "#3A5A4A",
-        neutral: "#7A8A8A", // lighter, seafoam gray
-        background: "#F3F5F4", // muted green-gray
-        surface: "#E2E6E4", // distinct, slightly greenish
+        neutral: "#7A8A8A",
+        background: "#F3F5F4",
+        surface: "#E2E6E4",
         danger: "#B85C5C",
         warning: "#E6C463",
         success: "#5CA88A",
@@ -21,10 +21,10 @@ export const oceanReverieTheme: Theme = {
     typography: {
         ...baseLightTheme.typography,
         colors: {
-            primary: "#222222", // harmonized
+            primary: "#222222",
             secondary: "#333333",
-            accent: "#3A5A4A", // match primary
-            muted: "#3A3A3A", // harmonized
+            accent: "#3A5A4A",
+            muted: "#3A3A3A",
         },
     },
 };

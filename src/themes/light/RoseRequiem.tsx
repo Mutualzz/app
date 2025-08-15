@@ -10,9 +10,9 @@ export const roseRequiemTheme: Theme = {
     colors: {
         ...baseLightTheme.colors,
         primary: "#A23A4F",
-        neutral: "#A88A9A", // lighter, romantic mauve
-        background: "#F6F4F6", // muted rose-gray
-        surface: "#EDE6EC", // distinct, slightly pinkish
+        neutral: "#A88A9A",
+        background: "#F6F4F6",
+        surface: "#EDE6EC",
         danger: "#B85C5C",
         warning: "#E6C463",
         success: "#5CA88A",
@@ -21,10 +21,10 @@ export const roseRequiemTheme: Theme = {
     typography: {
         ...baseLightTheme.typography,
         colors: {
-            primary: "#222222", // harmonized
+            primary: "#222222",
             secondary: "#333333",
-            accent: "#A23A4F", // match primary
-            muted: "#A88A9A", // harmonized, matches neutral
+            accent: "#A23A4F",
+            muted: "#A88A9A",
         },
     },
 };

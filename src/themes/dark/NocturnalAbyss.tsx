@@ -10,22 +10,22 @@ export const nocturnalAbyssTheme: Theme = {
     type: "dark",
     colors: {
         ...baseDarkTheme.colors,
-        primary: "#5A7C8A", // softer, less saturated
-        neutral: "#3A4A5A", // more neutral
-        background: "#151515", // harmonized with base
-        surface: "#23232A", // harmonized with base
-        danger: "#B85C5C", // softer red
-        warning: "#E6C463", // softer yellow
-        success: "#5CA88A", // softer green
-        info: "#5C7FA8", // softer blue
+        primary: "#5A7C8A",
+        neutral: "#3A4A5A",
+        background: "#151515",
+        surface: "#23232A",
+        danger: "#B85C5C",
+        warning: "#E6C463",
+        success: "#5CA88A",
+        info: "#5C7FA8",
     },
     typography: {
         ...baseDarkTheme.typography,
         colors: {
-            primary: "#F4F4F4", // harmonized
+            primary: "#F4F4F4",
             secondary: "#B5B5B5",
-            accent: "#5A7C8A", // match primary
-            muted: "#3A4A5A", // harmonized
+            accent: "#5A7C8A",
+            muted: "#3A4A5A",
         },
     },
 };

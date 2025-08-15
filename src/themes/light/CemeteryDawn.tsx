@@ -10,9 +10,9 @@ export const cemeteryDawnTheme: Theme = {
     colors: {
         ...baseLightTheme.colors,
         primary: "#7A5A5A",
-        neutral: "#8A7A7A", // lighter, misty neutral
-        background: "#F6F6F7", // more muted, layered gray
-        surface: "#E6E6EA", // cooler, more distinct from background
+        neutral: "#8A7A7A",
+        background: "#F6F6F7",
+        surface: "#E6E6EA",
         danger: "#B85C5C",
         warning: "#E6C463",
         success: "#5CA88A",
@@ -21,10 +21,10 @@ export const cemeteryDawnTheme: Theme = {
     typography: {
         ...baseLightTheme.typography,
         colors: {
-            primary: "#222222", // harmonized
+            primary: "#222222",
             secondary: "#333333",
-            accent: "#7A5A5A", // match primary
-            muted: "#4A3A3A", // harmonized
+            accent: "#7A5A5A",
+            muted: "#4A3A3A",
         },
     },
 };

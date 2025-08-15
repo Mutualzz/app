@@ -11,9 +11,9 @@ export const grungeIndustrialTheme: Theme = {
     colors: {
         ...baseDarkTheme.colors,
         primary: "#A87C5A",
-        neutral: "#A89A7A", // lighter, industrial taupe
-        background: "#19171A", // deeper, muted rust-black
-        surface: "#23241A", // distinct, layered rust
+        neutral: "#A89A7A",
+        background: "#19171A",
+        surface: "#23241A",
         danger: "#B85C5C",
         warning: "#E6C463",
         success: "#5CA88A",
@@ -22,10 +22,10 @@ export const grungeIndustrialTheme: Theme = {
     typography: {
         ...baseDarkTheme.typography,
         colors: {
-            primary: "#F4F4F4", // harmonized
+            primary: "#F4F4F4",
             secondary: "#C5B6AA",
-            accent: "#A87C5A", // match primary
-            muted: "#A89A7A", // harmonized, matches neutral
+            accent: "#A87C5A",
+            muted: "#A89A7A",
         },
     },
 };

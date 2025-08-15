@@ -9,22 +9,22 @@ export const victorianBloomTheme: Theme = {
     type: "light",
     colors: {
         ...baseLightTheme.colors,
-        primary: "#A88A5A", // softer, less saturated
-        neutral: "#A8A87A", // lighter, floral olive
-        background: "#F5F7F3", // muted green-gray
-        surface: "#E6EDE6", // distinct, slightly green
-        danger: "#B85C5C", // softer red
-        warning: "#E6C463", // softer yellow
-        success: "#5CA88A", // softer green
-        info: "#5C7FA8", // softer blue
+        primary: "#A88A5A",
+        neutral: "#A8A87A",
+        background: "#F5F7F3",
+        surface: "#E6EDE6",
+        danger: "#B85C5C",
+        warning: "#E6C463",
+        success: "#5CA88A",
+        info: "#5C7FA8",
     },
     typography: {
         ...baseLightTheme.typography,
         colors: {
-            primary: "#222222", // harmonized
+            primary: "#222222",
             secondary: "#333333",
-            accent: "#A88A5A", // match primary
-            muted: "#5A4A3A", // harmonized
+            accent: "#A88A5A",
+            muted: "#5A4A3A",
         },
     },
 };

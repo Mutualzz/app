@@ -10,9 +10,9 @@ export const crimsonLamentTheme: Theme = {
     colors: {
         ...baseDarkTheme.colors,
         primary: "#A23A4F",
-        neutral: "#A88A9A", // lighter, romantic mauve
-        background: "#18161A", // deep muted burgundy-black
-        surface: "#23141A", // muted wine, distinct from background
+        neutral: "#A88A9A",
+        background: "#18161A",
+        surface: "#23141A",
         danger: "#B85C5C",
         warning: "#E6C463",
         success: "#5CA88A",
@@ -21,10 +21,10 @@ export const crimsonLamentTheme: Theme = {
     typography: {
         ...baseDarkTheme.typography,
         colors: {
-            primary: "#F4F4F4", // softer white
+            primary: "#F4F4F4",
             secondary: "#E0B0B0",
-            accent: "#A23A4F", // match primary
-            muted: "#A88A9A", // harmonized, matches neutral
+            accent: "#A23A4F",
+            muted: "#A88A9A",
         },
     },
 };

@@ -11,9 +11,9 @@ export const graveyardWhispersTheme: Theme = {
     colors: {
         ...baseDarkTheme.colors,
         primary: "#7A7A8A",
-        neutral: "#7A8A9A", // lighter, cold blue-gray
-        background: "#19171D", // deeper, muted blue-black
-        surface: "#23243A", // distinct, layered blue-gray
+        neutral: "#7A8A9A",
+        background: "#19171D",
+        surface: "#23243A",
         danger: "#B85C5C",
         warning: "#E6C463",
         success: "#5CA88A",
@@ -22,10 +22,10 @@ export const graveyardWhispersTheme: Theme = {
     typography: {
         ...baseDarkTheme.typography,
         colors: {
-            primary: "#F4F4F4", // harmonized
+            primary: "#F4F4F4",
             secondary: "#C2C2C2",
-            accent: "#7A7A8A", // match primary
-            muted: "#7A8A9A", // harmonized, matches neutral
+            accent: "#7A7A8A",
+            muted: "#7A8A9A",
         },
     },
 };

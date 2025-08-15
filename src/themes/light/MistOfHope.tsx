@@ -10,9 +10,9 @@ export const mistOfHopeTheme: Theme = {
     colors: {
         ...baseLightTheme.colors,
         primary: "#5A7C8A",
-        neutral: "#7A8A9A", // lighter, hopeful blue-gray
-        background: "#F4F6F8", // muted blue-gray
-        surface: "#E6EAEE", // distinct, slightly blue
+        neutral: "#7A8A9A",
+        background: "#F4F6F8",
+        surface: "#E6EAEE",
         danger: "#B85C5C",
         warning: "#E6C463",
         success: "#5CA88A",
@@ -21,10 +21,10 @@ export const mistOfHopeTheme: Theme = {
     typography: {
         ...baseLightTheme.typography,
         colors: {
-            primary: "#222222", // harmonized
+            primary: "#222222",
             secondary: "#333333",
-            accent: "#5A7C8A", // match primary
-            muted: "#3A4A5A", // harmonized
+            accent: "#5A7C8A",
+            muted: "#3A4A5A",
         },
     },
 };

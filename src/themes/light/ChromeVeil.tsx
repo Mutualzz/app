@@ -10,9 +10,9 @@ export const chromeVeilTheme: Theme = {
     colors: {
         ...baseLightTheme.colors,
         primary: "#4A6A5A",
-        neutral: "#8A8A8A", // lighter, silvery neutral
-        background: "#F3F4F5", // muted cool gray
-        surface: "#E2E4E6", // distinct, slightly metallic
+        neutral: "#8A8A8A",
+        background: "#F3F4F5",
+        surface: "#E2E4E6",
         danger: "#B85C5C",
         warning: "#E6C463",
         success: "#5CA88A",
@@ -21,10 +21,10 @@ export const chromeVeilTheme: Theme = {
     typography: {
         ...baseLightTheme.typography,
         colors: {
-            primary: "#222222", // harmonized
+            primary: "#222222",
             secondary: "#333333",
-            accent: "#4A6A5A", // match primary
-            muted: "#3A3A3A", // harmonized
+            accent: "#4A6A5A",
+            muted: "#3A3A3A",
         },
     },
 };

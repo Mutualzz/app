@@ -11,9 +11,9 @@ export const midnightEleganceTheme: Theme = {
     colors: {
         ...baseDarkTheme.colors,
         primary: "#6A4A8A",
-        neutral: "#8A7CA8", // lighter, elegant indigo-gray
-        background: "#18161C", // deeper, muted violet-black
-        surface: "#23203A", // distinct, layered indigo
+        neutral: "#8A7CA8",
+        background: "#18161C",
+        surface: "#23203A",
         danger: "#B85C5C",
         warning: "#E6C463",
         success: "#5CA88A",
@@ -22,10 +22,10 @@ export const midnightEleganceTheme: Theme = {
     typography: {
         ...baseDarkTheme.typography,
         colors: {
-            primary: "#F4F4F4", // harmonized
+            primary: "#F4F4F4",
             secondary: "#B5B5B5",
-            accent: "#6A4A8A", // match primary
-            muted: "#8A7CA8", // harmonized, matches neutral
+            accent: "#6A4A8A",
+            muted: "#8A7CA8",
         },
     },
 };

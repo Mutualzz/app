@@ -10,9 +10,9 @@ export const arcaneSunriseTheme: Theme = {
     colors: {
         ...baseLightTheme.colors,
         primary: "#3A7C6A",
-        neutral: "#7A6A5A", // lighter, mystical taupe
-        background: "#F7F5F3", // muted gold-gray
-        surface: "#EDE9E6", // distinct, slightly golden
+        neutral: "#7A6A5A",
+        background: "#F7F5F3",
+        surface: "#EDE9E6",
         danger: "#B85C5C",
         warning: "#E6C463",
         success: "#5CA88A",
@@ -21,10 +21,10 @@ export const arcaneSunriseTheme: Theme = {
     typography: {
         ...baseLightTheme.typography,
         colors: {
-            primary: "#222222", // harmonized
+            primary: "#222222",
             secondary: "#333333",
-            accent: "#3A7C6A", // match primary
-            muted: "#3A4A5A", // harmonized
+            accent: "#3A7C6A",
+            muted: "#3A4A5A",
         },
     },
 };
