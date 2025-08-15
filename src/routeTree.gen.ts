@@ -18,6 +18,7 @@ import { Route as UiIndexRouteImport } from "./routes/ui/index";
 import { Route as UiSurfacesPaperRouteImport } from "./routes/ui/surfaces/paper";
 import { Route as UiInputsTextareaRouteImport } from "./routes/ui/inputs/textarea";
 import { Route as UiInputsSliderRouteImport } from "./routes/ui/inputs/slider";
+import { Route as UiInputsSelectRouteImport } from "./routes/ui/inputs/select";
 import { Route as UiInputsRadioButtonRouteImport } from "./routes/ui/inputs/radio-button";
 import { Route as UiInputsMarkdownInputRouteImport } from "./routes/ui/inputs/markdown-input";
 import { Route as UiInputsInputRouteImport } from "./routes/ui/inputs/input";
@@ -73,6 +74,11 @@ const UiInputsTextareaRoute = UiInputsTextareaRouteImport.update({
 const UiInputsSliderRoute = UiInputsSliderRouteImport.update({
   id: "/inputs/slider",
   path: "/inputs/slider",
+  getParentRoute: () => UiRoute,
+} as any);
+const UiInputsSelectRoute = UiInputsSelectRouteImport.update({
+  id: "/inputs/select",
+  path: "/inputs/select",
   getParentRoute: () => UiRoute,
 } as any);
 const UiInputsRadioButtonRoute = UiInputsRadioButtonRouteImport.update({
@@ -157,6 +163,7 @@ export interface FileRoutesByFullPath {
   "/ui/inputs/input": typeof UiInputsInputRoute;
   "/ui/inputs/markdown-input": typeof UiInputsMarkdownInputRoute;
   "/ui/inputs/radio-button": typeof UiInputsRadioButtonRoute;
+  "/ui/inputs/select": typeof UiInputsSelectRoute;
   "/ui/inputs/slider": typeof UiInputsSliderRoute;
   "/ui/inputs/textarea": typeof UiInputsTextareaRoute;
   "/ui/surfaces/paper": typeof UiSurfacesPaperRoute;
@@ -178,6 +185,7 @@ export interface FileRoutesByTo {
   "/ui/inputs/input": typeof UiInputsInputRoute;
   "/ui/inputs/markdown-input": typeof UiInputsMarkdownInputRoute;
   "/ui/inputs/radio-button": typeof UiInputsRadioButtonRoute;
+  "/ui/inputs/select": typeof UiInputsSelectRoute;
   "/ui/inputs/slider": typeof UiInputsSliderRoute;
   "/ui/inputs/textarea": typeof UiInputsTextareaRoute;
   "/ui/surfaces/paper": typeof UiSurfacesPaperRoute;
@@ -202,6 +210,7 @@ export interface FileRoutesById {
   "/ui/inputs/input": typeof UiInputsInputRoute;
   "/ui/inputs/markdown-input": typeof UiInputsMarkdownInputRoute;
   "/ui/inputs/radio-button": typeof UiInputsRadioButtonRoute;
+  "/ui/inputs/select": typeof UiInputsSelectRoute;
   "/ui/inputs/slider": typeof UiInputsSliderRoute;
   "/ui/inputs/textarea": typeof UiInputsTextareaRoute;
   "/ui/surfaces/paper": typeof UiSurfacesPaperRoute;
@@ -226,6 +235,7 @@ export interface FileRouteTypes {
     | "/ui/inputs/input"
     | "/ui/inputs/markdown-input"
     | "/ui/inputs/radio-button"
+    | "/ui/inputs/select"
     | "/ui/inputs/slider"
     | "/ui/inputs/textarea"
     | "/ui/surfaces/paper";
@@ -247,6 +257,7 @@ export interface FileRouteTypes {
     | "/ui/inputs/input"
     | "/ui/inputs/markdown-input"
     | "/ui/inputs/radio-button"
+    | "/ui/inputs/select"
     | "/ui/inputs/slider"
     | "/ui/inputs/textarea"
     | "/ui/surfaces/paper";
@@ -270,6 +281,7 @@ export interface FileRouteTypes {
     | "/ui/inputs/input"
     | "/ui/inputs/markdown-input"
     | "/ui/inputs/radio-button"
+    | "/ui/inputs/select"
     | "/ui/inputs/slider"
     | "/ui/inputs/textarea"
     | "/ui/surfaces/paper";
@@ -346,6 +358,13 @@ declare module "@tanstack/react-router" {
       path: "/inputs/slider";
       fullPath: "/ui/inputs/slider";
       preLoaderRoute: typeof UiInputsSliderRouteImport;
+      parentRoute: typeof UiRoute;
+    };
+    "/ui/inputs/select": {
+      id: "/ui/inputs/select";
+      path: "/inputs/select";
+      fullPath: "/ui/inputs/select";
+      preLoaderRoute: typeof UiInputsSelectRouteImport;
       parentRoute: typeof UiRoute;
     };
     "/ui/inputs/radio-button": {
@@ -449,6 +468,7 @@ interface UiRouteChildren {
   UiInputsInputRoute: typeof UiInputsInputRoute;
   UiInputsMarkdownInputRoute: typeof UiInputsMarkdownInputRoute;
   UiInputsRadioButtonRoute: typeof UiInputsRadioButtonRoute;
+  UiInputsSelectRoute: typeof UiInputsSelectRoute;
   UiInputsSliderRoute: typeof UiInputsSliderRoute;
   UiInputsTextareaRoute: typeof UiInputsTextareaRoute;
   UiSurfacesPaperRoute: typeof UiSurfacesPaperRoute;
@@ -468,6 +488,7 @@ const UiRouteChildren: UiRouteChildren = {
   UiInputsInputRoute: UiInputsInputRoute,
   UiInputsMarkdownInputRoute: UiInputsMarkdownInputRoute,
   UiInputsRadioButtonRoute: UiInputsRadioButtonRoute,
+  UiInputsSelectRoute: UiInputsSelectRoute,
   UiInputsSliderRoute: UiInputsSliderRoute,
   UiInputsTextareaRoute: UiInputsTextareaRoute,
   UiSurfacesPaperRoute: UiSurfacesPaperRoute,

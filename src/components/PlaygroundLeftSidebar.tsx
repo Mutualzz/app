@@ -41,6 +41,10 @@ const links = {
             link: "/ui/inputs/radio-button",
         },
         {
+            name: "Select",
+            link: "/ui/inputs/select",
+        },
+        {
             name: "Slider",
             link: "/ui/inputs/slider",
         },
