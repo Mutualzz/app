@@ -2,7 +2,9 @@ import { useAppStore } from "@hooks/useStores";
 import {
     Button,
     Divider,
+    Option,
     Paper,
+    Select,
     Stack,
     useTheme,
     type ThemeMode,
@@ -101,12 +103,9 @@ export const PlaygrondLeftSidebar = observer(() => {
         (theme) => theme.type === mode,
     );
 
-    const handleThemeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        const changeTo = themes.find((theme) => theme.id === e.target.value);
-        if (!changeTo) {
-            e.preventDefault();
-            return;
-        }
+    const handleThemeChange = (themeId: string) => {
+        const changeTo = themes.find((theme) => theme.id === themeId);
+        if (!changeTo) return;
 
         changeTheme(changeTo);
     };
@@ -146,23 +145,18 @@ export const PlaygrondLeftSidebar = observer(() => {
                     spacing={10}
                 >
                     <Divider>Color Mode</Divider>
-                    <select
-                        onChange={(e) =>
-                            changeMode(e.target.value as ThemeMode)
-                        }
-                        value={mode}
-                        css={{
-                            width: "100%",
-                            padding: 10,
-                            borderRadius: 5,
-                            border: "1px solid #ccc",
-                            backgroundColor: "#f9f9f9",
+                    <Select
+                        variant="solid"
+                        color="info"
+                        onValueChange={(modeToSet) => {
+                            changeMode(modeToSet as ThemeMode);
                         }}
+                        value={mode}
                     >
-                        <option value="dark">Dark</option>
-                        <option value="light">Light</option>
-                        <option value="system">System</option>
-                    </select>
+                        <Option value="dark">Dark</Option>
+                        <Option value="light">Light</Option>
+                        <Option value="system">System</Option>
+                    </Select>
                 </Stack>
                 {themes.length > 1 && (
                     <Stack
@@ -172,24 +166,21 @@ export const PlaygrondLeftSidebar = observer(() => {
                         spacing={10}
                     >
                         <Divider>Color Scheme</Divider>
-                        <select
-                            onChange={handleThemeChange}
-                            css={{
-                                width: "100%",
-                                padding: 10,
-                                borderRadius: 5,
-                                border: "1px solid #ccc",
-                                backgroundColor: "#f9f9f9",
-                            }}
+                        <Select
+                            variant="solid"
+                            color="info"
+                            onValueChange={(value) =>
+                                handleThemeChange(value as string)
+                            }
                             value={theme.id}
                         >
                             {sortThemes(themes).map((theme) => (
-                                <option key={theme.id} value={theme.id}>
+                                <Option key={theme.id} value={theme.id}>
                                     {theme.name}
                                     {theme.createdBy ? ` (by You)` : ""}
-                                </option>
+                                </Option>
                             ))}
-                        </select>
+                        </Select>
                     </Stack>
                 )}
             </Stack>
