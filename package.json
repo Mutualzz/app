@@ -106,7 +106,7 @@
     "scripts": {
         "build": "tsc && vite build",
         "build:dev": "tsc && cross-env VITE_ENV_DEV=true vite build",
-        "ci:prebuild": "node scripts/tauri-version.js",
+        "ci:prebuild": "node scripts/tauriVersion.js",
         "dev": "cross-env VITE_ENV_DEV=true vite",
         "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
         "lint:fix": "pnpx prettier . --write",
