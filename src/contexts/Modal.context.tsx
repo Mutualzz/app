@@ -1,16 +1,27 @@
 import { ModalRoot } from "@components/ModalRoot";
-import { createContext, useContext, useState, type ReactNode } from "react";
+import type { ModalProps } from "@mutualzz/ui";
+import {
+    createContext,
+    useCallback,
+    useContext,
+    useState,
+    type ReactNode,
+} from "react";
 
 interface ModalContextProps {
+    open: boolean;
     activeId: string | null;
+    modalContent: ReactNode;
+
     openModal: (
         id: string,
-        children?: ReactNode,
-        layout?: "center" | "fullscreen",
+        children: ReactNode,
+        modalProps?: Partial<ModalProps>,
     ) => void;
     closeModal: () => void;
-    modalContent?: ReactNode;
-    modalLayout?: "center" | "fullscreen";
+    isModalOpen: (id: string) => boolean;
+
+    modalProps: Partial<ModalProps>;
 }
 
 const ModalContext = createContext<ModalContextProps | undefined>(undefined);
@@ -18,36 +29,49 @@ const ModalContext = createContext<ModalContextProps | undefined>(undefined);
 export const ModalProvider = ({ children }: { children: ReactNode }) => {
     const [activeId, setActiveId] = useState<string | null>(null);
     const [modalContent, setModalContent] = useState<ReactNode>(null);
-    const [modalLayout, setModalLayout] = useState<"center" | "fullscreen">(
-        "center",
+    const [modalProps, setModalProps] = useState<Partial<ModalProps>>({
+        layout: "center",
+    });
+
+    const openModal = useCallback(
+        (id: string, content: ReactNode, props: Partial<ModalProps> = {}) => {
+            if (activeId) closeModal();
+
+            setActiveId(id);
+            setModalContent(content);
+            setModalProps({
+                layout: "center",
+                ...props,
+            });
+        },
+        [activeId],
     );
 
-    const openModal = (
-        id: string,
-        content: ReactNode,
-        layout: "center" | "fullscreen" = "center",
-    ) => {
-        setActiveId(id);
-        setModalContent(content);
-        setModalLayout(layout);
-    };
-
-    const closeModal = () => {
+    const closeModal = useCallback(() => {
         setActiveId(null);
         setModalContent(null);
-        setModalLayout("center");
+        setModalProps({ layout: "center" });
+    }, []);
+
+    const isModalOpen = useCallback(
+        (id: string) => {
+            return activeId === id;
+        },
+        [activeId],
+    );
+
+    const contextValue: ModalContextProps = {
+        open: activeId !== null,
+        activeId,
+        modalContent,
+        openModal,
+        closeModal,
+        isModalOpen,
+        modalProps,
     };
 
     return (
-        <ModalContext.Provider
-            value={{
-                activeId,
-                modalContent,
-                openModal,
-                closeModal,
-                modalLayout,
-            }}
-        >
+        <ModalContext.Provider value={contextValue}>
             {children}
             <ModalRoot />
         </ModalContext.Provider>
