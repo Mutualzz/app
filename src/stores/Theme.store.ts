@@ -1,4 +1,5 @@
 import type { MzTheme, ThemeDraft } from "@app-types/theme";
+import { usePrefersDark } from "@hooks/usePrefersDark";
 import { Logger } from "@logger";
 import type { APITheme, APIUser } from "@mutualzz/types";
 import { baseDarkTheme, baseLightTheme, type ThemeMode } from "@mutualzz/ui";
@@ -7,7 +8,6 @@ import { isSSR } from "@utils/index";
 import { makeAutoObservable } from "mobx";
 import { makePersistable } from "mobx-persist-store";
 
-// TODO: Finish theme system (with REST, Gateway and everything combined)
 export class ThemeStore {
     private readonly logger = new Logger({
         tag: "ThemeStore'",
@@ -16,7 +16,7 @@ export class ThemeStore {
     themes: MzTheme[] = [];
     themeDrafts: ThemeDraft[] = [];
 
-    currentTheme: MzTheme | null = null;
+    currentTheme: string | null = null;
     currentMode: ThemeMode = "system";
 
     constructor() {
@@ -33,22 +33,37 @@ export class ThemeStore {
     setCurrentTheme(themeId: string) {
         let theme = this.themes.find((theme) => theme.id === themeId);
         if (!theme) theme = this.themes[0];
-        this.currentTheme = theme;
+        this.currentTheme = theme?.id;
     }
 
     setInitialTheme() {
         if (!this.currentTheme && this.themes.length > 0) {
             // Set default theme based on current mode
-            const defaultTheme =
-                this.themes.find(
-                    (theme) =>
-                        theme.type ===
-                        (this.currentMode === "system"
-                            ? "dark"
-                            : this.currentMode),
-                ) || this.themes[0];
+            const prefersDark = usePrefersDark();
 
-            this.currentTheme = defaultTheme;
+            let defaultTheme: MzTheme | undefined;
+
+            const darkTheme = this.themes.find(
+                (theme) => theme.id === "baseDark",
+            );
+            const lightTheme = this.themes.find(
+                (theme) => theme.id === "baseLight",
+            );
+
+            switch (this.currentMode) {
+                case "dark":
+                    defaultTheme = darkTheme;
+                    break;
+                case "light":
+                    defaultTheme = lightTheme;
+                    break;
+                case "system":
+                default:
+                    defaultTheme = prefersDark ? darkTheme : lightTheme;
+                    break;
+            }
+
+            if (defaultTheme) this.currentTheme = defaultTheme.id;
         }
     }
 
@@ -69,7 +84,6 @@ export class ThemeStore {
             this.addTheme(themeWithMetadata);
         });
 
-        this.setInitialTheme();
         this.logger.debug("Default themes loaded");
     }
 
