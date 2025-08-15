@@ -23,7 +23,6 @@ import { useMutation } from "@tanstack/react-query";
 import { sortThemes } from "@utils/index";
 import capitalize from "lodash-es/capitalize";
 import { observer } from "mobx-react";
-import { motion } from "motion/react";
 import { useState } from "react";
 
 type ApiErrors = Record<string, string>;
@@ -79,8 +78,6 @@ interface FormMeta {
 const defaultMeta: FormMeta = {
     submitAction: "create",
 };
-
-const AnimatedPaper = motion.create(Paper);
 
 const defaultValues = {
     name: "",
@@ -364,20 +361,7 @@ export const ThemeCreator = observer(() => {
     });
 
     return (
-        <AnimatedPaper
-            width="100%"
-            height="100%"
-            maxWidth={800}
-            maxHeight={800}
-            initial={{
-                opacity: 0,
-                scale: 0,
-            }}
-            animate={{
-                opacity: 1,
-                scale: 1,
-            }}
-        >
+        <Paper width="100%" height="100%" maxWidth={800} maxHeight={800}>
             <form
                 css={{
                     width: "100%",
@@ -1153,6 +1137,6 @@ export const ThemeCreator = observer(() => {
                     </Paper>
                 </Stack>
             </form>
-        </AnimatedPaper>
+        </Paper>
     );
 });
