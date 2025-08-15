@@ -367,7 +367,6 @@ export class GatewayStore {
         const { sessionId, user } = payload;
         this.sessionId = sessionId;
         this.app.setUser(user);
-        this.app.theme.loadUserThemes(user);
 
         this.reconnectTimeout = 0;
         this.app.setGatewayReady(true);

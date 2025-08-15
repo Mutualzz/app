@@ -39,6 +39,7 @@ export class AppStore {
 
     setUser(user: APIUser) {
         this.account = new AccountStore(user);
+        this.theme.loadUserThemes(user);
     }
 
     setGatewayReady(ready: boolean) {
@@ -80,5 +81,7 @@ export class AppStore {
     loadSettings() {
         this.theme.loadDefaultThemes();
         this.loadToken();
+
+        this.theme.setInitialTheme();
     }
 }
