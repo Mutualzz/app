@@ -577,15 +577,7 @@ export const ThemeCreator = observer(() => {
                                     </Stack>
                                 </Stack>
 
-                                <ButtonGroup
-                                    disabled={
-                                        !canSubmit ||
-                                        isSubmitting ||
-                                        putPending ||
-                                        deletePending
-                                    }
-                                    orientation="vertical"
-                                >
+                                <ButtonGroup orientation="vertical">
                                     <Button
                                         onClick={() =>
                                             form.handleSubmit({
@@ -634,6 +626,12 @@ export const ThemeCreator = observer(() => {
                                         }
                                         type="submit"
                                         color="success"
+                                        loading={
+                                            isSubmitting ||
+                                            putPending ||
+                                            deletePending
+                                        }
+                                        disabled={!canSubmit}
                                     >
                                         {loadedUserTheme &&
                                         allUserThemes.some(
