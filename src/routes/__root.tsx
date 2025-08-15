@@ -135,7 +135,7 @@ function RootComponent() {
     return (
         <RootDocument>
             <AppTheme>
-                <CssBaseline />
+                <CssBaseline adaptiveScrollbar />
                 {app.isAppLoading ? (
                     <></>
                 ) : (
