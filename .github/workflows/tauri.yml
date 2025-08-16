@@ -43,6 +43,13 @@ jobs:
           node-version: lts/*
           cache: "pnpm"
 
+      # Enable Corepack and prepare pnpm
+      - name: Enable Corepack (for pnpm)
+        run: corepack enable
+
+      - name: Prepare pnpm
+        run: corepack prepare pnpm@10.14.0 --activate
+
       # Install Rust
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
