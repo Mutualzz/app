@@ -1,5 +1,5 @@
 import type { APIUser } from "@mutualzz/types";
-import { isSSR } from "@utils/index";
+import { isSSR, isTauri } from "@utils/index";
 import REST from "@utils/REST";
 import { secureStorageAdapter } from "@utils/secureStorageAdapter";
 import { Logger } from "Logger";
@@ -9,6 +9,7 @@ import secureLocalStorage from "react-secure-storage";
 import { AccountStore } from "./Account.store";
 import { GatewayStore } from "./Gateway.store";
 import { ThemeStore } from "./Theme.store";
+import { UpdaterStore } from "./Updater.store";
 
 export class AppStore {
     private readonly logger = new Logger({
@@ -24,8 +25,13 @@ export class AppStore {
     gateway = new GatewayStore(this);
     theme = new ThemeStore();
     rest = new REST();
+    updaterStore: UpdaterStore | null = null;
 
     constructor() {
+        if (isTauri) {
+            this.updaterStore = new UpdaterStore();
+        }
+
         makeAutoObservable(this);
 
         if (isSSR) return;
@@ -79,8 +85,22 @@ export class AppStore {
         this.theme.reset();
     }
 
+    setUpdaterEnabled(value: boolean) {
+        this.updaterStore?.setEnabled(value);
+        secureLocalStorage.setItem("updaterEnabled", String(value));
+    }
+
+    loadUpdaterEnabled() {
+        this.updaterStore?.setEnabled(
+            (secureStorageAdapter.getItem("updaterEnabled") as
+                | boolean
+                | null) ?? true,
+        );
+    }
+
     loadSettings() {
         this.loadToken();
         this.theme.loadDefaultThemes();
+        this.loadUpdaterEnabled();
     }
 }
