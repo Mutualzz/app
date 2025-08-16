@@ -18,10 +18,14 @@ fn close_splashscreen(
     {
         let splash_window = app.get_webview_window("splashscreen").unwrap();
         let main_window = app.get_webview_window("main").unwrap();
-        splash_window.hide().unwrap();
-        splash_window.close().unwrap();
-        main_window.show().unwrap();
-        main_window.set_focus().unwrap();
+
+        if splash_window.is_visible().unwrap() {
+            splash_window.hide().unwrap();
+            splash_window.close().unwrap();
+        }
+        if !main_window.is_visible().unwrap() {
+            main_window.show().unwrap();
+        }
     }
 }
 
