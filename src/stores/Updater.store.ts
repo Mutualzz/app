@@ -111,7 +111,7 @@ export class UpdaterStore {
         }
 
         this.logger.debug("Invoking check for updates");
-        await invoke("check_for_updates", { ignorePreleases: false });
+        await invoke("check_for_updates", { ignorePrereleases: false });
     }
 
     async downloadUpdate() {
