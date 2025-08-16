@@ -1,4 +1,4 @@
-use tauri::{AppHandle, Manager, RunEvent};
+use tauri::{Manager, RunEvent};
 #[cfg(desktop)]
 use tauri_plugin_autostart::MacosLauncher;
 use tauri_plugin_log::{Target, TargetKind, WEBVIEW_TARGET};
@@ -7,27 +7,6 @@ use tauri_plugin_notification::NotificationExt;
 #[cfg(desktop)]
 mod tray;
 mod updater;
-
-
-
-#[tauri::command]
-fn close_splashscreen(
-    app: AppHandle,
-) {
-    #[cfg(desktop)]
-    {
-        let splash_window = app.get_webview_window("splashscreen").unwrap();
-        let main_window = app.get_webview_window("main").unwrap();
-
-        if splash_window.is_visible().unwrap() {
-            splash_window.hide().unwrap();
-            splash_window.close().unwrap();
-        }
-        if !main_window.is_visible().unwrap() {
-            main_window.show().unwrap();
-        }
-    }
-}
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -104,7 +83,6 @@ pub fn run() {
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
-            close_splashscreen,
             updater::check_for_updates,
             updater::download_update,
             updater::install_update,
@@ -133,7 +111,7 @@ pub fn run() {
             }
         }
         tauri::RunEvent::WindowEvent {
-            label,
+            label: _,
             event: tauri::WindowEvent::CloseRequested { api, .. },
             ..
         } => {
