@@ -5,6 +5,7 @@ import { tanstackStart } from "@tanstack/react-start/plugin/vite";
 import viteReact from "@vitejs/plugin-react-swc";
 import { readFileSync } from "fs";
 import { defineConfig } from "vite";
+import cleanPlugin from "vite-plugin-clean";
 import svgr from "vite-plugin-svgr";
 import tsconfigPaths from "vite-tsconfig-paths";
 
@@ -42,9 +43,11 @@ function getVersion() {
     return JSON.parse(readFileSync("package.json").toString()).version;
 }
 
+const isTauri = !!process.env.TAURI_ENV_PLATFORM;
 const host = process.env.TAURI_DEV_HOST;
 const isDevBuild = !!process.env.VITE_ENV_DEV || !!process.env.TAURI_ENV_DEBUG;
 
+console.log("Serving for Tauri:", isTauri);
 console.log(`Sourcemaps: ${isDevBuild}`);
 console.log(`Minification: ${isDevBuild ? false : "esbuild"}`);
 console.log(
@@ -60,7 +63,7 @@ console.log(
 // https://vitejs.dev/config/
 export default defineConfig({
     plugins: [
-        // cleanPlugin(),
+        cleanPlugin(),
         svgr(),
         replace({
             __GIT_REVISION__: getGitRevision(),
@@ -74,9 +77,18 @@ export default defineConfig({
                 target: "netlify",
                 customViteReactPlugin: true,
                 tsr: {
+                    target: "react",
                     quoteStyle: "double",
                     semicolons: true,
                 },
+                ...(isTauri && {
+                    spa: {
+                        prerender: {
+                            outputPath: "/index.html",
+                        },
+                        enabled: true,
+                    },
+                }),
             }),
             {
                 org: "mutualzz",
@@ -84,6 +96,7 @@ export default defineConfig({
                 authToken: process.env.SENTRY_AUTH_TOKEN,
             },
         ),
+
         viteReact({
             jsxImportSource: "@emotion/react",
             tsDecorators: true,
