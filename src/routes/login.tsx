@@ -4,10 +4,10 @@ import type { HttpException } from "@mutualzz/types";
 import {
     Button,
     Input,
+    type InputProps,
     Paper,
     Stack,
     Typography,
-    type InputProps,
 } from "@mutualzz/ui";
 import { emailRegex } from "@mutualzz/validators";
 import { seo } from "@seo";
@@ -124,7 +124,25 @@ function Login() {
                 initial={{ opacity: 0, y: -200 }}
                 animate={{ opacity: 1, y: 0 }}
             >
-                <Typography level="h4">Login to an account</Typography>
+                <Stack
+                    marginBottom={20}
+                    position="relative"
+                    justifyContent="center"
+                    width="100%"
+                >
+                    <Button
+                        css={{
+                            position: "absolute",
+                            left: 0,
+                        }}
+                        variant="plain"
+                        color="info"
+                        onClick={() => navigate({ to: "/" })}
+                    >
+                        {"<--"} Home
+                    </Button>
+                    <Typography level="h4">Login to an account</Typography>
+                </Stack>
                 <form
                     css={{
                         width: "100%",
