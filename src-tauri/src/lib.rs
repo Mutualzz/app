@@ -1,5 +1,4 @@
-use std::{sync::Arc, sync::Mutex};
-use tauri::{Manager, RunEvent, State, WebviewWindow};
+use tauri::{AppHandle, Manager, RunEvent};
 #[cfg(desktop)]
 use tauri_plugin_autostart::MacosLauncher;
 use tauri_plugin_log::{Target, TargetKind, WEBVIEW_TARGET};
@@ -9,23 +8,20 @@ use tauri_plugin_notification::NotificationExt;
 mod tray;
 mod updater;
 
-// wrappers around each Window
-// we use a dedicated type because Tauri can only manage a single instance of a given type
-struct SplashscreenWindow(Arc<Mutex<WebviewWindow>>);
-struct MainWindow(Arc<Mutex<WebviewWindow>>);
+
 
 #[tauri::command]
 fn close_splashscreen(
-    _: WebviewWindow,
-    splashscreen: State<SplashscreenWindow>,
-    main: State<MainWindow>,
+    app: AppHandle,
 ) {
     #[cfg(desktop)]
     {
-        // Close splashscreen
-        splashscreen.0.lock().unwrap().close().unwrap();
-        // Show main window
-        main.0.lock().unwrap().show().unwrap();
+        let splash_window = app.get_webview_window("splashscreen").unwrap();
+        let main_window = app.get_webview_window("main").unwrap();
+        splash_window.hide().unwrap();
+        splash_window.close().unwrap();
+        main_window.show().unwrap();
+        main_window.set_focus().unwrap();
     }
 }
 
@@ -71,13 +67,6 @@ pub fn run() {
         .plugin(tauri_plugin_process::init())
         .setup(move |app| {
             let app_handle = app.handle();
-            // set the splashscreen and main windows to be globally available with the tauri state API
-            app.manage(SplashscreenWindow(Arc::new(Mutex::new(
-                app.get_webview_window("splashscreen").unwrap(),
-            ))));
-            app.manage(MainWindow(Arc::new(Mutex::new(
-                app.get_webview_window("main").unwrap(),
-            ))));
 
             #[cfg(desktop)]
             {
