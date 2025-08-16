@@ -1,7 +1,14 @@
 import { useAppStore } from "@hooks/useStores";
 
 import type { HttpException } from "@mutualzz/types";
-import { Button, Input, type InputProps, Paper, Stack, Typography, } from "@mutualzz/ui";
+import {
+    Button,
+    Input,
+    type InputProps,
+    Paper,
+    Stack,
+    Typography,
+} from "@mutualzz/ui";
 import { emailRegex } from "@mutualzz/validators";
 import { seo } from "@seo";
 import { useForm } from "@tanstack/react-form";
