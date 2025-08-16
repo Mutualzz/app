@@ -1,3 +1,4 @@
+import Loader from "@components/Loader";
 import { AppTheme } from "@contexts/AppTheme.context";
 import { ModalProvider } from "@contexts/Modal.context";
 import "@fontsource/inter/100";
@@ -136,32 +137,31 @@ function RootComponent() {
         <RootDocument>
             <AppTheme>
                 <CssBaseline adaptiveScrollbar />
-                {app.isAppLoading ? (
-                    <></>
-                ) : (
-                    <ModalProvider>
-                        {!networkState.online && (
-                            <Paper
-                                alignItems="center"
-                                justifyContent="center"
-                                variant="solid"
-                                color="danger"
-                            >
-                                <Typography level="body-lg">
-                                    You are currently offline
-                                </Typography>
-                            </Paper>
-                        )}
 
+                <ModalProvider>
+                    {!networkState.online && (
+                        <Paper
+                            alignItems="center"
+                            justifyContent="center"
+                            variant="solid"
+                            color="danger"
+                        >
+                            <Typography level="body-lg">
+                                You are currently offline
+                            </Typography>
+                        </Paper>
+                    )}
+
+                    <Loader>
                         <Outlet />
-                        {import.meta.env.DEV && (
-                            <>
-                                <ReactQueryDevtools />
-                                <TanStackRouterDevtools />
-                            </>
-                        )}
-                    </ModalProvider>
-                )}
+                    </Loader>
+                    {import.meta.env.DEV && (
+                        <>
+                            <ReactQueryDevtools />
+                            <TanStackRouterDevtools />
+                        </>
+                    )}
+                </ModalProvider>
             </AppTheme>
         </RootDocument>
     );
