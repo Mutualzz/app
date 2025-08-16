@@ -111,7 +111,7 @@ pub fn run() {
             }
         }
         tauri::RunEvent::WindowEvent {
-            label: _,
+            label,
             event: tauri::WindowEvent::CloseRequested { api, .. },
             ..
         } => {
