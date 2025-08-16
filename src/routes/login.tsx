@@ -1,14 +1,7 @@
 import { useAppStore } from "@hooks/useStores";
 
 import type { HttpException } from "@mutualzz/types";
-import {
-    Button,
-    Input,
-    type InputProps,
-    Paper,
-    Stack,
-    Typography,
-} from "@mutualzz/ui";
+import { Button, Input, type InputProps, Paper, Stack, Typography, } from "@mutualzz/ui";
 import { emailRegex } from "@mutualzz/validators";
 import { seo } from "@seo";
 import { useForm } from "@tanstack/react-form";
@@ -73,12 +66,10 @@ function Login() {
                 requestBody.email = values.usernameOrEmail;
             else requestBody.username = values.usernameOrEmail;
 
-            const response = await rest.post<any, { token: string }>(
+            return await rest.post<any, { token: string }>(
                 "auth/login",
                 requestBody,
             );
-
-            return response;
         },
         onSuccess: ({ token }) => {
             app.setToken(token);

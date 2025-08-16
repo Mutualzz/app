@@ -85,12 +85,10 @@ function Register() {
 
     const mutation = useMutation({
         mutationFn: async (values: any) => {
-            const response = await rest.post<any, { token: string }>(
+            return await rest.post<any, { token: string }>(
                 "auth/register",
                 values,
             );
-
-            return response;
         },
         onSuccess: ({ token }) => {
             app.setToken(token);
