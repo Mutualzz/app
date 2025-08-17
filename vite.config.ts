@@ -44,10 +44,14 @@ function getVersion() {
 }
 
 const isTauri = !!process.env.TAURI_ENV_PLATFORM;
+const isNativeMobile = !!process.env.VITE_CAPACITOR;
+const isNative = isTauri || isNativeMobile;
+
 const host = process.env.TAURI_DEV_HOST;
 const isDevBuild = !!process.env.VITE_ENV_DEV || !!process.env.TAURI_ENV_DEBUG;
 
 console.log("Serving for Tauri:", isTauri);
+console.log("Serving for Capacitor", isNativeMobile);
 console.log(`Sourcemaps: ${isDevBuild}`);
 console.log(`Minification: ${isDevBuild ? false : "esbuild"}`);
 console.log(
@@ -81,7 +85,7 @@ export default defineConfig({
                     quoteStyle: "double",
                     semicolons: true,
                 },
-                ...(isTauri && {
+                ...(isNative && {
                     spa: {
                         prerender: {
                             outputPath: "/index.html",
@@ -111,7 +115,7 @@ export default defineConfig({
     server: {
         port: 1420,
         strictPort: true,
-        host: host || false,
+        host: host || "0.0.0.0",
         hmr: host
             ? {
                   protocol: "ws",
@@ -121,7 +125,7 @@ export default defineConfig({
             : undefined,
         watch: {
             // 3. tell vite to ignore watching `src-tauri`
-            ignored: ["**/src-tauri/**"],
+            ignored: ["**/src-tauri/**", "**/ios/**", "**/android/**"],
         },
     },
 
