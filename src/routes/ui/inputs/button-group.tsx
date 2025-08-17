@@ -86,7 +86,6 @@ function PlaygroundButtonGroup() {
             size={size}
             loading={loading}
             disabled={disabled}
-            color={customColorToggle ? customColor : color}
             variant={v}
         >
             {text ?? `${capitalize(v)} ${capitalize(color)}`}
@@ -99,7 +98,6 @@ function PlaygroundButtonGroup() {
             size={size}
             loading={loading}
             disabled={disabled}
-            color={customColorToggle ? customColor : color}
         >
             {text ?? capitalize(numWords(index + 1))}
         </Button>
@@ -121,7 +119,7 @@ function PlaygroundButtonGroup() {
                     <ButtonGroup
                         orientation={orientation}
                         spacing={spacing}
-                        color={color}
+                        color={customColorToggle ? customColor : color}
                         separatorColor={
                             customSeparatorColorToggle
                                 ? customSeparatorColor
