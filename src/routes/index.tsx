@@ -40,7 +40,6 @@ function Index() {
                             to: "/ui",
                         });
                     }}
-                    size="lg"
                     variant="solid"
                     color="info"
                 >
