@@ -1,5 +1,5 @@
 import { HoverToolbar } from "@components/HoverToolbar/HoverToolbar";
-import { useTheme } from "@mutualzz/ui";
+import { resolveResponsiveMerge, useTheme } from "@mutualzz/ui";
 import { markdownToSlate } from "@utils/markdownToSlate";
 import { getActiveFormats } from "@utils/markdownUtils";
 import { slateToMarkdown } from "@utils/slateToMarkdown";
@@ -289,9 +289,13 @@ export const MarkdownInput = ({
                         padding: "0.5em",
                         minWidth: 0,
                         boxSizing: "border-box",
-                        ...resolveMarkdownStyles(theme, color, textColor)[
-                            variant
-                        ],
+                        ...resolveResponsiveMerge(
+                            theme,
+                            { color, textColor, variant },
+                            ({ color: c, textColor: tc, variant: v }) => ({
+                                ...resolveMarkdownStyles(theme, c, tc)[v],
+                            }),
+                        ),
                         ...(disabled && {
                             opacity: 0.5,
                             pointerEvents: "none",

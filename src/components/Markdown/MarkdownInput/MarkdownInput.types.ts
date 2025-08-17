@@ -1,10 +1,16 @@
 import type { CSSObject } from "@emotion/react";
-import type { Color, ColorLike, TypographyColor, Variant } from "@mutualzz/ui";
+import type {
+    Color,
+    ColorLike,
+    Responsive,
+    TypographyColor,
+    Variant,
+} from "@mutualzz/ui";
 
 export interface MarkdownInputProps {
-    color?: Color | ColorLike;
-    textColor?: TypographyColor | ColorLike | "inherit";
-    variant?: Variant;
+    color?: Responsive<Color | ColorLike>;
+    textColor?: Responsive<TypographyColor | ColorLike | "inherit">;
+    variant?: Responsive<Variant>;
 
     autoFocus?: boolean;
     emoticons?: boolean;

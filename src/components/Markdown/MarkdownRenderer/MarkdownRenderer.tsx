@@ -31,7 +31,7 @@ export const MarkdownRenderer = ({
 
     return (
         <Paper
-            color={color}
+            color={color as string}
             textColor={textColor}
             variant={variant}
             display="block"
