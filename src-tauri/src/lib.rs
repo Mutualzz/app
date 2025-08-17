@@ -1,8 +1,10 @@
+use std::path::Path;
 use tauri::{Manager, RunEvent};
 #[cfg(desktop)]
 use tauri_plugin_autostart::MacosLauncher;
 use tauri_plugin_log::{Target, TargetKind, WEBVIEW_TARGET};
 use tauri_plugin_notification;
+use dotenvy::from_path;
 
 #[cfg(desktop)]
 mod tray;
@@ -10,6 +12,7 @@ mod updater;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    from_path(Path::new("../.env.development")).ok();
     unsafe { 
         std::env::set_var("RUST_BACKTRACE", "1");
         std::env::set_var("RUST_LOG", "debug");
