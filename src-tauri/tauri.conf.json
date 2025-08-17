@@ -8,7 +8,7 @@
         "maximized": true,
         "resizable": true,
         "title": "Mutualzz",
-        "visible": false
+        "visible": true
       }
     ],
     "withGlobalTauri": true
@@ -54,7 +54,7 @@
     "updater": {
       "active": "true",
       "endpoints": [
-        "https://github.com/mutualzz/app/releases/download/latest/latest.json"
+        "https://github.com/mutualzz/mutualzz/releases/download/latest/latest.json"
       ],
       "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDlFNUEzOTMyNTFBMTY2RDQKUldUVVpxRlJNamxhbnZ2WmdIeGFKcGxkVXhuUFFVRXBDd0JPNVpNUDZkTDVJRCtPTlVqZDA5YUsK",
       "windows": {
