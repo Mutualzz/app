@@ -56,12 +56,15 @@ pub fn run() {
                 app_handle.plugin(tauri_plugin_updater::Builder::new().build())?;
                 let _ =
                     app_handle.plugin(tauri_plugin_single_instance::init(|app, _argv, _cwd| {
-                        app.notification()
-                            .builder()
-                            .title("This app is already running!")
-                            .body("You can find it in the tray menu.")
-                            .show()
-                            .unwrap();
+                        app.get_webview_window("main")
+                            .map(|window| {
+                                window.show().unwrap();
+                                window.set_focus().unwrap();
+                            })
+                            .unwrap_or_else(|| {
+                                eprintln!("Failed to focus the main window");
+                            });
+                        Ok(())
                     }));
 
                 let _ = app_handle.plugin(tauri_plugin_autostart::init(
