@@ -31,7 +31,7 @@ struct UpdateAvailable {
 pub fn check_for_updates<R: Runtime>(ignore_prereleases: bool, window: tauri::Window<R>) {
     let handle = window.app_handle().clone();
 
-    if std::env::var("DEVELOPMENT").is_ok() {
+    if std::env::var("TAURI_ENV_DEV").is_ok() {
         println!("[Updater] This is a development environment, not updating.");
         return;
     }
@@ -57,7 +57,7 @@ pub fn check_for_updates<R: Runtime>(ignore_prereleases: bool, window: tauri::Wi
     tauri::async_runtime::spawn(async move {
         println!("[Updater] Searching for update file on github.");
         // Custom configure the updater.
-        let github_releases_endpoint = "https://api.github.com/repos/mutualzz/app/releases";
+        let github_releases_endpoint = "https://api.github.com/repos/mutualzz/mutualzz/releases";
         let github_releases_endpoint = match Url::parse(github_releases_endpoint) {
             Ok(url) => url,
             Err(e) => {
