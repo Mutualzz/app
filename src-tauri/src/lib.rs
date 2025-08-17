@@ -2,7 +2,7 @@ use tauri::{Manager, RunEvent};
 #[cfg(desktop)]
 use tauri_plugin_autostart::MacosLauncher;
 use tauri_plugin_log::{Target, TargetKind, WEBVIEW_TARGET};
-use tauri_plugin_notification::NotificationExt;
+use tauri_plugin_notification;
 
 #[cfg(desktop)]
 mod tray;
@@ -64,7 +64,7 @@ pub fn run() {
                             .unwrap_or_else(|| {
                                 eprintln!("Failed to focus the main window");
                             });
-                        Ok(())
+                        ();
                     }));
 
                 let _ = app_handle.plugin(tauri_plugin_autostart::init(
