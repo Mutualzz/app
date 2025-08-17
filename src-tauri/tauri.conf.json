@@ -1,67 +1,60 @@
 {
-  "$schema": "https://schema.tauri.app/config/2",
-  "app": {
-    "windows": [
-      {
-        "fullscreen": false,
-        "label": "main",
-        "maximized": true,
-        "resizable": true,
-        "title": "Mutualzz",
-        "visible": true
-      }
-    ],
-    "withGlobalTauri": true
-  },
-  "build": {
-    "beforeBuildCommand": "pnpm build",
-    "beforeDevCommand": "pnpm vite:dev",
-    "devUrl": "http://localhost:1420",
-    "frontendDist": "../dist"
-  },
-  "bundle": {
-    "active": true,
-    "category": "SocialNetworking",
-    "createUpdaterArtifacts": true,
-    "icon": [
-      "icons/32x32.png",
-      "icons/128x128.png",
-      "icons/128x128@2x.png",
-      "icons/icon.icns",
-      "icons/icon.ico"
-    ],
-    "publisher": "Mutualzz",
-    "shortDescription": "Mutualzz is a social media platform that connects people with similar interests.",
-    "targets": [
-      "deb",
-      "rpm",
-      "appimage",
-      "nsis",
-      "app",
-      "dmg"
-    ],
-    "windows": {
-      "nsis": {
-        "installerIcon": "./icons/icon.ico"
-      }
-    }
-  },
-  "identifier": "com.mutualzz.mz",
-  "plugins": {
-    "shell": {
-      "open": true
+    "$schema": "https://schema.tauri.app/config/2",
+    "app": {
+        "windows": [
+            {
+                "fullscreen": false,
+                "label": "main",
+                "maximized": true,
+                "resizable": true,
+                "title": "Mutualzz",
+                "visible": true
+            }
+        ],
+        "withGlobalTauri": true
     },
-    "updater": {
-      "active": "true",
-      "endpoints": [
-        "https://github.com/mutualzz/mutualzz/releases/download/latest/latest.json"
-      ],
-      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDlFNUEzOTMyNTFBMTY2RDQKUldUVVpxRlJNamxhbnZ2WmdIeGFKcGxkVXhuUFFVRXBDd0JPNVpNUDZkTDVJRCtPTlVqZDA5YUsK",
-      "windows": {
-        "installMode": "passive"
-      }
-    }
-  },
-  "productName": "Mutualzz",
-  "version": "./version.json"
+    "build": {
+        "beforeBuildCommand": "pnpm build",
+        "beforeDevCommand": "pnpm vite:dev",
+        "devUrl": "http://localhost:1420",
+        "frontendDist": "../dist"
+    },
+    "bundle": {
+        "active": true,
+        "category": "SocialNetworking",
+        "createUpdaterArtifacts": true,
+        "icon": [
+            "icons/32x32.png",
+            "icons/128x128.png",
+            "icons/128x128@2x.png",
+            "icons/icon.icns",
+            "icons/icon.ico"
+        ],
+        "publisher": "Mutualzz",
+        "shortDescription": "Mutualzz is a social media platform that connects people with similar interests.",
+        "targets": ["deb", "rpm", "appimage", "nsis", "app", "dmg"],
+        "windows": {
+            "nsis": {
+                "installerIcon": "./icons/icon.ico"
+            }
+        }
+    },
+    "identifier": "com.mutualzz.mz",
+    "plugins": {
+        "shell": {
+            "open": true
+        },
+        "updater": {
+            "active": "true",
+            "endpoints": [
+                "https://github.com/mutualzz/mutualzz/releases/latest/download/latest.json"
+            ],
+            "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDlFNUEzOTMyNTFBMTY2RDQKUldUVVpxRlJNamxhbnZ2WmdIeGFKcGxkVXhuUFFVRXBDd0JPNVpNUDZkTDVJRCtPTlVqZDA5YUsK",
+            "windows": {
+                "installMode": "passive"
+            }
+        }
+    },
+    "productName": "Mutualzz",
+    "version": "./version.json"
 }
