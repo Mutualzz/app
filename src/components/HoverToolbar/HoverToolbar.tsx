@@ -108,7 +108,7 @@ export const HoverToolbar = () => {
                     pointerEvents: visible ? "auto" : "none",
                 }}
             >
-                <ButtonGroup variant="plain" size="lg">
+                <ButtonGroup variant="plain">
                     <Button
                         title="Bold"
                         color={
@@ -147,7 +147,7 @@ export const HoverToolbar = () => {
                     </Button>
                 </ButtonGroup>
                 <Divider orientation="vertical" />
-                <ButtonGroup variant="plain" size="lg">
+                <ButtonGroup variant="plain">
                     <Button
                         title="Blockquote"
                         color={
