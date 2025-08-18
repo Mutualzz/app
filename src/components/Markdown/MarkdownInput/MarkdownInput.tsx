@@ -269,6 +269,7 @@ export const MarkdownInput = ({
                         padding: "0.5em",
                         minWidth: 0,
                         boxSizing: "border-box",
+                        overflowX: "auto",
                         ...resolveResponsiveMerge(
                             theme,
                             { color, textColor, variant },

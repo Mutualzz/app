@@ -39,6 +39,7 @@ export const MarkdownRenderer = ({
             height="100%"
             p={12}
             mt={10}
+            overflowY="auto"
         >
             <Markdown
                 components={{
