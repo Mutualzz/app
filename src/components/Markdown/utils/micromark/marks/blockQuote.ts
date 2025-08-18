@@ -79,7 +79,7 @@ function tokenizeBlockQuoteStart(
         }
 
         effects.exit(types.blockQuotePrefix);
-        return ok(code);
+        return nok(code);
     }
 }
 
