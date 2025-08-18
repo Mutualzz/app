@@ -632,13 +632,8 @@ function compiler(options: Options | null | undefined) {
             const depth = this.sliceSerialize(token).length;
 
             assert(
-                depth === 1 ||
-                    depth === 2 ||
-                    depth === 3 ||
-                    depth === 4 ||
-                    depth === 5 ||
-                    depth === 6,
-                "expected `depth` between `1` and `6`",
+                depth === 1 || depth === 2 || depth === 3,
+                "expected `depth` between `1` and `3`",
             );
 
             node.depth = depth;
@@ -970,11 +965,25 @@ function compiler(options: Options | null | undefined) {
     }
 
     function codeFlow(): Code {
-        return { type: "code", lang: null, meta: null, value: "" };
+        return {
+            type: "code",
+            lang: null,
+            meta: null,
+            value: "",
+            data: {
+                hName: "blockCode",
+            },
+        };
     }
 
     function codeText(): InlineCode {
-        return { type: "inlineCode", value: "" };
+        return {
+            type: "inlineCode",
+            value: "",
+            data: {
+                hName: "inlineCode",
+            },
+        };
     }
 
     function definition(): Definition {
