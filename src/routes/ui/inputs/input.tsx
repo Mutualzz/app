@@ -271,7 +271,7 @@ function InputPlayground() {
                             onChange={(_, size) => setSize(size as Size)}
                             value={size as Size}
                             name="sizes"
-                            row
+                            orientation="horizontal"
                         >
                             {Object.keys(sizeNames).map((s) => (
                                 <Radio

@@ -231,7 +231,7 @@ function PlaygroundLinearProgress() {
                             onChange={(_, length) => setLength(length as Size)}
                             value={length as Size}
                             name="length"
-                            row
+                            orientation="horizontal"
                         >
                             {Object.keys(sizeNames).map((s) => (
                                 <Radio
@@ -284,7 +284,7 @@ function PlaygroundLinearProgress() {
                             }
                             value={thickness as Size}
                             name="thickness"
-                            row
+                            orientation="horizontal"
                         >
                             {Object.keys(sizeNames).map((s) => (
                                 <Radio

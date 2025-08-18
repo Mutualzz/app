@@ -260,7 +260,7 @@ function PlaygroundButton() {
                             onChange={(_, size) => setSize(size as Size)}
                             value={size as Size}
                             name="sizes"
-                            row
+                            orientation="horizontal"
                         >
                             {Object.keys(sizeNames).map((s) => (
                                 <Radio
@@ -405,7 +405,7 @@ function PlaygroundButton() {
                         }
                         value={iconPosition}
                         name="icon-position"
-                        row
+                        orientation="horizontal"
                     >
                         <Radio
                             value="none"

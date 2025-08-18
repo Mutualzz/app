@@ -159,7 +159,7 @@ function PlaygroundDivider() {
                         }
                         value={orientation}
                         name="orientations"
-                        row
+                        orientation="horizontal"
                     >
                         <Radio
                             value="horizontal"
@@ -212,7 +212,7 @@ function PlaygroundDivider() {
                                 }
                                 value={inset}
                                 name="insets"
-                                row
+                                orientation="horizontal"
                             >
                                 {insets.map((i) => (
                                     <Radio

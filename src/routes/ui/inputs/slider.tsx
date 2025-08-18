@@ -263,7 +263,7 @@ function SlderPlayground() {
                             onChange={(_, size) => setSize(size as Size)}
                             value={size as Size}
                             name="sizes"
-                            row
+                            orientation="horizontal"
                         >
                             {Object.keys(sizeNames).map((s) => (
                                 <Radio
@@ -289,7 +289,7 @@ function SlderPlayground() {
                         }
                         value={orientation}
                         name="orientation"
-                        row
+                        orientation="horizontal"
                     >
                         <Radio
                             value="horizontal"
@@ -347,7 +347,7 @@ function SlderPlayground() {
                 <Stack direction="column" spacing={10}>
                     <Typography>Marks</Typography>
                     <RadioGroup
-                        row
+                        orientation="horizontal"
                         onChange={(_, markStateValue) =>
                             setMarkState(
                                 markStateValue as "off" | "on" | "custom",
@@ -497,7 +497,7 @@ function SlderPlayground() {
                 <Stack direction="column" spacing={10}>
                     <Typography>Value Display</Typography>
                     <RadioGroup
-                        row
+                        orientation="horizontal"
                         onChange={(_, labelDisplayValue) =>
                             setValueDisplay(
                                 labelDisplayValue as SliderValueLabelDisplay,
