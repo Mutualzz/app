@@ -49,7 +49,6 @@ export const flow: Extension["flow"] = {
     [codes.dash]: thematicBreak,
     [codes.underscore]: thematicBreak,
     [codes.graveAccent]: codeFenced,
-    [codes.tilde]: codeFenced,
 };
 
 export const string: Extension["string"] = {

@@ -68,10 +68,7 @@ function tokenizeCodeFenced(
      *
      */
     function beforeSequenceOpen(code: Code) {
-        assert(
-            code === codes.graveAccent || code === codes.tilde,
-            "expected `` ` `` or `~`",
-        );
+        assert(code === codes.graveAccent, "expected `` ` ``");
 
         const tail = self.events[self.events.length - 1];
         initialPrefix =
