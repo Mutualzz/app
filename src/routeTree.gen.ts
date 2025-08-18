@@ -21,9 +21,9 @@ import { Route as UiInputsSliderRouteImport } from "./routes/ui/inputs/slider";
 import { Route as UiInputsSelectRouteImport } from "./routes/ui/inputs/select";
 import { Route as UiInputsRadioButtonRouteImport } from "./routes/ui/inputs/radio-button";
 import { Route as UiInputsMarkdownInputRouteImport } from "./routes/ui/inputs/markdown-input";
+import { Route as UiInputsInputGroupsRouteImport } from "./routes/ui/inputs/input-groups";
 import { Route as UiInputsInputRouteImport } from "./routes/ui/inputs/input";
 import { Route as UiInputsCheckboxRouteImport } from "./routes/ui/inputs/checkbox";
-import { Route as UiInputsButtonGroupRouteImport } from "./routes/ui/inputs/button-group";
 import { Route as UiInputsButtonRouteImport } from "./routes/ui/inputs/button";
 import { Route as UiFeedbackLinearProgressRouteImport } from "./routes/ui/feedback/linear-progress";
 import { Route as UiFeedbackCircularProgressRouteImport } from "./routes/ui/feedback/circular-progress";
@@ -91,6 +91,11 @@ const UiInputsMarkdownInputRoute = UiInputsMarkdownInputRouteImport.update({
   path: "/inputs/markdown-input",
   getParentRoute: () => UiRoute,
 } as any);
+const UiInputsInputGroupsRoute = UiInputsInputGroupsRouteImport.update({
+  id: "/inputs/input-groups",
+  path: "/inputs/input-groups",
+  getParentRoute: () => UiRoute,
+} as any);
 const UiInputsInputRoute = UiInputsInputRouteImport.update({
   id: "/inputs/input",
   path: "/inputs/input",
@@ -99,11 +104,6 @@ const UiInputsInputRoute = UiInputsInputRouteImport.update({
 const UiInputsCheckboxRoute = UiInputsCheckboxRouteImport.update({
   id: "/inputs/checkbox",
   path: "/inputs/checkbox",
-  getParentRoute: () => UiRoute,
-} as any);
-const UiInputsButtonGroupRoute = UiInputsButtonGroupRouteImport.update({
-  id: "/inputs/button-group",
-  path: "/inputs/button-group",
   getParentRoute: () => UiRoute,
 } as any);
 const UiInputsButtonRoute = UiInputsButtonRouteImport.update({
@@ -158,9 +158,9 @@ export interface FileRoutesByFullPath {
   "/ui/feedback/circular-progress": typeof UiFeedbackCircularProgressRoute;
   "/ui/feedback/linear-progress": typeof UiFeedbackLinearProgressRoute;
   "/ui/inputs/button": typeof UiInputsButtonRoute;
-  "/ui/inputs/button-group": typeof UiInputsButtonGroupRoute;
   "/ui/inputs/checkbox": typeof UiInputsCheckboxRoute;
   "/ui/inputs/input": typeof UiInputsInputRoute;
+  "/ui/inputs/input-groups": typeof UiInputsInputGroupsRoute;
   "/ui/inputs/markdown-input": typeof UiInputsMarkdownInputRoute;
   "/ui/inputs/radio-button": typeof UiInputsRadioButtonRoute;
   "/ui/inputs/select": typeof UiInputsSelectRoute;
@@ -180,9 +180,9 @@ export interface FileRoutesByTo {
   "/ui/feedback/circular-progress": typeof UiFeedbackCircularProgressRoute;
   "/ui/feedback/linear-progress": typeof UiFeedbackLinearProgressRoute;
   "/ui/inputs/button": typeof UiInputsButtonRoute;
-  "/ui/inputs/button-group": typeof UiInputsButtonGroupRoute;
   "/ui/inputs/checkbox": typeof UiInputsCheckboxRoute;
   "/ui/inputs/input": typeof UiInputsInputRoute;
+  "/ui/inputs/input-groups": typeof UiInputsInputGroupsRoute;
   "/ui/inputs/markdown-input": typeof UiInputsMarkdownInputRoute;
   "/ui/inputs/radio-button": typeof UiInputsRadioButtonRoute;
   "/ui/inputs/select": typeof UiInputsSelectRoute;
@@ -205,9 +205,9 @@ export interface FileRoutesById {
   "/ui/feedback/circular-progress": typeof UiFeedbackCircularProgressRoute;
   "/ui/feedback/linear-progress": typeof UiFeedbackLinearProgressRoute;
   "/ui/inputs/button": typeof UiInputsButtonRoute;
-  "/ui/inputs/button-group": typeof UiInputsButtonGroupRoute;
   "/ui/inputs/checkbox": typeof UiInputsCheckboxRoute;
   "/ui/inputs/input": typeof UiInputsInputRoute;
+  "/ui/inputs/input-groups": typeof UiInputsInputGroupsRoute;
   "/ui/inputs/markdown-input": typeof UiInputsMarkdownInputRoute;
   "/ui/inputs/radio-button": typeof UiInputsRadioButtonRoute;
   "/ui/inputs/select": typeof UiInputsSelectRoute;
@@ -230,9 +230,9 @@ export interface FileRouteTypes {
     | "/ui/feedback/circular-progress"
     | "/ui/feedback/linear-progress"
     | "/ui/inputs/button"
-    | "/ui/inputs/button-group"
     | "/ui/inputs/checkbox"
     | "/ui/inputs/input"
+    | "/ui/inputs/input-groups"
     | "/ui/inputs/markdown-input"
     | "/ui/inputs/radio-button"
     | "/ui/inputs/select"
@@ -252,9 +252,9 @@ export interface FileRouteTypes {
     | "/ui/feedback/circular-progress"
     | "/ui/feedback/linear-progress"
     | "/ui/inputs/button"
-    | "/ui/inputs/button-group"
     | "/ui/inputs/checkbox"
     | "/ui/inputs/input"
+    | "/ui/inputs/input-groups"
     | "/ui/inputs/markdown-input"
     | "/ui/inputs/radio-button"
     | "/ui/inputs/select"
@@ -276,9 +276,9 @@ export interface FileRouteTypes {
     | "/ui/feedback/circular-progress"
     | "/ui/feedback/linear-progress"
     | "/ui/inputs/button"
-    | "/ui/inputs/button-group"
     | "/ui/inputs/checkbox"
     | "/ui/inputs/input"
+    | "/ui/inputs/input-groups"
     | "/ui/inputs/markdown-input"
     | "/ui/inputs/radio-button"
     | "/ui/inputs/select"
@@ -381,6 +381,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof UiInputsMarkdownInputRouteImport;
       parentRoute: typeof UiRoute;
     };
+    "/ui/inputs/input-groups": {
+      id: "/ui/inputs/input-groups";
+      path: "/inputs/input-groups";
+      fullPath: "/ui/inputs/input-groups";
+      preLoaderRoute: typeof UiInputsInputGroupsRouteImport;
+      parentRoute: typeof UiRoute;
+    };
     "/ui/inputs/input": {
       id: "/ui/inputs/input";
       path: "/inputs/input";
@@ -393,13 +400,6 @@ declare module "@tanstack/react-router" {
       path: "/inputs/checkbox";
       fullPath: "/ui/inputs/checkbox";
       preLoaderRoute: typeof UiInputsCheckboxRouteImport;
-      parentRoute: typeof UiRoute;
-    };
-    "/ui/inputs/button-group": {
-      id: "/ui/inputs/button-group";
-      path: "/inputs/button-group";
-      fullPath: "/ui/inputs/button-group";
-      preLoaderRoute: typeof UiInputsButtonGroupRouteImport;
       parentRoute: typeof UiRoute;
     };
     "/ui/inputs/button": {
@@ -463,9 +463,9 @@ interface UiRouteChildren {
   UiFeedbackCircularProgressRoute: typeof UiFeedbackCircularProgressRoute;
   UiFeedbackLinearProgressRoute: typeof UiFeedbackLinearProgressRoute;
   UiInputsButtonRoute: typeof UiInputsButtonRoute;
-  UiInputsButtonGroupRoute: typeof UiInputsButtonGroupRoute;
   UiInputsCheckboxRoute: typeof UiInputsCheckboxRoute;
   UiInputsInputRoute: typeof UiInputsInputRoute;
+  UiInputsInputGroupsRoute: typeof UiInputsInputGroupsRoute;
   UiInputsMarkdownInputRoute: typeof UiInputsMarkdownInputRoute;
   UiInputsRadioButtonRoute: typeof UiInputsRadioButtonRoute;
   UiInputsSelectRoute: typeof UiInputsSelectRoute;
@@ -483,9 +483,9 @@ const UiRouteChildren: UiRouteChildren = {
   UiFeedbackCircularProgressRoute: UiFeedbackCircularProgressRoute,
   UiFeedbackLinearProgressRoute: UiFeedbackLinearProgressRoute,
   UiInputsButtonRoute: UiInputsButtonRoute,
-  UiInputsButtonGroupRoute: UiInputsButtonGroupRoute,
   UiInputsCheckboxRoute: UiInputsCheckboxRoute,
   UiInputsInputRoute: UiInputsInputRoute,
+  UiInputsInputGroupsRoute: UiInputsInputGroupsRoute,
   UiInputsMarkdownInputRoute: UiInputsMarkdownInputRoute,
   UiInputsRadioButtonRoute: UiInputsRadioButtonRoute,
   UiInputsSelectRoute: UiInputsSelectRoute,

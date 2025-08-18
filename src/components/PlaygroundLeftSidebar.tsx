@@ -22,10 +22,7 @@ const links = {
             name: "Button",
             link: "/ui/inputs/button",
         },
-        {
-            name: "Button Group",
-            link: "/ui/inputs/button-group",
-        },
+
         {
             name: "Checkbox",
             link: "/ui/inputs/checkbox",
@@ -33,6 +30,10 @@ const links = {
         {
             name: "Input",
             link: "/ui/inputs/input",
+        },
+        {
+            name: "Input Groups",
+            link: "/ui/inputs/input-groups",
         },
         {
             name: "Markdown",
