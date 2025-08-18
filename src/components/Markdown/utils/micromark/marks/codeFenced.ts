@@ -123,6 +123,11 @@ function tokenizeCodeFenced(
      *
      */
     function infoBefore(code: Code): State | undefined {
+        if (markdownSpace(code)) {
+            effects.consume(code);
+            return infoBefore;
+        }
+
         if (code === codes.eof || markdownLineEnding(code)) {
             effects.exit(types.codeFencedFence);
             return self.interrupt
@@ -337,6 +342,22 @@ function tokenizeCodeFenced(
      *
      */
     function after(code: Code) {
+        const events = self.events;
+        const contentEvent = events.find(
+            (e) => e[1].type === types.codeFlowValue,
+        );
+
+        const codeContent = contentEvent
+            ? self.sliceStream(contentEvent[1]).join("").trim()
+            : "";
+
+        const isEmpty = codeContent === "";
+
+        if (isEmpty) {
+            // Reject as code block, treat as text
+            return nok(code);
+        }
+
         effects.exit(types.codeFenced);
         return ok(code);
     }
