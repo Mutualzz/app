@@ -1,5 +1,6 @@
 import type { MzTheme } from "@app-types/theme";
 import mergeWith from "lodash-es/mergeWith";
+import { isValidElement, type ReactNode } from "react";
 
 export function mergeAppendAnything(
     ...objects: Record<string, string | string[]>[]
@@ -76,3 +77,30 @@ export const sortThemes = (themes: MzTheme[]): MzTheme[] => {
 
     return [...priorityThemes, ...otherThemes];
 };
+
+export function reactNodeToHtml(node: ReactNode): string {
+    if (typeof node === "string" || typeof node === "number")
+        return String(node);
+    if (node === null || node === undefined || typeof node === "boolean")
+        return "";
+    if (Array.isArray(node)) return node.map(reactNodeToHtml).join("");
+
+    if (isValidElement(node)) {
+        const { type, props } = node;
+
+        if (typeof type === "string") {
+            // native HTML element
+            const children = reactNodeToHtml((props as any).children);
+            const attrs = Object.entries(props as any)
+                .filter(([k]) => k !== "children")
+                .map(([k, v]) => ` ${k}="${v}"`)
+                .join("");
+            return `<${type}${attrs}>${children}</${type}>`;
+        }
+
+        // For custom components: either recurse or bail
+        return reactNodeToHtml((props as any).children);
+    }
+
+    return "";
+}
