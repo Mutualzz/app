@@ -166,19 +166,14 @@ export const withEmojis = (editor: Editor) => {
         if (selection && Range.isCollapsed(selection) && unit === "character") {
             const { path, offset } = selection.anchor;
 
-            if (offset === 0) {
+            const lastIndex = path[path.length - 1];
+            if (offset === 0 && lastIndex > 0) {
                 const prevPath = Path.previous(path);
+                const [prevNode] = editor.node(prevPath);
 
-                if (prevPath) {
-                    const [prevNode] = editor.node(prevPath);
-
-                    if (
-                        Element.isElement(prevNode) &&
-                        prevNode.type === "emoji"
-                    ) {
-                        editor.removeNodes({ at: prevPath });
-                        return;
-                    }
+                if (Element.isElement(prevNode) && prevNode.type === "emoji") {
+                    editor.removeNodes({ at: prevPath });
+                    return;
                 }
             }
         }
