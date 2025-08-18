@@ -1,4 +1,3 @@
-import { HoverToolbar } from "@components/HoverToolbar/HoverToolbar";
 import { resolveResponsiveMerge, useTheme } from "@mutualzz/ui";
 import { markdownToSlate } from "@utils/markdownToSlate";
 import { getActiveFormats } from "@utils/markdownUtils";
@@ -14,7 +13,6 @@ import {
 } from "react";
 import {
     createEditor,
-    Path,
     Range,
     Element as SlateElement,
     Text,
@@ -29,6 +27,7 @@ import {
     type RenderElementProps,
     type RenderLeafProps,
 } from "slate-react";
+import { HoverToolbar } from "../HoverToolbar/HoverToolbar";
 import { Element } from "./Element";
 import { Leaf } from "./Leaf";
 import { MarkdownInputContext } from "./MarkdownInput.context";
@@ -94,27 +93,8 @@ export const MarkdownInput = ({
         const { selection } = editor;
 
         if (selection && Range.isCollapsed(selection)) {
-            let [node, path] = editor.node(selection.focus.path);
-
-            while (path.length > 1) {
-                [node, path] = editor.node(path.slice(0, -1));
-            }
-
-            if (SlateElement.isElement(node)) {
-                e.preventDefault();
-
-                const newPath = Path.next(path);
-
-                editor.insertNode(
-                    {
-                        type: "line",
-                        children: [{ text: "" }],
-                    },
-                    { at: newPath },
-                );
-
-                editor.select(editor.start(newPath));
-            }
+            if (!e.defaultPrevented) e.preventDefault();
+            editor.splitNodes({ always: true });
         }
     };
 
