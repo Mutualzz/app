@@ -20,7 +20,6 @@ import { visit } from "unist-util-visit";
 import { VFile } from "vfile";
 import { remarkEmoji } from "./remark/remarkEmoji";
 import { remarkParse } from "./remark/remarkParse";
-
 type AllowElement = (
     element: Readonly<Element>,
     index: number,
@@ -39,6 +38,8 @@ type Components = {
     underline?: ComponentType<JSX.IntrinsicElements["u"] & ExtraProps>;
     emoji?: ComponentType<Emoji>;
     spoiler?: ComponentType<Spoiler>;
+    inlineCode?: ComponentType<JSX.IntrinsicElements["code"] & ExtraProps>;
+    blockCode?: ComponentType<JSX.IntrinsicElements["pre"] & ExtraProps>;
 };
 
 export interface Options {

@@ -1,9 +1,12 @@
-import { Paper, Typography, useTheme } from "@mutualzz/ui";
+import { Paper, Typography } from "@mutualzz/ui";
 
-import { spoilerStyles } from "@css/spoilerStyles";
 import emojiRegexOrig from "emojibase-regex";
 import shortcodeRegexOrig from "emojibase-regex/shortcode";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
+import { Blockquote } from "../components/Blockquote";
+import { CodeBlock } from "../components/CodeBlock";
+import { Emoji } from "../components/Emoji";
+import { Spoiler } from "../components/Spoiler";
 import { Markdown } from "./Markdown";
 import type { MarkdownRendererProps } from "./MarkdownRenderer.types";
 
@@ -17,8 +20,6 @@ export const MarkdownRenderer = ({
     enlargeEmojiOnly = true,
     value,
 }: MarkdownRendererProps) => {
-    const { theme } = useTheme();
-
     const isEmojiOnly = useMemo(() => {
         if (!value || !enlargeEmojiOnly) return false;
 
@@ -82,17 +83,7 @@ export const MarkdownRenderer = ({
                     ),
 
                     blockquote: ({ children }) => (
-                        <blockquote
-                            css={{
-                                display: "block",
-                                margin: 0,
-                                paddingLeft: "0.5em",
-                                borderLeft: `4px solid ${theme.typography.colors.muted}`,
-                                color: theme.typography.colors.primary,
-                            }}
-                        >
-                            {children}
-                        </blockquote>
+                        <Blockquote>{children}</Blockquote>
                     ),
 
                     strong: ({ children }) => (
@@ -134,61 +125,26 @@ export const MarkdownRenderer = ({
                         </Typography>
                     ),
 
-                    code: ({ children }) => (
-                        <Typography
-                            fontFamily="monospace"
-                            fontSize="inherit"
-                            padding="0.2em 0.4em"
-                            borderRadius={4}
-                            css={{
-                                background: "rgba(255,255,255,0.05)",
-                            }}
-                        >
-                            {children}
-                        </Typography>
-                    ),
-
                     emoji: ({ name, url, unicode }) => (
-                        <span
-                            role="button"
-                            aria-label={`:${name}:`}
-                            contentEditable={false}
-                            title={`:${name}:`}
-                            css={{
-                                display: "inline-block",
-                                width: isEmojiOnly ? "2.25em" : "1.375em",
-                                height: isEmojiOnly ? "2.25em" : "1.375em",
-                                verticalAlign: "middle",
-                            }}
-                        >
-                            <img
-                                src={url}
-                                alt={unicode}
-                                draggable={false}
-                                aria-label={`:${name}:`}
-                                css={{
-                                    width: "100%",
-                                    height: "100%",
-                                    objectFit: "contain",
-                                }}
-                            />
-                        </span>
+                        <Emoji
+                            isEmojiOnly={isEmojiOnly}
+                            url={url}
+                            unicode={unicode}
+                            name={name}
+                        />
                     ),
 
-                    spoiler: ({ children }) => {
-                        const [revealed, setRevealed] = useState(false);
+                    spoiler: ({ children }) => <Spoiler>{children}</Spoiler>,
 
-                        return (
-                            <Typography
-                                css={spoilerStyles(revealed, theme)}
-                                onClick={() => {
-                                    setRevealed(true);
-                                }}
-                            >
-                                {children}
-                            </Typography>
-                        );
-                    },
+                    blockCode: ({ children, className }) => (
+                        <CodeBlock className={className}>{children}</CodeBlock>
+                    ),
+
+                    inlineCode: ({ children, className }) => (
+                        <CodeBlock className={className} inline>
+                            {children}
+                        </CodeBlock>
+                    ),
                 }}
             >
                 {value}
