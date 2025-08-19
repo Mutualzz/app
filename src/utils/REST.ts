@@ -62,7 +62,7 @@ export default class REST {
 
         queryParams: Record<string, any> = {},
     ) {
-        const url = new URL(`${import.meta.env.VITE_CDN_URL}/${path}`);
+        const url = new URL(`${import.meta.env.VITE_CDN_URL}${path}`);
         Object.entries(queryParams).forEach(([key, value]) => {
             url.searchParams.append(key, value);
         });
