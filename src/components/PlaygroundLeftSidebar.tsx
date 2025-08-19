@@ -58,6 +58,10 @@ const links = {
     ],
     dataDisplay: [
         {
+            name: "Avatar",
+            link: "/ui/data-display/avatar",
+        },
+        {
             name: "Divider",
             link: "/ui/data-display/divider",
         },

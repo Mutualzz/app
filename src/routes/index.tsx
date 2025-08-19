@@ -2,7 +2,7 @@ import { Logo } from "@components/Logo";
 import { ThemeCreator } from "@components/ThemeCreator";
 import { useModal } from "@contexts/Modal.context";
 import { useAppStore } from "@hooks/useStores";
-import { Button, Stack, Typography } from "@mutualzz/ui";
+import { Avatar, Button, Stack, Typography } from "@mutualzz/ui";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { observer } from "mobx-react";
 
@@ -69,10 +69,24 @@ function Index() {
                     alignItems="center"
                     mt="2rem"
                     direction="column"
+                    spacing={10}
                 >
-                    <Typography level="body-lg">
-                        Hi {account.globalName ?? account.username} :3
-                    </Typography>
+                    <Stack
+                        spacing={5}
+                        justifyContent="center"
+                        alignItems="center"
+                    >
+                        Hi
+                        <Stack
+                            spacing={1}
+                            justifyContent="center"
+                            alignItems="center"
+                        >
+                            <Avatar src={account.avatarUrl} />
+                            {account.globalName ?? account.username}
+                        </Stack>
+                        :3
+                    </Stack>
                     <Stack
                         spacing={10}
                         justifyContent="center"

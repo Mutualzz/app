@@ -31,6 +31,7 @@ import { Route as UiDataDisplayTypographyRouteImport } from "./routes/ui/data-di
 import { Route as UiDataDisplayMarkdownRendererRouteImport } from "./routes/ui/data-display/markdown-renderer";
 import { Route as UiDataDisplayListRouteImport } from "./routes/ui/data-display/list";
 import { Route as UiDataDisplayDividerRouteImport } from "./routes/ui/data-display/divider";
+import { Route as UiDataDisplayAvatarRouteImport } from "./routes/ui/data-display/avatar";
 
 const UiRoute = UiRouteImport.update({
   id: "/ui",
@@ -144,6 +145,11 @@ const UiDataDisplayDividerRoute = UiDataDisplayDividerRouteImport.update({
   path: "/data-display/divider",
   getParentRoute: () => UiRoute,
 } as any);
+const UiDataDisplayAvatarRoute = UiDataDisplayAvatarRouteImport.update({
+  id: "/data-display/avatar",
+  path: "/data-display/avatar",
+  getParentRoute: () => UiRoute,
+} as any);
 
 export interface FileRoutesByFullPath {
   "/": typeof IndexRoute;
@@ -151,6 +157,7 @@ export interface FileRoutesByFullPath {
   "/register": typeof RegisterRoute;
   "/ui": typeof UiRouteWithChildren;
   "/ui/": typeof UiIndexRoute;
+  "/ui/data-display/avatar": typeof UiDataDisplayAvatarRoute;
   "/ui/data-display/divider": typeof UiDataDisplayDividerRoute;
   "/ui/data-display/list": typeof UiDataDisplayListRoute;
   "/ui/data-display/markdown-renderer": typeof UiDataDisplayMarkdownRendererRoute;
@@ -173,6 +180,7 @@ export interface FileRoutesByTo {
   "/login": typeof LoginRoute;
   "/register": typeof RegisterRoute;
   "/ui": typeof UiIndexRoute;
+  "/ui/data-display/avatar": typeof UiDataDisplayAvatarRoute;
   "/ui/data-display/divider": typeof UiDataDisplayDividerRoute;
   "/ui/data-display/list": typeof UiDataDisplayListRoute;
   "/ui/data-display/markdown-renderer": typeof UiDataDisplayMarkdownRendererRoute;
@@ -198,6 +206,7 @@ export interface FileRoutesById {
   "/register": typeof RegisterRoute;
   "/ui": typeof UiRouteWithChildren;
   "/ui/": typeof UiIndexRoute;
+  "/ui/data-display/avatar": typeof UiDataDisplayAvatarRoute;
   "/ui/data-display/divider": typeof UiDataDisplayDividerRoute;
   "/ui/data-display/list": typeof UiDataDisplayListRoute;
   "/ui/data-display/markdown-renderer": typeof UiDataDisplayMarkdownRendererRoute;
@@ -223,6 +232,7 @@ export interface FileRouteTypes {
     | "/register"
     | "/ui"
     | "/ui/"
+    | "/ui/data-display/avatar"
     | "/ui/data-display/divider"
     | "/ui/data-display/list"
     | "/ui/data-display/markdown-renderer"
@@ -245,6 +255,7 @@ export interface FileRouteTypes {
     | "/login"
     | "/register"
     | "/ui"
+    | "/ui/data-display/avatar"
     | "/ui/data-display/divider"
     | "/ui/data-display/list"
     | "/ui/data-display/markdown-renderer"
@@ -269,6 +280,7 @@ export interface FileRouteTypes {
     | "/register"
     | "/ui"
     | "/ui/"
+    | "/ui/data-display/avatar"
     | "/ui/data-display/divider"
     | "/ui/data-display/list"
     | "/ui/data-display/markdown-renderer"
@@ -451,11 +463,19 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof UiDataDisplayDividerRouteImport;
       parentRoute: typeof UiRoute;
     };
+    "/ui/data-display/avatar": {
+      id: "/ui/data-display/avatar";
+      path: "/data-display/avatar";
+      fullPath: "/ui/data-display/avatar";
+      preLoaderRoute: typeof UiDataDisplayAvatarRouteImport;
+      parentRoute: typeof UiRoute;
+    };
   }
 }
 
 interface UiRouteChildren {
   UiIndexRoute: typeof UiIndexRoute;
+  UiDataDisplayAvatarRoute: typeof UiDataDisplayAvatarRoute;
   UiDataDisplayDividerRoute: typeof UiDataDisplayDividerRoute;
   UiDataDisplayListRoute: typeof UiDataDisplayListRoute;
   UiDataDisplayMarkdownRendererRoute: typeof UiDataDisplayMarkdownRendererRoute;
@@ -476,6 +496,7 @@ interface UiRouteChildren {
 
 const UiRouteChildren: UiRouteChildren = {
   UiIndexRoute: UiIndexRoute,
+  UiDataDisplayAvatarRoute: UiDataDisplayAvatarRoute,
   UiDataDisplayDividerRoute: UiDataDisplayDividerRoute,
   UiDataDisplayListRoute: UiDataDisplayListRoute,
   UiDataDisplayMarkdownRendererRoute: UiDataDisplayMarkdownRendererRoute,
