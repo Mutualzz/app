@@ -12,7 +12,8 @@ export default [
         rules: {
             "@typescript-eslint/no-unnecessary-condition": "off",
             "@typescript-eslint/no-this-alias": "off",
-            "react/no-children-prop": "off"
+            "react/no-children-prop": "off",
         },
+        ignores: ["*", "!src", "!electron"],
     },
 ];
