@@ -1,8 +1,8 @@
+import { Logger } from "@logger";
 import type { APIUser } from "@mutualzz/types";
 import { isSSR, isTauri } from "@utils/index";
 import REST from "@utils/REST";
 import { secureStorageAdapter } from "@utils/secureStorageAdapter";
-import { Logger } from "Logger";
 import { makeAutoObservable } from "mobx";
 import { makePersistable } from "mobx-persist-store";
 import secureLocalStorage from "react-secure-storage";
