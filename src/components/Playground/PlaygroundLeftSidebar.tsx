@@ -13,7 +13,6 @@ import { useLocation, useNavigate } from "@tanstack/react-router";
 import { sortThemes } from "@utils/index";
 import startCase from "lodash-es/startCase";
 import { observer } from "mobx-react";
-import { FaRandom } from "react-icons/fa";
 
 const links = {
     dataDisplay: [
