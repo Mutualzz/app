@@ -1,10 +1,12 @@
+import { PlaygroundContent } from "@components/Playground/PlaygroundContent";
+import { PlaygroundRightSidebar } from "@components/Playground/PlaygroundRightSidebar";
 import {
     Button,
     Checkbox,
     Divider,
+    IconButton,
     Input,
     Option,
-    Paper,
     Radio,
     RadioGroup,
     randomColor,
@@ -24,6 +26,7 @@ import { seo } from "@seo";
 import { createFileRoute } from "@tanstack/react-router";
 import capitalize from "lodash-es/capitalize";
 import { useState } from "react";
+import { FaPlus } from "react-icons/fa";
 
 export const Route = createFileRoute("/ui/inputs/slider")({
     component: SlderPlayground,
@@ -95,6 +98,7 @@ function SlderPlayground() {
                 key={`${v}-${c}`}
                 width={orientation === "horizontal" ? 150 : "auto"}
                 height={orientation === "vertical" ? 150 : "auto"}
+                spacing={5}
             >
                 <Typography>
                     {capitalize(v)} {capitalize(c)}
@@ -142,6 +146,7 @@ function SlderPlayground() {
             key={c}
             width={orientation === "horizontal" ? 150 : "auto"}
             height={orientation === "vertical" ? 150 : "auto"}
+            spacing={5}
         >
             <Typography>
                 {capitalize(variant)} {capitalize(c)}
@@ -180,16 +185,13 @@ function SlderPlayground() {
     ));
 
     return (
-        <Stack width="100%" spacing={10} direction="row">
-            <Paper
-                width="100%"
+        <Stack width="100%" direction="row">
+            <PlaygroundContent
                 direction={variant === "all" ? "column" : "row"}
                 alignItems="flex-start"
                 alignContent="flex-start"
                 wrap={variant === "all" ? "nowrap" : "wrap"}
-                p={20}
                 spacing={25}
-                overflowY="auto"
             >
                 {variant === "all" &&
                     allSliders.map((sliders, i) => (
@@ -203,33 +205,20 @@ function SlderPlayground() {
                         </Stack>
                     ))}
                 {variant !== "all" && sliders}
-            </Paper>
-            <Paper width="25%" overflowY="auto" direction="column" p={20}>
-                <Divider>Playground</Divider>
+            </PlaygroundContent>
+            <PlaygroundRightSidebar>
                 <Stack direction="column" spacing={5}>
                     <Typography>Variant</Typography>
                     <RadioGroup
                         onChange={(_, vriant) => setVariant(vriant as Variant)}
                         value={variant}
                         name="variants"
+                        color="neutral"
+                        spacing={5}
                     >
-                        <Radio
-                            key="all"
-                            value="all"
-                            label="All"
-                            checked={variant === "all"}
-                            color="neutral"
-                            onChange={() => setVariant("all")}
-                        />
+                        <Radio key="all" value="all" label="All" />
                         {variants.map((v) => (
-                            <Radio
-                                key={v}
-                                value={v}
-                                label={capitalize(v)}
-                                checked={variant === v}
-                                color="neutral"
-                                onChange={() => setVariant(v)}
-                            />
+                            <Radio key={v} value={v} label={capitalize(v)} />
                         ))}
                     </RadioGroup>
                 </Stack>
@@ -247,6 +236,7 @@ function SlderPlayground() {
                                     return !prev;
                                 })
                             }
+                            size="sm"
                         />
                     </Stack>
                     {customSizeToggle ? (
@@ -264,15 +254,14 @@ function SlderPlayground() {
                             value={size as Size}
                             name="sizes"
                             orientation="horizontal"
+                            spacing={10}
+                            color="neutral"
                         >
                             {Object.keys(sizeNames).map((s) => (
                                 <Radio
                                     key={s}
                                     value={s}
                                     label={sizeNames[s as Size]}
-                                    checked={size === s}
-                                    color="neutral"
-                                    onChange={() => setSize(s as Size)}
                                 />
                             ))}
                         </RadioGroup>
@@ -290,34 +279,85 @@ function SlderPlayground() {
                         value={orientation}
                         name="orientation"
                         orientation="horizontal"
+                        spacing={10}
+                        color="neutral"
                     >
-                        <Radio
-                            value="horizontal"
-                            label="Horizontal"
-                            checked={orientation === "horizontal"}
-                            color="neutral"
+                        <Radio value="horizontal" label="Horizontal" />
+                        <Radio value="vertical" label="Vertical" />
+                    </RadioGroup>
+                </Stack>
+                <Divider />
+                <Stack direction="column" spacing={5}>
+                    <Typography>Min</Typography>
+                    <Input
+                        variant="solid"
+                        size="lg"
+                        color="primary"
+                        fullWidth
+                        type="number"
+                        value={min}
+                        onChange={(e) => setMin(Number(e.target.value))}
+                    />
+                </Stack>
+                <Divider />
+                <Stack direction="column" spacing={5}>
+                    <Typography>Max</Typography>
+                    <Input
+                        variant="solid"
+                        size="lg"
+                        color="primary"
+                        fullWidth
+                        type="number"
+                        value={max}
+                        onChange={(e) => setMax(Number(e.target.value))}
+                    />
+                </Stack>
+                <Stack
+                    direction="column"
+                    spacing={5}
+                    wrap="wrap"
+                    width="100%"
+                ></Stack>
+                <Divider />
+                <Stack direction="column" spacing={10}>
+                    <Stack
+                        justifyContent="space-between"
+                        direction="row"
+                        spacing={5}
+                    >
+                        <Typography>Step</Typography>
+                        <Checkbox
+                            checked={step === null}
+                            label="Default/Snap To Marks"
                             onChange={() =>
-                                setOrientation(
-                                    "horizontal" as SliderOrientation,
+                                setStep((prev) => (prev ? null : 1))
+                            }
+                            size="sm"
+                        />
+                    </Stack>
+                    {step !== null && (
+                        <Input
+                            variant="solid"
+                            size="lg"
+                            color="primary"
+                            fullWidth
+                            type="number"
+                            value={step}
+                            onChange={(e) =>
+                                setStep(
+                                    e.target.value
+                                        ? Number(e.target.value)
+                                        : null,
                                 )
                             }
                         />
-                        <Radio
-                            value="vertical"
-                            label="Vertical"
-                            checked={orientation === "vertical"}
-                            color="neutral"
-                            onChange={() =>
-                                setOrientation("vertical" as SliderOrientation)
-                            }
-                        />
-                    </RadioGroup>
+                    )}
                 </Stack>
                 <Divider />
                 <Stack direction="column" spacing={10}>
                     <Stack direction="column" spacing={10}>
                         <Typography>States</Typography>
-                        <Stack direction="row" spacing={5}>
+                        <Stack direction="row" spacing={10}>
                             <Checkbox
                                 checked={disabled}
                                 label="Disabled"
@@ -355,28 +395,12 @@ function SlderPlayground() {
                         }
                         value={markState}
                         name="markState"
+                        spacing={10}
+                        color="neutral"
                     >
-                        <Radio
-                            value="off"
-                            label="Off"
-                            checked={markState === "off"}
-                            color="neutral"
-                            onChange={() => setMarkState("off")}
-                        />
-                        <Radio
-                            value="on"
-                            label="On"
-                            checked={markState === "on"}
-                            color="neutral"
-                            onChange={() => setMarkState("on")}
-                        />
-                        <Radio
-                            value="custom"
-                            label="Custom"
-                            checked={markState === "custom"}
-                            color="neutral"
-                            onChange={() => setMarkState("custom")}
-                        />
+                        <Radio value="off" label="Off" />
+                        <Radio value="on" label="On" />
+                        <Radio value="custom" label="Custom" />
                     </RadioGroup>
                     {markState === "custom" && (
                         <Stack direction="column" spacing={10}>
@@ -389,6 +413,8 @@ function SlderPlayground() {
                                     type="number"
                                     placeholder="Value"
                                     value={valueInput ?? ""}
+                                    min={min}
+                                    max={max}
                                     onChange={(e) => {
                                         let value = Number(e.target.value);
                                         if (isNaN(value)) value = min;
@@ -494,7 +520,7 @@ function SlderPlayground() {
                     )}
                 </Stack>
                 <Divider />
-                <Stack direction="column" spacing={10}>
+                <Stack direction="column" spacing={5}>
                     <Typography>Value Display</Typography>
                     <RadioGroup
                         orientation="horizontal"
@@ -505,171 +531,110 @@ function SlderPlayground() {
                         }
                         value={valueDisplay}
                         name="labelDisplay"
+                        color="neutral"
+                        spacing={10}
                     >
-                        <Radio
-                            value="off"
-                            label="Off"
-                            checked={valueDisplay === "off"}
-                            color="neutral"
-                            onChange={() => setValueDisplay("off")}
-                        />
-                        <Radio
-                            value="on"
-                            label="On"
-                            checked={valueDisplay === "on"}
-                            color="neutral"
-                            onChange={() => setValueDisplay("on")}
-                        />
-                        <Radio
-                            value="auto"
-                            label="Auto"
-                            checked={valueDisplay === "auto"}
-                            color="neutral"
-                            onChange={() => setValueDisplay("auto")}
-                        />
+                        <Radio value="off" label="Off" />
+                        <Radio value="on" label="On" />
+                        <Radio value="auto" label="Auto" />
                     </RadioGroup>
                 </Stack>
                 <Divider />
-                <Stack direction="column" spacing={10}>
-                    <Stack
-                        justifyContent="space-between"
-                        direction="row"
-                        spacing={5}
-                    >
-                        <Typography>Step</Typography>
-                        <Checkbox
-                            checked={step === null}
-                            label={
-                                <span css={{ fontSize: 12 }}>
-                                    Default/Snap To Marks
-                                </span>
-                            }
-                            onChange={() =>
-                                setStep((prev) => (prev ? null : 1))
-                            }
-                        />
-                    </Stack>
-                    {step !== null && (
-                        <Input
-                            variant="solid"
-                            size="lg"
-                            color="primary"
-                            fullWidth
-                            type="number"
-                            value={step}
-                            onChange={(e) =>
-                                setStep(
-                                    e.target.value
-                                        ? Number(e.target.value)
-                                        : null,
-                                )
-                            }
-                        />
-                    )}
-                </Stack>
-                <Divider />
-                <Stack direction="row" spacing={5} wrap="wrap" width="100%">
-                    <Stack
-                        minWidth={0}
-                        flex={1}
-                        direction="column"
-                        spacing={10}
-                    >
-                        <Typography>Min</Typography>
-                        <Input
-                            variant="solid"
-                            size="lg"
-                            color="primary"
-                            fullWidth
-                            type="number"
-                            value={min}
-                            onChange={(e) => setMin(Number(e.target.value))}
-                        />
-                    </Stack>
-                    <Stack
-                        minWidth={0}
-                        direction="column"
-                        spacing={10}
-                        flex={1}
-                    >
-                        <Typography>Max</Typography>
-                        <Input
-                            variant="solid"
-                            size="lg"
-                            color="primary"
-                            fullWidth
-                            type="number"
-                            value={max}
-                            onChange={(e) => setMax(Number(e.target.value))}
-                        />
-                    </Stack>
-                </Stack>
-                <Divider />
-                <Stack direction="column" spacing={10}>
+                <Stack direction="column" spacing={5}>
                     <Typography>Custom Color</Typography>
-                    <Stack alignContent="center" direction="row" spacing={5}>
+                    <Stack direction="column" spacing={10}>
                         <Input
                             type="color"
                             variant="solid"
                             size="lg"
                             color="primary"
-                            fullWidth
+                            placeholder="Enter a color (e.g., #ff0000)"
                             value={customColor}
                             onChange={setCustomColor}
+                            endDecorator={
+                                <IconButton
+                                    color={customColor}
+                                    variant="solid"
+                                    onClick={() => {
+                                        setCustomColors(
+                                            (prev) =>
+                                                [
+                                                    ...prev,
+                                                    customColor,
+                                                ] as ColorLike[],
+                                        );
+                                        setCustomColor(randomColor());
+                                        setColorToDelete(customColor);
+                                    }}
+                                >
+                                    <FaPlus />
+                                </IconButton>
+                            }
                         />
-                        <Button
-                            color="primary"
-                            disabled={!customColor}
-                            onClick={() => {
-                                setCustomColors(
-                                    (prev) =>
-                                        [...prev, customColor] as ColorLike[],
-                                );
-                                setCustomColor(randomColor());
-                                setColorToDelete(customColor);
-                            }}
-                        >
-                            Add Color
-                        </Button>
-                    </Stack>
-                    {customColors.length > 0 && (
-                        <Stack alignItems="center" direction="row" spacing={10}>
-                            <Select
-                                value={colorToDelete ?? ""}
-                                onValueChange={(value) => {
-                                    setColorToDelete(
-                                        value.toString().trim() as ColorLike,
-                                    );
-                                }}
-                            >
-                                {customColors.map((color) => (
-                                    <Option key={color} value={color}>
-                                        {color}
-                                    </Option>
-                                ))}
-                            </Select>
-                            <Button
-                                color="danger"
-                                onClick={() => {
-                                    setCustomColors((prev) => {
-                                        const updated = prev.filter(
-                                            (color) => color !== colorToDelete,
-                                        );
+                        {customColors.length > 0 && (
+                            <Stack direction="column" spacing={10}>
+                                <Select
+                                    value={colorToDelete ?? ""}
+                                    onValueChange={(value) => {
                                         setColorToDelete(
-                                            updated.length > 0
-                                                ? updated[updated.length - 1]
-                                                : null,
+                                            value
+                                                .toString()
+                                                .trim() as ColorLike,
                                         );
-                                        return updated;
-                                    });
-                                }}
-                            >
-                                Delete Color
-                            </Button>
-                        </Stack>
-                    )}
+                                    }}
+                                    color={colorToDelete ?? "neutral"}
+                                >
+                                    {customColors.map((color) => (
+                                        <Option
+                                            color={color}
+                                            key={color}
+                                            value={color}
+                                        >
+                                            {color}
+                                        </Option>
+                                    ))}
+                                </Select>
+                                <Stack direction="column" spacing={10}>
+                                    <Button
+                                        color="danger"
+                                        onClick={() => {
+                                            setCustomColors((prev) => {
+                                                const updated = prev.filter(
+                                                    (color) =>
+                                                        color !== colorToDelete,
+                                                );
+                                                setColorToDelete(
+                                                    updated.length > 0
+                                                        ? updated[
+                                                              updated.length - 1
+                                                          ]
+                                                        : null,
+                                                );
+                                                return updated;
+                                            });
+                                        }}
+                                    >
+                                        {customColors.length > 1
+                                            ? "Delete Selected Color"
+                                            : "Delete Color"}
+                                    </Button>
+                                    {customColors.length > 1 && (
+                                        <Button
+                                            variant="soft"
+                                            color="danger"
+                                            onClick={() => {
+                                                setCustomColors([]);
+                                            }}
+                                        >
+                                            Delete All
+                                        </Button>
+                                    )}
+                                </Stack>
+                            </Stack>
+                        )}
+                    </Stack>
                 </Stack>
-            </Paper>
+            </PlaygroundRightSidebar>
         </Stack>
     );
 }

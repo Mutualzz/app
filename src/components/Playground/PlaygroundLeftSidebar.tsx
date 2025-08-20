@@ -13,10 +13,41 @@ import { useLocation, useNavigate } from "@tanstack/react-router";
 import { sortThemes } from "@utils/index";
 import startCase from "lodash-es/startCase";
 import { observer } from "mobx-react";
-import { motion } from "motion/react";
-import { Logo } from "./Logo";
+import { FaRandom } from "react-icons/fa";
 
 const links = {
+    dataDisplay: [
+        {
+            name: "Avatar",
+            link: "/ui/data-display/avatar",
+        },
+        {
+            name: "Divider",
+            link: "/ui/data-display/divider",
+        },
+        {
+            name: "List",
+            link: "/ui/data-display/list",
+        },
+        {
+            name: "Markdown",
+            link: "/ui/data-display/markdown-renderer",
+        },
+        {
+            name: "Typography",
+            link: "/ui/data-display/typography",
+        },
+    ],
+    feedback: [
+        {
+            name: "Circular Progress",
+            link: "/ui/feedback/circular-progress",
+        },
+        {
+            name: "Linear Progress",
+            link: "/ui/feedback/linear-progress",
+        },
+    ],
     inputs: [
         {
             name: "Button",
@@ -56,38 +87,6 @@ const links = {
             link: "/ui/inputs/textarea",
         },
     ],
-    dataDisplay: [
-        {
-            name: "Avatar",
-            link: "/ui/data-display/avatar",
-        },
-        {
-            name: "Divider",
-            link: "/ui/data-display/divider",
-        },
-        {
-            name: "List",
-            link: "/ui/data-display/list",
-        },
-        {
-            name: "Markdown",
-            link: "/ui/data-display/markdown-renderer",
-        },
-        {
-            name: "Typography",
-            link: "/ui/data-display/typography",
-        },
-    ],
-    feedback: [
-        {
-            name: "Circular Progress",
-            link: "/ui/feedback/circular-progress",
-        },
-        {
-            name: "Linear Progress",
-            link: "/ui/feedback/linear-progress",
-        },
-    ],
     surfaces: [
         {
             name: "Paper",
@@ -95,8 +94,6 @@ const links = {
         },
     ],
 };
-
-const AnimatedLogo = motion.create(Logo);
 
 export const PlaygrondLeftSidebar = observer(() => {
     const navigate = useNavigate();
@@ -119,29 +116,14 @@ export const PlaygrondLeftSidebar = observer(() => {
         <Paper
             spacing={25}
             direction="column"
-            justifyContent="flex-start"
             overflowY="auto"
-            width="14rem"
-            borderRadius="2rem"
+            minWidth="14rem"
             p={20}
+            css={{
+                borderTopLeftRadius: "2rem",
+                borderBottomLeftRadius: "2rem",
+            }}
         >
-            <AnimatedLogo
-                css={{
-                    width: 64,
-                    height: 64,
-                    alignSelf: "center",
-                    cursor: "pointer",
-                }}
-                onClick={() => {
-                    navigate({
-                        to: "/",
-                        replace: true,
-                    });
-                }}
-                whileHover={{
-                    scale: 1.1,
-                }}
-            />
             <Stack direction="column" spacing={25}>
                 <Stack
                     justifyContent="center"

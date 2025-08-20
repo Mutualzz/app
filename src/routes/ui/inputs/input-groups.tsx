@@ -1,3 +1,5 @@
+import { PlaygroundContent } from "@components/Playground/PlaygroundContent";
+import { PlaygroundRightSidebar } from "@components/Playground/PlaygroundRightSidebar";
 import {
     Button,
     ButtonGroup,
@@ -7,7 +9,6 @@ import {
     type ColorLike,
     Divider,
     Input,
-    Paper,
     Radio,
     RadioGroup,
     randomColor,
@@ -280,38 +281,28 @@ function PlaygroundInputGroups() {
     }
 
     return (
-        <Stack width="100%" spacing={10} direction="row">
-            <Paper
-                width="100%"
+        <Stack width="100%" direction="row">
+            <PlaygroundContent
                 direction="row"
                 alignItems="flex-start"
                 alignContent="flex-start"
                 wrap={variant === "all" ? "nowrap" : "wrap"}
-                p={20}
-                spacing={5}
-                overflowY="auto"
             >
                 {variant === "all" && group}
                 {variant !== "all" && groupWithoutAll}
-            </Paper>
-            <Paper p={20} overflowY="auto" width="25%" direction="column">
-                <Divider>Playground</Divider>
+            </PlaygroundContent>
+            <PlaygroundRightSidebar>
                 <Stack direction="column" spacing={5}>
                     <Typography>Input Type</Typography>
                     <RadioGroup
                         onChange={(_, type) => setInputType(type as InputType)}
                         value={inputType}
                         name="input-types"
+                        color="neutral"
+                        spacing={5}
                     >
                         {inputTypes.map((it) => (
-                            <Radio
-                                key={it}
-                                value={it}
-                                label={capitalize(it)}
-                                checked={inputType === it}
-                                color="neutral"
-                                onChange={() => setInputType(it)}
-                            />
+                            <Radio key={it} value={it} label={capitalize(it)} />
                         ))}
                     </RadioGroup>
                 </Stack>
@@ -322,23 +313,12 @@ function PlaygroundInputGroups() {
                         onChange={(_, vriant) => setVariant(vriant as Variant)}
                         value={variant}
                         name="variants"
+                        color="neutral"
+                        spacing={5}
                     >
-                        <Radio
-                            value="all"
-                            label="All"
-                            checked={variant === "all"}
-                            color="neutral"
-                            onChange={() => setVariant("all")}
-                        />
+                        <Radio value="all" label="All" />
                         {variants.map((v) => (
-                            <Radio
-                                key={v}
-                                value={v}
-                                label={capitalize(v)}
-                                checked={variant === v}
-                                color="neutral"
-                                onChange={() => setVariant(v)}
-                            />
+                            <Radio key={v} value={v} label={capitalize(v)} />
                         ))}
                     </RadioGroup>
                 </Stack>
@@ -385,15 +365,13 @@ function PlaygroundInputGroups() {
                         <Divider />
                     </>
                 )}
-                <Stack direction="column" spacing={10}>
+                <Stack direction="column" spacing={5}>
                     <Stack
                         direction="row"
                         justifyContent="space-between"
                         spacing={5}
                     >
-                        <Typography>
-                            {customColorToggle ? "Custom Color" : "Color"}
-                        </Typography>
+                        <Typography>Color</Typography>
                         <Checkbox
                             checked={customColorToggle}
                             label="Custom"
@@ -403,47 +381,33 @@ function PlaygroundInputGroups() {
                                     return !prev;
                                 })
                             }
+                            size="sm"
                         />
                     </Stack>
                     {customColorToggle ? (
-                        <Stack
-                            alignContent="center"
-                            direction="row"
-                            spacing={5}
-                        >
-                            <Input
-                                type="color"
-                                variant="solid"
-                                size="lg"
-                                color="primary"
-                                placeholder="Enter color (e.g. #ff0000)"
-                                value={customColor}
-                                onChange={setCustomColor}
-                            />
-                            <Button
-                                color="primary"
-                                disabled={!customColor}
-                                onClick={() => {
-                                    setCustomColor(randomColor());
-                                }}
-                            >
-                                Random
-                            </Button>
-                        </Stack>
+                        <Input
+                            type="color"
+                            variant="solid"
+                            size="lg"
+                            color="primary"
+                            placeholder="Enter color (e.g. #ff0000)"
+                            value={customColor}
+                            onChange={setCustomColor}
+                            showRandom
+                        />
                     ) : (
                         <RadioGroup
                             onChange={(_, clr) => setColor(clr as Color)}
                             value={color}
                             name="colors"
+                            color="neutral"
+                            spacing={5}
                         >
                             {colors.map((c) => (
                                 <Radio
                                     key={c}
                                     value={c}
                                     label={capitalize(c)}
-                                    checked={color === c}
-                                    color="neutral"
-                                    onChange={() => setColor(c)}
                                 />
                             ))}
                         </RadioGroup>
@@ -452,17 +416,13 @@ function PlaygroundInputGroups() {
                 <Divider />
                 {inputType === "button" && (
                     <>
-                        <Stack direction="column" spacing={10}>
+                        <Stack direction="column" spacing={5}>
                             <Stack
                                 direction="row"
                                 justifyContent="space-between"
                                 spacing={5}
                             >
-                                <Typography>
-                                    {customSeparatorColorToggle
-                                        ? "Custom Separator Color"
-                                        : "Separator Color"}
-                                </Typography>
+                                <Typography>Separator Color</Typography>
                                 <Checkbox
                                     checked={customSeparatorColorToggle}
                                     label="Custom"
@@ -474,35 +434,20 @@ function PlaygroundInputGroups() {
                                             },
                                         )
                                     }
+                                    size="sm"
                                 />
                             </Stack>
                             {customSeparatorColorToggle ? (
-                                <Stack
-                                    alignContent="center"
-                                    direction="row"
-                                    spacing={5}
-                                >
-                                    <Input
-                                        type="color"
-                                        variant="solid"
-                                        size="lg"
-                                        color="primary"
-                                        placeholder="Enter color (e.g. #ff0000)"
-                                        value={customSeparatorColor}
-                                        onChange={setCustomSeparatorColor}
-                                    />
-                                    <Button
-                                        color="primary"
-                                        disabled={!customSeparatorColor}
-                                        onClick={() => {
-                                            setCustomSeparatorColor(
-                                                randomColor(),
-                                            );
-                                        }}
-                                    >
-                                        Random
-                                    </Button>
-                                </Stack>
+                                <Input
+                                    type="color"
+                                    variant="solid"
+                                    size="lg"
+                                    color="primary"
+                                    placeholder="Enter color (e.g. #ff0000)"
+                                    value={customSeparatorColor}
+                                    onChange={setCustomSeparatorColor}
+                                    showRandom
+                                />
                             ) : (
                                 <RadioGroup
                                     onChange={(_, clr) =>
@@ -510,28 +455,17 @@ function PlaygroundInputGroups() {
                                     }
                                     value={separatorColor}
                                     name="separator-colors"
+                                    spacing={5}
+                                    color="neutral"
                                 >
+                                    <Radio value="none" label="None" />
                                     {colors.map((c) => (
                                         <Radio
                                             key={c}
                                             value={c}
                                             label={capitalize(c)}
-                                            checked={separatorColor === c}
-                                            color="neutral"
-                                            onChange={() =>
-                                                setSeparatorColor(c)
-                                            }
                                         />
                                     ))}
-                                    <Radio
-                                        value="none"
-                                        label="None"
-                                        checked={separatorColor === "none"}
-                                        color="neutral"
-                                        onChange={() =>
-                                            setSeparatorColor("none")
-                                        }
-                                    />
                                 </RadioGroup>
                             )}
                         </Stack>
@@ -556,6 +490,7 @@ function PlaygroundInputGroups() {
                                     return !prev;
                                 })
                             }
+                            size="sm"
                         />
                     </Stack>
                     {customSizeToggle ? (
@@ -572,7 +507,7 @@ function PlaygroundInputGroups() {
                             onChange={(_, size) => setSize(size as Size)}
                             value={size as Size}
                             name="sizes"
-                            orientation="horizontal"
+                            spacing={5}
                         >
                             {Object.keys(sizeNames).map((s) => (
                                 <Radio
@@ -592,30 +527,20 @@ function PlaygroundInputGroups() {
                     <Typography>Orientation</Typography>
                     <RadioGroup
                         orientation="horizontal"
-                        onChange={(_, orientation) =>
-                            setOrientation(orientation as "horizontal")
+                        onChange={(_, ori) =>
+                            setOrientation(ori as "horizontal")
                         }
                         value={orientation}
                         name="orientation"
+                        color="neutral"
+                        spacing={10}
                     >
-                        <Radio
-                            value="horizontal"
-                            label="Horizontal"
-                            checked={orientation === "horizontal"}
-                            color="neutral"
-                            onChange={() => setOrientation("horizontal")}
-                        />
-                        <Radio
-                            value="vertical"
-                            label="Vertical"
-                            checked={orientation === "vertical"}
-                            color="neutral"
-                            onChange={() => setOrientation("vertical")}
-                        />
+                        <Radio value="horizontal" label="Horizontal" />
+                        <Radio value="vertical" label="Vertical" />
                     </RadioGroup>
                 </Stack>
                 <Divider />
-                <Stack direction="column" spacing={5}>
+                <Stack direction="column" spacing={10}>
                     <Typography>Spacing</Typography>
                     <Slider
                         value={spacing}
@@ -666,7 +591,7 @@ function PlaygroundInputGroups() {
                         fullWidth
                     />
                 </Stack>
-            </Paper>
+            </PlaygroundRightSidebar>
         </Stack>
     );
 }

@@ -1,10 +1,12 @@
+import { PlaygroundContent } from "@components/Playground/PlaygroundContent";
+import { PlaygroundRightSidebar } from "@components/Playground/PlaygroundRightSidebar";
 import {
     Button,
     Checkbox,
     Divider,
+    IconButton,
     Input,
     Option,
-    Paper,
     Radio,
     RadioGroup,
     randomColor,
@@ -24,6 +26,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import capitalize from "lodash-es/capitalize";
 import startCase from "lodash-es/startCase";
 import { useState, type ChangeEvent } from "react";
+import { FaPlus } from "react-icons/fa";
 
 export const Route = createFileRoute("/ui/inputs/input")({
     component: InputPlayground,
@@ -109,6 +112,7 @@ function InputPlayground() {
                 justifyContent="center"
                 alignItems="center"
                 key={`${v}-${c}`}
+                spacing={5}
             >
                 <Typography>
                     {capitalize(v)} {capitalize(c)}
@@ -155,6 +159,7 @@ function InputPlayground() {
             alignItems="center"
             direction="column"
             key={c}
+            spacing={5}
         >
             <Typography>
                 {capitalize(variant)} {capitalize(c)}
@@ -190,50 +195,36 @@ function InputPlayground() {
     ));
 
     return (
-        <Stack width="100%" spacing={10} direction="row">
-            <Paper
-                width="100%"
+        <Stack width="100%" direction="row">
+            <PlaygroundContent
                 direction={variant === "all" ? "column" : "row"}
                 alignItems="flex-start"
                 alignContent="flex-start"
                 wrap={variant === "all" ? "nowrap" : "wrap"}
-                p={20}
-                spacing={variant === "all" ? 10 : 5}
                 overflowY="auto"
+                spacing={20}
             >
                 {variant === "all" &&
                     allInputs.map((inputs, i) => (
-                        <Stack wrap="wrap" direction="row" spacing={5} key={i}>
+                        <Stack wrap="wrap" direction="row" spacing={10} key={i}>
                             {inputs}
                         </Stack>
                     ))}
                 {variant !== "all" && inputs}
-            </Paper>
-            <Paper width="25%" overflowY="auto" direction="column" p={20}>
-                <Divider>Playground</Divider>
+            </PlaygroundContent>
+            <PlaygroundRightSidebar>
                 <Stack direction="column" spacing={5}>
                     <Typography>Variant</Typography>
                     <RadioGroup
                         onChange={(_, vriant) => setVariant(vriant as Variant)}
                         value={variant}
                         name="variants"
+                        color="neutral"
+                        spacing={5}
                     >
-                        <Radio
-                            value="all"
-                            label="All"
-                            checked={variant === "all"}
-                            color="neutral"
-                            onChange={() => setVariant("all")}
-                        />
+                        <Radio value="all" label="All" />
                         {variants.map((v) => (
-                            <Radio
-                                key={v}
-                                value={v}
-                                label={capitalize(v)}
-                                checked={variant === v}
-                                color="neutral"
-                                onChange={() => setVariant(v)}
-                            />
+                            <Radio key={v} value={v} label={capitalize(v)} />
                         ))}
                     </RadioGroup>
                 </Stack>
@@ -255,6 +246,7 @@ function InputPlayground() {
                                     return !prev;
                                 })
                             }
+                            size="sm"
                         />
                     </Stack>
                     {customSizeToggle ? (
@@ -272,15 +264,14 @@ function InputPlayground() {
                             value={size as Size}
                             name="sizes"
                             orientation="horizontal"
+                            spacing={10}
+                            color="neutral"
                         >
                             {Object.keys(sizeNames).map((s) => (
                                 <Radio
                                     key={s}
                                     value={s}
                                     label={sizeNames[s as Size]}
-                                    checked={size === s}
-                                    color="neutral"
-                                    onChange={() => setSize(s as Size)}
                                 />
                             ))}
                         </RadioGroup>
@@ -300,30 +291,21 @@ function InputPlayground() {
                             onChange={(e) =>
                                 setCustomTextColorEnabled(e.target.checked)
                             }
+                            size="sm"
                         />
                     </Stack>
                     {customTextColorEnabled ? (
-                        <Stack direction="row" spacing={5}>
-                            <Input
-                                type="color"
-                                variant="solid"
-                                size="lg"
-                                color="primary"
-                                fullWidth
-                                placeholder="Enter a text color (e.g. #ff0000)"
-                                value={customTextColor}
-                                onChange={setCustomTextColor}
-                            />
-                            <Button
-                                variant="solid"
-                                color="neutral"
-                                onClick={() => {
-                                    setCustomTextColor(randomColor());
-                                }}
-                            >
-                                Random
-                            </Button>
-                        </Stack>
+                        <Input
+                            type="color"
+                            variant="solid"
+                            size="lg"
+                            color="primary"
+                            fullWidth
+                            placeholder="Enter a text color (e.g. #ff0000)"
+                            value={customTextColor}
+                            onChange={setCustomTextColor}
+                            showRandom
+                        />
                     ) : (
                         <RadioGroup
                             onChange={(_, textColor) =>
@@ -333,17 +315,14 @@ function InputPlayground() {
                             }
                             value={textColor}
                             name="textColors"
+                            color="neutral"
+                            spacing={5}
                         >
                             {textColors.map((c) => (
                                 <Radio
                                     key={c}
                                     value={c}
                                     label={capitalize(c)}
-                                    checked={textColor === c}
-                                    color="neutral"
-                                    onChange={() =>
-                                        setTextColor(c as TypographyColor)
-                                    }
                                 />
                             ))}
                         </RadioGroup>
@@ -474,69 +453,99 @@ function InputPlayground() {
                 )}
                 <Stack direction="column" spacing={5}>
                     <Typography>Custom Color</Typography>
-                    <Stack alignContent="center" direction="row" spacing={5}>
+                    <Stack direction="column" spacing={10}>
                         <Input
                             type="color"
                             variant="solid"
                             size="lg"
                             color="primary"
-                            placeholder="Enter a color (e.g., #ff0000, red)"
+                            placeholder="Enter a color (e.g., #ff0000)"
                             value={customColor}
                             onChange={setCustomColor}
+                            endDecorator={
+                                <IconButton
+                                    color={customColor}
+                                    variant="solid"
+                                    onClick={() => {
+                                        setCustomColors(
+                                            (prev) =>
+                                                [
+                                                    ...prev,
+                                                    customColor,
+                                                ] as ColorLike[],
+                                        );
+                                        setCustomColor(randomColor());
+                                        setColorToDelete(customColor);
+                                    }}
+                                >
+                                    <FaPlus />
+                                </IconButton>
+                            }
                         />
-                        <Button
-                            color="primary"
-                            disabled={!customColor}
-                            onClick={() => {
-                                setCustomColors(
-                                    (prev) =>
-                                        [...prev, customColor] as ColorLike[],
-                                );
-                                setCustomColor(randomColor());
-                                setColorToDelete(customColor);
-                            }}
-                        >
-                            Add Color
-                        </Button>
-                    </Stack>
-                    {customColors.length > 0 && (
-                        <Stack alignItems="center" direction="row" spacing={10}>
-                            <Select
-                                value={colorToDelete ?? ""}
-                                onValueChange={(value) => {
-                                    setColorToDelete(
-                                        value.toString().trim() as ColorLike,
-                                    );
-                                }}
-                            >
-                                {customColors.map((color) => (
-                                    <Option key={color} value={color}>
-                                        {color}
-                                    </Option>
-                                ))}
-                            </Select>
-                            <Button
-                                color="danger"
-                                onClick={() => {
-                                    setCustomColors((prev) => {
-                                        const updated = prev.filter(
-                                            (color) => color !== colorToDelete,
-                                        );
+                        {customColors.length > 0 && (
+                            <Stack direction="column" spacing={10}>
+                                <Select
+                                    value={colorToDelete ?? ""}
+                                    onValueChange={(value) => {
                                         setColorToDelete(
-                                            updated.length > 0
-                                                ? updated[updated.length - 1]
-                                                : null,
+                                            value
+                                                .toString()
+                                                .trim() as ColorLike,
                                         );
-                                        return updated;
-                                    });
-                                }}
-                            >
-                                Delete Color
-                            </Button>
-                        </Stack>
-                    )}
+                                    }}
+                                    color={colorToDelete ?? "neutral"}
+                                >
+                                    {customColors.map((color) => (
+                                        <Option
+                                            color={color}
+                                            key={color}
+                                            value={color}
+                                        >
+                                            {color}
+                                        </Option>
+                                    ))}
+                                </Select>
+                                <Stack direction="column" spacing={10}>
+                                    <Button
+                                        color="danger"
+                                        onClick={() => {
+                                            setCustomColors((prev) => {
+                                                const updated = prev.filter(
+                                                    (color) =>
+                                                        color !== colorToDelete,
+                                                );
+                                                setColorToDelete(
+                                                    updated.length > 0
+                                                        ? updated[
+                                                              updated.length - 1
+                                                          ]
+                                                        : null,
+                                                );
+                                                return updated;
+                                            });
+                                        }}
+                                    >
+                                        {customColors.length > 1
+                                            ? "Delete Selected Color"
+                                            : "Delete Color"}
+                                    </Button>
+                                    {customColors.length > 1 && (
+                                        <Button
+                                            variant="soft"
+                                            color="danger"
+                                            onClick={() => {
+                                                setCustomColors([]);
+                                            }}
+                                        >
+                                            Delete All
+                                        </Button>
+                                    )}
+                                </Stack>
+                            </Stack>
+                        )}
+                    </Stack>
                 </Stack>
-            </Paper>
+            </PlaygroundRightSidebar>
         </Stack>
     );
 }

@@ -1,5 +1,6 @@
+import { PlaygroundContent } from "@components/Playground/PlaygroundContent";
+import { PlaygroundRightSidebar } from "@components/Playground/PlaygroundRightSidebar";
 import {
-    Button,
     Checkbox,
     Divider,
     Input,
@@ -92,10 +93,8 @@ function PlaygroundDivider() {
     );
 
     return (
-        <Stack width="100%" spacing={10} direction="row">
-            <Paper
-                width="100%"
-                p={20}
+        <Stack width="100%" direction="row">
+            <PlaygroundContent
                 justifyContent="center"
                 alignItems="center"
                 direction="column"
@@ -126,9 +125,8 @@ function PlaygroundDivider() {
                         />
                     </Stack>
                 )}
-            </Paper>
-            <Paper width="25%" overflowY="auto" direction="column" p={20}>
-                <Divider>Playground</Divider>
+            </PlaygroundContent>
+            <PlaygroundRightSidebar>
                 <Stack direction="column" spacing={5}>
                     <Typography>Variant</Typography>
                     <RadioGroup
@@ -136,17 +134,12 @@ function PlaygroundDivider() {
                             setVariant(vriant as DividerVariant)
                         }
                         value={variant}
+                        color="neutral"
                         name="variants"
+                        spacing={5}
                     >
                         {variants.map((v) => (
-                            <Radio
-                                key={v}
-                                value={v}
-                                label={capitalize(v)}
-                                checked={variant === v}
-                                color="neutral"
-                                onChange={() => setVariant(v)}
-                            />
+                            <Radio key={v} value={v} label={capitalize(v)} />
                         ))}
                     </RadioGroup>
                 </Stack>
@@ -159,31 +152,15 @@ function PlaygroundDivider() {
                         }
                         value={orientation}
                         name="orientations"
-                        orientation="horizontal"
+                        color="neutral"
+                        spacing={5}
                     >
-                        <Radio
-                            value="horizontal"
-                            label="Horizontal"
-                            checked={orientation === "horizontal"}
-                            color="neutral"
-                            onChange={() => setOrientation("horizontal")}
-                        />
-                        <Radio
-                            value="vertical"
-                            label="Vertical"
-                            checked={orientation === "vertical"}
-                            color="neutral"
-                            onChange={() => setOrientation("vertical")}
-                        />
+                        <Radio value="horizontal" label="Horizontal" />
+                        <Radio value="vertical" label="Vertical" />
                     </RadioGroup>
                 </Stack>
                 <Divider />
-                <Stack
-                    justifyContent="center"
-                    alignItems="stretch"
-                    spacing={5}
-                    direction="column"
-                >
+                <Stack spacing={5} direction="column">
                     <Typography>Text</Typography>
                     <Input
                         type="text"
@@ -201,42 +178,12 @@ function PlaygroundDivider() {
                         }
                     />
                 </Stack>
-                {text && (
-                    <>
-                        <Divider />
-                        <Stack direction="column" spacing={5}>
-                            <Typography>Inset</Typography>
-                            <RadioGroup
-                                onChange={(_, inst) =>
-                                    setInset(inst as DividerInset)
-                                }
-                                value={inset}
-                                name="insets"
-                                orientation="horizontal"
-                            >
-                                {insets.map((i) => (
-                                    <Radio
-                                        key={i}
-                                        value={i}
-                                        label={capitalize(i)}
-                                        checked={inset === i}
-                                        color="neutral"
-                                        onChange={() => setInset(i)}
-                                    />
-                                ))}
-                            </RadioGroup>
-                        </Stack>
-                    </>
-                )}
                 <Divider />
                 <Stack direction="column" spacing={5}>
-                    <Stack
-                        direction="row"
-                        justifyContent="space-between"
-                        spacing={5}
-                    >
+                    <Stack direction="row" justifyContent="space-between">
                         <Typography>Line Color</Typography>
                         <Checkbox
+                            size="sm"
                             label="Custom"
                             checked={customLineColorEnabled}
                             onChange={(e) =>
@@ -247,27 +194,17 @@ function PlaygroundDivider() {
                         />
                     </Stack>
                     {customLineColorEnabled ? (
-                        <Stack direction="row" spacing={5}>
-                            <InputColor
-                                type="color"
-                                variant="outlined"
-                                size="lg"
-                                color="primary"
-                                fullWidth
-                                placeholder="Enter a color (e.g., #ff0000, red)"
-                                value={customLineColor}
-                                onChange={(color) => setCustomLineColor(color)}
-                            />
-                            <Button
-                                variant="solid"
-                                color="neutral"
-                                onClick={() => {
-                                    setCustomLineColor(randomColor());
-                                }}
-                            >
-                                Random
-                            </Button>
-                        </Stack>
+                        <InputColor
+                            type="color"
+                            variant="solid"
+                            size="lg"
+                            color="primary"
+                            fullWidth
+                            placeholder="Enter a color (e.g., #ff0000, red)"
+                            value={customLineColor}
+                            showRandom
+                            onChange={(color) => setCustomLineColor(color)}
+                        />
                     ) : (
                         <Select
                             value={lineColor}
@@ -283,61 +220,79 @@ function PlaygroundDivider() {
                         </Select>
                     )}
                 </Stack>
-                <Divider />
-                <Stack spacing={5} direction="column">
-                    <Stack
-                        justifyContent="space-between"
-                        direction="row"
-                        spacing={5}
-                    >
-                        <Typography>Text Color</Typography>
-                        <Checkbox
-                            label="Custom"
-                            checked={customTextColorEnabled}
-                            onChange={(e) =>
-                                setCustomTextColorEnabled(
-                                    e.currentTarget.checked,
-                                )
-                            }
-                        />
-                    </Stack>
-                    {customTextColorEnabled ? (
-                        <Stack direction="row" spacing={5}>
-                            <InputColor
-                                variant="solid"
-                                size="lg"
-                                color="primary"
-                                fullWidth
-                                placeholder="Enter a color (e.g., #ff0000, red)"
-                                value={customTextColor}
-                                onChange={(color) => setCustomTextColor(color)}
-                            />
-                            <Button
-                                variant="solid"
-                                color="neutral"
-                                onClick={() => {
-                                    setCustomTextColor(randomColor());
-                                }}
+                {text && (
+                    <>
+                        <Divider />
+                        <Stack spacing={5} direction="column">
+                            <Stack
+                                justifyContent="space-between"
+                                direction="row"
+                                spacing={5}
                             >
-                                Random
-                            </Button>
+                                <Typography>Text Color</Typography>
+                                <Checkbox
+                                    label="Custom"
+                                    size="sm"
+                                    checked={customTextColorEnabled}
+                                    onChange={(e) =>
+                                        setCustomTextColorEnabled(
+                                            e.currentTarget.checked,
+                                        )
+                                    }
+                                />
+                            </Stack>
+                            {customTextColorEnabled ? (
+                                <InputColor
+                                    variant="solid"
+                                    size="lg"
+                                    color="primary"
+                                    fullWidth
+                                    placeholder="Enter a color (e.g., #ff0000, red)"
+                                    value={customTextColor}
+                                    onChange={(color) =>
+                                        setCustomTextColor(color)
+                                    }
+                                    showRandom
+                                />
+                            ) : (
+                                <Select
+                                    value={textColor}
+                                    onValueChange={(value) =>
+                                        setTextColor(value as Color)
+                                    }
+                                >
+                                    {colors.map((color) => (
+                                        <Option key={color} value={color}>
+                                            {capitalize(color)}
+                                        </Option>
+                                    ))}
+                                </Select>
+                            )}
                         </Stack>
-                    ) : (
-                        <Select
-                            value={textColor}
-                            onValueChange={(value) =>
-                                setTextColor(value as Color)
-                            }
-                        >
-                            {colors.map((color) => (
-                                <Option key={color} value={color}>
-                                    {capitalize(color)}
-                                </Option>
-                            ))}
-                        </Select>
-                    )}
-                </Stack>
-            </Paper>
+                        <Divider />
+                        <Stack direction="column" spacing={5}>
+                            <Typography>Inset</Typography>
+                            <RadioGroup
+                                onChange={(_, inst) =>
+                                    setInset(inst as DividerInset)
+                                }
+                                value={inset}
+                                name="insets"
+                                color="neutral"
+                                spacing={5}
+                            >
+                                {insets.map((i) => (
+                                    <Radio
+                                        key={i}
+                                        value={i}
+                                        label={capitalize(i)}
+                                    />
+                                ))}
+                            </RadioGroup>
+                        </Stack>
+                    </>
+                )}
+            </PlaygroundRightSidebar>
         </Stack>
     );
 }

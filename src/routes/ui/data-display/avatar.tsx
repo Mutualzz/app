@@ -1,11 +1,13 @@
+import { PlaygroundContent } from "@components/Playground/PlaygroundContent";
+import { PlaygroundRightSidebar } from "@components/Playground/PlaygroundRightSidebar";
 import {
     Avatar,
     Button,
     Checkbox,
     Divider,
+    IconButton,
     Input,
     Option,
-    Paper,
     Radio,
     RadioGroup,
     randomColor,
@@ -24,6 +26,7 @@ import { seo } from "@seo";
 import { createFileRoute } from "@tanstack/react-router";
 import capitalize from "lodash-es/capitalize";
 import { useState } from "react";
+import { FaPlus } from "react-icons/fa";
 
 export const Route = createFileRoute("/ui/data-display/avatar")({
     component: RouteComponent,
@@ -55,7 +58,7 @@ const sizeNames = {
 const shapes = ["circle", "square", "rounded"] as AvatarShape[];
 
 function RouteComponent() {
-    const [variant, setVariant] = useState<Variant | "all">("all");
+    const [variant, setVariant] = useState<Variant | "all">("solid");
     const [size, setSize] = useState<Size | number>("md");
     const [shape, setShape] = useState<AvatarShape | SizeValue | number>(
         "circle",
@@ -120,60 +123,41 @@ function RouteComponent() {
     ));
 
     return (
-        <Stack direction="row" width="100%" spacing={10}>
-            <Paper
-                width="100%"
+        <Stack direction="row" width="100%">
+            <PlaygroundContent
                 direction={variant === "all" ? "column" : "row"}
                 alignItems="flex-start"
                 alignContent="flex-start"
                 wrap={variant === "all" ? "nowrap" : "wrap"}
-                p={20}
-                spacing={variant === "all" ? 10 : 5}
-                overflowY="auto"
+                spacing={25}
             >
                 {variant === "all" &&
                     allAvatars.map((buttons, i) => (
-                        <Stack direction="row" spacing={5} key={i}>
+                        <Stack direction="row" spacing={25} key={i}>
                             {buttons}
                         </Stack>
                     ))}
                 {variant !== "all" && avatars}
-            </Paper>
-            <Paper width="25%" overflowY="auto" direction="column" p={20}>
-                <Divider>Playground</Divider>
+            </PlaygroundContent>
+            <PlaygroundRightSidebar>
                 <Stack direction="column" spacing={5}>
                     <Typography>Variant</Typography>
                     <RadioGroup
                         onChange={(_, vriant) => setVariant(vriant as Variant)}
                         value={variant}
                         name="variants"
+                        spacing={5}
+                        color="neutral"
                     >
-                        <Radio
-                            value="all"
-                            label="All"
-                            checked={variant === "all"}
-                            color="neutral"
-                            onChange={() => setVariant("all")}
-                        />
+                        <Radio key="all" value="all" label="All" />
                         {variants.map((v) => (
-                            <Radio
-                                key={v}
-                                value={v}
-                                label={capitalize(v)}
-                                checked={variant === v}
-                                color="neutral"
-                                onChange={() => setVariant(v)}
-                            />
+                            <Radio key={v} value={v} label={capitalize(v)} />
                         ))}
                     </RadioGroup>
                 </Stack>
                 <Divider />
                 <Stack direction="column" spacing={5}>
-                    <Stack
-                        direction="row"
-                        justifyContent="space-between"
-                        spacing={5}
-                    >
+                    <Stack direction="row" justifyContent="space-between">
                         <Typography>Size</Typography>
                         <Checkbox
                             checked={customSizeToggle}
@@ -185,6 +169,7 @@ function RouteComponent() {
                                     return !prev;
                                 })
                             }
+                            size="sm"
                         />
                     </Stack>
                     {customSizeToggle ? (
@@ -201,6 +186,8 @@ function RouteComponent() {
                             onChange={(_, size) => setSize(size as Size)}
                             value={size as Size}
                             name="sizes"
+                            color="neutral"
+                            spacing={10}
                             orientation="horizontal"
                         >
                             {Object.keys(sizeNames).map((s) => (
@@ -208,9 +195,6 @@ function RouteComponent() {
                                     key={s}
                                     value={s}
                                     label={sizeNames[s as Size]}
-                                    checked={size === s}
-                                    color="neutral"
-                                    onChange={() => setSize(s as Size)}
                                 />
                             ))}
                         </RadioGroup>
@@ -230,24 +214,23 @@ function RouteComponent() {
                             }
                             value={customShapeToggle}
                             label="Custom Shape"
+                            size="sm"
                         />
                     </Stack>
                     {customShapeToggle ? (
-                        <Stack>
-                            <Input
-                                type="text"
-                                onChange={(e) => {
-                                    const value = isNaN(Number(e.target.value))
-                                        ? e.target.value
-                                        : Number(e.target.value);
-                                    setShape(value as AvatarShape);
-                                }}
-                                value={shape}
-                                variant="solid"
-                                color="primary"
-                                fullWidth
-                            />
-                        </Stack>
+                        <Input
+                            type="text"
+                            onChange={(e) => {
+                                const value = isNaN(Number(e.target.value))
+                                    ? e.target.value
+                                    : Number(e.target.value);
+                                setShape(value as AvatarShape);
+                            }}
+                            value={shape}
+                            variant="solid"
+                            color="primary"
+                            fullWidth
+                        />
                     ) : (
                         <RadioGroup
                             onChange={(_, shape) =>
@@ -255,15 +238,14 @@ function RouteComponent() {
                             }
                             value={shape as AvatarShape}
                             name="shapes"
+                            color="neutral"
+                            spacing={5}
                         >
                             {shapes.map((br) => (
                                 <Radio
                                     key={br}
                                     value={br}
                                     label={capitalize(br)}
-                                    checked={shape === br}
-                                    color="neutral"
-                                    onChange={() => setShape(br)}
                                 />
                             ))}
                         </RadioGroup>
@@ -283,6 +265,7 @@ function RouteComponent() {
                         fullWidth
                     />
                 </Stack>
+                <Divider />
                 <Stack direction="column" spacing={5}>
                     <Typography>Image URL</Typography>
                     <Input
@@ -299,7 +282,7 @@ function RouteComponent() {
                 <Divider />
                 <Stack direction="column" spacing={5}>
                     <Typography>Custom Color</Typography>
-                    <Stack alignContent="center" direction="row" spacing={5}>
+                    <Stack direction="column" spacing={10}>
                         <Input
                             type="color"
                             variant="solid"
@@ -308,60 +291,90 @@ function RouteComponent() {
                             placeholder="Enter a color (e.g., #ff0000)"
                             value={customColor}
                             onChange={setCustomColor}
+                            endDecorator={
+                                <IconButton
+                                    color={customColor}
+                                    variant="solid"
+                                    onClick={() => {
+                                        setCustomColors(
+                                            (prev) =>
+                                                [
+                                                    ...prev,
+                                                    customColor,
+                                                ] as ColorLike[],
+                                        );
+                                        setCustomColor(randomColor());
+                                        setColorToDelete(customColor);
+                                    }}
+                                >
+                                    <FaPlus />
+                                </IconButton>
+                            }
                         />
-                        <Button
-                            color="primary"
-                            disabled={!customColor}
-                            onClick={() => {
-                                setCustomColors(
-                                    (prev) =>
-                                        [...prev, customColor] as ColorLike[],
-                                );
-                                setCustomColor(randomColor());
-                                setColorToDelete(customColor);
-                            }}
-                        >
-                            Add Color
-                        </Button>
-                    </Stack>
-                    {customColors.length > 0 && (
-                        <Stack alignItems="center" direction="row" spacing={10}>
-                            <Select
-                                value={colorToDelete ?? ""}
-                                onValueChange={(value) => {
-                                    setColorToDelete(
-                                        value.toString().trim() as ColorLike,
-                                    );
-                                }}
-                            >
-                                {customColors.map((color) => (
-                                    <Option key={color} value={color}>
-                                        {color}
-                                    </Option>
-                                ))}
-                            </Select>
-                            <Button
-                                color="danger"
-                                onClick={() => {
-                                    setCustomColors((prev) => {
-                                        const updated = prev.filter(
-                                            (color) => color !== colorToDelete,
-                                        );
+                        {customColors.length > 0 && (
+                            <Stack direction="column" spacing={10}>
+                                <Select
+                                    value={colorToDelete ?? ""}
+                                    onValueChange={(value) => {
                                         setColorToDelete(
-                                            updated.length > 0
-                                                ? updated[updated.length - 1]
-                                                : null,
+                                            value
+                                                .toString()
+                                                .trim() as ColorLike,
                                         );
-                                        return updated;
-                                    });
-                                }}
-                            >
-                                Delete Color
-                            </Button>
-                        </Stack>
-                    )}
+                                    }}
+                                    color={colorToDelete ?? "neutral"}
+                                >
+                                    {customColors.map((color) => (
+                                        <Option
+                                            color={color}
+                                            key={color}
+                                            value={color}
+                                        >
+                                            {color}
+                                        </Option>
+                                    ))}
+                                </Select>
+                                <Stack direction="column" spacing={10}>
+                                    <Button
+                                        color="danger"
+                                        onClick={() => {
+                                            setCustomColors((prev) => {
+                                                const updated = prev.filter(
+                                                    (color) =>
+                                                        color !== colorToDelete,
+                                                );
+                                                setColorToDelete(
+                                                    updated.length > 0
+                                                        ? updated[
+                                                              updated.length - 1
+                                                          ]
+                                                        : null,
+                                                );
+                                                return updated;
+                                            });
+                                        }}
+                                    >
+                                        {customColors.length > 1
+                                            ? "Delete Selected Color"
+                                            : "Delete Color"}
+                                    </Button>
+                                    {customColors.length > 1 && (
+                                        <Button
+                                            variant="soft"
+                                            color="danger"
+                                            onClick={() => {
+                                                setCustomColors([]);
+                                            }}
+                                        >
+                                            Delete All
+                                        </Button>
+                                    )}
+                                </Stack>
+                            </Stack>
+                        )}
+                    </Stack>
                 </Stack>
-            </Paper>
+            </PlaygroundRightSidebar>
         </Stack>
     );
 }

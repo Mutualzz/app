@@ -1,11 +1,11 @@
 import { MarkdownInput } from "@components/Markdown/MarkdownInput/MarkdownInput";
 import { MarkdownRenderer } from "@components/Markdown/MarkdownRenderer/MarkdownRenderer";
+import { PlaygroundContent } from "@components/Playground/PlaygroundContent";
+import { PlaygroundRightSidebar } from "@components/Playground/PlaygroundRightSidebar";
 import {
-    Button,
     Checkbox,
     Divider,
     Input,
-    Paper,
     Radio,
     RadioGroup,
     randomColor,
@@ -71,59 +71,55 @@ function RouteComponent() {
         useState<ColorLike>(randomColor());
 
     return (
-        <Stack direction="row" width="100%" spacing={10}>
-            <Paper width="50%" direction="column" pt={8}>
-                <Typography level="title-sm" textAlign="center">
-                    Markdown Editor
-                </Typography>
-                <Stack height="100%" p={12}>
-                    <MarkdownInput
-                        color="success"
-                        textColor="primary"
-                        emoticons={emoticons}
-                        hoverToolbar={hoverToolbar}
+        <Stack width="100%">
+            <PlaygroundContent>
+                <Stack width="50%" direction="column">
+                    <Typography level="title-md" textAlign="center">
+                        Markdown Editor
+                    </Typography>
+                    <Stack height="100%" p={12}>
+                        <MarkdownInput
+                            color="success"
+                            textColor="primary"
+                            emoticons={emoticons}
+                            hoverToolbar={hoverToolbar}
+                            value={markdown}
+                            onChange={setMarkdown}
+                        />
+                    </Stack>
+                </Stack>
+                <Stack direction="column" width="50%">
+                    <Typography level="title-md" textAlign="center">
+                        Markdown Renderer
+                    </Typography>
+                    <MarkdownRenderer
+                        color={customColorEnabled ? customColor : color}
+                        textColor={
+                            customTextColorEnabled ? customTextColor : textColor
+                        }
+                        variant={variant}
                         value={markdown}
-                        onChange={setMarkdown}
+                        enlargeEmojiOnly={enlargeEmojiOnly}
+                        css={{
+                            height: "100%",
+                            p: 12,
+                            mt: 10,
+                        }}
                     />
                 </Stack>
-            </Paper>
-            <Paper direction="column" p={12} pt={8} width="50%">
-                <Typography level="title-sm" textAlign="center">
-                    Markdown Renderer
-                </Typography>
-                <MarkdownRenderer
-                    color={customColorEnabled ? customColor : color}
-                    textColor={
-                        customTextColorEnabled ? customTextColor : textColor
-                    }
-                    variant={variant}
-                    value={markdown}
-                    enlargeEmojiOnly={enlargeEmojiOnly}
-                    css={{
-                        height: "100%",
-                        p: 12,
-                        mt: 10,
-                    }}
-                />
-            </Paper>
-            <Paper width="25%" overflowY="auto" direction="column" p={20}>
-                <Divider>Playground</Divider>
+            </PlaygroundContent>
+            <PlaygroundRightSidebar>
                 <Stack direction="column" spacing={5}>
                     <Typography>Variant</Typography>
                     <RadioGroup
                         onChange={(_, vriant) => setVariant(vriant as Variant)}
                         value={variant}
                         name="variants"
+                        spacing={5}
+                        color="neutral"
                     >
                         {variants.map((v) => (
-                            <Radio
-                                key={v}
-                                value={v}
-                                label={capitalize(v)}
-                                checked={variant === v}
-                                color="neutral"
-                                onChange={() => setVariant(v)}
-                            />
+                            <Radio key={v} value={v} label={capitalize(v)} />
                         ))}
                     </RadioGroup>
                 </Stack>
@@ -141,44 +137,34 @@ function RouteComponent() {
                             onChange={(e) =>
                                 setCustomColorEnabled(e.target.checked)
                             }
+                            size="sm"
                         />
                     </Stack>
                     {customColorEnabled ? (
-                        <Stack direction="row" spacing={5}>
-                            <Input
-                                type="color"
-                                variant="solid"
-                                size="lg"
-                                color="primary"
-                                fullWidth
-                                placeholder="Enter a color (e.g. #ff0000)"
-                                value={customColor}
-                                onChange={setCustomColor}
-                            />
-                            <Button
-                                variant="solid"
-                                color="neutral"
-                                onClick={() => {
-                                    setCustomColor(randomColor());
-                                }}
-                            >
-                                Random
-                            </Button>
-                        </Stack>
+                        <Input
+                            type="color"
+                            variant="solid"
+                            size="lg"
+                            color="primary"
+                            fullWidth
+                            placeholder="Enter a color (e.g. #ff0000)"
+                            value={customColor}
+                            onChange={setCustomColor}
+                            showRandom
+                        />
                     ) : (
                         <RadioGroup
                             onChange={(_, color) => setColor(color as Color)}
                             value={color}
                             name="colors"
+                            color="neutral"
+                            spacing={5}
                         >
                             {colors.map((c) => (
                                 <Radio
                                     key={c}
                                     value={c}
                                     label={capitalize(c)}
-                                    checked={color === c}
-                                    color="neutral"
-                                    onChange={() => setColor(c)}
                                 />
                             ))}
                         </RadioGroup>
@@ -198,30 +184,21 @@ function RouteComponent() {
                             onChange={(e) =>
                                 setCustomTextColorEnabled(e.target.checked)
                             }
+                            size="sm"
                         />
                     </Stack>
                     {customTextColorEnabled ? (
-                        <Stack direction="row" spacing={5}>
-                            <Input
-                                type="color"
-                                variant="solid"
-                                size="lg"
-                                color="primary"
-                                fullWidth
-                                placeholder="Enter a text color (e.g. #ff0000)"
-                                value={customTextColor}
-                                onChange={setCustomColor}
-                            />
-                            <Button
-                                variant="solid"
-                                color="neutral"
-                                onClick={() => {
-                                    setCustomTextColor(randomColor());
-                                }}
-                            >
-                                Random
-                            </Button>
-                        </Stack>
+                        <Input
+                            type="color"
+                            variant="solid"
+                            size="lg"
+                            color="primary"
+                            fullWidth
+                            placeholder="Enter a text color (e.g. #ff0000)"
+                            value={customTextColor}
+                            onChange={setCustomTextColor}
+                            showRandom
+                        />
                     ) : (
                         <RadioGroup
                             onChange={(_, textColor) =>
@@ -231,17 +208,14 @@ function RouteComponent() {
                             }
                             value={textColor}
                             name="textColors"
+                            color="neutral"
+                            spacing={5}
                         >
                             {textColors.map((c) => (
                                 <Radio
                                     key={c}
                                     value={c}
                                     label={capitalize(c)}
-                                    checked={textColor === c}
-                                    color="neutral"
-                                    onChange={() =>
-                                        setTextColor(c as TypographyColor)
-                                    }
                                 />
                             ))}
                         </RadioGroup>
@@ -249,7 +223,7 @@ function RouteComponent() {
                 </Stack>
                 <Divider />
                 <Stack direction="column" spacing={5}>
-                    <Typography level="body-sm">Editor Options</Typography>
+                    <Typography>Editor Options</Typography>
                     <Checkbox
                         label="Emoticons"
                         checked={emoticons}
@@ -267,14 +241,14 @@ function RouteComponent() {
                 </Stack>
                 <Divider />
                 <Stack direction="column" spacing={5}>
-                    <Typography level="body-sm">Renderer Options</Typography>
+                    <Typography>Renderer Options</Typography>
                     <Checkbox
                         checked={enlargeEmojiOnly}
                         onChange={(e) => setEnlargeEmojiOnly(e.target.checked)}
                         label="Enlarge Emojis Only"
                     />
                 </Stack>
-            </Paper>
+            </PlaygroundRightSidebar>
         </Stack>
     );
 }

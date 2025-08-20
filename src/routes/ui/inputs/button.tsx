@@ -1,12 +1,14 @@
+import { PlaygroundContent } from "@components/Playground/PlaygroundContent";
+import { PlaygroundRightSidebar } from "@components/Playground/PlaygroundRightSidebar";
 import {
     Button,
     Checkbox,
     type Color,
     type ColorLike,
     Divider,
+    IconButton,
     Input,
     Option,
-    Paper,
     Radio,
     RadioGroup,
     randomColor,
@@ -91,20 +93,16 @@ function PlaygroundButton() {
     const allButtons = [...colors, ...customColors].map((c) =>
         variants.map((v) =>
             iconOnly ? (
-                <Button
+                <IconButton
                     key={`${v}-${c}-button`}
                     variant={v}
                     color={c}
                     size={size}
                     loading={loading}
                     disabled={disabled}
-                    startDecorator={
-                        iconPosition === "left" && icon ? icon : null
-                    }
-                    endDecorator={
-                        iconPosition === "right" && icon ? icon : null
-                    }
-                />
+                >
+                    {icon}
+                </IconButton>
             ) : (
                 <Button
                     key={`${v}-${c}-button`}
@@ -134,25 +132,16 @@ function PlaygroundButton() {
 
     const buttons = [...colors, ...customColors].map((c) =>
         iconOnly ? (
-            <Button
+            <IconButton
                 key={`${variant}-${c}-button`}
                 variant={variant as Variant}
                 color={c}
                 size={size}
                 loading={loading}
                 disabled={disabled}
-                startDecorator={
-                    (iconPosition === "left" || iconPosition === "both") && icon
-                        ? icon
-                        : null
-                }
-                endDecorator={
-                    (iconPosition === "right" || iconPosition === "both") &&
-                    icon
-                        ? icon
-                        : null
-                }
-            />
+            >
+                {icon}
+            </IconButton>
         ) : (
             <Button
                 key={`${variant}-${c}-button`}
@@ -179,50 +168,35 @@ function PlaygroundButton() {
     );
 
     return (
-        <Stack width="100%" spacing={10} direction="row">
-            <Paper
-                width="100%"
+        <Stack width="100%" direction="row">
+            <PlaygroundContent
                 direction={variant === "all" ? "column" : "row"}
                 alignItems="flex-start"
                 alignContent="flex-start"
                 wrap={variant === "all" ? "nowrap" : "wrap"}
-                p={20}
-                spacing={variant === "all" ? 10 : 5}
-                overflowY="auto"
+                spacing={10}
             >
                 {variant === "all" &&
                     allButtons.map((buttons, i) => (
-                        <Stack direction="row" spacing={5} key={i}>
+                        <Stack direction="row" spacing={10} key={i}>
                             {buttons}
                         </Stack>
                     ))}
                 {variant !== "all" && buttons}
-            </Paper>
-            <Paper direction="column" overflowY="auto" width="25%" p={20}>
-                <Divider>Playground</Divider>
+            </PlaygroundContent>
+            <PlaygroundRightSidebar>
                 <Stack direction="column" spacing={5}>
                     <Typography>Variant</Typography>
                     <RadioGroup
                         onChange={(_, vriant) => setVariant(vriant as Variant)}
                         value={variant}
                         name="variants"
+                        color="neutral"
+                        spacing={5}
                     >
-                        <Radio
-                            value="all"
-                            label="All"
-                            checked={variant === "all"}
-                            color="neutral"
-                            onChange={() => setVariant("all")}
-                        />
+                        <Radio value="all" label="All" />
                         {variants.map((v) => (
-                            <Radio
-                                key={v}
-                                value={v}
-                                label={capitalize(v)}
-                                checked={variant === v}
-                                color="neutral"
-                                onChange={() => setVariant(v)}
-                            />
+                            <Radio key={v} value={v} label={capitalize(v)} />
                         ))}
                     </RadioGroup>
                 </Stack>
@@ -240,16 +214,17 @@ function PlaygroundButton() {
                             onChange={() =>
                                 setCustomSizeToggle((prev) => {
                                     if (prev) setSize("md");
-                                    else setSize(Math.round((24 + 10) / 2));
+                                    else setSize(Math.round((24 + 8) / 2));
                                     return !prev;
                                 })
                             }
+                            size="sm"
                         />
                     </Stack>
                     {customSizeToggle ? (
                         <Slider
                             value={size as number}
-                            min={10}
+                            min={8}
                             max={24}
                             onChange={(e) => setSize(Number(e.target.value))}
                             valueLabelDisplay="auto"
@@ -261,15 +236,14 @@ function PlaygroundButton() {
                             value={size as Size}
                             name="sizes"
                             orientation="horizontal"
+                            spacing={10}
+                            color="neutral"
                         >
                             {Object.keys(sizeNames).map((s) => (
                                 <Radio
                                     key={s}
                                     value={s}
                                     label={sizeNames[s as Size]}
-                                    checked={size === s}
-                                    color="neutral"
-                                    onChange={() => setSize(s as Size)}
                                 />
                             ))}
                         </RadioGroup>
@@ -278,7 +252,7 @@ function PlaygroundButton() {
                 <Divider />
                 <Stack direction="column" spacing={5}>
                     <Typography>States</Typography>
-                    <Stack direction="row" spacing={5}>
+                    <Stack direction="row" spacing={20}>
                         <Checkbox
                             checked={loading}
                             label="Loading"
@@ -292,71 +266,6 @@ function PlaygroundButton() {
                             disabled={loading}
                         />
                     </Stack>
-                </Stack>
-                <Divider />
-                <Stack direction="column" spacing={5}>
-                    <Typography>Custom Color</Typography>
-                    <Stack alignContent="center" direction="row" spacing={5}>
-                        <Input
-                            type="color"
-                            variant="solid"
-                            size="lg"
-                            color="primary"
-                            placeholder="Enter a color (e.g., #ff0000)"
-                            value={customColor}
-                            onChange={setCustomColor}
-                        />
-                        <Button
-                            color="primary"
-                            disabled={!customColor}
-                            onClick={() => {
-                                setCustomColors(
-                                    (prev) =>
-                                        [...prev, customColor] as ColorLike[],
-                                );
-                                setCustomColor(randomColor());
-                                setColorToDelete(customColor);
-                            }}
-                        >
-                            Add Color
-                        </Button>
-                    </Stack>
-                    {customColors.length > 0 && (
-                        <Stack alignItems="center" direction="row" spacing={10}>
-                            <Select
-                                value={colorToDelete ?? ""}
-                                onValueChange={(value) => {
-                                    setColorToDelete(
-                                        value.toString().trim() as ColorLike,
-                                    );
-                                }}
-                            >
-                                {customColors.map((color) => (
-                                    <Option key={color} value={color}>
-                                        {color}
-                                    </Option>
-                                ))}
-                            </Select>
-                            <Button
-                                color="danger"
-                                onClick={() => {
-                                    setCustomColors((prev) => {
-                                        const updated = prev.filter(
-                                            (color) => color !== colorToDelete,
-                                        );
-                                        setColorToDelete(
-                                            updated.length > 0
-                                                ? updated[updated.length - 1]
-                                                : null,
-                                        );
-                                        return updated;
-                                    });
-                                }}
-                            >
-                                Delete Color
-                            </Button>
-                        </Stack>
-                    )}
                 </Stack>
                 <Divider />
                 <Stack direction="column" spacing={5}>
@@ -380,18 +289,114 @@ function PlaygroundButton() {
                 </Stack>
                 <Divider />
                 <Stack direction="column" spacing={5}>
+                    <Typography>Custom Color</Typography>
+                    <Stack direction="column" spacing={10}>
+                        <Input
+                            type="color"
+                            variant="solid"
+                            size="lg"
+                            color="primary"
+                            placeholder="Enter a color (e.g., #ff0000)"
+                            value={customColor}
+                            onChange={setCustomColor}
+                            endDecorator={
+                                <IconButton
+                                    color={customColor}
+                                    variant="solid"
+                                    onClick={() => {
+                                        setCustomColors(
+                                            (prev) =>
+                                                [
+                                                    ...prev,
+                                                    customColor,
+                                                ] as ColorLike[],
+                                        );
+                                        setCustomColor(randomColor());
+                                        setColorToDelete(customColor);
+                                    }}
+                                >
+                                    <FaIcons.FaPlus />
+                                </IconButton>
+                            }
+                        />
+                        {customColors.length > 0 && (
+                            <Stack direction="column" spacing={10}>
+                                <Select
+                                    value={colorToDelete ?? ""}
+                                    onValueChange={(value) => {
+                                        setColorToDelete(
+                                            value
+                                                .toString()
+                                                .trim() as ColorLike,
+                                        );
+                                    }}
+                                    color={colorToDelete ?? "neutral"}
+                                >
+                                    {customColors.map((color) => (
+                                        <Option
+                                            color={color}
+                                            key={color}
+                                            value={color}
+                                        >
+                                            {color}
+                                        </Option>
+                                    ))}
+                                </Select>
+                                <Stack direction="column" spacing={10}>
+                                    <Button
+                                        color="danger"
+                                        onClick={() => {
+                                            setCustomColors((prev) => {
+                                                const updated = prev.filter(
+                                                    (color) =>
+                                                        color !== colorToDelete,
+                                                );
+                                                setColorToDelete(
+                                                    updated.length > 0
+                                                        ? updated[
+                                                              updated.length - 1
+                                                          ]
+                                                        : null,
+                                                );
+                                                return updated;
+                                            });
+                                        }}
+                                    >
+                                        {customColors.length > 1
+                                            ? "Delete Selected Color"
+                                            : "Delete Color"}
+                                    </Button>
+                                    {customColors.length > 1 && (
+                                        <Button
+                                            variant="soft"
+                                            color="danger"
+                                            onClick={() => {
+                                                setCustomColors([]);
+                                            }}
+                                        >
+                                            Delete All
+                                        </Button>
+                                    )}
+                                </Stack>
+                            </Stack>
+                        )}
+                    </Stack>
+                </Stack>
+                <Divider />
+                <Stack direction="column" spacing={10}>
                     <Stack
                         direction="row"
                         justifyContent="space-between"
                         spacing={5}
                     >
                         <Typography>Icon</Typography>
-                        {icon && iconPosition !== "both" && (
+                        {icon && (
                             <Checkbox
                                 checked={iconOnly}
                                 label="Icon Only"
                                 onChange={() => setIconOnly((prev) => !prev)}
                                 disabled={disabled}
+                                size="sm"
                             />
                         )}
                     </Stack>
@@ -405,36 +410,13 @@ function PlaygroundButton() {
                         }
                         value={iconPosition}
                         name="icon-position"
-                        orientation="horizontal"
+                        spacing={10}
+                        color="neutral"
                     >
-                        <Radio
-                            value="none"
-                            label="None"
-                            checked={iconPosition === "none"}
-                            color="neutral"
-                            onChange={() => setIconPosition("none")}
-                        />
-                        <Radio
-                            value="left"
-                            label="Left"
-                            checked={iconPosition === "left"}
-                            color="neutral"
-                            onChange={() => setIconPosition("left")}
-                        />
-                        <Radio
-                            value="right"
-                            label="Right"
-                            checked={iconPosition === "right"}
-                            color="neutral"
-                            onChange={() => setIconPosition("right")}
-                        />
-                        <Radio
-                            value="both"
-                            label="Both"
-                            checked={iconPosition === "both"}
-                            color="neutral"
-                            onChange={() => setIconPosition("both")}
-                        />
+                        <Radio value="none" label="None" />
+                        <Radio value="left" label="Left" />
+                        <Radio value="right" label="Right" />
+                        <Radio value="both" label="Both" />
                     </RadioGroup>
                     {iconPosition !== "none" && (
                         <Stack direction="column" spacing={10}>
@@ -446,6 +428,8 @@ function PlaygroundButton() {
                                 }
                                 value={iconLibrary}
                                 name="icon-library"
+                                color="neutral"
+                                spacing={5}
                             >
                                 {Object.keys(iconLibraries).map((lib) => (
                                     <Radio
@@ -455,13 +439,6 @@ function PlaygroundButton() {
                                             libNames[
                                                 lib as keyof typeof libNames
                                             ]
-                                        }
-                                        checked={iconLibrary === lib}
-                                        color="neutral"
-                                        onChange={() =>
-                                            setIconLibrary(
-                                                lib as keyof typeof iconLibraries,
-                                            )
                                         }
                                     />
                                 ))}
@@ -488,7 +465,7 @@ function PlaygroundButton() {
                         </Stack>
                     )}
                 </Stack>
-            </Paper>
+            </PlaygroundRightSidebar>
         </Stack>
     );
 }
