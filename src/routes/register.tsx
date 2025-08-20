@@ -20,6 +20,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { observer } from "mobx-react";
 import { motion } from "motion/react";
 import { useState } from "react";
+import { FaArrowLeft } from "react-icons/fa";
 
 export const Route = createFileRoute("/register")({
     component: observer(Register),
@@ -126,7 +127,7 @@ function Register() {
     }
 
     return (
-        <Stack height="100vh" justifyContent="center" alignItems="center">
+        <Stack width="100%" justifyContent="center" alignItems="center">
             <RegisterForm
                 direction="column"
                 justifyContent="center"
@@ -148,15 +149,16 @@ function Register() {
                     width="100%"
                 >
                     <Button
+                        startDecorator={<FaArrowLeft />}
                         css={{
                             position: "absolute",
                             left: 0,
                         }}
-                        variant="plain"
+                        variant="soft"
                         color="info"
                         onClick={() => navigate({ to: "/" })}
                     >
-                        {"<--"} Home
+                        Home
                     </Button>
                     <Typography level="h4">Create an account</Typography>
                 </Stack>
