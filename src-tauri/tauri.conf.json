@@ -14,7 +14,7 @@
         "withGlobalTauri": true
     },
     "build": {
-        "beforeBuildCommand": "pnpm build",
+        "beforeBuildCommand": "pnpm vite:build",
         "beforeDevCommand": "pnpm vite:dev",
         "devUrl": "http://localhost:1420",
         "frontendDist": "../dist"
