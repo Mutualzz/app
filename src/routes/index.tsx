@@ -1,4 +1,3 @@
-import { Logo } from "@components/Logo";
 import { ThemeCreator } from "@components/ThemeCreator";
 import { useModal } from "@contexts/Modal.context";
 import { useAppStore } from "@hooks/useStores";
@@ -19,12 +18,11 @@ function Index() {
     return (
         <Stack
             direction="column"
-            height="100vh"
             justifyContent="center"
             alignItems="center"
-            spacing="1rem"
+            spacing="0.5rem"
+            width="100%"
         >
-            <Logo css={{ width: 128, height: 128 }} />
             <Typography level="h2">
                 Website is currently under heavy development
             </Typography>
