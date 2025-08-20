@@ -1,4 +1,5 @@
 import Loader from "@components/Loader";
+import { TopNavigation } from "@components/TopNavigation/TopNavigation";
 import { AppTheme } from "@contexts/AppTheme.context";
 import { ModalProvider } from "@contexts/Modal.context";
 import "@fontsource/inter/100";
@@ -13,7 +14,7 @@ import "@fontsource/inter/900";
 import { useAppStore } from "@hooks/useStores";
 import { Logger } from "@logger";
 import { GatewayCloseCodes } from "@mutualzz/types";
-import { CssBaseline, Paper, Typography } from "@mutualzz/ui";
+import { CssBaseline, Paper, Stack, Typography } from "@mutualzz/ui";
 import { useNetworkState } from "@react-hookz/web";
 import { wrapCreateRootRouteWithSentry } from "@sentry/tanstackstart-react";
 import { seo } from "@seo";
@@ -36,6 +37,10 @@ import { useEffect, type ReactNode } from "react";
 export const Route = wrapCreateRootRouteWithSentry(createRootRoute)({
     head: () => ({
         meta: [...seo()],
+        links: [
+            { rel: "manifest", href: "/manifest.json" },
+            { rel: "icon", href: "/favicon.ico" },
+        ],
     }),
     component: observer(RootComponent),
     ssr: true,
@@ -153,7 +158,23 @@ function RootComponent() {
                     )}
 
                     <Loader>
-                        <Outlet />
+                        <Stack
+                            direction="column"
+                            height="100vh"
+                            width="100vw"
+                            flex={1}
+                            minHeight={0}
+                        >
+                            <TopNavigation />
+                            <Stack
+                                width="100%"
+                                flex={1}
+                                minHeight={0}
+                                overflow="hidden"
+                            >
+                                <Outlet />
+                            </Stack>
+                        </Stack>
                     </Loader>
                     {import.meta.env.DEV && (
                         <>
