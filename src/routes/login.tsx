@@ -17,6 +17,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { observer } from "mobx-react";
 import { motion } from "motion/react";
 import { useState } from "react";
+import { FaArrowLeft } from "react-icons/fa";
 
 export const Route = createFileRoute("/login")({
     component: observer(Login),
@@ -104,7 +105,7 @@ function Login() {
     return (
         <Stack
             direction="column"
-            height="100vh"
+            width="100%"
             justifyContent="center"
             alignItems="center"
         >
@@ -129,15 +130,16 @@ function Login() {
                     width="100%"
                 >
                     <Button
+                        startDecorator={<FaArrowLeft />}
                         css={{
                             position: "absolute",
                             left: 0,
                         }}
-                        variant="plain"
+                        variant="soft"
                         color="info"
                         onClick={() => navigate({ to: "/" })}
                     >
-                        {"<--"} Home
+                        Home
                     </Button>
                     <Typography level="h4">Login to an account</Typography>
                 </Stack>
