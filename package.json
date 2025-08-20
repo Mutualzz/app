@@ -111,7 +111,7 @@
     "name": "@mutualzz/app",
     "private": true,
     "scripts": {
-        "build": "tsc && tauri:build",
+        "build": "tsc && vite build",
         "build:dev": "tsc && cross-env VITE_ENV_DEV=true vite build",
         "cap:run:android": "cap copy && cap open android",
         "cap:run:ios": "cap copy && cap open ios",
@@ -126,8 +126,8 @@
         "tauri:build": "pnpm run ci:prebuild && tauri build",
         "tauri:dev": "pnpm run ci:prebuild && TAURI_ENV_DEV=true tauri dev",
         "typecheck": "tsc --noEmit",
-        "vite:dev": "cross-env VITE_ENV_DEV=true vite --host",
-        "vite:build": "vite build"
+        "vite:build": "vite build",
+        "vite:dev": "cross-env VITE_ENV_DEV=true vite --host"
     },
     "type": "module",
     "version": "1.5.1"
