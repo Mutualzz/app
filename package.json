@@ -126,7 +126,7 @@
         "tauri:build": "pnpm run ci:prebuild && tauri build",
         "tauri:dev": "pnpm run ci:prebuild && TAURI_ENV_DEV=true tauri dev",
         "typecheck": "tsc --noEmit",
-        "vite:build": "vite build",
+        "vite:build": "VITE_WEB=true vite build",
         "vite:dev": "cross-env VITE_ENV_DEV=true vite --host"
     },
     "type": "module",

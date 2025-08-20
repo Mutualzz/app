@@ -43,14 +43,14 @@ function getVersion() {
     return JSON.parse(readFileSync("package.json").toString()).version;
 }
 
-const isTauri = !!process.env.TAURI_ENV_PLATFORM;
+const isWeb = !!process.env.VITE_WEB;
 const isNativeMobile = !!process.env.VITE_CAPACITOR;
-const isNative = isTauri || isNativeMobile;
+const isNative = !isWeb || isNativeMobile;
 
 const host = process.env.TAURI_DEV_HOST;
 const isDevBuild = !!process.env.VITE_ENV_DEV || !!process.env.TAURI_ENV_DEBUG;
 
-console.log("Serving for Tauri:", isTauri);
+console.log("Serving for Web:", isWeb);
 console.log("Serving for Capacitor", isNativeMobile);
 console.log(`Sourcemaps: ${isDevBuild}`);
 console.log(`Minification: ${isDevBuild ? false : "esbuild"}`);
