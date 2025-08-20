@@ -111,7 +111,7 @@
     "name": "@mutualzz/app",
     "private": true,
     "scripts": {
-        "build": "tsc && tauri build",
+        "build": "tsc && tauri:build",
         "build:dev": "tsc && cross-env VITE_ENV_DEV=true vite build",
         "cap:run:android": "cap copy && cap open android",
         "cap:run:ios": "cap copy && cap open ios",
