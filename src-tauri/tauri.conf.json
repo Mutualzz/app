@@ -4,11 +4,15 @@
         "windows": [
             {
                 "fullscreen": false,
+                "height": 600,
                 "label": "main",
-                "maximized": true,
+                "maximized": false,
+                "minHeight": 600,
+                "minWidth": 800,
                 "resizable": true,
                 "title": "Mutualzz",
-                "visible": true
+                "visible": true,
+                "width": 800
             }
         ],
         "withGlobalTauri": true
