@@ -46,18 +46,9 @@ function Index() {
                 {!account && (
                     <>
                         or
-                        <Button
-                            onClick={() => {
-                                navigate({
-                                    to: "/login",
-                                });
-                            }}
-                            size="md"
-                            variant="solid"
-                            color="success"
-                        >
-                            Go to the Login page
-                        </Button>
+                        <Typography fontWeight="bold">
+                            click the login button top right
+                        </Typography>
                     </>
                 )}
             </Stack>
