@@ -13,6 +13,7 @@ import { useLocation, useNavigate } from "@tanstack/react-router";
 import { sortThemes } from "@utils/index";
 import startCase from "lodash-es/startCase";
 import { observer } from "mobx-react";
+import { motion } from "motion/react";
 
 const links = {
     dataDisplay: [
@@ -94,7 +95,9 @@ const links = {
     ],
 };
 
-export const PlaygrondLeftSidebar = observer(() => {
+const AnimatedPaper = motion.create(Paper);
+
+export const PlaygroundLeftSidebar = observer(() => {
     const navigate = useNavigate();
     const { theme: themeStore } = useAppStore();
     const { mode, theme, changeTheme, changeMode } = useTheme();
@@ -112,12 +115,18 @@ export const PlaygrondLeftSidebar = observer(() => {
     };
 
     return (
-        <Paper
+        <AnimatedPaper
             spacing={25}
             direction="column"
             overflowY="auto"
             minWidth="14rem"
             p={20}
+            initial={{
+                x: -230,
+            }}
+            animate={{
+                x: 0,
+            }}
             css={{
                 borderTopLeftRadius: "2rem",
                 borderBottomLeftRadius: "2rem",
@@ -197,6 +206,6 @@ export const PlaygrondLeftSidebar = observer(() => {
                     </Stack>
                 </Stack>
             ))}
-        </Paper>
+        </AnimatedPaper>
     );
 });

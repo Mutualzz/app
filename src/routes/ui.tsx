@@ -1,6 +1,6 @@
 import { Outlet, createFileRoute } from "@tanstack/react-router";
 
-import { PlaygrondLeftSidebar } from "@components/Playground/PlaygroundLeftSidebar";
+import { PlaygroundLeftSidebar } from "@components/Playground/PlaygroundLeftSidebar";
 import { Stack } from "@mutualzz/ui";
 
 export const Route = createFileRoute("/ui")({
@@ -10,7 +10,7 @@ export const Route = createFileRoute("/ui")({
 function Playground() {
     return (
         <Stack width="100%" direction="row" pt={10}>
-            <PlaygrondLeftSidebar />
+            <PlaygroundLeftSidebar />
             <Stack flex={1}>
                 <Outlet />
             </Stack>
