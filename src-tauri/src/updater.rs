@@ -113,7 +113,7 @@ pub fn check_for_updates<R: Runtime>(ignore_prereleases: bool, window: tauri::Wi
         // check if there are any releases
         if releases.len() == 0 {
             println!("[Updater] No releases found. Failed to check for updates");
-            match window.emit("UPDATE_NOT_AVAILABLE", Some({})) {
+            match window.emit("EMPTY_RELEASES", Some({})) {
                 Ok(_) => {}
                 Err(e) => {
                     println!(
