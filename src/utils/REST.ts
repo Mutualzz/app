@@ -1,18 +1,19 @@
 import { Logger } from "@logger";
 import { getCurrentWindow } from "@tauri-apps/api/window";
-import { detectBrowser, detectOS } from ".";
+import { detectBrowser, detectOS } from "./detect";
 
 let isTauri = false;
 let os = "Other";
 let client = "Unknown";
+
 try {
     getCurrentWindow();
     isTauri = true;
-    os = detectOS();
+    os = await detectOS();
     client = "Mutualzz Client";
 } catch {
     isTauri = false;
-    os = detectOS();
+    os = await detectOS();
     client = detectBrowser();
 }
 
