@@ -45,14 +45,6 @@ export class UpdaterStore {
                 this.setUpdateDownloaded(false);
             });
 
-            await listen("EMPTY_RELEASES", () => {
-                this.logger.debug("No releases found");
-                this.setCheckingForUpdates(false);
-                this.setUpdateAvailable(false);
-                this.setUpdateDownloading(false);
-                this.setUpdateDownloaded(false);
-            });
-
             await listen("UPDATE_DOWNLOADING", () => {
                 this.logger.debug("Update downloading");
                 this.setCheckingForUpdates(false);

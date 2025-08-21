@@ -31,10 +31,6 @@ struct UpdateAvailable {
 pub fn check_for_updates<R: Runtime>(ignore_prereleases: bool, window: tauri::Window<R>) {
     let handle = window.app_handle().clone();
 
-    if std::env::var("TAURI_ENV_DEV").is_ok() {
-        println!("[Updater] This is a development environment, not updating.");
-        return;
-    }
 
     match window.emit("CHECKING_FOR_UPDATE", Some(serde_json::json!({}))) {
         Ok(_) => {}
@@ -113,7 +109,7 @@ pub fn check_for_updates<R: Runtime>(ignore_prereleases: bool, window: tauri::Wi
         // check if there are any releases
         if releases.len() == 0 {
             println!("[Updater] No releases found. Failed to check for updates");
-            match window.emit("EMPTY_RELEASES", Some({})) {
+            match window.emit("UPDATE_NOT_AVAILABLE", Some({})) {
                 Ok(_) => {}
                 Err(e) => {
                     println!(
@@ -137,6 +133,7 @@ pub fn check_for_updates<R: Runtime>(ignore_prereleases: bool, window: tauri::Wi
             .assets
             .iter()
             .find(|asset| asset.name == "latest.json");
+
 
         // If we found the asset, set it as the updater endpoint.
         let tauri_release_asset = match tauri_release_asset {
