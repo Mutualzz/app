@@ -39,7 +39,7 @@ export class Logger {
 
     constructor({
         tag,
-        level = import.meta.env.DEV ? "debug" : "info",
+        level = "debug",
         transports = [],
         withTimestamp = false,
         withLevelPrefix = false,

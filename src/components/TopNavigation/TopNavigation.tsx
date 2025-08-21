@@ -1,6 +1,8 @@
+import { DownloadButton } from "@components/DownloadButton";
 import { useAppStore } from "@hooks/useStores";
-import { Avatar, Paper } from "@mutualzz/ui";
+import { Avatar, Button, Paper, Stack } from "@mutualzz/ui";
 import { useNavigate } from "@tanstack/react-router";
+import { isTauri } from "@utils/index";
 import { observer } from "mobx-react";
 import { motion } from "motion/react";
 import { Logo } from "../Logo";
@@ -43,7 +45,21 @@ export const TopNavigation = observer(() => {
                     alt={account.username}
                 />
             ) : (
-                <></>
+                <Stack spacing={!isTauri ? 10 : 0}>
+                    {!isTauri && <DownloadButton />}
+
+                    <Button
+                        onClick={() => {
+                            navigate({
+                                to: "/login",
+                                replace: true,
+                            });
+                        }}
+                        color="success"
+                    >
+                        Login
+                    </Button>
+                </Stack>
             )}
         </Paper>
     );
