@@ -8,13 +8,14 @@ import { motion } from "motion/react";
 import { Logo } from "../Logo";
 
 const AnimatedLogo = motion.create(Logo);
+const AnimatedPaper = motion.create(Paper);
 
 export const TopNavigation = observer(() => {
     const navigate = useNavigate();
     const { account } = useAppStore();
 
     return (
-        <Paper
+        <AnimatedPaper
             p="0.25rem 0.75rem"
             elevation={2}
             justifyContent="space-between"
@@ -22,6 +23,16 @@ export const TopNavigation = observer(() => {
             css={{
                 borderBottomLeftRadius: 16,
                 borderBottomRightRadius: 16,
+            }}
+            initial={{
+                borderTopLeftRadius: 16,
+                borderTopRightRadius: 16,
+                y: -80,
+            }}
+            animate={{
+                borderTopLeftRadius: 0,
+                borderTopRightRadius: 0,
+                y: 0,
             }}
         >
             <AnimatedLogo
@@ -61,6 +72,6 @@ export const TopNavigation = observer(() => {
                     </Button>
                 </Stack>
             )}
-        </Paper>
+        </AnimatedPaper>
     );
 });
