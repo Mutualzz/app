@@ -26,6 +26,26 @@ struct UpdateAvailable {
     body: Option<String>,
 }
 
+fn get_update_package_path<R: Runtime>(window: &tauri::Window<R>) -> Option<std::path::PathBuf> {
+    let handle = window.app_handle();
+    let package_dir = match handle.path().app_local_data_dir() {
+        Ok(dir) => dir,
+        Err(e) => {
+            let msg = format!("[Updater] Could not determine app local data directory: {:?}", e);
+            println!("{}", msg);
+            emit_update_error(window.clone(), msg);
+            return None;
+        }
+    };
+    if let Err(e) = std::fs::create_dir_all(&package_dir) {
+        let msg = format!("[Updater] Failed to create app local data directory: {:?}", e);
+        println!("{}", msg);
+        emit_update_error(window.clone(), msg);
+        return None;
+    }
+    Some(package_dir.join("update.sbcup"))
+}
+
 // ignore_version: String
 #[tauri::command]
 pub fn check_for_updates<R: Runtime>(ignore_prereleases: bool, window: tauri::Window<R>) {
@@ -39,11 +59,10 @@ pub fn check_for_updates<R: Runtime>(ignore_prereleases: bool, window: tauri::Wi
         }
     }
 
-    let package_path = handle
-        .path()
-        .app_local_data_dir()
-        .unwrap()
-        .join("update.sbcup");
+    let package_path = match get_update_package_path(&window) {
+        Some(path) => path,
+        None => return,
+    };
 
     // if we already have an update package, remove it
     if package_path.exists() {
@@ -133,7 +152,6 @@ pub fn check_for_updates<R: Runtime>(ignore_prereleases: bool, window: tauri::Wi
             .assets
             .iter()
             .find(|asset| asset.name == "latest.json");
-
 
         // If we found the asset, set it as the updater endpoint.
         let tauri_release_asset = match tauri_release_asset {
@@ -316,11 +334,10 @@ pub async fn download_update<R: Runtime>(window: tauri::Window<R>) {
         println!("[Updater] Update downloaded");
 
         let handle = window.app_handle().clone();
-        let package_path = handle
-            .path()
-            .app_local_data_dir()
-            .unwrap()
-            .join("update.sbcup");
+        let package_path = match get_update_package_path(&window) {
+            Some(path) => path,
+            None => return,
+        };
         println!("[Updater] Saving update package to {:?}", package_path);
 
         // store download_response bytes to a file
@@ -367,11 +384,10 @@ pub async fn install_update<R: Runtime>(window: tauri::Window<R>) {
     };
 
     let handle = window.app_handle().clone();
-    let package_path = handle
-        .path()
-        .app_local_data_dir()
-        .unwrap()
-        .join("update.sbcup");
+    let package_path = match get_update_package_path(&window) {
+        Some(path) => path,
+        None => return,
+    };
 
     // check if the update package exists
     if !package_path.exists() {
@@ -412,11 +428,10 @@ pub async fn install_update<R: Runtime>(window: tauri::Window<R>) {
 #[tauri::command]
 pub fn clear_update_cache<R: Runtime>(window: tauri::Window<R>) {
     let handle = window.app_handle().clone();
-    let package_path = handle
-        .path()
-        .app_local_data_dir()
-        .unwrap()
-        .join("update.sbcup");
+    let package_path = match get_update_package_path(&window) {
+        Some(path) => path,
+        None => return,
+    };
 
     // check if the update package exists
     if !package_path.exists() {
