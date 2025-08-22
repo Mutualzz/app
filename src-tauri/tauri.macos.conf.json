@@ -1,0 +1,22 @@
+{
+    "$schema": "./tauri.conf.json",
+    "app": {
+        "windows": [
+            {
+                "center": true,
+                "decorations": true,
+                "fullscreen": false,
+                "height": 768,
+                "label": "main",
+                "maximized": false,
+                "minHeight": 768,
+                "minWidth": 1024,
+                "resizable": true,
+                "title": "",
+                "titleBarStyle": "Overlay",
+                "visible": true,
+                "width": 1024
+            }
+        ]
+    }
+}

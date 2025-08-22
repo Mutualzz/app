@@ -4,7 +4,7 @@
         "windows": [
             {
                 "center": true,
-                "decorations": true,
+                "decorations": false,
                 "fullscreen": false,
                 "height": 768,
                 "label": "main",
