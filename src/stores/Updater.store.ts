@@ -1,6 +1,6 @@
 import { Logger } from "@logger";
 import { relaunch } from "@tauri-apps/plugin-process";
-import { check } from "@tauri-apps/plugin-updater";
+import { check, type Update } from "@tauri-apps/plugin-updater";
 import { makeAutoObservable } from "mobx";
 
 export class UpdaterStore {
@@ -9,6 +9,7 @@ export class UpdaterStore {
     });
 
     checking = false;
+    update: Update | null = null;
     interval: NodeJS.Timeout | null = null;
 
     constructor() {
@@ -38,20 +39,16 @@ export class UpdaterStore {
             const update = await check();
             if (update) {
                 this.logger.debug("New update found");
-                await update.downloadAndInstall((event) => {
+                await update.download((event) => {
                     if (event.event === "Started") {
-                        this.logger.debug("Update started");
+                        this.logger.debug("Downloading the update");
                     }
                     if (event.event === "Finished") {
-                        this.logger.debug("Update finished");
+                        this.logger.debug("Downloading the update finished");
                     }
                 });
 
-                if (import.meta.env.DEV)
-                    this.logger.debug(
-                        "Update downloaded in dev mode, skipping relaunch",
-                    );
-                else await relaunch();
+                this.setDownloadedUpdate(update);
             } else {
                 this.logger.debug("No new update found");
             }
@@ -60,6 +57,22 @@ export class UpdaterStore {
         } finally {
             this.setChecking(false);
         }
+    }
+
+    setDownloadedUpdate(update: Update) {
+        this.update = update;
+    }
+
+    async installUpdate() {
+        if (!this.update) {
+            this.logger.error(
+                "Update has not been downloaded yet, not installing...",
+            );
+            return;
+        }
+
+        await this.update.install();
+        await relaunch();
     }
 
     setChecking(value: boolean) {

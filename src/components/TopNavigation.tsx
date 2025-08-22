@@ -5,17 +5,17 @@ import { useNavigate } from "@tanstack/react-router";
 import { isTauri } from "@utils/index";
 import { observer } from "mobx-react";
 import { motion } from "motion/react";
-import { Logo } from "../Logo";
+import { Logo } from "./Logo";
 
 const AnimatedLogo = motion.create(Logo);
-const AnimatedPaper = motion.create(Paper);
 
 export const TopNavigation = observer(() => {
     const navigate = useNavigate();
     const { account } = useAppStore();
 
     return (
-        <AnimatedPaper
+        <Paper
+            data-tauri-drag-region
             p="0.25rem 0.75rem"
             elevation={2}
             justifyContent="space-between"
@@ -23,16 +23,6 @@ export const TopNavigation = observer(() => {
             css={{
                 borderBottomLeftRadius: 16,
                 borderBottomRightRadius: 16,
-            }}
-            initial={{
-                borderTopLeftRadius: 16,
-                borderTopRightRadius: 16,
-                y: -80,
-            }}
-            animate={{
-                borderTopLeftRadius: 0,
-                borderTopRightRadius: 0,
-                y: 0,
             }}
         >
             <AnimatedLogo
@@ -49,29 +39,32 @@ export const TopNavigation = observer(() => {
                     });
                 }}
             />
-            {account ? (
-                <Avatar
-                    size="lg"
-                    src={account.avatarUrl}
-                    alt={account.username}
-                />
-            ) : (
-                <Stack spacing={!isTauri ? 10 : 0}>
-                    {!isTauri && <DownloadButton />}
 
-                    <Button
-                        onClick={() => {
-                            navigate({
-                                to: "/login",
-                                replace: true,
-                            });
-                        }}
-                        color="success"
-                    >
-                        Login
-                    </Button>
-                </Stack>
-            )}
-        </AnimatedPaper>
+            <Stack flex={1} justifyContent="flex-end">
+                {account ? (
+                    <Avatar
+                        size="lg"
+                        src={account.avatarUrl}
+                        alt={account.username}
+                    />
+                ) : (
+                    <Stack spacing={!isTauri ? 10 : 0}>
+                        {!isTauri && <DownloadButton />}
+
+                        <Button
+                            onClick={() => {
+                                navigate({
+                                    to: "/login",
+                                    replace: true,
+                                });
+                            }}
+                            color="success"
+                        >
+                            Login
+                        </Button>
+                    </Stack>
+                )}
+            </Stack>
+        </Paper>
     );
 });

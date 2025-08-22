@@ -116,7 +116,7 @@
         "cap:run:android": "cap copy && cap open android",
         "cap:run:ios": "cap copy && cap open ios",
         "ci:prebuild": "node scripts/tauriVersion.js",
-        "dev": "pnpm vite:dev",
+        "dev": "pnpm tauri:dev",
         "dev:android": "cross-env VITE_CAPACITOR=true concurrently \"pnpm vite:dev\" \"pnpm cap:run:android\"",
         "dev:ios": "cross-env VITE_CAPACITOR=true concurrently \"pnpm vite:dev\" \"pnpm cap:run:ios\"",
         "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
