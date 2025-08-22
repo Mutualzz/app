@@ -8,7 +8,7 @@
                 "fullscreen": false,
                 "height": 768,
                 "label": "main",
-                "maximized": false,
+                "maximized": true,
                 "minHeight": 768,
                 "minWidth": 1024,
                 "resizable": true,
