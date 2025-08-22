@@ -22,6 +22,7 @@ export const TopNavigation = observer(() => {
             css={{
                 borderBottomLeftRadius: 16,
                 borderBottomRightRadius: 16,
+                userSelect: "none",
             }}
         >
             <AnimatedLogo
