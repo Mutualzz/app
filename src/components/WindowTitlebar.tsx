@@ -49,7 +49,12 @@ const WindowTitlebar = () => {
             >
                 {updaterStore?.update && (
                     <Stack px={isMac ? 15 : 0} alignItems="center">
-                        <IconButton size={16} variant="plain" color="success">
+                        <IconButton
+                            onClick={() => updaterStore.installUpdate()}
+                            size={16}
+                            variant="plain"
+                            color="success"
+                        >
                             <FaDownload />
                         </IconButton>
                         {!isMac && (
