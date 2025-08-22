@@ -141,7 +141,7 @@ function PlaygroundCircularProgress() {
     ));
 
     return (
-        <Stack width="100%" spacing={10} direction="row">
+        <Stack width="100%" direction="row">
             <PlaygroundContent
                 direction={variant === "all" ? "column" : "row"}
                 alignItems="flex-start"
