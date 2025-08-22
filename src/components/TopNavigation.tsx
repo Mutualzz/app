@@ -15,7 +15,6 @@ export const TopNavigation = observer(() => {
 
     return (
         <Paper
-            data-tauri-drag-region
             p="0.25rem 0.75rem"
             elevation={2}
             justifyContent="space-between"
