@@ -1,3 +1,4 @@
+import { DOBInput } from "@components/DOBInput";
 import { useAppStore } from "@hooks/useStores";
 import type { HttpException } from "@mutualzz/types";
 import {
@@ -61,7 +62,9 @@ const InputWithLabel = ({
                 </Typography>
             )}
         </Typography>
+
         <Input size="lg" {...props} />
+
         {!field.state.meta.isValid && field.state.meta.isTouched && (
             <Typography variant="plain" color="danger" level="body-sm">
                 {field.state.meta.errors[0].message}
@@ -277,15 +280,11 @@ function Register() {
                         <form.Field
                             name="dateOfBirth"
                             children={(field) => (
-                                <InputWithLabel
+                                <DOBInput
                                     apiErrors={apiErrors}
                                     field={field}
                                     name="dateOfBirth"
                                     label="Date Of Birth"
-                                    onChange={(e) =>
-                                        field.handleChange(e.target.value)
-                                    }
-                                    onBlur={field.handleBlur}
                                     value={field.state.value}
                                     type="date"
                                     required
