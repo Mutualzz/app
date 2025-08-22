@@ -1,6 +1,6 @@
 import Loader from "@components/Loader/Loader";
-import { TopNavigation } from "@components/TopNavigation/TopNavigation";
-import Updater from "@components/Updater/Updater";
+import { TopNavigation } from "@components/TopNavigation";
+import WindowTitlebar from "@components/WindowTitlebar";
 import { AppTheme } from "@contexts/AppTheme.context";
 import { ModalProvider } from "@contexts/Modal.context";
 import "@fontsource/inter/100";
@@ -144,6 +144,7 @@ function RootComponent() {
             <AppTheme>
                 <CssBaseline adaptiveScrollbar />
 
+                {isTauri && <WindowTitlebar />}
                 <ModalProvider>
                     {!networkState.online && (
                         <Paper
@@ -158,27 +159,26 @@ function RootComponent() {
                         </Paper>
                     )}
 
-                    <Updater>
-                        <Loader>
+                    <Loader>
+                        <Stack
+                            direction="column"
+                            height="100vh"
+                            width="100vw"
+                            flex={1}
+                            minHeight={0}
+                        >
+                            <TopNavigation />
                             <Stack
-                                direction="column"
-                                height="100vh"
-                                width="100vw"
+                                width="100%"
                                 flex={1}
                                 minHeight={0}
+                                overflow="hidden"
                             >
-                                <TopNavigation />
-                                <Stack
-                                    width="100%"
-                                    flex={1}
-                                    minHeight={0}
-                                    overflow="hidden"
-                                >
-                                    <Outlet />
-                                </Stack>
+                                <Outlet />
                             </Stack>
-                        </Loader>
-                    </Updater>
+                        </Stack>
+                    </Loader>
+
                     {import.meta.env.DEV && (
                         <>
                             <ReactQueryDevtools />

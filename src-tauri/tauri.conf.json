@@ -3,16 +3,19 @@
     "app": {
         "windows": [
             {
+                "center": true,
+                "decorations": true,
                 "fullscreen": false,
-                "height": 600,
+                "height": 768,
                 "label": "main",
                 "maximized": false,
-                "minHeight": 600,
-                "minWidth": 800,
+                "minHeight": 768,
+                "minWidth": 1024,
                 "resizable": true,
-                "title": "Mutualzz",
+                "title": "",
+                "titleBarStyle": "Overlay",
                 "visible": true,
-                "width": 800
+                "width": 1024
             }
         ],
         "withGlobalTauri": true
