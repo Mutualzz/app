@@ -27,10 +27,10 @@ export class AppStore {
     rest = new REST();
     updaterStore: UpdaterStore | null = null;
 
+    version: string | null = null;
+
     constructor() {
-        if (isTauri) {
-            this.updaterStore = new UpdaterStore();
-        }
+        if (isTauri) this.updaterStore = new UpdaterStore();
 
         makeAutoObservable(this);
 
@@ -85,22 +85,9 @@ export class AppStore {
         this.theme.reset();
     }
 
-    setUpdaterEnabled(value: boolean) {
-        this.updaterStore?.setEnabled(value);
-        secureLocalStorage.setItem("updaterEnabled", String(value));
-    }
-
-    loadUpdaterEnabled() {
-        this.updaterStore?.setEnabled(
-            (secureStorageAdapter.getItem("updaterEnabled") as
-                | boolean
-                | null) ?? true,
-        );
-    }
-
-    loadSettings() {
+    async loadSettings() {
+        if (this.updaterStore) await this.updaterStore.startAutoChecker();
         this.loadToken();
         this.theme.loadDefaultThemes();
-        this.loadUpdaterEnabled();
     }
 }

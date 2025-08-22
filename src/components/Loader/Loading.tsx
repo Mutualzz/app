@@ -1,6 +1,6 @@
 import { CircularProgress, Stack } from "@mutualzz/ui";
 import { observer } from "mobx-react";
-import { Logo } from "./Logo";
+import { Logo } from "../Logo";
 
 const Loading = () => {
     return (

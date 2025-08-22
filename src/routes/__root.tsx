@@ -1,5 +1,6 @@
-import Loader from "@components/Loader";
+import Loader from "@components/Loader/Loader";
 import { TopNavigation } from "@components/TopNavigation/TopNavigation";
+import Updater from "@components/Updater/Updater";
 import { AppTheme } from "@contexts/AppTheme.context";
 import { ModalProvider } from "@contexts/Modal.context";
 import "@fontsource/inter/100";
@@ -157,25 +158,27 @@ function RootComponent() {
                         </Paper>
                     )}
 
-                    <Loader>
-                        <Stack
-                            direction="column"
-                            height="100vh"
-                            width="100vw"
-                            flex={1}
-                            minHeight={0}
-                        >
-                            <TopNavigation />
+                    <Updater>
+                        <Loader>
                             <Stack
-                                width="100%"
+                                direction="column"
+                                height="100vh"
+                                width="100vw"
                                 flex={1}
                                 minHeight={0}
-                                overflow="hidden"
                             >
-                                <Outlet />
+                                <TopNavigation />
+                                <Stack
+                                    width="100%"
+                                    flex={1}
+                                    minHeight={0}
+                                    overflow="hidden"
+                                >
+                                    <Outlet />
+                                </Stack>
                             </Stack>
-                        </Stack>
-                    </Loader>
+                        </Loader>
+                    </Updater>
                     {import.meta.env.DEV && (
                         <>
                             <ReactQueryDevtools />
