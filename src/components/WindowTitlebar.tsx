@@ -35,7 +35,7 @@ const WindowTitlebar = () => {
             data-tauri-drag-region
             justifyContent="space-between"
             alignItems="center"
-            elevation={3}
+            elevation={2}
             py={isMac ? 10 : 0}
             width="100%"
         >
