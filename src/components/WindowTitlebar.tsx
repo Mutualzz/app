@@ -36,7 +36,7 @@ const WindowTitlebar = () => {
             justifyContent="space-between"
             alignItems="center"
             elevation={3}
-            py={isMac ? 15 : 0}
+            py={isMac ? 10 : 0}
             width="100%"
         >
             <Box data-tauri-drag-region flex={1} />
@@ -46,6 +46,7 @@ const WindowTitlebar = () => {
                 alignItems="center"
                 px={isMac ? 5 : 0}
                 justifyContent="flex-end"
+                data-tauri-drag-region
             >
                 {updaterStore?.update && (
                     <Stack px={isMac ? 15 : 0} alignItems="center">
