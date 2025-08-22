@@ -6,7 +6,7 @@ use tauri_plugin_notification;
 
 #[cfg(desktop)]
 mod tray;
-mod updater;
+
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -85,12 +85,6 @@ pub fn run() {
 
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![
-            updater::check_for_updates,
-            updater::download_update,
-            updater::install_update,
-            updater::clear_update_cache
-        ])
         .build(context)
         .expect("error while running tauri application");
 

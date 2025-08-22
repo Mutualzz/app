@@ -1,31 +1,27 @@
 {
-  "description": "base",
-  "identifier": "base",
-  "permissions": [
-    "core:path:default",
-    "core:event:default",
-    "core:window:default",
-    "core:app:default",
-    "core:resources:default",
-    "core:menu:default",
-    "core:tray:default",
-    "updater:default",
-    "notification:default",
-    "os:allow-platform",
-    "os:allow-arch",
-    "os:allow-family",
-    "os:allow-locale",
-    "os:allow-os-type",
-    "os:allow-version",
-    "core:webview:allow-internal-toggle-devtools",
-    "notification:default"
-  ],
-  "platforms": [
-    "linux",
-    "macOS",
-    "windows"
-  ],
-  "windows": [
-    "main"
-  ]
+    "description": "base",
+    "identifier": "base",
+    "permissions": [
+        "core:path:default",
+        "core:event:default",
+        "core:window:default",
+        "core:app:default",
+        "core:resources:default",
+        "core:menu:default",
+        "core:tray:default",
+        "updater:default",
+        "notification:default",
+        "os:allow-platform",
+        "os:allow-arch",
+        "os:allow-family",
+        "os:allow-locale",
+        "os:allow-os-type",
+        "os:allow-version",
+        "core:webview:allow-internal-toggle-devtools",
+        "notification:default",
+        "process:default",
+        "process:allow-restart"
+    ],
+    "platforms": ["linux", "macOS", "windows"],
+    "windows": ["main"]
 }
