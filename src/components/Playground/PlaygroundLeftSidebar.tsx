@@ -4,6 +4,8 @@ import {
     Divider,
     Option,
     Paper,
+    Radio,
+    RadioGroup,
     Select,
     Stack,
     useTheme,
@@ -14,6 +16,7 @@ import { sortThemes } from "@utils/index";
 import startCase from "lodash-es/startCase";
 import { observer } from "mobx-react";
 import { motion } from "motion/react";
+import { useState } from "react";
 
 const links = {
     dataDisplay: [
@@ -100,12 +103,13 @@ const AnimatedPaper = motion.create(Paper);
 export const PlaygroundLeftSidebar = observer(() => {
     const navigate = useNavigate();
     const { theme: themeStore } = useAppStore();
+    const [style, setStyle] = useState<"normal" | "gradient">("normal");
     const { mode, theme, changeTheme, changeMode } = useTheme();
     const { pathname } = useLocation();
 
-    const themes = Array.from(themeStore.themes.values()).filter(
-        (theme) => theme.type === mode,
-    );
+    const themes = Array.from(themeStore.themes.values())
+        .filter((theme) => theme.type === mode)
+        .filter((theme) => theme.mode === style);
 
     const handleThemeChange = (themeId: string) => {
         const changeTo = themes.find((theme) => theme.id === themeId);
@@ -139,19 +143,43 @@ export const PlaygroundLeftSidebar = observer(() => {
                     direction="column"
                     spacing={10}
                 >
-                    <Divider>Color Mode</Divider>
-                    <Select
+                    <Divider>Color Type</Divider>
+                    <RadioGroup
                         variant="solid"
-                        onValueChange={(modeToSet) => {
-                            changeMode(modeToSet as ThemeMode);
-                        }}
+                        orientation="horizontal"
+                        spacing={10}
                         value={mode}
+                        onChange={(_, modeToSet) =>
+                            changeMode(modeToSet as ThemeMode)
+                        }
                     >
-                        <Option value="dark">Dark</Option>
-                        <Option value="light">Light</Option>
-                        <Option value="system">System</Option>
-                    </Select>
+                        <Radio label="Dark" value="dark" />
+                        <Radio label="Light" value="light" />
+                        <Radio label="System" value="system" />
+                    </RadioGroup>
                 </Stack>
+                {mode !== "system" && (
+                    <Stack
+                        justifyContent="center"
+                        alignItems="center"
+                        direction="column"
+                        spacing={10}
+                    >
+                        <Divider>Color Mode</Divider>
+                        <RadioGroup
+                            variant="solid"
+                            onChange={(_, styleToSet) => {
+                                setStyle(styleToSet as "normal" | "gradient");
+                            }}
+                            orientation="horizontal"
+                            spacing={10}
+                            value={style}
+                        >
+                            <Radio label="Normal" value="normal" />
+                            <Radio label="Gradient" value="gradient" />
+                        </RadioGroup>
+                    </Stack>
+                )}
                 {themes.length > 1 && (
                     <Stack
                         justifyContent="center"
