@@ -58,7 +58,7 @@ const InputWithLabel = ({
             )}
         </Stack>
 
-        <Input textColor="primary" size="lg" {...props} />
+        <Input textColor="primary" showRandom size="lg" {...props} />
 
         {!meta.isValid && meta.isTouched && (
             <Typography variant="plain" color="danger" level="body-sm">
@@ -85,6 +85,7 @@ const defaultValues = {
     name: "",
     description: "",
     type: "dark" as "dark" | "light",
+    mode: "normal" as "normal" | "gradient",
     colors: {
         common: {
             white: randomColor(),
@@ -122,6 +123,10 @@ export const ThemeCreator = observer(() => {
     const [draftSelectValue, setDraftSelectValue] = useState("");
     const [userThemeSelectValue, setUserThemeSelectValue] = useState("");
     const [formKey, setFormKey] = useState(0);
+
+    const [currentColorMode, setCurrentColorMode] = useState<
+        "normal" | "gradient"
+    >("normal");
 
     const allDefaultThemes = themeStore.themes.filter(
         (theme) => !theme.createdBy,
@@ -718,6 +723,51 @@ export const ThemeCreator = observer(() => {
                             )}
                         />
                         <form.Field
+                            name="mode"
+                            children={({ handleChange, state: { value } }) => (
+                                <Stack direction="column" spacing={5}>
+                                    <Typography
+                                        fontWeight={500}
+                                        level="body-md"
+                                    >
+                                        Color Mode{" "}
+                                        <Typography
+                                            color="danger"
+                                            variant="plain"
+                                        >
+                                            *
+                                        </Typography>
+                                    </Typography>
+                                    <Typography level="body-xs">
+                                        What type of color mode is your theme?
+                                    </Typography>
+                                    <ButtonGroup>
+                                        <Button
+                                            color="primary"
+                                            disabled={value === "normal"}
+                                            onClick={() => {
+                                                setCurrentColorMode("normal");
+                                                handleChange("normal");
+                                            }}
+                                        >
+                                            Normal
+                                        </Button>
+                                        <Button
+                                            color="neutral"
+                                            disabled={value === "gradient"}
+                                            onClick={() => {
+                                                setCurrentColorMode("gradient");
+                                                handleChange("gradient");
+                                            }}
+                                        >
+                                            Gradient
+                                        </Button>
+                                    </ButtonGroup>
+                                </Stack>
+                            )}
+                        />
+
+                        <form.Field
                             name="type"
                             children={({ handleChange, state: { value } }) => (
                                 <Stack direction="column" spacing={5}>
@@ -821,6 +871,9 @@ export const ThemeCreator = observer(() => {
                                     name="colors.background"
                                     required
                                     label="Background Color"
+                                    allowGradient={
+                                        currentColorMode === "gradient"
+                                    }
                                     description="The background color of the app"
                                     onChange={handleChange}
                                     onBlur={handleBlur}
@@ -840,7 +893,10 @@ export const ThemeCreator = observer(() => {
                                     apiErrors={apiErrors}
                                     meta={meta}
                                     name="colors.surface"
-                                    label="Surface Color "
+                                    label="Surface Color"
+                                    allowGradient={
+                                        currentColorMode === "gradient"
+                                    }
                                     description="This colors get applied to Cards (it automatically adapts to certain UI elements)"
                                     onChange={handleChange}
                                     onBlur={handleBlur}
