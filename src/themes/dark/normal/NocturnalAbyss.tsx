@@ -2,18 +2,19 @@ import type { Theme } from "@emotion/react";
 
 import { baseDarkTheme } from "@mutualzz/ui";
 
-export const graveyardWhispersTheme: Theme = {
+export const nocturnalAbyssTheme: Theme = {
     ...baseDarkTheme,
-    id: "graveyardWhispers",
-    name: "Graveyard Whispers",
-    description: "Muted, Eerie, and Cold",
+    id: "nocturnalAbyss",
+    name: "Nocturnal Abyss",
+    description: "Deep, Mysterious, and Shadowy",
     type: "dark",
+    mode: "normal",
     colors: {
         ...baseDarkTheme.colors,
-        primary: "#7A7A8A",
+        primary: "#5A7C8A",
         neutral: "#7A8A9A",
-        background: "#19171D",
-        surface: "#23243A",
+        background: "#151515",
+        surface: "#23232A",
         danger: "#B85C5C",
         warning: "#E6C463",
         success: "#5CA88A",
@@ -23,8 +24,8 @@ export const graveyardWhispersTheme: Theme = {
         ...baseDarkTheme.typography,
         colors: {
             primary: "#F4F4F4",
-            secondary: "#C2C2C2",
-            accent: "#7A7A8A",
+            secondary: "#B5B5B5",
+            accent: "#5A7C8A",
             muted: "#7A8A9A",
         },
     },

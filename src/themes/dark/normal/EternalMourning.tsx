@@ -1,18 +1,19 @@
 import type { Theme } from "@emotion/react";
 import { baseDarkTheme } from "@mutualzz/ui";
 
-export const crimsonLamentTheme: Theme = {
+export const eternalMourningTheme: Theme = {
     ...baseDarkTheme,
-    id: "crimsonLament",
-    name: "Crimson Lament",
-    description: "Dark Romance & Tragedy",
+    id: "eternalMourning",
+    name: "Eternal Mourning",
+    description: "Melancholic & Gothic Elegance",
     type: "dark",
+    mode: "normal",
     colors: {
         ...baseDarkTheme.colors,
-        primary: "#A23A4F",
-        neutral: "#A88A9A",
-        background: "#18161A",
-        surface: "#23141A",
+        primary: "#6A4A8A",
+        neutral: "#8A7CA8",
+        background: "#18121D",
+        surface: "#23232A",
         danger: "#B85C5C",
         warning: "#E6C463",
         success: "#5CA88A",
@@ -22,9 +23,9 @@ export const crimsonLamentTheme: Theme = {
         ...baseDarkTheme.typography,
         colors: {
             primary: "#F4F4F4",
-            secondary: "#E0B0B0",
-            accent: "#A23A4F",
-            muted: "#A88A9A",
+            secondary: "#CAB8D8",
+            accent: "#6A4A8A",
+            muted: "#8A7CA8",
         },
     },
 };

@@ -1,17 +1,19 @@
 import type { Theme } from "@emotion/react";
+
 import { baseDarkTheme } from "@mutualzz/ui";
 
-export const eternalMourningTheme: Theme = {
+export const melancholyRomanceTheme: Theme = {
     ...baseDarkTheme,
-    id: "eternalMourning",
-    name: "Eternal Mourning",
-    description: "Melancholic & Gothic Elegance",
+    id: "melancholyRomance",
+    name: "Melancholy Romance",
+    description: "Dramatic, Vintage, and Elegant",
     type: "dark",
+    mode: "normal",
     colors: {
         ...baseDarkTheme.colors,
-        primary: "#6A4A8A",
-        neutral: "#8A7CA8",
-        background: "#18121D",
+        primary: "#A86A7A",
+        neutral: "#B8A8B8",
+        background: "#181218",
         surface: "#23232A",
         danger: "#B85C5C",
         warning: "#E6C463",
@@ -22,9 +24,9 @@ export const eternalMourningTheme: Theme = {
         ...baseDarkTheme.typography,
         colors: {
             primary: "#F4F4F4",
-            secondary: "#CAB8D8",
-            accent: "#6A4A8A",
-            muted: "#8A7CA8",
+            secondary: "#C0A5AF",
+            accent: "#A86A7A",
+            muted: "#B8A8B8",
         },
     },
 };

@@ -1,19 +1,19 @@
 import type { Theme } from "@emotion/react";
-
 import { baseDarkTheme } from "@mutualzz/ui";
 
-export const grungeIndustrialTheme: Theme = {
+export const rustRequiemTheme: Theme = {
     ...baseDarkTheme,
-    id: "grungeIndustrial",
-    name: "Grunge & Industrial",
-    description: "90s Underground Aesthetic",
+    id: "rustRequiem",
+    name: "Rust Requiem",
+    description: "Grunge & industrial gradients",
     type: "dark",
+    mode: "gradient",
     colors: {
         ...baseDarkTheme.colors,
         primary: "#A87C5A",
         neutral: "#A89A7A",
-        background: "#19171A",
-        surface: "#23241A",
+        background: "linear-gradient(135deg, #19171A 0%, #23241A 100%)",
+        surface: "linear-gradient(135deg, #23241A 0%, #A87C5A 100%)",
         danger: "#B85C5C",
         warning: "#E6C463",
         success: "#5CA88A",

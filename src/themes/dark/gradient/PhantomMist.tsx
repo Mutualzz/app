@@ -1,19 +1,19 @@
 import type { Theme } from "@emotion/react";
-
 import { baseDarkTheme } from "@mutualzz/ui";
 
-export const hauntedAestheticTheme: Theme = {
+export const phantomMistTheme: Theme = {
     ...baseDarkTheme,
-    id: "hauntedAesthetic",
-    name: "Haunted Aesthetic",
-    description: "Ethereal, Eerie, and Softly Dark",
+    id: "phantomMist",
+    name: "Phantom Mist",
+    description: "Ethereal gradients of despair",
     type: "dark",
+    mode: "gradient",
     colors: {
         ...baseDarkTheme.colors,
-        primary: "#6A7CA8",
+        primary: "#5A7C8A",
         neutral: "#7A8A9A",
-        background: "#191919",
-        surface: "#23232A",
+        background: "linear-gradient(135deg, #181A1D 0%, #23232A 100%)",
+        surface: "linear-gradient(135deg, #23232A 0%, #5A7C8A 100%)",
         danger: "#B85C5C",
         warning: "#E6C463",
         success: "#5CA88A",
@@ -23,8 +23,8 @@ export const hauntedAestheticTheme: Theme = {
         ...baseDarkTheme.typography,
         colors: {
             primary: "#F4F4F4",
-            secondary: "#B5B5B5",
-            accent: "#6A7CA8",
+            secondary: "#BFD0D9",
+            accent: "#5A7C8A",
             muted: "#7A8A9A",
         },
     },
