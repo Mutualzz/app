@@ -152,6 +152,7 @@ export const PlaygroundLeftSidebar = observer(() => {
                         onChange={(_, modeToSet) =>
                             changeMode(modeToSet as ThemeMode)
                         }
+                        size="sm"
                     >
                         <Radio label="Dark" value="dark" />
                         <Radio label="Light" value="light" />
