@@ -1,15 +1,25 @@
 import { baseDarkTheme } from "@mutualzz/ui";
-import { crimsonLamentTheme } from "./CrimsonLament";
-import { eternalMourningTheme } from "./EternalMourning";
-import { fogOfDespairTheme } from "./FogOfDespair";
-import { graveyardWhispersTheme } from "./GraveyardWhispers";
-import { grungeIndustrialTheme } from "./GrungeIndustrial";
-import { hauntedAestheticTheme } from "./HauntedAesthetic";
-import { melancholyRomanceTheme } from "./MelancholyRomance";
-import { midnightEleganceTheme } from "./MidnightElegance";
-import { nocturnalAbyssTheme } from "./NocturnalAbyss";
-import { shadowheartTheme } from "./Shadowheart";
-import { witchingHourTheme } from "./WitchingHour";
+import { abyssalNocturneTheme } from "./gradient/AbyssalNocturne";
+import { arcaneMidnightTheme } from "./gradient/ArcaneMidnight";
+import { bloodMoonSerenadeTheme } from "./gradient/BloodMoonSerenade";
+import { gravestoneChillTheme } from "./gradient/GravestoneChill";
+import { noirElegyTheme } from "./gradient/NoirElegy";
+import { phantomMistTheme } from "./gradient/PhantomMist";
+import { rustRequiemTheme } from "./gradient/RustRequiem";
+import { spectralVeilTheme } from "./gradient/SpectralVeil";
+import { steelShadowTheme } from "./gradient/SteelShadow";
+import { vintageSorrowTheme } from "./gradient/VintageSorrow";
+import { crimsonLamentTheme } from "./normal/CrimsonLament";
+import { eternalMourningTheme } from "./normal/EternalMourning";
+import { fogOfDespairTheme } from "./normal/FogOfDespair";
+import { graveyardWhispersTheme } from "./normal/GraveyardWhispers";
+import { grungeIndustrialTheme } from "./normal/GrungeIndustrial";
+import { hauntedAestheticTheme } from "./normal/HauntedAesthetic";
+import { melancholyRomanceTheme } from "./normal/MelancholyRomance";
+import { midnightEleganceTheme } from "./normal/MidnightElegance";
+import { nocturnalAbyssTheme } from "./normal/NocturnalAbyss";
+import { shadowheartTheme } from "./normal/Shadowheart";
+import { witchingHourTheme } from "./normal/WitchingHour";
 
 export const darkThemes = [
     baseDarkTheme,
@@ -24,4 +34,14 @@ export const darkThemes = [
     shadowheartTheme,
     witchingHourTheme,
     midnightEleganceTheme,
+    abyssalNocturneTheme,
+    arcaneMidnightTheme,
+    bloodMoonSerenadeTheme,
+    gravestoneChillTheme,
+    noirElegyTheme,
+    phantomMistTheme,
+    rustRequiemTheme,
+    spectralVeilTheme,
+    steelShadowTheme,
+    vintageSorrowTheme,
 ];
