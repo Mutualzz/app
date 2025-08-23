@@ -8,6 +8,7 @@ export interface ThemeDraft {
     name: string;
     description?: string;
     type: "dark" | "light";
+    mode: "normal" | "gradient";
     colors: {
         common: {
             white: ColorLike;

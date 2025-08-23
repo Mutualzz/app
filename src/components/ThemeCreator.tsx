@@ -124,10 +124,6 @@ export const ThemeCreator = observer(() => {
     const [userThemeSelectValue, setUserThemeSelectValue] = useState("");
     const [formKey, setFormKey] = useState(0);
 
-    const [currentColorMode, setCurrentColorMode] = useState<
-        "normal" | "gradient"
-    >("normal");
-
     const allDefaultThemes = themeStore.themes.filter(
         (theme) => !theme.createdBy,
     );
@@ -366,6 +362,17 @@ export const ThemeCreator = observer(() => {
             }
         },
     });
+
+    const getCurrentColorMode = () => {
+        let currentMode: "normal" | "gradient" = "normal";
+        if (loadedUserTheme) currentMode = loadedUserTheme.mode;
+        if (loadedDraft) currentMode = loadedDraft.mode;
+        if (loadedPreset) currentMode = loadedPreset.mode;
+
+        form.setFieldValue("mode", currentMode);
+
+        return currentMode;
+    };
 
     return (
         <Paper width="100%" height="100%" maxWidth={800} maxHeight={800}>
@@ -746,7 +753,6 @@ export const ThemeCreator = observer(() => {
                                             color="primary"
                                             disabled={value === "normal"}
                                             onClick={() => {
-                                                setCurrentColorMode("normal");
                                                 handleChange("normal");
                                             }}
                                         >
@@ -756,7 +762,6 @@ export const ThemeCreator = observer(() => {
                                             color="neutral"
                                             disabled={value === "gradient"}
                                             onClick={() => {
-                                                setCurrentColorMode("gradient");
                                                 handleChange("gradient");
                                             }}
                                         >
@@ -872,7 +877,7 @@ export const ThemeCreator = observer(() => {
                                     required
                                     label="Background Color"
                                     allowGradient={
-                                        currentColorMode === "gradient"
+                                        getCurrentColorMode() === "gradient"
                                     }
                                     description="The background color of the app"
                                     onChange={handleChange}
@@ -895,7 +900,7 @@ export const ThemeCreator = observer(() => {
                                     name="colors.surface"
                                     label="Surface Color"
                                     allowGradient={
-                                        currentColorMode === "gradient"
+                                        getCurrentColorMode() === "gradient"
                                     }
                                     description="This colors get applied to Cards (it automatically adapts to certain UI elements)"
                                     onChange={handleChange}
