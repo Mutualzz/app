@@ -1,3 +1,4 @@
+import { AdaptStatusBar } from "@components/AdaptStatusBar";
 import Loader from "@components/Loader/Loader";
 import { TopNavigation } from "@components/TopNavigation";
 import WindowTitlebar from "@components/WindowTitlebar";
@@ -30,7 +31,7 @@ import {
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import { getTauriVersion, getVersion } from "@tauri-apps/api/app";
 import { arch, locale, platform, version } from "@tauri-apps/plugin-os";
-import { isTauri } from "@utils/index";
+import { isMobile, isTauri } from "@utils/index";
 import { reaction } from "mobx";
 import { observer } from "mobx-react";
 import { useEffect, type ReactNode } from "react";
@@ -149,6 +150,7 @@ function RootComponent() {
                 <CssBaseline adaptiveScrollbar />
 
                 {isTauri && <WindowTitlebar />}
+                {isMobile && <AdaptStatusBar />}
                 <ModalProvider>
                     {!networkState.online && (
                         <Paper

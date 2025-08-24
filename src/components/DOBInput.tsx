@@ -103,8 +103,15 @@ export const DOBInput = ({
     };
 
     return (
-        <Stack direction="column" spacing={5} width="100%">
-            <Typography fontWeight={500} level="body-md">
+        <Stack
+            direction="column"
+            spacing={{ xs: 2, sm: 3, md: 4 }}
+            width="100%"
+        >
+            <Typography
+                fontWeight={500}
+                level={{ xs: "body-sm", sm: "body-md" }}
+            >
                 {label}{" "}
                 {props.required && (
                     <Typography variant="plain" color="danger">
@@ -112,12 +119,13 @@ export const DOBInput = ({
                     </Typography>
                 )}
             </Typography>
-            <Stack spacing={10} direction="row">
+            <Stack spacing={12} direction="row" width="100%">
                 <Select
                     color="neutral"
                     variant="outlined"
                     placeholder="Select month"
                     onValueChange={handleMonth}
+                    size={{ xs: "sm", sm: "md" }}
                 >
                     {MONTHS.map((month) => (
                         <Option key={month.value} value={month.value}>
@@ -127,7 +135,7 @@ export const DOBInput = ({
                 </Select>
                 <Input
                     type="number"
-                    size="lg"
+                    size={{ xs: "md", sm: "lg" }}
                     placeholder="Day"
                     min={1}
                     max={31}
@@ -137,6 +145,7 @@ export const DOBInput = ({
                 <Input
                     fullWidth
                     type="number"
+                    size={{ xs: "sm", sm: "md" }}
                     placeholder="Year"
                     onChange={handleYear}
                     min={1900}

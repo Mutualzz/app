@@ -1,4 +1,12 @@
-import { Paper, useTheme, type PaperProps } from "@mutualzz/ui";
+import {
+    Divider,
+    Paper,
+    Stack,
+    Typography,
+    useTheme,
+    type PaperProps,
+} from "@mutualzz/ui";
+import { useMediaQuery } from "@react-hookz/web";
 import { motion } from "motion/react";
 
 const AnimatedPaper = motion.create(Paper);
@@ -10,14 +18,18 @@ export const PlaygroundContent = ({
 }: PaperProps) => {
     const { theme } = useTheme();
 
+    const isMobileQuery = useMediaQuery(
+        theme.breakpoints.down("md").replace("@media", ""),
+    );
+
     return (
         <AnimatedPaper
-            borderLeft={`1px solid ${theme.colors.success}`}
-            borderRight={`1px solid ${theme.colors.success}`}
             color={color as string}
             overflowY="auto"
+            direction="column"
             p={20}
             width="100%"
+            height="100%"
             initial={{
                 opacity: 0,
                 scale: 0.95,
@@ -26,9 +38,34 @@ export const PlaygroundContent = ({
                 opacity: 1,
                 scale: 1,
             }}
-            {...(props as any)}
         >
-            {children}
+            {isMobileQuery && (
+                <>
+                    <Typography
+                        variant="none"
+                        level={{
+                            xs: "body-md",
+                            sm: "body-lg",
+                            md: "h6",
+                            lg: "h5",
+                        }}
+                        fontSize={{
+                            xs: "1rem",
+                            sm: "1.1rem",
+                            md: "1.25rem",
+                            lg: "1.5rem",
+                        }}
+                        textAlign="center"
+                        fontWeight={{ xs: 500, sm: 600 }}
+                    >
+                        Swipe from right to left to edit the component :3
+                    </Typography>
+                    <Divider />
+                </>
+            )}
+            <Stack width="100%" height="100%" {...props}>
+                {children}
+            </Stack>
         </AnimatedPaper>
     );
 };

@@ -53,8 +53,8 @@ const InputWithLabel = ({
     label: string;
     apiErrors: ApiErrors;
 }) => (
-    <Stack direction="column" spacing={5} width="100%">
-        <Typography fontWeight={500} level="body-md">
+    <Stack direction="column" spacing={{ xs: 2, sm: 3, md: 4 }} width="100%">
+        <Typography fontWeight={500} level={{ xs: "body-sm", sm: "body-md" }}>
             {label}{" "}
             {props.required && (
                 <Typography variant="plain" color="danger">
@@ -62,9 +62,7 @@ const InputWithLabel = ({
                 </Typography>
             )}
         </Typography>
-
-        <Input size="lg" {...props} />
-
+        <Input size={{ xs: "md", sm: "lg" }} {...props} />
         {!field.state.meta.isValid && field.state.meta.isTouched && (
             <Typography variant="plain" color="danger" level="body-sm">
                 {field.state.meta.errors[0].message}
@@ -130,27 +128,40 @@ function Register() {
     }
 
     return (
-        <Stack width="100%" justifyContent="center" alignItems="center">
+        <Stack
+            width="100%"
+            minHeight="100%"
+            justifyContent="center"
+            alignItems="center"
+            px={{ xs: "0.5rem", sm: "1.5rem", md: "2.5rem" }}
+            py={{ xs: "1rem", sm: "2rem", md: "3rem" }}
+        >
             <RegisterForm
                 direction="column"
                 justifyContent="center"
                 alignItems="center"
-                width="100%"
-                maxWidth="550px"
-                py="2rem"
-                px="2rem"
-                borderRadius={7.6}
-                spacing="1rem"
-                boxShadow={5}
+                width={{
+                    xs: "100%",
+                    sm: "90%",
+                    md: "70%",
+                    lg: "50%",
+                    xl: "40%",
+                }}
+                maxWidth={{
+                    xs: "100%",
+                    sm: "500px",
+                    md: "520px",
+                    lg: "600px",
+                }}
+                py={{ xs: "1.5rem", sm: "2rem", md: "2.5rem" }}
+                px={{ xs: "1rem", sm: "2rem", md: "2.5rem" }}
+                borderRadius={{ xs: "0.75rem", sm: "1.25rem", md: "1.5rem" }}
+                spacing={{ xs: "1rem", sm: "1.5rem", md: "2rem" }}
+                boxShadow={{ xs: 2, sm: 5, md: 8 }}
                 initial={{ opacity: 0, y: -200 }}
                 animate={{ opacity: 1, y: 0 }}
             >
-                <Stack
-                    marginBottom={20}
-                    position="relative"
-                    justifyContent="center"
-                    width="100%"
-                >
+                <Stack position="relative" justifyContent="center" width="100%">
                     <Button
                         startDecorator={<FaArrowLeft />}
                         css={{
@@ -160,10 +171,17 @@ function Register() {
                         variant="soft"
                         color="info"
                         onClick={() => navigate({ to: "/" })}
+                        size={{ xs: "sm", sm: "md" }}
                     >
                         Home
                     </Button>
-                    <Typography level="h4">Create an account</Typography>
+                    <Typography
+                        level={{ xs: "h5", sm: "h4" }}
+                        fontSize={{ xs: "1.25rem", sm: "1.5rem", md: "2rem" }}
+                        textAlign="center"
+                    >
+                        Create an account
+                    </Typography>
                 </Stack>
                 <form
                     css={{
@@ -175,7 +193,7 @@ function Register() {
                         form.handleSubmit();
                     }}
                 >
-                    <Stack direction="column" spacing={20} width="100%">
+                    <Stack direction="column" spacing={12} width="100%">
                         <form.Field
                             name="email"
                             children={(field) => (
@@ -300,7 +318,7 @@ function Register() {
                                 <Button
                                     type="submit"
                                     disabled={!canSubmit}
-                                    size="lg"
+                                    size={{ xs: "md", sm: "lg" }}
                                 >
                                     {isSubmitting ? "..." : "Create Account"}
                                 </Button>
@@ -315,14 +333,16 @@ function Register() {
                     css={{
                         cursor: "pointer",
                     }}
-                    level="body-sm"
+                    level={{ xs: "body-sm", sm: "body-md" }}
+                    fontSize={{ xs: "0.95rem", sm: "1.1rem" }}
+                    textAlign="center"
                 >
                     Already have an account?{" "}
                     <Typography
                         color="info"
                         textDecoration="underline"
                         variant="plain"
-                        level="body-sm"
+                        level={{ xs: "body-sm", sm: "body-md" }}
                     >
                         Login
                     </Typography>

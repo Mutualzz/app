@@ -6,7 +6,9 @@ export const DownloadButton = () => {
 
     return (
         <a href={fileUrl} rel="noopener noreferrer">
-            <Button color="neutral">Download App</Button>
+            <Button size={{ xs: "sm", sm: "md" }} color="neutral">
+                Download App
+            </Button>
         </a>
     );
 };

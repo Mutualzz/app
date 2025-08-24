@@ -2,6 +2,7 @@ import { useAppStore } from "@hooks/useStores";
 import {
     Button,
     Divider,
+    Drawer,
     Option,
     Paper,
     Radio,
@@ -11,6 +12,7 @@ import {
     useTheme,
     type ThemeMode,
 } from "@mutualzz/ui";
+import { useMediaQuery } from "@react-hookz/web";
 import { useLocation, useNavigate } from "@tanstack/react-router";
 import { sortThemes } from "@utils/index";
 import startCase from "lodash-es/startCase";
@@ -104,8 +106,12 @@ export const PlaygroundLeftSidebar = observer(() => {
     const navigate = useNavigate();
     const { theme: themeStore } = useAppStore();
     const [style, setStyle] = useState<"normal" | "gradient">("normal");
+    const [drawerOpen, setDrawerOpen] = useState(false);
     const { mode, theme, changeTheme, changeMode } = useTheme();
     const { pathname } = useLocation();
+    const isMobileQuery = useMediaQuery(
+        theme.breakpoints.down("md").replace("@media ", ""),
+    );
 
     const themes = Array.from(themeStore.themes.values())
         .filter((theme) => theme.type === mode)
@@ -118,94 +124,86 @@ export const PlaygroundLeftSidebar = observer(() => {
         changeTheme(changeTo);
     };
 
-    return (
-        <AnimatedPaper
+    const SidebarContent = () => (
+        <Stack
             spacing={25}
             direction="column"
             overflowY="auto"
             minWidth="14rem"
             p={20}
-            initial={{
-                x: -230,
-            }}
-            animate={{
-                x: 0,
-            }}
             css={{
                 borderTopLeftRadius: "2rem",
                 borderBottomLeftRadius: "2rem",
             }}
         >
-            <Stack direction="column" spacing={25}>
+            <Stack
+                justifyContent="center"
+                alignItems="center"
+                direction="column"
+                spacing={10}
+            >
+                <Divider>Color Type</Divider>
+                <RadioGroup
+                    variant="solid"
+                    orientation="horizontal"
+                    spacing={10}
+                    value={mode}
+                    onChange={(_, modeToSet) =>
+                        changeMode(modeToSet as ThemeMode)
+                    }
+                    size="sm"
+                >
+                    <Radio label="Dark" value="dark" />
+                    <Radio label="Light" value="light" />
+                    <Radio label="System" value="system" />
+                </RadioGroup>
+            </Stack>
+            {mode !== "system" && (
                 <Stack
                     justifyContent="center"
                     alignItems="center"
                     direction="column"
                     spacing={10}
                 >
-                    <Divider>Color Type</Divider>
+                    <Divider>Color Mode</Divider>
                     <RadioGroup
                         variant="solid"
+                        onChange={(_, styleToSet) => {
+                            setStyle(styleToSet as "normal" | "gradient");
+                        }}
                         orientation="horizontal"
                         spacing={10}
-                        value={mode}
-                        onChange={(_, modeToSet) =>
-                            changeMode(modeToSet as ThemeMode)
-                        }
-                        size="sm"
+                        value={style}
                     >
-                        <Radio label="Dark" value="dark" />
-                        <Radio label="Light" value="light" />
-                        <Radio label="System" value="system" />
+                        <Radio label="Normal" value="normal" />
+                        <Radio label="Gradient" value="gradient" />
                     </RadioGroup>
                 </Stack>
-                {mode !== "system" && (
-                    <Stack
-                        justifyContent="center"
-                        alignItems="center"
-                        direction="column"
-                        spacing={10}
+            )}
+            {themes.length > 1 && (
+                <Stack
+                    justifyContent="center"
+                    alignItems="center"
+                    direction="column"
+                    spacing={10}
+                >
+                    <Divider>Color Scheme</Divider>
+                    <Select
+                        variant="solid"
+                        onValueChange={(value) =>
+                            handleThemeChange(value.toString())
+                        }
+                        value={theme.id}
                     >
-                        <Divider>Color Mode</Divider>
-                        <RadioGroup
-                            variant="solid"
-                            onChange={(_, styleToSet) => {
-                                setStyle(styleToSet as "normal" | "gradient");
-                            }}
-                            orientation="horizontal"
-                            spacing={10}
-                            value={style}
-                        >
-                            <Radio label="Normal" value="normal" />
-                            <Radio label="Gradient" value="gradient" />
-                        </RadioGroup>
-                    </Stack>
-                )}
-                {themes.length > 1 && (
-                    <Stack
-                        justifyContent="center"
-                        alignItems="center"
-                        direction="column"
-                        spacing={10}
-                    >
-                        <Divider>Color Scheme</Divider>
-                        <Select
-                            variant="solid"
-                            onValueChange={(value) =>
-                                handleThemeChange(value.toString())
-                            }
-                            value={theme.id}
-                        >
-                            {sortThemes(themes).map((theme) => (
-                                <Option key={theme.id} value={theme.id}>
-                                    {theme.name}
-                                    {theme.createdBy ? ` (by You)` : ""}
-                                </Option>
-                            ))}
-                        </Select>
-                    </Stack>
-                )}
-            </Stack>
+                        {sortThemes(themes).map((theme) => (
+                            <Option key={theme.id} value={theme.id}>
+                                {theme.name}
+                                {theme.createdBy ? ` (by You)` : ""}
+                            </Option>
+                        ))}
+                    </Select>
+                </Stack>
+            )}
             {Object.entries(links).map(([key, value]) => (
                 <Stack
                     key={key}
@@ -235,6 +233,41 @@ export const PlaygroundLeftSidebar = observer(() => {
                     </Stack>
                 </Stack>
             ))}
-        </AnimatedPaper>
+        </Stack>
+    );
+
+    return (
+        <>
+            {isMobileQuery && (
+                <Drawer
+                    open={drawerOpen}
+                    onOpen={() => setDrawerOpen(true)}
+                    onClose={() => setDrawerOpen(false)}
+                    anchor="left"
+                    swipeable
+                    size="sm"
+                >
+                    <SidebarContent />
+                </Drawer>
+            )}
+            <AnimatedPaper
+                initial={false}
+                animate={{
+                    x: isMobileQuery ? -230 : 0,
+                    opacity: isMobileQuery ? 0 : 1,
+                    pointerEvents: isMobileQuery ? "none" : "auto",
+                    display: isMobileQuery ? "none" : "flex",
+                }}
+                transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                css={{
+                    borderRight: `1px solid ${theme.colors.primary}`,
+                    position: "relative",
+                    zIndex: 10,
+                }}
+                aria-hidden={isMobileQuery}
+            >
+                <SidebarContent />
+            </AnimatedPaper>
+        </>
     );
 });

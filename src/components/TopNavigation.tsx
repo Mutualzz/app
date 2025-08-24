@@ -1,8 +1,9 @@
 import { DownloadButton } from "@components/DownloadButton";
 import { useAppStore } from "@hooks/useStores";
-import { Avatar, Button, Paper, Stack } from "@mutualzz/ui";
+import { Avatar, Button, Paper, Stack, useTheme } from "@mutualzz/ui";
+import { useMediaQuery } from "@react-hookz/web";
 import { useNavigate } from "@tanstack/react-router";
-import { isTauri } from "@utils/index";
+import { isMobile, isTauri } from "@utils/index";
 import { observer } from "mobx-react";
 import { motion } from "motion/react";
 import { Logo } from "./Logo";
@@ -11,23 +12,35 @@ const AnimatedLogo = motion.create(Logo);
 
 export const TopNavigation = observer(() => {
     const navigate = useNavigate();
+    const { theme } = useTheme();
+    const isMobileQuery = useMediaQuery(
+        theme.breakpoints.down("md").replace("@media ", ""),
+    );
+
     const { account } = useAppStore();
 
     return (
         <Paper
-            p="0.25rem 0.75rem"
+            p={"0.5rem 1rem"}
             elevation={2}
-            justifyContent="space-between"
+            display="flex"
+            flexDirection="row"
             alignItems="center"
+            justifyContent="space-between"
             css={{
                 borderBottomLeftRadius: 16,
                 borderBottomRightRadius: 16,
                 userSelect: "none",
+                position: "sticky",
+                top: 0,
+                zIndex: 100,
             }}
         >
             <AnimatedLogo
                 css={{
-                    width: 64,
+                    width: isMobileQuery ? 40 : 64,
+                    minWidth: 32,
+                    maxWidth: 48,
                     cursor: "pointer",
                 }}
                 initial={{ scale: 1 }}
@@ -40,17 +53,22 @@ export const TopNavigation = observer(() => {
                 }}
             />
 
-            <Stack flex={1} justifyContent="flex-end">
+            <Stack
+                flex={1}
+                justifyContent="flex-end"
+                alignItems="center"
+                direction="row"
+                spacing={{ xs: 2, sm: 6, md: 10 }}
+            >
                 {account ? (
                     <Avatar
-                        size="lg"
+                        size={{ xs: "md", sm: "lg" }}
                         src={account.avatarUrl}
                         alt={account.username}
                     />
                 ) : (
-                    <Stack spacing={!isTauri ? 10 : 0}>
-                        {!isTauri && <DownloadButton />}
-
+                    <Stack direction="row" spacing={5} alignItems="center">
+                        {!isTauri && !isMobile && <DownloadButton />}
                         <Button
                             onClick={() => {
                                 navigate({
@@ -59,6 +77,7 @@ export const TopNavigation = observer(() => {
                                 });
                             }}
                             color="success"
+                            size={{ xs: "sm", sm: "md" }}
                         >
                             Login
                         </Button>
