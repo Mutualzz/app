@@ -1,5 +1,5 @@
 import { LinearProgress, Stack } from "@mutualzz/ui";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Navigate, useNavigate } from "@tanstack/react-router";
 import { detectDownloadURL } from "@utils/detect";
 import { isMobile, isTauri } from "@utils/index";
 import { useEffect } from "react";
@@ -30,7 +30,7 @@ function DownloadAndRedirect() {
         }
     }, [fileUrl, navigate]);
 
-    if (!isTauri || !isMobile) return null;
+    if (isTauri || isMobile) return <Navigate to="/" replace />;
 
     return (
         <Stack
