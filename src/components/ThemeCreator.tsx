@@ -668,6 +668,7 @@ export const ThemeCreator = observer(() => {
                             onOpen={() => setDrawerOpen(true)}
                             swipeable
                             anchor="left"
+                            size="sm"
                         >
                             <SidebarContent />
                         </Drawer>
