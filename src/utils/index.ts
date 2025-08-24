@@ -1,4 +1,5 @@
 import type { MzTheme } from "@app-types/theme";
+import { Capacitor } from "@capacitor/core";
 import mergeWith from "lodash-es/mergeWith";
 import { isValidElement, type ReactNode } from "react";
 
@@ -27,6 +28,8 @@ export const isSSR = typeof window === "undefined";
 export const isTauri =
     // @ts-expect-error no types
     !isSSR && !!window.__TAURI_INTERNALS__;
+
+export const isMobile = !isSSR && Capacitor.isNativePlatform();
 
 export const sortThemes = (themes: MzTheme[]): MzTheme[] => {
     const priorityOrder: string[] = ["baseDark", "baseLight"];
