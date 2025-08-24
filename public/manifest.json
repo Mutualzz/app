@@ -3,6 +3,48 @@
     "display": "standalone",
     "icons": [
         {
+            "purpose": "any maskable",
+            "sizes": "48x48",
+            "src": "assets/icons/icon-48.webp",
+            "type": "image/png"
+        },
+        {
+            "purpose": "any maskable",
+            "sizes": "72x72",
+            "src": "assets/icons/icon-72.webp",
+            "type": "image/png"
+        },
+        {
+            "purpose": "any maskable",
+            "sizes": "96x96",
+            "src": "assets/icons/icon-96.webp",
+            "type": "image/png"
+        },
+        {
+            "purpose": "any maskable",
+            "sizes": "128x128",
+            "src": "assets/icons/icon-128.webp",
+            "type": "image/png"
+        },
+        {
+            "purpose": "any maskable",
+            "sizes": "192x192",
+            "src": "assets/icons/icon-192.webp",
+            "type": "image/png"
+        },
+        {
+            "purpose": "any maskable",
+            "sizes": "256x256",
+            "src": "assets/icons/icon-256.webp",
+            "type": "image/png"
+        },
+        {
+            "purpose": "any maskable",
+            "sizes": "512x512",
+            "src": "assets/icons/icon-512.webp",
+            "type": "image/png"
+        },
+        {
             "sizes": "64x64 32x32 24x24 16x16",
             "src": "favicon.ico",
             "type": "image/x-icon"
