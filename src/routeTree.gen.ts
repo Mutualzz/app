@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from "./routes/__root";
 import { Route as UiRouteImport } from "./routes/ui";
 import { Route as RegisterRouteImport } from "./routes/register";
 import { Route as LoginRouteImport } from "./routes/login";
+import { Route as DownloadRouteImport } from "./routes/download";
 import { Route as AuthenticatedRouteImport } from "./routes/_authenticated";
 import { Route as IndexRouteImport } from "./routes/index";
 import { Route as UiIndexRouteImport } from "./routes/ui/index";
@@ -46,6 +47,11 @@ const RegisterRoute = RegisterRouteImport.update({
 const LoginRoute = LoginRouteImport.update({
   id: "/login",
   path: "/login",
+  getParentRoute: () => rootRouteImport,
+} as any);
+const DownloadRoute = DownloadRouteImport.update({
+  id: "/download",
+  path: "/download",
   getParentRoute: () => rootRouteImport,
 } as any);
 const AuthenticatedRoute = AuthenticatedRouteImport.update({
@@ -153,6 +159,7 @@ const UiDataDisplayAvatarRoute = UiDataDisplayAvatarRouteImport.update({
 
 export interface FileRoutesByFullPath {
   "/": typeof IndexRoute;
+  "/download": typeof DownloadRoute;
   "/login": typeof LoginRoute;
   "/register": typeof RegisterRoute;
   "/ui": typeof UiRouteWithChildren;
@@ -177,6 +184,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   "/": typeof IndexRoute;
+  "/download": typeof DownloadRoute;
   "/login": typeof LoginRoute;
   "/register": typeof RegisterRoute;
   "/ui": typeof UiIndexRoute;
@@ -202,6 +210,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport;
   "/": typeof IndexRoute;
   "/_authenticated": typeof AuthenticatedRoute;
+  "/download": typeof DownloadRoute;
   "/login": typeof LoginRoute;
   "/register": typeof RegisterRoute;
   "/ui": typeof UiRouteWithChildren;
@@ -228,6 +237,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath;
   fullPaths:
     | "/"
+    | "/download"
     | "/login"
     | "/register"
     | "/ui"
@@ -252,6 +262,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo;
   to:
     | "/"
+    | "/download"
     | "/login"
     | "/register"
     | "/ui"
@@ -276,6 +287,7 @@ export interface FileRouteTypes {
     | "__root__"
     | "/"
     | "/_authenticated"
+    | "/download"
     | "/login"
     | "/register"
     | "/ui"
@@ -302,6 +314,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute;
   AuthenticatedRoute: typeof AuthenticatedRoute;
+  DownloadRoute: typeof DownloadRoute;
   LoginRoute: typeof LoginRoute;
   RegisterRoute: typeof RegisterRoute;
   UiRoute: typeof UiRouteWithChildren;
@@ -328,6 +341,13 @@ declare module "@tanstack/react-router" {
       path: "/login";
       fullPath: "/login";
       preLoaderRoute: typeof LoginRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/download": {
+      id: "/download";
+      path: "/download";
+      fullPath: "/download";
+      preLoaderRoute: typeof DownloadRouteImport;
       parentRoute: typeof rootRouteImport;
     };
     "/_authenticated": {
@@ -520,6 +540,7 @@ const UiRouteWithChildren = UiRoute._addFileChildren(UiRouteChildren);
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRoute: AuthenticatedRoute,
+  DownloadRoute: DownloadRoute,
   LoginRoute: LoginRoute,
   RegisterRoute: RegisterRoute,
   UiRoute: UiRouteWithChildren,

@@ -133,5 +133,5 @@
         "vite:dev": "cross-env VITE_ENV_DEV=true vite --host"
     },
     "type": "module",
-    "version": "1.8.0"
+    "version": "1.8.1"
 }
