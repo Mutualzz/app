@@ -5,6 +5,7 @@ import {
     Button,
     ButtonGroup,
     Divider,
+    Drawer,
     Input,
     Option,
     Paper,
@@ -12,9 +13,11 @@ import {
     Select,
     Stack,
     Typography,
+    useTheme,
     type InputProps,
 } from "@mutualzz/ui";
 import { validateThemePut } from "@mutualzz/validators";
+import { useMediaQuery } from "@react-hookz/web";
 import {
     revalidateLogic,
     useForm,
@@ -43,9 +46,13 @@ const InputWithLabel = ({
     description?: string;
     apiErrors: ApiErrors;
 } & InputProps) => (
-    <Stack direction="column" spacing={5} width="100%">
+    <Stack direction="column" spacing={{ xs: 2, sm: 3, md: 4 }} width="100%">
         <Stack direction="column">
-            <Typography fontWeight={500} level="body-md">
+            <Typography
+                fontWeight={500}
+                level={{ xs: "body-sm", sm: "body-md" }}
+                mb={{ xs: "0.25rem", sm: "0.5rem" }}
+            >
                 {label}{" "}
                 {props.required && (
                     <Typography variant="plain" color="danger">
@@ -54,11 +61,18 @@ const InputWithLabel = ({
                 )}
             </Typography>
             {description && (
-                <Typography level="body-xs">{description}</Typography>
+                <Typography level={{ xs: "body-xs", sm: "body-sm" }}>
+                    {description}
+                </Typography>
             )}
         </Stack>
 
-        <Input textColor="primary" showRandom size="lg" {...props} />
+        <Input
+            textColor="primary"
+            showRandom
+            size={{ xs: "md", sm: "lg" }}
+            {...props}
+        />
 
         {!meta.isValid && meta.isTouched && (
             <Typography variant="plain" color="danger" level="body-sm">
@@ -112,12 +126,19 @@ const defaultValues = {
 
 export const ThemeCreator = observer(() => {
     const { rest, theme: themeStore } = useAppStore();
+    const { theme } = useTheme();
     const [apiErrors, setApiErrors] = useState<ApiErrors>({});
     const [loadedPreset, setLoadedPreset] = useState<MzTheme | null>(null);
     const [loadedDraft, setLoadedDraft] = useState<ThemeDraft | null>(null);
     const [loadedUserTheme, setLoadedUserTheme] = useState<MzTheme | null>(
         null,
     );
+
+    const isMobileQuery = useMediaQuery(
+        theme.breakpoints.down("md").replace("@media", ""),
+    );
+
+    const [drawerOpen, setDrawerOpen] = useState(false);
 
     const [presetSelectValue, setPresetSelectValue] = useState("");
     const [draftSelectValue, setDraftSelectValue] = useState("");
@@ -374,8 +395,256 @@ export const ThemeCreator = observer(() => {
         return currentMode;
     };
 
+    const SidebarContent = () => (
+        <form.Subscribe
+            selector={(state) => [
+                state.canSubmit,
+                state.isSubmitting,
+                themePut.isPending,
+                themeDelete.isPending,
+            ]}
+            children={([
+                canSubmit,
+                isSubmitting,
+                putPending,
+                deletePending,
+            ]) => (
+                <Paper
+                    justifyContent="space-between"
+                    p={{ xs: "0.75rem", sm: "1rem" }}
+                    direction="column"
+                    elevation={2}
+                    height="100%"
+                >
+                    <Stack direction="column" alignItems="center" spacing={10}>
+                        <Button
+                            color="danger"
+                            onClick={() => {
+                                unloadAndReset(form);
+                            }}
+                            css={{
+                                alignSelf: "stretch",
+                            }}
+                            disabled={
+                                !canSubmit ||
+                                isSubmitting ||
+                                putPending ||
+                                deletePending
+                            }
+                        >
+                            Start from scratch
+                        </Button>
+                        <Divider />
+                        <Stack
+                            direction="column"
+                            spacing={5}
+                            alignSelf="stretch"
+                        >
+                            <Typography level="body-sm">
+                                Pick a preset
+                            </Typography>
+                            <Select
+                                variant="solid"
+                                color="primary"
+                                onValueChange={(value) => {
+                                    loadAndUpdate(value.toString(), "preset");
+                                }}
+                                value={presetSelectValue}
+                                placeholder="Pick a preset"
+                                disabled={
+                                    isSubmitting || putPending || deletePending
+                                }
+                            >
+                                {sortThemes(allDefaultThemes).map((theme) => (
+                                    <Option key={theme.id} value={theme.id}>
+                                        {theme.name} ({capitalize(theme.type)})
+                                    </Option>
+                                ))}
+                            </Select>
+                        </Stack>
+                        <Divider />
+                        <Stack
+                            direction="column"
+                            spacing={5}
+                            alignSelf="stretch"
+                        >
+                            <Typography level="body-sm">
+                                Pick your drafts
+                            </Typography>
+                            <Select
+                                onValueChange={(value) => {
+                                    loadAndUpdate(value.toString(), "draft");
+                                }}
+                                value={draftSelectValue}
+                                placeholder={
+                                    allDrafts.length === 0
+                                        ? "No drafts available"
+                                        : "Pick a draft"
+                                }
+                                disabled={
+                                    isSubmitting ||
+                                    putPending ||
+                                    deletePending ||
+                                    allDrafts.length === 0
+                                }
+                            >
+                                {allDrafts.map((theme) => (
+                                    <Option key={theme.name} value={theme.name}>
+                                        {theme.name} ({capitalize(theme.type)})
+                                    </Option>
+                                ))}
+                            </Select>
+                            {loadedDraft && (
+                                <Button
+                                    onClick={() => {
+                                        deleteDraft();
+                                    }}
+                                    css={{
+                                        alignSelf: "stretch",
+                                    }}
+                                    disabled={
+                                        isSubmitting ||
+                                        putPending ||
+                                        deletePending
+                                    }
+                                    type="submit"
+                                >
+                                    Delete Draft
+                                </Button>
+                            )}
+                        </Stack>
+                        <Divider />
+                        <Stack
+                            direction="column"
+                            spacing={5}
+                            alignSelf="stretch"
+                        >
+                            <Typography level="body-sm">
+                                Pick your theme
+                            </Typography>
+                            <Select
+                                onValueChange={(value) => {
+                                    loadAndUpdate(
+                                        value.toString(),
+                                        "userTheme",
+                                    );
+                                }}
+                                placeholder={
+                                    allUserThemes.length === 0
+                                        ? "No themes available"
+                                        : "Pick your theme"
+                                }
+                                value={userThemeSelectValue}
+                                disabled={
+                                    isSubmitting ||
+                                    putPending ||
+                                    deletePending ||
+                                    allUserThemes.length === 0
+                                }
+                            >
+                                {allUserThemes.map((theme) => (
+                                    <Option key={theme.id} value={theme.id}>
+                                        {theme.name} ({capitalize(theme.type)})
+                                    </Option>
+                                ))}
+                            </Select>
+                            {loadedUserTheme && (
+                                <Button
+                                    onClick={() => {
+                                        form.handleSubmit({
+                                            submitAction: "delete",
+                                        });
+                                    }}
+                                    css={{
+                                        alignSelf: "stretch",
+                                    }}
+                                    type="submit"
+                                    disabled={
+                                        !canSubmit ||
+                                        isSubmitting ||
+                                        putPending ||
+                                        deletePending
+                                    }
+                                >
+                                    Delete Theme
+                                </Button>
+                            )}
+                        </Stack>
+                    </Stack>
+
+                    <ButtonGroup orientation="vertical">
+                        <Button
+                            onClick={() =>
+                                form.handleSubmit({
+                                    submitAction: "saveDraft",
+                                })
+                            }
+                            type="submit"
+                            color={
+                                loadedDraft &&
+                                allDrafts.some(
+                                    (draft) => draft.name === loadedDraft.name,
+                                )
+                                    ? "info"
+                                    : "warning"
+                            }
+                            disabled={
+                                !canSubmit ||
+                                isSubmitting ||
+                                putPending ||
+                                deletePending
+                            }
+                        >
+                            {loadedDraft &&
+                            allDrafts.some(
+                                (draft) => draft.name === loadedDraft.name,
+                            )
+                                ? "Update Draft"
+                                : "Save Draft"}
+                        </Button>
+                        <Button
+                            onClick={() =>
+                                form.handleSubmit({
+                                    submitAction:
+                                        loadedUserTheme &&
+                                        allUserThemes.some(
+                                            (theme) =>
+                                                theme.id === loadedUserTheme.id,
+                                        )
+                                            ? "update"
+                                            : "create",
+                                })
+                            }
+                            type="submit"
+                            color="success"
+                            loading={
+                                isSubmitting || putPending || deletePending
+                            }
+                            disabled={!canSubmit}
+                        >
+                            {loadedUserTheme &&
+                            allUserThemes.some(
+                                (theme) => theme.id === loadedUserTheme.id,
+                            )
+                                ? "Update"
+                                : "Create"}
+                        </Button>
+                    </ButtonGroup>
+                </Paper>
+            )}
+        />
+    );
+
     return (
-        <Paper width="100%" height="100%" maxWidth={800} maxHeight={800}>
+        <Paper
+            width="100%"
+            height="100%"
+            maxWidth={{ xs: "100%", sm: 700, md: 900, lg: 1200 }}
+            maxHeight={{ xs: 600, sm: 700, md: 800 }}
+            p={{ xs: "0.5rem", sm: "1.5rem", md: "2rem" }}
+            borderRadius={{ xs: "0.75rem", sm: "1.25rem", md: "1.5rem" }}
+            overflow="auto"
+        >
             <form
                 css={{
                     width: "100%",
@@ -386,288 +655,61 @@ export const ThemeCreator = observer(() => {
                 }}
                 key={formKey}
             >
-                <Stack width="100%" height="100%">
-                    <form.Subscribe
-                        selector={(state) => [
-                            state.canSubmit,
-                            state.isSubmitting,
-                            themePut.isPending,
-                            themeDelete.isPending,
-                        ]}
-                        children={([
-                            canSubmit,
-                            isSubmitting,
-                            putPending,
-                            deletePending,
-                        ]) => (
-                            <Paper
-                                justifyContent="space-between"
-                                p="1rem"
-                                direction="column"
-                                elevation={2}
-                            >
-                                <Stack
-                                    direction="column"
-                                    alignItems="center"
-                                    spacing={10}
-                                >
-                                    <Button
-                                        color="danger"
-                                        onClick={() => {
-                                            unloadAndReset(form);
-                                        }}
-                                        css={{
-                                            alignSelf: "stretch",
-                                        }}
-                                        disabled={
-                                            !canSubmit ||
-                                            isSubmitting ||
-                                            putPending ||
-                                            deletePending
-                                        }
-                                    >
-                                        Start from scratch
-                                    </Button>
-                                    <Divider />
-                                    <Stack
-                                        direction="column"
-                                        spacing={5}
-                                        alignSelf="stretch"
-                                    >
-                                        <Typography level="body-sm">
-                                            Pick a preset
-                                        </Typography>
-                                        <Select
-                                            variant="solid"
-                                            color="primary"
-                                            onValueChange={(value) => {
-                                                loadAndUpdate(
-                                                    value.toString(),
-                                                    "preset",
-                                                );
-                                            }}
-                                            value={presetSelectValue}
-                                            placeholder="Pick a preset"
-                                            disabled={
-                                                isSubmitting ||
-                                                putPending ||
-                                                deletePending
-                                            }
-                                        >
-                                            {sortThemes(allDefaultThemes).map(
-                                                (theme) => (
-                                                    <Option
-                                                        key={theme.id}
-                                                        value={theme.id}
-                                                    >
-                                                        {theme.name} (
-                                                        {capitalize(theme.type)}
-                                                        )
-                                                    </Option>
-                                                ),
-                                            )}
-                                        </Select>
-                                    </Stack>
-                                    <Divider />
-                                    <Stack
-                                        direction="column"
-                                        spacing={5}
-                                        alignSelf="stretch"
-                                    >
-                                        <Typography level="body-sm">
-                                            Pick your drafts
-                                        </Typography>
-                                        <Select
-                                            onValueChange={(value) => {
-                                                loadAndUpdate(
-                                                    value.toString(),
-                                                    "draft",
-                                                );
-                                            }}
-                                            value={draftSelectValue}
-                                            placeholder={
-                                                allDrafts.length === 0
-                                                    ? "No drafts available"
-                                                    : "Pick a draft"
-                                            }
-                                            disabled={
-                                                isSubmitting ||
-                                                putPending ||
-                                                deletePending ||
-                                                allDrafts.length === 0
-                                            }
-                                        >
-                                            {allDrafts.map((theme) => (
-                                                <Option
-                                                    key={theme.name}
-                                                    value={theme.name}
-                                                >
-                                                    {theme.name} (
-                                                    {capitalize(theme.type)})
-                                                </Option>
-                                            ))}
-                                        </Select>
-                                        {loadedDraft && (
-                                            <Button
-                                                onClick={() => {
-                                                    deleteDraft();
-                                                }}
-                                                css={{
-                                                    alignSelf: "stretch",
-                                                }}
-                                                disabled={
-                                                    isSubmitting ||
-                                                    putPending ||
-                                                    deletePending
-                                                }
-                                                type="submit"
-                                            >
-                                                Delete Draft
-                                            </Button>
-                                        )}
-                                    </Stack>
-                                    <Divider />
-                                    <Stack
-                                        direction="column"
-                                        spacing={5}
-                                        alignSelf="stretch"
-                                    >
-                                        <Typography level="body-sm">
-                                            Pick your theme
-                                        </Typography>
-                                        <Select
-                                            onValueChange={(value) => {
-                                                loadAndUpdate(
-                                                    value.toString(),
-                                                    "userTheme",
-                                                );
-                                            }}
-                                            placeholder={
-                                                allUserThemes.length === 0
-                                                    ? "No themes available"
-                                                    : "Pick your theme"
-                                            }
-                                            value={userThemeSelectValue}
-                                            disabled={
-                                                isSubmitting ||
-                                                putPending ||
-                                                deletePending ||
-                                                allUserThemes.length === 0
-                                            }
-                                        >
-                                            {allUserThemes.map((theme) => (
-                                                <Option
-                                                    key={theme.id}
-                                                    value={theme.id}
-                                                >
-                                                    {theme.name} (
-                                                    {capitalize(theme.type)})
-                                                </Option>
-                                            ))}
-                                        </Select>
-                                        {loadedUserTheme && (
-                                            <Button
-                                                onClick={() => {
-                                                    form.handleSubmit({
-                                                        submitAction: "delete",
-                                                    });
-                                                }}
-                                                css={{
-                                                    alignSelf: "stretch",
-                                                }}
-                                                type="submit"
-                                                disabled={
-                                                    !canSubmit ||
-                                                    isSubmitting ||
-                                                    putPending ||
-                                                    deletePending
-                                                }
-                                            >
-                                                Delete Theme
-                                            </Button>
-                                        )}
-                                    </Stack>
-                                </Stack>
-
-                                <ButtonGroup orientation="vertical">
-                                    <Button
-                                        onClick={() =>
-                                            form.handleSubmit({
-                                                submitAction: "saveDraft",
-                                            })
-                                        }
-                                        type="submit"
-                                        color={
-                                            loadedDraft &&
-                                            allDrafts.some(
-                                                (draft) =>
-                                                    draft.name ===
-                                                    loadedDraft.name,
-                                            )
-                                                ? "info"
-                                                : "warning"
-                                        }
-                                        disabled={
-                                            !canSubmit ||
-                                            isSubmitting ||
-                                            putPending ||
-                                            deletePending
-                                        }
-                                    >
-                                        {loadedDraft &&
-                                        allDrafts.some(
-                                            (draft) =>
-                                                draft.name === loadedDraft.name,
-                                        )
-                                            ? "Update Draft"
-                                            : "Save Draft"}
-                                    </Button>
-                                    <Button
-                                        onClick={() =>
-                                            form.handleSubmit({
-                                                submitAction:
-                                                    loadedUserTheme &&
-                                                    allUserThemes.some(
-                                                        (theme) =>
-                                                            theme.id ===
-                                                            loadedUserTheme.id,
-                                                    )
-                                                        ? "update"
-                                                        : "create",
-                                            })
-                                        }
-                                        type="submit"
-                                        color="success"
-                                        loading={
-                                            isSubmitting ||
-                                            putPending ||
-                                            deletePending
-                                        }
-                                        disabled={!canSubmit}
-                                    >
-                                        {loadedUserTheme &&
-                                        allUserThemes.some(
-                                            (theme) =>
-                                                theme.id === loadedUserTheme.id,
-                                        )
-                                            ? "Update"
-                                            : "Create"}
-                                    </Button>
-                                </ButtonGroup>
-                            </Paper>
-                        )}
-                    />
-
-                    <Paper
+                <Stack
+                    width="100%"
+                    height="100%"
+                    direction="row"
+                    spacing={{ xs: 2, sm: 4, md: 6 }}
+                >
+                    {isMobileQuery ? (
+                        <Drawer
+                            open={drawerOpen}
+                            onClose={() => setDrawerOpen(false)}
+                            onOpen={() => setDrawerOpen(true)}
+                            swipeable
+                            anchor="left"
+                        >
+                            <SidebarContent />
+                        </Drawer>
+                    ) : (
+                        <SidebarContent />
+                    )}
+                    <Stack
                         direction="column"
                         width="100%"
                         height="100%"
-                        p="1rem"
-                        spacing="1em"
+                        p={{ xs: "0.75rem", sm: "1rem" }}
+                        spacing={{ xs: 2, sm: 4, md: 6 }}
                         overflowY="auto"
                     >
-                        <Stack alignItems="center" direction="row" spacing={5}>
-                            <Typography level="h4">Theme Creator</Typography>
+                        <Stack
+                            alignItems="center"
+                            direction={{ xs: "column", sm: "row" }}
+                            spacing={5}
+                        >
+                            <Typography
+                                level={{ xs: "h5", sm: "h4" }}
+                                fontSize={{
+                                    xs: "1.25rem",
+                                    sm: "1.5rem",
+                                    md: "2rem",
+                                }}
+                            >
+                                Theme Creator{" "}
+                                {isMobileQuery &&
+                                    !loadedDraft &&
+                                    !loadedPreset &&
+                                    !loadedUserTheme && (
+                                        <Typography
+                                            level={{
+                                                xs: "body-sm",
+                                                sm: "body-md",
+                                            }}
+                                        >
+                                            (Swipe to access the sidebar)
+                                        </Typography>
+                                    )}
+                            </Typography>
                             {loadedDraft && (
                                 <Typography level="h5">
                                     (Draft &quot;{loadedDraft.name}&quot;)
@@ -1136,7 +1178,7 @@ export const ThemeCreator = observer(() => {
                                 />
                             )}
                         />
-                    </Paper>
+                    </Stack>
                 </Stack>
             </form>
         </Paper>
