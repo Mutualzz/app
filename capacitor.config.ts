@@ -5,6 +5,11 @@ const config: CapacitorConfig = {
     appName: "Mutualzz",
     webDir: "dist",
     server: { cleartext: true, url: "http://137.150.244.173:1420" },
+    plugins: {
+        StatusBar: {
+            overlaysWebView: false,
+        },
+    },
 };
 
 export default config;
