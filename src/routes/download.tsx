@@ -13,7 +13,7 @@ function DownloadAndRedirect() {
     const fileUrl = detectDownloadURL();
 
     useEffect(() => {
-        if (fileUrl && (isTauri || isMobile)) {
+        if (fileUrl && (!isTauri || !isMobile)) {
             const a = document.createElement("a");
             a.href = fileUrl;
             a.download = "";
@@ -30,7 +30,7 @@ function DownloadAndRedirect() {
         }
     }, [fileUrl, navigate]);
 
-    if (isTauri || isMobile) return null;
+    if (!isTauri || !isMobile) return null;
 
     return (
         <Stack
