@@ -46,7 +46,7 @@
             }
         }
     },
-    "identifier": "com.mutualzz.mz",
+    "identifier": "com.mutualzz.app",
     "plugins": {
         "shell": {
             "open": true
