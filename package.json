@@ -114,6 +114,8 @@
     "scripts": {
         "build": "tsc && vite build",
         "build:dev": "tsc && cross-env VITE_ENV_DEV=true vite build",
+        "cap:build:android": "cross-env VITE_CAPACITOR=true pnpm vite:build && cap sync && cap build android",
+        "cap:build:ios": "cross-env VITE_CAPACITOR=true pnpm vite:build && cap sync && cap build ios",
         "cap:run:android": "cap copy && cap open android",
         "cap:run:ios": "cap copy && cap open ios",
         "ci:prebuild": "node scripts/tauriVersion.js",
