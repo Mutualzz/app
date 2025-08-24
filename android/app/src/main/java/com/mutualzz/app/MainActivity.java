@@ -1,4 +1,4 @@
-package com.mutualzz.mz;
+package com.mutualzz.app;
 
 import com.getcapacitor.BridgeActivity;
 
