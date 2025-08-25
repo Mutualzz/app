@@ -409,11 +409,10 @@ export const ThemeCreator = observer(() => {
                 putPending,
                 deletePending,
             ]) => (
-                <Paper
+                <Stack
                     justifyContent="space-between"
                     p={{ xs: "0.75rem", sm: "1rem" }}
                     direction="column"
-                    elevation={2}
                     height="100%"
                 >
                     <Stack direction="column" alignItems="center" spacing={10}>
@@ -630,7 +629,7 @@ export const ThemeCreator = observer(() => {
                                 : "Create"}
                         </Button>
                     </ButtonGroup>
-                </Paper>
+                </Stack>
             )}
         />
     );
@@ -669,6 +668,7 @@ export const ThemeCreator = observer(() => {
                             swipeable
                             anchor="left"
                             size="sm"
+                            disablePortal
                         >
                             <SidebarContent />
                         </Drawer>
