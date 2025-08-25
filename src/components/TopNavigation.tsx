@@ -6,6 +6,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { isMobile, isTauri } from "@utils/index";
 import { observer } from "mobx-react";
 import { motion } from "motion/react";
+import { FaDownload, FaUser } from "react-icons/fa";
 import { Logo } from "./Logo";
 
 const AnimatedLogo = motion.create(Logo);
@@ -18,6 +19,8 @@ export const TopNavigation = observer(() => {
     );
 
     const { account } = useAppStore();
+
+    if (isMobileQuery) return null;
 
     return (
         <Paper
@@ -38,7 +41,7 @@ export const TopNavigation = observer(() => {
         >
             <AnimatedLogo
                 css={{
-                    width: isMobileQuery ? 40 : 64,
+                    width: 64,
                     minWidth: 32,
                     maxWidth: 48,
                     cursor: "pointer",
@@ -68,15 +71,21 @@ export const TopNavigation = observer(() => {
                     />
                 ) : (
                     <Stack direction="row" spacing={5} alignItems="center">
-                        {!isTauri && !isMobile && <DownloadButton />}
+                        {!isTauri && !isMobile && (
+                            <DownloadButton
+                                startDecorator={<FaDownload />}
+                                color="success"
+                            />
+                        )}
                         <Button
+                            startDecorator={<FaUser />}
                             onClick={() => {
                                 navigate({
                                     to: "/login",
                                     replace: true,
                                 });
                             }}
-                            color="success"
+                            color="neutral"
                             size={{ xs: "sm", sm: "md" }}
                         >
                             Login
