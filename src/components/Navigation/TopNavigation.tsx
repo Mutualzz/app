@@ -1,13 +1,14 @@
 import { DownloadButton } from "@components/DownloadButton";
+import { UserDropdown } from "@components/User/UserDropdown";
 import { useAppStore } from "@hooks/useStores";
-import { Avatar, Button, Paper, Stack, useTheme } from "@mutualzz/ui";
+import { Button, Paper, Stack, useTheme } from "@mutualzz/ui";
 import { useMediaQuery } from "@react-hookz/web";
 import { useNavigate } from "@tanstack/react-router";
 import { isMobile, isTauri } from "@utils/index";
 import { observer } from "mobx-react";
 import { motion } from "motion/react";
 import { FaDownload, FaUser } from "react-icons/fa";
-import { Logo } from "./Logo";
+import { Logo } from "../Logo";
 
 const AnimatedLogo = motion.create(Logo);
 
@@ -64,11 +65,7 @@ export const TopNavigation = observer(() => {
                 spacing={{ xs: 2, sm: 6, md: 10 }}
             >
                 {account ? (
-                    <Avatar
-                        size={{ xs: "md", sm: "lg" }}
-                        src={account.avatarUrl}
-                        alt={account.username}
-                    />
+                    <UserDropdown />
                 ) : (
                     <Stack direction="row" spacing={5} alignItems="center">
                         {!isTauri && !isMobile && (

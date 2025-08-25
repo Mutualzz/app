@@ -1,3 +1,4 @@
+import { useModal } from "@contexts/Modal.context";
 import { useAppStore } from "@hooks/useStores";
 import {
     Avatar,
@@ -10,12 +11,14 @@ import {
 import { observer } from "mobx-react";
 import { useState } from "react";
 import { FaCogs, FaSignOutAlt } from "react-icons/fa";
+import { UserSettingsModal } from "./UserSettingsModal";
 
 export const UserDrawer = observer(
     ({ onlyAvatar = false }: { onlyAvatar?: boolean }) => {
         const app = useAppStore();
         const { account } = app;
         const [isOpen, setIsOpen] = useState(false);
+        const { openModal } = useModal();
 
         if (!account) return null;
 
@@ -88,7 +91,12 @@ export const UserDrawer = observer(
                                     color="neutral"
                                     startDecorator={<FaCogs />}
                                     onClick={() => {
-                                        /* open settings modal */
+                                        setIsOpen(false);
+                                        openModal(
+                                            "user-settings",
+                                            <UserSettingsModal />,
+                                            { layout: "fullscreen" },
+                                        );
                                     }}
                                     size="md"
                                 >
@@ -100,7 +108,7 @@ export const UserDrawer = observer(
                                     startDecorator={<FaSignOutAlt />}
                                     onClick={() => {
                                         setIsOpen(false);
-                                        setTimeout(() => app.logout(), 200);
+                                        app.logout();
                                     }}
                                     size="md"
                                 >

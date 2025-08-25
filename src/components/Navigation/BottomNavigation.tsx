@@ -4,8 +4,8 @@ import { useMediaQuery } from "@react-hookz/web";
 import { useNavigate } from "@tanstack/react-router";
 import { observer } from "mobx-react";
 import { FaDownload, FaHome, FaUser } from "react-icons/fa";
-import { DownloadButton } from "./DownloadButton";
-import { UserDrawer } from "./UserDrawer";
+import { DownloadButton } from "../DownloadButton";
+import { UserDrawer } from "../User/UserDrawer";
 
 export const BottomNavigation = observer(() => {
     const navigate = useNavigate();

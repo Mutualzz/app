@@ -1,7 +1,7 @@
 import { AdaptStatusBar } from "@components/AdaptStatusBar";
-import { BottomNavigation } from "@components/BottomNavigation";
 import Loader from "@components/Loader/Loader";
-import { TopNavigation } from "@components/TopNavigation";
+import { BottomNavigation } from "@components/Navigation/BottomNavigation";
+import { TopNavigation } from "@components/Navigation/TopNavigation";
 import WindowTitlebar from "@components/WindowTitlebar";
 import { AppTheme } from "@contexts/AppTheme.context";
 import { ModalProvider } from "@contexts/Modal.context";
