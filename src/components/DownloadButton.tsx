@@ -1,14 +1,19 @@
-import { Button } from "@mutualzz/ui";
+import { Button, type ButtonProps } from "@mutualzz/ui";
 import { detectDownloadURL } from "@utils/detect";
 
-export const DownloadButton = () => {
+export const DownloadButton = (props: ButtonProps) => {
     const fileUrl = detectDownloadURL();
 
+    const handleClick = (e: React.MouseEvent) => {
+        e.preventDefault();
+        if (fileUrl) {
+            window.open(fileUrl, "_self", "noopener,noreferrer");
+        }
+    };
+
     return (
-        <a href={fileUrl} rel="noopener noreferrer">
-            <Button size={{ xs: "sm", sm: "md" }} color="neutral">
-                Download App
-            </Button>
-        </a>
+        <Button {...props} onClick={handleClick}>
+            Download App
+        </Button>
     );
 };
