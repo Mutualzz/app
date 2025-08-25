@@ -8,26 +8,25 @@ import {
     type ReactNode,
 } from "react";
 
-interface ModalContextProps {
-    open: boolean;
-    activeId: string | null;
-    modalContent: ReactNode;
+interface ModalStackItem {
+    id: string;
+    content: ReactNode;
+    props?: Partial<ModalProps>;
+}
 
+interface ModalContextProps {
+    modals: ModalStackItem[];
     openModal: (
         id: string,
         children: ReactNode,
         modalProps?: Partial<ModalProps>,
     ) => void;
-    closeModal: () => void;
+    closeModal: (id?: string) => void;
     isModalOpen: (id: string) => boolean;
-
-    modalProps: Partial<ModalProps>;
 }
 
 const ModalContext = createContext<ModalContextProps>({
-    open: false,
-    activeId: null,
-    modalContent: null,
+    modals: [],
     openModal: () => {
         return;
     },
@@ -35,51 +34,44 @@ const ModalContext = createContext<ModalContextProps>({
         return;
     },
     isModalOpen: () => false,
-    modalProps: {},
 });
 
 export const ModalProvider = ({ children }: { children: ReactNode }) => {
-    const [activeId, setActiveId] = useState<string | null>(null);
-    const [modalContent, setModalContent] = useState<ReactNode>(null);
-    const [modalProps, setModalProps] = useState<Partial<ModalProps>>({
-        layout: "center",
-    });
+    const [modals, setModals] = useState<ModalStackItem[]>([]);
 
     const openModal = useCallback(
         (id: string, content: ReactNode, props: Partial<ModalProps> = {}) => {
-            if (activeId) closeModal();
-
-            setActiveId(id);
-            setModalContent(content);
-            setModalProps({
-                layout: "center",
-                ...props,
-            });
+            setModals((prev) => [
+                ...prev,
+                {
+                    id,
+                    content,
+                    props: { layout: "center", ...props },
+                },
+            ]);
         },
-        [activeId],
+        [],
     );
 
-    const closeModal = useCallback(() => {
-        setActiveId(null);
-        setModalContent(null);
-        setModalProps({ layout: "center" });
+    const closeModal = useCallback((id?: string) => {
+        setModals(
+            (prev) =>
+                id
+                    ? prev.filter((modal) => modal.id !== id)
+                    : prev.slice(0, -1), // close topmost if no id
+        );
     }, []);
 
     const isModalOpen = useCallback(
-        (id: string) => {
-            return activeId === id;
-        },
-        [activeId],
+        (id: string) => modals.some((modal) => modal.id === id),
+        [modals],
     );
 
     const contextValue: ModalContextProps = {
-        open: activeId !== null,
-        activeId,
-        modalContent,
+        modals,
         openModal,
         closeModal,
         isModalOpen,
-        modalProps,
     };
 
     return (
