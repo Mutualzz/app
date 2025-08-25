@@ -1,4 +1,5 @@
 import { AdaptStatusBar } from "@components/AdaptStatusBar";
+import { BottomNavigation } from "@components/BottomNavigation";
 import Loader from "@components/Loader/Loader";
 import { TopNavigation } from "@components/TopNavigation";
 import WindowTitlebar from "@components/WindowTitlebar";
@@ -21,14 +22,12 @@ import { useNetworkState } from "@react-hookz/web";
 import { wrapCreateRootRouteWithSentry } from "@sentry/tanstackstart-react";
 import { seo } from "@seo";
 import { GatewayStatus } from "@stores/Gateway.store";
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import {
     createRootRoute,
     HeadContent,
     Outlet,
     Scripts,
 } from "@tanstack/react-router";
-import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import { getTauriVersion, getVersion } from "@tauri-apps/api/app";
 import { arch, locale, platform, version } from "@tauri-apps/plugin-os";
 import { isMobile, isTauri } from "@utils/index";
@@ -182,15 +181,16 @@ function RootComponent() {
                             >
                                 <Outlet />
                             </Stack>
+                            <BottomNavigation />
                         </Stack>
                     </Loader>
 
-                    {import.meta.env.DEV && (
+                    {/* {import.meta.env.DEV && (
                         <>
                             <ReactQueryDevtools />
                             <TanStackRouterDevtools />
                         </>
-                    )}
+                    )} */}
                 </ModalProvider>
             </AppTheme>
         </RootDocument>
