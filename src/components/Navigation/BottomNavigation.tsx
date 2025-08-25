@@ -2,6 +2,7 @@ import { useAppStore } from "@hooks/useStores";
 import { Button, IconButton, Paper, Stack, useTheme } from "@mutualzz/ui";
 import { useMediaQuery } from "@react-hookz/web";
 import { useNavigate } from "@tanstack/react-router";
+import { isMobile, isTauri } from "@utils/index";
 import { observer } from "mobx-react";
 import { FaDownload, FaHome, FaUser } from "react-icons/fa";
 import { DownloadButton } from "../DownloadButton";
@@ -50,12 +51,14 @@ export const BottomNavigation = observer(() => {
                 </IconButton>
                 {!account && (
                     <>
-                        <DownloadButton
-                            color="success"
-                            variant="plain"
-                            aria-label="Download"
-                            startDecorator={<FaDownload />}
-                        />
+                        {!isTauri && !isMobile && (
+                            <DownloadButton
+                                color="success"
+                                variant="plain"
+                                aria-label="Download"
+                                startDecorator={<FaDownload />}
+                            />
+                        )}
                         <Button
                             color="neutral"
                             variant="plain"
