@@ -32,8 +32,24 @@ export async function detectOS(): Promise<string> {
     return "Other";
 }
 
+export function detectMobileOS(): "iOS" | "Android" | "Other" {
+    const nav = typeof window !== "undefined" ? window.navigator : null;
+    if (!nav) return "Other";
+    const ua = nav.userAgent || "";
+
+    if (/iphone|ipad|ipod/i.test(ua)) return "iOS";
+    if (/android/i.test(ua)) return "Android";
+    return "Other";
+}
+
 export function detectDownloadURL() {
-    const os = detectOSDownload();
+    const mobileOs = detectMobileOS();
+    switch (mobileOs) {
+        case "iOS":
+            return "https://testflight.apple.com/join/23FhnCyx";
+    }
+
+    const os = detectDesktopOS();
     const baseUrl = "https://proxy.mutualzz.com/releases/latest";
 
     switch (os) {
@@ -48,9 +64,11 @@ export function detectDownloadURL() {
         case "linux-appimage":
             return `${baseUrl}/Mutualzz.AppImage`;
     }
+
+    return undefined;
 }
 
-export function detectOSDownload(): string {
+export function detectDesktopOS(): string {
     const ua = navigator.userAgent.toLowerCase();
 
     if (ua.includes("mac os x")) return "osx";
