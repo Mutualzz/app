@@ -17,7 +17,6 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { observer } from "mobx-react";
 import { motion } from "motion/react";
 import { useState } from "react";
-import { FaArrowLeft } from "react-icons/fa";
 
 export const Route = createFileRoute("/login")({
     component: observer(Login),
@@ -137,32 +136,17 @@ function Login() {
                 initial={{ opacity: 0, y: -200 }}
                 animate={{ opacity: 1, y: 0 }}
             >
-                <Stack position="relative" justifyContent="center" width="100%">
-                    <Button
-                        startDecorator={<FaArrowLeft />}
-                        css={{
-                            position: "absolute",
-                            left: 0,
-                        }}
-                        variant="soft"
-                        color="info"
-                        size={{ xs: "sm", sm: "md", md: "md" }}
-                        onClick={() => navigate({ to: "/" })}
-                    >
-                        Home
-                    </Button>
-                    <Typography
-                        level={{ xs: "h5", sm: "h4", md: "h3" }}
-                        fontSize={{
-                            xs: "1.25rem",
-                            sm: "1.5rem",
-                            md: "1.75rem",
-                        }}
-                        textAlign="center"
-                    >
-                        Login to an account
-                    </Typography>
-                </Stack>
+                <Typography
+                    level={{ xs: "h5", sm: "h4", md: "h3" }}
+                    fontSize={{
+                        xs: "1.25rem",
+                        sm: "1.5rem",
+                        md: "1.75rem",
+                    }}
+                    textAlign="center"
+                >
+                    Login to an account
+                </Typography>
                 <form
                     css={{
                         width: "100%",
