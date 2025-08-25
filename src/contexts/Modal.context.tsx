@@ -24,7 +24,19 @@ interface ModalContextProps {
     modalProps: Partial<ModalProps>;
 }
 
-const ModalContext = createContext<ModalContextProps | undefined>(undefined);
+const ModalContext = createContext<ModalContextProps>({
+    open: false,
+    activeId: null,
+    modalContent: null,
+    openModal: () => {
+        return;
+    },
+    closeModal: () => {
+        return;
+    },
+    isModalOpen: () => false,
+    modalProps: {},
+});
 
 export const ModalProvider = ({ children }: { children: ReactNode }) => {
     const [activeId, setActiveId] = useState<string | null>(null);
