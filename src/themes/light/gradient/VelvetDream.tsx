@@ -7,6 +7,7 @@ export const velvetDreamTheme: Theme = {
     name: "Velvet Dream",
     description: "Dramatic, vintage gradients",
     type: "light",
+    mode: "gradient",
     colors: {
         ...baseLightTheme.colors,
         primary: "#A86A7A",

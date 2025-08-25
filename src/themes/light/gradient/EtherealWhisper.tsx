@@ -7,6 +7,7 @@ export const etherealWhisperTheme: Theme = {
     name: "Ethereal Whisper",
     description: "Eerie, ethereal gradients",
     type: "light",
+    mode: "gradient",
     colors: {
         ...baseLightTheme.colors,
         primary: "#7CA8A6",

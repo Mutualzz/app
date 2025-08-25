@@ -7,6 +7,7 @@ export const sereneHorizonTheme: Theme = {
     name: "Serene Horizon",
     description: "Uplifting, hopeful gradients",
     type: "light",
+    mode: "gradient",
     colors: {
         ...baseLightTheme.colors,
         primary: "#5A7C8A",

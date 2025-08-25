@@ -7,6 +7,7 @@ export const silverDawnTheme: Theme = {
     name: "Silver Dawn",
     description: "Industrial metallic gradients",
     type: "light",
+    mode: "gradient",
     colors: {
         ...baseLightTheme.colors,
         primary: "#4A6A5A",

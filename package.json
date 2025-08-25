@@ -114,12 +114,12 @@
     "scripts": {
         "build": "tsc && vite build",
         "build:dev": "tsc && cross-env VITE_ENV_DEV=true vite build",
-        "cap:build:android": "cross-env VITE_CAPACITOR=true pnpm vite build && cap sync && cap build android",
+        "cap:build:android": "cross-env VITE_CAPACITOR=true pnpm vite build && cap sync && cross-env-shell 'npx cap build android --androidreleasetype AAB --keystorepath \"$MZ_UPLOAD_STORE_FILE\" --keystorepass \"$MZ_UPLOAD_STORE_PASSWORD\" --keystorealias \"$MZ_UPLOAD_KEY_ALIAS\" --keystorealiaspass \"$MZ_UPLOAD_KEY_PASSWORD\"'",
         "cap:build:ios": "cross-env VITE_CAPACITOR=true pnpm vite build && cap sync && cap build ios",
-        "cap:run:android": "cap copy && cap open android",
-        "cap:run:ios": "cap copy && cap open ios",
+        "cap:run:android": "NODE_ENV=development cap copy && cap open android",
+        "cap:run:ios": "NODE_ENV=development cap copy && cap open ios",
         "ci:prebuild": "node scripts/tauriVersion.js",
-        "dev": "pnpm dev:ios",
+        "dev": "pnpm vite:dev",
         "dev:android": "cross-env VITE_CAPACITOR=true concurrently \"pnpm vite:dev\" \"pnpm cap:run:android\"",
         "dev:ios": "cross-env VITE_CAPACITOR=true concurrently \"pnpm vite:dev\" \"pnpm cap:run:ios\"",
         "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
@@ -133,5 +133,5 @@
         "vite:dev": "cross-env VITE_ENV_DEV=true vite --host"
     },
     "type": "module",
-    "version": "1.9.0"
+    "version": "1.9.1"
 }

@@ -7,6 +7,7 @@ export const roseDuskTheme: Theme = {
     name: "Rose Dusk",
     description: "Romantic, soft gradients",
     type: "light",
+    mode: "gradient",
     colors: {
         ...baseLightTheme.colors,
         primary: "#A23A4F",
