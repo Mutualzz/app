@@ -24,7 +24,12 @@ export const BottomNavigation = observer(() => {
             elevation={2}
             width="100%"
             pt={{ xs: "0.75rem", sm: "1rem" }}
-            pb={{ xs: "0.75rem", sm: "1rem" }}
+            pl="calc(env(safe-area-inset-left, 0px) + 1.25rem)"
+            pr="calc(env(safe-area-inset-right, 0px) + 1.25rem)"
+            pb="calc(env(safe-area-inset-bottom, 0px) - 1.25rem)"
+            position="sticky"
+            bottom={0}
+            zIndex={100}
             css={{
                 borderTopLeftRadius: 16,
                 borderTopRightRadius: 16,
@@ -32,6 +37,7 @@ export const BottomNavigation = observer(() => {
                 position: "sticky",
                 bottom: 0,
                 zIndex: 100,
+                backgroundClip: "padding-box",
             }}
         >
             <Stack
@@ -45,6 +51,7 @@ export const BottomNavigation = observer(() => {
                     onClick={() => navigate({ to: "/" })}
                     color="neutral"
                     variant="plain"
+                    size="lg"
                     aria-label="Home"
                 >
                     <FaHome />
