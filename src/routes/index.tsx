@@ -19,8 +19,6 @@ function Index() {
         <Stack
             width={{ xs: "100vw", sm: "100vw" }}
             minHeight={{ xs: "100vh", sm: "100vh" }}
-            px={{ xs: "0.5rem", sm: "1rem" }}
-            py={{ xs: "1rem", sm: "2rem" }}
         >
             <Stack
                 direction="column"
@@ -36,8 +34,6 @@ function Index() {
                 }}
                 maxWidth={{ xs: "100%", sm: "500px", md: "700px", lg: "900px" }}
                 mx="auto"
-                px={{ xs: "0.5rem", sm: "1.5rem", md: "2rem" }}
-                py={{ xs: "1rem", sm: "2rem" }}
             >
                 <Typography
                     level={{ xs: "h5", sm: "h4", md: "h3", lg: "h2" }}
