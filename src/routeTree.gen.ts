@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from "./routes/__root";
 import { Route as UiRouteImport } from "./routes/ui";
 import { Route as RegisterRouteImport } from "./routes/register";
+import { Route as PrivacyRouteImport } from "./routes/privacy";
 import { Route as LoginRouteImport } from "./routes/login";
 import { Route as DownloadRouteImport } from "./routes/download";
 import { Route as AuthenticatedRouteImport } from "./routes/_authenticated";
@@ -42,6 +43,11 @@ const UiRoute = UiRouteImport.update({
 const RegisterRoute = RegisterRouteImport.update({
   id: "/register",
   path: "/register",
+  getParentRoute: () => rootRouteImport,
+} as any);
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: "/privacy",
+  path: "/privacy",
   getParentRoute: () => rootRouteImport,
 } as any);
 const LoginRoute = LoginRouteImport.update({
@@ -161,6 +167,7 @@ export interface FileRoutesByFullPath {
   "/": typeof IndexRoute;
   "/download": typeof DownloadRoute;
   "/login": typeof LoginRoute;
+  "/privacy": typeof PrivacyRoute;
   "/register": typeof RegisterRoute;
   "/ui": typeof UiRouteWithChildren;
   "/ui/": typeof UiIndexRoute;
@@ -186,6 +193,7 @@ export interface FileRoutesByTo {
   "/": typeof IndexRoute;
   "/download": typeof DownloadRoute;
   "/login": typeof LoginRoute;
+  "/privacy": typeof PrivacyRoute;
   "/register": typeof RegisterRoute;
   "/ui": typeof UiIndexRoute;
   "/ui/data-display/avatar": typeof UiDataDisplayAvatarRoute;
@@ -212,6 +220,7 @@ export interface FileRoutesById {
   "/_authenticated": typeof AuthenticatedRoute;
   "/download": typeof DownloadRoute;
   "/login": typeof LoginRoute;
+  "/privacy": typeof PrivacyRoute;
   "/register": typeof RegisterRoute;
   "/ui": typeof UiRouteWithChildren;
   "/ui/": typeof UiIndexRoute;
@@ -239,6 +248,7 @@ export interface FileRouteTypes {
     | "/"
     | "/download"
     | "/login"
+    | "/privacy"
     | "/register"
     | "/ui"
     | "/ui/"
@@ -264,6 +274,7 @@ export interface FileRouteTypes {
     | "/"
     | "/download"
     | "/login"
+    | "/privacy"
     | "/register"
     | "/ui"
     | "/ui/data-display/avatar"
@@ -289,6 +300,7 @@ export interface FileRouteTypes {
     | "/_authenticated"
     | "/download"
     | "/login"
+    | "/privacy"
     | "/register"
     | "/ui"
     | "/ui/"
@@ -316,6 +328,7 @@ export interface RootRouteChildren {
   AuthenticatedRoute: typeof AuthenticatedRoute;
   DownloadRoute: typeof DownloadRoute;
   LoginRoute: typeof LoginRoute;
+  PrivacyRoute: typeof PrivacyRoute;
   RegisterRoute: typeof RegisterRoute;
   UiRoute: typeof UiRouteWithChildren;
 }
@@ -334,6 +347,13 @@ declare module "@tanstack/react-router" {
       path: "/register";
       fullPath: "/register";
       preLoaderRoute: typeof RegisterRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/privacy": {
+      id: "/privacy";
+      path: "/privacy";
+      fullPath: "/privacy";
+      preLoaderRoute: typeof PrivacyRouteImport;
       parentRoute: typeof rootRouteImport;
     };
     "/login": {
@@ -542,6 +562,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRoute: AuthenticatedRoute,
   DownloadRoute: DownloadRoute,
   LoginRoute: LoginRoute,
+  PrivacyRoute: PrivacyRoute,
   RegisterRoute: RegisterRoute,
   UiRoute: UiRouteWithChildren,
 };
