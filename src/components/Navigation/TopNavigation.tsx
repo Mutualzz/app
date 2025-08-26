@@ -7,7 +7,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { isMobile, isTauri } from "@utils/index";
 import { observer } from "mobx-react";
 import { motion } from "motion/react";
-import { FaDownload, FaUser } from "react-icons/fa";
+import { FaClipboard, FaDownload, FaUser } from "react-icons/fa";
 import { Logo } from "../Logo";
 
 const AnimatedLogo = motion.create(Logo);
@@ -68,6 +68,12 @@ export const TopNavigation = observer(() => {
                     <UserDropdown />
                 ) : (
                     <Stack direction="row" spacing={5} alignItems="center">
+                        <Button
+                            startDecorator={<FaClipboard />}
+                            onClick={() => navigate({ to: "/privacy" })}
+                        >
+                            Privacy Policy
+                        </Button>
                         {!isTauri && !isMobile && (
                             <DownloadButton
                                 startDecorator={<FaDownload />}

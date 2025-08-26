@@ -1,10 +1,18 @@
 import { useAppStore } from "@hooks/useStores";
-import { Button, IconButton, Paper, Stack, useTheme } from "@mutualzz/ui";
+import {
+    Button,
+    Divider,
+    IconButton,
+    Paper,
+    Stack,
+    useTheme,
+} from "@mutualzz/ui";
 import { useMediaQuery } from "@react-hookz/web";
 import { useNavigate } from "@tanstack/react-router";
 import { isMobile, isTauri } from "@utils/index";
 import { observer } from "mobx-react";
-import { FaDownload, FaHome, FaUser } from "react-icons/fa";
+import { FaClipboard, FaDownload, FaHome } from "react-icons/fa";
+import { MdLogin } from "react-icons/md";
 import { DownloadButton } from "../DownloadButton";
 import { UserDrawer } from "../User/UserDrawer";
 
@@ -24,9 +32,9 @@ export const BottomNavigation = observer(() => {
             elevation={2}
             width="100%"
             pt={{ xs: "0.75rem", sm: "1rem" }}
-            pl="calc(env(safe-area-inset-left, 0px) + 1.25rem)"
-            pr="calc(env(safe-area-inset-right, 0px) + 1.25rem)"
-            pb="calc(env(safe-area-inset-bottom, 0px) - 1.25rem)"
+            pb="calc(env(safe-area-inset-bottom, 0px) + 0.75rem)"
+            pl="calc(env(safe-area-inset-left, 0px) + 1rem)"
+            pr="calc(env(safe-area-inset-right, 0px) + 1rem)"
             position="sticky"
             bottom={0}
             zIndex={100}
@@ -45,36 +53,46 @@ export const BottomNavigation = observer(() => {
                 justifyContent="space-between"
                 alignItems="center"
                 width="100%"
-                px={{ xs: "1rem", sm: "1.5rem" }}
             >
                 <IconButton
                     onClick={() => navigate({ to: "/" })}
                     color="neutral"
                     variant="plain"
-                    size="lg"
                     aria-label="Home"
                 >
                     <FaHome />
                 </IconButton>
                 {!account && (
                     <>
+                        <Divider orientation="vertical" />
                         {!isTauri && !isMobile && (
-                            <DownloadButton
-                                color="success"
-                                variant="plain"
-                                aria-label="Download"
-                                startDecorator={<FaDownload />}
-                            />
+                            <>
+                                <DownloadButton
+                                    color="success"
+                                    variant="plain"
+                                    aria-label="Download"
+                                    startDecorator={<FaDownload />}
+                                />
+                                <Divider orientation="vertical" />
+                            </>
                         )}
                         <Button
-                            color="neutral"
+                            startDecorator={<FaClipboard />}
+                            onClick={() => navigate({ to: "/privacy" })}
+                            color="danger"
                             variant="plain"
-                            startDecorator={<FaUser />}
+                        >
+                            Privacy Policy
+                        </Button>
+                        <Divider orientation="vertical" />
+                        <IconButton
+                            color="success"
+                            variant="plain"
                             aria-label="Login"
                             onClick={() => navigate({ to: "/login" })}
                         >
-                            Login
-                        </Button>
+                            <MdLogin />
+                        </IconButton>
                     </>
                 )}
                 {account && <UserDrawer onlyAvatar />}
