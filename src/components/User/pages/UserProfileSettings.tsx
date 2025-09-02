@@ -1,7 +1,7 @@
-import { AvatarEditor } from "@components/Avatar/AvatarEditor";
+import { AvatarUpload } from "@components/Avatar/AvatarUpload";
 import { useModal } from "@contexts/Modal.context";
 import { useAppStore } from "@hooks/useStores";
-import { Button, Stack, Typography } from "@mutualzz/ui";
+import { Button, ButtonGroup, Popover, Stack, Typography } from "@mutualzz/ui";
 import { observer } from "mobx-react";
 
 export const UserProfileSettings = observer(() => {
@@ -31,14 +31,25 @@ export const UserProfileSettings = observer(() => {
                     alignItems={{ xs: "stretch", sm: "center" }}
                     width="100%"
                 >
-                    <Button
-                        onClick={() =>
-                            openModal("avatar-editor", <AvatarEditor />)
+                    <Popover
+                        trigger={
+                            <Button size={{ xs: "sm", sm: "md" }}>
+                                Change Avatar
+                            </Button>
                         }
-                        size={{ xs: "sm", sm: "md" }}
                     >
-                        Change Avatar
-                    </Button>
+                        <ButtonGroup size={{ xs: "sm", sm: "md" }}>
+                            <Button>Avatars</Button>
+                            <Button
+                                onClick={() =>
+                                    openModal("avatar-upload", <AvatarUpload />)
+                                }
+                            >
+                                Upload
+                            </Button>
+                            <Button>Draw</Button>
+                        </ButtonGroup>
+                    </Popover>
                     <Button color="neutral" size={{ xs: "sm", sm: "md" }}>
                         Remove Avatar
                     </Button>

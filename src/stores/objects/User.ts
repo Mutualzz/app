@@ -1,48 +1,45 @@
 import {
     CDNRoutes,
     ImageFormat,
-    type APIPrivateUser,
     type APITheme,
-    type APIUserSettings,
+    type APIUser,
     type DefaultAvatar,
 } from "@mutualzz/types";
 import type { Hex } from "@mutualzz/ui";
 import REST from "@utils/REST";
 import { makeAutoObservable } from "mobx";
 
-export class AccountStore {
+export class User {
     id: string;
     username: string;
     defaultAvatar: DefaultAvatar;
-    previousAvatars: string[] = [];
     avatar?: string | null = null;
     globalName?: string | null = null;
-    email?: string | null = null;
-    themes: APITheme[] | null = [];
+    themes?: APITheme[] | null = null;
     accentColor: Hex;
     createdAt: Date;
     createdTimestamp: number;
-    settings: APIUserSettings;
 
-    raw: APIPrivateUser;
+    raw: APIUser;
 
-    constructor(user: APIPrivateUser) {
+    constructor(user: APIUser) {
         this.id = user.id;
         this.username = user.username;
         this.defaultAvatar = user.defaultAvatar;
         this.avatar = user.avatar ?? null;
-        this.accentColor = user.accentColor;
-        this.previousAvatars = user.previousAvatars ?? [];
         this.globalName = user.globalName ?? null;
-        this.email = user.email ?? null;
-        this.themes = user.themes ?? [];
-        this.settings = user.settings;
+        this.themes = user.themes ?? null;
+        this.accentColor = user.accentColor;
         this.createdAt = user.createdAt;
         this.createdTimestamp = user.createdTimestamp;
 
         this.raw = user;
 
         makeAutoObservable(this);
+    }
+
+    update(user: APIUser) {
+        Object.assign(this, user);
     }
 
     get avatarUrl() {
