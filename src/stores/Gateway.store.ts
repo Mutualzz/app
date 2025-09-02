@@ -2,7 +2,7 @@ import {
     GatewayCloseCodes,
     GatewayDispatchEvents,
     GatewayOpcodes,
-    type GatewayReadyPayload,
+    type GatewayReadyDispatchPayload,
 } from "@mutualzz/types";
 import { makeAutoObservable } from "mobx";
 import { Logger } from "../Logger";
@@ -360,7 +360,7 @@ export class GatewayStore {
         this.logger.debug("[Resume] Session:", this.sessionId);
     };
 
-    private onReady = (payload: GatewayReadyPayload) => {
+    private onReady = (payload: GatewayReadyDispatchPayload) => {
         this.logger.info(
             `[Ready] took ${Date.now() - this.identifyStartTime!}ms`,
         );

@@ -1,13 +1,9 @@
-import { Logger } from "@logger";
 import type { APIUser } from "@mutualzz/types";
 import { makeAutoObservable, observable, type ObservableMap } from "mobx";
 import type { AppStore } from "./App.store";
 import { User } from "./objects/User";
 
 export class UserStore {
-    private readonly logger = new Logger({
-        tag: "UserStore",
-    });
     readonly users: ObservableMap<string, User>;
 
     constructor(private readonly app: AppStore) {

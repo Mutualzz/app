@@ -1,5 +1,5 @@
 import { Logger } from "@logger";
-import type { APIUser } from "@mutualzz/types";
+import type { APIPrivateUser } from "@mutualzz/types";
 import { isSSR, isTauri } from "@utils/index";
 import REST from "@utils/REST";
 import { secureStorageAdapter } from "@utils/secureStorageAdapter";
@@ -43,7 +43,7 @@ export class AppStore {
         });
     }
 
-    setUser(user: APIUser) {
+    setUser(user: APIPrivateUser) {
         this.account = new AccountStore(user);
         this.theme.loadUserThemes(user);
     }
