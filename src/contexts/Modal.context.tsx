@@ -22,6 +22,7 @@ interface ModalContextProps {
         modalProps?: Partial<ModalProps>,
     ) => void;
     closeModal: (id?: string) => void;
+    closeAllModals: () => void;
     isModalOpen: (id: string) => boolean;
 }
 
@@ -34,6 +35,9 @@ const ModalContext = createContext<ModalContextProps>({
         return;
     },
     isModalOpen: () => false,
+    closeAllModals: () => {
+        return;
+    },
 });
 
 export const ModalProvider = ({ children }: { children: ReactNode }) => {
@@ -62,6 +66,10 @@ export const ModalProvider = ({ children }: { children: ReactNode }) => {
         );
     }, []);
 
+    const closeAllModals = useCallback(() => {
+        setModals([]);
+    }, []);
+
     const isModalOpen = useCallback(
         (id: string) => modals.some((modal) => modal.id === id),
         [modals],
@@ -72,6 +80,7 @@ export const ModalProvider = ({ children }: { children: ReactNode }) => {
         openModal,
         closeModal,
         isModalOpen,
+        closeAllModals,
     };
 
     return (
