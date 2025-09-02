@@ -14,6 +14,6 @@ export default [
             "@typescript-eslint/no-this-alias": "off",
             "react/no-children-prop": "off",
         },
-        ignores: ["*", "!src", "!electron"],
+        ignores: ["*", "!src"],
     },
 ];
