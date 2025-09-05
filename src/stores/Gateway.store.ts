@@ -2,6 +2,8 @@ import {
     GatewayCloseCodes,
     GatewayDispatchEvents,
     GatewayOpcodes,
+    type APIPrivateUser,
+    type APIUser,
     type GatewayReadyDispatchPayload,
 } from "@mutualzz/types";
 import { makeAutoObservable } from "mobx";
@@ -103,6 +105,11 @@ export class GatewayStore {
     private setupDispatchHandlers() {
         this.dispatchHandlers.set(GatewayDispatchEvents.Ready, this.onReady);
         this.dispatchHandlers.set(GatewayDispatchEvents.Resume, this.onResume);
+
+        this.dispatchHandlers.set(
+            GatewayDispatchEvents.UserUpdate,
+            this.onUserUpdate,
+        );
     }
 
     private onOpen = () => {
@@ -370,5 +377,13 @@ export class GatewayStore {
 
         this.reconnectTimeout = 0;
         this.app.setGatewayReady(true);
+    };
+
+    private onUserUpdate = (payload: APIUser | APIPrivateUser) => {
+        this.app.users.update(payload as APIUser);
+
+        if (payload.id === this.app.account?.id) {
+            this.app.setUser(payload as APIPrivateUser);
+        }
     };
 }

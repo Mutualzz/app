@@ -10,6 +10,7 @@ import { AccountStore } from "./Account.store";
 import { GatewayStore } from "./Gateway.store";
 import { ThemeStore } from "./Theme.store";
 import { UpdaterStore } from "./Updater.store";
+import { UserStore } from "./User.store";
 
 export class AppStore {
     private readonly logger = new Logger({
@@ -25,6 +26,7 @@ export class AppStore {
     gateway = new GatewayStore(this);
     theme = new ThemeStore();
     rest = new REST();
+    users = new UserStore(this);
     updaterStore: UpdaterStore | null = null;
 
     version: string | null = null;
