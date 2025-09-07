@@ -102,7 +102,8 @@ export const AvatarUpload = observer(() => {
         <Paper
             elevation={4}
             borderRadius={40}
-            minWidth={500}
+            minWidth={{ xs: "90vw", sm: 340, md: 420, lg: 500 }}
+            maxWidth={500}
             direction="column"
             minHeight={300}
         >
@@ -111,8 +112,8 @@ export const AvatarUpload = observer(() => {
                 height="100%"
                 position="relative"
                 direction="column"
-                px="2rem"
-                py="3rem"
+                px={{ xs: "1rem", sm: "2rem" }}
+                py={{ xs: "1.5rem", sm: "2.5rem", md: "3rem" }}
                 alignItems="center"
                 justifyContent="center"
             >
@@ -127,8 +128,12 @@ export const AvatarUpload = observer(() => {
                             alignItems="center"
                             justifyContent="center"
                             position="relative"
-                            width={256}
-                            height={256}
+                            width={{ xs: 180, sm: 220, md: 256 }}
+                            height={{ xs: 180, sm: 220, md: 256 }}
+                            css={{
+                                pointerEvents: saving ? "none" : "all",
+                                filter: saving ? "blur(4px)" : "none",
+                            }}
                         >
                             <Cropper
                                 image={imageFile}
@@ -156,9 +161,9 @@ export const AvatarUpload = observer(() => {
                         <Stack
                             direction="row"
                             alignItems="center"
-                            spacing={15}
-                            width={256}
-                            mt={10}
+                            spacing={{ xs: 4, sm: 10, md: 15 }}
+                            width={{ xs: 180, sm: 220, md: 256 }}
+                            mt={{ xs: 4, sm: 8, md: 10 }}
                         >
                             <FaMagnifyingGlass />
                             <Slider
@@ -191,8 +196,11 @@ export const AvatarUpload = observer(() => {
                         <Stack
                             alignItems="center"
                             justifyContent="center"
-                            spacing={25}
+                            spacing={{ xs: 8, sm: 16, md: 25 }}
                             direction="column"
+                            css={{
+                                cursor: "pointer",
+                            }}
                         >
                             <Avatar size={256} src={account.avatarUrl} />
                             <Typography level="body-xs">
@@ -203,12 +211,12 @@ export const AvatarUpload = observer(() => {
                 )}
             </Stack>
             <Stack
-                pb="2rem"
-                px="2rem"
+                pb={{ xs: "1rem", sm: "2rem" }}
+                px={{ xs: "1rem", sm: "2rem" }}
                 direction="row"
                 justifyContent="space-between"
             >
-                <ButtonGroup spacing={5}>
+                <ButtonGroup spacing={{ xs: 2, sm: 5 }}>
                     <Button
                         disabled={saving}
                         onClick={onClose}
@@ -224,7 +232,7 @@ export const AvatarUpload = observer(() => {
                     )}
                 </ButtonGroup>
                 {imageFile && croppedAreaPixels && (
-                    <ButtonGroup spacing={5}>
+                    <ButtonGroup spacing={{ xs: 2, sm: 5 }}>
                         <Button
                             onClick={handleSave}
                             color="success"
