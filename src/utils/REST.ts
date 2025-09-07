@@ -255,7 +255,7 @@ export default class REST {
             if (msg) {
                 // add abort callback
                 msg.setAbortCallback(() => {
-                    this.logger.debug("[PostFormData]: Message called abort");
+                    this.logger.debug("[PatchFormData]: Message called abort");
                     xhr.abort();
                     reject("aborted");
                 });
