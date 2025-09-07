@@ -19,8 +19,6 @@ import { useCallback, useState } from "react";
 import Cropper from "react-easy-crop";
 import { FaMagnifyingGlass, FaRotate } from "react-icons/fa6";
 
-// TODO: Start creating an event USER_UPDATE and users store so the user data updates for everyone
-
 export const AvatarUpload = observer(() => {
     const { theme } = useTheme();
     const { account, rest } = useAppStore();
@@ -53,6 +51,7 @@ export const AvatarUpload = observer(() => {
         },
         onError: (err: HttpException) => {
             setError(err.message ?? "An error occurred");
+            setSaving(false);
         },
     });
 
