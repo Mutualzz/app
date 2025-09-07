@@ -1,12 +1,5 @@
 import { useAppStore } from "@hooks/useStores";
-import {
-    Button,
-    Divider,
-    IconButton,
-    Paper,
-    Stack,
-    useTheme,
-} from "@mutualzz/ui";
+import { Button, IconButton, Paper, Stack, useTheme } from "@mutualzz/ui";
 import { useMediaQuery } from "@react-hookz/web";
 import { useNavigate } from "@tanstack/react-router";
 import { isMobile, isTauri } from "@utils/index";
@@ -31,10 +24,10 @@ export const BottomNavigation = observer(() => {
         <Paper
             elevation={2}
             width="100%"
-            pt={{ xs: "0.75rem", sm: "1rem" }}
-            pb="calc(env(safe-area-inset-bottom, 0px) + 0.75rem)"
-            pl="calc(env(safe-area-inset-left, 0px) + 1rem)"
-            pr="calc(env(safe-area-inset-right, 0px) + 1rem)"
+            pt="0.5rem"
+            pb="calc(env(safe-area-inset-bottom, 0px) - 1rem)"
+            pl="calc(env(safe-area-inset-left, 0px) + 1.5rem)"
+            pr="calc(env(safe-area-inset-right, 0px) + 1.5rem)"
             position="sticky"
             bottom={0}
             zIndex={100}
@@ -59,36 +52,35 @@ export const BottomNavigation = observer(() => {
                     color="neutral"
                     variant="plain"
                     aria-label="Home"
+                    size="lg"
                 >
                     <FaHome />
                 </IconButton>
                 {!account && (
                     <>
-                        <Divider orientation="vertical" />
                         {!isTauri && !isMobile && (
-                            <>
-                                <DownloadButton
-                                    color="success"
-                                    variant="plain"
-                                    aria-label="Download"
-                                    startDecorator={<FaDownload />}
-                                />
-                                <Divider orientation="vertical" />
-                            </>
+                            <DownloadButton
+                                color="success"
+                                variant="plain"
+                                aria-label="Download"
+                                size="lg"
+                                startDecorator={<FaDownload />}
+                            />
                         )}
                         <Button
                             startDecorator={<FaClipboard />}
                             onClick={() => navigate({ to: "/privacy" })}
                             color="danger"
+                            size="lg"
                             variant="plain"
                         >
                             Privacy Policy
                         </Button>
-                        <Divider orientation="vertical" />
                         <IconButton
                             color="success"
                             variant="plain"
                             aria-label="Login"
+                            size="lg"
                             onClick={() => navigate({ to: "/login" })}
                         >
                             <MdLogin />
