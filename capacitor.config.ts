@@ -6,15 +6,17 @@ const config: CapacitorConfig = {
     appId: "com.mutualzz.app",
     appName: "Mutualzz",
     webDir: "dist",
-    ...(isDev && {
-        server: { cleartext: true, url: "http://137.150.244.173:1420" },
-    }),
+    server: {
+        ...(isDev && {
+            cleartext: true,
+            url: "http://localhost:1420",
+        }),
+        androidScheme: "https",
+        iosScheme: "https",
+    },
     plugins: {
         StatusBar: {
             overlaysWebView: false,
-        },
-        CapacitorHttp: {
-            enabled: true,
         },
     },
 };
