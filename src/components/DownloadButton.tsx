@@ -7,13 +7,13 @@ export const DownloadButton = (props: ButtonProps) => {
     const handleClick = (e: React.MouseEvent) => {
         e.preventDefault();
         if (fileUrl) {
-            window.open(fileUrl, "_self", "noopener,noreferrer");
+            window.open(fileUrl, "_self", "noopener, noreferrer");
         }
     };
 
     return (
         <Button {...props} onClick={handleClick}>
-            Download App
+            Download
         </Button>
     );
 };
