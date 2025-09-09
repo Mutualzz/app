@@ -10,7 +10,6 @@ import {
     Typography,
 } from "@mutualzz/ui";
 import { observer } from "mobx-react";
-import { useState } from "react";
 import { FaCogs, FaSignOutAlt } from "react-icons/fa";
 import { UserSettingsModal } from "./UserSettingsModal";
 
@@ -18,7 +17,6 @@ export const UserDropdown = observer(() => {
     const app = useAppStore();
     const { account } = app;
     const { openModal } = useModal();
-    const [isOpen, setIsOpen] = useState(false);
 
     if (!account) return null;
 
@@ -33,10 +31,9 @@ export const UserDropdown = observer(() => {
                         css={{
                             cursor: "pointer",
                         }}
-                        onClick={() => setIsOpen(!isOpen)}
                     />
                 }
-                isOpen={isOpen}
+                closeOnInteract
             >
                 <Paper minHeight={200} minWidth={100}>
                     <Stack
@@ -83,7 +80,6 @@ export const UserDropdown = observer(() => {
                                     color="neutral"
                                     startDecorator={<FaCogs />}
                                     onClick={() => {
-                                        setIsOpen(false);
                                         openModal(
                                             "user-settings",
                                             <UserSettingsModal />,
@@ -101,7 +97,6 @@ export const UserDropdown = observer(() => {
                                     color="danger"
                                     startDecorator={<FaSignOutAlt />}
                                     onClick={() => {
-                                        setIsOpen(false);
                                         app.logout();
                                     }}
                                     size="md"

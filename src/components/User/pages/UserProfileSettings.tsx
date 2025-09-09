@@ -37,13 +37,17 @@ export const UserProfileSettings = observer(() => {
                                 Change Avatar
                             </Button>
                         }
+                        closeOnInteract
                     >
                         <ButtonGroup size={{ xs: "sm", sm: "md" }}>
                             <Button>Avatars</Button>
                             <Button
-                                onClick={() =>
-                                    openModal("avatar-upload", <AvatarUpload />)
-                                }
+                                onClick={() => {
+                                    openModal(
+                                        "avatar-upload",
+                                        <AvatarUpload />,
+                                    );
+                                }}
                             >
                                 Upload
                             </Button>
