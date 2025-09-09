@@ -1,3 +1,4 @@
+import { Avatars } from "@components/Avatar/Avatars";
 import { AvatarUpload } from "@components/Avatar/AvatarUpload";
 import { useModal } from "@contexts/Modal.context";
 import { useAppStore } from "@hooks/useStores";
@@ -56,7 +57,13 @@ export const UserProfileSettings = observer(() => {
                             disabled={isPending}
                             size={{ xs: "sm", sm: "md" }}
                         >
-                            <Button>Avatars</Button>
+                            <Button
+                                onClick={() =>
+                                    openModal("avatars", <Avatars />)
+                                }
+                            >
+                                Avatars
+                            </Button>
                             <Button
                                 onClick={() => {
                                     openModal(
