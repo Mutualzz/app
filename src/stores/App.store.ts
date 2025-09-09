@@ -7,6 +7,7 @@ import { makeAutoObservable } from "mobx";
 import { makePersistable } from "mobx-persist-store";
 import secureLocalStorage from "react-secure-storage";
 import { AccountStore } from "./Account.store";
+import { DraftStore } from "./Draft.store";
 import { GatewayStore } from "./Gateway.store";
 import { ThemeStore } from "./Theme.store";
 import { UpdaterStore } from "./Updater.store";
@@ -24,6 +25,7 @@ export class AppStore {
 
     account: AccountStore | null = null;
     gateway = new GatewayStore(this);
+    draft = new DraftStore();
     theme = new ThemeStore();
     rest = new REST();
     users = new UserStore(this);

@@ -125,7 +125,7 @@ const defaultValues = {
 };
 
 export const ThemeCreator = observer(() => {
-    const { rest, theme: themeStore } = useAppStore();
+    const { draft, rest, theme: themeStore } = useAppStore();
     const { theme } = useTheme();
     const [apiErrors, setApiErrors] = useState<ApiErrors>({});
     const [loadedPreset, setLoadedPreset] = useState<MzTheme | null>(null);
@@ -148,7 +148,7 @@ export const ThemeCreator = observer(() => {
     const allDefaultThemes = themeStore.themes.filter(
         (theme) => !theme.createdBy,
     );
-    const allDrafts = themeStore.themeDrafts;
+    const allDrafts = draft.themes;
     const allUserThemes = themeStore.themes.filter((t) => t.createdBy);
 
     const load = (
@@ -300,7 +300,7 @@ export const ThemeCreator = observer(() => {
     const deleteDraft = () => {
         if (!loadedDraft) return;
 
-        themeStore.deleteDraft(loadedDraft);
+        draft.deleteThemeDraft(loadedDraft);
         unloadAndReset(form);
     };
 
@@ -327,7 +327,7 @@ export const ThemeCreator = observer(() => {
             meta: FormMeta;
         }) => {
             if (meta.submitAction === "saveDraft") {
-                themeStore.saveDraft(value);
+                draft.saveThemeDraft(value);
 
                 load(value.name, "draft");
                 return;

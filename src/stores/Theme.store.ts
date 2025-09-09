@@ -1,4 +1,4 @@
-import type { MzTheme, ThemeDraft } from "@app-types/theme";
+import type { MzTheme } from "@app-types/theme";
 import { Logger } from "@logger";
 import type { APITheme, APIUser } from "@mutualzz/types";
 import { baseDarkTheme, baseLightTheme, type ThemeMode } from "@mutualzz/ui";
@@ -13,7 +13,6 @@ export class ThemeStore {
     });
 
     themes: MzTheme[] = [];
-    themeDrafts: ThemeDraft[] = [];
 
     currentTheme: string | null = null;
 
@@ -28,7 +27,7 @@ export class ThemeStore {
         if (isSSR) return;
         makePersistable(this, {
             name: "ThemeStore",
-            properties: ["themeDrafts", "currentTheme", "currentMode"],
+            properties: ["currentTheme", "currentMode"],
             storage: localStorage,
         });
     }
@@ -138,17 +137,5 @@ export class ThemeStore {
         userThemes.forEach((theme) => this.addTheme(theme));
         this.userThemesLoaded = true;
         this.logger.debug("User themes loaded");
-    }
-
-    saveDraft(theme: ThemeDraft) {
-        if (isSSR) return;
-        this.themeDrafts.push(theme);
-    }
-
-    deleteDraft(theme: ThemeDraft) {
-        if (isSSR) return;
-        this.themeDrafts = this.themeDrafts.filter(
-            (t) => t.name !== theme.name,
-        );
     }
 }
