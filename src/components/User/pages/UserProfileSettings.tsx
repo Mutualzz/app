@@ -2,11 +2,21 @@ import { AvatarUpload } from "@components/Avatar/AvatarUpload";
 import { useModal } from "@contexts/Modal.context";
 import { useAppStore } from "@hooks/useStores";
 import { Button, ButtonGroup, Popover, Stack, Typography } from "@mutualzz/ui";
+import { useMutation } from "@tanstack/react-query";
 import { observer } from "mobx-react";
 
 export const UserProfileSettings = observer(() => {
-    const { account } = useAppStore();
-    const { openModal } = useModal();
+    const { account, rest } = useAppStore();
+    const { openModal, closeModal } = useModal();
+
+    const { mutate: deleteAvatar, isPending } = useMutation({
+        mutationFn: () => {
+            return rest.patch("@me", { avatar: null });
+        },
+        onSuccess: () => {
+            closeModal("user-settings");
+        },
+    });
 
     if (!account) return null;
 
@@ -33,13 +43,19 @@ export const UserProfileSettings = observer(() => {
                 >
                     <Popover
                         trigger={
-                            <Button size={{ xs: "sm", sm: "md" }}>
+                            <Button
+                                disabled={isPending}
+                                size={{ xs: "sm", sm: "md" }}
+                            >
                                 Change Avatar
                             </Button>
                         }
                         closeOnInteract
                     >
-                        <ButtonGroup size={{ xs: "sm", sm: "md" }}>
+                        <ButtonGroup
+                            disabled={isPending}
+                            size={{ xs: "sm", sm: "md" }}
+                        >
                             <Button>Avatars</Button>
                             <Button
                                 onClick={() => {
@@ -54,7 +70,12 @@ export const UserProfileSettings = observer(() => {
                             <Button>Draw</Button>
                         </ButtonGroup>
                     </Popover>
-                    <Button color="neutral" size={{ xs: "sm", sm: "md" }}>
+                    <Button
+                        disabled={isPending || !account.avatar}
+                        onClick={() => deleteAvatar()}
+                        color="neutral"
+                        size={{ xs: "sm", sm: "md" }}
+                    >
                         Remove Avatar
                     </Button>
                 </Stack>
