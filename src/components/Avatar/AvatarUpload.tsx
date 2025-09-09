@@ -173,6 +173,7 @@ export const AvatarUpload = observer(() => {
                                 onChange={(_, value) =>
                                     setZoom(value as number)
                                 }
+                                disabled={saving}
                                 css={{
                                     flex: 1,
                                 }}
@@ -182,6 +183,7 @@ export const AvatarUpload = observer(() => {
                                 color={theme.typography.colors.primary}
                                 variant="plain"
                                 size="sm"
+                                disabled={saving}
                             >
                                 <FaRotate />
                             </IconButton>
