@@ -19,8 +19,6 @@ export const UserProfileSettings = observer(() => {
         },
     });
 
-    if (!account) return null;
-
     return (
         <Stack
             direction="column"
@@ -78,7 +76,7 @@ export const UserProfileSettings = observer(() => {
                         </ButtonGroup>
                     </Popover>
                     <Button
-                        disabled={isPending || !account.avatar}
+                        disabled={isPending || !account?.avatar}
                         onClick={() => deleteAvatar()}
                         color="neutral"
                         size={{ xs: "sm", sm: "md" }}

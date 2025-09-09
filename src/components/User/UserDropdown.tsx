@@ -18,16 +18,14 @@ export const UserDropdown = observer(() => {
     const { account } = app;
     const { openModal } = useModal();
 
-    if (!account) return null;
-
     return (
         <>
             <Popover
                 trigger={
                     <Avatar
                         size={{ xs: "md", sm: "lg" }}
-                        src={account.avatarUrl}
-                        alt={account.username}
+                        src={account?.avatarUrl}
+                        alt={account?.username}
                         css={{
                             cursor: "pointer",
                         }}
@@ -54,7 +52,7 @@ export const UserDropdown = observer(() => {
                             >
                                 <Avatar
                                     size="lg"
-                                    src={account.avatarUrl}
+                                    src={account?.avatarUrl}
                                     alt="User Avatar"
                                 />
                                 <Stack direction="column">
@@ -62,14 +60,15 @@ export const UserDropdown = observer(() => {
                                         fontWeight={700}
                                         level={{ xs: "body-lg", sm: "h6" }}
                                     >
-                                        {account.globalName ?? account.username}
+                                        {account?.globalName ??
+                                            account?.username}
                                     </Typography>
                                     <Typography
                                         textColor="muted"
                                         level="body-sm"
                                         variant="plain"
                                     >
-                                        @{account.username}
+                                        @{account?.username}
                                     </Typography>
                                 </Stack>
                             </Stack>

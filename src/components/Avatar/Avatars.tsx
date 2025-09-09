@@ -1,3 +1,5 @@
+import { useModal } from "@contexts/Modal.context";
+import { useAppStore } from "@hooks/useStores";
 import { defaultAvatars } from "@mutualzz/types";
 import {
     Avatar,
@@ -7,12 +9,15 @@ import {
     Stack,
     useTheme,
 } from "@mutualzz/ui";
+import { useMutation } from "@tanstack/react-query";
 import REST from "@utils/REST";
 import { observer } from "mobx-react";
 import { useState } from "react";
 
 export const Avatars = observer(() => {
     const { theme } = useTheme();
+    const { account, rest } = useAppStore();
+    const { closeAllModals } = useModal();
     const [selectedAvatar, setSelectedAvatar] = useState<{
         avatar: string;
         type: "previous" | "default";
@@ -24,6 +29,23 @@ export const Avatars = observer(() => {
     const [currentPage, setCurrentPage] = useState<"default" | "previous">(
         "default",
     );
+
+    const { mutate: updateAvatar } = useMutation({
+        mutationFn: () => {
+            if (selectedAvatar.type === "default")
+                return rest.patch("@me", {
+                    defaultAvatar: selectedAvatar.avatar,
+                    avatar: null,
+                });
+
+            return rest.patch("@me", {
+                avatar: selectedAvatar.avatar,
+            });
+        },
+        onSuccess: () => {
+            closeAllModals();
+        },
+    });
 
     const selectAvatar = (avatar: string, type: "previous" | "default") => {
         setSelectedAvatar({ avatar, type });
@@ -51,13 +73,13 @@ export const Avatars = observer(() => {
                 px={{ xs: "1rem", sm: "2rem" }}
                 py={{ xs: "3rem", sm: "4rem", md: "4.5rem" }}
                 alignItems="center"
-                justifyContent="center"
+                justifyContent="space-between"
             >
                 {currentPage === "default" && (
                     <Stack
                         direction="row"
                         flexWrap="wrap"
-                        gap={2}
+                        gap={10}
                         justifyContent="center"
                         alignItems="center"
                     >
@@ -71,9 +93,44 @@ export const Avatars = observer(() => {
                                 alt="Default Avatar"
                                 size={80}
                                 css={{
-                                    border:
+                                    filter:
                                         selectedAvatar.avatar === avatar
-                                            ? `${theme.colors.common.white} 2px solid`
+                                            ? `blur(1px)`
+                                            : "none",
+                                    cursor: "pointer",
+                                    boxShadow:
+                                        selectedAvatar.avatar === avatar
+                                            ? `0 0 0 2px ${theme.colors.common.white}`
+                                            : "none",
+                                }}
+                            />
+                        ))}
+                    </Stack>
+                )}
+                {currentPage === "previous" && (
+                    <Stack
+                        direction="row"
+                        flexWrap="wrap"
+                        gap={10}
+                        justifyContent="center"
+                        alignItems="center"
+                    >
+                        {account?.previousAvatars.map((avatar) => (
+                            <Avatar
+                                key={avatar}
+                                src={account?.previousAvatarUrls.get(avatar)}
+                                onClick={() => selectAvatar(avatar, "previous")}
+                                alt="Previous Avatar"
+                                size={80}
+                                css={{
+                                    filter:
+                                        selectedAvatar.avatar === avatar
+                                            ? `blur(1px)`
+                                            : "none",
+                                    cursor: "pointer",
+                                    boxShadow:
+                                        selectedAvatar.avatar === avatar
+                                            ? `0 0 0 2px ${theme.colors.common.white}`
                                             : "none",
                                 }}
                             />
@@ -81,7 +138,11 @@ export const Avatars = observer(() => {
                     </Stack>
                 )}
             </Stack>
-            <Stack pb={{ xs: "1rem", sm: "2rem" }} justifyContent="center">
+            <Stack
+                spacing="1rem"
+                pb={{ xs: "1rem", sm: "2rem" }}
+                justifyContent="center"
+            >
                 <ButtonGroup>
                     <Button
                         onClick={() => changePage("default")}
@@ -96,6 +157,12 @@ export const Avatars = observer(() => {
                         Previous Avatars
                     </Button>
                 </ButtonGroup>
+
+                {selectedAvatar.avatar && (
+                    <Button onClick={() => updateAvatar()} color="success">
+                        Save
+                    </Button>
+                )}
             </Stack>
         </Paper>
     );

@@ -20,16 +20,14 @@ export const UserDrawer = observer(
         const [isOpen, setIsOpen] = useState(false);
         const { openModal } = useModal();
 
-        if (!account) return null;
-
         return (
             <>
                 <Avatar
-                    src={account.avatarUrl}
+                    src={account?.avatarUrl}
                     alt={
-                        account.globalName
+                        account?.globalName
                             ? account.globalName
-                            : account.username
+                            : account?.username
                     }
                     size={onlyAvatar ? "md" : { xs: "md", sm: "lg" }}
                     onClick={() => setIsOpen(true)}
@@ -65,7 +63,7 @@ export const UserDrawer = observer(
                             >
                                 <Avatar
                                     size="lg"
-                                    src={account.avatarUrl}
+                                    src={account?.avatarUrl}
                                     alt="User Avatar"
                                 />
                                 <Stack direction="column">
@@ -73,14 +71,15 @@ export const UserDrawer = observer(
                                         fontWeight={700}
                                         level={{ xs: "body-lg", sm: "h6" }}
                                     >
-                                        {account.globalName ?? account.username}
+                                        {account?.globalName ??
+                                            account?.username}
                                     </Typography>
                                     <Typography
                                         textColor="muted"
                                         level="body-sm"
                                         variant="plain"
                                     >
-                                        @{account.username}
+                                        @{account?.username}
                                     </Typography>
                                 </Stack>
                             </Stack>

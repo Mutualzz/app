@@ -55,8 +55,6 @@ export const AvatarUpload = observer(() => {
         },
     });
 
-    if (!account) return null;
-
     const onUpload = async (file: File | File[]) => {
         let fileToUse: File;
         if (Array.isArray(file)) fileToUse = file[0];
@@ -203,7 +201,7 @@ export const AvatarUpload = observer(() => {
                                 cursor: "pointer",
                             }}
                         >
-                            <Avatar size={256} src={account.avatarUrl} />
+                            <Avatar size={256} src={account?.avatarUrl} />
                             <Typography level="body-xs">
                                 (Click or Drag and drop)
                             </Typography>

@@ -62,4 +62,21 @@ export class AccountStore {
                 : CDNRoutes.defaultUserAvatar(this.defaultAvatar),
         );
     }
+
+    get previousAvatarUrls(): Map<string, string> {
+        const map = new Map<string, string>();
+        for (const avatar of this.previousAvatars) {
+            const url = REST.makeCDNUrl(
+                avatar.startsWith("a_")
+                    ? CDNRoutes.userAvatar(this.id, avatar, ImageFormat.GIF)
+                    : CDNRoutes.userAvatar(this.id, avatar, ImageFormat.PNG),
+            );
+            map.set(avatar, url);
+        }
+        return map;
+    }
+
+    get defaultAvatarUrl() {
+        return REST.makeCDNUrl(CDNRoutes.defaultUserAvatar(this.defaultAvatar));
+    }
 }
