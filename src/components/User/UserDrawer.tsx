@@ -25,7 +25,7 @@ export const UserDrawer = observer(
                     open={isOpen}
                     onClose={() => setIsOpen(false)}
                     onOpen={() => setIsOpen(true)}
-                    swipeable={true}
+                    swipeable={false}
                     size={{ xs: "16rem", sm: "18rem" }}
                     css={{
                         borderTopLeftRadius: 16,
