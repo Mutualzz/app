@@ -95,35 +95,6 @@ const defaultMeta: FormMeta = {
     submitAction: "create",
 };
 
-const defaultValues = {
-    name: "",
-    description: "",
-    type: "dark" as "dark" | "light",
-    mode: "normal" as "normal" | "gradient",
-    colors: {
-        common: {
-            white: randomColor(),
-            black: randomColor(),
-        },
-        primary: randomColor(),
-        neutral: randomColor(),
-        background: randomColor(),
-        surface: randomColor(),
-        danger: randomColor(),
-        info: randomColor(),
-        success: randomColor(),
-        warning: randomColor(),
-    },
-    typography: {
-        colors: {
-            primary: randomColor(),
-            secondary: randomColor(),
-            accent: randomColor(),
-            muted: randomColor(),
-        },
-    },
-};
-
 export const ThemeCreator = observer(() => {
     const { draft, rest, theme: themeStore } = useAppStore();
     const { theme } = useTheme();
@@ -150,6 +121,35 @@ export const ThemeCreator = observer(() => {
     );
     const allDrafts = draft.themes;
     const allUserThemes = themeStore.themes.filter((t) => t.createdBy);
+
+    const defaultValues = {
+        name: "",
+        description: "",
+        type: "dark" as "dark" | "light",
+        mode: "normal" as "normal" | "gradient",
+        colors: {
+            common: {
+                white: randomColor(),
+                black: randomColor(),
+            },
+            primary: randomColor(),
+            neutral: randomColor(),
+            background: randomColor(),
+            surface: randomColor(),
+            danger: randomColor(),
+            info: randomColor(),
+            success: randomColor(),
+            warning: randomColor(),
+        },
+        typography: {
+            colors: {
+                primary: randomColor(),
+                secondary: randomColor(),
+                accent: randomColor(),
+                muted: randomColor(),
+            },
+        },
+    };
 
     const load = (
         toLoad: string,
