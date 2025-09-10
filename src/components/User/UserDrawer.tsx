@@ -1,13 +1,7 @@
+import { Avatar } from "@components/Avatar";
 import { useModal } from "@contexts/Modal.context";
 import { useAppStore } from "@hooks/useStores";
-import {
-    Avatar,
-    Button,
-    Divider,
-    Drawer,
-    Stack,
-    Typography,
-} from "@mutualzz/ui";
+import { Button, Divider, Drawer, Stack, Typography } from "@mutualzz/ui";
 import { observer } from "mobx-react";
 import { useState } from "react";
 import { FaCogs, FaSignOutAlt } from "react-icons/fa";
@@ -23,15 +17,8 @@ export const UserDrawer = observer(
         return (
             <>
                 <Avatar
-                    src={account?.avatarUrl}
-                    alt={
-                        account?.globalName
-                            ? account.globalName
-                            : account?.username
-                    }
                     size={onlyAvatar ? "md" : { xs: "md", sm: "lg" }}
                     onClick={() => setIsOpen(true)}
-                    css={{ cursor: "pointer" }}
                 />
                 <Drawer
                     anchor="bottom"

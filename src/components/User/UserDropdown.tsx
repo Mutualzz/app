@@ -1,7 +1,7 @@
+import { Avatar } from "@components/Avatar";
 import { useModal } from "@contexts/Modal.context";
 import { useAppStore } from "@hooks/useStores";
 import {
-    Avatar,
     Button,
     Divider,
     Paper,
@@ -21,16 +21,7 @@ export const UserDropdown = observer(() => {
     return (
         <>
             <Popover
-                trigger={
-                    <Avatar
-                        size={{ xs: "md", sm: "lg" }}
-                        src={account?.avatarUrl}
-                        alt={account?.username}
-                        css={{
-                            cursor: "pointer",
-                        }}
-                    />
-                }
+                trigger={<Avatar size={{ xs: "md", sm: "lg" }} />}
                 closeOnInteract
             >
                 <Paper minHeight={200} minWidth={100}>
@@ -52,8 +43,10 @@ export const UserDropdown = observer(() => {
                             >
                                 <Avatar
                                     size="lg"
-                                    src={account?.avatarUrl}
                                     alt="User Avatar"
+                                    css={{
+                                        cursor: "auto",
+                                    }}
                                 />
                                 <Stack direction="column">
                                     <Typography

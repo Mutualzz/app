@@ -1,9 +1,9 @@
+import { Avatar } from "@components/Avatar";
 import { useModal } from "@contexts/Modal.context";
 import { useAppStore } from "@hooks/useStores";
 import { FileUploader } from "@mateie/react-drag-drop-files";
 import type { HttpException } from "@mutualzz/types";
 import {
-    Avatar,
     Button,
     ButtonGroup,
     IconButton,
@@ -21,7 +21,7 @@ import { FaMagnifyingGlass, FaRotate } from "react-icons/fa6";
 
 export const AvatarUpload = observer(() => {
     const { theme } = useTheme();
-    const { account, rest } = useAppStore();
+    const { rest } = useAppStore();
     const { closeModal, closeAllModals } = useModal();
 
     const [imageFile, setImageFile] = useState<string | null>(null);
@@ -201,7 +201,7 @@ export const AvatarUpload = observer(() => {
                                 cursor: "pointer",
                             }}
                         >
-                            <Avatar size={256} src={account?.avatarUrl} />
+                            <Avatar size={256} />
                             <Typography level="body-xs">
                                 (Click or Drag and drop)
                             </Typography>

@@ -1,7 +1,8 @@
+import { Avatar } from "@components/Avatar";
 import { ThemeCreator } from "@components/ThemeCreator";
 import { useModal } from "@contexts/Modal.context";
 import { useAppStore } from "@hooks/useStores";
-import { Avatar, Button, Stack, Typography } from "@mutualzz/ui";
+import { Button, Stack, Typography } from "@mutualzz/ui";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { observer } from "mobx-react";
 
@@ -130,7 +131,6 @@ function Index() {
                                 direction="row"
                             >
                                 <Avatar
-                                    src={account.avatarUrl}
                                     size={{ xs: "sm", sm: "md", md: "lg" }}
                                 />
                                 <Typography

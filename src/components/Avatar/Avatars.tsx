@@ -1,14 +1,8 @@
+import { Avatar } from "@components/Avatar";
 import { useModal } from "@contexts/Modal.context";
 import { useAppStore } from "@hooks/useStores";
 import { defaultAvatars } from "@mutualzz/types";
-import {
-    Avatar,
-    Button,
-    ButtonGroup,
-    Paper,
-    Stack,
-    useTheme,
-} from "@mutualzz/ui";
+import { Button, ButtonGroup, Paper, Stack, useTheme } from "@mutualzz/ui";
 import { useMutation } from "@tanstack/react-query";
 import REST from "@utils/REST";
 import { observer } from "mobx-react";
@@ -61,27 +55,28 @@ export const Avatars = observer(() => {
             elevation={4}
             borderRadius={40}
             minWidth={{ xs: "90vw", sm: 340, md: 420, lg: 500 }}
-            maxWidth={500}
+            maxWidth={600}
             direction="column"
             minHeight={300}
+            justifyContent="center"
+            alignItems="center"
         >
             <Stack
                 width="100%"
                 height="100%"
                 position="relative"
                 direction="column"
-                px={{ xs: "1rem", sm: "2rem" }}
-                py={{ xs: "3rem", sm: "4rem", md: "4.5rem" }}
+                px="5rem"
+                py={{ xs: "1rem", sm: "4rem", md: "4.5rem" }}
                 alignItems="center"
-                justifyContent="space-between"
+                justifyContent="center"
             >
                 {currentPage === "default" && (
                     <Stack
-                        direction="row"
-                        flexWrap="wrap"
                         gap={10}
-                        justifyContent="center"
                         alignItems="center"
+                        flexWrap="wrap"
+                        justifyContent="center"
                     >
                         {defaultAvatars.map((avatar) => (
                             <Avatar
@@ -97,7 +92,6 @@ export const Avatars = observer(() => {
                                         selectedAvatar.avatar === avatar
                                             ? `blur(1px)`
                                             : "none",
-                                    cursor: "pointer",
                                     boxShadow:
                                         selectedAvatar.avatar === avatar
                                             ? `0 0 0 2px ${theme.colors.common.white}`

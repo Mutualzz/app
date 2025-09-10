@@ -60,7 +60,6 @@ export default class REST {
 
     public static makeCDNUrl(
         path: string,
-
         queryParams: Record<string, any> = {},
     ) {
         const url = new URL(`${import.meta.env.VITE_CDN_URL}${path}`);
