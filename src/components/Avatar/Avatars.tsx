@@ -24,7 +24,7 @@ export const Avatars = observer(() => {
         "default",
     );
 
-    const { mutate: updateAvatar } = useMutation({
+    const { mutate: updateAvatar, isPending } = useMutation({
         mutationFn: () => {
             if (selectedAvatar.type === "default")
                 return rest.patch("@me", {
@@ -42,6 +42,7 @@ export const Avatars = observer(() => {
     });
 
     const selectAvatar = (avatar: string, type: "previous" | "default") => {
+        if (isPending) return;
         setSelectedAvatar({ avatar, type });
     };
 
@@ -96,6 +97,9 @@ export const Avatars = observer(() => {
                                         selectedAvatar.avatar === avatar
                                             ? `0 0 0 2px ${theme.colors.common.white}`
                                             : "none",
+                                    cursor: isPending
+                                        ? "not-allowed"
+                                        : "pointer",
                                 }}
                             />
                         ))}
@@ -121,7 +125,9 @@ export const Avatars = observer(() => {
                                         selectedAvatar.avatar === avatar
                                             ? `blur(1px)`
                                             : "none",
-                                    cursor: "pointer",
+                                    cursor: isPending
+                                        ? "not-allowed"
+                                        : "pointer",
                                     boxShadow:
                                         selectedAvatar.avatar === avatar
                                             ? `0 0 0 2px ${theme.colors.common.white}`
@@ -137,7 +143,7 @@ export const Avatars = observer(() => {
                 pb={{ xs: "1rem", sm: "2rem" }}
                 justifyContent="center"
             >
-                <ButtonGroup>
+                <ButtonGroup disabled={isPending}>
                     <Button
                         onClick={() => changePage("default")}
                         disabled={currentPage === "default"}
@@ -153,7 +159,11 @@ export const Avatars = observer(() => {
                 </ButtonGroup>
 
                 {selectedAvatar.avatar && (
-                    <Button onClick={() => updateAvatar()} color="success">
+                    <Button
+                        disabled={isPending}
+                        onClick={() => updateAvatar()}
+                        color="success"
+                    >
                         Save
                     </Button>
                 )}
