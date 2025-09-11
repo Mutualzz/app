@@ -1,3 +1,4 @@
+import { AvatarDraw } from "@components/Avatar/AvatarDraw";
 import { Avatars } from "@components/Avatar/Avatars";
 import { AvatarUpload } from "@components/Avatar/AvatarUpload";
 import { useModal } from "@contexts/Modal.context";
@@ -65,7 +66,13 @@ export const UserProfileSettings = observer(() => {
                             >
                                 Upload
                             </Button>
-                            <Button>Draw</Button>
+                            <Button
+                                onClick={() =>
+                                    openModal("avatar-draw", <AvatarDraw />)
+                                }
+                            >
+                                Draw
+                            </Button>
                             <Button
                                 onClick={() =>
                                     openModal("avatars", <Avatars />)
