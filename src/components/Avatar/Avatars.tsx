@@ -2,11 +2,21 @@ import { Avatar } from "@components/Avatar";
 import { useModal } from "@contexts/Modal.context";
 import { useAppStore } from "@hooks/useStores";
 import { defaultAvatars } from "@mutualzz/types";
-import { Button, ButtonGroup, Paper, Stack, useTheme } from "@mutualzz/ui";
+import {
+    Box,
+    Button,
+    ButtonGroup,
+    IconButton,
+    Paper,
+    Stack,
+    Typography,
+    useTheme,
+} from "@mutualzz/ui";
 import { useMutation } from "@tanstack/react-query";
 import REST from "@utils/REST";
 import { observer } from "mobx-react";
 import { useState } from "react";
+import { FaTrash } from "react-icons/fa";
 
 export const Avatars = observer(() => {
     const { theme } = useTheme();
@@ -19,6 +29,7 @@ export const Avatars = observer(() => {
         avatar: "",
         type: "default",
     });
+    const [focusedAvatar, setFocusedAvatar] = useState("");
 
     const [currentPage, setCurrentPage] = useState<"default" | "previous">(
         "default",
@@ -41,8 +52,21 @@ export const Avatars = observer(() => {
         },
     });
 
+    const { mutate: deletePreviousAvatar, isPending: isDeleting } = useMutation(
+        {
+            mutationFn: () =>
+                rest.delete<{ avatar: string }>("@me/previousAvatar", {
+                    avatar: selectedAvatar.avatar || focusedAvatar,
+                }),
+            onSuccess: ({ avatar }) => {
+                account?.removePreviousAvatar(avatar);
+                setSelectedAvatar({ avatar: "", type: "default" });
+            },
+        },
+    );
+
     const selectAvatar = (avatar: string, type: "previous" | "default") => {
-        if (isPending) return;
+        if (isPending || isDeleting) return;
         setSelectedAvatar({ avatar, type });
     };
 
@@ -113,28 +137,78 @@ export const Avatars = observer(() => {
                         justifyContent="center"
                         alignItems="center"
                     >
-                        {account?.previousAvatars.map((avatar) => (
-                            <Avatar
-                                key={avatar}
-                                src={account?.previousAvatarUrls.get(avatar)}
-                                onClick={() => selectAvatar(avatar, "previous")}
-                                alt="Previous Avatar"
-                                size={80}
-                                css={{
-                                    filter:
-                                        selectedAvatar.avatar === avatar
-                                            ? `blur(1px)`
-                                            : "none",
-                                    cursor: isPending
-                                        ? "not-allowed"
-                                        : "pointer",
-                                    boxShadow:
-                                        selectedAvatar.avatar === avatar
-                                            ? `0 0 0 2px ${theme.colors.common.white}`
-                                            : "none",
-                                }}
-                            />
-                        ))}
+                        {(account?.previousAvatars.length ?? 0) > 0 ? (
+                            account?.previousAvatars.map((avatar) => (
+                                <Box
+                                    onMouseEnter={() =>
+                                        setFocusedAvatar(avatar)
+                                    }
+                                    onMouseLeave={() => setFocusedAvatar("")}
+                                    onFocus={() => setFocusedAvatar(avatar)}
+                                    position="relative"
+                                    key={`box-${avatar}`}
+                                >
+                                    {(focusedAvatar === avatar ||
+                                        selectedAvatar.avatar === avatar) && (
+                                        <IconButton
+                                            key={`delete-${avatar}`}
+                                            onClick={() =>
+                                                deletePreviousAvatar()
+                                            }
+                                            css={{
+                                                position: "absolute",
+                                                top: 0,
+                                                right: 0,
+                                                zIndex: 1,
+                                            }}
+                                            color="danger"
+                                            size="sm"
+                                        >
+                                            <FaTrash />
+                                        </IconButton>
+                                    )}
+
+                                    <Avatar
+                                        key={`avatar-${avatar}`}
+                                        src={account?.previousAvatarUrls.get(
+                                            avatar,
+                                        )}
+                                        onClick={() =>
+                                            selectAvatar(avatar, "previous")
+                                        }
+                                        alt="Previous Avatar"
+                                        size={80}
+                                        css={{
+                                            filter:
+                                                selectedAvatar.avatar === avatar
+                                                    ? `blur(1px)`
+                                                    : "none",
+                                            cursor: isPending
+                                                ? "not-allowed"
+                                                : "pointer",
+                                            boxShadow:
+                                                selectedAvatar.avatar === avatar
+                                                    ? `0 0 0 2px ${theme.colors.common.white}`
+                                                    : "none",
+                                        }}
+                                    />
+                                </Box>
+                            ))
+                        ) : (
+                            <Stack
+                                spacing={10}
+                                direction="column"
+                                alignItems="center"
+                            >
+                                <Typography fontWeight="bold" level="h6">
+                                    No previous avatars found.
+                                </Typography>
+                                <Typography level="body-sm">
+                                    Your last 9 avatars will be saved here
+                                    automatically.
+                                </Typography>
+                            </Stack>
+                        )}
                     </Stack>
                 )}
             </Stack>
@@ -143,7 +217,7 @@ export const Avatars = observer(() => {
                 pb={{ xs: "1rem", sm: "2rem" }}
                 justifyContent="center"
             >
-                <ButtonGroup disabled={isPending}>
+                <ButtonGroup disabled={isPending || isDeleting}>
                     <Button
                         onClick={() => changePage("default")}
                         disabled={currentPage === "default"}
@@ -160,7 +234,7 @@ export const Avatars = observer(() => {
 
                 {selectedAvatar.avatar && (
                     <Button
-                        disabled={isPending}
+                        disabled={isPending || isDeleting}
                         onClick={() => updateAvatar()}
                         color="success"
                     >

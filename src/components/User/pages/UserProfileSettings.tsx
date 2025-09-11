@@ -56,13 +56,6 @@ export const UserProfileSettings = observer(() => {
                             size={{ xs: "sm", sm: "md" }}
                         >
                             <Button
-                                onClick={() =>
-                                    openModal("avatars", <Avatars />)
-                                }
-                            >
-                                Avatars
-                            </Button>
-                            <Button
                                 onClick={() => {
                                     openModal(
                                         "avatar-upload",
@@ -73,6 +66,13 @@ export const UserProfileSettings = observer(() => {
                                 Upload
                             </Button>
                             <Button>Draw</Button>
+                            <Button
+                                onClick={() =>
+                                    openModal("avatars", <Avatars />)
+                                }
+                            >
+                                Avatars
+                            </Button>
                         </ButtonGroup>
                     </Popover>
                     <Button

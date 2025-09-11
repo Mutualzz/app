@@ -1,3 +1,4 @@
+import { Logger } from "@logger";
 import {
     CDNRoutes,
     ImageFormat,
@@ -13,6 +14,9 @@ import REST from "@utils/REST";
 import { makeAutoObservable } from "mobx";
 
 export class AccountStore {
+    private readonly logger = new Logger({
+        tag: "AccountStore",
+    });
     id: string;
     username: string;
     defaultAvatar: DefaultAvatar;
@@ -71,6 +75,15 @@ export class AccountStore {
                 animated,
             ),
         );
+    }
+
+    removePreviousAvatar(avatar: string) {
+        if (!this.previousAvatars.includes(avatar)) {
+            this.logger.warn(`Avatar ${avatar} not found in previous avatars.`);
+            return;
+        }
+
+        this.previousAvatars = this.previousAvatars.filter((a) => a !== avatar);
     }
 
     get previousAvatarUrls(): Map<string, string> {
