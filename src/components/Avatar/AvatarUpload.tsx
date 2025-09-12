@@ -33,9 +33,8 @@ export const AvatarUpload = observer(() => {
     const [rotation, setRotation] = useState(0);
 
     const [error, setError] = useState<string | null>(null);
-    const [saving, setSaving] = useState(false);
 
-    const { mutate: updateAvatar } = useMutation({
+    const { mutate: updateAvatar, isPending: saving } = useMutation({
         mutationFn: (avatar: File) => {
             const formData = new FormData();
             formData.append("avatar", avatar);
@@ -45,13 +44,11 @@ export const AvatarUpload = observer(() => {
         onSuccess: () => {
             setImageFile(null);
             setError(null);
-            setSaving(false);
             setOriginalFile(null);
             closeAllModals();
         },
         onError: (err: HttpException) => {
             setError(err.message ?? "An error occurred");
-            setSaving(false);
         },
     });
 
@@ -91,7 +88,6 @@ export const AvatarUpload = observer(() => {
 
     const handleSave = async () => {
         if (!imageFile || !croppedAreaPixels || !originalFile) return;
-        setSaving(true);
         updateAvatar(originalFile);
     };
 

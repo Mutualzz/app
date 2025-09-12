@@ -1,3 +1,4 @@
+import { useModal } from "@contexts/Modal.context";
 import { useAppStore } from "@hooks/useStores";
 import {
     Button,
@@ -14,6 +15,7 @@ import {
     useTheme,
 } from "@mutualzz/ui";
 import { useMediaQuery } from "@react-hookz/web";
+import { useMutation } from "@tanstack/react-query";
 import { observer } from "mobx-react";
 import { useRef, useState } from "react";
 import { FaEraser, FaPaintBrush } from "react-icons/fa";
@@ -24,7 +26,8 @@ import {
 
 export const AvatarDraw = observer(() => {
     const { theme } = useTheme();
-    const { draft } = useAppStore();
+    const { draft, rest } = useAppStore();
+    const { closeModal, closeAllModals } = useModal();
     const canvasRef = useRef<ReactSketchCanvasRef>(null);
     const [brushColor, setBrushColor] = useState<ColorLike>("#000000");
     const [backgroundColor, setBackgroundColor] =
@@ -33,8 +36,6 @@ export const AvatarDraw = observer(() => {
     const isMobile = useMediaQuery(
         theme.breakpoints.down("md").replace("@media", ""),
     );
-
-    const selectRef = useRef<HTMLSelectElement>(null);
 
     const [eraserMode, setEraserMode] = useState(false);
     const [emptyCanvas, setEmptyCanvas] = useState(true);
@@ -46,6 +47,35 @@ export const AvatarDraw = observer(() => {
 
     const [size, setSize] = useState(6);
 
+    useState<ColorLike>("#ffffff");
+
+    const { mutate: uploadAvatar, isPending } = useMutation({
+        mutationFn: async (avatar: string) => {
+            const blob = await (await fetch(avatar)).blob();
+            const file = new File([blob], "new-avatar.png", {
+                type: "image/png",
+            });
+
+            const formData = new FormData();
+            formData.append("avatar", file);
+            return rest.patchFormData("@me", formData);
+        },
+        onSuccess: () => {
+            setSelectedAvatarIndex(null);
+            setSelectedAvatarValue("");
+            canvasRef.current?.clearCanvas();
+            setBrushColor("#000000");
+            setBackgroundColor("#ffffff");
+            setSize(6);
+            setEraserMode(false);
+            setEmptyCanvas(true);
+            if (selectedAvatarIndex)
+                draft.deleteAvatarDraft(selectedAvatarIndex);
+
+            closeAllModals();
+        },
+    });
+
     const onChange = async () => {
         const time = await canvasRef.current?.getSketchingTime();
         if (!time) return;
@@ -55,6 +85,13 @@ export const AvatarDraw = observer(() => {
     const toggleEraser = () => {
         setEraserMode(!eraserMode);
         canvasRef.current?.eraseMode(!eraserMode);
+    };
+
+    const save = async () => {
+        const pngImage = await canvasRef.current?.exportImage("png");
+        if (!pngImage) return;
+
+        uploadAvatar(pngImage);
     };
 
     const saveDraft = async () => {
@@ -73,6 +110,18 @@ export const AvatarDraw = observer(() => {
         canvasRef.current?.loadPaths(avatar.paths);
         setSelectedAvatarIndex(index);
         setSelectedAvatarValue("");
+    };
+
+    const onClose = () => {
+        setSelectedAvatarIndex(null);
+        setSelectedAvatarValue("");
+        canvasRef.current?.clearCanvas();
+        setBrushColor("#000000");
+        setBackgroundColor("#ffffff");
+        setSize(6);
+        setEraserMode(false);
+        setEmptyCanvas(true);
+        closeModal("avatar-draw");
     };
 
     return (
@@ -104,11 +153,10 @@ export const AvatarDraw = observer(() => {
             >
                 <Typography>Saved Avatars</Typography>
                 <Select
-                    disabled={draft.avatars.length === 0}
+                    disabled={draft.avatars.length === 0 || isPending}
                     placeholder={`${draft.avatars.length > 0 ? draft.avatars.length : "No Saved"} Avatars`}
                     onValueChange={(value) => selectAvatar(Number(value))}
                     value={selectedAvatarValue}
-                    ref={selectRef}
                     size={isMobile ? "sm" : "md"}
                 >
                     {draft.avatars.map((avatar, index) => (
@@ -166,6 +214,7 @@ export const AvatarDraw = observer(() => {
                         onClick={toggleEraser}
                         color="neutral"
                         variant="outlined"
+                        disabled={isPending}
                     >
                         {eraserMode ? "Eraser" : "Brush"}
                     </Button>
@@ -180,6 +229,7 @@ export const AvatarDraw = observer(() => {
                             {eraserMode ? "Eraser" : "Brush"} Size
                         </Typography>
                         <InputNumber
+                            disabled={isPending}
                             onChange={(e) => setSize(e.target.valueAsNumber)}
                             value={String(size)}
                             size="md"
@@ -194,6 +244,7 @@ export const AvatarDraw = observer(() => {
                         >
                             <Typography level="body-sm">Brush Color</Typography>
                             <InputColor
+                                disabled={isPending}
                                 size="md"
                                 value={brushColor}
                                 onChange={(color) => setBrushColor(color)}
@@ -215,6 +266,7 @@ export const AvatarDraw = observer(() => {
                             eraserMode ? <FaEraser /> : <FaPaintBrush />
                         }
                         onClick={toggleEraser}
+                        disabled={isPending}
                         color="neutral"
                         variant="outlined"
                         size="sm"
@@ -238,6 +290,7 @@ export const AvatarDraw = observer(() => {
                                 {eraserMode ? "Eraser" : "Brush"} Size
                             </Typography>
                             <InputNumber
+                                disabled={isPending}
                                 onChange={(e) =>
                                     setSize(e.target.valueAsNumber)
                                 }
@@ -258,6 +311,7 @@ export const AvatarDraw = observer(() => {
                                 <InputColor
                                     size={10}
                                     value={brushColor}
+                                    disabled={isPending}
                                     onChange={(color) => setBrushColor(color)}
                                     showRandom
                                 />
@@ -283,6 +337,7 @@ export const AvatarDraw = observer(() => {
                         borderRadius: "50%",
                     }}
                     withTimestamp
+                    readOnly={isPending}
                     exportWithBackgroundImage
                 />
                 <Stack
@@ -298,6 +353,7 @@ export const AvatarDraw = observer(() => {
                         onChange={(color) => setBackgroundColor(color)}
                         allowAlpha
                         showRandom
+                        disabled={isPending}
                     />
                 </Stack>
             </Stack>
@@ -306,7 +362,7 @@ export const AvatarDraw = observer(() => {
                 spacing={10}
                 variant="soft"
                 orientation={isMobile ? "horizontal" : "vertical"}
-                disabled={emptyCanvas}
+                disabled={emptyCanvas || isPending}
                 size={isMobile ? "sm" : "md"}
             >
                 <Button
@@ -318,7 +374,7 @@ export const AvatarDraw = observer(() => {
                     Clear
                 </Button>
                 <ButtonGroup
-                    disabled={emptyCanvas}
+                    disabled={emptyCanvas || isPending}
                     variant="outlined"
                     color="success"
                     orientation={isMobile ? "horizontal" : "vertical"}
@@ -331,8 +387,11 @@ export const AvatarDraw = observer(() => {
                         Redo
                     </Button>
                 </ButtonGroup>
-                <Button>Save</Button>
+                <Button onClick={() => save()}>Save</Button>
                 <Button onClick={() => saveDraft()}>Save Draft</Button>
+                <Button disabled={isPending} color="danger" onClick={onClose}>
+                    Cancel
+                </Button>
             </ButtonGroup>
         </Paper>
     );
