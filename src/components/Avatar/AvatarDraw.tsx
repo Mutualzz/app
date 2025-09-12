@@ -1,6 +1,5 @@
 import { useAppStore } from "@hooks/useStores";
 import {
-    Box,
     Button,
     ButtonGroup,
     type ColorLike,
@@ -22,8 +21,6 @@ import {
     ReactSketchCanvas,
     type ReactSketchCanvasRef,
 } from "react-sketch-canvas";
-
-// TODO: need to work on mobile responsiveness
 
 export const AvatarDraw = observer(() => {
     const { theme } = useTheme();
@@ -83,7 +80,7 @@ export const AvatarDraw = observer(() => {
             direction={isMobile ? "column" : "row"}
             justifyContent="space-between"
             alignItems="center"
-            gap={{ xs: 2, sm: 4, md: 6, lg: 8 }}
+            gap={20}
             elevation={3}
             width="100%"
             minWidth={{ xs: "100vw", sm: 400, md: 720 }}
@@ -93,84 +90,74 @@ export const AvatarDraw = observer(() => {
             position="relative"
             p={{ xs: "0.5rem", sm: "1rem", md: "2rem" }}
             borderRadius={{ xs: "1rem", sm: "1.5rem" }}
-            overflow="auto"
+            overflow="hidden"
         >
             <Stack
                 direction="column"
-                gap={{ xs: 2, sm: 4, md: 6 }}
+                gap={10}
                 justifyContent="center"
                 alignItems="center"
-                width={isMobile ? "100%" : "auto"}
-                minWidth={isMobile ? "100%" : 225}
+                minWidth={isMobile ? 200 : 250}
                 position={isMobile ? "static" : "absolute"}
                 left={isMobile ? undefined : 20}
                 top={isMobile ? undefined : 20}
             >
+                <Typography>Saved Avatars</Typography>
+                <Select
+                    disabled={draft.avatars.length === 0}
+                    placeholder={`${draft.avatars.length > 0 ? draft.avatars.length : "No Saved"} Avatars`}
+                    onValueChange={(value) => selectAvatar(Number(value))}
+                    value={selectedAvatarValue}
+                    ref={selectRef}
+                    size={isMobile ? "sm" : "md"}
+                >
+                    {draft.avatars.map((avatar, index) => (
+                        <Option variant="plain" key={index} value={index}>
+                            <Stack
+                                direction="row"
+                                justifyContent="space-between"
+                                alignItems="center"
+                            >
+                                <Typography level="body-sm">
+                                    Avatar {index + 1}
+                                </Typography>
+                                <img
+                                    src={`data:image/svg+xml;utf8,${encodeURIComponent(avatar.image)}`}
+                                    alt={`Avatar ${index + 1}`}
+                                    css={{
+                                        width: isMobile ? 48 : "100%", // match md InputColor
+                                        height: isMobile ? 48 : "100%",
+                                        maxWidth: 64,
+                                        maxHeight: 64,
+                                    }}
+                                />
+                            </Stack>
+                        </Option>
+                    ))}
+                </Select>
+                {selectedAvatarIndex !== null && (
+                    <Button
+                        color="danger"
+                        variant="outlined"
+                        onClick={() => {
+                            if (selectedAvatarIndex === null) return;
+                            draft.deleteAvatarDraft(selectedAvatarIndex);
+                            setSelectedAvatarIndex(null);
+                            canvasRef.current?.clearCanvas();
+                        }}
+                        size={isMobile ? "sm" : "md"}
+                    >
+                        Delete Selected Avatar
+                    </Button>
+                )}
+            </Stack>
+            {!isMobile && (
                 <Stack
                     direction="column"
-                    gap={{ xs: 2, sm: 4, md: 6 }}
-                    justifyContent="center"
-                    alignItems="center"
-                    width={isMobile ? "100%" : "auto"}
-                    minWidth={isMobile ? "100%" : 225}
-                    position={isMobile ? "static" : "absolute"}
-                    left={isMobile ? undefined : 20}
-                    top={isMobile ? undefined : 20}
-                >
-                    <Divider textColor={theme.typography.colors.primary}>
-                        Saved Avatars
-                    </Divider>
-                    <Select
-                        disabled={draft.avatars.length === 0}
-                        placeholder={`${draft.avatars.length > 0 ? draft.avatars.length : "No Saved"} Avatars`}
-                        onValueChange={(value) => selectAvatar(Number(value))}
-                        value={selectedAvatarValue}
-                        ref={selectRef}
-                    >
-                        {draft.avatars.map((avatar, index) => (
-                            <Option variant="plain" key={index} value={index}>
-                                <Stack
-                                    direction="row"
-                                    justifyContent="space-between"
-                                    alignItems="center"
-                                >
-                                    <Typography level="body-sm">
-                                        Avatar {index + 1}
-                                    </Typography>
-                                    <img
-                                        src={`data:image/svg+xml;utf8,${encodeURIComponent(avatar.image)}`}
-                                        alt={`Avatar ${index + 1}`}
-                                        style={{
-                                            width: 48,
-                                            height: 48,
-                                        }}
-                                    />
-                                </Stack>
-                            </Option>
-                        ))}
-                    </Select>
-                    {selectedAvatarIndex !== null && (
-                        <Button
-                            color="danger"
-                            variant="outlined"
-                            onClick={() => {
-                                if (selectedAvatarIndex === null) return;
-                                draft.deleteAvatarDraft(selectedAvatarIndex);
-                                setSelectedAvatarIndex(null);
-                                canvasRef.current?.clearCanvas();
-                            }}
-                        >
-                            Delete Selected Avatar
-                        </Button>
-                    )}
-                </Stack>
-                <Stack
-                    direction={isMobile ? "row" : "column"}
-                    gap={{ xs: 2, sm: 4, md: 6 }}
                     alignItems="center"
                     justifyContent="center"
-                    width={isMobile ? "100%" : "auto"}
-                    mt={isMobile ? 2 : 0}
+                    minWidth={225}
+                    gap={10}
                 >
                     <Button
                         startDecorator={
@@ -182,36 +169,32 @@ export const AvatarDraw = observer(() => {
                     >
                         {eraserMode ? "Eraser" : "Brush"}
                     </Button>
-                    <Divider
-                        orientation={isMobile ? "vertical" : "horizontal"}
-                        lineColor="accent"
-                    />
-                    <Stack direction="column" gap={2} alignItems="center">
+                    <Divider orientation="horizontal" lineColor="muted" />
+                    <Stack
+                        direction="column"
+                        justifyContent="center"
+                        gap={2.5}
+                        alignItems="center"
+                    >
                         <Typography level="body-sm">
                             {eraserMode ? "Eraser" : "Brush"} Size
                         </Typography>
                         <InputNumber
                             onChange={(e) => setSize(e.target.valueAsNumber)}
                             value={String(size)}
-                        />
-                    </Stack>
-                    <Stack direction="column" gap={2} alignItems="center">
-                        <Typography level="body-xs">
-                            Background Color
-                        </Typography>
-                        <InputColor
-                            size={isMobile ? 8 : 12.5}
-                            value={backgroundColor}
-                            onChange={(color) => setBackgroundColor(color)}
-                            allowAlpha
-                            showRandom
+                            size="md"
                         />
                     </Stack>
                     {!eraserMode && (
-                        <Stack direction="column" gap={2} alignItems="center">
+                        <Stack
+                            direction="column"
+                            gap={2.5}
+                            justifyContent="center"
+                            alignItems="center"
+                        >
                             <Typography level="body-sm">Brush Color</Typography>
                             <InputColor
-                                size={isMobile ? 8 : 12.5}
+                                size="md"
                                 value={brushColor}
                                 onChange={(color) => setBrushColor(color)}
                                 showRandom
@@ -219,8 +202,71 @@ export const AvatarDraw = observer(() => {
                         </Stack>
                     )}
                 </Stack>
-            </Stack>
-            <Box width="512px" height="512px" position="relative">
+            )}
+            {isMobile && (
+                <Stack
+                    direction="column"
+                    alignItems="center"
+                    justifyContent="center"
+                    width="100%"
+                >
+                    <Button
+                        startDecorator={
+                            eraserMode ? <FaEraser /> : <FaPaintBrush />
+                        }
+                        onClick={toggleEraser}
+                        color="neutral"
+                        variant="outlined"
+                        size="sm"
+                    >
+                        {eraserMode ? "Eraser" : "Brush"}
+                    </Button>
+                    <Divider />
+                    <Stack
+                        direction="row"
+                        gap={10}
+                        alignItems="center"
+                        justifyContent="center"
+                    >
+                        <Stack
+                            direction="column"
+                            justifyContent="center"
+                            gap={2.5}
+                            alignItems="center"
+                        >
+                            <Typography level="body-xs">
+                                {eraserMode ? "Eraser" : "Brush"} Size
+                            </Typography>
+                            <InputNumber
+                                onChange={(e) =>
+                                    setSize(e.target.valueAsNumber)
+                                }
+                                value={String(size)}
+                                size={10}
+                            />
+                        </Stack>
+                        {!eraserMode && (
+                            <Stack
+                                direction="column"
+                                gap={2.5}
+                                justifyContent="center"
+                                alignItems="center"
+                            >
+                                <Typography level="body-xs">
+                                    Brush Color
+                                </Typography>
+                                <InputColor
+                                    size={10}
+                                    value={brushColor}
+                                    onChange={(color) => setBrushColor(color)}
+                                    showRandom
+                                />
+                            </Stack>
+                        )}
+                    </Stack>
+                </Stack>
+            )}
+            <Stack position="relative" gap={10} direction="column">
                 <ReactSketchCanvas
                     ref={canvasRef}
                     strokeColor={brushColor}
@@ -228,6 +274,8 @@ export const AvatarDraw = observer(() => {
                     eraserWidth={size}
                     canvasColor={backgroundColor}
                     onStroke={onChange}
+                    width={isMobile ? "256px" : "512px"}
+                    height={isMobile ? "256px" : "512px"}
                     svgStyle={{
                         borderRadius: "50%",
                     }}
@@ -237,39 +285,55 @@ export const AvatarDraw = observer(() => {
                     withTimestamp
                     exportWithBackgroundImage
                 />
-            </Box>
-            <Stack>
-                <ButtonGroup
-                    color="neutral"
-                    spacing={10}
-                    variant="soft"
-                    orientation="vertical"
-                    disabled={emptyCanvas}
+                <Stack
+                    direction="column"
+                    gap={2.5}
+                    justifyContent="center"
+                    alignItems="center"
                 >
-                    <Button
-                        onClick={() => {
-                            setEmptyCanvas(true);
-                            canvasRef.current?.clearCanvas();
-                        }}
-                    >
-                        Clear
-                    </Button>
-                    <ButtonGroup
-                        disabled={emptyCanvas}
-                        variant="outlined"
-                        color="success"
-                    >
-                        <Button onClick={() => canvasRef.current?.undo()}>
-                            Undo
-                        </Button>
-                        <Button onClick={() => canvasRef.current?.redo()}>
-                            Redo
-                        </Button>
-                    </ButtonGroup>
-                    <Button>Save</Button>
-                    <Button onClick={() => saveDraft()}>Save Draft</Button>
-                </ButtonGroup>
+                    <Typography level="body-sm">Background Color</Typography>
+                    <InputColor
+                        size={isMobile ? 10 : "md"}
+                        value={backgroundColor}
+                        onChange={(color) => setBackgroundColor(color)}
+                        allowAlpha
+                        showRandom
+                    />
+                </Stack>
             </Stack>
+            <ButtonGroup
+                color="neutral"
+                spacing={10}
+                variant="soft"
+                orientation={isMobile ? "horizontal" : "vertical"}
+                disabled={emptyCanvas}
+                size={isMobile ? "sm" : "md"}
+            >
+                <Button
+                    onClick={() => {
+                        setEmptyCanvas(true);
+                        canvasRef.current?.clearCanvas();
+                    }}
+                >
+                    Clear
+                </Button>
+                <ButtonGroup
+                    disabled={emptyCanvas}
+                    variant="outlined"
+                    color="success"
+                    orientation={isMobile ? "horizontal" : "vertical"}
+                    size={isMobile ? "sm" : "md"}
+                >
+                    <Button onClick={() => canvasRef.current?.undo()}>
+                        Undo
+                    </Button>
+                    <Button onClick={() => canvasRef.current?.redo()}>
+                        Redo
+                    </Button>
+                </ButtonGroup>
+                <Button>Save</Button>
+                <Button onClick={() => saveDraft()}>Save Draft</Button>
+            </ButtonGroup>
         </Paper>
     );
 });
