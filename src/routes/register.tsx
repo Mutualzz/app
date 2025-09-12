@@ -61,7 +61,7 @@ const InputWithLabel = ({
                 </Typography>
             )}
         </Typography>
-        <Input size={{ xs: "md", sm: "lg" }} {...props} />
+        <Input fullWidth size={{ xs: "md", sm: "lg" }} {...props} />
         {!field.state.meta.isValid && field.state.meta.isTouched && (
             <Typography variant="plain" color="danger" level="body-sm">
                 {field.state.meta.errors[0].message}

@@ -46,7 +46,7 @@ const InputWithLabel = ({
                 </Typography>
             )}
         </Typography>
-        <Input size={{ xs: "md", sm: "lg", md: "lg" }} {...props} />
+        <Input fullWidth size={{ xs: "md", sm: "lg", md: "lg" }} {...props} />
         {apiError && (
             <Typography variant="plain" color="danger" level="body-sm">
                 {apiError}
