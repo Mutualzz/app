@@ -19,6 +19,11 @@ import { useCallback, useState } from "react";
 import Cropper from "react-easy-crop";
 import { FaMagnifyingGlass, FaRotate } from "react-icons/fa6";
 
+interface UpdateAvatar {
+    avatar: File;
+    crop?: unknown;
+}
+
 export const AvatarUpload = observer(() => {
     const { theme } = useTheme();
     const { rest } = useAppStore();
@@ -35,10 +40,11 @@ export const AvatarUpload = observer(() => {
     const [error, setError] = useState<string | null>(null);
 
     const { mutate: updateAvatar, isPending: saving } = useMutation({
-        mutationFn: (avatar: File) => {
+        mutationFn: ({ avatar, crop }: UpdateAvatar) => {
             const formData = new FormData();
             formData.append("avatar", avatar);
-            formData.append("crop", JSON.stringify(croppedAreaPixels));
+            if (crop)
+                formData.append("crop", JSON.stringify(croppedAreaPixels));
             return rest.patchFormData("@me", formData);
         },
         onSuccess: () => {
@@ -86,9 +92,18 @@ export const AvatarUpload = observer(() => {
         setCroppedAreaPixels(croppedAreaPixels);
     }, []);
 
-    const handleSave = async () => {
-        if (!imageFile || !croppedAreaPixels || !originalFile) return;
-        updateAvatar(originalFile);
+    const handleSave = async (skipCrop = false) => {
+        if (!originalFile) return;
+
+        const shouldCrop =
+            !skipCrop &&
+            (crop.x !== 0 || crop.y !== 0 || zoom !== 1 || rotation !== 0) &&
+            !!croppedAreaPixels;
+
+        updateAvatar({
+            avatar: originalFile,
+            crop: shouldCrop ? croppedAreaPixels : undefined,
+        });
     };
 
     return (
@@ -229,7 +244,15 @@ export const AvatarUpload = observer(() => {
                 {imageFile && croppedAreaPixels && (
                     <ButtonGroup spacing={{ xs: 2, sm: 5 }}>
                         <Button
-                            onClick={handleSave}
+                            onClick={() => handleSave(true)}
+                            loading={saving}
+                            color="neutral"
+                            variant="plain"
+                        >
+                            Skip
+                        </Button>
+                        <Button
+                            onClick={() => handleSave(false)}
                             color="success"
                             loading={saving}
                         >
