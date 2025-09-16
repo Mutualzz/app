@@ -18,6 +18,7 @@ export const ModalRoot = () => {
                     css={{
                         zIndex: theme.zIndex.modal + idx,
                     }}
+                    pt="max(2rem, env(safe-area-inset-bottom, 0px))"
                 >
                     {modal.content}
                 </Modal>
