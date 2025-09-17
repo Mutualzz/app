@@ -4,7 +4,7 @@ import { useAppStore } from "@hooks/useStores";
 import { Button, Paper, Stack, useTheme } from "@mutualzz/ui";
 import { useMediaQuery } from "@react-hookz/web";
 import { useNavigate } from "@tanstack/react-router";
-import { isMobile, isTauri } from "@utils/index";
+import { isTauri } from "@utils/index";
 import { observer } from "mobx-react";
 import { motion } from "motion/react";
 import { FaClipboard, FaDownload, FaUser } from "react-icons/fa";
@@ -74,7 +74,7 @@ export const TopNavigation = observer(() => {
                         >
                             Privacy Policy
                         </Button>
-                        {!isTauri && !isMobile && (
+                        {!isTauri && (
                             <DownloadButton
                                 startDecorator={<FaDownload />}
                                 color="success"

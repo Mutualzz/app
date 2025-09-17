@@ -1,5 +1,4 @@
 import Loader from "@components/Loader/Loader";
-import { BottomNavigation } from "@components/Navigation/BottomNavigation";
 import { TopNavigation } from "@components/Navigation/TopNavigation";
 import WindowTitlebar from "@components/WindowTitlebar";
 import { AppTheme } from "@contexts/AppTheme.context";
@@ -179,7 +178,6 @@ function RootComponent() {
                             >
                                 <Outlet />
                             </Stack>
-                            <BottomNavigation />
                         </Stack>
                     </Loader>
 

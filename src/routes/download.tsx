@@ -1,7 +1,7 @@
 import { LinearProgress, Stack } from "@mutualzz/ui";
 import { createFileRoute, Navigate, useNavigate } from "@tanstack/react-router";
 import { detectDownloadURL } from "@utils/detect";
-import { isMobile, isTauri } from "@utils/index";
+import { isTauri } from "@utils/index";
 import { useEffect } from "react";
 
 export const Route = createFileRoute("/download")({
@@ -13,7 +13,7 @@ function DownloadAndRedirect() {
     const fileUrl = detectDownloadURL();
 
     useEffect(() => {
-        if (fileUrl && (!isTauri || !isMobile)) {
+        if (fileUrl && !isTauri) {
             const a = document.createElement("a");
             a.href = fileUrl;
             a.download = "";
@@ -30,7 +30,7 @@ function DownloadAndRedirect() {
         }
     }, [fileUrl, navigate]);
 
-    if (isTauri || isMobile) return <Navigate to="/" replace />;
+    if (isTauri) return <Navigate to="/" replace />;
 
     return (
         <Stack
