@@ -1,9 +1,5 @@
 {
     "dependencies": {
-        "@capacitor/android": "^7.4.2",
-        "@capacitor/core": "^7.4.2",
-        "@capacitor/ios": "^7.4.2",
-        "@capacitor/status-bar": "^7.0.2",
         "@fontsource/inter": "^5.2.6",
         "@fontsource/montserrat": "^5.2.6",
         "@juggle/resize-observer": "^3.4.0",
@@ -78,8 +74,6 @@
         "vfile": "^6.0.3"
     },
     "devDependencies": {
-        "@capacitor/assets": "^3.0.5",
-        "@capacitor/cli": "^7.4.2",
         "@emotion/babel-plugin": "^11.13.5",
         "@emotion/css-prettifier": "^1.2.0",
         "@ionic/cli": "^7.2.1",
@@ -115,23 +109,15 @@
     "name": "@mutualzz/app",
     "private": true,
     "scripts": {
-        "android:patch:adb": "adb reverse tcp:1420 tcp:1420 && adb reverse tcp:3000 tcp:3000 && adb reverse tcp:4000 tcp:4000 && adb reverse tcp:3001 tcp:3001",
         "build": "tsc && vite build",
         "build:dev": "tsc && cross-env VITE_ENV_DEV=true vite build",
-        "build:mobile": "cross-env VITE_CAPACITOR=true pnpm vite build && cap sync && pnpm cap:build:ios && pnpm cap:build:android",
-        "cap:build:android": "cross-env-shell 'npx cap build android --androidreleasetype AAB --keystorepath \"$MZ_UPLOAD_STORE_FILE\" --keystorepass \"$MZ_UPLOAD_STORE_PASSWORD\" --keystorealias \"$MZ_UPLOAD_KEY_ALIAS\" --keystorealiaspass \"$MZ_UPLOAD_KEY_PASSWORD\"'",
-        "cap:build:ios": "cap build ios",
-        "cap:run:android": "cross-env NODE_ENV=development cap sync && cap open android",
-        "cap:run:ios": "cross-env NODE_ENV=development cap sync && cap open ios",
         "ci:prebuild": "node scripts/tauriVersion.js",
         "dev": "pnpm vite:dev",
-        "dev:android": "cross-env VITE_CAPACITOR=true concurrently \"pnpm vite:dev\" \"pnpm cap:run:android\"",
-        "dev:ios": "cross-env VITE_CAPACITOR=true concurrently \"pnpm vite:dev\" \"pnpm cap:run:ios\"",
         "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
         "lint:fix": "pnpx prettier . --write",
         "preview": "vite preview",
         "tauri": "tauri",
-        "tauri:build": "pnpm run ci:prebuild && tauri build",
+        "tauri:build": "pnpm run ci:prebuild && cross-env VITE_FOR_TAURI=true tauri build",
         "tauri:dev": "pnpm run ci:prebuild && TAURI_ENV_DEV=true tauri dev",
         "typecheck": "tsc --noEmit",
         "vite:build": "VITE_WEB=true vite build",
