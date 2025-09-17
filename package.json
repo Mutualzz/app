@@ -115,13 +115,14 @@
     "name": "@mutualzz/app",
     "private": true,
     "scripts": {
+        "android:patch:adb": "adb reverse tcp:1420 tcp:1420 && adb reverse tcp:3000 tcp:3000 && adb reverse tcp:4000 tcp:4000 && adb reverse tcp:3001 tcp:3001",
         "build": "tsc && vite build",
         "build:dev": "tsc && cross-env VITE_ENV_DEV=true vite build",
         "build:mobile": "cross-env VITE_CAPACITOR=true pnpm vite build && cap sync && pnpm cap:build:ios && pnpm cap:build:android",
         "cap:build:android": "cross-env-shell 'npx cap build android --androidreleasetype AAB --keystorepath \"$MZ_UPLOAD_STORE_FILE\" --keystorepass \"$MZ_UPLOAD_STORE_PASSWORD\" --keystorealias \"$MZ_UPLOAD_KEY_ALIAS\" --keystorealiaspass \"$MZ_UPLOAD_KEY_PASSWORD\"'",
         "cap:build:ios": "cap build ios",
-        "cap:run:android": "NODE_ENV=development cap sync && cap open android",
-        "cap:run:ios": "NODE_ENV=development cap sync && cap open ios",
+        "cap:run:android": "cross-env NODE_ENV=development cap sync && cap open android",
+        "cap:run:ios": "cross-env NODE_ENV=development cap sync && cap open ios",
         "ci:prebuild": "node scripts/tauriVersion.js",
         "dev": "pnpm vite:dev",
         "dev:android": "cross-env VITE_CAPACITOR=true concurrently \"pnpm vite:dev\" \"pnpm cap:run:android\"",
@@ -134,7 +135,7 @@
         "tauri:dev": "pnpm run ci:prebuild && TAURI_ENV_DEV=true tauri dev",
         "typecheck": "tsc --noEmit",
         "vite:build": "VITE_WEB=true vite build",
-        "vite:dev": "cross-env VITE_ENV_DEV=true vite --host"
+        "vite:dev": "cross-env VITE_ENV_DEV=true vite --host 0.0.0.0"
     },
     "type": "module",
     "version": "1.9.7"

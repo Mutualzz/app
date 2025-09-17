@@ -55,7 +55,7 @@ function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
             </head>
             <body
                 css={{
-                    height: "100vh",
+                    height: "100dvh",
                     margin: 0,
                     padding: 0,
                     width: "100vw",

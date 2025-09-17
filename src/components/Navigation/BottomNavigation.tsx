@@ -25,7 +25,7 @@ export const BottomNavigation = observer(() => {
             elevation={2}
             width="100%"
             pt="0.5rem"
-            pb="calc(env(safe-area-inset-bottom, 0px) - 1rem)"
+            pb="max(0.75rem, env(safe-area-inset-bottom, 0px))"
             pl="calc(env(safe-area-inset-left, 0px) + 1.5rem)"
             pr="calc(env(safe-area-inset-right, 0px) + 1.5rem)"
             position="sticky"

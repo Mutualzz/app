@@ -12,8 +12,8 @@ import {
     Typography,
     useTheme,
 } from "@mutualzz/ui";
+import { REST } from "@stores/REST.store";
 import { useMutation } from "@tanstack/react-query";
-import REST from "@utils/REST";
 import { observer } from "mobx-react";
 import { useState } from "react";
 import { FaTrash } from "react-icons/fa";

@@ -10,8 +10,8 @@ import {
     type Sizes,
 } from "@mutualzz/types";
 import type { Hex } from "@mutualzz/ui";
-import REST from "@utils/REST";
 import { makeAutoObservable } from "mobx";
+import { REST } from "./REST.store";
 
 export class AccountStore {
     private readonly logger = new Logger({

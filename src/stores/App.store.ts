@@ -1,7 +1,6 @@
 import { Logger } from "@logger";
 import type { APIPrivateUser } from "@mutualzz/types";
 import { isSSR, isTauri } from "@utils/index";
-import REST from "@utils/REST";
 import { secureStorageAdapter } from "@utils/secureStorageAdapter";
 import { makeAutoObservable } from "mobx";
 import { makePersistable } from "mobx-persist-store";
@@ -9,6 +8,7 @@ import secureLocalStorage from "react-secure-storage";
 import { AccountStore } from "./Account.store";
 import { DraftStore } from "./Draft.store";
 import { GatewayStore } from "./Gateway.store";
+import { REST } from "./REST.store";
 import { ThemeStore } from "./Theme.store";
 import { UpdaterStore } from "./Updater.store";
 import { UserStore } from "./User.store";

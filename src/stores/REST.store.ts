@@ -1,6 +1,6 @@
 import { Logger } from "@logger";
 import { getCurrentWindow } from "@tauri-apps/api/window";
-import { detectBrowser, detectOS } from "./detect";
+import { detectBrowser, detectOS } from "../utils/detect";
 
 let isTauri = false;
 let os = "Other";
@@ -29,7 +29,7 @@ const DEFAULT_HEADERS = {
     ...clientMeta,
 };
 
-export default class REST {
+export class REST {
     private readonly logger = new Logger({
         tag: "REST",
     });
@@ -71,7 +71,6 @@ export default class REST {
 
     public async get<Data>(
         path: string,
-
         queryParams: Record<string, any> = {},
     ): Promise<Data> {
         return new Promise((resolve, reject) => {
@@ -104,7 +103,6 @@ export default class REST {
     public async post<Body, Data>(
         path: string,
         body?: Body,
-
         queryParams: Record<string, any> = {},
         headers: Record<string, string> = {},
     ): Promise<Data> {
@@ -150,7 +148,6 @@ export default class REST {
     public async put<Body, Data>(
         path: string,
         body?: Body,
-
         queryParams: Record<string, any> = {},
         headers: Record<string, string> = {},
     ): Promise<Data> {
@@ -196,7 +193,6 @@ export default class REST {
     public async patch<T, U>(
         path: string,
         body?: T,
-
         queryParams: Record<string, any> = {},
         headers: Record<string, string> = {},
     ): Promise<U> {
@@ -242,7 +238,6 @@ export default class REST {
     public async postFormData<Data>(
         path: string,
         body: FormData,
-
         queryParams: Record<string, any> = {},
         headers: Record<string, string> = {},
         msg?: any,
@@ -293,7 +288,6 @@ export default class REST {
     public async patchFormData<Data>(
         path: string,
         body: FormData,
-
         queryParams: Record<string, any> = {},
         headers: Record<string, string> = {},
         msg?: any,
