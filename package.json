@@ -5,6 +5,7 @@
         "@juggle/resize-observer": "^3.4.0",
         "@mateie/react-drag-drop-files": "^3.1.0",
         "@mutualzz/ui": "workspace:*",
+        "@mutualzz/validators": "workspace:*",
         "@react-hookz/web": "^25.1.1",
         "@sentry/node": "^10.1.0",
         "@sentry/react": "^10.1.0",
