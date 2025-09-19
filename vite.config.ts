@@ -49,8 +49,8 @@ const host = process.env.TAURI_DEV_HOST;
 const isDevBuild = !!process.env.VITE_ENV_DEV || !!process.env.TAURI_ENV_DEBUG;
 
 console.log("Serving for Tauri:", forTauri);
-console.log(`Sourcemaps: ${isDevBuild}`);
-console.log(`Minification: ${isDevBuild ? false : "esbuild"}`);
+console.log("Sourcemaps:", isDevBuild);
+console.log("Minification: ", isDevBuild ? false : "esbuild");
 console.log(
     `Target: ${
         process.env.TAURI_ENV_PLATFORM !== undefined
