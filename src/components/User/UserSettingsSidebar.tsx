@@ -9,7 +9,7 @@ import {
     Paper,
     Stack,
     Typography,
-} from "@mutualzz/ui";
+} from "@mutualzz/ui/web";
 import { observer } from "mobx-react";
 
 interface UserSettingsSidebarProps {

@@ -1,6 +1,7 @@
 import type { MzTheme, ThemeDraft } from "@app-types/theme";
 import { useAppStore } from "@hooks/useStores";
 import type { HttpException } from "@mutualzz/types";
+import { randomColor, useTheme } from "@mutualzz/ui";
 import {
     Button,
     ButtonGroup,
@@ -9,13 +10,11 @@ import {
     Input,
     Option,
     Paper,
-    randomColor,
     Select,
     Stack,
     Typography,
-    useTheme,
     type InputProps,
-} from "@mutualzz/ui";
+} from "@mutualzz/ui/web";
 import { validateThemePut } from "@mutualzz/validators";
 import { useMediaQuery } from "@react-hookz/web";
 import {

@@ -1,9 +1,9 @@
 import { useModal } from "@contexts/Modal.context";
 import { useAppStore } from "@hooks/useStores";
+import { type ColorLike, useTheme } from "@mutualzz/ui";
 import {
     Button,
     ButtonGroup,
-    type ColorLike,
     Divider,
     InputColor,
     InputNumber,
@@ -12,8 +12,7 @@ import {
     Select,
     Stack,
     Typography,
-    useTheme,
-} from "@mutualzz/ui";
+} from "@mutualzz/ui/web";
 import { useMediaQuery } from "@react-hookz/web";
 import { useMutation } from "@tanstack/react-query";
 import { observer } from "mobx-react";

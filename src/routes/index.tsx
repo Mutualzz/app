@@ -2,7 +2,7 @@ import { Avatar } from "@components/Avatar";
 import { ThemeCreator } from "@components/ThemeCreator";
 import { useModal } from "@contexts/Modal.context";
 import { useAppStore } from "@hooks/useStores";
-import { Button, Stack, Typography } from "@mutualzz/ui";
+import { Button, Stack, Typography } from "@mutualzz/ui/web";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { observer } from "mobx-react";
 

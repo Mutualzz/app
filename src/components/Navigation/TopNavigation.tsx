@@ -1,7 +1,8 @@
 import { DownloadButton } from "@components/DownloadButton";
 import { UserDropdown } from "@components/User/UserDropdown";
 import { useAppStore } from "@hooks/useStores";
-import { Button, Paper, Stack, useTheme } from "@mutualzz/ui";
+import { useTheme } from "@mutualzz/ui";
+import { Button, Paper, Stack } from "@mutualzz/ui/web";
 import { useMediaQuery } from "@react-hookz/web";
 import { useNavigate } from "@tanstack/react-router";
 import { isTauri } from "@utils/index";

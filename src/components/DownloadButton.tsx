@@ -1,4 +1,4 @@
-import { Button, type ButtonProps } from "@mutualzz/ui";
+import { Button, type ButtonProps } from "@mutualzz/ui/web";
 import { detectDownloadURL } from "@utils/detect";
 
 export const DownloadButton = (props: ButtonProps) => {

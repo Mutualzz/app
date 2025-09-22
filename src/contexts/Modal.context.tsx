@@ -1,5 +1,5 @@
 import { ModalRoot } from "@components/ModalRoot";
-import type { ModalProps } from "@mutualzz/ui";
+import type { ModalProps } from "@mutualzz/ui/web";
 import {
     createContext,
     useCallback,

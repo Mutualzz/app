@@ -1,4 +1,5 @@
-import { Stack, Typography, useTheme } from "@mutualzz/ui";
+import { useTheme } from "@mutualzz/ui";
+import { Stack, Typography } from "@mutualzz/ui/web";
 import { useMediaQuery } from "@react-hookz/web";
 import { seo } from "@seo";
 import { createFileRoute } from "@tanstack/react-router";

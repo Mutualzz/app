@@ -1,12 +1,6 @@
 import { MarkdownInputContext } from "@components/Markdown/MarkdownInput/MarkdownInput.context";
-import {
-    Button,
-    ButtonGroup,
-    Divider,
-    Paper,
-    Portal,
-    useTheme,
-} from "@mutualzz/ui";
+import { useTheme } from "@mutualzz/ui";
+import { Button, ButtonGroup, Divider, Paper, Portal } from "@mutualzz/ui/web";
 import { isBlockActive, toggleBlockquote } from "@utils/markdownUtils";
 import { wrapSelectionWith } from "@utils/wrapSelectionWith";
 import {

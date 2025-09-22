@@ -1,4 +1,5 @@
-import { Paper, Typography, useTheme } from "@mutualzz/ui";
+import { useTheme } from "@mutualzz/ui";
+import { Paper, Typography } from "@mutualzz/ui/web";
 import type { RenderLeafProps } from "slate-react";
 
 export const Leaf = ({ attributes, children, leaf }: RenderLeafProps) => {

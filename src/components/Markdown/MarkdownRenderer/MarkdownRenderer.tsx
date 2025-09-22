@@ -1,5 +1,4 @@
-import { Paper, Typography } from "@mutualzz/ui";
-
+import { Paper, Typography } from "@mutualzz/ui/web";
 import emojiRegexOrig from "emojibase-regex";
 import shortcodeRegexOrig from "emojibase-regex/shortcode";
 import { useMemo } from "react";

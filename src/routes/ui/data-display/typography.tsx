@@ -1,6 +1,12 @@
 import { PlaygroundContent } from "@components/Playground/PlaygroundContent";
 import { PlaygroundRightSidebar } from "@components/Playground/PlaygroundRightSidebar";
 import {
+    randomColor,
+    type Color,
+    type ColorLike,
+    type TypographyLevel,
+} from "@mutualzz/ui";
+import {
     Button,
     Checkbox,
     Divider,
@@ -9,16 +15,12 @@ import {
     Option,
     Radio,
     RadioGroup,
-    randomColor,
     Select,
     Slider,
     Stack,
     Typography,
-    type Color,
-    type ColorLike,
-    type TypographyLevel,
     type TypographyVariant,
-} from "@mutualzz/ui";
+} from "@mutualzz/ui/web";
 import { seo } from "@seo";
 import { createFileRoute } from "@tanstack/react-router";
 import type { Properties } from "csstype";

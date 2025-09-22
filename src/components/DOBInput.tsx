@@ -5,7 +5,7 @@ import {
     Stack,
     Typography,
     type InputProps,
-} from "@mutualzz/ui";
+} from "@mutualzz/ui/web";
 import type { AnyFieldApi } from "@tanstack/react-form";
 import { useEffect, useState } from "react";
 

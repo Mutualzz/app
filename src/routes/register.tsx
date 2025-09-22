@@ -8,7 +8,7 @@ import {
     Paper,
     Stack,
     Typography,
-} from "@mutualzz/ui";
+} from "@mutualzz/ui/web";
 import { validateRegister } from "@mutualzz/validators";
 import { seo } from "@seo";
 import {

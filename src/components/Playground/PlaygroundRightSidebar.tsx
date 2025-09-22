@@ -1,4 +1,5 @@
-import { Divider, Drawer, Paper, Stack, useTheme } from "@mutualzz/ui";
+import { useTheme } from "@mutualzz/ui";
+import { Divider, Drawer, Paper, Stack } from "@mutualzz/ui/web";
 import { useMediaQuery } from "@react-hookz/web";
 import { motion } from "motion/react";
 import { useState, type PropsWithChildren } from "react";

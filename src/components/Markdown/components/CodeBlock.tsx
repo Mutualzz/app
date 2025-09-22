@@ -1,5 +1,6 @@
 import type { JSX } from "@emotion/react/jsx-runtime";
-import { Box, Paper, Typography, useTheme, type ColorLike } from "@mutualzz/ui";
+import { useTheme, type ColorLike } from "@mutualzz/ui";
+import { Box, Paper, Typography } from "@mutualzz/ui/web";
 import { reactNodeToHtml } from "@utils/index";
 import { loadHighlighter } from "@utils/loadHighlighter";
 import { useEffect, useState, type PropsWithChildren } from "react";

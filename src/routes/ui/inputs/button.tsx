@@ -1,28 +1,30 @@
 import { PlaygroundContent } from "@components/Playground/PlaygroundContent";
 import { PlaygroundRightSidebar } from "@components/Playground/PlaygroundRightSidebar";
 import {
-    Button,
-    Checkbox,
+    randomColor,
     type Color,
     type ColorLike,
+    type Size,
+    type Variant,
+} from "@mutualzz/ui";
+import {
+    Button,
+    Checkbox,
     Divider,
     IconButton,
     Input,
     Option,
     Radio,
     RadioGroup,
-    randomColor,
     Select,
-    type Size,
     Slider,
     Stack,
     Typography,
-    type Variant,
-} from "@mutualzz/ui";
+} from "@mutualzz/ui/web";
 import { seo } from "@seo";
 import { createFileRoute } from "@tanstack/react-router";
 import capitalize from "lodash-es/capitalize";
-import { type ReactNode, useState } from "react";
+import { useState, type ReactNode } from "react";
 import * as AiIcons from "react-icons/ai";
 import * as FaIcons from "react-icons/fa";
 import * as MdIcons from "react-icons/md";

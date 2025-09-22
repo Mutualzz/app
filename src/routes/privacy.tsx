@@ -1,4 +1,4 @@
-import { Link, Paper, Stack, Typography } from "@mutualzz/ui";
+import { Link, Paper, Stack, Typography } from "@mutualzz/ui/web";
 import { createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/privacy")({

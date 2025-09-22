@@ -1,5 +1,5 @@
 import { useUserSidebar } from "@contexts/UserSidebar.context";
-import { Stack, Typography } from "@mutualzz/ui";
+import { Stack, Typography } from "@mutualzz/ui/web";
 import startCase from "lodash-es/startCase";
 import { observer } from "mobx-react";
 import { UserAccountSettings } from "./pages/UserAccountSettings";

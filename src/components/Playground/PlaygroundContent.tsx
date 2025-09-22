@@ -1,11 +1,11 @@
+import { useTheme } from "@mutualzz/ui";
 import {
     Divider,
     Paper,
     Stack,
     Typography,
-    useTheme,
     type PaperProps,
-} from "@mutualzz/ui";
+} from "@mutualzz/ui/web";
 import { useMediaQuery } from "@react-hookz/web";
 import { motion } from "motion/react";
 

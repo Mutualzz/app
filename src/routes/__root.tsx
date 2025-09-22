@@ -1,4 +1,5 @@
 import Loader from "@components/Loader/Loader";
+import { BottomNavigation } from "@components/Navigation/BottomNavigation";
 import { TopNavigation } from "@components/Navigation/TopNavigation";
 import WindowTitlebar from "@components/WindowTitlebar";
 import { AppTheme } from "@contexts/AppTheme.context";
@@ -15,7 +16,8 @@ import "@fontsource/inter/900";
 import { useAppStore } from "@hooks/useStores";
 import { Logger } from "@logger";
 import { GatewayCloseCodes } from "@mutualzz/types";
-import { CssBaseline, Paper, Stack, Typography } from "@mutualzz/ui";
+import { CssBaseline } from "@mutualzz/ui";
+import { Paper, Stack, Typography } from "@mutualzz/ui/web";
 import { useNetworkState } from "@react-hookz/web";
 import { wrapCreateRootRouteWithSentry } from "@sentry/tanstackstart-react";
 import { seo } from "@seo";
@@ -178,6 +180,7 @@ function RootComponent() {
                             >
                                 <Outlet />
                             </Stack>
+                            <BottomNavigation />
                         </Stack>
                     </Loader>
 

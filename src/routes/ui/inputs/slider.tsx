@@ -1,6 +1,13 @@
 import { PlaygroundContent } from "@components/Playground/PlaygroundContent";
 import { PlaygroundRightSidebar } from "@components/Playground/PlaygroundRightSidebar";
 import {
+    randomColor,
+    type Color,
+    type ColorLike,
+    type Size,
+    type Variant,
+} from "@mutualzz/ui";
+import {
     Button,
     Checkbox,
     Divider,
@@ -9,19 +16,14 @@ import {
     Option,
     Radio,
     RadioGroup,
-    randomColor,
     Select,
     Slider,
     Stack,
     Typography,
-    type Color,
-    type ColorLike,
-    type Size,
     type SliderMark,
     type SliderOrientation,
     type SliderValueLabelDisplay,
-    type Variant,
-} from "@mutualzz/ui";
+} from "@mutualzz/ui/web";
 import { seo } from "@seo";
 import { createFileRoute } from "@tanstack/react-router";
 import capitalize from "lodash-es/capitalize";

@@ -1,4 +1,5 @@
-import { Typography, useTheme, type TypographyHeadingKey } from "@mutualzz/ui";
+import { useTheme, type TypographyHeadingKey } from "@mutualzz/ui";
+import { Typography } from "@mutualzz/ui/web";
 import type { RenderElementProps } from "slate-react";
 
 export const Element = ({

@@ -2,19 +2,21 @@ import { MarkdownInput } from "@components/Markdown/MarkdownInput/MarkdownInput"
 import { PlaygroundContent } from "@components/Playground/PlaygroundContent";
 import { PlaygroundRightSidebar } from "@components/Playground/PlaygroundRightSidebar";
 import {
-    Checkbox,
-    Divider,
-    Input,
-    Radio,
-    RadioGroup,
     randomColor,
-    Stack,
-    Typography,
     type Color,
     type ColorLike,
     type TypographyColor,
     type Variant,
 } from "@mutualzz/ui";
+import {
+    Checkbox,
+    Divider,
+    Input,
+    Radio,
+    RadioGroup,
+    Stack,
+    Typography,
+} from "@mutualzz/ui/web";
 import { seo } from "@seo";
 import { createFileRoute } from "@tanstack/react-router";
 import capitalize from "lodash-es/capitalize";

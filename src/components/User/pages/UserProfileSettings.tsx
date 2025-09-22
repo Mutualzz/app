@@ -3,7 +3,13 @@ import { Avatars } from "@components/Avatar/Avatars";
 import { AvatarUpload } from "@components/Avatar/AvatarUpload";
 import { useModal } from "@contexts/Modal.context";
 import { useAppStore } from "@hooks/useStores";
-import { Button, ButtonGroup, Popover, Stack, Typography } from "@mutualzz/ui";
+import {
+    Button,
+    ButtonGroup,
+    Popover,
+    Stack,
+    Typography,
+} from "@mutualzz/ui/web";
 import { useMutation } from "@tanstack/react-query";
 import { observer } from "mobx-react";
 
