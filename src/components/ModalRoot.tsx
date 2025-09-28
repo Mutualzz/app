@@ -1,6 +1,5 @@
 import { useModal } from "@contexts/Modal.context";
-import { useTheme } from "@mutualzz/ui-core";
-import { Modal } from "@mutualzz/ui-web";
+import { Modal, useTheme } from "@mutualzz/ui-web";
 import { useMediaQuery } from "@react-hookz/web";
 
 export const ModalRoot = () => {

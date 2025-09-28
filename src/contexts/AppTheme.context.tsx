@@ -1,11 +1,7 @@
 import { usePrefersDark } from "@hooks/usePrefersDark";
 import { useAppStore } from "@hooks/useStores";
-import {
-    baseDarkTheme,
-    baseLightTheme,
-    ThemeProvider,
-    type ThemeProviderRef,
-} from "@mutualzz/ui-core";
+import { baseDarkTheme, baseLightTheme } from "@mutualzz/ui-core";
+import { ThemeProvider, type ThemeProviderRef } from "@mutualzz/ui-web";
 import { reaction } from "mobx";
 import { observer } from "mobx-react";
 import { useEffect, useRef, type PropsWithChildren } from "react";

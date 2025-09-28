@@ -1,4 +1,4 @@
-import { useTheme } from "@mutualzz/ui-core";
+import { useTheme } from "@mutualzz/ui-web";
 import type { HTMLAttributes } from "react";
 
 export const Logo = (props: HTMLAttributes<HTMLImageElement>) => {

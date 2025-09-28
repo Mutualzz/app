@@ -1,4 +1,5 @@
-import { resolveResponsiveMerge, useTheme } from "@mutualzz/ui-core";
+import { resolveResponsiveMerge } from "@mutualzz/ui-core";
+import { useTheme } from "@mutualzz/ui-web";
 import { markdownToSlate } from "@utils/markdownToSlate";
 import { getActiveFormats } from "@utils/markdownUtils";
 import { slateToMarkdown } from "@utils/slateToMarkdown";
@@ -250,9 +251,10 @@ const MarkdownInput = forwardRef<HTMLDivElement, MarkdownInputProps>(
                         placeholder={placeholder}
                         renderPlaceholder={({
                             children,
-                            attributes: { style, ...attributes },
+                            attributes: { style, ref, ...attributes },
                         }) => (
                             <span
+                                ref={ref ? (ref as any) : undefined}
                                 {...attributes}
                                 css={{
                                     pointerEvents: "none",

@@ -1,9 +1,9 @@
-import { useTheme } from "@mutualzz/ui-core";
 import {
     Divider,
     Paper,
     Stack,
     Typography,
+    useTheme,
     type PaperProps,
 } from "@mutualzz/ui-web";
 import { useMediaQuery } from "@react-hookz/web";

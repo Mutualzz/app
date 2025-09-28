@@ -1,6 +1,5 @@
 import { useAppStore } from "@hooks/useStores";
-import { useTheme } from "@mutualzz/ui-core";
-import { Button, IconButton, Paper, Stack } from "@mutualzz/ui-web";
+import { Button, IconButton, Paper, Stack, useTheme } from "@mutualzz/ui-web";
 import { useMediaQuery } from "@react-hookz/web";
 import { useNavigate } from "@tanstack/react-router";
 import { isTauri } from "@utils/index";

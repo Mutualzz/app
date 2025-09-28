@@ -2,7 +2,6 @@ import { Avatar } from "@components/Avatar";
 import { useModal } from "@contexts/Modal.context";
 import { useAppStore } from "@hooks/useStores";
 import { defaultAvatars } from "@mutualzz/types";
-import { useTheme } from "@mutualzz/ui-core";
 import {
     Box,
     Button,
@@ -11,6 +10,7 @@ import {
     Paper,
     Stack,
     Typography,
+    useTheme,
 } from "@mutualzz/ui-web";
 import { REST } from "@stores/REST.store";
 import { useMutation } from "@tanstack/react-query";

@@ -1,7 +1,7 @@
 import type { MzTheme, ThemeDraft } from "@app-types/theme";
 import { useAppStore } from "@hooks/useStores";
 import type { HttpException } from "@mutualzz/types";
-import { randomColor, useTheme } from "@mutualzz/ui-core";
+import { randomColor } from "@mutualzz/ui-core";
 import {
     Button,
     ButtonGroup,
@@ -13,6 +13,7 @@ import {
     Select,
     Stack,
     Typography,
+    useTheme,
     type InputProps,
 } from "@mutualzz/ui-web";
 import { validateThemePut } from "@mutualzz/validators";

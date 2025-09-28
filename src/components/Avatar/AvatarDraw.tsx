@@ -1,6 +1,6 @@
 import { useModal } from "@contexts/Modal.context";
 import { useAppStore } from "@hooks/useStores";
-import { type ColorLike, useTheme } from "@mutualzz/ui-core";
+import { type ColorLike } from "@mutualzz/ui-core";
 import {
     Button,
     ButtonGroup,
@@ -12,6 +12,7 @@ import {
     Select,
     Stack,
     Typography,
+    useTheme,
 } from "@mutualzz/ui-web";
 import { useMediaQuery } from "@react-hookz/web";
 import { useMutation } from "@tanstack/react-query";
