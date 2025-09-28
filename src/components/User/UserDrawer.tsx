@@ -1,7 +1,7 @@
 import { Avatar } from "@components/Avatar";
 import { useModal } from "@contexts/Modal.context";
 import { useAppStore } from "@hooks/useStores";
-import { Button, Divider, Drawer, Stack, Typography } from "@mutualzz/ui/web";
+import { Button, Divider, Drawer, Stack, Typography } from "@mutualzz/ui-web";
 import { observer } from "mobx-react";
 import { useState } from "react";
 import { FaCogs, FaSignOutAlt } from "react-icons/fa";

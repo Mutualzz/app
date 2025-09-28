@@ -1,6 +1,6 @@
 import type { Theme } from "@emotion/react";
 import type { APITheme } from "@mutualzz/types";
-import type { ColorLike } from "@mutualzz/ui";
+import type { ColorLike } from "@mutualzz/ui-core";
 
 export type MzTheme = Theme & APITheme;
 

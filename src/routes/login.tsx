@@ -7,7 +7,7 @@ import {
     Paper,
     Stack,
     Typography,
-} from "@mutualzz/ui/web";
+} from "@mutualzz/ui-web";
 import { emailRegex } from "@mutualzz/validators";
 import { seo } from "@seo";
 import { useForm } from "@tanstack/react-form";

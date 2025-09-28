@@ -5,7 +5,7 @@ import {
     type Color,
     type ColorLike,
     type TypographyColor,
-} from "@mutualzz/ui";
+} from "@mutualzz/ui-core";
 import {
     Checkbox,
     Divider,
@@ -21,7 +21,7 @@ import {
     type DividerInset,
     type DividerOrientation,
     type DividerVariant,
-} from "@mutualzz/ui/web";
+} from "@mutualzz/ui-web";
 import { seo } from "@seo";
 import { createFileRoute } from "@tanstack/react-router";
 import capitalize from "lodash-es/capitalize";

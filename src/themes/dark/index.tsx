@@ -1,4 +1,4 @@
-import { baseDarkTheme } from "@mutualzz/ui";
+import { baseDarkTheme } from "@mutualzz/ui-core";
 import { abyssalNocturneTheme } from "./gradient/AbyssalNocturne";
 import { arcaneMidnightTheme } from "./gradient/ArcaneMidnight";
 import { bloodMoonSerenadeTheme } from "./gradient/BloodMoonSerenade";

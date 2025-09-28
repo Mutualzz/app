@@ -1,6 +1,6 @@
 import type { Theme } from "@emotion/react";
 
-import { baseDarkTheme } from "@mutualzz/ui";
+import { baseDarkTheme } from "@mutualzz/ui-core";
 
 export const shadowheartTheme: Theme = {
     ...baseDarkTheme,

@@ -1,5 +1,5 @@
 import type { Theme } from "@emotion/react";
-import { baseLightTheme } from "@mutualzz/ui";
+import { baseLightTheme } from "@mutualzz/ui-core";
 
 export const twilightElegyTheme: Theme = {
     ...baseLightTheme,

@@ -1,5 +1,5 @@
 import type { EmojiElement } from "@app-types/slate";
-import { styled } from "@mutualzz/ui";
+import { styled } from "@mutualzz/ui-core";
 
 interface EmojiProps extends Omit<EmojiElement, "type" | "children"> {
     isEmojiOnly: boolean;

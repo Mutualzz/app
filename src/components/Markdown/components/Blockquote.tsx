@@ -1,4 +1,4 @@
-import { styled } from "@mutualzz/ui";
+import { styled } from "@mutualzz/ui-core";
 
 const Blockquote = styled("blockquote")(({ theme }) => ({
     display: "block",

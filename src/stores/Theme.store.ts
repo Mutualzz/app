@@ -1,7 +1,11 @@
 import type { MzTheme } from "@app-types/theme";
 import { Logger } from "@logger";
 import type { APITheme, APIUser } from "@mutualzz/types";
-import { baseDarkTheme, baseLightTheme, type ThemeMode } from "@mutualzz/ui";
+import {
+    baseDarkTheme,
+    baseLightTheme,
+    type ThemeMode,
+} from "@mutualzz/ui-core";
 import { themes as defaultThemes } from "@themes/index";
 import { isSSR } from "@utils/index";
 import { makeAutoObservable } from "mobx";

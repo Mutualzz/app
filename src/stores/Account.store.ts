@@ -9,7 +9,7 @@ import {
     type DefaultAvatar,
     type Sizes,
 } from "@mutualzz/types";
-import type { Hex } from "@mutualzz/ui";
+import type { Hex } from "@mutualzz/ui-core";
 import { makeAutoObservable } from "mobx";
 import { REST } from "./REST.store";
 

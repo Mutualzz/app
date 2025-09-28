@@ -1,5 +1,5 @@
 import { useAppStore } from "@hooks/useStores";
-import { useTheme, type ThemeMode } from "@mutualzz/ui";
+import { useTheme, type ThemeMode } from "@mutualzz/ui-core";
 import {
     Button,
     Divider,
@@ -10,7 +10,7 @@ import {
     RadioGroup,
     Select,
     Stack,
-} from "@mutualzz/ui/web";
+} from "@mutualzz/ui-web";
 import { useMediaQuery } from "@react-hookz/web";
 import { useLocation, useNavigate } from "@tanstack/react-router";
 import { sortThemes } from "@utils/index";

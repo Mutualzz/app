@@ -1,6 +1,6 @@
 import { PlaygroundContent } from "@components/Playground/PlaygroundContent";
 import { PlaygroundRightSidebar } from "@components/Playground/PlaygroundRightSidebar";
-import { randomColor, type Color, type ColorLike } from "@mutualzz/ui";
+import { randomColor, type Color, type ColorLike } from "@mutualzz/ui-core";
 import {
     Button,
     Divider,
@@ -14,7 +14,7 @@ import {
     Stack,
     Typography,
     type PaperVariant,
-} from "@mutualzz/ui/web";
+} from "@mutualzz/ui-web";
 import { seo } from "@seo";
 import { createFileRoute } from "@tanstack/react-router";
 import capitalize from "lodash-es/capitalize";

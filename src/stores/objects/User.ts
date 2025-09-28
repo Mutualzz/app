@@ -5,7 +5,7 @@ import {
     type APIUser,
     type DefaultAvatar,
 } from "@mutualzz/types";
-import type { Hex } from "@mutualzz/ui";
+import type { Hex } from "@mutualzz/ui-core";
 import { REST } from "@stores/REST.store";
 import { makeAutoObservable } from "mobx";
 

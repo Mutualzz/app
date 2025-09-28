@@ -1,6 +1,6 @@
 import { useAppStore } from "@hooks/useStores";
-import { useTheme } from "@mutualzz/ui";
-import { Box, Divider, IconButton, Paper, Stack } from "@mutualzz/ui/web";
+import { useTheme } from "@mutualzz/ui-core";
+import { Box, Divider, IconButton, Paper, Stack } from "@mutualzz/ui-web";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { detectOS } from "@utils/detect";
 import { observer } from "mobx-react";

@@ -1,5 +1,5 @@
 import { useAppStore } from "@hooks/useStores";
-import { Avatar as MAvatar, type AvatarProps } from "@mutualzz/ui/web";
+import { Avatar as MAvatar, type AvatarProps } from "@mutualzz/ui-web";
 import { observer } from "mobx-react";
 import { useState } from "react";
 

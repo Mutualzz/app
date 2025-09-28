@@ -7,7 +7,7 @@ import {
     type Color,
     type ColorLike,
     type TypographyColor,
-} from "@mutualzz/ui";
+} from "@mutualzz/ui-core";
 import { formatHex8 } from "culori";
 import { type Range } from "slate";
 

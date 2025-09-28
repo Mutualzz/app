@@ -1,4 +1,4 @@
-import { baseLightTheme } from "@mutualzz/ui";
+import { baseLightTheme } from "@mutualzz/ui-core";
 import { etherealWhisperTheme } from "./gradient/EtherealWhisper";
 import { floralRadianceTheme } from "./gradient/FloralRadiance";
 import { mourningMistTheme } from "./gradient/MourningMist";

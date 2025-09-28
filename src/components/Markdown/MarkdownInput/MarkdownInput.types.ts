@@ -5,7 +5,7 @@ import type {
     Responsive,
     TypographyColor,
     Variant,
-} from "@mutualzz/ui";
+} from "@mutualzz/ui-core";
 
 export interface MarkdownInputProps {
     color?: Responsive<Color | ColorLike>;

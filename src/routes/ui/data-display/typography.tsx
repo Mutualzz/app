@@ -5,7 +5,7 @@ import {
     type Color,
     type ColorLike,
     type TypographyLevel,
-} from "@mutualzz/ui";
+} from "@mutualzz/ui-core";
 import {
     Button,
     Checkbox,
@@ -20,7 +20,7 @@ import {
     Stack,
     Typography,
     type TypographyVariant,
-} from "@mutualzz/ui/web";
+} from "@mutualzz/ui-web";
 import { seo } from "@seo";
 import { createFileRoute } from "@tanstack/react-router";
 import type { Properties } from "csstype";

@@ -5,7 +5,7 @@ import {
     baseLightTheme,
     ThemeProvider,
     type ThemeProviderRef,
-} from "@mutualzz/ui";
+} from "@mutualzz/ui-core";
 import { reaction } from "mobx";
 import { observer } from "mobx-react";
 import { useEffect, useRef, type PropsWithChildren } from "react";

@@ -1,6 +1,6 @@
 import { UserSidebarProvider } from "@contexts/UserSidebar.context";
-import { useTheme } from "@mutualzz/ui";
-import { Drawer, Paper, Stack } from "@mutualzz/ui/web";
+import { useTheme } from "@mutualzz/ui-core";
+import { Drawer, Paper, Stack } from "@mutualzz/ui-web";
 import { useMediaQuery } from "@react-hookz/web";
 import { observer } from "mobx-react";
 import { useState } from "react";

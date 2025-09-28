@@ -1,5 +1,5 @@
-import { useTheme } from "@mutualzz/ui";
-import { CircularProgress, Stack } from "@mutualzz/ui/web";
+import { useTheme } from "@mutualzz/ui-core";
+import { CircularProgress, Stack } from "@mutualzz/ui-web";
 import { useMediaQuery } from "@react-hookz/web";
 import { observer } from "mobx-react";
 import { Logo } from "../Logo";

@@ -1,4 +1,4 @@
-import { LinearProgress, Stack } from "@mutualzz/ui/web";
+import { LinearProgress, Stack } from "@mutualzz/ui-web";
 import { createFileRoute, Navigate, useNavigate } from "@tanstack/react-router";
 import { detectDownloadURL } from "@utils/detect";
 import { isTauri } from "@utils/index";

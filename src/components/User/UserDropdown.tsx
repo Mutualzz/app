@@ -8,7 +8,7 @@ import {
     Popover,
     Stack,
     Typography,
-} from "@mutualzz/ui/web";
+} from "@mutualzz/ui-web";
 import { observer } from "mobx-react";
 import { FaCogs, FaSignOutAlt } from "react-icons/fa";
 import { UserSettingsModal } from "./UserSettingsModal";

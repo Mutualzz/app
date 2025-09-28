@@ -6,7 +6,7 @@ import {
     type ColorLike,
     type Size,
     type Variant,
-} from "@mutualzz/ui";
+} from "@mutualzz/ui-core";
 import {
     Button,
     Checkbox,
@@ -23,7 +23,7 @@ import {
     type SliderMark,
     type SliderOrientation,
     type SliderValueLabelDisplay,
-} from "@mutualzz/ui/web";
+} from "@mutualzz/ui-web";
 import { seo } from "@seo";
 import { createFileRoute } from "@tanstack/react-router";
 import capitalize from "lodash-es/capitalize";

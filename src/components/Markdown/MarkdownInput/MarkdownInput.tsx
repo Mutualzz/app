@@ -1,4 +1,4 @@
-import { resolveResponsiveMerge, useTheme } from "@mutualzz/ui";
+import { resolveResponsiveMerge, useTheme } from "@mutualzz/ui-core";
 import { markdownToSlate } from "@utils/markdownToSlate";
 import { getActiveFormats } from "@utils/markdownUtils";
 import { slateToMarkdown } from "@utils/slateToMarkdown";

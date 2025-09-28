@@ -8,7 +8,7 @@ import {
     type Orientation,
     type Size,
     type Variant,
-} from "@mutualzz/ui";
+} from "@mutualzz/ui-core";
 import {
     Button,
     Checkbox,
@@ -28,7 +28,7 @@ import {
     type AllowedListStyleTypes,
     type ListItemButtonProps,
     type ListItemProps,
-} from "@mutualzz/ui/web";
+} from "@mutualzz/ui-web";
 import { seo } from "@seo";
 import { createFileRoute } from "@tanstack/react-router";
 import capitalize from "lodash-es/capitalize";

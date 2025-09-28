@@ -7,7 +7,7 @@ import {
     type Size,
     type TypographyColor,
     type Variant,
-} from "@mutualzz/ui";
+} from "@mutualzz/ui-core";
 import {
     Button,
     Checkbox,
@@ -22,7 +22,7 @@ import {
     Stack,
     Textarea,
     Typography,
-} from "@mutualzz/ui/web";
+} from "@mutualzz/ui-web";
 import { seo } from "@seo";
 import { createFileRoute } from "@tanstack/react-router";
 import capitalize from "lodash-es/capitalize";
