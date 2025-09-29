@@ -39,11 +39,10 @@
             "@app-types": ["types/index.d.ts"],
             "@css/*": ["css/*"],
             "@logger": ["Logger.ts"],
-            "@seo": ["seo.ts"],
-            "@api": ["api.ts"]
+            "@seo": ["seo.ts"]
         }
     },
-    "include": ["src/**/*"],
+    "include": ["src/**/*", "../mobile/src/utils/secureStorageAdapter.ts"],
     "exclude": ["node_modules", "dist", "src-tauri"],
     "references": [{ "path": "./tsconfig.node.json" }]
 }

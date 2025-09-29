@@ -5,6 +5,7 @@ import { ThemeProvider, type ThemeProviderRef } from "@mutualzz/ui-web";
 import { reaction } from "mobx";
 import { observer } from "mobx-react";
 import { useEffect, useRef, type PropsWithChildren } from "react";
+
 export const AppTheme = observer(({ children }: PropsWithChildren) => {
     const app = useAppStore();
     const { theme: themeStore, account } = app;
