@@ -1,6 +1,5 @@
-import { darken, dynamicElevation, styled } from "@mutualzz/ui-core";
+import { dynamicElevation, formatColor, styled } from "@mutualzz/ui-core";
 import { Typography } from "@mutualzz/ui-web";
-import { formatHex8 } from "culori";
 import { useState, type PropsWithChildren } from "react";
 
 const SpoilerWrapper = styled(Typography)<{ revealed: boolean }>(
@@ -26,7 +25,10 @@ const SpoilerWrapper = styled(Typography)<{ revealed: boolean }>(
 
         "&:hover": {
             backgroundColor: !revealed
-                ? formatHex8(darken(theme.typography.colors.muted, 0.1))
+                ? formatColor(theme.typography.colors.muted, {
+                      format: "hexa",
+                      darken: 10,
+                  })
                 : undefined,
         },
     }),

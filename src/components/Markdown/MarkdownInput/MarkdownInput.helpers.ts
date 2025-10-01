@@ -1,7 +1,6 @@
 import type { CSSObject, Theme } from "@emotion/react";
 import {
-    darken,
-    lighten,
+    formatColor,
     resolveColor,
     resolveTypographyColor,
     type Color,
@@ -98,41 +97,58 @@ export const resolveMarkdownStyles = (
             ? resolvedColor
             : resolveTypographyColor(textColor, theme);
 
+    const formattedColor = formatColor(resolvedColor);
+
     return {
         outlined: {
             background: "transparent",
-            color: formatHex8(lighten(resolvedTextColor, 0.5)),
-            border: `1px solid ${formatHex8(resolvedColor)}`,
+            color: formatColor(resolvedTextColor, {
+                format: "hexa",
+                lighten: 50,
+            }),
+            border: `1px solid ${formattedColor}`,
             borderRadius: 8,
             ":focus": {
-                outline: `2px solid ${formatHex8(resolvedColor)}`,
+                outline: `2px solid ${formattedColor}`,
             },
         },
         solid: {
-            background: formatHex8(resolvedColor),
-            color: formatHex8(lighten(resolvedTextColor, 0.75)),
+            background: formattedColor,
+            color: formatColor(resolvedTextColor, {
+                format: "hexa",
+                lighten: 75,
+            }),
             border: "none",
             borderRadius: 8,
             ":focus": {
-                outline: `2px solid ${formatHex8(resolvedColor)}`,
+                outline: `2px solid ${formattedColor}`,
             },
         },
         plain: {
             background: "transparent",
-            color: formatHex8(lighten(resolvedTextColor, 0.25)),
+            color: formatColor(resolvedTextColor, {
+                format: "hexa",
+                lighten: 25,
+            }),
             border: "none",
             borderRadius: 8,
             ":focus": {
-                outline: `2px solid ${formatHex8(resolvedColor)}`,
+                outline: `2px solid ${formattedColor}`,
             },
         },
         soft: {
-            background: formatHex8(darken(resolvedColor, 0.5)),
-            color: formatHex8(lighten(resolvedTextColor, 0.5)),
+            backgroundColor: formatColor(resolvedColor, {
+                format: "hexa",
+                darken: 50,
+            }),
+            color: formatColor(resolvedTextColor, {
+                format: "hexa",
+                lighten: 50,
+            }),
             border: "none",
             borderRadius: 8,
             ":focus": {
-                outline: `2px solid ${formatHex8(resolvedColor)}`,
+                outline: `2px solid ${formattedColor}`,
             },
         },
     };
