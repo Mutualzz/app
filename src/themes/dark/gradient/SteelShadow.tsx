@@ -12,8 +12,10 @@ export const steelShadowTheme: Theme = {
         ...baseDarkTheme.colors,
         primary: "#7F82B0",
         neutral: "#B0B0B8",
-        background: "linear-gradient(135deg, #1A191E 0%, #23243A 100%)",
-        surface: "linear-gradient(135deg, #23243A 0%, #5A5A7A 100%)",
+        background:
+            "linear-gradient(90deg,#0D0D10 0%,#0D0D10 55%,#14161E 72%,#1B212C 82%,#243042 100%)",
+        surface:
+            "linear-gradient(90deg,#23243A 0%,#23243A 55%,#2B3048 70%,#3A3F5A 85%,#5A5A7A 100%)",
         danger: "#FF6B6B",
         warning: "#F3CE72",
         success: "#5CC8A6",

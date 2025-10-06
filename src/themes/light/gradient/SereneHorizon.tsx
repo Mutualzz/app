@@ -12,8 +12,10 @@ export const sereneHorizonTheme: Theme = {
         ...baseLightTheme.colors,
         primary: "#3F6070",
         neutral: "#4A5360",
-        background: "linear-gradient(135deg, #F4F6F8 0%, #E6EAEE 100%)",
-        surface: "linear-gradient(135deg, #E6EAEE 0%, #5A7C8A 100%)",
+        background:
+            "linear-gradient(90deg,#F4F6F8 0%,#F4F6F8 55%,#EFF2F5 72%,#E9EEF3 82%,#E6EAEE 100%)",
+        surface:
+            "linear-gradient(90deg,#E6EAEE 0%,#E6EAEE 55%,#D3DCE2 70%,#BCC9D1 85%,#5A7C8A 100%)",
         danger: "#B3261E",
         warning: "#8F6500",
         success: "#1F6E34",
