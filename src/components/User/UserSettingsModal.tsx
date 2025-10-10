@@ -24,6 +24,7 @@ export const UserSettingsModal = observer(() => {
                 overflow="auto"
                 justifyContent="center"
                 alignItems="center"
+                nonTranslucent
             >
                 {isMobileQuery ? (
                     <>
