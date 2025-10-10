@@ -1,6 +1,5 @@
 /* eslint-disable no-console */
 import replace from "@rollup/plugin-replace";
-import { wrapVinxiConfigWithSentry } from "@sentry/tanstackstart-react";
 import { tanstackStart } from "@tanstack/react-start/plugin/vite";
 import viteReact from "@vitejs/plugin-react-swc";
 import { readFileSync } from "fs";
@@ -64,7 +63,7 @@ console.log(
 // https://vitejs.dev/config/
 export default defineConfig({
     plugins: [
-        cleanPlugin(),
+        cleanPlugin() as any,
         svgr(),
         replace({
             __GIT_REVISION__: getGitRevision(),
@@ -73,30 +72,20 @@ export default defineConfig({
             preventAssignment: true,
         }),
         tsconfigPaths(),
-        wrapVinxiConfigWithSentry(
-            tanstackStart({
-                target: "netlify",
-                customViteReactPlugin: true,
-                tsr: {
-                    target: "react",
-                    quoteStyle: "double",
-                    semicolons: true,
-                },
-                ...(forTauri && {
-                    spa: {
-                        prerender: {
-                            outputPath: "/index.html",
-                        },
-                        enabled: true,
-                    },
-                }),
-            }),
-            {
-                org: "mutualzz",
-                project: "mutualzz-app",
-                authToken: process.env.SENTRY_AUTH_TOKEN,
+        tanstackStart({
+            router: {
+                quoteStyle: "double",
+                semicolons: true,
             },
-        ),
+            ...(forTauri && {
+                spa: {
+                    prerender: {
+                        outputPath: "/index.html",
+                    },
+                    enabled: true,
+                },
+            }),
+        }),
 
         viteReact({
             jsxImportSource: "@emotion/react",

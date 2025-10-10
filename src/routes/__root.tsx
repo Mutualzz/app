@@ -4,6 +4,8 @@ import { TopNavigation } from "@components/Navigation/TopNavigation";
 import WindowTitlebar from "@components/WindowTitlebar";
 import { AppTheme } from "@contexts/AppTheme.context";
 import { ModalProvider } from "@contexts/Modal.context";
+import createCache from "@emotion/cache";
+import { CacheProvider } from "@emotion/react";
 import "@fontsource/inter/100";
 import "@fontsource/inter/200";
 import "@fontsource/inter/300";
@@ -18,11 +20,11 @@ import { Logger } from "@logger";
 import { GatewayCloseCodes } from "@mutualzz/types";
 import { CssBaseline, Paper, Stack, Typography } from "@mutualzz/ui-web";
 import { useNetworkState } from "@react-hookz/web";
-import { wrapCreateRootRouteWithSentry } from "@sentry/tanstackstart-react";
 import { seo } from "@seo";
 import { GatewayStatus } from "@stores/Gateway.store";
+import type { QueryClient } from "@tanstack/react-query";
 import {
-    createRootRoute,
+    createRootRouteWithContext,
     HeadContent,
     Outlet,
     Scripts,
@@ -32,19 +34,27 @@ import { arch, locale, platform, version } from "@tauri-apps/plugin-os";
 import { isTauri } from "@utils/index";
 import { reaction } from "mobx";
 import { observer } from "mobx-react";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, type PropsWithChildren, type ReactNode } from "react";
 
-export const Route = wrapCreateRootRouteWithSentry(createRootRoute)({
-    head: () => ({
-        meta: [...seo()],
-        links: [
-            { rel: "manifest", href: "/manifest.json" },
-            { rel: "icon", href: "/favicon.ico" },
-        ],
-    }),
-    component: observer(RootComponent),
-    ssr: true,
-});
+export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
+    {
+        head: () => ({
+            meta: [...seo()],
+            links: [
+                { rel: "manifest", href: "/manifest.json" },
+                { rel: "icon", href: "/favicon.ico" },
+            ],
+        }),
+        component: observer(RootComponent),
+        ssr: true,
+    },
+);
+
+function Providers({ children }: PropsWithChildren) {
+    const emotionCache = createCache({ key: "css" });
+
+    return <CacheProvider value={emotionCache}>{children}</CacheProvider>;
+}
 
 function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
     return (
@@ -144,53 +154,55 @@ function RootComponent() {
 
     return (
         <RootDocument>
-            <AppTheme>
-                <CssBaseline adaptiveScrollbar />
+            <Providers>
+                <AppTheme>
+                    <CssBaseline adaptiveScrollbar />
 
-                {isTauri && <WindowTitlebar />}
-                <ModalProvider>
-                    {!networkState.online && (
-                        <Paper
-                            alignItems="center"
-                            justifyContent="center"
-                            variant="solid"
-                            color="danger"
-                        >
-                            <Typography level="body-lg">
-                                You are currently offline
-                            </Typography>
-                        </Paper>
-                    )}
+                    {isTauri && <WindowTitlebar />}
+                    <ModalProvider>
+                        {!networkState.online && (
+                            <Paper
+                                alignItems="center"
+                                justifyContent="center"
+                                variant="solid"
+                                color="danger"
+                            >
+                                <Typography level="body-lg">
+                                    You are currently offline
+                                </Typography>
+                            </Paper>
+                        )}
 
-                    <Loader>
-                        <Stack
-                            direction="column"
-                            height="100vh"
-                            width="100vw"
-                            flex={1}
-                            minHeight={0}
-                        >
-                            <TopNavigation />
+                        <Loader>
                             <Stack
-                                width="100%"
+                                direction="column"
+                                height="100vh"
+                                width="100vw"
                                 flex={1}
                                 minHeight={0}
-                                overflow="hidden"
                             >
-                                <Outlet />
+                                <TopNavigation />
+                                <Stack
+                                    width="100%"
+                                    flex={1}
+                                    minHeight={0}
+                                    overflow="hidden"
+                                >
+                                    <Outlet />
+                                </Stack>
+                                <BottomNavigation />
                             </Stack>
-                            <BottomNavigation />
-                        </Stack>
-                    </Loader>
+                        </Loader>
 
-                    {/* {import.meta.env.DEV && (
+                        {/* {import.meta.env.DEV && (
                         <>
                             <ReactQueryDevtools />
                             <TanStackRouterDevtools />
                         </>
                     )} */}
-                </ModalProvider>
-            </AppTheme>
+                    </ModalProvider>
+                </AppTheme>
+            </Providers>
         </RootDocument>
     );
 }

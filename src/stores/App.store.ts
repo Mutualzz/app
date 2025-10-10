@@ -4,7 +4,6 @@ import { isSSR, isTauri } from "@utils/index";
 import { secureStorageAdapter } from "@utils/secureStorageAdapter";
 import { makeAutoObservable } from "mobx";
 import { makePersistable } from "mobx-persist-store";
-import secureLocalStorage from "react-secure-storage";
 import { AccountStore } from "./Account.store";
 import { DraftStore } from "./Draft.store";
 import { GatewayStore } from "./Gateway.store";
@@ -85,7 +84,7 @@ export class AppStore {
         this.isGatewayReady = true;
         this.account = null;
         this.rest.setToken(null);
-        secureLocalStorage.clear();
+        secureStorageAdapter.clear();
         this.theme.reset();
     }
 
