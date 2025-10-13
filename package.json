@@ -82,6 +82,7 @@
         "@rollup/plugin-replace": "^6.0.2",
         "@tanstack/eslint-plugin-query": "^5.91.0",
         "@tanstack/eslint-plugin-router": "^1.132.31",
+        "@tanstack/nitro-v2-vite-plugin": "^1.132.40",
         "@tanstack/react-router-devtools": "1.132.51",
         "@tanstack/router-plugin": "1.132.51",
         "@tauri-apps/cli": "^2.8.4",

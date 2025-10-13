@@ -8,6 +8,8 @@ import cleanPlugin from "vite-plugin-clean";
 import svgr from "vite-plugin-svgr";
 import tsconfigPaths from "vite-tsconfig-paths";
 
+import { nitroV2Plugin } from "@tanstack/nitro-v2-vite-plugin";
+
 function getGitRevision() {
     try {
         const rev = readFileSync(".git/HEAD").toString().trim();
@@ -90,6 +92,11 @@ export default defineConfig({
             jsxImportSource: "@emotion/react",
             tsDecorators: true,
         }),
+        ...(!forTauri && [
+            nitroV2Plugin({
+                preset: "netlify",
+            }),
+        ]),
     ],
 
     // Vite options tailored for Tauri development and only applied in `tauri dev` or `tauri build`
