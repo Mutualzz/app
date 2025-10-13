@@ -1,7 +1,7 @@
 import { Avatar } from "@components/Avatar";
 import { useModal } from "@contexts/Modal.context";
 import { useAppStore } from "@hooks/useStores";
-import pkg from "@mateie/react-drag-drop-files";
+import { FileUploader } from "@mateie/react-drag-drop-files";
 import type { HttpException } from "@mutualzz/types";
 import {
     Button,
@@ -18,9 +18,6 @@ import { observer } from "mobx-react";
 import { useCallback, useState } from "react";
 import Cropper from "react-easy-crop";
 import { FaMagnifyingGlass, FaRotate } from "react-icons/fa6";
-
-// NOTE: Temporary fix
-const { FileUploader } = pkg;
 
 interface UpdateAvatar {
     avatar: File;
