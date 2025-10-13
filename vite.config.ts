@@ -3,7 +3,6 @@ import replace from "@rollup/plugin-replace";
 import { tanstackStart } from "@tanstack/react-start/plugin/vite";
 import viteReact from "@vitejs/plugin-react-swc";
 import { readFileSync } from "fs";
-import { nitro } from "nitro/vite";
 import { defineConfig } from "vite";
 import cleanPlugin from "vite-plugin-clean";
 import svgr from "vite-plugin-svgr";
@@ -91,13 +90,6 @@ export default defineConfig({
             jsxImportSource: "@emotion/react",
             tsDecorators: true,
         }),
-        ...(!forTauri && [
-            nitro({
-                config: {
-                    preset: "netlify",
-                },
-            }),
-        ]),
     ],
 
     // Vite options tailored for Tauri development and only applied in `tauri dev` or `tauri build`
