@@ -4,7 +4,6 @@ import replace from "@rollup/plugin-replace";
 import { tanstackStart } from "@tanstack/react-start/plugin/vite";
 import viteReact from "@vitejs/plugin-react-swc";
 import { readFileSync } from "fs";
-import { nitro } from "nitro/vite";
 import { defineConfig } from "vite";
 import cleanPlugin from "vite-plugin-clean";
 import svgr from "vite-plugin-svgr";
@@ -88,7 +87,6 @@ export default defineConfig({
                 },
             }),
         }),
-        nitro(),
         viteReact({
             jsxImportSource: "@emotion/react",
             tsDecorators: true,
