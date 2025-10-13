@@ -1,9 +1,9 @@
 /* eslint-disable no-console */
+import netlify from "@netlify/vite-plugin-tanstack-start";
 import replace from "@rollup/plugin-replace";
 import { tanstackStart } from "@tanstack/react-start/plugin/vite";
 import viteReact from "@vitejs/plugin-react-swc";
 import { readFileSync } from "fs";
-import { nitro } from "nitro/vite";
 import { defineConfig } from "vite";
 import cleanPlugin from "vite-plugin-clean";
 import svgr from "vite-plugin-svgr";
@@ -87,19 +87,7 @@ export default defineConfig({
                 },
             }),
         }),
-        ...(!forTauri && [
-            nitro({
-                config: {
-                    preset: "netlify",
-                    compatibilityDate: "latest",
-                    esbuild: {
-                        options: {
-                            target: "es2022",
-                        },
-                    },
-                },
-            }),
-        ]),
+        ...(!forTauri && [netlify()]),
         viteReact({
             jsxImportSource: "@emotion/react",
             tsDecorators: true,
@@ -124,7 +112,7 @@ export default defineConfig({
             : undefined,
         watch: {
             // 3. tell vite to ignore watching `src-tauri`
-            ignored: ["**/src-tauri/**", "**/ios/**", "**/android/**"],
+            ignored: ["**/src-tauri/**"],
         },
     },
 
