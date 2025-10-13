@@ -91,7 +91,7 @@ export default defineConfig({
             jsxImportSource: "@emotion/react",
             tsDecorators: true,
         }),
-        netlify(),
+        ...(!forTauri && [netlify()]),
     ],
 
     // Vite options tailored for Tauri development and only applied in `tauri dev` or `tauri build`
