@@ -1,7 +1,14 @@
 import type { MzTheme, ThemeDraft } from "@app-types/theme";
 import { useAppStore } from "@hooks/useStores";
 import type { HttpException } from "@mutualzz/types";
-import { randomColor } from "@mutualzz/ui-core";
+import {
+    createColor,
+    extractColors,
+    isValidGradient,
+    randomColor,
+    type ThemeStyle,
+    type ThemeType,
+} from "@mutualzz/ui-core";
 import {
     Button,
     ButtonGroup,
@@ -105,6 +112,9 @@ export const ThemeCreator = observer(() => {
         null,
     );
 
+    const [colorType, setColorType] =
+        useState<Omit<ThemeType, "system">>("dark");
+
     const isMobileQuery = useMediaQuery(
         theme.breakpoints.down("md").replace("@media", ""),
     );
@@ -125,8 +135,8 @@ export const ThemeCreator = observer(() => {
     const defaultValues = {
         name: "",
         description: "",
-        type: "dark" as "dark" | "light",
-        mode: "normal" as "normal" | "gradient",
+        type: colorType,
+        style: "normal" as ThemeStyle,
         colors: {
             common: {
                 white: randomColor(),
@@ -384,15 +394,15 @@ export const ThemeCreator = observer(() => {
         },
     });
 
-    const getCurrentColorMode = () => {
-        let currentMode: "normal" | "gradient" = "normal";
-        if (loadedUserTheme) currentMode = loadedUserTheme.mode;
-        if (loadedDraft) currentMode = loadedDraft.mode;
-        if (loadedPreset) currentMode = loadedPreset.mode;
+    const getCurrentColorStyle = () => {
+        let currentStyle: ThemeStyle = "normal";
+        if (loadedUserTheme) currentStyle = loadedUserTheme.style;
+        if (loadedDraft) currentStyle = loadedDraft.style;
+        if (loadedPreset) currentStyle = loadedPreset.style;
 
-        form.setFieldValue("mode", currentMode);
+        form.setFieldValue("style", currentStyle);
 
-        return currentMode;
+        return currentStyle;
     };
 
     const SidebarContent = () => (
@@ -489,7 +499,8 @@ export const ThemeCreator = observer(() => {
                             >
                                 {allDrafts.map((theme) => (
                                     <Option key={theme.name} value={theme.name}>
-                                        {theme.name} ({capitalize(theme.type)})
+                                        {theme.name} (
+                                        {capitalize(theme.type.toString())})
                                     </Option>
                                 ))}
                             </Select>
@@ -684,46 +695,62 @@ export const ThemeCreator = observer(() => {
                         overflowY="auto"
                     >
                         <Stack
+                            direction="column"
                             alignItems="center"
-                            direction={{ xs: "column", sm: "row" }}
-                            spacing={5}
+                            spacing={1}
                         >
-                            <Typography
-                                level={{ xs: "h5", sm: "h4" }}
-                                fontSize={{
-                                    xs: "1.25rem",
-                                    sm: "1.5rem",
-                                    md: "2rem",
-                                }}
+                            <Stack
+                                alignItems="center"
+                                direction={{ xs: "column", sm: "row" }}
+                                spacing={5}
                             >
-                                Theme Creator{" "}
-                                {isMobileQuery &&
-                                    !loadedDraft &&
-                                    !loadedPreset &&
-                                    !loadedUserTheme && (
-                                        <Typography
-                                            level={{
-                                                xs: "body-sm",
-                                                sm: "body-md",
-                                            }}
-                                        >
-                                            (Swipe to access the sidebar)
-                                        </Typography>
-                                    )}
-                            </Typography>
+                                <Typography
+                                    level={{ xs: "h5", sm: "h4" }}
+                                    fontSize={{
+                                        xs: "1.25rem",
+                                        sm: "1.5rem",
+                                        md: "2rem",
+                                    }}
+                                >
+                                    Theme Creator
+                                </Typography>
+                            </Stack>
+                            {isMobileQuery &&
+                                !loadedDraft &&
+                                !loadedPreset &&
+                                !loadedUserTheme && (
+                                    <Typography
+                                        level={{
+                                            xs: "body-sm",
+                                            sm: "body-md",
+                                        }}
+                                    >
+                                        (Swipe to access the sidebar)
+                                    </Typography>
+                                )}
+                            {!loadedDraft &&
+                                !loadedPreset &&
+                                !loadedUserTheme && (
+                                    <Typography level="body-sm">
+                                        {capitalize(colorType.toString())} Theme
+                                    </Typography>
+                                )}
                             {loadedDraft && (
-                                <Typography level="h5">
-                                    (Draft &quot;{loadedDraft.name}&quot;)
+                                <Typography level="h6">
+                                    Draft: {loadedDraft.name} (
+                                    {capitalize(loadedDraft.type.toString())})
                                 </Typography>
                             )}
                             {loadedPreset && (
-                                <Typography level="h5">
-                                    (Preset &quot;{loadedPreset.name}&quot;)
+                                <Typography level="h6">
+                                    Preset: {loadedPreset.name} (
+                                    {capitalize(loadedPreset.type)})
                                 </Typography>
                             )}
                             {loadedUserTheme && (
-                                <Typography level="h5">
-                                    (Theme &quot;{loadedUserTheme.name}&quot;)
+                                <Typography level="h6">
+                                    Your Theme: {loadedUserTheme.name} (
+                                    {capitalize(loadedUserTheme.type)})
                                 </Typography>
                             )}
                         </Stack>
@@ -773,14 +800,14 @@ export const ThemeCreator = observer(() => {
                             )}
                         />
                         <form.Field
-                            name="mode"
+                            name="style"
                             children={({ handleChange, state: { value } }) => (
                                 <Stack direction="column" spacing={5}>
                                     <Typography
                                         fontWeight={500}
                                         level="body-md"
                                     >
-                                        Color Mode{" "}
+                                        Color Style{" "}
                                         <Typography
                                             color="danger"
                                             variant="plain"
@@ -789,7 +816,7 @@ export const ThemeCreator = observer(() => {
                                         </Typography>
                                     </Typography>
                                     <Typography level="body-xs">
-                                        What type of color mode is your theme?
+                                        What type of color style is your theme?
                                     </Typography>
                                     <ButtonGroup>
                                         <Button
@@ -814,47 +841,6 @@ export const ThemeCreator = observer(() => {
                                 </Stack>
                             )}
                         />
-
-                        <form.Field
-                            name="type"
-                            children={({ handleChange, state: { value } }) => (
-                                <Stack direction="column" spacing={5}>
-                                    <Typography
-                                        fontWeight={500}
-                                        level="body-md"
-                                    >
-                                        Color Type{" "}
-                                        <Typography
-                                            color="danger"
-                                            variant="plain"
-                                        >
-                                            *
-                                        </Typography>
-                                    </Typography>
-                                    <Typography level="body-xs">
-                                        What type of color type is your theme?
-                                    </Typography>
-                                    <ButtonGroup>
-                                        <Button
-                                            color="#fff"
-                                            disabled={value === "light"}
-                                            onClick={() =>
-                                                handleChange("light")
-                                            }
-                                        >
-                                            Light
-                                        </Button>
-                                        <Button
-                                            color="#000"
-                                            disabled={value === "dark"}
-                                            onClick={() => handleChange("dark")}
-                                        >
-                                            Dark
-                                        </Button>
-                                    </ButtonGroup>
-                                </Stack>
-                            )}
-                        />
                         <Divider />
                         <Stack direction="column" spacing={1}>
                             <Typography level="h4">Common Colors</Typography>
@@ -863,6 +849,70 @@ export const ThemeCreator = observer(() => {
                                 elements.
                             </Typography>
                         </Stack>
+                        <form.Field
+                            name="colors.background"
+                            children={({
+                                state: { meta, value },
+                                handleChange,
+                                handleBlur,
+                            }) => (
+                                <InputWithLabel
+                                    type="color"
+                                    apiErrors={apiErrors}
+                                    meta={meta}
+                                    name="colors.background"
+                                    required
+                                    label="Background Color"
+                                    allowGradient={
+                                        getCurrentColorStyle() === "gradient"
+                                    }
+                                    description="The background color of the app"
+                                    onChange={(val: any) => {
+                                        handleChange(val);
+                                        let isDark = false;
+                                        if (
+                                            isValidGradient(val) &&
+                                            extractColors(val) &&
+                                            extractColors(val)!.length > 0
+                                        ) {
+                                            isDark = createColor(
+                                                extractColors(val)![0],
+                                            ).isDark();
+                                        } else {
+                                            isDark = createColor(val).isDark();
+                                        }
+                                        if (isDark) setColorType("dark");
+                                        else setColorType("light");
+                                    }}
+                                    onBlur={handleBlur}
+                                    value={value}
+                                />
+                            )}
+                        />
+                        <form.Field
+                            name="colors.surface"
+                            children={({
+                                state: { meta, value },
+                                handleChange,
+                                handleBlur,
+                            }) => (
+                                <InputWithLabel
+                                    type="color"
+                                    apiErrors={apiErrors}
+                                    meta={meta}
+                                    name="colors.surface"
+                                    label="Surface Color"
+                                    allowGradient={
+                                        getCurrentColorStyle() === "gradient"
+                                    }
+                                    description="This colors get applied to Cards (it automatically adapts to certain UI elements)"
+                                    onChange={handleChange}
+                                    onBlur={handleBlur}
+                                    value={value}
+                                    required
+                                />
+                            )}
+                        />
                         <form.Field
                             name="colors.common.black"
                             children={({
@@ -902,54 +952,6 @@ export const ThemeCreator = observer(() => {
                                     onChange={handleChange}
                                     onBlur={handleBlur}
                                     value={value}
-                                />
-                            )}
-                        />
-                        <form.Field
-                            name="colors.background"
-                            children={({
-                                state: { meta, value },
-                                handleChange,
-                                handleBlur,
-                            }) => (
-                                <InputWithLabel
-                                    type="color"
-                                    apiErrors={apiErrors}
-                                    meta={meta}
-                                    name="colors.background"
-                                    required
-                                    label="Background Color"
-                                    allowGradient={
-                                        getCurrentColorMode() === "gradient"
-                                    }
-                                    description="The background color of the app"
-                                    onChange={handleChange}
-                                    onBlur={handleBlur}
-                                    value={value}
-                                />
-                            )}
-                        />
-                        <form.Field
-                            name="colors.surface"
-                            children={({
-                                state: { meta, value },
-                                handleChange,
-                                handleBlur,
-                            }) => (
-                                <InputWithLabel
-                                    type="color"
-                                    apiErrors={apiErrors}
-                                    meta={meta}
-                                    name="colors.surface"
-                                    label="Surface Color"
-                                    allowGradient={
-                                        getCurrentColorMode() === "gradient"
-                                    }
-                                    description="This colors get applied to Cards (it automatically adapts to certain UI elements)"
-                                    onChange={handleChange}
-                                    onBlur={handleBlur}
-                                    value={value}
-                                    required
                                 />
                             )}
                         />

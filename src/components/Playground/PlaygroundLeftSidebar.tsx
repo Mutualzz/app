@@ -1,5 +1,5 @@
 import { useAppStore } from "@hooks/useStores";
-import { type ThemeMode } from "@mutualzz/ui-core";
+import { type ThemeStyle, type ThemeType } from "@mutualzz/ui-core";
 import {
     Button,
     Divider,
@@ -105,17 +105,17 @@ const AnimatedPaper = motion.create(Paper);
 export const PlaygroundLeftSidebar = observer(() => {
     const navigate = useNavigate();
     const { theme: themeStore } = useAppStore();
-    const [style, setStyle] = useState<"normal" | "gradient">("normal");
     const [drawerOpen, setDrawerOpen] = useState(false);
-    const { mode, theme, changeTheme, changeMode } = useTheme();
+    const { style, theme, type, changeTheme, changeStyle, changeType } =
+        useTheme();
     const { pathname } = useLocation();
     const isMobileQuery = useMediaQuery(
         theme.breakpoints.down("md").replace("@media ", ""),
     );
 
     const themes = Array.from(themeStore.themes.values())
-        .filter((theme) => theme.type === mode)
-        .filter((theme) => theme.mode === style);
+        .filter((theme) => theme.type === type)
+        .filter((theme) => theme.style === style);
 
     const handleThemeChange = (themeId: string) => {
         const changeTo = themes.find((theme) => theme.id === themeId);
@@ -147,9 +147,9 @@ export const PlaygroundLeftSidebar = observer(() => {
                     variant="solid"
                     orientation="horizontal"
                     spacing={10}
-                    value={mode}
-                    onChange={(_, modeToSet) =>
-                        changeMode(modeToSet as ThemeMode)
+                    value={type}
+                    onChange={(_, typeToSet) =>
+                        changeType(typeToSet as ThemeType)
                     }
                     size="sm"
                 >
@@ -158,18 +158,18 @@ export const PlaygroundLeftSidebar = observer(() => {
                     <Radio label="System" value="system" />
                 </RadioGroup>
             </Stack>
-            {mode !== "system" && (
+            {type !== "system" && (
                 <Stack
                     justifyContent="center"
                     alignItems="center"
                     direction="column"
                     spacing={10}
                 >
-                    <Divider>Color Mode</Divider>
+                    <Divider>Color Style</Divider>
                     <RadioGroup
                         variant="solid"
                         onChange={(_, styleToSet) => {
-                            setStyle(styleToSet as "normal" | "gradient");
+                            changeStyle(styleToSet as ThemeStyle);
                         }}
                         orientation="horizontal"
                         spacing={10}

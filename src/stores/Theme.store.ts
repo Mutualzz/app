@@ -4,7 +4,8 @@ import type { APITheme, APIUser } from "@mutualzz/types";
 import {
     baseDarkTheme,
     baseLightTheme,
-    type ThemeMode,
+    type ThemeStyle,
+    type ThemeType,
 } from "@mutualzz/ui-core";
 import { themes as defaultThemes } from "@themes/index";
 import { isSSR } from "@utils/index";
@@ -19,8 +20,8 @@ export class ThemeStore {
     themes: MzTheme[] = [];
 
     currentTheme: string | null = null;
-
-    currentMode: ThemeMode = "system";
+    currentType: ThemeType = "system";
+    currentStyle: ThemeStyle = "normal";
 
     defaultThemesLoaded = false;
     userThemesLoaded = false;
@@ -31,7 +32,7 @@ export class ThemeStore {
         if (isSSR) return;
         makePersistable(this, {
             name: "ThemeStore",
-            properties: ["currentTheme", "currentMode"],
+            properties: ["currentTheme", "currentStyle", "currentType"],
             storage: localStorage,
         });
     }
@@ -40,8 +41,12 @@ export class ThemeStore {
         this.currentTheme = themeId;
     }
 
-    setCurrentMode(mode: ThemeMode) {
-        this.currentMode = mode;
+    setCurrentType(type: ThemeType) {
+        this.currentType = type;
+    }
+
+    setCurrentStyle(style: ThemeStyle) {
+        this.currentStyle = style;
     }
 
     reset() {
@@ -60,7 +65,7 @@ export class ThemeStore {
                 updatedTimestamp: 0,
                 createdBy: undefined,
             };
-            this.addTheme(themeWithMetadata);
+            this.addTheme(themeWithMetadata as any);
         });
 
         this.defaultThemesLoaded = true;

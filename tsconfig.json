@@ -3,7 +3,7 @@
         "target": "es2024",
         "useDefineForClassFields": true,
         "lib": ["ES2024", "DOM", "DOM.Iterable"],
-        "types": ["vite/client"],
+        "types": ["vite/client", "node"],
         "module": "ESNext",
         "skipLibCheck": true,
 
@@ -42,7 +42,7 @@
             "@seo": ["seo.ts"]
         }
     },
-    "include": ["src/**/*", "../mobile/src/utils/secureStorageAdapter.ts"],
+    "include": ["src/**/*"],
     "exclude": ["node_modules", "dist", "src-tauri"],
     "references": [{ "path": "./tsconfig.node.json" }]
 }
