@@ -110,7 +110,7 @@
     "name": "@mutualzz/app",
     "private": true,
     "scripts": {
-        "build": "tsc && vite:build",
+        "build": "tsc && vite build",
         "build:dev": "tsc && cross-env VITE_ENV_DEV=true vite build",
         "ci:prebuild": "node scripts/tauriVersion.js",
         "dev": "pnpm vite:dev",
