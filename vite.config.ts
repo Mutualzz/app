@@ -98,7 +98,7 @@ export default defineConfig({
                 compatibilityDate: "latest",
                 esbuild: {
                     options: {
-                        target: "esnext",
+                        target: "es2022",
                     },
                 },
             }),
