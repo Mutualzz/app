@@ -3,12 +3,11 @@ import replace from "@rollup/plugin-replace";
 import { tanstackStart } from "@tanstack/react-start/plugin/vite";
 import viteReact from "@vitejs/plugin-react-swc";
 import { readFileSync } from "fs";
+import { nitro } from "nitro/vite";
 import { defineConfig } from "vite";
 import cleanPlugin from "vite-plugin-clean";
 import svgr from "vite-plugin-svgr";
 import tsconfigPaths from "vite-tsconfig-paths";
-
-import { nitroV2Plugin } from "@tanstack/nitro-v2-vite-plugin";
 
 function getGitRevision() {
     try {
@@ -88,21 +87,23 @@ export default defineConfig({
                 },
             }),
         }),
-        viteReact({
-            jsxImportSource: "@emotion/react",
-            tsDecorators: true,
-        }),
         ...(!forTauri && [
-            nitroV2Plugin({
-                preset: "netlify-edge",
-                compatibilityDate: "latest",
-                esbuild: {
-                    options: {
-                        target: "es2022",
+            nitro({
+                config: {
+                    preset: "netlify",
+                    compatibilityDate: "latest",
+                    esbuild: {
+                        options: {
+                            target: "es2022",
+                        },
                     },
                 },
             }),
         ]),
+        viteReact({
+            jsxImportSource: "@emotion/react",
+            tsDecorators: true,
+        }),
     ],
 
     // Vite options tailored for Tauri development and only applied in `tauri dev` or `tauri build`
