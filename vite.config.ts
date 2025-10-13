@@ -94,7 +94,7 @@ export default defineConfig({
         }),
         ...(!forTauri && [
             nitroV2Plugin({
-                preset: "netlify",
+                preset: "netlify-edge",
             }),
         ]),
     ],
