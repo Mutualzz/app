@@ -96,6 +96,11 @@ export default defineConfig({
             nitroV2Plugin({
                 preset: "netlify-edge",
                 compatibilityDate: "latest",
+                esbuild: {
+                    options: {
+                        target: "esnext",
+                    },
+                },
             }),
         ]),
     ],
