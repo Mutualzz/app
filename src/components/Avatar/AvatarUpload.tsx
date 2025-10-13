@@ -1,4 +1,5 @@
 import { Avatar } from "@components/Avatar";
+import { CropperClient as Cropper } from "@components/CropperClient";
 import { useModal } from "@contexts/Modal.context";
 import { useAppStore } from "@hooks/useStores";
 import { FileUploader } from "@mateie/react-drag-drop-files";
@@ -16,7 +17,6 @@ import {
 import { useMutation } from "@tanstack/react-query";
 import { observer } from "mobx-react";
 import { useCallback, useState } from "react";
-import Cropper from "react-easy-crop";
 import { FaMagnifyingGlass, FaRotate } from "react-icons/fa6";
 
 interface UpdateAvatar {
