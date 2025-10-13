@@ -85,7 +85,7 @@ export default defineConfig({
                 },
             }),
         }),
-        ...(!forTauri && [netlify()]),
+        ...(!forTauri ? [netlify()] : []),
         viteReact({
             jsxImportSource: "@emotion/react",
             tsDecorators: true,
