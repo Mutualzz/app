@@ -81,7 +81,10 @@ export const UserDrawer = observer(
                                         openModal(
                                             "user-settings",
                                             <UserSettingsModal />,
-                                            { layout: "fullscreen" },
+                                            {
+                                                layout: "fullscreen",
+                                                disableAutoFocus: true,
+                                            },
                                         );
                                     }}
                                     size="md"

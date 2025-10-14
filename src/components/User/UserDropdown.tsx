@@ -77,6 +77,7 @@ export const UserDropdown = observer(() => {
                                             <UserSettingsModal />,
                                             {
                                                 layout: "fullscreen",
+                                                disableBackdropClick: true,
                                             },
                                         );
                                     }}

@@ -188,6 +188,7 @@ function Index() {
                                             "theme-maker",
                                             <ThemeCreator />,
                                             {
+                                                layout: "fullscreen",
                                                 disableBackdropClick: true,
                                             },
                                         );

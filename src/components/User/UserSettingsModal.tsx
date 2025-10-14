@@ -27,7 +27,7 @@ export const UserSettingsModal = observer(() => {
                 nonTranslucent
             >
                 {isMobileQuery ? (
-                    <>
+                    <Stack maxWidth="1200px" width="100%" height="100%">
                         <Drawer
                             open={drawerOpen}
                             onOpen={() => setDrawerOpen(true)}
@@ -49,9 +49,9 @@ export const UserSettingsModal = observer(() => {
                         >
                             <UserSidebarContent />
                         </Stack>
-                    </>
+                    </Stack>
                 ) : (
-                    <>
+                    <Stack maxWidth="1200px" width="100%" height="100%">
                         <Stack
                             minWidth={220}
                             maxWidth={300}
@@ -68,7 +68,7 @@ export const UserSettingsModal = observer(() => {
                         >
                             <UserSidebarContent />
                         </Stack>
-                    </>
+                    </Stack>
                 )}
             </Paper>
         </UserSidebarProvider>

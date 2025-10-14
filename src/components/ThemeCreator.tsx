@@ -419,11 +419,12 @@ export const ThemeCreator = observer(() => {
                 putPending,
                 deletePending,
             ]) => (
-                <Stack
+                <Paper
                     justifyContent="space-between"
                     p={{ xs: "0.75rem", sm: "1rem" }}
                     direction="column"
                     height="100%"
+                    elevation={1}
                 >
                     <Stack direction="column" alignItems="center" spacing={10}>
                         <Button
@@ -640,7 +641,7 @@ export const ThemeCreator = observer(() => {
                                 : "Create"}
                         </Button>
                     </ButtonGroup>
-                </Stack>
+                </Paper>
             )}
         />
     );
@@ -649,15 +650,17 @@ export const ThemeCreator = observer(() => {
         <Paper
             width="100%"
             height="100%"
-            maxWidth={{ xs: "100%", sm: 700, md: 900, lg: 1200 }}
-            maxHeight={{ xs: 600, sm: 700, md: 800 }}
-            p={{ xs: "0.5rem", sm: "1.5rem", md: "2rem" }}
-            borderRadius={{ xs: "0.75rem", sm: "1.25rem", md: "1.5rem" }}
+            maxWidth="100%"
+            maxHeight="100%"
+            justifyContent="center"
+            alignItems="center"
             overflow="auto"
+            nonTranslucent
         >
             <form
                 css={{
                     width: "100%",
+                    height: "100%",
                 }}
                 onSubmit={(e) => {
                     e.preventDefault();
@@ -669,7 +672,10 @@ export const ThemeCreator = observer(() => {
                     width="100%"
                     height="100%"
                     direction="row"
+                    justifyContent="center"
+                    alignItems="center"
                     spacing={{ xs: 2, sm: 4, md: 6 }}
+                    pt={{ xs: "1rem", sm: "2.5rem", md: "3rem" }}
                 >
                     {isMobileQuery ? (
                         <Drawer
@@ -690,6 +696,7 @@ export const ThemeCreator = observer(() => {
                         direction="column"
                         width="100%"
                         height="100%"
+                        maxWidth="800px"
                         p={{ xs: "0.75rem", sm: "1rem" }}
                         spacing={{ xs: 2, sm: 4, md: 6 }}
                         overflowY="auto"
