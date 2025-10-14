@@ -43,8 +43,15 @@ const WindowTitlebar = () => {
             justifyContent="space-between"
             alignItems="center"
             elevation={2}
-            py={isMac ? 10 : 0}
+            py={isMac ? 10 : 4}
+            px={isMac ? 8 : 6}
+            minHeight={isMac ? 44 : 32}
             width="100%"
+            position="relative"
+            zIndex={99999999}
+            css={{
+                backdropFilter: "saturate(120%) blur(6px)",
+            }}
         >
             <Box data-tauri-drag-region flex={1} />
             <Box data-tauri-drag-region flex={1} />
@@ -56,12 +63,23 @@ const WindowTitlebar = () => {
                 data-tauri-drag-region
             >
                 {updaterStore?.update && (
-                    <Stack px={isMac ? 15 : 0} alignItems="center">
+                    <Stack
+                        px={isMac ? 15 : 0}
+                        alignItems="center"
+                        css={{ gap: 8 }}
+                    >
                         <IconButton
                             onClick={() => updaterStore.installUpdate()}
-                            size={16}
+                            size={18}
                             variant="plain"
                             color="success"
+                            css={{
+                                height: 32,
+                                width: 32,
+                                padding: 4,
+                                borderRadius: 6,
+                                transition: "background .12s, color .12s",
+                            }}
                         >
                             <FaDownload />
                         </IconButton>
@@ -74,14 +92,16 @@ const WindowTitlebar = () => {
                     </Stack>
                 )}
                 {!isMac && (
-                    <Stack direction="row" alignItems="center">
+                    <Stack direction="row" alignItems="center" css={{ gap: 6 }}>
                         <IconButton
                             css={{
-                                height: "100%",
+                                height: 32,
+                                width: 32,
                                 borderRadius: 0,
+                                padding: 4,
                             }}
                             color={theme.typography.colors.primary}
-                            size={16}
+                            size={18}
                             variant="plain"
                             onClick={() => appWindow.minimize()}
                         >
@@ -89,11 +109,13 @@ const WindowTitlebar = () => {
                         </IconButton>
                         <IconButton
                             css={{
-                                height: "100%",
+                                height: 32,
+                                width: 32,
                                 borderRadius: 0,
+                                padding: 4,
                             }}
                             color={theme.typography.colors.primary}
-                            size={16}
+                            size={18}
                             variant="plain"
                             onClick={() => appWindow.toggleMaximize()}
                         >
@@ -101,8 +123,11 @@ const WindowTitlebar = () => {
                         </IconButton>
                         <IconButton
                             css={{
-                                height: "100%",
+                                height: 32,
+                                width: 32,
                                 borderRadius: 0,
+                                padding: 4,
+                                transition: "background .12s, color .12s",
                             }}
                             color={
                                 closeDanger
@@ -113,7 +138,7 @@ const WindowTitlebar = () => {
                             onMouseLeave={() => setCloseDanger(false)}
                             variant={closeDanger ? "solid" : "plain"}
                             onClick={() => appWindow.close()}
-                            size={16}
+                            size={18}
                         >
                             <VscClose />
                         </IconButton>
