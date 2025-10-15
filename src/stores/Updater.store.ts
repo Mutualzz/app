@@ -10,7 +10,7 @@ export class UpdaterStore {
 
     checking = false;
     update: Update | null = null;
-    interval: ReturnType<typeof setInterval> | null = null;
+    interval: NodeJS.Timeout | null = null;
 
     constructor() {
         makeAutoObservable(this);
