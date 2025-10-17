@@ -1,5 +1,5 @@
 import { Logger } from "@logger";
-import type { APIPrivateUser } from "@mutualzz/types";
+import type { APIPrivateUser, AppMode } from "@mutualzz/types";
 import { isSSR, isTauri } from "@utils/index";
 import { secureStorageAdapter } from "@utils/secureStorageAdapter";
 import { makeAutoObservable } from "mobx";
@@ -32,6 +32,8 @@ export class AppStore {
 
     version: string | null = null;
 
+    mode: AppMode | null = null;
+
     constructor() {
         if (isTauri) this.updaterStore = new UpdaterStore();
 
@@ -49,6 +51,7 @@ export class AppStore {
     setUser(user: APIPrivateUser) {
         this.account = new AccountStore(user);
         this.theme.loadUserThemes(user);
+        this.mode = user.settings.prefferedMode;
     }
 
     setGatewayReady(ready: boolean) {
@@ -57,6 +60,10 @@ export class AppStore {
 
     setAppLoading(loading: boolean) {
         this.isAppLoading = loading;
+    }
+
+    setMode(mode: AppMode) {
+        this.mode = mode;
     }
 
     get isReady() {
@@ -83,6 +90,7 @@ export class AppStore {
         this.isAppLoading = false;
         this.isGatewayReady = true;
         this.account = null;
+        this.mode = null;
         this.rest.setToken(null);
         secureStorageAdapter.clear();
         this.theme.reset();

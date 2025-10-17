@@ -9,14 +9,15 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from "./routes/__root";
-import { Route as UiRouteImport } from "./routes/ui";
 import { Route as RegisterRouteImport } from "./routes/register";
 import { Route as PrivacyRouteImport } from "./routes/privacy";
 import { Route as LoginRouteImport } from "./routes/login";
 import { Route as DownloadRouteImport } from "./routes/download";
-import { Route as AuthenticatedRouteImport } from "./routes/_authenticated";
+import { Route as UiRouteRouteImport } from "./routes/ui/route";
+import { Route as AuthenticatedRouteRouteImport } from "./routes/_authenticated/route";
 import { Route as IndexRouteImport } from "./routes/index";
 import { Route as UiIndexRouteImport } from "./routes/ui/index";
+import { Route as AuthenticatedFeedRouteRouteImport } from "./routes/_authenticated/feed/route";
 import { Route as UiSurfacesPaperRouteImport } from "./routes/ui/surfaces/paper";
 import { Route as UiInputsTextareaRouteImport } from "./routes/ui/inputs/textarea";
 import { Route as UiInputsSliderRouteImport } from "./routes/ui/inputs/slider";
@@ -35,11 +36,6 @@ import { Route as UiDataDisplayListRouteImport } from "./routes/ui/data-display/
 import { Route as UiDataDisplayDividerRouteImport } from "./routes/ui/data-display/divider";
 import { Route as UiDataDisplayAvatarRouteImport } from "./routes/ui/data-display/avatar";
 
-const UiRoute = UiRouteImport.update({
-  id: "/ui",
-  path: "/ui",
-  getParentRoute: () => rootRouteImport,
-} as any);
 const RegisterRoute = RegisterRouteImport.update({
   id: "/register",
   path: "/register",
@@ -60,7 +56,12 @@ const DownloadRoute = DownloadRouteImport.update({
   path: "/download",
   getParentRoute: () => rootRouteImport,
 } as any);
-const AuthenticatedRoute = AuthenticatedRouteImport.update({
+const UiRouteRoute = UiRouteRouteImport.update({
+  id: "/ui",
+  path: "/ui",
+  getParentRoute: () => rootRouteImport,
+} as any);
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
   id: "/_authenticated",
   getParentRoute: () => rootRouteImport,
 } as any);
@@ -72,104 +73,110 @@ const IndexRoute = IndexRouteImport.update({
 const UiIndexRoute = UiIndexRouteImport.update({
   id: "/",
   path: "/",
-  getParentRoute: () => UiRoute,
+  getParentRoute: () => UiRouteRoute,
+} as any);
+const AuthenticatedFeedRouteRoute = AuthenticatedFeedRouteRouteImport.update({
+  id: "/feed",
+  path: "/feed",
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any);
 const UiSurfacesPaperRoute = UiSurfacesPaperRouteImport.update({
   id: "/surfaces/paper",
   path: "/surfaces/paper",
-  getParentRoute: () => UiRoute,
+  getParentRoute: () => UiRouteRoute,
 } as any);
 const UiInputsTextareaRoute = UiInputsTextareaRouteImport.update({
   id: "/inputs/textarea",
   path: "/inputs/textarea",
-  getParentRoute: () => UiRoute,
+  getParentRoute: () => UiRouteRoute,
 } as any);
 const UiInputsSliderRoute = UiInputsSliderRouteImport.update({
   id: "/inputs/slider",
   path: "/inputs/slider",
-  getParentRoute: () => UiRoute,
+  getParentRoute: () => UiRouteRoute,
 } as any);
 const UiInputsSelectRoute = UiInputsSelectRouteImport.update({
   id: "/inputs/select",
   path: "/inputs/select",
-  getParentRoute: () => UiRoute,
+  getParentRoute: () => UiRouteRoute,
 } as any);
 const UiInputsRadioButtonRoute = UiInputsRadioButtonRouteImport.update({
   id: "/inputs/radio-button",
   path: "/inputs/radio-button",
-  getParentRoute: () => UiRoute,
+  getParentRoute: () => UiRouteRoute,
 } as any);
 const UiInputsMarkdownInputRoute = UiInputsMarkdownInputRouteImport.update({
   id: "/inputs/markdown-input",
   path: "/inputs/markdown-input",
-  getParentRoute: () => UiRoute,
+  getParentRoute: () => UiRouteRoute,
 } as any);
 const UiInputsInputGroupsRoute = UiInputsInputGroupsRouteImport.update({
   id: "/inputs/input-groups",
   path: "/inputs/input-groups",
-  getParentRoute: () => UiRoute,
+  getParentRoute: () => UiRouteRoute,
 } as any);
 const UiInputsInputRoute = UiInputsInputRouteImport.update({
   id: "/inputs/input",
   path: "/inputs/input",
-  getParentRoute: () => UiRoute,
+  getParentRoute: () => UiRouteRoute,
 } as any);
 const UiInputsCheckboxRoute = UiInputsCheckboxRouteImport.update({
   id: "/inputs/checkbox",
   path: "/inputs/checkbox",
-  getParentRoute: () => UiRoute,
+  getParentRoute: () => UiRouteRoute,
 } as any);
 const UiInputsButtonRoute = UiInputsButtonRouteImport.update({
   id: "/inputs/button",
   path: "/inputs/button",
-  getParentRoute: () => UiRoute,
+  getParentRoute: () => UiRouteRoute,
 } as any);
 const UiFeedbackLinearProgressRoute =
   UiFeedbackLinearProgressRouteImport.update({
     id: "/feedback/linear-progress",
     path: "/feedback/linear-progress",
-    getParentRoute: () => UiRoute,
+    getParentRoute: () => UiRouteRoute,
   } as any);
 const UiFeedbackCircularProgressRoute =
   UiFeedbackCircularProgressRouteImport.update({
     id: "/feedback/circular-progress",
     path: "/feedback/circular-progress",
-    getParentRoute: () => UiRoute,
+    getParentRoute: () => UiRouteRoute,
   } as any);
 const UiDataDisplayTypographyRoute = UiDataDisplayTypographyRouteImport.update({
   id: "/data-display/typography",
   path: "/data-display/typography",
-  getParentRoute: () => UiRoute,
+  getParentRoute: () => UiRouteRoute,
 } as any);
 const UiDataDisplayMarkdownRendererRoute =
   UiDataDisplayMarkdownRendererRouteImport.update({
     id: "/data-display/markdown-renderer",
     path: "/data-display/markdown-renderer",
-    getParentRoute: () => UiRoute,
+    getParentRoute: () => UiRouteRoute,
   } as any);
 const UiDataDisplayListRoute = UiDataDisplayListRouteImport.update({
   id: "/data-display/list",
   path: "/data-display/list",
-  getParentRoute: () => UiRoute,
+  getParentRoute: () => UiRouteRoute,
 } as any);
 const UiDataDisplayDividerRoute = UiDataDisplayDividerRouteImport.update({
   id: "/data-display/divider",
   path: "/data-display/divider",
-  getParentRoute: () => UiRoute,
+  getParentRoute: () => UiRouteRoute,
 } as any);
 const UiDataDisplayAvatarRoute = UiDataDisplayAvatarRouteImport.update({
   id: "/data-display/avatar",
   path: "/data-display/avatar",
-  getParentRoute: () => UiRoute,
+  getParentRoute: () => UiRouteRoute,
 } as any);
 
 export interface FileRoutesByFullPath {
   "/": typeof IndexRoute;
+  "/ui": typeof UiRouteRouteWithChildren;
   "/download": typeof DownloadRoute;
   "/login": typeof LoginRoute;
   "/privacy": typeof PrivacyRoute;
   "/register": typeof RegisterRoute;
-  "/ui": typeof UiRouteWithChildren;
+  "/feed": typeof AuthenticatedFeedRouteRoute;
   "/ui/": typeof UiIndexRoute;
   "/ui/data-display/avatar": typeof UiDataDisplayAvatarRoute;
   "/ui/data-display/divider": typeof UiDataDisplayDividerRoute;
@@ -195,6 +202,7 @@ export interface FileRoutesByTo {
   "/login": typeof LoginRoute;
   "/privacy": typeof PrivacyRoute;
   "/register": typeof RegisterRoute;
+  "/feed": typeof AuthenticatedFeedRouteRoute;
   "/ui": typeof UiIndexRoute;
   "/ui/data-display/avatar": typeof UiDataDisplayAvatarRoute;
   "/ui/data-display/divider": typeof UiDataDisplayDividerRoute;
@@ -217,12 +225,13 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport;
   "/": typeof IndexRoute;
-  "/_authenticated": typeof AuthenticatedRoute;
+  "/_authenticated": typeof AuthenticatedRouteRouteWithChildren;
+  "/ui": typeof UiRouteRouteWithChildren;
   "/download": typeof DownloadRoute;
   "/login": typeof LoginRoute;
   "/privacy": typeof PrivacyRoute;
   "/register": typeof RegisterRoute;
-  "/ui": typeof UiRouteWithChildren;
+  "/_authenticated/feed": typeof AuthenticatedFeedRouteRoute;
   "/ui/": typeof UiIndexRoute;
   "/ui/data-display/avatar": typeof UiDataDisplayAvatarRoute;
   "/ui/data-display/divider": typeof UiDataDisplayDividerRoute;
@@ -246,11 +255,12 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath;
   fullPaths:
     | "/"
+    | "/ui"
     | "/download"
     | "/login"
     | "/privacy"
     | "/register"
-    | "/ui"
+    | "/feed"
     | "/ui/"
     | "/ui/data-display/avatar"
     | "/ui/data-display/divider"
@@ -276,6 +286,7 @@ export interface FileRouteTypes {
     | "/login"
     | "/privacy"
     | "/register"
+    | "/feed"
     | "/ui"
     | "/ui/data-display/avatar"
     | "/ui/data-display/divider"
@@ -298,11 +309,12 @@ export interface FileRouteTypes {
     | "__root__"
     | "/"
     | "/_authenticated"
+    | "/ui"
     | "/download"
     | "/login"
     | "/privacy"
     | "/register"
-    | "/ui"
+    | "/_authenticated/feed"
     | "/ui/"
     | "/ui/data-display/avatar"
     | "/ui/data-display/divider"
@@ -325,23 +337,16 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute;
-  AuthenticatedRoute: typeof AuthenticatedRoute;
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren;
+  UiRouteRoute: typeof UiRouteRouteWithChildren;
   DownloadRoute: typeof DownloadRoute;
   LoginRoute: typeof LoginRoute;
   PrivacyRoute: typeof PrivacyRoute;
   RegisterRoute: typeof RegisterRoute;
-  UiRoute: typeof UiRouteWithChildren;
 }
 
 declare module "@tanstack/react-router" {
   interface FileRoutesByPath {
-    "/ui": {
-      id: "/ui";
-      path: "/ui";
-      fullPath: "/ui";
-      preLoaderRoute: typeof UiRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
     "/register": {
       id: "/register";
       path: "/register";
@@ -370,11 +375,18 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof DownloadRouteImport;
       parentRoute: typeof rootRouteImport;
     };
+    "/ui": {
+      id: "/ui";
+      path: "/ui";
+      fullPath: "/ui";
+      preLoaderRoute: typeof UiRouteRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
     "/_authenticated": {
       id: "/_authenticated";
       path: "";
       fullPath: "";
-      preLoaderRoute: typeof AuthenticatedRouteImport;
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport;
       parentRoute: typeof rootRouteImport;
     };
     "/": {
@@ -389,131 +401,149 @@ declare module "@tanstack/react-router" {
       path: "/";
       fullPath: "/ui/";
       preLoaderRoute: typeof UiIndexRouteImport;
-      parentRoute: typeof UiRoute;
+      parentRoute: typeof UiRouteRoute;
+    };
+    "/_authenticated/feed": {
+      id: "/_authenticated/feed";
+      path: "/feed";
+      fullPath: "/feed";
+      preLoaderRoute: typeof AuthenticatedFeedRouteRouteImport;
+      parentRoute: typeof AuthenticatedRouteRoute;
     };
     "/ui/surfaces/paper": {
       id: "/ui/surfaces/paper";
       path: "/surfaces/paper";
       fullPath: "/ui/surfaces/paper";
       preLoaderRoute: typeof UiSurfacesPaperRouteImport;
-      parentRoute: typeof UiRoute;
+      parentRoute: typeof UiRouteRoute;
     };
     "/ui/inputs/textarea": {
       id: "/ui/inputs/textarea";
       path: "/inputs/textarea";
       fullPath: "/ui/inputs/textarea";
       preLoaderRoute: typeof UiInputsTextareaRouteImport;
-      parentRoute: typeof UiRoute;
+      parentRoute: typeof UiRouteRoute;
     };
     "/ui/inputs/slider": {
       id: "/ui/inputs/slider";
       path: "/inputs/slider";
       fullPath: "/ui/inputs/slider";
       preLoaderRoute: typeof UiInputsSliderRouteImport;
-      parentRoute: typeof UiRoute;
+      parentRoute: typeof UiRouteRoute;
     };
     "/ui/inputs/select": {
       id: "/ui/inputs/select";
       path: "/inputs/select";
       fullPath: "/ui/inputs/select";
       preLoaderRoute: typeof UiInputsSelectRouteImport;
-      parentRoute: typeof UiRoute;
+      parentRoute: typeof UiRouteRoute;
     };
     "/ui/inputs/radio-button": {
       id: "/ui/inputs/radio-button";
       path: "/inputs/radio-button";
       fullPath: "/ui/inputs/radio-button";
       preLoaderRoute: typeof UiInputsRadioButtonRouteImport;
-      parentRoute: typeof UiRoute;
+      parentRoute: typeof UiRouteRoute;
     };
     "/ui/inputs/markdown-input": {
       id: "/ui/inputs/markdown-input";
       path: "/inputs/markdown-input";
       fullPath: "/ui/inputs/markdown-input";
       preLoaderRoute: typeof UiInputsMarkdownInputRouteImport;
-      parentRoute: typeof UiRoute;
+      parentRoute: typeof UiRouteRoute;
     };
     "/ui/inputs/input-groups": {
       id: "/ui/inputs/input-groups";
       path: "/inputs/input-groups";
       fullPath: "/ui/inputs/input-groups";
       preLoaderRoute: typeof UiInputsInputGroupsRouteImport;
-      parentRoute: typeof UiRoute;
+      parentRoute: typeof UiRouteRoute;
     };
     "/ui/inputs/input": {
       id: "/ui/inputs/input";
       path: "/inputs/input";
       fullPath: "/ui/inputs/input";
       preLoaderRoute: typeof UiInputsInputRouteImport;
-      parentRoute: typeof UiRoute;
+      parentRoute: typeof UiRouteRoute;
     };
     "/ui/inputs/checkbox": {
       id: "/ui/inputs/checkbox";
       path: "/inputs/checkbox";
       fullPath: "/ui/inputs/checkbox";
       preLoaderRoute: typeof UiInputsCheckboxRouteImport;
-      parentRoute: typeof UiRoute;
+      parentRoute: typeof UiRouteRoute;
     };
     "/ui/inputs/button": {
       id: "/ui/inputs/button";
       path: "/inputs/button";
       fullPath: "/ui/inputs/button";
       preLoaderRoute: typeof UiInputsButtonRouteImport;
-      parentRoute: typeof UiRoute;
+      parentRoute: typeof UiRouteRoute;
     };
     "/ui/feedback/linear-progress": {
       id: "/ui/feedback/linear-progress";
       path: "/feedback/linear-progress";
       fullPath: "/ui/feedback/linear-progress";
       preLoaderRoute: typeof UiFeedbackLinearProgressRouteImport;
-      parentRoute: typeof UiRoute;
+      parentRoute: typeof UiRouteRoute;
     };
     "/ui/feedback/circular-progress": {
       id: "/ui/feedback/circular-progress";
       path: "/feedback/circular-progress";
       fullPath: "/ui/feedback/circular-progress";
       preLoaderRoute: typeof UiFeedbackCircularProgressRouteImport;
-      parentRoute: typeof UiRoute;
+      parentRoute: typeof UiRouteRoute;
     };
     "/ui/data-display/typography": {
       id: "/ui/data-display/typography";
       path: "/data-display/typography";
       fullPath: "/ui/data-display/typography";
       preLoaderRoute: typeof UiDataDisplayTypographyRouteImport;
-      parentRoute: typeof UiRoute;
+      parentRoute: typeof UiRouteRoute;
     };
     "/ui/data-display/markdown-renderer": {
       id: "/ui/data-display/markdown-renderer";
       path: "/data-display/markdown-renderer";
       fullPath: "/ui/data-display/markdown-renderer";
       preLoaderRoute: typeof UiDataDisplayMarkdownRendererRouteImport;
-      parentRoute: typeof UiRoute;
+      parentRoute: typeof UiRouteRoute;
     };
     "/ui/data-display/list": {
       id: "/ui/data-display/list";
       path: "/data-display/list";
       fullPath: "/ui/data-display/list";
       preLoaderRoute: typeof UiDataDisplayListRouteImport;
-      parentRoute: typeof UiRoute;
+      parentRoute: typeof UiRouteRoute;
     };
     "/ui/data-display/divider": {
       id: "/ui/data-display/divider";
       path: "/data-display/divider";
       fullPath: "/ui/data-display/divider";
       preLoaderRoute: typeof UiDataDisplayDividerRouteImport;
-      parentRoute: typeof UiRoute;
+      parentRoute: typeof UiRouteRoute;
     };
     "/ui/data-display/avatar": {
       id: "/ui/data-display/avatar";
       path: "/data-display/avatar";
       fullPath: "/ui/data-display/avatar";
       preLoaderRoute: typeof UiDataDisplayAvatarRouteImport;
-      parentRoute: typeof UiRoute;
+      parentRoute: typeof UiRouteRoute;
     };
   }
 }
 
-interface UiRouteChildren {
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedFeedRouteRoute: typeof AuthenticatedFeedRouteRoute;
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedFeedRouteRoute: AuthenticatedFeedRouteRoute,
+};
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren);
+
+interface UiRouteRouteChildren {
   UiIndexRoute: typeof UiIndexRoute;
   UiDataDisplayAvatarRoute: typeof UiDataDisplayAvatarRoute;
   UiDataDisplayDividerRoute: typeof UiDataDisplayDividerRoute;
@@ -534,7 +564,7 @@ interface UiRouteChildren {
   UiSurfacesPaperRoute: typeof UiSurfacesPaperRoute;
 }
 
-const UiRouteChildren: UiRouteChildren = {
+const UiRouteRouteChildren: UiRouteRouteChildren = {
   UiIndexRoute: UiIndexRoute,
   UiDataDisplayAvatarRoute: UiDataDisplayAvatarRoute,
   UiDataDisplayDividerRoute: UiDataDisplayDividerRoute,
@@ -555,16 +585,17 @@ const UiRouteChildren: UiRouteChildren = {
   UiSurfacesPaperRoute: UiSurfacesPaperRoute,
 };
 
-const UiRouteWithChildren = UiRoute._addFileChildren(UiRouteChildren);
+const UiRouteRouteWithChildren =
+  UiRouteRoute._addFileChildren(UiRouteRouteChildren);
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AuthenticatedRoute: AuthenticatedRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  UiRouteRoute: UiRouteRouteWithChildren,
   DownloadRoute: DownloadRoute,
   LoginRoute: LoginRoute,
   PrivacyRoute: PrivacyRoute,
   RegisterRoute: RegisterRoute,
-  UiRoute: UiRouteWithChildren,
 };
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

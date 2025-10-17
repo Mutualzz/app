@@ -85,7 +85,7 @@ const WindowTitlebar = () => {
                         </IconButton>
                         {!isMac && (
                             <Divider
-                                lineColor="neutral"
+                                lineColor="primary"
                                 orientation="vertical"
                             />
                         )}

@@ -1,4 +1,5 @@
 import Loader from "@components/Loader/Loader";
+import { ModeSwitcher } from "@components/ModeSwitcher";
 import { BottomNavigation } from "@components/Navigation/BottomNavigation";
 import { TopNavigation } from "@components/Navigation/TopNavigation";
 import WindowTitlebar from "@components/WindowTitlebar";
@@ -190,6 +191,7 @@ function RootComponent() {
                                 >
                                     <Outlet />
                                 </Stack>
+                                <ModeSwitcher />
                                 <BottomNavigation />
                             </Stack>
                         </Loader>

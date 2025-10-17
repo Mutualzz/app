@@ -1,4 +1,6 @@
 import type { MzTheme } from "@app-types/theme";
+import { useAppStore } from "@hooks/useStores";
+import { useNavigate } from "@tanstack/react-router";
 import mergeWith from "lodash-es/mergeWith";
 import { isValidElement, type ReactNode } from "react";
 
@@ -39,6 +41,29 @@ export const sortThemes = (themes: MzTheme[]): MzTheme[] => {
         .sort((a, b) => a.name.localeCompare(b.name));
 
     return [...priorityThemes, ...otherThemes];
+};
+
+export const switchMode = (navigate?: ReturnType<typeof useNavigate>) => {
+    const app = useAppStore();
+    const { mode } = app;
+
+    if (mode === "feed") {
+        app.setMode("spaces");
+        if (navigate)
+            navigate({
+                to: "/spaces",
+                replace: true,
+            });
+    }
+
+    if (mode === "spaces") {
+        app.setMode("feed");
+        if (navigate)
+            navigate({
+                to: "/feed",
+                replace: true,
+            });
+    }
 };
 
 export function reactNodeToHtml(node: ReactNode): string {
