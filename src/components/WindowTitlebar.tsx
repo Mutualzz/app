@@ -10,7 +10,7 @@ import {
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { detectOS } from "@utils/detect";
 import { observer } from "mobx-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { FaDownload } from "react-icons/fa";
 import {
     VscChromeMaximize,
@@ -18,12 +18,17 @@ import {
     VscClose,
 } from "react-icons/vsc";
 
-const WindowTitlebar = () => {
+interface WindowTitlebarProps {
+    onHeightChange?: (height: number) => void;
+}
+
+const WindowTitlebar = ({ onHeightChange }: WindowTitlebarProps) => {
     const appWindow = getCurrentWindow();
     const { theme } = useTheme();
     const { updaterStore } = useAppStore();
     const [isMac, setIsMac] = useState(false);
     const [closeDanger, setCloseDanger] = useState(false);
+    const rootRef = useRef<HTMLDivElement | null>(null);
 
     useEffect(() => {
         const checkMac = async () => {
@@ -37,8 +42,28 @@ const WindowTitlebar = () => {
         };
     }, []);
 
+    useEffect(() => {
+        const el = rootRef.current;
+        if (!el) return;
+
+        const setHeight = () => {
+            const height = Math.ceil(el.getBoundingClientRect().height);
+            onHeightChange?.(height);
+        };
+
+        setHeight();
+
+        const ro = new ResizeObserver(setHeight);
+        ro.observe(el);
+        return () => {
+            ro.disconnect();
+            onHeightChange?.(0);
+        };
+    }, [isMac]);
+
     return (
         <Paper
+            ref={rootRef}
             data-tauri-drag-region
             justifyContent="space-between"
             alignItems="center"
@@ -47,11 +72,11 @@ const WindowTitlebar = () => {
             px={isMac ? 8 : 6}
             minHeight={isMac ? 44 : 32}
             width="100%"
-            position="relative"
+            position="fixed"
             zIndex={99999999}
-            css={{
-                backdropFilter: "saturate(120%) blur(6px)",
-            }}
+            top={0}
+            left={0}
+            css={{ backdropFilter: "saturate(120%) blur(6px)" }}
         >
             <Box data-tauri-drag-region flex={1} />
             <Box data-tauri-drag-region flex={1} />
