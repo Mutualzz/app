@@ -1,20 +1,14 @@
-import { useAppStore } from "@hooks/useStores";
-import { type ThemeStyle, type ThemeType } from "@mutualzz/ui-core";
+import { ThemeSelector } from "@components/ThemeSelector";
 import {
     Button,
     Divider,
     Drawer,
-    Option,
     Paper,
-    Radio,
-    RadioGroup,
-    Select,
     Stack,
     useTheme,
 } from "@mutualzz/ui-web";
 import { useMediaQuery } from "@react-hookz/web";
 import { useLocation, useNavigate } from "@tanstack/react-router";
-import { sortThemes } from "@utils/index";
 import startCase from "lodash-es/startCase";
 import { observer } from "mobx-react";
 import { motion } from "motion/react";
@@ -104,25 +98,14 @@ const AnimatedPaper = motion.create(Paper);
 
 export const PlaygroundLeftSidebar = observer(() => {
     const navigate = useNavigate();
-    const { theme: themeStore } = useAppStore();
+    const { theme } = useTheme();
+
     const [drawerOpen, setDrawerOpen] = useState(false);
-    const { style, theme, type, changeTheme, changeStyle, changeType } =
-        useTheme();
+
     const { pathname } = useLocation();
     const isMobileQuery = useMediaQuery(
         theme.breakpoints.down("md").replace("@media ", ""),
     );
-
-    const themes = Array.from(themeStore.themes.values())
-        .filter((theme) => theme.type === type)
-        .filter((theme) => theme.style === style);
-
-    const handleThemeChange = (themeId: string) => {
-        const changeTo = themes.find((theme) => theme.id === themeId);
-        if (!changeTo) return;
-
-        changeTheme(changeTo);
-    };
 
     const SidebarContent = () => (
         <Stack
@@ -136,74 +119,7 @@ export const PlaygroundLeftSidebar = observer(() => {
                 borderBottomLeftRadius: "2rem",
             }}
         >
-            <Stack
-                justifyContent="center"
-                alignItems="center"
-                direction="column"
-                spacing={10}
-            >
-                <Divider>Color Type</Divider>
-                <RadioGroup
-                    variant="solid"
-                    orientation="horizontal"
-                    spacing={10}
-                    value={type}
-                    onChange={(_, typeToSet) =>
-                        changeType(typeToSet as ThemeType)
-                    }
-                    size="sm"
-                >
-                    <Radio label="Dark" value="dark" />
-                    <Radio label="Light" value="light" />
-                    <Radio label="System" value="system" />
-                </RadioGroup>
-            </Stack>
-            {type !== "system" && (
-                <Stack
-                    justifyContent="center"
-                    alignItems="center"
-                    direction="column"
-                    spacing={10}
-                >
-                    <Divider>Color Style</Divider>
-                    <RadioGroup
-                        variant="solid"
-                        onChange={(_, styleToSet) => {
-                            changeStyle(styleToSet as ThemeStyle);
-                        }}
-                        orientation="horizontal"
-                        spacing={10}
-                        value={style}
-                    >
-                        <Radio label="Normal" value="normal" />
-                        <Radio label="Gradient" value="gradient" />
-                    </RadioGroup>
-                </Stack>
-            )}
-            {themes.length > 1 && (
-                <Stack
-                    justifyContent="center"
-                    alignItems="center"
-                    direction="column"
-                    spacing={10}
-                >
-                    <Divider>Color Scheme</Divider>
-                    <Select
-                        variant="solid"
-                        onValueChange={(value) =>
-                            handleThemeChange(value.toString())
-                        }
-                        value={theme.id}
-                    >
-                        {sortThemes(themes).map((theme) => (
-                            <Option key={theme.id} value={theme.id}>
-                                {theme.name}
-                                {theme.createdBy ? ` (by You)` : ""}
-                            </Option>
-                        ))}
-                    </Select>
-                </Stack>
-            )}
+            <ThemeSelector />
             {Object.entries(links).map(([key, value]) => (
                 <Stack
                     key={key}
