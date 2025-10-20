@@ -9,7 +9,7 @@ import { useState } from "react";
 import { GiGalaxy } from "react-icons/gi";
 import { ImFeed, ImSpinner11 } from "react-icons/im";
 
-const AnimatedIconButton = motion(IconButton);
+const AnimatedIconButton = motion.create(IconButton);
 
 export const ModeSwitcher = observer(() => {
     const app = useAppStore();
