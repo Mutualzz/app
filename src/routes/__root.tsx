@@ -35,7 +35,12 @@ import { arch, locale, platform, version } from "@tauri-apps/plugin-os";
 import { isTauri } from "@utils/index";
 import { reaction } from "mobx";
 import { observer } from "mobx-react";
-import { useEffect, type PropsWithChildren, type ReactNode } from "react";
+import {
+    useEffect,
+    useState,
+    type PropsWithChildren,
+    type ReactNode,
+} from "react";
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     {
@@ -85,6 +90,7 @@ function RootComponent() {
     const logger = new Logger({
         tag: "App",
     });
+    const [titlebarHeight, setTitlebarHeight] = useState(0);
 
     const networkState = useNetworkState();
 
@@ -159,7 +165,9 @@ function RootComponent() {
                 <AppTheme>
                     <CssBaseline adaptiveScrollbar />
 
-                    {isTauri && <WindowTitlebar />}
+                    {isTauri && (
+                        <WindowTitlebar onHeightChange={setTitlebarHeight} />
+                    )}
                     <ModalProvider>
                         {!networkState.online && (
                             <Paper
@@ -181,6 +189,9 @@ function RootComponent() {
                                 width="100vw"
                                 flex={1}
                                 minHeight={0}
+                                css={{
+                                    paddingTop: titlebarHeight,
+                                }}
                             >
                                 <TopNavigation />
                                 <Stack
