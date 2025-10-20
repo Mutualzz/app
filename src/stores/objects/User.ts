@@ -3,7 +3,9 @@ import {
     ImageFormat,
     type APITheme,
     type APIUser,
+    type AvatarFormat,
     type DefaultAvatar,
+    type Sizes,
 } from "@mutualzz/types";
 import type { Hex } from "@mutualzz/ui-core";
 import { REST } from "@stores/REST.store";
@@ -43,20 +45,28 @@ export class User {
     }
 
     get avatarUrl() {
+        return this.constructAvatarUrl(true);
+    }
+
+    constructAvatarUrl(
+        animated = false,
+        size: Sizes = 128,
+        format: AvatarFormat = ImageFormat.WebP,
+        hash?: string,
+    ) {
+        if (!this.avatar)
+            return REST.makeCDNUrl(
+                CDNRoutes.defaultUserAvatar(this.defaultAvatar),
+            );
+
         return REST.makeCDNUrl(
-            this.avatar
-                ? this.avatar.startsWith("a_")
-                    ? CDNRoutes.userAvatar(
-                          this.id,
-                          this.avatar,
-                          ImageFormat.GIF,
-                      )
-                    : CDNRoutes.userAvatar(
-                          this.id,
-                          this.avatar,
-                          ImageFormat.PNG,
-                      )
-                : CDNRoutes.defaultUserAvatar(this.defaultAvatar),
+            CDNRoutes.userAvatar(
+                this.id,
+                hash ?? this.avatar,
+                format,
+                size,
+                animated,
+            ),
         );
     }
 }

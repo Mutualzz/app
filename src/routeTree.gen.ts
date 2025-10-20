@@ -17,6 +17,7 @@ import { Route as UiRouteRouteImport } from "./routes/ui/route";
 import { Route as AuthenticatedRouteRouteImport } from "./routes/_authenticated/route";
 import { Route as IndexRouteImport } from "./routes/index";
 import { Route as UiIndexRouteImport } from "./routes/ui/index";
+import { Route as AuthenticatedSpacesRouteRouteImport } from "./routes/_authenticated/spaces/route";
 import { Route as AuthenticatedFeedRouteRouteImport } from "./routes/_authenticated/feed/route";
 import { Route as UiSurfacesPaperRouteImport } from "./routes/ui/surfaces/paper";
 import { Route as UiInputsTextareaRouteImport } from "./routes/ui/inputs/textarea";
@@ -75,6 +76,12 @@ const UiIndexRoute = UiIndexRouteImport.update({
   path: "/",
   getParentRoute: () => UiRouteRoute,
 } as any);
+const AuthenticatedSpacesRouteRoute =
+  AuthenticatedSpacesRouteRouteImport.update({
+    id: "/spaces",
+    path: "/spaces",
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any);
 const AuthenticatedFeedRouteRoute = AuthenticatedFeedRouteRouteImport.update({
   id: "/feed",
   path: "/feed",
@@ -177,6 +184,7 @@ export interface FileRoutesByFullPath {
   "/privacy": typeof PrivacyRoute;
   "/register": typeof RegisterRoute;
   "/feed": typeof AuthenticatedFeedRouteRoute;
+  "/spaces": typeof AuthenticatedSpacesRouteRoute;
   "/ui/": typeof UiIndexRoute;
   "/ui/data-display/avatar": typeof UiDataDisplayAvatarRoute;
   "/ui/data-display/divider": typeof UiDataDisplayDividerRoute;
@@ -203,6 +211,7 @@ export interface FileRoutesByTo {
   "/privacy": typeof PrivacyRoute;
   "/register": typeof RegisterRoute;
   "/feed": typeof AuthenticatedFeedRouteRoute;
+  "/spaces": typeof AuthenticatedSpacesRouteRoute;
   "/ui": typeof UiIndexRoute;
   "/ui/data-display/avatar": typeof UiDataDisplayAvatarRoute;
   "/ui/data-display/divider": typeof UiDataDisplayDividerRoute;
@@ -232,6 +241,7 @@ export interface FileRoutesById {
   "/privacy": typeof PrivacyRoute;
   "/register": typeof RegisterRoute;
   "/_authenticated/feed": typeof AuthenticatedFeedRouteRoute;
+  "/_authenticated/spaces": typeof AuthenticatedSpacesRouteRoute;
   "/ui/": typeof UiIndexRoute;
   "/ui/data-display/avatar": typeof UiDataDisplayAvatarRoute;
   "/ui/data-display/divider": typeof UiDataDisplayDividerRoute;
@@ -261,6 +271,7 @@ export interface FileRouteTypes {
     | "/privacy"
     | "/register"
     | "/feed"
+    | "/spaces"
     | "/ui/"
     | "/ui/data-display/avatar"
     | "/ui/data-display/divider"
@@ -287,6 +298,7 @@ export interface FileRouteTypes {
     | "/privacy"
     | "/register"
     | "/feed"
+    | "/spaces"
     | "/ui"
     | "/ui/data-display/avatar"
     | "/ui/data-display/divider"
@@ -315,6 +327,7 @@ export interface FileRouteTypes {
     | "/privacy"
     | "/register"
     | "/_authenticated/feed"
+    | "/_authenticated/spaces"
     | "/ui/"
     | "/ui/data-display/avatar"
     | "/ui/data-display/divider"
@@ -402,6 +415,13 @@ declare module "@tanstack/react-router" {
       fullPath: "/ui/";
       preLoaderRoute: typeof UiIndexRouteImport;
       parentRoute: typeof UiRouteRoute;
+    };
+    "/_authenticated/spaces": {
+      id: "/_authenticated/spaces";
+      path: "/spaces";
+      fullPath: "/spaces";
+      preLoaderRoute: typeof AuthenticatedSpacesRouteRouteImport;
+      parentRoute: typeof AuthenticatedRouteRoute;
     };
     "/_authenticated/feed": {
       id: "/_authenticated/feed";
@@ -534,10 +554,12 @@ declare module "@tanstack/react-router" {
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedFeedRouteRoute: typeof AuthenticatedFeedRouteRoute;
+  AuthenticatedSpacesRouteRoute: typeof AuthenticatedSpacesRouteRoute;
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedFeedRouteRoute: AuthenticatedFeedRouteRoute,
+  AuthenticatedSpacesRouteRoute: AuthenticatedSpacesRouteRoute,
 };
 
 const AuthenticatedRouteRouteWithChildren =

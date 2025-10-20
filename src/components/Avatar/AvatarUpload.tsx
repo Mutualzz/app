@@ -1,5 +1,5 @@
-import { Avatar } from "@components/Avatar";
 import { CropperClient as Cropper } from "@components/CropperClient";
+import { UserAvatar } from "@components/User/UserAvatar";
 import { useModal } from "@contexts/Modal.context";
 import { useAppStore } from "@hooks/useStores";
 import { FileUploader } from "@mateie/react-drag-drop-files";
@@ -26,7 +26,7 @@ interface UpdateAvatar {
 
 export const AvatarUpload = observer(() => {
     const { theme } = useTheme();
-    const { rest } = useAppStore();
+    const { account, rest } = useAppStore();
     const { closeModal, closeAllModals } = useModal();
 
     const [imageFile, setImageFile] = useState<string | null>(null);
@@ -105,6 +105,8 @@ export const AvatarUpload = observer(() => {
             crop: shouldCrop ? croppedAreaPixels : undefined,
         });
     };
+
+    if (!account) return <></>;
 
     return (
         <Paper
@@ -212,7 +214,7 @@ export const AvatarUpload = observer(() => {
                                 cursor: "pointer",
                             }}
                         >
-                            <Avatar size={256} />
+                            <UserAvatar user={account} size={256} />
                             <Typography level="body-xs">
                                 (Click or Drag and drop)
                             </Typography>

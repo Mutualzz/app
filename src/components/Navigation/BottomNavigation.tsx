@@ -7,7 +7,6 @@ import { observer } from "mobx-react";
 import { FaClipboard, FaDownload, FaHome } from "react-icons/fa";
 import { MdLogin } from "react-icons/md";
 import { DownloadButton } from "../DownloadButton";
-import { UserDrawer } from "../User/UserDrawer";
 
 export const BottomNavigation = observer(() => {
     const navigate = useNavigate();
@@ -87,7 +86,6 @@ export const BottomNavigation = observer(() => {
                         </IconButton>
                     </>
                 )}
-                {account && <UserDrawer onlyAvatar />}
             </Stack>
         </Paper>
     );

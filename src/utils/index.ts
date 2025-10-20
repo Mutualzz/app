@@ -45,7 +45,7 @@ export const sortThemes = (themes: MzTheme[]): MzTheme[] => {
 
 export const switchMode = (navigate?: ReturnType<typeof useNavigate>) => {
     const app = useAppStore();
-    const { mode } = app;
+    const { mode, account } = app;
 
     if (mode === "feed") {
         app.setMode("spaces");
@@ -61,6 +61,16 @@ export const switchMode = (navigate?: ReturnType<typeof useNavigate>) => {
         if (navigate)
             navigate({
                 to: "/feed",
+                replace: true,
+            });
+    }
+
+    if (!mode && account) {
+        const preferredMode = account.settings.preferredMode;
+        app.setMode(preferredMode);
+        if (navigate)
+            navigate({
+                to: preferredMode === "feed" ? "/feed" : "/spaces",
                 replace: true,
             });
     }

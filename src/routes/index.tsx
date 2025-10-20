@@ -1,10 +1,12 @@
-import { Avatar } from "@components/Avatar";
 import { ThemeCreator } from "@components/ThemeCreator";
+import { UserAvatar } from "@components/User/UserAvatar";
 import { useModal } from "@contexts/Modal.context";
 import { useAppStore } from "@hooks/useStores";
-import { Button, Stack, Typography } from "@mutualzz/ui-web";
+import { Button, Link, Stack, Typography } from "@mutualzz/ui-web";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { switchMode } from "@utils/index";
 import { observer } from "mobx-react";
+import { useEffect } from "react";
 
 export const Route = createFileRoute("/")({
     component: observer(Index),
@@ -16,6 +18,10 @@ function Index() {
     const navigate = useNavigate();
     const { openModal } = useModal();
 
+    useEffect(() => {
+        app.resetMode();
+    }, []);
+
     return (
         <Stack
             width={{ xs: "100vw", sm: "100vw" }}
@@ -25,7 +31,7 @@ function Index() {
                 direction="column"
                 justifyContent="center"
                 alignItems="center"
-                spacing={{ xs: 2, sm: 3, md: 4 }}
+                spacing={{ xs: 4, sm: 6, md: 10 }}
                 width={{
                     xs: "100%",
                     sm: "90%",
@@ -36,47 +42,49 @@ function Index() {
                 maxWidth={{ xs: "100%", sm: "500px", md: "700px", lg: "900px" }}
                 mx="auto"
             >
-                <Typography
-                    level={{ xs: "h5", sm: "h4", md: "h3", lg: "h2" }}
-                    textAlign="center"
-                    fontSize={{
-                        xs: "1.25rem",
-                        sm: "1.5rem",
-                        md: "2rem",
-                        lg: "2.5rem",
-                    }}
-                    fontWeight={{ xs: 600, sm: 700 }}
-                    mb={{ xs: "0.5rem", sm: "1rem" }}
+                <Stack
+                    justifyContent="center"
+                    alignItems="center"
+                    direction="column"
                 >
-                    Website is currently under heavy development
+                    <Typography
+                        level={{ xs: "h5", sm: "h4", md: "h3", lg: "h2" }}
+                        textAlign="center"
+                        fontWeight={{ xs: 600, sm: 700 }}
+                    >
+                        Website is currently under heavy development
+                    </Typography>
+                    <Typography level="body-sm">
+                        and has placeholders for now :3
+                    </Typography>
+                </Stack>
+                <Typography level={{ xs: "body-xs", sm: "body-sm", md: "h6" }}>
+                    The UI is being made from scratch and many features are
+                    still missing
                 </Typography>
-                <Typography
-                    level={{ xs: "body-md", sm: "body-md", md: "h6" }}
-                    fontSize={{ xs: "1rem", sm: "1.125rem", md: "1.25rem" }}
-                    mb={{ xs: "0.25rem", sm: "0.5rem" }}
-                >
-                    The UI is being made from scratch
-                </Typography>
-                <Typography
-                    level={{ xs: "body-sm", sm: "h6", md: "h5" }}
-                    fontSize={{ xs: "0.95rem", sm: "1.1rem", md: "1.25rem" }}
-                    mb={{ xs: "0.5rem", sm: "1rem" }}
-                >
-                    It&apos;s open source too :3
+                <Typography level={{ xs: "body-sm", sm: "h6", md: "h5" }}>
+                    It&apos;s{" "}
+                    <Link
+                        color="success"
+                        underline="hover"
+                        variant="plain"
+                        href="https://github.com/mutualzz"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        open source
+                    </Link>{" "}
+                    too :3
                 </Typography>
                 <Stack
-                    spacing={{ xs: 2, sm: 4, md: 6 }}
+                    spacing={{ xs: 4, sm: 6, md: 10 }}
                     alignItems="center"
                     direction={{ xs: "column", sm: "row" }}
                     width="100%"
                     justifyContent="center"
                     flexWrap="wrap"
-                    mb={{ xs: "1rem", sm: "2rem" }}
                 >
-                    <Typography
-                        level={{ xs: "body-sm", sm: "h6" }}
-                        fontSize={{ xs: "0.95rem", sm: "1.1rem" }}
-                    >
+                    <Typography level={{ xs: "body-sm", sm: "h6" }}>
                         Meanwhile you can
                     </Typography>
                     <Button
@@ -91,18 +99,27 @@ function Index() {
                     >
                         Go to the UI playground
                     </Button>
+                    <Typography>to test components and themes</Typography>
                     {!account && (
                         <>
                             <Typography
                                 fontWeight="bold"
                                 level={{ xs: "body-sm", sm: "body-md" }}
-                                fontSize={{ xs: "0.95rem", sm: "1.1rem" }}
                             >
                                 or click the login button top right
                             </Typography>
                         </>
                     )}
                 </Stack>
+                <Typography
+                    fontWeight="bold"
+                    variant="plain"
+                    color="info"
+                    spacing={{ xs: 2, sm: 4, md: 6 }}
+                    level={{ xs: "body-sm", sm: "h6" }}
+                >
+                    Currently working on: Layouts for Feed and Spaces,
+                </Typography>
                 {account && (
                     <Stack
                         justifyContent="center"
@@ -120,7 +137,6 @@ function Index() {
                         >
                             <Typography
                                 level={{ xs: "body-md", sm: "body-lg" }}
-                                fontSize={{ xs: "1rem", sm: "1.25rem" }}
                             >
                                 Hi
                             </Typography>
@@ -130,19 +146,18 @@ function Index() {
                                 alignItems="center"
                                 direction="row"
                             >
-                                <Avatar
+                                <UserAvatar
+                                    user={account}
                                     size={{ xs: "sm", sm: "md", md: "lg" }}
                                 />
                                 <Typography
                                     level={{ xs: "body-md", sm: "body-lg" }}
-                                    fontSize={{ xs: "1rem", sm: "1.25rem" }}
                                 >
                                     {account.globalName ?? account.username}
                                 </Typography>
                             </Stack>
                             <Typography
                                 level={{ xs: "body-md", sm: "body-lg" }}
-                                fontSize={{ xs: "1rem", sm: "1.25rem" }}
                             >
                                 :3
                             </Typography>
@@ -156,7 +171,6 @@ function Index() {
                         >
                             <Typography
                                 level={{ xs: "body-sm", sm: "body-md" }}
-                                fontSize={{ xs: "0.95rem", sm: "1.1rem" }}
                             >
                                 For now you can either
                             </Typography>
@@ -178,7 +192,6 @@ function Index() {
                                 </Button>
                                 <Typography
                                     level={{ xs: "body-sm", sm: "body-md" }}
-                                    fontSize={{ xs: "0.95rem", sm: "1.1rem" }}
                                 >
                                     or
                                 </Typography>
@@ -198,6 +211,24 @@ function Index() {
                                     color="primary"
                                 >
                                     Create themes
+                                </Button>
+                                <Typography
+                                    level={{ xs: "body-sm", sm: "body-md" }}
+                                >
+                                    or
+                                </Typography>
+                                <Button
+                                    onClick={() => {
+                                        switchMode(navigate);
+                                    }}
+                                    size={{ xs: "sm", sm: "md", md: "lg" }}
+                                    variant="solid"
+                                    color="info"
+                                >
+                                    Switch to{" "}
+                                    {account.settings.preferredMode === "feed"
+                                        ? "Feed"
+                                        : "Spaces"}
                                 </Button>
                             </Stack>
                         </Stack>

@@ -51,7 +51,7 @@ export class AppStore {
     setUser(user: APIPrivateUser) {
         this.account = new AccountStore(user);
         this.theme.loadUserThemes(user);
-        this.mode = user.settings.prefferedMode;
+        this.mode = user.settings.preferredMode;
     }
 
     setGatewayReady(ready: boolean) {
@@ -64,6 +64,10 @@ export class AppStore {
 
     setMode(mode: AppMode) {
         this.mode = mode;
+    }
+
+    resetMode() {
+        this.mode = null;
     }
 
     get isReady() {

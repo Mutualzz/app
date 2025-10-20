@@ -191,8 +191,8 @@ function RootComponent() {
                                 >
                                     <Outlet />
                                 </Stack>
-                                <ModeSwitcher />
                                 <BottomNavigation />
+                                {app.account && <ModeSwitcher />}
                             </Stack>
                         </Loader>
 

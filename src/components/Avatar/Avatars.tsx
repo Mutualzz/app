@@ -1,8 +1,8 @@
-import { Avatar } from "@components/Avatar";
 import { useModal } from "@contexts/Modal.context";
 import { useAppStore } from "@hooks/useStores";
 import { defaultAvatars } from "@mutualzz/types";
 import {
+    Avatar,
     Box,
     Button,
     ButtonGroup,

@@ -1,13 +1,14 @@
 import { DownloadButton } from "@components/DownloadButton";
-import { UserDropdown } from "@components/User/UserDropdown";
 import { useAppStore } from "@hooks/useStores";
-import { Button, Paper, Stack, useTheme } from "@mutualzz/ui-web";
+import { Button, Divider, Paper, Stack, useTheme } from "@mutualzz/ui-web";
 import { useMediaQuery } from "@react-hookz/web";
 import { useNavigate } from "@tanstack/react-router";
 import { isTauri } from "@utils/index";
 import { observer } from "mobx-react";
 import { motion } from "motion/react";
 import { FaClipboard, FaDownload, FaUser } from "react-icons/fa";
+import { GiGalaxy } from "react-icons/gi";
+import { ImFeed } from "react-icons/im";
 import { Logo } from "../Logo";
 
 const AnimatedLogo = motion.create(Logo);
@@ -19,7 +20,8 @@ export const TopNavigation = observer(() => {
         theme.breakpoints.down("md").replace("@media ", ""),
     );
 
-    const { account } = useAppStore();
+    const app = useAppStore();
+    const { account } = app;
 
     if (isMobileQuery) return null;
 
@@ -32,30 +34,44 @@ export const TopNavigation = observer(() => {
             alignItems="center"
             justifyContent="space-between"
             css={{
-                borderBottomLeftRadius: 16,
-                borderBottomRightRadius: 16,
                 userSelect: "none",
                 position: "sticky",
                 top: 0,
                 zIndex: 100,
             }}
         >
-            <AnimatedLogo
-                css={{
-                    width: 64,
-                    minWidth: 32,
-                    maxWidth: 48,
-                    cursor: "pointer",
-                }}
-                initial={{ scale: 1 }}
-                whileHover={{ scale: 1.1 }}
-                onClick={() => {
-                    navigate({
-                        to: "/",
-                        replace: true,
-                    });
-                }}
-            />
+            <Stack
+                spacing={5}
+                direction="row"
+                height="100%"
+                alignItems="center"
+            >
+                <AnimatedLogo
+                    css={{
+                        width: 64,
+                        minWidth: 32,
+                        maxWidth: 48,
+                        cursor: "pointer",
+                    }}
+                    initial={{ scale: 1 }}
+                    whileHover={{ scale: 1.1 }}
+                    onClick={() => {
+                        navigate({
+                            to: "/",
+                            replace: true,
+                        });
+                    }}
+                />
+                {app.mode && (
+                    <>
+                        <Divider lineColor="accent" orientation="vertical" />
+                        <Paper spacing={5} py={2} px={6} direction="row">
+                            {app.mode === "feed" ? <ImFeed /> : <GiGalaxy />}
+                            {app.mode === "feed" ? "Feed" : "Spaces"}
+                        </Paper>
+                    </>
+                )}
+            </Stack>
 
             <Stack
                 flex={1}
@@ -64,9 +80,7 @@ export const TopNavigation = observer(() => {
                 direction="row"
                 spacing={{ xs: 2, sm: 6, md: 10 }}
             >
-                {account ? (
-                    <UserDropdown />
-                ) : (
+                {!account && (
                     <Stack direction="row" spacing={5} alignItems="center">
                         <Button
                             startDecorator={<FaClipboard />}
