@@ -17,6 +17,8 @@ import {
     Input,
     Option,
     Paper,
+    Radio,
+    RadioGroup,
     Select,
     Stack,
     Typography,
@@ -115,6 +117,8 @@ export const ThemeCreator = observer(() => {
     const [colorType, setColorType] =
         useState<Omit<ThemeType, "system">>("dark");
 
+    const [style, setStyle] = useState<ThemeStyle>("normal");
+
     const isMobileQuery = useMediaQuery(
         theme.breakpoints.down("md").replace("@media", ""),
     );
@@ -126,9 +130,9 @@ export const ThemeCreator = observer(() => {
     const [userThemeSelectValue, setUserThemeSelectValue] = useState("");
     const [formKey, setFormKey] = useState(0);
 
-    const allDefaultThemes = themeStore.themes.filter(
-        (theme) => !theme.createdBy,
-    );
+    const allDefaultThemes = themeStore.themes
+        .filter((theme) => !theme.createdBy)
+        .filter((theme) => theme.style === style);
     const allDrafts = draft.themes;
     const allUserThemes = themeStore.themes.filter((t) => t.createdBy);
 
@@ -450,6 +454,17 @@ export const ThemeCreator = observer(() => {
                             spacing={5}
                             alignSelf="stretch"
                         >
+                            <RadioGroup
+                                onChange={(_, val) =>
+                                    setStyle(val as ThemeStyle)
+                                }
+                                orientation="horizontal"
+                                spacing={10}
+                                value={style}
+                            >
+                                <Radio label="Normal" value="normal" />
+                                <Radio label="Gradient" value="gradient" />
+                            </RadioGroup>
                             <Typography level="body-sm">
                                 Pick a preset
                             </Typography>
