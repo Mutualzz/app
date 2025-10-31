@@ -2,15 +2,10 @@ import {
     useUserSidebar,
     type UserSidebarPage,
 } from "@contexts/UserSidebar.context";
-import {
-    Button,
-    ButtonGroup,
-    Divider,
-    Paper,
-    Stack,
-    Typography,
-} from "@mutualzz/ui-web";
+import { useAppStore } from "@hooks/useStores";
+import { Button, ButtonGroup, Divider, Paper, Stack } from "@mutualzz/ui-web";
 import { observer } from "mobx-react";
+import { UserAvatar } from "./UserAvatar";
 
 interface UserSettingsSidebarProps {
     drawerOpen?: boolean;
@@ -19,6 +14,10 @@ interface UserSettingsSidebarProps {
 
 export const UserSettingsSidebar = observer(
     ({ drawerOpen, setDrawerOpen }: UserSettingsSidebarProps) => {
+        const app = useAppStore();
+
+        const { account } = app;
+
         const { currentPage, setCurrentPage } = useUserSidebar();
 
         const handlePageSwitch = (page: UserSidebarPage) => {
@@ -28,47 +27,55 @@ export const UserSettingsSidebar = observer(
             }
         };
 
+        if (!account) return null;
+
         return (
             <Paper
                 p="1rem"
                 direction="column"
                 width="100%"
                 height="100%"
-                elevation={1}
+                elevation={2}
             >
-                <Stack direction="column">
-                    <Typography
-                        textAlign="center"
-                        textColor="muted"
-                        level="body-sm"
-                    >
-                        User Settings
-                    </Typography>
-                    <Divider />
-                    <ButtonGroup
-                        color="neutral"
-                        size={{ xs: "sm", sm: "md" }}
-                        orientation="vertical"
+                <Stack direction="column" spacing={10}>
+                    <Button
+                        startDecorator={<UserAvatar user={account} />}
                         variant="plain"
-                        spacing={5}
+                        horizontalAlign="left"
+                        color="neutral"
+                        onClick={() => handlePageSwitch("profile")}
                     >
-                        <Button
-                            onClick={() => handlePageSwitch("profile")}
-                            variant={
-                                currentPage === "profile" ? "soft" : "plain"
-                            }
+                        Profiles
+                    </Button>
+                    <Divider lineColor="primary" />
+                    <Stack direction="column" spacing={1}>
+                        <ButtonGroup
+                            color="neutral"
+                            size={{ xs: "sm", sm: "md" }}
+                            orientation="vertical"
+                            variant="plain"
+                            spacing={5}
                         >
-                            Profile
-                        </Button>
-                        <Button
-                            onClick={() => handlePageSwitch("my-account")}
-                            variant={
-                                currentPage === "my-account" ? "soft" : "plain"
-                            }
-                        >
-                            My Account
-                        </Button>
-                    </ButtonGroup>
+                            <Button
+                                onClick={() => handlePageSwitch("my-account")}
+                                variant={
+                                    currentPage === "my-account"
+                                        ? "soft"
+                                        : "plain"
+                                }
+                            >
+                                My Account
+                            </Button>
+                            <Button
+                                onClick={() => handlePageSwitch("profile")}
+                                variant={
+                                    currentPage === "profile" ? "soft" : "plain"
+                                }
+                            >
+                                Profile
+                            </Button>
+                        </ButtonGroup>
+                    </Stack>
                 </Stack>
             </Paper>
         );
