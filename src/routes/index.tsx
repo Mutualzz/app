@@ -200,10 +200,6 @@ function Index() {
                                         openModal(
                                             "theme-maker",
                                             <ThemeCreator />,
-                                            {
-                                                layout: "fullscreen",
-                                                disableBackdropClick: true,
-                                            },
                                         );
                                     }}
                                     size={{ xs: "sm", sm: "md", md: "lg" }}

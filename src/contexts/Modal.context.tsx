@@ -1,4 +1,5 @@
 import { ModalRoot } from "@components/ModalRoot";
+import type { CSSObject } from "@emotion/react";
 import type { ModalProps } from "@mutualzz/ui-web";
 import {
     createContext,
@@ -19,7 +20,7 @@ interface ModalContextProps {
     openModal: (
         id: string,
         children: ReactNode,
-        modalProps?: Partial<ModalProps>,
+        modalProps?: Partial<ModalProps> & { css?: CSSObject },
     ) => void;
     closeModal: (id?: string) => void;
     closeAllModals: () => void;
@@ -44,13 +45,17 @@ export const ModalProvider = ({ children }: { children: ReactNode }) => {
     const [modals, setModals] = useState<ModalStackItem[]>([]);
 
     const openModal = useCallback(
-        (id: string, content: ReactNode, props: Partial<ModalProps> = {}) => {
+        (
+            id: string,
+            content: ReactNode,
+            props: Partial<ModalProps> & { css?: CSSObject } = {},
+        ) => {
             setModals((prev) => [
                 ...prev,
                 {
                     id,
                     content,
-                    props: { layout: "center", ...props },
+                    props,
                 },
             ]);
         },
