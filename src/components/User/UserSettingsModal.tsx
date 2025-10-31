@@ -17,7 +17,7 @@ export const UserSettingsModal = observer(() => {
     return (
         <UserSidebarProvider>
             <Paper
-                width="100%"
+                width="90vw"
                 height="100%"
                 p={{ xs: "0.5rem", sm: "1.5rem", md: "2rem" }}
                 borderRadius={{ xs: "0.75rem", sm: "1.25rem", md: "1.5rem" }}
