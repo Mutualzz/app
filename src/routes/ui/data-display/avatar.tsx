@@ -4,6 +4,7 @@ import {
     randomColor,
     type Color,
     type ColorLike,
+    type ColorResult,
     type Size,
     type SizeValue,
     type Variant,
@@ -88,7 +89,7 @@ function RouteComponent() {
                     {capitalize(v)} {capitalize(c)}
                 </Typography>
                 <Avatar
-                    key={`${v}-${c}-button`}
+                    key={`${v}-${c}-avatar`}
                     variant={v}
                     color={c}
                     size={size}
@@ -112,7 +113,7 @@ function RouteComponent() {
                 {capitalize(variant)} {capitalize(c)}
             </Typography>
             <Avatar
-                key={`${variant}-${c}-button`}
+                key={`${variant}-${c}-avatar`}
                 variant={variant as Variant}
                 color={c}
                 size={size}
@@ -292,7 +293,9 @@ function RouteComponent() {
                             color="primary"
                             placeholder="Enter a color (e.g., #ff0000)"
                             value={customColor}
-                            onChange={setCustomColor}
+                            onChange={(result: ColorResult) =>
+                                setCustomColor(result.hex)
+                            }
                             endDecorator={
                                 <IconButton
                                     color={customColor}

@@ -5,6 +5,7 @@ import {
     randomColor,
     type Color,
     type ColorLike,
+    type ColorResult,
     type Orientation,
     type Size,
     type Variant,
@@ -323,7 +324,9 @@ function RouteComponent() {
                             color="primary"
                             placeholder="Enter a color (e.g., #ff0000)"
                             value={customColor}
-                            onChange={setCustomColor}
+                            onChange={(result: ColorResult) =>
+                                setCustomColor(result.hex)
+                            }
                             endDecorator={
                                 <IconButton
                                     color={customColor}

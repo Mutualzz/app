@@ -4,6 +4,7 @@ import {
     randomColor,
     type Color,
     type ColorLike,
+    type ColorResult,
     type Size,
     type TypographyColor,
     type Variant,
@@ -305,7 +306,9 @@ function InputPlayground() {
                             fullWidth
                             placeholder="Enter a text color (e.g. #ff0000)"
                             value={customTextColor}
-                            onChange={setCustomTextColor}
+                            onChange={(result: ColorResult) =>
+                                setCustomTextColor(result.hex)
+                            }
                             showRandom
                         />
                     ) : (
@@ -463,7 +466,9 @@ function InputPlayground() {
                             color="primary"
                             placeholder="Enter a color (e.g., #ff0000)"
                             value={customColor}
-                            onChange={setCustomColor}
+                            onChange={(result: ColorResult) =>
+                                setCustomColor(result.hex)
+                            }
                             endDecorator={
                                 <IconButton
                                     color={customColor}

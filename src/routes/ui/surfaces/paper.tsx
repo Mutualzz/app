@@ -1,6 +1,11 @@
 import { PlaygroundContent } from "@components/Playground/PlaygroundContent";
 import { PlaygroundRightSidebar } from "@components/Playground/PlaygroundRightSidebar";
-import { randomColor, type Color, type ColorLike } from "@mutualzz/ui-core";
+import {
+    randomColor,
+    type Color,
+    type ColorLike,
+    type ColorResult,
+} from "@mutualzz/ui-core";
 import {
     Button,
     Divider,
@@ -169,7 +174,9 @@ function PlaygroundPaper() {
                                 color="primary"
                                 placeholder="Enter a color (e.g., #ff0000)"
                                 value={customColor}
-                                onChange={setCustomColor}
+                                onChange={(result: ColorResult) =>
+                                    setCustomColor(result.hex)
+                                }
                                 endDecorator={
                                     <IconButton
                                         color={customColor}

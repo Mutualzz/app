@@ -4,6 +4,7 @@ import {
     randomColor,
     type Color,
     type ColorLike,
+    type ColorResult,
     type Size,
     type Variant,
 } from "@mutualzz/ui-core";
@@ -394,7 +395,9 @@ function PlaygroundInputGroups() {
                             color="primary"
                             placeholder="Enter color (e.g. #ff0000)"
                             value={customColor}
-                            onChange={setCustomColor}
+                            onChange={(result: ColorResult) =>
+                                setCustomColor(result.hex)
+                            }
                             showRandom
                         />
                     ) : (
@@ -447,7 +450,9 @@ function PlaygroundInputGroups() {
                                     color="primary"
                                     placeholder="Enter color (e.g. #ff0000)"
                                     value={customSeparatorColor}
-                                    onChange={setCustomSeparatorColor}
+                                    onChange={(result: ColorResult) =>
+                                        setCustomSeparatorColor(result.hex)
+                                    }
                                     showRandom
                                 />
                             ) : (

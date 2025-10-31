@@ -4,6 +4,7 @@ import {
     randomColor,
     type Color,
     type ColorLike,
+    type ColorResult,
     type Size,
     type Variant,
 } from "@mutualzz/ui-core";
@@ -552,7 +553,9 @@ function SlderPlayground() {
                             color="primary"
                             placeholder="Enter a color (e.g., #ff0000)"
                             value={customColor}
-                            onChange={setCustomColor}
+                            onChange={(result: ColorResult) =>
+                                setCustomColor(result.hex)
+                            }
                             endDecorator={
                                 <IconButton
                                     color={customColor}

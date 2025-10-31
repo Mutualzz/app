@@ -6,6 +6,7 @@ import {
     randomColor,
     type Color,
     type ColorLike,
+    type ColorResult,
     type TypographyColor,
     type Variant,
 } from "@mutualzz/ui-core";
@@ -151,7 +152,9 @@ function RouteComponent() {
                             fullWidth
                             placeholder="Enter a color (e.g. #ff0000)"
                             value={customColor}
-                            onChange={setCustomColor}
+                            onChange={(result: ColorResult) =>
+                                setCustomColor(result.hex)
+                            }
                             showRandom
                         />
                     ) : (
@@ -198,7 +201,9 @@ function RouteComponent() {
                             fullWidth
                             placeholder="Enter a text color (e.g. #ff0000)"
                             value={customTextColor}
-                            onChange={setCustomTextColor}
+                            onChange={(result: ColorResult) =>
+                                setCustomTextColor(result.hex)
+                            }
                             showRandom
                         />
                     ) : (
