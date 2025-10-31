@@ -2,10 +2,11 @@ import type { MzTheme, ThemeDraft } from "@app-types/theme";
 import { useAppStore } from "@hooks/useStores";
 import type { HttpException } from "@mutualzz/types";
 import {
+    baseDarkTheme,
     createColor,
     extractColors,
     isValidGradient,
-    randomColor,
+    type ColorResult,
     type ThemeStyle,
     type ThemeType,
 } from "@mutualzz/ui-core";
@@ -37,7 +38,7 @@ import { useMutation } from "@tanstack/react-query";
 import { sortThemes } from "@utils/index";
 import capitalize from "lodash-es/capitalize";
 import { observer } from "mobx-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 type ApiErrors = Record<string, string>;
 
@@ -116,14 +117,16 @@ export const ThemeCreator = observer(() => {
 
     const [colorType, setColorType] =
         useState<Omit<ThemeType, "system">>("dark");
-
-    const [style, setStyle] = useState<ThemeStyle>("normal");
+    const [colorStyle, setColorStyle] = useState<ThemeStyle>("normal");
 
     const isMobileQuery = useMediaQuery(
         theme.breakpoints.down("md").replace("@media", ""),
     );
 
     const [drawerOpen, setDrawerOpen] = useState(false);
+
+    const [chosenColorStyle, setChosenColorStyle] =
+        useState<ThemeStyle>("normal");
 
     const [presetSelectValue, setPresetSelectValue] = useState("");
     const [draftSelectValue, setDraftSelectValue] = useState("");
@@ -132,38 +135,25 @@ export const ThemeCreator = observer(() => {
 
     const allDefaultThemes = themeStore.themes
         .filter((theme) => !theme.createdBy)
-        .filter((theme) => theme.style === style);
+        .filter((theme) => theme.style === colorStyle);
     const allDrafts = draft.themes;
     const allUserThemes = themeStore.themes.filter((t) => t.createdBy);
 
     const defaultValues = {
+        ...baseDarkTheme,
         name: "",
         description: "",
-        type: colorType,
-        style: "normal" as ThemeStyle,
-        colors: {
-            common: {
-                white: randomColor(),
-                black: randomColor(),
-            },
-            primary: randomColor(),
-            neutral: randomColor(),
-            background: randomColor(),
-            surface: randomColor(),
-            danger: randomColor(),
-            info: randomColor(),
-            success: randomColor(),
-            warning: randomColor(),
-        },
-        typography: {
-            colors: {
-                primary: randomColor(),
-                secondary: randomColor(),
-                accent: randomColor(),
-                muted: randomColor(),
-            },
-        },
     };
+
+    const derivedStyle: ThemeStyle =
+        loadedUserTheme?.style ??
+        loadedDraft?.style ??
+        loadedPreset?.style ??
+        "normal";
+
+    useEffect(() => {
+        form.setFieldValue("style", derivedStyle);
+    }, [derivedStyle]);
 
     const load = (
         toLoad: string,
@@ -241,11 +231,11 @@ export const ThemeCreator = observer(() => {
         },
 
         onError: (error: HttpException) => {
-            error.errors.forEach((err) => {
-                setApiErrors({
-                    [err.path]: err.message,
-                });
+            const next: Record<string, string> = {};
+            error.errors.forEach((e) => {
+                next[e.path] = e.message;
             });
+            setApiErrors(next);
         },
     });
 
@@ -261,11 +251,11 @@ export const ThemeCreator = observer(() => {
             return response;
         },
         onError: (error: HttpException) => {
-            error.errors.forEach((err) => {
-                setApiErrors({
-                    [err.path]: err.message,
-                });
+            const next: Record<string, string> = {};
+            error.errors.forEach((e) => {
+                next[e.path] = e.message;
             });
+            setApiErrors(next);
         },
     });
 
@@ -398,17 +388,6 @@ export const ThemeCreator = observer(() => {
         },
     });
 
-    const getCurrentColorStyle = () => {
-        let currentStyle: ThemeStyle = "normal";
-        if (loadedUserTheme) currentStyle = loadedUserTheme.style;
-        if (loadedDraft) currentStyle = loadedDraft.style;
-        if (loadedPreset) currentStyle = loadedPreset.style;
-
-        form.setFieldValue("style", currentStyle);
-
-        return currentStyle;
-    };
-
     const SidebarContent = () => (
         <form.Subscribe
             selector={(state) => [
@@ -446,7 +425,7 @@ export const ThemeCreator = observer(() => {
                                 deletePending
                             }
                         >
-                            Start from scratch
+                            Reset
                         </Button>
                         <Divider />
                         <Stack
@@ -456,11 +435,11 @@ export const ThemeCreator = observer(() => {
                         >
                             <RadioGroup
                                 onChange={(_, val) =>
-                                    setStyle(val as ThemeStyle)
+                                    setColorStyle(val as ThemeStyle)
                                 }
                                 orientation="horizontal"
                                 spacing={10}
-                                value={style}
+                                value={colorStyle}
                             >
                                 <Radio label="Normal" value="normal" />
                                 <Radio label="Gradient" value="gradient" />
@@ -662,56 +641,48 @@ export const ThemeCreator = observer(() => {
     );
 
     return (
-        <Paper
-            width="100%"
-            height="100%"
-            maxWidth="100%"
-            maxHeight="100%"
-            justifyContent="center"
-            alignItems="center"
-            overflow="auto"
-            nonTranslucent
-        >
+        <Paper direction="row" nonTranslucent width="100%" height="100%">
             <form
-                css={{
-                    width: "100%",
-                    height: "100%",
-                }}
                 onSubmit={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
                 }}
                 key={formKey}
+                css={{
+                    width: "100%",
+                    height: "100%",
+                }}
             >
                 <Stack
-                    width="100%"
-                    height="100%"
                     direction="row"
+                    height="100%"
+                    width="100%"
                     justifyContent="center"
-                    alignItems="center"
                     spacing={{ xs: 2, sm: 4, md: 6 }}
-                    pt={{ xs: "1rem", sm: "2.5rem", md: "3rem" }}
+                    pt={{ xs: 0, sm: "0.5rem", md: "1rem" }}
                 >
-                    {isMobileQuery ? (
-                        <Drawer
-                            open={drawerOpen}
-                            onClose={() => setDrawerOpen(false)}
-                            onOpen={() => setDrawerOpen(true)}
-                            swipeable
-                            anchor="left"
-                            size="sm"
-                            disablePortal
-                        >
+                    <Stack justifyContent="space-between" height="100%">
+                        {isMobileQuery ? (
+                            <Drawer
+                                open={drawerOpen}
+                                onClose={() => setDrawerOpen(false)}
+                                onOpen={() => setDrawerOpen(true)}
+                                swipeable
+                                anchor="left"
+                                size="sm"
+                            >
+                                <SidebarContent />
+                            </Drawer>
+                        ) : (
                             <SidebarContent />
-                        </Drawer>
-                    ) : (
-                        <SidebarContent />
-                    )}
+                        )}
+                    </Stack>
                     <Stack
                         direction="column"
                         width="100%"
                         height="100%"
                         maxWidth="800px"
+                        flex={1}
                         p={{ xs: "0.75rem", sm: "1rem" }}
                         spacing={{ xs: 2, sm: 4, md: 6 }}
                         overflowY="auto"
@@ -754,25 +725,35 @@ export const ThemeCreator = observer(() => {
                                 !loadedPreset &&
                                 !loadedUserTheme && (
                                     <Typography level="body-sm">
-                                        {capitalize(colorType.toString())} Theme
+                                        {capitalize(colorType.toString())}{" "}
+                                        {capitalize(
+                                            chosenColorStyle.toString(),
+                                        )}{" "}
+                                        Theme
                                     </Typography>
                                 )}
                             {loadedDraft && (
                                 <Typography level="h6">
                                     Draft: {loadedDraft.name} (
-                                    {capitalize(loadedDraft.type.toString())})
+                                    {capitalize(loadedDraft.style.toString())}{" "}
+                                    {capitalize(loadedDraft.type.toString())}{" "}
+                                    Theme)
                                 </Typography>
                             )}
                             {loadedPreset && (
                                 <Typography level="h6">
                                     Preset: {loadedPreset.name} (
-                                    {capitalize(loadedPreset.type)})
+                                    {capitalize(loadedPreset.style.toString())}{" "}
+                                    {capitalize(loadedPreset.type)} Theme)
                                 </Typography>
                             )}
                             {loadedUserTheme && (
                                 <Typography level="h6">
-                                    Your Theme: {loadedUserTheme.name} (
-                                    {capitalize(loadedUserTheme.type)})
+                                    Your theme: {loadedUserTheme.name} (
+                                    {capitalize(
+                                        loadedUserTheme.style.toString(),
+                                    )}{" "}
+                                    {capitalize(loadedUserTheme.type)} Theme)
                                 </Typography>
                             )}
                         </Stack>
@@ -821,48 +802,6 @@ export const ThemeCreator = observer(() => {
                                 />
                             )}
                         />
-                        <form.Field
-                            name="style"
-                            children={({ handleChange, state: { value } }) => (
-                                <Stack direction="column" spacing={5}>
-                                    <Typography
-                                        fontWeight={500}
-                                        level="body-md"
-                                    >
-                                        Color Style{" "}
-                                        <Typography
-                                            color="danger"
-                                            variant="plain"
-                                        >
-                                            *
-                                        </Typography>
-                                    </Typography>
-                                    <Typography level="body-xs">
-                                        What type of color style is your theme?
-                                    </Typography>
-                                    <ButtonGroup>
-                                        <Button
-                                            color="primary"
-                                            disabled={value === "normal"}
-                                            onClick={() => {
-                                                handleChange("normal");
-                                            }}
-                                        >
-                                            Normal
-                                        </Button>
-                                        <Button
-                                            color="neutral"
-                                            disabled={value === "gradient"}
-                                            onClick={() => {
-                                                handleChange("gradient");
-                                            }}
-                                        >
-                                            Gradient
-                                        </Button>
-                                    </ButtonGroup>
-                                </Stack>
-                            )}
-                        />
                         <Divider />
                         <Stack direction="column" spacing={1}>
                             <Typography level="h4">Common Colors</Typography>
@@ -885,11 +824,10 @@ export const ThemeCreator = observer(() => {
                                     name="colors.background"
                                     required
                                     label="Background Color"
-                                    allowGradient={
-                                        getCurrentColorStyle() === "gradient"
-                                    }
+                                    allowGradient
                                     description="The background color of the app"
-                                    onChange={(val: any) => {
+                                    onChange={(result: ColorResult) => {
+                                        const val = result.hex;
                                         handleChange(val);
                                         let isDark = false;
                                         if (
@@ -924,11 +862,11 @@ export const ThemeCreator = observer(() => {
                                     meta={meta}
                                     name="colors.surface"
                                     label="Surface Color"
-                                    allowGradient={
-                                        getCurrentColorStyle() === "gradient"
-                                    }
+                                    allowGradient
                                     description="This colors get applied to Cards (it automatically adapts to certain UI elements)"
-                                    onChange={handleChange}
+                                    onChange={(result: ColorResult) =>
+                                        handleChange(result.hex)
+                                    }
                                     onBlur={handleBlur}
                                     value={value}
                                     required
@@ -949,7 +887,9 @@ export const ThemeCreator = observer(() => {
                                     name="colors.common.black"
                                     label="Black"
                                     description="The color to use for text and icons on a light background"
-                                    onChange={handleChange}
+                                    onChange={(result: ColorResult) =>
+                                        handleChange(result.hex)
+                                    }
                                     onBlur={handleBlur}
                                     value={value}
                                     required
@@ -971,7 +911,9 @@ export const ThemeCreator = observer(() => {
                                     label="White"
                                     description="The color to use for text and icons on a dark background"
                                     required
-                                    onChange={handleChange}
+                                    onChange={(result: ColorResult) =>
+                                        handleChange(result.hex)
+                                    }
                                     onBlur={handleBlur}
                                     value={value}
                                 />
@@ -1000,7 +942,9 @@ export const ThemeCreator = observer(() => {
                                     label="Primary Color"
                                     description="Usually used to indicate the primary action or important elements"
                                     required
-                                    onChange={handleChange}
+                                    onChange={(result: ColorResult) =>
+                                        handleChange(result.hex)
+                                    }
                                     onBlur={handleBlur}
                                     value={value}
                                 />
@@ -1021,7 +965,9 @@ export const ThemeCreator = observer(() => {
                                     label="Neutral Color"
                                     description="Usually used to indicate a neutral or inactive state"
                                     required
-                                    onChange={handleChange}
+                                    onChange={(result: ColorResult) =>
+                                        handleChange(result.hex)
+                                    }
                                     onBlur={handleBlur}
                                     value={value}
                                 />
@@ -1042,7 +988,9 @@ export const ThemeCreator = observer(() => {
                                     label="Danger Color"
                                     description="Usually used to indicate errors and failure within the app"
                                     required
-                                    onChange={handleChange}
+                                    onChange={(result: ColorResult) =>
+                                        handleChange(result.hex)
+                                    }
                                     onBlur={handleBlur}
                                     value={value}
                                 />
@@ -1063,7 +1011,9 @@ export const ThemeCreator = observer(() => {
                                     label="Warning Color"
                                     description="Usually used to indicate caution and requires user attention"
                                     required
-                                    onChange={handleChange}
+                                    onChange={(result: ColorResult) =>
+                                        handleChange(result.hex)
+                                    }
                                     onBlur={handleBlur}
                                     value={value}
                                 />
@@ -1084,7 +1034,9 @@ export const ThemeCreator = observer(() => {
                                     required
                                     label="Info Color"
                                     description="Usually used to indicate additional information"
-                                    onChange={handleChange}
+                                    onChange={(result: ColorResult) =>
+                                        handleChange(result.hex)
+                                    }
                                     onBlur={handleBlur}
                                     value={value}
                                 />
@@ -1104,7 +1056,9 @@ export const ThemeCreator = observer(() => {
                                     name="colors.success"
                                     label="Success Color"
                                     description="Usually used to indicate a successful or positive action"
-                                    onChange={handleChange}
+                                    onChange={(result: ColorResult) =>
+                                        handleChange(result.hex)
+                                    }
                                     onBlur={handleBlur}
                                     value={value}
                                     required
@@ -1134,7 +1088,9 @@ export const ThemeCreator = observer(() => {
                                     label="Primary Color"
                                     description="Used for important text"
                                     required
-                                    onChange={handleChange}
+                                    onChange={(result: ColorResult) =>
+                                        handleChange(result.hex)
+                                    }
                                     onBlur={handleBlur}
                                     value={value}
                                 />
@@ -1155,7 +1111,9 @@ export const ThemeCreator = observer(() => {
                                     label="Secondary Color"
                                     description="Used for less important text"
                                     required
-                                    onChange={handleChange}
+                                    onChange={(result: ColorResult) =>
+                                        handleChange(result.hex)
+                                    }
                                     onBlur={handleBlur}
                                     value={value}
                                 />
@@ -1176,7 +1134,9 @@ export const ThemeCreator = observer(() => {
                                     description="Used for accentuating important elements"
                                     required
                                     label="Accent Color"
-                                    onChange={handleChange}
+                                    onChange={(result: ColorResult) =>
+                                        handleChange(result.hex)
+                                    }
                                     onBlur={handleBlur}
                                     value={value}
                                 />
@@ -1196,7 +1156,9 @@ export const ThemeCreator = observer(() => {
                                     name="typography.colors.muted"
                                     description="Used for muted elements"
                                     label="Muted Color"
-                                    onChange={handleChange}
+                                    onChange={(result: ColorResult) =>
+                                        handleChange(result.hex)
+                                    }
                                     onBlur={handleBlur}
                                     value={value}
                                     required

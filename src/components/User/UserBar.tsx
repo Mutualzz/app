@@ -88,9 +88,6 @@ export const UserBar = observer(() => {
                                 openModal(
                                     "user-settings",
                                     <UserSettingsModal />,
-                                    {
-                                        layout: "fullscreen",
-                                    },
                                 )
                             }
                             color="neutral"
