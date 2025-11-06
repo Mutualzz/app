@@ -1,12 +1,15 @@
-import { UserSidebarProvider } from "@contexts/UserSidebar.context";
+import { SettingsSidebarProvider } from "@contexts/SettingsSidebar.context";
 import { Drawer, Paper, Stack, useTheme } from "@mutualzz/ui-web";
 import { useMediaQuery } from "@react-hookz/web";
 import { observer } from "mobx-react";
+import { motion } from "motion/react";
 import { useState } from "react";
-import { UserSettingsSidebar } from "./UserSettingsSidebar";
-import { UserSidebarContent } from "./UserSidebarContent";
+import { SettingsContent } from "./SettingsContent";
+import { UserSettingsSidebar } from "./SettingsSidebar";
 
-export const UserSettingsModal = observer(() => {
+const AnimatedPaper = motion.create(Paper);
+
+export const SettingsModal = observer(() => {
     const { theme } = useTheme();
     const isMobileQuery = useMediaQuery(
         theme.breakpoints.down("md").replace("@media", ""),
@@ -15,8 +18,8 @@ export const UserSettingsModal = observer(() => {
     const [drawerOpen, setDrawerOpen] = useState(false);
 
     return (
-        <UserSidebarProvider>
-            <Paper
+        <SettingsSidebarProvider>
+            <AnimatedPaper
                 width="90vw"
                 height="100%"
                 p={{ xs: "0.5rem", sm: "1.5rem", md: "2rem" }}
@@ -24,6 +27,8 @@ export const UserSettingsModal = observer(() => {
                 overflow="auto"
                 justifyContent="center"
                 alignItems="center"
+                initial={{ scale: 0.95 }}
+                animate={{ scale: 1 }}
                 nonTranslucent
             >
                 {isMobileQuery ? (
@@ -47,7 +52,7 @@ export const UserSettingsModal = observer(() => {
                             p={{ xs: "1rem", sm: "2rem" }}
                             overflow="auto"
                         >
-                            <UserSidebarContent />
+                            <SettingsContent />
                         </Stack>
                     </Stack>
                 ) : (
@@ -66,11 +71,11 @@ export const UserSettingsModal = observer(() => {
                             p={{ xs: "1rem", sm: "2rem" }}
                             overflow="auto"
                         >
-                            <UserSidebarContent />
+                            <SettingsContent />
                         </Stack>
                     </Stack>
                 )}
-            </Paper>
-        </UserSidebarProvider>
+            </AnimatedPaper>
+        </SettingsSidebarProvider>
     );
 });

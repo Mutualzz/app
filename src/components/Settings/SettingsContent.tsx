@@ -1,12 +1,13 @@
-import { useUserSidebar } from "@contexts/UserSidebar.context";
+import { useSettingsSidebar } from "@contexts/SettingsSidebar.context";
 import { Stack, Typography } from "@mutualzz/ui-web";
 import startCase from "lodash-es/startCase";
 import { observer } from "mobx-react";
+import { AppAppearanceSettings } from "./pages/AppAppearanceSettings";
 import { UserAccountSettings } from "./pages/UserAccountSettings";
 import { UserProfileSettings } from "./pages/UserProfileSettings";
 
-export const UserSidebarContent = observer(() => {
-    const { currentPage } = useUserSidebar();
+export const SettingsContent = observer(() => {
+    const { currentPage } = useSettingsSidebar();
 
     return (
         <Stack width="100%" height="100%" direction="column">
@@ -20,6 +21,7 @@ export const UserSidebarContent = observer(() => {
             </Typography>
             {currentPage === "profile" && <UserProfileSettings />}
             {currentPage === "my-account" && <UserAccountSettings />}
+            {currentPage === "appearance" && <AppAppearanceSettings />}
         </Stack>
     );
 });

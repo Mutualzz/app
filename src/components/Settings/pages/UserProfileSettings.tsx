@@ -67,6 +67,14 @@ export const UserProfileSettings = observer(() => {
                                     openModal(
                                         "avatar-upload",
                                         <AvatarUpload />,
+                                        {
+                                            showCloseButton: false,
+                                            css: {
+                                                display: "flex",
+                                                justifyContent: "center",
+                                                alignItems: "center",
+                                            },
+                                        },
                                     );
                                 }}
                             >
