@@ -6,7 +6,7 @@ use tauri::{
 
 pub fn create_tray<R: Runtime>(app: &tauri::AppHandle<R>) -> tauri::Result<()> {
     let branding = MenuItem::with_id(app, "name", "Mutualzz", false, None::<String>)?;
-    let quit_i = MenuItem::with_id(app, "quit", "Quit", true, None::<String>)?;
+    let quit_i = MenuItem::with_id(app, "quit", "Quit Mutualzz", true, None::<String>)?;
     let menu1 = Menu::with_items(app, &[&branding, &quit_i])?;
 
     let _ = TrayIconBuilder::with_id("main")
