@@ -20,7 +20,6 @@ export const UserAvatar = observer(({ user, ...props }: UserAvatarProps) => {
             }
             onMouseEnter={() => setFocused(true)}
             onMouseLeave={() => setFocused(false)}
-            alt={user.globalName ? user.globalName : user.username}
             css={{
                 cursor: "pointer",
             }}
