@@ -97,6 +97,7 @@ export class AppStore {
         this.mode = null;
         this.rest.setToken(null);
         secureStorageAdapter.clear();
+        this.resetMode();
         this.theme.reset();
     }
 
