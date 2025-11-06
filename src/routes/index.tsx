@@ -200,6 +200,9 @@ function Index() {
                                         openModal(
                                             "theme-maker",
                                             <ThemeCreator />,
+                                            {
+                                                height: "100%",
+                                            },
                                         );
                                     }}
                                     size={{ xs: "sm", sm: "md", md: "lg" }}
