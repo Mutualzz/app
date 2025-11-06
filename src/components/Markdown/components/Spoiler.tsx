@@ -1,18 +1,8 @@
 import { dynamicElevation, formatColor, styled } from "@mutualzz/ui-core";
 import { useState, type PropsWithChildren } from "react";
 
-const SpoilerWrapper = styled("span")<{ revealed: boolean }>(({
-    theme,
-    revealed,
-}) => {
-    console.log(
-        revealed,
-        revealed
-            ? dynamicElevation(theme.colors.surface, 5)
-            : theme.typography.colors.muted,
-        revealed ? "inherit" : "transparent",
-    );
-    return {
+const SpoilerWrapper = styled("span")<{ revealed: boolean }>(
+    ({ theme, revealed }) => ({
         display: "inline-block",
         borderRadius: 4,
         paddingInline: 1,
@@ -40,8 +30,8 @@ const SpoilerWrapper = styled("span")<{ revealed: boolean }>(({
                   })
                 : undefined,
         },
-    };
-});
+    }),
+);
 
 const Spoiler = ({ children }: PropsWithChildren) => {
     const [revealed, setRevealed] = useState(false);
