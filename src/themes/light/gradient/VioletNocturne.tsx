@@ -6,6 +6,7 @@ export const violetNocturneTheme: Theme = {
     id: "violetNocturne",
     name: "Violet Nocturne",
     description: "Gothic violet gradients",
+    adaptive: false,
     type: "light",
     style: "gradient",
     colors: {

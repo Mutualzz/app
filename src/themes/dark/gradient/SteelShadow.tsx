@@ -6,6 +6,7 @@ export const steelShadowTheme: Theme = {
     id: "steelShadow",
     name: "Steel Shadow",
     description: "Dystopian, sharp gradients",
+    adaptive: false,
     type: "dark",
     style: "gradient",
     colors: {

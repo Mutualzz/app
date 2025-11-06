@@ -6,6 +6,7 @@ export const rustAuroraTheme: Theme = {
     id: "rustAurora",
     name: "Rust Aurora",
     description: "Warm, industrial gradients",
+    adaptive: false,
     type: "light",
     style: "gradient",
     colors: {

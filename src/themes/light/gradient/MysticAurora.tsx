@@ -6,6 +6,7 @@ export const mysticAuroraTheme: Theme = {
     id: "mysticAurora",
     name: "Mystic Aurora",
     description: "Magical morning gradients",
+    adaptive: false,
     type: "light",
     style: "gradient",
     colors: {

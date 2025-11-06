@@ -6,6 +6,7 @@ export const velvetDreamTheme: Theme = {
     id: "velvetDream",
     name: "Velvet Dream",
     description: "Dramatic, vintage gradients",
+    adaptive: false,
     type: "light",
     style: "gradient",
     colors: {

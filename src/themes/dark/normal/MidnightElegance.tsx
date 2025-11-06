@@ -6,6 +6,7 @@ export const midnightEleganceTheme: Theme = {
     id: "midnightElegance",
     name: "Midnight Elegance",
     description: "Dark Victorian Vibes",
+    adaptive: false,
     type: "dark",
     style: "normal",
     colors: {

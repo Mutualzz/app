@@ -6,6 +6,7 @@ export const floralRadianceTheme: Theme = {
     id: "floralRadiance",
     name: "Floral Radiance",
     description: "Floral, radiant gradients",
+    adaptive: false,
     type: "light",
     style: "gradient",
     colors: {

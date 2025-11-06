@@ -6,6 +6,7 @@ export const arcaneMidnightTheme: Theme = {
     id: "arcaneMidnight",
     name: "Arcane Midnight",
     description: "Mystical, arcane gradients",
+    adaptive: false,
     type: "dark",
     style: "gradient",
     colors: {

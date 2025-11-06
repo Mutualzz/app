@@ -6,6 +6,8 @@ export const chromeVeilTheme: Theme = {
     id: "chromeVeil",
     name: "Chrome Veil",
     description: "Industrial Soft Metal",
+    adaptive: false,
+    style: "normal",
     type: "light",
     colors: {
         ...baseLightTheme.colors,

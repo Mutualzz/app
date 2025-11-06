@@ -6,6 +6,7 @@ export const eternalMourningTheme: Theme = {
     id: "eternalMourning",
     name: "Eternal Mourning",
     description: "Melancholic & Gothic Elegance",
+    adaptive: false,
     type: "dark",
     style: "normal",
     colors: {

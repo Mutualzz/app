@@ -6,6 +6,8 @@ export const mistOfHopeTheme: Theme = {
     id: "mistOfHope",
     name: "Mist of Hope",
     description: "Soft & Uplifting",
+    adaptive: false,
+    style: "normal",
     type: "light",
     colors: {
         ...baseLightTheme.colors,

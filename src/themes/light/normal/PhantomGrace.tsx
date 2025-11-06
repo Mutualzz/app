@@ -6,6 +6,8 @@ export const phantomGraceTheme: Theme = {
     id: "phantomGrace",
     name: "Phantom Grace",
     description: "Eerie & Ethereal",
+    adaptive: false,
+    style: "normal",
     type: "light",
     colors: {
         ...baseLightTheme.colors,

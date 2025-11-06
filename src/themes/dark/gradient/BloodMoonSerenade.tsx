@@ -6,6 +6,7 @@ export const bloodMoonSerenadeTheme: Theme = {
     id: "bloodMoonSerenade",
     name: "Blood Moon Serenade",
     description: "Crimson gradients of romance and tragedy",
+    adaptive: false,
     type: "dark",
     style: "gradient",
     colors: {

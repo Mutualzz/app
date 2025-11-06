@@ -6,6 +6,7 @@ export const fogOfDespairTheme: Theme = {
     id: "fogOfDespair",
     name: "Fog of Despair",
     description: "Cold, Distant, and Ethereal",
+    adaptive: false,
     type: "dark",
     style: "normal",
     colors: {

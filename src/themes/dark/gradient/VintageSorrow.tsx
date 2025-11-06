@@ -6,6 +6,7 @@ export const vintageSorrowTheme: Theme = {
     id: "vintageSorrow",
     name: "Vintage Sorrow",
     description: "Dramatic, vintage gradients",
+    adaptive: false,
     type: "dark",
     style: "gradient",
     colors: {

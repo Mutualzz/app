@@ -6,6 +6,7 @@ export const sereneHorizonTheme: Theme = {
     id: "sereneHorizon",
     name: "Serene Horizon",
     description: "Uplifting, hopeful gradients",
+    adaptive: false,
     type: "light",
     style: "gradient",
     colors: {

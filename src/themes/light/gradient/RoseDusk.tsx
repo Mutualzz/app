@@ -6,6 +6,7 @@ export const roseDuskTheme: Theme = {
     id: "roseDusk",
     name: "Rose Dusk",
     description: "Romantic, soft gradients",
+    adaptive: false,
     type: "light",
     style: "gradient",
     colors: {

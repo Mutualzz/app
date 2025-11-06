@@ -6,6 +6,8 @@ export const arcaneSunriseTheme: Theme = {
     id: "arcaneSunrise",
     name: "Arcane Sunrise",
     description: "Mystical Morning Glow",
+    adaptive: false,
+    style: "normal",
     type: "light",
     colors: {
         ...baseLightTheme.colors,

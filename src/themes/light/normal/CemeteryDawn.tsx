@@ -6,6 +6,8 @@ export const cemeteryDawnTheme: Theme = {
     id: "cemeteryDawn",
     name: "Cemetery Dawn",
     description: "Muted Morning Mist",
+    adaptive: false,
+    style: "normal",
     type: "light",
     colors: {
         ...baseLightTheme.colors,

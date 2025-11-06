@@ -6,6 +6,7 @@ export const tranquilDepthsTheme: Theme = {
     id: "tranquilDepths",
     name: "Tranquil Depths",
     description: "Calm, oceanic gradients",
+    adaptive: false,
     type: "light",
     style: "gradient",
     colors: {

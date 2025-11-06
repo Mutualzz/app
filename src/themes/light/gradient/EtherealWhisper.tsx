@@ -6,6 +6,7 @@ export const etherealWhisperTheme: Theme = {
     id: "etherealWhisper",
     name: "Ethereal Whisper",
     description: "Eerie, ethereal gradients",
+    adaptive: false,
     type: "light",
     style: "gradient",
     colors: {

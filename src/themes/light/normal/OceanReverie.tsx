@@ -6,6 +6,8 @@ export const oceanReverieTheme: Theme = {
     id: "oceanReverie",
     name: "Ocean Reverie",
     description: "Deep Ocean Calm",
+    adaptive: false,
+    style: "normal",
     type: "light",
     colors: {
         ...baseLightTheme.colors,

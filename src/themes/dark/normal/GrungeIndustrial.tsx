@@ -6,6 +6,7 @@ export const grungeIndustrialTheme: Theme = {
     id: "grungeIndustrial",
     name: "Grunge & Industrial",
     description: "90s Underground Aesthetic",
+    adaptive: false,
     type: "dark",
     style: "normal",
     colors: {

@@ -6,6 +6,8 @@ export const rustRevivalTheme: Theme = {
     id: "rustRevival",
     name: "Rust Revival",
     description: "Industrial Warm Rust",
+    adaptive: false,
+    style: "normal",
     type: "light",
     colors: {
         ...baseLightTheme.colors,

@@ -7,6 +7,7 @@ export type MzTheme = Theme & APITheme;
 export interface ThemeDraft {
     name: string;
     description?: string;
+    adaptive: boolean;
     type: Omit<ThemeType, "system">;
     style: ThemeStyle;
     colors: {

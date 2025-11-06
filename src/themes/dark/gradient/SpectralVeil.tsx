@@ -6,6 +6,7 @@ export const spectralVeilTheme: Theme = {
     id: "spectralVeil",
     name: "Spectral Veil",
     description: "Ethereal, softly dark gradients",
+    adaptive: false,
     type: "dark",
     style: "gradient",
     colors: {

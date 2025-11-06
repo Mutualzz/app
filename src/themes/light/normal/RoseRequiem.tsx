@@ -6,6 +6,8 @@ export const roseRequiemTheme: Theme = {
     id: "roseRequiem",
     name: "Rose Requiem",
     description: "Romantic & Soft Light",
+    adaptive: false,
+    style: "normal",
     type: "light",
     colors: {
         ...baseLightTheme.colors,

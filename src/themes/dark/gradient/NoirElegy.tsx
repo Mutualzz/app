@@ -6,6 +6,7 @@ export const noirElegyTheme: Theme = {
     id: "noirElegy",
     name: "Noir Elegy",
     description: "Melancholic gothic gradients",
+    adaptive: false,
     type: "dark",
     style: "gradient",
     colors: {
