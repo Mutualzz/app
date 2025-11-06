@@ -1,8 +1,11 @@
+import { SettingsModal } from "@components/Settings/SettingsModal";
+import { ThemeCreator } from "@components/ThemeCreator";
 import { ThemeSelector } from "@components/ThemeSelector";
 import { UserAvatar } from "@components/User/UserAvatar";
 import { useModal } from "@contexts/Modal.context";
 import { useAppStore } from "@hooks/useStores";
 import {
+    Button,
     IconButton,
     Paper,
     Popover,
@@ -11,14 +14,16 @@ import {
     Typography,
 } from "@mutualzz/ui-web";
 import { observer } from "mobx-react";
+import { useState } from "react";
 import { FaCogs, FaPalette } from "react-icons/fa";
 import { MdLogout } from "react-icons/md";
-import { UserSettingsModal } from "./UserSettingsModal";
 
 export const UserBar = observer(() => {
     const app = useAppStore();
     const { openModal } = useModal();
     const { account } = app;
+
+    const [isOpen, setIsOpen] = useState(false);
 
     if (!account) return <></>;
 
@@ -64,11 +69,13 @@ export const UserBar = observer(() => {
                                     size="sm"
                                     color="neutral"
                                     variant="plain"
+                                    onClick={() => setIsOpen((prev) => !prev)}
                                 >
                                     <FaPalette />
                                 </IconButton>
                             </Tooltip>
                         }
+                        isOpen={isOpen}
                     >
                         <Paper
                             spacing={10}
@@ -77,18 +84,32 @@ export const UserBar = observer(() => {
                             elevation={5}
                         >
                             <ThemeSelector />
+                            <Button
+                                color="success"
+                                onClick={() => {
+                                    openModal(
+                                        "theme-creator",
+                                        <ThemeCreator />,
+                                        {
+                                            height: "100%",
+                                        },
+                                    );
+                                    setIsOpen(false);
+                                }}
+                            >
+                                Theme Editor
+                            </Button>
                         </Paper>
                     </Popover>
                 </Stack>
                 <Stack direction="column">
-                    <Tooltip title="User Settings">
+                    <Tooltip placement="right" title="User Settings">
                         <IconButton
                             size="sm"
                             onClick={() =>
-                                openModal(
-                                    "user-settings",
-                                    <UserSettingsModal />,
-                                )
+                                openModal("user-settings", <SettingsModal />, {
+                                    height: "100%",
+                                })
                             }
                             color="neutral"
                             variant="plain"
@@ -96,7 +117,7 @@ export const UserBar = observer(() => {
                             <FaCogs />
                         </IconButton>
                     </Tooltip>
-                    <Tooltip title="Logout">
+                    <Tooltip placement="right" title="Logout">
                         <IconButton
                             size="sm"
                             onClick={() => {
