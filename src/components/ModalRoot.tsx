@@ -17,6 +17,7 @@ export const ModalRoot = () => {
                     onClose={() => closeModal(modal.id)}
                     css={{
                         zIndex: theme.zIndex.modal + idx,
+                        ...modal.props?.css,
                     }}
                 >
                     {modal.content}
