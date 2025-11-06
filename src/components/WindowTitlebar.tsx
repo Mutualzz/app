@@ -88,11 +88,7 @@ const WindowTitlebar = ({ onHeightChange }: WindowTitlebarProps) => {
                 data-tauri-drag-region
             >
                 {updaterStore?.update && (
-                    <Stack
-                        px={isMac ? 15 : 0}
-                        alignItems="center"
-                        css={{ gap: 8 }}
-                    >
+                    <Stack px={isMac ? 15 : 0} alignItems="center" spacing={8}>
                         <IconButton
                             onClick={() => updaterStore.installUpdate()}
                             size={18}
