@@ -319,7 +319,7 @@ function PlaygroundLinearProgress() {
                             color="primary"
                             placeholder="Enter a color (e.g., #ff0000)"
                             value={customColor}
-                            onChange={(result: ColorResult) =>
+                            onChangeResult={(result: ColorResult) =>
                                 setCustomColor(result.hex)
                             }
                             endDecorator={

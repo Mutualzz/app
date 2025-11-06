@@ -205,9 +205,7 @@ function PlaygroundDivider() {
                             placeholder="Enter a color (e.g., #ff0000, red)"
                             value={customLineColor}
                             showRandom
-                            onChange={(result) =>
-                                setCustomLineColor(result.hex)
-                            }
+                            onChange={(result) => setCustomLineColor(result)}
                         />
                     ) : (
                         <Select
@@ -254,7 +252,7 @@ function PlaygroundDivider() {
                                     placeholder="Enter a color (e.g., #ff0000, red)"
                                     value={customTextColor}
                                     onChange={(result) =>
-                                        setCustomTextColor(result.hex)
+                                        setCustomTextColor(result)
                                     }
                                     showRandom
                                 />

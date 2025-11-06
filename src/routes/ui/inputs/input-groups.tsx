@@ -395,7 +395,7 @@ function PlaygroundInputGroups() {
                             color="primary"
                             placeholder="Enter color (e.g. #ff0000)"
                             value={customColor}
-                            onChange={(result: ColorResult) =>
+                            onChangeResult={(result: ColorResult) =>
                                 setCustomColor(result.hex)
                             }
                             showRandom
@@ -450,7 +450,7 @@ function PlaygroundInputGroups() {
                                     color="primary"
                                     placeholder="Enter color (e.g. #ff0000)"
                                     value={customSeparatorColor}
-                                    onChange={(result: ColorResult) =>
+                                    onChangeResult={(result: ColorResult) =>
                                         setCustomSeparatorColor(result.hex)
                                     }
                                     showRandom
