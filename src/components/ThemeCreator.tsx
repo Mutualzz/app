@@ -1,11 +1,15 @@
 import type { MzTheme, ThemeDraft } from "@app-types/theme";
+import { usePrefersDark } from "@hooks/usePrefersDark";
 import { useAppStore } from "@hooks/useStores";
 import type { HttpException } from "@mutualzz/types";
 import {
     baseDarkTheme,
+    baseLightTheme,
     createColor,
     extractColors,
     isValidGradient,
+    randomColor,
+    type ColorLike,
     type ColorResult,
     type ThemeStyle,
     type ThemeType,
@@ -13,6 +17,7 @@ import {
 import {
     Button,
     ButtonGroup,
+    Checkbox,
     Divider,
     Drawer,
     Input,
@@ -35,10 +40,13 @@ import {
     type AnyFormApi,
 } from "@tanstack/react-form";
 import { useMutation } from "@tanstack/react-query";
+import { adaptColors } from "@utils/adaptation";
 import { sortThemes } from "@utils/index";
 import capitalize from "lodash-es/capitalize";
 import { observer } from "mobx-react";
+import { motion } from "motion/react";
 import { useEffect, useState } from "react";
+import { FaShuffle } from "react-icons/fa6";
 
 type ApiErrors = Record<string, string>;
 
@@ -56,12 +64,11 @@ const InputWithLabel = ({
     description?: string;
     apiErrors: ApiErrors;
 } & InputProps) => (
-    <Stack direction="column" spacing={{ xs: 2, sm: 3, md: 4 }} width="100%">
+    <Stack direction="column" spacing={{ xs: 0.5, sm: 1, md: 2 }} width="100%">
         <Stack direction="column">
             <Typography
                 fontWeight={500}
                 level={{ xs: "body-sm", sm: "body-md" }}
-                mb={{ xs: "0.25rem", sm: "0.5rem" }}
             >
                 {label}{" "}
                 {props.required && (
@@ -105,9 +112,12 @@ const defaultMeta: FormMeta = {
     submitAction: "create",
 };
 
+const AnimatedPaper = motion.create(Paper);
+
 export const ThemeCreator = observer(() => {
     const { draft, rest, theme: themeStore } = useAppStore();
-    const { theme } = useTheme();
+    const { theme, changeTheme } = useTheme();
+    const prefersDark = usePrefersDark();
     const [apiErrors, setApiErrors] = useState<ApiErrors>({});
     const [loadedPreset, setLoadedPreset] = useState<MzTheme | null>(null);
     const [loadedDraft, setLoadedDraft] = useState<ThemeDraft | null>(null);
@@ -118,6 +128,8 @@ export const ThemeCreator = observer(() => {
     const [colorType, setColorType] =
         useState<Omit<ThemeType, "system">>("dark");
     const [colorStyle, setColorStyle] = useState<ThemeStyle>("normal");
+
+    const [adaptationEnabled, setAdaptationEnabled] = useState(true);
 
     const isMobileQuery = useMediaQuery(
         theme.breakpoints.down("md").replace("@media", ""),
@@ -145,15 +157,26 @@ export const ThemeCreator = observer(() => {
         description: "",
     };
 
-    const derivedStyle: ThemeStyle =
-        loadedUserTheme?.style ??
-        loadedDraft?.style ??
-        loadedPreset?.style ??
-        "normal";
+    const loaded = loadedUserTheme ?? loadedDraft ?? loadedPreset;
+
+    const derivedType = loaded
+        ? loaded.type
+        : colorType || (prefersDark ? "dark" : "light");
+    const derivedStyle = loaded ? loaded.style : colorStyle || "normal";
+    const derivedAdaptive = loaded ? loaded.adaptive : adaptationEnabled;
 
     useEffect(() => {
         form.setFieldValue("style", derivedStyle);
     }, [derivedStyle]);
+
+    useEffect(() => {
+        form.setFieldValue("type", derivedType);
+    }, [derivedType]);
+
+    useEffect(() => {
+        form.setFieldValue("adaptive", derivedAdaptive);
+        setAdaptationEnabled(derivedAdaptive);
+    }, [derivedAdaptive]);
 
     const load = (
         toLoad: string,
@@ -225,7 +248,21 @@ export const ThemeCreator = observer(() => {
 
     const themePut = useMutation({
         mutationFn: async (values: any) => {
-            const response = await rest.put<any, MzTheme>("@me/themes", values);
+            let dataToSubmit = values;
+            if (adaptationEnabled)
+                dataToSubmit = {
+                    ...values,
+                    ...adaptColors({
+                        baseColor: values.colors.background,
+                        primaryColor: values.colors.primary,
+                        primaryText: values.typography.colors.primary,
+                    }),
+                };
+
+            const response = await rest.put<any, MzTheme>(
+                "@me/themes",
+                dataToSubmit,
+            );
 
             return response;
         },
@@ -241,9 +278,20 @@ export const ThemeCreator = observer(() => {
 
     const themePatch = useMutation({
         mutationFn: async (values: any) => {
+            let dataToSubmit = values;
+            if (adaptationEnabled)
+                dataToSubmit = {
+                    ...values,
+                    ...adaptColors({
+                        baseColor: values.colors.background,
+                        primaryColor: values.colors.primary,
+                        primaryText: values.typography.colors.primary,
+                    }),
+                };
+
             const response = await rest.patch<any, MzTheme>(
                 "@me/themes",
-                values,
+                dataToSubmit,
                 {
                     id: loadedUserTheme?.id,
                 },
@@ -278,21 +326,22 @@ export const ThemeCreator = observer(() => {
         theme?: MzTheme | ThemeDraft,
         type?: "userTheme" | "draft" | "preset",
     ) => {
-        if (theme && type) {
-            form.setFieldValue("name", type === "preset" ? "" : theme.name);
-            form.setFieldValue(
-                "description",
-                type === "preset" ? "" : (theme.description ?? ""),
-            );
-            form.setFieldValue("type", theme.type);
+        if (theme) {
+            if (type) {
+                form.setFieldValue("name", type === "preset" ? "" : theme.name);
+                form.setFieldValue(
+                    "description",
+                    type === "preset" ? "" : (theme.description ?? ""),
+                );
+                form.setFieldValue("adaptive", theme.adaptive);
+                form.setFieldValue("style", theme.style);
+                form.setFieldValue("type", theme.type);
+            }
+
             form.setFieldValue("colors", theme.colors);
             form.setFieldValue("typography", theme.typography);
+        } else form.reset(defaultValues);
 
-            setFormKey((prev) => prev + 1);
-            return;
-        }
-
-        form.reset(defaultValues);
         setFormKey((prev) => prev + 1);
     };
 
@@ -360,6 +409,9 @@ export const ThemeCreator = observer(() => {
                 themeDelete.mutate(loadedUserTheme.id, {
                     onSuccess: (data) => {
                         themeStore.removeTheme(data.id);
+                        changeTheme(
+                            prefersDark ? baseDarkTheme : baseLightTheme,
+                        );
                         unloadAndReset(form);
                     },
                 });
@@ -387,6 +439,44 @@ export const ThemeCreator = observer(() => {
             }
         },
     });
+
+    const randomizeColors = () => {
+        const data = {
+            name: form.getFieldValue("name"),
+            description: form.getFieldValue("description"),
+            adaptive: adaptationEnabled,
+            style: form.getFieldValue("style"),
+            type: form.getFieldValue("type"),
+            colors: {
+                background: randomColor("hex"),
+                primary: randomColor("hex"),
+                ...(!adaptationEnabled && {
+                    common: {
+                        black: randomColor("hex"),
+                        white: randomColor("hex"),
+                    },
+                    surface: randomColor("hex"),
+                    neutral: randomColor("hex"),
+                    success: randomColor("hex"),
+                    info: randomColor("hex"),
+                    warning: randomColor("hex"),
+                    danger: randomColor("hex"),
+                }),
+            },
+            typography: {
+                colors: {
+                    primary: randomColor("hex"),
+                    ...(!adaptationEnabled && {
+                        secondary: randomColor("hex"),
+                        accent: randomColor("hex"),
+                        muted: randomColor("hex"),
+                    }),
+                },
+            },
+        };
+
+        updateForm(form, data as MzTheme);
+    };
 
     const SidebarContent = () => (
         <form.Subscribe
@@ -641,7 +731,14 @@ export const ThemeCreator = observer(() => {
     );
 
     return (
-        <Paper direction="row" nonTranslucent width="100%" height="100%">
+        <AnimatedPaper
+            initial={{ scale: 0.95 }}
+            animate={{ scale: 1 }}
+            direction="row"
+            nonTranslucent
+            width="100%"
+            height="100%"
+        >
             <form
                 onSubmit={(e) => {
                     e.preventDefault();
@@ -681,10 +778,10 @@ export const ThemeCreator = observer(() => {
                         direction="column"
                         width="100%"
                         height="100%"
-                        maxWidth="800px"
+                        maxWidth={800}
                         flex={1}
                         p={{ xs: "0.75rem", sm: "1rem" }}
-                        spacing={{ xs: 2, sm: 4, md: 6 }}
+                        spacing={{ xs: 2, sm: 4, md: 8 }}
                         overflowY="auto"
                     >
                         <Stack
@@ -757,417 +854,460 @@ export const ThemeCreator = observer(() => {
                                 </Typography>
                             )}
                         </Stack>
-                        <form.Field
-                            name="name"
-                            children={({
-                                state: { meta, value },
-                                handleChange,
-                                handleBlur,
-                            }) => (
-                                <InputWithLabel
-                                    type="text"
-                                    apiErrors={apiErrors}
-                                    meta={meta}
-                                    name="name"
-                                    label="Name"
-                                    description="The name for your theme"
-                                    onChange={(e) =>
-                                        handleChange(e.target.value)
-                                    }
-                                    onBlur={handleBlur}
-                                    value={value}
-                                    required
-                                />
-                            )}
-                        />
-                        <form.Field
-                            name="description"
-                            children={({
-                                state: { meta, value },
-                                handleChange,
-                                handleBlur,
-                            }) => (
-                                <InputWithLabel
-                                    type="text"
-                                    apiErrors={apiErrors}
-                                    meta={meta}
-                                    name="description"
-                                    label="Description"
-                                    description="A brief description of your theme"
-                                    onChange={(e) =>
-                                        handleChange(e.target.value)
-                                    }
-                                    onBlur={handleBlur}
-                                    value={value}
-                                />
-                            )}
-                        />
-                        <Divider />
-                        <Stack direction="column" spacing={1}>
-                            <Typography level="h4">Common Colors</Typography>
-                            <Typography level="body-sm">
-                                These colors are used to calibrate some UI
-                                elements.
-                            </Typography>
-                        </Stack>
-                        <form.Field
-                            name="colors.background"
-                            children={({
-                                state: { meta, value },
-                                handleChange,
-                                handleBlur,
-                            }) => (
-                                <InputWithLabel
-                                    type="color"
-                                    apiErrors={apiErrors}
-                                    meta={meta}
-                                    name="colors.background"
-                                    required
-                                    label="Background Color"
-                                    allowGradient
-                                    description="The background color of the app"
-                                    onChange={(result: ColorResult) => {
-                                        const val = result.hex;
-                                        handleChange(val);
-                                        let isDark = false;
-                                        if (
-                                            isValidGradient(val) &&
-                                            extractColors(val) &&
-                                            extractColors(val)!.length > 0
-                                        ) {
-                                            isDark = createColor(
-                                                extractColors(val)![0],
-                                            ).isDark();
-                                        } else {
-                                            isDark = createColor(val).isDark();
+                        <Stack direction="column" width="100%" spacing={10}>
+                            <form.Field
+                                name="name"
+                                children={({
+                                    state: { meta, value },
+                                    handleChange,
+                                    handleBlur,
+                                }) => (
+                                    <InputWithLabel
+                                        type="text"
+                                        apiErrors={apiErrors}
+                                        meta={meta}
+                                        name="name"
+                                        label="Name"
+                                        description="The name for your theme"
+                                        onChange={(e) =>
+                                            handleChange(e.target.value)
                                         }
-                                        if (isDark) setColorType("dark");
-                                        else setColorType("light");
-                                    }}
-                                    onBlur={handleBlur}
-                                    value={value}
-                                />
+                                        onBlur={handleBlur}
+                                        value={value}
+                                        required
+                                    />
+                                )}
+                            />
+                            <form.Field
+                                name="description"
+                                children={({
+                                    state: { meta, value },
+                                    handleChange,
+                                    handleBlur,
+                                }) => (
+                                    <InputWithLabel
+                                        type="text"
+                                        apiErrors={apiErrors}
+                                        meta={meta}
+                                        name="description"
+                                        label="Description"
+                                        description="A brief description of your theme"
+                                        onChange={(e) =>
+                                            handleChange(e.target.value)
+                                        }
+                                        onBlur={handleBlur}
+                                        value={value}
+                                    />
+                                )}
+                            />
+                            <Divider />
+                            <Stack
+                                direction="row"
+                                spacing={10}
+                                alignItems="center"
+                                justifyContent="space-between"
+                            >
+                                <Typography level="h4">Colors</Typography>
+                                <Stack
+                                    justifyContent="center"
+                                    alignItems="center"
+                                    spacing={10}
+                                >
+                                    <Button
+                                        startDecorator={<FaShuffle />}
+                                        color="danger"
+                                        onClick={() => randomizeColors()}
+                                    >
+                                        Randomize
+                                    </Button>
+                                    <Checkbox
+                                        label="Adapt"
+                                        checked={adaptationEnabled}
+                                        onChange={() =>
+                                            setAdaptationEnabled(
+                                                (prev) => !prev,
+                                            )
+                                        }
+                                        variant="outlined"
+                                    />
+                                </Stack>
+                            </Stack>
+                            <form.Field
+                                name="colors.background"
+                                children={({
+                                    state: { meta, value },
+                                    handleChange,
+                                    handleBlur,
+                                }) => (
+                                    <InputWithLabel
+                                        type="color"
+                                        apiErrors={apiErrors}
+                                        meta={meta}
+                                        name="colors.background"
+                                        required
+                                        label={
+                                            adaptationEnabled
+                                                ? "Base Color"
+                                                : "Background Color"
+                                        }
+                                        allowGradient
+                                        description={`The ${adaptationEnabled ? "base" : "background"} color of the app`}
+                                        onChangeResult={(
+                                            result: ColorResult,
+                                        ) => {
+                                            const val = result.hex;
+                                            let isDark = false;
+                                            if (
+                                                isValidGradient(val) &&
+                                                extractColors(val) &&
+                                                extractColors(val)!.length > 0
+                                            ) {
+                                                isDark = createColor(
+                                                    extractColors(val)![0],
+                                                ).isDark();
+                                            } else {
+                                                isDark =
+                                                    createColor(val).isDark();
+                                            }
+                                            if (isDark) setColorType("dark");
+                                            else setColorType("light");
+                                        }}
+                                        onChange={(color: ColorLike) => {
+                                            if (isValidGradient(color))
+                                                setChosenColorStyle("gradient");
+                                            else setChosenColorStyle("normal");
+
+                                            handleChange(color);
+                                        }}
+                                        onBlur={handleBlur}
+                                        value={value}
+                                    />
+                                )}
+                            />
+                            {!adaptationEnabled && (
+                                <>
+                                    <form.Field
+                                        name="colors.surface"
+                                        children={({
+                                            state: { meta, value },
+                                            handleChange,
+                                            handleBlur,
+                                        }) => (
+                                            <InputWithLabel
+                                                type="color"
+                                                apiErrors={apiErrors}
+                                                meta={meta}
+                                                name="colors.surface"
+                                                label="Surface Color"
+                                                allowGradient
+                                                description="This color gets applied to Cards (it automatically adapts to certain UI elements)"
+                                                onChange={(color: ColorLike) =>
+                                                    handleChange(color)
+                                                }
+                                                onBlur={handleBlur}
+                                                value={value}
+                                                required
+                                            />
+                                        )}
+                                    />
+                                    <form.Field
+                                        name="colors.common.black"
+                                        children={({
+                                            state: { meta, value },
+                                            handleChange,
+                                            handleBlur,
+                                        }) => (
+                                            <InputWithLabel
+                                                type="color"
+                                                apiErrors={apiErrors}
+                                                meta={meta}
+                                                name="colors.common.black"
+                                                label="Black"
+                                                description="The color to use for text and icons on a light background"
+                                                onChangeResult={(
+                                                    result: ColorResult,
+                                                ) => handleChange(result.hex)}
+                                                onBlur={handleBlur}
+                                                value={value}
+                                                required
+                                            />
+                                        )}
+                                    />
+                                    <form.Field
+                                        name="colors.common.white"
+                                        children={({
+                                            state: { meta, value },
+                                            handleChange,
+                                            handleBlur,
+                                        }) => (
+                                            <InputWithLabel
+                                                type="color"
+                                                apiErrors={apiErrors}
+                                                meta={meta}
+                                                name="colors.common.white"
+                                                label="White"
+                                                description="The color to use for text and icons on a dark background"
+                                                required
+                                                onChangeResult={(
+                                                    result: ColorResult,
+                                                ) => handleChange(result.hex)}
+                                                onBlur={handleBlur}
+                                                value={value}
+                                            />
+                                        )}
+                                    />
+                                </>
                             )}
-                        />
-                        <form.Field
-                            name="colors.surface"
-                            children={({
-                                state: { meta, value },
-                                handleChange,
-                                handleBlur,
-                            }) => (
-                                <InputWithLabel
-                                    type="color"
-                                    apiErrors={apiErrors}
-                                    meta={meta}
-                                    name="colors.surface"
-                                    label="Surface Color"
-                                    allowGradient
-                                    description="This colors get applied to Cards (it automatically adapts to certain UI elements)"
-                                    onChange={(result: ColorResult) =>
-                                        handleChange(result.hex)
-                                    }
-                                    onBlur={handleBlur}
-                                    value={value}
-                                    required
-                                />
+                            <form.Field
+                                name="colors.primary"
+                                children={({
+                                    state: { meta, value },
+                                    handleChange,
+                                    handleBlur,
+                                }) => (
+                                    <InputWithLabel
+                                        type="color"
+                                        apiErrors={apiErrors}
+                                        meta={meta}
+                                        name="colors.primary"
+                                        label="Primary Color"
+                                        description={
+                                            adaptationEnabled
+                                                ? "Usually used to indicate the primary action or important elements"
+                                                : "Usually used to indicate the primary action or important elements"
+                                        }
+                                        required
+                                        onChangeResult={(result: ColorResult) =>
+                                            handleChange(result.hex)
+                                        }
+                                        onBlur={handleBlur}
+                                        value={value}
+                                    />
+                                )}
+                            />
+                            {!adaptationEnabled && (
+                                <>
+                                    <form.Field
+                                        name="colors.neutral"
+                                        children={({
+                                            state: { meta, value },
+                                            handleChange,
+                                            handleBlur,
+                                        }) => (
+                                            <InputWithLabel
+                                                type="color"
+                                                apiErrors={apiErrors}
+                                                meta={meta}
+                                                name="colors.neutral"
+                                                label="Neutral Color"
+                                                description="Usually used to indicate a neutral or inactive state"
+                                                required
+                                                onChangeResult={(
+                                                    result: ColorResult,
+                                                ) => handleChange(result.hex)}
+                                                onBlur={handleBlur}
+                                                value={value}
+                                            />
+                                        )}
+                                    />
+                                    <form.Field
+                                        name="colors.danger"
+                                        children={({
+                                            state: { meta, value },
+                                            handleChange,
+                                            handleBlur,
+                                        }) => (
+                                            <InputWithLabel
+                                                type="color"
+                                                apiErrors={apiErrors}
+                                                meta={meta}
+                                                name="colors.danger"
+                                                label="Danger Color"
+                                                description="Usually used to indicate errors and failure within the app"
+                                                required
+                                                onChangeResult={(
+                                                    result: ColorResult,
+                                                ) => handleChange(result.hex)}
+                                                onBlur={handleBlur}
+                                                value={value}
+                                            />
+                                        )}
+                                    />
+                                    <form.Field
+                                        name="colors.warning"
+                                        children={({
+                                            state: { meta, value },
+                                            handleChange,
+                                            handleBlur,
+                                        }) => (
+                                            <InputWithLabel
+                                                type="color"
+                                                apiErrors={apiErrors}
+                                                meta={meta}
+                                                name="colors.warning"
+                                                label="Warning Color"
+                                                description="Usually used to indicate caution and requires user attention"
+                                                required
+                                                onChangeResult={(
+                                                    result: ColorResult,
+                                                ) => handleChange(result.hex)}
+                                                onBlur={handleBlur}
+                                                value={value}
+                                            />
+                                        )}
+                                    />
+                                    <form.Field
+                                        name="colors.info"
+                                        children={({
+                                            state: { meta, value },
+                                            handleChange,
+                                            handleBlur,
+                                        }) => (
+                                            <InputWithLabel
+                                                type="color"
+                                                apiErrors={apiErrors}
+                                                meta={meta}
+                                                name="colors.info"
+                                                required
+                                                label="Info Color"
+                                                description="Usually used to indicate additional information"
+                                                onChangeResult={(
+                                                    result: ColorResult,
+                                                ) => handleChange(result.hex)}
+                                                onBlur={handleBlur}
+                                                value={value}
+                                            />
+                                        )}
+                                    />
+                                    <form.Field
+                                        name="colors.success"
+                                        children={({
+                                            state: { meta, value },
+                                            handleChange,
+                                            handleBlur,
+                                        }) => (
+                                            <InputWithLabel
+                                                type="color"
+                                                apiErrors={apiErrors}
+                                                meta={meta}
+                                                name="colors.success"
+                                                label="Success Color"
+                                                description="Usually used to indicate a successful or positive action"
+                                                onChangeResult={(
+                                                    result: ColorResult,
+                                                ) => handleChange(result.hex)}
+                                                onBlur={handleBlur}
+                                                value={value}
+                                                required
+                                            />
+                                        )}
+                                    />
+                                </>
                             )}
-                        />
-                        <form.Field
-                            name="colors.common.black"
-                            children={({
-                                state: { meta, value },
-                                handleChange,
-                                handleBlur,
-                            }) => (
-                                <InputWithLabel
-                                    type="color"
-                                    apiErrors={apiErrors}
-                                    meta={meta}
-                                    name="colors.common.black"
-                                    label="Black"
-                                    description="The color to use for text and icons on a light background"
-                                    onChange={(result: ColorResult) =>
-                                        handleChange(result.hex)
-                                    }
-                                    onBlur={handleBlur}
-                                    value={value}
-                                    required
-                                />
+                            <form.Field
+                                name="typography.colors.primary"
+                                children={({
+                                    state: { meta, value },
+                                    handleChange,
+                                    handleBlur,
+                                }) => (
+                                    <InputWithLabel
+                                        type="color"
+                                        apiErrors={apiErrors}
+                                        meta={meta}
+                                        name="typography.colors.primary"
+                                        label={
+                                            adaptationEnabled
+                                                ? "Base Text Color"
+                                                : "Primary Text Color"
+                                        }
+                                        description="The primary color for texts, usually white is used on dark backgrounds and black on light backgrounds"
+                                        required
+                                        onChangeResult={(result: ColorResult) =>
+                                            handleChange(result.hex)
+                                        }
+                                        onBlur={handleBlur}
+                                        value={value}
+                                    />
+                                )}
+                            />
+                            {!adaptationEnabled && (
+                                <>
+                                    <form.Field
+                                        name="typography.colors.secondary"
+                                        children={({
+                                            state: { meta, value },
+                                            handleChange,
+                                            handleBlur,
+                                        }) => (
+                                            <InputWithLabel
+                                                type="color"
+                                                apiErrors={apiErrors}
+                                                meta={meta}
+                                                name="typography.colors.secondary"
+                                                label="Secondary Text Color"
+                                                description="Used for less important text"
+                                                required
+                                                onChangeResult={(
+                                                    result: ColorResult,
+                                                ) => handleChange(result.hex)}
+                                                onBlur={handleBlur}
+                                                value={value}
+                                            />
+                                        )}
+                                    />
+                                    <form.Field
+                                        name="typography.colors.accent"
+                                        children={({
+                                            state: { meta, value },
+                                            handleChange,
+                                            handleBlur,
+                                        }) => (
+                                            <InputWithLabel
+                                                type="color"
+                                                apiErrors={apiErrors}
+                                                meta={meta}
+                                                name="typography.colors.accent"
+                                                description="Used for accentuating important texts"
+                                                required
+                                                label="Accent Text Color"
+                                                onChangeResult={(
+                                                    result: ColorResult,
+                                                ) => handleChange(result.hex)}
+                                                onBlur={handleBlur}
+                                                value={value}
+                                            />
+                                        )}
+                                    />
+                                    <form.Field
+                                        name="typography.colors.muted"
+                                        children={({
+                                            state: { meta, value },
+                                            handleChange,
+                                            handleBlur,
+                                        }) => (
+                                            <InputWithLabel
+                                                type="color"
+                                                apiErrors={apiErrors}
+                                                meta={meta}
+                                                name="typography.colors.muted"
+                                                description="Used for muted texts"
+                                                label="Muted Text Color"
+                                                onChangeResult={(
+                                                    result: ColorResult,
+                                                ) => handleChange(result.hex)}
+                                                onBlur={handleBlur}
+                                                value={value}
+                                                required
+                                            />
+                                        )}
+                                    />
+                                </>
                             )}
-                        />
-                        <form.Field
-                            name="colors.common.white"
-                            children={({
-                                state: { meta, value },
-                                handleChange,
-                                handleBlur,
-                            }) => (
-                                <InputWithLabel
-                                    type="color"
-                                    apiErrors={apiErrors}
-                                    meta={meta}
-                                    name="colors.common.white"
-                                    label="White"
-                                    description="The color to use for text and icons on a dark background"
-                                    required
-                                    onChange={(result: ColorResult) =>
-                                        handleChange(result.hex)
-                                    }
-                                    onBlur={handleBlur}
-                                    value={value}
-                                />
-                            )}
-                        />
-                        <Divider />
-                        <Stack direction="column" spacing={1}>
-                            <Typography level="h4">Feedback Colors</Typography>
-                            <Typography level="body-sm">
-                                These colors are used to indicate the importance
-                                of UI elements.
-                            </Typography>
                         </Stack>
-                        <form.Field
-                            name="colors.primary"
-                            children={({
-                                state: { meta, value },
-                                handleChange,
-                                handleBlur,
-                            }) => (
-                                <InputWithLabel
-                                    type="color"
-                                    apiErrors={apiErrors}
-                                    meta={meta}
-                                    name="colors.primary"
-                                    label="Primary Color"
-                                    description="Usually used to indicate the primary action or important elements"
-                                    required
-                                    onChange={(result: ColorResult) =>
-                                        handleChange(result.hex)
-                                    }
-                                    onBlur={handleBlur}
-                                    value={value}
-                                />
-                            )}
-                        />
-                        <form.Field
-                            name="colors.neutral"
-                            children={({
-                                state: { meta, value },
-                                handleChange,
-                                handleBlur,
-                            }) => (
-                                <InputWithLabel
-                                    type="color"
-                                    apiErrors={apiErrors}
-                                    meta={meta}
-                                    name="colors.neutral"
-                                    label="Neutral Color"
-                                    description="Usually used to indicate a neutral or inactive state"
-                                    required
-                                    onChange={(result: ColorResult) =>
-                                        handleChange(result.hex)
-                                    }
-                                    onBlur={handleBlur}
-                                    value={value}
-                                />
-                            )}
-                        />
-                        <form.Field
-                            name="colors.danger"
-                            children={({
-                                state: { meta, value },
-                                handleChange,
-                                handleBlur,
-                            }) => (
-                                <InputWithLabel
-                                    type="color"
-                                    apiErrors={apiErrors}
-                                    meta={meta}
-                                    name="colors.danger"
-                                    label="Danger Color"
-                                    description="Usually used to indicate errors and failure within the app"
-                                    required
-                                    onChange={(result: ColorResult) =>
-                                        handleChange(result.hex)
-                                    }
-                                    onBlur={handleBlur}
-                                    value={value}
-                                />
-                            )}
-                        />
-                        <form.Field
-                            name="colors.warning"
-                            children={({
-                                state: { meta, value },
-                                handleChange,
-                                handleBlur,
-                            }) => (
-                                <InputWithLabel
-                                    type="color"
-                                    apiErrors={apiErrors}
-                                    meta={meta}
-                                    name="colors.warning"
-                                    label="Warning Color"
-                                    description="Usually used to indicate caution and requires user attention"
-                                    required
-                                    onChange={(result: ColorResult) =>
-                                        handleChange(result.hex)
-                                    }
-                                    onBlur={handleBlur}
-                                    value={value}
-                                />
-                            )}
-                        />
-                        <form.Field
-                            name="colors.info"
-                            children={({
-                                state: { meta, value },
-                                handleChange,
-                                handleBlur,
-                            }) => (
-                                <InputWithLabel
-                                    type="color"
-                                    apiErrors={apiErrors}
-                                    meta={meta}
-                                    name="colors.info"
-                                    required
-                                    label="Info Color"
-                                    description="Usually used to indicate additional information"
-                                    onChange={(result: ColorResult) =>
-                                        handleChange(result.hex)
-                                    }
-                                    onBlur={handleBlur}
-                                    value={value}
-                                />
-                            )}
-                        />
-                        <form.Field
-                            name="colors.success"
-                            children={({
-                                state: { meta, value },
-                                handleChange,
-                                handleBlur,
-                            }) => (
-                                <InputWithLabel
-                                    type="color"
-                                    apiErrors={apiErrors}
-                                    meta={meta}
-                                    name="colors.success"
-                                    label="Success Color"
-                                    description="Usually used to indicate a successful or positive action"
-                                    onChange={(result: ColorResult) =>
-                                        handleChange(result.hex)
-                                    }
-                                    onBlur={handleBlur}
-                                    value={value}
-                                    required
-                                />
-                            )}
-                        />
-                        <Divider />
-                        <Stack direction="column" spacing={1}>
-                            <Typography level="h4">Text Colors</Typography>
-                            <Typography level="body-sm">
-                                These colors are used for text elements in the
-                                application.
-                            </Typography>
-                        </Stack>
-                        <form.Field
-                            name="typography.colors.primary"
-                            children={({
-                                state: { meta, value },
-                                handleChange,
-                                handleBlur,
-                            }) => (
-                                <InputWithLabel
-                                    type="color"
-                                    apiErrors={apiErrors}
-                                    meta={meta}
-                                    name="typography.colors.primary"
-                                    label="Primary Color"
-                                    description="Used for important text"
-                                    required
-                                    onChange={(result: ColorResult) =>
-                                        handleChange(result.hex)
-                                    }
-                                    onBlur={handleBlur}
-                                    value={value}
-                                />
-                            )}
-                        />
-                        <form.Field
-                            name="typography.colors.secondary"
-                            children={({
-                                state: { meta, value },
-                                handleChange,
-                                handleBlur,
-                            }) => (
-                                <InputWithLabel
-                                    type="color"
-                                    apiErrors={apiErrors}
-                                    meta={meta}
-                                    name="typography.colors.secondary"
-                                    label="Secondary Color"
-                                    description="Used for less important text"
-                                    required
-                                    onChange={(result: ColorResult) =>
-                                        handleChange(result.hex)
-                                    }
-                                    onBlur={handleBlur}
-                                    value={value}
-                                />
-                            )}
-                        />
-                        <form.Field
-                            name="typography.colors.accent"
-                            children={({
-                                state: { meta, value },
-                                handleChange,
-                                handleBlur,
-                            }) => (
-                                <InputWithLabel
-                                    type="color"
-                                    apiErrors={apiErrors}
-                                    meta={meta}
-                                    name="typography.colors.accent"
-                                    description="Used for accentuating important elements"
-                                    required
-                                    label="Accent Color"
-                                    onChange={(result: ColorResult) =>
-                                        handleChange(result.hex)
-                                    }
-                                    onBlur={handleBlur}
-                                    value={value}
-                                />
-                            )}
-                        />
-                        <form.Field
-                            name="typography.colors.muted"
-                            children={({
-                                state: { meta, value },
-                                handleChange,
-                                handleBlur,
-                            }) => (
-                                <InputWithLabel
-                                    type="color"
-                                    apiErrors={apiErrors}
-                                    meta={meta}
-                                    name="typography.colors.muted"
-                                    description="Used for muted elements"
-                                    label="Muted Color"
-                                    onChange={(result: ColorResult) =>
-                                        handleChange(result.hex)
-                                    }
-                                    onBlur={handleBlur}
-                                    value={value}
-                                    required
-                                />
-                            )}
-                        />
                     </Stack>
                 </Stack>
             </form>
-        </Paper>
+        </AnimatedPaper>
     );
 });
