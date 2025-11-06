@@ -97,7 +97,9 @@ export const resolveMarkdownStyles = (
             ? resolvedColor
             : resolveTypographyColor(textColor, theme);
 
-    const formattedColor = formatColor(resolvedColor);
+    const formattedColor = formatColor(resolvedColor, {
+        format: "hexa",
+    });
 
     return {
         outlined: {
