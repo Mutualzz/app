@@ -1,8 +1,9 @@
 import { useAppStore } from "@hooks/useStores";
 import { createFileRoute, Outlet, useNavigate } from "@tanstack/react-router";
+import { observer } from "mobx-react";
 
 export const Route = createFileRoute("/_authenticated")({
-    component: AuthenticatedRoute,
+    component: observer(AuthenticatedRoute),
 });
 
 function AuthenticatedRoute() {
