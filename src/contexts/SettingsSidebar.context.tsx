@@ -51,7 +51,7 @@ export function useSettingsSidebar() {
     const ctx = useContext(SettingsSidebarContext);
     if (!ctx)
         throw new Error(
-            "useUserSidebar must be used within a UserSidebarProvider",
+            "useSettingsSidebar must be used within a SettingsSidebarProvider",
         );
     return ctx;
 }

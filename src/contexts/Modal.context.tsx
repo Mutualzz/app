@@ -53,6 +53,7 @@ export const ModalProvider = ({ children }: { children: ReactNode }) => {
             setModals((prev) => [
                 ...prev,
                 {
+                    key: `modal-${id}-${Date.now()}`,
                     id,
                     content,
                     props,

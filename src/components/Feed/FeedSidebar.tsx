@@ -1,6 +1,29 @@
 import { Button, ButtonGroup, Paper } from "@mutualzz/ui-web";
 import { FaCompass, FaHome, FaPalette, FaStar, FaUsers } from "react-icons/fa";
 
+const links = [
+    {
+        label: "My Profile",
+        icon: <FaHome />,
+    },
+    {
+        label: "Friends",
+        icon: <FaUsers />,
+    },
+    {
+        label: "Favorites",
+        icon: <FaStar />,
+    },
+    {
+        label: "Explore / Discover",
+        icon: <FaCompass />,
+    },
+    {
+        label: "Customize Profile",
+        icon: <FaPalette />,
+    },
+];
+
 export const FeedSidebar = () => {
     return (
         <Paper
@@ -18,15 +41,14 @@ export const FeedSidebar = () => {
                 size="lg"
                 horizontalAlign="left"
             >
-                <Button startDecorator={<FaHome />}>My Profile</Button>
-                <Button startDecorator={<FaUsers />}>Friends</Button>
-                <Button startDecorator={<FaStar />}>Favorites</Button>
-                <Button startDecorator={<FaCompass />}>
-                    Explore / Discover
-                </Button>
-                <Button startDecorator={<FaPalette />}>
-                    Customize Profile
-                </Button>
+                {links.map((link) => (
+                    <Button
+                        key={`feed-sidebar-link-${link.label}`}
+                        startDecorator={link.icon}
+                    >
+                        {link.label}
+                    </Button>
+                ))}
             </ButtonGroup>
         </Paper>
     );
