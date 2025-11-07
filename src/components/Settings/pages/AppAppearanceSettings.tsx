@@ -1,6 +1,6 @@
 import { ThemeCreator } from "@components/ThemeCreator";
 import { useModal } from "@contexts/Modal.context";
-import type { Theme } from "@emotion/react";
+import type { Theme as MzTheme } from "@emotion/react";
 import { usePrefersDark } from "@hooks/usePrefersDark";
 import { useAppStore } from "@hooks/useStores";
 import {
@@ -18,13 +18,14 @@ import {
     Typography,
     useTheme,
 } from "@mutualzz/ui-web";
+import { Theme } from "@stores/objects/Theme";
 import { useMutation } from "@tanstack/react-query";
 import { observer } from "mobx-react";
 import { useState } from "react";
 import { FaCheck, FaTrash } from "react-icons/fa";
 
 const ColorBlob = styled("div")<{
-    shownTheme: Theme;
+    shownTheme: Theme | MzTheme;
     size?: string | number;
     current: boolean;
 }>(({ theme, shownTheme, size = "4rem", current }) => ({
@@ -68,18 +69,21 @@ export const AppAppearanceSettings = observer(() => {
             return response;
         },
         onSuccess: () => {
-            themeStore.removeTheme(focusedTheme);
+            themeStore.remove(focusedTheme);
+            changeTheme(prefersDark ? baseDarkTheme : baseLightTheme);
             setFocusedTheme("");
         },
     });
 
     const defaultThemes = [baseDarkTheme, baseLightTheme];
 
-    const defaultColorThemes = themeStore.themes
+    const defaultColorThemes = Array.from(themeStore.themes.values())
         .filter((t) => !t.createdBy)
         .filter((t) => t.id !== "baseDark" && t.id !== "baseLight");
 
-    const userThemes = themeStore.themes.filter((t) => t.createdBy);
+    const userThemes = Array.from(themeStore.themes.values()).filter(
+        (t) => t.createdBy,
+    );
 
     return (
         <Stack direction="column" spacing={30}>
@@ -152,7 +156,9 @@ export const AppAppearanceSettings = observer(() => {
                                         )}
                                         <ColorBlob
                                             onClick={() => {
-                                                changeTheme(t);
+                                                changeTheme(
+                                                    Theme.toEmotionTheme(t),
+                                                );
                                                 setFocusedTheme(t.id);
                                             }}
                                             shownTheme={t}
@@ -251,7 +257,11 @@ export const AppAppearanceSettings = observer(() => {
                                         placement="bottom"
                                     >
                                         <ColorBlob
-                                            onClick={() => changeTheme(t)}
+                                            onClick={() =>
+                                                changeTheme(
+                                                    Theme.toEmotionTheme(t),
+                                                )
+                                            }
                                             shownTheme={t}
                                             current={
                                                 t.id === currentTheme.id &&
@@ -295,7 +305,11 @@ export const AppAppearanceSettings = observer(() => {
                                         placement="bottom"
                                     >
                                         <ColorBlob
-                                            onClick={() => changeTheme(t)}
+                                            onClick={() =>
+                                                changeTheme(
+                                                    Theme.toEmotionTheme(t),
+                                                )
+                                            }
                                             shownTheme={t}
                                             current={
                                                 t.id === currentTheme.id &&

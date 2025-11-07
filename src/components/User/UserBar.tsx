@@ -1,20 +1,15 @@
 import { SettingsModal } from "@components/Settings/SettingsModal";
-import { ThemeCreator } from "@components/ThemeCreator";
-import { ThemeSelector } from "@components/ThemeSelector";
 import { UserAvatar } from "@components/User/UserAvatar";
 import { useModal } from "@contexts/Modal.context";
 import { useAppStore } from "@hooks/useStores";
 import {
-    Button,
     IconButton,
     Paper,
-    Popover,
     Stack,
     Tooltip,
     Typography,
 } from "@mutualzz/ui-web";
 import { observer } from "mobx-react";
-import { useState } from "react";
 import { FaCogs, FaPalette } from "react-icons/fa";
 import { MdLogout } from "react-icons/md";
 
@@ -22,8 +17,6 @@ export const UserBar = observer(() => {
     const app = useAppStore();
     const { openModal } = useModal();
     const { account } = app;
-
-    const [isOpen, setIsOpen] = useState(false);
 
     if (!account) return <></>;
 
@@ -62,45 +55,24 @@ export const UserBar = observer(() => {
                 spacing={5}
             >
                 <Stack direction="row">
-                    <Popover
-                        trigger={
-                            <Tooltip title="Choose theme">
-                                <IconButton
-                                    size="sm"
-                                    color="neutral"
-                                    variant="plain"
-                                    onClick={() => setIsOpen((prev) => !prev)}
-                                >
-                                    <FaPalette />
-                                </IconButton>
-                            </Tooltip>
-                        }
-                        isOpen={isOpen}
-                    >
-                        <Paper
-                            spacing={10}
-                            direction="column"
-                            p={20}
-                            elevation={5}
+                    <Tooltip title="Choose theme">
+                        <IconButton
+                            size="sm"
+                            color="neutral"
+                            variant="plain"
+                            onClick={() =>
+                                openModal(
+                                    "theme-picker",
+                                    <SettingsModal redirectTo="appearance" />,
+                                    {
+                                        height: "100%",
+                                    },
+                                )
+                            }
                         >
-                            <ThemeSelector />
-                            <Button
-                                color="success"
-                                onClick={() => {
-                                    openModal(
-                                        "theme-creator",
-                                        <ThemeCreator />,
-                                        {
-                                            height: "100%",
-                                        },
-                                    );
-                                    setIsOpen(false);
-                                }}
-                            >
-                                Theme Editor
-                            </Button>
-                        </Paper>
-                    </Popover>
+                            <FaPalette />
+                        </IconButton>
+                    </Tooltip>
                 </Stack>
                 <Stack direction="column">
                     <Tooltip placement="right" title="User Settings">

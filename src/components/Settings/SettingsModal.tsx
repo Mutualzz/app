@@ -1,4 +1,7 @@
-import { SettingsSidebarProvider } from "@contexts/SettingsSidebar.context";
+import {
+    SettingsSidebarProvider,
+    type SettingsSidebarPage,
+} from "@contexts/SettingsSidebar.context";
 import { Drawer, Paper, Stack, useTheme } from "@mutualzz/ui-web";
 import { useMediaQuery } from "@react-hookz/web";
 import { observer } from "mobx-react";
@@ -9,7 +12,11 @@ import { UserSettingsSidebar } from "./SettingsSidebar";
 
 const AnimatedPaper = motion.create(Paper);
 
-export const SettingsModal = observer(() => {
+interface SettingsPropsModal {
+    redirectTo?: SettingsSidebarPage;
+}
+
+export const SettingsModal = observer(({ redirectTo }: SettingsPropsModal) => {
     const { theme } = useTheme();
     const isMobileQuery = useMediaQuery(
         theme.breakpoints.down("md").replace("@media", ""),
@@ -52,7 +59,7 @@ export const SettingsModal = observer(() => {
                             p={{ xs: "1rem", sm: "2rem" }}
                             overflow="auto"
                         >
-                            <SettingsContent />
+                            <SettingsContent redirectTo={redirectTo} />
                         </Stack>
                     </Stack>
                 ) : (
@@ -71,7 +78,7 @@ export const SettingsModal = observer(() => {
                             p={{ xs: "1rem", sm: "2rem" }}
                             overflow="auto"
                         >
-                            <SettingsContent />
+                            <SettingsContent redirectTo={redirectTo} />
                         </Stack>
                     </Stack>
                 )}
