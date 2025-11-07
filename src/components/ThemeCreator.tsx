@@ -125,8 +125,7 @@ export const ThemeCreator = observer(() => {
         null,
     );
 
-    const [colorType, setColorType] =
-        useState<Omit<ThemeType, "system">>("dark");
+    const [colorType, setColorType] = useState<ThemeType>("dark");
     const [colorStyle, setColorStyle] = useState<ThemeStyle>("normal");
 
     const [adaptationEnabled, setAdaptationEnabled] = useState(true);
@@ -145,11 +144,13 @@ export const ThemeCreator = observer(() => {
     const [userThemeSelectValue, setUserThemeSelectValue] = useState("");
     const [formKey, setFormKey] = useState(0);
 
-    const allDefaultThemes = themeStore.themes
+    const allDefaultThemes = Array.from(themeStore.themes.values())
         .filter((theme) => !theme.createdBy)
         .filter((theme) => theme.style === colorStyle);
     const allDrafts = draft.themes;
-    const allUserThemes = themeStore.themes.filter((t) => t.createdBy);
+    const allUserThemes = Array.from(themeStore.themes.values()).filter(
+        (t) => t.createdBy,
+    );
 
     const defaultValues = {
         ...baseDarkTheme,
@@ -316,7 +317,7 @@ export const ThemeCreator = observer(() => {
             return response;
         },
         onSuccess: (data) => {
-            themeStore.removeTheme(data.id);
+            themeStore.remove(data.id);
             unload();
         },
     });
@@ -389,7 +390,7 @@ export const ThemeCreator = observer(() => {
             if (meta.submitAction === "update" && loadedUserTheme) {
                 themePatch.mutate(value, {
                     onSuccess: (data) => {
-                        themeStore.updateTheme(data);
+                        themeStore.update(data);
                         setApiErrors({});
 
                         // Directly set the loaded state instead of using the load function (because we want to avoid timing issues)
@@ -408,7 +409,7 @@ export const ThemeCreator = observer(() => {
             if (meta.submitAction === "delete" && loadedUserTheme) {
                 themeDelete.mutate(loadedUserTheme.id, {
                     onSuccess: (data) => {
-                        themeStore.removeTheme(data.id);
+                        themeStore.remove(data.id);
                         changeTheme(
                             prefersDark ? baseDarkTheme : baseLightTheme,
                         );
@@ -421,7 +422,7 @@ export const ThemeCreator = observer(() => {
             if (meta.submitAction === "create") {
                 themePut.mutate(value, {
                     onSuccess: (data) => {
-                        themeStore.addTheme(data);
+                        themeStore.add(data);
                         setApiErrors({});
 
                         // Directly set the loaded state instead of using the load function (because we want to avoid timing issues)

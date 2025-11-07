@@ -1,7 +1,6 @@
 import {
     CDNRoutes,
     ImageFormat,
-    type APITheme,
     type APIUser,
     type AvatarFormat,
     type DefaultAvatar,
@@ -17,10 +16,11 @@ export class User {
     defaultAvatar: DefaultAvatar;
     avatar?: string | null = null;
     globalName?: string | null = null;
-    themes?: APITheme[] | null = null;
     accentColor: Hex;
     createdAt: Date;
     createdTimestamp: number;
+    updatedAt: Date;
+    updatedTimestamp: number;
 
     raw: APIUser;
 
@@ -30,10 +30,11 @@ export class User {
         this.defaultAvatar = user.defaultAvatar;
         this.avatar = user.avatar ?? null;
         this.globalName = user.globalName ?? null;
-        this.themes = user.themes ?? null;
         this.accentColor = user.accentColor;
         this.createdAt = user.createdAt;
         this.createdTimestamp = user.createdTimestamp;
+        this.updatedAt = user.updatedAt;
+        this.updatedTimestamp = user.updatedTimestamp;
 
         this.raw = user;
 

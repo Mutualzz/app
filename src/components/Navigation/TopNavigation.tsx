@@ -1,6 +1,6 @@
 import { DownloadButton } from "@components/DownloadButton";
 import { useAppStore } from "@hooks/useStores";
-import { Button, Divider, Paper, Stack, useTheme } from "@mutualzz/ui-web";
+import { Button, Paper, Stack, useTheme } from "@mutualzz/ui-web";
 import { useMediaQuery } from "@react-hookz/web";
 import { useNavigate } from "@tanstack/react-router";
 import { isTauri } from "@utils/index";
@@ -63,13 +63,10 @@ export const TopNavigation = observer(() => {
                     }}
                 />
                 {app.mode && (
-                    <>
-                        <Divider lineColor="accent" orientation="vertical" />
-                        <Paper spacing={5} py={2} px={6} direction="row">
-                            {app.mode === "feed" ? <ImFeed /> : <GiGalaxy />}
-                            {app.mode === "feed" ? "Feed" : "Spaces"}
-                        </Paper>
-                    </>
+                    <Paper spacing={5} py={2} px={6} direction="row">
+                        {app.mode === "feed" ? <ImFeed /> : <GiGalaxy />}
+                        {app.mode === "feed" ? "Feed" : "Spaces"}
+                    </Paper>
                 )}
             </Stack>
 

@@ -1,5 +1,6 @@
 import { Logger } from "@logger";
 import type { APIPrivateUser, AppMode } from "@mutualzz/types";
+import { themes } from "@themes/index";
 import { isSSR, isTauri } from "@utils/index";
 import { secureStorageAdapter } from "@utils/secureStorageAdapter";
 import { makeAutoObservable } from "mobx";
@@ -25,7 +26,7 @@ export class AppStore {
     account: AccountStore | null = null;
     gateway = new GatewayStore(this);
     draft = new DraftStore();
-    theme = new ThemeStore();
+    theme = new ThemeStore(this);
     rest = new REST();
     users = new UserStore(this);
     updaterStore: UpdaterStore | null = null;
@@ -50,7 +51,6 @@ export class AppStore {
 
     setUser(user: APIPrivateUser) {
         this.account = new AccountStore(user);
-        this.theme.loadUserThemes(user);
         this.mode = user.settings.preferredMode;
     }
 
@@ -104,6 +104,6 @@ export class AppStore {
     async loadSettings() {
         if (this.updaterStore) await this.updaterStore.startAutoChecker();
         this.loadToken();
-        this.theme.loadDefaultThemes();
+        this.theme.loadThemes(themes);
     }
 }

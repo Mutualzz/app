@@ -1,7 +1,8 @@
 import { useModal } from "@contexts/Modal.context";
 import { Modal, useTheme } from "@mutualzz/ui-web";
+import { observer } from "mobx-react";
 
-export const ModalRoot = () => {
+export const ModalRoot = observer(() => {
     const { theme } = useTheme();
     const { modals, closeModal } = useModal();
 
@@ -25,4 +26,4 @@ export const ModalRoot = () => {
             ))}
         </>
     );
-};
+});

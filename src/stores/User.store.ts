@@ -29,6 +29,10 @@ export class UserStore {
         return this.users.get(id);
     }
 
+    remove(id: string) {
+        this.users.delete(id);
+    }
+
     get all() {
         return Array.from(this.users.values());
     }

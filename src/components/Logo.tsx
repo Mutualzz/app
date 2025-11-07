@@ -6,7 +6,7 @@ export const Logo = (props: HTMLAttributes<HTMLImageElement>) => {
 
     return (
         <img
-            src={theme.type === "light" ? "/logo.png" : "/logo-dark.png"}
+            src={theme.type === "light" ? "/icon-light.png" : "/icon.png"}
             alt="Mutualzz Logo"
             {...props}
         />

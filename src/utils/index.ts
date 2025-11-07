@@ -1,5 +1,5 @@
-import type { MzTheme } from "@app-types/theme";
 import { useAppStore } from "@hooks/useStores";
+import type { Theme } from "@stores/objects/Theme";
 import { useNavigate } from "@tanstack/react-router";
 import mergeWith from "lodash-es/mergeWith";
 import { isValidElement, type ReactNode } from "react";
@@ -30,7 +30,7 @@ export const isTauri =
     // @ts-expect-error no types
     !isSSR && !!window.__TAURI_INTERNALS__;
 
-export const sortThemes = (themes: MzTheme[]): MzTheme[] => {
+export const sortThemes = (themes: Theme[]): Theme[] => {
     const priorityOrder: string[] = ["baseDark", "baseLight"];
 
     const priorityThemes = themes.filter((theme) =>

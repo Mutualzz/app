@@ -9,6 +9,7 @@ import {
     Stack,
     useTheme,
 } from "@mutualzz/ui-web";
+import { Theme } from "@stores/objects/Theme";
 import { sortThemes } from "@utils/index";
 import { observer } from "mobx-react";
 
@@ -25,7 +26,7 @@ export const ThemeSelector = observer(() => {
         const changeTo = themes.find((theme) => theme.id === themeId);
         if (!changeTo) return;
 
-        changeTheme(changeTo);
+        changeTheme(Theme.toEmotionTheme(changeTo));
     };
     return (
         <>

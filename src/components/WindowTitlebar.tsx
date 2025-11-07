@@ -7,6 +7,7 @@ import {
     Stack,
     useTheme,
 } from "@mutualzz/ui-web";
+import { Image } from "@tauri-apps/api/image";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { detectOS } from "@utils/detect";
 import { observer } from "mobx-react";
@@ -41,6 +42,24 @@ const WindowTitlebar = ({ onHeightChange }: WindowTitlebarProps) => {
             setIsMac(false);
         };
     }, []);
+
+    useEffect(() => {
+        const iconUrl =
+            theme.type === "light" ? "/icon-light.png" : "/icon.png";
+
+        (async () => {
+            try {
+                const bytes = await fetch(iconUrl).then((res) =>
+                    res.arrayBuffer(),
+                );
+                const icon = await Image.fromBytes(bytes);
+
+                await appWindow.setIcon(icon);
+            } catch (e) {
+                console.error("Failed to load window icon:", e);
+            }
+        })();
+    }, [theme]);
 
     useEffect(() => {
         const el = rootRef.current;
