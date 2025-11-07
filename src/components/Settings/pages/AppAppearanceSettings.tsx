@@ -111,54 +111,66 @@ export const AppAppearanceSettings = observer(() => {
                     </Typography>
                     <Stack direction="row" spacing={10}>
                         {userThemes.map((t) => (
-                            <Tooltip key={t.id} title={t.name} placement="top">
-                                <Box
-                                    onMouseEnter={() => setFocusedTheme(t.id)}
-                                    onMouseLeave={() => setFocusedTheme("")}
-                                    onFocus={() => setFocusedTheme(t.id)}
-                                    position="relative"
-                                    key={`box-${t.id}`}
+                            <Tooltip
+                                key={`${t.id}-top`}
+                                title={t.name}
+                                placement="top"
+                            >
+                                <Tooltip
+                                    key={`${t.id}-bottom`}
+                                    title={t.description}
+                                    placement="bottom"
                                 >
-                                    {(focusedTheme === t.id ||
-                                        currentTheme.id === t.id) && (
-                                        <IconButton
-                                            key={`delete-${t.id}`}
-                                            onClick={() => {
-                                                deleteTheme();
-                                            }}
-                                            css={{
-                                                position: "absolute",
-                                                top: 0,
-                                                right: 0,
-                                                zIndex: 1,
-                                            }}
-                                            color="danger"
-                                            size={12}
-                                            disabled={isDeleting}
-                                        >
-                                            <FaTrash />
-                                        </IconButton>
-                                    )}
-                                    <ColorBlob
-                                        onClick={() => {
-                                            changeTheme(t);
-                                            setFocusedTheme(t.id);
-                                        }}
-                                        shownTheme={t}
-                                        current={
-                                            t.id === currentTheme.id &&
-                                            currentType === t.type
-                                        }
+                                    <Box
                                         onMouseEnter={() =>
                                             setFocusedTheme(t.id)
                                         }
+                                        onMouseLeave={() => setFocusedTheme("")}
+                                        onFocus={() => setFocusedTheme(t.id)}
+                                        position="relative"
+                                        key={`box-${t.id}`}
                                     >
-                                        {t.id === currentTheme.id &&
-                                            currentType === t.type && (
-                                                <FaCheck />
-                                            )}
-                                    </ColorBlob>
-                                </Box>
+                                        {(focusedTheme === t.id ||
+                                            currentTheme.id === t.id) && (
+                                            <IconButton
+                                                key={`delete-${t.id}`}
+                                                onClick={() => {
+                                                    deleteTheme();
+                                                }}
+                                                css={{
+                                                    position: "absolute",
+                                                    top: 0,
+                                                    right: 0,
+                                                    zIndex: 1,
+                                                }}
+                                                color="danger"
+                                                size={12}
+                                                disabled={isDeleting}
+                                            >
+                                                <FaTrash />
+                                            </IconButton>
+                                        )}
+                                        <ColorBlob
+                                            onClick={() => {
+                                                changeTheme(t);
+                                                setFocusedTheme(t.id);
+                                            }}
+                                            shownTheme={t}
+                                            current={
+                                                t.id === currentTheme.id &&
+                                                currentType === t.type
+                                            }
+                                            onMouseEnter={() =>
+                                                setFocusedTheme(t.id)
+                                            }
+                                        >
+                                            {t.id === currentTheme.id &&
+                                                currentType === t.type && (
+                                                    <FaCheck />
+                                                )}
+                                        </ColorBlob>
+                                    </Box>
+                                </Tooltip>
                             </Tooltip>
                         ))}
                     </Stack>
@@ -170,18 +182,28 @@ export const AppAppearanceSettings = observer(() => {
                 </Typography>
                 <Stack direction="row" spacing={10}>
                     {defaultThemes.map((t) => (
-                        <Tooltip key={t.id} title={t.name} placement="top">
-                            <ColorBlob
-                                onClick={() => changeTheme(t)}
-                                shownTheme={t}
-                                current={
-                                    t.id === currentTheme.id &&
-                                    currentType === t.type
-                                }
+                        <Tooltip
+                            key={`${t.id}-top`}
+                            title={t.name}
+                            placement="top"
+                        >
+                            <Tooltip
+                                key={`${t.id}-bottom`}
+                                title={t.description}
+                                placement="bottom"
                             >
-                                {t.id === currentTheme.id &&
-                                    currentType === t.type && <FaCheck />}
-                            </ColorBlob>
+                                <ColorBlob
+                                    onClick={() => changeTheme(t)}
+                                    shownTheme={t}
+                                    current={
+                                        t.id === currentTheme.id &&
+                                        currentType === t.type
+                                    }
+                                >
+                                    {t.id === currentTheme.id &&
+                                        currentType === t.type && <FaCheck />}
+                                </ColorBlob>
+                            </Tooltip>
                         </Tooltip>
                     ))}
                     <Tooltip title="Sync with system" placement="top">
@@ -219,23 +241,29 @@ export const AppAppearanceSettings = observer(() => {
                             .filter((t) => t.style === "normal")
                             .map((t) => (
                                 <Tooltip
-                                    key={t.id}
+                                    key={`${t.id}-top`}
                                     title={t.name}
                                     placement="top"
                                 >
-                                    <ColorBlob
-                                        onClick={() => changeTheme(t)}
-                                        shownTheme={t}
-                                        current={
-                                            t.id === currentTheme.id &&
-                                            currentType === t.type
-                                        }
+                                    <Tooltip
+                                        key={`${t.id}-bottom`}
+                                        title={t.description}
+                                        placement="bottom"
                                     >
-                                        {t.id === currentTheme.id &&
-                                            currentType === t.type && (
-                                                <FaCheck />
-                                            )}
-                                    </ColorBlob>
+                                        <ColorBlob
+                                            onClick={() => changeTheme(t)}
+                                            shownTheme={t}
+                                            current={
+                                                t.id === currentTheme.id &&
+                                                currentType === t.type
+                                            }
+                                        >
+                                            {t.id === currentTheme.id &&
+                                                currentType === t.type && (
+                                                    <FaCheck />
+                                                )}
+                                        </ColorBlob>
+                                    </Tooltip>
                                 </Tooltip>
                             ))}
                     </div>
@@ -257,23 +285,29 @@ export const AppAppearanceSettings = observer(() => {
                             .filter((t) => t.style === "gradient")
                             .map((t) => (
                                 <Tooltip
-                                    key={t.id}
+                                    key={`${t.id}-top`}
                                     title={t.name}
                                     placement="top"
                                 >
-                                    <ColorBlob
-                                        onClick={() => changeTheme(t)}
-                                        shownTheme={t}
-                                        current={
-                                            t.id === currentTheme.id &&
-                                            currentType === t.type
-                                        }
+                                    <Tooltip
+                                        key={`${t.id}-bottom`}
+                                        title={t.description}
+                                        placement="bottom"
                                     >
-                                        {t.id === currentTheme.id &&
-                                            currentType === t.type && (
-                                                <FaCheck />
-                                            )}
-                                    </ColorBlob>
+                                        <ColorBlob
+                                            onClick={() => changeTheme(t)}
+                                            shownTheme={t}
+                                            current={
+                                                t.id === currentTheme.id &&
+                                                currentType === t.type
+                                            }
+                                        >
+                                            {t.id === currentTheme.id &&
+                                                currentType === t.type && (
+                                                    <FaCheck />
+                                                )}
+                                        </ColorBlob>
+                                    </Tooltip>
                                 </Tooltip>
                             ))}
                     </div>
