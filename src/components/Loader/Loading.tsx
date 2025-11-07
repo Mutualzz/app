@@ -19,7 +19,7 @@ const Loading = () => {
         >
             <CircularProgress
                 strokeWidth="lg"
-                color="success"
+                color="primary"
                 size={{ xs: 120, sm: 180, md: 272 }}
             >
                 <Logo
