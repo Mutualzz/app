@@ -5,7 +5,7 @@ export const hauntedAestheticTheme: Theme = {
     ...baseDarkTheme,
     id: "hauntedAesthetic",
     name: "Haunted Aesthetic",
-    description: "Ethereal, Eerie, and Softly Dark",
+    description: "Ethereal eerie hues with soft blue illumination.",
     adaptive: false,
     type: "dark",
     style: "normal",

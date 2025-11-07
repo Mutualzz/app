@@ -5,7 +5,7 @@ export const nocturnalAbyssTheme: Theme = {
     ...baseDarkTheme,
     id: "nocturnalAbyss",
     name: "Nocturnal Abyss",
-    description: "Deep, Mysterious, and Shadowy",
+    description: "Deep mysterious tones with cool cyan highlights.",
     adaptive: false,
     type: "dark",
     style: "normal",

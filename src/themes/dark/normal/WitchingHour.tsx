@@ -5,7 +5,7 @@ export const witchingHourTheme: Theme = {
     ...baseDarkTheme,
     id: "witchingHour",
     name: "Witching Hour",
-    description: "Mystical, Arcane, and Enigmatic",
+    description: "Mystical, arcane palette with enigmatic violet highlights.",
     adaptive: false,
     type: "dark",
     style: "normal",

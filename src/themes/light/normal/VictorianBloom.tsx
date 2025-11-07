@@ -5,7 +5,7 @@ export const victorianBloomTheme: Theme = {
     ...baseLightTheme,
     id: "victorianBloom",
     name: "Victorian Bloom",
-    description: "Dark Floral Light",
+    description: "Light theme with Victorian floral tones and muted warmth.",
     adaptive: false,
     style: "normal",
     type: "light",

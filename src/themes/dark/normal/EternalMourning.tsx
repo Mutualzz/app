@@ -5,7 +5,7 @@ export const eternalMourningTheme: Theme = {
     ...baseDarkTheme,
     id: "eternalMourning",
     name: "Eternal Mourning",
-    description: "Melancholic & Gothic Elegance",
+    description: "Melancholic gothic elegance with deep purple tints.",
     adaptive: false,
     type: "dark",
     style: "normal",

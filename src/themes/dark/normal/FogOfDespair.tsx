@@ -5,7 +5,7 @@ export const fogOfDespairTheme: Theme = {
     ...baseDarkTheme,
     id: "fogOfDespair",
     name: "Fog of Despair",
-    description: "Cold, Distant, and Ethereal",
+    description: "Cold, distant tones with airy, ethereal fog hues.",
     adaptive: false,
     type: "dark",
     style: "normal",
