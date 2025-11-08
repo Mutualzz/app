@@ -10,8 +10,10 @@ import {
 import { Image } from "@tauri-apps/api/image";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { detectOS } from "@utils/detect";
+import { canvasToArrayBuffer } from "@utils/index";
+import { getIconFromCache, putIconInCache } from "@utils/indexedDb";
 import { observer } from "mobx-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { FaDownload } from "react-icons/fa";
 import {
     VscChromeMaximize,
@@ -43,7 +45,7 @@ const WindowTitlebar = ({ onHeightChange }: WindowTitlebarProps) => {
         };
     }, []);
 
-    useEffect(() => {
+    useLayoutEffect(() => {
         let iconUrl = "/icon.png";
         let isDefault = false;
 
@@ -67,6 +69,15 @@ const WindowTitlebar = ({ onHeightChange }: WindowTitlebarProps) => {
 
         (async () => {
             try {
+                const cacheKey = `${theme.id}-${theme.type}`;
+
+                const cachedIcon = await getIconFromCache(cacheKey);
+                if (cachedIcon) {
+                    console.log("hit cache");
+                    await appWindow.setIcon(cachedIcon);
+                    return;
+                }
+
                 const res = await fetch(iconUrl);
                 const bytes = await res.arrayBuffer();
 
@@ -96,17 +107,17 @@ const WindowTitlebar = ({ onHeightChange }: WindowTitlebarProps) => {
                 const imageBitmap = await createImageBitmap(new Blob([bytes]));
                 ctx.drawImage(imageBitmap, 0, 0);
 
-                const finalBytes = await fetch(canvas.toDataURL()).then((r) =>
-                    r.arrayBuffer(),
-                );
+                const finalBytes = await canvasToArrayBuffer(canvas);
                 const finalIcon = await Image.fromBytes(finalBytes);
+
+                await putIconInCache(cacheKey, finalBytes);
 
                 await appWindow.setIcon(finalIcon);
             } catch (e) {
                 console.error("Failed to load window icon:", e);
             }
         })();
-    }, [theme]);
+    }, [theme.id, theme.type]);
 
     useEffect(() => {
         const el = rootRef.current;
