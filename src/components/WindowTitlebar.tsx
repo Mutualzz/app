@@ -44,17 +44,64 @@ const WindowTitlebar = ({ onHeightChange }: WindowTitlebarProps) => {
     }, []);
 
     useEffect(() => {
-        const iconUrl =
-            theme.type === "light" ? "/icon-light.png" : "/icon.png";
+        let iconUrl = "/icon.png";
+        let isDefault = false;
+
+        switch (theme.id) {
+            case "baseDark":
+                iconUrl = "/icon.png";
+                isDefault = true;
+                break;
+            case "baseLight":
+                iconUrl = "/icon-light.png";
+                isDefault = true;
+                break;
+            default:
+                iconUrl =
+                    theme.type === "dark"
+                        ? "/icon-adaptive.png"
+                        : "/icon-light-adaptive.png";
+                isDefault = false;
+                break;
+        }
 
         (async () => {
             try {
-                const bytes = await fetch(iconUrl).then((res) =>
-                    res.arrayBuffer(),
-                );
-                const icon = await Image.fromBytes(bytes);
+                const res = await fetch(iconUrl);
+                const bytes = await res.arrayBuffer();
 
-                await appWindow.setIcon(icon);
+                const icon = await Image.fromBytes(bytes);
+                const iconSize = await icon.size();
+
+                const canvas = document.createElement("canvas");
+                const ctx = canvas.getContext("2d");
+                canvas.width = iconSize.width;
+                canvas.height = iconSize.height;
+                if (!ctx) throw new Error("Failed to create canvas context");
+
+                ctx.beginPath();
+                ctx.arc(
+                    canvas.width / 2,
+                    canvas.height / 2,
+                    Math.min(canvas.width, canvas.height) / 2,
+                    0,
+                    Math.PI * 2,
+                );
+                ctx.closePath();
+                ctx.clip();
+
+                ctx.fillStyle = theme.colors.primary;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                const imageBitmap = await createImageBitmap(new Blob([bytes]));
+                ctx.drawImage(imageBitmap, 0, 0);
+
+                const finalBytes = await fetch(canvas.toDataURL()).then((r) =>
+                    r.arrayBuffer(),
+                );
+                const finalIcon = await Image.fromBytes(finalBytes);
+
+                await appWindow.setIcon(finalIcon);
             } catch (e) {
                 console.error("Failed to load window icon:", e);
             }
