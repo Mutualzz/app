@@ -3,12 +3,7 @@ import { useModal } from "@contexts/Modal.context";
 import type { Theme as MzTheme } from "@emotion/react";
 import { usePrefersDark } from "@hooks/usePrefersDark";
 import { useAppStore } from "@hooks/useStores";
-import {
-    baseDarkTheme,
-    baseLightTheme,
-    createColor,
-    styled,
-} from "@mutualzz/ui-core";
+import { baseDarkTheme, baseLightTheme, styled } from "@mutualzz/ui-core";
 import {
     Box,
     Button,
@@ -20,30 +15,41 @@ import {
 } from "@mutualzz/ui-web";
 import { Theme } from "@stores/objects/Theme";
 import { useMutation } from "@tanstack/react-query";
+import { getAdaptiveIcon } from "@utils/index";
 import { observer } from "mobx-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FaCheck, FaTrash } from "react-icons/fa";
+import { FaRepeat } from "react-icons/fa6";
 
 const ColorBlob = styled("div")<{
     shownTheme: Theme | MzTheme;
-    size?: string | number;
+
     current: boolean;
-}>(({ theme, shownTheme, size = "4rem", current }) => ({
-    width: size,
-    height: size,
+}>(({ theme, shownTheme, current }) => ({
+    width: "4rem",
+    height: "4rem",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
     cursor: "pointer",
     background: shownTheme.colors.surface,
-    border: `1px solid ${
-        createColor(theme.colors.background).isLight()
-            ? theme.colors.common.black
-            : theme.colors.common.white
-    }`,
+    border: `3px solid ${theme.colors.primary}`,
     boxShadow: current ? `0 0 0 3px ${theme.colors.primary}` : "none",
     borderRadius: "50%",
 }));
+
+const ImageBlob = styled("img")<{
+    current: boolean;
+}>(({ theme, current }) => ({
+    width: "4rem",
+    height: "4rem",
+    cursor: "pointer",
+    border: `3px solid ${theme.colors.primary}`,
+    boxShadow: current ? `0 0 0 3px ${theme.colors.primary}` : "none",
+    borderRadius: "50%",
+}));
+
+type ThemeWithIcon<T> = { theme: T; icon: string };
 
 // NOTE: Upon deleting a theme, it doesn't immediately reflect in the UI until a refresh
 export const AppAppearanceSettings = observer(() => {
@@ -55,21 +61,63 @@ export const AppAppearanceSettings = observer(() => {
         type: currentType,
         changeType,
     } = useTheme();
-    const { theme: themeStore, rest } = app;
     const prefersDark = usePrefersDark();
+
+    const [icons, setIcons] = useState<Map<string, ThemeWithIcon<Theme>>>(
+        new Map(),
+    );
+    const [adaptiveIcon, setAdaptiveIcon] =
+        useState<ThemeWithIcon<MzTheme> | null>(null);
 
     const [focusedTheme, setFocusedTheme] = useState("");
 
+    useEffect(() => {
+        const loadIcons = async () => {
+            const allThemes = Array.from(app.theme.themes.values());
+            const iconMap = new Map<string, ThemeWithIcon<Theme>>();
+
+            // Load icons in parallel for better performance
+            await Promise.all(
+                allThemes.map(async (theme) => {
+                    const icon = (await getAdaptiveIcon(
+                        Theme.toEmotionTheme(theme),
+                        "baseUrl",
+                    )) as string;
+                    iconMap.set(theme.id, { theme, icon });
+                }),
+            );
+
+            setIcons(iconMap);
+        };
+
+        loadIcons();
+    }, [app.theme.themes.size]);
+
+    useEffect(() => {
+        const setupAdaptive = async () => {
+            const icon = (await getAdaptiveIcon(
+                currentTheme,
+                "baseUrl",
+            )) as string;
+            setAdaptiveIcon({ theme: currentTheme, icon });
+        };
+
+        setupAdaptive();
+    }, [currentTheme]);
+
     const { mutate: deleteTheme, isPending: isDeleting } = useMutation({
         mutationFn: async () => {
-            const response = await rest.delete<{ id: string }>("@me/themes", {
-                id: focusedTheme,
-            });
+            const response = await app.rest.delete<{ id: string }>(
+                "@me/themes",
+                {
+                    id: focusedTheme,
+                },
+            );
 
             return response;
         },
         onSuccess: () => {
-            themeStore.remove(focusedTheme);
+            app.theme.remove(focusedTheme);
             changeTheme(prefersDark ? baseDarkTheme : baseLightTheme);
             setFocusedTheme("");
         },
@@ -77,12 +125,20 @@ export const AppAppearanceSettings = observer(() => {
 
     const defaultThemes = [baseDarkTheme, baseLightTheme];
 
-    const defaultColorThemes = Array.from(themeStore.themes.values())
+    const defaultColorThemes = Array.from(app.theme.themes.values())
         .filter((t) => !t.createdBy)
         .filter((t) => t.id !== "baseDark" && t.id !== "baseLight");
 
-    const userThemes = Array.from(themeStore.themes.values()).filter(
+    const userThemes = Array.from(app.theme.themes.values()).filter(
         (t) => t.createdBy,
+    );
+
+    const defaultIcons = Array.from(icons.values()).filter(
+        (ic) => !ic.theme.createdBy,
+    );
+
+    const userIcons = Array.from(icons.values()).filter(
+        (ic) => ic.theme.createdBy,
     );
 
     return (
@@ -222,7 +278,11 @@ export const AppAppearanceSettings = observer(() => {
                                 changeType("system");
                             }}
                         >
-                            {currentType === "system" && <FaCheck />}
+                            {currentType === "system" ? (
+                                <FaCheck />
+                            ) : (
+                                <FaRepeat />
+                            )}
                         </ColorBlob>
                     </Tooltip>
                 </Stack>
@@ -257,6 +317,9 @@ export const AppAppearanceSettings = observer(() => {
                                         placement="bottom"
                                     >
                                         <ColorBlob
+                                            css={{
+                                                position: "relative",
+                                            }}
                                             onClick={() =>
                                                 changeTheme(
                                                     Theme.toEmotionTheme(t),
@@ -327,6 +390,191 @@ export const AppAppearanceSettings = observer(() => {
                     </div>
                 </Stack>
             </Stack>
+            {icons.size > 0 && (
+                <Stack direction="column" spacing={10}>
+                    <Typography level="body-lg" fontWeight="bolder">
+                        Icons
+                    </Typography>
+                    <Stack direction="column" spacing={10}>
+                        <Typography level="body-sm" fontWeight="bold">
+                            Default Icons
+                        </Typography>
+                        <div
+                            css={{
+                                display: "grid",
+                                gridTemplateColumns:
+                                    "repeat(10, minmax(4rem, 1fr))",
+                                gap: 10,
+                            }}
+                        >
+                            <Tooltip
+                                title="Adapt with current theme"
+                                placement="top"
+                            >
+                                <Box
+                                    position="relative"
+                                    display="inline-flex"
+                                    width="4rem"
+                                    height="4rem"
+                                >
+                                    <ImageBlob
+                                        current={!app.theme.currentIcon}
+                                        onClick={() => {
+                                            app.theme.setCurrentIcon(null);
+                                        }}
+                                        src={adaptiveIcon?.icon ?? ""}
+                                    />
+                                    <Stack
+                                        position="absolute"
+                                        top={-4}
+                                        right={-4}
+                                        alignItems="center"
+                                        border={`2px solid ${currentTheme.colors.surface}`}
+                                        justifyContent="center"
+                                        fontSize="0.75rem"
+                                        css={{
+                                            width: "1.5rem",
+                                            height: "1.5rem",
+                                            borderRadius: "50%",
+                                            background:
+                                                currentTheme.colors.primary,
+                                            pointerEvents: "none",
+                                        }}
+                                    >
+                                        {!app.theme.currentIcon ? (
+                                            <FaCheck />
+                                        ) : (
+                                            <FaRepeat />
+                                        )}
+                                    </Stack>
+                                </Box>
+                            </Tooltip>
+                            {defaultIcons.map((icon) => (
+                                <Tooltip
+                                    placement="top"
+                                    title={`${icon.theme.name} Icon`}
+                                >
+                                    <Box
+                                        position="relative"
+                                        display="inline-flex"
+                                        width="4rem"
+                                        height="4rem"
+                                    >
+                                        <ImageBlob
+                                            src={icon.icon}
+                                            css={{ width: 64, height: 64 }}
+                                            onClick={() =>
+                                                app.theme.setCurrentIcon(
+                                                    icon.theme.id,
+                                                )
+                                            }
+                                            current={
+                                                icon.theme.id ===
+                                                app.theme.currentIcon
+                                            }
+                                        />
+                                        {icon.theme.id ===
+                                            app.theme.currentIcon &&
+                                            app.theme.currentIcon ===
+                                                currentTheme.id && (
+                                                <Stack
+                                                    position="absolute"
+                                                    top={-4}
+                                                    right={-4}
+                                                    alignItems="center"
+                                                    border={`2px solid ${currentTheme.colors.surface}`}
+                                                    justifyContent="center"
+                                                    fontSize="0.75rem"
+                                                    css={{
+                                                        width: "1.5rem",
+                                                        height: "1.5rem",
+                                                        borderRadius: "50%",
+                                                        background:
+                                                            currentTheme.colors
+                                                                .primary,
+                                                        pointerEvents: "none",
+                                                    }}
+                                                >
+                                                    <FaCheck />
+                                                </Stack>
+                                            )}
+                                    </Box>
+                                </Tooltip>
+                            ))}
+                        </div>
+                    </Stack>
+                    {userIcons.length > 0 && (
+                        <Stack direction="column" spacing={10}>
+                            <Typography level="body-sm" fontWeight="bold">
+                                Your Icons
+                            </Typography>
+                            <div
+                                css={{
+                                    display: "grid",
+                                    gridTemplateColumns:
+                                        "repeat(10, minmax(4rem, 1fr))",
+                                    gap: 10,
+                                }}
+                            >
+                                {userIcons.map((icon) => (
+                                    <Tooltip
+                                        placement="top"
+                                        title={`${icon.theme.name} Icon`}
+                                    >
+                                        <Box
+                                            position="relative"
+                                            display="inline-flex"
+                                            width="4rem"
+                                            height="4rem"
+                                        >
+                                            <ImageBlob
+                                                src={icon.icon}
+                                                css={{ width: 64, height: 64 }}
+                                                onClick={() =>
+                                                    app.theme.setCurrentIcon(
+                                                        icon.theme.id,
+                                                    )
+                                                }
+                                                current={
+                                                    icon.theme.id ===
+                                                    app.theme.currentIcon
+                                                }
+                                            />
+                                            {icon.theme.id ===
+                                                app.theme.currentIcon &&
+                                                app.theme.currentIcon ===
+                                                    currentTheme.id && (
+                                                    <Stack
+                                                        position="absolute"
+                                                        top={-4}
+                                                        right={-4}
+                                                        alignItems="center"
+                                                        border={`2px solid ${currentTheme.colors.surface}`}
+                                                        justifyContent="center"
+                                                        fontSize="0.75rem"
+                                                        css={{
+                                                            width: "1.5rem",
+                                                            height: "1.5rem",
+                                                            borderRadius: "50%",
+                                                            background:
+                                                                currentTheme
+                                                                    .colors
+                                                                    .primary,
+                                                            pointerEvents:
+                                                                "none",
+                                                        }}
+                                                    >
+                                                        <FaCheck />
+                                                    </Stack>
+                                                )}
+                                        </Box>
+                                    </Tooltip>
+                                ))}
+                            </div>
+                        </Stack>
+                    )}
+                </Stack>
+            )}
         </Stack>
     );
 });

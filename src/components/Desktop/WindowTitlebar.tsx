@@ -1,3 +1,4 @@
+import { useDesktopShell } from "@contexts/DesktopShell.context";
 import { useAppStore } from "@hooks/useStores";
 import {
     Box,
@@ -7,13 +8,9 @@ import {
     Stack,
     useTheme,
 } from "@mutualzz/ui-web";
-import { Image } from "@tauri-apps/api/image";
 import { getCurrentWindow } from "@tauri-apps/api/window";
-import { detectOS } from "@utils/detect";
-import { canvasToArrayBuffer } from "@utils/index";
-import { getIconFromCache, putIconInCache } from "@utils/indexedDb";
 import { observer } from "mobx-react";
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { FaDownload } from "react-icons/fa";
 import {
     VscChromeMaximize,
@@ -28,96 +25,12 @@ interface WindowTitlebarProps {
 const WindowTitlebar = ({ onHeightChange }: WindowTitlebarProps) => {
     const appWindow = getCurrentWindow();
     const { theme } = useTheme();
+    const { os } = useDesktopShell();
     const { updaterStore } = useAppStore();
-    const [isMac, setIsMac] = useState(false);
     const [closeDanger, setCloseDanger] = useState(false);
     const rootRef = useRef<HTMLDivElement | null>(null);
 
-    useEffect(() => {
-        const checkMac = async () => {
-            setIsMac((await detectOS()).toLowerCase() === "macos");
-        };
-
-        checkMac();
-
-        return () => {
-            setIsMac(false);
-        };
-    }, []);
-
-    useLayoutEffect(() => {
-        let iconUrl = "/icon.png";
-        let isDefault = false;
-
-        switch (theme.id) {
-            case "baseDark":
-                iconUrl = "/icon.png";
-                isDefault = true;
-                break;
-            case "baseLight":
-                iconUrl = "/icon-light.png";
-                isDefault = true;
-                break;
-            default:
-                iconUrl =
-                    theme.type === "dark"
-                        ? "/icon-adaptive.png"
-                        : "/icon-light-adaptive.png";
-                isDefault = false;
-                break;
-        }
-
-        (async () => {
-            try {
-                const cacheKey = `${theme.id}-${theme.type}`;
-
-                const cachedIcon = await getIconFromCache(cacheKey);
-                if (cachedIcon) {
-                    console.log("hit cache");
-                    await appWindow.setIcon(cachedIcon);
-                    return;
-                }
-
-                const res = await fetch(iconUrl);
-                const bytes = await res.arrayBuffer();
-
-                const icon = await Image.fromBytes(bytes);
-                const iconSize = await icon.size();
-
-                const canvas = document.createElement("canvas");
-                const ctx = canvas.getContext("2d");
-                canvas.width = iconSize.width;
-                canvas.height = iconSize.height;
-                if (!ctx) throw new Error("Failed to create canvas context");
-
-                ctx.beginPath();
-                ctx.arc(
-                    canvas.width / 2,
-                    canvas.height / 2,
-                    Math.min(canvas.width, canvas.height) / 2,
-                    0,
-                    Math.PI * 2,
-                );
-                ctx.closePath();
-                ctx.clip();
-
-                ctx.fillStyle = theme.colors.primary;
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-                const imageBitmap = await createImageBitmap(new Blob([bytes]));
-                ctx.drawImage(imageBitmap, 0, 0);
-
-                const finalBytes = await canvasToArrayBuffer(canvas);
-                const finalIcon = await Image.fromBytes(finalBytes);
-
-                await putIconInCache(cacheKey, finalBytes);
-
-                await appWindow.setIcon(finalIcon);
-            } catch (e) {
-                console.error("Failed to load window icon:", e);
-            }
-        })();
-    }, [theme.id, theme.type]);
+    const isMac = os.platform === "macos";
 
     useEffect(() => {
         const el = rootRef.current;

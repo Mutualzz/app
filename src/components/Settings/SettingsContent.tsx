@@ -6,9 +6,9 @@ import { Stack, Typography } from "@mutualzz/ui-web";
 import startCase from "lodash-es/startCase";
 import { observer } from "mobx-react";
 import { useEffect } from "react";
-import { AppAppearanceSettings } from "./pages/AppAppearanceSettings";
-import { UserAccountSettings } from "./pages/UserAccountSettings";
-import { UserProfileSettings } from "./pages/UserProfileSettings";
+import { AppAppearanceSettings } from "./pages/app/AppAppearanceSettings";
+import { UserAccountSettings } from "./pages/user/UserAccountSettings";
+import { UserProfileSettings } from "./pages/user/UserProfileSettings";
 
 interface SettingsContentProps {
     redirectTo?: SettingsSidebarPage;

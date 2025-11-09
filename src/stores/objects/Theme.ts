@@ -90,7 +90,7 @@ export class Theme {
         } as unknown as APITheme;
     }
 
-    static toEmotionTheme(theme: Theme): MzTheme {
+    static toEmotionTheme(theme: Theme | MzTheme): MzTheme {
         const toMergeWith =
             theme.type === "dark" ? baseDarkTheme : baseLightTheme;
 

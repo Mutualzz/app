@@ -1,10 +1,3 @@
-import Loader from "@components/Loader/Loader";
-import { ModeSwitcher } from "@components/ModeSwitcher";
-import { BottomNavigation } from "@components/Navigation/BottomNavigation";
-import { TopNavigation } from "@components/Navigation/TopNavigation";
-import WindowTitlebar from "@components/WindowTitlebar";
-import { AppTheme } from "@contexts/AppTheme.context";
-import { ModalProvider } from "@contexts/Modal.context";
 import createCache from "@emotion/cache";
 import { CacheProvider } from "@emotion/react";
 import "@fontsource/inter/100";
@@ -48,6 +41,15 @@ import {
     type PropsWithChildren,
     type ReactNode,
 } from "react";
+
+import { DesktopShell } from "@components/Desktop/DesktopShell";
+import Loader from "@components/Loader/Loader";
+import { ModeSwitcher } from "@components/ModeSwitcher";
+import { BottomNavigation } from "@components/Navigation/BottomNavigation";
+import { TopNavigation } from "@components/Navigation/TopNavigation";
+import { AppTheme } from "@contexts/AppTheme.context";
+import { DesktopShellProvider } from "@contexts/DesktopShell.context";
+import { ModalProvider } from "@contexts/Modal.context";
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     {
@@ -171,56 +173,53 @@ function RootComponent() {
             <Providers>
                 <AppTheme>
                     <CssBaseline adaptiveScrollbar />
+                    <DesktopShellProvider>
+                        <DesktopShell
+                            titleBarProps={{
+                                onHeightChange: setTitlebarHeight,
+                            }}
+                        >
+                            <ModalProvider>
+                                {!networkState.online && (
+                                    <Paper
+                                        alignItems="center"
+                                        justifyContent="center"
+                                        variant="solid"
+                                        color="danger"
+                                    >
+                                        <Typography level="body-lg">
+                                            You are currently offline
+                                        </Typography>
+                                    </Paper>
+                                )}
 
-                    {isTauri && (
-                        <WindowTitlebar onHeightChange={setTitlebarHeight} />
-                    )}
-                    <ModalProvider>
-                        {!networkState.online && (
-                            <Paper
-                                alignItems="center"
-                                justifyContent="center"
-                                variant="solid"
-                                color="danger"
-                            >
-                                <Typography level="body-lg">
-                                    You are currently offline
-                                </Typography>
-                            </Paper>
-                        )}
-
-                        <Loader>
-                            <Stack
-                                direction="column"
-                                height="100vh"
-                                width="100vw"
-                                flex={1}
-                                minHeight={0}
-                                css={{
-                                    paddingTop: titlebarHeight,
-                                }}
-                            >
-                                <TopNavigation />
-                                <Stack
-                                    width="100%"
-                                    flex={1}
-                                    minHeight={0}
-                                    overflow="hidden"
-                                >
-                                    <Outlet />
-                                </Stack>
-                                <BottomNavigation />
-                                {app.account && <ModeSwitcher />}
-                            </Stack>
-                        </Loader>
-
-                        {/* {import.meta.env.DEV && (
-                        <>
-                            <ReactQueryDevtools />
-                            <TanStackRouterDevtools />
-                        </>
-                    )} */}
-                    </ModalProvider>
+                                <Loader>
+                                    <Stack
+                                        direction="column"
+                                        height="100vh"
+                                        width="100vw"
+                                        flex={1}
+                                        minHeight={0}
+                                        css={{
+                                            paddingTop: titlebarHeight,
+                                        }}
+                                    >
+                                        <TopNavigation />
+                                        <Stack
+                                            width="100%"
+                                            flex={1}
+                                            minHeight={0}
+                                            overflow="hidden"
+                                        >
+                                            <Outlet />
+                                        </Stack>
+                                        <BottomNavigation />
+                                        {app.account && <ModeSwitcher />}
+                                    </Stack>
+                                </Loader>
+                            </ModalProvider>
+                        </DesktopShell>
+                    </DesktopShellProvider>
                 </AppTheme>
             </Providers>
         </RootDocument>

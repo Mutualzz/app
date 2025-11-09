@@ -7,15 +7,13 @@ import {
     type ThemeStyle,
     type ThemeType,
 } from "@mutualzz/ui-core";
-import { isSSR } from "@utils/index";
+import { safeLocalStorage } from "@utils/safeLocalStorage";
 import { makeAutoObservable, observable, ObservableMap } from "mobx";
 import { makePersistable } from "mobx-persist-store";
 import type { AppStore } from "./App.store";
 import { Theme } from "./objects/Theme";
 
 export class ThemeStore {
-    private readonly app: AppStore;
-
     private readonly logger = new Logger({
         tag: "ThemeStore",
     });
@@ -23,20 +21,26 @@ export class ThemeStore {
     readonly themes: ObservableMap<string, Theme>;
 
     currentTheme: string | null = null;
+
+    // NOTE: If the currentIcon is null, it means its adaptive to the theme
+    currentIcon: string | null = null;
+
     currentType: ThemeType = "system";
     currentStyle: ThemeStyle = "normal";
 
-    constructor(app: AppStore) {
-        this.app = app;
-
+    constructor(private readonly app: AppStore) {
         this.themes = observable.map();
         makeAutoObservable(this);
 
-        if (isSSR) return;
         makePersistable(this, {
             name: "ThemeStore",
-            properties: ["currentTheme", "currentType", "currentStyle"],
-            storage: localStorage,
+            properties: [
+                "currentTheme",
+                "currentType",
+                "currentStyle",
+                "currentIcon",
+            ],
+            storage: safeLocalStorage,
         });
     }
 
@@ -52,13 +56,17 @@ export class ThemeStore {
         this.currentStyle = style;
     }
 
+    setCurrentIcon(icon: string | null) {
+        this.currentIcon = icon;
+    }
+
     reset() {
         this.themes.clear();
         this.themes.set(baseDarkTheme.id, new Theme(baseDarkTheme));
         this.themes.set(baseLightTheme.id, new Theme(baseLightTheme));
     }
 
-    loadThemes(themes: (APITheme | MzTheme)[]) {
+    addAll(themes: (APITheme | MzTheme)[]) {
         themes.forEach((theme) => this.add(theme));
     }
 
@@ -86,12 +94,16 @@ export class ThemeStore {
         existingTheme.update(theme);
     }
 
-    remove(themeId: string) {
-        if (!this.themes.has(themeId)) {
-            this.logger.warn(`Theme ${themeId} does not exist.`);
+    get(id: string) {
+        return this.themes.get(id) ?? baseDarkTheme;
+    }
+
+    remove(id: string) {
+        if (!this.themes.has(id)) {
+            this.logger.warn(`Theme ${id} does not exist.`);
             return;
         }
 
-        this.themes.delete(themeId);
+        this.themes.delete(id);
     }
 }
