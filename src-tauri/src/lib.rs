@@ -4,13 +4,11 @@ use tauri_plugin_autostart::MacosLauncher;
 use tauri_plugin_log::{Target, TargetKind, WEBVIEW_TARGET};
 use tauri_plugin_notification;
 
-#[cfg(desktop)]
-mod tray;
 
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    unsafe { 
+    unsafe {
         std::env::set_var("RUST_BACKTRACE", "1");
         std::env::set_var("RUST_LOG", "debug");
     }
@@ -71,10 +69,6 @@ pub fn run() {
                     MacosLauncher::LaunchAgent,
                     Some(vec![]),
                 ));
-
-                // Tray
-                let handle = app.handle();
-                tray::create_tray(handle)?;
             }
 
             // Open the dev tools automatically when debugging the application
@@ -98,14 +92,6 @@ pub fn run() {
             window.open_devtools();
 
             println!("App is ready");
-        }
-        RunEvent::ExitRequested { api, code, .. } => {
-            // Keep the event loop running even if all windows are closed
-            // This allow us to catch tray icon events when there is no window
-            // if we manually requested an exit (code is Some(_)) we will let it go through
-            if code.is_none() {
-                api.prevent_exit();
-            }
         }
         tauri::RunEvent::WindowEvent {
             label,
