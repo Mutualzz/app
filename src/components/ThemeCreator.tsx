@@ -44,9 +44,9 @@ import { adaptColors } from "@utils/adaptation";
 import { sortThemes } from "@utils/index";
 import capitalize from "lodash-es/capitalize";
 import { observer } from "mobx-react";
-import { motion } from "motion/react";
 import { useEffect, useState } from "react";
 import { FaShuffle } from "react-icons/fa6";
+import { AnimatedPaper } from "./Animated/AnimatedPaper";
 
 type ApiErrors = Record<string, string>;
 
@@ -111,8 +111,6 @@ interface FormMeta {
 const defaultMeta: FormMeta = {
     submitAction: "create",
 };
-
-const AnimatedPaper = motion.create(Paper);
 
 export const ThemeCreator = observer(() => {
     const { draft, rest, theme: themeStore } = useAppStore();

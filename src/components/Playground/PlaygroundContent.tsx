@@ -1,3 +1,4 @@
+import { AnimatedPaper } from "@components/Animated/AnimatedPaper";
 import {
     Divider,
     Paper,
@@ -7,9 +8,6 @@ import {
     type PaperProps,
 } from "@mutualzz/ui-web";
 import { useMediaQuery } from "@react-hookz/web";
-import { motion } from "motion/react";
-
-const AnimatedPaper = motion.create(Paper);
 
 export const PlaygroundContent = ({
     children,

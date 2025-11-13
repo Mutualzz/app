@@ -1,16 +1,14 @@
+import { AnimatedPaper } from "@components/Animated/AnimatedPaper";
 import {
     SettingsSidebarProvider,
     type SettingsSidebarPage,
 } from "@contexts/SettingsSidebar.context";
-import { Drawer, Paper, Stack, useTheme } from "@mutualzz/ui-web";
+import { Drawer, Stack, useTheme } from "@mutualzz/ui-web";
 import { useMediaQuery } from "@react-hookz/web";
 import { observer } from "mobx-react";
-import { motion } from "motion/react";
 import { useState } from "react";
 import { SettingsContent } from "./SettingsContent";
 import { UserSettingsSidebar } from "./SettingsSidebar";
-
-const AnimatedPaper = motion.create(Paper);
 
 interface SettingsPropsModal {
     redirectTo?: SettingsSidebarPage;

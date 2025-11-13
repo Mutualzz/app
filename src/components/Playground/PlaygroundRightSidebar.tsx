@@ -1,9 +1,7 @@
-import { Divider, Drawer, Paper, Stack, useTheme } from "@mutualzz/ui-web";
+import { AnimatedPaper } from "@components/Animated/AnimatedPaper";
+import { Divider, Drawer, Stack, useTheme } from "@mutualzz/ui-web";
 import { useMediaQuery } from "@react-hookz/web";
-import { motion } from "motion/react";
 import { useState, type PropsWithChildren } from "react";
-
-const AnimatedPaper = motion.create(Paper);
 
 export const PlaygroundRightSidebar = ({ children }: PropsWithChildren) => {
     const { theme } = useTheme();

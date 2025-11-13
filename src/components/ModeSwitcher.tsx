@@ -1,15 +1,13 @@
 import { useAppStore } from "@hooks/useStores";
-import { IconButton, Tooltip, useTheme } from "@mutualzz/ui-web";
+import { Tooltip, useTheme } from "@mutualzz/ui-web";
 import { useMediaQuery } from "@react-hookz/web";
 import { useNavigate } from "@tanstack/react-router";
 import { switchMode } from "@utils/index";
 import { observer } from "mobx-react";
-import { motion } from "motion/react";
 import { useState } from "react";
 import { GiGalaxy } from "react-icons/gi";
 import { ImFeed, ImSpinner11 } from "react-icons/im";
-
-const AnimatedIconButton = motion.create(IconButton);
+import { AnimatedIconButton } from "./Animated/AniamtedIconButton";
 
 export const ModeSwitcher = observer(() => {
     const app = useAppStore();

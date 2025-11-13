@@ -1,17 +1,10 @@
+import { AnimatedPaper } from "@components/Animated/AnimatedPaper";
 import { ThemeSelector } from "@components/ThemeSelector";
-import {
-    Button,
-    Divider,
-    Drawer,
-    Paper,
-    Stack,
-    useTheme,
-} from "@mutualzz/ui-web";
+import { Button, Divider, Drawer, Stack, useTheme } from "@mutualzz/ui-web";
 import { useMediaQuery } from "@react-hookz/web";
 import { useLocation, useNavigate } from "@tanstack/react-router";
 import startCase from "lodash-es/startCase";
 import { observer } from "mobx-react";
-import { motion } from "motion/react";
 import { useState } from "react";
 
 const links = {
@@ -93,8 +86,6 @@ const links = {
         },
     ],
 };
-
-const AnimatedPaper = motion.create(Paper);
 
 export const PlaygroundLeftSidebar = observer(() => {
     const navigate = useNavigate();
