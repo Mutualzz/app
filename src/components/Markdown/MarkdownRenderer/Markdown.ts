@@ -20,6 +20,7 @@ import { visit } from "unist-util-visit";
 import { VFile } from "vfile";
 import { remarkEmoji } from "./remark/remarkEmoji";
 import { remarkParse } from "./remark/remarkParse";
+
 type AllowElement = (
     element: Readonly<Element>,
     index: number,
