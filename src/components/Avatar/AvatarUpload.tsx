@@ -1,3 +1,4 @@
+import { AnimatedPaper } from "@components/Animated/AnimatedPaper";
 import { CropperClient as Cropper } from "@components/CropperClient";
 import { UserAvatar } from "@components/User/UserAvatar";
 import { useModal } from "@contexts/Modal.context";
@@ -8,7 +9,6 @@ import {
     Button,
     ButtonGroup,
     IconButton,
-    Paper,
     Slider,
     Stack,
     Typography,
@@ -109,13 +109,15 @@ export const AvatarUpload = observer(() => {
     if (!account) return <></>;
 
     return (
-        <Paper
+        <AnimatedPaper
             elevation={4}
             borderRadius={40}
             minWidth={{ xs: "90vw", sm: 340, md: 420, lg: 500 }}
             maxWidth={500}
             direction="column"
             minHeight={300}
+            initial={{ scale: 0.95 }}
+            animate={{ scale: 1 }}
         >
             <Stack
                 width="100%"
