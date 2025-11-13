@@ -14,8 +14,10 @@ export const AdaptiveIcon = observer(() => {
     useLayoutEffect(() => {
         (async () => {
             try {
-                const themeToUse = app.theme.currentIcon
-                    ? Theme.toEmotionTheme(app.theme.get(app.theme.currentIcon))
+                const themeToUse = app.themes.currentIcon
+                    ? Theme.toEmotionTheme(
+                          app.themes.get(app.themes.currentIcon),
+                      )
                     : theme;
 
                 const icon = await getAdaptiveIcon(themeToUse);
@@ -25,7 +27,7 @@ export const AdaptiveIcon = observer(() => {
                 console.error("Failed to load window icon:", e);
             }
         })();
-    }, [theme.id, theme.type, app.theme.currentIcon]);
+    }, [theme.id, theme.type, app.themes.currentIcon]);
 
     return null;
 });

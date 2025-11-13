@@ -26,7 +26,7 @@ const WindowTitlebar = ({ onHeightChange }: WindowTitlebarProps) => {
     const appWindow = getCurrentWindow();
     const { theme } = useTheme();
     const { os } = useDesktopShell();
-    const { updaterStore } = useAppStore();
+    const app = useAppStore();
     const [closeDanger, setCloseDanger] = useState(false);
     const rootRef = useRef<HTMLDivElement | null>(null);
 
@@ -77,10 +77,10 @@ const WindowTitlebar = ({ onHeightChange }: WindowTitlebarProps) => {
                 justifyContent="flex-end"
                 data-tauri-drag-region
             >
-                {updaterStore?.update && (
+                {app.updater?.update && (
                     <Stack px={isMac ? 15 : 0} alignItems="center" spacing={8}>
                         <IconButton
-                            onClick={() => updaterStore.installUpdate()}
+                            onClick={() => app.updater?.installUpdate()}
                             size={18}
                             variant="plain"
                             color="success"

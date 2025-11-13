@@ -15,7 +15,7 @@ export const AppTheme = observer(({ children }: PropsWithChildren) => {
 
     const applyingRef = useRef(false);
     const lastAppliedRef = useRef<{
-        type: typeof app.theme.currentType | null;
+        type: typeof app.themes.currentType | null;
         themeId: string | null;
     }>({
         type: null,
@@ -25,16 +25,16 @@ export const AppTheme = observer(({ children }: PropsWithChildren) => {
     useEffect(() => {
         const dispose = reaction(
             () => ({
-                theme: app.theme.currentTheme,
-                type: app.theme.currentType,
-                style: app.theme.currentStyle,
-                userThemeRemote: app.account?.settings.currentTheme,
+                theme: app.themes.currentTheme,
+                type: app.themes.currentType,
+                style: app.themes.currentStyle,
+                userThemeRemote: app.settings?.currentTheme,
                 isLoggedIn: app.token,
             }),
             ({ theme, type, userThemeRemote, isLoggedIn }) => {
                 let selectedTheme: MzTheme | undefined;
 
-                const themes = Array.from(app.theme.themes.values());
+                const themes = Array.from(app.themes.themes.values());
 
                 // Only proceed if themes are loaded
                 if (type === "system") {
@@ -89,16 +89,16 @@ export const AppTheme = observer(({ children }: PropsWithChildren) => {
         <ThemeProvider
             ref={themeProviderRef}
             onThemeChange={(theme) => {
-                if (theme.id !== app.theme.currentTheme)
-                    app.theme.setCurrentTheme(theme.id);
+                if (theme.id !== app.themes.currentTheme)
+                    app.themes.setCurrentTheme(theme.id);
             }}
             onTypeChange={(type) => {
-                if (type !== app.theme.currentType)
-                    app.theme.setCurrentType(type);
+                if (type !== app.themes.currentType)
+                    app.themes.setCurrentType(type);
             }}
             onStyleChange={(style) => {
-                if (style !== app.theme.currentStyle)
-                    app.theme.setCurrentStyle(style);
+                if (style !== app.themes.currentStyle)
+                    app.themes.setCurrentStyle(style);
             }}
         >
             {children}

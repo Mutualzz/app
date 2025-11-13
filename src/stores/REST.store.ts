@@ -1,4 +1,4 @@
-import { Logger } from "@logger";
+import { Logger } from "@mutualzz/logger";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { detectBrowser, detectOS } from "../utils/detect";
 
@@ -187,6 +187,56 @@ export class REST {
                     else return reject(res.statusText);
                 })
                 .catch(reject);
+        });
+    }
+
+    public async putFormData<Data>(
+        path: string,
+        body: FormData,
+        queryParams: Record<string, any> = {},
+        headers: Record<string, string> = {},
+        msg?: any,
+    ): Promise<Data> {
+        return new Promise((resolve, reject) => {
+            const url = REST.makeAPIUrl(path, queryParams);
+            this.logger.debug(`PUT ${url}; payload:`, body);
+            const xhr = new XMLHttpRequest();
+            if (msg) {
+                // add abort callback
+                msg.setAbortCallback(() => {
+                    this.logger.debug("[PostFormData]: Message called abort");
+                    xhr.abort();
+                    reject("aborted");
+                });
+                // add progress listener
+                xhr.upload.addEventListener("progress", (e: ProgressEvent) =>
+                    msg.updateProgress(e),
+                );
+            }
+            xhr.addEventListener("loadend", () => {
+                // if success, resolve text or json
+                if (xhr.status >= 200 && xhr.status < 300) {
+                    if (xhr.responseType === "json")
+                        return resolve(xhr.response);
+
+                    return resolve(JSON.parse(xhr.response));
+                }
+
+                // if theres content, reject with text
+                if (xhr.getResponseHeader("content-length") !== "0")
+                    return reject(xhr.responseText);
+
+                // reject with status code if theres no content
+                return reject(xhr.statusText);
+            });
+            xhr.open("PUT", url);
+            // set headers
+            Object.entries({ ...headers, ...this.headers }).forEach(
+                ([key, value]) => {
+                    xhr.setRequestHeader(key, value);
+                },
+            );
+            xhr.send(body);
         });
     }
 

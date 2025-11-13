@@ -14,7 +14,7 @@ import {
 } from "@mutualzz/ui-web";
 import startCase from "lodash-es/startCase";
 import { observer } from "mobx-react";
-import type { JSX } from "react";
+import { Fragment, type JSX } from "react";
 import { FaPaintBrush, FaPalette, FaUserCog } from "react-icons/fa";
 import { UserAvatar } from "../User/UserAvatar";
 
@@ -53,8 +53,6 @@ export const UserSettingsSidebar = observer(
     ({ drawerOpen, setDrawerOpen }: UserSettingsSidebarProps) => {
         const app = useAppStore();
 
-        const { account } = app;
-
         const { currentPage, setCurrentPage, setCurrentCategory } =
             useSettingsSidebar();
 
@@ -69,19 +67,21 @@ export const UserSettingsSidebar = observer(
             }
         };
 
-        if (!account) return null;
+        if (!app.account) return null;
 
         const categories = Object.entries(settingsPages);
 
         return (
             <Paper
-                p="1rem"
                 direction="column"
                 width="100%"
                 height="100%"
+                minWidth={175}
+                maxWidth={175}
                 elevation={2}
+                spacing={10}
             >
-                <Stack direction="column" spacing={10}>
+                <Stack px="1rem" pt="1rem">
                     <Button
                         variant="plain"
                         onClick={() =>
@@ -89,15 +89,17 @@ export const UserSettingsSidebar = observer(
                         }
                         color="neutral"
                         padding={5}
+                        horizontalAlign="left"
                     >
                         <Stack
                             width="100%"
-                            direction="row"
-                            spacing={10}
-                            alignItems="center"
                             justifyContent="center"
+                            alignItems="center"
+                            flex={1}
+                            direction="row"
+                            spacing={7.5}
                         >
-                            <UserAvatar user={account} />
+                            <UserAvatar user={app.account} />
                             <Stack
                                 spacing={2.5}
                                 justifyContent="flex-start"
@@ -105,7 +107,8 @@ export const UserSettingsSidebar = observer(
                                 direction="column"
                             >
                                 <Typography level="body-sm">
-                                    {account.globalName ?? account.username}
+                                    {app.account.globalName ??
+                                        app.account.username}
                                 </Typography>
                                 <Typography
                                     textColor="muted"
@@ -122,81 +125,55 @@ export const UserSettingsSidebar = observer(
                             </Stack>
                         </Stack>
                     </Button>
-                    <Divider lineColor="neutral" />
-                    {categories.map(([category, pages], index) => (
-                        <>
-                            <Stack
-                                direction="column"
-                                key={`settings-sidebar-category-${category}`}
-                            >
-                                <Typography
-                                    level="body-xs"
-                                    textColor="muted"
-                                    mb={5}
-                                >
-                                    {startCase(category)}
-                                </Typography>
-                                <ButtonGroup
-                                    color="neutral"
-                                    size={{ xs: "sm", sm: "md" }}
-                                    orientation="vertical"
-                                    variant="plain"
-                                    spacing={5}
-                                >
-                                    {pages.map((page) => (
-                                        <Button
-                                            startDecorator={page.icon}
-                                            onClick={() =>
-                                                handlePageSwitch(
-                                                    category as SettingsSidebarCategories,
-                                                    page.label,
-                                                )
-                                            }
-                                            key={`user-settings-sidebar-${page.label}`}
-                                            horizontalAlign="left"
-                                            variant={
-                                                currentPage === page.label
-                                                    ? "soft"
-                                                    : "plain"
-                                            }
-                                            padding={5}
-                                        >
-                                            {startCase(page.label)}
-                                        </Button>
-                                    ))}
-                                </ButtonGroup>
-                            </Stack>
-                            {index < categories.length - 1 && (
-                                <Divider lineColor="neutral" />
-                            )}
-                        </>
-                    ))}
-                    {/* <Stack direction="column" spacing={1}>
-                        <ButtonGroup
-                            color="neutral"
-                            size={{ xs: "sm", sm: "md" }}
-                            orientation="vertical"
-                            variant="plain"
-                            spacing={5}
-                        >
-                            {pages.map((page) => (
-                                <Button
-                                    startDecorator={page.icon}
-                                    onClick={() => handlePageSwitch(page.label)}
-                                    key={`user-settings-sidebar-${page.label}`}
-                                    horizontalAlign="left"
-                                    variant={
-                                        currentPage === page.label
-                                            ? "soft"
-                                            : "plain"
-                                    }
-                                >
-                                    {startCase(page.label)}
-                                </Button>
-                            ))}
-                        </ButtonGroup>
-                    </Stack> */}
                 </Stack>
+                <Divider lineColor="primary" />
+                {categories.map(([category, pages], index) => (
+                    <Fragment
+                        key={`settings-sidebar-category-fragment-${category}`}
+                    >
+                        <Stack px="1rem" direction="column">
+                            <Typography
+                                level="body-xs"
+                                textColor="muted"
+                                mb={5}
+                            >
+                                {startCase(category)}
+                            </Typography>
+                            <ButtonGroup
+                                color="neutral"
+                                size={{ xs: "sm", sm: "md" }}
+                                orientation="vertical"
+                                variant="plain"
+                                spacing={5}
+                            >
+                                {pages.map((page) => (
+                                    <Button
+                                        startDecorator={page.icon}
+                                        onClick={() =>
+                                            handlePageSwitch(
+                                                category as SettingsSidebarCategories,
+                                                page.label,
+                                            )
+                                        }
+                                        key={`user-settings-sidebar-${page.label}`}
+                                        horizontalAlign="left"
+                                        variant={
+                                            currentPage === page.label
+                                                ? "soft"
+                                                : "plain"
+                                        }
+                                        padding={5}
+                                    >
+                                        {startCase(page.label)}
+                                    </Button>
+                                ))}
+                            </ButtonGroup>
+                        </Stack>
+                        {index < categories.length - 1 && (
+                            <Divider lineColor="primary" />
+                        )}
+                    </Fragment>
+                ))}
             </Paper>
         );
     },

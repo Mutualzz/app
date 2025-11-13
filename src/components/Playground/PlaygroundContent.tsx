@@ -1,7 +1,6 @@
 import { AnimatedPaper } from "@components/Animated/AnimatedPaper";
 import {
     Divider,
-    Paper,
     Stack,
     Typography,
     useTheme,

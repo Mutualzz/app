@@ -1,6 +1,4 @@
 import { AnimatedPaper } from "@components/Animated/AnimatedPaper";
-import { CropperClient as Cropper } from "@components/CropperClient";
-import { UserAvatar } from "@components/User/UserAvatar";
 import { useModal } from "@contexts/Modal.context";
 import { useAppStore } from "@hooks/useStores";
 import { FileUploader } from "@mateie/react-drag-drop-files";
@@ -9,6 +7,7 @@ import {
     Button,
     ButtonGroup,
     IconButton,
+    Input,
     Slider,
     Stack,
     Typography,
@@ -16,18 +15,23 @@ import {
 } from "@mutualzz/ui-web";
 import { useMutation } from "@tanstack/react-query";
 import { observer } from "mobx-react";
-import { useCallback, useState } from "react";
+import { useCallback, useState, type ChangeEvent } from "react";
+import Cropper from "react-easy-crop";
+import { FaCamera } from "react-icons/fa";
 import { FaMagnifyingGlass, FaRotate } from "react-icons/fa6";
 
-interface UpdateAvatar {
-    avatar: File;
+interface CreateSpace {
+    icon?: File | null;
     crop?: unknown;
 }
 
-export const AvatarUpload = observer(() => {
-    const { theme } = useTheme();
+export const SpacesAdd = observer(() => {
     const app = useAppStore();
-    const { closeModal, closeAllModals } = useModal();
+    const { theme } = useTheme();
+
+    const { closeAllModals } = useModal();
+
+    const [name, setName] = useState("");
 
     const [imageFile, setImageFile] = useState<string | null>(null);
     const [originalFile, setOriginalFile] = useState<File | null>(null);
@@ -39,15 +43,15 @@ export const AvatarUpload = observer(() => {
 
     const [error, setError] = useState<string | null>(null);
 
-    const { mutate: updateAvatar, isPending: saving } = useMutation({
-        mutationFn: ({ avatar, crop }: UpdateAvatar) => {
+    const { mutate: createSpace, isPending: creating } = useMutation({
+        mutationFn: ({ icon, crop }: CreateSpace) => {
             const formData = new FormData();
-            formData.append("avatar", avatar);
-
+            formData.append("name", name);
+            if (icon) formData.append("icon", icon);
             if (crop)
                 formData.append("crop", JSON.stringify(croppedAreaPixels));
 
-            return app.rest.patchFormData("@me", formData);
+            return app.rest.putFormData("spaces", formData);
         },
         onSuccess: () => {
             setImageFile(null);
@@ -56,7 +60,9 @@ export const AvatarUpload = observer(() => {
             closeAllModals();
         },
         onError: (err: HttpException) => {
-            setError(err.message ?? "An error occurred");
+            setError(
+                err.errors?.[0].message ?? err.message ?? "An error occurred",
+            );
         },
     });
 
@@ -71,6 +77,8 @@ export const AvatarUpload = observer(() => {
             setOriginalFile(fileToUse);
         };
         reader.readAsDataURL(fileToUse);
+
+        setError(null);
     };
 
     const onClear = () => {
@@ -82,33 +90,25 @@ export const AvatarUpload = observer(() => {
         setZoom(1);
     };
 
-    const onClose = () => {
-        setImageFile(null);
-        setOriginalFile(null);
-        setError(null);
-        setCroppedAreaPixels(null);
-        closeModal("avatar-upload");
-    };
-
     const onCropComplete = useCallback((_: any, croppedAreaPixels: any) => {
         setCroppedAreaPixels(croppedAreaPixels);
     }, []);
 
-    const handleSave = async (skipCrop = false) => {
-        if (!originalFile) return;
+    const handleName = (e: ChangeEvent<HTMLInputElement>) => {
+        setError(null);
+        setName(e.target.value);
+    };
 
+    const handleCreate = async () => {
         const shouldCrop =
-            !skipCrop &&
             (crop.x !== 0 || crop.y !== 0 || zoom !== 1 || rotation !== 0) &&
             !!croppedAreaPixels;
 
-        updateAvatar({
-            avatar: originalFile,
+        createSpace({
+            icon: originalFile,
             crop: shouldCrop ? croppedAreaPixels : undefined,
         });
     };
-
-    if (!app.account) return <></>;
 
     return (
         <AnimatedPaper
@@ -120,22 +120,20 @@ export const AvatarUpload = observer(() => {
             minHeight={300}
             initial={{ scale: 0.95 }}
             animate={{ scale: 1 }}
+            justifyContent="center"
+            alignItems="center"
         >
             <Stack
                 width="100%"
                 height="100%"
                 position="relative"
                 direction="column"
-                px={{ xs: "1rem", sm: "2rem" }}
-                py={{ xs: "1.5rem", sm: "2.5rem", md: "3rem" }}
                 alignItems="center"
                 justifyContent="center"
+                pt={{ xs: "1rem", sm: "2rem" }}
+                px={{ xs: "1rem", sm: "2rem" }}
+                flex={1}
             >
-                {error && (
-                    <Typography color="danger" variant="plain" mb="2rem">
-                        {error}
-                    </Typography>
-                )}
                 {imageFile ? (
                     <>
                         <Stack
@@ -145,8 +143,8 @@ export const AvatarUpload = observer(() => {
                             width={{ xs: 180, sm: 220, md: 256 }}
                             height={{ xs: 180, sm: 220, md: 256 }}
                             css={{
-                                pointerEvents: saving ? "none" : "all",
-                                filter: saving ? "blur(4px)" : "none",
+                                pointerEvents: creating ? "none" : "all",
+                                filter: creating ? "blur(4px)" : "none",
                             }}
                         >
                             <Cropper
@@ -188,7 +186,7 @@ export const AvatarUpload = observer(() => {
                                 onChange={(_, value) =>
                                     setZoom(value as number)
                                 }
-                                disabled={saving}
+                                disabled={creating}
                                 css={{
                                     flex: 1,
                                 }}
@@ -198,7 +196,7 @@ export const AvatarUpload = observer(() => {
                                 color={theme.typography.colors.primary}
                                 variant="plain"
                                 size="sm"
-                                disabled={saving}
+                                disabled={creating}
                             >
                                 <FaRotate />
                             </IconButton>
@@ -212,19 +210,45 @@ export const AvatarUpload = observer(() => {
                         <Stack
                             alignItems="center"
                             justifyContent="center"
-                            spacing={{ xs: 8, sm: 16, md: 25 }}
                             direction="column"
                             css={{
                                 cursor: "pointer",
                             }}
+                            borderRadius="50%"
+                            width={72}
+                            height={72}
+                            border={`1px dashed ${theme.colors.neutral}`}
+                            spacing={5}
                         >
-                            <UserAvatar user={app.account} size={256} />
-                            <Typography level="body-xs">
-                                (Click or Drag and drop)
+                            <FaCamera size={16} />
+                            <Typography fontWeight="bold" fontSize="x-small">
+                                Upload
                             </Typography>
                         </Stack>
                     </FileUploader>
                 )}
+
+                <Stack direction="column" spacing={{ xs: 2, sm: 3, md: 3.5 }}>
+                    <Typography
+                        fontWeight={500}
+                        level={{ xs: "body-sm", sm: "body-md" }}
+                    >
+                        Name{" "}
+                        <Typography variant="plain" color="danger">
+                            *
+                        </Typography>
+                    </Typography>
+                    <Input type="text" value={name} onChange={handleName} />
+                    {error && (
+                        <Typography
+                            variant="plain"
+                            color="danger"
+                            level="body-sm"
+                        >
+                            {error}
+                        </Typography>
+                    )}
+                </Stack>
             </Stack>
             <Stack
                 pb={{ xs: "1rem", sm: "2rem" }}
@@ -234,38 +258,19 @@ export const AvatarUpload = observer(() => {
             >
                 <ButtonGroup spacing={{ xs: 2, sm: 5 }}>
                     <Button
-                        disabled={saving}
-                        onClick={onClose}
+                        disabled={creating || name.trim() === "" || !!error}
+                        onClick={() => handleCreate()}
                         variant="outlined"
-                        color="danger"
+                        color="success"
                     >
-                        Cancel
+                        Create
                     </Button>
                     {imageFile && (
-                        <Button disabled={saving} onClick={onClear}>
+                        <Button disabled={creating} onClick={onClear}>
                             Reset
                         </Button>
                     )}
                 </ButtonGroup>
-                {imageFile && croppedAreaPixels && (
-                    <ButtonGroup spacing={{ xs: 2, sm: 5 }}>
-                        <Button
-                            onClick={() => handleSave(true)}
-                            loading={saving}
-                            color="neutral"
-                            variant="plain"
-                        >
-                            Skip
-                        </Button>
-                        <Button
-                            onClick={() => handleSave(false)}
-                            color="success"
-                            loading={saving}
-                        >
-                            Save
-                        </Button>
-                    </ButtonGroup>
-                )}
             </Stack>
         </AnimatedPaper>
     );

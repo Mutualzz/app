@@ -1,17 +1,15 @@
+import { AnimatedLogo } from "@components/Animated/AnimatedLogo";
 import { DownloadButton } from "@components/DownloadButton";
 import { useAppStore } from "@hooks/useStores";
-import { Button, Paper, Stack, useTheme } from "@mutualzz/ui-web";
+import { Box, Button, Paper, Stack, Tooltip, useTheme } from "@mutualzz/ui-web";
 import { useMediaQuery } from "@react-hookz/web";
 import { useNavigate } from "@tanstack/react-router";
 import { isTauri } from "@utils/index";
+import capitalize from "lodash-es/capitalize";
 import { observer } from "mobx-react";
-import { motion } from "motion/react";
 import { FaClipboard, FaDownload, FaUser } from "react-icons/fa";
 import { GiGalaxy } from "react-icons/gi";
 import { ImFeed } from "react-icons/im";
-import { Logo } from "../Logo";
-
-const AnimatedLogo = motion.create(Logo);
 
 export const TopNavigation = observer(() => {
     const navigate = useNavigate();
@@ -21,7 +19,6 @@ export const TopNavigation = observer(() => {
     );
 
     const app = useAppStore();
-    const { account } = app;
 
     if (isMobileQuery) return null;
 
@@ -88,7 +85,7 @@ export const TopNavigation = observer(() => {
                 direction="row"
                 spacing={{ xs: 2, sm: 6, md: 10 }}
             >
-                {!account && (
+                {!app.account && (
                     <Stack direction="row" spacing={5} alignItems="center">
                         <Button
                             startDecorator={<FaClipboard />}

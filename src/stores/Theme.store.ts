@@ -1,5 +1,6 @@
 import type { Theme as MzTheme } from "@emotion/react";
-import { Logger } from "@logger";
+import { usePrefersDark } from "@hooks/usePrefersDark";
+import { Logger } from "@mutualzz/logger";
 import type { APITheme } from "@mutualzz/types";
 import {
     baseDarkTheme,
@@ -77,8 +78,8 @@ export class ThemeStore {
         }
 
         const newTheme = new Theme(theme);
-        if ("createdBy" in theme && theme.createdBy)
-            newTheme.createdBy = this.app.users.get(theme.createdBy) ?? null;
+        if ("author" in theme && theme.author)
+            newTheme.author = this.app.users.get(theme.author) ?? null;
 
         this.themes.set(newTheme.id, newTheme);
         this.logger.debug(`Added theme: ${newTheme.id}`);
@@ -98,6 +99,10 @@ export class ThemeStore {
         return this.themes.get(id) ?? baseDarkTheme;
     }
 
+    get all() {
+        return Array.from(this.themes.values());
+    }
+
     remove(id: string) {
         if (!this.themes.has(id)) {
             this.logger.warn(`Theme ${id} does not exist.`);
@@ -105,5 +110,10 @@ export class ThemeStore {
         }
 
         this.themes.delete(id);
+
+        if (this.currentTheme === id)
+            this.currentTheme = usePrefersDark()
+                ? baseDarkTheme.id
+                : baseLightTheme.id;
     }
 }

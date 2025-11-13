@@ -6,6 +6,7 @@ import {
     useCallback,
     useContext,
     useState,
+    type PropsWithChildren,
     type ReactNode,
 } from "react";
 
@@ -41,7 +42,7 @@ const ModalContext = createContext<ModalContextProps>({
     },
 });
 
-export const ModalProvider = ({ children }: { children: ReactNode }) => {
+export const ModalProvider = ({ children }: PropsWithChildren) => {
     const [modals, setModals] = useState<ModalStackItem[]>([]);
 
     const openModal = useCallback(

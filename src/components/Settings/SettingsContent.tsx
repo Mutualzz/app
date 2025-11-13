@@ -2,7 +2,7 @@ import {
     useSettingsSidebar,
     type SettingsSidebarPage,
 } from "@contexts/SettingsSidebar.context";
-import { Stack, Typography } from "@mutualzz/ui-web";
+import { Divider, Stack, Typography } from "@mutualzz/ui-web";
 import startCase from "lodash-es/startCase";
 import { observer } from "mobx-react";
 import { useEffect } from "react";
@@ -25,15 +25,23 @@ export const SettingsContent = observer(
         }, [redirectTo]);
 
         return (
-            <Stack width="100%" height="100%" direction="column">
+            <Stack
+                flex={1}
+                height="100%"
+                pt={{ xs: "1rem", sm: "2rem" }}
+                pl={{ xs: "1rem", sm: "2rem" }}
+                overflow="auto"
+                width="100%"
+                spacing={5}
+                direction="column"
+            >
                 <Typography
-                    level={{ xs: "h5", sm: "display-xs" }}
-                    fontSize={{ xs: "1.25rem", sm: "1.5rem" }}
-                    fontWeight={700}
-                    mb={{ xs: "0.5rem", sm: "1rem" }}
+                    level={{ xs: "h6", sm: "h4" }}
+                    fontFamily="monospace"
                 >
                     {startCase(currentPage)}
                 </Typography>
+                <Divider lineColor="primary" />
                 {currentPage === "profile" && <UserProfileSettings />}
                 {currentPage === "my-account" && <UserAccountSettings />}
                 {currentPage === "appearance" && <AppAppearanceSettings />}

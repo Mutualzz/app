@@ -2,8 +2,13 @@ import { SpacesChannelList } from "@components/Spaces/SpacesChannelList";
 import { SpacesSidebar } from "@components/Spaces/SpacesSidebar";
 import { UserBar } from "@components/User/UserBar";
 import { useAppStore } from "@hooks/useStores";
-import { Stack, Typography } from "@mutualzz/ui-web";
-import { createFileRoute, Outlet } from "@tanstack/react-router";
+import { Stack } from "@mutualzz/ui-web";
+import {
+    createFileRoute,
+    Outlet,
+    useNavigate,
+    useParams,
+} from "@tanstack/react-router";
 import { observer } from "mobx-react";
 import { useEffect } from "react";
 
@@ -13,6 +18,14 @@ export const Route = createFileRoute("/_authenticated/spaces")({
 
 function RouteComponent() {
     const app = useAppStore();
+    const navigate = useNavigate();
+
+    const params = useParams({
+        from: "/_authenticated/spaces/$spaceId",
+        shouldThrow: false,
+    });
+
+    const noSpaceSelected = !params;
 
     useEffect(() => {
         app.setMode("spaces");
@@ -22,20 +35,27 @@ function RouteComponent() {
         };
     }, []);
 
+    useEffect(() => {
+        if (noSpaceSelected) {
+            app.spaces.setActive(app.spaces.mostRecentSpaceId);
+            if (app.spaces.activeId) {
+                navigate({
+                    to: `/spaces/${app.spaces.activeId}`,
+                });
+            }
+        }
+    }, [params]);
+
     return (
         <Stack width="100%" height="100%" direction="row">
             <Stack maxWidth="20rem" width="100%" direction="column">
                 <Stack height="100%" direction="row">
                     <SpacesSidebar />
-                    <SpacesChannelList />
+                    <SpacesChannelList skeleton={noSpaceSelected} />
                 </Stack>
                 <UserBar />
             </Stack>
-            <Stack p={20} height="100%" width="100%">
-                <Typography>
-                    This is your spaces. Here you will see the channel list and
-                    and where you can type/message in the channel
-                </Typography>
+            <Stack height="100%" width="100%">
                 <Outlet />
             </Stack>
         </Stack>

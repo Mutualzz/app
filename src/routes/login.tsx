@@ -59,7 +59,6 @@ const LoginForm = motion.create(Paper);
 function Login() {
     const navigate = useNavigate();
     const app = useAppStore();
-    const { account, rest } = app;
     const [error, setError] = useState<string | null>(null);
 
     const mutation = useMutation({
@@ -72,7 +71,7 @@ function Login() {
                 requestBody.email = values.usernameOrEmail;
             else requestBody.username = values.usernameOrEmail;
 
-            return await rest.post<any, { token: string }>(
+            return await app.rest.post<any, { token: string }>(
                 "auth/login",
                 requestBody,
             );
@@ -95,7 +94,7 @@ function Login() {
         },
     });
 
-    if (account) {
+    if (app.account) {
         navigate({ to: "/", replace: true });
         return <></>;
     }

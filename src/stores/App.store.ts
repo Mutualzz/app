@@ -1,14 +1,16 @@
-import { Logger } from "@logger";
-import type { APIPrivateUser, AppMode } from "@mutualzz/types";
+import { Logger } from "@mutualzz/logger";
+import type { APIPrivateUser, APIUserSettings, AppMode } from "@mutualzz/types";
 import { themes } from "@themes/index";
 import { isSSR, isTauri } from "@utils/index";
 import { secureStorageAdapter } from "@utils/secureStorageAdapter";
 import { makeAutoObservable } from "mobx";
 import { makePersistable } from "mobx-persist-store";
 import { AccountStore } from "./Account.store";
+import { AccountSettingsStore } from "./AccountSettings.store";
 import { DraftStore } from "./Draft.store";
 import { GatewayStore } from "./Gateway.store";
 import { REST } from "./REST.store";
+import { SpaceStore } from "./Space.store";
 import { ThemeStore } from "./Theme.store";
 import { UpdaterStore } from "./Updater.store";
 import { UserStore } from "./User.store";
@@ -25,18 +27,20 @@ export class AppStore {
 
     account: AccountStore | null = null;
     gateway = new GatewayStore(this);
-    draft = new DraftStore();
-    theme = new ThemeStore(this);
+    drafts = new DraftStore();
+    spaces = new SpaceStore(this);
+    themes = new ThemeStore(this);
     rest = new REST();
     users = new UserStore(this);
-    updaterStore: UpdaterStore | null = null;
+    updater: UpdaterStore | null = null;
+    settings: AccountSettingsStore | null = null;
 
     version: string | null = null;
 
     mode: AppMode | null = null;
 
     constructor() {
-        if (isTauri) this.updaterStore = new UpdaterStore();
+        if (isTauri) this.updater = new UpdaterStore();
 
         makeAutoObservable(this);
 
@@ -49,9 +53,17 @@ export class AppStore {
         });
     }
 
-    setUser(user: APIPrivateUser) {
+    setMode(mode: AppMode) {
+        this.mode = mode;
+    }
+
+    resetMode() {
+        this.mode = null;
+    }
+
+    setUser(user: APIPrivateUser, settings?: APIUserSettings) {
         this.account = new AccountStore(user);
-        this.mode = user.settings.preferredMode;
+        if (settings) this.settings = new AccountSettingsStore(this, settings);
     }
 
     setGatewayReady(ready: boolean) {
@@ -60,14 +72,6 @@ export class AppStore {
 
     setAppLoading(loading: boolean) {
         this.isAppLoading = loading;
-    }
-
-    setMode(mode: AppMode) {
-        this.mode = mode;
-    }
-
-    resetMode() {
-        this.mode = null;
     }
 
     get isReady() {
@@ -94,16 +98,16 @@ export class AppStore {
         this.isAppLoading = false;
         this.isGatewayReady = true;
         this.account = null;
-        this.mode = null;
+        this.settings = null;
         this.rest.setToken(null);
         secureStorageAdapter.clear();
-        this.resetMode();
-        this.theme.reset();
+        this.themes.reset();
     }
 
     async loadSettings() {
-        if (this.updaterStore) await this.updaterStore.startAutoChecker();
+        if (this.updater) await this.updater.startAutoChecker();
         this.loadToken();
-        this.theme.loadThemes(themes);
+        this.themes.addAll(themes);
+        this.setAppLoading(false);
     }
 }

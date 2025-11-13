@@ -3,7 +3,7 @@ import { UserAvatar } from "@components/User/UserAvatar";
 import { useModal } from "@contexts/Modal.context";
 import { useAppStore } from "@hooks/useStores";
 import { Button, Link, Stack, Typography } from "@mutualzz/ui-web";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Navigate, useNavigate } from "@tanstack/react-router";
 import { switchMode } from "@utils/index";
 import { observer } from "mobx-react";
 import { useEffect } from "react";
@@ -14,13 +14,15 @@ export const Route = createFileRoute("/")({
 
 function Index() {
     const app = useAppStore();
-    const { account } = app;
     const navigate = useNavigate();
     const { openModal } = useModal();
 
     useEffect(() => {
         app.resetMode();
     }, []);
+
+    if (app.token)
+        return <Navigate to={`/${app.settings?.preferredMode ?? "feed"}`} />;
 
     return (
         <Stack
@@ -100,7 +102,7 @@ function Index() {
                         Go to the UI playground
                     </Button>
                     <Typography>to test components and themes</Typography>
-                    {!account && (
+                    {!app.account && (
                         <>
                             <Typography
                                 fontWeight="bold"
@@ -120,7 +122,7 @@ function Index() {
                 >
                     Currently working on: Layouts for Feed and Spaces,
                 </Typography>
-                {account && (
+                {app.account && (
                     <Stack
                         justifyContent="center"
                         alignItems="center"
@@ -147,13 +149,14 @@ function Index() {
                                 direction="row"
                             >
                                 <UserAvatar
-                                    user={account}
+                                    user={app.account}
                                     size={{ xs: "sm", sm: "md", md: "lg" }}
                                 />
                                 <Typography
                                     level={{ xs: "body-md", sm: "body-lg" }}
                                 >
-                                    {account.globalName ?? account.username}
+                                    {app.account.globalName ??
+                                        app.account.username}
                                 </Typography>
                             </Stack>
                             <Typography
@@ -225,7 +228,7 @@ function Index() {
                                     color="info"
                                 >
                                     Switch to{" "}
-                                    {account.settings.preferredMode === "feed"
+                                    {app.settings?.preferredMode === "feed"
                                         ? "Feed"
                                         : "Spaces"}
                                 </Button>

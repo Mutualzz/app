@@ -24,6 +24,12 @@ export function mergeAppendAnything(
     });
 }
 
+export const nameAcronym = (str: string) =>
+    str
+        .split(" ")
+        .map((str) => str[0])
+        .join("");
+
 export const getIconType = (theme: MzTheme): string => {
     let iconUrl = "/icon.png";
 
@@ -91,7 +97,6 @@ export const getAdaptiveIcon = async (
     ctx.clip();
 
     ctx.fillStyle = theme.colors.primary;
-    console.log(theme.colors.primary);
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     ctx.drawImage(imageBitmap, 0, 0);
@@ -141,19 +146,17 @@ export const sortThemes = (themes: Theme[]): Theme[] => {
 
 export const switchMode = (navigate?: ReturnType<typeof useNavigate>) => {
     const app = useAppStore();
-    const { mode, account } = app;
 
-    if (mode === "feed") {
-        app.setMode("spaces");
-        if (navigate)
+    if (app.mode === "feed") {
+        if (navigate) {
             navigate({
                 to: "/spaces",
                 replace: true,
             });
+        }
     }
 
-    if (mode === "spaces") {
-        app.setMode("feed");
+    if (app.mode === "spaces") {
         if (navigate)
             navigate({
                 to: "/feed",
@@ -161,9 +164,8 @@ export const switchMode = (navigate?: ReturnType<typeof useNavigate>) => {
             });
     }
 
-    if (!mode && account) {
-        const preferredMode = account.settings.preferredMode;
-        app.setMode(preferredMode);
+    if (!app.mode && app.account) {
+        const preferredMode = app.settings?.preferredMode;
         if (navigate)
             navigate({
                 to: preferredMode === "feed" ? "/feed" : "/spaces",

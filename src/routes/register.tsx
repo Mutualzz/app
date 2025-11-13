@@ -80,13 +80,12 @@ const RegisterForm = motion.create(Paper);
 function Register() {
     const navigate = useNavigate();
     const app = useAppStore();
-    const { account, rest } = app;
     const [passwordVisible, setPasswordVisible] = useState(false);
     const [apiErrors, setApiErrors] = useState<ApiErrors>({});
 
     const mutation = useMutation({
         mutationFn: async (values: any) => {
-            return await rest.post<any, { token: string }>(
+            return await app.rest.post<any, { token: string }>(
                 "auth/register",
                 values,
             );
@@ -121,7 +120,7 @@ function Register() {
         },
     });
 
-    if (account) {
+    if (app.account) {
         navigate({ to: "/", replace: true });
         return <></>;
     }

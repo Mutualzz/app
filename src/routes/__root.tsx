@@ -17,7 +17,7 @@ import "@fontsource/rubik/700";
 import "@fontsource/rubik/800";
 import "@fontsource/rubik/900";
 import { useAppStore } from "@hooks/useStores";
-import { Logger } from "@logger";
+import { Logger } from "@mutualzz/logger";
 import { GatewayCloseCodes } from "@mutualzz/types";
 import { CssBaseline, Paper, Stack, Typography } from "@mutualzz/ui-web";
 import { useNetworkState } from "@react-hookz/web";
@@ -85,6 +85,7 @@ function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
                     width: "100vw",
                     overflow: "hidden",
                 }}
+                onContextMenu={(e) => e.preventDefault()}
             >
                 {children}
                 <Scripts />
@@ -95,7 +96,6 @@ function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
 
 function RootComponent() {
     const app = useAppStore();
-    const { gateway, rest } = app;
     const logger = new Logger({
         tag: "App",
     });
@@ -108,10 +108,10 @@ function RootComponent() {
             () => app.token,
             (value) => {
                 if (value) {
-                    rest.setToken(value);
-                    if (gateway.readyState === GatewayStatus.CLOSED) {
+                    app.rest.setToken(value);
+                    if (app.gateway.readyState === GatewayStatus.CLOSED) {
                         app.setGatewayReady(false);
-                        gateway.connect();
+                        app.gateway.connect();
                     } else {
                         logger.debug(
                             "Gateway connect called but socket is not closed",
@@ -119,8 +119,8 @@ function RootComponent() {
                     }
                 } else {
                     logger.debug("user no longer authenticated");
-                    if (gateway.readyState === WebSocket.OPEN) {
-                        gateway.disconnect(
+                    if (app.gateway.readyState === WebSocket.OPEN) {
+                        app.gateway.disconnect(
                             GatewayCloseCodes.NotAuthenticated,
                             "user is no longer authenticated",
                         );
@@ -163,7 +163,6 @@ function RootComponent() {
         app.loadSettings();
 
         logger.debug("Loading complete");
-        app.setAppLoading(false);
 
         return dispose;
     }, []);

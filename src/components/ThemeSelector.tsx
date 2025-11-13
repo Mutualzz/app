@@ -16,9 +16,9 @@ import { observer } from "mobx-react";
 export const ThemeSelector = observer(() => {
     const { style, theme, type, changeTheme, changeStyle, changeType } =
         useTheme();
-    const { theme: themeStore } = useAppStore();
+    const app = useAppStore();
 
-    const themes = Array.from(themeStore.themes.values())
+    const themes = Array.from(app.themes.themes.values())
         .filter((theme) => theme.type === type)
         .filter((theme) => theme.style === style);
 
@@ -92,7 +92,7 @@ export const ThemeSelector = observer(() => {
                         {sortThemes(themes).map((theme) => (
                             <Option key={theme.id} value={theme.id}>
                                 {theme.name}
-                                {theme.createdBy ? ` (by You)` : ""}
+                                {theme.author ? ` (by You)` : ""}
                             </Option>
                         ))}
                     </Select>

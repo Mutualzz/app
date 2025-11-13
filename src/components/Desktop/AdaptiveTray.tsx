@@ -12,8 +12,8 @@ export const AdaptiveTray = observer(() => {
     useEffect(() => {
         let mounted = true;
         (async () => {
-            const themeToUse = app.theme.currentIcon
-                ? Theme.toEmotionTheme(app.theme.get(app.theme.currentIcon))
+            const themeToUse = app.themes.currentIcon
+                ? Theme.toEmotionTheme(app.themes.get(app.themes.currentIcon))
                 : theme;
 
             await getTray(themeToUse);
@@ -22,6 +22,6 @@ export const AdaptiveTray = observer(() => {
         return () => {
             mounted = false;
         };
-    }, [theme, app.theme.currentIcon]);
+    }, [theme, app.themes.currentIcon]);
     return null;
 });

@@ -1,10 +1,23 @@
+mod gateway;
+mod erlpack;
+
+use serde_json::Value;
 use tauri::{Manager, RunEvent};
 #[cfg(desktop)]
 use tauri_plugin_autostart::MacosLauncher;
 use tauri_plugin_log::{Target, TargetKind, WEBVIEW_TARGET};
 use tauri_plugin_notification;
+use crate::gateway::{decode_frame, encode_frame, Encoding};
 
+#[tauri::command]
+async fn gateway_decode(payload: Vec<u8>, encoding: Encoding) -> Result<Value, String> {
+    decode_frame(payload, encoding).map_err(|e| e.to_string())
+}
 
+#[tauri::command]
+async fn gateway_encode(payload: Value, encoding: Encoding) -> Result<Vec<u8>, String> {
+    encode_frame(&payload, encoding).map_err(|e| e.to_string())
+}
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -14,8 +27,6 @@ pub fn run() {
     }
 
     let context = tauri::generate_context!();
-
-    // let config = context.config_mut();
 
     let app = tauri::Builder::default()
         .plugin(tauri_plugin_os::init())
@@ -27,11 +38,11 @@ pub fn run() {
                     Target::new(TargetKind::LogDir {
                         file_name: Some("webview".into()),
                     })
-                    .filter(|metadata| metadata.target() == WEBVIEW_TARGET),
+                        .filter(|metadata| metadata.target() == WEBVIEW_TARGET),
                     Target::new(TargetKind::LogDir {
                         file_name: Some("rust".into()),
                     })
-                    .filter(|metadata| metadata.target() != WEBVIEW_TARGET),
+                        .filter(|metadata| metadata.target() != WEBVIEW_TARGET),
                 ])
                 .format(move |out, message, record| {
                     out.finish(format_args!(
@@ -79,6 +90,8 @@ pub fn run() {
 
             Ok(())
         })
+        .invoke_handler(tauri::generate_handler![ gateway_decode,
+            gateway_encode])
         .build(context)
         .expect("error while running tauri application");
 
@@ -93,7 +106,7 @@ pub fn run() {
 
             println!("App is ready");
         }
-        tauri::RunEvent::WindowEvent {
+        RunEvent::WindowEvent {
             label,
             event: tauri::WindowEvent::CloseRequested { api, .. },
             ..

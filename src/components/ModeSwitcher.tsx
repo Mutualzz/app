@@ -12,7 +12,6 @@ import { AnimatedIconButton } from "./Animated/AniamtedIconButton";
 export const ModeSwitcher = observer(() => {
     const app = useAppStore();
     const navigate = useNavigate();
-    const { mode } = app;
     const { theme } = useTheme();
     const [hoverOpen, setHoverOpen] = useState(false);
 
@@ -20,15 +19,15 @@ export const ModeSwitcher = observer(() => {
         theme.breakpoints.down("md").replace("@media ", ""),
     );
 
-    const preferredMode = app.account?.settings.preferredMode as
+    const preferredMode = app.settings?.preferredMode as
         | "feed"
         | "spaces"
         | undefined;
 
     const targetMode: "feed" | "spaces" =
-        mode === "feed"
+        app.mode === "feed"
             ? "spaces"
-            : mode === "spaces"
+            : app.mode === "spaces"
               ? "feed"
               : (preferredMode ?? "feed");
 
@@ -60,7 +59,7 @@ export const ModeSwitcher = observer(() => {
                     scale: 0.9,
                 }}
             >
-                {mode === null ? (
+                {app.mode === null ? (
                     <ImSpinner11 />
                 ) : targetMode === "feed" ? (
                     <ImFeed />

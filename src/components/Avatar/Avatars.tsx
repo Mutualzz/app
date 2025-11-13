@@ -20,7 +20,7 @@ import { FaTrash } from "react-icons/fa";
 
 export const Avatars = observer(() => {
     const { theme } = useTheme();
-    const { account, rest } = useAppStore();
+    const app = useAppStore();
     const { closeAllModals } = useModal();
     const [selectedAvatar, setSelectedAvatar] = useState<{
         avatar: string;
@@ -38,12 +38,12 @@ export const Avatars = observer(() => {
     const { mutate: updateAvatar, isPending } = useMutation({
         mutationFn: () => {
             if (selectedAvatar.type === "default")
-                return rest.patch("@me", {
+                return app.rest.patch("@me", {
                     defaultAvatar: selectedAvatar.avatar,
                     avatar: null,
                 });
 
-            return rest.patch("@me", {
+            return app.rest.patch("@me", {
                 avatar: selectedAvatar.avatar,
             });
         },
@@ -55,11 +55,11 @@ export const Avatars = observer(() => {
     const { mutate: deletePreviousAvatar, isPending: isDeleting } = useMutation(
         {
             mutationFn: () =>
-                rest.delete<{ avatar: string }>("@me/previousAvatar", {
+                app.rest.delete<{ avatar: string }>("@me/previousAvatar", {
                     avatar: selectedAvatar.avatar || focusedAvatar,
                 }),
             onSuccess: ({ avatar }) => {
-                account?.removePreviousAvatar(avatar);
+                app.account?.removePreviousAvatar(avatar);
                 setSelectedAvatar({ avatar: "", type: "default" });
             },
         },
@@ -139,8 +139,8 @@ export const Avatars = observer(() => {
                         justifyContent="center"
                         alignItems="center"
                     >
-                        {(account?.previousAvatars.length ?? 0) > 0 ? (
-                            account?.previousAvatars.map((avatar) => (
+                        {(app.account?.previousAvatars.length ?? 0) > 0 ? (
+                            app.account?.previousAvatars.map((avatar) => (
                                 <Box
                                     onMouseEnter={() =>
                                         setFocusedAvatar(avatar)
@@ -172,7 +172,7 @@ export const Avatars = observer(() => {
 
                                     <Avatar
                                         key={`avatar-${avatar}`}
-                                        src={account?.previousAvatarUrls.get(
+                                        src={app.account?.previousAvatarUrls.get(
                                             avatar,
                                         )}
                                         onClick={() =>
@@ -244,6 +244,6 @@ export const Avatars = observer(() => {
                     </Button>
                 )}
             </Stack>
-        </Paper>
+        </AnimatedPaper>
     );
 });

@@ -1,37 +1,31 @@
-import { Paper, useTheme } from "@mutualzz/ui-web";
-import { type HTMLAttributes } from "react";
+import { useAppStore } from "@hooks/useStores";
+import { useTheme } from "@mutualzz/ui-web";
+import { Theme } from "@stores/objects/Theme";
+import { getAdaptiveIcon } from "@utils/index";
+import { observer } from "mobx-react";
+import { useEffect, useState, type HTMLAttributes } from "react";
 
-export const Logo = (props: HTMLAttributes<HTMLImageElement>) => {
+export const Logo = observer((props: HTMLAttributes<HTMLImageElement>) => {
+    const app = useAppStore();
     const { theme } = useTheme();
 
-    let logoToUse = "/icon.png";
-    let isDefault = false;
+    const [icon, setIcon] = useState<string | null>(null);
 
-    switch (theme.id) {
-        case "baseDark":
-            logoToUse = "/icon.png";
-            isDefault = true;
-            break;
-        case "baseLight":
-            logoToUse = "/icon-light.png";
-            isDefault = true;
-            break;
-        default:
-            logoToUse =
-                theme.type === "dark"
-                    ? "/icon-adaptive.png"
-                    : "/icon-light-adaptive.png";
-            isDefault = false;
-            break;
-    }
+    useEffect(() => {
+        const setupAdaptive = async () => {
+            const themeToUse = app.themes.currentIcon
+                ? Theme.toEmotionTheme(app.themes.get(app.themes.currentIcon))
+                : theme;
 
-    const logo = <img src={logoToUse} alt="Mutualzz Logo" {...props} />;
+            const icon = (await getAdaptiveIcon(
+                themeToUse,
+                "baseUrl",
+            )) as string;
+            setIcon(icon);
+        };
 
-    return isDefault ? (
-        logo
-    ) : (
-        <Paper variant="solid" color={"primary"} borderRadius="50%" {...props}>
-            {logo}
-        </Paper>
-    );
-};
+        setupAdaptive();
+    }, [app.themes.currentIcon, theme.id, theme.type]);
+
+    return <img src={icon ?? "/icon.png"} {...props} />;
+});

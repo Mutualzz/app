@@ -27,7 +27,7 @@ function RouteComponent() {
                 <FeedSidebar />
                 <UserBar />
             </Stack>
-            <Stack p={20} width="100%" height="100%">
+            <Stack width="100%" height="100%">
                 <Typography>
                     This is your feed. Here you will see posts from your
                     algorithmically generated interests.

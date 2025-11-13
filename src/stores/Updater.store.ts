@@ -1,4 +1,4 @@
-import { Logger } from "@logger";
+import { Logger } from "@mutualzz/logger";
 import { relaunch } from "@tauri-apps/plugin-process";
 import { check, type Update } from "@tauri-apps/plugin-updater";
 import { makeAutoObservable } from "mobx";

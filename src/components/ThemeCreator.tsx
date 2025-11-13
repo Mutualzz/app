@@ -33,6 +33,7 @@ import {
 } from "@mutualzz/ui-web";
 import { validateThemePut } from "@mutualzz/validators";
 import { useMediaQuery } from "@react-hookz/web";
+import type { Theme } from "@stores/objects/Theme";
 import {
     revalidateLogic,
     useForm,
@@ -113,7 +114,7 @@ const defaultMeta: FormMeta = {
 };
 
 export const ThemeCreator = observer(() => {
-    const { draft, rest, theme: themeStore } = useAppStore();
+    const app = useAppStore();
     const { theme, changeTheme } = useTheme();
     const prefersDark = usePrefersDark();
     const [apiErrors, setApiErrors] = useState<ApiErrors>({});
@@ -142,12 +143,12 @@ export const ThemeCreator = observer(() => {
     const [userThemeSelectValue, setUserThemeSelectValue] = useState("");
     const [formKey, setFormKey] = useState(0);
 
-    const allDefaultThemes = Array.from(themeStore.themes.values())
-        .filter((theme) => !theme.createdBy)
+    const allDefaultThemes = Array.from(app.themes.themes.values())
+        .filter((theme) => !theme.author)
         .filter((theme) => theme.style === colorStyle);
-    const allDrafts = draft.themes;
-    const allUserThemes = Array.from(themeStore.themes.values()).filter(
-        (t) => t.createdBy,
+    const allDrafts = app.drafts.themes;
+    const allUserThemes = Array.from(app.themes.themes.values()).filter(
+        (t) => t.author,
     );
 
     const defaultValues = {
@@ -180,8 +181,8 @@ export const ThemeCreator = observer(() => {
     const load = (
         toLoad: string,
         type: "preset" | "draft" | "userTheme",
-    ): MzTheme | ThemeDraft | undefined => {
-        let theme: MzTheme | ThemeDraft | undefined;
+    ): Theme | MzTheme | ThemeDraft | undefined => {
+        let theme: MzTheme | Theme | ThemeDraft | undefined;
         switch (type) {
             case "draft":
                 theme = allDrafts.find((t) => t.name === toLoad);
@@ -258,7 +259,7 @@ export const ThemeCreator = observer(() => {
                     }),
                 };
 
-            const response = await rest.put<any, MzTheme>(
+            const response = await app.rest.put<any, MzTheme>(
                 "@me/themes",
                 dataToSubmit,
             );
@@ -288,14 +289,15 @@ export const ThemeCreator = observer(() => {
                     }),
                 };
 
-            const response = await rest.patch<any, MzTheme>(
-                "@me/themes",
+            const response = await app.rest.patch<any, MzTheme>(
+                `@me/themes/${loadedUserTheme?.id}`,
                 dataToSubmit,
-                {
-                    id: loadedUserTheme?.id,
-                },
             );
             return response;
+        },
+        onSuccess: (data) => {
+            app.themes.update(data);
+            setApiErrors({});
         },
         onError: (error: HttpException) => {
             const next: Record<string, string> = {};
@@ -308,21 +310,21 @@ export const ThemeCreator = observer(() => {
 
     const themeDelete = useMutation({
         mutationFn: async (id: any) => {
-            const response = await rest.delete<{ id: string }>("@me/themes", {
-                id,
-            });
+            const response = await app.rest.delete<{ id: string }>(
+                `@me/themes/${id}`,
+            );
 
             return response;
         },
         onSuccess: (data) => {
-            themeStore.remove(data.id);
+            app.themes.remove(data.id);
             unload();
         },
     });
 
     const updateForm = (
         form: AnyFormApi,
-        theme?: MzTheme | ThemeDraft,
+        theme?: Theme | MzTheme | ThemeDraft,
         type?: "userTheme" | "draft" | "preset",
     ) => {
         if (theme) {
@@ -352,7 +354,7 @@ export const ThemeCreator = observer(() => {
     const deleteDraft = () => {
         if (!loadedDraft) return;
 
-        draft.deleteThemeDraft(loadedDraft);
+        app.drafts.deleteThemeDraft(loadedDraft);
         unloadAndReset(form);
     };
 
@@ -379,7 +381,7 @@ export const ThemeCreator = observer(() => {
             meta: FormMeta;
         }) => {
             if (meta.submitAction === "saveDraft") {
-                draft.saveThemeDraft(value);
+                app.drafts.saveThemeDraft(value);
 
                 load(value.name, "draft");
                 return;
@@ -388,7 +390,7 @@ export const ThemeCreator = observer(() => {
             if (meta.submitAction === "update" && loadedUserTheme) {
                 themePatch.mutate(value, {
                     onSuccess: (data) => {
-                        themeStore.update(data);
+                        app.themes.update(data);
                         setApiErrors({});
 
                         // Directly set the loaded state instead of using the load function (because we want to avoid timing issues)
@@ -407,7 +409,7 @@ export const ThemeCreator = observer(() => {
             if (meta.submitAction === "delete" && loadedUserTheme) {
                 themeDelete.mutate(loadedUserTheme.id, {
                     onSuccess: (data) => {
-                        themeStore.remove(data.id);
+                        app.themes.remove(data.id);
                         changeTheme(
                             prefersDark ? baseDarkTheme : baseLightTheme,
                         );
@@ -420,7 +422,7 @@ export const ThemeCreator = observer(() => {
             if (meta.submitAction === "create") {
                 themePut.mutate(value, {
                     onSuccess: (data) => {
-                        themeStore.add(data);
+                        app.themes.add(data);
                         setApiErrors({});
 
                         // Directly set the loaded state instead of using the load function (because we want to avoid timing issues)

@@ -15,7 +15,7 @@ export const BottomNavigation = observer(() => {
         theme.breakpoints.down("md").replace("@media ", ""),
     );
 
-    const { account } = useAppStore();
+    const app = useAppStore();
 
     if (!isMobileQuery) return null;
 
@@ -55,7 +55,7 @@ export const BottomNavigation = observer(() => {
                 >
                     <FaHome />
                 </IconButton>
-                {!account && (
+                {!app.account && (
                     <>
                         {!isTauri && (
                             <DownloadButton

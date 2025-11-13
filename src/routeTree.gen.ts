@@ -36,6 +36,8 @@ import { Route as UiDataDisplayMarkdownRendererRouteImport } from "./routes/ui/d
 import { Route as UiDataDisplayListRouteImport } from "./routes/ui/data-display/list";
 import { Route as UiDataDisplayDividerRouteImport } from "./routes/ui/data-display/divider";
 import { Route as UiDataDisplayAvatarRouteImport } from "./routes/ui/data-display/avatar";
+import { Route as AuthenticatedSpacesSpaceIdRouteRouteImport } from "./routes/_authenticated/spaces/$spaceId/route";
+import { Route as AuthenticatedSpacesSpaceIdChannelIdRouteRouteImport } from "./routes/_authenticated/spaces/$spaceId/$channelId/route";
 
 const RegisterRoute = RegisterRouteImport.update({
   id: "/register",
@@ -175,6 +177,18 @@ const UiDataDisplayAvatarRoute = UiDataDisplayAvatarRouteImport.update({
   path: "/data-display/avatar",
   getParentRoute: () => UiRouteRoute,
 } as any);
+const AuthenticatedSpacesSpaceIdRouteRoute =
+  AuthenticatedSpacesSpaceIdRouteRouteImport.update({
+    id: "/$spaceId",
+    path: "/$spaceId",
+    getParentRoute: () => AuthenticatedSpacesRouteRoute,
+  } as any);
+const AuthenticatedSpacesSpaceIdChannelIdRouteRoute =
+  AuthenticatedSpacesSpaceIdChannelIdRouteRouteImport.update({
+    id: "/$channelId",
+    path: "/$channelId",
+    getParentRoute: () => AuthenticatedSpacesSpaceIdRouteRoute,
+  } as any);
 
 export interface FileRoutesByFullPath {
   "/": typeof IndexRoute;
@@ -184,8 +198,9 @@ export interface FileRoutesByFullPath {
   "/privacy": typeof PrivacyRoute;
   "/register": typeof RegisterRoute;
   "/feed": typeof AuthenticatedFeedRouteRoute;
-  "/spaces": typeof AuthenticatedSpacesRouteRoute;
+  "/spaces": typeof AuthenticatedSpacesRouteRouteWithChildren;
   "/ui/": typeof UiIndexRoute;
+  "/spaces/$spaceId": typeof AuthenticatedSpacesSpaceIdRouteRouteWithChildren;
   "/ui/data-display/avatar": typeof UiDataDisplayAvatarRoute;
   "/ui/data-display/divider": typeof UiDataDisplayDividerRoute;
   "/ui/data-display/list": typeof UiDataDisplayListRoute;
@@ -203,6 +218,7 @@ export interface FileRoutesByFullPath {
   "/ui/inputs/slider": typeof UiInputsSliderRoute;
   "/ui/inputs/textarea": typeof UiInputsTextareaRoute;
   "/ui/surfaces/paper": typeof UiSurfacesPaperRoute;
+  "/spaces/$spaceId/$channelId": typeof AuthenticatedSpacesSpaceIdChannelIdRouteRoute;
 }
 export interface FileRoutesByTo {
   "/": typeof IndexRoute;
@@ -211,8 +227,9 @@ export interface FileRoutesByTo {
   "/privacy": typeof PrivacyRoute;
   "/register": typeof RegisterRoute;
   "/feed": typeof AuthenticatedFeedRouteRoute;
-  "/spaces": typeof AuthenticatedSpacesRouteRoute;
+  "/spaces": typeof AuthenticatedSpacesRouteRouteWithChildren;
   "/ui": typeof UiIndexRoute;
+  "/spaces/$spaceId": typeof AuthenticatedSpacesSpaceIdRouteRouteWithChildren;
   "/ui/data-display/avatar": typeof UiDataDisplayAvatarRoute;
   "/ui/data-display/divider": typeof UiDataDisplayDividerRoute;
   "/ui/data-display/list": typeof UiDataDisplayListRoute;
@@ -230,6 +247,7 @@ export interface FileRoutesByTo {
   "/ui/inputs/slider": typeof UiInputsSliderRoute;
   "/ui/inputs/textarea": typeof UiInputsTextareaRoute;
   "/ui/surfaces/paper": typeof UiSurfacesPaperRoute;
+  "/spaces/$spaceId/$channelId": typeof AuthenticatedSpacesSpaceIdChannelIdRouteRoute;
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport;
@@ -241,8 +259,9 @@ export interface FileRoutesById {
   "/privacy": typeof PrivacyRoute;
   "/register": typeof RegisterRoute;
   "/_authenticated/feed": typeof AuthenticatedFeedRouteRoute;
-  "/_authenticated/spaces": typeof AuthenticatedSpacesRouteRoute;
+  "/_authenticated/spaces": typeof AuthenticatedSpacesRouteRouteWithChildren;
   "/ui/": typeof UiIndexRoute;
+  "/_authenticated/spaces/$spaceId": typeof AuthenticatedSpacesSpaceIdRouteRouteWithChildren;
   "/ui/data-display/avatar": typeof UiDataDisplayAvatarRoute;
   "/ui/data-display/divider": typeof UiDataDisplayDividerRoute;
   "/ui/data-display/list": typeof UiDataDisplayListRoute;
@@ -260,6 +279,7 @@ export interface FileRoutesById {
   "/ui/inputs/slider": typeof UiInputsSliderRoute;
   "/ui/inputs/textarea": typeof UiInputsTextareaRoute;
   "/ui/surfaces/paper": typeof UiSurfacesPaperRoute;
+  "/_authenticated/spaces/$spaceId/$channelId": typeof AuthenticatedSpacesSpaceIdChannelIdRouteRoute;
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath;
@@ -273,6 +293,7 @@ export interface FileRouteTypes {
     | "/feed"
     | "/spaces"
     | "/ui/"
+    | "/spaces/$spaceId"
     | "/ui/data-display/avatar"
     | "/ui/data-display/divider"
     | "/ui/data-display/list"
@@ -289,7 +310,8 @@ export interface FileRouteTypes {
     | "/ui/inputs/select"
     | "/ui/inputs/slider"
     | "/ui/inputs/textarea"
-    | "/ui/surfaces/paper";
+    | "/ui/surfaces/paper"
+    | "/spaces/$spaceId/$channelId";
   fileRoutesByTo: FileRoutesByTo;
   to:
     | "/"
@@ -300,6 +322,7 @@ export interface FileRouteTypes {
     | "/feed"
     | "/spaces"
     | "/ui"
+    | "/spaces/$spaceId"
     | "/ui/data-display/avatar"
     | "/ui/data-display/divider"
     | "/ui/data-display/list"
@@ -316,7 +339,8 @@ export interface FileRouteTypes {
     | "/ui/inputs/select"
     | "/ui/inputs/slider"
     | "/ui/inputs/textarea"
-    | "/ui/surfaces/paper";
+    | "/ui/surfaces/paper"
+    | "/spaces/$spaceId/$channelId";
   id:
     | "__root__"
     | "/"
@@ -329,6 +353,7 @@ export interface FileRouteTypes {
     | "/_authenticated/feed"
     | "/_authenticated/spaces"
     | "/ui/"
+    | "/_authenticated/spaces/$spaceId"
     | "/ui/data-display/avatar"
     | "/ui/data-display/divider"
     | "/ui/data-display/list"
@@ -345,7 +370,8 @@ export interface FileRouteTypes {
     | "/ui/inputs/select"
     | "/ui/inputs/slider"
     | "/ui/inputs/textarea"
-    | "/ui/surfaces/paper";
+    | "/ui/surfaces/paper"
+    | "/_authenticated/spaces/$spaceId/$channelId";
   fileRoutesById: FileRoutesById;
 }
 export interface RootRouteChildren {
@@ -549,17 +575,61 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof UiDataDisplayAvatarRouteImport;
       parentRoute: typeof UiRouteRoute;
     };
+    "/_authenticated/spaces/$spaceId": {
+      id: "/_authenticated/spaces/$spaceId";
+      path: "/$spaceId";
+      fullPath: "/spaces/$spaceId";
+      preLoaderRoute: typeof AuthenticatedSpacesSpaceIdRouteRouteImport;
+      parentRoute: typeof AuthenticatedSpacesRouteRoute;
+    };
+    "/_authenticated/spaces/$spaceId/$channelId": {
+      id: "/_authenticated/spaces/$spaceId/$channelId";
+      path: "/$channelId";
+      fullPath: "/spaces/$spaceId/$channelId";
+      preLoaderRoute: typeof AuthenticatedSpacesSpaceIdChannelIdRouteRouteImport;
+      parentRoute: typeof AuthenticatedSpacesSpaceIdRouteRoute;
+    };
   }
 }
 
+interface AuthenticatedSpacesSpaceIdRouteRouteChildren {
+  AuthenticatedSpacesSpaceIdChannelIdRouteRoute: typeof AuthenticatedSpacesSpaceIdChannelIdRouteRoute;
+}
+
+const AuthenticatedSpacesSpaceIdRouteRouteChildren: AuthenticatedSpacesSpaceIdRouteRouteChildren =
+  {
+    AuthenticatedSpacesSpaceIdChannelIdRouteRoute:
+      AuthenticatedSpacesSpaceIdChannelIdRouteRoute,
+  };
+
+const AuthenticatedSpacesSpaceIdRouteRouteWithChildren =
+  AuthenticatedSpacesSpaceIdRouteRoute._addFileChildren(
+    AuthenticatedSpacesSpaceIdRouteRouteChildren,
+  );
+
+interface AuthenticatedSpacesRouteRouteChildren {
+  AuthenticatedSpacesSpaceIdRouteRoute: typeof AuthenticatedSpacesSpaceIdRouteRouteWithChildren;
+}
+
+const AuthenticatedSpacesRouteRouteChildren: AuthenticatedSpacesRouteRouteChildren =
+  {
+    AuthenticatedSpacesSpaceIdRouteRoute:
+      AuthenticatedSpacesSpaceIdRouteRouteWithChildren,
+  };
+
+const AuthenticatedSpacesRouteRouteWithChildren =
+  AuthenticatedSpacesRouteRoute._addFileChildren(
+    AuthenticatedSpacesRouteRouteChildren,
+  );
+
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedFeedRouteRoute: typeof AuthenticatedFeedRouteRoute;
-  AuthenticatedSpacesRouteRoute: typeof AuthenticatedSpacesRouteRoute;
+  AuthenticatedSpacesRouteRoute: typeof AuthenticatedSpacesRouteRouteWithChildren;
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedFeedRouteRoute: AuthenticatedFeedRouteRoute,
-  AuthenticatedSpacesRouteRoute: AuthenticatedSpacesRouteRoute,
+  AuthenticatedSpacesRouteRoute: AuthenticatedSpacesRouteRouteWithChildren,
 };
 
 const AuthenticatedRouteRouteWithChildren =

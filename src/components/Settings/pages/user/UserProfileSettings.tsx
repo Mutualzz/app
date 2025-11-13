@@ -14,12 +14,12 @@ import { useMutation } from "@tanstack/react-query";
 import { observer } from "mobx-react";
 
 export const UserProfileSettings = observer(() => {
-    const { account, rest } = useAppStore();
+    const app = useAppStore();
     const { openModal, closeModal } = useModal();
 
     const { mutate: deleteAvatar, isPending } = useMutation({
         mutationFn: () => {
-            return rest.patch("@me", { avatar: null });
+            return app.rest.patch("@me", { avatar: null });
         },
         onSuccess: () => {
             closeModal("user-settings");
@@ -97,7 +97,7 @@ export const UserProfileSettings = observer(() => {
                         </ButtonGroup>
                     </Popover>
                     <Button
-                        disabled={isPending || !account?.avatar}
+                        disabled={isPending || !app.account?.avatar}
                         onClick={() => deleteAvatar()}
                         color="neutral"
                         size={{ xs: "sm", sm: "md" }}

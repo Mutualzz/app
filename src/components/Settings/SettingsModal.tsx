@@ -25,9 +25,8 @@ export const SettingsModal = observer(({ redirectTo }: SettingsPropsModal) => {
     return (
         <SettingsSidebarProvider>
             <AnimatedPaper
-                width="90vw"
+                width="60vw"
                 height="100%"
-                p={{ xs: "0.5rem", sm: "1.5rem", md: "2rem" }}
                 borderRadius={{ xs: "0.75rem", sm: "1.25rem", md: "1.5rem" }}
                 overflow="auto"
                 justifyContent="center"
@@ -51,33 +50,12 @@ export const SettingsModal = observer(({ redirectTo }: SettingsPropsModal) => {
                                 setDrawerOpen={setDrawerOpen}
                             />
                         </Drawer>
-                        <Stack
-                            width="100%"
-                            height="100%"
-                            p={{ xs: "1rem", sm: "2rem" }}
-                            overflow="auto"
-                        >
-                            <SettingsContent redirectTo={redirectTo} />
-                        </Stack>
+                        <SettingsContent redirectTo={redirectTo} />
                     </Stack>
                 ) : (
                     <Stack maxWidth="1200px" width="100%" height="100%">
-                        <Stack
-                            minWidth={220}
-                            maxWidth={300}
-                            height="100%"
-                            p={{ xs: "1rem", sm: "2rem" }}
-                        >
-                            <UserSettingsSidebar />
-                        </Stack>
-                        <Stack
-                            flex={1}
-                            height="100%"
-                            p={{ xs: "1rem", sm: "2rem" }}
-                            overflow="auto"
-                        >
-                            <SettingsContent redirectTo={redirectTo} />
-                        </Stack>
+                        <UserSettingsSidebar />
+                        <SettingsContent redirectTo={redirectTo} />
                     </Stack>
                 )}
             </AnimatedPaper>

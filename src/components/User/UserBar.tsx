@@ -16,9 +16,8 @@ import { MdLogout } from "react-icons/md";
 export const UserBar = observer(() => {
     const app = useAppStore();
     const { openModal } = useModal();
-    const { account } = app;
 
-    if (!account) return <></>;
+    if (!app.account) return <></>;
 
     return (
         <Paper
@@ -36,14 +35,14 @@ export const UserBar = observer(() => {
                 alignItems="center"
                 spacing={10}
             >
-                <UserAvatar user={account} />
+                <UserAvatar user={app.account} size="lg" />
                 <Stack direction="column">
                     <Typography level="body-sm">
-                        {account.globalName ?? account.username}
+                        {app.account.globalName ?? app.account.username}
                     </Typography>
-                    {account.globalName && (
+                    {app.account.globalName && (
                         <Typography level="body-xs" textColor="muted">
-                            {account.username}
+                            {app.account.username}
                         </Typography>
                     )}
                 </Stack>

@@ -26,7 +26,7 @@ import {
 
 export const AvatarDraw = observer(() => {
     const { theme } = useTheme();
-    const { draft, rest } = useAppStore();
+    const app = useAppStore();
     const { closeModal, closeAllModals } = useModal();
     const canvasRef = useRef<ReactSketchCanvasRef>(null);
     const [brushColor, setBrushColor] = useState<ColorLike>("#000000");
@@ -58,7 +58,7 @@ export const AvatarDraw = observer(() => {
 
             const formData = new FormData();
             formData.append("avatar", file);
-            return rest.patchFormData("@me", formData);
+            return app.rest.patchFormData("@me", formData);
         },
         onSuccess: () => {
             setSelectedAvatarIndex(null);
@@ -70,7 +70,7 @@ export const AvatarDraw = observer(() => {
             setEraserMode(false);
             setEmptyCanvas(true);
             if (selectedAvatarIndex)
-                draft.deleteAvatarDraft(selectedAvatarIndex);
+                app.drafts.deleteAvatarDraft(selectedAvatarIndex);
 
             closeAllModals();
         },
@@ -99,11 +99,11 @@ export const AvatarDraw = observer(() => {
         const image = await canvasRef.current?.exportSvg();
         if (!paths || !image) return;
 
-        draft.saveAvatarDraft(image, paths);
+        app.drafts.saveAvatarDraft(image, paths);
     };
 
     const selectAvatar = (index: number) => {
-        const avatar = draft.avatars[index];
+        const avatar = app.drafts.avatars[index];
         if (!avatar) return;
 
         canvasRef.current?.clearCanvas();
@@ -155,13 +155,13 @@ export const AvatarDraw = observer(() => {
             >
                 <Typography>Saved Avatars</Typography>
                 <Select
-                    disabled={draft.avatars.length === 0 || isPending}
-                    placeholder={`${draft.avatars.length > 0 ? draft.avatars.length : "No Saved"} Avatars`}
+                    disabled={app.drafts.avatars.length === 0 || isPending}
+                    placeholder={`${app.drafts.avatars.length > 0 ? app.drafts.avatars.length : "No Saved"} Avatars`}
                     onValueChange={(value) => selectAvatar(Number(value))}
                     value={selectedAvatarValue}
                     size={isMobile ? "sm" : "md"}
                 >
-                    {draft.avatars.map((avatar, index) => (
+                    {app.drafts.avatars.map((avatar, index) => (
                         <Option variant="plain" key={index} value={index}>
                             <Stack
                                 direction="row"
@@ -191,7 +191,7 @@ export const AvatarDraw = observer(() => {
                         variant="outlined"
                         onClick={() => {
                             if (selectedAvatarIndex === null) return;
-                            draft.deleteAvatarDraft(selectedAvatarIndex);
+                            app.drafts.deleteAvatarDraft(selectedAvatarIndex);
                             setSelectedAvatarIndex(null);
                             canvasRef.current?.clearCanvas();
                         }}
@@ -395,6 +395,6 @@ export const AvatarDraw = observer(() => {
                     Cancel
                 </Button>
             </ButtonGroup>
-        </Paper>
+        </AnimatedPaper>
     );
 });

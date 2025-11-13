@@ -1,6 +1,7 @@
 import type { ThemeDraft } from "@app-types/theme";
-import { Logger } from "@logger";
+import { Logger } from "@mutualzz/logger";
 import { isSSR } from "@utils/index";
+import { safeLocalStorage } from "@utils/safeLocalStorage";
 import { makeAutoObservable } from "mobx";
 import { makePersistable } from "mobx-persist-store";
 import { type CanvasPath } from "react-sketch-canvas";
@@ -20,7 +21,7 @@ export class DraftStore {
         makePersistable(this, {
             name: "DraftStore",
             properties: ["avatars", "themes"],
-            storage: localStorage,
+            storage: safeLocalStorage,
         });
     }
 

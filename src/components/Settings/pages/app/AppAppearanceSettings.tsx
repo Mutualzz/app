@@ -51,7 +51,6 @@ const ImageBlob = styled("img")<{
 
 type ThemeWithIcon<T> = { theme: T; icon: string };
 
-// NOTE: Upon deleting a theme, it doesn't immediately reflect in the UI until a refresh
 export const AppAppearanceSettings = observer(() => {
     const app = useAppStore();
     const { openModal } = useModal();
@@ -73,7 +72,7 @@ export const AppAppearanceSettings = observer(() => {
 
     useEffect(() => {
         const loadIcons = async () => {
-            const allThemes = Array.from(app.theme.themes.values());
+            const allThemes = Array.from(app.themes.themes.values());
             const iconMap = new Map<string, ThemeWithIcon<Theme>>();
 
             // Load icons in parallel for better performance
@@ -91,7 +90,7 @@ export const AppAppearanceSettings = observer(() => {
         };
 
         loadIcons();
-    }, [app.theme.themes.size]);
+    }, [app.themes.themes.size]);
 
     useEffect(() => {
         const setupAdaptive = async () => {
@@ -108,16 +107,13 @@ export const AppAppearanceSettings = observer(() => {
     const { mutate: deleteTheme, isPending: isDeleting } = useMutation({
         mutationFn: async () => {
             const response = await app.rest.delete<{ id: string }>(
-                "@me/themes",
-                {
-                    id: focusedTheme,
-                },
+                `@me/themes/${focusedTheme}`,
             );
 
             return response;
         },
         onSuccess: () => {
-            app.theme.remove(focusedTheme);
+            app.themes.remove(focusedTheme);
             changeTheme(prefersDark ? baseDarkTheme : baseLightTheme);
             setFocusedTheme("");
         },
@@ -125,20 +121,20 @@ export const AppAppearanceSettings = observer(() => {
 
     const defaultThemes = [baseDarkTheme, baseLightTheme];
 
-    const defaultColorThemes = Array.from(app.theme.themes.values())
-        .filter((t) => !t.createdBy)
+    const defaultColorThemes = Array.from(app.themes.themes.values())
+        .filter((t) => !t.author)
         .filter((t) => t.id !== "baseDark" && t.id !== "baseLight");
 
-    const userThemes = Array.from(app.theme.themes.values()).filter(
-        (t) => t.createdBy,
+    const userThemes = Array.from(app.themes.themes.values()).filter(
+        (t) => t.author,
     );
 
     const defaultIcons = Array.from(icons.values()).filter(
-        (ic) => !ic.theme.createdBy,
+        (ic) => !ic.theme.author,
     );
 
     const userIcons = Array.from(icons.values()).filter(
-        (ic) => ic.theme.createdBy,
+        (ic) => ic.theme.author,
     );
 
     return (
@@ -418,11 +414,11 @@ export const AppAppearanceSettings = observer(() => {
                                     height="4rem"
                                 >
                                     <ImageBlob
-                                        current={!app.theme.currentIcon}
+                                        current={!app.themes.currentIcon}
                                         onClick={() => {
-                                            app.theme.setCurrentIcon(null);
+                                            app.themes.setCurrentIcon(null);
                                         }}
-                                        src={adaptiveIcon?.icon ?? ""}
+                                        src={adaptiveIcon?.icon ?? undefined}
                                     />
                                     <Stack
                                         position="absolute"
@@ -441,7 +437,7 @@ export const AppAppearanceSettings = observer(() => {
                                             pointerEvents: "none",
                                         }}
                                     >
-                                        {!app.theme.currentIcon ? (
+                                        {!app.themes.currentIcon ? (
                                             <FaCheck />
                                         ) : (
                                             <FaRepeat />
@@ -451,6 +447,7 @@ export const AppAppearanceSettings = observer(() => {
                             </Tooltip>
                             {defaultIcons.map((icon) => (
                                 <Tooltip
+                                    key={`${icon.theme.id}-icon`}
                                     placement="top"
                                     title={`${icon.theme.name} Icon`}
                                 >
@@ -464,18 +461,18 @@ export const AppAppearanceSettings = observer(() => {
                                             src={icon.icon}
                                             css={{ width: 64, height: 64 }}
                                             onClick={() =>
-                                                app.theme.setCurrentIcon(
+                                                app.themes.setCurrentIcon(
                                                     icon.theme.id,
                                                 )
                                             }
                                             current={
                                                 icon.theme.id ===
-                                                app.theme.currentIcon
+                                                app.themes.currentIcon
                                             }
                                         />
                                         {icon.theme.id ===
-                                            app.theme.currentIcon &&
-                                            app.theme.currentIcon ===
+                                            app.themes.currentIcon &&
+                                            app.themes.currentIcon ===
                                                 currentTheme.id && (
                                                 <Stack
                                                     position="absolute"
@@ -518,6 +515,7 @@ export const AppAppearanceSettings = observer(() => {
                             >
                                 {userIcons.map((icon) => (
                                     <Tooltip
+                                        key={`${icon.theme.id}-icon`}
                                         placement="top"
                                         title={`${icon.theme.name} Icon`}
                                     >
@@ -531,18 +529,18 @@ export const AppAppearanceSettings = observer(() => {
                                                 src={icon.icon}
                                                 css={{ width: 64, height: 64 }}
                                                 onClick={() =>
-                                                    app.theme.setCurrentIcon(
+                                                    app.themes.setCurrentIcon(
                                                         icon.theme.id,
                                                     )
                                                 }
                                                 current={
                                                     icon.theme.id ===
-                                                    app.theme.currentIcon
+                                                    app.themes.currentIcon
                                                 }
                                             />
                                             {icon.theme.id ===
-                                                app.theme.currentIcon &&
-                                                app.theme.currentIcon ===
+                                                app.themes.currentIcon &&
+                                                app.themes.currentIcon ===
                                                     currentTheme.id && (
                                                     <Stack
                                                         position="absolute"
