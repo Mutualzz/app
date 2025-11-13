@@ -27,46 +27,57 @@ export const TopNavigation = observer(() => {
 
     return (
         <Paper
-            p={"0.5rem 1rem"}
-            elevation={2}
             display="flex"
             flexDirection="row"
             alignItems="center"
             justifyContent="space-between"
+            elevation={2}
+            zIndex={theme.zIndex.appBar}
+            position="sticky"
+            top={0}
+            pt="0.5rem"
             css={{
                 userSelect: "none",
-                position: "sticky",
-                top: 0,
-                zIndex: 100,
+            }}
+            style={{
+                boxShadow: "none",
             }}
         >
             <Stack
-                spacing={5}
+                spacing={20}
                 direction="row"
                 height="100%"
                 alignItems="center"
             >
-                <AnimatedLogo
-                    css={{
-                        width: 64,
-                        minWidth: 32,
-                        maxWidth: 48,
-                        cursor: "pointer",
-                    }}
-                    initial={{ scale: 1 }}
-                    whileHover={{ scale: 1.1 }}
-                    onClick={() => {
-                        navigate({
-                            to: "/",
-                            replace: true,
-                        });
-                    }}
-                />
+                <Box pl={16.25}>
+                    <Tooltip
+                        title={`Switch to ${capitalize(app.settings?.preferredMode ?? "Spaces")}`}
+                        placement="right"
+                    >
+                        <AnimatedLogo
+                            css={{
+                                width: 64,
+                                minWidth: 32,
+                                maxWidth: 48,
+                                cursor: "pointer",
+                            }}
+                            initial={{ scale: 1 }}
+                            whileHover={{ scale: 1.1 }}
+                            onClick={() => {
+                                navigate({
+                                    to: `/${app.settings?.preferredMode ?? "spaces"}`,
+                                    replace: true,
+                                });
+                            }}
+                        />
+                    </Tooltip>
+                </Box>
+
                 {app.mode && (
-                    <Paper spacing={5} py={2} px={6} direction="row">
+                    <Stack spacing={5} width="100%" direction="row">
                         {app.mode === "feed" ? <ImFeed /> : <GiGalaxy />}
                         {app.mode === "feed" ? "Feed" : "Spaces"}
-                    </Paper>
+                    </Stack>
                 )}
             </Stack>
 
