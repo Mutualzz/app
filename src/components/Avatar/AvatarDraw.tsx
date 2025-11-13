@@ -1,3 +1,4 @@
+import { AnimatedPaper } from "@components/Animated/AnimatedPaper";
 import { useModal } from "@contexts/Modal.context";
 import { useAppStore } from "@hooks/useStores";
 import { type ColorLike } from "@mutualzz/ui-core";
@@ -8,7 +9,6 @@ import {
     InputColor,
     InputNumber,
     Option,
-    Paper,
     Select,
     Stack,
     Typography,
@@ -125,7 +125,7 @@ export const AvatarDraw = observer(() => {
     };
 
     return (
-        <Paper
+        <AnimatedPaper
             direction={isMobile ? "column" : "row"}
             justifyContent="space-between"
             alignItems="center"
@@ -140,6 +140,8 @@ export const AvatarDraw = observer(() => {
             p={{ xs: "0.5rem", sm: "1rem", md: "2rem" }}
             borderRadius={{ xs: "1rem", sm: "1.5rem" }}
             overflow="hidden"
+            initial={{ scale: 0.95 }}
+            animate={{ scale: 1 }}
         >
             <Stack
                 direction="column"
