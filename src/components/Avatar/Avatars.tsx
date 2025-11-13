@@ -1,3 +1,4 @@
+import { AnimatedPaper } from "@components/Animated/AnimatedPaper";
 import { useModal } from "@contexts/Modal.context";
 import { useAppStore } from "@hooks/useStores";
 import { defaultAvatars } from "@mutualzz/types";
@@ -7,7 +8,6 @@ import {
     Button,
     ButtonGroup,
     IconButton,
-    Paper,
     Stack,
     Typography,
     useTheme,
@@ -76,7 +76,7 @@ export const Avatars = observer(() => {
     };
 
     return (
-        <Paper
+        <AnimatedPaper
             elevation={4}
             borderRadius={40}
             minWidth={{ xs: "90vw", sm: 340, md: 420, lg: 500 }}
@@ -85,6 +85,8 @@ export const Avatars = observer(() => {
             minHeight={300}
             justifyContent="center"
             alignItems="center"
+            initial={{ scale: 0.95 }}
+            animate={{ scale: 1 }}
         >
             <Stack
                 width="100%"
