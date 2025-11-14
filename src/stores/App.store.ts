@@ -100,8 +100,8 @@ export class AppStore {
         this.account = null;
         this.settings = null;
         this.rest.setToken(null);
-        secureStorageAdapter.clear();
         this.themes.reset();
+        secureStorageAdapter.clear();
     }
 
     async loadSettings() {

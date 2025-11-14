@@ -61,14 +61,14 @@ export class ThemeStore {
         this.currentIcon = icon;
     }
 
-    reset() {
-        this.themes.clear();
-        this.themes.set(baseDarkTheme.id, new Theme(baseDarkTheme));
-        this.themes.set(baseLightTheme.id, new Theme(baseLightTheme));
-    }
-
     addAll(themes: (APITheme | MzTheme)[]) {
         themes.forEach((theme) => this.add(theme));
+    }
+
+    reset() {
+        this.themes.forEach((theme) => {
+            if (theme.author) this.themes.delete(theme.id);
+        });
     }
 
     add(theme: APITheme | MzTheme) {
