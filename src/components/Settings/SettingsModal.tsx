@@ -26,7 +26,7 @@ export const SettingsModal = observer(({ redirectTo }: SettingsPropsModal) => {
         <SettingsSidebarProvider>
             <AnimatedPaper
                 width="60vw"
-                height="100%"
+                height="75%"
                 borderRadius={{ xs: "0.75rem", sm: "1.25rem", md: "1.5rem" }}
                 overflow="auto"
                 justifyContent="center"
