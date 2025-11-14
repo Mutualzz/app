@@ -1,6 +1,6 @@
 [package]
 name = "mutualzz"
-version = "2.2.0"
+version = "2.3.0"
 description = "Mutualzz is a social media app for everyone :3"
 authors = ["Azrael"]
 edition = "2021"
