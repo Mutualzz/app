@@ -38,6 +38,7 @@ export const SettingsContent = observer(
                 <Typography
                     level={{ xs: "h6", sm: "h4" }}
                     fontFamily="monospace"
+                    mb={10}
                 >
                     {startCase(currentPage)}
                 </Typography>

@@ -64,7 +64,7 @@ export const UserBar = observer(() => {
                                     "theme-picker",
                                     <SettingsModal redirectTo="appearance" />,
                                     {
-                                        height: "100%",
+                                        height: "75vh",
                                     },
                                 )
                             }
@@ -79,7 +79,7 @@ export const UserBar = observer(() => {
                             size="sm"
                             onClick={() =>
                                 openModal("user-settings", <SettingsModal />, {
-                                    height: "100%",
+                                    height: "75vh",
                                 })
                             }
                             color="neutral"
