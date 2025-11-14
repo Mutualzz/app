@@ -45,8 +45,9 @@ export const TopNavigation = observer(() => {
                 direction="row"
                 height="100%"
                 alignItems="center"
+                pl={16.15}
             >
-                <Box pl={16.25}>
+                <Box>
                     <Tooltip
                         title={`Switch to ${capitalize(app.settings?.preferredMode ?? "Spaces")}`}
                         placement="right"
@@ -84,6 +85,7 @@ export const TopNavigation = observer(() => {
                 alignItems="center"
                 direction="row"
                 spacing={{ xs: 2, sm: 6, md: 10 }}
+                pr={16.15}
             >
                 {!app.account && (
                     <Stack direction="row" spacing={5} alignItems="center">
