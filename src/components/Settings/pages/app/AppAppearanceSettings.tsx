@@ -138,7 +138,7 @@ export const AppAppearanceSettings = observer(() => {
     );
 
     return (
-        <Stack direction="column" spacing={30}>
+        <Stack direction="column" pt={10} pb={20} spacing={30}>
             <Typography
                 display="flex"
                 alignItems="center"
