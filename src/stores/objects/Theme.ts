@@ -52,8 +52,8 @@ export class Theme {
         this.colors = theme.colors;
         this.typography = theme.typography;
 
-        this.created = theme.created;
-        this.updated = theme.updated;
+        this.created = new Date(theme.created);
+        this.updated = new Date(theme.updated);
 
         this.raw = theme;
 

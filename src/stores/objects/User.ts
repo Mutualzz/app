@@ -32,8 +32,8 @@ export class User {
         this.avatar = user.avatar ?? null;
         this.globalName = user.globalName ?? null;
         this.accentColor = user.accentColor;
-        this.created = user.created;
-        this.updated = user.updated;
+        this.created = new Date(user.created);
+        this.updated = new Date(user.updated);
         this.flags = BitField.fromString(userFlags, user.flags.toString());
 
         this.raw = user;

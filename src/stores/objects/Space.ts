@@ -32,8 +32,8 @@ export class Space {
         this.description = space.description;
         this.icon = space.icon;
 
-        this.created = space.created;
-        this.updated = space.updated;
+        this.created = new Date(space.created);
+        this.updated = new Date(space.updated);
 
         this.flags = BitField.fromString(spaceFlags, space.flags.toString());
 

@@ -35,7 +35,7 @@ export class AccountStore {
         this.previousAvatars = user.previousAvatars ?? [];
         this.globalName = user.globalName ?? null;
         this.email = user.email ?? null;
-        this.created = user.created;
+        this.created = new Date(user.created);
 
         this.raw = user;
 
