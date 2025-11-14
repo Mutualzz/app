@@ -42,15 +42,7 @@ pub fn term_to_json(term: &Term) -> Value {
         Term::Binary(Binary { bytes }) => binary_like_to_json(bytes),
         Term::BitBinary(BitBinary { bytes, .. }) => binary_like_to_json(bytes),
 
-        Term::ByteList(ByteList { bytes }) => match std::str::from_utf8(bytes) {
-            Ok(s) => Value::String(s.to_owned()),
-            Err(_) => Value::Array(
-                bytes
-                    .iter()
-                    .map(|b| Value::Number(Number::from(*b)))
-                    .collect(),
-            ),
-        },
+        Term::ByteList(ByteList { bytes }) => binary_like_to_json(bytes),
 
         Term::List(List { elements }) => {
             Value::Array(elements.iter().map(term_to_json).collect())
