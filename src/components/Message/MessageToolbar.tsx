@@ -20,10 +20,22 @@ const ToolbarContent = ({ message }: Props) => {
         mutationFn: () => message.delete(),
     });
 
+    const hideSwitcher = () => {
+        if (!app.memberListVisible) {
+            app.setHideSwitcher(true);
+        }
+    };
+
+    const showSwitcher = () => {
+        if (!app.memberListVisible) {
+            app.setHideSwitcher(false);
+        }
+    };
+
     return (
         <Paper
-            onMouseEnter={() => app.setHideSwitcher(true)}
-            onMouseLeave={() => app.setHideSwitcher(false)}
+            onMouseEnter={hideSwitcher}
+            onMouseLeave={showSwitcher}
             p={2}
             borderRadius={10}
             elevation={0}
@@ -53,11 +65,7 @@ export const MessageToolbar = observer(
             <Tooltip
                 placement="right-start"
                 content={<ToolbarContent message={message} />}
-                shift={{
-                    padding: 30,
-                    crossAxis: true,
-                }}
-                offset={{ crossAxis: header ? -10 : -20 }}
+                offset={{ crossAxis: header ? -10 : -20, mainAxis: -65 }}
             >
                 {children}
             </Tooltip>
