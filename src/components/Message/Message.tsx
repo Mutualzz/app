@@ -30,10 +30,22 @@ export const Message = observer(({ message, header }: Props) => {
 
     const isSent = message instanceof MessageType;
 
+    const hideSwitcher = () => {
+        if (!app.memberListVisible) {
+            app.setHideSwitcher(true);
+        }
+    };
+
+    const showSwitcher = () => {
+        if (!app.memberListVisible) {
+            app.setHideSwitcher(false);
+        }
+    };
+
     const children = (
         <MessageBase
-            onMouseEnter={() => app.setHideSwitcher(true)}
-            onMouseLeave={() => app.setHideSwitcher(false)}
+            onMouseEnter={hideSwitcher}
+            onMouseLeave={showSwitcher}
             header={header}
         >
             <MessageInfo>
