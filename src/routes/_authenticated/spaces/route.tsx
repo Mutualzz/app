@@ -22,27 +22,6 @@ function RouteComponent() {
     }, []);
 
     useEffect(() => {
-        // const dispose = reaction(
-        //     () => ({
-        //         spaceId: app.spaces.activeId,
-        //         channelId: app.channels.activeId,
-        //     }),
-        //     ({ spaceId, channelId }) => {
-        //         console.log(spaceId, channelId);
-        //         if (spaceId && channelId) {
-        //             navigate({
-        //                 to: "/spaces/$spaceId/$channelId",
-        //                 params: {
-        //                     spaceId,
-        //                     channelId,
-        //                 },
-        //             });
-        //         }
-        //     },
-        // );
-        //
-        // return dispose;
-
         const spaceId = app.spaces.activeId;
         const channelId = app.channels.activeId;
         if (!spaceId || !channelId) return;

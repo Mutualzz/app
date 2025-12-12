@@ -25,8 +25,6 @@ export class Message extends MessageBase {
     constructor(app: AppStore, data: APIMessage) {
         super(app, data);
 
-        console.log(data);
-
         this.id = data.id;
         this.channelId = data.channelId;
         if (data.channel) {

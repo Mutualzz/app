@@ -690,7 +690,6 @@ export class GatewayStore {
     };
 
     private onSpaceMemberAdd = async (payload: any) => {
-        console.log(payload);
         const space = await this.app.spaces.resolve(payload.spaceId);
         if (!space) return;
 
@@ -713,8 +712,6 @@ export class GatewayStore {
         const space = this.app.spaces.get(spaceId);
 
         if (!space) return;
-
-        console.log(data);
 
         space.updateMemberList(data);
     };
