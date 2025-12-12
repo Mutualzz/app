@@ -24,7 +24,7 @@ const regex = import.meta.env.DEV
     ? /^(?:(?:https?:\/\/)?(?:www\.)?localhost:1420\/invite\/)?([A-Za-z0-9_-]{8,})$/
     : /^(?:(?:https?:\/\/)?(?:www\.)?mutualzz\.com\/invite\/)?([A-Za-z0-9_-]{8,})$/;
 
-// TODO: Finish up the join modal
+// TODO: Finish up the join modal (fix the button that doesnt lead to creating and add another example with just the code and push it as 4.0.1)
 export const SpaceJoin = observer(({ setCreating }: Props) => {
     const app = useAppStore();
     const [inviteLink, setInviteLink] = useState("");
@@ -133,7 +133,8 @@ export const SpaceJoin = observer(({ setCreating }: Props) => {
                 )}
             </Stack>
             <Stack direction="column" mt={5}>
-                <Typography>Invites should look like</Typography>
+                <Typography>Invites should look like:</Typography>
+                <Typography textColor="muted">fJ2XlEuD</Typography> or{" "}
                 <Typography textColor="muted">{exampleLink}</Typography>
             </Stack>
             <Stack
@@ -160,11 +161,11 @@ export const SpaceJoin = observer(({ setCreating }: Props) => {
                 </ButtonGroup>
             </Stack>
             <Stack mt={2.5} alignItems="center" spacing={2}>
-                <Typography>You prefer creating your own space?</Typography>
+                <Typography>You prefer to create your own space?</Typography>
                 <Link
                     variant="plain"
                     color="primary"
-                    onClick={() => setCreating(false)}
+                    onClick={() => setCreating(true)}
                     disabled={isGettingInvite || isJoining}
                 >
                     Back to creating
