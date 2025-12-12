@@ -53,7 +53,7 @@ export class GatewayStore {
     private url?: string;
 
     private encoding: Encoding = isTauri ? "etf" : "json";
-    private compress: Compression = "none";
+    private compress: Compression = "zlib-stream";
 
     private codec!: Codec;
     private compressor!: Compressor;
