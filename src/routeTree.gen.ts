@@ -13,29 +13,11 @@ import { Route as RegisterRouteImport } from "./routes/register";
 import { Route as PrivacyRouteImport } from "./routes/privacy";
 import { Route as LoginRouteImport } from "./routes/login";
 import { Route as DownloadRouteImport } from "./routes/download";
-import { Route as UiRouteRouteImport } from "./routes/ui/route";
 import { Route as AuthenticatedRouteRouteImport } from "./routes/_authenticated/route";
 import { Route as IndexRouteImport } from "./routes/index";
-import { Route as UiIndexRouteImport } from "./routes/ui/index";
+import { Route as InviteCodeRouteImport } from "./routes/invite/$code";
 import { Route as AuthenticatedSpacesRouteRouteImport } from "./routes/_authenticated/spaces/route";
 import { Route as AuthenticatedFeedRouteRouteImport } from "./routes/_authenticated/feed/route";
-import { Route as UiSurfacesPaperRouteImport } from "./routes/ui/surfaces/paper";
-import { Route as UiInputsTextareaRouteImport } from "./routes/ui/inputs/textarea";
-import { Route as UiInputsSliderRouteImport } from "./routes/ui/inputs/slider";
-import { Route as UiInputsSelectRouteImport } from "./routes/ui/inputs/select";
-import { Route as UiInputsRadioButtonRouteImport } from "./routes/ui/inputs/radio-button";
-import { Route as UiInputsMarkdownInputRouteImport } from "./routes/ui/inputs/markdown-input";
-import { Route as UiInputsInputGroupsRouteImport } from "./routes/ui/inputs/input-groups";
-import { Route as UiInputsInputRouteImport } from "./routes/ui/inputs/input";
-import { Route as UiInputsCheckboxRouteImport } from "./routes/ui/inputs/checkbox";
-import { Route as UiInputsButtonRouteImport } from "./routes/ui/inputs/button";
-import { Route as UiFeedbackLinearProgressRouteImport } from "./routes/ui/feedback/linear-progress";
-import { Route as UiFeedbackCircularProgressRouteImport } from "./routes/ui/feedback/circular-progress";
-import { Route as UiDataDisplayTypographyRouteImport } from "./routes/ui/data-display/typography";
-import { Route as UiDataDisplayMarkdownRendererRouteImport } from "./routes/ui/data-display/markdown-renderer";
-import { Route as UiDataDisplayListRouteImport } from "./routes/ui/data-display/list";
-import { Route as UiDataDisplayDividerRouteImport } from "./routes/ui/data-display/divider";
-import { Route as UiDataDisplayAvatarRouteImport } from "./routes/ui/data-display/avatar";
 import { Route as AuthenticatedSpacesSpaceIdRouteRouteImport } from "./routes/_authenticated/spaces/$spaceId/route";
 import { Route as AuthenticatedSpacesSpaceIdChannelIdRouteRouteImport } from "./routes/_authenticated/spaces/$spaceId/$channelId/route";
 
@@ -59,11 +41,6 @@ const DownloadRoute = DownloadRouteImport.update({
   path: "/download",
   getParentRoute: () => rootRouteImport,
 } as any);
-const UiRouteRoute = UiRouteRouteImport.update({
-  id: "/ui",
-  path: "/ui",
-  getParentRoute: () => rootRouteImport,
-} as any);
 const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
   id: "/_authenticated",
   getParentRoute: () => rootRouteImport,
@@ -73,10 +50,10 @@ const IndexRoute = IndexRouteImport.update({
   path: "/",
   getParentRoute: () => rootRouteImport,
 } as any);
-const UiIndexRoute = UiIndexRouteImport.update({
-  id: "/",
-  path: "/",
-  getParentRoute: () => UiRouteRoute,
+const InviteCodeRoute = InviteCodeRouteImport.update({
+  id: "/invite/$code",
+  path: "/invite/$code",
+  getParentRoute: () => rootRouteImport,
 } as any);
 const AuthenticatedSpacesRouteRoute =
   AuthenticatedSpacesRouteRouteImport.update({
@@ -88,94 +65,6 @@ const AuthenticatedFeedRouteRoute = AuthenticatedFeedRouteRouteImport.update({
   id: "/feed",
   path: "/feed",
   getParentRoute: () => AuthenticatedRouteRoute,
-} as any);
-const UiSurfacesPaperRoute = UiSurfacesPaperRouteImport.update({
-  id: "/surfaces/paper",
-  path: "/surfaces/paper",
-  getParentRoute: () => UiRouteRoute,
-} as any);
-const UiInputsTextareaRoute = UiInputsTextareaRouteImport.update({
-  id: "/inputs/textarea",
-  path: "/inputs/textarea",
-  getParentRoute: () => UiRouteRoute,
-} as any);
-const UiInputsSliderRoute = UiInputsSliderRouteImport.update({
-  id: "/inputs/slider",
-  path: "/inputs/slider",
-  getParentRoute: () => UiRouteRoute,
-} as any);
-const UiInputsSelectRoute = UiInputsSelectRouteImport.update({
-  id: "/inputs/select",
-  path: "/inputs/select",
-  getParentRoute: () => UiRouteRoute,
-} as any);
-const UiInputsRadioButtonRoute = UiInputsRadioButtonRouteImport.update({
-  id: "/inputs/radio-button",
-  path: "/inputs/radio-button",
-  getParentRoute: () => UiRouteRoute,
-} as any);
-const UiInputsMarkdownInputRoute = UiInputsMarkdownInputRouteImport.update({
-  id: "/inputs/markdown-input",
-  path: "/inputs/markdown-input",
-  getParentRoute: () => UiRouteRoute,
-} as any);
-const UiInputsInputGroupsRoute = UiInputsInputGroupsRouteImport.update({
-  id: "/inputs/input-groups",
-  path: "/inputs/input-groups",
-  getParentRoute: () => UiRouteRoute,
-} as any);
-const UiInputsInputRoute = UiInputsInputRouteImport.update({
-  id: "/inputs/input",
-  path: "/inputs/input",
-  getParentRoute: () => UiRouteRoute,
-} as any);
-const UiInputsCheckboxRoute = UiInputsCheckboxRouteImport.update({
-  id: "/inputs/checkbox",
-  path: "/inputs/checkbox",
-  getParentRoute: () => UiRouteRoute,
-} as any);
-const UiInputsButtonRoute = UiInputsButtonRouteImport.update({
-  id: "/inputs/button",
-  path: "/inputs/button",
-  getParentRoute: () => UiRouteRoute,
-} as any);
-const UiFeedbackLinearProgressRoute =
-  UiFeedbackLinearProgressRouteImport.update({
-    id: "/feedback/linear-progress",
-    path: "/feedback/linear-progress",
-    getParentRoute: () => UiRouteRoute,
-  } as any);
-const UiFeedbackCircularProgressRoute =
-  UiFeedbackCircularProgressRouteImport.update({
-    id: "/feedback/circular-progress",
-    path: "/feedback/circular-progress",
-    getParentRoute: () => UiRouteRoute,
-  } as any);
-const UiDataDisplayTypographyRoute = UiDataDisplayTypographyRouteImport.update({
-  id: "/data-display/typography",
-  path: "/data-display/typography",
-  getParentRoute: () => UiRouteRoute,
-} as any);
-const UiDataDisplayMarkdownRendererRoute =
-  UiDataDisplayMarkdownRendererRouteImport.update({
-    id: "/data-display/markdown-renderer",
-    path: "/data-display/markdown-renderer",
-    getParentRoute: () => UiRouteRoute,
-  } as any);
-const UiDataDisplayListRoute = UiDataDisplayListRouteImport.update({
-  id: "/data-display/list",
-  path: "/data-display/list",
-  getParentRoute: () => UiRouteRoute,
-} as any);
-const UiDataDisplayDividerRoute = UiDataDisplayDividerRouteImport.update({
-  id: "/data-display/divider",
-  path: "/data-display/divider",
-  getParentRoute: () => UiRouteRoute,
-} as any);
-const UiDataDisplayAvatarRoute = UiDataDisplayAvatarRouteImport.update({
-  id: "/data-display/avatar",
-  path: "/data-display/avatar",
-  getParentRoute: () => UiRouteRoute,
 } as any);
 const AuthenticatedSpacesSpaceIdRouteRoute =
   AuthenticatedSpacesSpaceIdRouteRouteImport.update({
@@ -192,32 +81,14 @@ const AuthenticatedSpacesSpaceIdChannelIdRouteRoute =
 
 export interface FileRoutesByFullPath {
   "/": typeof IndexRoute;
-  "/ui": typeof UiRouteRouteWithChildren;
   "/download": typeof DownloadRoute;
   "/login": typeof LoginRoute;
   "/privacy": typeof PrivacyRoute;
   "/register": typeof RegisterRoute;
   "/feed": typeof AuthenticatedFeedRouteRoute;
   "/spaces": typeof AuthenticatedSpacesRouteRouteWithChildren;
-  "/ui/": typeof UiIndexRoute;
+  "/invite/$code": typeof InviteCodeRoute;
   "/spaces/$spaceId": typeof AuthenticatedSpacesSpaceIdRouteRouteWithChildren;
-  "/ui/data-display/avatar": typeof UiDataDisplayAvatarRoute;
-  "/ui/data-display/divider": typeof UiDataDisplayDividerRoute;
-  "/ui/data-display/list": typeof UiDataDisplayListRoute;
-  "/ui/data-display/markdown-renderer": typeof UiDataDisplayMarkdownRendererRoute;
-  "/ui/data-display/typography": typeof UiDataDisplayTypographyRoute;
-  "/ui/feedback/circular-progress": typeof UiFeedbackCircularProgressRoute;
-  "/ui/feedback/linear-progress": typeof UiFeedbackLinearProgressRoute;
-  "/ui/inputs/button": typeof UiInputsButtonRoute;
-  "/ui/inputs/checkbox": typeof UiInputsCheckboxRoute;
-  "/ui/inputs/input": typeof UiInputsInputRoute;
-  "/ui/inputs/input-groups": typeof UiInputsInputGroupsRoute;
-  "/ui/inputs/markdown-input": typeof UiInputsMarkdownInputRoute;
-  "/ui/inputs/radio-button": typeof UiInputsRadioButtonRoute;
-  "/ui/inputs/select": typeof UiInputsSelectRoute;
-  "/ui/inputs/slider": typeof UiInputsSliderRoute;
-  "/ui/inputs/textarea": typeof UiInputsTextareaRoute;
-  "/ui/surfaces/paper": typeof UiSurfacesPaperRoute;
   "/spaces/$spaceId/$channelId": typeof AuthenticatedSpacesSpaceIdChannelIdRouteRoute;
 }
 export interface FileRoutesByTo {
@@ -228,89 +99,36 @@ export interface FileRoutesByTo {
   "/register": typeof RegisterRoute;
   "/feed": typeof AuthenticatedFeedRouteRoute;
   "/spaces": typeof AuthenticatedSpacesRouteRouteWithChildren;
-  "/ui": typeof UiIndexRoute;
+  "/invite/$code": typeof InviteCodeRoute;
   "/spaces/$spaceId": typeof AuthenticatedSpacesSpaceIdRouteRouteWithChildren;
-  "/ui/data-display/avatar": typeof UiDataDisplayAvatarRoute;
-  "/ui/data-display/divider": typeof UiDataDisplayDividerRoute;
-  "/ui/data-display/list": typeof UiDataDisplayListRoute;
-  "/ui/data-display/markdown-renderer": typeof UiDataDisplayMarkdownRendererRoute;
-  "/ui/data-display/typography": typeof UiDataDisplayTypographyRoute;
-  "/ui/feedback/circular-progress": typeof UiFeedbackCircularProgressRoute;
-  "/ui/feedback/linear-progress": typeof UiFeedbackLinearProgressRoute;
-  "/ui/inputs/button": typeof UiInputsButtonRoute;
-  "/ui/inputs/checkbox": typeof UiInputsCheckboxRoute;
-  "/ui/inputs/input": typeof UiInputsInputRoute;
-  "/ui/inputs/input-groups": typeof UiInputsInputGroupsRoute;
-  "/ui/inputs/markdown-input": typeof UiInputsMarkdownInputRoute;
-  "/ui/inputs/radio-button": typeof UiInputsRadioButtonRoute;
-  "/ui/inputs/select": typeof UiInputsSelectRoute;
-  "/ui/inputs/slider": typeof UiInputsSliderRoute;
-  "/ui/inputs/textarea": typeof UiInputsTextareaRoute;
-  "/ui/surfaces/paper": typeof UiSurfacesPaperRoute;
   "/spaces/$spaceId/$channelId": typeof AuthenticatedSpacesSpaceIdChannelIdRouteRoute;
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport;
   "/": typeof IndexRoute;
   "/_authenticated": typeof AuthenticatedRouteRouteWithChildren;
-  "/ui": typeof UiRouteRouteWithChildren;
   "/download": typeof DownloadRoute;
   "/login": typeof LoginRoute;
   "/privacy": typeof PrivacyRoute;
   "/register": typeof RegisterRoute;
   "/_authenticated/feed": typeof AuthenticatedFeedRouteRoute;
   "/_authenticated/spaces": typeof AuthenticatedSpacesRouteRouteWithChildren;
-  "/ui/": typeof UiIndexRoute;
+  "/invite/$code": typeof InviteCodeRoute;
   "/_authenticated/spaces/$spaceId": typeof AuthenticatedSpacesSpaceIdRouteRouteWithChildren;
-  "/ui/data-display/avatar": typeof UiDataDisplayAvatarRoute;
-  "/ui/data-display/divider": typeof UiDataDisplayDividerRoute;
-  "/ui/data-display/list": typeof UiDataDisplayListRoute;
-  "/ui/data-display/markdown-renderer": typeof UiDataDisplayMarkdownRendererRoute;
-  "/ui/data-display/typography": typeof UiDataDisplayTypographyRoute;
-  "/ui/feedback/circular-progress": typeof UiFeedbackCircularProgressRoute;
-  "/ui/feedback/linear-progress": typeof UiFeedbackLinearProgressRoute;
-  "/ui/inputs/button": typeof UiInputsButtonRoute;
-  "/ui/inputs/checkbox": typeof UiInputsCheckboxRoute;
-  "/ui/inputs/input": typeof UiInputsInputRoute;
-  "/ui/inputs/input-groups": typeof UiInputsInputGroupsRoute;
-  "/ui/inputs/markdown-input": typeof UiInputsMarkdownInputRoute;
-  "/ui/inputs/radio-button": typeof UiInputsRadioButtonRoute;
-  "/ui/inputs/select": typeof UiInputsSelectRoute;
-  "/ui/inputs/slider": typeof UiInputsSliderRoute;
-  "/ui/inputs/textarea": typeof UiInputsTextareaRoute;
-  "/ui/surfaces/paper": typeof UiSurfacesPaperRoute;
   "/_authenticated/spaces/$spaceId/$channelId": typeof AuthenticatedSpacesSpaceIdChannelIdRouteRoute;
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath;
   fullPaths:
     | "/"
-    | "/ui"
     | "/download"
     | "/login"
     | "/privacy"
     | "/register"
     | "/feed"
     | "/spaces"
-    | "/ui/"
+    | "/invite/$code"
     | "/spaces/$spaceId"
-    | "/ui/data-display/avatar"
-    | "/ui/data-display/divider"
-    | "/ui/data-display/list"
-    | "/ui/data-display/markdown-renderer"
-    | "/ui/data-display/typography"
-    | "/ui/feedback/circular-progress"
-    | "/ui/feedback/linear-progress"
-    | "/ui/inputs/button"
-    | "/ui/inputs/checkbox"
-    | "/ui/inputs/input"
-    | "/ui/inputs/input-groups"
-    | "/ui/inputs/markdown-input"
-    | "/ui/inputs/radio-button"
-    | "/ui/inputs/select"
-    | "/ui/inputs/slider"
-    | "/ui/inputs/textarea"
-    | "/ui/surfaces/paper"
     | "/spaces/$spaceId/$channelId";
   fileRoutesByTo: FileRoutesByTo;
   to:
@@ -321,67 +139,32 @@ export interface FileRouteTypes {
     | "/register"
     | "/feed"
     | "/spaces"
-    | "/ui"
+    | "/invite/$code"
     | "/spaces/$spaceId"
-    | "/ui/data-display/avatar"
-    | "/ui/data-display/divider"
-    | "/ui/data-display/list"
-    | "/ui/data-display/markdown-renderer"
-    | "/ui/data-display/typography"
-    | "/ui/feedback/circular-progress"
-    | "/ui/feedback/linear-progress"
-    | "/ui/inputs/button"
-    | "/ui/inputs/checkbox"
-    | "/ui/inputs/input"
-    | "/ui/inputs/input-groups"
-    | "/ui/inputs/markdown-input"
-    | "/ui/inputs/radio-button"
-    | "/ui/inputs/select"
-    | "/ui/inputs/slider"
-    | "/ui/inputs/textarea"
-    | "/ui/surfaces/paper"
     | "/spaces/$spaceId/$channelId";
   id:
     | "__root__"
     | "/"
     | "/_authenticated"
-    | "/ui"
     | "/download"
     | "/login"
     | "/privacy"
     | "/register"
     | "/_authenticated/feed"
     | "/_authenticated/spaces"
-    | "/ui/"
+    | "/invite/$code"
     | "/_authenticated/spaces/$spaceId"
-    | "/ui/data-display/avatar"
-    | "/ui/data-display/divider"
-    | "/ui/data-display/list"
-    | "/ui/data-display/markdown-renderer"
-    | "/ui/data-display/typography"
-    | "/ui/feedback/circular-progress"
-    | "/ui/feedback/linear-progress"
-    | "/ui/inputs/button"
-    | "/ui/inputs/checkbox"
-    | "/ui/inputs/input"
-    | "/ui/inputs/input-groups"
-    | "/ui/inputs/markdown-input"
-    | "/ui/inputs/radio-button"
-    | "/ui/inputs/select"
-    | "/ui/inputs/slider"
-    | "/ui/inputs/textarea"
-    | "/ui/surfaces/paper"
     | "/_authenticated/spaces/$spaceId/$channelId";
   fileRoutesById: FileRoutesById;
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute;
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren;
-  UiRouteRoute: typeof UiRouteRouteWithChildren;
   DownloadRoute: typeof DownloadRoute;
   LoginRoute: typeof LoginRoute;
   PrivacyRoute: typeof PrivacyRoute;
   RegisterRoute: typeof RegisterRoute;
+  InviteCodeRoute: typeof InviteCodeRoute;
 }
 
 declare module "@tanstack/react-router" {
@@ -414,13 +197,6 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof DownloadRouteImport;
       parentRoute: typeof rootRouteImport;
     };
-    "/ui": {
-      id: "/ui";
-      path: "/ui";
-      fullPath: "/ui";
-      preLoaderRoute: typeof UiRouteRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
     "/_authenticated": {
       id: "/_authenticated";
       path: "";
@@ -435,12 +211,12 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof IndexRouteImport;
       parentRoute: typeof rootRouteImport;
     };
-    "/ui/": {
-      id: "/ui/";
-      path: "/";
-      fullPath: "/ui/";
-      preLoaderRoute: typeof UiIndexRouteImport;
-      parentRoute: typeof UiRouteRoute;
+    "/invite/$code": {
+      id: "/invite/$code";
+      path: "/invite/$code";
+      fullPath: "/invite/$code";
+      preLoaderRoute: typeof InviteCodeRouteImport;
+      parentRoute: typeof rootRouteImport;
     };
     "/_authenticated/spaces": {
       id: "/_authenticated/spaces";
@@ -455,125 +231,6 @@ declare module "@tanstack/react-router" {
       fullPath: "/feed";
       preLoaderRoute: typeof AuthenticatedFeedRouteRouteImport;
       parentRoute: typeof AuthenticatedRouteRoute;
-    };
-    "/ui/surfaces/paper": {
-      id: "/ui/surfaces/paper";
-      path: "/surfaces/paper";
-      fullPath: "/ui/surfaces/paper";
-      preLoaderRoute: typeof UiSurfacesPaperRouteImport;
-      parentRoute: typeof UiRouteRoute;
-    };
-    "/ui/inputs/textarea": {
-      id: "/ui/inputs/textarea";
-      path: "/inputs/textarea";
-      fullPath: "/ui/inputs/textarea";
-      preLoaderRoute: typeof UiInputsTextareaRouteImport;
-      parentRoute: typeof UiRouteRoute;
-    };
-    "/ui/inputs/slider": {
-      id: "/ui/inputs/slider";
-      path: "/inputs/slider";
-      fullPath: "/ui/inputs/slider";
-      preLoaderRoute: typeof UiInputsSliderRouteImport;
-      parentRoute: typeof UiRouteRoute;
-    };
-    "/ui/inputs/select": {
-      id: "/ui/inputs/select";
-      path: "/inputs/select";
-      fullPath: "/ui/inputs/select";
-      preLoaderRoute: typeof UiInputsSelectRouteImport;
-      parentRoute: typeof UiRouteRoute;
-    };
-    "/ui/inputs/radio-button": {
-      id: "/ui/inputs/radio-button";
-      path: "/inputs/radio-button";
-      fullPath: "/ui/inputs/radio-button";
-      preLoaderRoute: typeof UiInputsRadioButtonRouteImport;
-      parentRoute: typeof UiRouteRoute;
-    };
-    "/ui/inputs/markdown-input": {
-      id: "/ui/inputs/markdown-input";
-      path: "/inputs/markdown-input";
-      fullPath: "/ui/inputs/markdown-input";
-      preLoaderRoute: typeof UiInputsMarkdownInputRouteImport;
-      parentRoute: typeof UiRouteRoute;
-    };
-    "/ui/inputs/input-groups": {
-      id: "/ui/inputs/input-groups";
-      path: "/inputs/input-groups";
-      fullPath: "/ui/inputs/input-groups";
-      preLoaderRoute: typeof UiInputsInputGroupsRouteImport;
-      parentRoute: typeof UiRouteRoute;
-    };
-    "/ui/inputs/input": {
-      id: "/ui/inputs/input";
-      path: "/inputs/input";
-      fullPath: "/ui/inputs/input";
-      preLoaderRoute: typeof UiInputsInputRouteImport;
-      parentRoute: typeof UiRouteRoute;
-    };
-    "/ui/inputs/checkbox": {
-      id: "/ui/inputs/checkbox";
-      path: "/inputs/checkbox";
-      fullPath: "/ui/inputs/checkbox";
-      preLoaderRoute: typeof UiInputsCheckboxRouteImport;
-      parentRoute: typeof UiRouteRoute;
-    };
-    "/ui/inputs/button": {
-      id: "/ui/inputs/button";
-      path: "/inputs/button";
-      fullPath: "/ui/inputs/button";
-      preLoaderRoute: typeof UiInputsButtonRouteImport;
-      parentRoute: typeof UiRouteRoute;
-    };
-    "/ui/feedback/linear-progress": {
-      id: "/ui/feedback/linear-progress";
-      path: "/feedback/linear-progress";
-      fullPath: "/ui/feedback/linear-progress";
-      preLoaderRoute: typeof UiFeedbackLinearProgressRouteImport;
-      parentRoute: typeof UiRouteRoute;
-    };
-    "/ui/feedback/circular-progress": {
-      id: "/ui/feedback/circular-progress";
-      path: "/feedback/circular-progress";
-      fullPath: "/ui/feedback/circular-progress";
-      preLoaderRoute: typeof UiFeedbackCircularProgressRouteImport;
-      parentRoute: typeof UiRouteRoute;
-    };
-    "/ui/data-display/typography": {
-      id: "/ui/data-display/typography";
-      path: "/data-display/typography";
-      fullPath: "/ui/data-display/typography";
-      preLoaderRoute: typeof UiDataDisplayTypographyRouteImport;
-      parentRoute: typeof UiRouteRoute;
-    };
-    "/ui/data-display/markdown-renderer": {
-      id: "/ui/data-display/markdown-renderer";
-      path: "/data-display/markdown-renderer";
-      fullPath: "/ui/data-display/markdown-renderer";
-      preLoaderRoute: typeof UiDataDisplayMarkdownRendererRouteImport;
-      parentRoute: typeof UiRouteRoute;
-    };
-    "/ui/data-display/list": {
-      id: "/ui/data-display/list";
-      path: "/data-display/list";
-      fullPath: "/ui/data-display/list";
-      preLoaderRoute: typeof UiDataDisplayListRouteImport;
-      parentRoute: typeof UiRouteRoute;
-    };
-    "/ui/data-display/divider": {
-      id: "/ui/data-display/divider";
-      path: "/data-display/divider";
-      fullPath: "/ui/data-display/divider";
-      preLoaderRoute: typeof UiDataDisplayDividerRouteImport;
-      parentRoute: typeof UiRouteRoute;
-    };
-    "/ui/data-display/avatar": {
-      id: "/ui/data-display/avatar";
-      path: "/data-display/avatar";
-      fullPath: "/ui/data-display/avatar";
-      preLoaderRoute: typeof UiDataDisplayAvatarRouteImport;
-      parentRoute: typeof UiRouteRoute;
     };
     "/_authenticated/spaces/$spaceId": {
       id: "/_authenticated/spaces/$spaceId";
@@ -635,59 +292,14 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
 const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren);
 
-interface UiRouteRouteChildren {
-  UiIndexRoute: typeof UiIndexRoute;
-  UiDataDisplayAvatarRoute: typeof UiDataDisplayAvatarRoute;
-  UiDataDisplayDividerRoute: typeof UiDataDisplayDividerRoute;
-  UiDataDisplayListRoute: typeof UiDataDisplayListRoute;
-  UiDataDisplayMarkdownRendererRoute: typeof UiDataDisplayMarkdownRendererRoute;
-  UiDataDisplayTypographyRoute: typeof UiDataDisplayTypographyRoute;
-  UiFeedbackCircularProgressRoute: typeof UiFeedbackCircularProgressRoute;
-  UiFeedbackLinearProgressRoute: typeof UiFeedbackLinearProgressRoute;
-  UiInputsButtonRoute: typeof UiInputsButtonRoute;
-  UiInputsCheckboxRoute: typeof UiInputsCheckboxRoute;
-  UiInputsInputRoute: typeof UiInputsInputRoute;
-  UiInputsInputGroupsRoute: typeof UiInputsInputGroupsRoute;
-  UiInputsMarkdownInputRoute: typeof UiInputsMarkdownInputRoute;
-  UiInputsRadioButtonRoute: typeof UiInputsRadioButtonRoute;
-  UiInputsSelectRoute: typeof UiInputsSelectRoute;
-  UiInputsSliderRoute: typeof UiInputsSliderRoute;
-  UiInputsTextareaRoute: typeof UiInputsTextareaRoute;
-  UiSurfacesPaperRoute: typeof UiSurfacesPaperRoute;
-}
-
-const UiRouteRouteChildren: UiRouteRouteChildren = {
-  UiIndexRoute: UiIndexRoute,
-  UiDataDisplayAvatarRoute: UiDataDisplayAvatarRoute,
-  UiDataDisplayDividerRoute: UiDataDisplayDividerRoute,
-  UiDataDisplayListRoute: UiDataDisplayListRoute,
-  UiDataDisplayMarkdownRendererRoute: UiDataDisplayMarkdownRendererRoute,
-  UiDataDisplayTypographyRoute: UiDataDisplayTypographyRoute,
-  UiFeedbackCircularProgressRoute: UiFeedbackCircularProgressRoute,
-  UiFeedbackLinearProgressRoute: UiFeedbackLinearProgressRoute,
-  UiInputsButtonRoute: UiInputsButtonRoute,
-  UiInputsCheckboxRoute: UiInputsCheckboxRoute,
-  UiInputsInputRoute: UiInputsInputRoute,
-  UiInputsInputGroupsRoute: UiInputsInputGroupsRoute,
-  UiInputsMarkdownInputRoute: UiInputsMarkdownInputRoute,
-  UiInputsRadioButtonRoute: UiInputsRadioButtonRoute,
-  UiInputsSelectRoute: UiInputsSelectRoute,
-  UiInputsSliderRoute: UiInputsSliderRoute,
-  UiInputsTextareaRoute: UiInputsTextareaRoute,
-  UiSurfacesPaperRoute: UiSurfacesPaperRoute,
-};
-
-const UiRouteRouteWithChildren =
-  UiRouteRoute._addFileChildren(UiRouteRouteChildren);
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
-  UiRouteRoute: UiRouteRouteWithChildren,
   DownloadRoute: DownloadRoute,
   LoginRoute: LoginRoute,
   PrivacyRoute: PrivacyRoute,
   RegisterRoute: RegisterRoute,
+  InviteCodeRoute: InviteCodeRoute,
 };
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

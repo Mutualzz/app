@@ -1,3 +1,4 @@
+import { WINDOW_TITLEBAR_ZINDEX } from "@app-types/index";
 import { useDesktopShell } from "@contexts/DesktopShell.context";
 import { useAppStore } from "@hooks/useStores";
 import {
@@ -58,12 +59,12 @@ const WindowTitlebar = ({ onHeightChange }: WindowTitlebarProps) => {
             justifyContent="space-between"
             alignItems="center"
             elevation={2}
-            py={isMac ? 10 : 4}
-            px={isMac ? 8 : 6}
+            py={isMac ? 2.5 : 1}
+            px={isMac ? 2 : 1.5}
             minHeight={isMac ? 44 : 32}
             width="100%"
             position="fixed"
-            zIndex={99999999}
+            zIndex={WINDOW_TITLEBAR_ZINDEX}
             top={0}
             left={0}
             css={{ backdropFilter: "saturate(120%) blur(6px)" }}
@@ -73,12 +74,16 @@ const WindowTitlebar = ({ onHeightChange }: WindowTitlebarProps) => {
             <Stack
                 flex={1}
                 alignItems="center"
-                px={isMac ? 5 : 0}
+                px={isMac ? 1.25 : 0}
                 justifyContent="flex-end"
                 data-tauri-drag-region
             >
                 {app.updater?.update && (
-                    <Stack px={isMac ? 15 : 0} alignItems="center" spacing={8}>
+                    <Stack
+                        px={isMac ? 3.75 : 0}
+                        alignItems="center"
+                        spacing={2}
+                    >
                         <IconButton
                             onClick={() => app.updater?.installUpdate()}
                             size={18}
@@ -98,12 +103,15 @@ const WindowTitlebar = ({ onHeightChange }: WindowTitlebarProps) => {
                             <Divider
                                 lineColor="primary"
                                 orientation="vertical"
+                                css={{
+                                    marginRight: 8,
+                                }}
                             />
                         )}
                     </Stack>
                 )}
                 {!isMac && (
-                    <Stack direction="row" alignItems="center" css={{ gap: 6 }}>
+                    <Stack direction="row" alignItems="center" spacing={1.5}>
                         <IconButton
                             css={{
                                 height: 32,

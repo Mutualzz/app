@@ -1,5 +1,4 @@
 import { AnimatedPaper } from "@components/Animated/AnimatedPaper";
-import { ThemeSelector } from "@components/ThemeSelector";
 import { Button, Divider, Drawer, Stack, useTheme } from "@mutualzz/ui-web";
 import { useMediaQuery } from "@react-hookz/web";
 import { useLocation, useNavigate } from "@tanstack/react-router";
@@ -100,26 +99,21 @@ export const PlaygroundLeftSidebar = observer(() => {
 
     const SidebarContent = () => (
         <Stack
-            spacing={25}
+            spacing={6.25}
             direction="column"
             overflowY="auto"
             minWidth="14rem"
-            p={20}
-            css={{
-                borderTopLeftRadius: "2rem",
-                borderBottomLeftRadius: "2rem",
-            }}
+            p={5}
         >
-            <ThemeSelector />
             {Object.entries(links).map(([key, value]) => (
                 <Stack
                     key={key}
                     justifyContent="center"
                     direction="column"
-                    spacing={10}
+                    spacing={2.5}
                 >
                     <Divider>{startCase(key)}</Divider>
-                    <Stack direction="column" spacing={10}>
+                    <Stack direction="column" spacing={2.5}>
                         {value.map((button, i) => (
                             <Button
                                 key={i}
@@ -166,11 +160,9 @@ export const PlaygroundLeftSidebar = observer(() => {
                     display: isMobileQuery ? "none" : "flex",
                 }}
                 transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                css={{
-                    borderRight: `1px solid ${theme.colors.primary}`,
-                    position: "relative",
-                    zIndex: 10,
-                }}
+                zIndex={10}
+                elevation={2}
+                position="relative"
                 aria-hidden={isMobileQuery}
             >
                 <SidebarContent />

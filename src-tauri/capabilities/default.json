@@ -30,7 +30,24 @@
         "os:allow-version",
         "core:webview:allow-internal-toggle-devtools",
         "process:default",
-        "process:allow-restart"
+        "process:allow-restart",
+        "clipboard-manager:default",
+        "clipboard-manager:allow-read-image",
+        "clipboard-manager:allow-read-text",
+        "clipboard-manager:allow-write-image",
+        "clipboard-manager:allow-write-text",
+        {
+            "identifier": "opener:allow-open-url",
+            "allow": [
+                {
+                    "url": "https://*/*"
+                },
+                {
+                    "url": "mutualzz://*/*"
+                }
+            ]
+        },
+        "deep-link:default"
     ],
     "platforms": ["linux", "macOS", "windows"],
     "windows": ["main"]

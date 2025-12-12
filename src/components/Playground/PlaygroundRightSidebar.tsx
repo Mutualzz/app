@@ -14,8 +14,8 @@ export const PlaygroundRightSidebar = ({ children }: PropsWithChildren) => {
         <Stack
             overflowY="auto"
             direction="column"
-            p={20}
-            spacing={5}
+            p={5}
+            spacing={1.25}
             minWidth="20%"
         >
             <Divider>Playground</Divider>
@@ -46,12 +46,10 @@ export const PlaygroundRightSidebar = ({ children }: PropsWithChildren) => {
                     display: isMobileQuery ? "none" : "flex",
                 }}
                 transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                css={{
-                    borderLeft: `1px solid ${theme.colors.primary}`,
-                    position: "relative",
-                    zIndex: 10,
-                }}
+                zIndex={10}
+                position="relative"
                 aria-hidden={isMobileQuery}
+                elevation={2}
             >
                 <SidebarContent />
             </AnimatedPaper>

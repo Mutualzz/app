@@ -5,6 +5,7 @@
             {
                 "center": true,
                 "decorations": true,
+                "dragDropEnabled": true,
                 "fullscreen": false,
                 "height": 768,
                 "label": "main",

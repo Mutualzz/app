@@ -1,14 +1,9 @@
-import { SpacesChannelList } from "@components/Spaces/SpacesChannelList";
-import { SpacesSidebar } from "@components/Spaces/SpacesSidebar";
+import { ChannelList } from "@components/Channel/ChannelList/ChannelList";
+import { SpacesSidebar } from "@components/Space/SpacesSidebar";
 import { UserBar } from "@components/User/UserBar";
 import { useAppStore } from "@hooks/useStores";
 import { Stack } from "@mutualzz/ui-web";
-import {
-    createFileRoute,
-    Outlet,
-    useNavigate,
-    useParams,
-} from "@tanstack/react-router";
+import { createFileRoute, Outlet, useNavigate } from "@tanstack/react-router";
 import { observer } from "mobx-react";
 import { useEffect } from "react";
 
@@ -20,38 +15,53 @@ function RouteComponent() {
     const app = useAppStore();
     const navigate = useNavigate();
 
-    const params = useParams({
-        from: "/_authenticated/spaces/$spaceId",
-        shouldThrow: false,
-    });
-
-    const noSpaceSelected = !params;
-
     useEffect(() => {
         app.setMode("spaces");
 
-        return () => {
-            app.resetMode();
-        };
+        return () => app.resetMode();
     }, []);
 
     useEffect(() => {
-        if (noSpaceSelected) {
-            app.spaces.setActive(app.spaces.mostRecentSpaceId);
-            if (app.spaces.activeId) {
-                navigate({
-                    to: `/spaces/${app.spaces.activeId}`,
-                });
-            }
-        }
-    }, [params]);
+        // const dispose = reaction(
+        //     () => ({
+        //         spaceId: app.spaces.activeId,
+        //         channelId: app.channels.activeId,
+        //     }),
+        //     ({ spaceId, channelId }) => {
+        //         console.log(spaceId, channelId);
+        //         if (spaceId && channelId) {
+        //             navigate({
+        //                 to: "/spaces/$spaceId/$channelId",
+        //                 params: {
+        //                     spaceId,
+        //                     channelId,
+        //                 },
+        //             });
+        //         }
+        //     },
+        // );
+        //
+        // return dispose;
+
+        const spaceId = app.spaces.activeId;
+        const channelId = app.channels.activeId;
+        if (!spaceId || !channelId) return;
+
+        navigate({
+            to: "/spaces/$spaceId/$channelId",
+            params: {
+                spaceId,
+                channelId,
+            },
+        });
+    }, [app.spaces.activeId, app.channels.activeId]);
 
     return (
         <Stack width="100%" height="100%" direction="row">
             <Stack maxWidth="20rem" width="100%" direction="column">
                 <Stack height="100%" direction="row">
                     <SpacesSidebar />
-                    <SpacesChannelList skeleton={noSpaceSelected} />
+                    <ChannelList />
                 </Stack>
                 <UserBar />
             </Stack>

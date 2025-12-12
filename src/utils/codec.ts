@@ -10,7 +10,7 @@ export interface Codec {
 }
 
 export async function createCodec(name: Encoding): Promise<Codec> {
-    if (name === "etf" && !isTauri)  {
+    if (name === "etf" && !isTauri) {
         return {
             name: "json",
             encode: (d) =>

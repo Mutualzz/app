@@ -29,12 +29,6 @@ interface CodeBlockProps extends PropsWithChildren {
     inline?: boolean;
 }
 
-/**
- * NOTE: Make sure to eventually change how codeblocks are parsed inside, so we can avoid hacky ways of removing certain characters
- *
- * check the file mentioned below
- * @file apps/app/src/components/Markdown/utils/micromark/marks/codeFenced.ts
- */
 export const CodeBlock = ({ children, className, inline }: CodeBlockProps) => {
     const { theme } = useTheme();
     const [tokens, setTokens] = useState<JSX.Element[] | null>(null);

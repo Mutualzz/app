@@ -1,3 +1,4 @@
+import { SpaceIcon } from "@components/Space/SpaceIcon.tsx";
 import { useAppStore } from "@hooks/useStores";
 import type { HttpException } from "@mutualzz/types";
 import {
@@ -36,7 +37,11 @@ const InputWithLabel = ({
     label: string;
     apiError?: string | null;
 }) => (
-    <Stack direction="column" spacing={{ xs: 2, sm: 3, md: 3.5 }} width="100%">
+    <Stack
+        direction="column"
+        spacing={{ xs: 0.5, sm: 0.75, md: 0.875 }}
+        width="100%"
+    >
         <Typography fontWeight={500} level={{ xs: "body-sm", sm: "body-md" }}>
             {label}{" "}
             {props.required && (
@@ -45,7 +50,13 @@ const InputWithLabel = ({
                 </Typography>
             )}
         </Typography>
-        <Input fullWidth size={{ xs: "md", sm: "lg", md: "lg" }} {...props} />
+        <Input
+            fullWidth
+            size={{ xs: "md", sm: "lg", md: "lg" }}
+            {...props}
+            autoComplete="off"
+            autoCapitalize="off"
+        />
         {apiError && (
             <Typography variant="plain" color="danger" level="body-sm">
                 {apiError}
@@ -71,7 +82,7 @@ function Login() {
                 requestBody.email = values.usernameOrEmail;
             else requestBody.username = values.usernameOrEmail;
 
-            return await app.rest.post<any, { token: string }>(
+            return app.rest.post<{ token: string }, any>(
                 "auth/login",
                 requestBody,
             );
@@ -98,6 +109,8 @@ function Login() {
         navigate({ to: "/", replace: true });
         return <></>;
     }
+
+    const space = app.joiningSpace;
 
     return (
         <Stack
@@ -134,17 +147,42 @@ function Login() {
                 initial={{ opacity: 0, y: -200 }}
                 animate={{ opacity: 1, y: 0 }}
             >
-                <Typography
-                    level={{ xs: "h5", sm: "h4", md: "h3" }}
-                    fontSize={{
-                        xs: "1.25rem",
-                        sm: "1.5rem",
-                        md: "1.75rem",
-                    }}
-                    textAlign="center"
-                >
-                    Login to an account
-                </Typography>
+                <Stack direction="column" spacing={1.5} width="100%">
+                    <Typography
+                        level={{ xs: "h5", sm: "h4", md: "h3" }}
+                        fontSize={{
+                            xs: "1.25rem",
+                            sm: "1.5rem",
+                            md: "1.75rem",
+                        }}
+                        textAlign="center"
+                    >
+                        Login to an account
+                    </Typography>
+                    {space && (
+                        <Stack
+                            direction="row"
+                            justifyContent="center"
+                            alignItems="center"
+                            spacing={3}
+                        >
+                            <Typography
+                                level="body-sm"
+                                color="primary"
+                                textAlign="center"
+                            >
+                                You are logging in to accept an invite to join a
+                                space:{" "}
+                            </Typography>
+                            <Stack alignItems="center" spacing={1}>
+                                <SpaceIcon size={36} space={space} />
+                                <Typography level="body-sm" textAlign="center">
+                                    {space.name}
+                                </Typography>
+                            </Stack>
+                        </Stack>
+                    )}
+                </Stack>
                 <form
                     css={{
                         width: "100%",
@@ -155,7 +193,7 @@ function Login() {
                         form.handleSubmit();
                     }}
                 >
-                    <Stack direction="column" spacing={12} width="100%">
+                    <Stack direction="column" spacing={3} width="100%">
                         <form.Field
                             name="usernameOrEmail"
                             children={(field) => (

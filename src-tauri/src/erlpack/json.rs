@@ -44,9 +44,7 @@ pub fn term_to_json(term: &Term) -> Value {
 
         Term::ByteList(ByteList { bytes }) => binary_like_to_json(bytes),
 
-        Term::List(List { elements }) => {
-            Value::Array(elements.iter().map(term_to_json).collect())
-        }
+        Term::List(List { elements }) => Value::Array(elements.iter().map(term_to_json).collect()),
 
         Term::ImproperList(ImproperList { elements, last }) => {
             let mut out: Vec<Value> = elements.iter().map(term_to_json).collect();
@@ -97,7 +95,11 @@ pub fn json_to_term(value: &Value) -> Term {
         }),
 
         Value::Bool(b) => Term::Binary(Binary {
-            bytes: if *b { b"true".to_vec() } else { b"false".to_vec() },
+            bytes: if *b {
+                b"true".to_vec()
+            } else {
+                b"false".to_vec()
+            },
         }),
 
         Value::Number(n) => {

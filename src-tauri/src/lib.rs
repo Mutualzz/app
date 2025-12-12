@@ -1,13 +1,13 @@
-mod gateway;
 mod erlpack;
+mod gateway;
 
+use crate::gateway::{decode_frame, encode_frame, Encoding};
 use serde_json::Value;
 use tauri::{Manager, RunEvent};
 #[cfg(desktop)]
 use tauri_plugin_autostart::MacosLauncher;
 use tauri_plugin_log::{Target, TargetKind, WEBVIEW_TARGET};
 use tauri_plugin_notification;
-use crate::gateway::{decode_frame, encode_frame, Encoding};
 
 #[tauri::command]
 async fn gateway_decode(payload: Vec<u8>, encoding: Encoding) -> Result<Value, String> {
@@ -29,7 +29,11 @@ pub fn run() {
     let context = tauri::generate_context!();
 
     let app = tauri::Builder::default()
+        .plugin(tauri_plugin_deep_link::init())
+        .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_clipboard_manager::init())
         .plugin(tauri_plugin_os::init())
+        .plugin(tauri_plugin_deep_link::init())
         .plugin(
             tauri_plugin_log::Builder::default()
                 .clear_targets()
@@ -90,8 +94,7 @@ pub fn run() {
 
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![ gateway_decode,
-            gateway_encode])
+        .invoke_handler(tauri::generate_handler![gateway_decode, gateway_encode])
         .build(context)
         .expect("error while running tauri application");
 

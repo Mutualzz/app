@@ -26,7 +26,7 @@ export const Leaf = ({ attributes, children, leaf }: RenderLeafProps) => {
 
     if (code)
         return (
-            <Paper {...attributes} display="inline" elevation={5} px={5}>
+            <Paper {...attributes} display="inline" elevation={5} px={1.25}>
                 <Typography
                     {...attributes}
                     fontWeight={bold ? "bold" : undefined}

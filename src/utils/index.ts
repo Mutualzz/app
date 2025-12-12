@@ -1,5 +1,6 @@
 import type { Theme as MzTheme } from "@emotion/react";
 import { useAppStore } from "@hooks/useStores";
+import type { Channel } from "@stores/objects/Channel";
 import type { Theme } from "@stores/objects/Theme";
 import { useNavigate } from "@tanstack/react-router";
 import { Image as TauriImage } from "@tauri-apps/api/image";
@@ -24,11 +25,15 @@ export function mergeAppendAnything(
     });
 }
 
-export const nameAcronym = (str: string) =>
+export const asAcronym = (str: string) =>
     str
         .split(" ")
         .map((str) => str[0])
         .join("");
+
+export const compareChannels = (a: Channel, b: Channel): number => {
+    return (a.position ?? -1) - (b.position ?? -1);
+};
 
 export const getIconType = (theme: MzTheme): string => {
     let iconUrl = "/icon.png";

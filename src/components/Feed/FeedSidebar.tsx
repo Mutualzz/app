@@ -29,7 +29,7 @@ export const FeedSidebar = () => {
         <Paper
             elevation={2}
             justifyContent="center"
-            p={20}
+            p={5}
             maxWidth="15rem"
             flex={1}
         >
@@ -37,7 +37,7 @@ export const FeedSidebar = () => {
                 orientation="vertical"
                 color="neutral"
                 variant="plain"
-                spacing={5}
+                spacing={1.25}
                 size="lg"
                 horizontalAlign="left"
             >

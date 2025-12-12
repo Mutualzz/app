@@ -13,26 +13,26 @@ function Privacy() {
             justifyContent="center"
             alignItems="center"
             direction="column"
-            py={{ xs: 16, sm: 32 }}
+            py={{ xs: 4, sm: 8 }}
         >
             <Paper
                 width="100%"
                 maxWidth="700px"
                 borderRadius={16}
                 boxShadow={2}
-                px={{ xs: 20, sm: 32 }} // 20px/32px horizontal padding
-                py={{ xs: 28, sm: 48 }} // 28px/48px vertical padding
+                px={{ xs: 5, sm: 8 }}
+                py={{ xs: 7, sm: 12 }}
                 overflow="auto"
                 direction="column"
             >
                 <Stack direction="column" spacing={0}>
-                    <Typography level="h3" mb={12}>
+                    <Typography level="h3" mb={3}>
                         Privacy Policy for Mutualzz
                     </Typography>
-                    <Typography level="body-lg" mb={20}>
+                    <Typography level="body-lg" mb={5}>
                         Effective Date: August 25, 2025
                     </Typography>
-                    <Typography mb={28}>
+                    <Typography mb={7}>
                         Mutualzz (“we,” “our,” or “us”) values your privacy and
                         is committed to protecting your personal information.
                         This Privacy Policy explains how we collect, use, and
@@ -45,20 +45,20 @@ function Privacy() {
                         title="1. Information We Collect"
                         mt={24}
                         content={
-                            <Stack direction="column" spacing={8}>
+                            <Stack direction="column" spacing={2}>
                                 <Typography>
                                     We collect information to provide, improve,
                                     and secure Mutualzz. The types of data we
                                     may collect include:
                                 </Typography>
-                                <Stack direction="column" pl={24} spacing={6}>
+                                <Stack direction="column" pl={6} spacing={1.5}>
                                     <Typography fontWeight="bold">
                                         a. Information You Provide
                                     </Typography>
                                     <Stack
                                         direction="column"
-                                        pl={16}
-                                        spacing={3}
+                                        pl={4}
+                                        spacing={0.75}
                                     >
                                         <Typography>
                                             • <b>Account Information:</b>{" "}
@@ -83,13 +83,13 @@ function Privacy() {
                                             options.
                                         </Typography>
                                     </Stack>
-                                    <Typography fontWeight="bold" mt={12}>
+                                    <Typography fontWeight="bold" mt={3}>
                                         b. Information Collected Automatically
                                     </Typography>
                                     <Stack
                                         direction="column"
-                                        pl={16}
-                                        spacing={3}
+                                        pl={4}
+                                        spacing={0.75}
                                     >
                                         <Typography>
                                             • <b>Usage Data:</b> Device info, IP
@@ -118,7 +118,7 @@ function Privacy() {
                     <Section
                         title="2. How We Use Your Information"
                         content={
-                            <Stack direction="column" pl={24} spacing={6}>
+                            <Stack direction="column" pl={6} spacing={1.5}>
                                 <Typography>
                                     • Providing and maintaining the Service.
                                 </Typography>
@@ -153,13 +153,13 @@ function Privacy() {
                     <Section
                         title="3. Sharing of Information"
                         content={
-                            <Stack direction="column" pl={24} spacing={12}>
+                            <Stack direction="column" pl={6} spacing={3}>
                                 <Typography>
                                     • <b>With Other Users:</b> Content you share
                                     is visible to others depending on the
                                     context:
                                 </Typography>
-                                <Stack direction="column" pl={24} spacing={6}>
+                                <Stack direction="column" pl={6} spacing={1.5}>
                                     <Typography>
                                         – In the Feed, your posts, media, and
                                         comments can be seen by other users.
@@ -198,7 +198,7 @@ function Privacy() {
                     <Section
                         title="4. User-Generated Content"
                         content={
-                            <Stack direction="column" pl={24} spacing={6}>
+                            <Stack direction="column" pl={6} spacing={1.5}>
                                 <Typography>
                                     • <b>Visibility:</b> Depending on your
                                     privacy settings, your content may be
@@ -230,7 +230,7 @@ function Privacy() {
                     <Section
                         title="5. Your Choices & Controls"
                         content={
-                            <Stack direction="column" pl={24} spacing={6}>
+                            <Stack direction="column" pl={6} spacing={1.5}>
                                 <Typography>
                                     • Account Settings: You can edit, update, or
                                     delete your information through your profile
@@ -355,7 +355,7 @@ function Section({
     title,
     content,
     mt,
-    my = 24,
+    my = 6,
 }: {
     title: string;
     content: React.ReactNode;

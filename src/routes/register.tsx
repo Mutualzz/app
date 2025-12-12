@@ -52,7 +52,11 @@ const InputWithLabel = ({
     label: string;
     apiErrors: ApiErrors;
 }) => (
-    <Stack direction="column" spacing={{ xs: 2, sm: 3, md: 4 }} width="100%">
+    <Stack
+        direction="column"
+        spacing={{ xs: 0.5, sm: 0.75, md: 1 }}
+        width="100%"
+    >
         <Typography fontWeight={500} level={{ xs: "body-sm", sm: "body-md" }}>
             {label}{" "}
             {props.required && (
@@ -61,7 +65,13 @@ const InputWithLabel = ({
                 </Typography>
             )}
         </Typography>
-        <Input fullWidth size={{ xs: "md", sm: "lg" }} {...props} />
+        <Input
+            fullWidth
+            size={{ xs: "md", sm: "lg" }}
+            {...props}
+            autoCapitalize="off"
+            autoComplete="off"
+        />
         {!field.state.meta.isValid && field.state.meta.isTouched && (
             <Typography variant="plain" color="danger" level="body-sm">
                 {field.state.meta.errors[0].message}
@@ -176,7 +186,7 @@ function Register() {
                         form.handleSubmit();
                     }}
                 >
-                    <Stack direction="column" spacing={12} width="100%">
+                    <Stack direction="column" spacing={3} width="100%">
                         <form.Field
                             name="email"
                             children={(field) => (

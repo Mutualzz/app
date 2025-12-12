@@ -1,5 +1,3 @@
-import createCache from "@emotion/cache";
-import { CacheProvider } from "@emotion/react";
 import "@fontsource/inter/100";
 import "@fontsource/inter/200";
 import "@fontsource/inter/300";
@@ -16,6 +14,9 @@ import "@fontsource/rubik/600";
 import "@fontsource/rubik/700";
 import "@fontsource/rubik/800";
 import "@fontsource/rubik/900";
+
+import createCache from "@emotion/cache";
+import { CacheProvider } from "@emotion/react";
 import { useAppStore } from "@hooks/useStores";
 import { Logger } from "@mutualzz/logger";
 import { GatewayCloseCodes } from "@mutualzz/types";
@@ -33,6 +34,10 @@ import {
 import { getTauriVersion, getVersion } from "@tauri-apps/api/app";
 import { arch, locale, platform, version } from "@tauri-apps/plugin-os";
 import { isTauri } from "@utils/index";
+import dayjs from "dayjs";
+import calendar from "dayjs/plugin/calendar";
+import duration from "dayjs/plugin/duration";
+import relativeTime from "dayjs/plugin/relativeTime";
 import { reaction } from "mobx";
 import { observer } from "mobx-react";
 import {
@@ -42,7 +47,9 @@ import {
     type ReactNode,
 } from "react";
 
+import { APIErrorListener } from "@components/APIErrorListener";
 import { DesktopShell } from "@components/Desktop/DesktopShell";
+import { InjectGlobal } from "@components/InjectGlobal";
 import Loader from "@components/Loader/Loader";
 import { ModeSwitcher } from "@components/ModeSwitcher";
 import { BottomNavigation } from "@components/Navigation/BottomNavigation";
@@ -50,6 +57,11 @@ import { TopNavigation } from "@components/Navigation/TopNavigation";
 import { AppTheme } from "@contexts/AppTheme.context";
 import { DesktopShellProvider } from "@contexts/DesktopShell.context";
 import { ModalProvider } from "@contexts/Modal.context";
+import { calendarStrings } from "@utils/i18n";
+
+dayjs.extend(relativeTime);
+dayjs.extend(calendar, calendarStrings);
+dayjs.extend(duration);
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     {
@@ -85,7 +97,9 @@ function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
                     width: "100vw",
                     overflow: "hidden",
                 }}
-                onContextMenu={(e) => e.preventDefault()}
+                onContextMenu={(e) =>
+                    import.meta.env.PROD && e.preventDefault()
+                }
             >
                 {children}
                 <Scripts />
@@ -104,6 +118,8 @@ function RootComponent() {
     const networkState = useNetworkState();
 
     useEffect(() => {
+        app.loadSettings();
+
         const dispose = reaction(
             () => app.token,
             (value) => {
@@ -160,8 +176,6 @@ function RootComponent() {
 
         if (isTauri) loadAsyncGlobals();
 
-        app.loadSettings();
-
         logger.debug("Loading complete");
 
         return dispose;
@@ -192,6 +206,8 @@ function RootComponent() {
                                     </Paper>
                                 )}
 
+                                <InjectGlobal />
+                                <APIErrorListener />
                                 <Loader>
                                     <Stack
                                         direction="column"
@@ -203,7 +219,7 @@ function RootComponent() {
                                             paddingTop: titlebarHeight,
                                         }}
                                     >
-                                        <TopNavigation />
+                                        {app.account && <TopNavigation />}
                                         <Stack
                                             width="100%"
                                             flex={1}
@@ -212,7 +228,7 @@ function RootComponent() {
                                         >
                                             <Outlet />
                                         </Stack>
-                                        <BottomNavigation />
+                                        {app.account && <BottomNavigation />}
                                         {app.account && <ModeSwitcher />}
                                     </Stack>
                                 </Loader>

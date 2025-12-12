@@ -40,6 +40,7 @@ export const AvatarUpload = observer(() => {
     const [error, setError] = useState<string | null>(null);
 
     const { mutate: updateAvatar, isPending: saving } = useMutation({
+        mutationKey: ["upload-avatar"],
         mutationFn: ({ avatar, crop }: UpdateAvatar) => {
             const formData = new FormData();
             formData.append("avatar", avatar);
@@ -131,11 +132,6 @@ export const AvatarUpload = observer(() => {
                 alignItems="center"
                 justifyContent="center"
             >
-                {error && (
-                    <Typography color="danger" variant="plain" mb="2rem">
-                        {error}
-                    </Typography>
-                )}
                 {imageFile ? (
                     <>
                         <Stack
@@ -175,9 +171,9 @@ export const AvatarUpload = observer(() => {
                         <Stack
                             direction="row"
                             alignItems="center"
-                            spacing={{ xs: 4, sm: 10, md: 15 }}
+                            spacing={{ xs: 1, sm: 2.5, md: 3.75 }}
                             width={{ xs: 180, sm: 220, md: 256 }}
-                            mt={{ xs: 4, sm: 8, md: 10 }}
+                            mt={{ xs: 1, sm: 2, md: 2.5 }}
                         >
                             <FaMagnifyingGlass />
                             <Slider
@@ -203,16 +199,27 @@ export const AvatarUpload = observer(() => {
                                 <FaRotate />
                             </IconButton>
                         </Stack>
+                        {error && (
+                            <Typography
+                                color="danger"
+                                variant="plain"
+                                mt="2rem"
+                            >
+                                {error}
+                            </Typography>
+                        )}
                     </>
                 ) : (
                     <FileUploader
                         types={["png", "gif", "webp", "jpeg", "jpg"]}
                         handleChange={onUpload}
+                        required
+                        disabled={saving}
                     >
                         <Stack
                             alignItems="center"
                             justifyContent="center"
-                            spacing={{ xs: 8, sm: 16, md: 25 }}
+                            spacing={{ xs: 2, sm: 4, md: 6.25 }}
                             direction="column"
                             css={{
                                 cursor: "pointer",

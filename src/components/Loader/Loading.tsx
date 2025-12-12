@@ -1,15 +1,8 @@
-import { CircularProgress, Stack, useTheme } from "@mutualzz/ui-web";
-import { useMediaQuery } from "@react-hookz/web";
+import { AnimatedLogo } from "@components/Animated/AnimatedLogo";
+import { Stack } from "@mutualzz/ui-web";
 import { observer } from "mobx-react";
-import { Logo } from "../Logo";
 
 const Loading = () => {
-    const { theme } = useTheme();
-
-    const isMobileQuery = useMediaQuery(
-        theme.breakpoints.down("sm").replace("@media", ""),
-    );
-
     return (
         <Stack
             direction="column"
@@ -17,20 +10,23 @@ const Loading = () => {
             height="100%"
             justifyContent="center"
         >
-            <CircularProgress
-                strokeWidth="lg"
-                color="primary"
-                size={{ xs: 120, sm: 180, md: 272 }}
-            >
-                <Logo
-                    css={{
-                        width: isMobileQuery ? 128 : 256,
-                        maxWidth: 256,
-                        minWidth: 64,
-                        height: "auto",
-                    }}
-                />
-            </CircularProgress>
+            <AnimatedLogo
+                css={{
+                    width: 256,
+                    maxWidth: 256,
+                    minWidth: 64,
+                    height: "auto",
+                }}
+                animate={{ opacity: [0.5, 1, 0.5] }}
+                transition={{
+                    opacity: {
+                        duration: 2.5,
+                        repeat: Infinity,
+                        repeatType: "loop",
+                        ease: "easeInOut",
+                    },
+                }}
+            />
         </Stack>
     );
 };

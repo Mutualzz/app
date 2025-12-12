@@ -1,23 +1,30 @@
-import { Paper, Typography } from "@mutualzz/ui-web";
+import { Link, Paper, Typography } from "@mutualzz/ui-web";
 import emojiRegexOrig from "emojibase-regex";
 import shortcodeRegexOrig from "emojibase-regex/shortcode";
+import parse, { domToReact } from "html-react-parser";
+import MarkdownIt from "markdown-it";
 import { useMemo } from "react";
 import { Blockquote } from "../components/Blockquote";
-import { CodeBlock } from "../components/CodeBlock";
 import { Emoji } from "../components/Emoji";
 import { Spoiler } from "../components/Spoiler";
-import { Markdown } from "./Markdown";
 import type { MarkdownRendererProps } from "./MarkdownRenderer.types";
+import { emojiPlugin } from "./plugins/emoji";
+import { emphasisPlugin } from "./plugins/emphasis";
+import { spoilerPlugin } from "./plugins/spoiler";
+import { strikethroughPlugin } from "./plugins/strikethrough";
+import { underlinePlugin } from "./plugins/underline";
 
 const shortcodeRegex = new RegExp(shortcodeRegexOrig.source, "g");
 const emojiRegex = new RegExp(emojiRegexOrig.source, "gu");
 
+// TODO: add code blocks inthe future
 export const MarkdownRenderer = ({
     color = "neutral",
     textColor = "primary",
     variant = "outlined",
     enlargeEmojiOnly = true,
     value,
+    ...props
 }: MarkdownRendererProps) => {
     const isEmojiOnly = useMemo(() => {
         if (!value || !enlargeEmojiOnly) return false;
@@ -29,6 +36,171 @@ export const MarkdownRenderer = ({
         return textWithoutEmojis.trim().length === 0 && value.trim().length > 0;
     }, [value, enlargeEmojiOnly]);
 
+    const md = useMemo(() => {
+        const instance = new MarkdownIt("default", {
+            html: false,
+            linkify: true,
+            typographer: true,
+            breaks: true,
+        });
+
+        instance.linkify.set({
+            fuzzyLink: false,
+        });
+
+        instance.disable("emphasis");
+        instance.disable("table");
+        instance.disable("hr");
+        instance.disable("escape");
+
+        instance.use(emojiPlugin);
+        instance.use(strikethroughPlugin);
+        instance.use(emphasisPlugin);
+        instance.use(underlinePlugin);
+        instance.use(spoilerPlugin);
+
+        return instance;
+    }, []);
+
+    const html = useMemo(() => md.render(value || ""), [md, value]);
+
+    const content = useMemo(
+        () =>
+            parse(html, {
+                replace: (domNode) => {
+                    if (
+                        domNode.type === "tag" &&
+                        domNode.name === "span" &&
+                        domNode.attribs?.class === "emoji"
+                    ) {
+                        const {
+                            ["data-name"]: name,
+                            ["data-url"]: url,
+                            ["data-unicode"]: unicode,
+                        } = domNode.attribs;
+
+                        return (
+                            <Emoji
+                                isEmojiOnly={isEmojiOnly}
+                                url={url}
+                                unicode={unicode}
+                                name={name}
+                            />
+                        );
+                    }
+
+                    if (domNode.type === "tag") {
+                        switch (domNode.name) {
+                            case "h1": {
+                                return (
+                                    <Typography
+                                        level="h3"
+                                        fontWeight="bold"
+                                        display="block"
+                                    >
+                                        {domToReact(domNode.children as any)}
+                                    </Typography>
+                                );
+                            }
+                            case "h2": {
+                                return (
+                                    <Typography
+                                        level="h4"
+                                        fontWeight="bold"
+                                        display="block"
+                                    >
+                                        {domToReact(domNode.children as any)}
+                                    </Typography>
+                                );
+                            }
+                            case "h3": {
+                                return (
+                                    <Typography
+                                        level="h5"
+                                        fontWeight="bold"
+                                        display="block"
+                                    >
+                                        {domToReact(domNode.children as any)}
+                                    </Typography>
+                                );
+                            }
+                            case "blockquote": {
+                                return (
+                                    <Blockquote>
+                                        {domToReact(domNode.children as any)}
+                                    </Blockquote>
+                                );
+                            }
+                            case "strong": {
+                                return (
+                                    <Typography
+                                        whiteSpace="pre-wrap"
+                                        fontSize="inherit"
+                                        fontWeight="bold"
+                                    >
+                                        {domToReact(domNode.children as any)}
+                                    </Typography>
+                                );
+                            }
+                            case "em": {
+                                return (
+                                    <Typography
+                                        whiteSpace="pre-wrap"
+                                        fontSize="inherit"
+                                        fontStyle="italic"
+                                    >
+                                        {domToReact(domNode.children as any)}
+                                    </Typography>
+                                );
+                            }
+                            case "del": {
+                                return (
+                                    <Typography
+                                        fontSize="inherit"
+                                        textDecoration="line-through"
+                                    >
+                                        {domToReact(domNode.children as any)}
+                                    </Typography>
+                                );
+                            }
+                            case "u": {
+                                return (
+                                    <Typography
+                                        whiteSpace="pre-wrap"
+                                        fontSize="inherit"
+                                        textDecoration="underline"
+                                    >
+                                        {domToReact(domNode.children as any)}
+                                    </Typography>
+                                );
+                            }
+                            case "spoiler": {
+                                return (
+                                    <Spoiler>
+                                        {domToReact(domNode.children as any)}
+                                    </Spoiler>
+                                );
+                            }
+                            case "a": {
+                                const { href } = domNode.attribs;
+                                return (
+                                    <Link
+                                        href={href}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        textColor="muted"
+                                    >
+                                        {domToReact(domNode.children as any)}
+                                    </Link>
+                                );
+                            }
+                        }
+                    }
+                },
+            }),
+        [html, isEmojiOnly],
+    );
+
     return (
         <Paper
             color={color as string}
@@ -36,119 +208,10 @@ export const MarkdownRenderer = ({
             variant={variant}
             display="block"
             height="100%"
-            p={12}
-            mt={10}
             overflowY="auto"
+            {...props}
         >
-            <Markdown
-                components={{
-                    h1: ({ children }) => (
-                        <Typography
-                            level="h3"
-                            fontWeight="bold"
-                            display="block"
-                        >
-                            {children}
-                        </Typography>
-                    ),
-
-                    h2: ({ children }) => (
-                        <Typography
-                            level="h4"
-                            fontWeight="bold"
-                            display="block"
-                        >
-                            {children}
-                        </Typography>
-                    ),
-
-                    h3: ({ children }) => (
-                        <Typography
-                            level="h5"
-                            fontWeight="bold"
-                            display="block"
-                        >
-                            {children}
-                        </Typography>
-                    ),
-
-                    p: ({ children }) => (
-                        <Typography
-                            whiteSpace="break-spaces"
-                            fontSize="inherit"
-                            display="inline"
-                        >
-                            {children}
-                        </Typography>
-                    ),
-
-                    blockquote: ({ children }) => (
-                        <Blockquote>{children}</Blockquote>
-                    ),
-
-                    strong: ({ children }) => (
-                        <Typography
-                            whiteSpace="pre-wrap"
-                            fontSize="inherit"
-                            fontWeight="bold"
-                        >
-                            {children}
-                        </Typography>
-                    ),
-
-                    em: ({ children }) => (
-                        <Typography
-                            whiteSpace="pre-wrap"
-                            fontSize="inherit"
-                            fontStyle="italic"
-                        >
-                            {children}
-                        </Typography>
-                    ),
-
-                    del: ({ children }) => (
-                        <Typography
-                            fontSize="inherit"
-                            textDecoration="line-through"
-                        >
-                            {children}
-                        </Typography>
-                    ),
-
-                    u: ({ children }) => (
-                        <Typography
-                            whiteSpace="pre-wrap"
-                            fontSize="inherit"
-                            textDecoration="underline"
-                        >
-                            {children}
-                        </Typography>
-                    ),
-
-                    emoji: ({ name, url, unicode }) => (
-                        <Emoji
-                            isEmojiOnly={isEmojiOnly}
-                            url={url}
-                            unicode={unicode}
-                            name={name}
-                        />
-                    ),
-
-                    spoiler: ({ children }) => <Spoiler>{children}</Spoiler>,
-
-                    blockCode: ({ children, className }) => (
-                        <CodeBlock className={className}>{children}</CodeBlock>
-                    ),
-
-                    inlineCode: ({ children, className }) => (
-                        <CodeBlock className={className} inline>
-                            {children}
-                        </CodeBlock>
-                    ),
-                }}
-            >
-                {value}
-            </Markdown>
+            {content}
         </Paper>
     );
 };

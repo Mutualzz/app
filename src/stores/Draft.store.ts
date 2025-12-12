@@ -1,22 +1,28 @@
 import type { ThemeDraft } from "@app-types/theme";
 import { Logger } from "@mutualzz/logger";
-import { isSSR } from "@utils/index";
 import { safeLocalStorage } from "@utils/safeLocalStorage";
-import { makeAutoObservable } from "mobx";
+import { makeAutoObservable, observable, type IObservableArray } from "mobx";
 import { makePersistable } from "mobx-persist-store";
 import { type CanvasPath } from "react-sketch-canvas";
+
+type AvatarDraft = {
+    image: string;
+    paths: CanvasPath[];
+};
 
 export class DraftStore {
     private readonly logger = new Logger({
         tag: "DraftStore",
     });
-    themes: ThemeDraft[] = [];
-    avatars: { image: string; paths: CanvasPath[] }[] = [];
+
+    themes: IObservableArray<ThemeDraft>;
+    avatars: IObservableArray<AvatarDraft>;
 
     constructor() {
         makeAutoObservable(this);
 
-        if (isSSR) return;
+        this.themes = observable.array([]);
+        this.avatars = observable.array([]);
 
         makePersistable(this, {
             name: "DraftStore",
@@ -26,7 +32,6 @@ export class DraftStore {
     }
 
     saveAvatarDraft(image: string, paths: CanvasPath[]) {
-        if (isSSR) return;
         if (this.avatars.some((avatar) => avatar.paths === paths)) {
             this.logger.warn("Avatar draft already exists");
             return;
@@ -36,7 +41,6 @@ export class DraftStore {
     }
 
     deleteAvatarDraft(index: number) {
-        if (isSSR) return;
         if (!this.avatars[index]) {
             this.logger.warn("Avatar draft does not exist");
             return;
@@ -46,14 +50,16 @@ export class DraftStore {
     }
 
     saveThemeDraft(theme: ThemeDraft) {
-        if (isSSR) return;
-
         this.themes.unshift(theme);
     }
 
     deleteThemeDraft(theme: ThemeDraft) {
-        if (isSSR) return;
+        const index = this.themes.findIndex((t) => t.name === theme.name);
+        if (index === -1) {
+            this.logger.warn("Theme draft does not exist");
+            return;
+        }
 
-        this.themes = this.themes.filter((t) => t.name !== theme.name);
+        this.themes.splice(index, 1);
     }
 }

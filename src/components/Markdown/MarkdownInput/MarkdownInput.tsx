@@ -1,5 +1,5 @@
 import { resolveResponsiveMerge } from "@mutualzz/ui-core";
-import { useTheme } from "@mutualzz/ui-web";
+import { Typography, useTheme } from "@mutualzz/ui-web";
 import { markdownToSlate } from "@utils/markdownToSlate";
 import { getActiveFormats } from "@utils/markdownUtils";
 import { slateToMarkdown } from "@utils/slateToMarkdown";
@@ -54,8 +54,8 @@ const MarkdownInput = forwardRef<HTMLDivElement, MarkdownInputProps>(
             hoverToolbar = true,
 
             onChange,
+            onKeyDown: onKeyDownProp,
             placeholder,
-            onEnter,
             value,
 
             css,
@@ -79,6 +79,10 @@ const MarkdownInput = forwardRef<HTMLDivElement, MarkdownInputProps>(
         useEffect(() => {
             editor.enableEmoticons = emoticons;
         }, [editor, emoticons]);
+
+        useEffect(() => {
+            setEditorValue(markdownToSlate(value ?? ""));
+        }, [value]);
 
         const renderElement = useCallback(
             (props: RenderElementProps) => <Element {...props} />,
@@ -179,18 +183,6 @@ const MarkdownInput = forwardRef<HTMLDivElement, MarkdownInputProps>(
 
                 if (e.key === "Enter" && e.shiftKey) handleShiftEnter(e);
 
-                if (e.key === "Enter" && !e.shiftKey) {
-                    e.preventDefault();
-                    if (onEnter) {
-                        editor.select({
-                            anchor: editor.start([]),
-                            focus: editor.end([]),
-                        });
-                        editor.delete();
-                        onEnter();
-                    }
-                }
-
                 const { selection } = editor;
 
                 if (selection && Range.isCollapsed(selection)) {
@@ -210,15 +202,16 @@ const MarkdownInput = forwardRef<HTMLDivElement, MarkdownInputProps>(
                         });
                     }
                 }
+                onKeyDownProp?.(e, editor);
             },
-            [editor, onEnter, handleShiftEnter, formats],
+            [editor, handleShiftEnter, formats, onKeyDownProp],
         );
 
         const handleChange = useCallback(
             (newValue: Descendant[]) => {
                 if (onChange) {
                     const markdown = slateToMarkdown(newValue);
-                    onChange(markdown);
+                    onChange(markdown, editor);
                 }
             },
             [editor, onChange],
@@ -253,25 +246,26 @@ const MarkdownInput = forwardRef<HTMLDivElement, MarkdownInputProps>(
                             children,
                             attributes: { style, ref, ...attributes },
                         }) => (
-                            <span
+                            <Typography
                                 ref={ref ? (ref as any) : undefined}
                                 {...attributes}
+                                lineHeight={1}
+                                position="absolute"
+                                top={2.7}
+                                left={2}
+                                textColor="muted"
+                                overflow="hidden"
+                                textOverflow="ellipsis"
+                                whiteSpace="nowrap"
                                 css={{
                                     pointerEvents: "none",
                                     userSelect: "none",
-                                    lineHeight: 1,
-                                    opacity: 0.3,
-                                    display: "block",
-                                    position: "absolute",
-                                    top: "0.5em",
-                                    left: "0.5em",
-                                    overflow: "hidden",
-                                    textOverflow: "ellipsis",
-                                    whiteSpace: "nowrap",
+                                    opacity: 0.75,
+                                    verticalAlign: "middle",
                                 }}
                             >
                                 {children}
-                            </span>
+                            </Typography>
                         )}
                         css={{
                             display: "block",

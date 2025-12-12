@@ -1,44 +1,61 @@
-import { SettingsModal } from "@components/Settings/SettingsModal";
+import { TooltipWrapper } from "@components/TooltipWrapper";
 import { UserAvatar } from "@components/User/UserAvatar";
+import { UserSettingsModal } from "@components/UserSettings/UserSettingsModal";
 import { useModal } from "@contexts/Modal.context";
 import { useAppStore } from "@hooks/useStores";
 import {
     IconButton,
     Paper,
+    type PaperProps,
     Stack,
     Tooltip,
     Typography,
 } from "@mutualzz/ui-web";
 import { observer } from "mobx-react";
+import { useMemo } from "react";
 import { FaCogs, FaPalette } from "react-icons/fa";
 import { MdLogout } from "react-icons/md";
 
 export const UserBar = observer(() => {
     const app = useAppStore();
     const { openModal } = useModal();
+    const conditionalProps = useMemo<Omit<PaperProps, "color">>(() => {
+        if (app.spaces.activeId)
+            return {
+                minWidth: "12rem",
+                maxWidth: "20rem",
+                direction: "row",
+            };
+
+        return {
+            maxWidth: "5rem",
+            minWidth: "5rem",
+            minHeight: "14rem",
+            maxHeight: "20rem",
+            direction: "column",
+        };
+    }, [app.spaces.activeId]);
 
     if (!app.account) return <></>;
 
     return (
         <Paper
-            elevation={3}
-            minWidth="12rem"
             justifyContent="space-between"
             alignItems="center"
-            direction="row"
-            maxWidth="20rem"
-            p={10}
+            p={2.5}
+            elevation={4}
+            {...conditionalProps}
         >
             <Stack
-                direction="row"
+                direction={app.spaces.activeId ? "row" : "column"}
                 justifyContent="center"
                 alignItems="center"
-                spacing={10}
+                spacing={2.5}
             >
                 <UserAvatar user={app.account} size="lg" />
                 <Stack direction="column">
                     <Typography level="body-sm">
-                        {app.account.globalName ?? app.account.username}
+                        {app.account.displayName}
                     </Typography>
                     {app.account.globalName && (
                         <Typography level="body-xs" textColor="muted">
@@ -50,11 +67,13 @@ export const UserBar = observer(() => {
             <Stack
                 justifyContent="center"
                 alignItems="center"
-                direction="row"
-                spacing={5}
+                direction={app.spaces.activeId ? "row" : "column"}
+                spacing={1.25}
             >
                 <Stack direction="row">
-                    <Tooltip title="Choose theme">
+                    <Tooltip
+                        title={<TooltipWrapper>Appearance</TooltipWrapper>}
+                    >
                         <IconButton
                             size="sm"
                             color="neutral"
@@ -62,10 +81,7 @@ export const UserBar = observer(() => {
                             onClick={() =>
                                 openModal(
                                     "theme-picker",
-                                    <SettingsModal redirectTo="appearance" />,
-                                    {
-                                        height: "75vh",
-                                    },
+                                    <UserSettingsModal redirectTo="appearance" />,
                                 )
                             }
                         >
@@ -74,13 +90,17 @@ export const UserBar = observer(() => {
                     </Tooltip>
                 </Stack>
                 <Stack direction="column">
-                    <Tooltip placement="right" title="User Settings">
+                    <Tooltip
+                        placement="right"
+                        title={<TooltipWrapper>Settings</TooltipWrapper>}
+                    >
                         <IconButton
                             size="sm"
                             onClick={() =>
-                                openModal("user-settings", <SettingsModal />, {
-                                    height: "75vh",
-                                })
+                                openModal(
+                                    "user-settings",
+                                    <UserSettingsModal />,
+                                )
                             }
                             color="neutral"
                             variant="plain"
@@ -88,7 +108,10 @@ export const UserBar = observer(() => {
                             <FaCogs />
                         </IconButton>
                     </Tooltip>
-                    <Tooltip placement="right" title="Logout">
+                    <Tooltip
+                        placement="right"
+                        title={<TooltipWrapper>Log out</TooltipWrapper>}
+                    >
                         <IconButton
                             size="sm"
                             onClick={() => {

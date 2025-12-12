@@ -1,5 +1,6 @@
 import { AnimatedLogo } from "@components/Animated/AnimatedLogo";
 import { DownloadButton } from "@components/DownloadButton";
+import { TooltipWrapper } from "@components/TooltipWrapper";
 import { useAppStore } from "@hooks/useStores";
 import { Box, Button, Paper, Stack, Tooltip, useTheme } from "@mutualzz/ui-web";
 import { useMediaQuery } from "@react-hookz/web";
@@ -32,24 +33,28 @@ export const TopNavigation = observer(() => {
             zIndex={theme.zIndex.appBar}
             position="sticky"
             top={0}
-            pt="0.5rem"
+            boxShadow="none"
             css={{
                 userSelect: "none",
             }}
-            style={{
-                boxShadow: "none",
-            }}
         >
             <Stack
-                spacing={20}
+                spacing={4}
                 direction="row"
                 height="100%"
                 alignItems="center"
-                pl={16.15}
+                pl={4.0375}
             >
                 <Box>
                     <Tooltip
-                        title={`Switch to ${capitalize(app.settings?.preferredMode ?? "Spaces")}`}
+                        title={
+                            <TooltipWrapper>
+                                Switch to{" "}
+                                {capitalize(
+                                    app.settings?.preferredMode ?? "Spaces",
+                                )}
+                            </TooltipWrapper>
+                        }
                         placement="right"
                     >
                         <AnimatedLogo
@@ -72,7 +77,7 @@ export const TopNavigation = observer(() => {
                 </Box>
 
                 {app.mode && (
-                    <Stack spacing={5} width="100%" direction="row">
+                    <Stack spacing={1.25} width="100%" direction="row">
                         {app.mode === "feed" ? <ImFeed /> : <GiGalaxy />}
                         {app.mode === "feed" ? "Feed" : "Spaces"}
                     </Stack>
@@ -84,11 +89,15 @@ export const TopNavigation = observer(() => {
                 justifyContent="flex-end"
                 alignItems="center"
                 direction="row"
-                spacing={{ xs: 2, sm: 6, md: 10 }}
-                pr={16.15}
+                spacing={{ xs: 0.5, sm: 1.5, md: 2.5 }}
             >
                 {!app.account && (
-                    <Stack direction="row" spacing={5} alignItems="center">
+                    <Stack
+                        direction="row"
+                        pr={2.5}
+                        spacing={1.5}
+                        alignItems="center"
+                    >
                         <Button
                             startDecorator={<FaClipboard />}
                             onClick={() => navigate({ to: "/privacy" })}

@@ -31,12 +31,8 @@ export const BottomNavigation = observer(() => {
             bottom={0}
             zIndex={100}
             css={{
-                borderTopLeftRadius: 16,
-                borderTopRightRadius: 16,
                 userSelect: "none",
                 position: "sticky",
-                bottom: 0,
-                zIndex: 100,
                 backgroundClip: "padding-box",
             }}
         >

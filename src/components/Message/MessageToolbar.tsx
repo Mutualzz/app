@@ -1,0 +1,66 @@
+import { TooltipWrapper } from "@components/TooltipWrapper";
+import { useAppStore } from "@hooks/useStores";
+import { ButtonGroup, IconButton, Paper, Tooltip } from "@mutualzz/ui-web";
+import type { Message } from "@stores/objects/Message";
+import { useMutation } from "@tanstack/react-query";
+import { observer } from "mobx-react";
+import type { PropsWithChildren } from "react";
+import { FaTrash } from "react-icons/fa";
+
+interface Props extends PropsWithChildren {
+    message: Message;
+    header?: boolean;
+}
+
+const ToolbarContent = ({ message }: Props) => {
+    const app = useAppStore();
+
+    const { mutate: deleteMessage } = useMutation({
+        mutationKey: ["delete-message", message.id],
+        mutationFn: () => message.delete(),
+    });
+
+    return (
+        <Paper
+            onMouseEnter={() => app.setHideSwitcher(true)}
+            onMouseLeave={() => app.setHideSwitcher(false)}
+            p={2}
+            borderRadius={10}
+            elevation={0}
+        >
+            <ButtonGroup color="neutral" size="sm" variant="plain">
+                {message.author?.id === app.account?.id && (
+                    <Tooltip
+                        offset={16}
+                        content={<TooltipWrapper>Delete</TooltipWrapper>}
+                    >
+                        <IconButton
+                            color="danger"
+                            onClick={() => deleteMessage()}
+                        >
+                            <FaTrash />
+                        </IconButton>
+                    </Tooltip>
+                )}
+            </ButtonGroup>
+        </Paper>
+    );
+};
+
+export const MessageToolbar = observer(
+    ({ message, header, children }: Props) => {
+        return (
+            <Tooltip
+                placement="right-start"
+                content={<ToolbarContent message={message} />}
+                shift={{
+                    padding: 30,
+                    crossAxis: true,
+                }}
+                offset={{ crossAxis: header ? -10 : -20 }}
+            >
+                {children}
+            </Tooltip>
+        );
+    },
+);

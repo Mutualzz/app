@@ -1,11 +1,15 @@
+import { Logger } from "@mutualzz/logger";
+import type { APIMessage, GatewayReadyPayload } from "@mutualzz/types";
 import {
     GatewayCloseCodes,
     GatewayDispatchEvents,
     GatewayOpcodes,
+    type APIChannel,
+    type APIInvite,
     type APIPrivateUser,
     type APISpace,
     type APIUser,
-    type GatewayReadyDispatchPayload,
+    type APIUserSettings,
 } from "@mutualzz/types";
 import { invoke } from "@tauri-apps/api/core";
 import { createCodec, type Codec, type Encoding } from "@utils/codec";
@@ -16,7 +20,6 @@ import {
 } from "@utils/compressor";
 import { isTauri } from "@utils/index";
 import { makeAutoObservable } from "mobx";
-import { Logger } from "../Logger";
 import type { AppStore } from "./App.store";
 
 // We have to create our own GatewayStatus "enum" to avoid issues with SSR
@@ -50,7 +53,7 @@ export class GatewayStore {
     private url?: string;
 
     private encoding: Encoding = isTauri ? "etf" : "json";
-    private compress: Compression = "zlib-stream";
+    private compress: Compression = "none";
 
     private codec!: Codec;
     private compressor!: Compressor;
@@ -67,6 +70,8 @@ export class GatewayStore {
         string,
         (...args: any[]) => any
     >();
+
+    private lazyRequestChannels = new Map<string, string[]>(); // spaceId -> channelIds
 
     constructor(private readonly app: AppStore) {
         makeAutoObservable(this);
@@ -120,17 +125,88 @@ export class GatewayStore {
     }
 
     private setupDispatchHandlers() {
+        // Connection
         this.dispatchHandlers.set(GatewayDispatchEvents.Ready, this.onReady);
         this.dispatchHandlers.set(GatewayDispatchEvents.Resume, this.onResume);
 
+        // User
         this.dispatchHandlers.set(
             GatewayDispatchEvents.UserUpdate,
             this.onUserUpdate,
         );
-
         this.dispatchHandlers.set(
-            GatewayDispatchEvents.SpaceAdded,
-            this.onSpaceAdded,
+            GatewayDispatchEvents.UserSettingsUpdate,
+            this.onUserSettingsUpdate,
+        );
+
+        // Spaces
+        this.dispatchHandlers.set(
+            GatewayDispatchEvents.SpaceCreate,
+            this.onSpaceCreate,
+        );
+        this.dispatchHandlers.set(
+            GatewayDispatchEvents.SpaceDelete,
+            this.onSpaceDelete,
+        );
+
+        // Channels
+        this.dispatchHandlers.set(
+            GatewayDispatchEvents.ChannelCreate,
+            this.onChannelCreate,
+        );
+        this.dispatchHandlers.set(
+            GatewayDispatchEvents.ChannelUpdate,
+            this.onChannelUpdate,
+        );
+        this.dispatchHandlers.set(
+            GatewayDispatchEvents.BulkChannelUpdate,
+            this.onBulkChannelUpdate,
+        );
+        this.dispatchHandlers.set(
+            GatewayDispatchEvents.BulkChannelDelete,
+            this.onBulkChannelDelete,
+        );
+        this.dispatchHandlers.set(
+            GatewayDispatchEvents.ChannelDelete,
+            this.onChannelDelete,
+        );
+
+        // Messages
+        this.dispatchHandlers.set(
+            GatewayDispatchEvents.MessageCreate,
+            this.onMessageCreate,
+        );
+        this.dispatchHandlers.set(
+            GatewayDispatchEvents.MessageDelete,
+            this.onMessageDelete,
+        );
+
+        // Invites
+        this.dispatchHandlers.set(
+            GatewayDispatchEvents.InviteCreate,
+            this.onInviteCreate,
+        );
+        this.dispatchHandlers.set(
+            GatewayDispatchEvents.InviteDelete,
+            this.onInviteDelete,
+        );
+        this.dispatchHandlers.set(
+            GatewayDispatchEvents.InviteUpdate,
+            this.onInviteUpdate,
+        );
+
+        // Members
+        this.dispatchHandlers.set(
+            GatewayDispatchEvents.SpaceMemberAdd,
+            this.onSpaceMemberAdd,
+        );
+        this.dispatchHandlers.set(
+            GatewayDispatchEvents.SpaceMemberRemove,
+            this.onSpaceMemberRemove,
+        );
+        this.dispatchHandlers.set(
+            GatewayDispatchEvents.SpaceMemberListUpdate,
+            this.onSpaceMemberListUpdate,
         );
     }
 
@@ -169,12 +245,13 @@ export class GatewayStore {
             if (this.compress !== "none")
                 bytes = this.compressor.decompress(bytes);
 
-            const data = isTauri
-                ? await invoke("gateway_decode", {
-                      payload: Array.from(bytes),
-                      encoding: this.encoding,
-                  })
-                : this.codec.decode(bytes);
+            const data =
+                this.encoding === "etf"
+                    ? await invoke("gateway_decode", {
+                          payload: Array.from(bytes),
+                          encoding: this.encoding,
+                      })
+                    : this.codec.decode(bytes);
 
             this.handlePayload(data);
         } catch (err) {
@@ -233,12 +310,13 @@ export class GatewayStore {
             return;
         }
 
-        const raw: any = isTauri
-            ? await invoke("gateway_encode", {
-                  payload,
-                  encoding: this.encoding,
-              })
-            : this.codec.encode(payload);
+        const raw: any =
+            this.encoding === "etf"
+                ? await invoke("gateway_encode", {
+                      payload,
+                      encoding: this.encoding,
+                  })
+                : this.codec.encode(payload);
 
         const out =
             this.compress !== "none"
@@ -295,6 +373,8 @@ export class GatewayStore {
     private handleResume() {
         if (!this.app.token || !this.sessionId) {
             this.logger.error("Cannot resume, token or sessionId is not set");
+            this.reset();
+            this.app.logout();
             return;
         }
 
@@ -424,6 +504,7 @@ export class GatewayStore {
         const { d, t, s } = data;
         this.logger.debug(`[Gateway] -> ${t}`);
         this.sequence = s;
+
         const handler = this.dispatchHandlers.get(t);
         if (!handler) {
             this.logger.debug(`No handler for dispatch event ${t}`);
@@ -437,9 +518,9 @@ export class GatewayStore {
         this.logger.debug("[Resume] Session");
     };
 
-    private onReady = (payload: GatewayReadyDispatchPayload) => {
+    private onReady = (payload: GatewayReadyPayload) => {
         this.logger.info(
-            `[Ready] took ${Date.now() - this.identifyStartTime!}ms`,
+            `[Ready] took ${Date.now() - (this.identifyStartTime ?? 0)}ms`,
         );
 
         const { sessionId, user, themes, spaces, settings } = payload;
@@ -453,11 +534,118 @@ export class GatewayStore {
 
         this.reconnectTimeout = 0;
         this.app.setGatewayReady(true);
+
+        const space =
+            this.app.spaces.mostRecentSpace || this.app.spaces.positioned[0];
+        if (space) {
+            this.app.spaces.setActive(space.id);
+        }
+        this.app.channels.setPreferredActive();
     };
 
-    private onSpaceAdded = (payload: APISpace) => {
-        this.app.spaces.add(payload);
-        this.app.settings?.addPoistion(payload.id);
+    onChannelOpen = (spaceId: string, channelId: string) => {
+        const spaceChannels = this.lazyRequestChannels.get(spaceId) || [];
+
+        if (spaceChannels.includes(channelId)) return;
+
+        const payload = {
+            spaceId,
+            channels: {
+                [channelId]: [[0, 99]],
+            },
+        };
+        this.lazyRequestChannels.set(spaceId, [channelId]);
+
+        this.send({
+            op: GatewayOpcodes.LazyRequest,
+            d: payload,
+        });
+    };
+
+    // Dispatcher Handlers start here
+    private onSpaceCreate = (payload: APISpace) => {
+        const space = this.app.spaces.add(payload);
+        space.members.addAll(payload.members ?? []);
+        for (const channel of payload.channels ?? []) {
+            space.addChannel(channel);
+        }
+
+        this.app.spaces.setActive(space.id);
+        this.app.channels.setPreferredActive();
+    };
+
+    private onSpaceDelete = async (payload: APISpace) => {
+        const space = await this.app.spaces.resolve(payload.id);
+        if (!space) return;
+
+        space.channels.forEach((channel) => {
+            channel.messages.clear();
+            space.removeChannel(channel.id);
+        });
+
+        this.app.spaces.remove(payload.id);
+        this.app.spaces.setActive(this.app.spaces.positioned[0]?.id);
+    };
+
+    private onChannelCreate = async (payload: APIChannel) => {
+        if (!payload.spaceId) return;
+        const space = await this.app.spaces.resolve(payload.spaceId);
+        if (!space) return;
+
+        const channel = space.addChannel(payload);
+        this.app.channels.setActive(channel.id);
+    };
+
+    private onChannelUpdate = async (payload: APIChannel) => {
+        if (!payload.spaceId) return;
+        const space = await this.app.spaces.resolve(payload.spaceId);
+        if (!space) return;
+
+        space.updateChannel(payload);
+    };
+
+    private onBulkChannelUpdate = async (payload: APIChannel[]) => {
+        for (const channel of payload) {
+            if (!channel.spaceId) continue;
+            const space = await this.app.spaces.resolve(channel.spaceId);
+            if (!space) continue;
+            space.updateChannel(channel);
+        }
+    };
+
+    private onChannelDelete = async (payload: APIChannel) => {
+        if (!payload.spaceId) return;
+        const space = await this.app.spaces.resolve(payload.spaceId);
+        if (!space) return;
+
+        space.removeChannel(payload.id);
+        this.app.channels.setPreferredActive();
+    };
+
+    private onBulkChannelDelete = async (payload: APIChannel[]) => {
+        for (const channel of payload) {
+            if (!channel.spaceId) continue;
+            const space = await this.app.spaces.resolve(channel.spaceId);
+            if (!space) continue;
+            space.removeChannel(channel.id);
+        }
+
+        this.app.channels.setPreferredActive();
+    };
+
+    private onMessageCreate = async (payload: APIMessage) => {
+        const channel = await this.app.channels.resolve(payload.channelId);
+        if (!channel) return;
+
+        channel.messages.add(payload);
+        this.app.queue.handleIncomingMessage(payload);
+    };
+
+    private onMessageDelete = async (payload: APIMessage) => {
+        const channel = await this.app.channels.resolve(payload.channelId);
+        if (!channel) return;
+
+        channel.messages.remove(payload.id);
     };
 
     private onUserUpdate = (payload: APIUser | APIPrivateUser) => {
@@ -466,5 +654,68 @@ export class GatewayStore {
         if (payload.id === this.app.account?.id) {
             this.app.setUser(payload as APIPrivateUser);
         }
+    };
+
+    private onUserSettingsUpdate = (payload: APIUserSettings) => {
+        this.app.settings?.update(payload);
+    };
+
+    private onInviteCreate = async (payload: APIInvite) => {
+        if (!payload.spaceId || !payload.channelId) return;
+
+        const space = await this.app.spaces.resolve(payload.spaceId);
+        if (!space) return;
+
+        space.addInvite(payload);
+    };
+
+    private onInviteUpdate = async (payload: APIInvite) => {
+        if (!payload.spaceId || !payload.channelId) return;
+
+        const space = await this.app.spaces.resolve(payload.spaceId);
+        if (!space) return;
+
+        space.updateInvite(payload);
+    };
+
+    private onInviteDelete = async (payload: {
+        spaceId: string;
+        channelId: string;
+        code: string;
+    }) => {
+        const space = await this.app.spaces.resolve(payload.spaceId);
+        if (!space) return;
+
+        space.removeInvite(payload.code);
+    };
+
+    private onSpaceMemberAdd = async (payload: any) => {
+        console.log(payload);
+        const space = await this.app.spaces.resolve(payload.spaceId);
+        if (!space) return;
+
+        space.members.add(payload);
+    };
+
+    private onSpaceMemberRemove = async (payload: {
+        spaceId: string;
+        userId: string;
+    }) => {
+        const space = await this.app.spaces.resolve(payload.spaceId);
+        if (!space) return;
+
+        space.members.remove(payload.userId);
+    };
+
+    // TODO: Add a type later
+    private onSpaceMemberListUpdate = (data: any) => {
+        const { spaceId } = data;
+        const space = this.app.spaces.get(spaceId);
+
+        if (!space) return;
+
+        console.log(data);
+
+        space.updateMemberList(data);
     };
 }

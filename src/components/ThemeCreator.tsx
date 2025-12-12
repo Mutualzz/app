@@ -33,7 +33,7 @@ import {
 } from "@mutualzz/ui-web";
 import { validateThemePut } from "@mutualzz/validators";
 import { useMediaQuery } from "@react-hookz/web";
-import type { Theme } from "@stores/objects/Theme";
+import { Theme } from "@stores/objects/Theme";
 import {
     revalidateLogic,
     useForm,
@@ -45,7 +45,7 @@ import { adaptColors } from "@utils/adaptation";
 import { sortThemes } from "@utils/index";
 import capitalize from "lodash-es/capitalize";
 import { observer } from "mobx-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { FaShuffle } from "react-icons/fa6";
 import { AnimatedPaper } from "./Animated/AnimatedPaper";
 
@@ -65,7 +65,11 @@ const InputWithLabel = ({
     description?: string;
     apiErrors: ApiErrors;
 } & InputProps) => (
-    <Stack direction="column" spacing={{ xs: 0.5, sm: 1, md: 2 }} width="100%">
+    <Stack
+        direction="column"
+        spacing={{ xs: 0.125, sm: 0.25, md: 0.5 }}
+        width="100%"
+    >
         <Stack direction="column">
             <Typography
                 fontWeight={500}
@@ -143,16 +147,21 @@ export const ThemeCreator = observer(() => {
     const [userThemeSelectValue, setUserThemeSelectValue] = useState("");
     const [formKey, setFormKey] = useState(0);
 
-    const allDefaultThemes = Array.from(app.themes.themes.values())
-        .filter((theme) => !theme.author)
-        .filter((theme) => theme.style === colorStyle);
-    const allDrafts = app.drafts.themes;
-    const allUserThemes = Array.from(app.themes.themes.values()).filter(
-        (t) => t.author,
+    const allDefaultThemes = useMemo(
+        () =>
+            app.themes.all
+                .filter((theme) => !theme.author)
+                .filter((theme) => theme.style === colorStyle),
+        [app.themes.all, colorStyle],
+    );
+    const allDrafts = useMemo(() => app.drafts.themes, [app.drafts.themes]);
+    const allUserThemes = useMemo(
+        () => app.themes.all.filter((t) => t.author),
+        [app.themes.all],
     );
 
     const defaultValues = {
-        ...baseDarkTheme,
+        ...(prefersDark ? baseDarkTheme : baseLightTheme),
         name: "",
         description: "",
     };
@@ -166,14 +175,19 @@ export const ThemeCreator = observer(() => {
     const derivedAdaptive = loaded ? loaded.adaptive : adaptationEnabled;
 
     useEffect(() => {
-        form.setFieldValue("style", derivedStyle);
+        if (form.getFieldValue("style") !== derivedStyle) {
+            form.setFieldValue("style", derivedStyle);
+        }
     }, [derivedStyle]);
 
     useEffect(() => {
-        form.setFieldValue("type", derivedType);
+        if (form.getFieldValue("type") !== derivedType) {
+            form.setFieldValue("type", derivedType);
+        }
     }, [derivedType]);
 
     useEffect(() => {
+        if (form.getFieldValue("adaptive") === derivedAdaptive) return;
         form.setFieldValue("adaptive", derivedAdaptive);
         setAdaptationEnabled(derivedAdaptive);
     }, [derivedAdaptive]);
@@ -194,30 +208,16 @@ export const ThemeCreator = observer(() => {
                 theme = allDefaultThemes.find((t) => t.id === toLoad);
         }
         if (!theme) return;
+
         setLoadedPreset(type === "preset" ? (theme as MzTheme) : null);
         setLoadedDraft(type === "draft" ? (theme as ThemeDraft) : null);
         setLoadedUserTheme(type === "userTheme" ? (theme as MzTheme) : null);
 
-        switch (type) {
-            case "preset": {
-                setPresetSelectValue("");
-                setDraftSelectValue("");
-                setUserThemeSelectValue("");
-                break;
-            }
-            case "draft": {
-                setPresetSelectValue("");
-                setDraftSelectValue(theme.name);
-                setUserThemeSelectValue("");
-                break;
-            }
-            case "userTheme": {
-                setPresetSelectValue("");
-                setDraftSelectValue("");
-                setUserThemeSelectValue((theme as MzTheme).id);
-                break;
-            }
-        }
+        setPresetSelectValue(type === "preset" ? toLoad : "");
+        setDraftSelectValue(type === "draft" ? (theme as ThemeDraft).name : "");
+        setUserThemeSelectValue(
+            type === "userTheme" ? (theme as MzTheme).id : "",
+        );
 
         return theme;
     };
@@ -247,6 +247,7 @@ export const ThemeCreator = observer(() => {
     };
 
     const themePut = useMutation({
+        mutationKey: ["create-theme"],
         mutationFn: async (values: any) => {
             let dataToSubmit = values;
             if (adaptationEnabled)
@@ -259,7 +260,7 @@ export const ThemeCreator = observer(() => {
                     }),
                 };
 
-            const response = await app.rest.put<any, MzTheme>(
+            const response = await app.rest.post<any, MzTheme>(
                 "@me/themes",
                 dataToSubmit,
             );
@@ -277,6 +278,7 @@ export const ThemeCreator = observer(() => {
     });
 
     const themePatch = useMutation({
+        mutationKey: ["update-theme"],
         mutationFn: async (values: any) => {
             let dataToSubmit = values;
             if (adaptationEnabled)
@@ -309,6 +311,7 @@ export const ThemeCreator = observer(() => {
     });
 
     const themeDelete = useMutation({
+        mutationKey: ["delete-theme"],
         mutationFn: async (id: any) => {
             const response = await app.rest.delete<{ id: string }>(
                 `@me/themes/${id}`,
@@ -318,6 +321,8 @@ export const ThemeCreator = observer(() => {
         },
         onSuccess: (data) => {
             app.themes.remove(data.id);
+            if (app.themes.currentTheme === data.id) changeTheme(null);
+            setApiErrors({});
             unload();
         },
     });
@@ -335,6 +340,7 @@ export const ThemeCreator = observer(() => {
                     type === "preset" ? "" : (theme.description ?? ""),
                 );
                 form.setFieldValue("adaptive", theme.adaptive);
+
                 form.setFieldValue("style", theme.style);
                 form.setFieldValue("type", theme.type);
             }
@@ -351,20 +357,20 @@ export const ThemeCreator = observer(() => {
         updateForm(form);
     };
 
-    const deleteDraft = () => {
+    const deleteDraft = useCallback(() => {
         if (!loadedDraft) return;
 
         app.drafts.deleteThemeDraft(loadedDraft);
         unloadAndReset(form);
-    };
+    }, [loadedDraft, app.drafts]);
 
-    const loadAndUpdate = (
-        idOrName: string,
-        type: "userTheme" | "draft" | "preset",
-    ) => {
-        const theme = load(idOrName, type);
-        updateForm(form, theme, type);
-    };
+    const loadAndUpdate = useCallback(
+        (idOrName: string, type: "userTheme" | "draft" | "preset") => {
+            const theme = load(idOrName, type);
+            updateForm(form, theme, type);
+        },
+        [],
+    );
 
     const form = useForm({
         defaultValues,
@@ -391,6 +397,7 @@ export const ThemeCreator = observer(() => {
                 themePatch.mutate(value, {
                     onSuccess: (data) => {
                         app.themes.update(data);
+                        changeTheme(Theme.toEmotionTheme(data));
                         setApiErrors({});
 
                         // Directly set the loaded state instead of using the load function (because we want to avoid timing issues)
@@ -410,9 +417,7 @@ export const ThemeCreator = observer(() => {
                 themeDelete.mutate(loadedUserTheme.id, {
                     onSuccess: (data) => {
                         app.themes.remove(data.id);
-                        changeTheme(
-                            prefersDark ? baseDarkTheme : baseLightTheme,
-                        );
+                        changeTheme(null);
                         unloadAndReset(form);
                     },
                 });
@@ -423,6 +428,7 @@ export const ThemeCreator = observer(() => {
                 themePut.mutate(value, {
                     onSuccess: (data) => {
                         app.themes.add(data);
+                        changeTheme(Theme.toEmotionTheme(data));
                         setApiErrors({});
 
                         // Directly set the loaded state instead of using the load function (because we want to avoid timing issues)
@@ -441,7 +447,7 @@ export const ThemeCreator = observer(() => {
         },
     });
 
-    const randomizeColors = () => {
+    const randomizeColors = useCallback(() => {
         const data = {
             name: form.getFieldValue("name"),
             description: form.getFieldValue("description"),
@@ -477,7 +483,7 @@ export const ThemeCreator = observer(() => {
         };
 
         updateForm(form, data as MzTheme);
-    };
+    }, [form, adaptationEnabled]);
 
     const SidebarContent = () => (
         <form.Subscribe
@@ -500,7 +506,7 @@ export const ThemeCreator = observer(() => {
                     height="100%"
                     elevation={1}
                 >
-                    <Stack direction="column" alignItems="center" spacing={10}>
+                    <Stack direction="column" alignItems="center" spacing={2.5}>
                         <Button
                             color="danger"
                             onClick={() => {
@@ -521,7 +527,7 @@ export const ThemeCreator = observer(() => {
                         <Divider />
                         <Stack
                             direction="column"
-                            spacing={5}
+                            spacing={1.25}
                             alignSelf="stretch"
                         >
                             <RadioGroup
@@ -560,7 +566,7 @@ export const ThemeCreator = observer(() => {
                         <Divider />
                         <Stack
                             direction="column"
-                            spacing={5}
+                            spacing={1.25}
                             alignSelf="stretch"
                         >
                             <Typography level="body-sm">
@@ -585,8 +591,7 @@ export const ThemeCreator = observer(() => {
                             >
                                 {allDrafts.map((theme) => (
                                     <Option key={theme.name} value={theme.name}>
-                                        {theme.name} (
-                                        {capitalize(theme.type.toString())})
+                                        {theme.name} ({capitalize(theme.type)})
                                     </Option>
                                 ))}
                             </Select>
@@ -612,7 +617,7 @@ export const ThemeCreator = observer(() => {
                         <Divider />
                         <Stack
                             direction="column"
-                            spacing={5}
+                            spacing={1.25}
                             alignSelf="stretch"
                         >
                             <Typography level="body-sm">
@@ -736,7 +741,6 @@ export const ThemeCreator = observer(() => {
             initial={{ scale: 0.95 }}
             animate={{ scale: 1 }}
             direction="row"
-            nonTranslucent
             width="100%"
             height="100%"
         >
@@ -823,39 +827,33 @@ export const ThemeCreator = observer(() => {
                                 !loadedPreset &&
                                 !loadedUserTheme && (
                                     <Typography level="body-sm">
-                                        {capitalize(colorType.toString())}{" "}
-                                        {capitalize(
-                                            chosenColorStyle.toString(),
-                                        )}{" "}
-                                        Theme
+                                        {capitalize(colorType)}{" "}
+                                        {capitalize(chosenColorStyle)} Theme
                                     </Typography>
                                 )}
                             {loadedDraft && (
                                 <Typography level="h6">
                                     Draft: {loadedDraft.name} (
-                                    {capitalize(loadedDraft.style.toString())}{" "}
-                                    {capitalize(loadedDraft.type.toString())}{" "}
-                                    Theme)
+                                    {capitalize(loadedDraft.style)}{" "}
+                                    {capitalize(loadedDraft.type)} Theme)
                                 </Typography>
                             )}
                             {loadedPreset && (
                                 <Typography level="h6">
                                     Preset: {loadedPreset.name} (
-                                    {capitalize(loadedPreset.style.toString())}{" "}
+                                    {capitalize(loadedPreset.style)}{" "}
                                     {capitalize(loadedPreset.type)} Theme)
                                 </Typography>
                             )}
                             {loadedUserTheme && (
                                 <Typography level="h6">
                                     Your theme: {loadedUserTheme.name} (
-                                    {capitalize(
-                                        loadedUserTheme.style.toString(),
-                                    )}{" "}
+                                    {capitalize(loadedUserTheme.style)}{" "}
                                     {capitalize(loadedUserTheme.type)} Theme)
                                 </Typography>
                             )}
                         </Stack>
-                        <Stack direction="column" width="100%" spacing={10}>
+                        <Stack direction="column" width="100%" spacing={2.5}>
                             <form.Field
                                 name="name"
                                 children={({
@@ -904,7 +902,7 @@ export const ThemeCreator = observer(() => {
                             <Divider />
                             <Stack
                                 direction="row"
-                                spacing={10}
+                                spacing={2.5}
                                 alignItems="center"
                                 justifyContent="space-between"
                             >
@@ -912,7 +910,7 @@ export const ThemeCreator = observer(() => {
                                 <Stack
                                     justifyContent="center"
                                     alignItems="center"
-                                    spacing={10}
+                                    spacing={2.5}
                                 >
                                     <Button
                                         startDecorator={<FaShuffle />}

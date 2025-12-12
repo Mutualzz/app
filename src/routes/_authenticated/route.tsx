@@ -1,5 +1,5 @@
 import { useAppStore } from "@hooks/useStores";
-import { createFileRoute, Outlet, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Navigate, Outlet } from "@tanstack/react-router";
 import { observer } from "mobx-react";
 
 export const Route = createFileRoute("/_authenticated")({
@@ -7,13 +7,9 @@ export const Route = createFileRoute("/_authenticated")({
 });
 
 function AuthenticatedRoute() {
-    const navigate = useNavigate();
-    const { account } = useAppStore();
+    const app = useAppStore();
 
-    if (!account) {
-        navigate({ to: "/login", replace: true });
-        return null;
-    }
+    if (!app.account) return <Navigate to="/login" replace />;
 
     return <Outlet />;
 }

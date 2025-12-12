@@ -1,7 +1,7 @@
 import { AnimatedPaper } from "@components/Animated/AnimatedPaper";
 import { useModal } from "@contexts/Modal.context";
 import { useAppStore } from "@hooks/useStores";
-import { type ColorLike } from "@mutualzz/ui-core";
+import type { ColorLike } from "@mutualzz/ui-core";
 import {
     Button,
     ButtonGroup,
@@ -47,9 +47,8 @@ export const AvatarDraw = observer(() => {
 
     const [size, setSize] = useState(6);
 
-    useState<ColorLike>("#ffffff");
-
     const { mutate: uploadAvatar, isPending } = useMutation({
+        mutationKey: ["upload-avatar"],
         mutationFn: async (avatar: string) => {
             const blob = await (await fetch(avatar)).blob();
             const file = new File([blob], "new-avatar.png", {
@@ -129,7 +128,7 @@ export const AvatarDraw = observer(() => {
             direction={isMobile ? "column" : "row"}
             justifyContent="space-between"
             alignItems="center"
-            gap={20}
+            spacing={5}
             elevation={3}
             width="100%"
             minWidth={{ xs: "100vw", sm: 400, md: 720 }}
@@ -145,13 +144,13 @@ export const AvatarDraw = observer(() => {
         >
             <Stack
                 direction="column"
-                gap={10}
+                spacing={2.5}
                 justifyContent="center"
                 alignItems="center"
                 minWidth={isMobile ? 200 : 250}
                 position={isMobile ? "static" : "absolute"}
-                left={isMobile ? undefined : 20}
-                top={isMobile ? undefined : 20}
+                left={isMobile ? undefined : 5}
+                top={isMobile ? undefined : 5}
             >
                 <Typography>Saved Avatars</Typography>
                 <Select
@@ -175,7 +174,7 @@ export const AvatarDraw = observer(() => {
                                     src={`data:image/svg+xml;utf8,${encodeURIComponent(avatar.image)}`}
                                     alt={`Avatar ${index + 1}`}
                                     css={{
-                                        width: isMobile ? 48 : "100%", // match md InputColor
+                                        width: isMobile ? 48 : "100%",
                                         height: isMobile ? 48 : "100%",
                                         maxWidth: 64,
                                         maxHeight: 64,
@@ -207,7 +206,7 @@ export const AvatarDraw = observer(() => {
                     alignItems="center"
                     justifyContent="center"
                     minWidth={225}
-                    gap={10}
+                    spacing={2.5}
                 >
                     <Button
                         startDecorator={
@@ -224,7 +223,7 @@ export const AvatarDraw = observer(() => {
                     <Stack
                         direction="column"
                         justifyContent="center"
-                        gap={2.5}
+                        spacing={2.5}
                         alignItems="center"
                     >
                         <Typography level="body-sm">
@@ -240,7 +239,7 @@ export const AvatarDraw = observer(() => {
                     {!eraserMode && (
                         <Stack
                             direction="column"
-                            gap={2.5}
+                            spacing={2.5}
                             justifyContent="center"
                             alignItems="center"
                         >
@@ -278,14 +277,14 @@ export const AvatarDraw = observer(() => {
                     <Divider />
                     <Stack
                         direction="row"
-                        gap={10}
+                        spacing={2.5}
                         alignItems="center"
                         justifyContent="center"
                     >
                         <Stack
                             direction="column"
                             justifyContent="center"
-                            gap={2.5}
+                            spacing={2.5}
                             alignItems="center"
                         >
                             <Typography level="body-xs">
@@ -303,7 +302,7 @@ export const AvatarDraw = observer(() => {
                         {!eraserMode && (
                             <Stack
                                 direction="column"
-                                gap={2.5}
+                                spacing={2.5}
                                 justifyContent="center"
                                 alignItems="center"
                             >
@@ -322,7 +321,7 @@ export const AvatarDraw = observer(() => {
                     </Stack>
                 </Stack>
             )}
-            <Stack position="relative" gap={10} direction="column">
+            <Stack position="relative" spacing={2.5} direction="column">
                 <ReactSketchCanvas
                     ref={canvasRef}
                     strokeColor={brushColor}
@@ -344,7 +343,7 @@ export const AvatarDraw = observer(() => {
                 />
                 <Stack
                     direction="column"
-                    gap={2.5}
+                    spacing={2.5}
                     justifyContent="center"
                     alignItems="center"
                 >

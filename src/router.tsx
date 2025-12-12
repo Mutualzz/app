@@ -1,11 +1,12 @@
-import { QueryClient } from "@tanstack/react-query";
 import { createRouter as createTanStackRouter } from "@tanstack/react-router";
 import { setupRouterSsrQueryIntegration } from "@tanstack/react-router-ssr-query";
 
+import { useAppStore } from "@hooks/useStores.ts";
 import { routeTree } from "./routeTree.gen";
 
 export function getRouter() {
-    const queryClient = new QueryClient();
+    const app = useAppStore();
+    const queryClient = app.queryClient;
 
     const router = createTanStackRouter({
         routeTree,

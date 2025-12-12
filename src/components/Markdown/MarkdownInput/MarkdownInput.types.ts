@@ -6,6 +6,8 @@ import type {
     TypographyColor,
     Variant,
 } from "@mutualzz/ui-core";
+import type { KeyboardEvent } from "react";
+import type { Editor } from "slate";
 
 export interface MarkdownInputProps {
     color?: Responsive<Color | ColorLike>;
@@ -19,9 +21,9 @@ export interface MarkdownInputProps {
     disabled?: boolean;
 
     value?: string;
-    onChange?: (value: string) => void;
+    onChange?: (value: string, editor: Editor) => void;
+    onKeyDown?: (event: KeyboardEvent, editor: Editor) => void;
     placeholder?: string;
-    onEnter?: () => void;
 
     css?: CSSObject;
 }

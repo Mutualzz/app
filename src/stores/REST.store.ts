@@ -1,10 +1,13 @@
 import { Logger } from "@mutualzz/logger";
+import { HttpStatusCode } from "@mutualzz/types";
 import { getCurrentWindow } from "@tauri-apps/api/window";
+import { normalizeJSON } from "@utils/JSON.ts";
+import EventEmitter from "events";
 import { detectBrowser, detectOS } from "../utils/detect";
 
-let isTauri = false;
-let os = "Other";
-let client = "Unknown";
+let isTauri: boolean;
+let os: string;
+let client: string;
 
 try {
     getCurrentWindow();
@@ -29,13 +32,14 @@ const DEFAULT_HEADERS = {
     ...clientMeta,
 };
 
-export class REST {
+export class REST extends EventEmitter {
     private readonly logger = new Logger({
         tag: "REST",
     });
     private headers: Record<string, string>;
 
     constructor() {
+        super();
         this.headers = DEFAULT_HEADERS;
     }
 
@@ -51,7 +55,10 @@ export class REST {
         path: string,
         queryParams: Record<string, any> = {},
     ) {
-        const url = new URL(`${import.meta.env.VITE_API_URL}/v1/${path}`);
+        const normalizedPath = path.replace(/\/{2,}/g, "/").replace(/^\/+/, "");
+        const url = new URL(
+            `${import.meta.env.VITE_API_URL}/v1/${normalizedPath}`,
+        );
         Object.entries(queryParams).forEach(([key, value]) => {
             url.searchParams.append(key, value);
         });
@@ -62,7 +69,10 @@ export class REST {
         path: string,
         queryParams: Record<string, any> = {},
     ) {
-        const url = new URL(`${import.meta.env.VITE_CDN_URL}${path}`);
+        const normalizedPath = path.replace(/\/{2,}/g, "/").replace(/^\/+/, "");
+        const url = new URL(
+            `${import.meta.env.VITE_CDN_URL}/${normalizedPath}`,
+        );
         Object.entries(queryParams).forEach(([key, value]) => {
             url.searchParams.append(key, value);
         });
@@ -76,31 +86,29 @@ export class REST {
         return new Promise((resolve, reject) => {
             const url = REST.makeAPIUrl(path, queryParams);
             this.logger.debug(`GET ${url}`);
+
             return fetch(url, {
                 method: "GET",
                 headers: this.headers,
                 mode: "cors",
             })
                 .then(async (res) => {
-                    if (res.headers.get("content-length") !== "0") {
-                        if (
-                            res.headers
-                                .get("content-type")
-                                ?.includes("application/json")
-                        ) {
-                            if (!res.ok) return reject(await res.json());
-                            return res.json();
-                        }
-                        if (!res.ok) return reject(res.json());
-                        return res.text();
+                    if (res.status === HttpStatusCode.RateLimit) {
+                        this.logger.warn("Rate limited on GET", url);
+                        this.emit("rateLimited");
                     }
+
+                    const data = normalizeJSON<Data>(await res.json());
+
+                    if (!res.ok) return reject(data);
+
+                    return resolve(data);
                 })
-                .then(resolve)
                 .catch(reject);
         });
     }
 
-    public async post<Body, Data>(
+    public async post<Data = unknown, Body = unknown>(
         path: string,
         body?: Body,
         queryParams: Record<string, any> = {},
@@ -120,32 +128,22 @@ export class REST {
                 mode: "cors",
             })
                 .then(async (res) => {
-                    // handle json if content type is json
-                    if (
-                        res.headers
-                            .get("content-type")
-                            ?.includes("application/json")
-                    ) {
-                        const data = await res.json();
-                        if (res.ok) return resolve(data);
-                        else return reject(data);
+                    if (res.status === HttpStatusCode.RateLimit) {
+                        this.logger.warn("Rate limited on POST", url);
+                        this.emit("rateLimited");
                     }
 
-                    // if theres content, handle text
-                    if (res.headers.get("content-length") !== "0") {
-                        const data = await res.text();
-                        if (res.ok) return resolve(data as Data);
-                        else return reject(data);
-                    }
+                    const data = normalizeJSON<Data>(await res.json());
 
-                    if (res.ok) return resolve(res.status as Data);
-                    else return reject(res.statusText);
+                    if (!res.ok) return reject(data);
+
+                    return resolve(data);
                 })
                 .catch(reject);
         });
     }
 
-    public async put<Body, Data>(
+    public async put<Data = unknown, Body = unknown>(
         path: string,
         body?: Body,
         queryParams: Record<string, any> = {},
@@ -165,26 +163,16 @@ export class REST {
                 mode: "cors",
             })
                 .then(async (res) => {
-                    // handle json if content type is json
-                    if (
-                        res.headers
-                            .get("content-type")
-                            ?.includes("application/json")
-                    ) {
-                        const data = await res.json();
-                        if (res.ok) return resolve(data);
-                        else return reject(data);
+                    if (res.status === HttpStatusCode.RateLimit) {
+                        this.logger.warn("Rate limited on PUT", url);
+                        this.emit("rateLimited");
                     }
 
-                    // if theres content, handle text
-                    if (res.headers.get("content-length") !== "0") {
-                        const data = await res.text();
-                        if (res.ok) return resolve(data as Data);
-                        else return reject(data as Data);
-                    }
+                    const data = normalizeJSON<Data>(await res.json());
 
-                    if (res.ok) return resolve(res.status as Data);
-                    else return reject(res.statusText);
+                    if (!res.ok) return reject(data);
+
+                    return resolve(data);
                 })
                 .catch(reject);
         });
@@ -204,7 +192,7 @@ export class REST {
             if (msg) {
                 // add abort callback
                 msg.setAbortCallback(() => {
-                    this.logger.debug("[PostFormData]: Message called abort");
+                    this.logger.debug("[PutFormData]: Message called abort");
                     xhr.abort();
                     reject("aborted");
                 });
@@ -213,21 +201,19 @@ export class REST {
                     msg.updateProgress(e),
                 );
             }
-            xhr.addEventListener("loadend", () => {
-                // if success, resolve text or json
-                if (xhr.status >= 200 && xhr.status < 300) {
-                    if (xhr.responseType === "json")
-                        return resolve(xhr.response);
 
-                    return resolve(JSON.parse(xhr.response));
+            xhr.addEventListener("loadend", () => {
+                if (xhr.status === HttpStatusCode.RateLimit) {
+                    this.logger.warn("Rate limited on PUT", url);
+                    this.emit("rateLimited");
                 }
 
-                // if theres content, reject with text
-                if (xhr.getResponseHeader("content-length") !== "0")
-                    return reject(xhr.responseText);
+                const data = JSON.parse(normalizeJSON(xhr.response));
 
-                // reject with status code if theres no content
-                return reject(xhr.statusText);
+                // if success, resolve text or json
+                if (xhr.status >= 200 && xhr.status < 300) return resolve(data);
+
+                return reject(data);
             });
             xhr.open("PUT", url);
             // set headers
@@ -240,12 +226,12 @@ export class REST {
         });
     }
 
-    public async patch<T, U>(
+    public async patch<Data = unknown, Body = unknown>(
         path: string,
-        body?: T,
+        body?: Body,
         queryParams: Record<string, any> = {},
         headers: Record<string, string> = {},
-    ): Promise<U> {
+    ): Promise<Data> {
         return new Promise((resolve, reject) => {
             const url = REST.makeAPIUrl(path, queryParams);
             this.logger.debug(`PATCH ${url}; payload:`, body);
@@ -260,26 +246,16 @@ export class REST {
                 mode: "cors",
             })
                 .then(async (res) => {
-                    // handle json if content type is json
-                    if (
-                        res.headers
-                            .get("content-type")
-                            ?.includes("application/json")
-                    ) {
-                        const data = await res.json();
-                        if (res.ok) return resolve(data);
-                        else return reject(data);
+                    if (res.status === HttpStatusCode.RateLimit) {
+                        this.logger.warn("Rate limited on PATCH", url);
+                        this.emit("rateLimited");
                     }
 
-                    // if theres content, handle text
-                    if (res.headers.get("content-length") !== "0") {
-                        const data = await res.text();
-                        if (res.ok) return resolve(data as U);
-                        else return reject(data as U);
-                    }
+                    const data = normalizeJSON<Data>(await res.json());
 
-                    if (res.ok) return resolve(res.status as U);
-                    else return reject(res.statusText);
+                    if (!res.ok) return reject(data);
+
+                    return resolve(data);
                 })
                 .catch(reject);
         });
@@ -299,7 +275,7 @@ export class REST {
             if (msg) {
                 // add abort callback
                 msg.setAbortCallback(() => {
-                    this.logger.debug("[PatchFormData]: Message called abort");
+                    this.logger.debug("[PostFormData]: Message called abort");
                     xhr.abort();
                     reject("aborted");
                 });
@@ -309,20 +285,17 @@ export class REST {
                 );
             }
             xhr.addEventListener("loadend", () => {
-                // if success, resolve text or json
-                if (xhr.status >= 200 && xhr.status < 300) {
-                    if (xhr.responseType === "json")
-                        return resolve(xhr.response);
-
-                    return resolve(JSON.parse(xhr.response));
+                if (xhr.status === HttpStatusCode.RateLimit) {
+                    this.logger.warn("Rate limited on POST", url);
+                    this.emit("rateLimited");
                 }
 
-                // if theres content, reject with text
-                if (xhr.getResponseHeader("content-length") !== "0")
-                    return reject(xhr.responseText);
+                const data = JSON.parse(normalizeJSON(xhr.response));
 
-                // reject with status code if theres no content
-                return reject(xhr.statusText);
+                // if success, resolve text or json
+                if (xhr.status >= 200 && xhr.status < 300) return resolve(data);
+
+                return reject(data);
             });
             xhr.open("POST", url);
             // set headers
@@ -349,7 +322,7 @@ export class REST {
             if (msg) {
                 // add abort callback
                 msg.setAbortCallback(() => {
-                    this.logger.debug("[PostFormData]: Message called abort");
+                    this.logger.debug("[PatchFormData]: Message called abort");
                     xhr.abort();
                     reject("aborted");
                 });
@@ -359,20 +332,17 @@ export class REST {
                 );
             }
             xhr.addEventListener("loadend", () => {
-                // if success, resolve text or json
-                if (xhr.status >= 200 && xhr.status < 300) {
-                    if (xhr.responseType === "json")
-                        return resolve(xhr.response);
-
-                    return resolve(JSON.parse(xhr.response));
+                if (xhr.status === HttpStatusCode.RateLimit) {
+                    this.logger.warn("Rate limited on PATCH", url);
+                    this.emit("rateLimited");
                 }
 
-                // if theres content, reject with text
-                if (xhr.getResponseHeader("content-length") !== "0")
-                    return reject(xhr.responseText);
+                const data = JSON.parse(normalizeJSON(xhr.response));
 
-                // reject with status code if theres no content
-                return reject(xhr.statusText);
+                // if success, resolve text or json
+                if (xhr.status >= 200 && xhr.status < 300) return resolve(data);
+
+                return reject(data);
             });
             xhr.open("PATCH", url);
             // set headers
@@ -402,24 +372,16 @@ export class REST {
                 mode: "cors",
             })
                 .then(async (res) => {
-                    if (
-                        res.headers
-                            .get("content-type")
-                            ?.includes("application/json")
-                    ) {
-                        const data = await res.json();
-                        if (res.ok) return resolve(data);
-                        else return reject(data);
+                    if (res.status === HttpStatusCode.RateLimit) {
+                        this.logger.warn("Rate limited on DELETE", url);
+                        this.emit("rateLimited");
                     }
 
-                    if (res.headers.get("content-length") !== "0") {
-                        const data = await res.text();
-                        if (res.ok) return resolve(data as Data);
-                        else return reject(data as Data);
-                    }
+                    const data = normalizeJSON<Data>(await res.json());
 
-                    if (res.ok) return resolve(res.status as Data);
-                    else return reject(res.statusText);
+                    if (!res.ok) return reject(data);
+
+                    return resolve(data);
                 })
                 .catch(reject);
         });

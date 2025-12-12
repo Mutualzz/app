@@ -1,10 +1,10 @@
 import { useDesktopShell } from "@contexts/DesktopShell.context";
+import { arch, family, locale, platform, type } from "@tauri-apps/plugin-os";
 import { isTauri } from "@utils/index";
+import { observer } from "mobx-react";
 import { useEffect, type FC, type PropsWithChildren } from "react";
 
-import { observer } from "mobx-react";
-import { AdaptiveIcon } from "./AdaptiveIcon";
-import { AdaptiveTray } from "./AdaptiveTray";
+import { AdaptiveElements } from "./AdaptiveElements";
 import WindowTitlebar from "./WindowTitlebar";
 
 interface WindowTitlebarProps {
@@ -23,9 +23,6 @@ const DesktopShell: FC<PropsWithChildren<DesktopShellProps>> = observer(
             if (!isTauri) return;
 
             (async () => {
-                const { arch, family, locale, platform, type } = await import(
-                    "@tauri-apps/plugin-os"
-                );
                 setOsInfo({
                     arch: arch(),
                     family: family(),
@@ -58,8 +55,7 @@ const DesktopShell: FC<PropsWithChildren<DesktopShellProps>> = observer(
                 {...props}
             >
                 <WindowTitlebar {...titleBarProps} />
-                <AdaptiveIcon />
-                <AdaptiveTray />
+                <AdaptiveElements />
                 {children}
             </div>
         );

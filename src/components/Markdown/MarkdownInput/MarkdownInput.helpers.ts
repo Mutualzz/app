@@ -135,7 +135,7 @@ export const resolveMarkdownStyles = (
             border: "none",
             borderRadius: 8,
             ":focus": {
-                outline: `2px solid ${formattedColor}`,
+                outline: "none",
             },
         },
         soft: {

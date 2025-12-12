@@ -105,7 +105,7 @@ export const DOBInput = ({
     return (
         <Stack
             direction="column"
-            spacing={{ xs: 2, sm: 3, md: 4 }}
+            spacing={{ xs: 0.5, sm: 0.75, md: 1 }}
             width="100%"
         >
             <Typography
@@ -119,7 +119,7 @@ export const DOBInput = ({
                     </Typography>
                 )}
             </Typography>
-            <Stack spacing={12} direction="row" width="100%">
+            <Stack spacing={3} direction="row" width="100%">
                 <Select
                     color="neutral"
                     variant="outlined"

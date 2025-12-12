@@ -1,35 +1,35 @@
 import { useAppStore } from "@hooks/useStores";
+import type { AppMode } from "@mutualzz/types";
 import { Tooltip, useTheme } from "@mutualzz/ui-web";
-import { useMediaQuery } from "@react-hookz/web";
 import { useNavigate } from "@tanstack/react-router";
 import { switchMode } from "@utils/index";
 import { observer } from "mobx-react";
-import { useState } from "react";
+import { AnimatePresence } from "motion/react";
+import { useMemo } from "react";
 import { GiGalaxy } from "react-icons/gi";
 import { ImFeed, ImSpinner11 } from "react-icons/im";
 import { AnimatedIconButton } from "./Animated/AniamtedIconButton";
+import { TooltipWrapper } from "./TooltipWrapper";
 
 export const ModeSwitcher = observer(() => {
     const app = useAppStore();
     const navigate = useNavigate();
     const { theme } = useTheme();
-    const [hoverOpen, setHoverOpen] = useState(false);
 
-    const isMobileQuery = useMediaQuery(
-        theme.breakpoints.down("md").replace("@media ", ""),
+    const preferredMode = useMemo(
+        () => app.settings?.preferredMode,
+        [app.settings?.preferredMode],
     );
 
-    const preferredMode = app.settings?.preferredMode as
-        | "feed"
-        | "spaces"
-        | undefined;
-
-    const targetMode: "feed" | "spaces" =
-        app.mode === "feed"
-            ? "spaces"
-            : app.mode === "spaces"
-              ? "feed"
-              : (preferredMode ?? "feed");
+    const targetMode: AppMode = useMemo(
+        () =>
+            app.mode === "feed"
+                ? "spaces"
+                : app.mode === "spaces"
+                  ? "feed"
+                  : (preferredMode ?? "feed"),
+        [app.mode, preferredMode],
+    );
 
     const title = `Switch to ${targetMode === "feed" ? "Feed" : "Spaces"}`;
 
@@ -38,35 +38,69 @@ export const ModeSwitcher = observer(() => {
     };
 
     return (
-        <Tooltip open={hoverOpen} title={title}>
-            <AnimatedIconButton
-                css={{
-                    position: "absolute",
-                    bottom: 24,
-                    right: 36,
-                    borderRadius: 9999,
-                    zIndex: theme.zIndex.fab,
-                }}
-                color="primary"
-                size={isMobileQuery ? 28 : 36}
-                variant="solid"
-                onMouseEnter={() => setHoverOpen(true)}
-                onMouseLeave={() => setHoverOpen(false)}
-                onClick={handleClick}
-                aria-label={title}
-                whileTap={{ scale: 0.75 }}
-                whileHover={{
-                    scale: 0.9,
-                }}
-            >
-                {app.mode === null ? (
-                    <ImSpinner11 />
-                ) : targetMode === "feed" ? (
-                    <ImFeed />
-                ) : (
-                    <GiGalaxy />
-                )}
-            </AnimatedIconButton>
-        </Tooltip>
+        <AnimatePresence>
+            {!app.hideSwitcher && (
+                <Tooltip
+                    placement="left"
+                    content={
+                        <TooltipWrapper
+                            paperProps={{
+                                elevation: 5,
+                                p: 1,
+                            }}
+                            typographyProps={{
+                                level: "body-sm",
+                            }}
+                        >
+                            {title}
+                        </TooltipWrapper>
+                    }
+                >
+                    <AnimatedIconButton
+                        css={{
+                            position: "fixed",
+                            bottom:
+                                24 +
+                                (app.channels.active != undefined &&
+                                app.mode === "spaces" &&
+                                !app.memberListVisible
+                                    ? 60
+                                    : 0),
+                            right: 24,
+                            borderRadius: 9999,
+                            zIndex: theme.zIndex.fab,
+                        }}
+                        color="primary"
+                        size={28}
+                        variant="solid"
+                        onClick={handleClick}
+                        aria-label={title}
+                        whileTap={{ scale: 0.75 }}
+                        whileHover={{ scale: 0.9 }}
+                        animate={{ scale: [1, 1.15, 1], opacity: 1 }}
+                        transition={{
+                            scale: {
+                                duration: 1,
+                                repeat: Infinity,
+                                repeatType: "loop",
+                                ease: "easeInOut",
+                            },
+                            opacity: {
+                                duration: 0.4,
+                                ease: "easeOut",
+                            },
+                        }}
+                    >
+                        {app.mode === null ? (
+                            <ImSpinner11 />
+                        ) : targetMode === "feed" ? (
+                            <ImFeed />
+                        ) : (
+                            <GiGalaxy />
+                        )}
+                    </AnimatedIconButton>
+                </Tooltip>
+            )}
+        </AnimatePresence>
     );
 });
