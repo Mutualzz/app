@@ -65,7 +65,6 @@ export const UserSettingsContent = observer(
                         size="sm"
                         onClick={() => closeAllModals()}
                     >
-                        `
                         <FaX />
                     </IconButton>
                 </Paper>
