@@ -1,4 +1,6 @@
-import { Button, ButtonGroup, Paper } from "@mutualzz/ui-web";
+import { Paper } from "@components/Paper.tsx";
+import { useAppStore } from "@hooks/useStores.ts";
+import { Button, ButtonGroup } from "@mutualzz/ui-web";
 import { FaCompass, FaHome, FaPalette, FaStar, FaUsers } from "react-icons/fa";
 
 const links = [
@@ -25,12 +27,15 @@ const links = [
 ];
 
 export const FeedSidebar = () => {
+    const app = useAppStore();
     return (
         <Paper
-            elevation={2}
+            elevation={app.preferEmbossed ? 1 : 0}
+            borderLeft="0 !important"
             justifyContent="center"
             p={5}
             maxWidth="15rem"
+            borderBottom="0 !important"
             flex={1}
         >
             <ButtonGroup

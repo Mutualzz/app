@@ -1,10 +1,11 @@
+import { Paper } from "@components/Paper.tsx";
 import { useModal } from "@contexts/Modal.context";
+import { useAppStore } from "@hooks/useStores.ts";
 import { ChannelType, HttpException } from "@mutualzz/types";
 import {
     Button,
     ButtonGroup,
     Input,
-    Paper,
     Stack,
     Typography,
 } from "@mutualzz/ui-web";
@@ -19,6 +20,7 @@ interface Props {
 }
 
 export const CategoryCreateModal = observer(({ space }: Props) => {
+    const app = useAppStore();
     const { closeModal } = useModal();
     const [name, setName] = useState("");
     const [errors, setErrors] = useState<{ name?: string }>({});
@@ -41,7 +43,7 @@ export const CategoryCreateModal = observer(({ space }: Props) => {
 
     return (
         <Paper
-            elevation={4}
+            elevation={app.preferEmbossed ? 5 : 1}
             borderRadius={8}
             minWidth={{ xs: "90vw", sm: 150, md: 200, lg: 400 }}
             maxWidth={400}
@@ -49,9 +51,9 @@ export const CategoryCreateModal = observer(({ space }: Props) => {
             minHeight={250}
             justifyContent="space-between"
             width="100%"
-            transparency={0}
             onKeyDown={(e) => e.key === "Enter" && createCategory()}
             px={5}
+            transparency={0}
         >
             <Stack direction="column" my="auto" spacing={1.25}>
                 <Stack direction="column" spacing={1.25}>

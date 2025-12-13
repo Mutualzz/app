@@ -1,8 +1,9 @@
 import { AnimatedLogo } from "@components/Animated/AnimatedLogo";
 import { DownloadButton } from "@components/DownloadButton";
+import { Paper } from "@components/Paper.tsx";
 import { TooltipWrapper } from "@components/TooltipWrapper";
 import { useAppStore } from "@hooks/useStores";
-import { Box, Button, Paper, Stack, Tooltip, useTheme } from "@mutualzz/ui-web";
+import { Box, Button, Stack, Tooltip, useTheme } from "@mutualzz/ui-web";
 import { useMediaQuery } from "@react-hookz/web";
 import { useNavigate } from "@tanstack/react-router";
 import { isTauri } from "@utils/index";
@@ -29,11 +30,13 @@ export const TopNavigation = observer(() => {
             flexDirection="row"
             alignItems="center"
             justifyContent="space-between"
-            elevation={2}
             zIndex={theme.zIndex.appBar}
             position="sticky"
             top={0}
+            py={1}
             boxShadow="none"
+            elevation={app.preferEmbossed ? 1 : 0}
+            variant="plain"
             css={{
                 userSelect: "none",
             }}
@@ -59,7 +62,6 @@ export const TopNavigation = observer(() => {
                     >
                         <AnimatedLogo
                             css={{
-                                width: 64,
                                 minWidth: 32,
                                 maxWidth: 48,
                                 cursor: "pointer",

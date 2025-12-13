@@ -1,7 +1,7 @@
 import { MarkdownInput } from "@components/Markdown/MarkdownInput/MarkdownInput";
+import { Paper } from "@components/Paper";
 import { useAppStore } from "@hooks/useStores";
 import { MessageType } from "@mutualzz/types";
-import { Paper } from "@mutualzz/ui-web";
 import type { Channel } from "@stores/objects/Channel";
 import Snowflake from "@utils/Snowflake";
 import { observer } from "mobx-react";
@@ -16,12 +16,11 @@ export const MessageInput = observer(({ channel }: Props) => {
     const app = useAppStore();
     const [content, setContent] = useState(() => "");
 
-    const canSendMessage = useCallback(() => {
-        if (!content || !content.trim() || !content.replace(/\r?\n|\r/g, ""))
-            return false;
-
-        return true;
-    }, [content]);
+    const canSendMessage = useCallback(
+        () =>
+            !(!content || !content.trim() || !content.replace(/\r?\n|\r/g, "")),
+        [content],
+    );
 
     const sendMessage = useCallback(
         async (editor: Editor) => {
@@ -70,7 +69,7 @@ export const MessageInput = observer(({ channel }: Props) => {
                 msg.fail(error);
             }
         },
-        [content, channel, canSendMessage],
+        [content, channel, canSendMessage, app.account, app.queue],
     );
 
     const onChange = (value: string) => {
@@ -85,7 +84,13 @@ export const MessageInput = observer(({ channel }: Props) => {
     };
 
     return (
-        <Paper elevation={4} p={2} borderRadius={6} display="block" m={2.5}>
+        <Paper
+            p={2}
+            elevation={app.preferEmbossed ? 5 : 1}
+            borderRadius={6}
+            display="block"
+            m={2.5}
+        >
             <MarkdownInput
                 autoFocus
                 color="success"

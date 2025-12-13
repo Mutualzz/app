@@ -1,3 +1,4 @@
+import { Paper } from "@components/Paper.tsx";
 import { SpaceContextMenu } from "@components/Space/SpaceContextMenu";
 import { SpaceInviteToSpaceModal } from "@components/Space/SpaceInviteToSpaceModal";
 import { TooltipWrapper } from "@components/TooltipWrapper";
@@ -29,7 +30,6 @@ import { ChannelType } from "@mutualzz/types";
 import {
     ButtonGroup,
     IconButton,
-    Paper,
     Portal,
     Stack,
     Tooltip,
@@ -233,15 +233,21 @@ export const ChannelList = observer(() => {
     return (
         <>
             <Paper
-                elevation={4}
+                borderRight="0 !important"
+                borderBottom="0 !important"
+                borderTopLeftRadius="0.75rem"
                 maxWidth="15rem"
                 direction="column"
                 width="100%"
+                elevation={app.preferEmbossed ? 4 : 0}
             >
                 <Paper
-                    elevation={5}
+                    elevation={app.preferEmbossed ? 5 : 0}
+                    borderLeft="0 !important"
+                    borderRight="0 !important"
+                    borderTop="0 !important"
                     width="100%"
-                    maxHeight="3rem"
+                    maxHeight="2.95rem"
                     height="100%"
                     alignItems="center"
                     p={2}

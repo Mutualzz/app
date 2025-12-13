@@ -1,9 +1,9 @@
 import { MarkdownInputContext } from "@components/Markdown/MarkdownInput/MarkdownInput.context";
+import { Paper } from "@components/Paper.tsx";
 import {
     Button,
     ButtonGroup,
     Divider,
-    Paper,
     Portal,
     useTheme,
 } from "@mutualzz/ui-web";

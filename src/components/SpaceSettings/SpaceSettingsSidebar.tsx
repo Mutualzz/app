@@ -1,3 +1,4 @@
+import { Paper } from "@components/Paper.tsx";
 import {
     useSpaceSettingsSidebar,
     type SpaceSettingsSidebarCategories,
@@ -8,7 +9,6 @@ import {
     Button,
     ButtonGroup,
     Divider,
-    Paper,
     Stack,
     Typography,
 } from "@mutualzz/ui-web";

@@ -1,3 +1,4 @@
+import { Paper } from "@components/Paper";
 import {
     useUserSettingsSidebar,
     type UserSettingsSidebarCategories,
@@ -8,7 +9,6 @@ import {
     Button,
     ButtonGroup,
     Divider,
-    Paper,
     Stack,
     Typography,
 } from "@mutualzz/ui-web";
@@ -74,15 +74,24 @@ export const UserSettingsSidebar = observer(
         return (
             <Paper
                 direction="column"
-                width="100%"
+                width={200}
                 height="100%"
-                minWidth={175}
-                maxWidth={175}
-                elevation={2}
+                elevation={app.preferEmbossed ? 5 : 1}
                 spacing={2.5}
+                borderTopLeftRadius={{
+                    xs: "0.75rem",
+                    sm: "1.25rem",
+                    md: "1.5rem",
+                }}
+                borderBottomLeftRadius={{
+                    xs: "0.75rem",
+                    sm: "1.25rem",
+                    md: "1.5rem",
+                }}
             >
-                <Stack px="1rem" pt="1rem">
+                <Stack px={2.5} width="100%" pt="1rem">
                     <Button
+                        fullWidth
                         variant="plain"
                         onClick={() =>
                             handlePageSwitch("user-settings", "profile")
@@ -93,20 +102,19 @@ export const UserSettingsSidebar = observer(
                     >
                         <Stack
                             width="100%"
-                            justifyContent="center"
-                            alignItems="center"
                             flex={1}
                             direction="row"
+                            alignItems="center"
                             spacing={1.875}
                         >
-                            <UserAvatar user={app.account} />
+                            <UserAvatar size={48} user={app.account} />
                             <Stack
                                 spacing={0.625}
                                 justifyContent="flex-start"
                                 alignItems="flex-start"
                                 direction="column"
                             >
-                                <Typography level="body-sm">
+                                <Typography level="body-md">
                                     {app.account.displayName}
                                 </Typography>
                                 <Typography
@@ -125,14 +133,14 @@ export const UserSettingsSidebar = observer(
                         </Stack>
                     </Button>
                 </Stack>
-                <Divider lineColor="muted" />
+
                 {categories.map(([category, pages], index) => (
                     <Fragment
                         key={`settings-sidebar-category-fragment-${category}`}
                     >
                         <Stack px="1rem" direction="column">
                             <Typography
-                                level="body-xs"
+                                level="body-sm"
                                 textColor="muted"
                                 mb={1.25}
                             >
@@ -140,7 +148,7 @@ export const UserSettingsSidebar = observer(
                             </Typography>
                             <ButtonGroup
                                 color="neutral"
-                                size={{ xs: "sm", sm: "md" }}
+                                size="md"
                                 orientation="vertical"
                                 variant="plain"
                                 spacing={1.25}
@@ -172,6 +180,7 @@ export const UserSettingsSidebar = observer(
                             <Divider
                                 css={{
                                     paddingInline: "1rem",
+                                    filter: "opacity(0.5)",
                                 }}
                                 lineColor="muted"
                             />

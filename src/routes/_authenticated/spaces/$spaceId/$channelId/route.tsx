@@ -2,8 +2,9 @@ import { ChannelHeader } from "@components/Channel/ChannelHeader";
 import { MemberList } from "@components/MemberList/MemberList.tsx";
 import { MessageInput } from "@components/Message/MessageInput";
 import { MessageList } from "@components/Message/MessageList";
+import { Paper } from "@components/Paper.tsx";
 import { useAppStore } from "@hooks/useStores";
-import { Paper, Stack, Typography } from "@mutualzz/ui-web";
+import { Stack, Typography } from "@mutualzz/ui-web";
 import { createFileRoute } from "@tanstack/react-router";
 import { runInAction } from "mobx";
 import { observer } from "mobx-react";
@@ -31,11 +32,13 @@ function RouteComponent() {
 
     return (
         <Paper
-            elevation={3}
+            elevation={app.preferEmbossed ? 3 : 0}
             direction="column"
             flex="1 1 auto"
             overflow="hidden"
-            boxShadow="none"
+            borderLeft="0 !important"
+            borderRight="0 !important"
+            borderBottom="0 !important"
         >
             {!app.channels.active && (
                 <Stack

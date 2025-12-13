@@ -1,4 +1,6 @@
-import { Link, Paper, Typography } from "@mutualzz/ui-web";
+import { Link } from "@components/Link";
+import { Paper } from "@components/Paper.tsx";
+import { Typography } from "@mutualzz/ui-web";
 import emojiRegexOrig from "emojibase-regex";
 import shortcodeRegexOrig from "emojibase-regex/shortcode";
 import parse, { domToReact } from "html-react-parser";
@@ -17,7 +19,7 @@ import { underlinePlugin } from "./plugins/underline";
 const shortcodeRegex = new RegExp(shortcodeRegexOrig.source, "g");
 const emojiRegex = new RegExp(emojiRegexOrig.source, "gu");
 
-// TODO: add code blocks inthe future
+// TODO: add code blocks in the future
 export const MarkdownRenderer = ({
     color = "neutral",
     textColor = "primary",
@@ -203,7 +205,7 @@ export const MarkdownRenderer = ({
 
     return (
         <Paper
-            color={color as string}
+            color={color as any}
             textColor={textColor}
             variant={variant}
             display="block"

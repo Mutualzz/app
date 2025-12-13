@@ -1,3 +1,4 @@
+import { Paper } from "@components/Paper.tsx";
 import { TooltipWrapper } from "@components/TooltipWrapper";
 import { UserAvatar } from "@components/User/UserAvatar";
 import { UserSettingsModal } from "@components/UserSettings/UserSettingsModal";
@@ -5,11 +6,11 @@ import { useModal } from "@contexts/Modal.context";
 import { useAppStore } from "@hooks/useStores";
 import {
     IconButton,
-    Paper,
     type PaperProps,
     Stack,
     Tooltip,
     Typography,
+    useTheme,
 } from "@mutualzz/ui-web";
 import { observer } from "mobx-react";
 import { useMemo } from "react";
@@ -18,7 +19,9 @@ import { MdLogout } from "react-icons/md";
 
 export const UserBar = observer(() => {
     const app = useAppStore();
+    const { theme } = useTheme();
     const { openModal } = useModal();
+
     const conditionalProps = useMemo<Omit<PaperProps, "color">>(() => {
         if (app.spaces.activeId)
             return {
@@ -43,7 +46,15 @@ export const UserBar = observer(() => {
             justifyContent="space-between"
             alignItems="center"
             p={2.5}
-            elevation={4}
+            position="absolute"
+            bottom={0}
+            width="95%"
+            mb={2}
+            ml={1.5}
+            elevation={app.preferEmbossed ? 5 : 1}
+            color="neutral"
+            borderRadius={15}
+            zIndex={theme.zIndex.appBar + 1}
             {...conditionalProps}
         >
             <Stack
@@ -82,6 +93,7 @@ export const UserBar = observer(() => {
                                 openModal(
                                     "theme-picker",
                                     <UserSettingsModal redirectTo="appearance" />,
+                                    { showCloseButton: false },
                                 )
                             }
                         >
@@ -100,6 +112,7 @@ export const UserBar = observer(() => {
                                 openModal(
                                     "user-settings",
                                     <UserSettingsModal />,
+                                    { showCloseButton: false },
                                 )
                             }
                             color="neutral"

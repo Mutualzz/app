@@ -1,4 +1,5 @@
 import { AnimatedPaper } from "@components/Animated/AnimatedPaper";
+import { Paper } from "@components/Paper";
 import { useModal } from "@contexts/Modal.context";
 import { useAppStore } from "@hooks/useStores";
 import { CDNRoutes } from "@mutualzz/types";
@@ -16,7 +17,6 @@ import {
     Checkbox,
     IconButton,
     InputColor,
-    Paper,
     Stack,
     Typography,
     useTheme,

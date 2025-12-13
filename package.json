@@ -110,7 +110,7 @@
         "build": "tsc && vite build",
         "build:dev": "tsc && cross-env VITE_ENV_DEV=true vite build",
         "ci:prebuild": "node scripts/tauriVersion.js",
-        "dev": "pnpm vite:dev",
+        "dev": "pnpm tauri:dev",
         "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
         "lint:fix": "pnpx prettier . --write",
         "preview": "vite preview",
@@ -122,5 +122,5 @@
         "vite:dev": "cross-env VITE_ENV_DEV=true vite"
     },
     "type": "module",
-    "version": "3.0.0"
+    "version": "3.0.1"
 }

@@ -1,4 +1,5 @@
 import type { MzTheme, ThemeDraft } from "@app-types/theme";
+import { Paper } from "@components/Paper";
 import { usePrefersDark } from "@hooks/usePrefersDark";
 import { useAppStore } from "@hooks/useStores";
 import type { HttpException } from "@mutualzz/types";
@@ -22,7 +23,6 @@ import {
     Drawer,
     Input,
     Option,
-    Paper,
     Radio,
     RadioGroup,
     Select,
@@ -31,7 +31,7 @@ import {
     useTheme,
     type InputProps,
 } from "@mutualzz/ui-web";
-import { validateThemePut } from "@mutualzz/validators";
+import { validateThemeCreate } from "@mutualzz/validators";
 import { useMediaQuery } from "@react-hookz/web";
 import { Theme } from "@stores/objects/Theme";
 import {
@@ -376,7 +376,7 @@ export const ThemeCreator = observer(() => {
         defaultValues,
         validationLogic: revalidateLogic(),
         validators: {
-            onDynamic: validateThemePut as any,
+            onDynamic: validateThemeCreate as any,
         },
         onSubmitMeta: defaultMeta,
         onSubmit: async ({
@@ -504,7 +504,10 @@ export const ThemeCreator = observer(() => {
                     p={{ xs: "0.75rem", sm: "1rem" }}
                     direction="column"
                     height="100%"
-                    elevation={1}
+                    elevation={app.preferEmbossed ? 5 : 1}
+                    borderTop="0 !important"
+                    borderBottom="0 !important"
+                    borderLeft="0 !important"
                 >
                     <Stack direction="column" alignItems="center" spacing={2.5}>
                         <Button
@@ -743,6 +746,7 @@ export const ThemeCreator = observer(() => {
             direction="row"
             width="100%"
             height="100%"
+            elevation={app.preferEmbossed ? 5 : 1}
         >
             <form
                 onSubmit={(e) => {
@@ -761,7 +765,6 @@ export const ThemeCreator = observer(() => {
                     width="100%"
                     justifyContent="center"
                     spacing={{ xs: 2, sm: 4, md: 6 }}
-                    pt={{ xs: 0, sm: "0.5rem", md: "1rem" }}
                 >
                     <Stack justifyContent="space-between" height="100%">
                         {isMobileQuery ? (

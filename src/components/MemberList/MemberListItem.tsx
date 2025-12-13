@@ -1,5 +1,6 @@
+import { Paper } from "@components/Paper.tsx";
 import { UserAvatar } from "@components/User/UserAvatar.tsx";
-import { Paper, Typography } from "@mutualzz/ui-web";
+import { Typography } from "@mutualzz/ui-web";
 import type { SpaceMember } from "@stores/objects/SpaceMember.ts";
 import { observer } from "mobx-react";
 import { useState } from "react";

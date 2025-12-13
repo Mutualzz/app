@@ -1,5 +1,8 @@
-import { Link, Paper, Stack, Typography } from "@mutualzz/ui-web";
+import { Link } from "@components/Link";
+import { Paper } from "@components/Paper.tsx";
+import { Stack, Typography } from "@mutualzz/ui-web";
 import { createFileRoute } from "@tanstack/react-router";
+import type { ReactNode } from "react";
 
 export const Route = createFileRoute("/privacy")({
     component: Privacy,
@@ -358,7 +361,7 @@ function Section({
     my = 6,
 }: {
     title: string;
-    content: React.ReactNode;
+    content: ReactNode;
     mt?: number;
     my?: number;
 }) {

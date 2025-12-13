@@ -1,3 +1,4 @@
+import { AnimatedPaper } from "@components/Animated/AnimatedPaper.tsx";
 import { DOBInput } from "@components/DOBInput";
 import { useAppStore } from "@hooks/useStores";
 import type { HttpException } from "@mutualzz/types";
@@ -5,7 +6,6 @@ import {
     Button,
     Input,
     type InputProps,
-    Paper,
     Stack,
     Typography,
 } from "@mutualzz/ui-web";
@@ -19,7 +19,6 @@ import {
 import { useMutation } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { observer } from "mobx-react";
-import { motion } from "motion/react";
 import { useState } from "react";
 
 export const Route = createFileRoute("/register")({
@@ -85,8 +84,6 @@ const InputWithLabel = ({
     </Stack>
 );
 
-const RegisterForm = motion.create(Paper);
-
 function Register() {
     const navigate = useNavigate();
     const app = useAppStore();
@@ -144,7 +141,7 @@ function Register() {
             px={{ xs: "0.5rem", sm: "1.5rem", md: "2.5rem" }}
             py={{ xs: "1rem", sm: "2rem", md: "3rem" }}
         >
-            <RegisterForm
+            <AnimatedPaper
                 direction="column"
                 justifyContent="center"
                 alignItems="center"
@@ -340,7 +337,7 @@ function Register() {
                         Login
                     </Typography>
                 </Typography>
-            </RegisterForm>
+            </AnimatedPaper>
         </Stack>
     );
 }

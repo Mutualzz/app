@@ -1,12 +1,7 @@
+import { Link } from "@components/Link.tsx";
+import { Paper } from "@components/Paper.tsx";
 import type { APIMessageEmbed } from "@mutualzz/types";
-import {
-    Avatar,
-    Link,
-    Paper,
-    Stack,
-    Typography,
-    useTheme,
-} from "@mutualzz/ui-web";
+import { Avatar, Stack, Typography, useTheme } from "@mutualzz/ui-web";
 import { observer } from "mobx-react";
 
 export const MessageEmbed = observer(
@@ -17,11 +12,10 @@ export const MessageEmbed = observer(
             return (
                 <iframe
                     data-testid="embed-iframe"
-                    css={{ borderRadius: 8 }}
+                    css={{ borderRadius: 8, border: 0 }}
                     src={embed.spotify.embedUrl}
                     width={400}
                     height={80}
-                    frameBorder={0}
                     allowFullScreen
                     allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
                     loading="lazy"
@@ -35,9 +29,9 @@ export const MessageEmbed = observer(
                     height={315}
                     src={embed.youtube.embedUrl}
                     title="YouTube video player"
-                    frameBorder={0}
                     css={{
                         borderRadius: 8,
+                        border: 0,
                     }}
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                     referrerPolicy="strict-origin-when-cross-origin"

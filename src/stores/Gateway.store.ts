@@ -52,8 +52,11 @@ export class GatewayStore {
     private heartbeatAck = true;
     private url?: string;
 
-    private encoding: Encoding = isTauri ? "etf" : "json";
-    private compress: Compression = "zlib-stream";
+    private encoding: Encoding =
+        isTauri && !import.meta.env.DEV ? "etf" : "json";
+    private compress: Compression = import.meta.env.DEV
+        ? "none"
+        : "zlib-stream";
 
     private codec!: Codec;
     private compressor!: Compressor;

@@ -1,4 +1,5 @@
 import { AnimatedPaper } from "@components/Animated/AnimatedPaper.tsx";
+import { Link } from "@components/Link.tsx";
 import { useModal } from "@contexts/Modal.context.tsx";
 import { useAppStore } from "@hooks/useStores.ts";
 import type { APIInvite } from "@mutualzz/types";
@@ -6,7 +7,6 @@ import {
     Button,
     ButtonGroup,
     Input,
-    Link,
     Stack,
     Typography,
 } from "@mutualzz/ui-web";

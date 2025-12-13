@@ -1,3 +1,4 @@
+import { AnimatedPaper } from "@components/Animated/AnimatedPaper.tsx";
 import { SpaceIcon } from "@components/Space/SpaceIcon.tsx";
 import { useAppStore } from "@hooks/useStores";
 import type { HttpException } from "@mutualzz/types";
@@ -5,7 +6,6 @@ import {
     Button,
     Input,
     type InputProps,
-    Paper,
     Stack,
     Typography,
 } from "@mutualzz/ui-web";
@@ -15,7 +15,6 @@ import { useForm } from "@tanstack/react-form";
 import { useMutation } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { observer } from "mobx-react";
-import { motion } from "motion/react";
 import { useState } from "react";
 
 export const Route = createFileRoute("/login")({
@@ -64,8 +63,6 @@ const InputWithLabel = ({
         )}
     </Stack>
 );
-
-const LoginForm = motion.create(Paper);
 
 function Login() {
     const navigate = useNavigate();
@@ -122,7 +119,7 @@ function Login() {
             px={{ xs: "0.5rem", sm: "1.5rem", md: "2.5rem" }}
             py={{ xs: "1rem", sm: "2rem", md: "3rem" }}
         >
-            <LoginForm
+            <AnimatedPaper
                 direction="column"
                 justifyContent="center"
                 alignItems="center"
@@ -260,7 +257,7 @@ function Login() {
                         Register
                     </Typography>
                 </Typography>
-            </LoginForm>
+            </AnimatedPaper>
         </Stack>
     );
 }

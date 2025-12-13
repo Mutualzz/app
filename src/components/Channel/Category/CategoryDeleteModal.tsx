@@ -37,11 +37,12 @@ export const CategoryDeleteModal = observer(({ channel }: Props) => {
         <AnimatedPaper
             borderRadius={12}
             minWidth={{ xs: "90vw", sm: 340, md: 420, lg: 400 }}
-            maxWidth={500}
+            maxWidth={600}
             direction="column"
             minHeight={200}
             initial={{ scale: 0.95 }}
             animate={{ scale: 1 }}
+            elevation={app.preferEmbossed ? 5 : 1}
             justifyContent="space-between"
             alignItems="center"
             spacing={0}
@@ -84,7 +85,16 @@ export const CategoryDeleteModal = observer(({ channel }: Props) => {
                         onClick={() => deleteCategory(false)}
                         disabled={isDeleting}
                     >
-                        Category and all channels related to it
+                        Category and all channels related
+                    </Button>
+                    <Button
+                        variant="solid"
+                        fullWidth
+                        color="success"
+                        onClick={closeAllModals}
+                        disabled={isDeleting}
+                    >
+                        Cancel
                     </Button>
                 </ButtonGroup>
             </Stack>

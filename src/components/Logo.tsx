@@ -27,5 +27,5 @@ export const Logo = observer((props: HTMLAttributes<HTMLImageElement>) => {
         setupAdaptive();
     }, [app.themes.currentIcon, theme.id, theme.type]);
 
-    return <img src={icon ?? "/icon.png"} {...props} />;
+    return <img alt="" src={icon ?? "/icon.png"} {...props} />;
 });

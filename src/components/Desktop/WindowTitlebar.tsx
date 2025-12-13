@@ -1,14 +1,8 @@
 import { WINDOW_TITLEBAR_ZINDEX } from "@app-types/index";
+import { Paper } from "@components/Paper";
 import { useDesktopShell } from "@contexts/DesktopShell.context";
 import { useAppStore } from "@hooks/useStores";
-import {
-    Box,
-    Divider,
-    IconButton,
-    Paper,
-    Stack,
-    useTheme,
-} from "@mutualzz/ui-web";
+import { Box, Divider, IconButton, Stack, useTheme } from "@mutualzz/ui-web";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { observer } from "mobx-react";
 import { useEffect, useRef, useState } from "react";
@@ -58,7 +52,7 @@ const WindowTitlebar = ({ onHeightChange }: WindowTitlebarProps) => {
             data-tauri-drag-region
             justifyContent="space-between"
             alignItems="center"
-            elevation={2}
+            variant="plain"
             py={isMac ? 2.5 : 1}
             px={isMac ? 2 : 1.5}
             minHeight={isMac ? 44 : 32}

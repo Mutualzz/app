@@ -1,10 +1,10 @@
+import { Paper } from "@components/Paper.tsx";
 import { TooltipWrapper } from "@components/TooltipWrapper.tsx";
 import { useAppStore } from "@hooks/useStores.ts";
 import {
     ButtonGroup,
     Divider,
     IconButton,
-    Paper,
     Stack,
     Tooltip,
     Typography,
@@ -22,14 +22,15 @@ export const ChannelHeader = observer(({ channel }: Props) => {
 
     return (
         <Paper
-            elevation={5}
+            elevation={app.preferEmbossed ? 5 : 0}
             p={2.5}
-            style={{
-                boxShadow: "none",
-            }}
             height="100%"
+            borderLeft="0 !important"
+            borderRight="0 !important"
+            borderTop="0 !important"
             maxHeight="3rem"
             direction="row"
+            boxShadow="0 !important"
             alignItems="center"
             justifyContent="space-between"
         >

@@ -8,6 +8,7 @@ import { baseDarkTheme, baseLightTheme, styled } from "@mutualzz/ui-core";
 import {
     Box,
     Button,
+    Checkbox,
     IconButton,
     Stack,
     Tooltip,
@@ -100,13 +101,8 @@ export const AppAppearanceSettings = observer(() => {
 
     const { mutate: deleteTheme, isPending: isDeleting } = useMutation({
         mutationKey: ["delete-theme", focusedTheme],
-        mutationFn: async (themeId: string) => {
-            const response = await app.rest.delete<{ id: string }>(
-                `@me/themes/${themeId}`,
-            );
-
-            return response;
-        },
+        mutationFn: async (themeId: string) =>
+            app.rest.delete<{ id: string }>(`@me/themes/${themeId}`),
         onSuccess: () => {
             app.themes.remove(focusedTheme);
             changeTheme(null);
@@ -170,6 +166,13 @@ export const AppAppearanceSettings = observer(() => {
                 >
                     Open Editor
                 </Button>
+                -{" "}
+                <Checkbox
+                    rtl
+                    label="Prefer Embossed Style"
+                    checked={app.preferEmbossed}
+                    onClick={() => app.togglePreferEmbossed()}
+                />
             </Typography>
             {userThemes.length > 0 && (
                 <Stack direction="column" spacing={2.5}>
@@ -352,7 +355,7 @@ export const AppAppearanceSettings = observer(() => {
                         css={{
                             display: "grid",
                             gridTemplateColumns:
-                                "repeat(10, minmax(4rem, 1fr))",
+                                "repeat(15, minmax(4rem, 1fr))",
                             gap: 10,
                         }}
                     >
@@ -419,7 +422,7 @@ export const AppAppearanceSettings = observer(() => {
                         css={{
                             display: "grid",
                             gridTemplateColumns:
-                                "repeat(10, minmax(4rem, 1fr))",
+                                "repeat(15, minmax(4rem, 1fr))",
                             gap: 10,
                         }}
                     >
@@ -488,7 +491,7 @@ export const AppAppearanceSettings = observer(() => {
                             css={{
                                 display: "grid",
                                 gridTemplateColumns:
-                                    "repeat(10, minmax(4rem, 1fr))",
+                                    "repeat(15, minmax(4rem, 1fr))",
                                 gap: 10,
                             }}
                         >
@@ -511,8 +514,8 @@ export const AppAppearanceSettings = observer(() => {
                                     />
                                     <Stack
                                         position="absolute"
-                                        top={-4}
-                                        right={-4}
+                                        top={-2}
+                                        right={-2}
                                         alignItems="center"
                                         border={`2px solid ${currentTheme.colors.surface}`}
                                         justifyContent="center"
@@ -563,8 +566,8 @@ export const AppAppearanceSettings = observer(() => {
                                                 currentTheme.id && (
                                                 <Stack
                                                     position="absolute"
-                                                    top={-4}
-                                                    right={-4}
+                                                    top={-2}
+                                                    right={-2}
                                                     alignItems="center"
                                                     border={`2px solid ${currentTheme.colors.surface}`}
                                                     justifyContent="center"
@@ -596,7 +599,7 @@ export const AppAppearanceSettings = observer(() => {
                                 css={{
                                     display: "grid",
                                     gridTemplateColumns:
-                                        "repeat(10, minmax(4rem, 1fr))",
+                                        "repeat(15, minmax(4rem, 1fr))",
                                     gap: 10,
                                 }}
                             >

@@ -26,8 +26,8 @@ export const UserSettingsModal = observer(
         return (
             <UserSettingsSidebarProvider>
                 <AnimatedPaper
-                    width="60vw"
-                    height="75vh"
+                    width="75vw"
+                    height="82.5vh"
                     borderRadius={{
                         xs: "0.75rem",
                         sm: "1.25rem",
@@ -58,7 +58,7 @@ export const UserSettingsModal = observer(
                             <UserSettingsContent redirectTo={redirectTo} />
                         </Stack>
                     ) : (
-                        <Stack maxWidth="1200px" width="100%" height="100%">
+                        <Stack width="100%" height="100%">
                             <UserSettingsSidebar />
                             <UserSettingsContent redirectTo={redirectTo} />
                         </Stack>

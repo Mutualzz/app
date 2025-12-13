@@ -1,7 +1,7 @@
 import { ListSection } from "@components/ListSection.tsx";
 import { MemberListItem } from "@components/MemberList/MemberListItem.tsx";
+import { Paper } from "@components/Paper.tsx";
 import { useAppStore } from "@hooks/useStores.ts";
-import { Paper } from "@mutualzz/ui-web";
 import { autorun } from "mobx";
 import { observer } from "mobx-react";
 import { useEffect, useState } from "react";
@@ -25,10 +25,13 @@ export const MemberList = observer(() => {
 
     return (
         <Paper
-            elevation={4}
+            elevation={app.preferEmbossed ? 5 : 0}
             direction="column"
             flex="0 0 240px"
             overflowX="hidden"
+            borderTop="0 !important"
+            borderRight="0 !important"
+            borderBottom="0 !important"
         >
             {list
                 ? list.map((category, i) => (

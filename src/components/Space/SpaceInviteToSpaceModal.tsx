@@ -1,4 +1,5 @@
 import { AnimatedPaper } from "@components/Animated/AnimatedPaper";
+import { Link } from "@components/Link";
 import { useAppStore } from "@hooks/useStores";
 import type { APIInvite } from "@mutualzz/types";
 import { HttpException } from "@mutualzz/types";
@@ -6,7 +7,6 @@ import {
     Button,
     ButtonGroup,
     Input,
-    Link,
     Option,
     Select,
     Stack,
@@ -53,6 +53,7 @@ export const SpaceInviteToSpaceModal = observer(({ channel }: Props) => {
     const [expiresAfter, setExpiresAfter] = useState(expirations[5].value);
     const [maxUsesAfter, setMaxUsesAfter] = useState(maxUses[0].value);
     const [invite, setInvite] = useState<Invite | null>(null);
+    const [copied, setCopied] = useState(false);
 
     const { data, isLoading, error } = useQuery<
         APIInvite | undefined,
@@ -91,8 +92,11 @@ export const SpaceInviteToSpaceModal = observer(({ channel }: Props) => {
     const inviteUrl = Invite.constructUrl(invite?.code || "");
 
     const copyInviteLink = async () => {
-        if (isTauri) writeText(inviteUrl);
-        else navigator.clipboard.writeText(inviteUrl);
+        if (isTauri) await writeText(inviteUrl);
+        else await navigator.clipboard.writeText(inviteUrl);
+
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
     };
 
     return (
@@ -225,9 +229,14 @@ export const SpaceInviteToSpaceModal = observer(({ channel }: Props) => {
                                     variant="soft"
                                     color={error ? "danger" : "neutral"}
                                     onClick={copyInviteLink}
-                                    disabled={isLoading || !!error || !invite}
+                                    disabled={
+                                        isLoading ||
+                                        !!error ||
+                                        !invite ||
+                                        copied
+                                    }
                                 >
-                                    Copy
+                                    {copied ? "Copied" : "Copy"}
                                 </Button>
                             }
                         />

@@ -56,6 +56,9 @@ export class AppStore {
     queryClient: QueryClient;
 
     memberListVisible = true;
+    dontShowLinkWarning = false;
+
+    preferEmbossed = true;
 
     constructor() {
         if (isTauri) this.updater = new UpdaterStore();
@@ -71,16 +74,34 @@ export class AppStore {
         });
 
         makePersistable(this, {
-            name: "AppStore",
-            properties: [
-                "joiningSpace",
-                "joiningInviteCode",
-                "memberListVisible",
-            ],
+            name: "AppStore-Transient",
+            properties: ["joiningSpace", "joiningInviteCode"],
             storage: safeLocalStorage,
             expireIn: 60 * 1000, // 1 minutes in milliseconds
             removeOnExpiration: true,
         });
+
+        makePersistable(this, {
+            name: "AppStore",
+            properties: [
+                "memberListVisible",
+                "dontShowLinkWarning",
+                "preferEmbossed",
+            ],
+            storage: safeLocalStorage,
+        });
+    }
+
+    setPreferEmbossed(val: boolean) {
+        this.preferEmbossed = val;
+    }
+
+    togglePreferEmbossed() {
+        this.preferEmbossed = !this.preferEmbossed;
+    }
+
+    setDontShowLinkWarning(val: boolean) {
+        this.dontShowLinkWarning = val;
     }
 
     setJoining(code?: string | null, space?: APISpacePartial | null) {

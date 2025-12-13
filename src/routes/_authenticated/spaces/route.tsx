@@ -37,7 +37,12 @@ function RouteComponent() {
 
     return (
         <Stack width="100%" height="100%" direction="row">
-            <Stack maxWidth="20rem" width="100%" direction="column">
+            <Stack
+                position="relative"
+                maxWidth="20rem"
+                width="100%"
+                direction="column"
+            >
                 <Stack height="100%" direction="row">
                     <SpacesSidebar />
                     <ChannelList />

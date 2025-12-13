@@ -1,3 +1,4 @@
+import { Paper } from "@components/Paper.tsx";
 import { SidebarPill, type PillType } from "@components/SidebarPill";
 import { SpaceIcon } from "@components/Space/SpaceIcon.tsx";
 import { SpaceInviteModal } from "@components/Space/SpaceInviteModal.tsx";
@@ -22,14 +23,7 @@ import type { CSSObject } from "@emotion/react";
 import { useAppStore } from "@hooks/useStores";
 import { contextMenu } from "@mutualzz/contexify";
 import { formatColor } from "@mutualzz/ui-core";
-import {
-    IconButton,
-    Paper,
-    Portal,
-    Stack,
-    Tooltip,
-    useTheme,
-} from "@mutualzz/ui-web";
+import { IconButton, Portal, Stack, Tooltip, useTheme } from "@mutualzz/ui-web";
 import type { Space } from "@stores/objects/Space";
 import { observer } from "mobx-react";
 import { useEffect, useState, type MouseEvent } from "react";
@@ -115,8 +109,6 @@ const SortableSpace = observer(
                                 space={space}
                                 onClick={onClick}
                                 css={{
-                                    borderRadius: 9999,
-                                    padding: 0,
                                     cursor: isDragging ? "grabbing" : "pointer",
                                 }}
                             />
@@ -165,13 +157,14 @@ export const SpacesSidebar = observer(() => {
 
     return (
         <Paper
-            elevation={2}
             maxWidth="5rem"
             direction="column"
             pt={3.75}
             spacing={2.5}
             width="100%"
+            variant="plain"
             boxShadow="none"
+            elevation={app.preferEmbossed ? 1 : 0}
         >
             <DndContext
                 sensors={sensors}

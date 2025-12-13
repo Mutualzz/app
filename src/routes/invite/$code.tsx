@@ -1,7 +1,8 @@
+import { Paper } from "@components/Paper.tsx";
 import { SpaceIcon } from "@components/Space/SpaceIcon.tsx";
 import { useAppStore } from "@hooks/useStores";
 import { type APIInvite } from "@mutualzz/types";
-import { Button, Paper, Stack, Typography } from "@mutualzz/ui-web";
+import { Button, Stack, Typography } from "@mutualzz/ui-web";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { createFileRoute, Navigate, useNavigate } from "@tanstack/react-router";
 import { observer } from "mobx-react";

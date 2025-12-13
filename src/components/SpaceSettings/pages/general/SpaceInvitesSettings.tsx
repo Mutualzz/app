@@ -1,4 +1,5 @@
 import { AnimatedStack } from "@components/Animated/AnimatedStack";
+import { Paper } from "@components/Paper.tsx";
 import { SpaceInviteToSpaceModal } from "@components/Space/SpaceInviteToSpaceModal.tsx";
 import { TooltipWrapper } from "@components/TooltipWrapper";
 import { UserAvatar } from "@components/User/UserAvatar";
@@ -12,7 +13,6 @@ import {
     ButtonGroup,
     Divider,
     IconButton,
-    Paper,
     Stack,
     Tooltip,
     Typography,

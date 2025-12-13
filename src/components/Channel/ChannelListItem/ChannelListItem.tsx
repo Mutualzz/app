@@ -1,24 +1,25 @@
+import { Paper } from "@components/Paper.tsx";
 import { useModal } from "@contexts/Modal.context";
 import { useAppStore } from "@hooks/useStores";
 import { contextMenu } from "@mutualzz/contexify";
 import {
     IconButton,
-    Paper,
     Portal,
     Stack,
     Typography,
     useTheme,
+    type PaperProps,
 } from "@mutualzz/ui-web";
 import type { Channel } from "@stores/objects/Channel";
 import type { Space } from "@stores/objects/Space";
 import { observer } from "mobx-react";
-import { useState, type HTMLAttributes, type MouseEvent } from "react";
+import { useState, type MouseEvent } from "react";
 import { FaChevronDown, FaChevronRight, FaPlus } from "react-icons/fa";
 import { ChannelCreateModal } from "../ChannelCreateModal";
 import { ChannelIcon } from "../ChannelIcon";
 import { ChannelListItemContextMenu } from "./ChannelListtemContextMenu";
 
-interface Props extends HTMLAttributes<HTMLDivElement> {
+interface Props extends PaperProps {
     space: Space;
     channel: Channel;
     isCategory: boolean;
@@ -51,9 +52,7 @@ export const ChannelListItem = observer(
         };
 
         const canModifyChannel =
-            app.account &&
-            channel.space?.owner &&
-            channel.space.owner.id === app.account.id;
+            app.account && space.owner && space.owner.id === app.account.id;
 
         const handleClick = () => {
             if (isCategory && onToggleCollapse) {
@@ -62,7 +61,6 @@ export const ChannelListItem = observer(
             }
 
             if (!channel.isTextChannel) return;
-            if (channel.space == null) return;
 
             app.channels.setActive(channel.id);
         };
@@ -78,13 +76,13 @@ export const ChannelListItem = observer(
                     css={{ cursor: "pointer" }}
                     onClick={handleClick}
                     variant={active ? "soft" : "plain"}
-                    color="neutral"
                     onMouseEnter={() => setWrapperHovered(true)}
                     onMouseLeave={() => setWrapperHovered(false)}
                     alignItems="center"
                     height="100%"
                     justifyContent="space-between"
                     onContextMenu={showChannelMenu}
+                    color={props.color as any}
                     {...props}
                 >
                     <Stack

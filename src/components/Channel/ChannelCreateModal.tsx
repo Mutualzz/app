@@ -1,10 +1,11 @@
+import { Paper } from "@components/Paper.tsx";
 import { useModal } from "@contexts/Modal.context";
+import { useAppStore } from "@hooks/useStores.ts";
 import { ChannelType, type HttpException } from "@mutualzz/types";
 import {
     Button,
     ButtonGroup,
     Input,
-    Paper,
     Radio,
     Stack,
     Typography,
@@ -30,6 +31,7 @@ interface Errors {
 }
 
 export const ChannelCreateModal = observer(({ space, parent }: Props) => {
+    const app = useAppStore();
     const navigate = useNavigate();
     const { closeModal } = useModal();
     const [name, setName] = useState("");
@@ -66,7 +68,7 @@ export const ChannelCreateModal = observer(({ space, parent }: Props) => {
 
     return (
         <Paper
-            elevation={4}
+            elevation={app.preferEmbossed ? 5 : 1}
             borderRadius={8}
             minWidth={{ xs: "90vw", sm: 150, md: 200, lg: 500 }}
             maxWidth={600}

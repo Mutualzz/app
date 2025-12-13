@@ -1,4 +1,5 @@
 import { AnimatedPaper } from "@components/Animated/AnimatedPaper";
+import { Link } from "@components/Link";
 import { useModal } from "@contexts/Modal.context";
 import { useAppStore } from "@hooks/useStores";
 import { FileUploader } from "@mateie/react-drag-drop-files";
@@ -8,7 +9,6 @@ import {
     ButtonGroup,
     IconButton,
     Input,
-    Link,
     Slider,
     Stack,
     Typography,
@@ -17,7 +17,7 @@ import {
 import { useMutation } from "@tanstack/react-query";
 import { observer } from "mobx-react";
 import { useCallback, useState, type ChangeEvent } from "react";
-import Cropper from "react-easy-crop";
+import Cropper, { type Area, type Point } from "react-easy-crop";
 import { FaCamera } from "react-icons/fa";
 import { FaMagnifyingGlass, FaRotate } from "react-icons/fa6";
 
@@ -40,9 +40,10 @@ export const SpaceCreate = observer(({ setCreating }: Props) => {
 
     const [imageFile, setImageFile] = useState<string | null>(null);
     const [originalFile, setOriginalFile] = useState<File | null>(null);
-    const [croppedAreaPixels, setCroppedAreaPixels] = useState<any>(null);
+    const [croppedAreaPixels, setCroppedAreaPixels] =
+        useState<Partial<Area> | null>(null);
 
-    const [crop, setCrop] = useState({ x: 0, y: 0 });
+    const [crop, setCrop] = useState<Point>({ x: 0, y: 0 });
     const [zoom, setZoom] = useState(1);
     const [rotation, setRotation] = useState(0);
 
@@ -95,7 +96,7 @@ export const SpaceCreate = observer(({ setCreating }: Props) => {
         setZoom(1);
     };
 
-    const onCropComplete = useCallback((_: any, croppedAreaPixels: any) => {
+    const onCropComplete = useCallback((_: any, croppedAreaPixels: Area) => {
         setCroppedAreaPixels(croppedAreaPixels);
     }, []);
 

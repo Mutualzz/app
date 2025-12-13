@@ -8,7 +8,7 @@ import { AnimatePresence } from "motion/react";
 import { useMemo } from "react";
 import { GiGalaxy } from "react-icons/gi";
 import { ImFeed, ImSpinner11 } from "react-icons/im";
-import { AnimatedIconButton } from "./Animated/AniamtedIconButton";
+import { AnimatedIconButton } from "./Animated/AnimatedIconButton.tsx";
 import { TooltipWrapper } from "./TooltipWrapper";
 
 export const ModeSwitcher = observer(() => {
@@ -45,7 +45,7 @@ export const ModeSwitcher = observer(() => {
                     content={
                         <TooltipWrapper
                             paperProps={{
-                                elevation: 5,
+                                elevation: app.preferEmbossed ? 5 : 1,
                                 p: 1,
                             }}
                             typographyProps={{
@@ -71,7 +71,7 @@ export const ModeSwitcher = observer(() => {
                             zIndex: theme.zIndex.fab,
                         }}
                         color="primary"
-                        size={28}
+                        size={30}
                         variant="solid"
                         onClick={handleClick}
                         aria-label={title}

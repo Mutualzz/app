@@ -204,7 +204,7 @@ const MarkdownInput = forwardRef<HTMLDivElement, MarkdownInputProps>(
                 }
                 onKeyDownProp?.(e, editor);
             },
-            [editor, handleShiftEnter, formats, onKeyDownProp],
+            [editor, formats, onKeyDownProp],
         );
 
         const handleChange = useCallback(

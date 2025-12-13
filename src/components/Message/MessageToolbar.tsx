@@ -1,6 +1,7 @@
+import { Paper } from "@components/Paper.tsx";
 import { TooltipWrapper } from "@components/TooltipWrapper";
 import { useAppStore } from "@hooks/useStores";
-import { ButtonGroup, IconButton, Paper, Tooltip } from "@mutualzz/ui-web";
+import { ButtonGroup, IconButton, Tooltip } from "@mutualzz/ui-web";
 import type { Message } from "@stores/objects/Message";
 import { useMutation } from "@tanstack/react-query";
 import { observer } from "mobx-react";
