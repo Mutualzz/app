@@ -44,6 +44,9 @@
                 },
                 {
                     "url": "mutualzz://*/*"
+                },
+                {
+                    "url": "spotify:*"
                 }
             ]
         },

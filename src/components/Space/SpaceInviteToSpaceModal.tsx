@@ -101,16 +101,16 @@ export const SpaceInviteToSpaceModal = observer(({ channel }: Props) => {
 
     return (
         <AnimatedPaper
-            elevation={5}
+            elevation={app.preferEmbossed ? 5 : 1}
             borderRadius={12}
             minWidth={{ xs: "90vw", sm: 340, md: 420, lg: 500 }}
             maxWidth={500}
             direction="column"
+            transparency={65}
             minHeight={300}
             initial={{ scale: 0.95 }}
             animate={{ scale: 1 }}
             alignItems="center"
-            transparency={0}
             justifyContent={editing ? "center" : "space-between"}
             spacing={0}
             px={{ xs: "0.75rem", sm: "1.5rem" }}

@@ -1,5 +1,5 @@
 import { FeedSidebar } from "@components/Feed/FeedSidebar";
-import { Paper } from "@components/Paper.tsx";
+import { Paper } from "@components/Paper";
 import { UserBar } from "@components/User/UserBar";
 import { useAppStore } from "@hooks/useStores";
 import { Stack, Typography } from "@mutualzz/ui-web";

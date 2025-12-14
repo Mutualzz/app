@@ -1,10 +1,16 @@
-import { SpaceCreate } from "@components/Space/SpaceCreate.tsx";
-import { SpaceJoin } from "@components/Space/SpaceJoin.tsx";
+import { SpaceCreate } from "@components/Space/SpaceCreate";
+import { SpaceJoin } from "@components/Space/SpaceJoin";
+import { useAppStore } from "@hooks/useStores.ts";
 import { observer } from "mobx-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export const SpaceInviteModal = observer(() => {
+    const app = useAppStore();
     const [creating, setCreating] = useState(false);
+
+    useEffect(() => {
+        if (app.spaces.all.length === 0) setCreating(true);
+    }, [app.spaces.all.length]);
 
     if (creating) return <SpaceCreate setCreating={setCreating} />;
 

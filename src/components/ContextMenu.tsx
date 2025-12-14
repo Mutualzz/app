@@ -1,23 +1,19 @@
-import { useAppStore } from "@hooks/useStores.ts";
-import { Paper as MPaper, type PaperProps } from "@mutualzz/ui-web";
-import { observer } from "mobx-react";
+import { useAppStore } from "@hooks/useStores";
+import { Menu, type MenuProps } from "@mutualzz/contexify";
 import { forwardRef } from "react";
 
-const PaperComponent = forwardRef<HTMLDivElement, PaperProps>(
-    ({ color, ...props }, ref) => {
+export const ContextMenu = forwardRef<HTMLDivElement, MenuProps>(
+    (props, ref) => {
         const app = useAppStore();
 
         return (
-            <MPaper
+            <Menu
                 variant={app.preferEmbossed ? "elevation" : "outlined"}
                 elevation={props.variant === "soft" ? 0 : props.elevation}
                 transparency={app.preferEmbossed ? 90 : props.transparency}
-                color={color as string}
                 {...props}
                 ref={ref}
             />
         );
     },
 );
-
-export const Paper = observer(PaperComponent);

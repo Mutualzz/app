@@ -1,9 +1,9 @@
 import { AnimatedStack } from "@components/Animated/AnimatedStack";
-import { Paper } from "@components/Paper.tsx";
-import { SpaceInviteToSpaceModal } from "@components/Space/SpaceInviteToSpaceModal.tsx";
+import { Paper } from "@components/Paper";
+import { SpaceInviteToSpaceModal } from "@components/Space/SpaceInviteToSpaceModal";
 import { TooltipWrapper } from "@components/TooltipWrapper";
 import { UserAvatar } from "@components/User/UserAvatar";
-import { useModal } from "@contexts/Modal.context.tsx";
+import { useModal } from "@contexts/Modal.context";
 import type { Theme } from "@emotion/react";
 import { useAppStore } from "@hooks/useStores";
 import type { APIInvite } from "@mutualzz/types";

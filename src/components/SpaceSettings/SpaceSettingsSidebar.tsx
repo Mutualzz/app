@@ -1,4 +1,4 @@
-import { Paper } from "@components/Paper.tsx";
+import { Paper } from "@components/Paper";
 import {
     useSpaceSettingsSidebar,
     type SpaceSettingsSidebarCategories,
@@ -75,9 +75,13 @@ export const SpaceSettingsSidebar = observer(
                 height="100%"
                 minWidth={175}
                 maxWidth={175}
-                elevation={2}
+                elevation={app.preferEmbossed ? 5 : 0}
                 spacing={2.5}
+                variant="outlined"
                 pt="1rem"
+                borderTop="0 !important"
+                borderLeft="0 !important"
+                borderBottom="0 !important"
             >
                 {categories.map(([category, pages], index) => (
                     <Fragment
@@ -136,6 +140,7 @@ export const SpaceSettingsSidebar = observer(
                             <Divider
                                 css={{
                                     paddingInline: "1rem",
+                                    filter: "opacity(0.5)",
                                 }}
                                 lineColor="muted"
                             />

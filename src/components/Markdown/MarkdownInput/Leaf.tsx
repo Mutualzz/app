@@ -1,4 +1,4 @@
-import { Paper } from "@components/Paper.tsx";
+import { Paper } from "@components/Paper";
 import { Typography, useTheme } from "@mutualzz/ui-web";
 import type { RenderLeafProps } from "slate-react";
 

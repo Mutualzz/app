@@ -1,4 +1,4 @@
-import { Paper } from "@components/Paper.tsx";
+import { Paper } from "@components/Paper";
 import { useModal } from "@contexts/Modal.context";
 import { useAppStore } from "@hooks/useStores.ts";
 import { ChannelType, HttpException } from "@mutualzz/types";
@@ -49,11 +49,11 @@ export const CategoryCreateModal = observer(({ space }: Props) => {
             maxWidth={400}
             direction="column"
             minHeight={250}
+            transparency={65}
             justifyContent="space-between"
             width="100%"
             onKeyDown={(e) => e.key === "Enter" && createCategory()}
             px={5}
-            transparency={0}
         >
             <Stack direction="column" my="auto" spacing={1.25}>
                 <Stack direction="column" spacing={1.25}>

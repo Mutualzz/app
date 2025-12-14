@@ -1,14 +1,14 @@
 import { ChannelHeader } from "@components/Channel/ChannelHeader";
-import { MemberList } from "@components/MemberList/MemberList.tsx";
+import { MemberList } from "@components/MemberList/MemberList";
 import { MessageInput } from "@components/Message/MessageInput";
 import { MessageList } from "@components/Message/MessageList";
-import { Paper } from "@components/Paper.tsx";
+import { Paper } from "@components/Paper";
 import { useAppStore } from "@hooks/useStores";
 import { Stack, Typography } from "@mutualzz/ui-web";
+import { useDebouncedEffect } from "@react-hookz/web";
 import { createFileRoute } from "@tanstack/react-router";
 import { runInAction } from "mobx";
 import { observer } from "mobx-react";
-import { useEffect } from "react";
 
 export const Route = createFileRoute(
     "/_authenticated/spaces/$spaceId/$channelId",
@@ -19,16 +19,20 @@ export const Route = createFileRoute(
 function RouteComponent() {
     const app = useAppStore();
 
-    useEffect(() => {
-        if (!app.channels.activeId || !app.spaces.activeId) return;
+    useDebouncedEffect(
+        () => {
+            if (!app.channels.activeId || !app.spaces.activeId) return;
 
-        runInAction(() => {
-            app.gateway.onChannelOpen(
-                app.spaces.activeId!,
-                app.channels.activeId!,
-            );
-        });
-    }, [app.channels.activeId, app.spaces.activeId]);
+            runInAction(() => {
+                app.gateway.onChannelOpen(
+                    app.spaces.activeId!,
+                    app.channels.activeId!,
+                );
+            });
+        },
+        [app.channels.activeId, app.spaces.activeId],
+        2000,
+    );
 
     return (
         <Paper

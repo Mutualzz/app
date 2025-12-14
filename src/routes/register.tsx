@@ -1,4 +1,4 @@
-import { AnimatedPaper } from "@components/Animated/AnimatedPaper.tsx";
+import { AnimatedPaper } from "@components/Animated/AnimatedPaper";
 import { DOBInput } from "@components/DOBInput";
 import { useAppStore } from "@hooks/useStores";
 import type { HttpException } from "@mutualzz/types";

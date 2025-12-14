@@ -1,5 +1,5 @@
-import { AnimatedPaper } from "@components/Animated/AnimatedPaper.tsx";
-import { SpaceIcon } from "@components/Space/SpaceIcon.tsx";
+import { AnimatedPaper } from "@components/Animated/AnimatedPaper";
+import { SpaceIcon } from "@components/Space/SpaceIcon";
 import { useAppStore } from "@hooks/useStores";
 import type { HttpException } from "@mutualzz/types";
 import {

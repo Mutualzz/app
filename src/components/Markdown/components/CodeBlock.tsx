@@ -1,4 +1,4 @@
-import { Paper } from "@components/Paper.tsx";
+import { Paper } from "@components/Paper";
 import type { JSX } from "@emotion/react/jsx-runtime";
 import { type ColorLike } from "@mutualzz/ui-core";
 import { Box, Typography, useTheme } from "@mutualzz/ui-web";

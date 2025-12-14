@@ -30,6 +30,7 @@ import {
     HeadContent,
     Outlet,
     Scripts,
+    useNavigate,
 } from "@tanstack/react-router";
 import { getTauriVersion, getVersion } from "@tauri-apps/api/app";
 import { arch, locale, platform, version } from "@tauri-apps/plugin-os";
@@ -58,6 +59,8 @@ import { Paper } from "@components/Paper";
 import { AppTheme } from "@contexts/AppTheme.context";
 import { DesktopShellProvider } from "@contexts/DesktopShell.context";
 import { ModalProvider } from "@contexts/Modal.context";
+import { listen } from "@tauri-apps/api/event";
+import { getCurrentWindow } from "@tauri-apps/api/window";
 import { calendarStrings } from "@utils/i18n";
 
 dayjs.extend(relativeTime);
@@ -110,6 +113,7 @@ function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
 }
 
 function RootComponent() {
+    const navigate = useNavigate();
     const app = useAppStore();
     const logger = new Logger({
         tag: "App",
@@ -182,6 +186,40 @@ function RootComponent() {
         return dispose;
     }, []);
 
+    useEffect(() => {
+        if (!isTauri) return;
+        const win = getCurrentWindow();
+
+        const unlistenP = listen<string[]>("app://open-url", async (e) => {
+            // Try focus again from the UI thread
+            await win.show();
+            await win.unminimize();
+            await win.setFocus();
+
+            // Route your deep link here too
+            const urlStr = e.payload.find((x) => x.startsWith("mutualzz://"));
+            if (!urlStr) return;
+
+            const url = new URL(urlStr);
+            if (url.hostname === "invite") {
+                const code = url.pathname.replace(/^\/+/, "");
+
+                navigate({
+                    to: "/invite/$code",
+                    replace: true,
+                    params: { code },
+                    search: {
+                        deepLink: true,
+                    },
+                });
+            }
+        });
+
+        return () => {
+            unlistenP.then((u) => u());
+        };
+    }, [navigate]);
+
     return (
         <RootDocument>
             <Providers>
@@ -233,6 +271,12 @@ function RootComponent() {
                                         {app.account && <ModeSwitcher />}
                                     </Stack>
                                 </Loader>
+                                {/* {import.meta.env.DEV && (
+                                    <>
+                                        <TanStackRouterDevtools />
+                                        <TanStackQueryDevtools />
+                                    </>
+                                )} */}
                             </ModalProvider>
                         </DesktopShell>
                     </DesktopShellProvider>

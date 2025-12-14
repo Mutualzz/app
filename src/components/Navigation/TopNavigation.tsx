@@ -1,6 +1,6 @@
 import { AnimatedLogo } from "@components/Animated/AnimatedLogo";
 import { DownloadButton } from "@components/DownloadButton";
-import { Paper } from "@components/Paper.tsx";
+import { Paper } from "@components/Paper";
 import { TooltipWrapper } from "@components/TooltipWrapper";
 import { useAppStore } from "@hooks/useStores";
 import { Box, Button, Stack, Tooltip, useTheme } from "@mutualzz/ui-web";

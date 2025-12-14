@@ -1,7 +1,7 @@
-import { Paper } from "@components/Paper.tsx";
+import { Paper } from "@components/Paper";
 import { SidebarPill, type PillType } from "@components/SidebarPill";
-import { SpaceIcon } from "@components/Space/SpaceIcon.tsx";
-import { SpaceInviteModal } from "@components/Space/SpaceInviteModal.tsx";
+import { SpaceIcon } from "@components/Space/SpaceIcon";
+import { SpaceInviteModal } from "@components/Space/SpaceInviteModal";
 import { TooltipWrapper } from "@components/TooltipWrapper";
 import { useModal } from "@contexts/Modal.context";
 import {
@@ -31,7 +31,15 @@ import { FaPlus } from "react-icons/fa";
 import { SpaceContextMenu } from "./SpaceContextMenu";
 
 const SortableSpace = observer(
-    ({ space, onClick }: { space: Space; onClick: () => void }) => {
+    ({
+        space,
+        onClick,
+        selected,
+    }: {
+        space: Space;
+        onClick: () => void;
+        selected: boolean;
+    }) => {
         const app = useAppStore();
         const {
             attributes,
@@ -108,6 +116,7 @@ const SortableSpace = observer(
                                 onMouseLeave={() => setIsHovered(false)}
                                 space={space}
                                 onClick={onClick}
+                                selected={selected}
                                 css={{
                                     cursor: isDragging ? "grabbing" : "pointer",
                                 }}
@@ -184,6 +193,7 @@ export const SpacesSidebar = observer(() => {
                             }}
                             key={space.id}
                             space={space}
+                            selected={app.spaces.activeId === space.id}
                         />
                     ))}
                 </SortableContext>

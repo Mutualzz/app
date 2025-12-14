@@ -8,7 +8,7 @@ import { AnimatePresence } from "motion/react";
 import { useMemo } from "react";
 import { GiGalaxy } from "react-icons/gi";
 import { ImFeed, ImSpinner11 } from "react-icons/im";
-import { AnimatedIconButton } from "./Animated/AnimatedIconButton.tsx";
+import { AnimatedIconButton } from "./Animated/AnimatedIconButton";
 import { TooltipWrapper } from "./TooltipWrapper";
 
 export const ModeSwitcher = observer(() => {

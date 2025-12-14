@@ -3,9 +3,10 @@ mod gateway;
 
 use crate::gateway::{decode_frame, encode_frame, Encoding};
 use serde_json::Value;
-use tauri::{Manager, RunEvent};
+use tauri::{Emitter, Manager, RunEvent};
 #[cfg(desktop)]
 use tauri_plugin_autostart::MacosLauncher;
+use tauri_plugin_deep_link::DeepLinkExt;
 use tauri_plugin_log::{Target, TargetKind, WEBVIEW_TARGET};
 use tauri_plugin_notification;
 
@@ -29,7 +30,21 @@ pub fn run() {
     let context = tauri::generate_context!();
 
     let app = tauri::Builder::default()
-        .plugin(tauri_plugin_deep_link::init())
+        .plugin(tauri_plugin_single_instance::init(|app, argv, _cwd| {
+            if let Some(win) = app.get_webview_window("main") {
+                let _ = win.set_always_on_top(true);
+                let _ = win.set_always_on_top(false);
+                let _ = win.show();
+                let _ = win.unminimize();
+                let _ = win.set_focus();
+
+                // If OS refuses focus, at least get attention (taskbar flash / bounce)
+                let _ = win.request_user_attention(Some(tauri::UserAttentionType::Critical));
+            }
+
+            // Forward args/urls to frontend to route + (optionally) focus again
+            // let _ = app.emit("app://open-url", argv);
+        }))
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_clipboard_manager::init())
         .plugin(tauri_plugin_os::init())
@@ -64,26 +79,22 @@ pub fn run() {
         .setup(move |app| {
             let app_handle = app.handle();
 
+            #[cfg(any(windows, target_os = "linux"))]
+            {
+                use tauri_plugin_deep_link::DeepLinkExt;
+                app.deep_link().register_all()?;
+            }
+
             #[cfg(desktop)]
             {
                 app_handle.plugin(tauri_plugin_updater::Builder::new().build())?;
-                let _ =
-                    app_handle.plugin(tauri_plugin_single_instance::init(|app, _argv, _cwd| {
-                        app.get_webview_window("main")
-                            .map(|window| {
-                                window.show().unwrap();
-                                window.set_focus().unwrap();
-                            })
-                            .unwrap_or_else(|| {
-                                eprintln!("Failed to focus the main window");
-                            });
-                        ();
-                    }));
 
                 let _ = app_handle.plugin(tauri_plugin_autostart::init(
                     MacosLauncher::LaunchAgent,
                     Some(vec![]),
                 ));
+
+                app.deep_link().register("mutualzz")?;
             }
 
             // Open the dev tools automatically when debugging the application

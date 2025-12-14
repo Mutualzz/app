@@ -1,7 +1,8 @@
-import { Link } from "@components/Link.tsx";
-import { Paper } from "@components/Paper.tsx";
+import { Link } from "@components/Link";
+import { Paper } from "@components/Paper";
+import { UserAvatar } from "@components/User/UserAvatar";
 import type { APIMessageEmbed } from "@mutualzz/types";
-import { Avatar, Stack, Typography, useTheme } from "@mutualzz/ui-web";
+import { Stack, Typography, useTheme } from "@mutualzz/ui-web";
 import { observer } from "mobx-react";
 
 export const MessageEmbed = observer(
@@ -44,19 +45,13 @@ export const MessageEmbed = observer(
                 direction="column"
                 width="25rem"
                 borderRadius={5}
-                p={1}
+                p={2}
                 spacing={1.25}
-                border={`2px solid ${embed.color ?? theme.colors.primary}`}
+                border={`1px solid ${embed.color ?? theme.colors.primary} !important`}
             >
-                <Stack direction="row" spacing={0.25} alignItems="center">
+                <Stack direction="row" spacing={1.25} alignItems="center">
                     {embed.author?.iconUrl && (
-                        <Paper
-                            borderRadius="50%"
-                            elevation={5}
-                            overflow="hidden"
-                        >
-                            <Avatar src={embed.author?.iconUrl} />
-                        </Paper>
+                        <UserAvatar src={embed.author?.iconUrl} />
                     )}
                     {embed.author?.name && (
                         <Link

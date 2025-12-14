@@ -1,5 +1,5 @@
 import { Link } from "@components/Link";
-import { Paper } from "@components/Paper.tsx";
+import { Paper } from "@components/Paper";
 import { Typography } from "@mutualzz/ui-web";
 import emojiRegexOrig from "emojibase-regex";
 import shortcodeRegexOrig from "emojibase-regex/shortcode";

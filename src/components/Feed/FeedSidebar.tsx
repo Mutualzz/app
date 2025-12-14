@@ -1,4 +1,4 @@
-import { Paper } from "@components/Paper.tsx";
+import { Paper } from "@components/Paper";
 import { useAppStore } from "@hooks/useStores.ts";
 import { Button, ButtonGroup } from "@mutualzz/ui-web";
 import { FaCompass, FaHome, FaPalette, FaStar, FaUsers } from "react-icons/fa";

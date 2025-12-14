@@ -1,3 +1,5 @@
+import { Paper } from "@components/Paper";
+import { useAppStore } from "@hooks/useStores";
 import type { APISpacePartial } from "@mutualzz/types";
 import { Avatar, type AvatarProps, Typography } from "@mutualzz/ui-web";
 import { Space } from "@stores/objects/Space.ts";
@@ -5,26 +7,32 @@ import { asAcronym } from "@utils/index.ts";
 import { observer } from "mobx-react";
 import { useState } from "react";
 
-export const SpaceIcon = observer(
-    ({ space, ...props }: AvatarProps & { space: Space | APISpacePartial }) => {
-        const [hovered, setHovered] = useState(false);
+interface Props extends AvatarProps {
+    space: Space | APISpacePartial;
+    selected?: boolean;
+}
 
-        const iconUrl = space
-            ? Space.constructIconUrl(
-                  space.id,
-                  space.icon?.startsWith("a_"),
-                  space.icon,
-              )
-            : null;
+export const SpaceIcon = observer(({ space, selected, ...props }: Props) => {
+    const app = useAppStore();
+    const [hovered, setHovered] = useState(false);
 
+    const iconUrl = space
+        ? Space.constructIconUrl(
+              space.id,
+              space.icon?.startsWith("a_"),
+              space.icon,
+          )
+        : null;
+
+    if (iconUrl)
         return (
             <Avatar
                 size={48}
-                src={iconUrl || undefined}
-                variant={iconUrl ? "plain" : "elevation"}
+                src={iconUrl}
+                variant="plain"
                 color="primary"
                 elevation={5}
-                shape={hovered ? 10 : 15}
+                shape={selected || hovered ? 10 : 15}
                 onMouseOver={() => setHovered(true)}
                 onMouseOut={() => setHovered(false)}
                 {...props}
@@ -32,5 +40,43 @@ export const SpaceIcon = observer(
                 <Typography level="body-sm">{asAcronym(space.name)}</Typography>
             </Avatar>
         );
-    },
-);
+
+    // return (
+    //     <Avatar
+    //         size={48}
+    //         src={iconUrl || undefined}
+    //         variant={iconUrl ? "plain" : "elevation"}
+    //         color="primary"
+    //         elevation={5}
+    //         shape={hovered ? 10 : 15}
+    //         onMouseOver={() => setHovered(true)}
+    //         onMouseOut={() => setHovered(false)}
+    //         {...props}
+    //     >
+    //         <Typography level="body-sm">{asAcronym(space.name)}</Typography>
+    //     </Avatar>
+    // );
+
+    return (
+        <Paper
+            elevation={app.preferEmbossed ? 5 : 1}
+            transparency={25}
+            borderRadius={hovered ? 10 : 17.5}
+            css={{
+                transition: "border-radius 0.2s ease-in-out",
+            }}
+        >
+            <Avatar
+                size={48}
+                variant="plain"
+                color="primary"
+                shape={hovered ? 10 : 15}
+                onMouseOver={() => setHovered(true)}
+                onMouseOut={() => setHovered(false)}
+                {...props}
+            >
+                <Typography level="body-sm">{asAcronym(space.name)}</Typography>
+            </Avatar>
+        </Paper>
+    );
+});

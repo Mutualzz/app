@@ -25,6 +25,18 @@ export function mergeAppendAnything(
     });
 }
 
+export function toSpotifyUri(u: URL): string | null {
+    if (u.hostname !== "open.spotify.com") return null;
+
+    // /track/<id>, /album/<id>, /playlist/<id>, /artist/<id>, /show/<id>, /episode/<id>
+    const parts = u.pathname.split("/").filter(Boolean);
+    const type = parts[0];
+    const id = parts[1];
+
+    if (!type || !id) return null;
+    return `spotify:${type}:${id}`;
+}
+
 export const asAcronym = (str: string) =>
     str
         .split(" ")

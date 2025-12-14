@@ -1,4 +1,4 @@
-import { Paper } from "@components/Paper.tsx";
+import { Paper } from "@components/Paper";
 import type { CSSObject } from "@emotion/react";
 import {
     createColor,
@@ -58,12 +58,6 @@ export const UserAvatar = observer(
         if (!user)
             return (
                 <MAvatar
-                    css={{
-                        ...css,
-                        display: "inline-flex",
-                        justifyContent: "center",
-                        alignItems: "center",
-                    }}
                     elevation={5}
                     shape="circle"
                     variant="elevation"
@@ -92,11 +86,13 @@ export const UserAvatar = observer(
             <Paper
                 variant={user.defaultAvatar.color ? "solid" : "elevation"}
                 elevation={5}
+                transparency={0}
                 css={{
-                    display: "inline-flex",
-                    justifyContent: "center",
-                    alignItems: "center",
+                    width: size,
+                    height: size,
+                    ...css,
                 }}
+                direction="column"
                 borderRadius={9999}
                 color={(user.defaultAvatar.color as Hex) || "neutral"}
             >

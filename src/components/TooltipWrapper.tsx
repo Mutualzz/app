@@ -1,4 +1,4 @@
-import { Paper } from "@components/Paper.tsx";
+import { Paper } from "@components/Paper";
 import { useAppStore } from "@hooks/useStores.ts";
 import {
     Typography,

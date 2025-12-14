@@ -1,5 +1,5 @@
-import { Paper } from "@components/Paper.tsx";
-import { useModal } from "@contexts/Modal.context.tsx";
+import { Paper } from "@components/Paper";
+import { useModal } from "@contexts/Modal.context";
 import {
     useUserSettingsSidebar,
     type UserSettingsSidebarPage,
@@ -49,6 +49,8 @@ export const UserSettingsContent = observer(
                     borderLeftWidth="0px !important"
                     elevation={app.preferEmbossed ? 3 : 1}
                     justifyContent="space-between"
+                    borderTop="0 !important"
+                    borderLeft="0 !important"
                 >
                     <Typography
                         level={{ xs: "h6", sm: "h5" }}

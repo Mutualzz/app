@@ -22,6 +22,9 @@ function RouteComponent() {
                 params={{
                     code: app.joiningInviteCode,
                 }}
+                search={{
+                    deepLink: false,
+                }}
             />
         );
 

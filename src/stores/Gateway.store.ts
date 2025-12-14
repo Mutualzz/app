@@ -578,7 +578,7 @@ export class GatewayStore {
     };
 
     private onSpaceDelete = async (payload: APISpace) => {
-        const space = await this.app.spaces.resolve(payload.id);
+        const space = this.app.spaces.get(payload.id);
         if (!space) return;
 
         space.channels.forEach((channel) => {
@@ -587,12 +587,14 @@ export class GatewayStore {
         });
 
         this.app.spaces.remove(payload.id);
-        this.app.spaces.setActive(this.app.spaces.positioned[0]?.id);
+        this.lazyRequestChannels.delete(space.id);
+        this.app.spaces.setPreferredActive();
+        this.app.channels.setPreferredActive();
     };
 
     private onChannelCreate = async (payload: APIChannel) => {
         if (!payload.spaceId) return;
-        const space = await this.app.spaces.resolve(payload.spaceId);
+        const space = this.app.spaces.get(payload.spaceId);
         if (!space) return;
 
         const channel = space.addChannel(payload);
@@ -601,7 +603,7 @@ export class GatewayStore {
 
     private onChannelUpdate = async (payload: APIChannel) => {
         if (!payload.spaceId) return;
-        const space = await this.app.spaces.resolve(payload.spaceId);
+        const space = this.app.spaces.get(payload.spaceId);
         if (!space) return;
 
         space.updateChannel(payload);
@@ -610,7 +612,7 @@ export class GatewayStore {
     private onBulkChannelUpdate = async (payload: APIChannel[]) => {
         for (const channel of payload) {
             if (!channel.spaceId) continue;
-            const space = await this.app.spaces.resolve(channel.spaceId);
+            const space = this.app.spaces.get(channel.spaceId);
             if (!space) continue;
             space.updateChannel(channel);
         }
@@ -618,7 +620,7 @@ export class GatewayStore {
 
     private onChannelDelete = async (payload: APIChannel) => {
         if (!payload.spaceId) return;
-        const space = await this.app.spaces.resolve(payload.spaceId);
+        const space = this.app.spaces.get(payload.spaceId);
         if (!space) return;
 
         space.removeChannel(payload.id);
@@ -628,7 +630,7 @@ export class GatewayStore {
     private onBulkChannelDelete = async (payload: APIChannel[]) => {
         for (const channel of payload) {
             if (!channel.spaceId) continue;
-            const space = await this.app.spaces.resolve(channel.spaceId);
+            const space = this.app.spaces.get(channel.spaceId);
             if (!space) continue;
             space.removeChannel(channel.id);
         }
@@ -637,7 +639,7 @@ export class GatewayStore {
     };
 
     private onMessageCreate = async (payload: APIMessage) => {
-        const channel = await this.app.channels.resolve(payload.channelId);
+        const channel = this.app.channels.get(payload.channelId);
         if (!channel) return;
 
         channel.messages.add(payload);
@@ -645,7 +647,7 @@ export class GatewayStore {
     };
 
     private onMessageDelete = async (payload: APIMessage) => {
-        const channel = await this.app.channels.resolve(payload.channelId);
+        const channel = this.app.channels.get(payload.channelId);
         if (!channel) return;
 
         channel.messages.remove(payload.id);
@@ -666,7 +668,7 @@ export class GatewayStore {
     private onInviteCreate = async (payload: APIInvite) => {
         if (!payload.spaceId || !payload.channelId) return;
 
-        const space = await this.app.spaces.resolve(payload.spaceId);
+        const space = this.app.spaces.get(payload.spaceId);
         if (!space) return;
 
         space.addInvite(payload);
@@ -675,7 +677,7 @@ export class GatewayStore {
     private onInviteUpdate = async (payload: APIInvite) => {
         if (!payload.spaceId || !payload.channelId) return;
 
-        const space = await this.app.spaces.resolve(payload.spaceId);
+        const space = this.app.spaces.get(payload.spaceId);
         if (!space) return;
 
         space.updateInvite(payload);
@@ -686,24 +688,26 @@ export class GatewayStore {
         channelId: string;
         code: string;
     }) => {
-        const space = await this.app.spaces.resolve(payload.spaceId);
+        const space = this.app.spaces.get(payload.spaceId);
         if (!space) return;
 
         space.removeInvite(payload.code);
     };
 
+    // TODO: Implement lazy request to sync properly
     private onSpaceMemberAdd = async (payload: any) => {
-        const space = await this.app.spaces.resolve(payload.spaceId);
+        const space = this.app.spaces.get(payload.spaceId);
         if (!space) return;
 
         space.members.add(payload);
     };
 
+    // TODO: Implement lazy request to sync properly
     private onSpaceMemberRemove = async (payload: {
         spaceId: string;
         userId: string;
     }) => {
-        const space = await this.app.spaces.resolve(payload.spaceId);
+        const space = this.app.spaces.get(payload.spaceId);
         if (!space) return;
 
         space.members.remove(payload.userId);

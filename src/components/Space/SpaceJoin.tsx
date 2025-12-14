@@ -1,6 +1,6 @@
-import { AnimatedPaper } from "@components/Animated/AnimatedPaper.tsx";
-import { Link } from "@components/Link.tsx";
-import { useModal } from "@contexts/Modal.context.tsx";
+import { AnimatedPaper } from "@components/Animated/AnimatedPaper";
+import { Link } from "@components/Link";
+import { useModal } from "@contexts/Modal.context";
 import { useAppStore } from "@hooks/useStores.ts";
 import type { APIInvite } from "@mutualzz/types";
 import {

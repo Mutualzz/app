@@ -1,7 +1,8 @@
-import { SpaceInviteToSpaceModal } from "@components/Space/SpaceInviteToSpaceModal.tsx";
+import { ContextMenu } from "@components/ContextMenu";
+import { SpaceInviteToSpaceModal } from "@components/Space/SpaceInviteToSpaceModal";
 import { useModal } from "@contexts/Modal.context";
 import { useAppStore } from "@hooks/useStores";
-import { Item, Menu } from "@mutualzz/contexify";
+import { Item } from "@mutualzz/contexify";
 import type { Channel } from "@stores/objects/Channel";
 import type { Space } from "@stores/objects/Space";
 import { useMutation } from "@tanstack/react-query";
@@ -41,7 +42,11 @@ export const ChannelListItemContextMenu = observer(
             app.account && space.owner && space.owner.id === app.account.id;
 
         return (
-            <Menu id={`channel-context-menu-${channel.id}`}>
+            <ContextMenu
+                elevation={app.preferEmbossed ? 5 : 1}
+                transparency={65}
+                id={`channel-context-menu-${channel.id}`}
+            >
                 {!isCategory && (
                     <Item
                         onClick={() =>
@@ -78,7 +83,7 @@ export const ChannelListItemContextMenu = observer(
                         </Item>
                     </>
                 )}
-            </Menu>
+            </ContextMenu>
         );
     },
 );

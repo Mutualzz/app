@@ -1,6 +1,6 @@
-import { ListSection } from "@components/ListSection.tsx";
-import { MemberListItem } from "@components/MemberList/MemberListItem.tsx";
-import { Paper } from "@components/Paper.tsx";
+import { ListSection } from "@components/ListSection";
+import { MemberListItem } from "@components/MemberList/MemberListItem";
+import { Paper } from "@components/Paper";
 import { useAppStore } from "@hooks/useStores.ts";
 import { autorun } from "mobx";
 import { observer } from "mobx-react";

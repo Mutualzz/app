@@ -1,5 +1,5 @@
 import { MarkdownInputContext } from "@components/Markdown/MarkdownInput/MarkdownInput.context";
-import { Paper } from "@components/Paper.tsx";
+import { Paper } from "@components/Paper";
 import {
     Button,
     ButtonGroup,
@@ -108,7 +108,7 @@ export const HoverToolbar = () => {
                     pointerEvents: visible ? "auto" : "none",
                 }}
             >
-                <ButtonGroup variant="plain">
+                <ButtonGroup spacing={1} variant="plain">
                     <Button
                         title="Bold"
                         color={
@@ -146,8 +146,15 @@ export const HoverToolbar = () => {
                         <FaStrikethrough />
                     </Button>
                 </ButtonGroup>
-                <Divider orientation="vertical" />
-                <ButtonGroup variant="plain">
+                <Divider
+                    orientation="vertical"
+                    lineColor="muted"
+                    css={{
+                        filter: "opacity(0.25)",
+                        marginInline: 4,
+                    }}
+                />
+                <ButtonGroup spacing={1} variant="plain">
                     <Button
                         title="Blockquote"
                         color={

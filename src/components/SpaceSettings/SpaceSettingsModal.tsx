@@ -3,6 +3,7 @@ import {
     SpaceSettingsSidebarProvider,
     type SpaceSettingsSidebarPage,
 } from "@contexts/SpaceSettingsSidebar.context";
+import { useAppStore } from "@hooks/useStores";
 import { Drawer, Stack, useTheme } from "@mutualzz/ui-web";
 import { useMediaQuery } from "@react-hookz/web";
 import type { Space } from "@stores/objects/Space";
@@ -18,6 +19,7 @@ interface SpaceSettingsPropsModal {
 
 export const SpaceSettingsModal = observer(
     ({ space, redirectTo }: SpaceSettingsPropsModal) => {
+        const app = useAppStore();
         const { theme } = useTheme();
 
         const isMobileQuery = useMediaQuery(
@@ -39,10 +41,10 @@ export const SpaceSettingsModal = observer(
                     overflow="auto"
                     justifyContent="center"
                     alignItems="center"
-                    elevation={5}
+                    elevation={app.preferEmbossed ? 0 : 1}
+                    transparency={0}
                     initial={{ scale: 0.95 }}
                     animate={{ scale: 1 }}
-                    transparency={0}
                 >
                     {isMobileQuery ? (
                         <Stack maxWidth="1200px" width="100%" height="100%">

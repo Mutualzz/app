@@ -1,7 +1,8 @@
-import { SpaceInviteToSpaceModal } from "@components/Space/SpaceInviteToSpaceModal.tsx";
+import { ContextMenu } from "@components/ContextMenu";
+import { SpaceInviteToSpaceModal } from "@components/Space/SpaceInviteToSpaceModal";
 import { useModal } from "@contexts/Modal.context";
 import { useAppStore } from "@hooks/useStores";
-import { Item, Menu } from "@mutualzz/contexify";
+import { Item } from "@mutualzz/contexify";
 import type { Space } from "@stores/objects/Space";
 import { observer } from "mobx-react";
 import { FaClipboard, FaHashtag, FaPaperPlane } from "react-icons/fa";
@@ -20,7 +21,11 @@ export const ChannelListContextMenu = observer(({ space }: Props) => {
         app.account && space.owner && space.owner.id === app.account.id;
 
     return (
-        <Menu id={`channel-list-context-menu-${space.id}`}>
+        <ContextMenu
+            elevation={app.preferEmbossed ? 5 : 1}
+            transparency={65}
+            id={`channel-list-context-menu-${space.id}`}
+        >
             {canModifySpace && (
                 <>
                     <Item
@@ -58,6 +63,6 @@ export const ChannelListContextMenu = observer(({ space }: Props) => {
             >
                 Invite to Space
             </Item>
-        </Menu>
+        </ContextMenu>
     );
 });

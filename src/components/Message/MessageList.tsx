@@ -1,4 +1,4 @@
-import { Paper } from "@components/Paper.tsx";
+import { Paper } from "@components/Paper";
 import { Logger } from "@mutualzz/logger";
 import { Stack, Typography } from "@mutualzz/ui-web";
 import type { MessageGroup as MessageGroupType } from "@stores/Message.store";

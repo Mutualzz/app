@@ -1,4 +1,4 @@
-import { Paper } from "@components/Paper.tsx";
+import { Paper } from "@components/Paper";
 import { TooltipWrapper } from "@components/TooltipWrapper";
 import { UserAvatar } from "@components/User/UserAvatar";
 import { UserSettingsModal } from "@components/UserSettings/UserSettingsModal";

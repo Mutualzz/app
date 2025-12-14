@@ -1,4 +1,4 @@
-import { Paper } from "@components/Paper.tsx";
+import { Paper } from "@components/Paper";
 import { useModal } from "@contexts/Modal.context";
 import { useAppStore } from "@hooks/useStores.ts";
 import { ChannelType, type HttpException } from "@mutualzz/types";
@@ -78,7 +78,7 @@ export const ChannelCreateModal = observer(({ space, parent }: Props) => {
             width="100%"
             onKeyDown={(e) => e.key === "Enter" && createChannel()}
             px={5}
-            transparency={0}
+            transparency={65}
         >
             <Stack direction="column" my="auto" spacing={3}>
                 <Stack direction="column" spacing={1.25}>

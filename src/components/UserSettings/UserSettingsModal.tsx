@@ -3,6 +3,7 @@ import {
     UserSettingsSidebarProvider,
     type UserSettingsSidebarPage,
 } from "@contexts/UserSettingsSidebar.context";
+import { useAppStore } from "@hooks/useStores";
 import { Drawer, Stack, useTheme } from "@mutualzz/ui-web";
 import { useMediaQuery } from "@react-hookz/web";
 import { observer } from "mobx-react";
@@ -16,6 +17,7 @@ interface UserSettingsPropsModal {
 
 export const UserSettingsModal = observer(
     ({ redirectTo }: UserSettingsPropsModal) => {
+        const app = useAppStore();
         const { theme } = useTheme();
         const isMobileQuery = useMediaQuery(
             theme.breakpoints.down("md").replace("@media", ""),
@@ -36,9 +38,10 @@ export const UserSettingsModal = observer(
                     overflow="auto"
                     justifyContent="center"
                     alignItems="center"
+                    elevation={app.preferEmbossed ? 0 : 1}
+                    transparency={0}
                     initial={{ scale: 0.95 }}
                     animate={{ scale: 1 }}
-                    transparency={0}
                 >
                     {isMobileQuery ? (
                         <Stack maxWidth="1200px" width="100%" height="100%">

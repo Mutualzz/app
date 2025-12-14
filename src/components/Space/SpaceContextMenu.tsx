@@ -1,12 +1,13 @@
+import { ContextMenu } from "@components/ContextMenu";
+import { ContextSubmenu } from "@components/ContextSubmenu";
 import { SpaceSettingsModal } from "@components/SpaceSettings/SpaceSettingsModal";
 import { TooltipWrapper } from "@components/TooltipWrapper";
 import { useModal } from "@contexts/Modal.context";
 import { useAppStore } from "@hooks/useStores";
-import { Item, Menu, Submenu } from "@mutualzz/contexify";
+import { Item } from "@mutualzz/contexify";
 import { Divider, Tooltip } from "@mutualzz/ui-web";
 import type { Space } from "@stores/objects/Space";
 import { useMutation } from "@tanstack/react-query";
-import { useNavigate } from "@tanstack/react-router";
 import { observer } from "mobx-react";
 import { type Dispatch, type SetStateAction } from "react";
 import {
@@ -25,26 +26,16 @@ interface Props {
 export const SpaceContextMenu = observer(
     ({ space, fromSidebar, setMenuOpen }: Props) => {
         const app = useAppStore();
-        const navigate = useNavigate();
         const { openModal } = useModal();
 
         const { mutate: deleteSpace, isPending } = useMutation({
             mutationKey: ["delete-space", space.id],
             mutationFn: async () => space.delete(),
-            onSuccess: ({ id }) => {
-                if (app.spaces.activeId === id)
-                    navigate({ to: "/", replace: true });
-            },
         });
 
         const { mutate: leaveSpace, isPending: isLeaving } = useMutation({
             mutationKey: ["leave-space", space.id],
             mutationFn: async () => space.leave(),
-            onSuccess: (member) => {
-                if (app.spaces.activeId === member.space?.id) {
-                    navigate({ to: "/", replace: true });
-                }
-            },
         });
 
         const canModifySpace =
@@ -55,7 +46,9 @@ export const SpaceContextMenu = observer(
         };
 
         return (
-            <Menu
+            <ContextMenu
+                elevation={app.preferEmbossed ? 5 : 1}
+                transparency={65}
                 id={`space-context-menu-${space.id}-${fromSidebar ? "sidebar" : "default"}`}
                 onVisibilityChange={onVisibilityChange}
             >
@@ -83,13 +76,18 @@ export const SpaceContextMenu = observer(
                 )}
                 {canModifySpace && (
                     <>
-                        <Submenu
+                        <ContextSubmenu
                             onClick={() =>
                                 openModal(
                                     `space-settings-${space.id}`,
                                     <SpaceSettingsModal space={space} />,
+                                    {
+                                        showCloseButton: false,
+                                    },
                                 )
                             }
+                            elevation={app.preferEmbossed ? 5 : 1}
+                            transparency={65}
                             label="Server Settings"
                             arrow={<FaArrowRight />}
                         >
@@ -101,13 +99,16 @@ export const SpaceContextMenu = observer(
                                             space={space}
                                             redirectTo="invites"
                                         />,
+                                        {
+                                            showCloseButton: false,
+                                        },
                                     )
                                 }
                                 endDecorator={<FaPaperPlane />}
                             >
                                 Invites
                             </Item>
-                        </Submenu>
+                        </ContextSubmenu>
                         <Item
                             color="danger"
                             onClick={() => deleteSpace()}
@@ -130,7 +131,7 @@ export const SpaceContextMenu = observer(
                         Leave Server
                     </Item>
                 )}
-            </Menu>
+            </ContextMenu>
         );
     },
 );

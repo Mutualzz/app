@@ -1,4 +1,4 @@
-import { Paper } from "@components/Paper.tsx";
+import { Paper } from "@components/Paper";
 import { TooltipWrapper } from "@components/TooltipWrapper";
 import { useAppStore } from "@hooks/useStores";
 import { ButtonGroup, IconButton, Tooltip } from "@mutualzz/ui-web";

@@ -1,4 +1,4 @@
-import { Paper } from "@components/Paper.tsx";
+import { Paper } from "@components/Paper";
 import { SpaceContextMenu } from "@components/Space/SpaceContextMenu";
 import { SpaceInviteToSpaceModal } from "@components/Space/SpaceInviteToSpaceModal";
 import { TooltipWrapper } from "@components/TooltipWrapper";

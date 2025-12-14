@@ -76,18 +76,11 @@ export const UserSettingsSidebar = observer(
                 direction="column"
                 width={200}
                 height="100%"
-                elevation={app.preferEmbossed ? 5 : 1}
+                elevation={app.preferEmbossed ? 5 : 0}
                 spacing={2.5}
-                borderTopLeftRadius={{
-                    xs: "0.75rem",
-                    sm: "1.25rem",
-                    md: "1.5rem",
-                }}
-                borderBottomLeftRadius={{
-                    xs: "0.75rem",
-                    sm: "1.25rem",
-                    md: "1.5rem",
-                }}
+                borderTop="0 !important"
+                borderLeft="0 !important"
+                borderBottom="0 !important"
             >
                 <Stack px={2.5} width="100%" pt="1rem">
                     <Button

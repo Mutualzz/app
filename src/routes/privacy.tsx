@@ -1,5 +1,5 @@
 import { Link } from "@components/Link";
-import { Paper } from "@components/Paper.tsx";
+import { Paper } from "@components/Paper";
 import { Stack, Typography } from "@mutualzz/ui-web";
 import { createFileRoute } from "@tanstack/react-router";
 import type { ReactNode } from "react";

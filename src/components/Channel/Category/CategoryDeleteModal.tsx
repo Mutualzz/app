@@ -47,7 +47,7 @@ export const CategoryDeleteModal = observer(({ channel }: Props) => {
             alignItems="center"
             spacing={0}
             p={{ xs: "1rem", sm: "2rem" }}
-            transparency={0}
+            transparency={65}
         >
             <Stack
                 width="100%"
