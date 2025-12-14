@@ -23,7 +23,7 @@ export const UserBar = observer(() => {
     const { openModal } = useModal();
 
     const conditionalProps = useMemo<Omit<PaperProps, "color">>(() => {
-        if (app.spaces.activeId)
+        if (app.channels.activeId)
             return {
                 minWidth: "12rem",
                 maxWidth: "20rem",
@@ -31,8 +31,8 @@ export const UserBar = observer(() => {
             };
 
         return {
-            maxWidth: "5rem",
-            minWidth: "5rem",
+            maxWidth: "4.25rem",
+            minWidth: "4.25rem",
             minHeight: "14rem",
             maxHeight: "20rem",
             direction: "column",
