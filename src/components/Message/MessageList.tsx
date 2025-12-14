@@ -65,7 +65,6 @@ export const MessageList = observer(({ channel }: Props) => {
                     null;
                 return { count, earliestId, before: pageParam };
             },
-            enabled: !!channel,
             getNextPageParam: (lastPage) => {
                 if (lastPage?.count != null && lastPage.count < LIMIT)
                     return undefined;
@@ -74,7 +73,7 @@ export const MessageList = observer(({ channel }: Props) => {
 
                 return lastPage.earliestId;
             },
-            staleTime: 1000 * 60,
+            enabled: !!channel?.id,
         },
     );
 
