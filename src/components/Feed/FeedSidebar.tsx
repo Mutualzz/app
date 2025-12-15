@@ -30,12 +30,15 @@ export const FeedSidebar = () => {
     const app = useAppStore();
     return (
         <Paper
-            elevation={app.preferEmbossed ? 1 : 0}
+            elevation={app.preferEmbossed ? 5 : 0}
+            borderRight="0 !important"
             borderLeft="0 !important"
+            borderTop="0 !important"
             justifyContent="center"
             p={5}
             maxWidth="15rem"
             borderBottom="0 !important"
+            transparency={65}
             flex={1}
         >
             <ButtonGroup

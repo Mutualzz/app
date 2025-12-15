@@ -36,7 +36,9 @@ function RouteComponent() {
             <Paper
                 borderRight="0 !important"
                 borderBottom="0 !important"
+                borderTopLeftRadius="0.75rem"
                 width="100%"
+                p={5}
                 height="100%"
             >
                 <Typography>
