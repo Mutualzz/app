@@ -1,5 +1,5 @@
 import { Paper } from "@components/Paper";
-import { useAppStore } from "@hooks/useStores.ts";
+import { useAppStore } from "@hooks/useStores";
 import {
     Typography,
     type PaperProps,

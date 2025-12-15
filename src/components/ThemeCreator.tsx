@@ -44,7 +44,7 @@ import { useMutation } from "@tanstack/react-query";
 import { adaptColors } from "@utils/adaptation";
 import { sortThemes } from "@utils/index";
 import capitalize from "lodash-es/capitalize";
-import { observer } from "mobx-react";
+import { observer } from "mobx-react-lite";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { FaShuffle } from "react-icons/fa6";
 import { AnimatedPaper } from "./Animated/AnimatedPaper";

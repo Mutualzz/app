@@ -1,6 +1,6 @@
 import { Stack } from "@mutualzz/ui-web";
 import { createFileRoute, Outlet } from "@tanstack/react-router";
-import { observer } from "mobx-react";
+import { observer } from "mobx-react-lite";
 
 export const Route = createFileRoute("/_authenticated/spaces/$spaceId")({
     component: observer(RouteComponent),

@@ -7,7 +7,7 @@ import { useAppStore } from "@hooks/useStores";
 import { Drawer, Stack, useTheme } from "@mutualzz/ui-web";
 import { useMediaQuery } from "@react-hookz/web";
 import type { Space } from "@stores/objects/Space";
-import { observer } from "mobx-react";
+import { observer } from "mobx-react-lite";
 import { useState } from "react";
 import { SpaceSettingsContent } from "./SpaceSettingsContent";
 import { SpaceSettingsSidebar } from "./SpaceSettingsSidebar";

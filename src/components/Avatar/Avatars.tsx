@@ -23,7 +23,7 @@ import {
 } from "@mutualzz/ui-web";
 import { REST } from "@stores/REST.store";
 import { useMutation } from "@tanstack/react-query";
-import { observer } from "mobx-react";
+import { observer } from "mobx-react-lite";
 import { useState } from "react";
 import { FaTrash } from "react-icons/fa";
 

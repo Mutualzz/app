@@ -3,7 +3,7 @@ import { useAppStore } from "@hooks/useStores";
 import { ThemeProvider, type ThemeProviderRef } from "@mutualzz/ui-web";
 import { Theme } from "@stores/objects/Theme";
 import { reaction } from "mobx";
-import { observer } from "mobx-react";
+import { observer } from "mobx-react-lite";
 import { useEffect, useRef, type PropsWithChildren } from "react";
 
 export const AppTheme = observer(({ children }: PropsWithChildren) => {

@@ -8,7 +8,7 @@ import { Stack, Typography } from "@mutualzz/ui-web";
 import { useDebouncedEffect } from "@react-hookz/web";
 import { createFileRoute } from "@tanstack/react-router";
 import { runInAction } from "mobx";
-import { observer } from "mobx-react";
+import { observer } from "mobx-react-lite";
 
 export const Route = createFileRoute(
     "/_authenticated/spaces/$spaceId/$channelId",

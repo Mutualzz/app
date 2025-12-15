@@ -4,7 +4,7 @@ import { useAppStore } from "@hooks/useStores";
 import { MessageType } from "@mutualzz/types";
 import type { Channel } from "@stores/objects/Channel";
 import Snowflake from "@utils/Snowflake";
-import { observer } from "mobx-react";
+import { observer } from "mobx-react-lite";
 import { useCallback, useState, type KeyboardEvent } from "react";
 import type { Editor } from "slate";
 

@@ -15,7 +15,7 @@ import {
 } from "@mutualzz/ui-web";
 import type { AccountStore } from "@stores/Account.store";
 import type { User } from "@stores/objects/User";
-import { observer } from "mobx-react";
+import { observer } from "mobx-react-lite";
 import { useMemo, useState } from "react";
 import { FaUser } from "react-icons/fa";
 

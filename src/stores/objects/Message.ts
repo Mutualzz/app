@@ -1,6 +1,6 @@
 import type { APIMessage, APIMessageEmbed, Snowflake } from "@mutualzz/types";
 import type { AppStore } from "@stores/App.store";
-import type { Space } from "@stores/objects/Space.ts";
+import type { Space } from "@stores/objects/Space";
 import { makeObservable } from "mobx";
 import { Channel } from "./Channel";
 import { MessageBase } from "./MessageBase";

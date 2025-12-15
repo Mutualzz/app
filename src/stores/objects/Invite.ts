@@ -1,8 +1,8 @@
 import type { Snowflake } from "@mutualzz/types";
 import { type APIInvite, type InviteType } from "@mutualzz/types";
 import type { AppStore } from "@stores/App.store";
-import { Channel } from "@stores/objects/Channel.ts";
-import type { User } from "@stores/objects/User.ts";
+import { Channel } from "@stores/objects/Channel";
+import type { User } from "@stores/objects/User";
 import { Space } from "./Space";
 
 const prefixUrl = import.meta.env.DEV

@@ -4,7 +4,7 @@ import { Box, Stack, Tooltip, Typography } from "@mutualzz/ui-web";
 import { Message, type MessageLike } from "@stores/objects/Message";
 import { calendarStrings } from "@utils/i18n";
 import dayjs from "dayjs";
-import { observer } from "mobx-react";
+import { observer } from "mobx-react-lite";
 import type { HTMLAttributes, PropsWithChildren } from "react";
 
 interface Props extends PropsWithChildren, HTMLAttributes<HTMLDivElement> {

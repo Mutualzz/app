@@ -5,7 +5,7 @@ import type { MessageGroup as MessageGroupType } from "@stores/Message.store";
 import type { Channel } from "@stores/objects/Channel";
 import type { Space } from "@stores/objects/Space";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { observer } from "mobx-react";
+import { observer } from "mobx-react-lite";
 import { createContext, useCallback, useRef } from "react";
 import { FaHashtag } from "react-icons/fa";
 import InfiniteScroll from "react-infinite-scroll-component";

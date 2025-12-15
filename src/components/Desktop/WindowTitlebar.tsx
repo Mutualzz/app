@@ -4,7 +4,7 @@ import { useDesktopShell } from "@contexts/DesktopShell.context";
 import { useAppStore } from "@hooks/useStores";
 import { Box, Divider, IconButton, Stack, useTheme } from "@mutualzz/ui-web";
 import { getCurrentWindow } from "@tauri-apps/api/window";
-import { observer } from "mobx-react";
+import { observer } from "mobx-react-lite";
 import { useEffect, useRef, useState } from "react";
 import { FaDownload } from "react-icons/fa";
 import {

@@ -1,8 +1,8 @@
 import { Paper } from "@components/Paper";
 import { useModal } from "@contexts/Modal.context";
-import { useAppStore } from "@hooks/useStores.ts";
+import { useAppStore } from "@hooks/useStores";
 import { Button, Typography, useTheme } from "@mutualzz/ui-web";
-import { observer } from "mobx-react";
+import { observer } from "mobx-react-lite";
 
 export const RateLimitError = observer(() => {
     const app = useAppStore();

@@ -1,5 +1,5 @@
 import { useAppStore } from "@hooks/useStores";
-import { observer } from "mobx-react";
+import { observer } from "mobx-react-lite";
 import type { PropsWithChildren } from "react";
 import Loading from "./Loading";
 

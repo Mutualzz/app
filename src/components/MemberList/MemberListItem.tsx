@@ -1,8 +1,8 @@
 import { Paper } from "@components/Paper";
 import { UserAvatar } from "@components/User/UserAvatar";
 import { Typography } from "@mutualzz/ui-web";
-import type { SpaceMember } from "@stores/objects/SpaceMember.ts";
-import { observer } from "mobx-react";
+import type { SpaceMember } from "@stores/objects/SpaceMember";
+import { observer } from "mobx-react-lite";
 import { useState } from "react";
 
 interface Props {

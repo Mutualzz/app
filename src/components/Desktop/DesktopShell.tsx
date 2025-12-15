@@ -1,7 +1,7 @@
 import { useDesktopShell } from "@contexts/DesktopShell.context";
 import { arch, family, locale, platform, type } from "@tauri-apps/plugin-os";
 import { isTauri } from "@utils/index";
-import { observer } from "mobx-react";
+import { observer } from "mobx-react-lite";
 import { useEffect, type FC, type PropsWithChildren } from "react";
 
 import { AdaptiveElements } from "./AdaptiveElements";

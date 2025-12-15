@@ -1,6 +1,6 @@
 import { MessageType } from "@mutualzz/types";
 import type { MessageGroup as MessageGroupType } from "@stores/Message.store";
-import { observer } from "mobx-react";
+import { observer } from "mobx-react-lite";
 import { Message } from "./Message";
 
 interface Props {

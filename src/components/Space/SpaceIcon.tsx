@@ -2,9 +2,9 @@ import { Paper } from "@components/Paper";
 import { useAppStore } from "@hooks/useStores";
 import type { APISpacePartial } from "@mutualzz/types";
 import { Avatar, type AvatarProps, Typography } from "@mutualzz/ui-web";
-import { Space } from "@stores/objects/Space.ts";
-import { asAcronym } from "@utils/index.ts";
-import { observer } from "mobx-react";
+import { Space } from "@stores/objects/Space";
+import { asAcronym } from "@utils/index";
+import { observer } from "mobx-react-lite";
 import { useState } from "react";
 
 interface Props extends AvatarProps {

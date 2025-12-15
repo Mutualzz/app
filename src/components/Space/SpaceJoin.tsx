@@ -1,7 +1,7 @@
 import { AnimatedPaper } from "@components/Animated/AnimatedPaper";
 import { Link } from "@components/Link";
 import { useModal } from "@contexts/Modal.context";
-import { useAppStore } from "@hooks/useStores.ts";
+import { useAppStore } from "@hooks/useStores";
 import type { APIInvite } from "@mutualzz/types";
 import {
     Button,
@@ -11,7 +11,7 @@ import {
     Typography,
 } from "@mutualzz/ui-web";
 import { useMutation } from "@tanstack/react-query";
-import { observer } from "mobx-react";
+import { observer } from "mobx-react-lite";
 import { type ChangeEvent, useState } from "react";
 
 interface Props {

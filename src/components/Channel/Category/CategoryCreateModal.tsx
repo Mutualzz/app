@@ -1,6 +1,6 @@
 import { Paper } from "@components/Paper";
 import { useModal } from "@contexts/Modal.context";
-import { useAppStore } from "@hooks/useStores.ts";
+import { useAppStore } from "@hooks/useStores";
 import { ChannelType, HttpException } from "@mutualzz/types";
 import {
     Button,
@@ -11,7 +11,7 @@ import {
 } from "@mutualzz/ui-web";
 import type { Space } from "@stores/objects/Space";
 import { useMutation } from "@tanstack/react-query";
-import { observer } from "mobx-react";
+import { observer } from "mobx-react-lite";
 import { useState } from "react";
 import { FaFolder } from "react-icons/fa";
 

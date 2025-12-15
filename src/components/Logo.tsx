@@ -2,7 +2,7 @@ import { useAppStore } from "@hooks/useStores";
 import { useTheme } from "@mutualzz/ui-web";
 import { Theme } from "@stores/objects/Theme";
 import { getAdaptiveIcon } from "@utils/index";
-import { observer } from "mobx-react";
+import { observer } from "mobx-react-lite";
 import { useEffect, useState, type HTMLAttributes } from "react";
 
 export const Logo = observer((props: HTMLAttributes<HTMLImageElement>) => {

@@ -18,7 +18,7 @@ import {
 import { Theme } from "@stores/objects/Theme";
 import { useMutation } from "@tanstack/react-query";
 import { getAdaptiveIcon } from "@utils/index";
-import { observer } from "mobx-react";
+import { observer } from "mobx-react-lite";
 import { useEffect, useState } from "react";
 import { FaCheck, FaTrash } from "react-icons/fa";
 import { FaRepeat } from "react-icons/fa6";

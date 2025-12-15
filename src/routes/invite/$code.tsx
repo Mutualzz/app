@@ -6,7 +6,7 @@ import { Button, Stack, Typography } from "@mutualzz/ui-web";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { createFileRoute, Navigate, useNavigate } from "@tanstack/react-router";
 import { isTauri } from "@utils/index";
-import { observer } from "mobx-react";
+import { observer } from "mobx-react-lite";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 export const Route = createFileRoute("/invite/$code")({

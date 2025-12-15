@@ -7,7 +7,7 @@ import {
     type MessageLike,
 } from "@stores/objects/Message";
 import { QueuedMessageStatus } from "@stores/objects/QueuedMessage";
-import { observer } from "mobx-react";
+import { observer } from "mobx-react-lite";
 import { MessageAuthor } from "./MessageAuthor";
 import {
     MessageBase,

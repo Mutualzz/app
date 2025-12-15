@@ -3,7 +3,7 @@ import { Paper } from "@components/Paper";
 import { UserAvatar } from "@components/User/UserAvatar";
 import type { APIMessageEmbed } from "@mutualzz/types";
 import { Stack, Typography, useTheme } from "@mutualzz/ui-web";
-import { observer } from "mobx-react";
+import { observer } from "mobx-react-lite";
 
 export const MessageEmbed = observer(
     ({ embed }: { embed: APIMessageEmbed }) => {

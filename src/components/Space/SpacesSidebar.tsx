@@ -25,7 +25,7 @@ import { contextMenu } from "@mutualzz/contexify";
 import { formatColor } from "@mutualzz/ui-core";
 import { IconButton, Portal, Stack, Tooltip, useTheme } from "@mutualzz/ui-web";
 import type { Space } from "@stores/objects/Space";
-import { observer } from "mobx-react";
+import { observer } from "mobx-react-lite";
 import { useEffect, useState, type MouseEvent } from "react";
 import { FaPlus } from "react-icons/fa";
 import { SpaceContextMenu } from "./SpaceContextMenu";

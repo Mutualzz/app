@@ -4,10 +4,10 @@ import {
     useUserSettingsSidebar,
     type UserSettingsSidebarPage,
 } from "@contexts/UserSettingsSidebar.context";
-import { useAppStore } from "@hooks/useStores.ts";
+import { useAppStore } from "@hooks/useStores";
 import { IconButton, Stack, Typography } from "@mutualzz/ui-web";
 import startCase from "lodash-es/startCase";
-import { observer } from "mobx-react";
+import { observer } from "mobx-react-lite";
 import { useEffect } from "react";
 import { FaX } from "react-icons/fa6";
 import { AppAppearanceSettings } from "./pages/app/AppAppearanceSettings";

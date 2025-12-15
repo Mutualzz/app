@@ -1,7 +1,7 @@
 import { Typography } from "@mutualzz/ui-web";
 import type { MessageLike } from "@stores/objects/Message";
 import type { Space } from "@stores/objects/Space";
-import { observer } from "mobx-react";
+import { observer } from "mobx-react-lite";
 
 interface Props {
     message: MessageLike;

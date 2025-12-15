@@ -15,7 +15,7 @@ import {
     useTheme,
 } from "@mutualzz/ui-web";
 import { useMutation } from "@tanstack/react-query";
-import { observer } from "mobx-react";
+import { observer } from "mobx-react-lite";
 import { useCallback, useState, type ChangeEvent } from "react";
 import Cropper, { type Area, type Point } from "react-easy-crop";
 import { FaCamera } from "react-icons/fa";

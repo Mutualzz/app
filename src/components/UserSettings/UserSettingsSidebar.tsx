@@ -13,7 +13,7 @@ import {
     Typography,
 } from "@mutualzz/ui-web";
 import startCase from "lodash-es/startCase";
-import { observer } from "mobx-react";
+import { observer } from "mobx-react-lite";
 import { Fragment, type JSX } from "react";
 import { FaPaintBrush, FaPalette, FaUserCog } from "react-icons/fa";
 import { UserAvatar } from "../User/UserAvatar";

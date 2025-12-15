@@ -1,8 +1,8 @@
 import { Logger } from "@mutualzz/logger";
 import type { Snowflake } from "@mutualzz/types";
-import type { AppStore } from "@stores/App.store.ts";
-import type { Space } from "@stores/objects/Space.ts";
-import { SpaceMember } from "@stores/objects/SpaceMember.ts";
+import type { AppStore } from "@stores/App.store";
+import type { Space } from "@stores/objects/Space";
+import { SpaceMember } from "@stores/objects/SpaceMember";
 import { makeAutoObservable } from "mobx";
 
 // TODO: Add types for this store

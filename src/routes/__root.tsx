@@ -40,7 +40,7 @@ import calendar from "dayjs/plugin/calendar";
 import duration from "dayjs/plugin/duration";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { reaction } from "mobx";
-import { observer } from "mobx-react";
+import { observer } from "mobx-react-lite";
 import {
     useEffect,
     useState,

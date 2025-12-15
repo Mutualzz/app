@@ -3,7 +3,7 @@ import { Button, IconButton, Paper, Stack, useTheme } from "@mutualzz/ui-web";
 import { useMediaQuery } from "@react-hookz/web";
 import { useNavigate } from "@tanstack/react-router";
 import { isTauri } from "@utils/index";
-import { observer } from "mobx-react";
+import { observer } from "mobx-react-lite";
 import { FaClipboard, FaDownload, FaHome } from "react-icons/fa";
 import { MdLogin } from "react-icons/md";
 import { DownloadButton } from "../DownloadButton";

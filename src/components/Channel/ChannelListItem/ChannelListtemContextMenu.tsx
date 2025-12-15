@@ -7,7 +7,7 @@ import type { Channel } from "@stores/objects/Channel";
 import type { Space } from "@stores/objects/Space";
 import { useMutation } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
-import { observer } from "mobx-react";
+import { observer } from "mobx-react-lite";
 import { FaPaperPlane, FaTrash } from "react-icons/fa";
 import { CategoryDeleteModal } from "../Category/CategoryDeleteModal";
 

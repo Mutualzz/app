@@ -12,7 +12,7 @@ import {
     Typography,
     useTheme,
 } from "@mutualzz/ui-web";
-import { observer } from "mobx-react";
+import { observer } from "mobx-react-lite";
 import { useMemo } from "react";
 import { FaCogs, FaPalette } from "react-icons/fa";
 import { MdLogout } from "react-icons/md";

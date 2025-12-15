@@ -4,7 +4,7 @@ import { useAppStore } from "@hooks/useStores";
 import { ButtonGroup, IconButton, Tooltip } from "@mutualzz/ui-web";
 import type { Message } from "@stores/objects/Message";
 import { useMutation } from "@tanstack/react-query";
-import { observer } from "mobx-react";
+import { observer } from "mobx-react-lite";
 import type { PropsWithChildren } from "react";
 import { FaTrash } from "react-icons/fa";
 

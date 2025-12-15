@@ -1,6 +1,6 @@
 import { AnimatedLogo } from "@components/Animated/AnimatedLogo";
 import { Stack } from "@mutualzz/ui-web";
-import { observer } from "mobx-react";
+import { observer } from "mobx-react-lite";
 
 const Loading = () => {
     return (

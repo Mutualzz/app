@@ -11,7 +11,7 @@ import {
     Typography,
 } from "@mutualzz/ui-web";
 import { useMutation } from "@tanstack/react-query";
-import { observer } from "mobx-react";
+import { observer } from "mobx-react-lite";
 
 export const UserProfileSettings = observer(() => {
     const app = useAppStore();

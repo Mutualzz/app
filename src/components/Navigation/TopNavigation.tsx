@@ -8,7 +8,7 @@ import { useMediaQuery } from "@react-hookz/web";
 import { useNavigate } from "@tanstack/react-router";
 import { isTauri } from "@utils/index";
 import capitalize from "lodash-es/capitalize";
-import { observer } from "mobx-react";
+import { observer } from "mobx-react-lite";
 import { FaClipboard, FaDownload, FaUser } from "react-icons/fa";
 import { GiGalaxy } from "react-icons/gi";
 import { ImFeed } from "react-icons/im";

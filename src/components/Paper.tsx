@@ -1,6 +1,6 @@
-import { useAppStore } from "@hooks/useStores.ts";
+import { useAppStore } from "@hooks/useStores";
 import { Paper as MPaper, type PaperProps } from "@mutualzz/ui-web";
-import { observer } from "mobx-react";
+import { observer } from "mobx-react-lite";
 import { forwardRef } from "react";
 
 const PaperComponent = forwardRef<HTMLDivElement, PaperProps>(

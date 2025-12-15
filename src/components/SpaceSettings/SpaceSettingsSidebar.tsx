@@ -14,7 +14,7 @@ import {
 } from "@mutualzz/ui-web";
 import type { Space } from "@stores/objects/Space";
 import startCase from "lodash-es/startCase";
-import { observer } from "mobx-react";
+import { observer } from "mobx-react-lite";
 import { Fragment, type JSX } from "react";
 import { FaPaintBrush, FaPaperPlane } from "react-icons/fa";
 

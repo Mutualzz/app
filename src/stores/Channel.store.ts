@@ -1,6 +1,6 @@
 import type { Snowflake } from "@mutualzz/types";
 import { ChannelType, type APIChannel } from "@mutualzz/types";
-import type { Space } from "@stores/objects/Space.ts";
+import type { Space } from "@stores/objects/Space";
 import { safeLocalStorage } from "@utils/safeLocalStorage";
 import { makeAutoObservable, observable, ObservableMap } from "mobx";
 import { makePersistable } from "mobx-persist-store";

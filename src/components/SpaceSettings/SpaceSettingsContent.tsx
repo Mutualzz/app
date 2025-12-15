@@ -8,7 +8,7 @@ import { useAppStore } from "@hooks/useStores";
 import { IconButton, Stack, Typography } from "@mutualzz/ui-web";
 import type { Space } from "@stores/objects/Space";
 import startCase from "lodash-es/startCase";
-import { observer } from "mobx-react";
+import { observer } from "mobx-react-lite";
 import { useEffect } from "react";
 import { FaX } from "react-icons/fa6";
 import { SpaceInvitesSettings } from "./pages/general/SpaceInvitesSettings";

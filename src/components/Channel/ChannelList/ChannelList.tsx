@@ -38,7 +38,7 @@ import {
 import type { Channel } from "@stores/objects/Channel";
 import type { Space } from "@stores/objects/Space";
 import { runInAction } from "mobx";
-import { observer } from "mobx-react";
+import { observer } from "mobx-react-lite";
 import { useState, type MouseEvent } from "react";
 import { FaChevronDown, FaUserPlus } from "react-icons/fa";
 import { ChannelListItem } from "../ChannelListItem/ChannelListItem";

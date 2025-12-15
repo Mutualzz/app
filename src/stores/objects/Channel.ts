@@ -10,8 +10,8 @@ import {
 } from "@mutualzz/types";
 import type { AppStore } from "@stores/App.store";
 import { MessageStore } from "@stores/Message.store";
-import { Message } from "@stores/objects/Message.ts";
-import type { Space } from "@stores/objects/Space.ts";
+import { Message } from "@stores/objects/Message";
+import type { Space } from "@stores/objects/Space";
 import { makeAutoObservable } from "mobx";
 import type { QueuedMessage } from "./QueuedMessage";
 

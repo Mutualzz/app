@@ -1,6 +1,6 @@
 import { useAppStore } from "@hooks/useStores";
 import { createFileRoute, Navigate } from "@tanstack/react-router";
-import { observer } from "mobx-react";
+import { observer } from "mobx-react-lite";
 import { useEffect } from "react";
 
 export const Route = createFileRoute("/")({

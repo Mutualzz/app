@@ -19,7 +19,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { writeText } from "@tauri-apps/plugin-clipboard-manager";
 import { isTauri } from "@utils/index";
 import dayjs from "dayjs";
-import { observer } from "mobx-react";
+import { observer } from "mobx-react-lite";
 import { useEffect, useState } from "react";
 import { FaCopy } from "react-icons/fa";
 

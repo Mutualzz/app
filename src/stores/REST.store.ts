@@ -1,7 +1,7 @@
 import { Logger } from "@mutualzz/logger";
 import { HttpStatusCode } from "@mutualzz/types";
 import { getCurrentWindow } from "@tauri-apps/api/window";
-import { normalizeJSON } from "@utils/JSON.ts";
+import { normalizeJSON } from "@utils/JSON";
 import EventEmitter from "events";
 import { detectBrowser, detectOS } from "../utils/detect";
 

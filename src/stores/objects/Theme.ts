@@ -6,8 +6,8 @@ import type {
     ThemeType,
 } from "@mutualzz/types";
 import { baseDarkTheme, baseLightTheme } from "@mutualzz/ui-core";
-import type { AppStore } from "@stores/App.store.ts";
-import type { User } from "@stores/objects/User.ts";
+import type { AppStore } from "@stores/App.store";
+import type { User } from "@stores/objects/User";
 import { makeAutoObservable } from "mobx";
 
 export class Theme {

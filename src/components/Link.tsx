@@ -1,6 +1,6 @@
 import { AnimatedPaper } from "@components/Animated/AnimatedPaper";
 import { useModal } from "@contexts/Modal.context";
-import { useAppStore } from "@hooks/useStores.ts";
+import { useAppStore } from "@hooks/useStores";
 import {
     Box,
     Button,
@@ -12,7 +12,7 @@ import {
 } from "@mutualzz/ui-web";
 import { useNavigate } from "@tanstack/react-router";
 import { openUrl } from "@tauri-apps/plugin-opener";
-import { isTauri, toSpotifyUri } from "@utils/index.ts";
+import { isTauri, toSpotifyUri } from "@utils/index";
 import { useMemo, type MouseEvent } from "react";
 
 interface Props {

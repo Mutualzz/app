@@ -8,7 +8,7 @@ import { Item } from "@mutualzz/contexify";
 import { Divider, Tooltip } from "@mutualzz/ui-web";
 import type { Space } from "@stores/objects/Space";
 import { useMutation } from "@tanstack/react-query";
-import { observer } from "mobx-react";
+import { observer } from "mobx-react-lite";
 import { type Dispatch, type SetStateAction } from "react";
 import {
     FaArrowRight,

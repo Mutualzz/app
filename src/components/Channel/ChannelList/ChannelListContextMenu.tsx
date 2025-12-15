@@ -4,7 +4,7 @@ import { useModal } from "@contexts/Modal.context";
 import { useAppStore } from "@hooks/useStores";
 import { Item } from "@mutualzz/contexify";
 import type { Space } from "@stores/objects/Space";
-import { observer } from "mobx-react";
+import { observer } from "mobx-react-lite";
 import { FaClipboard, FaHashtag, FaPaperPlane } from "react-icons/fa";
 import { CategoryCreateModal } from "../Category/CategoryCreateModal";
 import { ChannelCreateModal } from "../ChannelCreateModal";

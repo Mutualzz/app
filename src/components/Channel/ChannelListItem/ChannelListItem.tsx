@@ -12,7 +12,7 @@ import {
 } from "@mutualzz/ui-web";
 import type { Channel } from "@stores/objects/Channel";
 import type { Space } from "@stores/objects/Space";
-import { observer } from "mobx-react";
+import { observer } from "mobx-react-lite";
 import { useState, type MouseEvent } from "react";
 import { FaChevronDown, FaChevronRight, FaPlus } from "react-icons/fa";
 import { ChannelCreateModal } from "../ChannelCreateModal";

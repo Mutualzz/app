@@ -1,6 +1,6 @@
 import { Paper } from "@components/Paper";
 import { useModal } from "@contexts/Modal.context";
-import { useAppStore } from "@hooks/useStores.ts";
+import { useAppStore } from "@hooks/useStores";
 import { ChannelType, type HttpException } from "@mutualzz/types";
 import {
     Button,
@@ -14,7 +14,7 @@ import type { Channel } from "@stores/objects/Channel";
 import type { Space } from "@stores/objects/Space";
 import { useMutation } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
-import { observer } from "mobx-react";
+import { observer } from "mobx-react-lite";
 import { useState } from "react";
 import { FaHashtag, FaVolumeUp } from "react-icons/fa";
 import { ChannelIcon } from "./ChannelIcon";

@@ -1,6 +1,6 @@
 import { injectGlobal } from "@emotion/css";
 import { useTheme } from "@mutualzz/ui-web";
-import { observer } from "mobx-react";
+import { observer } from "mobx-react-lite";
 import { useEffect } from "react";
 
 export const InjectGlobal = observer(() => {

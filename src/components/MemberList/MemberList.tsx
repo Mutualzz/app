@@ -1,9 +1,9 @@
 import { ListSection } from "@components/ListSection";
 import { MemberListItem } from "@components/MemberList/MemberListItem";
 import { Paper } from "@components/Paper";
-import { useAppStore } from "@hooks/useStores.ts";
+import { useAppStore } from "@hooks/useStores";
 import { autorun } from "mobx";
-import { observer } from "mobx-react";
+import { observer } from "mobx-react-lite";
 import { useEffect, useState } from "react";
 
 export const MemberList = observer(() => {

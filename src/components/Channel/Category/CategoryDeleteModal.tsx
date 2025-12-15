@@ -5,7 +5,7 @@ import { Button, ButtonGroup, Stack, Typography } from "@mutualzz/ui-web";
 import type { Channel } from "@stores/objects/Channel";
 import { useMutation } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
-import { observer } from "mobx-react";
+import { observer } from "mobx-react-lite";
 
 interface Props {
     channel: Channel;

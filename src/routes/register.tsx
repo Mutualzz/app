@@ -18,7 +18,7 @@ import {
 } from "@tanstack/react-form";
 import { useMutation } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { observer } from "mobx-react";
+import { observer } from "mobx-react-lite";
 import { useState } from "react";
 
 export const Route = createFileRoute("/register")({

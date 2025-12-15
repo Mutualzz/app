@@ -16,7 +16,7 @@ import {
 } from "@mutualzz/ui-web";
 import { useMediaQuery } from "@react-hookz/web";
 import { useMutation } from "@tanstack/react-query";
-import { observer } from "mobx-react";
+import { observer } from "mobx-react-lite";
 import { useRef, useState } from "react";
 import { FaEraser, FaPaintBrush } from "react-icons/fa";
 import {

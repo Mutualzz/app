@@ -6,7 +6,7 @@ import {
 import { useAppStore } from "@hooks/useStores";
 import { Drawer, Stack, useTheme } from "@mutualzz/ui-web";
 import { useMediaQuery } from "@react-hookz/web";
-import { observer } from "mobx-react";
+import { observer } from "mobx-react-lite";
 import { useState } from "react";
 import { UserSettingsContent } from "./UserSettingsContent";
 import { UserSettingsSidebar } from "./UserSettingsSidebar";

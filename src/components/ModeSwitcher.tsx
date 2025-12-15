@@ -3,7 +3,7 @@ import type { AppMode } from "@mutualzz/types";
 import { Tooltip, useTheme } from "@mutualzz/ui-web";
 import { useNavigate } from "@tanstack/react-router";
 import { switchMode } from "@utils/index";
-import { observer } from "mobx-react";
+import { observer } from "mobx-react-lite";
 import { AnimatePresence } from "motion/react";
 import { useMemo } from "react";
 import { GiGalaxy } from "react-icons/gi";

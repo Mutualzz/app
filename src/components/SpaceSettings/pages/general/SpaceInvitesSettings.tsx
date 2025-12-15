@@ -25,7 +25,7 @@ import { writeText } from "@tauri-apps/plugin-clipboard-manager";
 import { isTauri } from "@utils/index";
 import dayjs from "dayjs";
 import { reaction } from "mobx";
-import { observer } from "mobx-react";
+import { observer } from "mobx-react-lite";
 import { useEffect, useState } from "react";
 import { FaClipboard, FaTrash } from "react-icons/fa";
 

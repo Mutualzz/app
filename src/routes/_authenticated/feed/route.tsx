@@ -4,7 +4,7 @@ import { UserBar } from "@components/User/UserBar";
 import { useAppStore } from "@hooks/useStores";
 import { Stack, Typography } from "@mutualzz/ui-web";
 import { createFileRoute, Outlet } from "@tanstack/react-router";
-import { observer } from "mobx-react";
+import { observer } from "mobx-react-lite";
 import { useEffect } from "react";
 
 export const Route = createFileRoute("/_authenticated/feed")({

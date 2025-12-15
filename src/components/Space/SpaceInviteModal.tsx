@@ -1,7 +1,7 @@
 import { SpaceCreate } from "@components/Space/SpaceCreate";
 import { SpaceJoin } from "@components/Space/SpaceJoin";
-import { useAppStore } from "@hooks/useStores.ts";
-import { observer } from "mobx-react";
+import { useAppStore } from "@hooks/useStores";
+import { observer } from "mobx-react-lite";
 import { useEffect, useState } from "react";
 
 export const SpaceInviteModal = observer(() => {
