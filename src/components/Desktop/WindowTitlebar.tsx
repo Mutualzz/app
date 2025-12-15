@@ -52,8 +52,9 @@ const WindowTitlebar = ({ onHeightChange }: WindowTitlebarProps) => {
             data-tauri-drag-region
             justifyContent="space-between"
             alignItems="center"
-            variant="plain"
             py={isMac ? 2.5 : 1}
+            variant={app.preferEmbossed ? "elevation" : "plain"}
+            transparency={65}
             px={isMac ? 2 : 1.5}
             minHeight={isMac ? 44 : 32}
             width="100%"
@@ -95,10 +96,11 @@ const WindowTitlebar = ({ onHeightChange }: WindowTitlebarProps) => {
                         </IconButton>
                         {!isMac && (
                             <Divider
-                                lineColor="primary"
+                                lineColor="neutral"
                                 orientation="vertical"
                                 css={{
                                     marginRight: 8,
+                                    filter: "opacity(0.25)",
                                 }}
                             />
                         )}
