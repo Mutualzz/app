@@ -3,6 +3,7 @@ import { SpaceInviteToSpaceModal } from "@components/Space/SpaceInviteToSpaceMod
 import { useModal } from "@contexts/Modal.context";
 import { useAppStore } from "@hooks/useStores";
 import { Item } from "@mutualzz/contexify";
+import { Box } from "@mutualzz/ui-web";
 import type { Space } from "@stores/objects/Space";
 import { observer } from "mobx-react-lite";
 import { FaClipboard, FaHashtag, FaPaperPlane } from "react-icons/fa";
@@ -25,9 +26,10 @@ export const ChannelListContextMenu = observer(({ space }: Props) => {
             elevation={app.preferEmbossed ? 5 : 1}
             transparency={65}
             id={`channel-list-context-menu-${space.id}`}
+            key={space.id}
         >
             {canModifySpace && (
-                <>
+                <Box>
                     <Item
                         onClick={() =>
                             openModal(
@@ -50,7 +52,7 @@ export const ChannelListContextMenu = observer(({ space }: Props) => {
                     >
                         Create Category
                     </Item>
-                </>
+                </Box>
             )}
             <Item
                 onClick={() =>

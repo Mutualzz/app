@@ -34,7 +34,7 @@ export const ModeSwitcher = observer(() => {
     const title = `Switch to ${targetMode === "feed" ? "Feed" : "Spaces"}`;
 
     const handleClick = () => {
-        switchMode(navigate);
+        switchMode(app, navigate);
     };
 
     return (

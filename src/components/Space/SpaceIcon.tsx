@@ -41,22 +41,6 @@ export const SpaceIcon = observer(({ space, selected, ...props }: Props) => {
             </Avatar>
         );
 
-    // return (
-    //     <Avatar
-    //         size={48}
-    //         src={iconUrl || undefined}
-    //         variant={iconUrl ? "plain" : "elevation"}
-    //         color="primary"
-    //         elevation={5}
-    //         shape={hovered ? 10 : 15}
-    //         onMouseOver={() => setHovered(true)}
-    //         onMouseOut={() => setHovered(false)}
-    //         {...props}
-    //     >
-    //         <Typography level="body-sm">{asAcronym(space.name)}</Typography>
-    //     </Avatar>
-    // );
-
     return (
         <Paper
             elevation={app.preferEmbossed ? 5 : 1}

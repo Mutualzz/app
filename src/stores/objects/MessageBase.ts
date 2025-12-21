@@ -21,8 +21,6 @@ export class MessageBase {
         this.type = data.type;
 
         this.authorId = data.authorId;
-        if (data.author) {
-            this.author = this.app.users.add(data.author);
-        }
+        if (data.author) this.author = this.app.users.add(data.author);
     }
 }

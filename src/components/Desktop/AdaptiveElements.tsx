@@ -2,7 +2,7 @@ import { useAppStore } from "@hooks/useStores";
 import { useTheme } from "@mutualzz/ui-web";
 import { Theme } from "@stores/objects/Theme";
 import { getCurrentWindow } from "@tauri-apps/api/window";
-import { getAdaptiveIcon } from "@utils/index";
+import { getAdaptiveIcon } from "@utils/icons";
 import { getTray } from "@utils/tray";
 import { observer } from "mobx-react-lite";
 import { useLayoutEffect } from "react";

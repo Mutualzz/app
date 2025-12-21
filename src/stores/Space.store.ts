@@ -34,6 +34,7 @@ export class SpaceStore {
     setPreferredActive() {
         const preferred = this.mostRecentSpace ?? this.all[0];
         this.setActive(preferred?.id);
+        return preferred;
     }
 
     setMostRecentSpace(id?: string | null) {
@@ -45,6 +46,9 @@ export class SpaceStore {
     }
 
     add(space: APISpace): Space {
+        const exists = this.spaces.get(space.id);
+        if (exists) return exists;
+
         const newSpace = new Space(this.app, space);
         this.spaces.set(space.id, newSpace);
         return newSpace;

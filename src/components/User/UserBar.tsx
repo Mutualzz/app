@@ -22,8 +22,10 @@ export const UserBar = observer(() => {
     const { theme } = useTheme();
     const { openModal } = useModal();
 
+    const inSpace = Boolean(app.spaces.activeId);
+
     const conditionalProps = useMemo<Omit<PaperProps, "color">>(() => {
-        if (app.channels.activeId)
+        if (inSpace)
             return {
                 minWidth: "12rem",
                 maxWidth: "20rem",
@@ -37,7 +39,7 @@ export const UserBar = observer(() => {
             maxHeight: "20rem",
             direction: "column",
         };
-    }, [app.spaces.activeId]);
+    }, [inSpace]);
 
     if (!app.account) return <></>;
 
@@ -58,7 +60,7 @@ export const UserBar = observer(() => {
             {...conditionalProps}
         >
             <Stack
-                direction={app.spaces.activeId ? "row" : "column"}
+                direction={inSpace ? "row" : "column"}
                 justifyContent="center"
                 alignItems="center"
                 spacing={2.5}
@@ -78,7 +80,7 @@ export const UserBar = observer(() => {
             <Stack
                 justifyContent="center"
                 alignItems="center"
-                direction={app.spaces.activeId ? "row" : "column"}
+                direction={inSpace ? "row" : "column"}
                 spacing={1.25}
             >
                 <Stack direction="row">

@@ -3,7 +3,12 @@ import { SpacesSidebar } from "@components/Space/SpacesSidebar";
 import { UserBar } from "@components/User/UserBar";
 import { useAppStore } from "@hooks/useStores";
 import { Stack } from "@mutualzz/ui-web";
-import { createFileRoute, Outlet, useNavigate } from "@tanstack/react-router";
+import {
+    createFileRoute,
+    Outlet,
+    useNavigate,
+    useParams,
+} from "@tanstack/react-router";
 import { observer } from "mobx-react-lite";
 import { useEffect } from "react";
 
@@ -14,6 +19,10 @@ export const Route = createFileRoute("/_authenticated/spaces")({
 function RouteComponent() {
     const app = useAppStore();
     const navigate = useNavigate();
+    const params = useParams({
+        from: "/_authenticated/spaces/$spaceId",
+        shouldThrow: false,
+    });
 
     useEffect(() => {
         app.setMode("spaces");
@@ -22,18 +31,15 @@ function RouteComponent() {
     }, []);
 
     useEffect(() => {
-        const spaceId = app.spaces.activeId;
-        const channelId = app.channels.activeId;
-        if (!spaceId || !channelId) return;
+        if (params && params?.spaceId) return;
 
+        const space = app.spaces.setPreferredActive();
+        if (!space) return;
         navigate({
-            to: "/spaces/$spaceId/$channelId",
-            params: {
-                spaceId,
-                channelId,
-            },
+            to: "/spaces/$spaceId",
+            params: { spaceId: space.id },
         });
-    }, [app.spaces.activeId, app.channels.activeId]);
+    }, [params]);
 
     return (
         <Stack width="100%" height="100%" direction="row">

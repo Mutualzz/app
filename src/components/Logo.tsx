@@ -1,7 +1,7 @@
 import { useAppStore } from "@hooks/useStores";
 import { useTheme } from "@mutualzz/ui-web";
 import { Theme } from "@stores/objects/Theme";
-import { getAdaptiveIcon } from "@utils/index";
+import { getAdaptiveIcon } from "@utils/icons";
 import { observer } from "mobx-react-lite";
 import { useEffect, useState, type HTMLAttributes } from "react";
 

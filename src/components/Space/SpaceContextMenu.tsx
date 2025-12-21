@@ -1,11 +1,10 @@
 import { ContextMenu } from "@components/ContextMenu";
 import { ContextSubmenu } from "@components/ContextSubmenu";
 import { SpaceSettingsModal } from "@components/SpaceSettings/SpaceSettingsModal";
-import { TooltipWrapper } from "@components/TooltipWrapper";
 import { useModal } from "@contexts/Modal.context";
 import { useAppStore } from "@hooks/useStores";
 import { Item } from "@mutualzz/contexify";
-import { Divider, Tooltip } from "@mutualzz/ui-web";
+import { Box } from "@mutualzz/ui-web";
 import type { Space } from "@stores/objects/Space";
 import { useMutation } from "@tanstack/react-query";
 import { observer } from "mobx-react-lite";
@@ -51,31 +50,10 @@ export const SpaceContextMenu = observer(
                 transparency={65}
                 id={`space-context-menu-${space.id}-${fromSidebar ? "sidebar" : "default"}`}
                 onVisibilityChange={onVisibilityChange}
+                key={space.id}
             >
-                {fromSidebar && (
-                    <>
-                        <Tooltip
-                            content={
-                                <TooltipWrapper>
-                                    Not implemented yet
-                                </TooltipWrapper>
-                            }
-                            placement="right"
-                        >
-                            <Item color="neutral" disabled>
-                                Mark as read
-                            </Item>
-                        </Tooltip>
-                        <Divider
-                            lineColor="muted"
-                            css={{
-                                marginBlock: 10,
-                            }}
-                        />
-                    </>
-                )}
                 {canModifySpace && (
-                    <>
+                    <Box>
                         <ContextSubmenu
                             onClick={() =>
                                 openModal(
@@ -118,7 +96,7 @@ export const SpaceContextMenu = observer(
                         >
                             Delete Space
                         </Item>
-                    </>
+                    </Box>
                 )}
                 {!canModifySpace && (
                     <Item

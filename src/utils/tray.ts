@@ -4,7 +4,8 @@ import { resolveResource } from "@tauri-apps/api/path";
 import { TrayIcon, type TrayIconOptions } from "@tauri-apps/api/tray";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { platform } from "@tauri-apps/plugin-os";
-import { getAdaptiveIcon, isSSR } from ".";
+import { isSSR } from ".";
+import { getAdaptiveIcon } from "./icons";
 
 const TRAY_ID = "mz-tray";
 

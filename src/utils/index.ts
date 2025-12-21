@@ -1,12 +1,10 @@
 import type { Theme as MzTheme } from "@emotion/react";
-import { useAppStore } from "@hooks/useStores";
+import type { AppStore } from "@stores/App.store";
 import type { Channel } from "@stores/objects/Channel";
 import type { Theme } from "@stores/objects/Theme";
 import { useNavigate } from "@tanstack/react-router";
-import { Image as TauriImage } from "@tauri-apps/api/image";
 import mergeWith from "lodash-es/mergeWith";
 import { isValidElement, type ReactNode } from "react";
-import { getIconFromCache, putIconInCache } from "./indexedDb";
 
 export function mergeAppendAnything(
     ...objects: Record<string, string | string[]>[]
@@ -71,66 +69,6 @@ export const getIconType = (theme: MzTheme): string => {
     return iconUrl;
 };
 
-export const getAdaptiveIcon = async (
-    theme: MzTheme,
-    type: "automatic" | "baseUrl" = "automatic",
-    iconUrl?: string,
-) => {
-    if (!iconUrl) iconUrl = getIconType(theme);
-
-    const cacheKey = `${theme.id}-${theme.type}-${theme.colors.primary}`;
-
-    const cachedIcon = await getIconFromCache(cacheKey);
-    if (cachedIcon) {
-        // If we need automatic and it's Tauri, convert cached base64 to TauriImage
-        if (type === "automatic" && isTauri && typeof cachedIcon === "string") {
-            const bytes = Uint8Array.from(atob(cachedIcon.split(",")[1]), (c) =>
-                c.charCodeAt(0),
-            );
-            return await TauriImage.fromBytes(bytes.buffer);
-        }
-        return cachedIcon;
-    }
-
-    const res = await fetch(iconUrl);
-    const bytes = await res.arrayBuffer();
-    const imageBitmap = await createImageBitmap(new Blob([bytes]));
-
-    const canvas = document.createElement("canvas");
-    const ctx = canvas.getContext("2d");
-    canvas.width = imageBitmap.width;
-    canvas.height = imageBitmap.height;
-    if (!ctx) throw new Error("Failed to create canvas context");
-
-    ctx.beginPath();
-    ctx.arc(
-        canvas.width / 2,
-        canvas.height / 2,
-        Math.min(canvas.width, canvas.height) / 2,
-        0,
-        Math.PI * 2,
-    );
-    ctx.closePath();
-    ctx.clip();
-
-    ctx.fillStyle = theme.colors.primary;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    ctx.drawImage(imageBitmap, 0, 0);
-
-    const base64Data = canvas.toDataURL();
-    await putIconInCache(cacheKey, base64Data);
-
-    if (type === "baseUrl") return base64Data;
-
-    if (isTauri) {
-        const arrayBuffer = await canvasToArrayBuffer(canvas);
-        return await TauriImage.fromBytes(arrayBuffer);
-    }
-
-    return base64Data;
-};
-
 export const isSSR = typeof window === "undefined";
 
 /**
@@ -161,9 +99,10 @@ export const sortThemes = (themes: Theme[]): Theme[] => {
     return [...priorityThemes, ...otherThemes];
 };
 
-export const switchMode = (navigate?: ReturnType<typeof useNavigate>) => {
-    const app = useAppStore();
-
+export const switchMode = (
+    app: AppStore,
+    navigate?: ReturnType<typeof useNavigate>,
+) => {
     if (app.mode === "feed") {
         if (navigate) {
             navigate({

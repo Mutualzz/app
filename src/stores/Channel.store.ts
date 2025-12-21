@@ -1,6 +1,5 @@
 import type { Snowflake } from "@mutualzz/types";
 import { ChannelType, type APIChannel } from "@mutualzz/types";
-import type { Space } from "@stores/objects/Space";
 import { safeLocalStorage } from "@utils/safeLocalStorage";
 import { makeAutoObservable, observable, ObservableMap } from "mobx";
 import { makePersistable } from "mobx-persist-store";
@@ -83,14 +82,17 @@ export class ChannelStore {
         this.activeId = this.active?.id;
     }
 
-    add(channel: APIChannel, space?: Space): Channel {
-        const newChannel = new Channel(this.app, channel, space);
+    add(channel: APIChannel): Channel {
+        const exists = this.channels.get(channel.id);
+        if (exists) return exists;
+
+        let newChannel = new Channel(this.app, channel);
         this.channels.set(channel.id, newChannel);
         return newChannel;
     }
 
-    addAll(channels: APIChannel[], space?: Space): Channel[] {
-        return channels.map((channel) => this.add(channel, space));
+    addAll(channels: APIChannel[]): Channel[] {
+        return channels.map((channel) => this.add(channel));
     }
 
     update(channel: APIChannel) {
@@ -186,22 +188,26 @@ export class ChannelStore {
     setChannelOrder(spaceId: Snowflake, newOrder: Channel[]) {
         let currentCategory: Channel | null = null;
 
-        newOrder.forEach((channel, index) => {
+        const order = newOrder.map((channel, index) => {
             if (channel.type === ChannelType.Category) {
                 currentCategory = channel;
-                channel.parent = null;
+                channel.setParent(null);
                 channel.position = index;
             } else {
-                channel.parent = currentCategory;
+                channel.setParent(currentCategory);
                 channel.position = index;
             }
+
             this.channels.set(channel.id, channel);
+
+            console.log(channel.parentId);
+
+            return channel;
         });
 
-        // TODO: make sure that snowflakes are converted to strings within stores
-        const payload = newOrder.map((channel) => ({
+        const payload = order.map((channel) => ({
             id: channel.id,
-            parentId: channel.parent ? channel.parent.id : null,
+            parentId: channel.parentId ? channel.parentId : null,
             position: channel.position,
             spaceId: spaceId,
         }));

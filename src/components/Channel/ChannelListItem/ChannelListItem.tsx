@@ -12,6 +12,7 @@ import {
 } from "@mutualzz/ui-web";
 import type { Channel } from "@stores/objects/Channel";
 import type { Space } from "@stores/objects/Space";
+import { useNavigate } from "@tanstack/react-router";
 import { observer } from "mobx-react-lite";
 import { useState, type MouseEvent } from "react";
 import { FaChevronDown, FaChevronRight, FaPlus } from "react-icons/fa";
@@ -41,6 +42,7 @@ export const ChannelListItem = observer(
         const { theme } = useTheme();
         const { openModal } = useModal();
         const app = useAppStore();
+        const navigate = useNavigate();
         const [wrapperHovered, setWrapperHovered] = useState(false);
 
         const showChannelMenu = (e: MouseEvent) => {
@@ -61,8 +63,12 @@ export const ChannelListItem = observer(
             }
 
             if (!channel.isTextChannel) return;
+            if (channel.id === app.channels.activeId) return;
 
-            app.channels.setActive(channel.id);
+            navigate({
+                to: "/spaces/$spaceId/$channelId",
+                params: { spaceId: space.id, channelId: channel.id },
+            });
         };
 
         return (
@@ -73,7 +79,9 @@ export const ChannelListItem = observer(
                     mr={isCategory ? 1 : 2.5}
                     borderRadius={6}
                     key={channel.id}
-                    css={{ cursor: "pointer" }}
+                    css={{
+                        cursor: "pointer",
+                    }}
                     onClick={handleClick}
                     variant={active ? "soft" : "plain"}
                     onMouseEnter={() => setWrapperHovered(true)}

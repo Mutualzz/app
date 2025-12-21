@@ -15,7 +15,7 @@ export type QueuedMessageData = {
     type: MessageType;
     createdAt: string;
     authorId: Snowflake;
-    author: APIUser;
+    author?: APIUser;
 };
 
 export class QueuedMessage extends MessageBase {

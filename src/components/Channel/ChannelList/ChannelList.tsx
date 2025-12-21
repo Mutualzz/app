@@ -81,7 +81,7 @@ const SortableChannelListItem = observer(
                     transition,
                     opacity: isDragging ? 0.5 : 1,
                     zIndex: isDragging ? 999 : undefined,
-                    height: channel.type === ChannelType.Category ? 32 : 28,
+                    height: isCategory ? 32 : 28,
                 }}
                 {...attributes}
                 {...listeners}
@@ -123,6 +123,7 @@ export const ChannelList = observer(() => {
     const [activeId, setActiveId] = useState<string | null>(null);
     const [menuOpen, setMenuOpen] = useState(false);
     const { openModal } = useModal();
+    const inChannel = Boolean(app.channels.activeId);
 
     const sensors = useSensors(
         useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -187,9 +188,10 @@ export const ChannelList = observer(() => {
             newOrder.forEach((channel) => {
                 if (channel.type === ChannelType.Category) {
                     currentCategory = channel;
-                    channel.parent = null;
+                    channel.parentId = null;
+                    channel.setParent(null);
                 } else {
-                    channel.parent = currentCategory;
+                    channel.setParent(currentCategory);
                 }
             });
 
@@ -233,7 +235,7 @@ export const ChannelList = observer(() => {
     return (
         <>
             <Paper
-                borderRight="0 !important"
+                borderRight={inChannel ? "0 !important" : undefined}
                 borderBottom="0 !important"
                 borderTopLeftRadius="0.75rem"
                 maxWidth="15rem"
@@ -348,13 +350,6 @@ export const ChannelList = observer(() => {
                                             ? () => toggleCategory(channel.id)
                                             : undefined
                                     }
-                                    css={{
-                                        height:
-                                            channel.type ===
-                                            ChannelType.Category
-                                                ? 32
-                                                : 28,
-                                    }}
                                 />
                             ))}
                         </SortableContext>

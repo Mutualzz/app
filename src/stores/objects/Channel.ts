@@ -37,10 +37,10 @@ export class Channel {
     messages: MessageStore;
 
     parentId?: Snowflake | null;
-    spaceId?: Snowflake | null;
-
-    space?: Space | null;
     parent?: Channel | null;
+
+    spaceId?: Snowflake | null;
+    space?: Space | null;
 
     raw: APIChannel;
 
@@ -52,7 +52,6 @@ export class Channel {
     constructor(
         private readonly app: AppStore,
         channel: APIChannel,
-        space?: Space,
     ) {
         this.app = app;
 
@@ -63,16 +62,11 @@ export class Channel {
         this.topic = channel.topic;
 
         this.parentId = channel.parentId;
+        if (channel.parent) this.parent = this.app.channels.add(channel.parent);
+
         this.spaceId = channel.spaceId;
 
-        if (channel.parent) {
-            this.parent = this.app.channels.add(channel.parent);
-        }
-
-        if (space) {
-            this.space = space;
-            this.space.addChannel(channel);
-        }
+        if (channel.space) this.space = this.app.spaces.add(channel.space);
 
         this.position = channel.position;
 
@@ -90,20 +84,21 @@ export class Channel {
 
         this.messages = new MessageStore(this.app, this.id);
 
-        if (channel.messages) {
-            this.messages.addAll(channel.messages);
-        }
+        if (channel.messages) this.messages.addAll(channel.messages);
 
         this.lastMessageId = channel.lastMessageId;
-        if (channel.lastMessage) {
+        if (channel.lastMessage)
             this.lastMessage = this.messages.add(channel.lastMessage);
-        }
 
         makeAutoObservable(this);
     }
 
     update(channel: APIChannel) {
         Object.assign(this, channel);
+    }
+
+    setParent(channel: Channel | null) {
+        this.parentId = channel?.id || null;
     }
 
     getMessages(

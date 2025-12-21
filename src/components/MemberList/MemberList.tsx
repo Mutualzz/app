@@ -39,7 +39,12 @@ export const MemberList = observer(() => {
                           key={i}
                           name={category.name}
                           items={category.items.map((x: any) => (
-                              <MemberListItem member={x} />
+                              <MemberListItem
+                                  member={x}
+                                  isOwner={
+                                      x.userId === app.spaces.active?.ownerId
+                                  }
+                              />
                           ))}
                       />
                   ))

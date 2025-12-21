@@ -2,16 +2,17 @@ import type { APISpaceMember, Snowflake } from "@mutualzz/types";
 import type { AppStore } from "@stores/App.store";
 import { makeAutoObservable } from "mobx";
 import type { Space } from "./Space";
-import { User } from "./User";
+import type { User } from "./User";
 
 export class SpaceMember {
     readonly space: Space;
 
-    user?: User;
-    userId?: Snowflake | null;
+    userId: Snowflake;
     nickname?: string | null;
     avatar?: string | null;
     joinedAt: Date;
+
+    user?: User | null;
 
     constructor(
         private readonly app: AppStore,
@@ -21,10 +22,7 @@ export class SpaceMember {
         this.space = space;
 
         this.userId = member.userId;
-
-        if (member.user) {
-            this.user = this.app.users.add(member.user);
-        }
+        if (member.user) this.user = this.app.users.add(member.user);
 
         this.nickname = member.nickname;
         this.avatar = member.avatar;

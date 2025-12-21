@@ -3,6 +3,7 @@ import { SpaceInviteToSpaceModal } from "@components/Space/SpaceInviteToSpaceMod
 import { useModal } from "@contexts/Modal.context";
 import { useAppStore } from "@hooks/useStores";
 import { Item } from "@mutualzz/contexify";
+import { Box } from "@mutualzz/ui-web";
 import type { Channel } from "@stores/objects/Channel";
 import type { Space } from "@stores/objects/Space";
 import { useMutation } from "@tanstack/react-query";
@@ -46,6 +47,7 @@ export const ChannelListItemContextMenu = observer(
                 elevation={app.preferEmbossed ? 5 : 1}
                 transparency={65}
                 id={`channel-context-menu-${channel.id}`}
+                key={channel.id}
             >
                 {!isCategory && (
                     <Item
@@ -62,7 +64,7 @@ export const ChannelListItemContextMenu = observer(
                 )}
 
                 {canModifyChannel && (
-                    <>
+                    <Box>
                         <Item
                             onClick={() =>
                                 isCategory && channel.hasChildren
@@ -81,7 +83,7 @@ export const ChannelListItemContextMenu = observer(
                         >
                             Delete {isCategory ? "Category" : "Channel"}
                         </Item>
-                    </>
+                    </Box>
                 )}
             </ContextMenu>
         );

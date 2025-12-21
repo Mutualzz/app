@@ -116,8 +116,6 @@ function Login() {
             minHeight="100%"
             justifyContent="center"
             alignItems="center"
-            px={{ xs: "0.5rem", sm: "1.5rem", md: "2.5rem" }}
-            py={{ xs: "1rem", sm: "2rem", md: "3rem" }}
         >
             <AnimatedPaper
                 direction="column"

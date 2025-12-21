@@ -68,10 +68,7 @@ export class Theme {
         this.raw = theme;
 
         this.authorId = theme.authorId;
-
-        if (theme.author) {
-            this.author = this.app.users.add(theme.author);
-        }
+        if (theme.author) this.author = this.app.users.add(theme.author);
 
         makeAutoObservable(this);
     }

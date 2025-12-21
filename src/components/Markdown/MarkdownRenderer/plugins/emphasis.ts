@@ -11,7 +11,7 @@ export const emphasisPlugin = (md: MarkdownIt) => {
                     const token = children[j];
                     // Bold: **text**
                     if (token.type === "text" && token.content.includes("**")) {
-                        const regex = /\*\*([^\*]+?)\*\*/g;
+                        const regex = /\*\*([^*]+?)\*\*/g;
                         let lastIndex = 0;
                         let match;
                         const newTokens: Token[] = [];

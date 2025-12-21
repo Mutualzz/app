@@ -9,6 +9,7 @@ import { useDebouncedEffect } from "@react-hookz/web";
 import { createFileRoute } from "@tanstack/react-router";
 import { runInAction } from "mobx";
 import { observer } from "mobx-react-lite";
+import { useEffect } from "react";
 
 export const Route = createFileRoute(
     "/_authenticated/spaces/$spaceId/$channelId",
@@ -18,6 +19,7 @@ export const Route = createFileRoute(
 
 function RouteComponent() {
     const app = useAppStore();
+    const { spaceId, channelId } = Route.useParams();
 
     useDebouncedEffect(
         () => {
@@ -33,6 +35,17 @@ function RouteComponent() {
         [app.channels.activeId, app.spaces.activeId],
         2000,
     );
+
+    useEffect(() => {
+        if (
+            spaceId === app.spaces.activeId ||
+            channelId === app.channels.activeId
+        )
+            return;
+
+        app.spaces.setActive(spaceId);
+        app.channels.setActive(channelId);
+    }, []);
 
     return (
         <Paper

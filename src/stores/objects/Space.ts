@@ -14,7 +14,7 @@ import {
 } from "@mutualzz/types";
 import type { AppStore } from "@stores/App.store";
 import { SpaceMemberListStore } from "@stores/objects/SpaceMemberListStore";
-import type { User } from "@stores/objects/User";
+import type { User } from "@stores/objects/User.ts";
 import { REST } from "@stores/REST.store";
 import { SpaceMemberStore } from "@stores/SpaceMember.store";
 import { asAcronym, compareChannels } from "@utils/index";
@@ -66,6 +66,7 @@ export class Space {
         this.invites = observable.map();
 
         this.ownerId = space.ownerId;
+        if (space.owner) this.owner = this.app.users.add(space.owner);
 
         this.createdAt = new Date(space.createdAt);
         this.updatedAt = new Date(space.updatedAt);
@@ -75,17 +76,12 @@ export class Space {
         this._channels = observable.set();
 
         if ("channels" in space && space.channels) {
-            app.channels.addAll(space.channels, this);
+            app.channels.addAll(space.channels);
             space.channels.forEach((channel) => this._channels.add(channel.id));
         }
 
-        if ("members" in space && space.members) {
+        if ("members" in space && space.members)
             this.members.addAll(space.members);
-        }
-
-        if (space.owner) {
-            this.owner = this.app.users.add(space.owner);
-        }
 
         this.raw = space;
 

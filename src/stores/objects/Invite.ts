@@ -1,9 +1,9 @@
 import type { Snowflake } from "@mutualzz/types";
 import { type APIInvite, type InviteType } from "@mutualzz/types";
 import type { AppStore } from "@stores/App.store";
-import { Channel } from "@stores/objects/Channel";
-import type { User } from "@stores/objects/User";
-import { Space } from "./Space";
+import type { Channel } from "./Channel";
+import type { Space } from "./Space";
+import type { User } from "./User";
 
 const prefixUrl = import.meta.env.DEV
     ? "http://localhost:1420/invite"
@@ -39,23 +39,14 @@ export class Invite {
         this.type = invite.type;
 
         this.spaceId = invite.spaceId;
-        if (invite.space) {
-            this.space = this.app.spaces.add(invite.space);
-        }
+        if (invite.space) this.space = this.app.spaces.add(invite.space);
 
         this.channelId = invite.channelId;
-        if (invite.channel) {
+        if (invite.channel)
             this.channel = this.app.channels.add(invite.channel);
-            this.app.channels.add(invite.channel);
-            if (this.space) {
-                this.space.addChannel(invite.channel);
-            }
-        }
 
         this.inviterId = invite.inviterId;
-        if (invite.inviter) {
-            this.inviter = this.app.users.add(invite.inviter);
-        }
+        if (invite.inviter) this.inviter = this.app.users.add(invite.inviter);
 
         this.maxUses = invite.maxUses;
         this.uses = invite.uses;

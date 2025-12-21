@@ -6,7 +6,7 @@ import shortcodesGithub from "emojibase-data/en/shortcodes/github.json";
 import shortcodesIamcal from "emojibase-data/en/shortcodes/iamcal.json";
 import shortcodesJoyPixels from "emojibase-data/en/shortcodes/joypixels.json";
 
-import { joinShortcodes, type Emoji } from "emojibase";
+import { type Emoji, joinShortcodes } from "emojibase";
 
 const shortcodes = [
     shortcodesEmojiBase,
@@ -34,13 +34,12 @@ export function getEmoji(
             e.emoticon === shortcodeOrUnicodeOrEmoticon,
     );
 
-    const target =
+    return (
         emoji?.skins?.find(
             (skin) =>
                 skin.shortcodes?.includes(shortcodeOrUnicodeOrEmoticon) ||
                 skin.emoji === shortcodeOrUnicodeOrEmoticon ||
                 skin.emoticon === shortcodeOrUnicodeOrEmoticon,
-        ) ?? emoji;
-
-    return target;
+        ) ?? emoji
+    );
 }
