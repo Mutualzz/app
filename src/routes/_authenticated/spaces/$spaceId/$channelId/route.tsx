@@ -37,15 +37,9 @@ function RouteComponent() {
     );
 
     useEffect(() => {
-        if (
-            spaceId === app.spaces.activeId ||
-            channelId === app.channels.activeId
-        )
-            return;
-
         app.spaces.setActive(spaceId);
         app.channels.setActive(channelId);
-    }, []);
+    }, [spaceId, channelId]);
 
     return (
         <Paper

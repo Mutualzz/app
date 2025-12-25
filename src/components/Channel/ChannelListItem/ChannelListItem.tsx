@@ -63,7 +63,7 @@ export const ChannelListItem = observer(
             }
 
             if (!channel.isTextChannel) return;
-            if (channel.id === app.channels.activeId) return;
+            if (active) return;
 
             navigate({
                 to: "/spaces/$spaceId/$channelId",

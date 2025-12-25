@@ -15,29 +15,31 @@ export const Route = createFileRoute("/_authenticated/spaces/$spaceId")({
 
 function RouteComponent() {
     const app = useAppStore();
-    const params = useParams({
+
+    const { spaceId } = Route.useParams();
+    const childParams = useParams({
         from: "/_authenticated/spaces/$spaceId/$channelId",
         shouldThrow: false,
     });
     const navigate = useNavigate();
 
     useEffect(() => {
-        if (params && (params.spaceId || params.channelId)) return;
+        app.spaces.setActive(spaceId);
+    }, [spaceId]);
+
+    useEffect(() => {
+        if (childParams?.channelId) return;
 
         const channel = app.channels.preferredChannel;
-        if (!channel || !channel.spaceId) return;
+        if (!channel) return;
+        if (channel.spaceId !== spaceId) return;
 
         navigate({
             to: "/spaces/$spaceId/$channelId",
-            params: { spaceId: channel.spaceId, channelId: channel.id },
+            params: { spaceId, channelId: channel.id },
+            replace: true,
         });
-    }, [params]);
-
-    useEffect(() => {
-        if (!params?.spaceId) return;
-
-        app.spaces.setActive(params.spaceId);
-    }, []);
+    }, [childParams?.channelId, app.channels.preferredChannel, spaceId]);
 
     return (
         <Stack direction="row" width="100%" height="100%">

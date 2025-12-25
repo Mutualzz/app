@@ -32,6 +32,7 @@ import {
     Scripts,
     useNavigate,
 } from "@tanstack/react-router";
+import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import { getTauriVersion, getVersion } from "@tauri-apps/api/app";
 import { arch, locale, platform, version } from "@tauri-apps/plugin-os";
 import { isTauri } from "@utils/index";
@@ -271,12 +272,11 @@ function RootComponent() {
                                         {app.account && <ModeSwitcher />}
                                     </Stack>
                                 </Loader>
-                                {/* {import.meta.env.DEV && (
+                                {import.meta.env.DEV && (
                                     <>
                                         <TanStackRouterDevtools />
-                                        <TanStackQueryDevtools />
                                     </>
-                                )} */}
+                                )}
                             </ModalProvider>
                         </DesktopShell>
                     </DesktopShellProvider>

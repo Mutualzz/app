@@ -25,21 +25,21 @@ function RouteComponent() {
     });
 
     useEffect(() => {
-        app.setMode("spaces");
-
-        return () => app.resetMode();
+        if (app.mode !== "spaces") app.setMode("spaces");
     }, []);
 
     useEffect(() => {
-        if (params && params?.spaceId) return;
+        if (params?.spaceId) return;
 
         const space = app.spaces.setPreferredActive();
         if (!space) return;
+
         navigate({
             to: "/spaces/$spaceId",
             params: { spaceId: space.id },
+            replace: true,
         });
-    }, [params]);
+    }, [params?.spaceId]);
 
     return (
         <Stack width="100%" height="100%" direction="row">

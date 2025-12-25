@@ -15,11 +15,7 @@ function RouteComponent() {
     const app = useAppStore();
 
     useEffect(() => {
-        app.setMode("feed");
-
-        return () => {
-            app.resetMode();
-        };
+        if (app.mode !== "feed") app.setMode("feed");
     }, []);
 
     return (
