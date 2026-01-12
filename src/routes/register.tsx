@@ -90,13 +90,9 @@ function Register() {
     const [passwordVisible, setPasswordVisible] = useState(false);
     const [apiErrors, setApiErrors] = useState<ApiErrors>({});
 
-    const mutation = useMutation({
-        mutationFn: async (values: any) => {
-            return await app.rest.post<any, { token: string }>(
-                "auth/register",
-                values,
-            );
-        },
+    const { mutate: register, isPending } = useMutation({
+        mutationFn: async (values: any) =>
+            app.rest.post<any, { token: string }>("auth/register", values),
         onSuccess: ({ token }) => {
             app.setToken(token);
         },
@@ -109,7 +105,7 @@ function Register() {
         },
     });
 
-    const form = useForm({
+    const Form = useForm({
         defaultValues: {
             email: "",
             globalName: undefined as string | undefined,
@@ -123,11 +119,11 @@ function Register() {
             onDynamic: validateRegister as any, // TypeScript workaround for dynamic validation
         },
         onSubmit: ({ value }) => {
-            mutation.mutate(value);
+            register(value);
         },
     });
 
-    if (app.account) {
+    if (app.token) {
         navigate({ to: "/", replace: true });
         return <></>;
     }
@@ -180,11 +176,11 @@ function Register() {
                     onSubmit={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
-                        form.handleSubmit();
+                        Form.handleSubmit();
                     }}
                 >
                     <Stack direction="column" spacing={3} width="100%">
-                        <form.Field
+                        <Form.Field
                             name="email"
                             children={(field) => (
                                 <InputWithLabel
@@ -202,7 +198,26 @@ function Register() {
                                 />
                             )}
                         />
-                        <form.Field
+
+                        <Form.Field
+                            name="username"
+                            children={(field) => (
+                                <InputWithLabel
+                                    type="text"
+                                    apiErrors={apiErrors}
+                                    field={field}
+                                    name="username"
+                                    label="Username"
+                                    onChange={(e) =>
+                                        field.handleChange(e.target.value)
+                                    }
+                                    onBlur={field.handleBlur}
+                                    value={field.state.value}
+                                    required
+                                />
+                            )}
+                        />
+                        <Form.Field
                             name="globalName"
                             children={(field) => (
                                 <InputWithLabel
@@ -223,25 +238,7 @@ function Register() {
                                 />
                             )}
                         />
-                        <form.Field
-                            name="username"
-                            children={(field) => (
-                                <InputWithLabel
-                                    type="text"
-                                    apiErrors={apiErrors}
-                                    field={field}
-                                    name="username"
-                                    label="Username"
-                                    onChange={(e) =>
-                                        field.handleChange(e.target.value)
-                                    }
-                                    onBlur={field.handleBlur}
-                                    value={field.state.value}
-                                    required
-                                />
-                            )}
-                        />
-                        <form.Field
+                        <Form.Field
                             name="password"
                             children={(field) => (
                                 <InputWithLabel
@@ -263,7 +260,7 @@ function Register() {
                                 />
                             )}
                         />
-                        <form.Field
+                        <Form.Field
                             name="confirmPassword"
                             children={(field) => (
                                 <InputWithLabel
@@ -285,7 +282,7 @@ function Register() {
                                 />
                             )}
                         />
-                        <form.Field
+                        <Form.Field
                             name="dateOfBirth"
                             children={(field) => (
                                 <DOBInput
@@ -299,15 +296,12 @@ function Register() {
                                 />
                             )}
                         />
-                        <form.Subscribe
-                            selector={(state) => [
-                                state.canSubmit,
-                                state.isSubmitting,
-                            ]}
-                            children={([canSubmit, isSubmitting]) => (
+                        <Form.Subscribe
+                            selector={(state) => [state.isSubmitting]}
+                            children={([isSubmitting]) => (
                                 <Button
                                     type="submit"
-                                    disabled={!canSubmit}
+                                    disabled={isSubmitting || isPending}
                                     size={{ xs: "md", sm: "lg" }}
                                 >
                                     {isSubmitting ? "..." : "Create Account"}

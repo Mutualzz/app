@@ -17,7 +17,7 @@ import { SpaceMemberListStore } from "@stores/objects/SpaceMemberListStore";
 import type { User } from "@stores/objects/User.ts";
 import { REST } from "@stores/REST.store";
 import { SpaceMemberStore } from "@stores/SpaceMember.store";
-import { asAcronym, compareChannels } from "@utils/index";
+import { asAcronym } from "@utils/index";
 import {
     makeAutoObservable,
     observable,
@@ -124,14 +124,14 @@ export class Space {
         );
 
         return topLevelChannels
-            .sort(compareChannels)
+            .sort(this.app.channels.compareChannels)
             .flatMap((topLevelChannel) => [
                 topLevelChannel,
                 ...spaceChannels
                     .filter(
                         (channel) => channel.parent?.id === topLevelChannel.id,
                     )
-                    .sort(compareChannels),
+                    .sort(this.app.channels.compareChannels),
             ]);
     }
 

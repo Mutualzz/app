@@ -1,6 +1,7 @@
-import type { ThemeDraft } from "@app-types/theme";
 import { Logger } from "@mutualzz/logger";
+import type { APITheme } from "@mutualzz/types";
 import { safeLocalStorage } from "@utils/safeLocalStorage";
+import Snowflake from "@utils/Snowflake";
 import { makeAutoObservable, observable, type IObservableArray } from "mobx";
 import { makePersistable } from "mobx-persist-store";
 import { type CanvasPath } from "react-sketch-canvas";
@@ -15,7 +16,7 @@ export class DraftStore {
         tag: "DraftStore",
     });
 
-    themes: IObservableArray<ThemeDraft>;
+    themes: IObservableArray<APITheme>;
     avatars: IObservableArray<AvatarDraft>;
 
     constructor() {
@@ -49,17 +50,25 @@ export class DraftStore {
         this.avatars.splice(index, 1);
     }
 
-    saveThemeDraft(theme: ThemeDraft) {
+    saveThemeDraft(theme: APITheme) {
+        const id = Snowflake.generate();
+        theme.id = id;
+        const existing = this.themes.some((t) => t.id === theme.id);
+        if (existing) {
+            this.logger.warn("Theme draft already exists");
+            return;
+        }
+
         this.themes.unshift(theme);
     }
 
-    deleteThemeDraft(theme: ThemeDraft) {
-        const index = this.themes.findIndex((t) => t.name === theme.name);
-        if (index === -1) {
+    deleteThemeDraft(theme: APITheme) {
+        const existing = this.themes.some((t) => t.id === theme.id);
+        if (!existing) {
             this.logger.warn("Theme draft does not exist");
             return;
         }
 
-        this.themes.splice(index, 1);
+        this.themes.filter((t) => t.id !== theme.id);
     }
 }

@@ -1,20 +1,21 @@
 import { AnimatedPaper } from "@components/Animated/AnimatedPaper";
-import {
-    SpaceSettingsSidebarProvider,
-    type SpaceSettingsSidebarPage,
-} from "@contexts/SpaceSettingsSidebar.context";
 import { useAppStore } from "@hooks/useStores";
-import { Drawer, Stack, useTheme } from "@mutualzz/ui-web";
+import { Drawer, useTheme } from "@mutualzz/ui-web";
 import { useMediaQuery } from "@react-hookz/web";
 import type { Space } from "@stores/objects/Space";
 import { observer } from "mobx-react-lite";
 import { useState } from "react";
+
+import {
+    SpaceSettingsProvider,
+    type SpaceSettingsPage,
+} from "@contexts/SpaceSettings.context";
 import { SpaceSettingsContent } from "./SpaceSettingsContent";
 import { SpaceSettingsSidebar } from "./SpaceSettingsSidebar";
 
 interface SpaceSettingsPropsModal {
     space: Space;
-    redirectTo?: SpaceSettingsSidebarPage;
+    redirectTo?: SpaceSettingsPage;
 }
 
 export const SpaceSettingsModal = observer(
@@ -29,7 +30,7 @@ export const SpaceSettingsModal = observer(
         const [drawerOpen, setDrawerOpen] = useState(false);
 
         return (
-            <SpaceSettingsSidebarProvider>
+            <SpaceSettingsProvider>
                 <AnimatedPaper
                     width="60vw"
                     height="75vh"
@@ -47,7 +48,7 @@ export const SpaceSettingsModal = observer(
                     animate={{ scale: 1 }}
                 >
                     {isMobileQuery ? (
-                        <Stack maxWidth="1200px" width="100%" height="100%">
+                        <>
                             <Drawer
                                 open={drawerOpen}
                                 onOpen={() => setDrawerOpen(true)}
@@ -66,18 +67,18 @@ export const SpaceSettingsModal = observer(
                                 space={space}
                                 redirectTo={redirectTo}
                             />
-                        </Stack>
+                        </>
                     ) : (
-                        <Stack maxWidth="1200px" width="100%" height="100%">
+                        <>
                             <SpaceSettingsSidebar space={space} />
                             <SpaceSettingsContent
                                 space={space}
                                 redirectTo={redirectTo}
                             />
-                        </Stack>
+                        </>
                     )}
                 </AnimatedPaper>
-            </SpaceSettingsSidebarProvider>
+            </SpaceSettingsProvider>
         );
     },
 );

@@ -145,10 +145,8 @@ export class ChannelStore {
             this.collapsedCategories.get(spaceId) || new Set();
 
         return allChannels.filter((channel, currentIndex) => {
-            // Always show category channels (even if collapsed)
             if (channel.type === ChannelType.Category) return true;
 
-            // Filter by type if specified
             if (types && types.length > 0 && !types.includes(channel.type))
                 return false;
 
@@ -162,6 +160,9 @@ export class ChannelStore {
             return !collapsedCategories.has(parentCategoryId);
         });
     }
+
+    compareChannels = (a: Channel, b: Channel): number =>
+        (a.position ?? -1) - (b.position ?? -1);
 
     getLastPositionInCategory(
         categoryId: string | null,
@@ -212,7 +213,6 @@ export class ChannelStore {
             spaceId: spaceId,
         }));
 
-        // Update the channels in the backend as well
         this.app.rest.patch(`/channels/bulk`, payload);
     }
 

@@ -26,6 +26,10 @@ function RouteComponent() {
 
     useEffect(() => {
         if (app.mode !== "spaces") app.setMode("spaces");
+
+        return () => {
+            if (app.mode === "spaces") app.resetMode();
+        };
     }, []);
 
     useEffect(() => {

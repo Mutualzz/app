@@ -5,18 +5,9 @@ import { observer } from "mobx-react-lite";
 import { useEffect, type FC, type PropsWithChildren } from "react";
 
 import { AdaptiveElements } from "./AdaptiveElements";
-import WindowTitlebar from "./WindowTitlebar";
 
-interface WindowTitlebarProps {
-    onHeightChange?: (height: number) => void;
-}
-
-interface DesktopShellProps {
-    titleBarProps?: WindowTitlebarProps;
-}
-
-const DesktopShell: FC<PropsWithChildren<DesktopShellProps>> = observer(
-    ({ titleBarProps, children, ...props }) => {
+const DesktopShell: FC<PropsWithChildren> = observer(
+    ({ children, ...props }) => {
         const { setOsInfo } = useDesktopShell();
 
         useEffect(() => {
@@ -54,7 +45,6 @@ const DesktopShell: FC<PropsWithChildren<DesktopShellProps>> = observer(
                 }}
                 {...props}
             >
-                <WindowTitlebar {...titleBarProps} />
                 <AdaptiveElements />
                 {children}
             </div>

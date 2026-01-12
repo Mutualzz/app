@@ -1,24 +1,34 @@
-import { WINDOW_TITLEBAR_ZINDEX } from "@app-types/index";
-import { Paper } from "@components/Paper";
-import { useDesktopShell } from "@contexts/DesktopShell.context";
-import { useAppStore } from "@hooks/useStores";
-import { Box, Divider, IconButton, Stack, useTheme } from "@mutualzz/ui-web";
+import { WINDOW_TITLEBAR_ZINDEX } from "@app-types/index.ts";
+import { Paper } from "@components/Paper.tsx";
+import { useDesktopShell } from "@contexts/DesktopShell.context.tsx";
+import { useAppStore } from "@hooks/useStores.ts";
+import {
+    Box,
+    Divider,
+    IconButton,
+    Stack,
+    Typography,
+    useTheme,
+} from "@mutualzz/ui-web";
 import { getCurrentWindow } from "@tauri-apps/api/window";
+import { isTauri } from "@utils/index.ts";
 import { observer } from "mobx-react-lite";
-import { useEffect, useRef, useState } from "react";
-import { FaDownload } from "react-icons/fa";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { FaDownload, FaPeopleArrows } from "react-icons/fa";
+import { GiGalaxy } from "react-icons/gi";
+import { ImFeed } from "react-icons/im";
 import {
     VscChromeMaximize,
     VscChromeMinimize,
     VscClose,
 } from "react-icons/vsc";
 
-interface WindowTitlebarProps {
+interface WindowTitleBarProps {
     onHeightChange?: (height: number) => void;
 }
 
-const WindowTitlebar = ({ onHeightChange }: WindowTitlebarProps) => {
-    const appWindow = getCurrentWindow();
+const WindowTitleBar = ({ onHeightChange }: WindowTitleBarProps) => {
+    const appWindow = useMemo(() => (isTauri ? getCurrentWindow() : null), []);
     const { theme } = useTheme();
     const { os } = useDesktopShell();
     const app = useAppStore();
@@ -52,7 +62,7 @@ const WindowTitlebar = ({ onHeightChange }: WindowTitlebarProps) => {
             data-tauri-drag-region
             justifyContent="space-between"
             alignItems="center"
-            py={isMac ? 2.5 : 1}
+            py={isMac ? 2.5 : 1.5}
             variant={app.preferEmbossed ? "elevation" : "plain"}
             transparency={65}
             px={isMac ? 2 : 1.5}
@@ -62,10 +72,40 @@ const WindowTitlebar = ({ onHeightChange }: WindowTitlebarProps) => {
             zIndex={WINDOW_TITLEBAR_ZINDEX}
             top={0}
             left={0}
-            css={{ backdropFilter: "saturate(120%) blur(6px)" }}
+            elevation={app.preferEmbossed ? 1 : 0}
+            boxShadow="none !important"
         >
             <Box data-tauri-drag-region flex={1} />
-            <Box data-tauri-drag-region flex={1} />
+            <Stack
+                width="100%"
+                spacing={1.25}
+                direction="row"
+                data-tauri-drag-region
+                alignItems="center"
+                justifyContent="center"
+                flex={1}
+            >
+                {!app.mode && (
+                    <>
+                        <FaPeopleArrows />
+                        <Typography fontWeight="bold">
+                            Direct Messages
+                        </Typography>
+                    </>
+                )}
+                {app.mode === "spaces" && (
+                    <>
+                        <GiGalaxy />
+                        <Typography fontWeight="bold">Spaces</Typography>
+                    </>
+                )}
+                {app.mode === "feed" && (
+                    <>
+                        <ImFeed />
+                        <Typography fontWeight="bold">Feed</Typography>
+                    </>
+                )}
+            </Stack>
             <Stack
                 flex={1}
                 alignItems="center"
@@ -106,7 +146,7 @@ const WindowTitlebar = ({ onHeightChange }: WindowTitlebarProps) => {
                         )}
                     </Stack>
                 )}
-                {!isMac && (
+                {!isMac && appWindow && isTauri && (
                     <Stack direction="row" alignItems="center" spacing={1.5}>
                         <IconButton
                             css={{
@@ -164,4 +204,4 @@ const WindowTitlebar = ({ onHeightChange }: WindowTitlebarProps) => {
     );
 };
 
-export default observer(WindowTitlebar);
+export default observer(WindowTitleBar);

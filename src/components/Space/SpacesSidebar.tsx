@@ -1,3 +1,4 @@
+import { AnimatedLogo } from "@components/Animated/AnimatedLogo.tsx";
 import { Paper } from "@components/Paper";
 import { SidebarPill, type PillType } from "@components/SidebarPill";
 import { SpaceIcon } from "@components/Space/SpaceIcon";
@@ -25,6 +26,8 @@ import { contextMenu } from "@mutualzz/contexify";
 import { formatColor } from "@mutualzz/ui-core";
 import { IconButton, Portal, Stack, Tooltip, useTheme } from "@mutualzz/ui-web";
 import type { Space } from "@stores/objects/Space";
+import { useNavigate } from "@tanstack/react-router";
+import capitalize from "lodash-es/capitalize";
 import { observer } from "mobx-react-lite";
 import { useEffect, useState, type MouseEvent } from "react";
 import { FaPlus } from "react-icons/fa";
@@ -65,7 +68,6 @@ const SortableSpace = observer(
             transform: CSS.Transform.toString(transform),
             transition,
             opacity: isDragging ? 0.5 : 1,
-            alignSelf: "center",
         };
 
         const showSpaceMenu = (e: MouseEvent) => {
@@ -111,6 +113,7 @@ const SortableSpace = observer(
                         <Stack justifyContent="center" position="relative">
                             <SidebarPill type={pillType} />
                             <SpaceIcon
+                                size={40}
                                 onContextMenu={showSpaceMenu}
                                 onMouseEnter={() => setIsHovered(true)}
                                 onMouseLeave={() => setIsHovered(false)}
@@ -133,6 +136,7 @@ const SortableSpace = observer(
 );
 
 export const SpacesSidebar = observer(() => {
+    const navigate = useNavigate();
     const app = useAppStore();
     const { openModal } = useModal();
 
@@ -166,15 +170,50 @@ export const SpacesSidebar = observer(() => {
 
     return (
         <Paper
-            maxWidth="5rem"
+            width="5rem"
             direction="column"
-            pt={3.75}
+            pt={1}
             spacing={2.5}
-            width="100%"
             variant="plain"
-            boxShadow="none"
+            boxShadow="none !important"
             elevation={app.preferEmbossed ? 1 : 0}
+            alignItems="center"
+            height="100%"
         >
+            <Stack width="100%" alignItems="center" justifyContent="center">
+                <Tooltip
+                    title={
+                        <TooltipWrapper>
+                            Switch to{" "}
+                            {capitalize(
+                                app.mode
+                                    ? "Direct Messages"
+                                    : (app.settings?.preferredMode ?? "Spaces"),
+                            )}
+                        </TooltipWrapper>
+                    }
+                    placement="right"
+                >
+                    <AnimatedLogo
+                        css={{
+                            width: 48,
+                            cursor: "pointer",
+                            marginBottom: 5,
+                        }}
+                        initial={{ scale: 1 }}
+                        whileHover={{ scale: 1.1 }}
+                        onClick={() => {
+                            navigate({
+                                to: app.mode
+                                    ? "/@me"
+                                    : `/${app.settings?.preferredMode ?? "spaces"}`,
+                                replace: true,
+                            });
+                        }}
+                    />
+                </Tooltip>
+            </Stack>
+
             <DndContext
                 sensors={sensors}
                 collisionDetection={closestCenter}
@@ -198,16 +237,15 @@ export const SpacesSidebar = observer(() => {
                     ))}
                 </SortableContext>
             </DndContext>
-            <Stack alignSelf="center">
+            <Stack>
                 <Tooltip
                     title={<TooltipWrapper>Create a space</TooltipWrapper>}
                     placement="right"
                 >
                     <IconButton
+                        size={36}
                         css={{
                             borderRadius: 9999,
-                            padding: 12,
-                            alignSelf: "center",
                         }}
                         color="success"
                         variant="outlined"
@@ -215,7 +253,11 @@ export const SpacesSidebar = observer(() => {
                             openModal("space-invite", <SpaceInviteModal />)
                         }
                     >
-                        <FaPlus size={24} />
+                        <FaPlus
+                            css={{
+                                padding: 6,
+                            }}
+                        />
                     </IconButton>
                 </Tooltip>
             </Stack>

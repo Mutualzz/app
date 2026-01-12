@@ -23,7 +23,6 @@ export const emojiPlugin = (md: MarkdownIt) => {
                     const emojiData = getEmoji(emojiName);
 
                     if (emojiData) {
-                        // Add text before emoji
                         if (lastIndex < match.index) {
                             const textToken = new Token("text", "", 0);
                             textToken.content = content.slice(
@@ -34,7 +33,6 @@ export const emojiPlugin = (md: MarkdownIt) => {
                             newTokens.push(textToken);
                         }
 
-                        // Add emoji token
                         const emojiToken = new Token("emoji", "", 0);
                         emojiToken.content = emojiData.emoji;
                         emojiToken.attrSet(
@@ -53,7 +51,6 @@ export const emojiPlugin = (md: MarkdownIt) => {
                     }
                 }
 
-                // Add remaining text
                 if (lastIndex < content.length) {
                     const textToken = new Token("text", "", 0);
                     textToken.content = content.slice(lastIndex);
@@ -74,6 +71,6 @@ export const emojiPlugin = (md: MarkdownIt) => {
     md.renderer.rules.emoji = (tokens, idx) => {
         const token = tokens[idx];
 
-        return `<span class="emoji" data-name="${token.attrGet("name")}" data-url="${token.attrGet("url")}" data-unicode="${token.attrGet("unicode")}">${token.content}</span>`;
+        return `<emoji data-name="${token.attrGet("name")}" data-url="${token.attrGet("url")}" data-unicode="${token.attrGet("unicode")}">${token.content}</span>`;
     };
 };

@@ -1,9 +1,9 @@
 import { Paper } from "@components/Paper";
 import { useModal } from "@contexts/Modal.context";
 import {
-    useSpaceSettingsSidebar,
-    type SpaceSettingsSidebarPage,
-} from "@contexts/SpaceSettingsSidebar.context";
+    useSpaceSettings,
+    type SpaceSettingsPage,
+} from "@contexts/SpaceSettings.context";
 import { useAppStore } from "@hooks/useStores";
 import { IconButton, Stack, Typography } from "@mutualzz/ui-web";
 import type { Space } from "@stores/objects/Space";
@@ -15,14 +15,14 @@ import { SpaceInvitesSettings } from "./pages/general/SpaceInvitesSettings";
 
 interface SpaceSettingsContentProps {
     space: Space;
-    redirectTo?: SpaceSettingsSidebarPage;
+    redirectTo?: SpaceSettingsPage;
 }
 
 export const SpaceSettingsContent = observer(
     ({ space, redirectTo }: SpaceSettingsContentProps) => {
         const app = useAppStore();
         const { closeAllModals } = useModal();
-        const { currentPage, setCurrentPage } = useSpaceSettingsSidebar();
+        const { currentPage, setCurrentPage } = useSpaceSettings();
 
         useEffect(() => {
             if (redirectTo) {

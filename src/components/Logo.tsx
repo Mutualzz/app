@@ -19,6 +19,7 @@ export const Logo = observer((props: HTMLAttributes<HTMLImageElement>) => {
 
             const icon = (await getAdaptiveIcon(
                 themeToUse,
+                "image/webp",
                 "baseUrl",
             )) as string;
             setIcon(icon);

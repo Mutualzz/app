@@ -16,13 +16,17 @@ function RouteComponent() {
 
     useEffect(() => {
         if (app.mode !== "feed") app.setMode("feed");
+
+        return () => {
+            if (app.mode === "feed") app.resetMode();
+        };
     }, []);
 
     return (
         <Stack width="100%" height="100%" direction="row">
             <Stack
                 position="relative"
-                maxWidth="15rem"
+                maxWidth="5rem"
                 width="100%"
                 direction="column"
             >

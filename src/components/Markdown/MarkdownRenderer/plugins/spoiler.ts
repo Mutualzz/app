@@ -7,55 +7,74 @@ export const spoilerPlugin = (md: MarkdownIt) => {
         for (let i = 0; i < tokens.length; i++) {
             const children = tokens[i].children;
             if (tokens[i].type === "inline" && children) {
+                const newChildren: Token[] = [];
+                let insideSpoiler = false;
+                let spoilerTokens: Token[] = [];
+
                 for (let j = 0; j < children.length; j++) {
                     const token = children[j];
+
                     if (token.type === "text" && token.content.includes("||")) {
-                        const regex = /\|\|([^|]+?)\|\|/g;
-                        let lastIndex = 0;
-                        let match;
-                        const newTokens: Token[] = [];
-                        const content = token.content;
-
-                        while ((match = regex.exec(content))) {
-                            // Add text before spoiler
-                            if (match.index > lastIndex) {
-                                const textToken = new Token("text", "", 0);
-                                textToken.content = content.slice(
-                                    lastIndex,
-                                    match.index,
-                                );
-                                textToken.level = token.level;
-                                newTokens.push(textToken);
+                        const parts = token.content.split("||");
+                        for (let k = 0; k < parts.length; k++) {
+                            if (k > 0) {
+                                if (insideSpoiler) {
+                                    const spoilerToken = new Token(
+                                        "spoiler",
+                                        "",
+                                        0,
+                                    );
+                                    spoilerToken.children = [...spoilerTokens];
+                                    spoilerToken.content = "";
+                                    spoilerToken.level = token.level;
+                                    spoilerToken.markup = "||";
+                                    newChildren.push(spoilerToken);
+                                    spoilerTokens = [];
+                                }
+                                insideSpoiler = !insideSpoiler;
                             }
-                            // Add spoiler token
-                            const spoilerToken = new Token("spoiler", "", 0);
-                            spoilerToken.content = match[1];
-                            spoilerToken.level = token.level;
-                            newTokens.push(spoilerToken);
-
-                            lastIndex = match.index + match[0].length;
+                            if (parts[k]) {
+                                const partToken = new Token(
+                                    token.type,
+                                    token.tag,
+                                    token.nesting,
+                                );
+                                partToken.content = parts[k];
+                                partToken.level = token.level;
+                                if (insideSpoiler) {
+                                    spoilerTokens.push(partToken);
+                                } else {
+                                    newChildren.push(partToken);
+                                }
+                            }
                         }
-
-                        // Add remaining text (including standalone ||)
-                        if (lastIndex < content.length) {
-                            const textToken = new Token("text", "", 0);
-                            textToken.content = content.slice(lastIndex);
-                            textToken.level = token.level;
-                            newTokens.push(textToken);
-                        }
-
-                        if (newTokens.length > 0) {
-                            children.splice(j, 1, ...newTokens);
-                            j += newTokens.length - 1;
+                    } else {
+                        if (insideSpoiler) {
+                            spoilerTokens.push(token);
+                        } else {
+                            newChildren.push(token);
                         }
                     }
                 }
+                if (insideSpoiler && spoilerTokens.length > 0) {
+                    const spoilerToken = new Token("spoiler", "", 0);
+                    spoilerToken.children = [...spoilerTokens];
+                    spoilerToken.content = "";
+                    spoilerToken.level = children[0]?.level ?? 0;
+                    spoilerToken.markup = "||";
+                    newChildren.push(spoilerToken);
+                }
+                tokens[i].children = newChildren;
             }
         }
     });
 
-    md.renderer.rules.spoiler = (tokens, idx) => {
+    md.renderer.rules.spoiler = (tokens, idx, options, env, self) => {
         const token = tokens[idx];
-        return `<spoiler>${md.utils.escapeHtml(token.content)}</spoiler>`;
+        const inner = token.children
+            ? self.renderInline(token.children, options, env)
+            : md.utils.escapeHtml(token.content);
+
+        return `<spoiler>${inner}</spoiler>`;
     };
 };

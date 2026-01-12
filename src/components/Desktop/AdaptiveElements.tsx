@@ -21,7 +21,7 @@ export const AdaptiveElements = observer(() => {
                       )
                     : theme;
 
-                const icon = await getAdaptiveIcon(themeToUse);
+                const icon = await getAdaptiveIcon(themeToUse, "image/png");
 
                 await appWindow.setIcon(icon);
                 await getTray(themeToUse);

@@ -117,7 +117,6 @@ export const withSyntax = (editor: Editor) => {
                         if (hashtagMatch) {
                             const currentHashtagCount = hashtagMatch[1].length;
 
-                            // Check if we're deleting the last hashtag in the sequence
                             const hashtagsBeforeCursor = currentText.substring(
                                 0,
                                 cursorOffset,

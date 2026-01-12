@@ -7,7 +7,7 @@ import { observer } from "mobx-react-lite";
 import { AnimatePresence } from "motion/react";
 import { useMemo } from "react";
 import { GiGalaxy } from "react-icons/gi";
-import { ImFeed, ImSpinner11 } from "react-icons/im";
+import { ImFeed } from "react-icons/im";
 import { AnimatedIconButton } from "./Animated/AnimatedIconButton";
 import { TooltipWrapper } from "./TooltipWrapper";
 
@@ -27,7 +27,7 @@ export const ModeSwitcher = observer(() => {
                 ? "spaces"
                 : app.mode === "spaces"
                   ? "feed"
-                  : (preferredMode ?? "feed"),
+                  : (preferredMode ?? "spaces"),
         [app.mode, preferredMode],
     );
 
@@ -91,13 +91,7 @@ export const ModeSwitcher = observer(() => {
                             },
                         }}
                     >
-                        {app.mode === null ? (
-                            <ImSpinner11 />
-                        ) : targetMode === "feed" ? (
-                            <ImFeed />
-                        ) : (
-                            <GiGalaxy />
-                        )}
+                        {targetMode === "feed" ? <ImFeed /> : <GiGalaxy />}
                     </AnimatedIconButton>
                 </Tooltip>
             )}

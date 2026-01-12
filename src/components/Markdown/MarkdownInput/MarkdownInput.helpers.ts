@@ -51,21 +51,18 @@ export const parseMarkdownToRanges = (
                 const contentEnd = i;
 
                 if (contentEnd > contentStart) {
-                    // Add range for opening marker
                     ranges.push({
                         isMarker: true,
                         anchor: { path, offset: startOffset },
                         focus: { path, offset: startOffset + markerLength },
                     });
 
-                    // Add decorated content range
                     ranges.push({
                         [type]: true,
                         anchor: { path, offset: contentStart },
                         focus: { path, offset: contentEnd },
                     });
 
-                    // Add range for closing marker
                     ranges.push({
                         isMarker: true,
                         anchor: { path, offset: contentEnd },

@@ -32,7 +32,7 @@ export const SpaceIcon = observer(({ space, selected, ...props }: Props) => {
                 variant="plain"
                 color="primary"
                 elevation={5}
-                shape={selected || hovered ? 10 : 15}
+                shape={selected || hovered ? 15 : 10}
                 onMouseOver={() => setHovered(true)}
                 onMouseOut={() => setHovered(false)}
                 {...props}
@@ -44,8 +44,8 @@ export const SpaceIcon = observer(({ space, selected, ...props }: Props) => {
     return (
         <Paper
             elevation={app.preferEmbossed ? 5 : 1}
-            transparency={25}
-            borderRadius={hovered ? 10 : 17.5}
+            transparency={50}
+            borderRadius={selected || hovered ? 15 : 10}
             css={{
                 transition: "border-radius 0.2s ease-in-out",
             }}
@@ -54,7 +54,7 @@ export const SpaceIcon = observer(({ space, selected, ...props }: Props) => {
                 size={48}
                 variant="plain"
                 color="primary"
-                shape={hovered ? 10 : 15}
+                shape={selected || hovered ? 15 : 10}
                 onMouseOver={() => setHovered(true)}
                 onMouseOut={() => setHovered(false)}
                 {...props}

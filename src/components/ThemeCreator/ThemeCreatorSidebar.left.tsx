@@ -1,9 +1,9 @@
 import { Paper } from "@components/Paper";
 import {
-    useSpaceSettings,
-    type SpaceSettingsCategories,
-    type SpaceSettingsPage,
-} from "@contexts/SpaceSettings.context";
+    useThemeCreator,
+    type ThemeCreatorCategory,
+    type ThemeCreatorPage,
+} from "@contexts/ThemeCreator.context";
 import { useAppStore } from "@hooks/useStores";
 import {
     Button,
@@ -12,115 +12,104 @@ import {
     Stack,
     Typography,
 } from "@mutualzz/ui-web";
-import type { Space } from "@stores/objects/Space";
 import startCase from "lodash-es/startCase";
 import { observer } from "mobx-react-lite";
 import { Fragment, type JSX } from "react";
-import { FaPaintBrush, FaPaperPlane } from "react-icons/fa";
+import { CiTextAlignJustify } from "react-icons/ci";
+import { FaPalette } from "react-icons/fa6";
+import { IoText } from "react-icons/io5";
 
-interface SpaceSettingsProps {
-    space: Space;
+interface ThemeCreatorSidebarProps {
     drawerOpen?: boolean;
     setDrawerOpen?: (open: boolean) => void;
 }
 
 interface Pages {
-    label: SpaceSettingsPage;
+    label: ThemeCreatorPage;
     icon: JSX.Element;
 }
 
-type SettingsPages = Record<SpaceSettingsCategories, Pages[]>;
+type ThemeCreatorPages = Record<ThemeCreatorCategory, Pages[]>;
 
-const settingsPages: SettingsPages = {
+const creatorPages: ThemeCreatorPages = {
     general: [
         {
-            label: "profile",
-            icon: <FaPaintBrush />,
+            label: "details",
+            icon: <CiTextAlignJustify />,
         },
     ],
-    people: [
+    colors: [
         {
-            label: "invites",
-            icon: <FaPaperPlane />,
+            label: "base",
+            icon: <FaPalette />,
+        },
+        {
+            label: "typography",
+            icon: <IoText />,
         },
     ],
 };
 
-export const SpaceSettingsSidebar = observer(
-    ({ space, drawerOpen, setDrawerOpen }: SpaceSettingsProps) => {
+export const ThemeCreatorSidebarLeft = observer(
+    ({ drawerOpen, setDrawerOpen }: ThemeCreatorSidebarProps) => {
         const app = useAppStore();
 
         const { currentPage, setCurrentPage, setCurrentCategory } =
-            useSpaceSettings();
+            useThemeCreator();
 
         const handlePageSwitch = (
-            category: SpaceSettingsCategories,
-            page: SpaceSettingsPage,
+            category: ThemeCreatorCategory,
+            page: ThemeCreatorPage,
         ) => {
             setCurrentPage(page);
             setCurrentCategory(category);
-            if (drawerOpen && setDrawerOpen) {
-                setDrawerOpen(false);
-            }
+            if (drawerOpen && setDrawerOpen) setDrawerOpen(false);
         };
 
-        if (!app.account) return null;
-
-        const categories = Object.entries(settingsPages);
+        const categories = Object.entries(creatorPages);
 
         return (
             <Paper
                 direction="column"
-                width={175}
+                width="8rem"
                 height="100%"
                 elevation={app.preferEmbossed ? 5 : 0}
-                spacing={2.5}
-                p="1rem"
                 borderTop="0 !important"
                 borderLeft="0 !important"
                 borderBottom="0 !important"
+                px={2.5}
+                pt={15}
+                spacing={2}
             >
                 {categories.map(([category, pages], index) => (
                     <Fragment
-                        key={`settings-sidebar-category-fragment-${category}`}
+                        key={`theme-creator-sidebar-category-${category}`}
                     >
                         <Stack direction="column">
-                            {category === "general" ? (
-                                <Typography
-                                    level="body-lg"
-                                    textColor="secondary"
-                                    mb={1.25}
-                                >
-                                    {space.name}
-                                </Typography>
-                            ) : (
-                                <Typography
-                                    level="body-xs"
-                                    textColor="muted"
-                                    mb={1.25}
-                                >
-                                    {startCase(category)}
-                                </Typography>
-                            )}
-
+                            <Typography
+                                level="body-sm"
+                                textColor="muted"
+                                mb={1.25}
+                            >
+                                {startCase(category)}
+                            </Typography>
                             <ButtonGroup
                                 color="neutral"
-                                size={{ xs: "sm", sm: "md" }}
                                 orientation="vertical"
                                 variant="plain"
-                                spacing={1.25}
+                                spacing={5}
+                                horizontalAlign="left"
                             >
                                 {pages.map((page) => (
                                     <Button
                                         startDecorator={page.icon}
                                         onClick={() =>
                                             handlePageSwitch(
-                                                category as SpaceSettingsCategories,
+                                                category as ThemeCreatorCategory,
                                                 page.label,
                                             )
                                         }
                                         key={`user-settings-sidebar-${page.label}`}
-                                        horizontalAlign="left"
                                         variant={
                                             currentPage === page.label
                                                 ? "soft"

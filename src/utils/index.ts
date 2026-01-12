@@ -1,8 +1,7 @@
 import type { Theme as MzTheme } from "@emotion/react";
 import type { AppStore } from "@stores/App.store";
-import type { Channel } from "@stores/objects/Channel";
-import type { Theme } from "@stores/objects/Theme";
-import { useNavigate } from "@tanstack/react-router";
+import { Theme } from "@stores/objects/Theme";
+import type { useNavigate } from "@tanstack/react-router";
 import mergeWith from "lodash-es/mergeWith";
 import { isValidElement, type ReactNode } from "react";
 
@@ -41,28 +40,16 @@ export const asAcronym = (str: string) =>
         .map((str) => str[0])
         .join("");
 
-export const compareChannels = (a: Channel, b: Channel): number => {
-    return (a.position ?? -1) - (b.position ?? -1);
-};
-
 export const getIconType = (theme: MzTheme): string => {
     let iconUrl = "/icon.png";
 
     switch (theme.id) {
         case "baseDark":
-            iconUrl = "/icon.png";
-
-            break;
         case "baseLight":
-            iconUrl = "/icon-light.png";
-
+            iconUrl = "/icon.png";
             break;
         default:
-            iconUrl =
-                theme.type === "dark"
-                    ? "/icon-adaptive.png"
-                    : "/icon-light-adaptive.png";
-
+            iconUrl = "/icon-adaptive.png";
             break;
     }
 
@@ -92,6 +79,7 @@ export const sortThemes = (themes: Theme[]): Theme[] => {
     const priorityThemes = themes.filter((theme) =>
         priorityOrder.includes(theme.id),
     );
+
     const otherThemes = themes
         .filter((theme) => !priorityOrder.includes(theme.id))
         .sort((a, b) => a.name.localeCompare(b.name));

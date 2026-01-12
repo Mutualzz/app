@@ -108,13 +108,11 @@ function flattenChannels(channels: Channel[]) {
             const children = channels.filter(
                 (c) => c.parent?.id === channel.id,
             );
-            // Sort children by position
             children.sort((a, b) => (a.position ?? 0) - (b.position ?? 0));
             result.push(...children);
         }
     }
 
-    // Remove duplicates (children already included)
     return Array.from(new Set(result));
 }
 
@@ -168,7 +166,6 @@ export const ChannelList = observer(() => {
         runInAction(() => {
             const movingChannel = flatChannels[oldIndex];
 
-            // If moving a category, move its children too
             let newOrder: Channel[] = [...flatChannels];
             if (movingChannel.type === ChannelType.Category) {
                 const group = getCategoryWithChildren(movingChannel.id);
@@ -179,11 +176,9 @@ export const ChannelList = observer(() => {
 
                 newOrder.splice(insertAt, 0, ...group);
             } else {
-                // Move single channel
                 newOrder = arrayMove(newOrder, oldIndex, newIndex);
             }
 
-            // Recalculate parent/category for each channel
             let currentCategory: Channel | null = null;
             newOrder.forEach((channel) => {
                 if (channel.type === ChannelType.Category) {

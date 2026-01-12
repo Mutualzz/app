@@ -1,9 +1,9 @@
 import { Paper } from "@components/Paper";
 import { useModal } from "@contexts/Modal.context";
 import {
-    useUserSettingsSidebar,
-    type UserSettingsSidebarPage,
-} from "@contexts/UserSettingsSidebar.context";
+    useUserSettings,
+    type UserSettingsPage,
+} from "@contexts/UserSettings.context";
 import { useAppStore } from "@hooks/useStores";
 import { IconButton, Stack, Typography } from "@mutualzz/ui-web";
 import startCase from "lodash-es/startCase";
@@ -15,14 +15,14 @@ import { UserAccountSettings } from "./pages/user/UserAccountSettings";
 import { UserProfileSettings } from "./pages/user/UserProfileSettings";
 
 interface UserSettingsContentProps {
-    redirectTo?: UserSettingsSidebarPage;
+    redirectTo?: UserSettingsPage;
 }
 
 export const UserSettingsContent = observer(
     ({ redirectTo }: UserSettingsContentProps) => {
         const app = useAppStore();
-        const { currentPage, setCurrentPage } = useUserSettingsSidebar();
-        const { closeAllModals } = useModal();
+        const { currentPage, setCurrentPage } = useUserSettings();
+        const { closeModal } = useModal();
 
         useEffect(() => {
             if (redirectTo) {
@@ -65,7 +65,7 @@ export const UserSettingsContent = observer(
                         }}
                         variant="plain"
                         size="sm"
-                        onClick={() => closeAllModals()}
+                        onClick={() => closeModal("user-settings")}
                     >
                         <FaX />
                     </IconButton>

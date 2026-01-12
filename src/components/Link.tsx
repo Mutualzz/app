@@ -110,7 +110,7 @@ export const OpenLink = ({ url, unsafe }: Props) => {
                     </Stack>
                 </>
             )}
-            =
+
             <Box width="100%" mb={4} px={4}>
                 <ButtonGroup fullWidth spacing={10}>
                     <Button

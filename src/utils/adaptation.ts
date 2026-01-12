@@ -42,6 +42,7 @@ const ensureContrast = (
     return attempt.hex();
 };
 
+// TODO: rework this, because its completely ass
 export const adaptColors = ({
     baseColor,
     primaryColor,

@@ -69,7 +69,7 @@ function Login() {
     const app = useAppStore();
     const [error, setError] = useState<string | null>(null);
 
-    const mutation = useMutation({
+    const { mutate: login, isPending } = useMutation({
         mutationFn: async (values: any) => {
             const requestBody: Record<string, string | undefined> = {
                 password: values.password,
@@ -92,17 +92,17 @@ function Login() {
         },
     });
 
-    const form = useForm({
+    const Form = useForm({
         defaultValues: {
             usernameOrEmail: "",
             password: "",
         },
         onSubmit: ({ value }) => {
-            mutation.mutate(value);
+            login(value);
         },
     });
 
-    if (app.account) {
+    if (app.token) {
         navigate({ to: "/", replace: true });
         return <></>;
     }
@@ -185,11 +185,11 @@ function Login() {
                     onSubmit={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
-                        form.handleSubmit();
+                        Form.handleSubmit();
                     }}
                 >
                     <Stack direction="column" spacing={3} width="100%">
-                        <form.Field
+                        <Form.Field
                             name="usernameOrEmail"
                             children={(field) => (
                                 <InputWithLabel
@@ -204,7 +204,7 @@ function Login() {
                                 />
                             )}
                         />
-                        <form.Field
+                        <Form.Field
                             name="password"
                             children={(field) => (
                                 <InputWithLabel
@@ -220,12 +220,13 @@ function Login() {
                                 />
                             )}
                         />
-                        <form.Subscribe
+                        <Form.Subscribe
                             selector={(state) => [state.isSubmitting]}
                             children={([isSubmitting]) => (
                                 <Button
                                     type="submit"
                                     size={{ xs: "md", sm: "lg", md: "lg" }}
+                                    disabled={isSubmitting || isPending}
                                 >
                                     {isSubmitting ? "..." : "Login"}
                                 </Button>

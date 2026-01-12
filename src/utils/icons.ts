@@ -26,12 +26,13 @@ type AdaptiveIconReturn<T extends "automatic" | "baseUrl"> =
 
 export const getAdaptiveIcon = async <T extends "automatic" | "baseUrl">(
     theme: Theme,
+    mime: string = "image/webp",
     type: T = "automatic" as T,
     iconUrl?: string,
 ): Promise<AdaptiveIconReturn<T>> => {
     if (!iconUrl) iconUrl = getIconType(theme);
 
-    const cacheKey = `${theme.id}-${theme.type}-${theme.colors.primary}`;
+    let cacheKey = `${theme.id}-${theme.type}-${theme.colors.primary}-${mime}`;
 
     const cachedBlob = await getIconFromCache(cacheKey);
     if (cachedBlob) {
@@ -74,7 +75,7 @@ export const getAdaptiveIcon = async <T extends "automatic" | "baseUrl">(
 
     ctx.drawImage(imageBitmap, 0, 0);
 
-    const blob = await canvasToBlob(canvas, "image/webp", 0.9);
+    const blob = await canvasToBlob(canvas, mime, 0.9);
     await putIconInCache(cacheKey, blob);
 
     if (type === "baseUrl") {

@@ -23,7 +23,7 @@ export const TooltipWrapper = ({
         <Paper
             elevation={app.preferEmbossed ? 5 : 2}
             p={2}
-            transparency={0}
+            transparency={75}
             borderRadius={8}
             {...paperProps}
         >

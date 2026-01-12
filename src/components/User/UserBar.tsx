@@ -15,14 +15,13 @@ import {
 import { observer } from "mobx-react-lite";
 import { useMemo } from "react";
 import { FaCogs, FaPalette } from "react-icons/fa";
-import { MdLogout } from "react-icons/md";
 
 export const UserBar = observer(() => {
     const app = useAppStore();
     const { theme } = useTheme();
     const { openModal } = useModal();
 
-    const inSpace = Boolean(app.spaces.activeId);
+    const inSpace = Boolean(app.spaces.activeId) && app.mode === "spaces";
 
     const conditionalProps = useMemo<Omit<PaperProps, "color">>(() => {
         if (inSpace)
@@ -86,6 +85,7 @@ export const UserBar = observer(() => {
                 <Stack direction="row">
                     <Tooltip
                         title={<TooltipWrapper>Appearance</TooltipWrapper>}
+                        placement={inSpace ? "top" : "right"}
                     >
                         <IconButton
                             size="sm"
@@ -121,21 +121,6 @@ export const UserBar = observer(() => {
                             variant="plain"
                         >
                             <FaCogs />
-                        </IconButton>
-                    </Tooltip>
-                    <Tooltip
-                        placement="right"
-                        title={<TooltipWrapper>Log out</TooltipWrapper>}
-                    >
-                        <IconButton
-                            size="sm"
-                            onClick={() => {
-                                app.logout();
-                            }}
-                            color="neutral"
-                            variant="plain"
-                        >
-                            <MdLogout />
                         </IconButton>
                     </Tooltip>
                 </Stack>

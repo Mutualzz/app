@@ -20,6 +20,7 @@ const shortcodeRegex = new RegExp(shortcodeRegexOrig.source, "g");
 const emojiRegex = new RegExp(emojiRegexOrig.source, "gu");
 
 // TODO: add code blocks in the future
+// TODO: Fix spoilers not rendering emojis correctly
 export const MarkdownRenderer = ({
     color = "neutral",
     textColor = "primary",
@@ -55,11 +56,11 @@ export const MarkdownRenderer = ({
         instance.disable("hr");
         instance.disable("escape");
 
+        instance.use(spoilerPlugin);
         instance.use(emojiPlugin);
         instance.use(strikethroughPlugin);
         instance.use(emphasisPlugin);
         instance.use(underlinePlugin);
-        instance.use(spoilerPlugin);
 
         return instance;
     }, []);
@@ -70,27 +71,6 @@ export const MarkdownRenderer = ({
         () =>
             parse(html, {
                 replace: (domNode) => {
-                    if (
-                        domNode.type === "tag" &&
-                        domNode.name === "span" &&
-                        domNode.attribs?.class === "emoji"
-                    ) {
-                        const {
-                            ["data-name"]: name,
-                            ["data-url"]: url,
-                            ["data-unicode"]: unicode,
-                        } = domNode.attribs;
-
-                        return (
-                            <Emoji
-                                isEmojiOnly={isEmojiOnly}
-                                url={url}
-                                unicode={unicode}
-                                name={name}
-                            />
-                        );
-                    }
-
                     if (domNode.type === "tag") {
                         switch (domNode.name) {
                             case "h1": {
@@ -181,6 +161,24 @@ export const MarkdownRenderer = ({
                                     <Spoiler>
                                         {domToReact(domNode.children as any)}
                                     </Spoiler>
+                                );
+                            }
+                            case "emoji": {
+                                const {
+                                    ["data-name"]: name,
+                                    ["data-url"]: url,
+                                    ["data-unicode"]: unicode,
+                                } = domNode.attribs;
+
+                                console.log(domNode);
+
+                                return (
+                                    <Emoji
+                                        isEmojiOnly={isEmojiOnly}
+                                        url={url}
+                                        unicode={unicode}
+                                        name={name}
+                                    />
                                 );
                             }
                             case "a": {

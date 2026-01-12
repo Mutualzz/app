@@ -1,10 +1,10 @@
 import { AnimatedPaper } from "@components/Animated/AnimatedPaper";
 import {
-    UserSettingsSidebarProvider,
-    type UserSettingsSidebarPage,
-} from "@contexts/UserSettingsSidebar.context";
+    UserSettingsProvider,
+    type UserSettingsPage,
+} from "@contexts/UserSettings.context";
 import { useAppStore } from "@hooks/useStores";
-import { Drawer, Stack, useTheme } from "@mutualzz/ui-web";
+import { Drawer, useTheme } from "@mutualzz/ui-web";
 import { useMediaQuery } from "@react-hookz/web";
 import { observer } from "mobx-react-lite";
 import { useState } from "react";
@@ -12,7 +12,7 @@ import { UserSettingsContent } from "./UserSettingsContent";
 import { UserSettingsSidebar } from "./UserSettingsSidebar";
 
 interface UserSettingsPropsModal {
-    redirectTo?: UserSettingsSidebarPage;
+    redirectTo?: UserSettingsPage;
 }
 
 export const UserSettingsModal = observer(
@@ -26,7 +26,7 @@ export const UserSettingsModal = observer(
         const [drawerOpen, setDrawerOpen] = useState(false);
 
         return (
-            <UserSettingsSidebarProvider>
+            <UserSettingsProvider>
                 <AnimatedPaper
                     width="75vw"
                     height="82.5vh"
@@ -44,7 +44,7 @@ export const UserSettingsModal = observer(
                     animate={{ scale: 1 }}
                 >
                     {isMobileQuery ? (
-                        <Stack maxWidth="1200px" width="100%" height="100%">
+                        <>
                             <Drawer
                                 open={drawerOpen}
                                 onOpen={() => setDrawerOpen(true)}
@@ -59,15 +59,15 @@ export const UserSettingsModal = observer(
                                 />
                             </Drawer>
                             <UserSettingsContent redirectTo={redirectTo} />
-                        </Stack>
+                        </>
                     ) : (
-                        <Stack width="100%" height="100%">
+                        <>
                             <UserSettingsSidebar />
                             <UserSettingsContent redirectTo={redirectTo} />
-                        </Stack>
+                        </>
                     )}
                 </AnimatedPaper>
-            </UserSettingsSidebarProvider>
+            </UserSettingsProvider>
         );
     },
 );

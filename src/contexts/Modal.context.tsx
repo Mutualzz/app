@@ -1,10 +1,14 @@
 import { ModalRoot } from "@components/ModalRoot";
 import type { CSSObject } from "@emotion/react";
+import { useAppStore } from "@hooks/useStores";
 import type { ModalProps } from "@mutualzz/ui-web";
+import { reaction } from "mobx";
+import { observer } from "mobx-react-lite";
 import {
     createContext,
     useCallback,
     useContext,
+    useEffect,
     useState,
     type PropsWithChildren,
     type ReactNode,
@@ -42,8 +46,22 @@ const ModalContext = createContext<ModalContextProps>({
     },
 });
 
-export const ModalProvider = ({ children }: PropsWithChildren) => {
+export const ModalProvider = observer(({ children }: PropsWithChildren) => {
+    const app = useAppStore();
     const [modals, setModals] = useState<ModalStackItem[]>([]);
+
+    useEffect(() => {
+        const dispose = reaction(
+            () => app.token,
+            (token) => {
+                if (!token) {
+                    setModals([]);
+                }
+            },
+        );
+
+        return () => dispose();
+    }, [app.token]);
 
     const openModal = useCallback(
         (
@@ -96,7 +114,7 @@ export const ModalProvider = ({ children }: PropsWithChildren) => {
             <ModalRoot />
         </ModalContext.Provider>
     );
-};
+});
 
 export function useModal() {
     const ctx = useContext(ModalContext);

@@ -1,4 +1,5 @@
 import type { Arch, Family, OsType, Platform } from "@tauri-apps/plugin-os";
+import { observer } from "mobx-react-lite";
 import {
     createContext,
     useContext,
@@ -34,30 +35,32 @@ const DesktopShellContext = createContext<DesktopShellContextProps>({
     },
 });
 
-export const DesktopShellProvider = ({ children }: PropsWithChildren) => {
-    const [osInfo, setOsInfo] = useState<OsInfo>({
-        platform: "unknown",
-        type: "unknown",
-        family: "unknown",
-        arch: "unknown",
-        locale: null,
-    });
+export const DesktopShellProvider = observer(
+    ({ children }: PropsWithChildren) => {
+        const [osInfo, setOsInfo] = useState<OsInfo>({
+            platform: "unknown",
+            type: "unknown",
+            family: "unknown",
+            arch: "unknown",
+            locale: null,
+        });
 
-    const setOsInfoInternal = (info: Partial<OsInfo>) => {
-        setOsInfo((prev) => ({ ...prev, info }));
-    };
+        const setOsInfoInternal = (info: Partial<OsInfo>) => {
+            setOsInfo((prev) => ({ ...prev, info }));
+        };
 
-    const contextValue: DesktopShellContextProps = {
-        os: osInfo,
-        setOsInfo: setOsInfoInternal,
-    };
+        const contextValue: DesktopShellContextProps = {
+            os: osInfo,
+            setOsInfo: setOsInfoInternal,
+        };
 
-    return (
-        <DesktopShellContext.Provider value={contextValue}>
-            {children}
-        </DesktopShellContext.Provider>
-    );
-};
+        return (
+            <DesktopShellContext.Provider value={contextValue}>
+                {children}
+            </DesktopShellContext.Provider>
+        );
+    },
+);
 
 export function useDesktopShell() {
     const ctx = useContext(DesktopShellContext);

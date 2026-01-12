@@ -23,28 +23,23 @@ export function wrapSelectionWith(
         right += w.length;
     }
 
-    // Strip all wrappers to get the true core text
     let coreText = blockText.slice(left, right);
     for (const w of activeWrappers) {
         coreText = coreText.slice(w.length, coreText.length - w.length);
     }
 
-    // Decide new wrappers (Discord: last clicked always outermost)
     let newWrappers: string[];
     if (activeWrappers.includes(wrapper)) {
-        // Remove only if it's outermost!
         newWrappers = activeWrappers.filter((w) => w !== wrapper);
     } else {
         newWrappers = [...activeWrappers.filter((w) => w !== wrapper), wrapper];
     }
 
-    // Wrap core text with new wrappers, OUTERMOST first
     let wrapped = coreText;
     for (let i = newWrappers.length - 1; i >= 0; i--) {
         wrapped = newWrappers[i] + wrapped + newWrappers[i];
     }
 
-    // Replace expanded selection with new text
     editor.delete({
         at: {
             anchor: { path: blockPath, offset: left },
@@ -54,7 +49,6 @@ export function wrapSelectionWith(
 
     editor.insertText(wrapped, { at: { path: blockPath, offset: left } });
 
-    // Selection is always just inside all the wrappers
     const outerLen = newWrappers.reduce((sum, w) => sum + w.length, 0);
     editor.select({
         anchor: { path: blockPath, offset: left + outerLen },

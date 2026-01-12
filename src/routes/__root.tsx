@@ -32,7 +32,6 @@ import {
     Scripts,
     useNavigate,
 } from "@tanstack/react-router";
-import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import { getTauriVersion, getVersion } from "@tauri-apps/api/app";
 import { arch, locale, platform, version } from "@tauri-apps/plugin-os";
 import { isTauri } from "@utils/index";
@@ -54,12 +53,12 @@ import { DesktopShell } from "@components/Desktop/DesktopShell";
 import { InjectGlobal } from "@components/InjectGlobal";
 import Loader from "@components/Loader/Loader";
 import { ModeSwitcher } from "@components/ModeSwitcher";
-import { BottomNavigation } from "@components/Navigation/BottomNavigation";
-import { TopNavigation } from "@components/Navigation/TopNavigation";
 import { Paper } from "@components/Paper";
+import WindowTitleBar from "@components/WindowTitleBar";
 import { AppTheme } from "@contexts/AppTheme.context";
 import { DesktopShellProvider } from "@contexts/DesktopShell.context";
 import { ModalProvider } from "@contexts/Modal.context";
+import { ThemeCreatorProvider } from "@contexts/ThemeCreator.context";
 import { listen } from "@tauri-apps/api/event";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { calendarStrings } from "@utils/i18n";
@@ -141,6 +140,7 @@ function RootComponent() {
                     }
                 } else {
                     logger.debug("user no longer authenticated");
+
                     if (app.gateway.readyState === WebSocket.OPEN) {
                         app.gateway.disconnect(
                             GatewayCloseCodes.NotAuthenticated,
@@ -197,7 +197,6 @@ function RootComponent() {
             await win.unminimize();
             await win.setFocus();
 
-            // Route your deep link here too
             const urlStr = e.payload.find((x) => x.startsWith("mutualzz://"));
             if (!urlStr) return;
 
@@ -225,61 +224,60 @@ function RootComponent() {
         <RootDocument>
             <Providers>
                 <AppTheme>
-                    <CssBaseline adaptiveScrollbar />
-                    <DesktopShellProvider>
-                        <DesktopShell
-                            titleBarProps={{
-                                onHeightChange: setTitlebarHeight,
-                            }}
-                        >
-                            <ModalProvider>
-                                {!networkState.online && (
-                                    <Paper
-                                        alignItems="center"
-                                        justifyContent="center"
-                                        variant="solid"
-                                        color="danger"
-                                    >
-                                        <Typography level="body-lg">
-                                            You are currently offline
-                                        </Typography>
-                                    </Paper>
-                                )}
+                    <ThemeCreatorProvider>
+                        <CssBaseline adaptiveScrollbar />
+                        <DesktopShellProvider>
+                            <WindowTitleBar
+                                onHeightChange={setTitlebarHeight}
+                            />
+                            <DesktopShell>
+                                <ModalProvider>
+                                    {!networkState.online && (
+                                        <Paper
+                                            alignItems="center"
+                                            justifyContent="center"
+                                            variant="solid"
+                                            color="danger"
+                                        >
+                                            <Typography level="body-lg">
+                                                You are currently offline
+                                            </Typography>
+                                        </Paper>
+                                    )}
 
-                                <InjectGlobal />
-                                <APIErrorListener />
-                                <Loader>
-                                    <Stack
-                                        direction="column"
-                                        height="100vh"
-                                        width="100vw"
-                                        flex={1}
-                                        minHeight={0}
-                                        css={{
-                                            paddingTop: titlebarHeight,
-                                        }}
-                                    >
-                                        {app.account && <TopNavigation />}
+                                    <InjectGlobal />
+                                    <APIErrorListener />
+                                    <Loader>
                                         <Stack
-                                            width="100%"
+                                            direction="column"
+                                            height="100vh"
+                                            width="100vw"
                                             flex={1}
                                             minHeight={0}
-                                            overflow="hidden"
+                                            css={{
+                                                paddingTop: titlebarHeight,
+                                            }}
                                         >
-                                            <Outlet />
+                                            <Stack
+                                                width="100%"
+                                                flex={1}
+                                                minHeight={0}
+                                                overflow="hidden"
+                                            >
+                                                <Outlet />
+                                            </Stack>
+                                            {app.account && <ModeSwitcher />}
                                         </Stack>
-                                        {app.account && <BottomNavigation />}
-                                        {app.account && <ModeSwitcher />}
-                                    </Stack>
-                                </Loader>
-                                {import.meta.env.DEV && (
-                                    <>
-                                        <TanStackRouterDevtools />
-                                    </>
-                                )}
-                            </ModalProvider>
-                        </DesktopShell>
-                    </DesktopShellProvider>
+                                    </Loader>
+                                    {/*{import.meta.env.DEV && (*/}
+                                    {/*    <>*/}
+                                    {/*        <TanStackRouterDevtools />*/}
+                                    {/*    </>*/}
+                                    {/*)}*/}
+                                </ModalProvider>
+                            </DesktopShell>
+                        </DesktopShellProvider>
+                    </ThemeCreatorProvider>
                 </AppTheme>
             </Providers>
         </RootDocument>

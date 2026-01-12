@@ -141,7 +141,12 @@ export async function updateTrayProperties(theme: Theme) {
         const iconUrl = await resolveIconPath(theme);
         if (myVersion !== iconOpVersion) return;
 
-        const icon = await getAdaptiveIcon(theme, "automatic", iconUrl);
+        const icon = await getAdaptiveIcon(
+            theme,
+            "image/png",
+            "automatic",
+            iconUrl,
+        );
         if (myVersion !== iconOpVersion) return;
 
         const menu = await Menu.new({

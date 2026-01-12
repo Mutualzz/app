@@ -251,7 +251,7 @@ const MarkdownInput = forwardRef<HTMLDivElement, MarkdownInputProps>(
                                 {...attributes}
                                 lineHeight={1}
                                 position="absolute"
-                                top={2.7}
+                                top={2.75}
                                 left={2}
                                 textColor="muted"
                                 overflow="hidden"

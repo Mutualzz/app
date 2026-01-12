@@ -1,4 +1,5 @@
-import { ThemeCreator } from "@components/ThemeCreator";
+import { ThemeCreator } from "@components/ThemeCreator.old";
+import { ThemeCreatorModal } from "@components/ThemeCreator/ThemeCreatorModal";
 import { TooltipWrapper } from "@components/TooltipWrapper";
 import { useModal } from "@contexts/Modal.context";
 import type { Theme as MzTheme } from "@emotion/react";
@@ -159,8 +160,9 @@ export const AppAppearanceSettings = observer(() => {
                     color="neutral"
                     horizontalAlign="left"
                     onClick={() =>
-                        openModal("theme-creator", <ThemeCreator />, {
+                        openModal("theme-creator", <ThemeCreatorModal />, {
                             height: "100%",
+                            showCloseButton: false,
                         })
                     }
                 >
@@ -173,6 +175,19 @@ export const AppAppearanceSettings = observer(() => {
                     checked={app.preferEmbossed}
                     onClick={() => app.togglePreferEmbossed()}
                 />
+                <Button
+                    variant="soft"
+                    color="neutral"
+                    horizontalAlign="left"
+                    onClick={() =>
+                        openModal("theme-creator", <ThemeCreator />, {
+                            height: "100%",
+                            showCloseButton: false,
+                        })
+                    }
+                >
+                    Open Old Editor
+                </Button>
             </Typography>
             {userThemes.length > 0 && (
                 <Stack direction="column" spacing={2.5}>
@@ -496,7 +511,14 @@ export const AppAppearanceSettings = observer(() => {
                             }}
                         >
                             <Tooltip
-                                title="Adapt with current theme"
+                                title={
+                                    <TooltipWrapper
+                                        paperProps={{ borderRadius: 10 }}
+                                        typographyProps={{ level: "body-sm" }}
+                                    >
+                                        Adapt with current theme
+                                    </TooltipWrapper>
+                                }
                                 placement="top"
                             >
                                 <Box
@@ -541,7 +563,16 @@ export const AppAppearanceSettings = observer(() => {
                                 <Tooltip
                                     key={`${icon.theme.id}-icon`}
                                     placement="top"
-                                    title={`${icon.theme.name} Icon`}
+                                    title={
+                                        <TooltipWrapper
+                                            paperProps={{ borderRadius: 10 }}
+                                            typographyProps={{
+                                                level: "body-sm",
+                                            }}
+                                        >
+                                            {icon.theme.name} Icon
+                                        </TooltipWrapper>
+                                    }
                                 >
                                     <Box
                                         position="relative"
@@ -607,7 +638,18 @@ export const AppAppearanceSettings = observer(() => {
                                     <Tooltip
                                         key={`${icon.theme.id}-icon`}
                                         placement="top"
-                                        title={`${icon.theme.name} Icon`}
+                                        title={
+                                            <TooltipWrapper
+                                                paperProps={{
+                                                    borderRadius: 10,
+                                                }}
+                                                typographyProps={{
+                                                    level: "body-sm",
+                                                }}
+                                            >
+                                                {icon.theme.name} Icon
+                                            </TooltipWrapper>
+                                        }
                                     >
                                         <Box
                                             position="relative"
