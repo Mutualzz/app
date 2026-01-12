@@ -1,3 +1,4 @@
+// @ts-nocheck
 import type { MzTheme, ThemeDraft } from "@app-types/theme";
 import { Paper } from "@components/Paper";
 import { usePrefersDark } from "@hooks/usePrefersDark";
