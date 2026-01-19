@@ -1,4 +1,4 @@
-import tanstack from "@mutualzz/eslint-config/tanstack";
+import { tanstack } from "@mutualzz/eslint-config";
 
 export default [
     ...tanstack,
@@ -14,6 +14,6 @@ export default [
             "@typescript-eslint/no-this-alias": "off",
             "react/no-children-prop": "off",
         },
-        ignores: ["*", "!src"],
+        ignores: ["**/*", "!src/**"],
     },
 ];
