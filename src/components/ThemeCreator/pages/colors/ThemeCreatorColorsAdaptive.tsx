@@ -1,13 +1,14 @@
 import { InputWithLabel } from "@components/InputWIthLabel";
 import { useThemeCreator } from "@contexts/ThemeCreator.context";
 import {
+    type ColorLike,
     createColor,
     extractColors,
     isValidGradient,
-    type ColorLike,
 } from "@mutualzz/ui-core";
-import { Stack } from "@mutualzz/ui-web";
+import { Stack, Typography } from "@mutualzz/ui-web";
 import { observer } from "mobx-react-lite";
+import { CiCircleInfo } from "react-icons/ci";
 
 export const ThemeCreatorColorsAdaptive = observer(() => {
     const { values, setValues } = useThemeCreator();
@@ -24,8 +25,8 @@ export const ThemeCreatorColorsAdaptive = observer(() => {
                 allowGradient
                 // apiError={errors.backgroundColor}
                 onChange={(color: ColorLike) => {
-                    let isDark = false;
-                    let isGradient = false;
+                    let isDark: boolean;
+                    let isGradient: boolean;
                     if (
                         isValidGradient(color) &&
                         extractColors(color) &&
@@ -57,9 +58,18 @@ export const ThemeCreatorColorsAdaptive = observer(() => {
                 description={
                     <>
                         Usually used to indicate the primary action or important
-                        elements
-                        <br />
-                        <b>Auto-generated icons derive from this color</b>
+                        elements{" "}
+                        <Typography
+                            level="body-sm"
+                            display="inline-flex"
+                            variant="plain"
+                            color="info"
+                            spacing={1}
+                            alignItems="center"
+                        >
+                            <CiCircleInfo />
+                            Auto-generated icons derive from this color
+                        </Typography>
                     </>
                 }
                 required
@@ -79,7 +89,23 @@ export const ThemeCreatorColorsAdaptive = observer(() => {
                 type="color"
                 label="Base Text Color"
                 name="typographyBaseColor"
-                description="The base color for texts, usually white-ish is used on dark backgrounds and black-ish on light backgrounds"
+                description={
+                    <>
+                        The base color for texts{" "}
+                        <Typography
+                            level="body-sm"
+                            display="inline-flex"
+                            variant="plain"
+                            color="info"
+                            spacing={1}
+                            alignItems="center"
+                        >
+                            <CiCircleInfo />
+                            Usually white-ish is used on dark backgrounds,
+                            black-ish on light backgrounds
+                        </Typography>
+                    </>
+                }
                 required
                 value={values.typography.colors.primary}
                 onChange={(color: ColorLike) =>

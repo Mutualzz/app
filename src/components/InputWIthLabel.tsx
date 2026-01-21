@@ -1,4 +1,4 @@
-import { Input, Stack, Typography, type InputProps } from "@mutualzz/ui-web";
+import { Input, type InputProps, Stack, Typography } from "@mutualzz/ui-web";
 import type { ReactNode } from "react";
 
 export const InputWithLabel = ({
@@ -18,7 +18,7 @@ export const InputWithLabel = ({
         spacing={{ xs: 0.125, sm: 0.25, md: 0.5 }}
         width="100%"
     >
-        <Stack direction="column">
+        <Stack direction="column" flex={1} width="100%">
             <Typography
                 fontWeight={500}
                 level={{ xs: "body-sm", sm: "body-md" }}

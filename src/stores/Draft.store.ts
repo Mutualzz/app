@@ -1,8 +1,7 @@
 import { Logger } from "@mutualzz/logger";
 import type { APITheme } from "@mutualzz/types";
 import { safeLocalStorage } from "@utils/safeLocalStorage";
-import Snowflake from "@utils/Snowflake";
-import { makeAutoObservable, observable, type IObservableArray } from "mobx";
+import { type IObservableArray, makeAutoObservable, observable } from "mobx";
 import { makePersistable } from "mobx-persist-store";
 import { type CanvasPath } from "react-sketch-canvas";
 
@@ -12,12 +11,11 @@ interface AvatarDraft {
 }
 
 export class DraftStore {
+    themes: IObservableArray<APITheme>;
+    avatars: IObservableArray<AvatarDraft>;
     private readonly logger = new Logger({
         tag: "DraftStore",
     });
-
-    themes: IObservableArray<APITheme>;
-    avatars: IObservableArray<AvatarDraft>;
 
     constructor() {
         makeAutoObservable(this);
@@ -51,9 +49,7 @@ export class DraftStore {
     }
 
     saveThemeDraft(theme: APITheme) {
-        const id = Snowflake.generate();
-        theme.id = id;
-        const existing = this.themes.some((t) => t.id === theme.id);
+        const existing = this.themes.some((t) => t.name === theme.name);
         if (existing) {
             this.logger.warn("Theme draft already exists");
             return;
@@ -62,13 +58,27 @@ export class DraftStore {
         this.themes.unshift(theme);
     }
 
+    updateThemeDraft(theme: APITheme) {
+        const index = this.themes.findIndex((t) => t.name === theme.name);
+        if (index === -1) {
+            this.logger.warn("Theme draft does not exist");
+            return;
+        }
+
+        this.themes[index] = theme;
+    }
+
+    existsThemeDraft(theme: APITheme) {
+        return this.themes.some((t) => t.name === theme.name);
+    }
+
     deleteThemeDraft(theme: APITheme) {
-        const existing = this.themes.some((t) => t.id === theme.id);
+        const existing = this.themes.some((t) => t.name === theme.name);
         if (!existing) {
             this.logger.warn("Theme draft does not exist");
             return;
         }
 
-        this.themes.filter((t) => t.id !== theme.id);
+        this.themes.filter((t) => t.name !== theme.name);
     }
 }

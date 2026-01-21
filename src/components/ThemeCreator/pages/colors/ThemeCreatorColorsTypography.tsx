@@ -1,8 +1,9 @@
 import { InputWithLabel } from "@components/InputWIthLabel";
 import { useThemeCreator } from "@contexts/ThemeCreator.context";
 import type { ColorLike } from "@mutualzz/ui-core";
-import { Stack } from "@mutualzz/ui-web";
+import { Stack, Typography } from "@mutualzz/ui-web";
 import { observer } from "mobx-react-lite";
+import { CiCircleInfo } from "react-icons/ci";
 
 export const ThemeCreatorColorsTypography = observer(() => {
     const { values, setValues } = useThemeCreator();
@@ -13,7 +14,23 @@ export const ThemeCreatorColorsTypography = observer(() => {
                 type="color"
                 label="Primary Text Color"
                 name="typographyPrimaryColor"
-                description="The primary color for texts, usually white-ish is used on dark backgrounds and black-ish on light backgrounds"
+                description={
+                    <>
+                        The base color for texts{" "}
+                        <Typography
+                            level="body-sm"
+                            display="inline-flex"
+                            variant="plain"
+                            color="info"
+                            spacing={1}
+                            alignItems="center"
+                        >
+                            <CiCircleInfo />
+                            Usually white-ish is used on dark backgrounds,
+                            black-ish on light backgrounds
+                        </Typography>
+                    </>
+                }
                 required
                 value={values.typography.colors.primary}
                 onChange={(color: ColorLike) =>

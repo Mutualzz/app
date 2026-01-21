@@ -57,15 +57,15 @@ interface ThemeWithIcon<T> {
     icon: string;
 }
 
-const GRID_COLUMNS = 15;
 const GRID_ITEM_SIZE = "4rem";
 
 const gridStyles: CSSObject = {
     display: "grid",
-    gridTemplateColumns: `repeat(${GRID_COLUMNS}, minmax(${GRID_ITEM_SIZE}, 1fr))`,
-    paddingLeft: "0.25rem",
-    width: "100%",
+    gridTemplateColumns: `repeat(auto-fill, minmax(${GRID_ITEM_SIZE}, 1fr))`,
+    paddingInline: "0.75rem",
+    paddingBlock: "0.75rem",
     boxSizing: "border-box",
+    gap: "0.625rem",
 };
 
 function gradientToDataUrl(colors: string[]): string {
@@ -109,7 +109,7 @@ const VirtuosoGridList = forwardRef<HTMLDivElement, HTMLProps<HTMLDivElement>>(
 VirtuosoGridList.displayName = "VirtuosoGridList";
 
 const VirtuosoGridItem = (props: HTMLProps<HTMLDivElement>) => (
-    <Stack {...(props as any)} py={2} />
+    <Box {...(props as any)} py={1} />
 );
 
 export const AppAppearanceSettings = observer(() => {
@@ -205,11 +205,11 @@ export const AppAppearanceSettings = observer(() => {
 
     const defaultIcons = useMemo(
         () => Array.from(icons.values()).filter((ic) => !ic.theme.author),
-        [icons],
+        [icons, _iconsVersion],
     );
     const userIcons = useMemo(
         () => Array.from(icons.values()).filter((ic) => ic.theme.author),
-        [icons],
+        [icons, _iconsVersion],
     );
 
     const handleThemeChange = (theme: MzTheme | Theme) => {
@@ -357,10 +357,9 @@ export const AppAppearanceSettings = observer(() => {
                         height="4rem"
                     >
                         <ImageBlob
-                            src={icon.icon}
-                            css={{ width: "4rem", height: "4rem" }}
                             onClick={() => handleIconChange(icon.theme.id)}
                             current={icon.theme.id === currentIcon}
+                            src={icon.icon}
                         />
                         {icon.theme.id === currentIcon && (
                             <Stack
@@ -398,7 +397,7 @@ export const AppAppearanceSettings = observer(() => {
                 py={2.5}
                 px={4}
                 variant="outlined"
-                spacing={5}
+                spacing={2.5}
                 borderRadius={10}
             >
                 <Typography
@@ -427,11 +426,13 @@ export const AppAppearanceSettings = observer(() => {
                         onClick={() => app.togglePreferEmbossed()}
                     />
                 </Typography>
-                <Stack direction="column" spacing={2.5}>
-                    <Typography fontWeight="bold" level="body-sm">
-                        Default Themes
-                    </Typography>
-                    <Stack css={gridStyles} display="grid" spacing={2.5}>
+                <Stack direction="column">
+                    <Divider lineColor="muted" inset="half-start">
+                        <Typography fontWeight="bold" level="body-sm">
+                            Default Themes
+                        </Typography>
+                    </Divider>
+                    <Stack css={gridStyles} display="grid">
                         {defaultThemes.map((_, idx) =>
                             renderThemeColorBlob(
                                 defaultThemes,
@@ -467,10 +468,10 @@ export const AppAppearanceSettings = observer(() => {
                                     border={`2px solid ${currentTheme.colors.surface}`}
                                     justifyContent="center"
                                     fontSize="0.75rem"
+                                    width="1.5rem"
+                                    height="1.5rem"
+                                    borderRadius="50%"
                                     css={{
-                                        width: "1.5rem",
-                                        height: "1.5rem",
-                                        borderRadius: "50%",
                                         background: currentTheme.colors.primary,
                                         pointerEvents: "none",
                                     }}
@@ -496,10 +497,12 @@ export const AppAppearanceSettings = observer(() => {
                     </Stack>
                 </Stack>
                 {userThemes.length > 0 && (
-                    <Stack direction="column" spacing={2.5}>
-                        <Typography fontWeight="bold" level="body-sm">
-                            Your Themes
-                        </Typography>
+                    <Stack direction="column">
+                        <Divider lineColor="muted" inset="half-start">
+                            <Typography fontWeight="bold" level="body-sm">
+                                Your Themes
+                            </Typography>
+                        </Divider>
                         <VirtuosoGrid
                             style={{
                                 height:
@@ -524,11 +527,19 @@ export const AppAppearanceSettings = observer(() => {
                         />
                     </Stack>
                 )}
-                <Stack direction="column" spacing={2.5}>
-                    <Typography fontWeight="bold" level="body-sm">
-                        Color Themes
-                    </Typography>
-                    <Stack direction="column" spacing={2.5} mb={2.5}>
+                <Stack direction="column">
+                    <Divider
+                        lineColor="muted"
+                        inset="half-start"
+                        css={{
+                            marginBottom: "0.625rem",
+                        }}
+                    >
+                        <Typography fontWeight="bold" level="body-sm">
+                            Color Themes
+                        </Typography>
+                    </Divider>
+                    <Stack direction="column" spacing={2.5}>
                         <Typography level="body-xs" fontWeight="bold">
                             Normal
                         </Typography>
@@ -547,12 +558,6 @@ export const AppAppearanceSettings = observer(() => {
                             )}
                         />
                     </Stack>
-                    <Divider
-                        lineColor="muted"
-                        css={{
-                            opacity: 0.25,
-                        }}
-                    />
                     <Stack direction="column" spacing={2.5}>
                         <Typography level="body-xs" fontWeight="bold">
                             Gradient
@@ -587,9 +592,11 @@ export const AppAppearanceSettings = observer(() => {
                         Icons
                     </Typography>
                     <Stack direction="column" spacing={2.5}>
-                        <Typography level="body-sm" fontWeight="bold">
-                            Default Icons
-                        </Typography>
+                        <Divider inset="half-start" lineColor="muted">
+                            <Typography level="body-sm" fontWeight="bold">
+                                Default Icons
+                            </Typography>
+                        </Divider>
                         <VirtuosoGrid
                             style={{
                                 height: "10rem",
@@ -645,10 +652,10 @@ export const AppAppearanceSettings = observer(() => {
                                                     border={`2px solid ${currentTheme.colors.surface}`}
                                                     justifyContent="center"
                                                     fontSize="0.75rem"
+                                                    width="1.5rem"
+                                                    height="1.5rem"
+                                                    borderRadius="50%"
                                                     css={{
-                                                        width: "1.5rem",
-                                                        height: "1.5rem",
-                                                        borderRadius: "50%",
                                                         background:
                                                             currentTheme.colors
                                                                 .primary,
@@ -689,9 +696,11 @@ export const AppAppearanceSettings = observer(() => {
                     </Stack>
                     {userIcons.length > 0 && (
                         <Stack direction="column" spacing={2.5}>
-                            <Typography level="body-sm" fontWeight="bold">
-                                Your Icons
-                            </Typography>
+                            <Divider inset="half-start" lineColor="muted">
+                                <Typography level="body-sm" fontWeight="bold">
+                                    Your Icons
+                                </Typography>
+                            </Divider>
                             <VirtuosoGrid
                                 style={{
                                     height:

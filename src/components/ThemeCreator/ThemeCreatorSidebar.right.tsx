@@ -1,10 +1,6 @@
 import { Paper } from "@components/Paper";
 import { useModal } from "@contexts/Modal.context";
-import {
-    type ThemeCreatorFilter,
-    type ThemeCreatorLoadedType,
-    useThemeCreator,
-} from "@contexts/ThemeCreator.context";
+import { type ThemeCreatorFilter, type ThemeCreatorLoadedType, useThemeCreator, } from "@contexts/ThemeCreator.context";
 import { useAppStore } from "@hooks/useStores";
 import type { APITheme, HttpException } from "@mutualzz/types";
 import type { MzTheme } from "@mutualzz/ui-core";
@@ -39,7 +35,6 @@ const availableFilters = [
     "gradient",
 ] as const;
 
-// TODO: Implement save and publish functionality (save is draft, publish is creating it in the api) make sure to update drafts and updating themes if they exist
 export const ThemeCreatorSidebarRight = observer(() => {
     const app = useAppStore();
     const { changeTheme } = useTheme();
@@ -103,6 +98,7 @@ export const ThemeCreatorSidebarRight = observer(() => {
         onSuccess: (data) => {
             const newTheme = app.themes.add(data);
             changeTheme(Theme.toEmotion(newTheme));
+            resetValues();
         },
         onError: (error: HttpException) => {
             const next: Record<string, string> = {};
@@ -227,19 +223,31 @@ export const ThemeCreatorSidebarRight = observer(() => {
                         <Radio value="custom" label="Custom" />
                     </RadioGroup>
                 </Stack>
-                <Select
-                    onValueChange={handleChange}
-                    color="primary"
-                    placeholder="Pick a theme"
-                    disabled={themes.length === 0}
-                    value={values.id || values.name || undefined}
-                >
-                    {sortThemes(themes).map((theme) => (
-                        <Option key={theme.id} value={theme.id} variant="soft">
-                            {theme.name}
-                        </Option>
-                    ))}
-                </Select>
+                <Stack direction="column" spacing={2.5}>
+                    <Select
+                        onValueChange={handleChange}
+                        color="primary"
+                        placeholder="Pick a theme"
+                        disabled={themes.length === 0}
+                        value={values.id || values.name || undefined}
+                    >
+                        {sortThemes(themes).map((theme) => (
+                            <Option
+                                key={
+                                    theme.id ||
+                                    `${theme.name}-${theme.authorId}`
+                                }
+                                value={theme.id || theme.name}
+                                variant="soft"
+                            >
+                                {theme.name}
+                            </Option>
+                        ))}
+                    </Select>
+                    {loadedType === "custom" && values.id && (
+                        <Button color="danger">Delete Theme</Button>
+                    )}
+                </Stack>
                 <Divider
                     css={{
                         opacity: 0.25,
@@ -273,7 +281,15 @@ export const ThemeCreatorSidebarRight = observer(() => {
                     spacing={5}
                     disabled={!userInteracted || nameEmpty}
                 >
-                    <Button color="warning" disabled={ownedByUser}>
+                    <Button
+                        color="warning"
+                        disabled={ownedByUser}
+                        onClick={() =>
+                            app.drafts.existsThemeDraft(values)
+                                ? app.drafts.updateThemeDraft(values)
+                                : app.drafts.saveThemeDraft(values)
+                        }
+                    >
                         Save
                     </Button>
                     <Button

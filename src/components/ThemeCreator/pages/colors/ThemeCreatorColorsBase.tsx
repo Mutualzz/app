@@ -1,13 +1,14 @@
 import { InputWithLabel } from "@components/InputWIthLabel";
 import { useThemeCreator } from "@contexts/ThemeCreator.context";
 import {
+    type ColorLike,
     createColor,
     extractColors,
     isValidGradient,
-    type ColorLike,
 } from "@mutualzz/ui-core";
-import { Stack } from "@mutualzz/ui-web";
+import { Stack, Typography } from "@mutualzz/ui-web";
 import { observer } from "mobx-react-lite";
+import { CiCircleInfo, CiWarning } from "react-icons/ci";
 
 export const ThemeCreatorColorsBase = observer(() => {
     const { values, setValues } = useThemeCreator();
@@ -53,7 +54,34 @@ export const ThemeCreatorColorsBase = observer(() => {
                 type="color"
                 label="Surface Color"
                 name="surfaceColor"
-                description="This color gets applied to Cards (it automatically adapts to certain UI elements)"
+                description={
+                    <>
+                        This color gets applied to cards, sheets, and menus
+                        <Typography
+                            level="body-sm"
+                            display="flex"
+                            variant="plain"
+                            color="info"
+                            spacing={1}
+                            alignItems="center"
+                        >
+                            <CiCircleInfo />
+                            it automatically adapts to certain UI elements
+                        </Typography>
+                        <Typography
+                            level="body-sm"
+                            color="warning"
+                            display="flex"
+                            spacing={1}
+                            variant="plain"
+                            alignItems="center"
+                        >
+                            <CiWarning />
+                            If you prefer using embossed style, I recommend
+                            modifying this color
+                        </Typography>
+                    </>
+                }
                 value={values.colors.surface}
                 allowGradient
                 // apiError={errors.surfaceColor}

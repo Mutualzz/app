@@ -1,8 +1,9 @@
 import { InputWithLabel } from "@components/InputWIthLabel";
 import { useThemeCreator } from "@contexts/ThemeCreator.context";
 import type { ColorLike } from "@mutualzz/ui-core";
-import { Stack } from "@mutualzz/ui-web";
+import { Stack, Typography } from "@mutualzz/ui-web";
 import { observer } from "mobx-react-lite";
+import { CiCircleInfo } from "react-icons/ci";
 
 export const ThemeCreatorColorsFeedback = observer(() => {
     const { values, setValues } = useThemeCreator();
@@ -17,8 +18,17 @@ export const ThemeCreatorColorsFeedback = observer(() => {
                     <>
                         Usually used to indicate the primary action or important
                         elements
-                        <br />
-                        <b>Auto-generated icons derive from this color</b>
+                        <Typography
+                            level="body-sm"
+                            display="flex"
+                            variant="plain"
+                            color="info"
+                            spacing={1}
+                            alignItems="center"
+                        >
+                            <CiCircleInfo />
+                            Auto-generated icons derive from this color
+                        </Typography>
                     </>
                 }
                 required
