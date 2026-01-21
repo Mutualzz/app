@@ -9,7 +9,6 @@ export const ThemeCreatorDetails = observer(() => {
     return (
         <Stack direction="column" p={4} spacing={5}>
             <InputWithLabel
-                key={values.name}
                 label="Theme Name"
                 name="name"
                 description="A unique name for your theme"
@@ -21,7 +20,6 @@ export const ThemeCreatorDetails = observer(() => {
                 }
             />
             <InputWithLabel
-                key={values.description}
                 label="Theme Description"
                 name="description"
                 description="A brief description of your theme"

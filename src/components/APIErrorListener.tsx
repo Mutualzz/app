@@ -11,7 +11,6 @@ export const APIErrorListener = observer(() => {
     useEffect(() => {
         app.rest.on("rateLimited", () => {
             openModal("rateLimitError", <RateLimitError />, {
-                showCloseButton: false,
                 disableBackdropClick: true,
             });
         });

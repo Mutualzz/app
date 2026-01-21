@@ -7,12 +7,12 @@ import type { HttpException } from "@mutualzz/types";
 import {
     baseDarkTheme,
     baseLightTheme,
+    type ColorLike,
+    type ColorResult,
     createColor,
     extractColors,
     isValidGradient,
     randomColor,
-    type ColorLike,
-    type ColorResult,
     type ThemeStyle,
     type ThemeType,
 } from "@mutualzz/ui-core";
@@ -23,6 +23,7 @@ import {
     Divider,
     Drawer,
     Input,
+    type InputProps,
     Option,
     Radio,
     RadioGroup,
@@ -30,16 +31,15 @@ import {
     Stack,
     Typography,
     useTheme,
-    type InputProps,
 } from "@mutualzz/ui-web";
 import { validateThemeCreate } from "@mutualzz/validators";
 import { useMediaQuery } from "@react-hookz/web";
 import { Theme } from "@stores/objects/Theme";
 import {
-    revalidateLogic,
-    useForm,
     type AnyFieldMeta,
     type AnyFormApi,
+    revalidateLogic,
+    useForm,
 } from "@tanstack/react-form";
 import { useMutation } from "@tanstack/react-query";
 import { adaptColors } from "@utils/adaptation";
@@ -304,7 +304,7 @@ export const ThemeCreator = observer(() => {
         },
         onError: (error: HttpException) => {
             const next: Record<string, string> = {};
-            error.errors.forEach((e) => {
+            error.errors?.forEach((e) => {
                 next[e.path] = e.message;
             });
             setApiErrors(next);

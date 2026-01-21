@@ -29,7 +29,7 @@ export const CategoryCreateModal = observer(({ space }: Props) => {
         mutationKey: ["create-category", space.id, name],
         mutationFn: async () => space.createChannel(name, ChannelType.Category),
         onSuccess: () => {
-            closeModal("create-category");
+            closeModal();
         },
         onError: (err: HttpException) => {
             err.errors?.forEach((error) => {
@@ -79,7 +79,7 @@ export const CategoryCreateModal = observer(({ space }: Props) => {
                     <Button
                         color="neutral"
                         variant="soft"
-                        onClick={() => closeModal("create-category")}
+                        onClick={() => closeModal()}
                         disabled={isCreating}
                     >
                         Cancel

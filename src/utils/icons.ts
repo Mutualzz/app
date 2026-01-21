@@ -5,8 +5,8 @@ import { getIconFromCache, putIconInCache } from "./indexedDb";
 
 const canvasToBlob = (
     canvas: HTMLCanvasElement,
-    mime: string = "image/webp",
-    quality: number = 0.9,
+    mime = "image/webp",
+    quality = 0.9,
 ) =>
     new Promise<Blob>((resolve, reject) => {
         canvas.toBlob(
@@ -26,13 +26,13 @@ type AdaptiveIconReturn<T extends "automatic" | "baseUrl"> =
 
 export const getAdaptiveIcon = async <T extends "automatic" | "baseUrl">(
     theme: Theme,
-    mime: string = "image/webp",
     type: T = "automatic" as T,
+    mime = "image/webp",
     iconUrl?: string,
 ): Promise<AdaptiveIconReturn<T>> => {
     if (!iconUrl) iconUrl = getIconType(theme);
 
-    let cacheKey = `${theme.id}-${theme.type}-${theme.colors.primary}-${mime}`;
+    const cacheKey = `${theme.id}-${theme.type}-${theme.colors.primary}-${mime}`;
 
     const cachedBlob = await getIconFromCache(cacheKey);
     if (cachedBlob) {

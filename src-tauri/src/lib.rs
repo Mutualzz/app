@@ -40,10 +40,9 @@ pub fn run() {
 
                 // If OS refuses focus, at least get attention (taskbar flash / bounce)
                 let _ = win.request_user_attention(Some(tauri::UserAttentionType::Critical));
+            } else {
+                eprintln!("Main window not found during deep link handling");
             }
-
-            // Forward args/urls to frontend to route + (optionally) focus again
-            // let _ = app.emit("app://open-url", argv);
         }))
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_clipboard_manager::init())
@@ -83,6 +82,7 @@ pub fn run() {
             {
                 use tauri_plugin_deep_link::DeepLinkExt;
                 app.deep_link().register_all()?;
+                app.deep_link().register("mutualzz")?;
             }
 
             #[cfg(desktop)]
@@ -94,7 +94,8 @@ pub fn run() {
                     Some(vec![]),
                 ));
 
-                app.deep_link().register("mutualzz")?;
+                // Breaks on macos, find a workaround later
+                // app.deep_link().register("mutualzz")?;
             }
 
             // Open the dev tools automatically when debugging the application

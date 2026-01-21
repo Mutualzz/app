@@ -7,22 +7,25 @@ import startCase from "lodash-es/startCase";
 import { observer } from "mobx-react-lite";
 import { FaX } from "react-icons/fa6";
 import { ThemeCreatorSidebarRight } from "./ThemeCreatorSidebar.right";
+import { ThemeCreatorColorsAdaptive } from "./pages/colors/ThemeCreatorColorsAdaptive";
 import { ThemeCreatorColorsBase } from "./pages/colors/ThemeCreatorColorsBase";
+import { ThemeCreatorColorsFeedback } from "./pages/colors/ThemeCreatorColorsFeedback";
+import { ThemeCreatorColorsTypography } from "./pages/colors/ThemeCreatorColorsTypography";
 import { ThemeCreatorDetails } from "./pages/general/ThemeCreatorDetails";
 
 export const ThemeCreatorContent = observer(() => {
     const app = useAppStore();
-    const { currentCategory, currentPage, currentType, currentStyle } =
-        useThemeCreator();
+    const { currentCategory, currentPage, values } = useThemeCreator();
     const { closeModal } = useModal();
 
     return (
         <Stack
             flex={1}
             height="100%"
-            overflow="auto"
             width="100%"
             direction="column"
+            position="relative"
+            overflow="auto"
         >
             <Paper
                 borderTopRightRadius={{
@@ -38,7 +41,7 @@ export const ThemeCreatorContent = observer(() => {
                 borderTop="0 !important"
                 borderLeft="0 !important"
             >
-                <Stack alignItems="center" justifyContent="center" spacing={10}>
+                <Stack alignItems="center" justifyContent="center" spacing={40}>
                     <Typography
                         level={{ xs: "h6", sm: "body-lg" }}
                         fontFamily="monospace"
@@ -55,7 +58,8 @@ export const ThemeCreatorContent = observer(() => {
                         fontFamily="monospace"
                         textAlign="center"
                     >
-                        {startCase(currentType)} {startCase(currentStyle)} Theme
+                        {startCase(values.type)} {startCase(values.style)}
+                        {values.adaptive ? " Adaptive " : ""} Theme
                     </Typography>
                 </Stack>
                 <IconButton
@@ -65,13 +69,13 @@ export const ThemeCreatorContent = observer(() => {
                     }}
                     variant="plain"
                     size="sm"
-                    onClick={() => closeModal("theme-creator")}
+                    onClick={() => closeModal()}
                 >
                     <FaX />
                 </IconButton>
             </Paper>
 
-            <Stack direction="row" flex={1}>
+            <Stack direction="row" flex={1} minHeight={0}>
                 <Paper
                     flex={1}
                     height="100%"
@@ -84,12 +88,31 @@ export const ThemeCreatorContent = observer(() => {
                     borderLeft="0 !important"
                     borderBottom="0 !important"
                     py={{ xs: "0.5rem", sm: 1 }}
+                    minWidth={0}
+                    variant="plain"
                 >
                     {currentPage === "details" && <ThemeCreatorDetails />}
-                    {currentPage === "base" && <ThemeCreatorColorsBase />}
+                    {!values.adaptive && (
+                        <>
+                            {currentPage === "base" && (
+                                <ThemeCreatorColorsBase />
+                            )}
+                            {currentPage === "feedback" && (
+                                <ThemeCreatorColorsFeedback />
+                            )}
+                            {currentPage === "typography" && (
+                                <ThemeCreatorColorsTypography />
+                            )}
+                        </>
+                    )}
+                    {values.adaptive && currentPage === "adaptive" && (
+                        <ThemeCreatorColorsAdaptive />
+                    )}
                 </Paper>
 
-                <ThemeCreatorSidebarRight />
+                <Stack flexShrink={0} width={250} height="100%">
+                    <ThemeCreatorSidebarRight />
+                </Stack>
             </Stack>
         </Stack>
     );

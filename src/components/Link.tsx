@@ -28,12 +28,12 @@ export const OpenLink = ({ url, unsafe }: Props) => {
         const urlStr = url.toString();
         if (isTauri) {
             await openUrl(toSpotifyUri(url) ?? urlStr);
-            closeModal(unsafe ? "open-link-unsafe" : "open-link");
+            closeModal();
             return;
         }
 
         window.open(urlStr, "_blank", "noopener,noreferrer");
-        closeModal(unsafe ? "open-link-unsafe" : "open-link");
+        closeModal();
     };
 
     if (isTauri && unsafe)
@@ -53,10 +53,7 @@ export const OpenLink = ({ url, unsafe }: Props) => {
                     browser.
                 </Typography>
                 <Stack width="80%" spacing={2}>
-                    <Button
-                        onClick={() => closeModal("open-link-unsafe")}
-                        fullWidth
-                    >
+                    <Button onClick={() => closeModal()} fullWidth>
                         Close
                     </Button>
                 </Stack>

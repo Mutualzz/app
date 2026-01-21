@@ -1,7 +1,7 @@
 import type { Theme as MzTheme } from "@emotion/react";
 import type { APITheme, ThemeType } from "@mutualzz/types";
 import { safeLocalStorage } from "@utils/safeLocalStorage";
-import { makeAutoObservable, observable, ObservableMap } from "mobx";
+import { makeAutoObservable, observable, type ObservableMap } from "mobx";
 import { makePersistable } from "mobx-persist-store";
 import type { AppStore } from "./App.store";
 import { Theme } from "./objects/Theme";
@@ -55,7 +55,9 @@ export class ThemeStore {
     }
 
     add(theme: APITheme | MzTheme) {
-        this.themes.set(theme.id, new Theme(this.app, theme));
+        const newTheme = new Theme(this.app, theme);
+        this.themes.set(theme.id, newTheme);
+        return newTheme;
     }
 
     update(theme: APITheme) {

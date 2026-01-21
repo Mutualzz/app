@@ -8,18 +8,26 @@ export const ModalRoot = observer(() => {
 
     if (modals.length === 0) return null;
 
+    const topIdx = modals.length - 1;
+
     return (
         <>
             {modals.map((modal, idx) => (
                 <Modal
                     {...modal.props}
                     key={modal.id}
-                    open={true}
+                    open={idx === topIdx}
+                    disableEnforceFocus={idx !== topIdx}
+                    disableAutoFocus={idx !== topIdx}
+                    disableEscapeKeyDown={idx !== topIdx}
                     onClose={() => closeModal(modal.id)}
                     css={{
                         zIndex: theme.zIndex.modal + idx,
+                        pointerEvents: idx === topIdx ? "auto" : "none",
                         ...modal.props?.css,
                     }}
+                    aria-hidden={idx !== topIdx}
+                    tabIndex={idx === topIdx ? 0 : -1}
                 >
                     {modal.content}
                 </Modal>

@@ -93,9 +93,8 @@ export const UserBar = observer(() => {
                             variant="plain"
                             onClick={() =>
                                 openModal(
-                                    "theme-picker",
+                                    "user-settings",
                                     <UserSettingsModal redirectTo="appearance" />,
-                                    { showCloseButton: false },
                                 )
                             }
                         >
@@ -114,7 +113,6 @@ export const UserBar = observer(() => {
                                 openModal(
                                     "user-settings",
                                     <UserSettingsModal />,
-                                    { showCloseButton: false },
                                 )
                             }
                             color="neutral"

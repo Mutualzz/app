@@ -3,7 +3,7 @@ import { useTheme } from "@mutualzz/ui-web";
 import { Theme } from "@stores/objects/Theme";
 import { getAdaptiveIcon } from "@utils/icons";
 import { observer } from "mobx-react-lite";
-import { useEffect, useState, type HTMLAttributes } from "react";
+import { type HTMLAttributes, useEffect, useState } from "react";
 
 export const Logo = observer((props: HTMLAttributes<HTMLImageElement>) => {
     const app = useAppStore();
@@ -14,14 +14,10 @@ export const Logo = observer((props: HTMLAttributes<HTMLImageElement>) => {
     useEffect(() => {
         const setupAdaptive = async () => {
             const themeToUse = app.themes.currentIcon
-                ? Theme.toEmotionTheme(app.themes.get(app.themes.currentIcon))
+                ? Theme.toEmotion(app.themes.get(app.themes.currentIcon))
                 : theme;
 
-            const icon = (await getAdaptiveIcon(
-                themeToUse,
-                "image/webp",
-                "baseUrl",
-            )) as string;
+            const icon = await getAdaptiveIcon(themeToUse, "baseUrl");
             setIcon(icon);
         };
 

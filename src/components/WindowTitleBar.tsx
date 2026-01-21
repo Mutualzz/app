@@ -1,9 +1,11 @@
 import { WINDOW_TITLEBAR_ZINDEX } from "@app-types/index.ts";
 import { Paper } from "@components/Paper.tsx";
 import { useDesktopShell } from "@contexts/DesktopShell.context.tsx";
+import { useModal } from "@contexts/Modal.context";
+import { useThemeCreator } from "@contexts/ThemeCreator.context";
 import { useAppStore } from "@hooks/useStores.ts";
 import {
-    Box,
+    Button,
     Divider,
     IconButton,
     Stack,
@@ -22,6 +24,7 @@ import {
     VscChromeMinimize,
     VscClose,
 } from "react-icons/vsc";
+import { ThemeCreatorModal } from "./ThemeCreator/ThemeCreatorModal";
 
 interface WindowTitleBarProps {
     onHeightChange?: (height: number) => void;
@@ -29,6 +32,8 @@ interface WindowTitleBarProps {
 
 const WindowTitleBar = ({ onHeightChange }: WindowTitleBarProps) => {
     const appWindow = useMemo(() => (isTauri ? getCurrentWindow() : null), []);
+    const { inPreview, stopPreview, values } = useThemeCreator();
+    const { openModal } = useModal();
     const { theme } = useTheme();
     const { os } = useDesktopShell();
     const app = useAppStore();
@@ -36,6 +41,10 @@ const WindowTitleBar = ({ onHeightChange }: WindowTitleBarProps) => {
     const rootRef = useRef<HTMLDivElement | null>(null);
 
     const isMac = os.platform === "macos";
+
+    const stage = app.updater?.stage;
+
+    const isUpdating = stage === "installing" || stage === "relaunching";
 
     useEffect(() => {
         const el = rootRef.current;
@@ -62,11 +71,10 @@ const WindowTitleBar = ({ onHeightChange }: WindowTitleBarProps) => {
             data-tauri-drag-region
             justifyContent="space-between"
             alignItems="center"
-            py={isMac ? 2.5 : 1.5}
+            p={1.5}
             variant={app.preferEmbossed ? "elevation" : "plain"}
             transparency={65}
-            px={isMac ? 2 : 1.5}
-            minHeight={isMac ? 44 : 32}
+            minHeight={44}
             width="100%"
             position="fixed"
             zIndex={WINDOW_TITLEBAR_ZINDEX}
@@ -75,7 +83,29 @@ const WindowTitleBar = ({ onHeightChange }: WindowTitleBarProps) => {
             elevation={app.preferEmbossed ? 1 : 0}
             boxShadow="none !important"
         >
-            <Box data-tauri-drag-region flex={1} />
+            <Stack alignItems="center" data-tauri-drag-region flex={1}>
+                {inPreview && (
+                    <Stack pl={20} spacing={5} alignItems="center">
+                        <Typography fontWeight="bold" ml={2}>
+                            Currently previewing a theme
+                            {values.name ? `: ${values.name}` : ""}
+                        </Typography>
+                        <Button
+                            onClick={() => {
+                                openModal(
+                                    "theme-creator",
+                                    <ThemeCreatorModal />,
+                                );
+                                stopPreview();
+                            }}
+                            variant="solid"
+                            color="danger"
+                        >
+                            Stop preview
+                        </Button>
+                    </Stack>
+                )}
+            </Stack>
             <Stack
                 width="100%"
                 spacing={1.25}
@@ -85,35 +115,38 @@ const WindowTitleBar = ({ onHeightChange }: WindowTitleBarProps) => {
                 justifyContent="center"
                 flex={1}
             >
-                {!app.mode && (
+                {app.mode === "@me" && (
                     <>
-                        <FaPeopleArrows />
-                        <Typography fontWeight="bold">
+                        <FaPeopleArrows data-tauri-drag-region />
+                        <Typography data-tauri-drag-region fontWeight="bold">
                             Direct Messages
                         </Typography>
                     </>
                 )}
                 {app.mode === "spaces" && (
                     <>
-                        <GiGalaxy />
-                        <Typography fontWeight="bold">Spaces</Typography>
+                        <GiGalaxy data-tauri-drag-region />
+                        <Typography data-tauri-drag-region fontWeight="bold">
+                            Spaces
+                        </Typography>
                     </>
                 )}
                 {app.mode === "feed" && (
                     <>
-                        <ImFeed />
-                        <Typography fontWeight="bold">Feed</Typography>
+                        <ImFeed data-tauri-drag-region />
+                        <Typography data-tauri-drag-region fontWeight="bold">
+                            Feed
+                        </Typography>
                     </>
                 )}
             </Stack>
             <Stack
                 flex={1}
                 alignItems="center"
-                px={isMac ? 1.25 : 0}
                 justifyContent="flex-end"
                 data-tauri-drag-region
             >
-                {app.updater?.update && (
+                {appWindow && app.updater?.update && (
                     <Stack
                         px={isMac ? 3.75 : 0}
                         alignItems="center"
@@ -140,7 +173,7 @@ const WindowTitleBar = ({ onHeightChange }: WindowTitleBarProps) => {
                                 orientation="vertical"
                                 css={{
                                     marginRight: 8,
-                                    filter: "opacity(0.25)",
+                                    opacity: 0.25,
                                 }}
                             />
                         )}
@@ -183,17 +216,24 @@ const WindowTitleBar = ({ onHeightChange }: WindowTitleBarProps) => {
                                 borderRadius: 0,
                                 padding: 4,
                                 transition: "background .12s, color .12s",
+                                opacity: isUpdating ? 0.45 : 1,
+                                pointerEvents: isUpdating ? "none" : "auto",
                             }}
                             color={
                                 closeDanger
                                     ? "danger"
                                     : theme.typography.colors.primary
                             }
-                            onMouseEnter={() => setCloseDanger(true)}
+                            onMouseEnter={() =>
+                                !isUpdating && setCloseDanger(true)
+                            }
                             onMouseLeave={() => setCloseDanger(false)}
                             variant={closeDanger ? "solid" : "plain"}
                             onClick={() => appWindow.close()}
                             size={18}
+                            title={
+                                isUpdating ? "Updating… please wait" : "Close"
+                            }
                         >
                             <VscClose />
                         </IconButton>

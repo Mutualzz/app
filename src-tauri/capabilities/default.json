@@ -28,6 +28,7 @@
         "os:allow-locale",
         "os:allow-os-type",
         "os:allow-version",
+        "core:window:allow-set-closable",
         "core:webview:allow-internal-toggle-devtools",
         "process:default",
         "process:allow-restart",
@@ -37,18 +38,15 @@
         "clipboard-manager:allow-write-image",
         "clipboard-manager:allow-write-text",
         {
-            "identifier": "opener:allow-open-url",
             "allow": [
                 {
-                    "url": "https://*/*"
-                },
-                {
-                    "url": "mutualzz://*/*"
+                    "url": "mutualzz:*"
                 },
                 {
                     "url": "spotify:*"
                 }
-            ]
+            ],
+            "identifier": "opener:allow-open-url"
         },
         "deep-link:default"
     ],

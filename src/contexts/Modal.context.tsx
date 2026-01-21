@@ -60,7 +60,7 @@ export const ModalProvider = observer(({ children }: PropsWithChildren) => {
             },
         );
 
-        return () => dispose();
+        return dispose;
     }, [app.token]);
 
     const openModal = useCallback(
@@ -75,7 +75,10 @@ export const ModalProvider = observer(({ children }: PropsWithChildren) => {
                     key: `modal-${id}-${Date.now()}`,
                     id,
                     content,
-                    props,
+                    props: {
+                        showCloseButton: false,
+                        ...props,
+                    },
                 },
             ]);
         },

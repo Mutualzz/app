@@ -36,8 +36,6 @@ const SpoilerWrapper = styled("span")<{ revealed: boolean }>(
 const Spoiler = ({ children }: PropsWithChildren) => {
     const [revealed, setRevealed] = useState(false);
 
-    console.log(children);
-
     return (
         <SpoilerWrapper revealed={revealed} onClick={() => setRevealed(true)}>
             {children}

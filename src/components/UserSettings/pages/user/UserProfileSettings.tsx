@@ -21,7 +21,7 @@ export const UserProfileSettings = observer(() => {
         mutationKey: ["delete-avatar"],
         mutationFn: () => app.rest.patch("@me", { avatar: null }),
         onSuccess: () => {
-            closeModal("user-settings");
+            closeModal();
         },
     });
 
@@ -67,7 +67,6 @@ export const UserProfileSettings = observer(() => {
                                         "avatar-upload",
                                         <AvatarUpload />,
                                         {
-                                            showCloseButton: false,
                                             css: {
                                                 display: "flex",
                                                 justifyContent: "center",

@@ -1,16 +1,25 @@
-import { ThemeCreator } from "@components/ThemeCreator.old";
 import { ThemeCreatorModal } from "@components/ThemeCreator/ThemeCreatorModal";
 import { TooltipWrapper } from "@components/TooltipWrapper";
 import { useModal } from "@contexts/Modal.context";
-import type { Theme as MzTheme } from "@emotion/react";
+import type { CSSObject, Theme as MzTheme } from "@emotion/react";
 import { usePrefersDark } from "@hooks/usePrefersDark";
 import { useAppStore } from "@hooks/useStores";
-import { baseDarkTheme, baseLightTheme, styled } from "@mutualzz/ui-core";
+import type { ThemeType } from "@mutualzz/types";
+import {
+    baseDarkTheme,
+    baseLightTheme,
+    type ColorLike,
+    extractColors,
+    isValidGradient,
+    styled,
+} from "@mutualzz/ui-core";
 import {
     Box,
     Button,
     Checkbox,
+    Divider,
     IconButton,
+    Paper,
     Stack,
     Tooltip,
     Typography,
@@ -20,25 +29,17 @@ import { Theme } from "@stores/objects/Theme";
 import { useMutation } from "@tanstack/react-query";
 import { getAdaptiveIcon } from "@utils/icons";
 import { observer } from "mobx-react-lite";
-import { useEffect, useState } from "react";
+import {
+    forwardRef,
+    type HTMLProps,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+} from "react";
 import { FaCheck, FaTrash } from "react-icons/fa";
 import { FaRepeat } from "react-icons/fa6";
-
-const ColorBlob = styled("div")<{
-    shownTheme: Theme | MzTheme;
-    current: boolean;
-}>(({ theme, shownTheme, current }) => ({
-    width: "4rem",
-    height: "4rem",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    cursor: "pointer",
-    background: shownTheme.colors.surface,
-    border: `3px solid ${theme.colors.primary}`,
-    boxShadow: current ? `0 0 0 3px ${theme.colors.primary}` : "none",
-    borderRadius: "50%",
-}));
+import { VirtuosoGrid } from "react-virtuoso";
 
 const ImageBlob = styled("img")<{
     current: boolean;
@@ -46,12 +47,75 @@ const ImageBlob = styled("img")<{
     width: "4rem",
     height: "4rem",
     cursor: "pointer",
-    border: `3px solid ${theme.colors.primary}`,
+    outline: `3px solid ${theme.colors.primary}`,
     boxShadow: current ? `0 0 0 3px ${theme.colors.primary}` : "none",
     borderRadius: "50%",
 }));
 
-type ThemeWithIcon<T> = { theme: T; icon: string };
+interface ThemeWithIcon<T> {
+    theme: T;
+    icon: string;
+}
+
+const GRID_COLUMNS = 10;
+const GRID_ITEM_SIZE = "4rem";
+const GRID_GAP = 0;
+
+const gridStyles: CSSObject = {
+    display: "grid",
+    gridTemplateColumns: `repeat(${GRID_COLUMNS}, minmax(${GRID_ITEM_SIZE}, 1fr))`,
+    gap: GRID_GAP,
+};
+
+function gradientToDataUrl(colors: string[]): string {
+    const stops = colors
+        .map(
+            (color, i) =>
+                `<stop offset="${(i / (colors.length - 1)) * 100}%" stop-color="${color}"/>`,
+        )
+        .join("");
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="0">${stops}</linearGradient></defs><circle cx="32" cy="32" r="32" fill="url(#g)" /></svg>`;
+    return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+}
+
+function solidColorToDataUrl(color: string): string {
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><circle cx="32" cy="32" r="32" fill="${color}" /></svg>`;
+    return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+}
+
+function colorOrGradientToDataUrl(colorOrGradient: ColorLike): string {
+    if (isValidGradient(colorOrGradient)) {
+        const colors = extractColors(colorOrGradient) || ["#888", "#ccc"];
+        return gradientToDataUrl(colors);
+    }
+    return solidColorToDataUrl(colorOrGradient);
+}
+
+const VirtuosoGridList = forwardRef<HTMLDivElement, HTMLProps<HTMLDivElement>>(
+    (props, ref) => (
+        <Stack
+            {...(props as any)}
+            ref={ref}
+            display="grid"
+            style={{
+                ...gridStyles,
+                boxSizing: "border-box",
+                ...(props.style || {}),
+            }}
+        />
+    ),
+);
+
+VirtuosoGridList.displayName = "VirtuosoGridList";
+
+const VirtuosoGridItem = (props: HTMLProps<HTMLDivElement>) => (
+    <Stack
+        {...(props as any)}
+        justifyContent="center"
+        alignItems="center"
+        py={2}
+    />
+);
 
 export const AppAppearanceSettings = observer(() => {
     const app = useAppStore();
@@ -59,45 +123,48 @@ export const AppAppearanceSettings = observer(() => {
     const { theme: currentTheme, changeTheme, type: currentType } = useTheme();
     const prefersDark = usePrefersDark();
 
-    const [icons, setIcons] = useState<Map<string, ThemeWithIcon<Theme>>>(
-        new Map(),
-    );
+    // Use ref for icons to avoid unnecessary re-renders
+    const iconsRef = useRef<Map<string, ThemeWithIcon<Theme>>>(new Map());
+    const [_iconsVersion, setIconsVersion] = useState(0); // Used to trigger re-renders when icons are loaded
     const [adaptiveIcon, setAdaptiveIcon] =
         useState<ThemeWithIcon<MzTheme> | null>(null);
 
     const [focusedTheme, setFocusedTheme] = useState(currentTheme.id);
 
     useEffect(() => {
+        let cancelled = false;
         const loadIcons = async () => {
             const iconMap = new Map<string, ThemeWithIcon<Theme>>();
-
-            // Load icons in parallel for better performance
             await Promise.all(
                 app.themes.all.map(async (theme) => {
-                    const icon = (await getAdaptiveIcon(
-                        Theme.toEmotionTheme(theme),
+                    const icon = await getAdaptiveIcon(
+                        Theme.toEmotion(theme),
                         "baseUrl",
-                    )) as string;
+                    );
                     iconMap.set(theme.id, { theme, icon });
                 }),
             );
-
-            setIcons(iconMap);
+            if (!cancelled) {
+                iconsRef.current = iconMap;
+                setIconsVersion((v) => v + 1);
+            }
         };
-
         loadIcons();
+        return () => {
+            cancelled = true;
+        };
     }, [app.themes.themes.size]);
 
     useEffect(() => {
+        let cancelled = false;
         const setupAdaptive = async () => {
-            const icon = (await getAdaptiveIcon(
-                currentTheme,
-                "baseUrl",
-            )) as string;
-            setAdaptiveIcon({ theme: currentTheme, icon });
+            const icon = await getAdaptiveIcon(currentTheme, "baseUrl");
+            if (!cancelled) setAdaptiveIcon({ theme: currentTheme, icon });
         };
-
         setupAdaptive();
+        return () => {
+            cancelled = true;
+        };
     }, [currentTheme]);
 
     const { mutate: deleteTheme, isPending: isDeleting } = useMutation({
@@ -111,25 +178,48 @@ export const AppAppearanceSettings = observer(() => {
         },
     });
 
-    const defaultThemes = [baseDarkTheme, baseLightTheme];
+    const defaultThemes = useMemo(() => [baseDarkTheme, baseLightTheme], []);
 
-    const defaultColorThemes = app.themes.all
-        .filter((t) => !t.author)
-        .filter((t) => t.id !== "baseDark" && t.id !== "baseLight");
-
-    const userThemes = app.themes.all.filter((t) => t.author);
-
-    const defaultIcons = Array.from(icons.values()).filter(
-        (ic) => !ic.theme.author,
+    const defaultColorThemes = useMemo(
+        () =>
+            app.themes.all
+                .filter((theme) => !theme.author)
+                .filter(
+                    (theme) =>
+                        theme.id !== "baseDark" && theme.id !== "baseLight",
+                ),
+        [app.themes.all],
     );
 
-    const userIcons = Array.from(icons.values()).filter(
-        (ic) => ic.theme.author,
+    const normalThemes = useMemo(
+        () => defaultColorThemes.filter((theme) => theme.style === "normal"),
+        [defaultColorThemes],
+    );
+
+    const gradientThemes = useMemo(
+        () => defaultColorThemes.filter((theme) => theme.style === "gradient"),
+        [defaultColorThemes],
+    );
+
+    const userThemes = useMemo(
+        () => app.themes.all.filter((theme) => theme.author),
+        [app.themes.all],
+    );
+
+    const icons = iconsRef.current;
+
+    const defaultIcons = useMemo(
+        () => Array.from(icons.values()).filter((ic) => !ic.theme.author),
+        [_iconsVersion, icons],
+    );
+    const userIcons = useMemo(
+        () => Array.from(icons.values()).filter((ic) => ic.theme.author),
+        [_iconsVersion, icons],
     );
 
     const handleThemeChange = (theme: MzTheme | Theme) => {
         if (theme.id === currentTheme.id) return;
-        changeTheme(Theme.toEmotionTheme(theme));
+        changeTheme(Theme.toEmotion(theme));
         app?.settings?.setCurrentTheme(theme.id);
     };
 
@@ -145,395 +235,77 @@ export const AppAppearanceSettings = observer(() => {
         app?.settings?.setCurrentTheme(null);
     };
 
-    return (
-        <Stack direction="column" pt={2.5} pb={5} spacing={7.5}>
-            <Typography
-                display="flex"
-                alignItems="center"
-                level="body-lg"
-                fontWeight="bolder"
-                spacing={1.25}
-            >
-                Themes -
-                <Button
-                    variant="soft"
-                    color="neutral"
-                    horizontalAlign="left"
-                    onClick={() =>
-                        openModal("theme-creator", <ThemeCreatorModal />, {
-                            height: "100%",
-                            showCloseButton: false,
-                        })
+    const renderThemeColorBlob =
+        (
+            themes: (Theme | MzTheme)[],
+            currentTheme: MzTheme,
+            currentType: ThemeType | null,
+            onDelete?: (id: string) => void,
+            focusedThemeId?: string,
+            isDeleting?: boolean,
+            setFocusedTheme?: (id: string) => void,
+        ) =>
+        (index: number) => {
+            const theme = themes[index];
+            const description = theme.description || "No description";
+            return (
+                <Tooltip
+                    key={`${theme.id}-top`}
+                    title={
+                        <TooltipWrapper typographyProps={{ level: "body-sm" }}>
+                            {theme.name}
+                        </TooltipWrapper>
                     }
+                    placement="top"
                 >
-                    Open Editor
-                </Button>
-                -{" "}
-                <Checkbox
-                    rtl
-                    label="Prefer Embossed Style"
-                    checked={app.preferEmbossed}
-                    onClick={() => app.togglePreferEmbossed()}
-                />
-                <Button
-                    variant="soft"
-                    color="neutral"
-                    horizontalAlign="left"
-                    onClick={() =>
-                        openModal("theme-creator", <ThemeCreator />, {
-                            height: "100%",
-                            showCloseButton: false,
-                        })
-                    }
-                >
-                    Open Old Editor
-                </Button>
-            </Typography>
-            {userThemes.length > 0 && (
-                <Stack direction="column" spacing={2.5}>
-                    <Typography fontWeight="bold" level="body-sm">
-                        Your Themes
-                    </Typography>
-                    <Stack direction="row" spacing={2.5}>
-                        {userThemes.map((t) => (
-                            <Tooltip
-                                key={`${t.id}-top`}
-                                title={
-                                    <TooltipWrapper
-                                        paperProps={{ borderRadius: 10 }}
-                                        typographyProps={{ level: "body-sm" }}
-                                    >
-                                        {t.name}
-                                    </TooltipWrapper>
-                                }
-                                placement="top"
-                            >
-                                <Tooltip
-                                    key={`${t.id}-bottom`}
-                                    title={
-                                        <TooltipWrapper
-                                            paperProps={{
-                                                borderRadius: 10,
-                                            }}
-                                            typographyProps={{
-                                                level: "body-xs",
-                                            }}
-                                        >
-                                            {t.description}
-                                        </TooltipWrapper>
-                                    }
-                                    placement="bottom"
-                                >
-                                    <Box
-                                        onMouseEnter={() =>
-                                            setFocusedTheme(t.id)
-                                        }
-                                        onMouseLeave={() => setFocusedTheme("")}
-                                        onFocus={() => setFocusedTheme(t.id)}
-                                        position="relative"
-                                        key={`box-${t.id}`}
-                                    >
-                                        {(focusedTheme === t.id ||
-                                            currentTheme.id === t.id) && (
-                                            <IconButton
-                                                key={`delete-${t.id}`}
-                                                onClick={() => {
-                                                    deleteTheme(t.id);
-                                                }}
-                                                css={{
-                                                    position: "absolute",
-                                                    top: 0,
-                                                    right: 0,
-                                                    zIndex: 1,
-                                                }}
-                                                color="danger"
-                                                size={12}
-                                                disabled={isDeleting}
-                                            >
-                                                <FaTrash />
-                                            </IconButton>
-                                        )}
-                                        <ColorBlob
-                                            onClick={() => {
-                                                handleThemeChange(t);
-                                                setFocusedTheme(t.id);
-                                            }}
-                                            shownTheme={t}
-                                            current={
-                                                t.id === currentTheme.id &&
-                                                currentType === t.type
-                                            }
-                                            onMouseEnter={() =>
-                                                setFocusedTheme(t.id)
-                                            }
-                                        >
-                                            {t.id === currentTheme.id &&
-                                                currentType === t.type && (
-                                                    <FaCheck />
-                                                )}
-                                        </ColorBlob>
-                                    </Box>
-                                </Tooltip>
-                            </Tooltip>
-                        ))}
-                    </Stack>
-                </Stack>
-            )}
-            <Stack direction="column" spacing={2.5}>
-                <Typography fontWeight="bold" level="body-sm">
-                    Default Themes
-                </Typography>
-                <Stack direction="row" spacing={2.5}>
-                    {defaultThemes.map((t) => (
-                        <Tooltip
-                            key={`${t.id}-top`}
-                            title={
-                                <TooltipWrapper
-                                    paperProps={{ borderRadius: 10 }}
-                                    typographyProps={{ level: "body-sm" }}
-                                >
-                                    {t.name}
-                                </TooltipWrapper>
-                            }
-                            placement="top"
-                        >
-                            <Tooltip
-                                key={`${t.id}-bottom`}
-                                title={
-                                    <TooltipWrapper
-                                        paperProps={{
-                                            borderRadius: 10,
-                                        }}
-                                        typographyProps={{
-                                            level: "body-xs",
-                                        }}
-                                    >
-                                        {t.description}
-                                    </TooltipWrapper>
-                                }
-                                placement="bottom"
-                            >
-                                <ColorBlob
-                                    onClick={() => handleThemeChange(t)}
-                                    shownTheme={t}
-                                    current={
-                                        t.id === currentTheme.id &&
-                                        currentType === t.type
-                                    }
-                                >
-                                    {t.id === currentTheme.id &&
-                                        currentType === t.type && <FaCheck />}
-                                </ColorBlob>
-                            </Tooltip>
-                        </Tooltip>
-                    ))}
                     <Tooltip
+                        key={`${theme.id}-bottom`}
                         title={
                             <TooltipWrapper
-                                paperProps={{ borderRadius: 10 }}
-                                typographyProps={{ level: "body-sm" }}
+                                typographyProps={{ level: "body-xs" }}
                             >
-                                Sync with System
+                                {description}
                             </TooltipWrapper>
                         }
-                        placement="top"
+                        placement="bottom"
                     >
-                        <ColorBlob
-                            shownTheme={
-                                prefersDark ? baseDarkTheme : baseLightTheme
-                            }
-                            current={!currentType}
-                            onClick={() => handleSyncWithSystem()}
+                        <Box
+                            position="relative"
+                            onMouseEnter={() => setFocusedTheme?.(theme.id)}
+                            onMouseLeave={() => setFocusedTheme?.("")}
+                            onFocus={() => setFocusedTheme?.(theme.id)}
                         >
-                            {!currentType ? (
-                                <FaCheck
-                                    color={currentTheme.colors.common.white}
-                                />
-                            ) : (
-                                <FaRepeat
-                                    color={currentTheme.colors.common.white}
-                                />
-                            )}
-                        </ColorBlob>
-                    </Tooltip>
-                </Stack>
-            </Stack>
-            <Stack direction="column" spacing={2.5}>
-                <Typography fontWeight="bold" level="body-sm">
-                    Color Themes
-                </Typography>
-                <Stack direction="column" spacing={2.5}>
-                    <Typography level="body-xs" fontWeight="bold">
-                        Normal
-                    </Typography>
-                    <div
-                        css={{
-                            display: "grid",
-                            gridTemplateColumns:
-                                "repeat(15, minmax(4rem, 1fr))",
-                            gap: 10,
-                        }}
-                    >
-                        {defaultColorThemes
-                            .filter((t) => t.style === "normal")
-                            .map((t) => (
-                                <Tooltip
-                                    key={`${t.id}-top`}
-                                    title={
-                                        <TooltipWrapper
-                                            paperProps={{ borderRadius: 10 }}
-                                            typographyProps={{
-                                                level: "body-sm",
-                                            }}
-                                        >
-                                            {t.name}
-                                        </TooltipWrapper>
-                                    }
-                                    placement="top"
-                                >
-                                    <Tooltip
-                                        key={`${t.id}-bottom`}
-                                        title={
-                                            <TooltipWrapper
-                                                paperProps={{
-                                                    borderRadius: 10,
-                                                }}
-                                                typographyProps={{
-                                                    level: "body-xs",
-                                                }}
-                                            >
-                                                {t.description}
-                                            </TooltipWrapper>
-                                        }
-                                        placement="bottom"
-                                    >
-                                        <ColorBlob
-                                            css={{
-                                                position: "relative",
-                                            }}
-                                            onClick={() => handleThemeChange(t)}
-                                            shownTheme={t}
-                                            current={
-                                                t.id === currentTheme.id &&
-                                                currentType === t.type
-                                            }
-                                        >
-                                            {t.id === currentTheme.id &&
-                                                currentType === t.type && (
-                                                    <FaCheck />
-                                                )}
-                                        </ColorBlob>
-                                    </Tooltip>
-                                </Tooltip>
-                            ))}
-                    </div>
-                </Stack>
-
-                <Stack direction="column" spacing={2.5}>
-                    <Typography level="body-xs" fontWeight="bold">
-                        Gradient
-                    </Typography>
-                    <div
-                        css={{
-                            display: "grid",
-                            gridTemplateColumns:
-                                "repeat(15, minmax(4rem, 1fr))",
-                            gap: 10,
-                        }}
-                    >
-                        {defaultColorThemes
-                            .filter((t) => t.style === "gradient")
-                            .map((t) => (
-                                <Tooltip
-                                    key={`${t.id}-top`}
-                                    title={
-                                        <TooltipWrapper
-                                            paperProps={{ borderRadius: 10 }}
-                                            typographyProps={{
-                                                level: "body-sm",
-                                            }}
-                                        >
-                                            {t.name}
-                                        </TooltipWrapper>
-                                    }
-                                    placement="top"
-                                >
-                                    <Tooltip
-                                        key={`${t.id}-bottom`}
-                                        title={
-                                            <TooltipWrapper
-                                                paperProps={{
-                                                    borderRadius: 10,
-                                                }}
-                                                typographyProps={{
-                                                    level: "body-xs",
-                                                }}
-                                            >
-                                                {t.description}
-                                            </TooltipWrapper>
-                                        }
-                                        placement="bottom"
-                                    >
-                                        <ColorBlob
-                                            onClick={() => handleThemeChange(t)}
-                                            shownTheme={t}
-                                            current={
-                                                t.id === currentTheme.id &&
-                                                currentType === t.type
-                                            }
-                                        >
-                                            {t.id === currentTheme.id &&
-                                                currentType === t.type && (
-                                                    <FaCheck />
-                                                )}
-                                        </ColorBlob>
-                                    </Tooltip>
-                                </Tooltip>
-                            ))}
-                    </div>
-                </Stack>
-            </Stack>
-            {icons.size > 0 && (
-                <Stack direction="column" spacing={2.5}>
-                    <Typography level="body-lg" fontWeight="bolder">
-                        Icons
-                    </Typography>
-                    <Stack direction="column" spacing={2.5}>
-                        <Typography level="body-sm" fontWeight="bold">
-                            Default Icons
-                        </Typography>
-                        <div
-                            css={{
-                                display: "grid",
-                                gridTemplateColumns:
-                                    "repeat(15, minmax(4rem, 1fr))",
-                                gap: 10,
-                            }}
-                        >
-                            <Tooltip
-                                title={
-                                    <TooltipWrapper
-                                        paperProps={{ borderRadius: 10 }}
-                                        typographyProps={{ level: "body-sm" }}
-                                    >
-                                        Adapt with current theme
-                                    </TooltipWrapper>
-                                }
-                                placement="top"
-                            >
-                                <Box
-                                    position="relative"
-                                    display="inline-flex"
-                                    width="4rem"
-                                    height="4rem"
-                                >
-                                    <ImageBlob
-                                        current={!app.themes.currentIcon}
-                                        onClick={() => {
-                                            handleIconChange(null);
+                            {onDelete &&
+                                (focusedThemeId === theme.id ||
+                                    currentTheme.id === theme.id) && (
+                                    <IconButton
+                                        onClick={() => onDelete(theme.id)}
+                                        css={{
+                                            position: "absolute",
+                                            top: 0,
+                                            right: 0,
+                                            zIndex: 1,
                                         }}
-                                        src={adaptiveIcon?.icon ?? undefined}
-                                    />
+                                        color="danger"
+                                        size={12}
+                                        disabled={isDeleting}
+                                    >
+                                        <FaTrash />
+                                    </IconButton>
+                                )}
+                            <ImageBlob
+                                src={colorOrGradientToDataUrl(
+                                    theme.colors.surface,
+                                )}
+                                onClick={() => handleThemeChange(theme)}
+                                current={
+                                    theme.id === currentTheme.id &&
+                                    currentType === theme.type
+                                }
+                                onMouseEnter={() => setFocusedTheme?.(theme.id)}
+                            />
+                            {theme.id === currentTheme.id &&
+                                currentType === theme.type && (
                                     <Stack
                                         position="absolute"
                                         top={-2}
@@ -542,59 +314,330 @@ export const AppAppearanceSettings = observer(() => {
                                         border={`2px solid ${currentTheme.colors.surface}`}
                                         justifyContent="center"
                                         fontSize="0.75rem"
+                                        width="1.5rem"
+                                        height="1.5rem"
+                                        borderRadius="50%"
                                         css={{
-                                            width: "1.5rem",
-                                            height: "1.5rem",
-                                            borderRadius: "50%",
                                             background:
                                                 currentTheme.colors.primary,
                                             pointerEvents: "none",
                                         }}
                                     >
-                                        {!app.themes.currentIcon ? (
-                                            <FaCheck />
-                                        ) : (
-                                            <FaRepeat />
-                                        )}
-                                    </Stack>
-                                </Box>
-                            </Tooltip>
-                            {defaultIcons.map((icon) => (
-                                <Tooltip
-                                    key={`${icon.theme.id}-icon`}
-                                    placement="top"
-                                    title={
-                                        <TooltipWrapper
-                                            paperProps={{ borderRadius: 10 }}
-                                            typographyProps={{
-                                                level: "body-sm",
-                                            }}
-                                        >
-                                            {icon.theme.name} Icon
-                                        </TooltipWrapper>
-                                    }
-                                >
-                                    <Box
-                                        position="relative"
-                                        display="inline-flex"
-                                        width="4rem"
-                                        height="4rem"
-                                    >
-                                        <ImageBlob
-                                            src={icon.icon}
-                                            css={{ width: 64, height: 64 }}
-                                            onClick={() =>
-                                                handleIconChange(icon.theme.id)
-                                            }
-                                            current={
-                                                icon.theme.id ===
-                                                app.themes.currentIcon
+                                        <FaCheck
+                                            color={
+                                                currentTheme.typography.colors
+                                                    .primary
                                             }
                                         />
-                                        {icon.theme.id ===
-                                            app.themes.currentIcon &&
-                                            app.themes.currentIcon ===
-                                                currentTheme.id && (
+                                    </Stack>
+                                )}
+                        </Box>
+                    </Tooltip>
+                </Tooltip>
+            );
+        };
+
+    const renderIconBlob =
+        (
+            iconsArr: ThemeWithIcon<Theme>[],
+            currentIcon: string | null,
+            currentTheme: MzTheme,
+        ) =>
+        (index: number) => {
+            const icon = iconsArr[index];
+            return (
+                <Tooltip
+                    key={`${icon.theme.id}-icon`}
+                    placement="top"
+                    title={
+                        <TooltipWrapper typographyProps={{ level: "body-sm" }}>
+                            {icon.theme.name} Icon
+                        </TooltipWrapper>
+                    }
+                >
+                    <Box
+                        position="relative"
+                        display="inline-flex"
+                        width="4rem"
+                        height="4rem"
+                    >
+                        <ImageBlob
+                            src={icon.icon}
+                            css={{ width: "4rem", height: "4rem" }}
+                            onClick={() => handleIconChange(icon.theme.id)}
+                            current={icon.theme.id === currentIcon}
+                        />
+                        {icon.theme.id === currentIcon && (
+                            <Stack
+                                position="absolute"
+                                top={-2}
+                                right={-2}
+                                alignItems="center"
+                                border={`2px solid ${currentTheme.colors.surface}`}
+                                justifyContent="center"
+                                fontSize="0.75rem"
+                                width="1.5rem"
+                                height="1.5rem"
+                                borderRadius="50%"
+                                css={{
+                                    background: currentTheme.colors.primary,
+                                    pointerEvents: "none",
+                                }}
+                            >
+                                <FaCheck
+                                    color={
+                                        currentTheme.typography.colors.primary
+                                    }
+                                />
+                            </Stack>
+                        )}
+                    </Box>
+                </Tooltip>
+            );
+        };
+
+    return (
+        <Stack direction="column" pt={2.5} pb={5} spacing={7.5}>
+            <Paper
+                direction="column"
+                py={2.5}
+                px={4}
+                variant="outlined"
+                spacing={5}
+                borderRadius={10}
+            >
+                <Typography
+                    display="flex"
+                    alignItems="center"
+                    level="body-lg"
+                    fontWeight="bolder"
+                    spacing={1.25}
+                >
+                    Themes -
+                    <Button
+                        variant="soft"
+                        color="neutral"
+                        horizontalAlign="left"
+                        onClick={() =>
+                            openModal("theme-creator", <ThemeCreatorModal />)
+                        }
+                    >
+                        Open Editor
+                    </Button>
+                    -{" "}
+                    <Checkbox
+                        rtl
+                        label="Prefer Embossed Style"
+                        checked={app.preferEmbossed}
+                        onClick={() => app.togglePreferEmbossed()}
+                    />
+                </Typography>
+                {userThemes.length > 0 && (
+                    <Stack direction="column" spacing={2.5}>
+                        <Typography fontWeight="bold" level="body-sm">
+                            Your Themes
+                        </Typography>
+                        <VirtuosoGrid
+                            style={{ height: 120, width: "100%" }}
+                            totalCount={userThemes.length}
+                            overscan={4}
+                            components={{
+                                List: VirtuosoGridList,
+                                Item: VirtuosoGridItem,
+                            }}
+                            itemContent={renderThemeColorBlob(
+                                userThemes,
+                                currentTheme,
+                                currentType,
+                                deleteTheme,
+                                focusedTheme,
+                                isDeleting,
+                                setFocusedTheme,
+                            )}
+                        />
+                    </Stack>
+                )}
+                <Stack direction="column" spacing={2.5}>
+                    <Typography fontWeight="bold" level="body-sm">
+                        Default Themes
+                    </Typography>
+                    <Stack direction="row" spacing={2.5}>
+                        {defaultThemes.map((_, idx) =>
+                            renderThemeColorBlob(
+                                defaultThemes,
+                                currentTheme,
+                                currentType,
+                            )(idx),
+                        )}
+                        <Tooltip
+                            title={
+                                <TooltipWrapper
+                                    typographyProps={{ level: "body-sm" }}
+                                >
+                                    Sync with System
+                                </TooltipWrapper>
+                            }
+                            placement="top"
+                        >
+                            <Box position="relative">
+                                <ImageBlob
+                                    src={colorOrGradientToDataUrl(
+                                        prefersDark
+                                            ? baseDarkTheme.colors.surface
+                                            : baseLightTheme.colors.surface,
+                                    )}
+                                    current={!currentType}
+                                    onClick={() => handleSyncWithSystem()}
+                                />
+                                <Stack
+                                    position="absolute"
+                                    top={-2}
+                                    right={-2}
+                                    alignItems="center"
+                                    border={`2px solid ${currentTheme.colors.surface}`}
+                                    justifyContent="center"
+                                    fontSize="0.75rem"
+                                    css={{
+                                        width: "1.5rem",
+                                        height: "1.5rem",
+                                        borderRadius: "50%",
+                                        background: currentTheme.colors.primary,
+                                        pointerEvents: "none",
+                                    }}
+                                >
+                                    {!currentType ? (
+                                        <FaCheck
+                                            color={
+                                                currentTheme.typography.colors
+                                                    .primary
+                                            }
+                                        />
+                                    ) : (
+                                        <FaRepeat
+                                            color={
+                                                currentTheme.typography.colors
+                                                    .primary
+                                            }
+                                        />
+                                    )}
+                                </Stack>
+                            </Box>
+                        </Tooltip>
+                    </Stack>
+                </Stack>
+                <Stack direction="column" spacing={2.5}>
+                    <Typography fontWeight="bold" level="body-sm">
+                        Color Themes
+                    </Typography>
+                    <Stack direction="column" spacing={2.5} mb={2.5}>
+                        <Typography level="body-xs" fontWeight="bold">
+                            Normal
+                        </Typography>
+                        <VirtuosoGrid
+                            style={{ height: 150, width: "100%" }}
+                            totalCount={normalThemes.length}
+                            overscan={4}
+                            components={{
+                                List: VirtuosoGridList,
+                                Item: VirtuosoGridItem,
+                            }}
+                            itemContent={renderThemeColorBlob(
+                                normalThemes,
+                                currentTheme,
+                                currentType,
+                            )}
+                        />
+                    </Stack>
+                    <Divider
+                        lineColor="muted"
+                        css={{
+                            opacity: 0.25,
+                        }}
+                    />
+                    <Stack direction="column" spacing={2.5}>
+                        <Typography level="body-xs" fontWeight="bold">
+                            Gradient
+                        </Typography>
+                        <VirtuosoGrid
+                            style={{ height: 150, width: "100%" }}
+                            totalCount={gradientThemes.length}
+                            overscan={4}
+                            components={{
+                                List: VirtuosoGridList,
+                                Item: VirtuosoGridItem,
+                            }}
+                            itemContent={renderThemeColorBlob(
+                                gradientThemes,
+                                currentTheme,
+                                currentType,
+                            )}
+                        />
+                    </Stack>
+                </Stack>
+            </Paper>
+            {icons.size > 0 && (
+                <Paper
+                    variant="outlined"
+                    borderRadius={10}
+                    direction="column"
+                    py={2}
+                    px={4}
+                    spacing={2.5}
+                >
+                    <Typography level="body-lg" fontWeight="bolder">
+                        Icons
+                    </Typography>
+                    <Stack direction="column" spacing={2.5}>
+                        <Typography level="body-sm" fontWeight="bold">
+                            Default Icons
+                        </Typography>
+                        <VirtuosoGrid
+                            style={{
+                                height: 150,
+                                width: "100%",
+                            }}
+                            totalCount={defaultIcons.length + 1}
+                            overscan={4}
+                            components={{
+                                List: VirtuosoGridList,
+                                Item: VirtuosoGridItem,
+                            }}
+                            itemContent={(index: number) => {
+                                if (index === 0) {
+                                    return (
+                                        <Tooltip
+                                            title={
+                                                <TooltipWrapper
+                                                    paperProps={{
+                                                        borderRadius: 10,
+                                                    }}
+                                                    typographyProps={{
+                                                        level: "body-sm",
+                                                    }}
+                                                >
+                                                    Adapt with current theme
+                                                </TooltipWrapper>
+                                            }
+                                            placement="top"
+                                        >
+                                            <Box
+                                                position="relative"
+                                                display="inline-flex"
+                                                width="4rem"
+                                                height="4rem"
+                                            >
+                                                <ImageBlob
+                                                    current={
+                                                        !app.themes.currentIcon
+                                                    }
+                                                    onClick={() => {
+                                                        handleIconChange(null);
+                                                    }}
+                                                    src={
+                                                        adaptiveIcon?.icon ??
+                                                        undefined
+                                                    }
+                                                />
                                                 <Stack
                                                     position="absolute"
                                                     top={-2}
@@ -613,97 +656,60 @@ export const AppAppearanceSettings = observer(() => {
                                                         pointerEvents: "none",
                                                     }}
                                                 >
-                                                    <FaCheck />
+                                                    {!app.themes.currentIcon ? (
+                                                        <FaCheck
+                                                            color={
+                                                                currentTheme
+                                                                    .typography
+                                                                    .colors
+                                                                    .primary
+                                                            }
+                                                        />
+                                                    ) : (
+                                                        <FaRepeat
+                                                            color={
+                                                                currentTheme
+                                                                    .typography
+                                                                    .colors
+                                                                    .primary
+                                                            }
+                                                        />
+                                                    )}
                                                 </Stack>
-                                            )}
-                                    </Box>
-                                </Tooltip>
-                            ))}
-                        </div>
+                                            </Box>
+                                        </Tooltip>
+                                    );
+                                }
+                                return renderIconBlob(
+                                    defaultIcons,
+                                    app.themes.currentIcon,
+                                    currentTheme,
+                                )(index - 1);
+                            }}
+                        />
                     </Stack>
                     {userIcons.length > 0 && (
                         <Stack direction="column" spacing={2.5}>
                             <Typography level="body-sm" fontWeight="bold">
                                 Your Icons
                             </Typography>
-                            <div
-                                css={{
-                                    display: "grid",
-                                    gridTemplateColumns:
-                                        "repeat(15, minmax(4rem, 1fr))",
-                                    gap: 10,
+                            <VirtuosoGrid
+                                style={{ height: 150, width: "100%" }}
+                                totalCount={userIcons.length}
+                                overscan={4}
+                                components={{
+                                    List: VirtuosoGridList,
+                                    Item: VirtuosoGridItem,
                                 }}
-                            >
-                                {userIcons.map((icon) => (
-                                    <Tooltip
-                                        key={`${icon.theme.id}-icon`}
-                                        placement="top"
-                                        title={
-                                            <TooltipWrapper
-                                                paperProps={{
-                                                    borderRadius: 10,
-                                                }}
-                                                typographyProps={{
-                                                    level: "body-sm",
-                                                }}
-                                            >
-                                                {icon.theme.name} Icon
-                                            </TooltipWrapper>
-                                        }
-                                    >
-                                        <Box
-                                            position="relative"
-                                            display="inline-flex"
-                                            width="4rem"
-                                            height="4rem"
-                                        >
-                                            <ImageBlob
-                                                src={icon.icon}
-                                                css={{ width: 64, height: 64 }}
-                                                onClick={() =>
-                                                    handleIconChange(
-                                                        icon.theme.id,
-                                                    )
-                                                }
-                                                current={
-                                                    icon.theme.id ===
-                                                    app.themes.currentIcon
-                                                }
-                                            />
-                                            {icon.theme.id ===
-                                                app.themes.currentIcon &&
-                                                app.themes.currentIcon ===
-                                                    currentTheme.id && (
-                                                    <Stack
-                                                        position="absolute"
-                                                        top={-4}
-                                                        right={-4}
-                                                        alignItems="center"
-                                                        border={`2px solid ${currentTheme.colors.surface}`}
-                                                        justifyContent="center"
-                                                        fontSize="0.75rem"
-                                                        css={{
-                                                            width: "1.5rem",
-                                                            height: "1.5rem",
-                                                            borderRadius: "50%",
-                                                            background:
-                                                                currentTheme
-                                                                    .colors
-                                                                    .primary,
-                                                            pointerEvents:
-                                                                "none",
-                                                        }}
-                                                    >
-                                                        <FaCheck />
-                                                    </Stack>
-                                                )}
-                                        </Box>
-                                    </Tooltip>
-                                ))}
-                            </div>
+                                itemContent={renderIconBlob(
+                                    userIcons,
+                                    app.themes.currentIcon,
+                                    currentTheme,
+                                )}
+                            />
                         </Stack>
                     )}
-                </Stack>
+                </Paper>
             )}
         </Stack>
     );

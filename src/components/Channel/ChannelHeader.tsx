@@ -28,7 +28,7 @@ export const ChannelHeader = observer(({ channel }: Props) => {
             borderLeft="0 !important"
             borderRight="0 !important"
             borderTop="0 !important"
-            maxHeight="3rem"
+            maxHeight="2.95rem"
             direction="row"
             boxShadow="0 !important"
             alignItems="center"

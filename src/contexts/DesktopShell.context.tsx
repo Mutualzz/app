@@ -46,7 +46,7 @@ export const DesktopShellProvider = observer(
         });
 
         const setOsInfoInternal = (info: Partial<OsInfo>) => {
-            setOsInfo((prev) => ({ ...prev, info }));
+            setOsInfo((prev) => ({ ...prev, ...info }));
         };
 
         const contextValue: DesktopShellContextProps = {

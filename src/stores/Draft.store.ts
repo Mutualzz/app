@@ -6,10 +6,10 @@ import { makeAutoObservable, observable, type IObservableArray } from "mobx";
 import { makePersistable } from "mobx-persist-store";
 import { type CanvasPath } from "react-sketch-canvas";
 
-type AvatarDraft = {
+interface AvatarDraft {
     image: string;
     paths: CanvasPath[];
-};
+}
 
 export class DraftStore {
     private readonly logger = new Logger({

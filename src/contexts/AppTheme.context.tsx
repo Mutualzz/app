@@ -4,7 +4,7 @@ import { ThemeProvider, type ThemeProviderRef } from "@mutualzz/ui-web";
 import { Theme } from "@stores/objects/Theme";
 import { reaction } from "mobx";
 import { observer } from "mobx-react-lite";
-import { useEffect, useRef, type PropsWithChildren } from "react";
+import { type PropsWithChildren, useEffect, useRef } from "react";
 
 export const AppTheme = observer(({ children }: PropsWithChildren) => {
     const app = useAppStore();
@@ -29,7 +29,7 @@ export const AppTheme = observer(({ children }: PropsWithChildren) => {
                 const pick = (id?: string | null) => {
                     const pickenTheme = themes.find((t) => t.id === id);
                     if (!pickenTheme) return undefined;
-                    return Theme.toEmotionTheme(pickenTheme);
+                    return Theme.toEmotion(pickenTheme);
                 };
 
                 const selectedTheme =

@@ -1,10 +1,14 @@
+import { usePrefersDark } from "@hooks/usePrefersDark";
 import {
+    baseDarkTheme,
+    baseLightTheme,
     extractColors,
+    formatColor,
     isValidGradient,
     randomHexColor,
     type ColorLike,
 } from "@mutualzz/ui-core";
-import Color, { type ColorInstance } from "color";
+import chroma from "chroma-js";
 
 interface AdaptColors {
     baseColor: ColorLike;
@@ -12,78 +16,111 @@ interface AdaptColors {
     primaryText: ColorLike;
 }
 
-const contrastRatio = (a: ColorInstance, b: ColorInstance) => {
-    const la = a.luminosity();
-    const lb = b.luminosity();
-    const L1 = Math.max(la, lb);
-    const L2 = Math.min(la, lb);
-    return (L1 + 0.05) / (L2 + 0.05);
-};
-
-const ensureContrast = (
-    bg: ColorInstance,
-    fg: ColorInstance,
-    minRatio = 4.5,
-) => {
-    let attempt = bg;
-    let ratio = contrastRatio(attempt, fg);
-
-    // adjust it by checking if background is lighter or darker than text
-    const bgIsLighterThanText = attempt.luminosity() > fg.luminosity();
-    let step = 0;
-    const stepAmount = 0.03; // adjust lightness per iteration
-    while (ratio < minRatio && step < 40) {
-        attempt = bgIsLighterThanText
-            ? attempt.darken(stepAmount)
-            : attempt.lighten(stepAmount);
-        ratio = contrastRatio(attempt, fg);
-        step++;
+const ensureContrast = (bg: chroma.Color, fg: chroma.Color, minRatio = 4.5) => {
+    let lighten = bg;
+    let darken = bg;
+    let lightenSteps = 0;
+    let darkenSteps = 0;
+    const stepAmount = 0.03;
+    // Try lightening
+    while (chroma.contrast(lighten, fg) < minRatio && lightenSteps < 40) {
+        lighten = lighten.brighten(stepAmount);
+        lightenSteps++;
     }
-    return attempt.hex();
+    // Try darkening
+    while (chroma.contrast(darken, fg) < minRatio && darkenSteps < 40) {
+        darken = darken.darken(stepAmount);
+        darkenSteps++;
+    }
+    // Pick the one with the least steps (least color distortion)
+    return lightenSteps < darkenSteps ? lighten.hex() : darken.hex();
 };
 
-// TODO: rework this, because its completely ass
+function blendSemantic(baseHex: string, themeBase: chroma.Color) {
+    return chroma
+        .mix(baseHex, themeBase, 0.4, "lab")
+        .saturate(1)
+        .set("hsl.l", 0.6);
+}
+
+function averageColors(colors: string[]): chroma.Color {
+    if (colors.length === 1) return chroma(colors[0]);
+    let avg = chroma(colors[0]);
+    for (let i = 1; i < colors.length; i++) {
+        avg = chroma.mix(avg, colors[i], 1 / (i + 1));
+    }
+    return avg;
+}
+
 export const adaptColors = ({
     baseColor,
     primaryColor,
     primaryText,
 }: AdaptColors) => {
-    const baseColorObj = Color(
-        isValidGradient(baseColor)
-            ? (extractColors(baseColor)?.[0] ?? randomHexColor())
-            : baseColor,
+    const prefersDark = usePrefersDark();
+    const gradientColors = isValidGradient(baseColor)
+        ? (extractColors(baseColor) ?? [randomHexColor()])
+        : [baseColor];
+
+    const SEMANTIC_BASES = prefersDark
+        ? {
+              danger: baseDarkTheme.colors.danger,
+              info: baseDarkTheme.colors.info,
+              success: baseDarkTheme.colors.success,
+              warning: baseDarkTheme.colors.warning,
+          }
+        : {
+              danger: baseLightTheme.colors.danger,
+              info: baseLightTheme.colors.info,
+              success: baseLightTheme.colors.success,
+              warning: baseLightTheme.colors.warning,
+          };
+
+    const base = averageColors(gradientColors);
+
+    const primary = chroma(primaryColor);
+    const text = chroma(primaryText);
+
+    const background = baseColor;
+
+    const surface = formatColor(baseColor, {
+        lighten: prefersDark ? 10 : 50,
+    });
+
+    const surfaceColors = gradientColors.map((c) =>
+        formatColor(c, { lighten: prefersDark ? 10 : 50 }),
     );
-    const primaryColorObj = Color(primaryColor);
-    const primaryTextObj = Color(primaryText);
+    const surfaceBase = averageColors(surfaceColors);
 
-    const background = baseColorObj.hex();
-    const surface = baseColorObj.lighten(0.1).hex();
-
-    const primary = primaryColorObj.hex();
-    const neutral = baseColorObj.isLight()
-        ? baseColorObj.darken(0.2).hex()
-        : baseColorObj.lighten(0.2).hex();
+    // Adaptive neutral lightness based on theme
+    const neutralBase = chroma.mix(base, surfaceBase, 0.5);
+    const neutralLightness = prefersDark ? 0.85 : 0.25;
+    const neutral = neutralBase
+        .desaturate(5)
+        .set("hsl.l", neutralLightness)
+        .hex();
 
     // Typography
-    const typographyPrimary = primaryTextObj.hex();
-    const typographySecondary = primaryTextObj.lighten(0.2).hex();
-    const typographyAccent = primaryColorObj.hex();
-    const typographyMuted = primaryTextObj.desaturate(0.5).hex();
+    const typographyPrimary = ensureContrast(text, base, 4.5);
+    const typographySecondary = ensureContrast(text.brighten(0.5), base, 3.5);
+    const typographyAccent = ensureContrast(primary, base, 4.5);
+    const typographyMuted = chroma(ensureContrast(text.desaturate(2), base, 3))
+        .alpha(0.7)
+        .css();
 
-    const [, pS = 50, pL = 50] = primaryColorObj.hsl().array();
-
-    const derive = (hue: number) => Color.hsl(hue, pS, pL);
-
-    // Setup semantic colors
-    const dangerHue = 0;
-    const infoHue = 220;
-    const successHue = 120;
-    const warningHue = 30;
-
-    const danger = ensureContrast(derive(dangerHue), primaryTextObj);
-    const info = ensureContrast(derive(infoHue), primaryTextObj);
-    const success = ensureContrast(derive(successHue), primaryTextObj);
-    const warning = ensureContrast(derive(warningHue), primaryTextObj);
+    const danger = ensureContrast(
+        blendSemantic(SEMANTIC_BASES.danger, base),
+        text,
+    );
+    const success = ensureContrast(
+        blendSemantic(SEMANTIC_BASES.success, base),
+        text,
+    );
+    const info = ensureContrast(blendSemantic(SEMANTIC_BASES.info, base), text);
+    const warning = ensureContrast(
+        blendSemantic(SEMANTIC_BASES.warning, base),
+        text,
+    );
 
     return {
         colors: {
@@ -91,7 +128,7 @@ export const adaptColors = ({
                 white: "#FFFFFF",
                 black: "#000000",
             },
-            primary,
+            primary: primary.hex(),
             neutral,
             background,
             surface,

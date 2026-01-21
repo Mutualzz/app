@@ -42,10 +42,10 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import { reaction } from "mobx";
 import { observer } from "mobx-react-lite";
 import {
-    useEffect,
-    useState,
     type PropsWithChildren,
     type ReactNode,
+    useEffect,
+    useState,
 } from "react";
 
 import { APIErrorListener } from "@components/APIErrorListener";
@@ -62,6 +62,7 @@ import { ThemeCreatorProvider } from "@contexts/ThemeCreator.context";
 import { listen } from "@tauri-apps/api/event";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { calendarStrings } from "@utils/i18n";
+import { UpdatingOverlay } from "@components/UpdatingOverlay.tsx";
 
 dayjs.extend(relativeTime);
 dayjs.extend(calendar, calendarStrings);
@@ -82,7 +83,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 );
 
 function Providers({ children }: PropsWithChildren) {
-    const emotionCache = createCache({ key: "css" });
+    const emotionCache = createCache({ key: "mz" });
 
     return <CacheProvider value={emotionCache}>{children}</CacheProvider>;
 }
@@ -93,21 +94,23 @@ function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
             <head>
                 <HeadContent />
             </head>
-            <body
-                css={{
-                    height: "100dvh",
-                    margin: 0,
-                    padding: 0,
-                    width: "100vw",
-                    overflow: "hidden",
-                }}
-                onContextMenu={(e) =>
-                    import.meta.env.PROD && e.preventDefault()
-                }
-            >
-                {children}
-                <Scripts />
-            </body>
+            <Providers>
+                <body
+                    css={{
+                        height: "100dvh",
+                        margin: 0,
+                        padding: 0,
+                        width: "100vw",
+                        overflow: "hidden",
+                    }}
+                    onContextMenu={(e) =>
+                        import.meta.env.PROD && e.preventDefault()
+                    }
+                >
+                    {children}
+                    <Scripts />
+                </body>
+            </Providers>
         </html>
     );
 }
@@ -118,7 +121,7 @@ function RootComponent() {
     const logger = new Logger({
         tag: "App",
     });
-    const [titlebarHeight, setTitlebarHeight] = useState(0);
+    const [titleBarHeight, setTitleBarHeight] = useState(0);
 
     const networkState = useNetworkState();
 
@@ -189,6 +192,38 @@ function RootComponent() {
 
     useEffect(() => {
         if (!isTauri) return;
+
+        const win = getCurrentWindow();
+
+        const dispose = reaction(
+            () => ({
+                stage: app.updater?.stage,
+                forceUpdateActive: app.updater?.forceUpdate,
+            }),
+            async ({ stage, forceUpdateActive }) => {
+                const isForcedBlocking =
+                    !import.meta.env.DEV &&
+                    !!forceUpdateActive &&
+                    (stage === "downloading" ||
+                        stage === "installing" ||
+                        stage === "relaunching");
+
+                const isNormalBlocking =
+                    !forceUpdateActive &&
+                    (stage === "installing" || stage === "relaunching");
+
+                const shouldBlockClose = isForcedBlocking || isNormalBlocking;
+
+                await win.setClosable(!shouldBlockClose);
+            },
+            { fireImmediately: true },
+        );
+
+        return dispose;
+    }, []);
+
+    useEffect(() => {
+        if (!isTauri) return;
         const win = getCurrentWindow();
 
         const unlistenP = listen<string[]>("app://open-url", async (e) => {
@@ -218,68 +253,119 @@ function RootComponent() {
         return () => {
             unlistenP.then((u) => u());
         };
-    }, [navigate]);
+    }, []);
+
+    useEffect(() => {
+        if (!import.meta.env.DEV) return;
+
+        const onKeyDown = (e: KeyboardEvent) => {
+            const modifierOk = (e.metaKey || e.ctrlKey) && e.shiftKey;
+            if (!modifierOk) return;
+
+            const updater = app.updater;
+            if (!updater) return;
+
+            // Stages
+            if (e.key === "1") updater.debugSetStage("downloading");
+            if (e.key === "2") updater.debugSetStage("installing");
+            if (e.key === "6") updater.debugSetStage("relaunching");
+            if (e.key === "0") updater.debugSetStage("idle");
+
+            if (e.key.toLowerCase() === "f") {
+                updater.debugSetForceGate(!updater.forceUpdate);
+            }
+
+            // Force-gate ON (dev only)
+            if (e.key.toLowerCase() === "g") {
+                updater.debugSetForceGate(true);
+                updater.debugSetStage("downloading");
+            }
+
+            // Force-gate OFF (dev only)
+            if (e.key.toLowerCase() === "h") {
+                updater.debugSetForceGate(false);
+                updater.debugSetStage("idle");
+            }
+        };
+
+        window.addEventListener("keydown", onKeyDown);
+        return () => window.removeEventListener("keydown", onKeyDown);
+    }, [app]);
+
+    const stage = app.updater?.stage;
+    const forceGate =
+        !!app.updater?.forceUpdate &&
+        (stage === "downloading" ||
+            stage === "installing" ||
+            stage === "relaunching" ||
+            stage === "error");
 
     return (
         <RootDocument>
-            <Providers>
-                <AppTheme>
-                    <ThemeCreatorProvider>
+            <AppTheme>
+                <ThemeCreatorProvider>
+                    <ModalProvider>
                         <CssBaseline adaptiveScrollbar />
                         <DesktopShellProvider>
                             <WindowTitleBar
-                                onHeightChange={setTitlebarHeight}
+                                onHeightChange={setTitleBarHeight}
                             />
                             <DesktopShell>
-                                <ModalProvider>
-                                    {!networkState.online && (
-                                        <Paper
-                                            alignItems="center"
-                                            justifyContent="center"
-                                            variant="solid"
-                                            color="danger"
-                                        >
-                                            <Typography level="body-lg">
-                                                You are currently offline
-                                            </Typography>
-                                        </Paper>
-                                    )}
+                                <UpdatingOverlay />
 
-                                    <InjectGlobal />
-                                    <APIErrorListener />
-                                    <Loader>
-                                        <Stack
-                                            direction="column"
-                                            height="100vh"
-                                            width="100vw"
-                                            flex={1}
-                                            minHeight={0}
-                                            css={{
-                                                paddingTop: titlebarHeight,
-                                            }}
-                                        >
+                                {forceGate ? null : (
+                                    <>
+                                        {!networkState.online && (
+                                            <Paper
+                                                alignItems="center"
+                                                justifyContent="center"
+                                                variant="solid"
+                                                color="danger"
+                                            >
+                                                <Typography level="body-lg">
+                                                    You are currently offline
+                                                </Typography>
+                                            </Paper>
+                                        )}
+
+                                        <InjectGlobal />
+                                        <APIErrorListener />
+                                        <Loader>
                                             <Stack
-                                                width="100%"
+                                                direction="column"
+                                                height="100vh"
+                                                width="100vw"
                                                 flex={1}
                                                 minHeight={0}
-                                                overflow="hidden"
+                                                css={{
+                                                    paddingTop: titleBarHeight,
+                                                }}
                                             >
-                                                <Outlet />
+                                                <Stack
+                                                    width="100%"
+                                                    flex={1}
+                                                    minHeight={0}
+                                                    overflow="hidden"
+                                                >
+                                                    <Outlet />
+                                                </Stack>
+                                                {app.account && (
+                                                    <ModeSwitcher />
+                                                )}
                                             </Stack>
-                                            {app.account && <ModeSwitcher />}
-                                        </Stack>
-                                    </Loader>
-                                    {/*{import.meta.env.DEV && (*/}
-                                    {/*    <>*/}
-                                    {/*        <TanStackRouterDevtools />*/}
-                                    {/*    </>*/}
-                                    {/*)}*/}
-                                </ModalProvider>
+                                        </Loader>
+                                        {/*{import.meta.env.DEV && (*/}
+                                        {/*    <>*/}
+                                        {/*        <TanStackRouterDevtools />*/}
+                                        {/*    </>*/}
+                                        {/*)}*/}
+                                    </>
+                                )}
                             </DesktopShell>
                         </DesktopShellProvider>
-                    </ThemeCreatorProvider>
-                </AppTheme>
-            </Providers>
+                    </ModalProvider>
+                </ThemeCreatorProvider>
+            </AppTheme>
         </RootDocument>
     );
 }

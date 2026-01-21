@@ -1,8 +1,8 @@
 import { Paper } from "@components/Paper";
 import {
-    useSpaceSettings,
     type SpaceSettingsCategories,
     type SpaceSettingsPage,
+    useSpaceSettings,
 } from "@contexts/SpaceSettings.context";
 import { useAppStore } from "@hooks/useStores";
 import {
@@ -137,7 +137,7 @@ export const SpaceSettingsSidebar = observer(
                         {index < categories.length - 1 && (
                             <Divider
                                 css={{
-                                    filter: "opacity(0.25)",
+                                    opacity: 0.25,
                                 }}
                                 lineColor="muted"
                             />

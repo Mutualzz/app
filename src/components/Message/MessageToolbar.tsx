@@ -68,6 +68,7 @@ export const MessageToolbar = observer(
                 placement="right-start"
                 content={<ToolbarContent message={message} />}
                 offset={{ crossAxis: header ? -10 : -20, mainAxis: -65 }}
+                disablePortal
             >
                 {children}
             </Tooltip>

@@ -120,7 +120,7 @@ export const AvatarDraw = observer(() => {
         setSize(6);
         setEraserMode(false);
         setEmptyCanvas(true);
-        closeModal("avatar-draw");
+        closeModal();
     };
 
     return (

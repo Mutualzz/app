@@ -88,7 +88,7 @@ export const AvatarUpload = observer(() => {
         setOriginalFile(null);
         setError(null);
         setCroppedAreaPixels(null);
-        closeModal("avatar-upload");
+        closeModal();
     };
 
     const onCropComplete = useCallback((_: any, croppedAreaPixels: any) => {

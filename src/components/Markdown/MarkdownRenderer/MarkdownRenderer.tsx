@@ -170,8 +170,6 @@ export const MarkdownRenderer = ({
                                     ["data-unicode"]: unicode,
                                 } = domNode.attribs;
 
-                                console.log(domNode);
-
                                 return (
                                     <Emoji
                                         isEmojiOnly={isEmojiOnly}

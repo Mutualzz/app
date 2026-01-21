@@ -9,19 +9,20 @@ import {
 import { Stack } from "@mutualzz/ui-web";
 import { observer } from "mobx-react-lite";
 
-export const ThemeCreatorColorsBase = observer(() => {
+export const ThemeCreatorColorsAdaptive = observer(() => {
     const { values, setValues } = useThemeCreator();
 
     return (
         <Stack direction="column" p={4} spacing={5}>
             <InputWithLabel
                 type="color"
-                label="Background color"
-                name="backgroundColor"
-                description="The background color of the app"
+                label="Base color"
+                name="baseColor"
+                description="The base color of the app"
                 required
                 value={values.colors.background}
                 allowGradient
+                // apiError={errors.backgroundColor}
                 onChange={(color: ColorLike) => {
                     let isDark = false;
                     let isGradient = false;
@@ -51,36 +52,24 @@ export const ThemeCreatorColorsBase = observer(() => {
             />
             <InputWithLabel
                 type="color"
-                label="Surface Color"
-                name="surfaceColor"
-                description="This color gets applied to Cards (it automatically adapts to certain UI elements)"
-                value={values.colors.surface}
-                allowAlpha
-                // apiError={errors.surfaceColor}
-                onChange={(color: ColorLike) =>
-                    setValues({
-                        ...values,
-                        colors: { ...values.colors, surface: color },
-                    })
+                label="Primary Color"
+                name="primaryColor"
+                description={
+                    <>
+                        Usually used to indicate the primary action or important
+                        elements
+                        <br />
+                        <b>Auto-generated icons derive from this color</b>
+                    </>
                 }
-                fullWidth
-            />
-            <InputWithLabel
-                type="color"
-                label="Black Color"
-                name="blackColor"
-                description="The color to use for text and icons on a light background"
-                value={values.colors.common.black}
-                // apiError={errors.whiteColor}
+                required
+                value={values.colors.primary}
                 onChange={(color: ColorLike) =>
                     setValues({
                         ...values,
                         colors: {
                             ...values.colors,
-                            common: {
-                                ...values.colors.common,
-                                black: color,
-                            },
+                            primary: color,
                         },
                     })
                 }
@@ -88,24 +77,24 @@ export const ThemeCreatorColorsBase = observer(() => {
             />
             <InputWithLabel
                 type="color"
-                label="White Color"
-                name="whiteColor"
-                description="The color to use for text and icons on a dark background"
-                value={values.colors.common.white}
-                // apiError={errors.whiteColor}
-                fullWidth
+                label="Base Text Color"
+                name="typographyBaseColor"
+                description="The base color for texts, usually white-ish is used on dark backgrounds and black-ish on light backgrounds"
+                required
+                value={values.typography.colors.primary}
                 onChange={(color: ColorLike) =>
                     setValues({
                         ...values,
-                        colors: {
-                            ...values.colors,
-                            common: {
-                                ...values.colors.common,
-                                white: color,
+                        typography: {
+                            ...values.typography,
+                            colors: {
+                                ...values.typography.colors,
+                                primary: color,
                             },
                         },
                     })
                 }
+                fullWidth
             />
         </Stack>
     );

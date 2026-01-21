@@ -1,8 +1,8 @@
 import { Paper } from "@components/Paper";
 import {
-    useUserSettings,
     type UserSettingsCategories,
     type UserSettingsPage,
+    useUserSettings,
 } from "@contexts/UserSettings.context";
 import { useAppStore } from "@hooks/useStores";
 import {
@@ -182,7 +182,7 @@ export const UserSettingsSidebar = observer(
                             {index < categories.length - 1 && (
                                 <Divider
                                     css={{
-                                        filter: "opacity(0.25)",
+                                        opacity: 0.25,
                                     }}
                                     lineColor="muted"
                                 />

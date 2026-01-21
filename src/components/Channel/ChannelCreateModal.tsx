@@ -45,7 +45,7 @@ export const ChannelCreateModal = observer(({ space, parent }: Props) => {
             space.createChannel(name, type, parent?.id ?? undefined),
         onSuccess: (newChannel) => {
             if (!newChannel.spaceId) return;
-            closeModal("create-channel");
+            closeModal();
             if (newChannel.type === ChannelType.Voice) return;
             navigate({
                 to: "/spaces/$spaceId/$channelId",
@@ -198,7 +198,7 @@ export const ChannelCreateModal = observer(({ space, parent }: Props) => {
                     <Button
                         color="neutral"
                         variant="soft"
-                        onClick={() => closeModal("create-channel")}
+                        onClick={() => closeModal()}
                         disabled={isCreating}
                     >
                         Cancel

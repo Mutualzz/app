@@ -1,4 +1,5 @@
 import { Input, Stack, Typography, type InputProps } from "@mutualzz/ui-web";
+import type { ReactNode } from "react";
 
 export const InputWithLabel = ({
     label,
@@ -8,7 +9,7 @@ export const InputWithLabel = ({
     ...props
 }: {
     name: string;
-    description?: string;
+    description?: ReactNode;
     label: string;
     apiError?: string;
 } & InputProps) => (

@@ -1,28 +1,27 @@
+/* eslint-disable @typescript-eslint/no-empty-function */
 import type { Theme as MzTheme } from "@emotion/react";
 import { usePrefersDark } from "@hooks/usePrefersDark";
 import type { APITheme } from "@mutualzz/types";
-import {
-    baseDarkTheme,
-    baseLightTheme,
-    type ThemeStyle,
-    type ThemeType,
-} from "@mutualzz/ui-core";
+import { baseDarkTheme, baseLightTheme, type ThemeStyle, type ThemeType, } from "@mutualzz/ui-core";
 import { useTheme } from "@mutualzz/ui-web";
 import { Theme } from "@stores/objects/Theme";
-import { toJS } from "mobx";
+import { adaptColors } from "@utils/adaptation";
 import { observer } from "mobx-react-lite";
-import {
-    createContext,
-    useContext,
-    useState,
-    type PropsWithChildren,
-} from "react";
+import { createContext, type PropsWithChildren, useContext, useState, } from "react";
 
 type ApiErrors = Record<string, string>;
 
 export type ThemeCreatorCategory = "general" | "colors";
-export type ThemeCreatorPage = "details" | "base" | "typography";
-export type ThemeSelectedType = "default" | "draft" | "custom";
+export type ThemeCreatorPage =
+    | "details"
+    | "base"
+    | "feedback"
+    | "typography"
+    | "adaptive";
+
+export type ThemeCreatorLoadedType = "default" | "draft" | "custom";
+
+export type ThemeCreatorFilter = ThemeType | ThemeStyle | "adaptive";
 
 interface ThemeCreatorContextProps {
     // Page management
@@ -32,124 +31,188 @@ interface ThemeCreatorContextProps {
     setCurrentPage: (page: ThemeCreatorPage) => void;
 
     // Value management
-    values: MzTheme | APITheme;
-    setValues: (values: Partial<MzTheme | APITheme>) => void;
+    values: APITheme;
+    setValues: (values: Partial<APITheme>) => void;
+    loadValues: (theme: APITheme) => void;
     resetValues: () => void;
 
-    // Preview
-    preview: boolean;
-    setPreview: (preview: boolean) => void;
+    // Filters
+    filters: ThemeCreatorFilter[];
+    addFilter: (filter: ThemeCreatorFilter) => void;
+    removeFilter: (filter: ThemeCreatorFilter) => void;
+    setFilters: (filters: ThemeCreatorFilter[]) => void;
+    resetFilters: () => void;
+    filter: (themes: Theme[]) => Theme[];
 
-    selectedType: ThemeSelectedType;
-    setSelectedType: (type: ThemeSelectedType) => void;
+    // Loaded Type
+    loadedType: ThemeCreatorLoadedType;
+    setLoadedType: (type: ThemeCreatorLoadedType) => void;
 
     errors: ApiErrors;
     setErrors: (errors: ApiErrors) => void;
 
-    currentType: ThemeType;
-    setCurrentType: (type: ThemeType) => void;
+    // Preview
+    themeBeforePreview: Theme | APITheme | null;
+    inPreview: boolean;
+    startPreview: () => void;
+    stopPreview: () => void;
 
-    currentStyle: ThemeStyle;
-    setCurrentStyle: (style: ThemeStyle) => void;
+    userInteracted: boolean;
 }
 
 const ThemeCreatorContext = createContext<ThemeCreatorContextProps>({
     currentCategory: "general",
-    setCurrentCategory: () => {
-        return;
-    },
+    setCurrentCategory: () => {},
     currentPage: "details",
-    setCurrentPage: () => {
-        return;
-    },
+    setCurrentPage: () => {},
 
     values: baseDarkTheme,
-    setValues: () => {
-        return;
-    },
-    resetValues: () => {
-        return;
-    },
+    setValues: () => {},
+    loadValues: () => {},
+    resetValues: () => {},
 
-    preview: false,
-    setPreview: () => {
-        return;
-    },
+    loadedType: "default",
+    setLoadedType: () => {},
 
-    selectedType: "default",
-    setSelectedType: () => {
-        return;
-    },
+    filters: [],
+    addFilter: () => {},
+    removeFilter: () => {},
+    setFilters: () => {},
+    resetFilters: () => {},
+    filter: () => [],
 
     errors: {},
-    setErrors: () => {
-        return;
-    },
-    currentType: "dark",
-    setCurrentType: () => {
-        return;
-    },
-    currentStyle: "normal",
-    setCurrentStyle: () => {
-        return;
-    },
+    setErrors: () => {},
+
+    themeBeforePreview: null,
+    inPreview: false,
+    startPreview: () => {},
+    stopPreview: () => {},
+
+    userInteracted: false,
 });
 
 export const ThemeCreatorProvider = observer(
     ({ children }: PropsWithChildren) => {
-        const { changeTheme } = useTheme();
+        const { theme: currentTheme, changeTheme } = useTheme();
         const prefersDark = usePrefersDark();
         const [currentPage, setCurrentPage] =
             useState<ThemeCreatorPage>("details");
         const [currentCategory, setCurrentCategory] =
             useState<ThemeCreatorCategory>("general");
-        const [values, _setValues] = useState<MzTheme | APITheme>(() => {
+        const [values, _setValues] = useState<APITheme>(() => {
             const theme = prefersDark ? baseDarkTheme : baseLightTheme;
-            delete (theme as any).name;
-            delete theme.description;
 
-            return toJS(Theme.toEmotionTheme(theme));
+            return { ...theme, name: "", description: "" };
         });
-        const [preview, _setPreview] = useState<boolean>(false);
-        const [selectedType, setSelectedType] =
-            useState<ThemeSelectedType>("default");
-        const [currentType, setCurrentType] = useState<ThemeType>("dark");
-        const [currentStyle, setCurrentStyle] = useState<ThemeStyle>("normal");
+        const [inPreview, setInPreview] = useState(false);
+        const [themeBeforePreview, setThemeBeforePreview] =
+            useState<MzTheme | null>(null);
+
+        const [userInteracted, setUserInteracted] = useState(false);
+
+        const [loadedType, setLoadedType] =
+            useState<ThemeCreatorLoadedType>("default");
+
+        const [filters, setFilters] = useState<ThemeCreatorFilter[]>([]);
+
+        const addFilter = (value: ThemeCreatorFilter) => {
+            setFilters((prev) => Array.from(new Set([...prev, value])));
+        };
+
+        const removeFilter = (value: ThemeCreatorFilter) => {
+            setFilters((prev) => prev.filter((filter) => filter !== value));
+        };
+
+        const resetFilters = () => {
+            setFilters([]);
+        };
+
+        const filter = (themes: Theme[]) => {
+            if (filters.length === 0) return themes;
+
+            return themes.filter((theme) => {
+                return filters.every((filter) => {
+                    return (
+                        theme.type === filter ||
+                        theme.style === filter ||
+                        (filter === "adaptive" && theme.adaptive)
+                    );
+                });
+            });
+        };
 
         const [errors, setErrors] = useState<ApiErrors>({});
 
-        const setPreview = (preview: boolean) => {
-            if (preview) changeTheme(toJS(Theme.toEmotionTheme(values)));
-            _setPreview(preview);
+        const startPreview = () => {
+            if (inPreview) return;
+            let previewTheme = values;
+            if (values.adaptive)
+                previewTheme = Theme.serialize({
+                    ...values,
+                    ...(adaptColors({
+                        baseColor: values.colors.background,
+                        primaryColor: values.colors.primary,
+                        primaryText: values.typography.colors.primary,
+                    }) as Partial<APITheme>),
+                });
+
+            if (!themeBeforePreview) setThemeBeforePreview(currentTheme);
+            changeTheme(Theme.toEmotion(previewTheme));
+            setInPreview(true);
         };
 
-        const setValues = (newValues: Partial<MzTheme | APITheme>) => {
-            if (selectedType === "default") {
-                newValues.name = "";
-                newValues.description = "";
+        const stopPreview = () => {
+            if (!inPreview) return;
+            if (themeBeforePreview)
+                changeTheme(Theme.toEmotion(themeBeforePreview));
+
+            setThemeBeforePreview(null);
+            setInPreview(false);
+        };
+
+        const setValues = (newValues: Partial<APITheme>) => {
+            _setValues(
+                Theme.serialize({
+                    ...values,
+                    ...newValues,
+                }),
+            );
+            if (!userInteracted) setUserInteracted(true);
+            if (loadedType === "default") setLoadedType("custom");
+            if (newValues.name?.trim() === "") setUserInteracted(false);
+        };
+
+        const loadValues = (theme: APITheme) => {
+            if (loadedType === "default") {
+                theme = {
+                    ...theme,
+                    id: "",
+                    name: "",
+                    description: "",
+                };
+                _setValues(Theme.serialize(theme));
+                if (userInteracted) setUserInteracted(false);
+                return;
             }
-            const updatedValues: MzTheme | APITheme = toJS({
-                ...values,
-                ...newValues,
-            });
 
-            setCurrentType(newValues.type || currentType);
-            setCurrentStyle(newValues.style || currentStyle);
-
-            const finalTheme = Theme.toEmotionTheme(updatedValues);
-
-            _setValues(finalTheme);
-            if (preview) changeTheme(finalTheme);
+            _setValues(Theme.serialize(theme));
+            if (!userInteracted) setUserInteracted(true);
         };
 
         const resetValues = () => {
             const defaultValues = prefersDark ? baseDarkTheme : baseLightTheme;
-            _setValues(defaultValues);
-            setSelectedType("default");
+            _setValues(
+                Theme.serialize({
+                    ...defaultValues,
+                    id: "",
+                    name: "",
+                    description: "",
+                }),
+            );
+            setLoadedType("default");
             setErrors({});
-            setCurrentType(prefersDark ? "dark" : "light");
-            setCurrentStyle("normal");
-            if (preview) changeTheme(defaultValues);
+            if (userInteracted) setUserInteracted(false);
         };
 
         return (
@@ -161,17 +224,23 @@ export const ThemeCreatorProvider = observer(
                     setCurrentPage,
                     values,
                     setValues,
-                    preview,
-                    setPreview,
+                    loadValues,
                     resetValues,
-                    selectedType,
-                    setSelectedType,
+                    loadedType,
+                    setLoadedType,
+                    filters,
+                    addFilter,
+                    removeFilter,
+                    setFilters,
+                    resetFilters,
+                    filter,
                     errors,
                     setErrors,
-                    currentType,
-                    setCurrentType,
-                    currentStyle,
-                    setCurrentStyle,
+                    themeBeforePreview,
+                    inPreview,
+                    startPreview,
+                    stopPreview,
+                    userInteracted,
                 }}
             >
                 {children}

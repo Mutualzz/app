@@ -59,9 +59,6 @@ export const SpaceContextMenu = observer(
                                 openModal(
                                     `space-settings-${space.id}`,
                                     <SpaceSettingsModal space={space} />,
-                                    {
-                                        showCloseButton: false,
-                                    },
                                 )
                             }
                             elevation={app.preferEmbossed ? 5 : 1}
@@ -77,9 +74,6 @@ export const SpaceContextMenu = observer(
                                             space={space}
                                             redirectTo="invites"
                                         />,
-                                        {
-                                            showCloseButton: false,
-                                        },
                                     )
                                 }
                                 endDecorator={<FaPaperPlane />}

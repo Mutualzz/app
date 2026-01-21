@@ -59,7 +59,9 @@ async function dedupeTrays() {
         for (let i = 1; i < dups.length; i++) {
             try {
                 await dups[i].close();
-            } catch {}
+            } catch {
+                // ignore
+            }
         }
     }
 }
@@ -86,7 +88,6 @@ async function ensureTrayBase(extraOpts?: TrayIconOptions) {
             const opts: TrayIconOptions = {
                 id: TRAY_ID,
                 tooltip: "Mutualzz",
-                title: "Mutualzz",
                 action: (e) => {
                     switch (e.type) {
                         case "Click": {
@@ -108,13 +109,17 @@ async function ensureTrayBase(extraOpts?: TrayIconOptions) {
                 } else if (existing) {
                     try {
                         await tr.close();
-                    } catch {}
+                    } catch {
+                        // ignore
+                    }
                     tr = await TrayIcon.new(opts);
                 }
             } catch {
                 try {
                     await tr.close();
-                } catch {}
+                } catch {
+                    // ignore
+                }
                 tr = await TrayIcon.new(opts);
             }
 
@@ -143,8 +148,8 @@ export async function updateTrayProperties(theme: Theme) {
 
         const icon = await getAdaptiveIcon(
             theme,
-            "image/png",
             "automatic",
+            "image/png",
             iconUrl,
         );
         if (myVersion !== iconOpVersion) return;
@@ -173,6 +178,7 @@ export async function updateTrayProperties(theme: Theme) {
         await t.setMenu(menu);
         await t.setIcon(icon);
     } catch {
+        // ignore
     } finally {
         iconUpdateRunning = false;
     }
@@ -192,7 +198,9 @@ if (import.meta.hot) {
         iconOpVersion++;
         try {
             if (tray) await tray.close();
-        } catch {}
+        } catch {
+            // ignore
+        }
         tray = null;
     });
 }

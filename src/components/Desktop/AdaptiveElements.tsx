@@ -1,4 +1,5 @@
 import { useAppStore } from "@hooks/useStores";
+import { Logger } from "@mutualzz/logger";
 import { useTheme } from "@mutualzz/ui-web";
 import { Theme } from "@stores/objects/Theme";
 import { getCurrentWindow } from "@tauri-apps/api/window";
@@ -6,6 +7,10 @@ import { getAdaptiveIcon } from "@utils/icons";
 import { getTray } from "@utils/tray";
 import { observer } from "mobx-react-lite";
 import { useLayoutEffect } from "react";
+
+const logger = new Logger({
+    tag: "AdaptiveElements",
+});
 
 export const AdaptiveElements = observer(() => {
     const app = useAppStore();
@@ -16,17 +21,19 @@ export const AdaptiveElements = observer(() => {
         (async () => {
             try {
                 const themeToUse = app.themes.currentIcon
-                    ? Theme.toEmotionTheme(
-                          app.themes.get(app.themes.currentIcon),
-                      )
+                    ? Theme.toEmotion(app.themes.get(app.themes.currentIcon))
                     : theme;
 
-                const icon = await getAdaptiveIcon(themeToUse, "image/png");
+                const icon = await getAdaptiveIcon(
+                    themeToUse,
+                    "automatic",
+                    "image/png",
+                );
 
                 await appWindow.setIcon(icon);
                 await getTray(themeToUse);
             } catch (e) {
-                console.error("Failed to load window icon:", e);
+                logger.error("Failed to load window icon:", e);
             }
         })();
     }, [theme.id, theme.type, app.themes.currentIcon]);

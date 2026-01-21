@@ -150,7 +150,7 @@ export const HoverToolbar = () => {
                     orientation="vertical"
                     lineColor="muted"
                     css={{
-                        filter: "opacity(0.25)",
+                        opacity: 0.25,
                         marginInline: 4,
                     }}
                 />
