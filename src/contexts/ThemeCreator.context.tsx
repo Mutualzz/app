@@ -2,12 +2,22 @@
 import type { Theme as MzTheme } from "@emotion/react";
 import { usePrefersDark } from "@hooks/usePrefersDark";
 import type { APITheme } from "@mutualzz/types";
-import { baseDarkTheme, baseLightTheme, type ThemeStyle, type ThemeType, } from "@mutualzz/ui-core";
+import {
+    baseDarkTheme,
+    baseLightTheme,
+    type ThemeStyle,
+    type ThemeType,
+} from "@mutualzz/ui-core";
 import { useTheme } from "@mutualzz/ui-web";
 import { Theme } from "@stores/objects/Theme";
 import { adaptColors } from "@utils/adaptation";
 import { observer } from "mobx-react-lite";
-import { createContext, type PropsWithChildren, useContext, useState, } from "react";
+import {
+    createContext,
+    type PropsWithChildren,
+    useContext,
+    useState,
+} from "react";
 
 type ApiErrors = Record<string, string>;
 
@@ -212,6 +222,8 @@ export const ThemeCreatorProvider = observer(
             );
             setLoadedType("default");
             setErrors({});
+            setCurrentCategory("general");
+            setCurrentPage("details");
             if (userInteracted) setUserInteracted(false);
         };
 

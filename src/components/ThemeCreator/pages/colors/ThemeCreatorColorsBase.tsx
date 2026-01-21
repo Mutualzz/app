@@ -55,7 +55,7 @@ export const ThemeCreatorColorsBase = observer(() => {
                 name="surfaceColor"
                 description="This color gets applied to Cards (it automatically adapts to certain UI elements)"
                 value={values.colors.surface}
-                allowAlpha
+                allowGradient
                 // apiError={errors.surfaceColor}
                 onChange={(color: ColorLike) =>
                     setValues({

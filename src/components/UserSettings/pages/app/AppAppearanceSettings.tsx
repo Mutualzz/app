@@ -59,12 +59,14 @@ interface ThemeWithIcon<T> {
 
 const GRID_COLUMNS = 10;
 const GRID_ITEM_SIZE = "4rem";
-const GRID_GAP = 0;
 
 const gridStyles: CSSObject = {
     display: "grid",
     gridTemplateColumns: `repeat(${GRID_COLUMNS}, minmax(${GRID_ITEM_SIZE}, 1fr))`,
-    gap: GRID_GAP,
+    paddingLeft: "0.5rem",
+    paddingRight: "0.5rem",
+    width: "100%",
+    boxSizing: "border-box",
 };
 
 function gradientToDataUrl(colors: string[]): string {
@@ -99,7 +101,6 @@ const VirtuosoGridList = forwardRef<HTMLDivElement, HTMLProps<HTMLDivElement>>(
             display="grid"
             style={{
                 ...gridStyles,
-                boxSizing: "border-box",
                 ...(props.style || {}),
             }}
         />
@@ -109,12 +110,7 @@ const VirtuosoGridList = forwardRef<HTMLDivElement, HTMLProps<HTMLDivElement>>(
 VirtuosoGridList.displayName = "VirtuosoGridList";
 
 const VirtuosoGridItem = (props: HTMLProps<HTMLDivElement>) => (
-    <Stack
-        {...(props as any)}
-        justifyContent="center"
-        alignItems="center"
-        py={2}
-    />
+    <Stack {...(props as any)} py={2} />
 );
 
 export const AppAppearanceSettings = observer(() => {
@@ -282,8 +278,8 @@ export const AppAppearanceSettings = observer(() => {
                                         onClick={() => onDelete(theme.id)}
                                         css={{
                                             position: "absolute",
-                                            top: 0,
-                                            right: 0,
+                                            bottom: -3,
+                                            right: -3,
                                             zIndex: 1,
                                         }}
                                         color="danger"
@@ -432,36 +428,11 @@ export const AppAppearanceSettings = observer(() => {
                         onClick={() => app.togglePreferEmbossed()}
                     />
                 </Typography>
-                {userThemes.length > 0 && (
-                    <Stack direction="column" spacing={2.5}>
-                        <Typography fontWeight="bold" level="body-sm">
-                            Your Themes
-                        </Typography>
-                        <VirtuosoGrid
-                            style={{ height: 120, width: "100%" }}
-                            totalCount={userThemes.length}
-                            overscan={4}
-                            components={{
-                                List: VirtuosoGridList,
-                                Item: VirtuosoGridItem,
-                            }}
-                            itemContent={renderThemeColorBlob(
-                                userThemes,
-                                currentTheme,
-                                currentType,
-                                deleteTheme,
-                                focusedTheme,
-                                isDeleting,
-                                setFocusedTheme,
-                            )}
-                        />
-                    </Stack>
-                )}
                 <Stack direction="column" spacing={2.5}>
                     <Typography fontWeight="bold" level="body-sm">
                         Default Themes
                     </Typography>
-                    <Stack direction="row" spacing={2.5}>
+                    <Stack css={gridStyles} display="grid" spacing={2.5}>
                         {defaultThemes.map((_, idx) =>
                             renderThemeColorBlob(
                                 defaultThemes,
@@ -525,6 +496,35 @@ export const AppAppearanceSettings = observer(() => {
                         </Tooltip>
                     </Stack>
                 </Stack>
+                {userThemes.length > 0 && (
+                    <Stack direction="column" spacing={2.5}>
+                        <Typography fontWeight="bold" level="body-sm">
+                            Your Themes
+                        </Typography>
+                        <VirtuosoGrid
+                            style={{
+                                height:
+                                    userThemes.length > 10 ? "10rem" : "5rem",
+                                width: "100%",
+                            }}
+                            totalCount={userThemes.length}
+                            overscan={4}
+                            components={{
+                                List: VirtuosoGridList,
+                                Item: VirtuosoGridItem,
+                            }}
+                            itemContent={renderThemeColorBlob(
+                                userThemes,
+                                currentTheme,
+                                currentType,
+                                deleteTheme,
+                                focusedTheme,
+                                isDeleting,
+                                setFocusedTheme,
+                            )}
+                        />
+                    </Stack>
+                )}
                 <Stack direction="column" spacing={2.5}>
                     <Typography fontWeight="bold" level="body-sm">
                         Color Themes
@@ -534,7 +534,7 @@ export const AppAppearanceSettings = observer(() => {
                             Normal
                         </Typography>
                         <VirtuosoGrid
-                            style={{ height: 150, width: "100%" }}
+                            style={{ height: "10rem", width: "100%" }}
                             totalCount={normalThemes.length}
                             overscan={4}
                             components={{
@@ -559,7 +559,7 @@ export const AppAppearanceSettings = observer(() => {
                             Gradient
                         </Typography>
                         <VirtuosoGrid
-                            style={{ height: 150, width: "100%" }}
+                            style={{ height: "10rem", width: "100%" }}
                             totalCount={gradientThemes.length}
                             overscan={4}
                             components={{
@@ -593,7 +593,7 @@ export const AppAppearanceSettings = observer(() => {
                         </Typography>
                         <VirtuosoGrid
                             style={{
-                                height: 150,
+                                height: "10rem",
                                 width: "100%",
                             }}
                             totalCount={defaultIcons.length + 1}
@@ -694,7 +694,13 @@ export const AppAppearanceSettings = observer(() => {
                                 Your Icons
                             </Typography>
                             <VirtuosoGrid
-                                style={{ height: 150, width: "100%" }}
+                                style={{
+                                    height:
+                                        userIcons.length > 10
+                                            ? "10rem"
+                                            : "5rem",
+                                    width: "100%",
+                                }}
                                 totalCount={userIcons.length}
                                 overscan={4}
                                 components={{
