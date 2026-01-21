@@ -61,6 +61,7 @@ export const ThemeCreatorSidebarRight = observer(() => {
         startPreview,
         stopPreview,
         userInteracted,
+        nameEmpty,
     } = useThemeCreator();
     const { closeAllModals } = useModal();
 
@@ -72,7 +73,12 @@ export const ThemeCreatorSidebarRight = observer(() => {
                   ? app.drafts.themes.map((draft) => new Theme(app, draft))
                   : app.themes.all.filter((theme) => !theme.author),
         );
-    }, [app.themes.all, app.drafts.themes, loadedType, filters]);
+    }, [app.drafts.themes, loadedType, themeFilter, app]);
+
+    const ownedByUser = useMemo(
+        () => !!values.id && app.account?.id === values.authorId,
+        [values.id, values.authorId, app.account?.id],
+    );
 
     const { mutate: themePut } = useMutation({
         mutationKey: ["theme-put"],
@@ -149,11 +155,8 @@ export const ThemeCreatorSidebarRight = observer(() => {
     };
 
     const toggleFilter = (filter: ThemeCreatorFilter) => {
-        if (filters.includes(filter)) {
-            removeFilter(filter);
-        } else {
-            addFilter(filter);
-        }
+        if (filters.includes(filter)) removeFilter(filter);
+        else addFilter(filter);
     };
 
     const resetThemeCreator = () => {
@@ -163,9 +166,6 @@ export const ThemeCreatorSidebarRight = observer(() => {
         setCurrentPage("details");
         setCurrentCategory("general");
     };
-
-    // TODO: use memo for ownedByUser
-    const ownedByUser = !!values.id && app.account?.id === values.authorId;
 
     return (
         <Paper
@@ -185,7 +185,7 @@ export const ThemeCreatorSidebarRight = observer(() => {
                         <Button
                             color="danger"
                             onClick={() => resetThemeCreator()}
-                            disabled={!userInteracted}
+                            disabled={!userInteracted || inPreview}
                         >
                             Reset
                         </Button>
@@ -268,7 +268,11 @@ export const ThemeCreatorSidebarRight = observer(() => {
             </Stack>
 
             <Stack direction="column">
-                <ButtonGroup fullWidth spacing={5} disabled={!userInteracted}>
+                <ButtonGroup
+                    fullWidth
+                    spacing={5}
+                    disabled={!userInteracted || nameEmpty}
+                >
                     <Button color="warning" disabled={ownedByUser}>
                         Save
                     </Button>

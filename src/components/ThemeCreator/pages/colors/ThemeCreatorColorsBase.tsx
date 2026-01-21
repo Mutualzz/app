@@ -23,8 +23,8 @@ export const ThemeCreatorColorsBase = observer(() => {
                 value={values.colors.background}
                 allowGradient
                 onChange={(color: ColorLike) => {
-                    let isDark = false;
-                    let isGradient = false;
+                    let isDark: boolean;
+                    let isGradient: boolean;
                     if (
                         isValidGradient(color) &&
                         extractColors(color) &&

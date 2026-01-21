@@ -16,6 +16,7 @@ import {
     createContext,
     type PropsWithChildren,
     useContext,
+    useMemo,
     useState,
 } from "react";
 
@@ -68,6 +69,7 @@ interface ThemeCreatorContextProps {
     stopPreview: () => void;
 
     userInteracted: boolean;
+    nameEmpty: boolean;
 }
 
 const ThemeCreatorContext = createContext<ThemeCreatorContextProps>({
@@ -100,6 +102,7 @@ const ThemeCreatorContext = createContext<ThemeCreatorContextProps>({
     stopPreview: () => {},
 
     userInteracted: false,
+    nameEmpty: true,
 });
 
 export const ThemeCreatorProvider = observer(
@@ -123,6 +126,11 @@ export const ThemeCreatorProvider = observer(
 
         const [loadedType, setLoadedType] =
             useState<ThemeCreatorLoadedType>("default");
+
+        const nameEmpty = useMemo(
+            () => values.name.trim() === "",
+            [values.name],
+        );
 
         const [filters, setFilters] = useState<ThemeCreatorFilter[]>([]);
 
@@ -190,7 +198,6 @@ export const ThemeCreatorProvider = observer(
             );
             if (!userInteracted) setUserInteracted(true);
             if (loadedType === "default") setLoadedType("custom");
-            if (newValues.name?.trim() === "") setUserInteracted(false);
         };
 
         const loadValues = (theme: APITheme) => {
@@ -253,6 +260,7 @@ export const ThemeCreatorProvider = observer(
                     startPreview,
                     stopPreview,
                     userInteracted,
+                    nameEmpty,
                 }}
             >
                 {children}

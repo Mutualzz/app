@@ -57,14 +57,13 @@ interface ThemeWithIcon<T> {
     icon: string;
 }
 
-const GRID_COLUMNS = 10;
+const GRID_COLUMNS = 15;
 const GRID_ITEM_SIZE = "4rem";
 
 const gridStyles: CSSObject = {
     display: "grid",
     gridTemplateColumns: `repeat(${GRID_COLUMNS}, minmax(${GRID_ITEM_SIZE}, 1fr))`,
-    paddingLeft: "0.5rem",
-    paddingRight: "0.5rem",
+    paddingLeft: "0.25rem",
     width: "100%",
     boxSizing: "border-box",
 };
@@ -206,11 +205,11 @@ export const AppAppearanceSettings = observer(() => {
 
     const defaultIcons = useMemo(
         () => Array.from(icons.values()).filter((ic) => !ic.theme.author),
-        [_iconsVersion, icons],
+        [icons],
     );
     const userIcons = useMemo(
         () => Array.from(icons.values()).filter((ic) => ic.theme.author),
-        [_iconsVersion, icons],
+        [icons],
     );
 
     const handleThemeChange = (theme: MzTheme | Theme) => {
