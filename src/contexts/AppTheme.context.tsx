@@ -27,9 +27,9 @@ export const AppTheme = observer(({ children }: PropsWithChildren) => {
 
                 // Check if themes are loaded
                 const pick = (id?: string | null) => {
-                    const pickenTheme = themes.find((t) => t.id === id);
-                    if (!pickenTheme) return undefined;
-                    return Theme.toEmotion(pickenTheme);
+                    const pickedTheme = themes.find((t) => t.id === id);
+                    if (!pickedTheme) return undefined;
+                    return Theme.toEmotion(pickedTheme);
                 };
 
                 const selectedTheme =
@@ -43,6 +43,7 @@ export const AppTheme = observer(({ children }: PropsWithChildren) => {
                 isUpdatingFromServer.current = true;
                 themeProviderRef.current?.changeTheme(selectedTheme);
                 isUpdatingFromServer.current = false;
+                app.themes.setCurrentTheme(selectedTheme.id);
             },
             { fireImmediately: true },
         );

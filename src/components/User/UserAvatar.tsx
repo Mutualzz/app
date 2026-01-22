@@ -75,7 +75,11 @@ export const UserAvatar = observer(
                     onMouseLeave={() => setFocused(false)}
                     src={
                         focused
-                            ? user.constructAvatarUrl(true, version, size)
+                            ? user.constructAvatarUrl(
+                                  !!user.avatar?.startsWith("a_"),
+                                  version,
+                                  size,
+                              )
                             : user.constructAvatarUrl(false, version, size)
                     }
                     {...props}

@@ -1,7 +1,7 @@
 import { ThemeCreatorModal } from "@components/ThemeCreator/ThemeCreatorModal";
 import { TooltipWrapper } from "@components/TooltipWrapper";
 import { useModal } from "@contexts/Modal.context";
-import type { CSSObject, Theme as MzTheme } from "@emotion/react";
+import type { Theme as MzTheme } from "@emotion/react";
 import { usePrefersDark } from "@hooks/usePrefersDark";
 import { useAppStore } from "@hooks/useStores";
 import type { ThemeType } from "@mutualzz/types";
@@ -15,6 +15,7 @@ import {
 } from "@mutualzz/ui-core";
 import {
     Box,
+    type BoxProps,
     Button,
     Checkbox,
     Divider,
@@ -30,8 +31,8 @@ import { useMutation } from "@tanstack/react-query";
 import { getAdaptiveIcon } from "@utils/icons";
 import { observer } from "mobx-react-lite";
 import {
+    type CSSProperties,
     forwardRef,
-    type HTMLProps,
     useEffect,
     useMemo,
     useRef,
@@ -59,7 +60,7 @@ interface ThemeWithIcon<T> {
 
 const GRID_ITEM_SIZE = "4rem";
 
-const gridStyles: CSSObject = {
+const gridStyles: CSSProperties = {
     display: "grid",
     gridTemplateColumns: `repeat(auto-fill, minmax(${GRID_ITEM_SIZE}, 1fr))`,
     paddingInline: "0.75rem",
@@ -92,25 +93,19 @@ function colorOrGradientToDataUrl(colorOrGradient: ColorLike): string {
     return solidColorToDataUrl(colorOrGradient);
 }
 
-const VirtuosoGridList = forwardRef<HTMLDivElement, HTMLProps<HTMLDivElement>>(
-    (props, ref) => (
-        <Stack
-            {...(props as any)}
-            ref={ref}
-            display="grid"
-            style={{
-                ...gridStyles,
-                ...(props.style || {}),
-            }}
-        />
-    ),
-);
+const VirtuosoGridList = forwardRef<HTMLDivElement, BoxProps>((props, ref) => (
+    <Stack
+        {...props}
+        ref={ref}
+        display="grid"
+        style={{
+            ...gridStyles,
+            ...props.style,
+        }}
+    />
+));
 
-VirtuosoGridList.displayName = "VirtuosoGridList";
-
-const VirtuosoGridItem = (props: HTMLProps<HTMLDivElement>) => (
-    <Box {...(props as any)} py={1} />
-);
+const VirtuosoGridItem = (props: BoxProps) => <Box {...props} py={1} />;
 
 export const AppAppearanceSettings = observer(() => {
     const app = useAppStore();
@@ -166,10 +161,22 @@ export const AppAppearanceSettings = observer(() => {
         mutationKey: ["delete-theme", focusedTheme],
         mutationFn: async (themeId: string) =>
             app.rest.delete<{ id: string }>(`@me/themes/${themeId}`),
-        onSuccess: () => {
-            app.themes.remove(focusedTheme);
-            changeTheme(null);
-            setFocusedTheme("");
+        onSuccess: ({ id: themeId }: { id: string }) => {
+            const deletingCurrent = currentTheme.id === themeId;
+
+            // Remove theme from store first
+            app.themes.remove(themeId);
+
+            if (deletingCurrent) {
+                const fallback = prefersDark ? baseDarkTheme : baseLightTheme;
+
+                app.settings?.setCurrentTheme(fallback.id);
+                app.themes.setCurrentTheme(fallback.id);
+
+                changeTheme(Theme.toEmotion(fallback));
+            }
+
+            setFocusedTheme((prev) => (prev === themeId ? "" : prev));
         },
     });
 
@@ -290,7 +297,7 @@ export const AppAppearanceSettings = observer(() => {
                                 )}
                             <ImageBlob
                                 src={colorOrGradientToDataUrl(
-                                    theme.colors.surface,
+                                    theme.colors.background,
                                 )}
                                 onClick={() => handleThemeChange(theme)}
                                 current={
@@ -303,7 +310,7 @@ export const AppAppearanceSettings = observer(() => {
                                 currentType === theme.type && (
                                     <Stack
                                         position="absolute"
-                                        top={-2}
+                                        top={-1}
                                         right={-2}
                                         alignItems="center"
                                         border={`2px solid ${currentTheme.colors.surface}`}
@@ -364,7 +371,7 @@ export const AppAppearanceSettings = observer(() => {
                         {icon.theme.id === currentIcon && (
                             <Stack
                                 position="absolute"
-                                top={-2}
+                                top={-1}
                                 right={-2}
                                 alignItems="center"
                                 border={`2px solid ${currentTheme.colors.surface}`}
@@ -432,7 +439,7 @@ export const AppAppearanceSettings = observer(() => {
                             Default Themes
                         </Typography>
                     </Divider>
-                    <Stack css={gridStyles} display="grid">
+                    <Stack style={gridStyles} display="grid">
                         {defaultThemes.map((_, idx) =>
                             renderThemeColorBlob(
                                 defaultThemes,
@@ -454,15 +461,15 @@ export const AppAppearanceSettings = observer(() => {
                                 <ImageBlob
                                     src={colorOrGradientToDataUrl(
                                         prefersDark
-                                            ? baseDarkTheme.colors.surface
-                                            : baseLightTheme.colors.surface,
+                                            ? baseDarkTheme.colors.background
+                                            : baseLightTheme.colors.background,
                                     )}
                                     current={!currentType}
                                     onClick={() => handleSyncWithSystem()}
                                 />
                                 <Stack
                                     position="absolute"
-                                    top={-2}
+                                    top={-1}
                                     right={-2}
                                     alignItems="center"
                                     border={`2px solid ${currentTheme.colors.surface}`}
@@ -646,7 +653,7 @@ export const AppAppearanceSettings = observer(() => {
                                                 />
                                                 <Stack
                                                     position="absolute"
-                                                    top={-2}
+                                                    top={-1}
                                                     right={-2}
                                                     alignItems="center"
                                                     border={`2px solid ${currentTheme.colors.surface}`}
