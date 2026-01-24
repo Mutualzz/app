@@ -114,7 +114,7 @@
         "build": "tsc && vite build",
         "build:dev": "tsc && cross-env VITE_ENV_DEV=true vite build",
         "ci:prebuild": "node scripts/tauriVersion.js",
-        "dev": "pnpm tauri:dev",
+        "dev": "pnpm vite:dev",
         "lint": "eslint .",
         "lint:fix": "pnpx prettier . --write",
         "preview": "vite preview",
