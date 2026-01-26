@@ -20,6 +20,7 @@ export const ThemeCreatorModal = observer(() => {
 
     useEffect(() => {
         return () => {
+            if (themeCreator.inPreview) return;
             themeCreator.resetValues();
         };
     }, []);

@@ -1,13 +1,9 @@
 import { Paper } from "@components/Paper";
 import { useModal } from "@contexts/Modal.context";
-import {
-    type ThemeCreatorFilter,
-    type ThemeCreatorLoadedType,
-    useThemeCreator,
-} from "@contexts/ThemeCreator.context";
+import { type ThemeCreatorFilter, type ThemeCreatorLoadedType, useThemeCreator, } from "@contexts/ThemeCreator.context";
 import { useAppStore } from "@hooks/useStores";
 import type { APITheme, HttpException } from "@mutualzz/types";
-import type { MzTheme } from "@mutualzz/ui-core";
+import { baseDarkTheme, baseLightTheme, type MzTheme } from "@mutualzz/ui-core";
 import {
     Button,
     ButtonGroup,
@@ -30,6 +26,7 @@ import startCase from "lodash-es/startCase";
 import { observer } from "mobx-react-lite";
 import { useMemo } from "react";
 import Snowflake from "@utils/Snowflake.ts";
+import { usePrefersDark } from "@hooks/usePrefersDark.ts";
 
 const availableFilters = [
     "light",
@@ -41,7 +38,8 @@ const availableFilters = [
 
 export const ThemeCreatorSidebarRight = observer(() => {
     const app = useAppStore();
-    const { changeTheme } = useTheme();
+    const prefersDark = usePrefersDark();
+    const { theme: currentTheme, changeTheme } = useTheme();
     const {
         setCurrentCategory,
         setCurrentPage,
@@ -135,7 +133,11 @@ export const ThemeCreatorSidebarRight = observer(() => {
         },
         onSuccess: (data) => {
             app.themes.update(data);
-            changeTheme(Theme.toEmotion(data));
+
+            // If the current theme is the one updated, change it
+            if (app.settings?.currentTheme === data.id)
+                changeTheme(Theme.toEmotion(data));
+
             setErrors({});
         },
         onError: (error: HttpException) => {
@@ -144,6 +146,30 @@ export const ThemeCreatorSidebarRight = observer(() => {
                 next[e.path] = e.message;
             });
             setErrors(next);
+        },
+    });
+
+    const { mutate: themeDelete } = useMutation({
+        mutationKey: ["theme-delete"],
+        mutationFn: async () => {
+            if (!values.id) return;
+
+            return app.rest.delete<any>(`@me/themes/${values.id}`);
+        },
+        onSuccess: ({ id: themeId }: { id: string }) => {
+            const deletingCurrent = currentTheme.id === themeId;
+
+            // Remove theme from store first
+            app.themes.remove(themeId);
+
+            if (deletingCurrent) {
+                const fallback = prefersDark ? baseDarkTheme : baseLightTheme;
+
+                app.settings?.setCurrentTheme(fallback.id);
+                app.themes.setCurrentTheme(fallback.id);
+
+                changeTheme(Theme.toEmotion(fallback));
+            }
         },
     });
 
@@ -197,9 +223,15 @@ export const ThemeCreatorSidebarRight = observer(() => {
                                 }
 
                                 startPreview();
-                                closeAllModals();
+
+                                // Close modals after a tick to allow the theme and ref to update in ThemeCreatorModal
+                                setTimeout(() => closeAllModals(), 50);
                             }}
-                            disabled={loadedType === "default" || ownedByUser}
+                            disabled={
+                                loadedType === "default" ||
+                                ownedByUser ||
+                                !userInteracted
+                            }
                         >
                             {inPreview ? "Stop Preview" : "Preview"}
                         </Button>
@@ -248,9 +280,16 @@ export const ThemeCreatorSidebarRight = observer(() => {
                             </Option>
                         ))}
                     </Select>
-                    {loadedType === "custom" && values.id && (
-                        <Button color="danger">Delete Theme</Button>
-                    )}
+                    {loadedType === "custom" &&
+                        values.id &&
+                        values.id.trim() !== "" && (
+                            <Button
+                                color="danger"
+                                onClick={() => themeDelete()}
+                            >
+                                Delete Theme
+                            </Button>
+                        )}
                 </Stack>
                 <Divider
                     css={{

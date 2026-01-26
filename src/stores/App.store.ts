@@ -22,18 +22,13 @@ import { SpaceStore } from "./Space.store";
 import { ThemeStore } from "./Theme.store";
 import { UpdaterStore } from "./Updater.store";
 import { UserStore } from "./User.store";
+import { ThemeCreatorStore } from "@stores/ThemeCreator.store.ts";
 
 export class AppStore {
-    private readonly logger = new Logger({
-        tag: "AppStore",
-    });
-
     isGatewayReady = false;
     isAppLoading = true;
     hideSwitcher = false;
-
     token: string | null = null;
-
     account: AccountStore | null = null;
     channels = new ChannelStore(this);
     gateway = new GatewayStore(this);
@@ -41,24 +36,22 @@ export class AppStore {
     spaces = new SpaceStore(this);
     queue = new MessageQueue(this);
     themes = new ThemeStore(this);
+    themeCreator = new ThemeCreatorStore();
     rest = new REST();
     users = new UserStore(this);
     updater: UpdaterStore | null = null;
     settings: AccountSettingsStore | null = null;
-
     version: string | null = null;
-
     mode: AppMode | null = null;
-
     joiningSpace?: APISpacePartial | null = null;
     joiningInviteCode?: string | null = null;
-
     queryClient: QueryClient;
-
     memberListVisible = true;
     dontShowLinkWarning = false;
-
     preferEmbossed = true;
+    private readonly logger = new Logger({
+        tag: "AppStore",
+    });
 
     constructor() {
         if (isTauri) this.updater = new UpdaterStore();
@@ -90,6 +83,10 @@ export class AppStore {
             ],
             storage: safeLocalStorage,
         });
+    }
+
+    get isReady() {
+        return !this.isAppLoading && this.isGatewayReady;
     }
 
     setPreferEmbossed(val: boolean) {
@@ -136,10 +133,6 @@ export class AppStore {
 
     setAppLoading(loading: boolean) {
         this.isAppLoading = loading;
-    }
-
-    get isReady() {
-        return !this.isAppLoading && this.isGatewayReady;
     }
 
     setToken(token: string) {

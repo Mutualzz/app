@@ -23,6 +23,7 @@ export type ThemeCreatorLoadedType = "default" | "draft" | "custom";
 
 export type ThemeCreatorFilter = ThemeType | ThemeStyle | "adaptive";
 
+// TODO: Move this to MobX store since its much easier to manage complex state with MobX
 interface ThemeCreatorContextProps {
     // Page management
     currentCategory: ThemeCreatorCategory;
