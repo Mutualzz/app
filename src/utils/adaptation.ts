@@ -106,7 +106,7 @@ export const adaptColors = ({
     const typographyAccent = ensureContrast(primary, base, 4.5);
     const typographyMuted = chroma(ensureContrast(text.desaturate(2), base, 3))
         .alpha(0.7)
-        .css();
+        .hex();
 
     const danger = ensureContrast(
         blendSemantic(SEMANTIC_BASES.danger, base),

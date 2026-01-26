@@ -1,6 +1,10 @@
 import { Paper } from "@components/Paper";
 import { useModal } from "@contexts/Modal.context";
-import { type ThemeCreatorFilter, type ThemeCreatorLoadedType, useThemeCreator, } from "@contexts/ThemeCreator.context";
+import {
+    type ThemeCreatorFilter,
+    type ThemeCreatorLoadedType,
+    useThemeCreator,
+} from "@contexts/ThemeCreator.context";
 import { useAppStore } from "@hooks/useStores";
 import type { APITheme, HttpException } from "@mutualzz/types";
 import type { MzTheme } from "@mutualzz/ui-core";
@@ -195,7 +199,7 @@ export const ThemeCreatorSidebarRight = observer(() => {
                                 startPreview();
                                 closeAllModals();
                             }}
-                            disabled={loadedType === "default" || !ownedByUser}
+                            disabled={loadedType === "default" || ownedByUser}
                         >
                             {inPreview ? "Stop Preview" : "Preview"}
                         </Button>
