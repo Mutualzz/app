@@ -42,7 +42,7 @@ export const CategoryDeleteModal = observer(({ channel }: Props) => {
             minHeight={200}
             initial={{ scale: 0.95 }}
             animate={{ scale: 1 }}
-            elevation={app.preferEmbossed ? 5 : 1}
+            elevation={app.settings?.preferEmbossed ? 5 : 1}
             justifyContent="space-between"
             alignItems="center"
             spacing={0}

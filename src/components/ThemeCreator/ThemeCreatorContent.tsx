@@ -35,7 +35,7 @@ export const ThemeCreatorContent = observer(() => {
                 px={{ xs: "0.5rem", sm: 3 }}
                 py={{ xs: "0.5rem", sm: 4 }}
                 borderLeftWidth="0px !important"
-                elevation={app.preferEmbossed ? 3 : 1}
+                elevation={app.settings?.preferEmbossed ? 3 : 1}
                 justifyContent="space-between"
                 borderTop="0 !important"
                 borderLeft="0 !important"
@@ -80,7 +80,7 @@ export const ThemeCreatorContent = observer(() => {
                     height="100%"
                     overflow="auto"
                     width="100%"
-                    elevation={app.preferEmbossed ? 2 : 1}
+                    elevation={app.settings?.preferEmbossed ? 2 : 1}
                     direction="column"
                     px={{ xs: "0.5rem", sm: 3 }}
                     borderTop="0 !important"

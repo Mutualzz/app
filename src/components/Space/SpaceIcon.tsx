@@ -43,7 +43,7 @@ export const SpaceIcon = observer(({ space, selected, ...props }: Props) => {
 
     return (
         <Paper
-            elevation={app.preferEmbossed ? 5 : 1}
+            elevation={app.settings?.preferEmbossed ? 5 : 1}
             transparency={50}
             borderRadius={selected || hovered ? 15 : 10}
             css={{

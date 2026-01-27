@@ -48,7 +48,7 @@ export class AppStore {
     queryClient: QueryClient;
     memberListVisible = true;
     dontShowLinkWarning = false;
-    preferEmbossed = true;
+
     private readonly logger = new Logger({
         tag: "AppStore",
     });
@@ -76,25 +76,13 @@ export class AppStore {
 
         makePersistable(this, {
             name: "AppStore",
-            properties: [
-                "memberListVisible",
-                "dontShowLinkWarning",
-                "preferEmbossed",
-            ],
+            properties: ["memberListVisible", "dontShowLinkWarning"],
             storage: safeLocalStorage,
         });
     }
 
     get isReady() {
         return !this.isAppLoading && this.isGatewayReady;
-    }
-
-    setPreferEmbossed(val: boolean) {
-        this.preferEmbossed = val;
-    }
-
-    togglePreferEmbossed() {
-        this.preferEmbossed = !this.preferEmbossed;
     }
 
     setDontShowLinkWarning(val: boolean) {
@@ -155,6 +143,7 @@ export class AppStore {
         this.isAppLoading = false;
         this.isGatewayReady = true;
         this.account = null;
+        if (this.settings) this.settings.stopSyncing();
         this.settings = null;
         this.rest.setToken(null);
         this.themes.reset();
@@ -163,6 +152,7 @@ export class AppStore {
 
     async loadSettings() {
         if (this.updater) await this.updater.startAutoChecker();
+        if (this.settings) this.settings.startSyncing();
         this.loadToken();
         this.setAppLoading(false);
     }

@@ -201,7 +201,7 @@ export const ThemeCreatorSidebarRight = observer(() => {
             direction="column"
             width="15em"
             height="100%"
-            elevation={app.preferEmbossed ? 4 : 0}
+            elevation={app.settings?.preferEmbossed ? 4 : 0}
             borderTop="0 !important"
             borderRight="0 !important"
             borderBottom="0 !important"
@@ -268,7 +268,7 @@ export const ThemeCreatorSidebarRight = observer(() => {
                         color="primary"
                         placeholder="Pick a theme"
                         disabled={themes.length === 0}
-                        value={values.id || values.name || undefined}
+                        value={loadedType === "draft" ? values.name : values.id}
                     >
                         {sortThemes(themes).map((theme) => (
                             <Option
@@ -276,13 +276,28 @@ export const ThemeCreatorSidebarRight = observer(() => {
                                     theme.id ||
                                     `${theme.name}-${theme.authorId}`
                                 }
-                                value={theme.id || theme.name}
+                                value={
+                                    loadedType === "draft"
+                                        ? values.name
+                                        : values.id
+                                }
                                 variant="soft"
                             >
                                 {theme.name}
                             </Option>
                         ))}
                     </Select>
+                    {loadedType === "draft" &&
+                        app.drafts.existsThemeDraft(values) && (
+                            <Button
+                                color="danger"
+                                onClick={() =>
+                                    app.drafts.deleteThemeDraft(values)
+                                }
+                            >
+                                Delete Draft
+                            </Button>
+                        )}
                     {loadedType === "custom" &&
                         values.id &&
                         values.id.trim() !== "" && (
@@ -336,7 +351,9 @@ export const ThemeCreatorSidebarRight = observer(() => {
                                 : app.drafts.saveThemeDraft(values)
                         }
                     >
-                        Save
+                        {app.drafts.existsThemeDraft(values)
+                            ? "Update Draft"
+                            : "Save Draft"}
                     </Button>
                     <Button
                         color="success"

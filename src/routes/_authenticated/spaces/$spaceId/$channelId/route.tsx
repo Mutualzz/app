@@ -43,7 +43,7 @@ function RouteComponent() {
 
     return (
         <Paper
-            elevation={app.preferEmbossed ? 3 : 0}
+            elevation={app.settings?.preferEmbossed ? 3 : 0}
             direction="column"
             flex="1 1 auto"
             overflow="hidden"

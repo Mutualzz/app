@@ -43,7 +43,7 @@ export const CategoryCreateModal = observer(({ space }: Props) => {
 
     return (
         <Paper
-            elevation={app.preferEmbossed ? 5 : 1}
+            elevation={app.settings?.preferEmbossed ? 5 : 1}
             borderRadius={8}
             minWidth={{ xs: "90vw", sm: 150, md: 200, lg: 400 }}
             maxWidth={400}

@@ -44,7 +44,7 @@ export const ChannelListItemContextMenu = observer(
 
         return (
             <ContextMenu
-                elevation={app.preferEmbossed ? 5 : 1}
+                elevation={app.settings?.preferEmbossed ? 5 : 1}
                 transparency={0}
                 id={`channel-context-menu-${channel.id}`}
                 key={channel.id}

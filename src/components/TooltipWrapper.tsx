@@ -21,7 +21,7 @@ export const TooltipWrapper = ({
 
     return (
         <Paper
-            elevation={app.preferEmbossed ? 5 : 2}
+            elevation={app.settings?.preferEmbossed ? 5 : 2}
             p={2}
             transparency={100}
             borderRadius={8}

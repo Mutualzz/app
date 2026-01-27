@@ -72,7 +72,7 @@ const WindowTitleBar = ({ onHeightChange }: WindowTitleBarProps) => {
             justifyContent="space-between"
             alignItems="center"
             p={1.5}
-            variant={app.preferEmbossed ? "elevation" : "plain"}
+            variant={app.settings?.preferEmbossed ? "elevation" : "plain"}
             transparency={65}
             minHeight={44}
             width="100%"
@@ -80,7 +80,7 @@ const WindowTitleBar = ({ onHeightChange }: WindowTitleBarProps) => {
             zIndex={WINDOW_TITLEBAR_ZINDEX}
             top={0}
             left={0}
-            elevation={app.preferEmbossed ? 1 : 0}
+            elevation={app.settings?.preferEmbossed ? 1 : 0}
             boxShadow="none !important"
         >
             <Stack alignItems="center" data-tauri-drag-region flex={1}>

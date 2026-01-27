@@ -52,7 +52,7 @@ export const UserBar = observer(() => {
             width="95%"
             mb={2}
             ml={1.5}
-            elevation={app.preferEmbossed ? 5 : 1}
+            elevation={app.settings?.preferEmbossed ? 5 : 1}
             color="neutral"
             borderRadius={15}
             zIndex={theme.zIndex.appBar + 1}

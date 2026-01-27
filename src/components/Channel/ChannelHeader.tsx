@@ -22,7 +22,7 @@ export const ChannelHeader = observer(({ channel }: Props) => {
 
     return (
         <Paper
-            elevation={app.preferEmbossed ? 5 : 0}
+            elevation={app.settings?.preferEmbossed ? 5 : 0}
             p={2.5}
             height="100%"
             borderLeft="0 !important"

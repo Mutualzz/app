@@ -45,7 +45,7 @@ export const ModeSwitcher = observer(() => {
                     content={
                         <TooltipWrapper
                             paperProps={{
-                                elevation: app.preferEmbossed ? 5 : 1,
+                                elevation: app.settings?.preferEmbossed ? 5 : 1,
                                 p: 1,
                             }}
                             typographyProps={{

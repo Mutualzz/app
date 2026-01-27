@@ -12,7 +12,7 @@ export const RateLimitError = observer(() => {
     return (
         <Paper
             p={4}
-            elevation={app.preferEmbossed ? 8 : 1}
+            elevation={app.settings?.preferEmbossed ? 8 : 1}
             justifyContent="center"
             maxWidth={500}
             width="100%"

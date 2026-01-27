@@ -46,7 +46,7 @@ export const SpaceContextMenu = observer(
 
         return (
             <ContextMenu
-                elevation={app.preferEmbossed ? 5 : 1}
+                elevation={app.settings?.preferEmbossed ? 5 : 1}
                 transparency={0}
                 id={`space-context-menu-${space.id}-${fromSidebar ? "sidebar" : "default"}`}
                 onVisibilityChange={onVisibilityChange}
@@ -61,7 +61,7 @@ export const SpaceContextMenu = observer(
                                     <SpaceSettingsModal space={space} />,
                                 )
                             }
-                            elevation={app.preferEmbossed ? 5 : 1}
+                            elevation={app.settings?.preferEmbossed ? 5 : 1}
                             transparency={0}
                             label="Server Settings"
                             arrow={<FaArrowRight />}

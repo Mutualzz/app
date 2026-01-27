@@ -29,7 +29,7 @@ export const ThemeCreatorModal = observer(() => {
             }}
             justifyContent="center"
             alignItems="center"
-            elevation={app.preferEmbossed ? 0 : 1}
+            elevation={app.settings?.preferEmbossed ? 0 : 1}
             transparency={0}
             initial={{ scale: 0.95 }}
             animate={{ scale: 1 }}

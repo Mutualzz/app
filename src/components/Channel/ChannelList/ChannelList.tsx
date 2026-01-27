@@ -236,10 +236,10 @@ export const ChannelList = observer(() => {
                 maxWidth="15rem"
                 direction="column"
                 width="100%"
-                elevation={app.preferEmbossed ? 4 : 0}
+                elevation={app.settings?.preferEmbossed ? 4 : 0}
             >
                 <Paper
-                    elevation={app.preferEmbossed ? 5 : 0}
+                    elevation={app.settings?.preferEmbossed ? 5 : 0}
                     borderLeft="0 !important"
                     borderRight="0 !important"
                     borderTop="0 !important"

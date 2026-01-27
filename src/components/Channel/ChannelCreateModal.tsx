@@ -68,7 +68,7 @@ export const ChannelCreateModal = observer(({ space, parent }: Props) => {
 
     return (
         <Paper
-            elevation={app.preferEmbossed ? 5 : 1}
+            elevation={app.settings?.preferEmbossed ? 5 : 1}
             borderRadius={8}
             minWidth={{ xs: "90vw", sm: 150, md: 200, lg: 500 }}
             maxWidth={600}

@@ -86,7 +86,7 @@ export const MessageInput = observer(({ channel }: Props) => {
     return (
         <Paper
             p={2}
-            elevation={app.preferEmbossed ? 5 : 1}
+            elevation={app.settings?.preferEmbossed ? 5 : 1}
             borderRadius={6}
             display="block"
             m={2.5}

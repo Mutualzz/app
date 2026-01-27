@@ -57,7 +57,7 @@ export const UpdatingOverlay = observer(() => {
                 borderRadius={16}
                 spacing={4}
                 direction="column"
-                elevation={app.preferEmbossed ? 2 : 1}
+                elevation={app.settings?.preferEmbossed ? 2 : 1}
             >
                 <Logo
                     css={{

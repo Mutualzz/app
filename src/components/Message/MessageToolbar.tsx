@@ -39,7 +39,7 @@ const ToolbarContent = ({ message }: Props) => {
             onMouseLeave={showSwitcher}
             p={2}
             borderRadius={10}
-            elevation={app.preferEmbossed ? 5 : 2}
+            elevation={app.settings?.preferEmbossed ? 5 : 2}
             transparency={25}
         >
             <ButtonGroup color="neutral" size="sm" variant="plain">

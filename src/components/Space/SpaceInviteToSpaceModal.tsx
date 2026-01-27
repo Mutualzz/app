@@ -101,7 +101,7 @@ export const SpaceInviteToSpaceModal = observer(({ channel }: Props) => {
 
     return (
         <AnimatedPaper
-            elevation={app.preferEmbossed ? 5 : 1}
+            elevation={app.settings?.preferEmbossed ? 5 : 1}
             borderRadius={12}
             minWidth={{ xs: "90vw", sm: 340, md: 420, lg: 500 }}
             maxWidth={500}

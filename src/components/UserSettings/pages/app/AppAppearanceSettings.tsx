@@ -429,8 +429,8 @@ export const AppAppearanceSettings = observer(() => {
                     <Checkbox
                         rtl
                         label="Prefer Embossed Style"
-                        checked={app.preferEmbossed}
-                        onClick={() => app.togglePreferEmbossed()}
+                        checked={app.settings?.preferEmbossed}
+                        onClick={() => app.settings?.togglePreferEmbossed()}
                     />
                 </Typography>
                 <Stack direction="column">

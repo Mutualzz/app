@@ -176,7 +176,7 @@ export const SpacesSidebar = observer(() => {
             spacing={2.5}
             variant="plain"
             boxShadow="none !important"
-            elevation={app.preferEmbossed ? 1 : 0}
+            elevation={app.settings?.preferEmbossed ? 1 : 0}
             alignItems="center"
             height="100%"
         >

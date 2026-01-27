@@ -42,7 +42,7 @@ export const OpenLink = ({ url, unsafe }: Props) => {
                 width="35rem"
                 justifyContent="space-between"
                 direction="column"
-                elevation={app.preferEmbossed ? 5 : 1}
+                elevation={app.settings?.preferEmbossed ? 5 : 1}
                 height="15rem"
                 alignItems="center"
                 py={4}
@@ -65,7 +65,7 @@ export const OpenLink = ({ url, unsafe }: Props) => {
             width="35rem"
             justifyContent="space-between"
             direction="column"
-            elevation={app.preferEmbossed ? 5 : 1}
+            elevation={app.settings?.preferEmbossed ? 5 : 1}
             height="15rem"
             alignItems="center"
         >

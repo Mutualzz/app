@@ -37,7 +37,7 @@ export const FeedSidebar = observer(() => {
 
     return (
         <Paper
-            elevation={app.preferEmbossed ? 1 : 0}
+            elevation={app.settings?.preferEmbossed ? 1 : 0}
             width="5rem"
             direction="column"
             pt={1}
