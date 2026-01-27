@@ -1,9 +1,4 @@
-import {
-    baseDarkTheme,
-    baseLightTheme,
-    type ThemeStyle,
-    type ThemeType,
-} from "@mutualzz/ui-core";
+import { baseDarkTheme, baseLightTheme, type ThemeStyle, type ThemeType, } from "@mutualzz/ui-core";
 import type { APITheme } from "@mutualzz/types";
 import type { Theme as MzTheme } from "@emotion/react";
 import { type IObservableArray, makeAutoObservable, observable } from "mobx";
@@ -27,19 +22,16 @@ export type ThemeCreatorFilter = ThemeType | ThemeStyle | "adaptive";
 
 // TODO: Finish implementing the store from the old context
 export class ThemeCreatorStore {
-    private readonly prefersDark: boolean;
     currentCategory: ThemeCreatorCategory = "general";
     currentPage: ThemeCreatorPage = "details";
-
     values: APITheme;
     inPreview = false;
     themeBeforePreview: MzTheme | null = null;
-
     filters: IObservableArray<ThemeCreatorFilter> = observable.array([]);
     loadedType: ThemeCreatorLoadedType = "default";
     errors: ApiErrors = {};
-
     userInteracted = false;
+    private readonly prefersDark: boolean;
 
     constructor() {
         this.prefersDark = usePrefersDark();
@@ -83,8 +75,12 @@ export class ThemeCreatorStore {
 
     loadValues(theme: APITheme) {
         if (this.loadedType === "default") {
-            const t = { ...theme, id: "", name: "", description: "" };
-            this.values = Theme.serialize(t);
+            this.values = Theme.serialize({
+                ...this.values,
+                id: "",
+                name: "",
+                description: "",
+            });
             if (this.userInteracted) this.userInteracted = false;
             return;
         }

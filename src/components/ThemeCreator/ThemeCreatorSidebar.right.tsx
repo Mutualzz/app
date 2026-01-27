@@ -26,10 +26,7 @@ import { observer } from "mobx-react-lite";
 import { useMemo } from "react";
 import Snowflake from "@utils/Snowflake";
 import { usePrefersDark } from "@hooks/usePrefersDark";
-import type {
-    ThemeCreatorFilter,
-    ThemeCreatorLoadedType,
-} from "@stores/ThemeCreator.store";
+import type { ThemeCreatorFilter, ThemeCreatorLoadedType, } from "@stores/ThemeCreator.store";
 
 const availableFilters = [
     "light",
@@ -103,7 +100,13 @@ export const ThemeCreatorSidebarRight = observer(() => {
         onSuccess: (data) => {
             const newTheme = app.themes.add(data);
             changeTheme(Theme.toEmotion(newTheme));
-            resetValues();
+            app.settings?.setCurrentTheme(newTheme.id);
+            app.themes.setCurrentTheme(newTheme.id);
+            setErrors({});
+
+            // Always set loaded type to custom when publishing a new theme
+            setLoadedType("custom");
+            loadValues(data);
         },
         onError: (error: HttpException) => {
             const next: Record<string, string> = {};
