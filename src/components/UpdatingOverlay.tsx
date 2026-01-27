@@ -1,9 +1,9 @@
 import { observer } from "mobx-react-lite";
-import { useAppStore } from "@hooks/useStores.ts";
+import { useAppStore } from "@hooks/useStores";
 import { Button, LinearProgress, Stack, Typography } from "@mutualzz/ui-web";
 import { Paper } from "@components/Paper.tsx";
 import { Logo } from "@components/Logo.tsx";
-import { isTauri } from "@utils/index.ts";
+import { isTauri } from "@utils/index";
 
 export const UpdatingOverlay = observer(() => {
     const app = useAppStore();

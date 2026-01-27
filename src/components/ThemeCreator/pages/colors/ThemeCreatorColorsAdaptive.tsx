@@ -1,5 +1,4 @@
 import { InputWithLabel } from "@components/InputWIthLabel";
-import { useThemeCreator } from "@contexts/ThemeCreator.context";
 import {
     type ColorLike,
     createColor,
@@ -9,9 +8,11 @@ import {
 import { Stack, Typography } from "@mutualzz/ui-web";
 import { observer } from "mobx-react-lite";
 import { CiCircleInfo } from "react-icons/ci";
+import { useAppStore } from "@hooks/useStores";
 
 export const ThemeCreatorColorsAdaptive = observer(() => {
-    const { values, setValues } = useThemeCreator();
+    const app = useAppStore();
+    const { values, setValues } = app.themeCreator;
 
     return (
         <Stack direction="column" p={4} spacing={5}>
@@ -90,7 +91,7 @@ export const ThemeCreatorColorsAdaptive = observer(() => {
                 label="Base Text Color"
                 name="typographyBaseColor"
                 description={
-                    <>
+                    <Stack direction="column" justifyContent="center">
                         The base color for texts{" "}
                         <Typography
                             level="body-sm"
@@ -98,13 +99,12 @@ export const ThemeCreatorColorsAdaptive = observer(() => {
                             variant="plain"
                             color="info"
                             spacing={1}
-                            alignItems="center"
                         >
                             <CiCircleInfo />
                             Usually white-ish is used on dark backgrounds,
                             black-ish on light backgrounds
                         </Typography>
-                    </>
+                    </Stack>
                 }
                 required
                 value={values.typography.colors.primary}

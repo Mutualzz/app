@@ -1,9 +1,4 @@
 import { Paper } from "@components/Paper";
-import {
-    type ThemeCreatorCategory,
-    type ThemeCreatorPage,
-    useThemeCreator,
-} from "@contexts/ThemeCreator.context";
 import { useAppStore } from "@hooks/useStores";
 import {
     Button,
@@ -19,6 +14,10 @@ import { Fragment, type JSX, useMemo } from "react";
 import { CiTextAlignJustify, CiWarning } from "react-icons/ci";
 import { FaPalette } from "react-icons/fa6";
 import { IoText } from "react-icons/io5";
+import type {
+    ThemeCreatorCategory,
+    ThemeCreatorPage,
+} from "@stores/ThemeCreator.store";
 
 interface ThemeCreatorSidebarProps {
     drawerOpen?: boolean;
@@ -44,7 +43,7 @@ export const ThemeCreatorSidebarLeft = observer(
             currentPage,
             setCurrentPage,
             setCurrentCategory,
-        } = useThemeCreator();
+        } = app.themeCreator;
 
         const handlePageSwitch = (
             category: ThemeCreatorCategory,

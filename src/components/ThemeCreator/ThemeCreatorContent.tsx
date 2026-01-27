@@ -1,6 +1,5 @@
 import { Paper } from "@components/Paper";
 import { useModal } from "@contexts/Modal.context";
-import { useThemeCreator } from "@contexts/ThemeCreator.context";
 import { useAppStore } from "@hooks/useStores";
 import { IconButton, Stack, Typography } from "@mutualzz/ui-web";
 import startCase from "lodash-es/startCase";
@@ -15,7 +14,7 @@ import { ThemeCreatorDetails } from "./pages/general/ThemeCreatorDetails";
 
 export const ThemeCreatorContent = observer(() => {
     const app = useAppStore();
-    const { currentCategory, currentPage, values } = useThemeCreator();
+    const { currentCategory, currentPage, values } = app.themeCreator;
     const { closeModal } = useModal();
 
     return (

@@ -22,7 +22,7 @@ import { SpaceStore } from "./Space.store";
 import { ThemeStore } from "./Theme.store";
 import { UpdaterStore } from "./Updater.store";
 import { UserStore } from "./User.store";
-import { ThemeCreatorStore } from "@stores/ThemeCreator.store.ts";
+import { ThemeCreatorStore } from "@stores/ThemeCreator.store";
 
 export class AppStore {
     isGatewayReady = false;

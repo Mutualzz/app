@@ -3,27 +3,20 @@ import { useAppStore } from "@hooks/useStores";
 import { Drawer, useTheme } from "@mutualzz/ui-web";
 import { useMediaQuery } from "@react-hookz/web";
 import { observer } from "mobx-react-lite";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { ThemeCreatorContent } from "./ThemeCreatorContent";
 import { ThemeCreatorSidebarLeft } from "./ThemeCreatorSidebar.left";
-import { useThemeCreator } from "@contexts/ThemeCreator.context.tsx";
 
+// TODO: finish resetting values when modal is closed in certain circumstances, not when preview is stopped or started
+// NOTE: Start at right sidebar first and try to utilize close modal there onClose stuff or something similar to that
 export const ThemeCreatorModal = observer(() => {
     const app = useAppStore();
     const { theme } = useTheme();
-    const themeCreator = useThemeCreator();
     const isMobileQuery = useMediaQuery(
         theme.breakpoints.down("md").replace("@media", ""),
     );
 
     const [drawerOpen, setDrawerOpen] = useState(false);
-
-    useEffect(() => {
-        return () => {
-            if (themeCreator.inPreview) return;
-            themeCreator.resetValues();
-        };
-    }, []);
 
     return (
         <AnimatedPaper

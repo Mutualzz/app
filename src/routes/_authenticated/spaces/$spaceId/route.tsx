@@ -1,4 +1,4 @@
-import { useAppStore } from "@hooks/useStores.ts";
+import { useAppStore } from "@hooks/useStores";
 import { Stack } from "@mutualzz/ui-web";
 import {
     createFileRoute,

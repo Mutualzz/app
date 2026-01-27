@@ -1,10 +1,15 @@
-import { baseDarkTheme, baseLightTheme, type ThemeStyle, type ThemeType, } from "@mutualzz/ui-core";
+import {
+    baseDarkTheme,
+    baseLightTheme,
+    type ThemeStyle,
+    type ThemeType,
+} from "@mutualzz/ui-core";
 import type { APITheme } from "@mutualzz/types";
 import type { Theme as MzTheme } from "@emotion/react";
 import { type IObservableArray, makeAutoObservable, observable } from "mobx";
 import { Theme } from "@stores/objects/Theme";
-import { adaptColors } from "@utils/adaptation.ts";
-import { usePrefersDark } from "@hooks/usePrefersDark.ts";
+import { adaptColors } from "@utils/adaptation";
+import { usePrefersDark } from "@hooks/usePrefersDark";
 
 type ApiErrors = Record<string, string>;
 
@@ -22,29 +27,57 @@ export type ThemeCreatorFilter = ThemeType | ThemeStyle | "adaptive";
 
 // TODO: Finish implementing the store from the old context
 export class ThemeCreatorStore {
+    private readonly prefersDark: boolean;
+    currentCategory: ThemeCreatorCategory = "general";
+    currentPage: ThemeCreatorPage = "details";
+
     values: APITheme;
     inPreview = false;
     themeBeforePreview: MzTheme | null = null;
 
     filters: IObservableArray<ThemeCreatorFilter> = observable.array([]);
     loadedType: ThemeCreatorLoadedType = "default";
-    userInteracted = false;
     errors: ApiErrors = {};
 
+    userInteracted = false;
+
     constructor() {
-        const prefersDark = usePrefersDark();
+        this.prefersDark = usePrefersDark();
         this.values = {
-            ...(prefersDark ? baseDarkTheme : baseLightTheme),
+            ...(this.prefersDark ? baseDarkTheme : baseLightTheme),
             id: "",
             name: "",
             description: "",
         };
-        makeAutoObservable(this);
+
+        makeAutoObservable(
+            this,
+            {},
+            {
+                autoBind: true,
+            },
+        );
+    }
+
+    get nameEmpty() {
+        return this.values.name.trim() === "";
+    }
+
+    setCurrentCategory(category: ThemeCreatorCategory) {
+        this.currentCategory = category;
+    }
+
+    setCurrentPage(page: ThemeCreatorPage) {
+        this.currentPage = page;
+    }
+
+    setErrors(errors: ApiErrors) {
+        this.errors = errors;
     }
 
     setValues(newValues: Partial<APITheme>) {
         this.values = Theme.serialize({ ...this.values, ...newValues });
-        this.userInteracted = true;
+        if (!this.userInteracted) this.userInteracted = true;
         if (this.loadedType === "default") this.loadedType = "custom";
     }
 
@@ -52,11 +85,29 @@ export class ThemeCreatorStore {
         if (this.loadedType === "default") {
             const t = { ...theme, id: "", name: "", description: "" };
             this.values = Theme.serialize(t);
-            this.userInteracted = false;
+            if (this.userInteracted) this.userInteracted = false;
             return;
         }
+
         this.values = Theme.serialize(theme);
-        this.userInteracted = true;
+        if (!this.userInteracted) this.userInteracted = true;
+    }
+
+    resetValues() {
+        const defaultValues = this.prefersDark ? baseDarkTheme : baseLightTheme;
+        this.values = Theme.serialize({
+            ...defaultValues,
+            id: "",
+            name: "",
+            description: "",
+        });
+
+        if (this.userInteracted) this.userInteracted = false;
+        if (this.loadedType !== "default") this.loadedType = "default";
+
+        this.errors = {};
+        this.currentPage = "details";
+        this.currentCategory = "general";
     }
 
     addFilter(filter: ThemeCreatorFilter) {
@@ -68,8 +119,26 @@ export class ThemeCreatorStore {
         this.filters.remove(filter);
     }
 
-    resetValues() {
+    setFilters(filters: ThemeCreatorFilter[]) {
+        this.filters.replace(filters);
+    }
+
+    resetFilters() {
         this.filters = observable.array([]);
+    }
+
+    filter(themes: Theme[]) {
+        if (this.filters.length === 0) return themes;
+
+        return themes.filter((theme) => {
+            return this.filters.every((filter) => {
+                return (
+                    theme.type === filter ||
+                    theme.style === filter ||
+                    (filter === "adaptive" && theme.adaptive)
+                );
+            });
+        });
     }
 
     setLoadedType(type: ThemeCreatorLoadedType) {

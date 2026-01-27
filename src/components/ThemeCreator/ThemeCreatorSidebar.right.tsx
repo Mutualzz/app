@@ -1,6 +1,5 @@
 import { Paper } from "@components/Paper";
 import { useModal } from "@contexts/Modal.context";
-import { type ThemeCreatorFilter, type ThemeCreatorLoadedType, useThemeCreator, } from "@contexts/ThemeCreator.context";
 import { useAppStore } from "@hooks/useStores";
 import type { APITheme, HttpException } from "@mutualzz/types";
 import { baseDarkTheme, baseLightTheme, type MzTheme } from "@mutualzz/ui-core";
@@ -25,8 +24,12 @@ import { sortThemes } from "@utils/index";
 import startCase from "lodash-es/startCase";
 import { observer } from "mobx-react-lite";
 import { useMemo } from "react";
-import Snowflake from "@utils/Snowflake.ts";
-import { usePrefersDark } from "@hooks/usePrefersDark.ts";
+import Snowflake from "@utils/Snowflake";
+import { usePrefersDark } from "@hooks/usePrefersDark";
+import type {
+    ThemeCreatorFilter,
+    ThemeCreatorLoadedType,
+} from "@stores/ThemeCreator.store";
 
 const availableFilters = [
     "light",
@@ -49,7 +52,6 @@ export const ThemeCreatorSidebarRight = observer(() => {
         setErrors,
         values,
         loadValues,
-        filter: themeFilter,
         filters,
         resetFilters,
         addFilter,
@@ -59,26 +61,27 @@ export const ThemeCreatorSidebarRight = observer(() => {
         stopPreview,
         userInteracted,
         nameEmpty,
-    } = useThemeCreator();
+    } = app.themeCreator;
     const { closeAllModals } = useModal();
 
     const themes = useMemo(() => {
-        return themeFilter(
+        const base =
             loadedType === "custom"
                 ? app.themes.all.filter((theme) => theme.authorId)
                 : loadedType === "draft"
                   ? app.drafts.themes.map((draft) => new Theme(app, draft))
-                  : app.themes.all.filter((theme) => !theme.author),
-        );
-    }, [app.drafts.themes, loadedType, themeFilter, app]);
+                  : app.themes.all.filter((theme) => !theme.author);
+
+        return app.themeCreator.filter(base);
+    }, [app.drafts.themes, loadedType, app]);
 
     const ownedByUser = useMemo(
         () => !!values.id && app.account?.id === values.authorId,
         [values.id, values.authorId, app.account?.id],
     );
 
-    const { mutate: themePut } = useMutation({
-        mutationKey: ["theme-put"],
+    const { mutate: putTheme } = useMutation({
+        mutationKey: ["put-theme", values.name],
         mutationFn: async () => {
             let dataToPut = {
                 ...values,
@@ -111,8 +114,8 @@ export const ThemeCreatorSidebarRight = observer(() => {
         },
     });
 
-    const { mutate: themePatch } = useMutation({
-        mutationKey: ["themePatch"],
+    const { mutate: patchTheme } = useMutation({
+        mutationKey: ["patch-theme", values.id],
         mutationFn: async () => {
             let dataToPatch = { ...values };
             if (values.adaptive) {
@@ -149,7 +152,7 @@ export const ThemeCreatorSidebarRight = observer(() => {
         },
     });
 
-    const { mutate: themeDelete } = useMutation({
+    const { mutate: deleteTheme } = useMutation({
         mutationKey: ["theme-delete"],
         mutationFn: async () => {
             if (!values.id) return;
@@ -218,14 +221,14 @@ export const ThemeCreatorSidebarRight = observer(() => {
                         <Button
                             onClick={() => {
                                 if (inPreview) {
-                                    stopPreview();
+                                    stopPreview(changeTheme);
                                     return;
                                 }
 
-                                startPreview();
+                                startPreview(changeTheme, currentTheme);
 
                                 // Close modals after a tick to allow the theme and ref to update in ThemeCreatorModal
-                                setTimeout(() => closeAllModals(), 50);
+                                setTimeout(() => closeAllModals(), 0);
                             }}
                             disabled={
                                 loadedType === "default" ||
@@ -285,7 +288,7 @@ export const ThemeCreatorSidebarRight = observer(() => {
                         values.id.trim() !== "" && (
                             <Button
                                 color="danger"
-                                onClick={() => themeDelete()}
+                                onClick={() => deleteTheme()}
                             >
                                 Delete Theme
                             </Button>
@@ -338,7 +341,7 @@ export const ThemeCreatorSidebarRight = observer(() => {
                     <Button
                         color="success"
                         onClick={() =>
-                            ownedByUser ? themePatch() : themePut()
+                            ownedByUser ? patchTheme() : putTheme()
                         }
                     >
                         {ownedByUser ? "Update" : "Publish"}

@@ -58,7 +58,6 @@ import WindowTitleBar from "@components/WindowTitleBar";
 import { AppTheme } from "@contexts/AppTheme.context";
 import { DesktopShellProvider } from "@contexts/DesktopShell.context";
 import { ModalProvider } from "@contexts/Modal.context";
-import { ThemeCreatorProvider } from "@contexts/ThemeCreator.context";
 import { listen } from "@tauri-apps/api/event";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { calendarStrings } from "@utils/i18n";
@@ -303,68 +302,62 @@ function RootComponent() {
     return (
         <RootDocument>
             <AppTheme>
-                <ThemeCreatorProvider>
-                    <ModalProvider>
-                        <CssBaseline adaptiveScrollbar />
-                        <DesktopShellProvider>
-                            <WindowTitleBar
-                                onHeightChange={setTitleBarHeight}
-                            />
-                            <DesktopShell>
-                                <UpdatingOverlay />
+                <ModalProvider>
+                    <CssBaseline adaptiveScrollbar />
+                    <DesktopShellProvider>
+                        <WindowTitleBar onHeightChange={setTitleBarHeight} />
+                        <DesktopShell>
+                            <UpdatingOverlay />
 
-                                {forceGate ? null : (
-                                    <>
-                                        {!networkState.online && (
-                                            <Paper
-                                                alignItems="center"
-                                                justifyContent="center"
-                                                variant="solid"
-                                                color="danger"
-                                            >
-                                                <Typography level="body-lg">
-                                                    You are currently offline
-                                                </Typography>
-                                            </Paper>
-                                        )}
+                            {forceGate ? null : (
+                                <>
+                                    {!networkState.online && (
+                                        <Paper
+                                            alignItems="center"
+                                            justifyContent="center"
+                                            variant="solid"
+                                            color="danger"
+                                        >
+                                            <Typography level="body-lg">
+                                                You are currently offline
+                                            </Typography>
+                                        </Paper>
+                                    )}
 
-                                        <InjectGlobal />
-                                        <APIErrorListener />
-                                        <Loader>
+                                    <InjectGlobal />
+                                    <APIErrorListener />
+                                    <Loader>
+                                        <Stack
+                                            direction="column"
+                                            height="100vh"
+                                            width="100vw"
+                                            flex={1}
+                                            minHeight={0}
+                                            css={{
+                                                paddingTop: titleBarHeight,
+                                            }}
+                                        >
                                             <Stack
-                                                direction="column"
-                                                height="100vh"
-                                                width="100vw"
+                                                width="100%"
                                                 flex={1}
                                                 minHeight={0}
-                                                css={{
-                                                    paddingTop: titleBarHeight,
-                                                }}
+                                                overflow="hidden"
                                             >
-                                                <Stack
-                                                    width="100%"
-                                                    flex={1}
-                                                    minHeight={0}
-                                                    overflow="hidden"
-                                                >
-                                                    <Outlet />
-                                                </Stack>
-                                                {app.account && (
-                                                    <ModeSwitcher />
-                                                )}
+                                                <Outlet />
                                             </Stack>
-                                        </Loader>
-                                        {/*{import.meta.env.DEV && (*/}
-                                        {/*    <>*/}
-                                        {/*        <TanStackRouterDevtools />*/}
-                                        {/*    </>*/}
-                                        {/*)}*/}
-                                    </>
-                                )}
-                            </DesktopShell>
-                        </DesktopShellProvider>
-                    </ModalProvider>
-                </ThemeCreatorProvider>
+                                            {app.account && <ModeSwitcher />}
+                                        </Stack>
+                                    </Loader>
+                                    {/*{import.meta.env.DEV && (*/}
+                                    {/*    <>*/}
+                                    {/*        <TanStackRouterDevtools />*/}
+                                    {/*    </>*/}
+                                    {/*)}*/}
+                                </>
+                            )}
+                        </DesktopShell>
+                    </DesktopShellProvider>
+                </ModalProvider>
             </AppTheme>
         </RootDocument>
     );

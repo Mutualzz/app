@@ -1,12 +1,13 @@
 import { InputWithLabel } from "@components/InputWIthLabel";
-import { useThemeCreator } from "@contexts/ThemeCreator.context";
 import type { ColorLike } from "@mutualzz/ui-core";
 import { Stack, Typography } from "@mutualzz/ui-web";
 import { observer } from "mobx-react-lite";
 import { CiCircleInfo } from "react-icons/ci";
+import { useAppStore } from "@hooks/useStores";
 
 export const ThemeCreatorColorsFeedback = observer(() => {
-    const { values, setValues } = useThemeCreator();
+    const app = useAppStore();
+    const { values, setValues } = app.themeCreator;
 
     return (
         <Stack direction="column" p={4} spacing={5}>

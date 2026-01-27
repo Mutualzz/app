@@ -1,9 +1,8 @@
-import { WINDOW_TITLEBAR_ZINDEX } from "@app-types/index.ts";
+import { WINDOW_TITLEBAR_ZINDEX } from "@app-types/index";
 import { Paper } from "@components/Paper.tsx";
 import { useDesktopShell } from "@contexts/DesktopShell.context.tsx";
 import { useModal } from "@contexts/Modal.context";
-import { useThemeCreator } from "@contexts/ThemeCreator.context";
-import { useAppStore } from "@hooks/useStores.ts";
+import { useAppStore } from "@hooks/useStores";
 import {
     Button,
     Divider,
@@ -13,7 +12,7 @@ import {
     useTheme,
 } from "@mutualzz/ui-web";
 import { getCurrentWindow } from "@tauri-apps/api/window";
-import { isTauri } from "@utils/index.ts";
+import { isTauri } from "@utils/index";
 import { observer } from "mobx-react-lite";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { FaDownload, FaPeopleArrows } from "react-icons/fa";
@@ -32,11 +31,12 @@ interface WindowTitleBarProps {
 
 const WindowTitleBar = ({ onHeightChange }: WindowTitleBarProps) => {
     const appWindow = useMemo(() => (isTauri ? getCurrentWindow() : null), []);
-    const { inPreview, stopPreview, values } = useThemeCreator();
-    const { openModal } = useModal();
-    const { theme } = useTheme();
-    const { os } = useDesktopShell();
     const app = useAppStore();
+    const { inPreview, stopPreview, values } = app.themeCreator;
+    const { openModal } = useModal();
+    const { theme, changeTheme } = useTheme();
+    const { os } = useDesktopShell();
+
     const [closeDanger, setCloseDanger] = useState(false);
     const rootRef = useRef<HTMLDivElement | null>(null);
 
@@ -96,7 +96,7 @@ const WindowTitleBar = ({ onHeightChange }: WindowTitleBarProps) => {
                                     "theme-creator",
                                     <ThemeCreatorModal />,
                                 );
-                                stopPreview();
+                                stopPreview(changeTheme);
                             }}
                             variant="solid"
                             color="danger"
