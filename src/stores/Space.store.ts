@@ -79,8 +79,6 @@ export class SpaceStore {
 
         if (!positions || positions.size === 0) return this.all;
 
-        console.log(positions);
-
         const positionedSpaces = positions
             .toArray()
             .map((id) => this.spaces.get(id))

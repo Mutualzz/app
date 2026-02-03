@@ -7,7 +7,7 @@ import {
     type ColorLike,
     type TypographyColor,
 } from "@mutualzz/ui-core";
-import { type Range } from "slate";
+import { Node, Text, type Range } from "slate";
 
 const tokenDefs = [
     { symbol: "**", type: "bold" },
@@ -40,6 +40,7 @@ export const parseMarkdownToRanges = (
         const match = tokenDefs.find(({ symbol }) =>
             text.startsWith(symbol, i),
         );
+
         if (match) {
             const { symbol, type } = match;
             const stack = stacks[type];
@@ -69,14 +70,98 @@ export const parseMarkdownToRanges = (
                         focus: { path, offset: contentEnd + markerLength },
                     });
                 }
-            } else {
-                stack.push({ offset: i, symbol });
-            }
+            } else stack.push({ offset: i, symbol });
 
             i += symbol.length;
-        } else {
-            i++;
+        } else i++;
+    }
+
+    return ranges;
+};
+
+type DecoratedRange = Range & { spoiler?: boolean; isMarker?: boolean };
+
+export const parseSpoilerRanges = ([node, path]: [
+    Node,
+    number[],
+]): DecoratedRange[] => {
+    if (!("children" in node)) return [];
+
+    const children = node.children as Node[];
+    const ranges: DecoratedRange[] = [];
+
+    type Pos = { childIndex: number; offset: number };
+
+    const findNextToken = (from: Pos): Pos | null => {
+        for (
+            let childIndex = from.childIndex;
+            childIndex < children.length;
+            childIndex++
+        ) {
+            const child = children[childIndex];
+            if (!Text.isText(child)) continue;
+
+            const startOffset =
+                childIndex === from.childIndex ? from.offset : 0;
+            const at = child.text.indexOf("||", startOffset);
+            if (at !== -1) return { childIndex: childIndex, offset: at };
         }
+
+        return null;
+    };
+
+    let cursor: Pos = { childIndex: 0, offset: 0 };
+
+    while (true) {
+        const open = findNextToken(cursor);
+        if (!open) break;
+
+        const afterOpen: Pos = {
+            childIndex: open.childIndex,
+            offset: open.offset + 2,
+        };
+        const close = findNextToken(afterOpen);
+        if (!close) break;
+
+        ranges.push({
+            isMarker: true,
+            anchor: { path: [...path, open.childIndex], offset: open.offset },
+            focus: {
+                path: [...path, open.childIndex],
+                offset: open.offset + 2,
+            },
+        });
+
+        const contentAnchor = {
+            path: [...path, open.childIndex],
+            offset: open.offset + 2,
+        };
+        const contentFocus = {
+            path: [...path, close.childIndex],
+            offset: close.offset,
+        };
+
+        if (
+            contentAnchor.path.join(",") !== contentFocus.path.join(",") ||
+            contentAnchor.offset !== contentFocus.offset
+        ) {
+            ranges.push({
+                spoiler: true,
+                anchor: contentAnchor,
+                focus: contentFocus,
+            });
+        }
+
+        ranges.push({
+            isMarker: true,
+            anchor: { path: [...path, close.childIndex], offset: close.offset },
+            focus: {
+                path: [...path, close.childIndex],
+                offset: close.offset + 2,
+            },
+        });
+
+        cursor = { childIndex: close.childIndex, offset: close.offset + 2 };
     }
 
     return ranges;

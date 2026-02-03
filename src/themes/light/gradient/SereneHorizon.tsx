@@ -11,16 +11,16 @@ export const sereneHorizonTheme: Theme = {
     style: "gradient",
     colors: {
         ...baseLightTheme.colors,
-        primary: "#4A90B0",
-        neutral: "#4A5360",
+        primary: "#5A8FE6",
+        neutral: "#7CA7B7",
         background:
-            "linear-gradient(90deg,#F6FAFB 0%,#EEF5F8 45%,#DDEFF4 75%,#8CC0DA 100%,#4A90B0 100%)",
+            "linear-gradient(90deg,#F6FAFB 0%,#EEF5F8 45%,#DDEFF4 75%,#8CC0DA 100%,#5A8FE6 100%)",
         surface:
-            "linear-gradient(90deg,#EEF6F9 0%,#DDEFF4 45%,#B7DFEE 75%,#8CC0DA 100%,#4A90B0 100%)",
+            "linear-gradient(90deg,#EEF6F9 0%,#DDEFF4 45%,#B7DFEE 75%,#8CC0DA 100%,#5A8FE6 100%)",
         danger: "#B3261E",
-        warning: "#8F6500",
-        success: "#1F6E34",
-        info: "#0F5DA8",
+        warning: "#B15A14",
+        success: "#2F7A54",
+        info: "#5A8FE6",
     },
     typography: {
         ...baseLightTheme.typography,

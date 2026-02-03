@@ -1,10 +1,13 @@
 import { observer } from "mobx-react-lite";
 import { useAppStore } from "@hooks/useStores";
 import { Button, LinearProgress, Stack, Typography } from "@mutualzz/ui-web";
-import { Paper } from "@components/Paper.tsx";
-import { Logo } from "@components/Logo.tsx";
+import { Paper } from "@components/Paper";
+import { Logo } from "@components/Logo";
 import { isTauri } from "@utils/index";
+import { useEffect } from "react";
+import { getCurrentWindow, LogicalSize } from "@tauri-apps/api/window";
 
+// TODO: Finish size locking on update overlay and automatic re-centering content after resize
 export const UpdatingOverlay = observer(() => {
     const app = useAppStore();
 
@@ -18,6 +21,25 @@ export const UpdatingOverlay = observer(() => {
         stage === "relaunching" ||
         showDownloadOverlay ||
         (app.updater?.forceUpdate && stage === "error");
+
+    const updaterSize = new LogicalSize(420, 325);
+
+    useEffect(() => {
+        const appWindow = getCurrentWindow();
+        if (!visible) {
+            appWindow.setMaxSize(null);
+            appWindow.setMinSize(null);
+            appWindow.maximize();
+
+            return;
+        }
+
+        appWindow.unmaximize();
+        appWindow.setMinSize(updaterSize);
+        appWindow.setMaxSize(updaterSize);
+        appWindow.setSize(updaterSize);
+        appWindow.center();
+    }, [visible]);
 
     if (!visible) return null;
 
@@ -42,37 +64,52 @@ export const UpdatingOverlay = observer(() => {
             zIndex={999999}
             alignItems="center"
             justifyContent="center"
-            css={{
-                pointerEvents: "auto",
-                backdropFilter: "blur(14px)",
-                WebkitBackdropFilter: "blur(14px)",
-            }}
+            data-tauri-drag-region
         >
             <Paper
                 alignItems="center"
                 justifyContent="center"
-                width={420}
-                maxWidth="calc(100vw - 32px)"
+                width="100%"
+                maxWidth={updaterSize.width}
                 padding={6}
-                borderRadius={16}
                 spacing={4}
+                height={updaterSize.height}
                 direction="column"
                 elevation={app.settings?.preferEmbossed ? 2 : 1}
+                data-tauri-drag-region
             >
                 <Logo
                     css={{
                         width: 128,
                         height: 128,
+                        userSelect: "none",
+                        pointerEvents: "none",
                     }}
                 />
-
-                <Stack direction="column" spacing={1} alignItems="center">
-                    <Typography level="title-lg">{title}</Typography>
+                <Stack
+                    direction="column"
+                    spacing={1}
+                    alignItems="center"
+                    data-tauri-drag-region
+                >
+                    <Typography
+                        level="title-lg"
+                        css={{
+                            userSelect: "none",
+                        }}
+                        data-tauri-drag-region
+                    >
+                        {title}
+                    </Typography>
                     {stage !== "error" ? (
                         <Typography
                             level="body-md"
                             variant="plain"
                             color="danger"
+                            css={{
+                                userSelect: "none",
+                            }}
+                            data-tauri-drag-region
                         >
                             Don’t close the app.
                         </Typography>
@@ -81,6 +118,10 @@ export const UpdatingOverlay = observer(() => {
                             level="body-md"
                             variant="plain"
                             color="danger"
+                            css={{
+                                userSelect: "none",
+                            }}
+                            data-tauri-drag-region
                         >
                             Update failed. Check your connection and retry.
                         </Typography>
@@ -91,10 +132,16 @@ export const UpdatingOverlay = observer(() => {
                         color="neutral"
                         value={progressPct}
                         determinate
+                        data-tauri-drag-region
                     />
                 )}
                 {(stage === "installing" || stage === "relaunching") && (
-                    <LinearProgress color="success" value={100} determinate />
+                    <LinearProgress
+                        color="success"
+                        value={100}
+                        determinate
+                        data-tauri-drag-region
+                    />
                 )}
                 {stage === "error" && (
                     <Stack direction="row" spacing={2}>
@@ -125,7 +172,8 @@ export const UpdatingOverlay = observer(() => {
                 <Typography
                     level="body-sm"
                     textColor="muted"
-                    css={{ opacity: 0.7, marginTop: 10 }}
+                    css={{ opacity: 0.7, marginTop: 10, userSelect: "none" }}
+                    data-tauri-drag-region
                 >
                     You can minimize this window.
                 </Typography>

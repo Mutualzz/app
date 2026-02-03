@@ -11,23 +11,23 @@ export const silverDawnTheme: Theme = {
     style: "gradient",
     colors: {
         ...baseLightTheme.colors,
-        primary: "#5B8E6F",
-        neutral: "#555555",
+        primary: "#AEB6CF",
+        neutral: "#8C9BAA",
         background:
-            "linear-gradient(90deg,#F4F7F8 0%,#EAF0F2 45%,#D8E6E6 75%,#86B39E 100%,#5B8E6F 100%)",
+            "linear-gradient(90deg,#F4F7F8 0%,#EAF0F2 45%,#D8E6E6 75%,#86B39E 100%,#AEB6CF 100%)",
         surface:
-            "linear-gradient(90deg,#EEF3F3 0%,#DCE9E7 45%,#B6D6CB 75%,#86B39E 100%,#5B8E6F 100%)",
+            "linear-gradient(90deg,#EEF3F3 0%,#DCE9E7 45%,#B6D6CB 75%,#86B39E 100%,#AEB6CF 100%)",
         danger: "#B3261E",
-        warning: "#8F6500",
-        success: "#1F6E34",
-        info: "#0F5DA8",
+        warning: "#B15A14",
+        success: "#2F7A54",
+        info: "#AEB6CF",
     },
     typography: {
         ...baseLightTheme.typography,
         colors: {
             primary: "#1A1A1A",
             secondary: "#3A3A3A",
-            accent: "#5B8E6F",
+            accent: "#AEB6CF",
             muted: "#5A5A5F",
         },
     },

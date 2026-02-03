@@ -11,24 +11,24 @@ export const bloodMoonSerenadeTheme: Theme = {
     style: "gradient",
     colors: {
         ...baseDarkTheme.colors,
-        primary: "#FF6F84",
-        neutral: "#C7AFC0",
+        primary: "#F45A6A",
+        neutral: "#B89CA9",
         background:
-            "linear-gradient(90deg,#070608 0%,#0D0D10 45%,#160F12 75%,#8B2F3C 100%,#FF6F84 100%)",
+            "linear-gradient(90deg,#070608 0%,#181014 40%,#2C1620 70%,#7A2B3A 100%)",
         surface:
-            "linear-gradient(90deg,#140F12 0%,#24171C 45%,#312126 75%,#7A3945 100%,#FF6F84 100%)",
-        danger: "#FF6B6B",
-        warning: "#F3CE72",
-        success: "#5CC8A6",
-        info: "#64A9FF",
+            "linear-gradient(90deg,#140F12 0%,#24171C 40%,#3A1E2A 80%,#F45A6A 100%)",
+        danger: "#FF5A6B",
+        warning: "#F2C572",
+        success: "#4DBE9A",
+        info: "#F47B94",
     },
     typography: {
         ...baseDarkTheme.typography,
         colors: {
-            primary: "#F5F5F7",
-            secondary: "#F0C8CF",
-            accent: "#FF6F84",
-            muted: "#BFA8B4",
+            primary: "#F3F6FA",
+            secondary: "#E8B7C1",
+            accent: "#F45A6A",
+            muted: "#A88B97",
         },
     },
 };

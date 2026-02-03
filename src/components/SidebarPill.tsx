@@ -6,7 +6,7 @@ export type PillType = "none" | "unread" | "hover" | "active";
 const Pill = styled("span")<{ type: PillType }>(({ theme, type }) => ({
     width: 4,
     borderRadius: "0 4px 4px 0",
-    background: theme.colors.neutral,
+    background: theme.typography.colors.accent,
     marginLeft: -16,
     transition: "height 0.3s ease, background 0.3s ease",
 
@@ -33,7 +33,6 @@ export const SidebarPill = ({ type }: Props) => {
     return (
         <Stack
             justifyContent="flex-start"
-            alignItems="center"
             position="absolute"
             left={0}
             width={8}

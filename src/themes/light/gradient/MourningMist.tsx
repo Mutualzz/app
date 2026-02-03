@@ -11,16 +11,16 @@ export const mourningMistTheme: Theme = {
     style: "gradient",
     colors: {
         ...baseLightTheme.colors,
-        primary: "#7A4A4A",
-        neutral: "#554848",
+        primary: "#A88082",
+        neutral: "#A89A9A",
         background:
-            "linear-gradient(90deg,#FBFBFC 0%,#F5F5F7 45%,#ECE9EE 75%,#A88082 100%,#7A4A4A 100%)",
+            "linear-gradient(90deg,#FBFBFC 0%,#F5F5F7 45%,#ECE9EE 75%,#B37E80 100%,#A88082 100%)",
         surface:
-            "linear-gradient(90deg,#F4F2F4 0%,#ECE7EA 45%,#D9C8CA 75%,#B37E80 100%,#7A4A4A 100%)",
+            "linear-gradient(90deg,#F4F2F4 0%,#ECE7EA 45%,#D9C8CA 75%,#B37E80 100%,#A88082 100%)",
         danger: "#B3261E",
-        warning: "#8F6500",
-        success: "#1F6E34",
-        info: "#0F5DA8",
+        warning: "#B15A14",
+        success: "#2F7A54",
+        info: "#B37E80",
     },
     typography: {
         ...baseLightTheme.typography,

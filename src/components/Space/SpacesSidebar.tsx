@@ -1,4 +1,4 @@
-import { AnimatedLogo } from "@components/Animated/AnimatedLogo.tsx";
+import { AnimatedLogo } from "@components/Animated/AnimatedLogo";
 import { Paper } from "@components/Paper";
 import { SidebarPill, type PillType } from "@components/SidebarPill";
 import { SpaceIcon } from "@components/Space/SpaceIcon";

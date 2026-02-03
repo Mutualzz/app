@@ -13,7 +13,6 @@ const escapedCustom = extendedEmoticons
     .join("|");
 
 const combinedPattern = `(?:${baseEmoticonRegex.source}|${escapedCustom})`;
-
 const emoticonRegex = new RegExp(`(${combinedPattern})(?=\\s)`, "g");
 
 export const withEmojis = (editor: Editor) => {

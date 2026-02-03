@@ -1,4 +1,9 @@
-import { baseDarkTheme, baseLightTheme, type ThemeStyle, type ThemeType, } from "@mutualzz/ui-core";
+import {
+    baseDarkTheme,
+    baseLightTheme,
+    type ThemeStyle,
+    type ThemeType,
+} from "@mutualzz/ui-core";
 import type { APITheme } from "@mutualzz/types";
 import type { Theme as MzTheme } from "@emotion/react";
 import { type IObservableArray, makeAutoObservable, observable } from "mobx";
@@ -26,7 +31,7 @@ export class ThemeCreatorStore {
     currentPage: ThemeCreatorPage = "details";
     values: APITheme;
     inPreview = false;
-    themeBeforePreview: MzTheme | null = null;
+    themeBeforePreview: APITheme | null = null;
     filters: IObservableArray<ThemeCreatorFilter> = observable.array([]);
     loadedType: ThemeCreatorLoadedType = "default";
     errors: ApiErrors = {};
@@ -35,12 +40,15 @@ export class ThemeCreatorStore {
 
     constructor() {
         this.prefersDark = usePrefersDark();
-        this.values = {
-            ...(this.prefersDark ? baseDarkTheme : baseLightTheme),
+
+        const base = this.prefersDark ? baseDarkTheme : baseLightTheme;
+
+        this.values = Theme.serialize({
+            ...base,
             id: "",
             name: "",
             description: "",
-        };
+        });
 
         makeAutoObservable(
             this,
@@ -90,9 +98,10 @@ export class ThemeCreatorStore {
     }
 
     resetValues() {
-        const defaultValues = this.prefersDark ? baseDarkTheme : baseLightTheme;
+        const base = this.prefersDark ? baseDarkTheme : baseLightTheme;
+
         this.values = Theme.serialize({
-            ...defaultValues,
+            ...base,
             id: "",
             name: "",
             description: "",
@@ -120,21 +129,20 @@ export class ThemeCreatorStore {
     }
 
     resetFilters() {
-        this.filters = observable.array([]);
+        this.filters.clear();
     }
 
     filter(themes: Theme[]) {
         if (this.filters.length === 0) return themes;
 
-        return themes.filter((theme) => {
-            return this.filters.every((filter) => {
-                return (
+        return themes.filter((theme) =>
+            this.filters.every(
+                (filter) =>
                     theme.type === filter ||
                     theme.style === filter ||
-                    (filter === "adaptive" && theme.adaptive)
-                );
-            });
-        });
+                    (filter === "adaptive" && theme.adaptive),
+            ),
+        );
     }
 
     setLoadedType(type: ThemeCreatorLoadedType) {
@@ -143,12 +151,14 @@ export class ThemeCreatorStore {
 
     startPreview(
         changeTheme: (theme: MzTheme) => void,
-        currentTheme?: MzTheme,
+        currentThemeValues?: APITheme,
     ) {
         if (this.inPreview) return;
-        let previewTheme = this.values;
-        if (this.values.adaptive) {
-            previewTheme = Theme.serialize({
+
+        let previewThemeValues = this.values;
+
+        if (this.values.adaptive)
+            previewThemeValues = Theme.serialize({
                 ...this.values,
                 ...(adaptColors({
                     baseColor: this.values.colors.background,
@@ -156,18 +166,20 @@ export class ThemeCreatorStore {
                     primaryText: this.values.typography.colors.primary,
                 }) as Partial<APITheme>),
             });
-        }
 
-        if (!this.themeBeforePreview && currentTheme)
-            this.themeBeforePreview = currentTheme;
-        changeTheme(Theme.toEmotion(previewTheme));
+        if (!this.themeBeforePreview && currentThemeValues)
+            this.themeBeforePreview = Theme.serialize(currentThemeValues);
+
+        changeTheme(Theme.toEmotion(previewThemeValues));
         this.inPreview = true;
     }
 
     stopPreview(changeTheme: (theme: MzTheme) => void) {
         if (!this.inPreview) return;
+
         if (this.themeBeforePreview)
             changeTheme(Theme.toEmotion(this.themeBeforePreview));
+
         this.themeBeforePreview = null;
         this.inPreview = false;
     }

@@ -21,9 +21,8 @@ export const AppTheme = observer(({ children }: PropsWithChildren) => {
             ({ userThemeRemote, userIconRemote }) => {
                 const themes = app.themes.all;
 
-                if (userIconRemote !== app.themes.currentIcon) {
+                if (userIconRemote !== app.themes.currentIcon)
                     app.themes.setCurrentIcon(userIconRemote ?? null);
-                }
 
                 // Check if themes are loaded
                 const pick = (id?: string | null) => {

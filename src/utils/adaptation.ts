@@ -22,6 +22,7 @@ const ensureContrast = (bg: chroma.Color, fg: chroma.Color, minRatio = 4.5) => {
     let lightenSteps = 0;
     let darkenSteps = 0;
     const stepAmount = 0.03;
+
     // Try lightening
     while (chroma.contrast(lighten, fg) < minRatio && lightenSteps < 40) {
         lighten = lighten.brighten(stepAmount);

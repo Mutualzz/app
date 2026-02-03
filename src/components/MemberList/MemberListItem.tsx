@@ -1,5 +1,5 @@
 import { Paper } from "@components/Paper";
-import { TooltipWrapper } from "@components/TooltipWrapper.tsx";
+import { TooltipWrapper } from "@components/TooltipWrapper";
 import { UserAvatar } from "@components/User/UserAvatar";
 import { Tooltip, Typography, useTheme } from "@mutualzz/ui-web";
 import type { SpaceMember } from "@stores/objects/SpaceMember";

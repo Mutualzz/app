@@ -3,7 +3,10 @@ import { Paper } from "@components/Paper";
 import { Typography } from "@mutualzz/ui-web";
 import emojiRegexOrig from "emojibase-regex";
 import shortcodeRegexOrig from "emojibase-regex/shortcode";
-import parse, { domToReact } from "html-react-parser";
+import parse, {
+    domToReact,
+    type HTMLReactParserOptions,
+} from "html-react-parser";
 import MarkdownIt from "markdown-it";
 import { useMemo } from "react";
 import { Blockquote } from "../components/Blockquote";
@@ -67,137 +70,136 @@ export const MarkdownRenderer = ({
 
     const html = useMemo(() => md.render(value || ""), [md, value]);
 
-    const content = useMemo(
-        () =>
-            parse(html, {
-                replace: (domNode) => {
-                    if (domNode.type === "tag") {
-                        switch (domNode.name) {
-                            case "h1": {
-                                return (
-                                    <Typography
-                                        level="h3"
-                                        fontWeight="bold"
-                                        display="block"
-                                    >
-                                        {domToReact(domNode.children as any)}
-                                    </Typography>
-                                );
-                            }
-                            case "h2": {
-                                return (
-                                    <Typography
-                                        level="h4"
-                                        fontWeight="bold"
-                                        display="block"
-                                    >
-                                        {domToReact(domNode.children as any)}
-                                    </Typography>
-                                );
-                            }
-                            case "h3": {
-                                return (
-                                    <Typography
-                                        level="h5"
-                                        fontWeight="bold"
-                                        display="block"
-                                    >
-                                        {domToReact(domNode.children as any)}
-                                    </Typography>
-                                );
-                            }
-                            case "blockquote": {
-                                return (
-                                    <Blockquote>
-                                        {domToReact(domNode.children as any)}
-                                    </Blockquote>
-                                );
-                            }
-                            case "strong": {
-                                return (
-                                    <Typography
-                                        whiteSpace="pre-wrap"
-                                        fontSize="inherit"
-                                        fontWeight="bold"
-                                    >
-                                        {domToReact(domNode.children as any)}
-                                    </Typography>
-                                );
-                            }
-                            case "em": {
-                                return (
-                                    <Typography
-                                        whiteSpace="pre-wrap"
-                                        fontSize="inherit"
-                                        fontStyle="italic"
-                                    >
-                                        {domToReact(domNode.children as any)}
-                                    </Typography>
-                                );
-                            }
-                            case "del": {
-                                return (
-                                    <Typography
-                                        fontSize="inherit"
-                                        textDecoration="line-through"
-                                    >
-                                        {domToReact(domNode.children as any)}
-                                    </Typography>
-                                );
-                            }
-                            case "u": {
-                                return (
-                                    <Typography
-                                        whiteSpace="pre-wrap"
-                                        fontSize="inherit"
-                                        textDecoration="underline"
-                                    >
-                                        {domToReact(domNode.children as any)}
-                                    </Typography>
-                                );
-                            }
-                            case "spoiler": {
-                                return (
-                                    <Spoiler>
-                                        {domToReact(domNode.children as any)}
-                                    </Spoiler>
-                                );
-                            }
-                            case "emoji": {
-                                const {
-                                    ["data-name"]: name,
-                                    ["data-url"]: url,
-                                    ["data-unicode"]: unicode,
-                                } = domNode.attribs;
+    const content = useMemo(() => {
+        const options: HTMLReactParserOptions = {
+            replace: (domNode) => {
+                if (domNode.type !== "tag") return;
 
-                                return (
-                                    <Emoji
-                                        isEmojiOnly={isEmojiOnly}
-                                        url={url}
-                                        unicode={unicode}
-                                        name={name}
-                                    />
-                                );
-                            }
-                            case "a": {
-                                const { href } = domNode.attribs;
-                                return (
-                                    <Link
-                                        href={href}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        textColor="muted"
-                                    >
-                                        {domToReact(domNode.children as any)}
-                                    </Link>
-                                );
-                            }
-                        }
+                const children = domToReact(
+                    (domNode.children ?? []) as any,
+                    options,
+                );
+
+                switch (domNode.name) {
+                    case "h1":
+                        return (
+                            <Typography
+                                level="h3"
+                                fontWeight="bold"
+                                display="block"
+                            >
+                                {children}
+                            </Typography>
+                        );
+                    case "h2":
+                        return (
+                            <Typography
+                                level="h4"
+                                fontWeight="bold"
+                                display="block"
+                            >
+                                {children}
+                            </Typography>
+                        );
+                    case "p": {
+                        return (
+                            <Typography
+                                whiteSpace="pre-wrap"
+                                fontSize="inherit"
+                                display="block"
+                            >
+                                {children}
+                            </Typography>
+                        );
                     }
-                },
-            }),
-        [html, isEmojiOnly],
-    );
+                    case "h3":
+                        return (
+                            <Typography
+                                level="h5"
+                                fontWeight="bold"
+                                display="block"
+                            >
+                                {children}
+                            </Typography>
+                        );
+                    case "blockquote":
+                        return <Blockquote>{children}</Blockquote>;
+                    case "strong":
+                        return (
+                            <Typography
+                                whiteSpace="pre-wrap"
+                                fontSize="inherit"
+                                fontWeight="bold"
+                            >
+                                {children}
+                            </Typography>
+                        );
+                    case "em":
+                        return (
+                            <Typography
+                                whiteSpace="pre-wrap"
+                                fontSize="inherit"
+                                fontStyle="italic"
+                            >
+                                {children}
+                            </Typography>
+                        );
+                    case "del":
+                        return (
+                            <Typography
+                                fontSize="inherit"
+                                textDecoration="line-through"
+                            >
+                                {children}
+                            </Typography>
+                        );
+                    case "u":
+                        return (
+                            <Typography
+                                whiteSpace="pre-wrap"
+                                fontSize="inherit"
+                                textDecoration="underline"
+                            >
+                                {children}
+                            </Typography>
+                        );
+                    case "spoiler":
+                        return <Spoiler>{children}</Spoiler>;
+                    case "emoji": {
+                        const {
+                            ["data-name"]: name,
+                            ["data-url"]: url,
+                            ["data-unicode"]: unicode,
+                        } = (domNode as any).attribs ?? {};
+
+                        return (
+                            <Emoji
+                                isEmojiOnly={isEmojiOnly}
+                                url={url}
+                                unicode={unicode}
+                                name={name}
+                            />
+                        );
+                    }
+                    case "a": {
+                        const { href } = (domNode as any).attribs ?? {};
+                        return (
+                            <Link
+                                href={href}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                textColor="muted"
+                            >
+                                {children}
+                            </Link>
+                        );
+                    }
+                }
+            },
+        };
+
+        return parse(html, options);
+    }, [html, isEmojiOnly]);
 
     return (
         <Paper

@@ -23,6 +23,7 @@ import { ThemeStore } from "./Theme.store";
 import { UpdaterStore } from "./Updater.store";
 import { UserStore } from "./User.store";
 import { ThemeCreatorStore } from "@stores/ThemeCreator.store";
+import { NavigationStore } from "@stores/Navigation.store";
 
 export class AppStore {
     isGatewayReady = false;
@@ -33,6 +34,7 @@ export class AppStore {
     channels = new ChannelStore(this);
     gateway = new GatewayStore(this);
     drafts = new DraftStore();
+    navigation = new NavigationStore(this);
     spaces = new SpaceStore(this);
     queue = new MessageQueue(this);
     themes = new ThemeStore(this);
@@ -52,6 +54,8 @@ export class AppStore {
     private readonly logger = new Logger({
         tag: "AppStore",
     });
+
+    // Page Navigation for navigation purposes
 
     constructor() {
         if (isTauri) this.updater = new UpdaterStore();

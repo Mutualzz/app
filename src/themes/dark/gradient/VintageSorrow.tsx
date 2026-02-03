@@ -12,24 +12,24 @@ export const vintageSorrowTheme: Theme = {
     style: "gradient",
     colors: {
         ...baseDarkTheme.colors,
-        primary: "#FF95AB",
-        neutral: "#D9C0CC",
+        primary: "#F48CA7",
+        neutral: "#CDAFB9",
         background:
-            "linear-gradient(90deg,#070609 0%,#0F0D11 45%,#2A1720 75%,#8B4B5A 100%,#FF95AB 100%)",
+            "linear-gradient(90deg,#070609 0%,#181014 40%,#2C1720 70%,#7A3A4B 100%)",
         surface:
-            "linear-gradient(90deg,#19161A 0%,#20161A 45%,#3C2430 75%,#7A4B57 100%,#FF95AB 100%)",
-        danger: "#FF6B6B",
-        warning: "#F3CE72",
-        success: "#5CC8A6",
-        info: "#64A9FF",
+            "linear-gradient(90deg,#19161A 0%,#20161A 40%,#3C2430 80%,#F48CA7 100%)",
+        danger: "#FF5A6B",
+        warning: "#F2C572",
+        success: "#4DBE9A",
+        info: "#FF95AB",
     },
     typography: {
         ...baseDarkTheme.typography,
         colors: {
-            primary: "#F5F5F7",
-            secondary: "#EBCDD7",
-            accent: "#FF95AB",
-            muted: "#CDAFB9",
+            primary: "#F3F6FA",
+            secondary: "#E1B7C8",
+            accent: "#F48CA7",
+            muted: "#A88B97",
         },
     },
 };

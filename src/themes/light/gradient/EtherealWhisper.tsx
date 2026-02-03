@@ -11,16 +11,16 @@ export const etherealWhisperTheme: Theme = {
     style: "gradient",
     colors: {
         ...baseLightTheme.colors,
-        primary: "#2AA8A3",
-        neutral: "#4A5E5E",
+        primary: "#3CB8B3",
+        neutral: "#7CA7A7",
         background:
-            "linear-gradient(90deg,#F0FBFA 0%,#DFF7F5 45%,#AEEBE7 75%,#56C2BD 100%,#2AA8A3 100%)",
+            "linear-gradient(90deg,#F0FBFA 0%,#E6F7F5 45%,#BEEBE7 75%,#5AC2BD 100%,#3CB8B3 100%)",
         surface:
-            "linear-gradient(90deg,#E9F9F8 0%,#CDF3F1 45%,#9BE6E2 75%,#58C1BD 100%,#2AA8A3 100%)",
+            "linear-gradient(90deg,#E9F9F8 0%,#D3F3F1 45%,#A3E6E2 75%,#5AC2BD 100%,#3CB8B3 100%)",
         danger: "#B3261E",
-        warning: "#8F6500",
-        success: "#1F6E34",
-        info: "#0F5DA8",
+        warning: "#B15A14",
+        success: "#2F7A54",
+        info: "#3FB8AD",
     },
     typography: {
         ...baseLightTheme.typography,

@@ -115,7 +115,7 @@ export const UserBar = observer(() => {
                                     <UserSettingsModal />,
                                 )
                             }
-                            color="neutral"
+                            color="info"
                             variant="plain"
                         >
                             <FaCogs />

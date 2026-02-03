@@ -35,6 +35,7 @@ import { Leaf } from "./Leaf";
 import { MarkdownInputContext } from "./MarkdownInput.context";
 import {
     parseMarkdownToRanges,
+    parseSpoilerRanges,
     resolveMarkdownStyles,
 } from "./MarkdownInput.helpers";
 import type { MarkdownInputProps } from "./MarkdownInput.types";
@@ -96,9 +97,10 @@ const MarkdownInput = forwardRef<HTMLDivElement, MarkdownInputProps>(
 
         const decorate = useCallback(
             ([node, path]: [Node, number[]]): Range[] => {
-                if (!Text.isText(node)) return [];
+                if (Text.isText(node))
+                    return parseMarkdownToRanges(node.text, path);
 
-                return parseMarkdownToRanges(node.text, path);
+                return parseSpoilerRanges([node, path]);
             },
             [],
         );

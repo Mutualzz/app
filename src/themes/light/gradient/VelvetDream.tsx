@@ -11,23 +11,23 @@ export const velvetDreamTheme: Theme = {
     style: "gradient",
     colors: {
         ...baseLightTheme.colors,
-        primary: "#B25574",
-        neutral: "#5A4652",
+        primary: "#A06DDF",
+        neutral: "#B3A3D6",
         background:
-            "linear-gradient(90deg,#F7F5F7 0%,#F1EDF3 38%,#E3D2E2 65%,#C26B89 100%,#B25574 100%)",
+            "linear-gradient(90deg,#F7F5F7 0%,#F1EDF3 38%,#E3D2E2 65%,#C26B89 100%,#A06DDF 100%)",
         surface:
-            "linear-gradient(90deg,#F0E9EE 0%,#E6DAE4 45%,#D0B2C5 75%,#B86F88 92%,#B25574 100%)",
+            "linear-gradient(90deg,#F0E9EE 0%,#E6DAE4 45%,#D0B2C5 75%,#B86F88 92%,#A06DDF 100%)",
         danger: "#B3261E",
-        warning: "#8F6500",
-        success: "#1F6E34",
-        info: "#0F5DA8",
+        warning: "#B15A14",
+        success: "#2F7A54",
+        info: "#A06DDF",
     },
     typography: {
         ...baseLightTheme.typography,
         colors: {
             primary: "#1A1A1A",
             secondary: "#3A3A3A",
-            accent: "#B25574",
+            accent: "#A06DDF",
             muted: "#5A5A5F",
         },
     },

@@ -148,7 +148,7 @@ export const UserSettingsSidebar = observer(
                                     {startCase(category)}
                                 </Typography>
                                 <ButtonGroup
-                                    color="neutral"
+                                    color="info"
                                     orientation="vertical"
                                     variant="plain"
                                     spacing={1.25}
@@ -192,7 +192,7 @@ export const UserSettingsSidebar = observer(
                 </Stack>
                 <Stack direction="column" pb="1rem">
                     <Button
-                        color="neutral"
+                        color="danger"
                         variant="plain"
                         startDecorator={<FaSignOutAlt />}
                         horizontalAlign="left"

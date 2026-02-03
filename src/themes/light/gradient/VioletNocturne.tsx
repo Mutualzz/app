@@ -11,16 +11,16 @@ export const violetNocturneTheme: Theme = {
     style: "gradient",
     colors: {
         ...baseLightTheme.colors,
-        primary: "#5C6FE6",
-        neutral: "#4A4F63",
+        primary: "#A06DDF",
+        neutral: "#B3A3D6",
         background:
-            "linear-gradient(90deg,#F2F4FB 0%,#E9ECFB 45%,#D0D5F8 75%,#827BEF 100%,#5C6FE6 100%)",
+            "linear-gradient(90deg,#F2F4FB 0%,#E9ECFB 45%,#D0D5F8 75%,#827BEF 100%,#A06DDF 100%)",
         surface:
-            "linear-gradient(90deg,#E9EAF7 0%,#D6D9F6 45%,#B7BFF3 75%,#7E78F0 100%,#5C6FE6 100%)",
+            "linear-gradient(90deg,#E9EAF7 0%,#D6D9F6 45%,#B7BFF3 75%,#7E78F0 100%,#A06DDF 100%)",
         danger: "#B3261E",
-        warning: "#8F6500",
-        success: "#1F6E34",
-        info: "#0F5DA8",
+        warning: "#B15A14",
+        success: "#2F7A54",
+        info: "#A06DDF",
     },
     typography: {
         ...baseLightTheme.typography,

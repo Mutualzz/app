@@ -148,12 +148,13 @@ export const ChannelCreateModal = observer(({ space, parent }: Props) => {
                                 </Stack>
                             </Stack>
                         </Button>
-                        <Button value={1}>
+                        <Button disabled value={1}>
                             <Stack direction="row" textAlign="left" spacing={2}>
                                 <Radio
                                     variant="outlined"
                                     color="neutral"
                                     checked={type === 1}
+                                    disabled
                                 />
                                 <Stack
                                     direction="row"

@@ -11,24 +11,24 @@ export const noirElegyTheme: Theme = {
     style: "gradient",
     colors: {
         ...baseDarkTheme.colors,
-        primary: "#B884F0",
-        neutral: "#C2B5D8",
+        primary: "#A06DDF",
+        neutral: "#B3A3D6",
         background:
-            "linear-gradient(90deg,#070609 0%,#0D0D10 45%,#1B1426 75%,#6B3F7A 100%,#B884F0 100%)",
+            "linear-gradient(90deg,#070609 0%,#18101C 40%,#241C3A 70%,#6B3F7A 100%)",
         surface:
-            "linear-gradient(90deg,#16141B 0%,#23232A 45%,#2E2738 75%,#4A3A5A 100%,#B884F0 100%)",
-        danger: "#FF6B6B",
-        warning: "#F3CE72",
-        success: "#5CC8A6",
-        info: "#64A9FF",
+            "linear-gradient(90deg,#16141B 0%,#23232A 40%,#2E2738 80%,#A06DDF 100%)",
+        danger: "#FF5A6B",
+        warning: "#F2C572",
+        success: "#4DBE9A",
+        info: "#B884F0",
     },
     typography: {
         ...baseDarkTheme.typography,
         colors: {
-            primary: "#F5F5F7",
-            secondary: "#E1D2F2",
-            accent: "#B884F0",
-            muted: "#B7A8CC",
+            primary: "#F3F6FA",
+            secondary: "#CFC3E6",
+            accent: "#A06DDF",
+            muted: "#8B7CA8",
         },
     },
 };

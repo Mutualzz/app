@@ -1,13 +1,14 @@
 import { WINDOW_TITLEBAR_ZINDEX } from "@app-types/index";
-import { Paper } from "@components/Paper.tsx";
-import { useDesktopShell } from "@contexts/DesktopShell.context.tsx";
+import { Paper } from "@components/Paper";
+import { useDesktopShell } from "@contexts/DesktopShell.context";
 import { useModal } from "@contexts/Modal.context";
 import { useAppStore } from "@hooks/useStores";
 import {
     Button,
+    ButtonGroup,
     Divider,
-    IconButton,
     Stack,
+    Tooltip,
     Typography,
     useTheme,
 } from "@mutualzz/ui-web";
@@ -15,7 +16,12 @@ import { getCurrentWindow } from "@tauri-apps/api/window";
 import { isTauri } from "@utils/index";
 import { observer } from "mobx-react-lite";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { FaDownload, FaPeopleArrows } from "react-icons/fa";
+import {
+    FaArrowLeft,
+    FaArrowRight,
+    FaDownload,
+    FaPeopleArrows,
+} from "react-icons/fa";
 import { GiGalaxy } from "react-icons/gi";
 import { ImFeed } from "react-icons/im";
 import {
@@ -24,6 +30,9 @@ import {
     VscClose,
 } from "react-icons/vsc";
 import { ThemeCreatorModal } from "./ThemeCreator/ThemeCreatorModal";
+import { useNavigate } from "@tanstack/react-router";
+import { TooltipWrapper } from "@components/TooltipWrapper.tsx";
+import { IconButton } from "./IconButton";
 
 interface WindowTitleBarProps {
     onHeightChange?: (height: number) => void;
@@ -32,6 +41,7 @@ interface WindowTitleBarProps {
 const WindowTitleBar = ({ onHeightChange }: WindowTitleBarProps) => {
     const appWindow = useMemo(() => (isTauri ? getCurrentWindow() : null), []);
     const app = useAppStore();
+    const navigate = useNavigate();
     const { inPreview, stopPreview, values } = app.themeCreator;
     const { openModal } = useModal();
     const { theme, changeTheme } = useTheme();
@@ -47,6 +57,7 @@ const WindowTitleBar = ({ onHeightChange }: WindowTitleBarProps) => {
     const isUpdating = stage === "installing" || stage === "relaunching";
 
     useEffect(() => {
+        if (isUpdating || app.updater?.forceUpdate) return;
         const el = rootRef.current;
         if (!el) return;
 
@@ -63,7 +74,9 @@ const WindowTitleBar = ({ onHeightChange }: WindowTitleBarProps) => {
             ro.disconnect();
             onHeightChange?.(0);
         };
-    }, [isMac]);
+    }, [isMac, isUpdating, onHeightChange, app.updater?.forceUpdate]);
+
+    if (isUpdating || app.updater?.forceUpdate) return null;
 
     return (
         <Paper
@@ -84,25 +97,71 @@ const WindowTitleBar = ({ onHeightChange }: WindowTitleBarProps) => {
             boxShadow="none !important"
         >
             <Stack alignItems="center" data-tauri-drag-region flex={1}>
-                {inPreview && (
-                    <Stack pl={20} spacing={5} alignItems="center">
-                        <Typography fontWeight="bold" ml={2}>
-                            Currently previewing a theme
-                            {values.name ? `: ${values.name}` : ""}
-                        </Typography>
-                        <Button
-                            onClick={() => {
-                                openModal(
-                                    "theme-creator",
-                                    <ThemeCreatorModal />,
-                                );
-                                stopPreview(changeTheme);
-                            }}
-                            variant="solid"
-                            color="danger"
-                        >
-                            Stop preview
-                        </Button>
+                {app.account && (
+                    <Stack
+                        data-tauri-drag-region
+                        pl={isMac ? 20 : 1.25}
+                        direction="row"
+                        alignItems="center"
+                        spacing={2}
+                    >
+                        <ButtonGroup variant="plain" spacing={10} size="sm">
+                            <IconButton
+                                disabled={!app.navigation.canBack}
+                                onClick={() => app.navigation.back(navigate)}
+                                color="primary"
+                            >
+                                <Tooltip
+                                    content={
+                                        <TooltipWrapper>Go Back</TooltipWrapper>
+                                    }
+                                >
+                                    <FaArrowLeft />
+                                </Tooltip>
+                            </IconButton>
+                            <IconButton
+                                disabled={!app.navigation.canForward}
+                                onClick={() => app.navigation.forward(navigate)}
+                                color="primary"
+                            >
+                                <Tooltip
+                                    content={
+                                        <TooltipWrapper>
+                                            Go Forward
+                                        </TooltipWrapper>
+                                    }
+                                >
+                                    <FaArrowRight />
+                                </Tooltip>
+                            </IconButton>
+                        </ButtonGroup>
+                        {inPreview && (
+                            <Stack spacing={5} alignItems="center">
+                                <Typography
+                                    css={{
+                                        userSelect: "none",
+                                    }}
+                                    fontWeight="bold"
+                                    ml={2}
+                                >
+                                    Currently previewing a theme
+                                    {values.name ? `: ${values.name}` : ""}
+                                </Typography>
+                                <Button
+                                    onClick={() => {
+                                        openModal(
+                                            "theme-creator",
+                                            <ThemeCreatorModal />,
+                                        );
+                                        stopPreview(changeTheme);
+                                    }}
+                                    variant="solid"
+                                    color="danger"
+                                >
+                                    Stop preview
+                                </Button>
+                            </Stack>
+                        )}
                     </Stack>
                 )}
             </Stack>
@@ -188,7 +247,6 @@ const WindowTitleBar = ({ onHeightChange }: WindowTitleBarProps) => {
                                 borderRadius: 0,
                                 padding: 4,
                             }}
-                            color={theme.typography.colors.primary}
                             size={18}
                             variant="plain"
                             onClick={() => appWindow.minimize()}
@@ -202,7 +260,6 @@ const WindowTitleBar = ({ onHeightChange }: WindowTitleBarProps) => {
                                 borderRadius: 0,
                                 padding: 4,
                             }}
-                            color={theme.typography.colors.primary}
                             size={18}
                             variant="plain"
                             onClick={() => appWindow.toggleMaximize()}

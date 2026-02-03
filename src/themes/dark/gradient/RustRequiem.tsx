@@ -11,24 +11,24 @@ export const rustRequiemTheme: Theme = {
     style: "gradient",
     colors: {
         ...baseDarkTheme.colors,
-        primary: "#FFB37A",
-        neutral: "#C4B48F",
+        primary: "#FF9B5A",
+        neutral: "#B8A47A",
         background:
-            "linear-gradient(90deg,#070605 0%,#0D0D0B 45%,#241B14 75%,#905E3F 100%,#FFB37A 100%)",
+            "linear-gradient(90deg,#070605 0%,#18140F 40%,#2C2114 70%,#7A4E2B 100%)",
         surface:
-            "linear-gradient(90deg,#15140F 0%,#201E18 45%,#2E2A23 75%,#6F4E3D 100%,#FFB37A 100%)",
-        danger: "#FF6B6B",
-        warning: "#F3CE72",
-        success: "#5CC8A6",
-        info: "#64A9FF",
+            "linear-gradient(90deg,#15140F 0%,#201E18 40%,#3A2A1E 80%,#FF9B5A 100%)",
+        danger: "#FF5A6B",
+        warning: "#F2C572",
+        success: "#4DBE9A",
+        info: "#FFB37A",
     },
     typography: {
         ...baseDarkTheme.typography,
         colors: {
-            primary: "#F5F5F7",
-            secondary: "#E1D3C0",
-            accent: "#FFB37A",
-            muted: "#B8AB88",
+            primary: "#F3F6FA",
+            secondary: "#D8C6B0",
+            accent: "#FF9B5A",
+            muted: "#A88B67",
         },
     },
 };

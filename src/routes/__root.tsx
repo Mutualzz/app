@@ -31,6 +31,7 @@ import {
     Outlet,
     Scripts,
     useNavigate,
+    useRouterState,
 } from "@tanstack/react-router";
 import { getTauriVersion, getVersion } from "@tauri-apps/api/app";
 import { arch, locale, platform, version } from "@tauri-apps/plugin-os";
@@ -45,6 +46,7 @@ import {
     type PropsWithChildren,
     type ReactNode,
     useEffect,
+    useRef,
     useState,
 } from "react";
 
@@ -61,7 +63,9 @@ import { ModalProvider } from "@contexts/Modal.context";
 import { listen } from "@tauri-apps/api/event";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { calendarStrings } from "@utils/i18n";
-import { UpdatingOverlay } from "@components/UpdatingOverlay.tsx";
+import { UpdatingOverlay } from "@components/UpdatingOverlay";
+import { NavigationTracker } from "@components/NavigationTracker";
+import { AppHotkeys } from "@components/AppHotkeys";
 
 dayjs.extend(relativeTime);
 dayjs.extend(calendar, calendarStrings);
@@ -123,6 +127,13 @@ function RootComponent() {
     const [titleBarHeight, setTitleBarHeight] = useState(0);
 
     const networkState = useNetworkState();
+
+    const didRestoreNavRef = useRef(false);
+    const didDeepLinkRef = useRef(false);
+
+    const currentRouterHref = useRouterState({
+        select: (state) => state.location.href,
+    });
 
     useEffect(() => {
         app.loadSettings();
@@ -223,6 +234,7 @@ function RootComponent() {
 
     useEffect(() => {
         if (!isTauri) return;
+
         const win = getCurrentWindow();
 
         const unlistenP = listen<string[]>("app://open-url", async (e) => {
@@ -231,6 +243,8 @@ function RootComponent() {
             await win.unminimize();
             await win.setFocus();
 
+            didDeepLinkRef.current = true;
+
             const urlStr = e.payload.find((x) => x.startsWith("mutualzz://"));
             if (!urlStr) return;
 
@@ -238,7 +252,7 @@ function RootComponent() {
             if (url.hostname === "invite") {
                 const code = url.pathname.replace(/^\/+/, "");
 
-                navigate({
+                await navigate({
                     to: "/invite/$code",
                     replace: true,
                     params: { code },
@@ -270,9 +284,8 @@ function RootComponent() {
             if (e.key === "6") updater.debugSetStage("relaunching");
             if (e.key === "0") updater.debugSetStage("idle");
 
-            if (e.key.toLowerCase() === "f") {
+            if (e.key.toLowerCase() === "f")
                 updater.debugSetForceGate(!updater.forceUpdate);
-            }
 
             // Force-gate ON (dev only)
             if (e.key.toLowerCase() === "g") {
@@ -289,7 +302,29 @@ function RootComponent() {
 
         window.addEventListener("keydown", onKeyDown);
         return () => window.removeEventListener("keydown", onKeyDown);
-    }, [app]);
+    }, []);
+
+    useEffect(() => {
+        if (didRestoreNavRef.current) return;
+        if (didDeepLinkRef.current) return;
+
+        const targetHref = app.navigation.current?.href;
+        if (!targetHref) return;
+
+        if (targetHref === "/spaces" || targetHref === "/feed") return;
+
+        if (targetHref === currentRouterHref) {
+            didRestoreNavRef.current = true;
+            return;
+        }
+
+        didRestoreNavRef.current = true;
+
+        navigate({
+            to: targetHref,
+            replace: true,
+        });
+    }, [currentRouterHref, app.navigation.current?.href]);
 
     const stage = app.updater?.stage;
     const forceGate =
@@ -307,6 +342,8 @@ function RootComponent() {
                     <DesktopShellProvider>
                         <WindowTitleBar onHeightChange={setTitleBarHeight} />
                         <DesktopShell>
+                            <NavigationTracker />
+                            <AppHotkeys />
                             <UpdatingOverlay />
 
                             {forceGate ? null : (

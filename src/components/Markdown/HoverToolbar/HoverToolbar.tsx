@@ -28,9 +28,11 @@ import {
 } from "react-icons/fa";
 import { Range } from "slate";
 import { useFocused, useSlate } from "slate-react";
+import { useAppStore } from "@hooks/useStores";
 
 export const HoverToolbar = () => {
     const { theme } = useTheme();
+    const app = useAppStore();
     const { activeFormats, enableHoverToolbar } =
         useContext(MarkdownInputContext);
     const ref = useRef<HTMLDivElement>(null);
@@ -65,7 +67,7 @@ export const HoverToolbar = () => {
         const domRange = domSelection.getRangeAt(0);
         const rect = domRange.getBoundingClientRect();
 
-        const top = rect.top + window.scrollY - el.offsetHeight - 8;
+        const top = rect.top + window.scrollY - el.offsetHeight - 16;
         const left =
             rect.left + window.scrollX + rect.width / 2 - el.offsetWidth / 2;
 
@@ -92,8 +94,11 @@ export const HoverToolbar = () => {
     return (
         <Portal>
             <Paper
-                elevation={5}
+                elevation={app.settings?.preferEmbossed ? 3 : 2}
+                transparency={0}
                 ref={ref}
+                borderRadius={12}
+                p={1}
                 onMouseDown={(e) => e.preventDefault()}
                 css={{
                     position: "absolute",
@@ -110,6 +115,9 @@ export const HoverToolbar = () => {
             >
                 <ButtonGroup spacing={1} variant="plain">
                     <Button
+                        css={{
+                            borderRadius: 9999,
+                        }}
                         title="Bold"
                         color={
                             activeFormats.includes("**") ? "success" : "neutral"
@@ -120,6 +128,9 @@ export const HoverToolbar = () => {
                     </Button>
                     <Button
                         title="Italic"
+                        css={{
+                            borderRadius: 9999,
+                        }}
                         color={
                             activeFormats.includes("*") ? "success" : "neutral"
                         }
@@ -129,6 +140,9 @@ export const HoverToolbar = () => {
                     </Button>
                     <Button
                         title="Underline"
+                        css={{
+                            borderRadius: 9999,
+                        }}
                         color={
                             activeFormats.includes("__") ? "success" : "neutral"
                         }
@@ -138,6 +152,9 @@ export const HoverToolbar = () => {
                     </Button>
                     <Button
                         title="Strikethrough"
+                        css={{
+                            borderRadius: 9999,
+                        }}
                         color={
                             activeFormats.includes("~~") ? "success" : "neutral"
                         }
@@ -162,6 +179,9 @@ export const HoverToolbar = () => {
                                 ? "success"
                                 : "neutral"
                         }
+                        css={{
+                            borderRadius: 9999,
+                        }}
                         onClick={() => toggleBlockquote(editor)}
                     >
                         <FaQuoteLeft />
@@ -171,6 +191,9 @@ export const HoverToolbar = () => {
                         color={
                             activeFormats.includes("`") ? "success" : "neutral"
                         }
+                        css={{
+                            borderRadius: 9999,
+                        }}
                         onClick={(e) => textFormat(e, "`")}
                     >
                         <FaCode />
@@ -180,6 +203,9 @@ export const HoverToolbar = () => {
                         color={
                             activeFormats.includes("||") ? "success" : "neutral"
                         }
+                        css={{
+                            borderRadius: 9999,
+                        }}
                         onClick={(e) => textFormat(e, "||")}
                     >
                         {activeFormats.includes("||") ? (

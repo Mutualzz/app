@@ -11,16 +11,16 @@ export const rustAuroraTheme: Theme = {
     style: "gradient",
     colors: {
         ...baseLightTheme.colors,
-        primary: "#A76B3C",
-        neutral: "#5A5142",
+        primary: "#FF9B5A",
+        neutral: "#B8A47A",
         background:
-            "linear-gradient(90deg,#FBF7F5 0%,#F5EEE9 38%,#ECD7C8 65%,#C6744A 100%,#A76B3C 100%)",
+            "linear-gradient(90deg,#FBF7F5 0%,#F5EEE9 38%,#ECD7C8 65%,#C6744A 100%,#FF9B5A 100%)",
         surface:
-            "linear-gradient(90deg,#F1E9E5 0%,#E6D9D1 45%,#D2B9A8 75%,#C07752 100%,#A76B3C 100%)",
+            "linear-gradient(90deg,#F1E9E5 0%,#E6D9D1 45%,#D2B9A8 75%,#C07752 100%,#FF9B5A 100%)",
         danger: "#B3261E",
-        warning: "#8F6500",
-        success: "#1F6E34",
-        info: "#0F5DA8",
+        warning: "#B15A14",
+        success: "#2F7A54",
+        info: "#FFB37A",
     },
     typography: {
         ...baseLightTheme.typography,

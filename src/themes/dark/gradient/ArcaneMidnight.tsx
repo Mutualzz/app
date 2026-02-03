@@ -11,24 +11,24 @@ export const arcaneMidnightTheme: Theme = {
     style: "gradient",
     colors: {
         ...baseDarkTheme.colors,
-        primary: "#B884F0",
-        neutral: "#C2B5E8",
+        primary: "#A06DDF",
+        neutral: "#B3A3D6",
         background:
-            "linear-gradient(90deg,#070608 0%,#0D0D10 45%,#18142A 75%,#4D3A66 100%,#B884F0 100%)",
+            "linear-gradient(90deg,#070608 0%,#14101C 40%,#241C3A 70%,#3C2B5C 100%)",
         surface:
-            "linear-gradient(90deg,#19162A 0%,#23203A 45%,#312A52 75%,#56407A 100%,#B884F0 100%)",
-        danger: "#FF6B6B",
-        warning: "#F3CE72",
-        success: "#5CC8A6",
-        info: "#64A9FF",
+            "linear-gradient(90deg,#19162A 0%,#23203A 40%,#3A2C5A 80%,#A06DDF 100%)",
+        danger: "#FF5A6B",
+        warning: "#F2C572",
+        success: "#4DBE9A",
+        info: "#6C8CFF",
     },
     typography: {
         ...baseDarkTheme.typography,
         colors: {
-            primary: "#F5F5F7",
-            secondary: "#DACFEE",
-            accent: "#B884F0",
-            muted: "#B7A8D2",
+            primary: "#F3F6FA",
+            secondary: "#CFC3E6",
+            accent: "#A06DDF",
+            muted: "#8B7CA8",
         },
     },
 };

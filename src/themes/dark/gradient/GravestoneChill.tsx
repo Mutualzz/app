@@ -11,24 +11,24 @@ export const gravestoneChillTheme: Theme = {
     style: "gradient",
     colors: {
         ...baseDarkTheme.colors,
-        primary: "#B7B7D8",
-        neutral: "#A5B4C2",
+        primary: "#AEB6CF",
+        neutral: "#8C9BAA",
         background:
-            "linear-gradient(90deg,#070708 0%,#0C0D11 45%,#15161C 75%,#3C3E4A 100%,#B7B7D8 100%)",
+            "linear-gradient(90deg,#070708 0%,#181A1F 40%,#23262E 70%,#49505E 100%)",
         surface:
-            "linear-gradient(90deg,#15161A 0%,#23243A 45%,#2F3348 75%,#485266 100%,#B7B7D8 100%)",
-        danger: "#FF6B6B",
-        warning: "#F3CE72",
-        success: "#5CC8A6",
-        info: "#64A9FF",
+            "linear-gradient(90deg,#15161A 0%,#23243A 40%,#384052 80%,#AEB6CF 100%)",
+        danger: "#FF5A6B",
+        warning: "#F2C572",
+        success: "#4DBE9A",
+        info: "#7CA7E6",
     },
     typography: {
         ...baseDarkTheme.typography,
         colors: {
-            primary: "#F5F5F7",
-            secondary: "#D0D6DE",
-            accent: "#B7B7D8",
-            muted: "#97A9B8",
+            primary: "#F3F6FA",
+            secondary: "#C3C9D1",
+            accent: "#AEB6CF",
+            muted: "#7C8B9C",
         },
     },
 };

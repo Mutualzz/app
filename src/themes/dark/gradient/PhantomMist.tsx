@@ -11,24 +11,24 @@ export const phantomMistTheme: Theme = {
     style: "gradient",
     colors: {
         ...baseDarkTheme.colors,
-        primary: "#4BB7D9",
-        neutral: "#A5B4C2",
+        primary: "#3CA9C8",
+        neutral: "#8CA3B7",
         background:
-            "linear-gradient(90deg,#070709 0%,#0D1113 45%,#0E1C21 75%,#255A71 100%,#4BB7D9 100%)",
+            "linear-gradient(90deg,#070709 0%,#14181B 40%,#1B2A32 70%,#3A6B82 100%)",
         surface:
-            "linear-gradient(90deg,#15181B 0%,#20272A 45%,#2B3638 75%,#3F5560 100%,#4BB7D9 100%)",
-        danger: "#FF6B6B",
-        warning: "#F3CE72",
-        success: "#5CC8A6",
-        info: "#64A9FF",
+            "linear-gradient(90deg,#15181B 0%,#20272A 40%,#2B3638 80%,#3CA9C8 100%)",
+        danger: "#FF5A6B",
+        warning: "#F2C572",
+        success: "#4DBE9A",
+        info: "#5CB8E6",
     },
     typography: {
         ...baseDarkTheme.typography,
         colors: {
-            primary: "#F5F5F7",
-            secondary: "#C9D8E0",
-            accent: "#4BB7D9",
-            muted: "#97A9B8",
+            primary: "#F3F6FA",
+            secondary: "#B6C3D1",
+            accent: "#3CA9C8",
+            muted: "#7C8B9C",
         },
     },
 };

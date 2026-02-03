@@ -10,19 +10,18 @@ export interface Codec {
 }
 
 export async function createCodec(name: Encoding): Promise<Codec> {
-    if (name === "etf" && !isTauri) {
+    if (name === "etf" && !isTauri)
         return {
             name: "json",
-            encode: (d) =>
-                new TextEncoder().encode(JSON.stringify(d, JSONReplacer)),
-            decode: (b) => JSON.parse(new TextDecoder().decode(b)),
+            encode: (data) =>
+                new TextEncoder().encode(JSON.stringify(data, JSONReplacer)),
+            decode: (bytes) => JSON.parse(new TextDecoder().decode(bytes)),
         };
-    }
 
     return {
         name: "json",
-        encode: (d) =>
-            new TextEncoder().encode(JSON.stringify(d, JSONReplacer)),
-        decode: (b) => JSON.parse(new TextDecoder().decode(b)),
+        encode: (data) =>
+            new TextEncoder().encode(JSON.stringify(data, JSONReplacer)),
+        decode: (bytes) => JSON.parse(new TextDecoder().decode(bytes)),
     };
 }
