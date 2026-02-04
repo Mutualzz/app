@@ -1,4 +1,5 @@
 import { getEmoji } from "@utils/emojis";
+import { TWEMOJI_URL } from "@utils/urls";
 import shortcodeRegex from "emojibase-regex/shortcode";
 import MarkdownIt from "markdown-it";
 import Token from "markdown-it/lib/token.mjs";
@@ -41,7 +42,7 @@ export const emojiPlugin = (md: MarkdownIt) => {
                         );
                         emojiToken.attrSet(
                             "url",
-                            `/assets/emojis/${emojiData.hexcode.toLowerCase()}.svg`,
+                            `${TWEMOJI_URL}/${emojiData.hexcode.toLowerCase()}.svg`,
                         );
                         emojiToken.attrSet("unicode", emojiData.emoji);
                         emojiToken.level = tokens[i].level;

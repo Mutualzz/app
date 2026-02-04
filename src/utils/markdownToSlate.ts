@@ -1,6 +1,7 @@
 import shortcodeRegex from "emojibase-regex/shortcode";
 import type { Descendant, Text } from "slate";
 import { getEmoji } from "./emojis";
+import { TWEMOJI_URL } from "./urls";
 
 export function markdownToSlate(markdown: string): Descendant[] {
     const lines = markdown.split(/\r?\n/);
@@ -109,7 +110,7 @@ function parseInlineMarkdown(input: string): Descendant[] {
                 ? {
                       type: "emoji",
                       name: `:${emoji.shortcodes?.[0]}:`,
-                      url: `/assets/emojis/${emoji.hexcode.toLowerCase()}.png`,
+                      url: `${TWEMOJI_URL}/${emoji.hexcode.toLowerCase()}.png`,
                       unicode: emoji.emoji,
                       children: [{ text: "" }],
                   }

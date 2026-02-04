@@ -1,6 +1,7 @@
 import type { EmojiElement } from "@app-types/slate";
 import { getEmoji } from "@utils/emojis";
 import { slateToMarkdown } from "@utils/slateToMarkdown";
+import { TWEMOJI_URL } from "@utils/urls";
 import emojiRegex from "emojibase-regex";
 import baseEmoticonRegex from "emojibase-regex/emoticon";
 import shortcodeRegex from "emojibase-regex/shortcode";
@@ -231,7 +232,7 @@ const insertEmoji = (editor: Editor, emoji: ReturnType<typeof getEmoji>) => {
 
     const emojiElement: EmojiElement = {
         type: "emoji",
-        url: `/assets/emojis/${emoji.hexcode.toLowerCase()}.svg`,
+        url: `${TWEMOJI_URL}/${emoji.hexcode.toLowerCase()}.svg`,
         children: [{ text: emoji.emoji }],
         unicode: emoji.emoji,
         name: emoji.shortcodes?.[0] ?? emoji.emoji,
