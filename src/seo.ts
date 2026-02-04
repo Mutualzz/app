@@ -24,7 +24,7 @@ export const seo = (params?: SEO) => {
         {
             name: "viewport",
             content:
-                "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover",
+                "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover, shrink-to-fit=no",
         },
         { title },
         {
@@ -59,10 +59,6 @@ export const seo = (params?: SEO) => {
         { name: "og:title", content: title },
         { name: "og:description", content: description },
         {
-            name: "theme-color",
-            content: "#B22222",
-        },
-        {
             name: "application-name",
             content: "Mutualzz",
         },
@@ -77,6 +73,152 @@ export const seo = (params?: SEO) => {
                   { name: "og:image", content: image },
               ]
             : []),
+
+        { rel: "manifest", href: "manifest.json" },
+
+        { name: "mobile-web-app-capable", content: "yes" },
+        { name: "apple-mobile-web-app-title", content: "Mutualzz" },
+        { name: "theme-color", content: "#88449a" },
+        { name: "msapplication-navbutton-color", content: "#88449a" },
+        {
+            name: "apple-mobile-web-app-status-bar-style",
+            content: "black-translucent",
+        },
+        { name: "msapplication-starturl", content: "." },
+
+        // Icons
+        {
+            rel: "icon",
+            type: "image/png",
+            sizes: "48x48",
+            href: "assets/icons/icon-48.webp",
+        },
+        {
+            rel: "apple-touch-icon",
+            type: "image/png",
+            sizes: "48x48",
+            href: "assets/icons/icon-48.webp",
+        },
+        {
+            rel: "icon",
+            type: "image/png",
+            sizes: "72x72",
+            href: "assets/icons/icon-72.webp",
+        },
+        {
+            rel: "apple-touch-icon",
+            type: "image/png",
+            sizes: "72x72",
+            href: "assets/icons/icon-72.webp",
+        },
+        {
+            rel: "icon",
+            type: "image/png",
+            sizes: "96x96",
+            href: "assets/icons/icon-96.webp",
+        },
+        {
+            rel: "apple-touch-icon",
+            type: "image/png",
+            sizes: "96x96",
+            href: "assets/icons/icon-96.webp",
+        },
+        {
+            rel: "icon",
+            type: "image/png",
+            sizes: "128x128",
+            href: "assets/icons/icon-128.webp",
+        },
+        {
+            rel: "apple-touch-icon",
+            type: "image/png",
+            sizes: "128x128",
+            href: "assets/icons/icon-128.webp",
+        },
+        {
+            rel: "icon",
+            type: "image/png",
+            sizes: "192x192",
+            href: "assets/icons/icon-192.webp",
+        },
+        {
+            rel: "apple-touch-icon",
+            type: "image/png",
+            sizes: "192x192",
+            href: "assets/icons/icon-192.webp",
+        },
+        {
+            rel: "icon",
+            type: "image/png",
+            sizes: "256x256",
+            href: "assets/icons/icon-256.webp",
+        },
+        {
+            rel: "apple-touch-icon",
+            type: "image/png",
+            sizes: "256x256",
+            href: "assets/icons/icon-256.webp",
+        },
+        {
+            rel: "icon",
+            type: "image/png",
+            sizes: "512x512",
+            href: "assets/icons/icon-512.webp",
+        },
+        {
+            rel: "apple-touch-icon",
+            type: "image/png",
+            sizes: "512x512",
+            href: "assets/icons/icon-512.webp",
+        },
+        {
+            rel: "icon",
+            type: "image/x-icon",
+            sizes: "64x64 32x32 24x24 16x16",
+            href: "favicon.ico",
+        },
+        {
+            rel: "apple-touch-icon",
+            type: "image/x-icon",
+            sizes: "64x64 32x32 24x24 16x16",
+            href: "favicon.ico",
+        },
+        {
+            rel: "icon",
+            type: "image/png",
+            sizes: "256x256",
+            href: "icon256.png",
+        },
+        {
+            rel: "apple-touch-icon",
+            type: "image/png",
+            sizes: "256x256",
+            href: "icon256.png",
+        },
+        {
+            rel: "icon",
+            type: "image/png",
+            sizes: "192x192",
+            href: "icon192.png",
+        },
+        {
+            rel: "apple-touch-icon",
+            type: "image/png",
+            sizes: "192x192",
+            href: "icon192.png",
+        },
+        {
+            rel: "icon",
+            type: "image/png",
+            sizes: "512x512",
+            href: "icon512.png",
+        },
+        {
+            rel: "apple-touch-icon",
+            type: "image/png",
+            sizes: "512x512",
+            href: "icon512.png",
+        },
     ];
 
     return tags;
