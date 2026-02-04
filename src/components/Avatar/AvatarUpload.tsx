@@ -239,13 +239,27 @@ export const AvatarUpload = observer(() => {
                 direction="row"
                 justifyContent="space-between"
             >
-                <ButtonGroup spacing={{ xs: 2, sm: 5 }}>
-                    <Button
-                        disabled={saving}
-                        onClick={onClose}
-                        variant="outlined"
-                        color="danger"
-                    >
+                {imageFile && croppedAreaPixels && (
+                    <ButtonGroup spacing={{ xs: 2, sm: 5 }}>
+                        <Button
+                            onClick={() => handleSave(false)}
+                            color="success"
+                            loading={saving}
+                        >
+                            Save
+                        </Button>
+                        <Button
+                            onClick={() => handleSave(true)}
+                            loading={saving}
+                            color="neutral"
+                            variant="outlined"
+                        >
+                            Skip
+                        </Button>
+                    </ButtonGroup>
+                )}
+                <ButtonGroup color="danger" spacing={{ xs: 2, sm: 5 }}>
+                    <Button disabled={saving} onClick={onClose}>
                         Cancel
                     </Button>
                     {imageFile && (
@@ -254,25 +268,6 @@ export const AvatarUpload = observer(() => {
                         </Button>
                     )}
                 </ButtonGroup>
-                {imageFile && croppedAreaPixels && (
-                    <ButtonGroup spacing={{ xs: 2, sm: 5 }}>
-                        <Button
-                            onClick={() => handleSave(true)}
-                            loading={saving}
-                            color="neutral"
-                            variant="plain"
-                        >
-                            Skip
-                        </Button>
-                        <Button
-                            onClick={() => handleSave(false)}
-                            color="success"
-                            loading={saving}
-                        >
-                            Save
-                        </Button>
-                    </ButtonGroup>
-                )}
             </Stack>
         </AnimatedPaper>
     );

@@ -5,13 +5,7 @@ import {
     useUserSettings,
 } from "@contexts/UserSettings.context";
 import { useAppStore } from "@hooks/useStores";
-import {
-    Button,
-    ButtonGroup,
-    Divider,
-    Stack,
-    Typography,
-} from "@mutualzz/ui-web";
+import { ButtonGroup, Divider, Stack, Typography } from "@mutualzz/ui-web";
 import startCase from "lodash-es/startCase";
 import { observer } from "mobx-react-lite";
 import { Fragment, type JSX } from "react";
@@ -23,6 +17,7 @@ import {
 } from "react-icons/fa";
 import { FaPencil } from "react-icons/fa6";
 import { UserAvatar } from "../User/UserAvatar";
+import { Button } from "@components/Button";
 
 interface UserSettingsSidebarProps {
     drawerOpen?: boolean;

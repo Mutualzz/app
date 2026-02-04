@@ -295,8 +295,9 @@ export const SpaceCreate = observer(({ setCreating }: Props) => {
                 <Typography>Already have an invite?</Typography>
                 <Link
                     variant="plain"
-                    color="primary"
+                    color="success"
                     disabled={creating}
+                    underline="always"
                     onClick={() => setCreating(false)}
                 >
                     Back to join

@@ -269,6 +269,7 @@ function RootComponent() {
     }, []);
 
     useEffect(() => {
+        if (!isTauri) return;
         if (!import.meta.env.DEV) return;
 
         const onKeyDown = (e: KeyboardEvent) => {
@@ -343,8 +344,8 @@ function RootComponent() {
                         <WindowTitleBar onHeightChange={setTitleBarHeight} />
                         <DesktopShell>
                             <NavigationTracker />
+                            {isTauri && <UpdatingOverlay />}
                             <AppHotkeys />
-                            <UpdatingOverlay />
 
                             {forceGate ? null : (
                                 <>

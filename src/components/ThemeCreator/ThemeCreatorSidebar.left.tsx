@@ -1,7 +1,6 @@
 import { Paper } from "@components/Paper";
 import { useAppStore } from "@hooks/useStores";
 import {
-    Button,
     ButtonGroup,
     Checkbox,
     Divider,
@@ -18,6 +17,7 @@ import type {
     ThemeCreatorCategory,
     ThemeCreatorPage,
 } from "@stores/ThemeCreator.store";
+import { Button } from "@components/Button";
 
 interface ThemeCreatorSidebarProps {
     drawerOpen?: boolean;
@@ -129,7 +129,6 @@ export const ThemeCreatorSidebarLeft = observer(
                                     {startCase(category)}
                                 </Typography>
                                 <ButtonGroup
-                                    color="neutral"
                                     orientation="vertical"
                                     variant="plain"
                                     spacing={5}

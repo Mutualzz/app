@@ -36,18 +36,16 @@ export const CategoryDeleteModal = observer(({ channel }: Props) => {
     return (
         <AnimatedPaper
             borderRadius={12}
-            minWidth={{ xs: "90vw", sm: 340, md: 420, lg: 400 }}
-            maxWidth={600}
             direction="column"
-            minHeight={200}
             initial={{ scale: 0.95 }}
             animate={{ scale: 1 }}
             elevation={app.settings?.preferEmbossed ? 5 : 1}
-            justifyContent="space-between"
+            justifyContent="center"
+            spacing={5}
             alignItems="center"
-            spacing={0}
-            p={{ xs: "1rem", sm: "2rem" }}
+            p="1rem"
             transparency={65}
+            width="25vw"
         >
             <Stack
                 width="100%"
@@ -64,13 +62,12 @@ export const CategoryDeleteModal = observer(({ channel }: Props) => {
                 </Typography>
             </Stack>
             <Stack
-                pt={{ xs: 6, sm: 8, md: 10 }}
                 direction="row"
-                justifyContent="space-between"
+                justifyContent="center"
+                alignItems="center"
                 width="100%"
-                alignItems="flex-end"
             >
-                <ButtonGroup fullWidth spacing={{ xs: 2, sm: 5 }}>
+                <ButtonGroup spacing={{ xs: 2, sm: 5 }}>
                     <Button
                         variant="solid"
                         color="danger"

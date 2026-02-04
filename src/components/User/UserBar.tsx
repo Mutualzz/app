@@ -5,7 +5,6 @@ import { UserSettingsModal } from "@components/UserSettings/UserSettingsModal";
 import { useModal } from "@contexts/Modal.context";
 import { useAppStore } from "@hooks/useStores";
 import {
-    IconButton,
     type PaperProps,
     Stack,
     Tooltip,
@@ -15,6 +14,7 @@ import {
 import { observer } from "mobx-react-lite";
 import { useMemo } from "react";
 import { FaCogs, FaPalette } from "react-icons/fa";
+import { IconButton } from "@components/IconButton";
 
 export const UserBar = observer(() => {
     const app = useAppStore();
@@ -89,7 +89,6 @@ export const UserBar = observer(() => {
                     >
                         <IconButton
                             size="sm"
-                            color="neutral"
                             variant="plain"
                             onClick={() =>
                                 openModal(
@@ -115,7 +114,6 @@ export const UserBar = observer(() => {
                                     <UserSettingsModal />,
                                 )
                             }
-                            color="info"
                             variant="plain"
                         >
                             <FaCogs />

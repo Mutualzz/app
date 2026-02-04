@@ -347,9 +347,6 @@ export const Avatars = observer(() => {
                 </Stack>
 
                 <ButtonGroup orientation="horizontal" spacing={2.5}>
-                    <Button color="danger" onClick={() => closeModal()}>
-                        Cancel
-                    </Button>
                     {showSave && (
                         <Button
                             disabled={isPending || isDeleting}
@@ -359,6 +356,9 @@ export const Avatars = observer(() => {
                             Save
                         </Button>
                     )}
+                    <Button color="danger" onClick={() => closeModal()}>
+                        Cancel
+                    </Button>
                 </ButtonGroup>
             </Stack>
         </AnimatedPaper>

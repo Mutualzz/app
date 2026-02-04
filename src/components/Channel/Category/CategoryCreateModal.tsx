@@ -3,6 +3,7 @@ import { useModal } from "@contexts/Modal.context";
 import { useAppStore } from "@hooks/useStores";
 import { ChannelType, HttpException } from "@mutualzz/types";
 import {
+    Box,
     Button,
     ButtonGroup,
     Input,
@@ -45,13 +46,11 @@ export const CategoryCreateModal = observer(({ space }: Props) => {
         <Paper
             elevation={app.settings?.preferEmbossed ? 5 : 1}
             borderRadius={8}
-            minWidth={{ xs: "90vw", sm: 150, md: 200, lg: 400 }}
-            maxWidth={400}
+            width="20vw"
             direction="column"
             minHeight={250}
             transparency={65}
             justifyContent="space-between"
-            width="100%"
             onKeyDown={(e) => e.key === "Enter" && createCategory()}
             px={5}
         >
@@ -74,11 +73,10 @@ export const CategoryCreateModal = observer(({ space }: Props) => {
                     )}
                 </Stack>
             </Stack>
-            <Stack width="100%" mx="auto" mb={5} spacing={1.25}>
-                <ButtonGroup fullWidth spacing={1.25}>
+            <Box mb={5}>
+                <ButtonGroup fullWidth spacing={5}>
                     <Button
-                        color="neutral"
-                        variant="soft"
+                        color="danger"
                         onClick={() => closeModal()}
                         disabled={isCreating}
                     >
@@ -91,7 +89,7 @@ export const CategoryCreateModal = observer(({ space }: Props) => {
                         Create Category
                     </Button>
                 </ButtonGroup>
-            </Stack>
+            </Box>
         </Paper>
     );
 });

@@ -29,7 +29,6 @@ import { contextMenu } from "@mutualzz/contexify";
 import { ChannelType } from "@mutualzz/types";
 import {
     ButtonGroup,
-    IconButton,
     Portal,
     Stack,
     Tooltip,
@@ -43,6 +42,7 @@ import { useState, type MouseEvent } from "react";
 import { FaChevronDown, FaUserPlus } from "react-icons/fa";
 import { ChannelListItem } from "../ChannelListItem/ChannelListItem";
 import { ChannelListContextMenu } from "./ChannelListContextMenu";
+import { IconButton } from "@components/IconButton";
 
 const SortableChannelListItem = observer(
     ({
@@ -262,12 +262,7 @@ export const ChannelList = observer(() => {
                         spacing={1}
                         alignItems="center"
                     >
-                        <ButtonGroup
-                            spacing={2}
-                            variant="plain"
-                            size={12}
-                            color="neutral"
-                        >
+                        <ButtonGroup spacing={2} variant="plain" size={12}>
                             <Tooltip
                                 content={
                                     <TooltipWrapper>

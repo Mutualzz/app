@@ -2,14 +2,7 @@ import { Paper } from "@components/Paper";
 import { useModal } from "@contexts/Modal.context";
 import { useAppStore } from "@hooks/useStores";
 import { ChannelType, type HttpException } from "@mutualzz/types";
-import {
-    Button,
-    ButtonGroup,
-    Input,
-    Radio,
-    Stack,
-    Typography,
-} from "@mutualzz/ui-web";
+import { ButtonGroup, Input, Radio, Stack, Typography } from "@mutualzz/ui-web";
 import type { Channel } from "@stores/objects/Channel";
 import type { Space } from "@stores/objects/Space";
 import { useMutation } from "@tanstack/react-query";
@@ -18,6 +11,7 @@ import { observer } from "mobx-react-lite";
 import { useState } from "react";
 import { FaHashtag, FaVolumeUp } from "react-icons/fa";
 import { ChannelIcon } from "./ChannelIcon";
+import { Button } from "@components/Button";
 
 interface Props {
     // Usually a category channel under which to create a new channel

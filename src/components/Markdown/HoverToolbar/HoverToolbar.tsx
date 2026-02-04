@@ -1,12 +1,6 @@
 import { MarkdownInputContext } from "@components/Markdown/MarkdownInput/MarkdownInput.context";
 import { Paper } from "@components/Paper";
-import {
-    Button,
-    ButtonGroup,
-    Divider,
-    Portal,
-    useTheme,
-} from "@mutualzz/ui-web";
+import { ButtonGroup, Divider, Portal, useTheme } from "@mutualzz/ui-web";
 import { isBlockActive, toggleBlockquote } from "@utils/markdownUtils";
 import { wrapSelectionWith } from "@utils/wrapSelectionWith";
 import {
@@ -29,6 +23,7 @@ import {
 import { Range } from "slate";
 import { useFocused, useSlate } from "slate-react";
 import { useAppStore } from "@hooks/useStores";
+import { Button } from "@components/Button";
 
 export const HoverToolbar = () => {
     const { theme } = useTheme();
@@ -120,7 +115,7 @@ export const HoverToolbar = () => {
                         }}
                         title="Bold"
                         color={
-                            activeFormats.includes("**") ? "success" : "neutral"
+                            activeFormats.includes("**") ? "success" : undefined
                         }
                         onClick={(e) => textFormat(e, "**")}
                     >
@@ -132,7 +127,7 @@ export const HoverToolbar = () => {
                             borderRadius: 9999,
                         }}
                         color={
-                            activeFormats.includes("*") ? "success" : "neutral"
+                            activeFormats.includes("*") ? "success" : undefined
                         }
                         onClick={(e) => textFormat(e, "*")}
                     >
@@ -144,7 +139,7 @@ export const HoverToolbar = () => {
                             borderRadius: 9999,
                         }}
                         color={
-                            activeFormats.includes("__") ? "success" : "neutral"
+                            activeFormats.includes("__") ? "success" : undefined
                         }
                         onClick={(e) => textFormat(e, "__")}
                     >
@@ -156,7 +151,7 @@ export const HoverToolbar = () => {
                             borderRadius: 9999,
                         }}
                         color={
-                            activeFormats.includes("~~") ? "success" : "neutral"
+                            activeFormats.includes("~~") ? "success" : undefined
                         }
                         onClick={(e) => textFormat(e, "~~")}
                     >
@@ -177,7 +172,7 @@ export const HoverToolbar = () => {
                         color={
                             isBlockActive(editor, "blockquote")
                                 ? "success"
-                                : "neutral"
+                                : undefined
                         }
                         css={{
                             borderRadius: 9999,
@@ -189,7 +184,7 @@ export const HoverToolbar = () => {
                     <Button
                         title="Code"
                         color={
-                            activeFormats.includes("`") ? "success" : "neutral"
+                            activeFormats.includes("`") ? "success" : undefined
                         }
                         css={{
                             borderRadius: 9999,
@@ -201,7 +196,7 @@ export const HoverToolbar = () => {
                     <Button
                         title="Spoiler"
                         color={
-                            activeFormats.includes("||") ? "success" : "neutral"
+                            activeFormats.includes("||") ? "success" : undefined
                         }
                         css={{
                             borderRadius: 9999,

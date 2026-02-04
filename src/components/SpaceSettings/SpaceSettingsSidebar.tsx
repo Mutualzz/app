@@ -1,3 +1,4 @@
+import { Button } from "@components/Button";
 import { Paper } from "@components/Paper";
 import {
     type SpaceSettingsCategories,
@@ -5,13 +6,7 @@ import {
     useSpaceSettings,
 } from "@contexts/SpaceSettings.context";
 import { useAppStore } from "@hooks/useStores";
-import {
-    Button,
-    ButtonGroup,
-    Divider,
-    Stack,
-    Typography,
-} from "@mutualzz/ui-web";
+import { ButtonGroup, Divider, Stack, Typography } from "@mutualzz/ui-web";
 import type { Space } from "@stores/objects/Space";
 import startCase from "lodash-es/startCase";
 import { observer } from "mobx-react-lite";
@@ -104,7 +99,6 @@ export const SpaceSettingsSidebar = observer(
                             )}
 
                             <ButtonGroup
-                                color="neutral"
                                 size={{ xs: "sm", sm: "md" }}
                                 orientation="vertical"
                                 variant="plain"

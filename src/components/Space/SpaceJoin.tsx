@@ -164,8 +164,9 @@ export const SpaceJoin = observer(({ setCreating }: Props) => {
                 <Typography>You prefer to create your own space?</Typography>
                 <Link
                     variant="plain"
-                    color="primary"
+                    color="success"
                     onClick={() => setCreating(true)}
+                    underline="always"
                     disabled={isGettingInvite || isJoining}
                 >
                     Back to creating

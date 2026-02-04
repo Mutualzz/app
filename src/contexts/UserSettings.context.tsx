@@ -14,6 +14,7 @@ interface UserSettingsContextProps {
     currentCategory: UserSettingsCategories;
     setCurrentPage: (page: UserSettingsPage) => void;
     setCurrentCategory: (category: UserSettingsCategories) => void;
+    reset: () => void;
 }
 
 const UserSettingsContext = createContext<UserSettingsContextProps>({
@@ -25,6 +26,9 @@ const UserSettingsContext = createContext<UserSettingsContextProps>({
     setCurrentCategory: () => {
         return;
     },
+    reset: () => {
+        return;
+    },
 });
 
 export const UserSettingsProvider = observer(
@@ -34,6 +38,11 @@ export const UserSettingsProvider = observer(
         const [currentCategory, setCurrentCategory] =
             useState<UserSettingsCategories>("user-settings");
 
+        const reset = () => {
+            setCurrentPage("profile");
+            setCurrentCategory("user-settings");
+        };
+
         return (
             <UserSettingsContext.Provider
                 value={{
@@ -41,6 +50,7 @@ export const UserSettingsProvider = observer(
                     setCurrentPage,
                     currentCategory,
                     setCurrentCategory,
+                    reset,
                 }}
             >
                 {children}

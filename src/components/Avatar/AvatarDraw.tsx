@@ -24,6 +24,7 @@ import {
     type ReactSketchCanvasRef,
 } from "react-sketch-canvas";
 
+// NOTE: Eventually fork ReactSketchCanvas to fit our usage case
 export const AvatarDraw = observer(() => {
     const { theme } = useTheme();
     const app = useAppStore();
@@ -130,11 +131,7 @@ export const AvatarDraw = observer(() => {
             alignItems="center"
             spacing={5}
             elevation={3}
-            width="100%"
-            minWidth={{ xs: "100vw", sm: 400, md: 720 }}
-            minHeight={{ xs: 400, sm: 500, md: 600 }}
-            maxWidth={{ xs: "100vw", sm: 600, md: 900 }}
-            maxHeight={{ xs: "100vh", sm: 700, md: 900 }}
+            width="60vw"
             position="relative"
             p={{ xs: "0.5rem", sm: "1rem", md: "2rem" }}
             borderRadius={{ xs: "1rem", sm: "1.5rem" }}
@@ -205,8 +202,6 @@ export const AvatarDraw = observer(() => {
                     direction="column"
                     alignItems="center"
                     justifyContent="center"
-                    minWidth={225}
-                    spacing={2.5}
                 >
                     <Button
                         startDecorator={
@@ -214,45 +209,58 @@ export const AvatarDraw = observer(() => {
                         }
                         onClick={toggleEraser}
                         color="neutral"
-                        variant="outlined"
                         disabled={isPending}
                     >
                         {eraserMode ? "Eraser" : "Brush"}
                     </Button>
-                    <Divider orientation="horizontal" lineColor="muted" />
-                    <Stack
-                        direction="column"
-                        justifyContent="center"
-                        spacing={2.5}
-                        alignItems="center"
-                    >
-                        <Typography level="body-sm">
-                            {eraserMode ? "Eraser" : "Brush"} Size
-                        </Typography>
-                        <InputNumber
-                            disabled={isPending}
-                            onChange={(e) => setSize(e.target.valueAsNumber)}
-                            value={String(size)}
-                            size="md"
-                        />
-                    </Stack>
-                    {!eraserMode && (
+                    <Divider
+                        orientation="horizontal"
+                        lineColor="muted"
+                        css={{
+                            marginBlock: "0.5rem",
+                            opacity: 0.25,
+                        }}
+                    />
+                    <Stack spacing={5} direction="column">
                         <Stack
                             direction="column"
-                            spacing={2.5}
                             justifyContent="center"
                             alignItems="center"
+                            spacing={0.5}
                         >
-                            <Typography level="body-sm">Brush Color</Typography>
-                            <InputColor
+                            <Typography level="body-sm">
+                                {eraserMode ? "Eraser" : "Brush"} Size
+                            </Typography>
+                            <InputNumber
                                 disabled={isPending}
+                                onChange={(e) =>
+                                    setSize(e.target.valueAsNumber)
+                                }
+                                fullWidth
+                                value={String(size)}
                                 size="md"
-                                value={brushColor}
-                                onChange={(color) => setBrushColor(color)}
-                                showRandom
                             />
                         </Stack>
-                    )}
+                        {!eraserMode && (
+                            <Stack
+                                direction="column"
+                                justifyContent="center"
+                                alignItems="center"
+                            >
+                                <Typography level="body-sm">
+                                    Brush Color
+                                </Typography>
+                                <InputColor
+                                    disabled={isPending}
+                                    size="md"
+                                    value={brushColor}
+                                    fullWidth
+                                    onChange={(color) => setBrushColor(color)}
+                                    showRandom
+                                />
+                            </Stack>
+                        )}
+                    </Stack>
                 </Stack>
             )}
             {isMobile && (
@@ -343,7 +351,7 @@ export const AvatarDraw = observer(() => {
                 />
                 <Stack
                     direction="column"
-                    spacing={2.5}
+                    spacing={1}
                     justifyContent="center"
                     alignItems="center"
                 >
@@ -359,11 +367,8 @@ export const AvatarDraw = observer(() => {
                 </Stack>
             </Stack>
             <ButtonGroup
-                color="neutral"
                 spacing={10}
-                variant="soft"
                 orientation={isMobile ? "horizontal" : "vertical"}
-                disabled={emptyCanvas || isPending}
                 size={isMobile ? "sm" : "md"}
             >
                 <Button
@@ -371,13 +376,14 @@ export const AvatarDraw = observer(() => {
                         setEmptyCanvas(true);
                         canvasRef.current?.clearCanvas();
                     }}
+                    color="danger"
+                    disabled={emptyCanvas || isPending}
                 >
                     Clear
                 </Button>
                 <ButtonGroup
                     disabled={emptyCanvas || isPending}
-                    variant="outlined"
-                    color="success"
+                    color="warning"
                     orientation={isMobile ? "horizontal" : "vertical"}
                     size={isMobile ? "sm" : "md"}
                 >
@@ -388,9 +394,21 @@ export const AvatarDraw = observer(() => {
                         Redo
                     </Button>
                 </ButtonGroup>
-                <Button onClick={() => save()}>Save</Button>
-                <Button onClick={() => saveDraft()}>Save Draft</Button>
-                <Button disabled={isPending} color="danger" onClick={onClose}>
+                <Button
+                    disabled={emptyCanvas || isPending}
+                    color="success"
+                    onClick={() => save()}
+                >
+                    Save
+                </Button>
+                <Button
+                    disabled={emptyCanvas || isPending}
+                    color="success"
+                    onClick={() => saveDraft()}
+                >
+                    Save Draft
+                </Button>
+                <Button color="danger" onClick={onClose}>
                     Cancel
                 </Button>
             </ButtonGroup>

@@ -2,11 +2,12 @@ import { AnimatedLogo } from "@components/Animated/AnimatedLogo";
 import { Paper } from "@components/Paper";
 import { TooltipWrapper } from "@components/TooltipWrapper";
 import { useAppStore } from "@hooks/useStores";
-import { ButtonGroup, IconButton, Stack, Tooltip } from "@mutualzz/ui-web";
+import { ButtonGroup, Stack, Tooltip } from "@mutualzz/ui-web";
 import { useNavigate } from "@tanstack/react-router";
 import capitalize from "lodash-es/capitalize";
 import { observer } from "mobx-react-lite";
 import { FaCompass, FaHome, FaPalette, FaStar, FaUsers } from "react-icons/fa";
+import { IconButton } from "@components/IconButton";
 
 const links = [
     {
@@ -83,7 +84,6 @@ export const FeedSidebar = observer(() => {
 
             <ButtonGroup
                 orientation="vertical"
-                color="neutral"
                 variant="plain"
                 spacing={15}
                 size="lg"
