@@ -17,6 +17,8 @@ import {
     Checkbox,
     IconButton,
     InputColor,
+    Radio,
+    RadioGroup,
     Stack,
     Typography,
     useTheme,
@@ -27,17 +29,17 @@ import { observer } from "mobx-react-lite";
 import { useState } from "react";
 import { FaTrash } from "react-icons/fa";
 
+type AvatarType = "default" | "previous";
+
 export const Avatars = observer(() => {
     const { theme } = useTheme();
     const app = useAppStore();
-    const { closeAllModals } = useModal();
+    const { closeAllModals, closeModal } = useModal();
 
     const [focusedAvatar, setFocusedAvatar] = useState("");
     const [customColor, setCustomColor] = useState<ColorLike | null>(null);
 
-    const [currentPage, setCurrentPage] = useState<"default" | "previous">(
-        "default",
-    );
+    const [currentPage, setCurrentPage] = useState<AvatarType>("default");
 
     const version = customColor
         ? createColor(customColor).isLight()
@@ -92,10 +94,7 @@ export const Avatars = observer(() => {
         },
     );
 
-    const selectAvatar = (
-        avatar: number | string,
-        type: "previous" | "default",
-    ) => {
+    const selectAvatar = (avatar: number | string, type: AvatarType) => {
         if (isPending || isDeleting) return;
         setSelectedAvatar({
             avatar,
@@ -104,7 +103,8 @@ export const Avatars = observer(() => {
         });
     };
 
-    const changePage = (page: "default" | "previous") => {
+    const changePage = (page: AvatarType) => {
+        console.log(page);
         setSelectedAvatar({ avatar: -1, color: null, type: "default" });
         setCurrentPage(page);
     };
@@ -136,6 +136,7 @@ export const Avatars = observer(() => {
             alignItems="center"
             initial={{ scale: 0.95 }}
             animate={{ scale: 1 }}
+            height="35rem"
         >
             <Stack
                 width="100%"
@@ -284,7 +285,7 @@ export const Avatars = observer(() => {
                                             selectAvatar(avatar, "previous")
                                         }
                                         alt="Previous Avatar"
-                                        size={80}
+                                        size={128}
                                         css={{
                                             filter:
                                                 selectedAvatar.avatar === avatar
@@ -323,34 +324,42 @@ export const Avatars = observer(() => {
                 spacing="1rem"
                 pb={{ xs: "1rem", sm: "2rem" }}
                 px={{ xs: "1rem", sm: "2rem", md: "4rem" }}
-                justifyContent="center"
+                justifyContent="space-between"
+                alignItems="center"
                 width="100%"
             >
-                <ButtonGroup fullWidth disabled={isPending || isDeleting}>
-                    <Button
-                        onClick={() => changePage("default")}
-                        disabled={currentPage === "default"}
-                    >
-                        Default Avatars
-                    </Button>
-                    <Button
-                        onClick={() => changePage("previous")}
-                        disabled={currentPage === "previous"}
-                    >
-                        Previous Avatars
-                    </Button>
-                </ButtonGroup>
-
-                {showSave && (
-                    <Button
+                <Stack
+                    spacing={1.75}
+                    alignItems="center"
+                    justifyContent="center"
+                >
+                    <Typography fontWeight="bold">Avatars</Typography>
+                    {"-"}
+                    <RadioGroup
+                        orientation="horizontal"
+                        onChange={(_, val) => changePage(val)}
                         disabled={isPending || isDeleting}
-                        onClick={() => updateAvatar()}
-                        color="success"
-                        fullWidth
+                        value={currentPage}
                     >
-                        Save
+                        <Radio label="Default" value="default" />
+                        <Radio label="Previous" value="previous" />
+                    </RadioGroup>
+                </Stack>
+
+                <ButtonGroup orientation="horizontal" spacing={2.5}>
+                    <Button color="danger" onClick={() => closeModal()}>
+                        Cancel
                     </Button>
-                )}
+                    {showSave && (
+                        <Button
+                            disabled={isPending || isDeleting}
+                            onClick={() => updateAvatar()}
+                            color="success"
+                        >
+                            Save
+                        </Button>
+                    )}
+                </ButtonGroup>
             </Stack>
         </AnimatedPaper>
     );
