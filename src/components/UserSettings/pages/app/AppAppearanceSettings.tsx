@@ -1,3 +1,4 @@
+import { Button } from "@components/Button";
 import { ThemeCreatorModal } from "@components/ThemeCreator/ThemeCreatorModal";
 import { TooltipWrapper } from "@components/TooltipWrapper";
 import { useModal } from "@contexts/Modal.context";
@@ -16,7 +17,6 @@ import {
 import {
     Box,
     type BoxProps,
-    Button,
     Checkbox,
     Divider,
     IconButton,
@@ -417,7 +417,6 @@ export const AppAppearanceSettings = observer(() => {
                     Themes -
                     <Button
                         variant="soft"
-                        color="neutral"
                         horizontalAlign="left"
                         onClick={() =>
                             openModal("theme-creator", <ThemeCreatorModal />)
