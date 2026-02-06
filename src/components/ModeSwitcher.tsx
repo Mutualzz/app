@@ -37,6 +37,8 @@ export const ModeSwitcher = observer(() => {
         switchMode(app, navigate);
     };
 
+    if (app.isAppLoading) return null;
+
     return (
         <AnimatePresence>
             {!app.hideSwitcher && (
