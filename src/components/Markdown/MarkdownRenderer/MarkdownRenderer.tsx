@@ -18,6 +18,7 @@ import { emphasisPlugin } from "./plugins/emphasis";
 import { spoilerPlugin } from "./plugins/spoiler";
 import { strikethroughPlugin } from "./plugins/strikethrough";
 import { underlinePlugin } from "./plugins/underline";
+import { brOnEmpty } from "./plugins/brOnEmpty";
 
 const shortcodeRegex = new RegExp(shortcodeRegexOrig.source, "g");
 const emojiRegex = new RegExp(emojiRegexOrig.source, "gu");
@@ -47,7 +48,7 @@ export const MarkdownRenderer = ({
             html: false,
             linkify: true,
             typographer: true,
-            breaks: true,
+            breaks: false,
         });
 
         instance.linkify.set({
@@ -59,6 +60,7 @@ export const MarkdownRenderer = ({
         instance.disable("hr");
         instance.disable("escape");
 
+        instance.use(brOnEmpty);
         instance.use(spoilerPlugin);
         instance.use(emojiPlugin);
         instance.use(strikethroughPlugin);
