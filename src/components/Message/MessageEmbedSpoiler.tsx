@@ -1,8 +1,10 @@
-import { useMemo, useState, type PropsWithChildren } from "react";
 import { Paper } from "@components/Paper";
 import { useAppStore } from "@hooks/useStores";
+import { useMemo, useState, type PropsWithChildren } from "react";
 
-export const Spoiler = ({ children }: PropsWithChildren) => {
+type Props = PropsWithChildren<{ spoiler?: boolean }>;
+
+export const MessageEmbedSpoiler = ({ spoiler, children }: Props) => {
     const app = useAppStore();
     const [revealed, setRevealed] = useState(false);
     const [hovered, setHovered] = useState(false);
@@ -12,13 +14,15 @@ export const Spoiler = ({ children }: PropsWithChildren) => {
         [app.settings?.preferEmbossed],
     );
 
+    if (!spoiler) return children;
+
     return (
         <Paper
             display="inline-block"
             borderRadius={4}
-            paddingX={0.25}
             fontSize="inherit"
-            variant={revealed ? "elevation" : "plain"}
+            variant="plain"
+            padding={0}
             elevation={revealed ? 0 : hovered ? (prefersEmbossed ? 3 : 1) : 5}
             textColor={revealed ? "inherit" : "transparent"}
             css={{

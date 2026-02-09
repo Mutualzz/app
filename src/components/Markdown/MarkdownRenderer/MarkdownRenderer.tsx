@@ -24,7 +24,6 @@ const shortcodeRegex = new RegExp(shortcodeRegexOrig.source, "g");
 const emojiRegex = new RegExp(emojiRegexOrig.source, "gu");
 
 // TODO: add code blocks in the future
-// TODO: Fix spoilers not rendering emojis correctly
 export const MarkdownRenderer = ({
     color = "neutral",
     textColor = "primary",
@@ -46,7 +45,7 @@ export const MarkdownRenderer = ({
     const md = useMemo(() => {
         const instance = new MarkdownIt("default", {
             html: false,
-            linkify: true,
+            linkify: false,
             typographer: true,
             breaks: false,
         });
