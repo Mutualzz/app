@@ -104,7 +104,6 @@ export const Avatars = observer(() => {
     };
 
     const changePage = (page: AvatarType) => {
-        console.log(page);
         setSelectedAvatar({ avatar: -1, color: null, type: "default" });
         setCurrentPage(page);
     };
