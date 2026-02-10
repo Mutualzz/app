@@ -7,8 +7,6 @@ import { useState } from "react";
 import { ThemeCreatorContent } from "./ThemeCreatorContent";
 import { ThemeCreatorSidebarLeft } from "./ThemeCreatorSidebar.left";
 
-// TODO: finish resetting values when modal is closed in certain circumstances, not when preview is stopped or started
-// NOTE: Start at right sidebar first and try to utilize close modal there onClose stuff or something similar to that
 export const ThemeCreatorModal = observer(() => {
     const app = useAppStore();
     const { theme } = useTheme();
