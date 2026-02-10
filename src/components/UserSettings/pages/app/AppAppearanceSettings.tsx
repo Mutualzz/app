@@ -426,7 +426,7 @@ export const AppAppearanceSettings = observer(() => {
                             variant="soft"
                             horizontalAlign="left"
                             onClick={() =>
-                                import.meta.env &&
+                                import.meta.env.DEV &&
                                 openModal(
                                     "theme-creator",
                                     <ThemeCreatorModal />,
