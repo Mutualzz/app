@@ -415,15 +415,27 @@ export const AppAppearanceSettings = observer(() => {
                     spacing={1.25}
                 >
                     Themes -
-                    <Button
-                        variant="soft"
-                        horizontalAlign="left"
-                        onClick={() =>
-                            openModal("theme-creator", <ThemeCreatorModal />)
+                    <Tooltip
+                        content={
+                            <TooltipWrapper>
+                                Not available currently
+                            </TooltipWrapper>
                         }
                     >
-                        Open Editor
-                    </Button>
+                        <Button
+                            variant="soft"
+                            horizontalAlign="left"
+                            onClick={() =>
+                                import.meta.env &&
+                                openModal(
+                                    "theme-creator",
+                                    <ThemeCreatorModal />,
+                                )
+                            }
+                        >
+                            Open Editor
+                        </Button>
+                    </Tooltip>
                     -{" "}
                     <Checkbox
                         rtl
