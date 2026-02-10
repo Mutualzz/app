@@ -75,7 +75,7 @@
             "icons/adaptive/StoreLogo.png"
         ],
         "publisher": "Mutualzz",
-        "resources": ["icons/**/*"],
+        "resources": ["icons/**/*", "./version.json"],
         "shortDescription": "Mutualzz is a social media platform that connects people with similar interests.",
         "targets": ["deb", "rpm", "appimage", "nsis", "app", "dmg"],
         "windows": {

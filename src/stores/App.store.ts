@@ -24,6 +24,7 @@ import { UpdaterStore } from "./Updater.store";
 import { UserStore } from "./User.store";
 import { ThemeCreatorStore } from "@stores/ThemeCreator.store";
 import { NavigationStore } from "@stores/Navigation.store";
+import { getTauriVersion, getVersion } from "@tauri-apps/api/app";
 
 export class AppStore {
     isGatewayReady = false;
@@ -43,13 +44,20 @@ export class AppStore {
     users = new UserStore(this);
     updater: UpdaterStore | null = null;
     settings: AccountSettingsStore | null = null;
-    version: string | null = null;
     mode: AppMode | null = null;
     joiningSpace?: APISpacePartial | null = null;
     joiningInviteCode?: string | null = null;
     queryClient: QueryClient;
     memberListVisible = true;
     dontShowLinkWarning = false;
+
+    versions: {
+        app: string | null;
+        tauri: string | null;
+    } = {
+        app: "4.0.1",
+        tauri: null,
+    };
 
     private readonly logger = new Logger({
         tag: "AppStore",
@@ -159,5 +167,12 @@ export class AppStore {
         if (this.settings) this.settings.startSyncing();
         this.loadToken();
         this.setAppLoading(false);
+
+        if (isTauri) {
+            this.versions = {
+                app: await getVersion(),
+                tauri: await getTauriVersion(),
+            };
+        }
     }
 }

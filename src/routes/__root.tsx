@@ -33,8 +33,6 @@ import {
     useNavigate,
     useRouterState,
 } from "@tanstack/react-router";
-import { getTauriVersion, getVersion } from "@tauri-apps/api/app";
-import { arch, locale, platform, version } from "@tauri-apps/plugin-os";
 import { isTauri } from "@utils/index";
 import dayjs from "dayjs";
 import calendar from "dayjs/plugin/calendar";
@@ -164,36 +162,6 @@ function RootComponent() {
             },
             { fireImmediately: true },
         );
-
-        const loadAsyncGlobals = async () => {
-            const [
-                tauriVersion,
-                appVersion,
-                platformName,
-                platformArch,
-                platformVersion,
-                platformLocale,
-            ] = await Promise.all([
-                getTauriVersion(),
-                getVersion(),
-                platform(),
-                arch(),
-                version(),
-                locale(),
-            ]);
-            window.globals = {
-                tauriVersion: tauriVersion,
-                appVersion: appVersion,
-                platform: {
-                    name: platformName,
-                    arch: platformArch,
-                    version: platformVersion,
-                    locale: platformLocale,
-                },
-            };
-        };
-
-        if (isTauri) loadAsyncGlobals();
 
         logger.debug("Loading complete");
 

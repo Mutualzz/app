@@ -1,48 +1,48 @@
 {
     "compilerOptions": {
-        "target": "es2024",
-        "useDefineForClassFields": true,
-        "lib": ["ES2024", "DOM", "DOM.Iterable"],
-        "types": ["vite/client", "node"],
-        "module": "ESNext",
-        "skipLibCheck": true,
-
-        /* Bundler mode */
-        "moduleResolution": "bundler",
         "allowImportingTsExtensions": true,
-        "resolveJsonModule": true,
+        "baseUrl": "src",
+        "forceConsistentCasingInFileNames": true,
         "isolatedModules": true,
-        "noEmit": true,
         "jsx": "react-jsx",
         "jsxImportSource": "@emotion/react",
-        "verbatimModuleSyntax": true,
-        "forceConsistentCasingInFileNames": true,
-
-        /* Linting */
-        "strict": true,
+        "lib": ["ES2024", "DOM", "DOM.Iterable"],
+        "module": "ESNext",
+        /* Bundler mode */
+        "moduleResolution": "bundler",
+        "noEmit": true,
+        "noFallthroughCasesInSwitch": true,
         "noUnusedLocals": true,
         "noUnusedParameters": true,
-        "noFallthroughCasesInSwitch": true,
-
-        "baseUrl": "src",
-
         "paths": {
-            "@hooks/*": ["hooks/*"],
-            "@contexts/*": ["contexts/*"],
-            "@components/*": ["components/*"],
-            "@editor/*": ["editor/*"],
-            "@utils/*": ["utils/*"],
-            "@themes/*": ["themes/*"],
-            "@themes": ["themes/index.ts"],
-            "@stores/*": ["stores/*"],
-            "@app-types/*": ["types/*"],
             "@app-types": ["types/index.d.ts"],
+            "@app-types/*": ["types/*"],
+            "@components/*": ["components/*"],
+            "@contexts/*": ["contexts/*"],
             "@css/*": ["css/*"],
+            "@editor/*": ["editor/*"],
+            "@hooks/*": ["hooks/*"],
             "@logger": ["Logger.ts"],
-            "@seo": ["seo.ts"]
-        }
+            "@seo": ["seo.ts"],
+            "@stores/*": ["stores/*"],
+            "@themes": ["themes/index.ts"],
+            "@themes/*": ["themes/*"],
+            "@utils/*": ["utils/*"]
+        },
+        "resolveJsonModule": true,
+        "skipLibCheck": true,
+        /* Linting */
+        "strict": true,
+        "target": "es2024",
+        "types": ["vite/client", "node"],
+        "useDefineForClassFields": true,
+        "verbatimModuleSyntax": true
     },
-    "include": ["src/**/*"],
     "exclude": ["node_modules", "dist", "src-tauri"],
-    "references": [{ "path": "./tsconfig.node.json" }]
+    "include": ["src/**/*"],
+    "references": [
+        {
+            "path": "./tsconfig.node.json"
+        }
+    ]
 }

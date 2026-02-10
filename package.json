@@ -126,5 +126,5 @@
         "vite:dev": "cross-env VITE_ENV_DEV=true vite"
     },
     "type": "module",
-    "version": "4.0.0"
+    "version": "4.0.1"
 }

@@ -52,6 +52,9 @@
                 },
                 {
                     "url": "spotify:*"
+                },
+                {
+                    "url": "https://*"
                 }
             ],
             "identifier": "opener:allow-open-url"

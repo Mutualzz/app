@@ -1,11 +1,19 @@
 import { Paper } from "@components/Paper";
+import { openUrl } from "@tauri-apps/plugin-opener";
 import {
     type UserSettingsCategories,
     type UserSettingsPage,
     useUserSettings,
 } from "@contexts/UserSettings.context";
 import { useAppStore } from "@hooks/useStores";
-import { ButtonGroup, Divider, Stack, Typography } from "@mutualzz/ui-web";
+import {
+    Box,
+    ButtonGroup,
+    Divider,
+    Link,
+    Stack,
+    Typography,
+} from "@mutualzz/ui-web";
 import startCase from "lodash-es/startCase";
 import { observer } from "mobx-react-lite";
 import { Fragment, type JSX } from "react";
@@ -18,6 +26,7 @@ import {
 import { FaPencil } from "react-icons/fa6";
 import { UserAvatar } from "../User/UserAvatar";
 import { Button } from "@components/Button";
+import { isTauri } from "@utils/index";
 
 interface UserSettingsSidebarProps {
     drawerOpen?: boolean;
@@ -196,6 +205,40 @@ export const UserSettingsSidebar = observer(
                         Log out
                     </Button>
                 </Stack>
+
+                <Box mb={5} fontFamily="monospace">
+                    <Stack direction="column" mb={2}>
+                        <Typography level="body-xs" textColor="muted">
+                            Mutualzz v{app.versions.app}
+                        </Typography>
+                        {isTauri && (
+                            <Typography level="body-xs" textColor="muted">
+                                Tauri v{app.versions.tauri}
+                            </Typography>
+                        )}
+                    </Stack>
+                    <Stack fontFamily="monospace">
+                        <Link
+                            href={
+                                !isTauri
+                                    ? "https://mutualzz.com/privacy"
+                                    : undefined
+                            }
+                            target={!isTauri ? "_blank" : undefined}
+                            level="body-xs"
+                            onClick={async (e) => {
+                                if (isTauri) {
+                                    e.preventDefault();
+                                    openUrl("https://mutualzz.com/privacy");
+                                }
+                            }}
+                            variant="plain"
+                            color="info"
+                        >
+                            Privacy Policy
+                        </Link>
+                    </Stack>
+                </Box>
             </Paper>
         );
     },
