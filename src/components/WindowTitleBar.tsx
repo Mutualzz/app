@@ -30,7 +30,7 @@ import {
     VscClose,
 } from "react-icons/vsc";
 import { ThemeCreatorModal } from "./ThemeCreator/ThemeCreatorModal";
-import { useNavigate, useRouter, useRouterState } from "@tanstack/react-router";
+import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { TooltipWrapper } from "@components/TooltipWrapper.tsx";
 import { IconButton } from "./IconButton";
 import { DownloadButton } from "./DownloadButton";
