@@ -19,6 +19,7 @@ import { spoilerPlugin } from "./plugins/spoiler";
 import { strikethroughPlugin } from "./plugins/strikethrough";
 import { underlinePlugin } from "./plugins/underline";
 import { brOnEmpty } from "./plugins/brOnEmpty";
+import { linkPlugin } from "./plugins/links";
 
 const shortcodeRegex = new RegExp(shortcodeRegexOrig.source, "g");
 const emojiRegex = new RegExp(emojiRegexOrig.source, "gu");
@@ -65,6 +66,7 @@ export const MarkdownRenderer = ({
         instance.use(strikethroughPlugin);
         instance.use(emphasisPlugin);
         instance.use(underlinePlugin);
+        instance.use(linkPlugin);
 
         return instance;
     }, []);
