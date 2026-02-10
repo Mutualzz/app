@@ -30,9 +30,10 @@ import {
     VscClose,
 } from "react-icons/vsc";
 import { ThemeCreatorModal } from "./ThemeCreator/ThemeCreatorModal";
-import { useNavigate } from "@tanstack/react-router";
+import { useNavigate, useRouter, useRouterState } from "@tanstack/react-router";
 import { TooltipWrapper } from "@components/TooltipWrapper.tsx";
 import { IconButton } from "./IconButton";
+import { DownloadButton } from "./DownloadButton";
 
 interface WindowTitleBarProps {
     onHeightChange?: (height: number) => void;
@@ -42,6 +43,7 @@ const WindowTitleBar = ({ onHeightChange }: WindowTitleBarProps) => {
     const appWindow = useMemo(() => (isTauri ? getCurrentWindow() : null), []);
     const app = useAppStore();
     const navigate = useNavigate();
+    const { location } = useRouterState();
     const { inPreview, stopPreview, values } = app.themeCreator;
     const { openModal } = useModal();
     const { theme, changeTheme } = useTheme();
@@ -55,6 +57,9 @@ const WindowTitleBar = ({ onHeightChange }: WindowTitleBarProps) => {
     const stage = app.updater?.stage;
 
     const isUpdating = stage === "installing" || stage === "relaunching";
+
+    const isAuthPage =
+        location.pathname === "/login" || location.pathname === "/register";
 
     useEffect(() => {
         if (isUpdating || app.updater?.forceUpdate) return;
@@ -205,6 +210,9 @@ const WindowTitleBar = ({ onHeightChange }: WindowTitleBarProps) => {
                 justifyContent="flex-end"
                 data-tauri-drag-region
             >
+                {!isTauri && isAuthPage && (
+                    <DownloadButton color="success" size="lg" />
+                )}
                 {appWindow && app.updater?.update && (
                     <Stack
                         px={isMac ? 3.75 : 0}

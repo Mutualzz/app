@@ -13,7 +13,7 @@ export const DownloadButton = (props: ButtonProps) => {
 
     return (
         <Button {...props} onClick={handleClick}>
-            Download
+            Download Mutualzz
         </Button>
     );
 };
