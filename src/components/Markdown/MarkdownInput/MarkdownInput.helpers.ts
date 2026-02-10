@@ -1,6 +1,8 @@
 import type { CSSObject, Theme } from "@emotion/react";
 import {
+    createColor,
     formatColor,
+    isValidColorInput,
     resolveColor,
     resolveTypographyColor,
     type Color,
@@ -172,67 +174,71 @@ export const resolveMarkdownStyles = (
     color: Color | ColorLike,
     textColor: TypographyColor | ColorLike | "inherit",
 ): Record<string, CSSObject> => {
+    const { colors } = theme;
     const resolvedColor = resolveColor(color, theme);
 
-    const resolvedTextColor =
-        textColor === "inherit"
-            ? resolvedColor
-            : resolveTypographyColor(textColor, theme);
+    const parsedTextColor = resolveTypographyColor(textColor, theme);
 
-    const formattedColor = formatColor(resolvedColor, {
-        format: "hexa",
-    });
+    const isColorLike = isValidColorInput(parsedTextColor);
+
+    const isDark = createColor(resolvedColor).isDark();
+    const solidTextColor = isDark
+        ? theme.typography.colors.primary
+        : formatColor(resolvedColor, {
+              darken: 70,
+          });
+
+    const textColorFinal = isColorLike
+        ? parsedTextColor
+        : theme.typography.colors.primary;
 
     return {
-        outlined: {
-            background: "transparent",
-            color: formatColor(resolvedTextColor, {
-                format: "hexa",
-                lighten: 50,
-            }),
-            border: `1px solid ${formattedColor}`,
-            borderRadius: 8,
-            ":focus": {
-                outline: `2px solid ${formattedColor}`,
-            },
-        },
         solid: {
-            background: formattedColor,
-            color: formatColor(resolvedTextColor, {
-                format: "hexa",
-                lighten: 75,
-            }),
+            backgroundColor: resolvedColor,
+            color: solidTextColor,
             border: "none",
-            borderRadius: 8,
-            ":focus": {
-                outline: `2px solid ${formattedColor}`,
+            "&:focus-within": {
+                backgroundColor: formatColor(resolvedColor, {
+                    format: "hexa",
+                    alpha: 90,
+                }),
             },
         },
-        plain: {
-            background: "transparent",
-            color: formatColor(resolvedTextColor, {
-                format: "hexa",
-                lighten: 25,
-            }),
-            border: "none",
-            borderRadius: 8,
-            ":focus": {
-                outline: "none",
+        outlined: {
+            backgroundColor: colors.background,
+            border: `1px solid ${formatColor(resolvedColor, { alpha: 30, format: "hexa" })}`,
+            color: textColorFinal,
+            "&:focus-within": {
+                borderColor: resolvedColor,
+                backgroundColor: formatColor(resolvedColor, {
+                    alpha: 5,
+                    format: "hexa",
+                }),
             },
         },
         soft: {
             backgroundColor: formatColor(resolvedColor, {
+                alpha: 10,
                 format: "hexa",
-                darken: 50,
-            }),
-            color: formatColor(resolvedTextColor, {
-                format: "hexa",
-                lighten: 50,
             }),
             border: "none",
-            borderRadius: 8,
-            ":focus": {
-                outline: `2px solid ${formattedColor}`,
+            color: textColorFinal,
+            "&:focus-within": {
+                backgroundColor: formatColor(resolvedColor, {
+                    alpha: 15,
+                    format: "hexa",
+                }),
+            },
+        },
+        plain: {
+            backgroundColor: "transparent",
+            border: "none",
+            color: textColorFinal,
+            "&:focus-within": {
+                backgroundColor: formatColor(resolvedColor, {
+                    alpha: 5,
+                    format: "hexa",
+                }),
             },
         },
     };

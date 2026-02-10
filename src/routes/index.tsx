@@ -30,5 +30,10 @@ function RouteComponent() {
 
     if (!app.token) return <Navigate to="/login" replace />;
 
-    return <Navigate to={`/${app.settings?.preferredMode ?? "feed"}`} />;
+    // NOTE: This "as" is added because we havent implemented DMs yet
+    return (
+        <Navigate
+            to={`/${(app.settings?.preferredMode as "feed" | "spaces") ?? "feed"}`}
+        />
+    );
 }
