@@ -2,9 +2,22 @@ import { Paper } from "@components/Paper";
 import { useAppStore } from "@hooks/useStores";
 import { useMemo, useState, type PropsWithChildren } from "react";
 
-type Props = PropsWithChildren<{ spoiler?: boolean }>;
+type Props = PropsWithChildren<{
+    spoiler?: boolean;
+    width?: string | number;
+    height?: string | number;
+    borderRadius?: string | number;
+    maxWidth?: string | number;
+}>;
 
-export const MessageEmbedSpoiler = ({ spoiler, children }: Props) => {
+export const MessageEmbedSpoiler = ({
+    spoiler,
+    children,
+    width,
+    height,
+    borderRadius,
+    maxWidth,
+}: Props) => {
     const app = useAppStore();
     const [revealed, setRevealed] = useState(false);
     const [hovered, setHovered] = useState(false);
@@ -19,9 +32,12 @@ export const MessageEmbedSpoiler = ({ spoiler, children }: Props) => {
     return (
         <Paper
             display="inline-block"
-            borderRadius={4}
+            borderRadius={borderRadius ?? 8}
             fontSize="inherit"
             variant="plain"
+            width={width}
+            maxWidth={maxWidth}
+            height={height}
             padding={0}
             elevation={revealed ? 0 : hovered ? (prefersEmbossed ? 3 : 1) : 5}
             textColor={revealed ? "inherit" : "transparent"}

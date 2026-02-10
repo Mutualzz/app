@@ -1,12 +1,10 @@
 import { Link } from "@components/Link";
 import { MessageEmbedSpoiler } from "@components/Message/MessageEmbedSpoiler";
-import { Spoiler } from "@components/Markdown/components/Spoiler";
 import { Paper } from "@components/Paper";
 import { UserAvatar } from "@components/User/UserAvatar";
 import type { APIMessageEmbed } from "@mutualzz/types";
 import { Stack, Typography, useTheme } from "@mutualzz/ui-web";
 import { observer } from "mobx-react-lite";
-import type { PropsWithChildren } from "react";
 
 export const MessageEmbed = observer(
     ({ embed }: { embed: APIMessageEmbed }) => {
@@ -14,22 +12,35 @@ export const MessageEmbed = observer(
 
         if (embed.spotify)
             return (
-                <MessageEmbedSpoiler spoiler={embed.spoiler}>
+                <MessageEmbedSpoiler
+                    width={400}
+                    height={80}
+                    borderRadius={8}
+                    spoiler={embed.spoiler}
+                >
                     <iframe
-                        css={{ borderRadius: 8, border: 0 }}
+                        css={{
+                            borderRadius: 8,
+                            border: 0,
+                        }}
                         src={embed.spotify.embedUrl}
                         width={400}
                         height={80}
                         allowFullScreen
                         allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
                         loading="lazy"
-                    />
+                    ></iframe>
                 </MessageEmbedSpoiler>
             );
 
         if (embed.youtube)
             return (
-                <MessageEmbedSpoiler spoiler={embed.spoiler}>
+                <MessageEmbedSpoiler
+                    width={560}
+                    height={315}
+                    borderRadius={8}
+                    spoiler={embed.spoiler}
+                >
                     <iframe
                         width={560}
                         height={315}
@@ -37,15 +48,53 @@ export const MessageEmbed = observer(
                         title="YouTube video player"
                         css={{
                             borderRadius: 8,
-                            border: 0,
+                            border: `1px solid ${embed.color ?? theme.colors.primary} !important`,
                         }}
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                         referrerPolicy="strict-origin-when-cross-origin"
                         allowFullScreen
                         loading="lazy"
-                    />
+                    ></iframe>
                 </MessageEmbedSpoiler>
             );
+
+        if (
+            embed.apple &&
+            (embed.apple.type === "song" ||
+                embed.apple.type === "playlist" ||
+                embed.apple.type === "album")
+        ) {
+            const isSong = embed.apple.type === "song";
+
+            return (
+                <MessageEmbedSpoiler
+                    width="100%"
+                    height={isSong ? 175 : 450}
+                    maxWidth={660}
+                    spoiler={embed.spoiler}
+                    borderRadius={10}
+                >
+                    <iframe
+                        allow="autoplay *; encrypted-media *; fullscreen *; clipboard-write"
+                        height={isSong ? 175 : 450}
+                        width="100%"
+                        css={{
+                            maxWidth: 660,
+                            borderRadius: 10,
+                            border: 0,
+                            overflow: "hidden",
+                        }}
+                        sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-storage-access-by-user-activation allow-top-navigation-by-user-activation"
+                        src={
+                            theme.type === "dark"
+                                ? `${embed.apple.embedUrl}?theme=dark`
+                                : embed.apple.embedUrl
+                        }
+                        loading="lazy"
+                    ></iframe>
+                </MessageEmbedSpoiler>
+            );
+        }
 
         return (
             <MessageEmbedSpoiler spoiler={embed.spoiler}>
