@@ -24,7 +24,6 @@ const regex = import.meta.env.DEV
     ? /^(?:(?:https?:\/\/)?(?:www\.)?localhost:1420\/invite\/)?([A-Za-z0-9_-]{8,})$/
     : /^(?:(?:https?:\/\/)?(?:www\.)?mutualzz\.com\/invite\/)?([A-Za-z0-9_-]{8,})$/;
 
-// TODO: Finish up the join modal (fix the button that doesnt lead to creating and add another example with just the code and push it as 4.0.1)
 export const SpaceJoin = observer(({ setCreating }: Props) => {
     const app = useAppStore();
     const [inviteLink, setInviteLink] = useState("");

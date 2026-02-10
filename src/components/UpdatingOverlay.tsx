@@ -7,7 +7,6 @@ import { isTauri } from "@utils/index";
 import { useEffect } from "react";
 import { getCurrentWindow, LogicalSize } from "@tauri-apps/api/window";
 
-// TODO: Finish size locking on update overlay and automatic re-centering content after resize
 export const UpdatingOverlay = observer(() => {
     const app = useAppStore();
 
