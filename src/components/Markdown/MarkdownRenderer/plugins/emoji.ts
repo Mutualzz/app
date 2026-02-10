@@ -62,9 +62,8 @@ export const emojiPlugin = (md: MarkdownIt) => {
                 if (
                     newTokens.length &&
                     newTokens.some((t) => t.type === "emoji")
-                ) {
+                )
                     tokens[i].children = newTokens;
-                }
             }
         }
     });

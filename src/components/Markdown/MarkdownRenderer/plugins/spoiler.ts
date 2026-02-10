@@ -4,8 +4,10 @@ import Token from "markdown-it/lib/token.mjs";
 export const spoilerPlugin = (md: MarkdownIt) => {
     md.core.ruler.after("inline", "spoiler", (state) => {
         const tokens = state.tokens;
+
         for (let i = 0; i < tokens.length; i++) {
             const children = tokens[i].children;
+
             if (tokens[i].type === "inline" && children) {
                 const newChildren: Token[] = [];
                 let insideSpoiler = false;
@@ -33,6 +35,7 @@ export const spoilerPlugin = (md: MarkdownIt) => {
                                 }
                                 insideSpoiler = !insideSpoiler;
                             }
+
                             if (parts[k]) {
                                 const partToken = new Token(
                                     token.type,
@@ -49,19 +52,18 @@ export const spoilerPlugin = (md: MarkdownIt) => {
                             }
                         }
                     } else {
-                        if (insideSpoiler) {
-                            spoilerTokens.push(token);
-                        } else {
-                            newChildren.push(token);
-                        }
+                        if (insideSpoiler) spoilerTokens.push(token);
+                        else newChildren.push(token);
                     }
                 }
                 if (insideSpoiler && spoilerTokens.length > 0) {
                     const spoilerToken = new Token("spoiler", "", 0);
+
                     spoilerToken.children = [...spoilerTokens];
                     spoilerToken.content = "";
                     spoilerToken.level = children[0]?.level ?? 0;
                     spoilerToken.markup = "||";
+
                     newChildren.push(spoilerToken);
                 }
                 tokens[i].children = newChildren;
