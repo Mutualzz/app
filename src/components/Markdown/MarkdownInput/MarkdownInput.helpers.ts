@@ -193,52 +193,43 @@ export const resolveMarkdownStyles = (
         : theme.typography.colors.primary;
 
     return {
-        solid: {
-            backgroundColor: resolvedColor,
-            color: solidTextColor,
-            border: "none",
-            "&:focus-within": {
-                backgroundColor: formatColor(resolvedColor, {
-                    format: "hexa",
-                    alpha: 90,
-                }),
-            },
-        },
         outlined: {
-            backgroundColor: colors.background,
+            background: colors.background,
             border: `1px solid ${formatColor(resolvedColor, { alpha: 30, format: "hexa" })}`,
             color: textColorFinal,
-            "&:focus-within": {
-                borderColor: resolvedColor,
-                backgroundColor: formatColor(resolvedColor, {
-                    alpha: 5,
-                    format: "hexa",
-                }),
+            borderRadius: 8,
+            ":focus": {
+                outline: `2px solid ${resolvedColor}`,
+            },
+        },
+        solid: {
+            background: resolvedColor,
+            color: solidTextColor,
+            border: "none",
+            borderRadius: 8,
+            ":focus": {
+                outline: `2px solid ${resolvedColor}`,
+            },
+        },
+        plain: {
+            background: "transparent",
+            color: textColorFinal,
+            border: "none",
+            borderRadius: 8,
+            ":focus": {
+                outline: "none",
             },
         },
         soft: {
             backgroundColor: formatColor(resolvedColor, {
-                alpha: 10,
                 format: "hexa",
+                darken: 50,
             }),
-            border: "none",
             color: textColorFinal,
-            "&:focus-within": {
-                backgroundColor: formatColor(resolvedColor, {
-                    alpha: 15,
-                    format: "hexa",
-                }),
-            },
-        },
-        plain: {
-            backgroundColor: "transparent",
             border: "none",
-            color: textColorFinal,
-            "&:focus-within": {
-                backgroundColor: formatColor(resolvedColor, {
-                    alpha: 5,
-                    format: "hexa",
-                }),
+            borderRadius: 8,
+            ":focus": {
+                outline: `2px solid ${resolvedColor}`,
             },
         },
     };
