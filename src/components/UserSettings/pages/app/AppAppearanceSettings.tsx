@@ -425,6 +425,7 @@ export const AppAppearanceSettings = observer(() => {
                         <Button
                             variant="soft"
                             horizontalAlign="left"
+                            disabled={!import.meta.env.DEV}
                             onClick={() =>
                                 import.meta.env.DEV &&
                                 openModal(
