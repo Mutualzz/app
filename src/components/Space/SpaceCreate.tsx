@@ -15,6 +15,7 @@ import {
     useTheme,
 } from "@mutualzz/ui-web";
 import { useMutation } from "@tanstack/react-query";
+import { useNavigate } from "@tanstack/react-router";
 import { observer } from "mobx-react-lite";
 import { useCallback, useState, type ChangeEvent } from "react";
 import Cropper, { type Area, type Point } from "react-easy-crop";
@@ -32,9 +33,10 @@ interface Props {
 
 export const SpaceCreate = observer(({ setCreating }: Props) => {
     const app = useAppStore();
+    const navigate = useNavigate();
     const { theme } = useTheme();
 
-    const { closeAllModals } = useModal();
+    const { closeModal } = useModal();
 
     const [name, setName] = useState("");
 
@@ -59,11 +61,15 @@ export const SpaceCreate = observer(({ setCreating }: Props) => {
 
             return app.rest.postFormData<APISpace>("spaces", formData);
         },
-        onSuccess: () => {
+        onSuccess: (space) => {
+            if (space.channels && space.channels.length > 1)
+                navigate({ to: `/spaces/${space.id}/${space.channels[0].id}` });
+            else navigate({ to: `/spaces/${space.id}/` });
+
             setImageFile(null);
             setError(null);
             setOriginalFile(null);
-            closeAllModals();
+            closeModal();
         },
         onError: (err: HttpException) => {
             setError(

@@ -34,6 +34,7 @@ export const SidebarPill = ({ type }: Props) => {
         <Stack
             justifyContent="flex-start"
             position="absolute"
+            alignItems={type === "active" ? "flex-start" : "center"}
             left={0}
             width={8}
             height={48}

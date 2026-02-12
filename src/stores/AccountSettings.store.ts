@@ -11,7 +11,7 @@ export class AccountSettingsStore {
     currentTheme?: string | null;
     currentIcon?: string | null;
     preferredMode: AppMode;
-    preferEmbossed: boolean = false;
+    preferEmbossed: boolean = true;
     spacePositions: ObservableOrderedSet<string>;
     updatedAt: Date;
 

@@ -10,7 +10,11 @@ const PaperComponent = forwardRef<HTMLDivElement, PaperProps>(
         return (
             <MPaper
                 variant={
-                    app.settings?.preferEmbossed ? "elevation" : "outlined"
+                    !app.token
+                        ? "elevation"
+                        : app.settings?.preferEmbossed
+                          ? "elevation"
+                          : "outlined"
                 }
                 elevation={props.variant === "soft" ? 0 : props.elevation}
                 transparency={

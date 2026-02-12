@@ -7,6 +7,7 @@ import { Item } from "@mutualzz/contexify";
 import { Box } from "@mutualzz/ui-web";
 import type { Space } from "@stores/objects/Space";
 import { useMutation } from "@tanstack/react-query";
+import { useNavigate } from "@tanstack/react-router";
 import { observer } from "mobx-react-lite";
 import { type Dispatch, type SetStateAction } from "react";
 import {
@@ -25,16 +26,23 @@ interface Props {
 export const SpaceContextMenu = observer(
     ({ space, fromSidebar, setMenuOpen }: Props) => {
         const app = useAppStore();
+        const navigate = useNavigate();
         const { openModal } = useModal();
 
         const { mutate: deleteSpace, isPending } = useMutation({
             mutationKey: ["delete-space", space.id],
             mutationFn: async () => space.delete(),
+            onSuccess: () => {
+                navigate({ to: "/" });
+            },
         });
 
         const { mutate: leaveSpace, isPending: isLeaving } = useMutation({
             mutationKey: ["leave-space", space.id],
             mutationFn: async () => space.leave(),
+            onSuccess: () => {
+                navigate({ to: "/" });
+            },
         });
 
         const canModifySpace =
@@ -94,7 +102,7 @@ export const SpaceContextMenu = observer(
                 )}
                 {!canModifySpace && (
                     <Item
-                        color="neutral"
+                        color="danger"
                         endDecorator={<FaDoorOpen />}
                         onClick={() => leaveSpace()}
                         disabled={isLeaving}

@@ -31,7 +31,6 @@ import {
     Outlet,
     Scripts,
     useNavigate,
-    useRouterState,
 } from "@tanstack/react-router";
 import { isTauri } from "@utils/index";
 import dayjs from "dayjs";
@@ -44,7 +43,6 @@ import {
     type PropsWithChildren,
     type ReactNode,
     useEffect,
-    useRef,
     useState,
 } from "react";
 
@@ -105,7 +103,7 @@ function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
                         overflow: "hidden",
                     }}
                     onContextMenu={(e) =>
-                        import.meta.env.PROD && e.preventDefault()
+                        import.meta.env.PROD && isTauri && e.preventDefault()
                     }
                 >
                     {children}
@@ -125,13 +123,6 @@ function RootComponent() {
     const [titleBarHeight, setTitleBarHeight] = useState(0);
 
     const networkState = useNetworkState();
-
-    const didRestoreNavRef = useRef(false);
-    const didDeepLinkRef = useRef(false);
-
-    const currentRouterHref = useRouterState({
-        select: (state) => state.location.href,
-    });
 
     useEffect(() => {
         app.loadSettings();
@@ -211,8 +202,6 @@ function RootComponent() {
             await win.unminimize();
             await win.setFocus();
 
-            didDeepLinkRef.current = true;
-
             const urlStr = e.payload.find((x) => x.startsWith("mutualzz://"));
             if (!urlStr) return;
 
@@ -272,28 +261,6 @@ function RootComponent() {
         window.addEventListener("keydown", onKeyDown);
         return () => window.removeEventListener("keydown", onKeyDown);
     }, []);
-
-    useEffect(() => {
-        if (didRestoreNavRef.current) return;
-        if (didDeepLinkRef.current) return;
-
-        const targetHref = app.navigation.current?.href;
-        if (!targetHref) return;
-
-        if (targetHref === "/spaces" || targetHref === "/feed") return;
-
-        if (targetHref === currentRouterHref) {
-            didRestoreNavRef.current = true;
-            return;
-        }
-
-        didRestoreNavRef.current = true;
-
-        navigate({
-            to: targetHref,
-            replace: true,
-        });
-    }, [currentRouterHref, app.navigation.current?.href]);
 
     const stage = app.updater?.stage;
     const forceGate =

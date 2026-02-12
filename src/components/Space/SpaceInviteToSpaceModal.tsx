@@ -47,6 +47,8 @@ const maxUses = [
     { label: "100 uses", value: 100 },
 ];
 
+type CreateInviteResponse = APIInvite & { editSessionId?: string };
+
 export const SpaceInviteToSpaceModal = observer(({ channel }: Props) => {
     const app = useAppStore();
     const [editing, setEditing] = useState(false);
@@ -54,12 +56,13 @@ export const SpaceInviteToSpaceModal = observer(({ channel }: Props) => {
     const [maxUsesAfter, setMaxUsesAfter] = useState(maxUses[0].value);
     const [invite, setInvite] = useState<Invite | null>(null);
     const [copied, setCopied] = useState(false);
+    const [editSessionId, setEditSessionId] = useState<string | null>(null);
 
     const { data, isLoading, error } = useQuery<
-        APIInvite | undefined,
+        CreateInviteResponse | undefined,
         HttpException
     >({
-        queryKey: ["createInvite", app.spaces.active?.id, channel?.id],
+        queryKey: ["createInvite", invite?.code],
         queryFn: () => app.spaces.active?.createInvite(channel?.id),
         enabled: !!app.spaces.active,
         refetchOnWindowFocus: false,
@@ -68,7 +71,7 @@ export const SpaceInviteToSpaceModal = observer(({ channel }: Props) => {
     });
 
     const { mutate: updateInvite } = useMutation({
-        mutationKey: ["updateInvite", app.spaces.active?.id, channel?.id],
+        mutationKey: ["updateInvite", invite?.code],
         mutationFn: (space: Space) =>
             app.rest.patch<APIInvite>(
                 `/spaces/${space.id}/invites/${invite?.code}`,
@@ -76,15 +79,52 @@ export const SpaceInviteToSpaceModal = observer(({ channel }: Props) => {
                     maxUses: maxUsesAfter,
                     expiresAt: expiresAfter,
                 },
+                undefined,
+                {
+                    ...(editSessionId && {
+                        "x-invite-edit-session": editSessionId,
+                    }),
+                },
             ),
         onSuccess: (invite) => {
             setEditing(false);
             setInvite(new Invite(app, invite));
+            setEditSessionId(null);
+        },
+    });
+
+    const { mutateAsync: keepAlive } = useMutation({
+        mutationKey: ["inviteKeepAlive", invite?.code],
+        mutationFn: async () => {
+            const spaceId = app.spaces.active?.id;
+            if (!spaceId || !invite?.code || !editSessionId) return;
+
+            await app.rest.post(
+                `/spaces/${spaceId}/invites/${invite.code}/keepalive`,
+                null,
+                { headers: { "x-invite-edit-session": editSessionId } },
+            );
         },
     });
 
     useEffect(() => {
-        if (!isLoading && data) setInvite(new Invite(app, data));
+        if (!editing) return;
+        if (!editSessionId) return;
+        if (!invite?.code) return;
+        if (!app.spaces.active?.id) return;
+
+        const id = setInterval(() => {
+            keepAlive().catch(() => null);
+        }, 12000);
+
+        return () => clearInterval(id);
+    }, [editing, editSessionId, invite?.code, app.spaces.active?.id]);
+
+    useEffect(() => {
+        if (!isLoading && data) {
+            setInvite(new Invite(app, data));
+            setEditSessionId(data.editSessionId ?? null);
+        }
     }, [data, isLoading]);
 
     const channelToUse = channel ?? app.spaces.active?.firstNavigableChannel;
@@ -177,7 +217,10 @@ export const SpaceInviteToSpaceModal = observer(({ channel }: Props) => {
                         >
                             <ButtonGroup spacing={10} fullWidth>
                                 <Button
-                                    onClick={() => setEditing(false)}
+                                    onClick={() => {
+                                        setEditing(false);
+                                        setEditSessionId(null);
+                                    }}
                                     variant="soft"
                                     color="neutral"
                                 >

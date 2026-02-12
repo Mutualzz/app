@@ -2,7 +2,7 @@ import { AnimatedPaper } from "@components/Animated/AnimatedPaper";
 import { Link } from "@components/Link";
 import { useModal } from "@contexts/Modal.context";
 import { useAppStore } from "@hooks/useStores";
-import type { APIInvite } from "@mutualzz/types";
+import type { APISpaceMember, APIInvite } from "@mutualzz/types";
 import {
     Button,
     ButtonGroup,
@@ -11,6 +11,7 @@ import {
     Typography,
 } from "@mutualzz/ui-web";
 import { useMutation } from "@tanstack/react-query";
+import { useNavigate } from "@tanstack/react-router";
 import { observer } from "mobx-react-lite";
 import { type ChangeEvent, useState } from "react";
 
@@ -24,21 +25,36 @@ const regex = import.meta.env.DEV
     ? /^(?:(?:https?:\/\/)?(?:www\.)?localhost:1420\/invite\/)?([A-Za-z0-9_-]{8,})$/
     : /^(?:(?:https?:\/\/)?(?:www\.)?mutualzz\.com\/invite\/)?([A-Za-z0-9_-]{8,})$/;
 
+// TODO: Fixed redirection errros when joining or creating space
 export const SpaceJoin = observer(({ setCreating }: Props) => {
     const app = useAppStore();
+    const navigate = useNavigate();
+    const [invite, setInvite] = useState<APIInvite | null>(null);
     const [inviteLink, setInviteLink] = useState("");
     const [error, setError] = useState<string | null>(null);
-    const { closeAllModals } = useModal();
+    const { closeModal } = useModal();
 
     const { mutate: joinSpace, isPending: isJoining } = useMutation({
         mutationKey: ["join-space", inviteLink],
-        mutationFn: async (invite: APIInvite) =>
-            app.rest.put(`/spaces/${invite.space?.id}/members`, {
-                channelId: invite.channelId,
-                code: invite.code,
-            }),
-        onSuccess: () => {
-            closeAllModals();
+        mutationFn: async (invite: APIInvite) => {
+            setInvite(invite);
+
+            return app.rest.put<APISpaceMember>(
+                `/spaces/${invite.space?.id}/members`,
+                {
+                    channelId: invite.channelId,
+                    code: invite.code,
+                },
+            );
+        },
+        onSuccess: (member: APISpaceMember) => {
+            if (!member) return;
+            if (invite?.channelId)
+                navigate({
+                    to: `/spaces/${member.spaceId}/$${invite.channelId}`,
+                });
+            else navigate({ to: `/spaces/${member.spaceId}` });
+            closeModal();
         },
     });
 

@@ -30,6 +30,14 @@ function RouteComponent() {
 
     if (!app.token) return <Navigate to="/login" replace />;
 
+    const lastHref = app.navigation.current?.href;
+    if (
+        app.token &&
+        lastHref &&
+        (lastHref.startsWith("/spaces") || lastHref.startsWith("/feed"))
+    )
+        return <Navigate to={lastHref} replace />;
+
     // NOTE: This "as" is added because we havent implemented DMs yet
     return (
         <Navigate
