@@ -1,16 +1,14 @@
 import type { Snowflake } from "@mutualzz/types";
 import {
-    BitField,
     CDNRoutes,
     ImageFormat,
-    userFlags,
     type APIUser,
     type AvatarFormat,
     type Sizes,
-    type UserFlags,
 } from "@mutualzz/types";
 import { REST } from "@stores/REST.store";
 import { makeAutoObservable } from "mobx";
+import { BitField, type UserFlags, userFlags } from "@mutualzz/permissions";
 
 export class User {
     id: Snowflake;

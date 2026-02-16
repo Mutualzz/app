@@ -25,13 +25,7 @@ import { useNetworkState } from "@react-hookz/web";
 import { seo } from "@seo";
 import { GatewayStatus } from "@stores/Gateway.store";
 import type { QueryClient } from "@tanstack/react-query";
-import {
-    createRootRouteWithContext,
-    HeadContent,
-    Outlet,
-    Scripts,
-    useNavigate,
-} from "@tanstack/react-router";
+import { createRootRouteWithContext, HeadContent, Outlet, Scripts, useNavigate, } from "@tanstack/react-router";
 import { isTauri } from "@utils/index";
 import dayjs from "dayjs";
 import calendar from "dayjs/plugin/calendar";
@@ -39,12 +33,7 @@ import duration from "dayjs/plugin/duration";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { reaction } from "mobx";
 import { observer } from "mobx-react-lite";
-import {
-    type PropsWithChildren,
-    type ReactNode,
-    useEffect,
-    useState,
-} from "react";
+import { type PropsWithChildren, type ReactNode, useEffect, useState, } from "react";
 
 import { APIErrorListener } from "@components/APIErrorListener";
 import { DesktopShell } from "@components/Desktop/DesktopShell";
@@ -62,6 +51,8 @@ import { calendarStrings } from "@utils/i18n";
 import { UpdatingOverlay } from "@components/UpdatingOverlay";
 import { NavigationTracker } from "@components/NavigationTracker";
 import { AppHotkeys } from "@components/AppHotkeys";
+import { ContextMenuProvider } from "@contexts/ContextMenu.context.tsx";
+import { ModalRoot } from "@components/Modals/ModalRoot.tsx";
 
 dayjs.extend(relativeTime);
 dayjs.extend(calendar, calendarStrings);
@@ -278,56 +269,61 @@ function RootComponent() {
                     <DesktopShellProvider>
                         <WindowTitleBar onHeightChange={setTitleBarHeight} />
                         <DesktopShell>
-                            <NavigationTracker />
-                            {isTauri && <UpdatingOverlay />}
-                            <AppHotkeys />
+                            <ContextMenuProvider>
+                                <ModalRoot />
+                                <NavigationTracker />
+                                {isTauri && <UpdatingOverlay />}
+                                <AppHotkeys />
 
-                            {forceGate ? null : (
-                                <>
-                                    {!networkState.online && (
-                                        <Paper
-                                            alignItems="center"
-                                            justifyContent="center"
-                                            variant="solid"
-                                            color="danger"
-                                        >
-                                            <Typography level="body-lg">
-                                                You are currently offline
-                                            </Typography>
-                                        </Paper>
-                                    )}
+                                {forceGate ? null : (
+                                    <>
+                                        {!networkState.online && (
+                                            <Paper
+                                                alignItems="center"
+                                                justifyContent="center"
+                                                variant="solid"
+                                                color="danger"
+                                            >
+                                                <Typography level="body-lg">
+                                                    You are currently offline
+                                                </Typography>
+                                            </Paper>
+                                        )}
 
-                                    <InjectGlobal />
-                                    <APIErrorListener />
-                                    <Loader>
-                                        <Stack
-                                            direction="column"
-                                            height="100vh"
-                                            width="100vw"
-                                            flex={1}
-                                            minHeight={0}
-                                            css={{
-                                                paddingTop: titleBarHeight,
-                                            }}
-                                        >
+                                        <InjectGlobal />
+                                        <APIErrorListener />
+                                        <Loader>
                                             <Stack
-                                                width="100%"
+                                                direction="column"
+                                                height="100vh"
+                                                width="100vw"
                                                 flex={1}
                                                 minHeight={0}
-                                                overflow="hidden"
+                                                css={{
+                                                    paddingTop: titleBarHeight,
+                                                }}
                                             >
-                                                <Outlet />
+                                                <Stack
+                                                    width="100%"
+                                                    flex={1}
+                                                    minHeight={0}
+                                                    overflow="hidden"
+                                                >
+                                                    <Outlet />
+                                                </Stack>
+                                                {app.account && (
+                                                    <ModeSwitcher />
+                                                )}
                                             </Stack>
-                                            {app.account && <ModeSwitcher />}
-                                        </Stack>
-                                    </Loader>
-                                    {/*{import.meta.env.DEV && (*/}
-                                    {/*    <>*/}
-                                    {/*        <TanStackRouterDevtools />*/}
-                                    {/*    </>*/}
-                                    {/*)}*/}
-                                </>
-                            )}
+                                        </Loader>
+                                        {/*{import.meta.env.DEV && (*/}
+                                        {/*    <>*/}
+                                        {/*        <TanStackRouterDevtools />*/}
+                                        {/*    </>*/}
+                                        {/*)}*/}
+                                    </>
+                                )}
+                            </ContextMenuProvider>
                         </DesktopShell>
                     </DesktopShellProvider>
                 </ModalProvider>

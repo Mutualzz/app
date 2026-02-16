@@ -5,6 +5,7 @@ import { makeObservable } from "mobx";
 import type { Channel } from "./Channel";
 import { MessageBase } from "./MessageBase";
 import type { QueuedMessage, QueuedMessageData } from "./QueuedMessage";
+import type { SpaceMember } from "@stores/objects/SpaceMember.ts";
 
 export type MessageLike = Message | QueuedMessage;
 export type MessageLikeData = APIMessage | QueuedMessageData;
@@ -21,6 +22,7 @@ export class Message extends MessageBase {
 
     space?: Space | null;
     channel?: Channel | null;
+    member?: SpaceMember | null;
 
     constructor(app: AppStore, data: APIMessage) {
         super(app, data);
@@ -43,6 +45,10 @@ export class Message extends MessageBase {
 
         this.spaceId = data.spaceId;
         if (data.space) this.space = this.app.spaces.add(data.space);
+        else if (this.spaceId)
+            this.space = this.app.spaces.get(this.spaceId) ?? null;
+
+        this.member = this.space?.members.get(data.authorId) ?? null;
 
         makeObservable(this);
     }
@@ -53,6 +59,10 @@ export class Message extends MessageBase {
         this.createdAt = new Date(message.createdAt);
         this.updatedAt = message.updatedAt ? new Date(message.updatedAt) : null;
         this.edited = message.edited ?? this.edited;
+
+        if (message.member && this.space) {
+            this.member = this.space.members.add(message.member);
+        }
     }
 
     async delete() {

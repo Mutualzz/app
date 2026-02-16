@@ -17,7 +17,7 @@ interface UserSettingsContextProps {
     reset: () => void;
 }
 
-const UserSettingsContext = createContext<UserSettingsContextProps>({
+const UserSettingsContext = createContext<UserSettingsContextProps | null>({
     currentPage: "my-account",
     currentCategory: "user-settings",
     setCurrentPage: () => {

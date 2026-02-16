@@ -18,7 +18,7 @@ import { DraftStore } from "./Draft.store";
 import { GatewayStore } from "./Gateway.store";
 import { MessageQueue } from "./MessageQueue.store";
 import { REST } from "./REST.store";
-import { SpaceStore } from "./Space.store";
+import { SpaceStore } from "./Space/Space.store";
 import { ThemeStore } from "./Theme.store";
 import { UpdaterStore } from "./Updater.store";
 import { UserStore } from "./User.store";

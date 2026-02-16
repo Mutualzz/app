@@ -40,7 +40,7 @@ export const ChannelCreateModal = observer(({ space, parent }: Props) => {
         onSuccess: (newChannel) => {
             if (!newChannel.spaceId) return;
             closeModal();
-            if (newChannel.type === ChannelType.Voice) return;
+            if (newChannel.type !== ChannelType.Text) return;
             navigate({
                 to: "/spaces/$spaceId/$channelId",
                 params: {

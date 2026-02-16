@@ -1,4 +1,4 @@
-import { InputWithLabel } from "@components/InputWIthLabel";
+import { InputWithLabel } from "@components/InputWithLabel.tsx";
 import {
     type ColorLike,
     createColor,

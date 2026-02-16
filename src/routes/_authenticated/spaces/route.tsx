@@ -1,4 +1,4 @@
-import { ChannelList } from "@components/Channel/ChannelList/ChannelList";
+import { ChannelList } from "@components/Channel/ChannelList.tsx";
 import { SpacesSidebar } from "@components/Space/SpacesSidebar";
 import { UserBar } from "@components/User/UserBar";
 import { useAppStore } from "@hooks/useStores";

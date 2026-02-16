@@ -1,4 +1,4 @@
-import { InputWithLabel } from "@components/InputWIthLabel";
+import { InputWithLabel } from "@components/InputWithLabel.tsx";
 import { Stack } from "@mutualzz/ui-web";
 import { observer } from "mobx-react-lite";
 import { useAppStore } from "@hooks/useStores";

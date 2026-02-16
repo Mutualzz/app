@@ -2,26 +2,16 @@ import { ListSection } from "@components/ListSection";
 import { MemberListItem } from "@components/MemberList/MemberListItem";
 import { Paper } from "@components/Paper";
 import { useAppStore } from "@hooks/useStores";
-import { autorun } from "mobx";
 import { observer } from "mobx-react-lite";
-import { useEffect, useState } from "react";
 
 export const MemberList = observer(() => {
     const app = useAppStore();
-    const [list, setList] = useState<any[] | null>(null);
+    const space = app.spaces.active;
+    const channel = app.channels.active;
 
-    useEffect(() => {
-        autorun(() => {
-            if (!app.spaces.active || !app.channels.active) {
-                setList(null);
-                return;
-            }
-
-            const memberLists = app.spaces.active.memberLists;
-            const store = memberLists.get(app.channels.active.listId);
-            setList(store ? store.list : null);
-        });
-    }, []);
+    const store =
+        space && channel ? space.memberLists.get(channel.listId) : undefined;
+    const list = store?.list ?? null;
 
     return (
         <Paper
@@ -36,13 +26,19 @@ export const MemberList = observer(() => {
             {list
                 ? list.map((category, i) => (
                       <ListSection
-                          key={i}
+                          key={`${category.name}-${i}`}
                           name={category.name}
-                          items={category.items.map((x: any) => (
+                          items={category.items.map((m: any) => (
                               <MemberListItem
-                                  member={x}
+                                  key={
+                                      m.userId ??
+                                      m.user?.id ??
+                                      `${category.name}-${i}`
+                                  }
+                                  member={m}
                                   isOwner={
-                                      x.userId === app.spaces.active?.ownerId
+                                      (m.userId ?? m.user?.id) ===
+                                      space?.ownerId
                                   }
                               />
                           ))}

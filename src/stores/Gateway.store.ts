@@ -1,22 +1,22 @@
 import { Logger } from "@mutualzz/logger";
-import type { APIMessage, GatewayReadyPayload } from "@mutualzz/types";
+import type { APIMessage, APIRole, GatewayReadyPayload } from "@mutualzz/types";
 import {
-    GatewayCloseCodes,
-    GatewayDispatchEvents,
-    GatewayOpcodes,
     type APIChannel,
     type APIInvite,
     type APIPrivateUser,
     type APISpace,
     type APIUser,
     type APIUserSettings,
+    GatewayCloseCodes,
+    GatewayDispatchEvents,
+    GatewayOpcodes,
 } from "@mutualzz/types";
 import { invoke } from "@tauri-apps/api/core";
-import { createCodec, type Codec, type Encoding } from "@utils/codec";
+import { type Codec, createCodec, type Encoding } from "@utils/codec";
 import {
-    createCompressor,
     type Compression,
     type Compressor,
+    createCompressor,
 } from "@utils/compressor";
 import { isTauri } from "@utils/index";
 import { makeAutoObservable } from "mobx";
@@ -38,34 +38,27 @@ const RECONNECT_TIMEOUT = 5000;
 
 export class GatewayStore {
     socket: WebSocket | null = null;
+    public readyState: GatewayStatus = GatewayStatus.CLOSED;
+    public events: { t: string; d: any; s: number }[] = [];
     private readonly logger = new Logger({
         tag: "GatewayStore",
     });
-
-    public readyState: GatewayStatus = GatewayStatus.CLOSED;
     private sessionId: string | null = null;
     private sequence = 0;
-
     private heartbeatInterval: number | null = null;
     private heartbeater: NodeJS.Timeout | null = null;
     private initialHeartbeatTimeout: NodeJS.Timeout | null = null;
     private heartbeatAck = true;
     private url?: string;
-
     private encoding: Encoding = isTauri ? "etf" : "json";
-    private compress: Compression = "zlib-stream";
-
+    private compress: Compression =
+        import.meta.env.DEV && !isTauri ? "none" : "zlib-stream";
     private codec!: Codec;
     private compressor!: Compressor;
-
     private connectionStartTime?: number;
     private identifyStartTime?: number;
     private reconnectTimeout = 0;
-
     private reconnecting = false;
-
-    public events: { t: string; d: any; s: number }[] = [];
-
     private readonly dispatchHandlers = new Map<
         string,
         (...args: any[]) => any
@@ -116,6 +109,25 @@ export class GatewayStore {
             this.connect(this.url);
         }, this.reconnectTimeout);
     }
+
+    onChannelOpen = (spaceId: string, channelId: string) => {
+        const prev = this.lazyRequestChannels.get(spaceId) ?? [];
+        if (prev.includes(channelId)) return;
+
+        const payload = {
+            spaceId,
+            channels: {
+                [channelId]: [[0, 99]],
+            },
+        };
+
+        this.lazyRequestChannels.set(spaceId, [...prev, channelId]);
+
+        this.send({
+            op: GatewayOpcodes.LazyRequest,
+            d: payload,
+        });
+    };
 
     private setupListeners() {
         this.socket!.onopen = this.onOpen;
@@ -207,6 +219,30 @@ export class GatewayStore {
         this.dispatchHandlers.set(
             GatewayDispatchEvents.SpaceMemberListUpdate,
             this.onSpaceMemberListUpdate,
+        );
+
+        // Roles
+        this.dispatchHandlers.set(
+            GatewayDispatchEvents.RoleCreate,
+            this.onRoleCreate,
+        );
+        this.dispatchHandlers.set(
+            GatewayDispatchEvents.RoleUpdate,
+            this.onRoleUpdate,
+        );
+        this.dispatchHandlers.set(
+            GatewayDispatchEvents.RoleDelete,
+            this.onRoleDelete,
+        );
+
+        // Role assignments
+        this.dispatchHandlers.set(
+            GatewayDispatchEvents.SpaceMemberRoleAdd,
+            this.onMemberRoleAdd,
+        );
+        this.dispatchHandlers.set(
+            GatewayDispatchEvents.SpaceMemberRoleRemove,
+            this.onMemberRoleRemove,
         );
     }
 
@@ -543,25 +579,6 @@ export class GatewayStore {
         this.app.channels.setPreferredActive();
     };
 
-    onChannelOpen = (spaceId: string, channelId: string) => {
-        const spaceChannels = this.lazyRequestChannels.get(spaceId) || [];
-
-        if (spaceChannels.includes(channelId)) return;
-
-        const payload = {
-            spaceId,
-            channels: {
-                [channelId]: [[0, 99]],
-            },
-        };
-        this.lazyRequestChannels.set(spaceId, [channelId]);
-
-        this.send({
-            op: GatewayOpcodes.LazyRequest,
-            d: payload,
-        });
-    };
-
     // Dispatcher Handlers start here
     private onSpaceCreate = (payload: APISpace) => {
         const space = this.app.spaces.add(payload);
@@ -599,7 +616,6 @@ export class GatewayStore {
             this.logger.error("Failed to add channel to space");
             return;
         }
-        this.app.channels.setActive(channel.id);
     };
 
     private onChannelUpdate = (payload: APIChannel) => {
@@ -720,5 +736,58 @@ export class GatewayStore {
         if (!space) return;
 
         space.updateMemberList(data);
+    };
+
+    private onRoleCreate = (role: APIRole) => {
+        const space = this.app.spaces.get(role.spaceId);
+        if (!space) return;
+
+        space.roles.add(role);
+        space.members.all.forEach((member) => {
+            member.invalidateChannelPermCache();
+        });
+    };
+
+    private onRoleUpdate = (role: APIRole) => {
+        const space = this.app.spaces.get(role.spaceId);
+        if (!space) return;
+
+        space.roles.update(role);
+        space.members.all.forEach((member) => {
+            member.invalidateChannelPermCache();
+        });
+    };
+
+    private onRoleDelete = (role: APIRole) => {
+        const space = this.app.spaces.get(role.spaceId);
+        if (!space) return;
+
+        space.roles.remove(role.id);
+
+        space.members.all.forEach((member) => {
+            member.invalidateChannelPermCache();
+        });
+    };
+
+    private onMemberRoleAdd = (payload: any) => {
+        const space = this.app.spaces.get(payload.spaceId);
+        if (!space) return;
+
+        const member = space.members.get(payload.userId);
+        if (!member) return;
+
+        member.roles.add(payload.roleId);
+        member.invalidateChannelPermCache();
+    };
+
+    private onMemberRoleRemove = (payload: any) => {
+        const space = this.app.spaces.get(payload.spaceId);
+        if (!space) return;
+
+        const member = space.members.get(payload.userId);
+        if (!member) return;
+
+        member.roles.delete(String(payload.roleId));
+        member.invalidateChannelPermCache();
     };
 }

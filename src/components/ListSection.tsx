@@ -20,7 +20,6 @@ export const ListSection = (props: Props) => {
                 justifyContent="space-between"
                 fontSize={12}
                 fontWeight="bold"
-                textColor="secondary"
                 onClick={toggle}
                 css={{
                     cursor: "pointer",
@@ -31,7 +30,7 @@ export const ListSection = (props: Props) => {
                 {open ? <FaChevronDown /> : <FaChevronRight />}
             </Typography>
             {open && (
-                <Stack mt="4px" direction="column">
+                <Stack direction="column">
                     {...props.items}
                 </Stack>
             )}

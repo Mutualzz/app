@@ -8,7 +8,7 @@ import { useAppStore } from "@hooks/useStores";
 import { IconButton, Stack, Typography } from "@mutualzz/ui-web";
 import startCase from "lodash-es/startCase";
 import { observer } from "mobx-react-lite";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { FaX } from "react-icons/fa6";
 import { AppAppearanceSettings } from "./pages/app/AppAppearanceSettings";
 import { UserAccountSettings } from "./pages/user/UserAccountSettings";
@@ -24,11 +24,16 @@ export const UserSettingsContent = observer(
         const { currentPage, setCurrentPage } = useUserSettings();
         const { closeModal } = useModal();
 
+        const didInitRedirect = useRef(false);
+
         useEffect(() => {
-            if (redirectTo) {
-                setCurrentPage(redirectTo);
-            }
-        }, [redirectTo]);
+            if (didInitRedirect.current) return;
+            if (!redirectTo) return;
+
+            didInitRedirect.current = true;
+
+            setCurrentPage(redirectTo);
+        }, [redirectTo, setCurrentPage]);
 
         return (
             <Stack

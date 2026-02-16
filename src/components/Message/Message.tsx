@@ -42,6 +42,8 @@ export const Message = observer(({ message, header }: Props) => {
         }
     };
 
+    if (!space) return <></>;
+
     const children = (
         <MessageBase
             onMouseEnter={hideSwitcher}

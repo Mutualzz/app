@@ -7,7 +7,7 @@ export const ContextSubmenu: FC<SubMenuProps> = (props) => {
 
     return (
         <Submenu
-            variant={app.settings?.preferEmbossed ? "elevation" : "outlined"}
+            variant="plain"
             elevation={props.variant === "soft" ? 0 : props.elevation}
             transparency={
                 app.settings?.preferEmbossed ? 90 : props.transparency

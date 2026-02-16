@@ -6,6 +6,8 @@ import type { SpaceMember } from "@stores/objects/SpaceMember";
 import { observer } from "mobx-react-lite";
 import { useState } from "react";
 import { FaCrown } from "react-icons/fa";
+import type { ColorLike } from "@mutualzz/ui-core";
+import { useMenu } from "@contexts/ContextMenu.context.tsx";
 
 interface Props {
     member: SpaceMember;
@@ -15,6 +17,10 @@ interface Props {
 export const MemberListItem = observer(({ member, isOwner }: Props) => {
     const [hovered, setHovered] = useState(false);
     const { theme } = useTheme();
+    const { openContextMenu } = useMenu();
+
+    const nameColor: ColorLike =
+        (member.highestRole?.color as ColorLike) ?? "#99aab5";
 
     return (
         <Paper
@@ -29,6 +35,16 @@ export const MemberListItem = observer(({ member, isOwner }: Props) => {
             spacing={1}
             alignItems="center"
             px={1}
+            onContextMenu={(e) =>
+                openContextMenu(e, {
+                    type: "member",
+                    space: member.space!,
+                    member,
+                })
+            }
+            css={{
+                cursor: "pointer",
+            }}
         >
             <UserAvatar size={32} user={member.user} />
             <Typography
@@ -41,6 +57,7 @@ export const MemberListItem = observer(({ member, isOwner }: Props) => {
                 alignItems="center"
                 display="flex"
                 spacing={2}
+                textColor={nameColor}
             >
                 {member.displayName}
                 {isOwner && (

@@ -5,7 +5,6 @@ import { MessageList } from "@components/Message/MessageList";
 import { Paper } from "@components/Paper";
 import { useAppStore } from "@hooks/useStores";
 import { Stack, Typography } from "@mutualzz/ui-web";
-import { useDebouncedEffect } from "@react-hookz/web";
 import { createFileRoute } from "@tanstack/react-router";
 import { runInAction } from "mobx";
 import { observer } from "mobx-react-lite";
@@ -21,20 +20,16 @@ function RouteComponent() {
     const app = useAppStore();
     const { spaceId, channelId } = Route.useParams();
 
-    useDebouncedEffect(
-        () => {
-            if (!app.channels.activeId || !app.spaces.activeId) return;
+    useEffect(() => {
+        if (!app.channels.activeId || !app.spaces.activeId) return;
 
-            runInAction(() => {
-                app.gateway.onChannelOpen(
-                    app.spaces.activeId!,
-                    app.channels.activeId!,
-                );
-            });
-        },
-        [app.channels.activeId, app.spaces.activeId],
-        2000,
-    );
+        runInAction(() => {
+            app.gateway.onChannelOpen(
+                app.spaces.activeId!,
+                app.channels.activeId!,
+            );
+        });
+    }, [app.channels.activeId, app.spaces.activeId]);
 
     useEffect(() => {
         app.spaces.setActive(spaceId);

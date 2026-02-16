@@ -1,5 +1,4 @@
 import { AnimatedStack } from "@components/Animated/AnimatedStack";
-import { Paper } from "@components/Paper";
 import { SpaceInviteToSpaceModal } from "@components/Space/SpaceInviteToSpaceModal";
 import { TooltipWrapper } from "@components/TooltipWrapper";
 import { UserAvatar } from "@components/User/UserAvatar";
@@ -164,10 +163,10 @@ const InviteItem = observer(({ theme, invite, last, now }: InviteItemProps) => {
             </AnimatedStack>
             {!last && (
                 <Divider
-                    lineColor={formatColor(theme.typography.colors.muted, {
-                        alpha: 35,
-                        format: "hexa",
-                    })}
+                    lineColor="muted"
+                    css={{
+                        opacity: 0.25,
+                    }}
                 />
             )}
         </>
@@ -193,8 +192,9 @@ export const SpaceInvitesSettings = observer(({ space }: Props) => {
     });
 
     useEffect(() => {
+        if (invites.length > 0) return;
         fetchInvites();
-    }, []);
+    }, [invites.length]);
 
     useEffect(() => {
         const dispose = reaction(
@@ -214,9 +214,11 @@ export const SpaceInvitesSettings = observer(({ space }: Props) => {
     }, []);
 
     return (
-        <Stack direction="column" spacing={4} pt={1}>
+        <Stack direction="column" spacing={4} mt={1}>
             <Stack alignItems="center" justifyContent="space-between">
-                <Typography>Active Invite Links</Typography>
+                <Typography fontFamily="monospace">
+                    Active Invite Links
+                </Typography>
                 <ButtonGroup spacing={10}>
                     <Button
                         onClick={() => space.deleteAll()}
@@ -238,9 +240,9 @@ export const SpaceInvitesSettings = observer(({ space }: Props) => {
                     </Button>
                 </ButtonGroup>
             </Stack>
-            <Paper direction="column" variant="outlined">
+            <Stack direction="column">
                 {invites.length > 0 && (
-                    <Stack direction="column" spacing={2} pt={2}>
+                    <Stack direction="column" spacing={2}>
                         <Stack
                             flex={1}
                             direction="row"
@@ -253,6 +255,12 @@ export const SpaceInvitesSettings = observer(({ space }: Props) => {
                             <Typography flex={1}>Uses</Typography>
                             <Typography flex={1}>Expires</Typography>
                         </Stack>
+                        <Divider
+                            lineColor="muted"
+                            css={{
+                                opacity: 0.25,
+                            }}
+                        />
                     </Stack>
                 )}
 
@@ -269,7 +277,7 @@ export const SpaceInvitesSettings = observer(({ space }: Props) => {
                 )}
                 <Stack direction="column" justifyContent="center">
                     {invites.length > 0 &&
-                        invites?.map((invite, i) => (
+                        invites.map((invite, i) => (
                             <InviteItem
                                 theme={theme}
                                 key={invite.code}
@@ -279,7 +287,7 @@ export const SpaceInvitesSettings = observer(({ space }: Props) => {
                             />
                         ))}
                 </Stack>
-            </Paper>
+            </Stack>
         </Stack>
     );
 });

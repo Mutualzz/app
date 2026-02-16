@@ -1,4 +1,3 @@
-import { ModalRoot } from "@components/ModalRoot";
 import type { CSSObject } from "@emotion/react";
 import { useAppStore } from "@hooks/useStores";
 import type { ModalProps } from "@mutualzz/ui-web";
@@ -15,6 +14,7 @@ import {
 } from "react";
 
 interface ModalStackItem {
+    key: string;
     id: string;
     content: ReactNode;
     props?: Partial<ModalProps>;
@@ -32,7 +32,7 @@ interface ModalContextProps {
     isModalOpen: (id: string) => boolean;
 }
 
-const ModalContext = createContext<ModalContextProps>({
+const ModalContext = createContext<ModalContextProps | null>({
     modals: [],
     openModal: () => {
         return;
@@ -72,7 +72,7 @@ export const ModalProvider = observer(({ children }: PropsWithChildren) => {
             setModals((prev) => [
                 ...prev,
                 {
-                    key: `modal-${id}-${Date.now()}`,
+                    key: `modal-${id}-${Date.now()}-${Math.random().toString(16).slice(2)}`,
                     id,
                     content,
                     props: {
@@ -114,14 +114,12 @@ export const ModalProvider = observer(({ children }: PropsWithChildren) => {
     return (
         <ModalContext.Provider value={contextValue}>
             {children}
-            <ModalRoot />
         </ModalContext.Provider>
     );
 });
 
 export function useModal() {
     const ctx = useContext(ModalContext);
-    if (!ctx)
-        throw new Error("useModalContext must be used within a ModalProvider");
+    if (!ctx) throw new Error("useModal must be used within a ModalProvider");
     return ctx;
 }

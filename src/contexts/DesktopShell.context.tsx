@@ -21,7 +21,7 @@ interface DesktopShellContextProps {
     setOsInfo: (info: Partial<OsInfo>) => void;
 }
 
-const DesktopShellContext = createContext<DesktopShellContextProps>({
+const DesktopShellContext = createContext<DesktopShellContextProps | null>({
     os: {
         platform: "unknown",
         type: "unknown",

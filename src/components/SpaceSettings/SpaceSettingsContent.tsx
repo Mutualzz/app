@@ -9,9 +9,10 @@ import { IconButton, Stack, Typography } from "@mutualzz/ui-web";
 import type { Space } from "@stores/objects/Space";
 import startCase from "lodash-es/startCase";
 import { observer } from "mobx-react-lite";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { FaX } from "react-icons/fa6";
-import { SpaceInvitesSettings } from "./pages/general/SpaceInvitesSettings";
+import { SpaceInvitesSettings } from "@components/SpaceSettings/pages/people/SpaceInvitesSettings";
+import { SpaceRolesSettings } from "@components/SpaceSettings/pages/people/roles/SpaceRolesSettings.tsx";
 
 interface SpaceSettingsContentProps {
     space: Space;
@@ -24,11 +25,16 @@ export const SpaceSettingsContent = observer(
         const { closeAllModals } = useModal();
         const { currentPage, setCurrentPage } = useSpaceSettings();
 
+        const didInitRedirect = useRef(false);
+
         useEffect(() => {
-            if (redirectTo) {
-                setCurrentPage(redirectTo);
-            }
-        }, [redirectTo]);
+            if (didInitRedirect.current) return;
+            if (!redirectTo) return;
+
+            didInitRedirect.current = true;
+
+            setCurrentPage(redirectTo);
+        }, [redirectTo, setCurrentPage]);
 
         return (
             <Stack
@@ -78,14 +84,17 @@ export const SpaceSettingsContent = observer(
                     spacing={1.25}
                     elevation={app.settings?.preferEmbossed ? 2 : 1}
                     direction="column"
-                    px={{ xs: "0.5rem", sm: 3 }}
+                    px={{ xs: "0.5rem", sm: currentPage === "roles" ? 0 : 3 }}
                     borderTop="0 !important"
                     borderLeft="0 !important"
                     borderBottom="0 !important"
-                    py={{ xs: "0.5rem", sm: 1 }}
+                    py={{ xs: "0.5rem", sm: currentPage === "roles" ? 0 : 1 }}
                 >
                     {currentPage === "invites" && (
                         <SpaceInvitesSettings space={space} />
+                    )}
+                    {currentPage === "roles" && (
+                        <SpaceRolesSettings space={space} />
                     )}
                 </Paper>
             </Stack>

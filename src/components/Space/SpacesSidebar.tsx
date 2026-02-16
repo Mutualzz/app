@@ -22,16 +22,16 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import type { CSSObject } from "@emotion/react";
 import { useAppStore } from "@hooks/useStores";
-import { contextMenu } from "@mutualzz/contexify";
 import { formatColor } from "@mutualzz/ui-core";
 import { IconButton, Portal, Stack, Tooltip, useTheme } from "@mutualzz/ui-web";
 import type { Space } from "@stores/objects/Space";
 import { useNavigate } from "@tanstack/react-router";
 import capitalize from "lodash-es/capitalize";
 import { observer } from "mobx-react-lite";
-import { useEffect, useState, type MouseEvent } from "react";
+import { useEffect, useState } from "react";
 import { FaPlus } from "react-icons/fa";
-import { SpaceContextMenu } from "./SpaceContextMenu";
+import { SpaceContextMenu } from "../ContextMenus/SpaceContextMenu.tsx";
+import { useMenu } from "@contexts/ContextMenu.context.tsx";
 
 const SortableSpace = observer(
     ({
@@ -44,6 +44,7 @@ const SortableSpace = observer(
         selected: boolean;
     }) => {
         const app = useAppStore();
+        const { openContextMenu } = useMenu();
         const {
             attributes,
             listeners,
@@ -68,13 +69,6 @@ const SortableSpace = observer(
             transform: CSS.Transform.toString(transform),
             transition,
             opacity: isDragging ? 0.5 : 1,
-        };
-
-        const showSpaceMenu = (e: MouseEvent) => {
-            contextMenu.show({
-                event: e,
-                id: `space-context-menu-${space.id}-sidebar`,
-            });
         };
 
         return (
@@ -114,7 +108,13 @@ const SortableSpace = observer(
                             <SidebarPill type={pillType} />
                             <SpaceIcon
                                 size={40}
-                                onContextMenu={showSpaceMenu}
+                                onContextMenu={(e) =>
+                                    openContextMenu(e, {
+                                        type: "space",
+                                        space,
+                                        fromSidebar: true,
+                                    })
+                                }
                                 onMouseEnter={() => setIsHovered(true)}
                                 onMouseLeave={() => setIsHovered(false)}
                                 space={space}

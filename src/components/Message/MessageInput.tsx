@@ -5,18 +5,25 @@ import { MessageType } from "@mutualzz/types";
 import type { Channel } from "@stores/objects/Channel";
 import Snowflake from "@utils/Snowflake";
 import { observer } from "mobx-react-lite";
-import { useCallback, useState, type KeyboardEvent } from "react";
+import { type KeyboardEvent, useCallback, useMemo, useState } from "react";
 import type { Editor } from "slate";
 
 interface Props {
-    channel?: Channel | null;
+    channel: Channel;
 }
 
 export const MessageInput = observer(({ channel }: Props) => {
     const app = useAppStore();
     const [content, setContent] = useState(() => "");
 
-    const canSendMessage = useCallback(
+    const space =
+        app.spaces.get(channel.spaceId ?? "") ?? app.spaces.active ?? null;
+
+    const me = space?.members.me;
+
+    const denySendingMessages = !me?.canSendMessages(channel);
+
+    const canSendMessage = useMemo(
         () =>
             !(!content || !content.trim() || !content.replace(/\r?\n|\r/g, "")),
         [content],
@@ -24,11 +31,12 @@ export const MessageInput = observer(({ channel }: Props) => {
 
     const sendMessage = useCallback(
         async (editor: Editor) => {
-            if (!canSendMessage()) return;
+            if (!app.account) return;
+            if (!canSendMessage) return;
             setContent("");
 
             const nonce = Snowflake.generate();
-            const author = app.account!.raw;
+            const author = app.account.raw;
             const msg = app.queue.add({
                 id: nonce,
                 content,
@@ -83,6 +91,8 @@ export const MessageInput = observer(({ channel }: Props) => {
         }
     };
 
+    if (!space) return null;
+
     return (
         <Paper
             p={2}
@@ -97,8 +107,13 @@ export const MessageInput = observer(({ channel }: Props) => {
                 value={content}
                 variant="plain"
                 onChange={onChange}
-                placeholder={`Message #${channel?.name}`}
+                placeholder={
+                    denySendingMessages
+                        ? "You are not allowed to send messages to this channel"
+                        : `Message #${channel?.name}`
+                }
                 onKeyDown={onKeyDown}
+                disabled={denySendingMessages}
             />
         </Paper>
     );

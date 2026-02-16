@@ -6,7 +6,7 @@ import {
     type PropsWithChildren,
 } from "react";
 
-export type SpaceSettingsPage = "invites" | "profile";
+export type SpaceSettingsPage = "invites" | "profile" | "roles";
 export type SpaceSettingsCategories = "people" | "general";
 
 interface SpaceSettingsContextProps {
@@ -16,7 +16,7 @@ interface SpaceSettingsContextProps {
     setCurrentCategory: (category: SpaceSettingsCategories) => void;
 }
 
-const SpaceSettingsContext = createContext<SpaceSettingsContextProps>({
+const SpaceSettingsContext = createContext<SpaceSettingsContextProps | null>({
     currentPage: "profile",
     currentCategory: "general",
     setCurrentPage: () => {

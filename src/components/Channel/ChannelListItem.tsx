@@ -1,29 +1,27 @@
-import { Paper } from "@components/Paper";
-import { useModal } from "@contexts/Modal.context";
-import { useAppStore } from "@hooks/useStores";
-import { contextMenu } from "@mutualzz/contexify";
+import { Paper } from "@components/Paper.tsx";
+import { useModal } from "@contexts/Modal.context.tsx";
+import { useAppStore } from "@hooks/useStores.ts";
 import {
     IconButton,
-    Portal,
     Stack,
     Typography,
     useTheme,
     type PaperProps,
 } from "@mutualzz/ui-web";
-import type { Channel } from "@stores/objects/Channel";
-import type { Space } from "@stores/objects/Space";
+import type { Channel } from "@stores/objects/Channel.ts";
+import type { Space } from "@stores/objects/Space.ts";
 import { useNavigate } from "@tanstack/react-router";
 import { observer } from "mobx-react-lite";
-import { useState, type MouseEvent } from "react";
+import { useState, useMemo } from "react";
 import { FaChevronDown, FaChevronRight, FaPlus } from "react-icons/fa";
-import { ChannelCreateModal } from "../ChannelCreateModal";
-import { ChannelIcon } from "../ChannelIcon";
-import { ChannelListItemContextMenu } from "./ChannelListtemContextMenu";
+import { ChannelCreateModal } from "./ChannelCreateModal.tsx";
+import { ChannelIcon } from "./ChannelIcon.tsx";
+import { ChannelType } from "@mutualzz/types";
+import { useMenu } from "@contexts/ContextMenu.context.tsx";
 
 interface Props extends PaperProps {
     space: Space;
     channel: Channel;
-    isCategory: boolean;
     active: boolean;
     isCollapsed?: boolean;
     onToggleCollapse?: (channelId: string) => void;
@@ -32,26 +30,23 @@ interface Props extends PaperProps {
 export const ChannelListItem = observer(
     ({
         channel,
-        isCategory,
         active,
         isCollapsed,
         space,
         onToggleCollapse,
         ...props
     }: Props) => {
+        const { openContextMenu } = useMenu();
         const { theme } = useTheme();
         const { openModal } = useModal();
         const app = useAppStore();
         const navigate = useNavigate();
         const [wrapperHovered, setWrapperHovered] = useState(false);
 
-        const showChannelMenu = (e: MouseEvent) => {
-            e.stopPropagation();
-            contextMenu.show({
-                event: e,
-                id: `channel-context-menu-${channel.id}`,
-            });
-        };
+        const isCategory = useMemo(
+            () => channel.type === ChannelType.Category,
+            [channel.type],
+        );
 
         const canModifyChannel =
             app.account && space.owner && space.owner.id === app.account.id;
@@ -74,7 +69,7 @@ export const ChannelListItem = observer(
         return (
             <>
                 <Paper
-                    ml={isCategory ? 0.5 : channel.parent ? 1.5 : 0.5}
+                    ml={isCategory ? 1.5 : channel.parent ? 2.5 : 1.5}
                     px={isCategory ? 1 : 1.5}
                     mr={isCategory ? 1 : 2.5}
                     borderRadius={6}
@@ -89,7 +84,9 @@ export const ChannelListItem = observer(
                     alignItems="center"
                     height="100%"
                     justifyContent="space-between"
-                    onContextMenu={showChannelMenu}
+                    onContextMenu={(e) =>
+                        openContextMenu(e, { type: "channel", space, channel })
+                    }
                     color={props.color as any}
                     {...props}
                 >
@@ -155,13 +152,6 @@ export const ChannelListItem = observer(
                         </IconButton>
                     )}
                 </Paper>
-                <Portal>
-                    <ChannelListItemContextMenu
-                        isCategory={isCategory}
-                        space={space}
-                        channel={channel}
-                    />
-                </Portal>
             </>
         );
     },

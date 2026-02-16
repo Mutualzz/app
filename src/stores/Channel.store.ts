@@ -1,5 +1,5 @@
 import type { Snowflake } from "@mutualzz/types";
-import { ChannelType, type APIChannel } from "@mutualzz/types";
+import { type APIChannel, ChannelType } from "@mutualzz/types";
 import { safeLocalStorage } from "@utils/safeLocalStorage";
 import { makeAutoObservable, observable, type ObservableMap } from "mobx";
 import { makePersistable } from "mobx-persist-store";
@@ -7,14 +7,12 @@ import type { AppStore } from "./App.store";
 import { Channel } from "./objects/Channel";
 
 export class ChannelStore {
-    private readonly channels: ObservableMap<string, Channel>;
     collapsedCategories: ObservableMap<string, Set<string>>; // Space -> Set of collapsed category IDs
-
     active?: Channel | null;
     activeId?: Snowflake;
-
     mostRecentBySpace: ObservableMap<string, Snowflake | null> =
         observable.map();
+    private readonly channels: ObservableMap<string, Channel>;
 
     constructor(private readonly app: AppStore) {
         this.channels = observable.map();
@@ -53,6 +51,14 @@ export class ChannelStore {
             this.getMostRecentChannelForSpace(this.app.spaces.activeId ?? "") ??
             this.getFirstNavigableChannel(this.app.spaces.activeId ?? "")
         );
+    }
+
+    get all() {
+        return Array.from(this.channels.values());
+    }
+
+    get count() {
+        return this.channels.size;
     }
 
     setPreferredActive() {
@@ -107,14 +113,6 @@ export class ChannelStore {
         this.channels.delete(id);
     }
 
-    get all() {
-        return Array.from(this.channels.values());
-    }
-
-    get count() {
-        return this.channels.size;
-    }
-
     has(id: string) {
         return this.channels.has(id);
     }
@@ -140,25 +138,41 @@ export class ChannelStore {
         const space = this.app.spaces.get(spaceId);
         if (!space) return [];
 
-        const allChannels = space.channels;
-        const collapsedCategories =
-            this.collapsedCategories.get(spaceId) || new Set();
+        const me = space.members.me;
+        if (!me) return [];
 
-        return allChannels.filter((channel, currentIndex) => {
-            if (channel.type === ChannelType.Category) return true;
+        const all = space.channels;
+        const collapsed =
+            this.app.channels.collapsedCategories.get(spaceId) ||
+            new Set<Snowflake>();
 
-            if (types && types.length > 0 && !types.includes(channel.type))
-                return false;
-
-            const parentCategoryId = this.findParentCategoryId(
-                allChannels,
-                currentIndex,
-            );
-
-            if (!parentCategoryId) return true;
-
-            return !collapsedCategories.has(parentCategoryId);
+        const viewableNonCats = all.filter((ch) => {
+            if (ch.type === ChannelType.Category) return false;
+            if (types && types.length && !types.includes(ch.type)) return false;
+            return me.canViewChannel(ch);
         });
+
+        const categoryIdsToShow = new Set(
+            viewableNonCats
+                .map((c) => c.parentId)
+                .filter((id): id is string => Boolean(id)),
+        );
+
+        const visibleNonCats = viewableNonCats.filter((ch) => {
+            const parentId = ch.parentId ?? null;
+            return !(parentId && collapsed.has(parentId));
+        });
+
+        const visibleCategories = all.filter((ch) => {
+            if (ch.type !== ChannelType.Category) return false;
+
+            const hasVisibleChildren = categoryIdsToShow.has(ch.id);
+            if (hasVisibleChildren) return true;
+
+            return me.canViewChannel(ch);
+        });
+
+        return this.sortPosition([...visibleCategories, ...visibleNonCats]);
     }
 
     compareChannels = (a: Channel, b: Channel): number =>
@@ -186,48 +200,46 @@ export class ChannelStore {
         });
     }
 
-    setChannelOrder(spaceId: Snowflake, newOrder: Channel[]) {
-        let currentCategory: Channel | null = null;
+    async applyReorder(
+        spaceId: Snowflake,
+        parentId: Snowflake | null,
+        orderedIds: Snowflake[],
+    ) {
+        const updates = orderedIds
+            .map((id, idx) => {
+                const channel = this.channels.get(id);
+                if (!channel) return null;
 
-        const order = newOrder.map((channel, index) => {
-            if (channel.type === ChannelType.Category) {
-                currentCategory = channel;
-                channel.setParent(null);
-                channel.position = index;
-            } else {
-                channel.setParent(currentCategory);
-                channel.position = index;
-            }
+                if (parentId == null) {
+                    channel.parentId = null;
+                    channel.setParent(null);
+                } else {
+                    const parent = this.channels.get(parentId) ?? null;
+                    channel.parentId = parentId;
+                    channel.setParent(parent);
+                }
 
-            this.channels.set(channel.id, channel);
-            return channel;
+                channel.position = idx;
+                this.channels.set(channel.id, channel);
+
+                return {
+                    id: channel.id,
+                    parentId,
+                    position: idx,
+                };
+            })
+            .filter(Boolean) as {
+            id: Snowflake;
+            parentId: Snowflake | null;
+            position: number;
+        }[];
+
+        if (updates.length === 0) return;
+
+        return this.app.rest.patch(`/channels/bulk`, {
+            spaceId,
+            channels: updates,
         });
-
-        const payload = order.map((channel) => ({
-            id: channel.id,
-            parentId: channel.parentId ? channel.parentId : null,
-            position: channel.position,
-            spaceId: spaceId,
-        }));
-
-        this.app.rest.patch(`/channels/bulk`, payload);
-    }
-
-    private findParentCategoryId(allChannels: Channel[], channelIndex: number) {
-        const channel = allChannels[channelIndex];
-        if (!channel.parent) return null;
-
-        for (let i = channelIndex - 1; i >= 0; i--) {
-            const previousChannel = allChannels[i];
-
-            if (
-                previousChannel.type === ChannelType.Category &&
-                previousChannel.id === channel.parent.id
-            )
-                return previousChannel.id;
-        }
-
-        return null;
     }
 
     async resolve(id: Snowflake, force = false) {
