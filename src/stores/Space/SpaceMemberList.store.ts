@@ -1,12 +1,11 @@
 import { Logger } from "@mutualzz/logger";
-import type { Snowflake } from "@mutualzz/types";
+import type { PresencePayload, Snowflake } from "@mutualzz/types";
 import type { AppStore } from "@stores/App.store";
 import type { Space } from "@stores/objects/Space";
 import { SpaceMember } from "@stores/objects/SpaceMember";
 import capitalize from "lodash/capitalize";
 import { makeAutoObservable } from "mobx";
 
-// TODO: Add types for this store
 export class SpaceMemberListStore {
     id: Snowflake;
     memberCount: number;
@@ -43,6 +42,21 @@ export class SpaceMemberListStore {
         this.computeListData(ops);
     }
 
+    private getGroupName(group: any) {
+        if (group.id === "online") return "Online";
+        if (group.id === "offline") return "Offline";
+        return group.name;
+    }
+
+    private upsertPresence(
+        userId: Snowflake,
+        presence?: PresencePayload | null,
+    ) {
+        if (!presence) return;
+
+        this.app.presence.upsert(userId, presence);
+    }
+
     private computeListData(ops: any) {
         for (const i of ops) {
             const { op, items, range, item, index } = i;
@@ -50,6 +64,7 @@ export class SpaceMemberListStore {
             switch (op) {
                 case "SYNC": {
                     let listData: {
+                        id: string;
                         title: string;
                         data: { member: SpaceMember; index: number }[];
                     }[] = [];
@@ -57,10 +72,8 @@ export class SpaceMemberListStore {
                     for (const entry of items ?? []) {
                         if ("group" in entry) {
                             listData.push({
-                                title:
-                                    entry.group.id === "online"
-                                        ? "Online"
-                                        : entry.group.id,
+                                id: entry.group.id,
+                                title: this.getGroupName(entry.group),
                                 data: [],
                             });
                             continue;
@@ -74,29 +87,35 @@ export class SpaceMemberListStore {
                             continue;
                         }
 
-                        // m = APISpaceMember
                         const m = entry.member;
-                        const memberKey =
-                            m?.userId != null ? String(m.userId) : null;
+                        const memberKey = m?.userId ? m.userId : null;
                         if (!memberKey) continue;
 
-                        let member = this.space.members.get(memberKey);
+                        this.upsertPresence(memberKey, m?.presence);
 
-                        if (member) member.update?.(m);
-                        else member = this.space.members.add(m);
-                        
-                        if (member) {
-                            listData[listData.length - 1].data.push({
-                                member,
-                                index: m.index ?? 0,
-                            });
-                        }
+                        const {
+                            presence: _presence,
+                            ...memberWithoutPresence
+                        } = m;
+
+                        let member = this.space.members.get(memberKey);
+                        if (member) member.update?.(memberWithoutPresence);
+                        else
+                            member = this.space.members.add(
+                                memberWithoutPresence,
+                            );
+
+                        listData[listData.length - 1].data.push({
+                            member,
+                            index: entry.index,
+                        });
                     }
 
                     listData = listData.filter((x) => x.data.length > 0);
 
                     listData = listData.map((x) => ({
                         ...x,
+                        id: x.id,
                         title: `${x.title} - ${x.data.length}`,
                     }));
 
@@ -104,7 +123,7 @@ export class SpaceMemberListStore {
                     listData = listData.filter(
                         (x) =>
                             !(
-                                x.title.toLowerCase().startsWith("offline") &&
+                                x.id.toLowerCase().startsWith("offline") &&
                                 x.data.length >= 100
                             ),
                     );
@@ -179,7 +198,6 @@ export class SpaceMemberListStore {
                         break;
                     }
 
-                    // If index-based, treat as single-target update (like DELETE)
                     const first = (items ?? [])[0];
                     if (!first) break;
 
@@ -192,14 +210,16 @@ export class SpaceMemberListStore {
                         break;
                     }
 
-                    // m = APISpaceMember
                     const m = first.member;
-                    const memberKey =
-                        m?.userId != null ? String(m.userId) : null;
+                    const memberKey = m?.userId ? m.userId : null;
                     if (!memberKey) break;
 
+                    this.upsertPresence(memberKey, m?.presence);
+
+                    const { presence: _presence, ...memberWithoutPresence } = m;
+
                     const storeMember = this.space.members.get(memberKey);
-                    storeMember?.update?.(m);
+                    storeMember?.update?.(memberWithoutPresence);
 
                     if (typeof memberIndex === "number") {
                         const visibleMember =
@@ -207,12 +227,12 @@ export class SpaceMemberListStore {
 
                         if (
                             visibleMember &&
-                            String(visibleMember.userId) === memberKey
+                            visibleMember.userId === memberKey
                         ) {
-                            visibleMember.update?.(m);
+                            visibleMember.update?.(memberWithoutPresence);
                         } else {
                             const idx = this.list[groupIndex].items.findIndex(
-                                (x) => String(x.userId) === memberKey,
+                                (x) => x.userId === memberKey,
                             );
                             if (idx !== -1)
                                 this.list[groupIndex].items[idx].update?.(m);
@@ -251,14 +271,28 @@ export class SpaceMemberListStore {
 
                     let memberObj: SpaceMember | undefined;
 
-                    const memberKey =
-                        item.member?.userId != null
-                            ? String(item.member.userId)
-                            : null;
+                    const memberKey = item.member?.userId
+                        ? item.member.userId
+                        : null;
 
                     if (memberKey) {
+                        this.upsertPresence(memberKey, item.member?.presence);
+
+                        const {
+                            presence: _presence,
+                            ...memberWithoutPresence
+                        } = item.member;
+
                         memberObj = this.space.members.get(memberKey);
-                        memberObj?.update?.(item.member);
+                        memberObj?.update?.(memberWithoutPresence);
+
+                        if (!memberObj) {
+                            memberObj = new SpaceMember(
+                                this.app,
+                                this.space,
+                                memberWithoutPresence,
+                            );
+                        }
                     }
 
                     if (!memberObj) {

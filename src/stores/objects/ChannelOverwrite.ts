@@ -44,7 +44,12 @@ export class ChannelPermissionOverwrite {
     }
 
     update(overwrite: APIChannelPermissionOverwrite) {
-        Object.assign(this, overwrite);
+        this.channelId = overwrite.channelId;
+        this.spaceId = overwrite.spaceId;
+
+        // target
+        this.roleId = overwrite.roleId;
+        this.userId = overwrite.userId;
 
         this.allow = BitField.fromString(
             permissionFlags,
@@ -55,6 +60,7 @@ export class ChannelPermissionOverwrite {
             overwrite.deny.toString(),
         );
 
+        this.createdAt = new Date(overwrite.createdAt);
         this.updatedAt = new Date(overwrite.updatedAt);
     }
 }

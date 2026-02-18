@@ -8,7 +8,19 @@ import type { Space } from "@stores/objects/Space";
 import { makeAutoObservable } from "mobx";
 import type { QueuedMessage } from "./QueuedMessage";
 import { ChannelPermissionOverwrite } from "./ChannelOverwrite";
-import { BitField, channelFlags, type ChannelFlags, } from "@mutualzz/permissions";
+import {
+    BitField,
+    channelFlags,
+    type ChannelFlags,
+} from "@mutualzz/permissions";
+import { murmur } from "@utils/index.ts";
+
+function getOverwriteKey(ow: ChannelPermissionOverwrite): string {
+    if (ow.roleId != null) return `r:${ow.roleId}`;
+    if (ow.userId != null) return `u:${ow.userId}`;
+
+    return "x";
+}
 
 export class Channel {
     id: Snowflake;
@@ -83,7 +95,33 @@ export class Channel {
     }
 
     get listId() {
-       return this.id;
+        const parts: string[] = [];
+
+        // p = parent
+        // c = channel
+        const add = (
+            prefix: "p" | "c",
+            overwrites?: ChannelPermissionOverwrite[] | null,
+        ) => {
+            if (!overwrites?.length) return;
+
+            for (const ow of overwrites) {
+                const key = getOverwriteKey(ow);
+
+                if (ow.allow.has("ViewChannel"))
+                    parts.push(`${prefix}:a:${key}`);
+                if (ow.deny.has("ViewChannel"))
+                    parts.push(`${prefix}:d:${key}`);
+            }
+        };
+
+        add("p", this.parent?.overwrites);
+        add("c", this.overwrites);
+
+        const sorted = Array.from(new Set(parts)).sort();
+        if (!sorted.length) return "everyone";
+
+        return murmur(sorted.join(","));
     }
 
     get hasChildren(): boolean {
@@ -113,20 +151,42 @@ export class Channel {
     }
 
     update(channel: APIChannel) {
-        Object.assign(this, channel);
+        this.type = channel.type;
+        this.name = channel.name;
+        this.topic = channel.topic;
+        this.position = channel.position;
+        this.nsfw = channel.nsfw;
+
+        this.parentId = channel.parentId ?? null;
+        this.parent = channel.parent
+            ? this.app.channels.add(channel.parent)
+            : null;
+
+        this.spaceId = channel.spaceId ?? null;
+        this.space = channel.space
+            ? this.app.spaces.add(channel.space)
+            : (this.space ?? null);
 
         this.overwrites = (channel.overwrites ?? []).map(
             (ow) => new ChannelPermissionOverwrite(ow),
         );
-
-        this.space?.members.me?.invalidateChannelPermCache?.();
 
         this.flags = BitField.fromString(
             channelFlags,
             channel.flags.toString(),
         );
 
+        this.createdAt = new Date(channel.createdAt);
         this.updatedAt = new Date(channel.updatedAt);
+
+        this.raw = channel;
+
+        this.lastMessageId = channel.lastMessageId ?? null;
+        this.lastMessage = channel.lastMessage
+            ? this.messages.add(channel.lastMessage)
+            : (this.lastMessage ?? null);
+
+        this.space?.members.me?.invalidateChannelPermCache?.();
     }
 
     setParent(channel: Channel | null) {

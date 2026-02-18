@@ -25,6 +25,8 @@ import { UserStore } from "./User.store";
 import { ThemeCreatorStore } from "@stores/ThemeCreator.store";
 import { NavigationStore } from "@stores/Navigation.store";
 import { getTauriVersion, getVersion } from "@tauri-apps/api/app";
+import { PresenceStore } from "@stores/Presence.store.ts";
+import { CustomStatusStore } from "@stores/CustomStatus.store.ts";
 
 export class AppStore {
     isGatewayReady = false;
@@ -47,9 +49,12 @@ export class AppStore {
     mode: AppMode | null = null;
     joiningSpace?: APISpacePartial | null = null;
     joiningInviteCode?: string | null = null;
+    presence = new PresenceStore();
     queryClient: QueryClient;
     memberListVisible = true;
     dontShowLinkWarning = false;
+
+    customStatus = new CustomStatusStore();
 
     versions: {
         app: string | null;
@@ -159,6 +164,9 @@ export class AppStore {
         this.settings = null;
         this.rest.setToken(null);
         this.themes.reset();
+
+        this.customStatus.clear();
+
         secureStorageAdapter.clear();
     }
 

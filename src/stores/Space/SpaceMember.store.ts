@@ -5,7 +5,7 @@ import type { Space } from "../objects/Space";
 import { SpaceMember } from "../objects/SpaceMember";
 
 export class SpaceMemberStore {
-    private readonly members: ObservableMap<string, SpaceMember>; // userId -> SpaceMember
+    private readonly members: ObservableMap<string, SpaceMember>; // userId(string) -> SpaceMember
     private readonly space: Space;
 
     constructor(
@@ -34,7 +34,10 @@ export class SpaceMemberStore {
 
     add(member: APISpaceMember) {
         const exists = this.members.get(member.userId);
-        if (exists) return exists;
+        if (exists) {
+            exists.update?.(member);
+            return exists;
+        }
 
         const m = new SpaceMember(this.app, this.space, member);
         this.members.set(member.userId, m);
@@ -42,7 +45,7 @@ export class SpaceMemberStore {
     }
 
     addAll(members: APISpaceMember[]) {
-        members.forEach((member) => this.add(member));
+        for (const member of members) this.add(member);
     }
 
     remove(id: string) {
@@ -50,23 +53,25 @@ export class SpaceMemberStore {
     }
 
     update(member: APISpaceMember) {
-        if (!member.userId) throw new Error("Member does not have a user");
-
         const existingMember = this.members.get(member.userId);
         if (!existingMember) return;
 
-        if (member.roles) {
+        if (Array.isArray(member.roles)) {
             existingMember.roles.clear();
-            member.roles.forEach((mr) => {
-                const role = this.space.roles.get(mr.roleId);
-                if (role) existingMember.roles.add(role.id);
-            });
+
+            // Always include @everyone
+            existingMember.roles.add(this.space.id);
+
+            for (const memberRole of member.roles) {
+                if (!memberRole?.roleId) continue;
+                existingMember.roles.add(memberRole.roleId);
+            }
         }
 
         existingMember.update(member);
 
         const meId = this.app.account?.id;
-        if (meId && String(meId) === String(member.userId)) {
+        if (meId != null && meId === member.userId) {
             existingMember.invalidateChannelPermCache?.();
         }
     }

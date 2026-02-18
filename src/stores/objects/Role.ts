@@ -53,14 +53,22 @@ export class Role {
         this.raw = role;
     }
 
+    get isEveryone() {
+        return this.flags.has("Everyone");
+    }
+
     update(role: APIRole) {
-        this.raw = role;
-
         this.id = role.id;
-        this.name = role.name;
         this.spaceId = role.spaceId;
-        if (role.space) this.space = this.app.spaces.add(role.space);
 
+        if (role.space) {
+            this.space = this.app.spaces.add(role.space);
+        } else {
+            this.space =
+                this.app.spaces.get(this.spaceId) ?? this.space ?? null;
+        }
+
+        this.name = role.name;
         this.color = role.color;
         this.position = role.position;
         this.hoist = role.hoist;
@@ -74,10 +82,8 @@ export class Role {
 
         this.createdAt = new Date(role.createdAt);
         this.updatedAt = new Date(role.updatedAt);
-    }
 
-    get isEveryone() {
-        return this.flags.has("Everyone");
+        this.raw = role;
     }
 
     delete() {

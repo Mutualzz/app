@@ -4,6 +4,8 @@ import { Theme } from "@stores/objects/Theme";
 import type { useNavigate } from "@tanstack/react-router";
 import mergeWith from "lodash-es/mergeWith";
 import { isValidElement, type ReactNode } from "react";
+import MurmurHash from "imurmurhash";
+import type { PresenceStatus } from "@mutualzz/types";
 
 export function mergeAppendAnything(
     ...objects: Record<string, string | string[]>[]
@@ -22,7 +24,26 @@ export function mergeAppendAnything(
     });
 }
 
-export function toSpotifyUri(u: URL): string | null {
+export const formatPresenceStatus = (status: PresenceStatus) => {
+    switch (status) {
+        case "online":
+            return "Online";
+        case "idle":
+            return "Idle";
+        case "dnd":
+            return "Do Not Disturb";
+        case "invisible":
+            return "Invisible";
+        case "offline":
+        default:
+            return "Offline";
+    }
+};
+
+export const murmur = (input: string): string =>
+    MurmurHash(input).result().toString();
+
+export const toSpotifyUri = (u: URL): string | null => {
     if (u.hostname !== "open.spotify.com") return null;
 
     // /track/<id>, /album/<id>, /playlist/<id>, /artist/<id>, /show/<id>, /episode/<id>
@@ -32,7 +53,7 @@ export function toSpotifyUri(u: URL): string | null {
 
     if (!type || !id) return null;
     return `spotify:${type}:${id}`;
-}
+};
 
 export const asAcronym = (str: string) =>
     str

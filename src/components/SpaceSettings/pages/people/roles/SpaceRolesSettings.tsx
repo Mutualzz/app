@@ -25,6 +25,8 @@ import { IconButton } from "@components/IconButton";
 import { TooltipWrapper } from "@components/TooltipWrapper.tsx";
 import { RiShieldUserFill } from "react-icons/ri";
 import { useMenu } from "@contexts/ContextMenu.context.tsx";
+import { useModal } from "@contexts/Modal.context.tsx";
+import { RoleActionConfirm } from "@components/Modals/RoleActionConfirm.tsx";
 
 interface Props {
     space: Space;
@@ -41,11 +43,7 @@ interface RoleItemProps {
 
 const RoleItem = observer(
     ({ theme, role, last, space, onClick, membersWithRole }: RoleItemProps) => {
-        const { mutate: deleteRole, isPending: deleting } = useMutation({
-            mutationKey: ["delete-role", role.id],
-            mutationFn: async () => role.delete(),
-        });
-
+        const { openModal } = useModal();
         const { openContextMenu } = useMenu();
 
         return (
@@ -60,7 +58,7 @@ const RoleItem = observer(
                         background: formatColor(
                             dynamicElevation(theme.colors.surface, 5),
                             {
-                                alpha: 0.5,
+                                alpha: 50,
                             },
                         ),
                     }}
@@ -105,7 +103,6 @@ const RoleItem = observer(
                                     onClick={onClick}
                                     padding={8}
                                     size="sm"
-                                    disabled={deleting}
                                 >
                                     <FaPencil />
                                 </IconButton>
@@ -119,13 +116,15 @@ const RoleItem = observer(
                                 <IconButton
                                     onClick={(e) => {
                                         e.stopPropagation();
-                                        deleteRole();
+                                        openModal(
+                                            "delete-role",
+                                            <RoleActionConfirm role={role} />,
+                                        );
                                     }}
                                     color="danger"
                                     padding={8}
                                     variant="soft"
                                     size="sm"
-                                    disabled={deleting}
                                 >
                                     <FaTrash />
                                 </IconButton>

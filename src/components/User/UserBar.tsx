@@ -15,11 +15,15 @@ import { observer } from "mobx-react-lite";
 import { useMemo } from "react";
 import { FaCogs, FaPalette } from "react-icons/fa";
 import { IconButton } from "@components/IconButton";
+import { AnimatedStack } from "@components/Animated/AnimatedStack.tsx";
+import { formatColor } from "@mutualzz/ui-core";
+import { generateMenuIDs, useMenu } from "@contexts/ContextMenu.context.tsx";
 
 export const UserBar = observer(() => {
     const app = useAppStore();
     const { theme } = useTheme();
     const { openModal } = useModal();
+    const { openContextMenu } = useMenu();
 
     const inSpace = Boolean(app.spaces.activeId) && app.mode === "spaces";
 
@@ -40,7 +44,9 @@ export const UserBar = observer(() => {
         };
     }, [inSpace]);
 
-    if (!app.account) return <></>;
+    const account = app.account;
+
+    if (!account) return <></>;
 
     return (
         <Paper
@@ -58,24 +64,52 @@ export const UserBar = observer(() => {
             zIndex={theme.zIndex.appBar + 1}
             {...conditionalProps}
         >
-            <Stack
+            <AnimatedStack
                 direction={inSpace ? "row" : "column"}
-                justifyContent="center"
                 alignItems="center"
                 spacing={2.5}
+                width="75%"
+                px={1}
+                py={0.25}
+                borderRadius={6}
+                whileHover={{
+                    backgroundColor: formatColor(theme.colors.neutral, {
+                        alpha: 0,
+                    }),
+                }}
+                onClick={(e) => {
+                    const rect = e.currentTarget.getBoundingClientRect();
+
+                    openContextMenu(
+                        e,
+                        {
+                            id: generateMenuIDs.user(account.id),
+                            type: "account",
+                            account,
+                        },
+                        {
+                            x: Math.round(rect.left),
+                            y: Math.round(rect.bottom - 125),
+                        },
+                    );
+                }}
+                css={{
+                    cursor: "pointer",
+                    userSelect: "none",
+                }}
             >
-                <UserAvatar user={app.account} size="lg" />
+                <UserAvatar user={account} size={48} badge />
                 <Stack direction="column">
                     <Typography level="body-sm">
-                        {app.account.displayName}
+                        {account.displayName}
                     </Typography>
-                    {app.account.globalName && (
+                    {account.globalName && (
                         <Typography level="body-xs" textColor="muted">
-                            {app.account.username}
+                            {account.username}
                         </Typography>
                     )}
                 </Stack>
-            </Stack>
+            </AnimatedStack>
             <Stack
                 justifyContent="center"
                 alignItems="center"

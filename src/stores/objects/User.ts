@@ -1,9 +1,9 @@
 import type { Snowflake } from "@mutualzz/types";
 import {
-    CDNRoutes,
-    ImageFormat,
     type APIUser,
     type AvatarFormat,
+    CDNRoutes,
+    ImageFormat,
     type Sizes,
 } from "@mutualzz/types";
 import { REST } from "@stores/REST.store";
@@ -42,16 +42,30 @@ export class User {
         makeAutoObservable(this);
     }
 
-    update(user: APIUser) {
-        Object.assign(this, user);
-    }
-
     get avatarUrl() {
         return this.constructAvatarUrl(true);
     }
 
     get displayName() {
         return this.globalName || this.username;
+    }
+
+    update(user: APIUser) {
+        this.id = user.id;
+        this.username = user.username;
+
+        this.defaultAvatar = user.defaultAvatar;
+        this.avatar = user.avatar ?? null;
+        this.globalName = user.globalName ?? null;
+
+        this.accentColor = user.accentColor;
+
+        this.createdAt = new Date(user.createdAt);
+        this.updatedAt = new Date(user.updatedAt);
+
+        this.flags = BitField.fromString(userFlags, user.flags.toString());
+
+        this.raw = user;
     }
 
     constructAvatarUrl(

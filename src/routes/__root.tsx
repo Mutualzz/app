@@ -25,7 +25,13 @@ import { useNetworkState } from "@react-hookz/web";
 import { seo } from "@seo";
 import { GatewayStatus } from "@stores/Gateway.store";
 import type { QueryClient } from "@tanstack/react-query";
-import { createRootRouteWithContext, HeadContent, Outlet, Scripts, useNavigate, } from "@tanstack/react-router";
+import {
+    createRootRouteWithContext,
+    HeadContent,
+    Outlet,
+    Scripts,
+    useNavigate,
+} from "@tanstack/react-router";
 import { isTauri } from "@utils/index";
 import dayjs from "dayjs";
 import calendar from "dayjs/plugin/calendar";
@@ -33,7 +39,12 @@ import duration from "dayjs/plugin/duration";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { reaction } from "mobx";
 import { observer } from "mobx-react-lite";
-import { type PropsWithChildren, type ReactNode, useEffect, useState, } from "react";
+import {
+    type PropsWithChildren,
+    type ReactNode,
+    useEffect,
+    useState,
+} from "react";
 
 import { APIErrorListener } from "@components/APIErrorListener";
 import { DesktopShell } from "@components/Desktop/DesktopShell";

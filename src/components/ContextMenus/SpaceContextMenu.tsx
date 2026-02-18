@@ -46,6 +46,8 @@ export const SpaceContextMenu = observer(
             setMenuOpen?.(visible);
         };
 
+        const isOwner = space.ownerId === app.account?.id;
+
         return (
             <ContextMenu
                 elevation={app.settings?.preferEmbossed ? 5 : 1}
@@ -106,7 +108,7 @@ export const SpaceContextMenu = observer(
                         </ContextSubmenu>
                     </Box>
                 )}
-                {!canModifySpace && (
+                {!isOwner && (
                     <Item
                         color="danger"
                         endDecorator={<FaDoorOpen />}

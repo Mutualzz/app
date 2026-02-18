@@ -3,7 +3,7 @@ import { Role } from "@stores/objects/Role";
 import { useEffect, useState } from "react";
 import { Box, ButtonGroup, Divider, Stack, Typography } from "@mutualzz/ui-web";
 import { Paper } from "@components/Paper";
-import { FaArrowLeft, FaPlus } from "react-icons/fa";
+import { FaArrowLeft, FaPlus, FaTrash } from "react-icons/fa";
 import { Button } from "@components/Button";
 import { IconButton } from "@components/IconButton";
 import { useMutation } from "@tanstack/react-query";
@@ -16,6 +16,8 @@ import type { APIRole } from "@mutualzz/types";
 import { useDraft } from "@hooks/useDraft.ts";
 import { SpaceRoleEditPermissions } from "@components/SpaceSettings/pages/people/roles/SpaceRoleEditPermissions.tsx";
 import { normalizeJSON } from "@utils/JSON.ts";
+import { RoleActionConfirm } from "@components/Modals/RoleActionConfirm.tsx";
+import { useModal } from "@contexts/Modal.context.tsx";
 
 interface Props {
     membersWithRole: number;
@@ -43,6 +45,7 @@ export const SpaceRoleEdit = observer(
     ({ space, currentRole, setCurrentRole, membersWithRole, roles }: Props) => {
         const app = useAppStore();
         const { openContextMenu } = useMenu();
+        const { openModal } = useModal();
 
         const [tab, setTab] = useState<Tab>(
             currentRole.id === space.id ? "permissions" : "display",
@@ -54,7 +57,7 @@ export const SpaceRoleEdit = observer(
         }, [currentRole.id, space.id]);
 
         const pickEditable = (role: Role): RoleEditable => {
-            const json = role.toJSON() as APIRole;
+            const json = role.toJSON();
             return {
                 name: json.name,
                 color: json.color ?? "#ffffff",
@@ -198,13 +201,30 @@ export const SpaceRoleEdit = observer(
                     minHeight={0}
                     overflow="auto"
                 >
-                    {/* CONTENT WRAPPER */}
                     <Stack direction="column" spacing={2.5} flex={1}>
-                        <Box>
+                        <Stack
+                            direction="row"
+                            justifyContent="space-between"
+                            alignItems="center"
+                        >
                             <Typography fontFamily="monospace">
                                 Edit Role - {currentRole.name}
                             </Typography>
-                        </Box>
+                            <IconButton
+                                onClick={() =>
+                                    openModal(
+                                        "delete-role",
+                                        <RoleActionConfirm
+                                            role={currentRole}
+                                        />,
+                                    )
+                                }
+                                size="sm"
+                                color="danger"
+                            >
+                                <FaTrash />
+                            </IconButton>
+                        </Stack>
 
                         <Box>
                             <ButtonGroup spacing={10} variant="plain">

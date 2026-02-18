@@ -112,10 +112,8 @@ export class SpaceMember {
 
         if (space.ownerId === this.userId) return ALL_BITS;
 
-        // If roles aren't loaded yet, don't pretend permissions are final.
         if (space.roles.all.length === 0) return 0n;
 
-        // Build role list from store
         const roles = space.roles.all.map((r) => ({
             id: r.id,
             permissions: r.permissions.bits,
@@ -145,36 +143,40 @@ export class SpaceMember {
     }
 
     update(member: APISpaceMember) {
-        const rawUser = member.user;
-        const rawRoles = member.roles;
+        const uid = member.userId ?? member.user?.id ?? this.userId;
 
-        const { user: _u, roles: _r, ...rest } = member;
-        Object.assign(this, rest);
+        this.userId = uid;
+        this.id = uid;
 
-        if (member.updatedAt) this.updatedAt = new Date(member.updatedAt);
-        if (member.joinedAt) this.joinedAt = new Date(member.joinedAt);
+        this.spaceId = member.spaceId ?? this.spaceId;
 
-        const uid = member.userId ?? member.user?.id;
-        if (uid != null) this.userId = uid;
-        this.id = this.userId;
-
-        if (rawUser) {
-            const userId = rawUser.id ?? uid;
+        if (member.user) {
+            const userId = member.user.id ?? uid;
             const existing = this.app.users.get?.(userId);
 
-            if (existing) this.app.users.update?.(rawUser);
-            else this.app.users.add?.(rawUser);
+            if (existing) this.app.users.update?.(member.user);
+            else this.app.users.add?.(member.user);
 
-            this.user = this.app.users.get?.(userId) ?? new User(rawUser);
+            this.user = this.app.users.get?.(userId) ?? new User(member.user);
+        } else if (this.userId) {
+            this.user = this.app.users.get?.(this.userId) ?? this.user ?? null;
         }
+
+        this.nickname = member.nickname ?? null;
+        this.avatar = member.avatar ?? null;
+        this.banner = member.banner ?? null;
+
+        this.flags = BitField.fromString(memberFlags, member.flags.toString());
+
+        if (member.joinedAt) this.joinedAt = new Date(member.joinedAt);
+        if (member.updatedAt) this.updatedAt = new Date(member.updatedAt);
 
         if (this.space) {
             this.roles.clear();
             this.roles.add(this.space.id);
-            if (rawRoles) for (const mr of rawRoles) this.roles.add(mr.roleId);
+            if (member.roles)
+                for (const mr of member.roles) this.roles.add(mr.roleId);
         }
-
-        this.flags = BitField.fromString(memberFlags, member.flags.toString());
 
         this.invalidateChannelPermCache();
     }

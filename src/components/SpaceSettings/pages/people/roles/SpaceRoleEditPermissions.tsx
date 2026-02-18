@@ -1,6 +1,11 @@
 import type { APIRole } from "@mutualzz/types";
 import { Button, Divider, Stack, Switch, Typography } from "@mutualzz/ui-web";
-import { BitField, type PermissionFlag, type PermissionFlags, permissionFlags, } from "@mutualzz/permissions";
+import {
+    BitField,
+    type PermissionFlag,
+    type PermissionFlags,
+    permissionFlags,
+} from "@mutualzz/permissions";
 import { type ReactNode, useMemo } from "react";
 
 interface Props {
@@ -43,7 +48,11 @@ const PermissionItem = ({
                     </Typography>
                 )}
             </Stack>
-            <Switch checked={hasPermission} color="primary" onChange={() => togglePermission(flag)} />
+            <Switch
+                checked={hasPermission}
+                color="primary"
+                onChange={() => togglePermission(flag)}
+            />
         </Stack>
     );
 };
@@ -135,63 +144,68 @@ export const SpaceRoleEditPermissions = ({ changes, setChanges }: Props) => {
                 />
             </Stack>
             <Stack direction="column" spacing={2.5}>
-            <Stack alignItems="center">
-                <Typography level="body-lg">Membership Permissions</Typography>
-            </Stack>
-            <PermissionItem
-                flag="CreateInvites"
-                label="Create Invites"
-                description="Allow members to invite new people to this space"
-                hasPermission={permissions.has("CreateInvites")}
-                togglePermission={togglePermission}
-            />
-            <Divider css={{ opacity: 0.5 }} />
-            <PermissionItem
-                flag="KickMembers"
-                label="Kick Members"
-                description="Kick will remove other members from this space. Kicked members can rejoin if they have another invite."
-                hasPermission={permissions.has("KickMembers")}
-                togglePermission={togglePermission}
-            />
-            <Divider css={{ opacity: 0.5 }} />
-            <PermissionItem
-                flag="BanMembers"
-                label="Ban Members"
-                description="Ban will remove members from this space and prevent them from rejoining until they are unbanned."
-                hasPermission={permissions.has("BanMembers")}
-                togglePermission={togglePermission}
-            />
-            </Stack>
-            <Stack direction="column" spacing={2.5}>
-            <Stack alignItems="center">
-                <Typography level="body-lg">
-                    Text Channel Permissions
-                </Typography>
-            </Stack>
-            <PermissionItem
-                flag="SendMessages"
-                label="Send Messages"
-                description="Allow members to send messages in text channels"
-                hasPermission={permissions.has("SendMessages")}
-                togglePermission={togglePermission}
-            />
+                <Stack alignItems="center">
+                    <Typography level="body-lg">
+                        Membership Permissions
+                    </Typography>
+                </Stack>
+                <PermissionItem
+                    flag="CreateInvites"
+                    label="Create Invites"
+                    description="Allow members to invite new people to this space"
+                    hasPermission={permissions.has("CreateInvites")}
+                    togglePermission={togglePermission}
+                />
+                <Divider css={{ opacity: 0.5 }} />
+                <PermissionItem
+                    flag="KickMembers"
+                    label="Kick Members"
+                    description="Kick will remove other members from this space. Kicked members can rejoin if they have another invite."
+                    hasPermission={permissions.has("KickMembers")}
+                    togglePermission={togglePermission}
+                />
+                <Divider css={{ opacity: 0.5 }} />
+                <PermissionItem
+                    flag="BanMembers"
+                    label="Ban Members"
+                    description="Ban will remove members from this space and prevent them from rejoining until they are unbanned."
+                    hasPermission={permissions.has("BanMembers")}
+                    togglePermission={togglePermission}
+                />
             </Stack>
             <Stack direction="column" spacing={2.5}>
-            <Stack alignItems="center">
-                <Typography level="body-lg">Advanced Permissions</Typography>
+                <Stack alignItems="center">
+                    <Typography level="body-lg">
+                        Text Channel Permissions
+                    </Typography>
+                </Stack>
+                <PermissionItem
+                    flag="SendMessages"
+                    label="Send Messages"
+                    description="Allow members to send messages in text channels"
+                    hasPermission={permissions.has("SendMessages")}
+                    togglePermission={togglePermission}
+                />
             </Stack>
-            <PermissionItem
-                flag="Administrator"
-                label="Administrator"
-                description={
-                    <>
-                        Members with this permission will have every permission.{" "}
-                        <b>This is a dangerous permission to grant</b>.
-                    </>
-                }
-                hasPermission={permissions.has("Administrator")}
-                togglePermission={togglePermission}
-            />
+            <Stack direction="column" spacing={2.5}>
+                <Stack alignItems="center">
+                    <Typography level="body-lg">
+                        Advanced Permissions
+                    </Typography>
+                </Stack>
+                <PermissionItem
+                    flag="Administrator"
+                    label="Administrator"
+                    description={
+                        <>
+                            Members with this permission will have every
+                            permission.{" "}
+                            <b>This is a dangerous permission to grant</b>.
+                        </>
+                    }
+                    hasPermission={permissions.has("Administrator")}
+                    togglePermission={togglePermission}
+                />
             </Stack>
         </Stack>
     );

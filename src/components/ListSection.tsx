@@ -30,7 +30,7 @@ export const ListSection = (props: Props) => {
                 {open ? <FaChevronDown /> : <FaChevronRight />}
             </Typography>
             {open && (
-                <Stack direction="column">
+                <Stack direction="column" spacing={1.25}>
                     {...props.items}
                 </Stack>
             )}

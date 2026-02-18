@@ -1,5 +1,10 @@
 import type { Theme as MzTheme } from "@emotion/react";
-import type { APITheme, Snowflake, ThemeStyle, ThemeType, } from "@mutualzz/types";
+import type {
+    APITheme,
+    Snowflake,
+    ThemeStyle,
+    ThemeType,
+} from "@mutualzz/types";
 import {
     baseDarkTheme,
     baseLightTheme,
@@ -115,6 +120,29 @@ export class Theme implements Partial<MzTheme> {
     }
 
     update(theme: APITheme) {
-        return Object.assign(this, theme);
+        this.id = theme.id;
+        this.name = theme.name;
+        this.description = theme.description;
+        this.adaptive = theme.adaptive;
+        this.type = theme.type;
+        this.style = theme.style;
+        this.colors = theme.colors;
+        this.typography = theme.typography;
+
+        if (theme.createdAt) this.createdAt = new Date(theme.createdAt);
+        else this.createdAt = undefined;
+
+        if (theme.updatedAt) this.updatedAt = new Date(theme.updatedAt);
+        else this.updatedAt = undefined;
+
+        this.authorId = theme.authorId ?? null;
+
+        if (theme.author) this.author = this.app.users.add(theme.author);
+        else if (this.authorId)
+            this.author =
+                this.app.users.get(this.authorId) ?? this.author ?? null;
+        else this.author = null;
+
+        this.raw = theme;
     }
 }

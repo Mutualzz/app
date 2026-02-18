@@ -1,26 +1,29 @@
-import { Paper } from "@components/Paper";
 import type { CSSObject } from "@emotion/react";
 import {
+    type ColorLike,
     createColor,
     resolveResponsiveMerge,
     resolveSize,
-    type ColorLike,
-    type Hex,
     type Size,
 } from "@mutualzz/ui-core";
 import {
     Avatar as MAvatar,
-    useTheme,
     type AvatarProps,
+    useTheme,
 } from "@mutualzz/ui-web";
 import type { AccountStore } from "@stores/Account.store";
 import type { User } from "@stores/objects/User";
 import { observer } from "mobx-react-lite";
 import { useMemo, useState } from "react";
 import { FaUser } from "react-icons/fa";
+import { useAppStore } from "@hooks/useStores.ts";
+import { Paper } from "@components/Paper.tsx";
+import { StatusBadge } from "@components/StatusBadge.tsx";
 
 interface UserAvatarProps extends AvatarProps {
     user?: AccountStore | User | null;
+
+    badge?: boolean;
 }
 
 const baseSizeMap: Record<Size, number> = {
@@ -29,9 +32,9 @@ const baseSizeMap: Record<Size, number> = {
     lg: 48,
 };
 
-// NOTE: add a feature later where it detects if the image has transparent background to apply elevation variant
 export const UserAvatar = observer(
-    ({ user, css, ...props }: UserAvatarProps & { css?: CSSObject }) => {
+    ({ user, css, badge, ...props }: UserAvatarProps & { css?: CSSObject }) => {
+        const app = useAppStore();
         const { theme } = useTheme();
         const [focused, setFocused] = useState(false);
 
@@ -47,30 +50,48 @@ export const UserAvatar = observer(
                   : "light";
         }, [theme.type, user]);
 
+        const { size: sizeProp, ...restProps } = props;
+
         const { size } = resolveResponsiveMerge(
             theme,
-            { size: props?.size || "md" },
+            { size: sizeProp || "md" },
             ({ size: s }) => ({ size: resolveSize(theme, s, baseSizeMap) }),
         );
 
-        const hasAvatar = useMemo(() => user && user.avatar != null, [user]);
-
-        if (!user)
+        if (!user) {
             return (
                 <MAvatar
                     elevation={5}
                     shape="circle"
                     variant="elevation"
                     size={size}
-                    {...props}
+                    {...restProps}
                 >
                     <FaUser />
                 </MAvatar>
             );
+        }
 
-        if (hasAvatar)
-            return (
+        const status = app.presence.get(user.id)?.status;
+        const hasAvatar = !!user.avatar;
+
+        return (
+            <Paper
+                position="relative"
+                width={size}
+                height={size}
+                variant={
+                    hasAvatar
+                        ? "plain"
+                        : user.defaultAvatar.color
+                          ? "solid"
+                          : "elevation"
+                }
+                elevation={hasAvatar ? 0 : 5}
+                borderRadius={9999}
+            >
                 <MAvatar
+                    size={size}
                     onMouseEnter={() => setFocused(true)}
                     onMouseLeave={() => setFocused(false)}
                     src={
@@ -82,29 +103,16 @@ export const UserAvatar = observer(
                               )
                             : user.constructAvatarUrl(false, version, size)
                     }
-                    {...props}
+                    {...restProps}
                 />
-            );
-
-        return (
-            <Paper
-                variant={user.defaultAvatar.color ? "solid" : "elevation"}
-                elevation={5}
-                transparency={0}
-                css={{
-                    width: size,
-                    height: size,
-                    ...css,
-                }}
-                direction="column"
-                borderRadius={9999}
-                color={(user.defaultAvatar.color as Hex) || "neutral"}
-            >
-                <MAvatar
-                    size={size}
-                    src={user.constructAvatarUrl(false, version, size)}
-                    {...props}
-                />
+                {status && badge && (
+                    <StatusBadge
+                        theme={theme}
+                        status={status}
+                        size={size}
+                        elevation={0}
+                    />
+                )}
             </Paper>
         );
     },

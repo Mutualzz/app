@@ -1,5 +1,10 @@
 import { Logger } from "@mutualzz/logger";
-import type { APIMessage, APIRole, GatewayReadyPayload } from "@mutualzz/types";
+import type {
+    APIMessage,
+    APIRole,
+    GatewayReadyPayload,
+    PresenceActivity,
+} from "@mutualzz/types";
 import {
     type APIChannel,
     type APIInvite,
@@ -21,6 +26,10 @@ import {
 import { isTauri } from "@utils/index";
 import { makeAutoObservable } from "mobx";
 import type { AppStore } from "./App.store";
+import {
+    buildDesktopPresenceFromProcesses,
+    type PresenceUpdateDraft,
+} from "../presence/gamePresence.ts";
 
 // We have to create our own GatewayStatus "enum" to avoid issues with SSR
 // since WebSocket is not available in the server environment.
@@ -36,6 +45,27 @@ export type GatewayStatus = (typeof GatewayStatus)[keyof typeof GatewayStatus];
 
 const RECONNECT_TIMEOUT = 5000;
 
+function mergeActivities(opts: {
+    processActivities: PresenceActivity[];
+    customActivity: PresenceActivity | null;
+}): PresenceActivity[] {
+    const out: PresenceActivity[] = [];
+
+    for (const act of opts.processActivities ?? []) out.push(act);
+
+    if (opts.customActivity) out.push(opts.customActivity);
+
+    return out.slice(0, 5);
+}
+
+function stableStringify(value: unknown) {
+    try {
+        return JSON.stringify(value);
+    } catch {
+        return "";
+    }
+}
+
 export class GatewayStore {
     socket: WebSocket | null = null;
     public readyState: GatewayStatus = GatewayStatus.CLOSED;
@@ -46,7 +76,7 @@ export class GatewayStore {
     private sessionId: string | null = null;
     private sequence = 0;
     private heartbeatInterval: number | null = null;
-    private heartbeater: NodeJS.Timeout | null = null;
+    private heartbeat: NodeJS.Timeout | null = null;
     private initialHeartbeatTimeout: NodeJS.Timeout | null = null;
     private heartbeatAck = true;
     private url?: string;
@@ -63,6 +93,9 @@ export class GatewayStore {
         string,
         (...args: any[]) => any
     >();
+
+    private presenceLoopInterval: number | null = null;
+    private lastPresenceHash: string | null = null;
 
     private lazyRequestChannels = new Map<string, string[]>(); // spaceId -> channelIds
 
@@ -129,6 +162,47 @@ export class GatewayStore {
         });
     };
 
+    sendPresenceUpdate(presence: PresenceUpdateDraft) {
+        this.send({
+            op: GatewayOpcodes.PresenceUpdate,
+            d: {
+                presence,
+            },
+        });
+    }
+
+    setStatus(status: "online" | "idle" | "dnd" | "invisible") {
+        const userId = this.app.account?.id;
+        if (!userId) return;
+
+        const prev = this.app.presence.get(userId);
+        this.app.presence.upsert(userId, {
+            ...(prev ?? { activities: [] }),
+            status,
+            device: isTauri ? "desktop" : "web",
+            updatedAt: Date.now(),
+        });
+
+        this.sendPresenceUpdate({
+            status,
+            device: isTauri ? "desktop" : "web",
+            activities: prev?.activities ?? [],
+        });
+    }
+
+    setCustomStatus(text: string) {
+        this.app.customStatus.set(text);
+
+        const customActivity = this.app.customStatus.activity;
+        const draft: PresenceUpdateDraft = {
+            status: "online",
+            device: isTauri ? "desktop" : "web",
+            activities: customActivity ? [customActivity] : [],
+        };
+
+        this.sendPresenceUpdate(draft);
+    }
+
     private setupListeners() {
         this.socket!.onopen = this.onOpen;
         this.socket!.onmessage = this.onMessage;
@@ -140,6 +214,12 @@ export class GatewayStore {
         // Connection
         this.dispatchHandlers.set(GatewayDispatchEvents.Ready, this.onReady);
         this.dispatchHandlers.set(GatewayDispatchEvents.Resume, this.onResume);
+
+        // Presence
+        this.dispatchHandlers.set(
+            GatewayDispatchEvents.PresenceUpdate,
+            this.onPresenceUpdate,
+        );
 
         // User
         this.dispatchHandlers.set(
@@ -189,8 +269,16 @@ export class GatewayStore {
             this.onMessageCreate,
         );
         this.dispatchHandlers.set(
+            GatewayDispatchEvents.MessageUpdate,
+            this.onMessageUpdate,
+        );
+        this.dispatchHandlers.set(
             GatewayDispatchEvents.MessageDelete,
             this.onMessageDelete,
+        );
+        this.dispatchHandlers.set(
+            GatewayDispatchEvents.MessageDeleteBulk,
+            this.onMessageDeleteBulk,
         );
 
         // Invites
@@ -264,24 +352,25 @@ export class GatewayStore {
 
     private onMessage = async (e: MessageEvent) => {
         try {
-            let bytes: Uint8Array;
+            let rawBytes: Uint8Array;
 
             if (typeof e.data === "string") {
-                bytes = new TextEncoder().encode(e.data);
+                rawBytes = new TextEncoder().encode(e.data);
             } else if (e.data instanceof ArrayBuffer) {
-                bytes = new Uint8Array(e.data);
+                rawBytes = new Uint8Array(e.data);
             } else if (e.data instanceof Blob) {
-                const ab = await e.data.arrayBuffer();
-                bytes = new Uint8Array(ab);
+                rawBytes = new Uint8Array(await e.data.arrayBuffer());
             } else {
                 this.logger.error("Unknown message data type");
                 return;
             }
 
-            if (this.compress !== "none")
-                bytes = this.compressor.decompress(bytes);
+            const bytes =
+                this.compress !== "none"
+                    ? this.compressor.decompress(rawBytes)
+                    : rawBytes;
 
-            const data =
+            const payload =
                 this.encoding === "etf"
                     ? await invoke("gateway_decode", {
                           payload: Array.from(bytes),
@@ -289,9 +378,9 @@ export class GatewayStore {
                       })
                     : this.codec.decode(bytes);
 
-            this.handlePayload(data);
+            this.handlePayload(payload);
         } catch (err) {
-            this.logger.error("Failed to decompress message", err);
+            this.logger.error("Failed to decode gateway message", err);
         }
     };
 
@@ -331,6 +420,7 @@ export class GatewayStore {
 
     private onClose = (e: CloseEvent) => {
         this.readyState = GatewayStatus.CLOSED;
+        this.stopPresenceLoop();
         this.handleClose(e.code);
     };
 
@@ -346,22 +436,27 @@ export class GatewayStore {
             return;
         }
 
-        const raw: any =
-            this.encoding === "etf"
-                ? await invoke("gateway_encode", {
-                      payload,
-                      encoding: this.encoding,
-                  })
-                : this.codec.encode(payload);
-
-        const out =
-            this.compress !== "none"
-                ? this.compressor.compress(Uint8Array.from(raw))
-                : raw;
-
         try {
-            if (this.compress !== "none") this.socket.send(out);
-            else this.socket.send(new TextDecoder().decode(raw));
+            const rawBytes: Uint8Array =
+                this.encoding === "etf"
+                    ? Uint8Array.from(
+                          await invoke("gateway_encode", {
+                              payload,
+                              encoding: this.encoding,
+                          }),
+                      )
+                    : this.codec.encode(payload);
+
+            const outBytes =
+                this.compress !== "none"
+                    ? this.compressor.compress(rawBytes)
+                    : rawBytes;
+
+            if (this.compress !== "none") {
+                this.socket.send(outBytes);
+            } else {
+                this.socket.send(new TextDecoder().decode(rawBytes));
+            }
 
             this.logger.debug(`[Gateway] <- ${payload.op}`);
         } catch (err) {
@@ -435,7 +530,7 @@ export class GatewayStore {
         this.logger.info(
             `[Hello] heartbeat interval: ${data.heartbeatInterval} (took ${Date.now() - this.connectionStartTime!}ms)`,
         );
-        this.startHeartbeater();
+        this.startHeartbeat();
     }
 
     private handleClose = (code?: number) => {
@@ -462,13 +557,13 @@ export class GatewayStore {
         this.readyState = GatewayStatus.CLOSED;
     };
 
-    private startHeartbeater = () => {
-        if (this.heartbeater) {
-            clearInterval(this.heartbeater);
-            this.heartbeater = null;
+    private startHeartbeat = () => {
+        if (this.heartbeat) {
+            clearInterval(this.heartbeat);
+            this.heartbeat = null;
         }
 
-        const heartbeaterFn = () => {
+        const heartbeatFn = () => {
             if (this.heartbeatAck) {
                 this.heartbeatAck = false;
                 this.sendHeartbeat();
@@ -480,20 +575,20 @@ export class GatewayStore {
         this.initialHeartbeatTimeout = setTimeout(
             () => {
                 this.initialHeartbeatTimeout = null;
-                this.heartbeater = setInterval(
-                    heartbeaterFn,
+                this.heartbeat = setInterval(
+                    heartbeatFn,
                     this.heartbeatInterval!,
                 );
-                heartbeaterFn();
+                heartbeatFn();
             },
             Math.floor(Math.random() * this.heartbeatInterval!),
         );
     };
 
-    private stopHeartbeater = () => {
-        if (this.heartbeater) {
-            clearInterval(this.heartbeater);
-            this.heartbeater = null;
+    private stopHeartbeat = () => {
+        if (this.heartbeat) {
+            clearInterval(this.heartbeat);
+            this.heartbeat = null;
         }
 
         if (this.initialHeartbeatTimeout) {
@@ -526,7 +621,7 @@ export class GatewayStore {
 
     private cleanup = () => {
         this.logger.debug("Cleaning up");
-        this.stopHeartbeater();
+        this.stopHeartbeat();
         this.socket = null;
         this.sessionId = null;
     };
@@ -577,9 +672,89 @@ export class GatewayStore {
         if (space) this.app.spaces.setActive(space.id);
 
         this.app.channels.setPreferredActive();
+
+        this.startPresenceLoop();
     };
 
-    // Dispatcher Handlers start here
+    // NOTE: Dispatcher Handlers start here
+
+    // Presence
+    private onPresenceUpdate = (payload: any) => {
+        if (payload?.userId && payload?.presence) {
+            this.app.presence.upsert(payload.userId, payload.presence);
+            return;
+        }
+
+        const list = payload?.presences;
+        if (Array.isArray(list)) {
+            for (const p of list) {
+                if (!p?.userId || !p?.presence) continue;
+                this.app.presence.upsert(p.userId, p.presence);
+            }
+            return;
+        }
+
+        this.logger.debug("[Presence] unknown payload shape", payload);
+    };
+
+    private startPresenceLoop() {
+        if (this.presenceLoopInterval) return;
+
+        const intervalMs = 15_000;
+
+        const tick = async () => {
+            if (!this.socket || this.readyState !== GatewayStatus.OPEN) return;
+            if (!this.app.account?.id) return;
+
+            if (isTauri) {
+                const baseDraft = await buildDesktopPresenceFromProcesses();
+
+                const mergedDraft: PresenceUpdateDraft = {
+                    ...baseDraft,
+                    device: "desktop",
+                    activities: mergeActivities({
+                        processActivities: baseDraft.activities ?? [],
+                        customActivity: this.app.customStatus.activity,
+                    }),
+                    status: "online",
+                };
+
+                const draftHash = stableStringify(mergedDraft);
+                if (this.lastPresenceHash === draftHash) return;
+                this.lastPresenceHash = draftHash;
+
+                this.sendPresenceUpdate(mergedDraft);
+                return;
+            }
+
+            const webDraft: PresenceUpdateDraft = {
+                status: "online",
+                device: "web",
+                activities: this.app.customStatus.activity
+                    ? [this.app.customStatus.activity]
+                    : [],
+            };
+
+            const draftHash = stableStringify(webDraft);
+            if (this.lastPresenceHash === draftHash) return;
+            this.lastPresenceHash = draftHash;
+
+            this.sendPresenceUpdate(webDraft);
+        };
+
+        tick();
+        this.presenceLoopInterval = window.setInterval(tick, intervalMs);
+    }
+
+    private stopPresenceLoop() {
+        if (this.presenceLoopInterval) {
+            window.clearInterval(this.presenceLoopInterval);
+            this.presenceLoopInterval = null;
+        }
+        this.lastPresenceHash = null;
+    }
+
+    // Space
     private onSpaceCreate = (payload: APISpace) => {
         const space = this.app.spaces.add(payload);
         space.members.addAll(payload.members ?? []);
@@ -661,6 +836,32 @@ export class GatewayStore {
 
         channel.messages.add(payload);
         this.app.queue.handleIncomingMessage(payload);
+    };
+
+    private onMessageUpdate = (payload: APIMessage) => {
+        const channel = this.app.channels.get(payload.channelId);
+        if (!channel) return;
+
+        channel.messages.update(payload);
+    };
+
+    private onMessageDeleteBulk = (payload: APIMessage[]) => {
+        const sortMessagesByChannel = payload.reduce(
+            (acc, message) => {
+                if (!acc[message.channelId]) acc[message.channelId] = [];
+                acc[message.channelId].push(message.id);
+                return acc;
+            },
+            {} as Record<string, string[]>,
+        );
+
+        for (const channelId in sortMessagesByChannel) {
+            const channel = this.app.channels.get(channelId);
+            if (!channel) continue;
+
+            const messageIds = sortMessagesByChannel[channelId];
+            channel.messages.removeBulk(messageIds);
+        }
     };
 
     private onMessageDelete = (payload: APIMessage) => {
@@ -787,7 +988,7 @@ export class GatewayStore {
         const member = space.members.get(payload.userId);
         if (!member) return;
 
-        member.roles.delete(String(payload.roleId));
+        member.roles.delete(payload.roleId);
         member.invalidateChannelPermCache();
     };
 }

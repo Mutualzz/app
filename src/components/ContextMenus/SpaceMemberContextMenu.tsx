@@ -5,12 +5,15 @@ import { ContextMenu } from "@components/ContextMenu.tsx";
 import { useAppStore } from "@hooks/useStores.ts";
 import { ContextSubmenu } from "@components/ContextSubmenu.tsx";
 import type { Role } from "@stores/objects/Role.ts";
-import { generateMenuIDs } from "@contexts/ContextMenu.context.tsx";
-import { Box, Checkbox, Typography } from "@mutualzz/ui-web";
+import { generateMenuIDs, useMenu } from "@contexts/ContextMenu.context.tsx";
+import { Box, Checkbox, Stack, Typography } from "@mutualzz/ui-web";
 import { FaArrowLeft } from "react-icons/fa";
 import { styled } from "@mutualzz/ui-core";
 import { useMutation } from "@tanstack/react-query";
 import { Item } from "@mutualzz/contexify";
+import { Button } from "@components/Button.tsx";
+import { useModal } from "@contexts/Modal.context.tsx";
+import { SpaceSettingsModal } from "@components/SpaceSettings/SpaceSettingsModal.tsx";
 
 interface Props {
     space: Space;
@@ -38,9 +41,25 @@ const RoleItem = observer(
             <Item
                 variant="plain"
                 disabled={toggling}
-                startDecorator={<RoleColorBlob color={role.color} />}
-                endDecorator={
-                    canManage ? (
+                onClick={() => {
+                    toggleRole(role);
+                }}
+                closeOnClick={false}
+                style={{
+                    flex: 0,
+                }}
+            >
+                <Stack
+                    justifyContent="space-between"
+                    flex={1}
+                    alignItems="center"
+                >
+                    <Stack alignItems="center" spacing={1.25}>
+                        <RoleColorBlob color={role.color} />
+                        <Typography level="body-sm">{role.name}</Typography>
+                    </Stack>
+
+                    {canManage ? (
                         <span data-menu-interactive>
                             <Checkbox
                                 disabled={toggling}
@@ -48,17 +67,8 @@ const RoleItem = observer(
                                 checked={hasRole}
                             />
                         </span>
-                    ) : undefined
-                }
-                onClick={() => {
-                    toggleRole(role);
-                }}
-                style={{
-                    flex: 0,
-                }}
-                closeOnClick={false}
-            >
-                <Typography level="body-sm">{role.name}</Typography>
+                    ) : undefined}
+                </Stack>
             </Item>
         );
     },
@@ -67,8 +77,25 @@ const RoleItem = observer(
 export const SpaceMemberContextMenu = observer(({ space, member }: Props) => {
     const app = useAppStore();
     const me = space.members.me;
+    const { openModal } = useModal();
+    const { clearMenu } = useMenu();
 
     const canManage = me?.canManageMember(member) ?? false;
+
+    const { mutate: createRole, isPending: creatingRole } = useMutation({
+        mutationKey: ["create-role", space.id],
+        mutationFn: async () => space.roles.create(),
+        onSuccess: (data) => {
+            space.roles.add(data);
+
+            openModal(
+                "space-settings",
+                <SpaceSettingsModal space={space} redirectTo="roles" />,
+            );
+
+            clearMenu();
+        },
+    });
 
     const { mutate: toggleRole, isPending: togglingRole } = useMutation({
         mutationKey: ["toggle-member-role", member.id],
@@ -83,6 +110,14 @@ export const SpaceMemberContextMenu = observer(({ space, member }: Props) => {
             return member.addRole(role);
         },
     });
+
+    const manageableRoles = canManage ? space.roles.assignable : [];
+
+    const assignedRoles = space.roles.assignable.filter(
+        (r) =>
+            member.roles.has(r.id) ||
+            manageableRoles.some((mr) => mr.id === r.id),
+    );
 
     return (
         <ContextMenu
@@ -99,34 +134,72 @@ export const SpaceMemberContextMenu = observer(({ space, member }: Props) => {
                     inverted
                     label="Roles"
                     style={{
-                        minHeight: "15rem",
+                        height:
+                            assignedRoles.length === 0 && !canManage
+                                ? "2.5rem"
+                                : "15rem",
                         maxHeight: "15rem",
                         overflowY: "auto",
                     }}
                 >
-                    {canManage &&
-                        space.roles.assignable.map((role) => (
-                            <RoleItem
-                                key={role.id}
-                                role={role}
-                                canManage={canManage}
-                                hasRole={member.roles.has(role.id)}
-                                toggleRole={toggleRole}
-                                toggling={togglingRole}
-                            />
-                        ))}
-                    {!canManage &&
-                        space.roles.assignable
+                    {canManage ? (
+                        manageableRoles.length === 0 ? (
+                            <Stack
+                                direction="column"
+                                justifyContent="center"
+                                alignItems="center"
+                                height="100%"
+                                spacing={1.25}
+                            >
+                                <Typography level="body-sm">
+                                    No roles to assign
+                                </Typography>
+                                <Button
+                                    color="info"
+                                    size="sm"
+                                    onClick={() => createRole()}
+                                    disabled={creatingRole}
+                                >
+                                    Create role
+                                </Button>
+                            </Stack>
+                        ) : (
+                            manageableRoles.map((role) => (
+                                <RoleItem
+                                    key={role.id}
+                                    role={role}
+                                    canManage={canManage}
+                                    hasRole={member.roles.has(role.id)}
+                                    toggleRole={toggleRole}
+                                    toggling={togglingRole}
+                                />
+                            ))
+                        )
+                    ) : assignedRoles.length === 0 ? (
+                        <Stack
+                            direction="column"
+                            justifyContent="center"
+                            alignItems="center"
+                            height="100%"
+                        >
+                            <Typography level="body-sm">
+                                No roles assigned
+                            </Typography>
+                        </Stack>
+                    ) : (
+                        assignedRoles
                             .filter((r) => member.roles.has(r.id))
                             .map((role) => (
                                 <RoleItem
+                                    key={role.id}
                                     role={role}
                                     canManage={canManage}
                                     toggleRole={toggleRole}
                                     hasRole={member.roles.has(role.id)}
                                     toggling={togglingRole}
                                 />
-                            ))}
+                            ))
+                    )}
                 </ContextSubmenu>
             </Box>
         </ContextMenu>

@@ -1,6 +1,5 @@
 import { observer } from "mobx-react-lite";
 import { Portal } from "@mutualzz/ui-web";
-import type { ReactElement } from "react";
 import { useMenu } from "@contexts/ContextMenu.context";
 
 import { SpaceContextMenu } from "@components/ContextMenus/SpaceContextMenu";
@@ -8,8 +7,9 @@ import { ChannelListContextMenu } from "@components/ContextMenus/ChannelListCont
 import { RoleContextMenu } from "@components/ContextMenus/RoleContextMenu";
 import { ChannelItemContextMenu } from "@components/ContextMenus/ChannelItemContextMenu.tsx";
 import { SpaceMemberContextMenu } from "@components/ContextMenus/SpaceMemberContextMenu.tsx";
+import { AccountContextMenu } from "@components/ContextMenus/AccountContextMenu.tsx";
 
-export const ContextMenuRoot = observer((): ReactElement | null => {
+export const ContextMenuRoot = observer(() => {
     const { menu } = useMenu();
     if (!menu) return null;
 
@@ -41,6 +41,13 @@ export const ContextMenuRoot = observer((): ReactElement | null => {
                         space={menu.space}
                         member={menu.member}
                     />
+                </Portal>
+            );
+
+        case "account":
+            return (
+                <Portal>
+                    <AccountContextMenu {...menu} />
                 </Portal>
             );
 

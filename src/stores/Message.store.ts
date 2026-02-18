@@ -26,47 +26,6 @@ export class MessageStore {
         makeAutoObservable(this);
     }
 
-    clear() {
-        this.messages.clear();
-    }
-
-    add(message: APIMessage) {
-        const existing = this.get(message.id);
-        if (existing) return existing;
-
-        const newMessage = new Message(this.app, message);
-        this.messages.push(newMessage);
-        return newMessage;
-    }
-
-    addAll(messages: APIMessage[]) {
-        return messages.map((message) => this.add(message));
-    }
-
-    get(id: string) {
-        return this.messages.find((message) => message.id === id);
-    }
-
-    has(id: string) {
-        return this.messages.some((message) => message.id === id);
-    }
-
-    remove(id: Snowflake) {
-        const message = this.get(id);
-        if (!message) return;
-        this.messages.remove(message);
-    }
-
-    update(message: APIMessage) {
-        const oldMessage = this.get(message.id);
-        if (!oldMessage) return;
-
-        this.messages[this.messages.indexOf(oldMessage)] = new Message(
-            this.app,
-            message,
-        );
-    }
-
     get count() {
         return this.messages.length;
     }
@@ -113,6 +72,51 @@ export class MessageStore {
 
     get all() {
         return this.messages;
+    }
+
+    clear() {
+        this.messages.clear();
+    }
+
+    add(message: APIMessage) {
+        const existing = this.get(message.id);
+        if (existing) return existing;
+
+        const newMessage = new Message(this.app, message);
+        this.messages.push(newMessage);
+        return newMessage;
+    }
+
+    addAll(messages: APIMessage[]) {
+        return messages.map((message) => this.add(message));
+    }
+
+    get(id: string) {
+        return this.messages.find((message) => message.id === id);
+    }
+
+    has(id: string) {
+        return this.messages.some((message) => message.id === id);
+    }
+
+    remove(id: Snowflake) {
+        const message = this.get(id);
+        if (!message) return;
+        this.messages.remove(message);
+    }
+
+    removeBulk(ids: Snowflake[]) {
+        ids.forEach((id) => this.remove(id));
+    }
+
+    update(message: APIMessage) {
+        const oldMessage = this.get(message.id);
+        if (!oldMessage) return;
+
+        this.messages[this.messages.indexOf(oldMessage)] = new Message(
+            this.app,
+            message,
+        );
     }
 
     async resolve(channelId: string, id: string, force = false) {

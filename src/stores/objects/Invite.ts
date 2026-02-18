@@ -58,21 +58,41 @@ export class Invite {
         this.raw = invite;
     }
 
-    update(invite: APIInvite) {
-        Object.assign(this, invite);
-    }
-
-    delete() {
-        return this.app.rest.delete(
-            `/spaces/${this.spaceId}/invites/${this.code}`,
-        );
-    }
-
     get url() {
         return Invite.constructUrl(this.code);
     }
 
     static constructUrl(code: string) {
         return `${prefixUrl}/${code}`;
+    }
+
+    update(invite: APIInvite) {
+        this.code = invite.code;
+        this.type = invite.type;
+
+        this.spaceId = invite.spaceId;
+        this.channelId = invite.channelId;
+
+        this.inviterId = invite.inviterId;
+
+        this.maxUses = invite.maxUses;
+        this.uses = invite.uses;
+
+        this.createdAt = new Date(invite.createdAt);
+        this.updatedAt = new Date(invite.updatedAt);
+        this.expiresAt = invite.expiresAt ? new Date(invite.expiresAt) : null;
+
+        if (invite.space) this.space = this.app.spaces.add(invite.space);
+        if (invite.channel)
+            this.channel = this.app.channels.add(invite.channel);
+        if (invite.inviter) this.inviter = this.app.users.add(invite.inviter);
+
+        this.raw = invite;
+    }
+
+    delete() {
+        return this.app.rest.delete(
+            `/spaces/${this.spaceId}/invites/${this.code}`,
+        );
     }
 }

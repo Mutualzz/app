@@ -15,7 +15,12 @@ import type { User } from "@stores/objects/User";
 import { REST } from "@stores/REST.store";
 import { SpaceMemberStore } from "@stores/Space/SpaceMember.store";
 import { asAcronym } from "@utils/index";
-import { makeAutoObservable, observable, ObservableMap, ObservableSet, } from "mobx";
+import {
+    makeAutoObservable,
+    observable,
+    ObservableMap,
+    ObservableSet,
+} from "mobx";
 import type { Channel } from "./Channel";
 import { Invite } from "./Invite";
 import { SpaceRoleStore } from "@stores/Space/SpaceRole.store";
@@ -163,10 +168,32 @@ export class Space {
     }
 
     update(space: APISpace) {
-        Object.assign(this, space);
+        this.id = space.id;
+        this.name = space.name;
+        this.description = space.description;
+        this.icon = space.icon;
 
+        this.ownerId = space.ownerId;
+        this.owner = space.owner
+            ? this.app.users.add(space.owner)
+            : (this.owner ?? null);
+
+        this.createdAt = new Date(space.createdAt);
         this.updatedAt = new Date(space.updatedAt);
+
         this.flags = BitField.fromString(spaceFlags, space.flags.toString());
+
+        if ("channels" in space && space.channels) {
+            this.app.channels.addAll(space.channels);
+            this._channels.clear();
+            space.channels.forEach((ch) => this._channels.add(ch.id));
+        }
+
+        if ("members" in space && space.members)
+            this.members.addAll(space.members);
+        if ("roles" in space && space.roles) this.roles.addAll(space.roles);
+
+        this.raw = space;
     }
 
     createInvite(channelId?: string | null) {

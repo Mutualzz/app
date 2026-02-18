@@ -3,29 +3,20 @@ import type { Space } from "@stores/objects/Space";
 import type { Role } from "@stores/objects/Role";
 import { ContextMenu } from "@components/ContextMenu";
 import { useAppStore } from "@hooks/useStores";
-import { generateMenuIDs, useMenu } from "@contexts/ContextMenu.context.tsx";
+import { generateMenuIDs } from "@contexts/ContextMenu.context.tsx";
 import { Item } from "@mutualzz/contexify";
-import { useMutation } from "@tanstack/react-query";
 import { FaTrash } from "react-icons/fa";
+import { RoleActionConfirm } from "@components/Modals/RoleActionConfirm.tsx";
+import { useModal } from "@contexts/Modal.context.tsx";
 
 interface Props {
     space: Space;
     role: Role;
-    onDelete?: () => void;
 }
 
-export const RoleContextMenu = observer(({ space, role, onDelete }: Props) => {
+export const RoleContextMenu = observer(({ space, role }: Props) => {
     const app = useAppStore();
-    const { clearMenu } = useMenu();
-
-    const { mutate: deleteRole, isPending: deletingRole } = useMutation({
-        mutationKey: ["delete-role", role.id],
-        mutationFn: async () => role.delete(),
-        onSuccess: async () => {
-            clearMenu();
-            onDelete?.();
-        },
-    });
+    const { openModal } = useModal();
 
     if (role.id === space.id) return null;
 
@@ -37,11 +28,12 @@ export const RoleContextMenu = observer(({ space, role, onDelete }: Props) => {
             key={`${space.id}-${role.id}`}
         >
             <Item
-                onClick={() => deleteRole()}
+                onClick={() =>
+                    openModal("delete-role", <RoleActionConfirm role={role} />)
+                }
                 endDecorator={<FaTrash />}
                 color="danger"
                 size="sm"
-                disabled={deletingRole}
             >
                 Delete Role
             </Item>

@@ -16,6 +16,7 @@ import type { Channel } from "@stores/objects/Channel";
 import type { SpaceMember } from "@stores/objects/SpaceMember";
 import type { User } from "@stores/objects/User";
 import type { Role } from "@stores/objects/Role";
+import type { AccountStore } from "@stores/Account.store.ts";
 
 export type ContextMenuPayload =
     | { type: "space"; space: Space; fromSidebar?: boolean; [key: string]: any }
@@ -23,6 +24,7 @@ export type ContextMenuPayload =
     | { type: "channel"; space: Space; channel: Channel; [key: string]: any }
     | { type: "member"; space: Space; member: SpaceMember; [key: string]: any }
     | { type: "user"; user: User; [key: string]: any }
+    | { type: "account"; account: AccountStore; [key: string]: any }
     | { type: "role"; space: Space; role: Role; [key: string]: any };
 
 export type MenuPosition = { x: number; y: number };
@@ -58,6 +60,8 @@ export const generateMenuIDs = {
     user: (userId: string) => `context-user-${userId}`,
     role: (spaceId: string, roleId: string) =>
         `context-role-${spaceId}-${roleId}`,
+
+    account: (userId: string) => `context-account-${userId}`,
 };
 
 function getMenuId(menu: ContextMenuPayload): string {
@@ -72,6 +76,8 @@ function getMenuId(menu: ContextMenuPayload): string {
             return generateMenuIDs.member(menu.space.id, menu.member.id);
         case "user":
             return generateMenuIDs.user(menu.user.id);
+        case "account":
+            return generateMenuIDs.account(menu.account.id);
         case "role":
             return generateMenuIDs.role(menu.space.id, menu.role.id);
     }

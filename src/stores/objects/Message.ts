@@ -54,15 +54,35 @@ export class Message extends MessageBase {
     }
 
     update(message: APIMessage) {
-        Object.assign(this, message);
+        this.id = message.id;
+        this.channelId = message.channelId;
+
+        if (message.channel)
+            this.channel = this.app.channels.add(message.channel);
+        else
+            this.channel =
+                this.app.channels.get(this.channelId) ?? this.channel ?? null;
+
+        this.spaceId = message.spaceId ?? null;
+        if (message.space) this.space = this.app.spaces.add(message.space);
+        else if (this.spaceId)
+            this.space =
+                this.app.spaces.get(this.spaceId) ?? this.space ?? null;
+
+        this.content = message.content;
+        this.nonce = message.nonce ?? null;
+        this.embeds = message.embeds ?? this.embeds ?? [];
 
         this.createdAt = new Date(message.createdAt);
         this.updatedAt = message.updatedAt ? new Date(message.updatedAt) : null;
+
         this.edited = message.edited ?? this.edited;
 
-        if (message.member && this.space) {
+        if (message.member && this.space)
             this.member = this.space.members.add(message.member);
-        }
+        else if (this.space)
+            this.member =
+                this.space.members.get(message.authorId) ?? this.member ?? null;
     }
 
     async delete() {
