@@ -14,6 +14,10 @@ export const APIErrorListener = observer(() => {
                 disableBackdropClick: true,
             });
         });
+
+        return () => {
+            app.rest.off("rateLimited", () => {});
+        };
     }, []);
 
     return null;

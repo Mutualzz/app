@@ -1,16 +1,6 @@
 import type { CSSObject } from "@emotion/react";
-import {
-    type ColorLike,
-    createColor,
-    resolveResponsiveMerge,
-    resolveSize,
-    type Size,
-} from "@mutualzz/ui-core";
-import {
-    Avatar as MAvatar,
-    type AvatarProps,
-    useTheme,
-} from "@mutualzz/ui-web";
+import { type ColorLike, createColor, resolveResponsiveMerge, resolveSize, type Size, } from "@mutualzz/ui-core";
+import { Avatar as MAvatar, type AvatarProps, useTheme, } from "@mutualzz/ui-web";
 import type { AccountStore } from "@stores/Account.store";
 import type { User } from "@stores/objects/User";
 import { observer } from "mobx-react-lite";
@@ -106,12 +96,7 @@ export const UserAvatar = observer(
                     {...restProps}
                 />
                 {status && badge && (
-                    <StatusBadge
-                        theme={theme}
-                        status={status}
-                        size={size}
-                        elevation={0}
-                    />
+                    <StatusBadge status={status} size={size} elevation={0} />
                 )}
             </Paper>
         );

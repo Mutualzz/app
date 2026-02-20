@@ -1,9 +1,12 @@
+// frontend/src/stores/GatewayStore.ts
 import { Logger } from "@mutualzz/logger";
 import type {
     APIMessage,
     APIRole,
     GatewayReadyPayload,
     PresenceActivity,
+    PresenceSchedule,
+    PresenceStatus,
 } from "@mutualzz/types";
 import {
     type APIChannel,
@@ -18,22 +21,14 @@ import {
 } from "@mutualzz/types";
 import { invoke } from "@tauri-apps/api/core";
 import { type Codec, createCodec, type Encoding } from "@utils/codec";
-import {
-    type Compression,
-    type Compressor,
-    createCompressor,
-} from "@utils/compressor";
+import { type Compression, type Compressor, createCompressor, } from "@utils/compressor";
 import { isTauri } from "@utils/index";
 import { makeAutoObservable } from "mobx";
 import type { AppStore } from "./App.store";
-import {
-    buildDesktopPresenceFromProcesses,
-    type PresenceUpdateDraft,
-} from "../presence/gamePresence.ts";
+import { buildDesktopPresenceFromProcesses, type PresenceUpdateDraft, } from "../presence/gamePresence.ts";
 
 // We have to create our own GatewayStatus "enum" to avoid issues with SSR
 // since WebSocket is not available in the server environment.
-// If someone has a better solution, please let me know. lol
 export const GatewayStatus = {
     CONNECTING: 0,
     OPEN: 1,
@@ -70,25 +65,30 @@ export class GatewayStore {
     socket: WebSocket | null = null;
     public readyState: GatewayStatus = GatewayStatus.CLOSED;
     public events: { t: string; d: any; s: number }[] = [];
-    private readonly logger = new Logger({
-        tag: "GatewayStore",
-    });
+
+    private readonly logger = new Logger({ tag: "GatewayStore" });
+
     private sessionId: string | null = null;
     private sequence = 0;
+
     private heartbeatInterval: number | null = null;
     private heartbeat: NodeJS.Timeout | null = null;
     private initialHeartbeatTimeout: NodeJS.Timeout | null = null;
     private heartbeatAck = true;
+
     private url?: string;
     private encoding: Encoding = isTauri ? "etf" : "json";
     private compress: Compression =
         import.meta.env.DEV && !isTauri ? "none" : "zlib-stream";
     private codec!: Codec;
     private compressor!: Compressor;
+
     private connectionStartTime?: number;
     private identifyStartTime?: number;
+
     private reconnectTimeout = 0;
     private reconnecting = false;
+
     private readonly dispatchHandlers = new Map<
         string,
         (...args: any[]) => any
@@ -113,6 +113,7 @@ export class GatewayStore {
 
         this.logger.debug(`[Connect] Gateway URL ${this.url}`);
         this.connectionStartTime = Date.now();
+
         this.socket = new WebSocket(this.url);
         this.socket.binaryType = "arraybuffer";
         this.readyState = GatewayStatus.CONNECTING;
@@ -165,17 +166,22 @@ export class GatewayStore {
     sendPresenceUpdate(presence: PresenceUpdateDraft) {
         this.send({
             op: GatewayOpcodes.PresenceUpdate,
-            d: {
-                presence,
-            },
+            d: { presence },
         });
     }
 
-    setStatus(status: "online" | "idle" | "dnd" | "invisible") {
+    /**
+     * Manual status set cancels any scheduled status (Discord-like).
+     * If you don't want that, remove the clearScheduledStatus() call.
+     */
+    setStatus(status: PresenceStatus) {
+        this.clearScheduledStatus();
+
         const userId = this.app.account?.id;
         if (!userId) return;
 
         const prev = this.app.presence.get(userId);
+
         this.app.presence.upsert(userId, {
             ...(prev ?? { activities: [] }),
             status,
@@ -194,13 +200,42 @@ export class GatewayStore {
         this.app.customStatus.set(text);
 
         const customActivity = this.app.customStatus.activity;
+        const status = this.getEffectiveStatus();
+
         const draft: PresenceUpdateDraft = {
-            status: "online",
+            status,
             device: isTauri ? "desktop" : "web",
             activities: customActivity ? [customActivity] : [],
         };
 
         this.sendPresenceUpdate(draft);
+    }
+
+    scheduleStatus(opts: { status: PresenceStatus; durationMs: number }) {
+        this.send({
+            op: GatewayOpcodes.PresenceScheduleSet,
+            d: {
+                status: opts.status,
+                durationMs: opts.durationMs,
+            },
+        });
+    }
+
+    clearScheduledStatus() {
+        this.send({
+            op: GatewayOpcodes.PresenceScheduleClear,
+            d: {},
+        });
+    }
+
+    private getEffectiveStatus(): PresenceStatus {
+        const userId = this.app.account?.id;
+        if (!userId) return "online";
+
+        const scheduled = this.app.presence.scheduledStatus;
+        if (scheduled && scheduled.until > Date.now()) return scheduled.status;
+
+        return this.app.presence.get(userId)?.status ?? "online";
     }
 
     private setupListeners() {
@@ -219,6 +254,10 @@ export class GatewayStore {
         this.dispatchHandlers.set(
             GatewayDispatchEvents.PresenceUpdate,
             this.onPresenceUpdate,
+        );
+        this.dispatchHandlers.set(
+            GatewayDispatchEvents.PresenceScheduleUpdate,
+            this.onPresenceScheduleUpdate,
         );
 
         // User
@@ -350,16 +389,16 @@ export class GatewayStore {
         }
     };
 
-    private onMessage = async (e: MessageEvent) => {
+    private onMessage = async (event: MessageEvent) => {
         try {
             let rawBytes: Uint8Array;
 
-            if (typeof e.data === "string") {
-                rawBytes = new TextEncoder().encode(e.data);
-            } else if (e.data instanceof ArrayBuffer) {
-                rawBytes = new Uint8Array(e.data);
-            } else if (e.data instanceof Blob) {
-                rawBytes = new Uint8Array(await e.data.arrayBuffer());
+            if (typeof event.data === "string") {
+                rawBytes = new TextEncoder().encode(event.data);
+            } else if (event.data instanceof ArrayBuffer) {
+                rawBytes = new Uint8Array(event.data);
+            } else if (event.data instanceof Blob) {
+                rawBytes = new Uint8Array(await event.data.arrayBuffer());
             } else {
                 this.logger.error("Unknown message data type");
                 return;
@@ -379,8 +418,8 @@ export class GatewayStore {
                     : this.codec.decode(bytes);
 
             this.handlePayload(payload);
-        } catch (err) {
-            this.logger.error("Failed to decode gateway message", err);
+        } catch (error) {
+            this.logger.error("Failed to decode gateway message", error);
         }
     };
 
@@ -414,14 +453,14 @@ export class GatewayStore {
         }
     };
 
-    private onError = (e: Event) => {
-        this.logger.error(`[Socket Error]`, e);
+    private onError = (event: Event) => {
+        this.logger.error(`[Socket Error]`, event);
     };
 
-    private onClose = (e: CloseEvent) => {
+    private onClose = (event: CloseEvent) => {
         this.readyState = GatewayStatus.CLOSED;
         this.stopPresenceLoop();
-        this.handleClose(e.code);
+        this.handleClose(event.code);
     };
 
     private send = async (payload: any) => {
@@ -459,8 +498,8 @@ export class GatewayStore {
             }
 
             this.logger.debug(`[Gateway] <- ${payload.op}`);
-        } catch (err) {
-            this.logger.error("Failed to send message", err);
+        } catch (error) {
+            this.logger.error("Failed to send message", error);
         }
     };
 
@@ -472,14 +511,10 @@ export class GatewayStore {
 
         this.identifyStartTime = Date.now();
 
-        const payload = {
+        this.send({
             op: GatewayOpcodes.Identify,
-            d: {
-                token: this.app.token,
-            },
-        };
-
-        this.send(payload);
+            d: { token: this.app.token },
+        });
     }
 
     private handleInvalidSession = (resumable: boolean) => {
@@ -496,7 +531,6 @@ export class GatewayStore {
 
     private handleReconnect() {
         this.cleanup();
-
         this.logger.debug(`[Gateway] -> Reconnect`);
         this.startReconnect();
     }
@@ -649,6 +683,7 @@ export class GatewayStore {
         this.logger.debug("[Resume] Session");
     };
 
+    // NOTE: Dispatcher Handlers start here
     private onReady = async (payload: GatewayReadyPayload) => {
         this.logger.info(
             `[Ready] took ${Date.now() - (this.identifyStartTime ?? 0)}ms`,
@@ -674,9 +709,11 @@ export class GatewayStore {
         this.app.channels.setPreferredActive();
 
         this.startPresenceLoop();
-    };
 
-    // NOTE: Dispatcher Handlers start here
+        // if we already persisted a schedule in local storage, rearm timer for UI
+        const selfUserId = this.app.account?.id;
+        if (selfUserId) this.app.presence.rearmScheduledStatusTimer();
+    };
 
     // Presence
     private onPresenceUpdate = (payload: any) => {
@@ -687,14 +724,26 @@ export class GatewayStore {
 
         const list = payload?.presences;
         if (Array.isArray(list)) {
-            for (const p of list) {
-                if (!p?.userId || !p?.presence) continue;
-                this.app.presence.upsert(p.userId, p.presence);
+            for (const item of list) {
+                if (!item?.userId || !item?.presence) continue;
+                this.app.presence.upsert(item.userId, item.presence);
             }
             return;
         }
 
         this.logger.debug("[Presence] unknown payload shape", payload);
+    };
+
+    private onPresenceScheduleUpdate = (payload: any) => {
+        const userId = payload?.userId;
+        const schedule: PresenceSchedule | null = payload?.schedule ?? null;
+
+        const selfId = this.app.account?.id;
+        if (!selfId || !userId) return;
+
+        if (String(userId) === String(selfId)) {
+            this.app.presence.setScheduledStatus(schedule);
+        }
     };
 
     private startPresenceLoop() {
@@ -716,7 +765,7 @@ export class GatewayStore {
                         processActivities: baseDraft.activities ?? [],
                         customActivity: this.app.customStatus.activity,
                     }),
-                    status: "online",
+                    status: this.getEffectiveStatus(),
                 };
 
                 const draftHash = stableStringify(mergedDraft);
@@ -728,7 +777,7 @@ export class GatewayStore {
             }
 
             const webDraft: PresenceUpdateDraft = {
-                status: "online",
+                status: this.getEffectiveStatus(),
                 device: "web",
                 activities: this.app.customStatus.activity
                     ? [this.app.customStatus.activity]
@@ -929,11 +978,9 @@ export class GatewayStore {
         space.members.remove(payload.userId);
     };
 
-    // TODO: Add a type later
     private onSpaceMemberListUpdate = (data: any) => {
         const { spaceId } = data;
         const space = this.app.spaces.get(spaceId);
-
         if (!space) return;
 
         space.updateMemberList(data);
@@ -944,9 +991,9 @@ export class GatewayStore {
         if (!space) return;
 
         space.roles.add(role);
-        space.members.all.forEach((member) => {
-            member.invalidateChannelPermCache();
-        });
+        space.members.all.forEach((member) =>
+            member.invalidateChannelPermCache(),
+        );
     };
 
     private onRoleUpdate = (role: APIRole) => {
@@ -954,9 +1001,9 @@ export class GatewayStore {
         if (!space) return;
 
         space.roles.update(role);
-        space.members.all.forEach((member) => {
-            member.invalidateChannelPermCache();
-        });
+        space.members.all.forEach((member) =>
+            member.invalidateChannelPermCache(),
+        );
     };
 
     private onRoleDelete = (role: APIRole) => {
@@ -964,10 +1011,9 @@ export class GatewayStore {
         if (!space) return;
 
         space.roles.remove(role.id);
-
-        space.members.all.forEach((member) => {
-            member.invalidateChannelPermCache();
-        });
+        space.members.all.forEach((member) =>
+            member.invalidateChannelPermCache(),
+        );
     };
 
     private onMemberRoleAdd = (payload: any) => {

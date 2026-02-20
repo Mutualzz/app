@@ -1,8 +1,7 @@
 import { observer } from "mobx-react-lite";
-import type { Theme } from "@emotion/react";
 import type { PresenceStatus } from "@mutualzz/types";
 import { useMemo } from "react";
-import { Stack } from "@mutualzz/ui-web";
+import { Stack, useTheme } from "@mutualzz/ui-web";
 import { type ColorLike, dynamicElevation } from "@mutualzz/ui-core";
 
 function roundPx(value: number) {
@@ -20,7 +19,6 @@ function getStatusMetrics(avatarSize: number) {
 }
 
 interface StatusBadgeProps {
-    theme: Theme;
     status: PresenceStatus;
     size?: number;
     cutColor?: string;
@@ -139,7 +137,6 @@ const BadgeVisual = observer(
 
 export const StatusBadge = observer(
     ({
-        theme,
         status,
         size = 48,
         cutColor,
@@ -147,6 +144,7 @@ export const StatusBadge = observer(
         inPicker = false,
         showInvisible = false,
     }: StatusBadgeProps) => {
+        const { theme } = useTheme();
         if (!showInvisible && status === "invisible") return null;
 
         const fillColor = useMemo(() => {

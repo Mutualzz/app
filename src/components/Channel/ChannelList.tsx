@@ -13,28 +13,13 @@ import {
     useSensor,
     useSensors,
 } from "@dnd-kit/core";
-import {
-    restrictToParentElement,
-    restrictToVerticalAxis,
-    restrictToWindowEdges,
-} from "@dnd-kit/modifiers";
-import {
-    arrayMove,
-    SortableContext,
-    useSortable,
-    verticalListSortingStrategy,
-} from "@dnd-kit/sortable";
+import { restrictToParentElement, restrictToVerticalAxis, restrictToWindowEdges, } from "@dnd-kit/modifiers";
+import { arrayMove, SortableContext, useSortable, verticalListSortingStrategy, } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { useAppStore } from "@hooks/useStores.ts";
 import { contextMenu } from "@mutualzz/contexify";
 import { ChannelType } from "@mutualzz/types";
-import {
-    ButtonGroup,
-    Portal,
-    Stack,
-    Tooltip,
-    Typography,
-} from "@mutualzz/ui-web";
+import { ButtonGroup, Portal, Stack, Tooltip, Typography, } from "@mutualzz/ui-web";
 import type { Channel } from "@stores/objects/Channel.ts";
 import type { Space } from "@stores/objects/Space.ts";
 import { runInAction } from "mobx";
@@ -126,7 +111,7 @@ interface DragData {
     parentId?: string | null;
 }
 
-// TODO: Fix a bug where you cant drag a channel outside of its category
+// TODO: Fix a bug where you cant drag a channel outside its category
 export const ChannelList = observer(() => {
     const app = useAppStore();
     const { openContextMenu } = useMenu();

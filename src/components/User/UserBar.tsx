@@ -4,26 +4,21 @@ import { UserAvatar } from "@components/User/UserAvatar";
 import { UserSettingsModal } from "@components/UserSettings/UserSettingsModal";
 import { useModal } from "@contexts/Modal.context";
 import { useAppStore } from "@hooks/useStores";
-import {
-    type PaperProps,
-    Stack,
-    Tooltip,
-    Typography,
-    useTheme,
-} from "@mutualzz/ui-web";
+import { type PaperProps, Stack, Tooltip, Typography, useTheme, } from "@mutualzz/ui-web";
 import { observer } from "mobx-react-lite";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { FaCogs, FaPalette } from "react-icons/fa";
 import { IconButton } from "@components/IconButton";
-import { AnimatedStack } from "@components/Animated/AnimatedStack.tsx";
-import { formatColor } from "@mutualzz/ui-core";
 import { generateMenuIDs, useMenu } from "@contexts/ContextMenu.context.tsx";
+import { formatColor } from "@mutualzz/ui-core";
 
+// NOTE: Instead of using hovered, you should use the Animated motion stuff, fix it.
 export const UserBar = observer(() => {
     const app = useAppStore();
     const { theme } = useTheme();
     const { openModal } = useModal();
     const { openContextMenu } = useMenu();
+    const [hovered, setHovered] = useState(false);
 
     const inSpace = Boolean(app.spaces.activeId) && app.mode === "spaces";
 
@@ -48,6 +43,14 @@ export const UserBar = observer(() => {
 
     if (!account) return <></>;
 
+    console.log(
+        "Rendering UserBar with account:",
+        hovered,
+        formatColor(theme.colors.neutral, {
+            alpha: 90,
+        }),
+    );
+
     return (
         <Paper
             justifyContent="space-between"
@@ -64,7 +67,7 @@ export const UserBar = observer(() => {
             zIndex={theme.zIndex.appBar + 1}
             {...conditionalProps}
         >
-            <AnimatedStack
+            <Paper
                 direction={inSpace ? "row" : "column"}
                 alignItems="center"
                 spacing={2.5}
@@ -72,11 +75,12 @@ export const UserBar = observer(() => {
                 px={1}
                 py={0.25}
                 borderRadius={6}
-                whileHover={{
-                    backgroundColor: formatColor(theme.colors.neutral, {
-                        alpha: 0,
-                    }),
-                }}
+                variant={hovered ? "soft" : "plain"}
+                color={formatColor(theme.colors.neutral, {
+                    alpha: 90,
+                })}
+                onMouseEnter={() => setHovered(true)}
+                onMouseLeave={() => setHovered(false)}
                 onClick={(e) => {
                     const rect = e.currentTarget.getBoundingClientRect();
 
@@ -96,6 +100,7 @@ export const UserBar = observer(() => {
                 css={{
                     cursor: "pointer",
                     userSelect: "none",
+                    transition: "background-color 0.2s",
                 }}
             >
                 <UserAvatar user={account} size={48} badge />
@@ -109,7 +114,7 @@ export const UserBar = observer(() => {
                         </Typography>
                     )}
                 </Stack>
-            </AnimatedStack>
+            </Paper>
             <Stack
                 justifyContent="center"
                 alignItems="center"

@@ -6,21 +6,84 @@ import { useAppStore } from "@hooks/useStores.ts";
 import { ContextSubmenu } from "@components/ContextSubmenu.tsx";
 import { formatPresenceStatus } from "@utils/index.ts";
 import { StatusBadge } from "@components/StatusBadge.tsx";
-import { Divider, useTheme } from "@mutualzz/ui-web";
+import { Divider } from "@mutualzz/ui-web";
 import { Item } from "@mutualzz/contexify";
 import { FaArrowRight } from "react-icons/fa";
+import type { AppStore } from "@stores/App.store.ts";
+import type { PresenceStatus } from "@mutualzz/types";
 
 interface Props {
     account: AccountStore;
 }
 
+const times: { label: string; durationMs: number | null }[] = [
+    { label: "15 minutes", durationMs: 15 * 60_000 },
+    { label: "1 hour", durationMs: 60 * 60_000 },
+    { label: "4 hours", durationMs: 4 * 60 * 60_000 },
+    { label: "1 day", durationMs: 24 * 60 * 60_000 },
+    { label: "3 days", durationMs: 3 * 24 * 60 * 60_000 },
+    { label: "Forever", durationMs: null },
+];
+
+const SubmenuLabel = (props: { text: string; onForeverClick: () => void }) => {
+    const { text, onForeverClick } = props;
+
+    return (
+        <div
+            style={{
+                display: "flex",
+                alignItems: "center",
+                width: "100%",
+                gap: 8,
+            }}
+            onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onForeverClick();
+            }}
+        >
+            {text}
+        </div>
+    );
+};
+
+const TimeContextMenu = observer(
+    ({ app, status }: { app: AppStore; status: PresenceStatus }) => {
+        return times.map(({ label, durationMs }) => (
+            <Item
+                horizontalAlign="left"
+                key={`${status}:${label}`}
+                onClick={() => {
+                    if (!durationMs) {
+                        app.gateway.setStatus(status);
+                        app.gateway.clearScheduledStatus();
+
+                        return;
+                    }
+
+                    app.gateway.scheduleStatus({
+                        status,
+                        durationMs,
+                    });
+                }}
+            >
+                {label}
+            </Item>
+        ));
+    },
+);
+
 export const AccountContextMenu = observer(({ account }: Props) => {
-    const { theme } = useTheme();
     const app = useAppStore();
 
     const presence = app.presence.get(account.id);
 
     const elevation = app.settings?.preferEmbossed ? 5 : 1;
+
+    const setForever = (status: PresenceStatus) => {
+        app.gateway.setStatus(status);
+        app.gateway.clearScheduledStatus();
+    };
 
     return (
         <ContextMenu
@@ -34,7 +97,6 @@ export const AccountContextMenu = observer(({ account }: Props) => {
                 <ContextSubmenu
                     decorator={
                         <StatusBadge
-                            theme={theme}
                             status={presence.status}
                             inPicker
                             size={32}
@@ -49,56 +111,84 @@ export const AccountContextMenu = observer(({ account }: Props) => {
                     transparency={0}
                     arrow={<FaArrowRight />}
                 >
-                    <Item
-                        startDecorator={
+                    <ContextSubmenu
+                        decorator={
                             <StatusBadge
-                                theme={theme}
                                 status="online"
                                 size={32}
                                 inPicker
                                 elevation={elevation}
                             />
                         }
-                        onClick={() => app.gateway.setStatus("online")}
-                        closeOnClick={false}
+                        css={{
+                            width: "100%",
+                        }}
+                        label={
+                            <SubmenuLabel
+                                text="Online"
+                                onForeverClick={() => setForever("online")}
+                            />
+                        }
+                        transparency={0}
+                        elevation={elevation}
                     >
-                        Online
-                    </Item>
-                    <Divider />
-                    <Item
-                        startDecorator={
+                        <TimeContextMenu app={app} status="online" />
+                    </ContextSubmenu>
+                    <Divider
+                        lineColor="muted"
+                        css={{
+                            opacity: 0.5,
+                        }}
+                    />
+                    <ContextSubmenu
+                        decorator={
                             <StatusBadge
-                                theme={theme}
                                 status="idle"
                                 size={32}
                                 inPicker
                                 elevation={elevation}
                             />
                         }
-                        onClick={() => app.gateway.setStatus("idle")}
-                        closeOnClick={false}
+                        css={{
+                            width: "100%",
+                        }}
+                        label={
+                            <SubmenuLabel
+                                text="Idle"
+                                onForeverClick={() => setForever("idle")}
+                            />
+                        }
+                        transparency={0}
+                        elevation={elevation}
                     >
-                        Idle
-                    </Item>
-                    <Item
-                        startDecorator={
+                        <TimeContextMenu app={app} status="idle" />
+                    </ContextSubmenu>
+                    <ContextSubmenu
+                        decorator={
                             <StatusBadge
-                                theme={theme}
                                 status="dnd"
                                 size={32}
                                 inPicker
                                 elevation={elevation}
                             />
                         }
-                        onClick={() => app.gateway.setStatus("dnd")}
-                        closeOnClick={false}
+                        css={{
+                            width: "100%",
+                        }}
+                        label={
+                            <SubmenuLabel
+                                text="Do Not Disturb"
+                                onForeverClick={() => setForever("dnd")}
+                            />
+                        }
+                        transparency={0}
+                        elevation={elevation}
                     >
-                        Do Not Disturb
-                    </Item>
-                    <Item
-                        startDecorator={
+                        <TimeContextMenu app={app} status="dnd" />
+                    </ContextSubmenu>
+                    <ContextSubmenu
+                        decorator={
                             <StatusBadge
-                                theme={theme}
                                 status="invisible"
                                 size={32}
                                 inPicker
@@ -106,11 +196,20 @@ export const AccountContextMenu = observer(({ account }: Props) => {
                                 elevation={elevation}
                             />
                         }
-                        onClick={() => app.gateway.setStatus("invisible")}
-                        closeOnClick={false}
+                        css={{
+                            width: "100%",
+                        }}
+                        label={
+                            <SubmenuLabel
+                                text="Invisible"
+                                onForeverClick={() => setForever("invisible")}
+                            />
+                        }
+                        transparency={0}
+                        elevation={elevation}
                     >
-                        Invisible
-                    </Item>
+                        <TimeContextMenu app={app} status="invisible" />
+                    </ContextSubmenu>
                 </ContextSubmenu>
             )}
         </ContextMenu>

@@ -68,7 +68,7 @@ export const MemberListItem = observer(({ member, isOwner }: Props) => {
                 cursor: "pointer",
             }}
         >
-            <UserAvatar size={32} user={member.user} badge />
+            <UserAvatar user={member.user} badge />
             <Stack direction="column" spacing={0}>
                 <Typography
                     flex={1}
