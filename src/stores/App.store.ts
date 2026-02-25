@@ -1,10 +1,5 @@
 import { Logger } from "@mutualzz/logger";
-import type {
-    APIPrivateUser,
-    APISpacePartial,
-    APIUserSettings,
-    AppMode,
-} from "@mutualzz/types";
+import { type APIPrivateUser, type APISpacePartial, type APIUserSettings, type AppMode, } from "@mutualzz/types";
 import { QueryClient } from "@tanstack/react-query";
 import { isTauri } from "@utils/index";
 import { safeLocalStorage } from "@utils/safeLocalStorage";
@@ -27,6 +22,7 @@ import { NavigationStore } from "@stores/Navigation.store";
 import { getTauriVersion, getVersion } from "@tauri-apps/api/app";
 import { PresenceStore } from "@stores/Presence.store.ts";
 import { CustomStatusStore } from "@stores/CustomStatus.store.ts";
+import { VoiceStore } from "@stores/Voice.store.ts";
 
 export class AppStore {
     isGatewayReady = false;
@@ -56,6 +52,8 @@ export class AppStore {
 
     customStatus = new CustomStatusStore();
 
+    voice = new VoiceStore(this);
+
     versions: {
         app: string | null;
         tauri: string | null;
@@ -63,12 +61,9 @@ export class AppStore {
         app: "4.0.1",
         tauri: null,
     };
-
     private readonly logger = new Logger({
         tag: "AppStore",
     });
-
-    // Page Navigation for navigation purposes
 
     constructor() {
         if (isTauri) this.updater = new UpdaterStore();
@@ -96,6 +91,14 @@ export class AppStore {
             properties: ["memberListVisible", "dontShowLinkWarning"],
             storage: safeLocalStorage,
         });
+    }
+
+    get targetMode(): AppMode {
+        const preferredMode = this.settings?.preferredMode;
+
+        if (this.mode === "feed") return "spaces";
+        if (this.mode === "spaces") return "feed";
+        return preferredMode ?? "spaces";
     }
 
     get isReady() {
@@ -164,6 +167,9 @@ export class AppStore {
         this.settings = null;
         this.rest.setToken(null);
         this.themes.reset();
+
+        void this.voice.leave();
+        this.voice.reset();
 
         this.customStatus.clear();
 

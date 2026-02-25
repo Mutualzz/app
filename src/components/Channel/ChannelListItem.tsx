@@ -1,23 +1,18 @@
 import { Paper } from "@components/Paper.tsx";
 import { useModal } from "@contexts/Modal.context.tsx";
 import { useAppStore } from "@hooks/useStores.ts";
-import {
-    IconButton,
-    Stack,
-    Typography,
-    useTheme,
-    type PaperProps,
-} from "@mutualzz/ui-web";
+import { Avatar, IconButton, type PaperProps, Stack, Typography, useTheme, } from "@mutualzz/ui-web";
 import type { Channel } from "@stores/objects/Channel.ts";
 import type { Space } from "@stores/objects/Space.ts";
 import { useNavigate } from "@tanstack/react-router";
 import { observer } from "mobx-react-lite";
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { FaChevronDown, FaChevronRight, FaPlus } from "react-icons/fa";
 import { ChannelCreateModal } from "./ChannelCreateModal.tsx";
 import { ChannelIcon } from "./ChannelIcon.tsx";
 import { ChannelType } from "@mutualzz/types";
 import { useMenu } from "@contexts/ContextMenu.context.tsx";
+import { ChannelMemberItem } from "@components/Channel/ChannelMemberItem.tsx";
 
 interface Props extends PaperProps {
     space: Space;
@@ -27,6 +22,7 @@ interface Props extends PaperProps {
     onToggleCollapse?: (channelId: string) => void;
 }
 
+// TODO: Fix users not updating in voice channels when they leave
 export const ChannelListItem = observer(
     ({
         channel,
@@ -43,115 +39,185 @@ export const ChannelListItem = observer(
         const navigate = useNavigate();
         const [wrapperHovered, setWrapperHovered] = useState(false);
 
-        const isCategory = useMemo(
-            () => channel.type === ChannelType.Category,
-            [channel.type],
-        );
+        const isCategory = channel.type === ChannelType.Category;
+        const isText = channel.type === ChannelType.Text;
+        const isVoice = channel.type === ChannelType.Voice;
 
         const canModifyChannel =
             app.account && space.owner && space.owner.id === app.account.id;
 
-        const handleClick = () => {
-            if (isCategory && onToggleCollapse) {
+        const isActiveVoiceChannel =
+            channel.isVoiceChannel && app.voice.currentChannelId === channel.id;
+
+        const canConnect =
+            channel.isVoiceChannel &&
+            space.members.me?.canConnectToVoice(channel);
+
+        const isDisabled = isVoice && !canConnect;
+
+        const handleChannel = () => {
+            if (isDisabled) return;
+
+            if (isCategory) {
+                if (!onToggleCollapse) return;
                 onToggleCollapse(channel.id);
                 return;
             }
 
-            if (!channel.isTextChannel) return;
-            if (active) return;
+            if (isText) {
+                if (active) return;
+                navigate({
+                    to: "/spaces/$spaceId/$channelId",
+                    params: { spaceId: space.id, channelId: channel.id },
+                });
+                return;
+            }
 
-            navigate({
-                to: "/spaces/$spaceId/$channelId",
-                params: { spaceId: space.id, channelId: channel.id },
-            });
+            if (isVoice) {
+                if (isActiveVoiceChannel) return;
+                app.voice.join(space.id, channel.id);
+            }
         };
+
+        const voiceStates = Array.from(channel.voiceStates.values());
 
         return (
             <>
-                <Paper
+                <Stack
                     ml={isCategory ? 1.5 : channel.parent ? 2.5 : 1.5}
                     px={isCategory ? 1 : 1.5}
                     mr={isCategory ? 1 : 2.5}
-                    borderRadius={6}
                     key={channel.id}
-                    css={{
-                        cursor: "pointer",
-                    }}
-                    onClick={handleClick}
-                    variant={active ? "soft" : "plain"}
-                    onMouseEnter={() => setWrapperHovered(true)}
-                    onMouseLeave={() => setWrapperHovered(false)}
-                    alignItems="center"
-                    height="100%"
-                    justifyContent="space-between"
                     onContextMenu={(e) =>
                         openContextMenu(e, { type: "channel", space, channel })
                     }
-                    color={props.color as any}
-                    {...props}
+                    borderLeft={
+                        isActiveVoiceChannel
+                            ? `2px solid ${theme.colors.success}`
+                            : 0
+                    }
+                    borderRadius={6}
+                    direction="column"
+                    onClick={handleChannel}
+                    css={{
+                        cursor: isDisabled ? "not-allowed" : "pointer",
+                        ...(isDisabled && { opacity: 0.5 }),
+                    }}
                 >
-                    <Stack
+                    <Paper
+                        width="100%"
                         direction="row"
+                        height="100%"
                         alignItems="center"
-                        spacing={isCategory ? 1 : 1.5}
+                        borderRadius={6}
+                        justifyContent="space-between"
+                        onMouseEnter={() => setWrapperHovered(true)}
+                        onMouseLeave={() => setWrapperHovered(false)}
+                        variant={
+                            active || isActiveVoiceChannel ? "soft" : "plain"
+                        }
+                        color={props.color as any}
+                        {...props}
                     >
-                        {!isCategory && <ChannelIcon type={channel.type} />}
+                        <Stack
+                            direction="row"
+                            alignItems="center"
+                            spacing={isCategory ? 1 : 1.5}
+                        >
+                            {!isCategory && (
+                                <>
+                                    {channel.icon && channel.iconUrl ? (
+                                        <Avatar
+                                            src={channel.iconUrl}
+                                            size={16}
+                                        />
+                                    ) : (
+                                        <ChannelIcon
+                                            voiceActive={isActiveVoiceChannel}
+                                            type={channel.type}
+                                        />
+                                    )}
+                                </>
+                            )}
 
-                        <Typography
-                            textColor={
-                                isCategory && wrapperHovered
-                                    ? "primary"
-                                    : "secondary"
-                            }
-                            fontSize={isCategory ? 12 : 14}
-                            fontWeight={isCategory ? 400 : 600}
-                            letterSpacing={isCategory ? 0.5 : 0}
-                        >
-                            {channel.name}
-                        </Typography>
-                        {isCategory && (
-                            <>
-                                {isCollapsed ? (
-                                    <FaChevronRight
-                                        size={8}
-                                        color={
-                                            theme.typography.colors.secondary
-                                        }
-                                    />
-                                ) : (
-                                    <FaChevronDown
-                                        size={8}
-                                        color={
-                                            theme.typography.colors.secondary
-                                        }
-                                    />
-                                )}
-                            </>
+                            <Typography
+                                textColor={
+                                    isCategory && wrapperHovered
+                                        ? "primary"
+                                        : "secondary"
+                                }
+                                fontSize={isCategory ? 12 : 14}
+                                fontWeight={isCategory ? 400 : 600}
+                                letterSpacing={isCategory ? 0.5 : 0}
+                            >
+                                {channel.name}
+                            </Typography>
+                            {isCategory && (
+                                <>
+                                    {isCollapsed ? (
+                                        <FaChevronRight
+                                            size={8}
+                                            color={
+                                                theme.typography.colors
+                                                    .secondary
+                                            }
+                                        />
+                                    ) : (
+                                        <FaChevronDown
+                                            size={8}
+                                            color={
+                                                theme.typography.colors
+                                                    .secondary
+                                            }
+                                        />
+                                    )}
+                                </>
+                            )}
+                        </Stack>
+                        {isCategory && canModifyChannel && (
+                            <IconButton
+                                size="sm"
+                                variant="plain"
+                                color="neutral"
+                                css={{
+                                    borderRadius: 9999,
+                                }}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    openModal(
+                                        "create-channel",
+                                        <ChannelCreateModal
+                                            space={space}
+                                            parent={channel}
+                                        />,
+                                    );
+                                }}
+                            >
+                                <FaPlus size={12} />
+                            </IconButton>
                         )}
-                    </Stack>
-                    {isCategory && canModifyChannel && (
-                        <IconButton
-                            size="sm"
-                            variant="plain"
-                            color="neutral"
+                    </Paper>
+                    {channel.isVoiceChannel && voiceStates.length > 0 && (
+                        <Stack
+                            mt={1.25}
+                            spacing={0.125}
+                            pl={2}
+                            direction="column"
                             css={{
-                                borderRadius: 9999,
-                            }}
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                openModal(
-                                    "create-channel",
-                                    <ChannelCreateModal
-                                        space={space}
-                                        parent={channel}
-                                    />,
-                                );
+                                maxHeight: 100,
+                                overflowY: "auto",
                             }}
                         >
-                            <FaPlus size={12} />
-                        </IconButton>
+                            {voiceStates.map((state) => (
+                                <ChannelMemberItem
+                                    key={state.userId}
+                                    space={space}
+                                    state={state}
+                                />
+                            ))}
+                        </Stack>
                     )}
-                </Paper>
+                </Stack>
             </>
         );
     },

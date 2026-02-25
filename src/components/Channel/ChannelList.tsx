@@ -13,13 +13,28 @@ import {
     useSensor,
     useSensors,
 } from "@dnd-kit/core";
-import { restrictToParentElement, restrictToVerticalAxis, restrictToWindowEdges, } from "@dnd-kit/modifiers";
-import { arrayMove, SortableContext, useSortable, verticalListSortingStrategy, } from "@dnd-kit/sortable";
+import {
+    restrictToParentElement,
+    restrictToVerticalAxis,
+    restrictToWindowEdges,
+} from "@dnd-kit/modifiers";
+import {
+    arrayMove,
+    SortableContext,
+    useSortable,
+    verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { useAppStore } from "@hooks/useStores.ts";
 import { contextMenu } from "@mutualzz/contexify";
 import { ChannelType } from "@mutualzz/types";
-import { ButtonGroup, Portal, Stack, Tooltip, Typography, } from "@mutualzz/ui-web";
+import {
+    ButtonGroup,
+    Portal,
+    Stack,
+    Tooltip,
+    Typography,
+} from "@mutualzz/ui-web";
 import type { Channel } from "@stores/objects/Channel.ts";
 import type { Space } from "@stores/objects/Space.ts";
 import { runInAction } from "mobx";
@@ -102,7 +117,11 @@ function sortByPosition(a: Channel, b: Channel) {
 
 function Container({ id, children }: { id: string; children: ReactNode }) {
     const { setNodeRef } = useDroppable({ id });
-    return <div ref={setNodeRef}>{children}</div>;
+    return (
+        <Stack spacing={2.5} direction="column" ref={setNodeRef}>
+            {children}
+        </Stack>
+    );
 }
 
 interface DragData {

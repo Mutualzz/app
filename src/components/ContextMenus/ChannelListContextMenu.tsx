@@ -2,7 +2,6 @@ import { ContextMenu } from "@components/ContextMenu.tsx";
 import { SpaceInviteToSpaceModal } from "@components/Space/SpaceInviteToSpaceModal.tsx";
 import { useModal } from "@contexts/Modal.context.tsx";
 import { useAppStore } from "@hooks/useStores.ts";
-import { Item } from "@mutualzz/contexify";
 import { Box } from "@mutualzz/ui-web";
 import type { Space } from "@stores/objects/Space.ts";
 import { observer } from "mobx-react-lite";
@@ -11,6 +10,7 @@ import { CategoryCreateModal } from "../Channel/Category/CategoryCreateModal.tsx
 import { ChannelCreateModal } from "../Channel/ChannelCreateModal.tsx";
 import { generateMenuIDs } from "@contexts/ContextMenu.context.tsx";
 import { useMemo } from "react";
+import { ContextItem } from "@components/ContextItem.tsx";
 
 interface Props {
     space: Space;
@@ -39,7 +39,7 @@ export const ChannelListContextMenu = observer(({ space }: Props) => {
         >
             {canManageChannels && (
                 <Box>
-                    <Item
+                    <ContextItem
                         onClick={() =>
                             openModal(
                                 "create-channel",
@@ -49,8 +49,8 @@ export const ChannelListContextMenu = observer(({ space }: Props) => {
                         endDecorator={<FaHashtag />}
                     >
                         Create Channel
-                    </Item>
-                    <Item
+                    </ContextItem>
+                    <ContextItem
                         onClick={() =>
                             openModal(
                                 "create-category",
@@ -60,11 +60,11 @@ export const ChannelListContextMenu = observer(({ space }: Props) => {
                         endDecorator={<FaClipboard />}
                     >
                         Create Category
-                    </Item>
+                    </ContextItem>
                 </Box>
             )}
             {canInvite && (
-                <Item
+                <ContextItem
                     onClick={() =>
                         openModal(
                             `invite-to-space-${space.id}`,
@@ -74,7 +74,7 @@ export const ChannelListContextMenu = observer(({ space }: Props) => {
                     endDecorator={<FaPaperPlane />}
                 >
                     Invite to Space
-                </Item>
+                </ContextItem>
             )}
         </ContextMenu>
     );

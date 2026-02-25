@@ -27,9 +27,11 @@ const clientMeta = {
 };
 
 const DEFAULT_HEADERS = {
-    "User-Agent": "Mutualzz-Client/1.0",
     accept: "application/json",
-    ...clientMeta,
+
+    "X-Mutualzz-Client": clientMeta.client,
+    "X-Mutualzz-Client-OS": clientMeta.os,
+    "X-Mutualzz-Client-Type": clientMeta.type,
 };
 
 export class REST extends EventEmitter {
@@ -41,14 +43,6 @@ export class REST extends EventEmitter {
     constructor() {
         super();
         this.headers = DEFAULT_HEADERS;
-    }
-
-    public setToken(token: string | null) {
-        if (token) {
-            this.headers.Authorization = `Bearer ${token}`;
-        } else {
-            delete this.headers.Authorization;
-        }
     }
 
     public static makeAPIUrl(
@@ -77,6 +71,14 @@ export class REST extends EventEmitter {
             url.searchParams.append(key, value);
         });
         return url.toString();
+    }
+
+    public setToken(token: string | null) {
+        if (token) {
+            this.headers.Authorization = `Bearer ${token}`;
+        } else {
+            delete this.headers.Authorization;
+        }
     }
 
     public async get<Data>(

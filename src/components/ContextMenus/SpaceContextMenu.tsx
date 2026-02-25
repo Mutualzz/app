@@ -3,7 +3,6 @@ import { ContextSubmenu } from "@components/ContextSubmenu.tsx";
 import { SpaceSettingsModal } from "@components/SpaceSettings/SpaceSettingsModal.tsx";
 import { useModal } from "@contexts/Modal.context.tsx";
 import { useAppStore } from "@hooks/useStores.ts";
-import { Item } from "@mutualzz/contexify";
 import { Box } from "@mutualzz/ui-web";
 import type { Space } from "@stores/objects/Space.ts";
 import { observer } from "mobx-react-lite";
@@ -13,6 +12,7 @@ import { settingsPages } from "@components/SpaceSettings/SpaceSettingsSidebar.ts
 import startCase from "lodash-es/startCase";
 import { generateMenuIDs } from "@contexts/ContextMenu.context.tsx";
 import { SpaceActionConfirm } from "@components/Modals/SpaceActionConfirm.tsx";
+import { ContextItem } from "@components/ContextItem.tsx";
 
 interface Props {
     space: Space;
@@ -83,7 +83,7 @@ export const SpaceContextMenu = observer(
                                         transparency={0}
                                     >
                                         {pages.map((page) => (
-                                            <Item
+                                            <ContextItem
                                                 id={`space-settings-${page.label}-${space.id}`}
                                                 key={`context-menu-settings-page-${page.label}`}
                                                 onClick={() =>
@@ -100,7 +100,7 @@ export const SpaceContextMenu = observer(
                                                 endDecorator={page.icon}
                                             >
                                                 {startCase(page.label)}
-                                            </Item>
+                                            </ContextItem>
                                         ))}
                                     </ContextSubmenu>
                                 </Box>
@@ -109,7 +109,7 @@ export const SpaceContextMenu = observer(
                     </Box>
                 )}
                 {!isOwner && (
-                    <Item
+                    <ContextItem
                         color="danger"
                         endDecorator={<FaDoorOpen />}
                         onClick={() =>
@@ -122,9 +122,10 @@ export const SpaceContextMenu = observer(
                             )
                         }
                         id={`space-leave-${space.id}`}
+                        textColor={undefined}
                     >
                         Leave Server
-                    </Item>
+                    </ContextItem>
                 )}
             </ContextMenu>
         );

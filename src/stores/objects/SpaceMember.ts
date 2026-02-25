@@ -1,4 +1,4 @@
-import { type APISpaceMember, type Snowflake } from "@mutualzz/types";
+import { type APISpaceMember, type Snowflake, type VoiceState, } from "@mutualzz/types";
 import type { AppStore } from "@stores/App.store";
 import { makeAutoObservable, observable, ObservableMap } from "mobx";
 import type { Space } from "./Space";
@@ -35,7 +35,7 @@ export class SpaceMember {
 
     joinedAt: Date;
     updatedAt: Date;
-
+    voiceState?: VoiceState | null;
     private channelPermCache: ObservableMap<string, bigint> = observable.map();
 
     constructor(
@@ -140,6 +140,14 @@ export class SpaceMember {
         return Array.from(this.roles)
             .map((id) => space.roles.get(id))
             .filter(Boolean) as Role[];
+    }
+
+    setVoiceState(voiceState: VoiceState | null) {
+        this.voiceState = voiceState;
+    }
+
+    getVoiceState() {
+        return this.voiceState;
     }
 
     update(member: APISpaceMember) {
@@ -273,6 +281,11 @@ export class SpaceMember {
         return (
             permissions.has("ViewChannel") && permissions.has("SendMessages")
         );
+    }
+
+    canConnectToVoice(channel: Channel) {
+        const permissions = this.resolveChannelPermissions(channel);
+        return this.canViewChannel(channel) && permissions.has("Connect");
     }
 
     compareRoleHierarchy(other: SpaceMember): number {

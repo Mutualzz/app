@@ -26,6 +26,7 @@ import { isTauri } from "@utils/index";
 import { makeAutoObservable } from "mobx";
 import type { AppStore } from "./App.store";
 import { buildDesktopPresenceFromProcesses, type PresenceUpdateDraft, } from "../presence/gamePresence.ts";
+import { normalizeJSON } from "@utils/JSON.ts";
 
 // We have to create our own GatewayStatus "enum" to avoid issues with SSR
 // since WebSocket is not available in the server environment.
@@ -61,43 +62,36 @@ function stableStringify(value: unknown) {
     }
 }
 
+// NOTE: Some normalizations are very cheap way of dealing with it since ETF is being an asshole
+// And eventually I will fix the ETF issues on Tauri and etc
 export class GatewayStore {
-    socket: WebSocket | null = null;
     public readyState: GatewayStatus = GatewayStatus.CLOSED;
     public events: { t: string; d: any; s: number }[] = [];
-
+    private socket: WebSocket | null = null;
     private readonly logger = new Logger({ tag: "GatewayStore" });
-
     private sessionId: string | null = null;
     private sequence = 0;
-
     private heartbeatInterval: number | null = null;
     private heartbeat: NodeJS.Timeout | null = null;
     private initialHeartbeatTimeout: NodeJS.Timeout | null = null;
     private heartbeatAck = true;
-
     private url?: string;
     private encoding: Encoding = isTauri ? "etf" : "json";
     private compress: Compression =
         import.meta.env.DEV && !isTauri ? "none" : "zlib-stream";
     private codec!: Codec;
     private compressor!: Compressor;
-
     private connectionStartTime?: number;
     private identifyStartTime?: number;
-
     private reconnectTimeout = 0;
     private reconnecting = false;
-
     private readonly dispatchHandlers = new Map<
         string,
         (...args: any[]) => any
     >();
-
     private presenceLoopInterval: number | null = null;
     private lastPresenceHash: string | null = null;
-
-    private lazyRequestChannels = new Map<string, string[]>(); // spaceId -> channelIds
+    private lazyRequestChannels = new Map<string, string[]>(); // spaceId -> channelIdsq
 
     constructor(private readonly app: AppStore) {
         makeAutoObservable(this);
@@ -128,6 +122,7 @@ export class GatewayStore {
     async disconnect(code?: number, reason?: string) {
         if (!this.socket) return;
 
+        this.app.voice.reset();
         this.readyState = GatewayStatus.CLOSING;
         this.logger.debug(`[Disconnect] ${this.url}`);
         this.socket.close(code, reason);
@@ -163,20 +158,17 @@ export class GatewayStore {
         });
     };
 
-    sendPresenceUpdate(presence: PresenceUpdateDraft) {
+    sendPresenceUpdate(
+        presence: PresenceUpdateDraft,
+        opts?: { persist?: boolean },
+    ) {
         this.send({
             op: GatewayOpcodes.PresenceUpdate,
-            d: { presence },
+            d: { presence, persist: !!opts?.persist },
         });
     }
 
-    /**
-     * Manual status set cancels any scheduled status (Discord-like).
-     * If you don't want that, remove the clearScheduledStatus() call.
-     */
-    setStatus(status: PresenceStatus) {
-        this.clearScheduledStatus();
-
+    setStatus(status: PresenceStatus, opts?: { persist?: boolean }) {
         const userId = this.app.account?.id;
         if (!userId) return;
 
@@ -189,11 +181,14 @@ export class GatewayStore {
             updatedAt: Date.now(),
         });
 
-        this.sendPresenceUpdate({
-            status,
-            device: isTauri ? "desktop" : "web",
-            activities: prev?.activities ?? [],
-        });
+        this.sendPresenceUpdate(
+            {
+                status,
+                device: isTauri ? "desktop" : "web",
+                activities: prev?.activities ?? [],
+            },
+            { persist: Boolean(opts?.persist) },
+        );
     }
 
     setCustomStatus(text: string) {
@@ -227,6 +222,46 @@ export class GatewayStore {
             d: {},
         });
     }
+
+    send = async (payload: any) => {
+        if (!this.socket) {
+            this.logger.error("Socket is not open");
+            return;
+        }
+        if (this.socket.readyState !== WebSocket.OPEN) {
+            this.logger.error(
+                `Socket is not open; readyState: ${this.socket.readyState}`,
+            );
+            return;
+        }
+
+        try {
+            const rawBytes: Uint8Array =
+                this.encoding === "etf"
+                    ? Uint8Array.from(
+                          await invoke("gateway_encode", {
+                              payload,
+                              encoding: this.encoding,
+                          }),
+                      )
+                    : this.codec.encode(payload);
+
+            const outBytes =
+                this.compress !== "none"
+                    ? this.compressor.compress(rawBytes)
+                    : rawBytes;
+
+            if (this.compress !== "none") {
+                this.socket.send(outBytes);
+            } else {
+                this.socket.send(new TextDecoder().decode(rawBytes));
+            }
+
+            this.logger.debug(`[Gateway] <- ${payload.op}`);
+        } catch (error) {
+            this.logger.error("Failed to send message", error);
+        }
+    };
 
     private getEffectiveStatus(): PresenceStatus {
         const userId = this.app.account?.id;
@@ -371,6 +406,20 @@ export class GatewayStore {
             GatewayDispatchEvents.SpaceMemberRoleRemove,
             this.onMemberRoleRemove,
         );
+
+        // Voice
+        this.dispatchHandlers.set(
+            GatewayDispatchEvents.VoiceServerUpdate,
+            this.app.voice.onVoiceServerUpdate,
+        );
+        this.dispatchHandlers.set(
+            GatewayDispatchEvents.VoiceStateSync,
+            this.app.voice.onVoiceStateSync,
+        );
+        this.dispatchHandlers.set(
+            GatewayDispatchEvents.VoiceStateUpdate,
+            this.app.voice.onVoiceStateUpdate,
+        );
     }
 
     private onOpen = () => {
@@ -461,46 +510,6 @@ export class GatewayStore {
         this.readyState = GatewayStatus.CLOSED;
         this.stopPresenceLoop();
         this.handleClose(event.code);
-    };
-
-    private send = async (payload: any) => {
-        if (!this.socket) {
-            this.logger.error("Socket is not open");
-            return;
-        }
-        if (this.socket.readyState !== WebSocket.OPEN) {
-            this.logger.error(
-                `Socket is not open; readyState: ${this.socket.readyState}`,
-            );
-            return;
-        }
-
-        try {
-            const rawBytes: Uint8Array =
-                this.encoding === "etf"
-                    ? Uint8Array.from(
-                          await invoke("gateway_encode", {
-                              payload,
-                              encoding: this.encoding,
-                          }),
-                      )
-                    : this.codec.encode(payload);
-
-            const outBytes =
-                this.compress !== "none"
-                    ? this.compressor.compress(rawBytes)
-                    : rawBytes;
-
-            if (this.compress !== "none") {
-                this.socket.send(outBytes);
-            } else {
-                this.socket.send(new TextDecoder().decode(rawBytes));
-            }
-
-            this.logger.debug(`[Gateway] <- ${payload.op}`);
-        } catch (error) {
-            this.logger.error("Failed to send message", error);
-        }
     };
 
     private handleIdentify() {
@@ -676,7 +685,10 @@ export class GatewayStore {
             return;
         }
 
-        handler(d);
+        // To avoid issues with ETF mutability and etc, we do a cheap clone of the data for now
+        const parsedData = normalizeJSON(d);
+
+        handler(parsedData);
     };
 
     private onResume = () => {
@@ -923,9 +935,8 @@ export class GatewayStore {
     private onUserUpdate = (payload: APIUser | APIPrivateUser) => {
         this.app.users.update(payload as APIUser);
 
-        if (payload.id === this.app.account?.id) {
+        if (payload.id === this.app.account?.id)
             this.app.setUser(payload as APIPrivateUser);
-        }
     };
 
     private onUserSettingsUpdate = (payload: APIUserSettings) => {

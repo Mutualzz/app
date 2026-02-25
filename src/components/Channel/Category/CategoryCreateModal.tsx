@@ -28,7 +28,13 @@ export const CategoryCreateModal = observer(({ space }: Props) => {
 
     const { mutate: createCategory, isPending: isCreating } = useMutation({
         mutationKey: ["create-category", space.id, name],
-        mutationFn: async () => space.createChannel(name, ChannelType.Category),
+        mutationFn: async () => {
+            const formData = new FormData();
+            formData.append("name", name);
+            formData.append("type", ChannelType.Category.toString());
+
+            return app.rest.postFormData("channels", formData);
+        },
         onSuccess: () => {
             closeModal();
         },

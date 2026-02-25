@@ -190,6 +190,27 @@ export const SpaceRoleEditPermissions = ({ changes, setChanges }: Props) => {
             <Stack direction="column" spacing={2.5}>
                 <Stack alignItems="center">
                     <Typography level="body-lg">
+                        Voice Channel Permissions
+                    </Typography>
+                </Stack>
+                <PermissionItem
+                    flag="Connect"
+                    label="Connect"
+                    description="Allow members to connect to voice channels"
+                    hasPermission={permissions.has("Connect")}
+                    togglePermission={togglePermission}
+                />
+                <PermissionItem
+                    flag="Speak"
+                    label="Speak"
+                    description="Allow members to speak in voice channels"
+                    hasPermission={permissions.has("Speak")}
+                    togglePermission={togglePermission}
+                />
+            </Stack>
+            <Stack direction="column" spacing={2.5}>
+                <Stack alignItems="center">
+                    <Typography level="body-lg">
                         Advanced Permissions
                     </Typography>
                 </Stack>

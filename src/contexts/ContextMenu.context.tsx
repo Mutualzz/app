@@ -22,10 +22,23 @@ export type ContextMenuPayload =
     | { type: "space"; space: Space; fromSidebar?: boolean; [key: string]: any }
     | { type: "channelList"; space: Space; [key: string]: any }
     | { type: "channel"; space: Space; channel: Channel; [key: string]: any }
-    | { type: "member"; space: Space; member: SpaceMember; [key: string]: any }
+    | {
+          type: "member";
+          space: Space;
+          member: SpaceMember;
+
+          submenuArrowDirection?: "left" | "right";
+
+          [key: string]: any;
+      }
     | { type: "user"; user: User; [key: string]: any }
     | { type: "account"; account: AccountStore; [key: string]: any }
-    | { type: "role"; space: Space; role: Role; [key: string]: any };
+    | {
+          type: "role";
+          space: Space;
+          role: Role;
+          [key: string]: any;
+      };
 
 export type MenuPosition = { x: number; y: number };
 type AnyMouseEvent = MouseEvent | { nativeEvent: MouseEvent };
@@ -92,7 +105,8 @@ export const ContextMenuProvider = observer(
             position?: MenuPosition | null;
         } | null>(null);
 
-        const setMenu = (m: ContextMenuPayload | null) => setMenuState(m);
+        const setMenu = (nextMenu: ContextMenuPayload | null) =>
+            setMenuState(nextMenu);
 
         const clearMenu = () => setMenuState(null);
 
@@ -104,11 +118,11 @@ export const ContextMenuProvider = observer(
             if ("stopPropagation" in e) e.stopPropagation();
             if ("preventDefault" in e) e.preventDefault();
 
-            const ev = "nativeEvent" in e ? e.nativeEvent : e;
-            ev.preventDefault?.();
-            ev.stopPropagation?.();
+            const mouseEvent = "nativeEvent" in e ? e.nativeEvent : e;
+            mouseEvent.preventDefault?.();
+            mouseEvent.stopPropagation?.();
 
-            pendingShowRef.current = { event: ev, position };
+            pendingShowRef.current = { event: mouseEvent, position };
             setMenu(nextMenu);
         };
 
@@ -118,7 +132,7 @@ export const ContextMenuProvider = observer(
 
             const id = getMenuId(menu);
 
-            const raf = requestAnimationFrame(() => {
+            const rafHandle = requestAnimationFrame(() => {
                 contextMenu.show({
                     event: pending.event,
                     id,
@@ -127,17 +141,24 @@ export const ContextMenuProvider = observer(
             });
 
             pendingShowRef.current = null;
-            return () => cancelAnimationFrame(raf);
+            return () => cancelAnimationFrame(rafHandle);
         }, [menu]);
 
         useEffect(() => {
-            const onVisible = (e: Event) => {
-                const ev = e as CustomEvent<{ id: string; visible: boolean }>;
-                if (!ev.detail) return;
+            const onVisible = (event: Event) => {
+                const customEvent = event as CustomEvent<{
+                    id: string;
+                    visible: boolean;
+                }>;
+
+                if (!customEvent.detail) return;
                 if (!menu) return;
 
                 const currentId = getMenuId(menu);
-                if (ev.detail.id === currentId && !ev.detail.visible) {
+                if (
+                    customEvent.detail.id === currentId &&
+                    !customEvent.detail.visible
+                ) {
                     clearMenu();
                 }
             };

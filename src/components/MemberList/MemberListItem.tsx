@@ -40,9 +40,11 @@ export const MemberListItem = observer(({ member, isOwner }: Props) => {
     const { openContextMenu } = useMenu();
 
     const nameColor: ColorLike =
-        (member.highestRole?.color as ColorLike) ?? "#99aab5";
+        (member.highestRole?.color as ColorLike) ??
+        (hovered ? theme.typography.colors.primary : "#99aab5");
 
-    const presence = formatPresence(app.presence.get(member.userId));
+    const presence = app.presence.get(member.userId);
+    const presenceActivity = formatPresence(app.presence.get(member.userId));
 
     return (
         <Paper
@@ -66,6 +68,11 @@ export const MemberListItem = observer(({ member, isOwner }: Props) => {
             }
             css={{
                 cursor: "pointer",
+                ...(presence &&
+                    presence.status == "offline" &&
+                    !hovered && {
+                        opacity: 0.5,
+                    }),
             }}
         >
             <UserAvatar user={member.user} badge />
@@ -97,7 +104,7 @@ export const MemberListItem = observer(({ member, isOwner }: Props) => {
                         </Tooltip>
                     )}
                 </Typography>
-                {presence && (
+                {presenceActivity && (
                     <Typography
                         level="body-xs"
                         whiteSpace="nowrap"
@@ -106,7 +113,7 @@ export const MemberListItem = observer(({ member, isOwner }: Props) => {
                         textColor="secondary"
                         css={{ opacity: 0.85 }}
                     >
-                        {presence}
+                        {presenceActivity}
                     </Typography>
                 )}
             </Stack>

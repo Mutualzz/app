@@ -10,6 +10,12 @@ use tauri_plugin_autostart::MacosLauncher;
 use tauri_plugin_deep_link::DeepLinkExt;
 use tauri_plugin_log::{Target, TargetKind, WEBVIEW_TARGET};
 use tauri_plugin_notification;
+use tauri_plugin_opener;
+use tauri_plugin_os;
+use tauri_plugin_prevent_default;
+use tauri_plugin_single_instance;
+use tauri_plugin_updater;
+use tauri_plugin_clipboard_manager;
 use crate::presence::list_processes;
 
 #[tauri::command]
@@ -50,6 +56,7 @@ pub fn run() {
         .plugin(tauri_plugin_clipboard_manager::init())
         .plugin(tauri_plugin_os::init())
         .plugin(tauri_plugin_deep_link::init())
+        .plugin(tauri_plugin_prevent_default::debug())
         .plugin(
             tauri_plugin_log::Builder::default()
                 .clear_targets()

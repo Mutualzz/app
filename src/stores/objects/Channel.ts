@@ -1,19 +1,25 @@
 import { Logger } from "@mutualzz/logger";
-import type { Snowflake } from "@mutualzz/types";
-import { type APIChannel, type APIMessage, ChannelType } from "@mutualzz/types";
+import {
+    type APIChannel,
+    type APIMessage,
+    CDNRoutes,
+    type ChannelIconFormat,
+    ChannelType,
+    ImageFormat,
+    type Sizes,
+    type Snowflake,
+    type VoiceState,
+} from "@mutualzz/types";
 import type { AppStore } from "@stores/App.store";
 import { MessageStore } from "@stores/Message.store";
 import { Message } from "@stores/objects/Message";
 import type { Space } from "@stores/objects/Space";
-import { makeAutoObservable } from "mobx";
+import { makeAutoObservable, observable } from "mobx";
 import type { QueuedMessage } from "./QueuedMessage";
 import { ChannelPermissionOverwrite } from "./ChannelOverwrite";
-import {
-    BitField,
-    channelFlags,
-    type ChannelFlags,
-} from "@mutualzz/permissions";
+import { BitField, channelFlags, type ChannelFlags, } from "@mutualzz/permissions";
 import { murmur } from "@utils/index.ts";
+import { REST } from "@stores/REST.store.ts";
 
 function getOverwriteKey(ow: ChannelPermissionOverwrite): string {
     if (ow.roleId != null) return `r:${ow.roleId}`;
@@ -41,6 +47,8 @@ export class Channel {
     lastMessageId?: Snowflake | null;
     lastMessage?: Message | null;
     overwrites: ChannelPermissionOverwrite[] = [];
+    icon?: string | null;
+    voiceStates = observable.map<Snowflake, VoiceState>();
     private readonly logger = new Logger({
         tag: "Channel",
     });
@@ -73,6 +81,8 @@ export class Channel {
             channelFlags,
             channel.flags.toString(),
         );
+
+        this.icon = channel.icon;
 
         this.createdAt = new Date(channel.createdAt);
         this.updatedAt = new Date(channel.updatedAt);
@@ -124,6 +134,15 @@ export class Channel {
         return murmur(sorted.join(","));
     }
 
+    get iconUrl() {
+        if (!this.icon) return null;
+        return Channel.constructIconUrl(
+            this.id,
+            this.icon.startsWith("a_"),
+            this.icon,
+        );
+    }
+
     get hasChildren(): boolean {
         return this.app.channels.all.some((ch) => ch.parent?.id === this.id);
     }
@@ -148,6 +167,27 @@ export class Channel {
 
     get isCategory() {
         return this.type === ChannelType.Category;
+    }
+
+    static constructIconUrl(
+        channelId: Snowflake,
+        animated = false,
+        hash?: string | null,
+        size: Sizes = 128,
+        format: ChannelIconFormat = ImageFormat.WebP,
+    ) {
+        if (!hash) return null;
+        return REST.makeCDNUrl(
+            CDNRoutes.channelIcon(channelId, hash, format, size, animated),
+        );
+    }
+
+    addVoiceState(state: VoiceState) {
+        this.voiceStates.set(state.userId, state);
+    }
+
+    removeVoiceState(userId: Snowflake) {
+        this.voiceStates.delete(userId);
     }
 
     update(channel: APIChannel) {

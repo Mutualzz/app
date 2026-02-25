@@ -10,10 +10,10 @@ import { Box, Checkbox, Stack, Typography } from "@mutualzz/ui-web";
 import { FaArrowLeft } from "react-icons/fa";
 import { styled } from "@mutualzz/ui-core";
 import { useMutation } from "@tanstack/react-query";
-import { Item } from "@mutualzz/contexify";
 import { Button } from "@components/Button.tsx";
 import { useModal } from "@contexts/Modal.context.tsx";
 import { SpaceSettingsModal } from "@components/SpaceSettings/SpaceSettingsModal.tsx";
+import { ContextItem } from "@components/ContextItem.tsx";
 
 interface Props {
     space: Space;
@@ -38,7 +38,7 @@ interface RoleItemProps {
 const RoleItem = observer(
     ({ role, hasRole, canManage, toggleRole, toggling }: RoleItemProps) => {
         return (
-            <Item
+            <ContextItem
                 variant="plain"
                 disabled={toggling}
                 onClick={() => {
@@ -69,7 +69,7 @@ const RoleItem = observer(
                         </span>
                     ) : undefined}
                 </Stack>
-            </Item>
+            </ContextItem>
         );
     },
 );
@@ -80,7 +80,12 @@ export const SpaceMemberContextMenu = observer(({ space, member }: Props) => {
     const { openModal } = useModal();
     const { clearMenu } = useMenu();
 
-    const canManage = me?.canManageMember(member) ?? false;
+    const canManageRoles = me?.canManageMember(member) ?? false;
+
+    const canMuteMembers = me?.hasPermission("MuteMembers");
+    const canDeafenMembers = me?.hasPermission("DeafenMembers");
+
+    const voiceState = member.getVoiceState();
 
     const { mutate: createRole, isPending: creatingRole } = useMutation({
         mutationKey: ["create-role", space.id],
@@ -97,10 +102,25 @@ export const SpaceMemberContextMenu = observer(({ space, member }: Props) => {
         },
     });
 
+    const { mutate: moderateMember, isPending: moderating } = useMutation({
+        mutationKey: ["moderate-member", member.id],
+        mutationFn: async (action: "mute" | "deafen") => {
+            const body: Record<string, boolean> = {};
+
+            if (action === "mute") body.spaceMute = !voiceState?.spaceMute;
+            else body.spaceDeaf = !voiceState?.spaceDeaf;
+
+            return app.rest.patch(
+                `/spaces/${space.id}/members/${member.id}/voice`,
+                body,
+            );
+        },
+    });
+
     const { mutate: toggleRole, isPending: togglingRole } = useMutation({
         mutationKey: ["toggle-member-role", member.id],
         mutationFn: async (role: Role) => {
-            if (!canManage)
+            if (!canManageRoles)
                 throw new Error(
                     "You don't have permission to manage this member",
                 );
@@ -111,7 +131,7 @@ export const SpaceMemberContextMenu = observer(({ space, member }: Props) => {
         },
     });
 
-    const manageableRoles = canManage ? space.roles.assignable : [];
+    const manageableRoles = canManageRoles ? space.roles.assignable : [];
 
     const assignedRoles = space.roles.assignable.filter(
         (r) =>
@@ -131,18 +151,17 @@ export const SpaceMemberContextMenu = observer(({ space, member }: Props) => {
                     elevation={app.settings?.preferEmbossed ? 5 : 1}
                     transparency={0}
                     arrow={<FaArrowLeft />}
-                    inverted
                     label="Roles"
                     style={{
                         height:
-                            assignedRoles.length === 0 && !canManage
+                            assignedRoles.length === 0 && !canManageRoles
                                 ? "2.5rem"
                                 : "15rem",
                         maxHeight: "15rem",
                         overflowY: "auto",
                     }}
                 >
-                    {canManage ? (
+                    {canManageRoles ? (
                         manageableRoles.length === 0 ? (
                             <Stack
                                 direction="column"
@@ -168,7 +187,7 @@ export const SpaceMemberContextMenu = observer(({ space, member }: Props) => {
                                 <RoleItem
                                     key={role.id}
                                     role={role}
-                                    canManage={canManage}
+                                    canManage={canManageRoles}
                                     hasRole={member.roles.has(role.id)}
                                     toggleRole={toggleRole}
                                     toggling={togglingRole}
@@ -193,7 +212,7 @@ export const SpaceMemberContextMenu = observer(({ space, member }: Props) => {
                                 <RoleItem
                                     key={role.id}
                                     role={role}
-                                    canManage={canManage}
+                                    canManage={canManageRoles}
                                     toggleRole={toggleRole}
                                     hasRole={member.roles.has(role.id)}
                                     toggling={togglingRole}
@@ -202,6 +221,86 @@ export const SpaceMemberContextMenu = observer(({ space, member }: Props) => {
                     )}
                 </ContextSubmenu>
             </Box>
+            {voiceState && (
+                <>
+                    {canMuteMembers && (
+                        <ContextItem
+                            variant="plain"
+                            disabled={moderating}
+                            onClick={() => {
+                                moderateMember("mute");
+                            }}
+                            closeOnClick={false}
+                            style={{
+                                flex: 0,
+                            }}
+                            size="sm"
+                            color="danger"
+                        >
+                            <Stack
+                                justifyContent="space-between"
+                                flex={1}
+                                alignItems="center"
+                            >
+                                <Stack alignItems="center" spacing={1.25}>
+                                    <Typography
+                                        color="danger"
+                                        variant="plain"
+                                        level="body-sm"
+                                    >
+                                        Space Mute
+                                    </Typography>
+                                </Stack>
+                                <span data-menu-interactive>
+                                    <Checkbox
+                                        disabled={moderating}
+                                        color="neutral"
+                                        checked={voiceState.spaceMute}
+                                    />
+                                </span>
+                            </Stack>
+                        </ContextItem>
+                    )}
+                    {canDeafenMembers && (
+                        <ContextItem
+                            variant="plain"
+                            disabled={moderating}
+                            onClick={() => {
+                                moderateMember("deafen");
+                            }}
+                            closeOnClick={false}
+                            style={{
+                                flex: 0,
+                            }}
+                            size="sm"
+                            color="danger"
+                        >
+                            <Stack
+                                justifyContent="space-between"
+                                flex={1}
+                                alignItems="center"
+                            >
+                                <Stack alignItems="center" spacing={1.25}>
+                                    <Typography
+                                        color="danger"
+                                        variant="plain"
+                                        level="body-sm"
+                                    >
+                                        Space Deafen
+                                    </Typography>
+                                </Stack>
+                                <span data-menu-interactive>
+                                    <Checkbox
+                                        disabled={moderating}
+                                        color="neutral"
+                                        checked={voiceState.spaceDeaf}
+                                    />
+                                </span>
+                            </Stack>
+                        </ContextItem>
+                    )}
+                </>
+            )}
         </ContextMenu>
     );
 });

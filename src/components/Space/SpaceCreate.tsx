@@ -17,7 +17,7 @@ import {
 import { useMutation } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { observer } from "mobx-react-lite";
-import { useCallback, useState, type ChangeEvent } from "react";
+import { type ChangeEvent, useCallback, useState } from "react";
 import Cropper, { type Area, type Point } from "react-easy-crop";
 import { FaCamera } from "react-icons/fa";
 import { FaMagnifyingGlass, FaRotate } from "react-icons/fa6";
@@ -38,7 +38,10 @@ export const SpaceCreate = observer(({ setCreating }: Props) => {
 
     const { closeModal } = useModal();
 
-    const [name, setName] = useState("");
+    const userDisplay = app.account?.displayName;
+    const [name, setName] = useState(
+        userDisplay ? `${userDisplay}'s space` : "",
+    );
 
     const [imageFile, setImageFile] = useState<string | null>(null);
     const [originalFile, setOriginalFile] = useState<File | null>(null);
@@ -266,6 +269,8 @@ export const SpaceCreate = observer(({ setCreating }: Props) => {
                     type="text"
                     fullWidth
                     value={name}
+                    autoComplete="off"
+                    autoFocus
                     onChange={handleName}
                 />
                 {error && (
@@ -282,6 +287,11 @@ export const SpaceCreate = observer(({ setCreating }: Props) => {
                 alignItems="flex-end"
             >
                 <ButtonGroup fullWidth spacing={{ xs: 2, sm: 5 }}>
+                    {imageFile && (
+                        <Button disabled={creating} onClick={onClear}>
+                            Clear
+                        </Button>
+                    )}
                     <Button
                         disabled={creating || name.trim() === "" || !!error}
                         onClick={() => handleCreate()}
@@ -290,11 +300,6 @@ export const SpaceCreate = observer(({ setCreating }: Props) => {
                     >
                         Create Space
                     </Button>
-                    {imageFile && (
-                        <Button disabled={creating} onClick={onClear}>
-                            Reset
-                        </Button>
-                    )}
                 </ButtonGroup>
             </Stack>
             <Stack mt={2.5} alignItems="center" spacing={2}>

@@ -1,10 +1,12 @@
 import { useAppStore } from "@hooks/useStores";
 import { Menu, type MenuProps } from "@mutualzz/contexify";
 import { forwardRef } from "react";
+import { useTheme } from "@mutualzz/ui-web";
 
 export const ContextMenu = forwardRef<HTMLDivElement, MenuProps>(
-    (props, ref) => {
+    ({ textColor, ...props }, ref) => {
         const app = useAppStore();
+        const { theme } = useTheme();
 
         return (
             <Menu
@@ -15,6 +17,7 @@ export const ContextMenu = forwardRef<HTMLDivElement, MenuProps>(
                 transparency={
                     app.settings?.preferEmbossed ? 90 : props.transparency
                 }
+                textColor={textColor ?? theme.typography.colors.primary}
                 {...props}
                 ref={ref}
             />

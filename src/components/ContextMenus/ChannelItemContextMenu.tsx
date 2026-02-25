@@ -2,18 +2,17 @@ import { ContextMenu } from "@components/ContextMenu.tsx";
 import { SpaceInviteToSpaceModal } from "@components/Space/SpaceInviteToSpaceModal.tsx";
 import { useModal } from "@contexts/Modal.context.tsx";
 import { useAppStore } from "@hooks/useStores.ts";
-import { Item } from "@mutualzz/contexify";
 import { Box } from "@mutualzz/ui-web";
 import type { Channel } from "@stores/objects/Channel.ts";
 import type { Space } from "@stores/objects/Space.ts";
-import { useMutation } from "@tanstack/react-query";
-import { useNavigate } from "@tanstack/react-router";
 import { observer } from "mobx-react-lite";
 import { FaPaperPlane, FaTrash } from "react-icons/fa";
 import { CategoryDeleteModal } from "../Channel/Category/CategoryDeleteModal.tsx";
 import { ChannelType } from "@mutualzz/types";
 import { generateMenuIDs } from "@contexts/ContextMenu.context.tsx";
 import { useMemo } from "react";
+import { ChannelActionConfirm } from "@components/Modals/ChannelActionConfirm.tsx";
+import { ContextItem } from "@components/ContextItem.tsx";
 
 interface Props {
     space: Space;
@@ -23,22 +22,6 @@ interface Props {
 export const ChannelItemContextMenu = observer(({ space, channel }: Props) => {
     const app = useAppStore();
     const { openModal } = useModal();
-    const navigate = useNavigate();
-
-    const { mutate: deleteChannel, isPending: isDeleting } = useMutation({
-        mutationKey: ["delete-channel", channel.id],
-        mutationFn: async () => channel.delete(false),
-        onSuccess: ({ channelId }) => {
-            if (app.channels.activeId === channelId)
-                navigate({
-                    to: "/spaces/$spaceId/$channelId",
-                    params: {
-                        spaceId: space.id,
-                        channelId: space.firstNavigableChannel?.id || "",
-                    },
-                });
-        },
-    });
 
     const canModifyChannel = useMemo(
         () => space.members.me?.hasPermission("ManageChannels", channel),
@@ -60,7 +43,7 @@ export const ChannelItemContextMenu = observer(({ space, channel }: Props) => {
             key={channel.id}
         >
             {!isCategory && canInvite && (
-                <Item
+                <ContextItem
                     onClick={() =>
                         openModal(
                             `invite-to-space-${space.id}`,
@@ -70,27 +53,31 @@ export const ChannelItemContextMenu = observer(({ space, channel }: Props) => {
                     endDecorator={<FaPaperPlane />}
                 >
                     Invite to Channel
-                </Item>
+                </ContextItem>
             )}
 
             {canModifyChannel && (
                 <Box>
-                    <Item
+                    <ContextItem
                         onClick={() =>
                             isCategory && channel.hasChildren
                                 ? openModal(
                                       `delete-category-${channel.id}`,
                                       <CategoryDeleteModal channel={channel} />,
                                   )
-                                : deleteChannel()
+                                : openModal(
+                                      `delete-channel-${channel.id}`,
+                                      <ChannelActionConfirm
+                                          channel={channel}
+                                      />,
+                                  )
                         }
-                        disabled={isDeleting}
                         color="danger"
                         size="sm"
                         endDecorator={<FaTrash />}
                     >
                         Delete {isCategory ? "Category" : "Channel"}
-                    </Item>
+                    </ContextItem>
                 </Box>
             )}
         </ContextMenu>

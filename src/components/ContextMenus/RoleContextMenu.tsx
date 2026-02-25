@@ -4,10 +4,10 @@ import type { Role } from "@stores/objects/Role";
 import { ContextMenu } from "@components/ContextMenu";
 import { useAppStore } from "@hooks/useStores";
 import { generateMenuIDs } from "@contexts/ContextMenu.context.tsx";
-import { Item } from "@mutualzz/contexify";
 import { FaTrash } from "react-icons/fa";
 import { RoleActionConfirm } from "@components/Modals/RoleActionConfirm.tsx";
 import { useModal } from "@contexts/Modal.context.tsx";
+import { ContextItem } from "@components/ContextItem.tsx";
 
 interface Props {
     space: Space;
@@ -27,7 +27,7 @@ export const RoleContextMenu = observer(({ space, role }: Props) => {
             transparency={0}
             key={`${space.id}-${role.id}`}
         >
-            <Item
+            <ContextItem
                 onClick={() =>
                     openModal("delete-role", <RoleActionConfirm role={role} />)
                 }
@@ -36,7 +36,7 @@ export const RoleContextMenu = observer(({ space, role }: Props) => {
                 size="sm"
             >
                 Delete Role
-            </Item>
+            </ContextItem>
         </ContextMenu>
     );
 });

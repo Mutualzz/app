@@ -1,16 +1,14 @@
-import { useMemo, useState, type PropsWithChildren } from "react";
+import { type PropsWithChildren,  useState } from "react";
 import { Paper } from "@components/Paper";
 import { useAppStore } from "@hooks/useStores";
+import { observer } from "mobx-react-lite";
 
-export const Spoiler = ({ children }: PropsWithChildren) => {
+export const Spoiler = observer(({ children }: PropsWithChildren) => {
     const app = useAppStore();
     const [revealed, setRevealed] = useState(false);
     const [hovered, setHovered] = useState(false);
 
-    const prefersEmbossed = useMemo(
-        () => app.settings?.preferEmbossed,
-        [app.settings?.preferEmbossed],
-    );
+    const prefersEmbossed = app.settings?.preferEmbossed;
 
     return (
         <Paper
@@ -44,4 +42,4 @@ export const Spoiler = ({ children }: PropsWithChildren) => {
             {children}
         </Paper>
     );
-};
+});

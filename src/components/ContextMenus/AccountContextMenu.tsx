@@ -7,10 +7,11 @@ import { ContextSubmenu } from "@components/ContextSubmenu.tsx";
 import { formatPresenceStatus } from "@utils/index.ts";
 import { StatusBadge } from "@components/StatusBadge.tsx";
 import { Divider } from "@mutualzz/ui-web";
-import { Item } from "@mutualzz/contexify";
 import { FaArrowRight } from "react-icons/fa";
 import type { AppStore } from "@stores/App.store.ts";
 import type { PresenceStatus } from "@mutualzz/types";
+import * as React from "react";
+import { ContextItem } from "@components/ContextItem.tsx";
 
 interface Props {
     account: AccountStore;
@@ -25,33 +26,10 @@ const times: { label: string; durationMs: number | null }[] = [
     { label: "Forever", durationMs: null },
 ];
 
-const SubmenuLabel = (props: { text: string; onForeverClick: () => void }) => {
-    const { text, onForeverClick } = props;
-
-    return (
-        <div
-            style={{
-                display: "flex",
-                alignItems: "center",
-                width: "100%",
-                gap: 8,
-            }}
-            onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                onForeverClick();
-            }}
-        >
-            {text}
-        </div>
-    );
-};
-
 const TimeContextMenu = observer(
     ({ app, status }: { app: AppStore; status: PresenceStatus }) => {
         return times.map(({ label, durationMs }) => (
-            <Item
-                horizontalAlign="left"
+            <ContextItem
                 key={`${status}:${label}`}
                 onClick={() => {
                     if (!durationMs) {
@@ -68,7 +46,7 @@ const TimeContextMenu = observer(
                 }}
             >
                 {label}
-            </Item>
+            </ContextItem>
         ));
     },
 );
@@ -80,9 +58,12 @@ export const AccountContextMenu = observer(({ account }: Props) => {
 
     const elevation = app.settings?.preferEmbossed ? 5 : 1;
 
-    const setForever = (status: PresenceStatus) => {
-        app.gateway.setStatus(status);
+    const setForever = (e: React.MouseEvent, status: PresenceStatus) => {
+        e.stopPropagation();
+        e.preventDefault();
+
         app.gateway.clearScheduledStatus();
+        app.gateway.setStatus(status, { persist: true });
     };
 
     return (
@@ -101,6 +82,7 @@ export const AccountContextMenu = observer(({ account }: Props) => {
                             inPicker
                             size={32}
                             elevation={elevation}
+                            showInvisible
                         />
                     }
                     label={formatPresenceStatus(presence.status)}
@@ -123,14 +105,10 @@ export const AccountContextMenu = observer(({ account }: Props) => {
                         css={{
                             width: "100%",
                         }}
-                        label={
-                            <SubmenuLabel
-                                text="Online"
-                                onForeverClick={() => setForever("online")}
-                            />
-                        }
+                        label="Online"
                         transparency={0}
                         elevation={elevation}
+                        onClick={(e) => setForever(e, "online")}
                     >
                         <TimeContextMenu app={app} status="online" />
                     </ContextSubmenu>
@@ -152,14 +130,10 @@ export const AccountContextMenu = observer(({ account }: Props) => {
                         css={{
                             width: "100%",
                         }}
-                        label={
-                            <SubmenuLabel
-                                text="Idle"
-                                onForeverClick={() => setForever("idle")}
-                            />
-                        }
+                        label="Idle"
                         transparency={0}
                         elevation={elevation}
+                        onClick={(e) => setForever(e, "idle")}
                     >
                         <TimeContextMenu app={app} status="idle" />
                     </ContextSubmenu>
@@ -175,14 +149,10 @@ export const AccountContextMenu = observer(({ account }: Props) => {
                         css={{
                             width: "100%",
                         }}
-                        label={
-                            <SubmenuLabel
-                                text="Do Not Disturb"
-                                onForeverClick={() => setForever("dnd")}
-                            />
-                        }
+                        label="Do Not Disturb"
                         transparency={0}
                         elevation={elevation}
+                        onClick={(e) => setForever(e, "dnd")}
                     >
                         <TimeContextMenu app={app} status="dnd" />
                     </ContextSubmenu>
@@ -199,14 +169,10 @@ export const AccountContextMenu = observer(({ account }: Props) => {
                         css={{
                             width: "100%",
                         }}
-                        label={
-                            <SubmenuLabel
-                                text="Invisible"
-                                onForeverClick={() => setForever("invisible")}
-                            />
-                        }
+                        label="Invisible"
                         transparency={0}
                         elevation={elevation}
+                        onClick={(e) => setForever(e, "invisible")}
                     >
                         <TimeContextMenu app={app} status="invisible" />
                     </ContextSubmenu>

@@ -14,6 +14,8 @@ export const JSONReplacer = function (
         return this[key].toString();
     }
 
+    if (value === "null") return null;
+
     // Handle objects with custom .toJSON
     // erlpack doesn't use JSON.stringify so force it manually
     //@ts-ignore

@@ -49,6 +49,7 @@
         "is-hotkey": "^0.2.0",
         "lodash-es": "^4.17.23",
         "markdown-it": "^14.1.1",
+        "mediasoup-client": "^3.18.7",
         "mobx": "^6.15.0",
         "mobx-persist": "^0.4.1",
         "mobx-persist-store": "^1.1.8",

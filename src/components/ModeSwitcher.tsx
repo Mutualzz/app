@@ -1,11 +1,9 @@
 import { useAppStore } from "@hooks/useStores";
-import type { AppMode } from "@mutualzz/types";
 import { Tooltip, useTheme } from "@mutualzz/ui-web";
 import { useNavigate } from "@tanstack/react-router";
 import { switchMode } from "@utils/index";
 import { observer } from "mobx-react-lite";
 import { AnimatePresence } from "motion/react";
-import { useMemo } from "react";
 import { GiGalaxy } from "react-icons/gi";
 import { ImFeed } from "react-icons/im";
 import { AnimatedIconButton } from "./Animated/AnimatedIconButton";
@@ -16,20 +14,7 @@ export const ModeSwitcher = observer(() => {
     const navigate = useNavigate();
     const { theme } = useTheme();
 
-    const preferredMode = useMemo(
-        () => app.settings?.preferredMode,
-        [app.settings?.preferredMode],
-    );
-
-    const targetMode: AppMode = useMemo(
-        () =>
-            app.mode === "feed"
-                ? "spaces"
-                : app.mode === "spaces"
-                  ? "feed"
-                  : (preferredMode ?? "spaces"),
-        [app.mode, preferredMode],
-    );
+    const targetMode = app.targetMode;
 
     const title = `Switch to ${targetMode === "feed" ? "Feed" : "Spaces"}`;
 

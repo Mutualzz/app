@@ -1,11 +1,13 @@
-import type { APISpaceMember, Snowflake } from "@mutualzz/types";
+import type {
+    APISpaceMember,
+    Snowflake,
+    SpaceIconFormat,
+} from "@mutualzz/types";
 import {
     type APIChannel,
     type APIInvite,
     type APISpace,
-    type AvatarFormat,
     CDNRoutes,
-    ChannelType,
     ImageFormat,
     type Sizes,
 } from "@mutualzz/types";
@@ -133,7 +135,7 @@ export class Space {
         animated = false,
         hash?: string | null,
         size: Sizes = 128,
-        format: AvatarFormat = ImageFormat.WebP,
+        format: SpaceIconFormat = ImageFormat.WebP,
     ) {
         if (!hash) return null;
         return REST.makeCDNUrl(
@@ -215,15 +217,6 @@ export class Space {
 
     delete() {
         return this.app.rest.delete<{ id: string }>(`/spaces/${this.id}`);
-    }
-
-    createChannel(name: string, type: ChannelType, parentId?: string) {
-        return this.app.rest.post<APIChannel>("/channels", {
-            name,
-            type,
-            spaceId: this.id,
-            parentId: parentId ?? null,
-        });
     }
 
     addInvite(invite: APIInvite) {

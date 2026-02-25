@@ -145,7 +145,6 @@ export const StatusBadge = observer(
         showInvisible = false,
     }: StatusBadgeProps) => {
         const { theme } = useTheme();
-        if (!showInvisible && status === "invisible") return null;
 
         const fillColor = useMemo(() => {
             switch (status) {
@@ -168,6 +167,7 @@ export const StatusBadge = observer(
             theme.colors.danger,
         ]);
 
+        if (!showInvisible && status === "invisible") return null;
         if (fillColor == null) return null;
 
         const effectiveCutColor = dynamicElevation(
