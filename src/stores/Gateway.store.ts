@@ -21,11 +21,18 @@ import {
 } from "@mutualzz/types";
 import { invoke } from "@tauri-apps/api/core";
 import { type Codec, createCodec, type Encoding } from "@utils/codec";
-import { type Compression, type Compressor, createCompressor, } from "@utils/compressor";
+import {
+    type Compression,
+    type Compressor,
+    createCompressor,
+} from "@utils/compressor";
 import { isTauri } from "@utils/index";
 import { makeAutoObservable } from "mobx";
 import type { AppStore } from "./App.store";
-import { buildDesktopPresenceFromProcesses, type PresenceUpdateDraft, } from "../presence/gamePresence.ts";
+import {
+    buildDesktopPresenceFromProcesses,
+    type PresenceUpdateDraft,
+} from "../presence/gamePresence.ts";
 import { normalizeJSON } from "@utils/JSON.ts";
 
 // We have to create our own GatewayStatus "enum" to avoid issues with SSR

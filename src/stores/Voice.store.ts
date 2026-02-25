@@ -153,16 +153,37 @@ class MediasoupSession {
         );
 
         if (attemptId !== this.connectAttemptId) throw this.cancelledError();
-        // TODO: COntinuje here later
+
         const device = new mediasoupClient.Device();
 
         await device.load({
             routerRtpCapabilities: capabilities.rtpCapabilities,
         });
 
-        if (attemptId !== this.connectAttemptId) throw this.cancelledError();
-
         this.device = device;
+
+        const receiverTransportInfo = await this.request(
+            VoiceOpcodes.VoiceCreateTransport,
+            { direction: "receive" },
+        );
+
+        const receiverTransport = device.createRecvTransport(
+            receiverTransportInfo.transportOptions,
+        );
+
+        receiverTransport.on(
+            "connect",
+            ({ dtlsParameters }, callback, errback) => {
+                void this.request(VoiceOpcodes.VoiceConnectTransport, {
+                    transportId: receiverTransport.id,
+                    dtlsParameters,
+                })
+                    .then(() => callback())
+                    .catch((err) => errback(err));
+            },
+        );
+
+        this.receiverTransport = receiverTransport;
 
         await this.request(VoiceOpcodes.VoiceSetRTPCapabilities, {
             rtpCapabilities: device.rtpCapabilities,
@@ -170,9 +191,7 @@ class MediasoupSession {
 
         const sendTransportInfo = await this.request(
             VoiceOpcodes.VoiceCreateTransport,
-            {
-                direction: "send",
-            },
+            { direction: "send" },
         );
 
         const sendTransport = device.createSendTransport(
@@ -202,31 +221,6 @@ class MediasoupSession {
         );
 
         this.sendTransport = sendTransport;
-
-        const receiverTransportInfo = await this.request(
-            VoiceOpcodes.VoiceCreateTransport,
-            {
-                direction: "receive",
-            },
-        );
-
-        const receiverTransport = device.createRecvTransport(
-            receiverTransportInfo.transportOptions,
-        );
-
-        receiverTransport.on(
-            "connect",
-            ({ dtlsParameters }, callback, errback) => {
-                void this.request(VoiceOpcodes.VoiceConnectTransport, {
-                    transportId: receiverTransport.id,
-                    dtlsParameters,
-                })
-                    .then(() => callback())
-                    .catch((err) => errback(err));
-            },
-        );
-
-        this.receiverTransport = receiverTransport;
 
         await this.startMic(attemptId);
     }
@@ -442,7 +436,10 @@ class MediasoupSession {
         }
 
         const track = media.getAudioTracks()[0];
-        if (!track) return;
+        if (!track) {
+            this.setSelfMute(true);
+            return;
+        }
 
         this.micTrack = track;
 
