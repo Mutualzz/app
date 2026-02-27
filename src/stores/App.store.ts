@@ -1,5 +1,10 @@
 import { Logger } from "@mutualzz/logger";
-import { type APIPrivateUser, type APISpacePartial, type APIUserSettings, type AppMode, } from "@mutualzz/types";
+import {
+    type APIPrivateUser,
+    type APISpacePartial,
+    type APIUserSettings,
+    type AppMode,
+} from "@mutualzz/types";
 import { QueryClient } from "@tanstack/react-query";
 import { isTauri } from "@utils/index";
 import { safeLocalStorage } from "@utils/safeLocalStorage";
@@ -61,6 +66,7 @@ export class AppStore {
         app: "4.0.1",
         tauri: null,
     };
+
     private readonly logger = new Logger({
         tag: "AppStore",
     });
@@ -181,6 +187,7 @@ export class AppStore {
         if (this.settings) this.settings.startSyncing();
         this.loadToken();
         this.setAppLoading(false);
+        await this.voice.setupTracks();
 
         if (isTauri) {
             this.versions = {

@@ -14,7 +14,9 @@ export const JSONReplacer = function (
         return this[key].toString();
     }
 
-    if (value === "null") return null;
+    if (this[key] === "null") return null;
+    if (this[key] === "false") return false;
+    if (this[key] === "true") return true;
 
     // Handle objects with custom .toJSON
     // erlpack doesn't use JSON.stringify so force it manually
@@ -26,5 +28,5 @@ export const JSONReplacer = function (
 
 export const normalizeJSON = <T>(obj: T): T => {
     if (obj === null || obj === undefined) return obj as any;
-    return JSON.parse(JSON.stringify(obj, JSONReplacer), JSONReplacer);
+    return JSON.parse(JSON.stringify(obj, JSONReplacer));
 };

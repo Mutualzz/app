@@ -1,7 +1,14 @@
 import { Paper } from "@components/Paper.tsx";
 import { useModal } from "@contexts/Modal.context.tsx";
 import { useAppStore } from "@hooks/useStores.ts";
-import { Avatar, IconButton, type PaperProps, Stack, Typography, useTheme, } from "@mutualzz/ui-web";
+import {
+    Avatar,
+    IconButton,
+    type PaperProps,
+    Stack,
+    Typography,
+    useTheme,
+} from "@mutualzz/ui-web";
 import type { Channel } from "@stores/objects/Channel.ts";
 import type { Space } from "@stores/objects/Space.ts";
 import { useNavigate } from "@tanstack/react-router";

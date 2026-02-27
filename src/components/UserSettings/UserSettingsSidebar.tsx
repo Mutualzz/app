@@ -4,7 +4,7 @@ import {
     type UserSettingsCategories,
     type UserSettingsPage,
     useUserSettings,
-} from "@contexts/UserSettings.context";
+} from "@components/UserSettings/UserSettings.context.tsx";
 import { useAppStore } from "@hooks/useStores";
 import {
     Box,
@@ -18,6 +18,7 @@ import startCase from "lodash-es/startCase";
 import { observer } from "mobx-react-lite";
 import { Fragment, type JSX } from "react";
 import {
+    FaMicrophone,
     FaPaintBrush,
     FaPalette,
     FaSignOutAlt,
@@ -35,6 +36,7 @@ interface UserSettingsSidebarProps {
 
 interface Pages {
     label: UserSettingsPage;
+    title?: string;
     icon: JSX.Element;
 }
 
@@ -55,6 +57,11 @@ const settingsPages: SettingsPages = {
         {
             label: "appearance",
             icon: <FaPalette />,
+        },
+        {
+            label: "voice_and_video",
+            title: "Voice & Video",
+            icon: <FaMicrophone />,
         },
     ],
 };
@@ -155,7 +162,7 @@ export const UserSettingsSidebar = observer(
                                     color="info"
                                     orientation="vertical"
                                     variant="plain"
-                                    spacing={1.25}
+                                    spacing={5}
                                     horizontalAlign="left"
                                 >
                                     {pages.map((page) => (
@@ -178,7 +185,8 @@ export const UserSettingsSidebar = observer(
                                                 currentPage === page.label
                                             }
                                         >
-                                            {startCase(page.label)}
+                                            {page.title ??
+                                                startCase(page.label)}
                                         </Button>
                                     ))}
                                 </ButtonGroup>

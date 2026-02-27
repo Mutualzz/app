@@ -3,10 +3,12 @@ mod gateway;
 mod presence;
 
 use crate::gateway::{decode_frame, encode_frame, Encoding};
+use crate::presence::list_processes;
 use serde_json::Value;
 use tauri::{Emitter, Manager, RunEvent};
 #[cfg(desktop)]
 use tauri_plugin_autostart::MacosLauncher;
+use tauri_plugin_clipboard_manager;
 use tauri_plugin_deep_link::DeepLinkExt;
 use tauri_plugin_log::{Target, TargetKind, WEBVIEW_TARGET};
 use tauri_plugin_notification;
@@ -15,8 +17,7 @@ use tauri_plugin_os;
 use tauri_plugin_prevent_default;
 use tauri_plugin_single_instance;
 use tauri_plugin_updater;
-use tauri_plugin_clipboard_manager;
-use crate::presence::list_processes;
+use tauri_plugin_media;
 
 #[tauri::command]
 async fn gateway_decode(payload: Vec<u8>, encoding: Encoding) -> Result<Value, String> {
@@ -38,6 +39,7 @@ pub fn run() {
     let context = tauri::generate_context!();
 
     let app = tauri::Builder::default()
+        .plugin(tauri_plugin_media::init())
         .plugin(tauri_plugin_single_instance::init(|app, argv, _cwd| {
             if let Some(win) = app.get_webview_window("main") {
                 let _ = win.set_always_on_top(true);
@@ -65,11 +67,11 @@ pub fn run() {
                     Target::new(TargetKind::LogDir {
                         file_name: Some("webview".into()),
                     })
-                        .filter(|metadata| metadata.target() == WEBVIEW_TARGET),
+                    .filter(|metadata| metadata.target() == WEBVIEW_TARGET),
                     Target::new(TargetKind::LogDir {
                         file_name: Some("rust".into()),
                     })
-                        .filter(|metadata| metadata.target() != WEBVIEW_TARGET),
+                    .filter(|metadata| metadata.target() != WEBVIEW_TARGET),
                 ])
                 .format(move |out, message, record| {
                     out.finish(format_args!(
@@ -115,7 +117,11 @@ pub fn run() {
 
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![gateway_decode, gateway_encode, list_processes])
+        .invoke_handler(tauri::generate_handler![
+            gateway_decode,
+            gateway_encode,
+            list_processes
+        ])
         .build(context)
         .expect("error while running tauri application");
 

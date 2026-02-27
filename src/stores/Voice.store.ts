@@ -1,4 +1,5 @@
 import {
+    type IObservableArray,
     makeAutoObservable,
     observable,
     type ObservableMap,
@@ -18,6 +19,10 @@ import type {
     VoiceServerUpdatePayload,
     VoiceStateSyncPayload,
 } from "@app-types/index.ts";
+import { isSSR } from "@utils/index.ts";
+import { makePersistable } from "mobx-persist-store";
+import { safeLocalStorage } from "@utils/safeLocalStorage.ts";
+import { Logger } from "@mutualzz/logger";
 
 export type VoiceConnectionStatus =
     | "idle"
@@ -27,14 +32,21 @@ export type VoiceConnectionStatus =
     | "failed"
     | "reconnecting";
 
-// TODO: After implementing new opcodes, audio still doesnt work and payloads dont seem to send properly
 class MediasoupSession {
     private socket: WebSocket | null = null;
+
+    private currentInputDeviceId: string | null = null;
+    private currentOutputDeviceId: string | null = null;
+    private currentCameraDeviceId: string | null = null;
 
     private pending = new Map<
         string,
         { resolve: (v: any) => void; reject: (e: any) => void }
     >();
+
+    private readonly logger = new Logger({
+        tag: "VoiceSession",
+    });
 
     private suppressOnDisconnected = 0;
 
@@ -60,6 +72,26 @@ class MediasoupSession {
 
     constructor(private readonly onDisconnected: () => void) {}
 
+    setInputDeviceId(deviceId: string | null) {
+        this.currentInputDeviceId = deviceId;
+    }
+
+    setOutputDeviceId(deviceId: string | null) {
+        this.currentOutputDeviceId = deviceId;
+
+        if (deviceId) {
+            for (const [, audio] of this.audioByProducerId) {
+                void audio
+                    .setSinkId(deviceId)
+                    .catch((err) => this.logger.warn("setSinkId failed", err));
+            }
+        }
+    }
+
+    setVideoDeviceId(deviceId: string | null) {
+        this.currentCameraDeviceId = deviceId;
+    }
+
     setSelfMute(isMuted: boolean) {
         this.isMuted = isMuted;
 
@@ -76,6 +108,26 @@ class MediasoupSession {
                 this.micTrack.enabled = !isMuted;
             } catch {}
         }
+    }
+
+    // Restart mic to apply a new input device
+    async restartMic() {
+        try {
+            this.micProducer?.close();
+        } catch {}
+        this.micProducer = null;
+
+        if (this.micTrack) {
+            try {
+                this.micTrack.stop();
+            } catch {}
+            this.micTrack = null;
+        }
+
+        if (!this.sendTransport) return;
+
+        const attemptId = this.connectAttemptId;
+        await this.startMic(attemptId);
     }
 
     setSelfDeaf(isDeafened: boolean) {
@@ -186,7 +238,7 @@ class MediasoupSession {
         this.receiverTransport = receiverTransport;
 
         await this.request(VoiceOpcodes.VoiceSetRTPCapabilities, {
-            rtpCapabilities: device.rtpCapabilities,
+            rtpCapabilities: device.recvRtpCapabilities,
         });
 
         const sendTransportInfo = await this.request(
@@ -311,7 +363,6 @@ class MediasoupSession {
         }
 
         if (envelope.id == null && envelope.op != null) {
-            console.log("Received push", envelope.op, envelope.data);
             void this.onPush(envelope.op, envelope.data);
             return;
         }
@@ -401,15 +452,16 @@ class MediasoupSession {
         audio.autoplay = true;
         audio.muted = this.isDeafened;
 
+        // TODO: Doesnt work until refresh
+        if (this.currentOutputDeviceId)
+            await audio.setSinkId(this.currentOutputDeviceId);
+
         this.audioByProducerId.set(producerId, audio);
 
-        console.log(audio);
-
-        // Force play to work around autoplay policies. We'll pause it again if the user is deafened, but this ensures the audio will play immediately when they undeafen.
         try {
             await audio.play();
         } catch (err) {
-            console.warn("Voice audio.play() blocked or failed", err);
+            this.logger.warn("Voice audio.play() blocked or failed", err);
         }
 
         await this.request(VoiceOpcodes.VoiceResumeConsumer, {
@@ -426,6 +478,7 @@ class MediasoupSession {
                 echoCancellation: true,
                 noiseSuppression: true,
                 autoGainControl: true,
+                deviceId: this.currentInputDeviceId ?? undefined,
             },
             video: false,
         });
@@ -473,6 +526,15 @@ export class VoiceStore {
     >();
     connectionStatus: VoiceConnectionStatus = "idle";
     connectionError: string | null = null;
+    inputs: IObservableArray<MediaDeviceInfo> =
+        observable.array<MediaDeviceInfo>([]);
+    outputs: IObservableArray<MediaDeviceInfo> =
+        observable.array<MediaDeviceInfo>([]);
+    cameras: IObservableArray<MediaDeviceInfo> =
+        observable.array<MediaDeviceInfo>([]);
+    currentInputDeviceId?: string | null = null;
+    currentOutputDeviceId?: string | null = null;
+    currentCameraDeviceId?: string | null = null;
     private connectPromise: Promise<void> | null = null;
     private connectGeneration = 0;
     private readonly session: MediasoupSession;
@@ -496,7 +558,18 @@ export class VoiceStore {
                 });
             }
         });
+
         makeAutoObservable(this, {}, { autoBind: true });
+
+        makePersistable(this, {
+            name: "VoiceStore",
+            properties: [
+                "currentInputDeviceId",
+                "currentOutputDeviceId",
+                "currentCameraDeviceId",
+            ],
+            storage: safeLocalStorage,
+        });
     }
 
     get channel() {
@@ -505,6 +578,24 @@ export class VoiceStore {
         if (!space) return null;
         return (
             space.channels.find((ch) => ch.id === this.currentChannelId) ?? null
+        );
+    }
+
+    get currentInputDevice() {
+        return this.inputs.find(
+            (dev) => dev.deviceId === this.currentInputDeviceId,
+        );
+    }
+
+    get currentOutputDevice() {
+        return this.outputs.find(
+            (dev) => dev.deviceId === this.currentOutputDeviceId,
+        );
+    }
+
+    get currentVideoDevice() {
+        return this.cameras.find(
+            (dev) => dev.deviceId === this.currentCameraDeviceId,
         );
     }
 
@@ -547,9 +638,8 @@ export class VoiceStore {
             const member = stateSpace.members.get(state.userId);
             if (member) member.setVoiceState(state);
 
-            if (syncedChannel && state.channelId === payload.channelId) {
+            if (syncedChannel && state.channelId === payload.channelId)
                 syncedChannel.voiceStates.set(state.userId, state);
-            }
         }
 
         this.channelStates.set(payload.channelId, statesByUserId);
@@ -565,14 +655,11 @@ export class VoiceStore {
 
         const member = space?.members.get(state.userId) ?? null;
 
-        // Leaving voice entirely
         if (!normalizedChannelId) {
-            // Remove from all store maps
             for (const [, userMap] of this.channelStates) {
                 userMap.delete(state.userId);
             }
 
-            // Remove from all channel objects
             if (space) {
                 for (const channelItem of space.channels) {
                     channelItem.voiceStates.delete(state.userId);
@@ -583,19 +670,15 @@ export class VoiceStore {
             return;
         }
 
-        // Moving / updating: remove from any other channel first
         for (const [existingChannelId, userMap] of this.channelStates) {
             if (existingChannelId !== normalizedChannelId)
                 userMap.delete(state.userId);
         }
 
-        if (space) {
-            for (const channelItem of space.channels) {
-                if (channelItem.id !== normalizedChannelId) {
+        if (space)
+            for (const channelItem of space.channels)
+                if (channelItem.id !== normalizedChannelId)
                     channelItem.voiceStates.delete(state.userId);
-                }
-            }
-        }
 
         let userStatesForChannel = this.channelStates.get(normalizedChannelId);
         if (!userStatesForChannel) {
@@ -629,14 +712,34 @@ export class VoiceStore {
             this.connectionError = null;
         });
 
-        this.sendVoiceStateUpdate();
-        this.startKeepAlive();
+        this.session.setInputDeviceId(this.currentInputDeviceId ?? null);
+        this.session.setOutputDeviceId(this.currentOutputDeviceId ?? null);
+        this.session.setVideoDeviceId(this.currentCameraDeviceId ?? null);
 
-        await this.waitForVoiceServerUpdate();
-
-        // waitForVoiceServerUpdate() triggers maybeConnectSession(), which owns the connection lifecycle.
         this.session.setSelfMute(this.selfMute);
         this.session.setSelfDeaf(this.selfDeaf);
+
+        this.sendVoiceStateUpdate();
+        await this.waitForVoiceServerUpdate();
+        this.startKeepAlive();
+    }
+
+    setInputDevice(deviceId: string) {
+        this.currentInputDeviceId = deviceId;
+        this.session.setInputDeviceId(deviceId);
+
+        if (this.connectionStatus === "connected")
+            void this.session.restartMic();
+    }
+
+    setOutputDevice(deviceId: string) {
+        this.currentOutputDeviceId = deviceId;
+        this.session.setOutputDeviceId(deviceId);
+    }
+
+    setVideoDevice(deviceId: string) {
+        this.currentCameraDeviceId = deviceId;
+        this.session.setVideoDeviceId(deviceId);
     }
 
     async leave() {
@@ -695,7 +798,6 @@ export class VoiceStore {
         runInAction(() => {
             if (this.spaceMute || this.spaceDeaf) return;
 
-            // Not in a voice channel yet: treat as preference for the next join
             if (!this.currentSpaceId || !this.currentChannelId) {
                 this.selfMute = value;
                 this.preferredSelfMute = value;
@@ -729,7 +831,6 @@ export class VoiceStore {
         runInAction(() => {
             if (this.spaceMute || this.spaceDeaf) return;
 
-            // Not in a voice channel yet: treat as preference for the next join
             if (!this.currentSpaceId || !this.currentChannelId) {
                 this.selfDeaf = value;
                 this.preferredSelfDeaf = value;
@@ -770,7 +871,7 @@ export class VoiceStore {
         });
     }
 
-    private maybeConnectSession(): Promise<void> {
+    maybeConnectSession(): Promise<void> {
         const endpoint = this.voiceEndpoint;
         const token = this.voiceToken;
 
@@ -778,7 +879,6 @@ export class VoiceStore {
         if (!this.currentSpaceId || !this.currentChannelId)
             return Promise.resolve();
 
-        // If a connection is already running, reuse it
         if (this.connectPromise) return this.connectPromise;
 
         const generation = ++this.connectGeneration;
@@ -790,6 +890,16 @@ export class VoiceStore {
             });
 
             try {
+                this.session.setInputDeviceId(
+                    this.currentInputDeviceId ?? null,
+                );
+                this.session.setOutputDeviceId(
+                    this.currentOutputDeviceId ?? null,
+                );
+                this.session.setVideoDeviceId(
+                    this.currentCameraDeviceId ?? null,
+                );
+
                 await this.session.connect({ endpoint, token });
 
                 if (generation !== this.connectGeneration) return;
@@ -817,6 +927,51 @@ export class VoiceStore {
         })();
 
         return this.connectPromise;
+    }
+
+    async setupTracks() {
+        if (isSSR) return;
+
+        const mediaDeviceInfos = (
+            await navigator.mediaDevices.enumerateDevices()
+        ).filter((info) => info.deviceId !== "");
+
+        runInAction(() => {
+            this.inputs = observable.array<MediaDeviceInfo>(
+                mediaDeviceInfos.filter((info) => info.kind === "audioinput"),
+            );
+            this.outputs = observable.array<MediaDeviceInfo>(
+                mediaDeviceInfos.filter((info) => info.kind === "audiooutput"),
+            );
+            this.cameras = observable.array<MediaDeviceInfo>(
+                mediaDeviceInfos.filter((info) => info.kind === "videoinput"),
+            );
+
+            if (!this.currentInputDeviceId)
+                this.currentInputDeviceId = mediaDeviceInfos.find(
+                    (device) =>
+                        device.kind === "audioinput" &&
+                        device.deviceId === "default",
+                )?.deviceId;
+
+            if (!this.currentOutputDeviceId)
+                this.currentOutputDeviceId = mediaDeviceInfos.find(
+                    (device) =>
+                        device.kind === "audiooutput" &&
+                        device.deviceId === "default",
+                )?.deviceId;
+
+            if (!this.currentCameraDeviceId)
+                this.currentCameraDeviceId = mediaDeviceInfos.find(
+                    (device) =>
+                        device.kind === "videoinput" &&
+                        device.deviceId === "default",
+                )?.deviceId;
+        });
+
+        this.session.setInputDeviceId(this.currentInputDeviceId ?? null);
+        this.session.setOutputDeviceId(this.currentOutputDeviceId ?? null);
+        this.session.setVideoDeviceId(this.currentCameraDeviceId ?? null);
     }
 
     private waitForVoiceServerUpdate() {

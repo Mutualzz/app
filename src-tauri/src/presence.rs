@@ -1,5 +1,5 @@
 use serde::Serialize;
-use sysinfo::{System};
+use sysinfo::System;
 
 #[derive(Serialize)]
 pub struct RunningProcess {

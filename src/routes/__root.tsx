@@ -199,7 +199,7 @@ function RootComponent() {
         const win = getCurrentWindow();
 
         const unlistenP = listen<string[]>("app://open-url", async (e) => {
-            // Try focus again from the UI thread
+            // Try to focus again from the UI thread
             await win.show();
             await win.unminimize();
             await win.setFocus();

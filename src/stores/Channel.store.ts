@@ -160,7 +160,10 @@ export class ChannelStore {
 
         const visibleNonCats = viewableNonCats.filter((ch) => {
             const parentId = ch.parentId ?? null;
-            return !(parentId && collapsed.has(parentId));
+            return (
+                !(parentId && collapsed.has(parentId)) ||
+                ch.voiceStates.size > 0
+            );
         });
 
         const visibleCategories = all.filter((ch) => {

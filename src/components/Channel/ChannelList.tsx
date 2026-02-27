@@ -29,6 +29,7 @@ import { useAppStore } from "@hooks/useStores.ts";
 import { contextMenu } from "@mutualzz/contexify";
 import { ChannelType } from "@mutualzz/types";
 import {
+    Box,
     ButtonGroup,
     Portal,
     Stack,
@@ -80,11 +81,6 @@ const SortableChannelItem = observer(
             },
         });
 
-        const isCategory = useMemo(
-            () => channel.type === ChannelType.Category,
-            [channel.type],
-        );
-
         return (
             <div
                 ref={setNodeRef}
@@ -93,7 +89,8 @@ const SortableChannelItem = observer(
                     transition,
                     opacity: isDragging ? 0.5 : 1,
                     zIndex: isDragging ? 999 : undefined,
-                    height: isCategory ? 32 : 28,
+                    marginTop:
+                        channel.type === ChannelType.Category ? 0 : "0.5rem",
                 }}
                 {...attributes}
                 {...listeners}
@@ -118,7 +115,11 @@ function sortByPosition(a: Channel, b: Channel) {
 function Container({ id, children }: { id: string; children: ReactNode }) {
     const { setNodeRef } = useDroppable({ id });
     return (
-        <Stack spacing={2.5} direction="column" ref={setNodeRef}>
+        <Stack
+            spacing={id === "container:root" ? 5 : 1.25}
+            direction="column"
+            ref={setNodeRef}
+        >
             {children}
         </Stack>
     );
@@ -428,7 +429,7 @@ export const ChannelList = observer(() => {
                                         : [];
 
                                     return (
-                                        <div key={channel.id}>
+                                        <Box key={channel.id}>
                                             <SortableChannelItem
                                                 channel={channel}
                                                 isCategory={isCategory}
@@ -465,15 +466,6 @@ export const ChannelList = observer(() => {
                                                                 !canManage
                                                             }
                                                         >
-                                                            {children.length ===
-                                                            0 ? (
-                                                                <div
-                                                                    style={{
-                                                                        height: 4,
-                                                                    }}
-                                                                />
-                                                            ) : null}
-
                                                             {children.map(
                                                                 (child) => (
                                                                     <SortableChannelItem
@@ -504,7 +496,7 @@ export const ChannelList = observer(() => {
                                                     </Container>
                                                 </>
                                             ) : null}
-                                        </div>
+                                        </Box>
                                     );
                                 })}
                             </SortableContext>

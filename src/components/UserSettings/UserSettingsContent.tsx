@@ -1,9 +1,9 @@
 import { Paper } from "@components/Paper";
 import { useModal } from "@contexts/Modal.context";
 import {
-    useUserSettings,
     type UserSettingsPage,
-} from "@contexts/UserSettings.context";
+    useUserSettings,
+} from "@components/UserSettings/UserSettings.context.tsx";
 import { useAppStore } from "@hooks/useStores";
 import { IconButton, Stack, Typography } from "@mutualzz/ui-web";
 import startCase from "lodash-es/startCase";
@@ -13,6 +13,7 @@ import { FaX } from "react-icons/fa6";
 import { AppAppearanceSettings } from "./pages/app/AppAppearanceSettings";
 import { UserAccountSettings } from "./pages/user/UserAccountSettings";
 import { UserProfileSettings } from "./pages/user/UserProfileSettings";
+import { AppVoiceVideoSettings } from "@components/UserSettings/pages/app/AppVoiceVideoSettings.tsx";
 
 interface UserSettingsContentProps {
     redirectTo?: UserSettingsPage;
@@ -61,7 +62,9 @@ export const UserSettingsContent = observer(
                         level={{ xs: "h6", sm: "h5" }}
                         fontFamily="monospace"
                     >
-                        {startCase(currentPage)}
+                        {currentPage === "voice_and_video"
+                            ? "Voice & Video"
+                            : startCase(currentPage)}
                     </Typography>
                     <IconButton
                         color="neutral"
@@ -93,6 +96,9 @@ export const UserSettingsContent = observer(
                     {currentPage === "profile" && <UserProfileSettings />}
                     {currentPage === "my-account" && <UserAccountSettings />}
                     {currentPage === "appearance" && <AppAppearanceSettings />}
+                    {currentPage === "voice_and_video" && (
+                        <AppVoiceVideoSettings />
+                    )}
                 </Paper>
             </Stack>
         );

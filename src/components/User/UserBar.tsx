@@ -170,23 +170,19 @@ export const UserBar = observer(() => {
                     </Stack>
 
                     <Tooltip
-                        title={
-                            <TooltipWrapper>
-                                {voiceStatus === "failed"
-                                    ? "Leave"
-                                    : voiceStatus === "connected"
-                                      ? "Disconnect"
-                                      : "Cancel"}
-                            </TooltipWrapper>
-                        }
+                        title={<TooltipWrapper>Disconnect</TooltipWrapper>}
                         placement="top"
                     >
                         <IconButton
                             disabled={!canHangup}
                             onClick={() => app.voice.leave()}
                         >
-                            {/** TODO: Wiggle it when hovering */}
-                            <AnimatedPhoneHangUp initial={{ rotate: 0 }} />
+                            <AnimatedPhoneHangUp
+                                initial={{ rotate: 90 }}
+                                whileHover={{
+                                    rotate: 0,
+                                }}
+                            />
                         </IconButton>
                     </Tooltip>
                 </Paper>
@@ -233,8 +229,12 @@ export const UserBar = observer(() => {
                                 account,
                             },
                             {
-                                x: Math.round(rect.left),
-                                y: Math.round(rect.bottom - 125),
+                                x: inSpace
+                                    ? Math.round(rect.left)
+                                    : Math.round(rect.left + 55),
+                                y: inSpace
+                                    ? Math.round(rect.bottom - 120)
+                                    : Math.round(rect.top + 10),
                             },
                         );
                     }}
@@ -257,11 +257,13 @@ export const UserBar = observer(() => {
                     </Stack>
                 </Paper>
 
-                <Stack spacing={1.25} direction="column">
-                    <Tooltip
-                        title={<TooltipWrapper>Mute</TooltipWrapper>}
-                        placement="right"
-                    >
+                <Stack
+                    spacing={2.5}
+                    alignItems="center"
+                    direction={inSpace ? "row" : "column"}
+                    ml={1.25}
+                >
+                    <Tooltip title={<TooltipWrapper>Mute</TooltipWrapper>}>
                         <IconButton
                             variant="plain"
                             onClick={() =>
@@ -277,11 +279,7 @@ export const UserBar = observer(() => {
                             )}
                         </IconButton>
                     </Tooltip>
-
-                    <Tooltip
-                        title={<TooltipWrapper>Deafen</TooltipWrapper>}
-                        placement="right"
-                    >
+                    <Tooltip title={<TooltipWrapper>Deafen</TooltipWrapper>}>
                         <IconButton
                             variant="plain"
                             onClick={() =>
@@ -295,17 +293,8 @@ export const UserBar = observer(() => {
                             )}
                         </IconButton>
                     </Tooltip>
-                </Stack>
-
-                <Stack
-                    justifyContent="center"
-                    alignItems="center"
-                    direction="column"
-                    spacing={1.25}
-                >
                     <Tooltip
                         title={<TooltipWrapper>Appearance</TooltipWrapper>}
-                        placement="right"
                     >
                         <IconButton
                             size="sm"
@@ -320,11 +309,7 @@ export const UserBar = observer(() => {
                             <FaPalette />
                         </IconButton>
                     </Tooltip>
-
-                    <Tooltip
-                        placement="right"
-                        title={<TooltipWrapper>Settings</TooltipWrapper>}
-                    >
+                    <Tooltip title={<TooltipWrapper>Settings</TooltipWrapper>}>
                         <IconButton
                             size="sm"
                             onClick={() =>

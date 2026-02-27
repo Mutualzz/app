@@ -1,8 +1,8 @@
 import { AnimatedPaper } from "@components/Animated/AnimatedPaper";
 import {
-    UserSettingsProvider,
     type UserSettingsPage,
-} from "@contexts/UserSettings.context";
+    UserSettingsProvider,
+} from "@components/UserSettings/UserSettings.context.tsx";
 import { useAppStore } from "@hooks/useStores";
 import { Drawer, useTheme } from "@mutualzz/ui-web";
 import { useMediaQuery } from "@react-hookz/web";

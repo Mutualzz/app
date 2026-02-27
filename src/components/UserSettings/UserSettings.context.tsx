@@ -1,12 +1,16 @@
 import { observer } from "mobx-react-lite";
 import {
     createContext,
+    type PropsWithChildren,
     useContext,
     useState,
-    type PropsWithChildren,
 } from "react";
 
-export type UserSettingsPage = "my-account" | "profile" | "appearance";
+export type UserSettingsPage =
+    | "my-account"
+    | "profile"
+    | "appearance"
+    | "voice_and_video";
 export type UserSettingsCategories = "user-settings" | "app-settings";
 
 interface UserSettingsContextProps {
