@@ -4,7 +4,7 @@ import {
     type SpaceSettingsCategories,
     type SpaceSettingsPage,
     useSpaceSettings,
-} from "@contexts/SpaceSettings.context";
+} from "@components/SpaceSettings/SpaceSettings.context.tsx";
 import { useAppStore } from "@hooks/useStores";
 import { ButtonGroup, Divider, Stack, Typography } from "@mutualzz/ui-web";
 import type { Space } from "@stores/objects/Space";

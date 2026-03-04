@@ -7,9 +7,9 @@ import { observer } from "mobx-react-lite";
 import { useState } from "react";
 
 import {
-    SpaceSettingsProvider,
     type SpaceSettingsPage,
-} from "@contexts/SpaceSettings.context";
+    SpaceSettingsProvider,
+} from "@components/SpaceSettings/SpaceSettings.context.tsx";
 import { SpaceSettingsContent } from "./SpaceSettingsContent";
 import { SpaceSettingsSidebar } from "./SpaceSettingsSidebar";
 

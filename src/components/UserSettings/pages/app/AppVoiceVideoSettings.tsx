@@ -1,9 +1,19 @@
 import { observer } from "mobx-react-lite";
-import { Divider, Option, Select, Stack, Typography } from "@mutualzz/ui-web";
+import {
+    Divider,
+    IconButton,
+    Option,
+    Select,
+    Stack,
+    Tooltip,
+    Typography,
+} from "@mutualzz/ui-web";
 import { useAppStore } from "@hooks/useStores.ts";
 import { Paper } from "@components/Paper.tsx";
 import { Button } from "@components/Button.tsx";
 import { useState } from "react";
+import { FaX } from "react-icons/fa6";
+import { TooltipWrapper } from "@components/TooltipWrapper.tsx";
 
 export const AppVoiceVideoSettings = observer(() => {
     const app = useAppStore();
@@ -13,6 +23,7 @@ export const AppVoiceVideoSettings = observer(() => {
 
     const inputs = voice.inputs;
     const outputs = voice.outputs;
+    const cameras = voice.cameras;
 
     return (
         <Stack spacing={25} mt={7.5} mx={50} direction="column">
@@ -33,13 +44,13 @@ export const AppVoiceVideoSettings = observer(() => {
                                     ? "No microphones detected"
                                     : "Select a microphone"
                             }
-                            value={voice.currentInputDevice?.deviceId ?? ""}
+                            value={voice.currentInputDeviceId ?? ""}
                             disabled={inputs.length === 0}
                             onValueChange={(value) => {
                                 if (Array.isArray(value)) return;
                                 if (typeof value !== "string") return;
 
-                                voice.setInputDevice(value);
+                                voice.setInputDeviceId(value);
                             }}
                         >
                             {inputs.map((input) => (
@@ -61,12 +72,12 @@ export const AppVoiceVideoSettings = observer(() => {
                                     : "Select a speaker"
                             }
                             disabled={outputs.length === 0}
-                            value={voice.currentOutputDevice?.deviceId ?? ""}
+                            value={voice.currentOutputDeviceId ?? ""}
                             onValueChange={(value) => {
                                 if (Array.isArray(value)) return;
                                 if (typeof value !== "string") return;
 
-                                voice.setOutputDevice(value);
+                                voice.setOutputDeviceId(value);
                             }}
                         >
                             {outputs.map((output) => (
@@ -89,17 +100,78 @@ export const AppVoiceVideoSettings = observer(() => {
                         opacity: 0.5,
                     }}
                 />
-                <Stack direction="column">
+                <Stack
+                    direction="column"
+                    justifyContent="center"
+                    alignItems="center"
+                >
                     <Paper
                         justifyContent="center"
                         alignItems="center"
-                        elevation={app.settings?.preferEmbossed ? 1 : 0}
-                        p={10}
+                        elevation={5}
+                        width={480}
+                        height={270}
+                        position="relative"
                     >
                         {!showCamera && (
-                            <Button color="primary">Test Camera</Button>
+                            <Stack direction="column" spacing={2.5}>
+                                <Button
+                                    color="primary"
+                                    onClick={() => setShowCamera(true)}
+                                >
+                                    Test Camera
+                                </Button>
+                                <Select
+                                    placeholder={
+                                        cameras.length === 0
+                                            ? "No cameras detected"
+                                            : "Select a camera"
+                                    }
+                                    disabled={cameras.length === 0}
+                                    value={voice.currentCameraDeviceId ?? ""}
+                                    onValueChange={(value) => {
+                                        if (Array.isArray(value)) return;
+                                        if (typeof value !== "string") return;
+
+                                        voice.setCameraDeviceId(value);
+                                    }}
+                                >
+                                    {cameras.map((camera) => (
+                                        <Option
+                                            key={camera.deviceId}
+                                            value={camera.deviceId}
+                                        >
+                                            {camera.label || "Unknown Camera"}
+                                        </Option>
+                                    ))}
+                                </Select>
+                            </Stack>
                         )}
-                        {showCamera && <></>}
+                        {showCamera && (
+                            <>
+                                <Tooltip
+                                    content={
+                                        <TooltipWrapper>
+                                            Stop testing
+                                        </TooltipWrapper>
+                                    }
+                                >
+                                    <IconButton
+                                        css={{
+                                            position: "absolute",
+                                            top: 10,
+                                            right: 10,
+                                        }}
+                                        color="danger"
+                                        variant="plain"
+                                        size="sm"
+                                        onClick={() => setShowCamera(false)}
+                                    >
+                                        <FaX />
+                                    </IconButton>
+                                </Tooltip>
+                            </>
+                        )}
                     </Paper>
                 </Stack>
             </Stack>

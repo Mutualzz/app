@@ -57,15 +57,18 @@ class MediasoupSession {
     private receiverTransport: mediasoupClient.types.Transport | null = null;
 
     private micTrack: MediaStreamTrack | null = null;
+    private cameraTrack: MediaStreamTrack | null = null;
     private lastToken: string | null = null;
 
     private micProducer: mediasoupClient.types.Producer | null = null;
+    private cameraProducer: mediasoupClient.types.Producer | null = null;
 
     private consumersByProducerId = new Map<
         string,
         mediasoupClient.types.Consumer
     >();
     private audioByProducerId = new Map<string, HTMLAudioElement>();
+    private cameraByProducerId = new Map<string, HTMLVideoElement>();
 
     private isDeafened = false;
     private isMuted = false;
@@ -88,8 +91,16 @@ class MediasoupSession {
         }
     }
 
-    setVideoDeviceId(deviceId: string | null) {
+    setCameraDeviceId(deviceId: string | null) {
         this.currentCameraDeviceId = deviceId;
+
+        if (deviceId) {
+            for (const [, video] of this.cameraByProducerId) {
+                void video
+                    .setSinkId(deviceId)
+                    .catch((err) => this.logger.warn("setSinkId failed", err));
+            }
+        }
     }
 
     setSelfMute(isMuted: boolean) {
@@ -111,11 +122,16 @@ class MediasoupSession {
     }
 
     // Restart mic to apply a new input device
-    async restartMic() {
+    async restartDevices() {
         try {
             this.micProducer?.close();
         } catch {}
         this.micProducer = null;
+
+        try {
+            this.cameraProducer?.close();
+        } catch {}
+        this.cameraProducer = null;
 
         if (this.micTrack) {
             try {
@@ -124,10 +140,17 @@ class MediasoupSession {
             this.micTrack = null;
         }
 
+        if (this.cameraTrack) {
+            try {
+                this.cameraTrack.stop();
+            } catch {}
+            this.cameraTrack = null;
+        }
+
         if (!this.sendTransport) return;
 
         const attemptId = this.connectAttemptId;
-        await this.startMic(attemptId);
+        await this.startDevices(attemptId);
     }
 
     setSelfDeaf(isDeafened: boolean) {
@@ -274,7 +297,7 @@ class MediasoupSession {
 
         this.sendTransport = sendTransport;
 
-        await this.startMic(attemptId);
+        await this.startDevices(attemptId);
     }
 
     private cancelledError() {
@@ -335,6 +358,14 @@ class MediasoupSession {
         }
         this.audioByProducerId.clear();
 
+        for (const [, camera] of this.cameraByProducerId) {
+            try {
+                camera.pause();
+            } catch {}
+            camera.srcObject = null;
+        }
+        this.cameraByProducerId.clear();
+
         try {
             this.micProducer?.close();
         } catch {}
@@ -345,6 +376,18 @@ class MediasoupSession {
                 this.micTrack.stop();
             } catch {}
             this.micTrack = null;
+        }
+
+        try {
+            this.cameraProducer?.close();
+        } catch {}
+        this.cameraProducer = null;
+
+        if (this.cameraTrack) {
+            try {
+                this.cameraTrack.stop();
+            } catch {}
+            this.cameraTrack = null;
         }
 
         if (this.suppressOnDisconnected === 0) {
@@ -421,6 +464,15 @@ class MediasoupSession {
                 this.audioByProducerId.delete(producerId);
             }
 
+            const camera = this.cameraByProducerId.get(producerId);
+            if (camera) {
+                try {
+                    camera.pause();
+                } catch {}
+                camera.srcObject = null;
+                this.cameraByProducerId.delete(producerId);
+            }
+
             return;
         }
 
@@ -452,7 +504,6 @@ class MediasoupSession {
         audio.autoplay = true;
         audio.muted = this.isDeafened;
 
-        // TODO: Doesnt work until refresh
         if (this.currentOutputDeviceId)
             await audio.setSinkId(this.currentOutputDeviceId);
 
@@ -469,7 +520,7 @@ class MediasoupSession {
         });
     }
 
-    private async startMic(attemptId: number) {
+    private async startDevices(attemptId: number) {
         if (!this.sendTransport) return;
         if (attemptId !== this.connectAttemptId) throw this.cancelledError();
 
@@ -480,7 +531,9 @@ class MediasoupSession {
                 autoGainControl: true,
                 deviceId: this.currentInputDeviceId ?? undefined,
             },
-            video: false,
+            video: {
+                deviceId: this.currentCameraDeviceId ?? undefined,
+            },
         });
 
         if (attemptId !== this.connectAttemptId) {
@@ -488,20 +541,34 @@ class MediasoupSession {
             throw this.cancelledError();
         }
 
-        const track = media.getAudioTracks()[0];
-        if (!track) {
+        const inputTrack = media.getTrackById(this.currentInputDeviceId ?? "");
+        if (!inputTrack) {
             this.setSelfMute(true);
             return;
         }
 
-        this.micTrack = track;
+        this.micTrack = inputTrack;
 
         this.micProducer = await this.sendTransport.produce({
-            track,
+            track: inputTrack,
             codecOptions: { opusStereo: true, opusDtx: true },
         });
 
         this.setSelfMute(this.isMuted);
+
+        const cameraTrack = media.getTrackById(
+            this.currentCameraDeviceId ?? "",
+        );
+        if (!cameraTrack) return;
+
+        this.cameraTrack = cameraTrack;
+        this.cameraProducer = await this.sendTransport.produce({
+            track: cameraTrack,
+            codecOptions: {
+                videoGoogleStartBitrate: 1000,
+                videoGoogleMaxBitrate: 9000,
+            },
+        });
     }
 }
 
@@ -593,7 +660,7 @@ export class VoiceStore {
         );
     }
 
-    get currentVideoDevice() {
+    get currentCameraDevice() {
         return this.cameras.find(
             (dev) => dev.deviceId === this.currentCameraDeviceId,
         );
@@ -714,7 +781,7 @@ export class VoiceStore {
 
         this.session.setInputDeviceId(this.currentInputDeviceId ?? null);
         this.session.setOutputDeviceId(this.currentOutputDeviceId ?? null);
-        this.session.setVideoDeviceId(this.currentCameraDeviceId ?? null);
+        this.session.setCameraDeviceId(this.currentCameraDeviceId ?? null);
 
         this.session.setSelfMute(this.selfMute);
         this.session.setSelfDeaf(this.selfDeaf);
@@ -724,22 +791,25 @@ export class VoiceStore {
         this.startKeepAlive();
     }
 
-    setInputDevice(deviceId: string) {
+    setInputDeviceId(deviceId: string) {
         this.currentInputDeviceId = deviceId;
         this.session.setInputDeviceId(deviceId);
 
         if (this.connectionStatus === "connected")
-            void this.session.restartMic();
+            void this.session.restartDevices();
     }
 
-    setOutputDevice(deviceId: string) {
+    setOutputDeviceId(deviceId: string) {
         this.currentOutputDeviceId = deviceId;
         this.session.setOutputDeviceId(deviceId);
     }
 
-    setVideoDevice(deviceId: string) {
+    setCameraDeviceId(deviceId: string) {
         this.currentCameraDeviceId = deviceId;
-        this.session.setVideoDeviceId(deviceId);
+        this.session.setCameraDeviceId(deviceId);
+
+        if (this.connectionStatus === "connected")
+            void this.session.restartDevices();
     }
 
     async leave() {
@@ -896,7 +966,7 @@ export class VoiceStore {
                 this.session.setOutputDeviceId(
                     this.currentOutputDeviceId ?? null,
                 );
-                this.session.setVideoDeviceId(
+                this.session.setCameraDeviceId(
                     this.currentCameraDeviceId ?? null,
                 );
 
@@ -971,7 +1041,7 @@ export class VoiceStore {
 
         this.session.setInputDeviceId(this.currentInputDeviceId ?? null);
         this.session.setOutputDeviceId(this.currentOutputDeviceId ?? null);
-        this.session.setVideoDeviceId(this.currentCameraDeviceId ?? null);
+        this.session.setCameraDeviceId(this.currentCameraDeviceId ?? null);
     }
 
     private waitForVoiceServerUpdate() {

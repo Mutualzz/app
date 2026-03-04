@@ -1,9 +1,9 @@
 import { Paper } from "@components/Paper";
 import { useModal } from "@contexts/Modal.context";
 import {
-    useSpaceSettings,
     type SpaceSettingsPage,
-} from "@contexts/SpaceSettings.context";
+    useSpaceSettings,
+} from "@components/SpaceSettings/SpaceSettings.context.tsx";
 import { useAppStore } from "@hooks/useStores";
 import { IconButton, Stack, Typography } from "@mutualzz/ui-web";
 import type { Space } from "@stores/objects/Space";
