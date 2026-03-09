@@ -203,45 +203,34 @@ export class ChannelStore {
         });
     }
 
-    async applyReorder(
-        spaceId: Snowflake,
-        parentId: Snowflake | null,
-        orderedIds: Snowflake[],
-    ) {
-        const updates = orderedIds
-            .map((id, idx) => {
-                const channel = this.channels.get(id);
-                if (!channel) return null;
+    setChannelOrder(spaceId: Snowflake, newOrder: Channel[]) {
+        let currentCategory: Channel | null = null;
 
-                if (parentId == null) {
-                    channel.parentId = null;
-                    channel.setParent(null);
-                } else {
-                    const parent = this.channels.get(parentId) ?? null;
-                    channel.parentId = parentId;
-                    channel.setParent(parent);
-                }
+        const order = newOrder.map((channel, index) => {
+            if (channel.type === ChannelType.Category) {
+                currentCategory = channel;
+                channel.setParent(null);
+                channel.position = index;
+            } else {
+                channel.setParent(currentCategory);
+                channel.position = index;
+            }
 
-                channel.position = idx;
-                this.channels.set(channel.id, channel);
+            this.channels.set(channel.id, channel);
 
-                return {
-                    id: channel.id,
-                    parentId,
-                    position: idx,
-                };
-            })
-            .filter(Boolean) as {
-            id: Snowflake;
-            parentId: Snowflake | null;
-            position: number;
-        }[];
+            return channel;
+        });
 
-        if (updates.length === 0) return;
+        const payload = order.map((channel) => ({
+            id: channel.id,
+            parentId: channel.parentId ? channel.parentId : null,
+            position: channel.position,
+        }));
 
-        return this.app.rest.patch(`/channels/bulk`, {
+        // Update the channels in the backend as well
+        this.app.rest.patch(`/channels/bulk`, {
             spaceId,
-            channels: updates,
+            channels: payload,
         });
     }
 

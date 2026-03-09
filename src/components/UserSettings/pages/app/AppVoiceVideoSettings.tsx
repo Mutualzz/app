@@ -11,19 +11,54 @@ import {
 import { useAppStore } from "@hooks/useStores.ts";
 import { Paper } from "@components/Paper.tsx";
 import { Button } from "@components/Button.tsx";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { FaX } from "react-icons/fa6";
 import { TooltipWrapper } from "@components/TooltipWrapper.tsx";
 
 export const AppVoiceVideoSettings = observer(() => {
     const app = useAppStore();
     const [showCamera, setShowCamera] = useState(false);
+    const [testStream, setTestStream] = useState<MediaStream | null>(null);
+    const videoRef = useRef<HTMLVideoElement>(null);
 
     const voice = app.voice;
 
     const inputs = voice.inputs;
     const outputs = voice.outputs;
     const cameras = voice.cameras;
+
+    useEffect(() => {
+        if (!showCamera || !voice.currentCameraDeviceId) return;
+
+        const startTest = async () => {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: { deviceId: voice.currentCameraDeviceId! },
+                    audio: false,
+                });
+
+                setTestStream(stream);
+
+                if (videoRef.current) {
+                    videoRef.current.srcObject = stream;
+                    await videoRef.current.play();
+                }
+            } catch (err) {
+                console.error("Failed to start camera test:", err);
+            }
+        };
+
+        void startTest();
+
+        return () => {
+            if (testStream) {
+                for (const track of testStream.getTracks()) {
+                    track.stop();
+                }
+                setTestStream(null);
+            }
+        };
+    }, [showCamera, voice.currentCameraDeviceId]);
 
     return (
         <Stack spacing={25} mt={7.5} mx={50} direction="column">
@@ -109,14 +144,20 @@ export const AppVoiceVideoSettings = observer(() => {
                         justifyContent="center"
                         alignItems="center"
                         elevation={5}
-                        width={480}
-                        height={270}
+                        width="100%"
+                        maxWidth={560}
+                        height={315}
                         position="relative"
+                        css={{
+                            overflow: "hidden",
+                            backgroundColor: "#000",
+                        }}
                     >
                         {!showCamera && (
                             <Stack direction="column" spacing={2.5}>
                                 <Button
                                     color="primary"
+                                    disabled={cameras.length === 0}
                                     onClick={() => setShowCamera(true)}
                                 >
                                     Test Camera
@@ -149,6 +190,17 @@ export const AppVoiceVideoSettings = observer(() => {
                         )}
                         {showCamera && (
                             <>
+                                <video
+                                    ref={videoRef}
+                                    autoPlay
+                                    playsInline
+                                    muted
+                                    style={{
+                                        width: "100%",
+                                        height: "100%",
+                                        objectFit: "cover",
+                                    }}
+                                />
                                 <Tooltip
                                     content={
                                         <TooltipWrapper>

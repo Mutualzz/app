@@ -499,20 +499,46 @@ class MediasoupSession {
         this.consumersByProducerId.set(producerId, consumer);
 
         const stream = new MediaStream([consumer.track]);
-        const audio = new Audio();
-        audio.srcObject = stream;
-        audio.autoplay = true;
-        audio.muted = this.isDeafened;
 
-        if (this.currentOutputDeviceId)
-            await audio.setSinkId(this.currentOutputDeviceId);
+        // Handle video consumers
+        if (consumer.kind === "video") {
+            const video = document.createElement("video");
+            video.srcObject = stream;
+            video.autoplay = true;
+            video.playsInline = true;
 
-        this.audioByProducerId.set(producerId, audio);
+            if (this.currentOutputDeviceId) {
+                await video
+                    .setSinkId(this.currentOutputDeviceId)
+                    .catch((err) =>
+                        this.logger.warn("setSinkId failed for video", err),
+                    );
+            }
 
-        try {
-            await audio.play();
-        } catch (err) {
-            this.logger.warn("Voice audio.play() blocked or failed", err);
+            this.cameraByProducerId.set(producerId, video);
+
+            try {
+                await video.play();
+            } catch (err) {
+                this.logger.warn("Voice video.play() blocked or failed", err);
+            }
+        } else {
+            // Handle audio consumers
+            const audio = new Audio();
+            audio.srcObject = stream;
+            audio.autoplay = true;
+            audio.muted = this.isDeafened;
+
+            if (this.currentOutputDeviceId)
+                await audio.setSinkId(this.currentOutputDeviceId);
+
+            this.audioByProducerId.set(producerId, audio);
+
+            try {
+                await audio.play();
+            } catch (err) {
+                this.logger.warn("Voice audio.play() blocked or failed", err);
+            }
         }
 
         await this.request(VoiceOpcodes.VoiceResumeConsumer, {
@@ -531,9 +557,9 @@ class MediasoupSession {
                 autoGainControl: true,
                 deviceId: this.currentInputDeviceId ?? undefined,
             },
-            video: {
-                deviceId: this.currentCameraDeviceId ?? undefined,
-            },
+            video: this.currentCameraDeviceId
+                ? { deviceId: this.currentCameraDeviceId }
+                : false,
         });
 
         if (attemptId !== this.connectAttemptId) {
@@ -541,29 +567,29 @@ class MediasoupSession {
             throw this.cancelledError();
         }
 
-        const inputTrack = media.getTrackById(this.currentInputDeviceId ?? "");
-        if (!inputTrack) {
+        const audioTracks = media.getAudioTracks();
+        if (!audioTracks.length) {
             this.setSelfMute(true);
             return;
         }
 
-        this.micTrack = inputTrack;
+        this.micTrack = audioTracks[0];
 
         this.micProducer = await this.sendTransport.produce({
-            track: inputTrack,
+            track: this.micTrack,
             codecOptions: { opusStereo: true, opusDtx: true },
         });
 
         this.setSelfMute(this.isMuted);
 
-        const cameraTrack = media.getTrackById(
-            this.currentCameraDeviceId ?? "",
-        );
-        if (!cameraTrack) return;
+        if (!this.currentCameraDeviceId) return;
 
-        this.cameraTrack = cameraTrack;
+        const videoTracks = media.getVideoTracks();
+        if (!videoTracks.length) return;
+
+        this.cameraTrack = videoTracks[0];
         this.cameraProducer = await this.sendTransport.produce({
-            track: cameraTrack,
+            track: this.cameraTrack,
             codecOptions: {
                 videoGoogleStartBitrate: 1000,
                 videoGoogleMaxBitrate: 9000,
@@ -587,6 +613,9 @@ export class VoiceStore {
 
     preferredSelfMute = false;
     preferredSelfDeaf = false;
+
+    cameraEnabled = false;
+
     channelStates = observable.map<
         Snowflake,
         ObservableMap<Snowflake, VoiceState>
@@ -634,6 +663,7 @@ export class VoiceStore {
                 "currentInputDeviceId",
                 "currentOutputDeviceId",
                 "currentCameraDeviceId",
+                "cameraEnabled",
             ],
             storage: safeLocalStorage,
         });
@@ -806,10 +836,45 @@ export class VoiceStore {
 
     setCameraDeviceId(deviceId: string) {
         this.currentCameraDeviceId = deviceId;
+
+        if (!this.cameraEnabled) {
+            this.cameraEnabled = true;
+        }
+
         this.session.setCameraDeviceId(deviceId);
 
         if (this.connectionStatus === "connected")
             void this.session.restartDevices();
+    }
+
+    toggleCamera() {
+        runInAction(() => {
+            this.cameraEnabled = !this.cameraEnabled;
+
+            if (this.cameraEnabled && !this.currentCameraDeviceId) {
+                const defaultCamera =
+                    this.cameras.find(
+                        (device) => device.deviceId === "default",
+                    ) ?? this.cameras[0];
+
+                if (defaultCamera) {
+                    this.currentCameraDeviceId = defaultCamera.deviceId;
+                }
+            }
+
+            if (this.cameraEnabled) {
+                this.session.setCameraDeviceId(
+                    this.currentCameraDeviceId ?? null,
+                );
+            } else {
+                this.session.setCameraDeviceId(null);
+            }
+
+            // Restart devices if connected
+            if (this.connectionStatus === "connected") {
+                void this.session.restartDevices();
+            }
+        });
     }
 
     async leave() {
@@ -830,6 +895,8 @@ export class VoiceStore {
                     : this.preferredSelfMute;
 
             if (this.selfDeaf) this.selfMute = true;
+
+            this.cameraEnabled = false;
         });
 
         this.sendVoiceStateUpdate();
@@ -856,6 +923,8 @@ export class VoiceStore {
 
             this.preferredSelfMute = false;
             this.preferredSelfDeaf = false;
+
+            this.cameraEnabled = false;
 
             this.channelStates.clear();
         });
@@ -1031,17 +1100,20 @@ export class VoiceStore {
                         device.deviceId === "default",
                 )?.deviceId;
 
-            if (!this.currentCameraDeviceId)
+            if (this.cameraEnabled && !this.currentCameraDeviceId) {
                 this.currentCameraDeviceId = mediaDeviceInfos.find(
                     (device) =>
                         device.kind === "videoinput" &&
                         device.deviceId === "default",
                 )?.deviceId;
+            }
         });
 
         this.session.setInputDeviceId(this.currentInputDeviceId ?? null);
         this.session.setOutputDeviceId(this.currentOutputDeviceId ?? null);
-        this.session.setCameraDeviceId(this.currentCameraDeviceId ?? null);
+        this.session.setCameraDeviceId(
+            this.cameraEnabled ? (this.currentCameraDeviceId ?? null) : null,
+        );
     }
 
     private waitForVoiceServerUpdate() {

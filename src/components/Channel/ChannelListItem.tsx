@@ -29,7 +29,6 @@ interface Props extends PaperProps {
     onToggleCollapse?: (channelId: string) => void;
 }
 
-// TODO: Fix users not updating in voice channels when they leave
 export const ChannelListItem = observer(
     ({
         channel,
@@ -47,7 +46,6 @@ export const ChannelListItem = observer(
         const [wrapperHovered, setWrapperHovered] = useState(false);
 
         const isCategory = channel.type === ChannelType.Category;
-        const isText = channel.type === ChannelType.Text;
         const isVoice = channel.type === ChannelType.Voice;
 
         const canModifyChannel =
@@ -71,19 +69,17 @@ export const ChannelListItem = observer(
                 return;
             }
 
-            if (isText) {
-                if (active) return;
-                navigate({
-                    to: "/spaces/$spaceId/$channelId",
-                    params: { spaceId: space.id, channelId: channel.id },
-                });
-                return;
-            }
-
             if (isVoice) {
                 if (isActiveVoiceChannel) return;
                 app.voice.join(space.id, channel.id);
             }
+
+            if (active) return;
+
+            navigate({
+                to: "/spaces/$spaceId/$channelId",
+                params: { spaceId: space.id, channelId: channel.id },
+            });
         };
 
         const voiceStates = Array.from(channel.voiceStates.values());

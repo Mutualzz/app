@@ -3,7 +3,6 @@ import { Logger } from "@mutualzz/logger";
 import { Stack, Typography } from "@mutualzz/ui-web";
 import type { MessageGroup as MessageGroupType } from "@stores/Message.store";
 import type { Channel } from "@stores/objects/Channel";
-import type { Space } from "@stores/objects/Space";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { observer } from "mobx-react-lite";
 import { createContext, useCallback, useRef } from "react";
@@ -13,7 +12,6 @@ import useResizeObserver from "use-resize-observer";
 import { MessageGroup } from "./MessageGroup";
 
 interface Props {
-    space?: Space | null;
     channel?: Channel | null;
 }
 

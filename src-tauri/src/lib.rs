@@ -14,7 +14,7 @@ use tauri_plugin_log::{Target, TargetKind, WEBVIEW_TARGET};
 use tauri_plugin_notification;
 use tauri_plugin_opener;
 use tauri_plugin_os;
-use tauri_plugin_prevent_default;
+use tauri_plugin_prevent_default::PlatformOptions;
 use tauri_plugin_single_instance;
 use tauri_plugin_updater;
 use tauri_plugin_media;
@@ -58,7 +58,25 @@ pub fn run() {
         .plugin(tauri_plugin_clipboard_manager::init())
         .plugin(tauri_plugin_os::init())
         .plugin(tauri_plugin_deep_link::init())
-        .plugin(tauri_plugin_prevent_default::debug())
+        .plugin({
+            #[cfg(debug_assertions)]
+            {
+                tauri_plugin_prevent_default::debug()
+            }
+            #[cfg(not(debug_assertions))]
+            {
+                tauri_plugin_prevent_default::Builder::new()
+                    .platform(
+                        PlatformOptions::new()
+                            .general_autofill(false)
+                            .password_autosave(false)
+                            .browser_accelerator_keys(false)
+                            .default_context_menus(false)
+                            .default_script_dialogs(false),
+                    )
+                    .build()
+            }
+        })
         .plugin(
             tauri_plugin_log::Builder::default()
                 .clear_targets()
@@ -67,11 +85,11 @@ pub fn run() {
                     Target::new(TargetKind::LogDir {
                         file_name: Some("webview".into()),
                     })
-                    .filter(|metadata| metadata.target() == WEBVIEW_TARGET),
+                        .filter(|metadata| metadata.target() == WEBVIEW_TARGET),
                     Target::new(TargetKind::LogDir {
                         file_name: Some("rust".into()),
                     })
-                    .filter(|metadata| metadata.target() != WEBVIEW_TARGET),
+                        .filter(|metadata| metadata.target() != WEBVIEW_TARGET),
                 ])
                 .format(move |out, message, record| {
                     out.finish(format_args!(

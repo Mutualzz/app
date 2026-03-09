@@ -32,9 +32,13 @@ function RouteComponent() {
     }, [app.channels.activeId, app.spaces.activeId]);
 
     useEffect(() => {
-        app.spaces.setActive(spaceId);
-        app.channels.setActive(channelId);
+        runInAction(() => {
+            app.spaces.setActive(spaceId);
+            app.channels.setActive(channelId);
+        });
     }, [spaceId, channelId]);
+
+    const activeChannel = app.channels.active;
 
     return (
         <Paper
@@ -46,7 +50,7 @@ function RouteComponent() {
             borderRight="0 !important"
             borderBottom="0 !important"
         >
-            {!app.channels.active && (
+            {!activeChannel && (
                 <Stack
                     direction="column"
                     flex="1 1 auto"
@@ -70,9 +74,9 @@ function RouteComponent() {
                     </Typography>
                 </Stack>
             )}
-            {app.channels.active && (
+            {activeChannel && (
                 <>
-                    <ChannelHeader channel={app.channels.active} />
+                    <ChannelHeader channel={activeChannel} />
                     <Stack direction="row" flex="1 1 auto" overflow="hidden">
                         <Stack
                             direction="column"
@@ -80,11 +84,8 @@ function RouteComponent() {
                             position="relative"
                             overflow="hidden"
                         >
-                            <MessageList
-                                space={app.spaces.active}
-                                channel={app.channels.active}
-                            />
-                            <MessageInput channel={app.channels.active} />
+                            <MessageList channel={activeChannel} />
+                            <MessageInput channel={activeChannel} />
                         </Stack>
                         {app.memberListVisible && <MemberList />}
                     </Stack>

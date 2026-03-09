@@ -1,4 +1,4 @@
-import { IconButton } from "@mutualzz/ui-web";
+import { IconButton } from "@components/IconButton";
 import { motion } from "motion/react";
 
 export const AnimatedIconButton = motion.create(IconButton);

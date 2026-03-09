@@ -41,7 +41,10 @@ export async function buildDesktopPresenceFromProcesses(): Promise<PresenceUpdat
 
     let processes: RunningProcess[] = [];
     try {
-        processes = (await invoke("list_processes")) as RunningProcess[];
+        const gameExes = GAME_CATALOG.map((g) => g.exe);
+        processes = (await invoke("list_processes", {
+            filterExes: gameExes,
+        })) as RunningProcess[];
     } catch {
         return { status: "online", device: "desktop", activities: [] };
     }

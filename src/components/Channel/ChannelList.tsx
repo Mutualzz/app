@@ -3,13 +3,13 @@ import { SpaceContextMenu } from "@components/ContextMenus/SpaceContextMenu.tsx"
 import { SpaceInviteToSpaceModal } from "@components/Space/SpaceInviteToSpaceModal.tsx";
 import { TooltipWrapper } from "@components/TooltipWrapper.tsx";
 import { useModal } from "@contexts/Modal.context.tsx";
+import { useMenu } from "@contexts/ContextMenu.context.tsx";
 import {
     closestCenter,
     DndContext,
     type DragEndEvent,
     DragOverlay,
     PointerSensor,
-    useDroppable,
     useSensor,
     useSensors,
 } from "@dnd-kit/core";
@@ -29,7 +29,6 @@ import { useAppStore } from "@hooks/useStores.ts";
 import { contextMenu } from "@mutualzz/contexify";
 import { ChannelType } from "@mutualzz/types";
 import {
-    Box,
     ButtonGroup,
     Portal,
     Stack,
@@ -40,12 +39,11 @@ import type { Channel } from "@stores/objects/Channel.ts";
 import type { Space } from "@stores/objects/Space.ts";
 import { runInAction } from "mobx";
 import { observer } from "mobx-react-lite";
-import { type MouseEvent, type ReactNode, useMemo, useState } from "react";
+import { type MouseEvent, useState } from "react";
 import { FaChevronDown, FaUserPlus } from "react-icons/fa";
 import { ChannelListItem } from "./ChannelListItem.tsx";
 import { ChannelListContextMenu } from "../ContextMenus/ChannelListContextMenu.tsx";
 import { IconButton } from "@components/IconButton.tsx";
-import { useMenu } from "@contexts/ContextMenu.context.tsx";
 
 interface SortableChannelItemProps {
     channel: Channel;
@@ -53,7 +51,6 @@ interface SortableChannelItemProps {
     isCollapsed: boolean;
     space: Space;
     onToggleCollapse?: () => void;
-    [key: string]: any;
 }
 
 const SortableChannelItem = observer(
@@ -74,11 +71,6 @@ const SortableChannelItem = observer(
             isDragging,
         } = useSortable({
             id: channel.id,
-            data: {
-                containerId: props.containerId,
-                type: channel.type,
-                parentId: channel.parent?.id ?? null,
-            },
         });
 
         return (
@@ -90,7 +82,9 @@ const SortableChannelItem = observer(
                     opacity: isDragging ? 0.5 : 1,
                     zIndex: isDragging ? 999 : undefined,
                     marginTop:
-                        channel.type === ChannelType.Category ? 0 : "0.5rem",
+                        channel.type === ChannelType.Category
+                            ? "1rem"
+                            : "0.5rem",
                 }}
                 {...attributes}
                 {...listeners}
@@ -108,30 +102,45 @@ const SortableChannelItem = observer(
     },
 );
 
-function sortByPosition(a: Channel, b: Channel) {
-    return (a.position ?? 0) - (b.position ?? 0);
+function flattenChannels(
+    allChannels: Channel[],
+    collapsedCategories: Set<string>,
+): Channel[] {
+    const rootChannels = allChannels
+        .filter((c) => !c.parentId)
+        .sort((a, b) => (a.position ?? 0) - (b.position ?? 0));
+
+    const result: Channel[] = [];
+
+    for (const channel of rootChannels) {
+        result.push(channel);
+
+        if (channel.type === ChannelType.Category) {
+            const isCollapsed = collapsedCategories.has(channel.id);
+
+            if (!isCollapsed) {
+                const children = allChannels
+                    .filter((c) => c.parentId === channel.id)
+                    .sort((a, b) => (a.position ?? 0) - (b.position ?? 0));
+                result.push(...children);
+            }
+        }
+    }
+
+    return result;
 }
 
-function Container({ id, children }: { id: string; children: ReactNode }) {
-    const { setNodeRef } = useDroppable({ id });
-    return (
-        <Stack
-            spacing={id === "container:root" ? 5 : 1.25}
-            direction="column"
-            ref={setNodeRef}
-        >
-            {children}
-        </Stack>
-    );
+function getAllCategoryChildren(
+    allChannels: Channel[],
+    categoryId: string,
+): Channel[] {
+    const category = allChannels.find((c) => c.id === categoryId);
+    if (!category) return [];
+
+    const children = allChannels.filter((c) => c.parentId === categoryId);
+    return [category, ...children];
 }
 
-interface DragData {
-    containerId?: string;
-    type?: number;
-    parentId?: string | null;
-}
-
-// TODO: Fix a bug where you cant drag a channel outside its category
 export const ChannelList = observer(() => {
     const app = useAppStore();
     const { openContextMenu } = useMenu();
@@ -144,33 +153,22 @@ export const ChannelList = observer(() => {
         useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
     );
 
-    const canManage = useMemo(
-        () => app.spaces.active?.members.me?.hasPermission("ManageChannels"),
-        [app.spaces.active?.members.me],
-    );
-
     const space = app.spaces.active;
     if (!space) return null;
 
     const visibleChannels = space.visibleChannels;
     const activeChannel = app.channels.active;
 
-    const rootChannels = visibleChannels
-        .filter((c) => !c.parent)
-        .slice()
-        .sort(sortByPosition);
+    const collapsedCategories = new Set<string>();
+    visibleChannels
+        .filter((c) => c.type === ChannelType.Category)
+        .forEach((c) => {
+            if (app.channels.isCategoryCollapsed(space.id, c.id)) {
+                collapsedCategories.add(c.id);
+            }
+        });
 
-    const categories = rootChannels.filter(
-        (c) => c.type === ChannelType.Category,
-    );
-
-    const childrenByCategory: Record<string, Channel[]> = {};
-    for (const category of categories) {
-        childrenByCategory[category.id] = visibleChannels
-            .filter((c) => c.parent?.id === category.id)
-            .slice()
-            .sort(sortByPosition);
-    }
+    const flatChannels = flattenChannels(visibleChannels, collapsedCategories);
 
     const toggleCategory = (categoryId: string) => {
         app.channels.toggleCategoryCollapse(space.id, categoryId);
@@ -181,110 +179,74 @@ export const ChannelList = observer(() => {
         setActiveId(null);
         if (!over || active.id === over.id) return;
 
-        const activeIdStr = String(active.id);
-        const overIdStr = String(over.id);
-
-        const activeData = active.data.current as DragData | undefined;
-        const overData = over.data.current as DragData | undefined;
-
-        const activeType = activeData?.type;
-        const fromContainer = activeData?.containerId ?? "root";
-
-        let toContainer = overData?.containerId ?? "root";
-
-        // Dropping onto a container area (including empty categories)
-        if (overIdStr.startsWith("container:"))
-            toContainer = overIdStr.slice("container:".length);
-
-        if (
-            activeType !== ChannelType.Category &&
-            overData?.type === ChannelType.Category
-        )
-            toContainer = `category:${overIdStr}`;
-
-        // Categories should only live in the root container.
-        if (activeType === ChannelType.Category) toContainer = "root";
-
-        let rootOverId = overIdStr;
-        if (
-            activeType === ChannelType.Category &&
-            overData?.containerId?.startsWith("category:")
-        )
-            rootOverId = overData.parentId ?? overIdStr;
-
-        const rootIds = rootChannels.map((c) => c.id);
-        const childIdsByCategory: Record<string, string[]> = {};
-        for (const category of categories)
-            childIdsByCategory[category.id] = (
-                childrenByCategory[category.id] ?? []
-            ).map((c) => c.id);
-
-        const getIdsForContainer = (containerId: string): string[] => {
-            if (containerId === "root") return [...rootIds];
-
-            if (containerId.startsWith("category:")) {
-                const catId = containerId.slice("category:".length);
-                return [...(childIdsByCategory[catId] ?? [])];
-            }
-
-            return [];
-        };
-
-        const setIdsForContainer = (containerId: string, ids: string[]) => {
-            if (containerId === "root") {
-                app.channels.applyReorder(space.id, null, ids);
-                return;
-            }
-
-            if (containerId.startsWith("category:")) {
-                const catId = containerId.slice("category:".length);
-                app.channels.applyReorder(space.id, catId, ids);
-            }
-        };
+        const oldIndex = flatChannels.findIndex((c) => c.id === active.id);
+        const newIndex = flatChannels.findIndex((c) => c.id === over.id);
+        if (oldIndex === -1 || newIndex === -1) return;
 
         runInAction(() => {
-            const sourceIds = getIdsForContainer(fromContainer);
-            const destIds = getIdsForContainer(toContainer);
+            const movingChannel = flatChannels[oldIndex];
 
-            const isOverContainer = overIdStr.startsWith("container:");
+            let newOrder: Channel[];
 
-            if (fromContainer === toContainer) {
-                const currentIds =
-                    fromContainer === "root" ? sourceIds : destIds;
-                const oldIndex = currentIds.indexOf(activeIdStr);
-                const newIndex =
-                    fromContainer === "root"
-                        ? currentIds.indexOf(rootOverId)
-                        : currentIds.indexOf(overIdStr);
-                if (oldIndex === -1 || newIndex === -1) return;
+            if (movingChannel.type === ChannelType.Category) {
+                const group = getAllCategoryChildren(
+                    visibleChannels,
+                    movingChannel.id,
+                );
 
-                const next = arrayMove(currentIds, oldIndex, newIndex);
-                setIdsForContainer(fromContainer, next);
-                return;
+                newOrder = flatChannels.filter((c) => !group.includes(c));
+
+                let insertAt = newIndex;
+                if (newIndex > oldIndex) {
+                    const visibleGroupSize = group.filter((c) =>
+                        flatChannels.includes(c),
+                    ).length;
+                    insertAt = newIndex - visibleGroupSize + 1;
+                }
+
+                const visibleGroup = group.filter((c) =>
+                    flatChannels.includes(c),
+                );
+                newOrder.splice(insertAt, 0, ...visibleGroup);
+            } else {
+                newOrder = arrayMove(flatChannels, oldIndex, newIndex);
             }
 
-            const fromIndex = sourceIds.indexOf(activeIdStr);
-            if (fromIndex !== -1) sourceIds.splice(fromIndex, 1);
+            const completeOrder: Channel[] = [];
+            let currentCategory: Channel | null = null;
 
-            let insertIndex = destIds.length;
-            if (!isOverContainer) {
-                if (overData?.type !== ChannelType.Category) {
-                    const idx = destIds.indexOf(overIdStr);
-                    if (idx !== -1) insertIndex = idx;
+            for (const channel of newOrder) {
+                if (channel.type === ChannelType.Category) {
+                    currentCategory = channel;
+                    completeOrder.push(channel);
+
+                    const allChildren = visibleChannels
+                        .filter((c) => c.parentId === channel.id)
+                        .sort((a, b) => (a.position ?? 0) - (b.position ?? 0));
+                    completeOrder.push(...allChildren);
+                } else {
+                    completeOrder.push(channel);
                 }
             }
-            destIds.splice(Math.max(0, insertIndex), 0, activeIdStr);
 
-            setIdsForContainer(fromContainer, sourceIds);
-            setIdsForContainer(toContainer, destIds);
+            currentCategory = null;
+            completeOrder.forEach((channel, idx) => {
+                if (channel.type === ChannelType.Category) {
+                    currentCategory = channel;
+                    channel.parentId = null;
+                } else {
+                    channel.parentId = currentCategory?.id ?? null;
+                }
+                channel.position = idx;
+            });
+
+            app.channels.setChannelOrder(space.id, completeOrder);
         });
     };
 
-    const allForOverlay = [
-        ...rootChannels,
-        ...Object.values(childrenByCategory).flat(),
-    ];
-    const activeChannelDrag = allForOverlay.find((c) => c.id === activeId);
+    const activeChannelDrag = flatChannels.find((c) => c.id === activeId);
+    const canMoveChannels =
+        app.spaces.active?.members.me?.hasPermission("ManageChannels");
 
     const showSpaceMenu = (e: MouseEvent) => {
         if (!e.currentTarget) return;
@@ -300,7 +262,6 @@ export const ChannelList = observer(() => {
                     y: Math.round(rect.bottom + 5),
                 },
             );
-
             return;
         }
 
@@ -408,103 +369,32 @@ export const ChannelList = observer(() => {
                             restrictToVerticalAxis,
                         ]}
                     >
-                        <Container id="container:root">
-                            <SortableContext
-                                items={rootChannels.map((c) => c.id)}
-                                strategy={verticalListSortingStrategy}
-                                disabled={!canManage}
-                            >
-                                {rootChannels.map((channel) => {
-                                    const isCategory =
-                                        channel.type === ChannelType.Category;
-                                    const collapsed = isCategory
-                                        ? app.channels.isCategoryCollapsed(
-                                              space.id,
-                                              channel.id,
-                                          )
-                                        : false;
-
-                                    const children = isCategory
-                                        ? (childrenByCategory[channel.id] ?? [])
-                                        : [];
-
-                                    return (
-                                        <Box key={channel.id}>
-                                            <SortableChannelItem
-                                                channel={channel}
-                                                isCategory={isCategory}
-                                                active={
-                                                    activeChannel?.id ===
-                                                    channel.id
-                                                }
-                                                space={space}
-                                                isCollapsed={collapsed}
-                                                containerId="root"
-                                                onToggleCollapse={
-                                                    isCategory
-                                                        ? () =>
-                                                              toggleCategory(
-                                                                  channel.id,
-                                                              )
-                                                        : undefined
-                                                }
-                                            />
-
-                                            {isCategory && !collapsed ? (
-                                                <>
-                                                    <Container
-                                                        id={`container:category:${channel.id}`}
-                                                    >
-                                                        <SortableContext
-                                                            items={children.map(
-                                                                (c) => c.id,
-                                                            )}
-                                                            strategy={
-                                                                verticalListSortingStrategy
-                                                            }
-                                                            disabled={
-                                                                !canManage
-                                                            }
-                                                        >
-                                                            {children.map(
-                                                                (child) => (
-                                                                    <SortableChannelItem
-                                                                        key={
-                                                                            child.id
-                                                                        }
-                                                                        channel={
-                                                                            child
-                                                                        }
-                                                                        isCategory={
-                                                                            false
-                                                                        }
-                                                                        active={
-                                                                            activeChannel?.id ===
-                                                                            child.id
-                                                                        }
-                                                                        space={
-                                                                            space
-                                                                        }
-                                                                        isCollapsed={
-                                                                            false
-                                                                        }
-                                                                        containerId={`category:${channel.id}`}
-                                                                    />
-                                                                ),
-                                                            )}
-                                                        </SortableContext>
-                                                    </Container>
-                                                </>
-                                            ) : null}
-                                        </Box>
-                                    );
-                                })}
-                            </SortableContext>
-                        </Container>
-
+                        <SortableContext
+                            items={flatChannels.map((c) => c.id)}
+                            strategy={verticalListSortingStrategy}
+                            disabled={!canMoveChannels}
+                        >
+                            {flatChannels.map((channel) => (
+                                <SortableChannelItem
+                                    key={channel.id}
+                                    channel={channel}
+                                    active={activeChannel?.id === channel.id}
+                                    space={space}
+                                    isCollapsed={app.channels.isCategoryCollapsed(
+                                        space.id,
+                                        channel.id,
+                                    )}
+                                    onToggleCollapse={
+                                        channel.type === ChannelType.Category
+                                            ? () => toggleCategory(channel.id)
+                                            : undefined
+                                    }
+                                />
+                            ))}
+                        </SortableContext>
                         <Portal>
                             <DragOverlay>
-                                {activeChannelDrag ? (
+                                {activeChannelDrag && (
                                     <ChannelListItem
                                         channel={activeChannelDrag}
                                         active={false}
@@ -517,7 +407,7 @@ export const ChannelList = observer(() => {
                                             opacity: 0.8,
                                         }}
                                     />
-                                ) : null}
+                                )}
                             </DragOverlay>
                         </Portal>
                     </DndContext>
