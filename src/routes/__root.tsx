@@ -227,43 +227,6 @@ function RootComponent() {
         };
     }, []);
 
-    useEffect(() => {
-        if (!isTauri) return;
-        if (!import.meta.env.DEV) return;
-
-        const onKeyDown = (e: KeyboardEvent) => {
-            const modifierOk = (e.metaKey || e.ctrlKey) && e.shiftKey;
-            if (!modifierOk) return;
-
-            const updater = app.updater;
-            if (!updater) return;
-
-            // Stages
-            if (e.key === "1") updater.debugSetStage("downloading");
-            if (e.key === "2") updater.debugSetStage("installing");
-            if (e.key === "6") updater.debugSetStage("relaunching");
-            if (e.key === "0") updater.debugSetStage("idle");
-
-            if (e.key.toLowerCase() === "f")
-                updater.debugSetForceGate(!updater.forceUpdate);
-
-            // Force-gate ON (dev only)
-            if (e.key.toLowerCase() === "g") {
-                updater.debugSetForceGate(true);
-                updater.debugSetStage("downloading");
-            }
-
-            // Force-gate OFF (dev only)
-            if (e.key.toLowerCase() === "h") {
-                updater.debugSetForceGate(false);
-                updater.debugSetStage("idle");
-            }
-        };
-
-        window.addEventListener("keydown", onKeyDown);
-        return () => window.removeEventListener("keydown", onKeyDown);
-    }, []);
-
     const stage = app.updater?.stage;
     const forceGate =
         !!app.updater?.forceUpdate &&

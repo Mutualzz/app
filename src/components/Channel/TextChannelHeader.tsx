@@ -17,7 +17,7 @@ interface Props {
     channel?: Channel | null;
 }
 
-export const ChannelHeader = observer(({ channel }: Props) => {
+export const TextChannelHeader = observer(({ channel }: Props) => {
     const app = useAppStore();
 
     return (

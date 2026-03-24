@@ -6,12 +6,10 @@ import type { AppStore } from "../App.store";
 import { Space } from "../objects/Space";
 
 export class SpaceStore {
-    private readonly spaces: ObservableMap<string, Space>;
-
     active?: Space | null;
     activeId?: Snowflake;
-
     mostRecentSpaceId?: string | null;
+    private readonly spaces: ObservableMap<string, Space>;
 
     constructor(private readonly app: AppStore) {
         this.spaces = observable.map();
@@ -24,50 +22,8 @@ export class SpaceStore {
         });
     }
 
-    setActive(id?: string) {
-        this.active = (id ? this.get(id) : null) ?? null;
-        this.activeId = this.active?.id;
-
-        this.app.channels.setPreferredActive();
-    }
-
-    setPreferredActive() {
-        const preferred = this.mostRecentSpace ?? this.all[0];
-        this.setActive(preferred?.id);
-        return preferred;
-    }
-
-    setMostRecentSpace(id?: string | null) {
-        this.mostRecentSpaceId = id;
-    }
-
     get mostRecentSpace(): Space | undefined {
         return this.spaces.get(this.mostRecentSpaceId ?? "");
-    }
-
-    add(space: APISpace): Space {
-        const exists = this.spaces.get(space.id);
-        if (exists) return exists;
-
-        const newSpace = new Space(this.app, space);
-        this.spaces.set(space.id, newSpace);
-        return newSpace;
-    }
-
-    addAll(spaces: APISpace[]): Space[] {
-        return spaces.map((space) => this.add(space));
-    }
-
-    update(space: APISpace) {
-        this.spaces.get(space.id)?.update(space);
-    }
-
-    get(id: string) {
-        return this.spaces.get(id);
-    }
-
-    remove(id: Snowflake) {
-        this.spaces.delete(id);
     }
 
     get all() {
@@ -93,6 +49,46 @@ export class SpaceStore {
 
     get count() {
         return this.spaces.size;
+    }
+
+    setActive(id?: string) {
+        this.active = (id ? this.get(id) : null) ?? null;
+        this.activeId = this.active?.id;
+    }
+
+    setPreferredActive() {
+        const preferred = this.mostRecentSpace ?? this.all[0];
+        this.setActive(preferred?.id);
+        return preferred;
+    }
+
+    setMostRecentSpace(id?: string | null) {
+        this.mostRecentSpaceId = id;
+    }
+
+    add(space: APISpace): Space {
+        const exists = this.spaces.get(space.id);
+        if (exists) return exists;
+
+        const newSpace = new Space(this.app, space);
+        this.spaces.set(space.id, newSpace);
+        return newSpace;
+    }
+
+    addAll(spaces: APISpace[]): Space[] {
+        return spaces.map((space) => this.add(space));
+    }
+
+    update(space: APISpace) {
+        this.spaces.get(space.id)?.update(space);
+    }
+
+    get(id: string) {
+        return this.spaces.get(id);
+    }
+
+    remove(id: Snowflake) {
+        this.spaces.delete(id);
     }
 
     has(id: string) {

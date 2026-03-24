@@ -276,6 +276,14 @@ export class SpaceMember {
         return this.resolveChannelPermissions(channel).has("ViewChannel");
     }
 
+    canManageChannel(channel: Channel) {
+        return this.resolveChannelPermissions(channel).has("ManageChannels");
+    }
+
+    canInviteToChannel(channel: Channel) {
+        return this.resolveChannelPermissions(channel).has("CreateInvites");
+    }
+
     canSendMessages(channel: Channel) {
         const permissions = this.resolveChannelPermissions(channel);
         return (

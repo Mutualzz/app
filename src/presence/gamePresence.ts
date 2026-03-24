@@ -8,26 +8,33 @@ interface RunningProcess {
 }
 
 interface GameCatalogEntry {
-    exe: string;
+    exes: string[];
     name: string;
+    id: string;
 }
 
-// NOTE: This is a hardcoded catalog of games that we want to support presence for. In the future, we could expand this to be user-configurable, or even query the Windows registry for installed games.
+// NOTE: This is a hardcoded catalog of games that we want to support presence for. In the future, we could expand this to be user-configurable or even query the Windows registry for installed games.
+// 2nd NOTE: we will eventually move them later
 const GAME_CATALOG: GameCatalogEntry[] = [
-    { exe: "cs2.exe", name: "Counter-Strike 2" },
-    { exe: "valorant.exe", name: "VALORANT" },
-    { exe: "minecraft.exe", name: "Minecraft" },
-    { exe: "warframe.x64.exe", name: "Warframe" },
+    { exes: ["cs2.exe"], name: "Counter-Strike 2", id: "counter-strike-2" },
+    { exes: ["valorant.exe"], name: "VALORANT", id: "valorant" },
+    {
+        exes: ["minecraft.exe", "minecraftlauncher.exe"],
+        name: "Minecraft",
+        id: "minecraft",
+    },
+    {
+        exes: ["warframe.x64.exe", "warframe.exe"],
+        name: "Warframe",
+        id: "warframe",
+    },
 ];
 
-function matchGame(processNames: string[]): GameCatalogEntry | null {
-    const lowerSet = new Set(
-        processNames.map((processName) => processName.toLowerCase()),
+function matchGames(processNames: string[]): GameCatalogEntry[] {
+    const lowerSet = new Set(processNames.map((p) => p.toLowerCase()));
+    return GAME_CATALOG.filter((entry) =>
+        entry.exes.some((exe) => lowerSet.has(exe)),
     );
-    for (const entry of GAME_CATALOG) {
-        if (lowerSet.has(entry.exe)) return entry;
-    }
-    return null;
 }
 
 export interface PresenceUpdateDraft {
@@ -41,7 +48,8 @@ export async function buildDesktopPresenceFromProcesses(): Promise<PresenceUpdat
 
     let processes: RunningProcess[] = [];
     try {
-        const gameExes = GAME_CATALOG.map((g) => g.exe);
+        const gameExes = GAME_CATALOG.flatMap((g) => g.exes);
+
         processes = (await invoke("list_processes", {
             filterExes: gameExes,
         })) as RunningProcess[];
@@ -50,19 +58,17 @@ export async function buildDesktopPresenceFromProcesses(): Promise<PresenceUpdat
     }
 
     const processNames = processes.map((proc) => proc.name);
-    const game = matchGame(processNames);
+    const games = matchGames(processNames);
 
-    if (!game) return { status: "online", device: "desktop", activities: [] };
+    if (!games.length)
+        return { status: "online", device: "desktop", activities: [] };
 
     return {
         status: "online",
         device: "desktop",
-        activities: [
-            {
-                type: "playing",
-                name: game.name,
-                timestamps: { start: Date.now() },
-            },
-        ],
+        activities: games.map((game) => ({
+            type: "playing",
+            name: game.name,
+        })),
     };
 }

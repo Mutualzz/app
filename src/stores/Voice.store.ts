@@ -12,17 +12,18 @@ import {
     VoiceDispatchEvents,
     type VoiceOpcode,
     VoiceOpcodes,
-    type VoiceState,
 } from "@mutualzz/types";
 import type { AppStore } from "@stores/App.store.ts";
 import type {
     VoiceServerUpdatePayload,
     VoiceStateSyncPayload,
+    VoiceTarget,
 } from "@app-types/index.ts";
 import { isSSR } from "@utils/index.ts";
 import { makePersistable } from "mobx-persist-store";
 import { safeLocalStorage } from "@utils/safeLocalStorage.ts";
 import { Logger } from "@mutualzz/logger";
+import { VoiceState } from "@stores/objects/VoiceState.ts";
 
 export type VoiceConnectionStatus =
     | "idle"
@@ -601,21 +602,14 @@ class MediasoupSession {
 export class VoiceStore {
     voiceEndpoint: string | null = null;
     voiceToken: string | null = null;
-
-    currentSpaceId: Snowflake | null = null;
-    currentChannelId: Snowflake | null = null;
-
+    currentVoiceTarget: VoiceTarget | null = null;
     selfMute = false;
     selfDeaf = false;
-
     spaceMute = false;
     spaceDeaf = false;
-
     preferredSelfMute = false;
     preferredSelfDeaf = false;
-
     cameraEnabled = false;
-
     channelStates = observable.map<
         Snowflake,
         ObservableMap<Snowflake, VoiceState>
@@ -638,7 +632,7 @@ export class VoiceStore {
 
     constructor(private readonly app: AppStore) {
         this.session = new MediasoupSession(() => {
-            if (this.currentSpaceId && this.currentChannelId) {
+            if (this.currentChannelId) {
                 runInAction(() => {
                     this.connectionStatus = "reconnecting";
                     this.connectionError = null;
@@ -669,13 +663,33 @@ export class VoiceStore {
         });
     }
 
+    get currentChannelId() {
+        return this.currentVoiceTarget?.channelId ?? null;
+    }
+
+    get currentSpaceId() {
+        return this.currentVoiceTarget?.spaceId ?? null;
+    }
+
     get channel() {
-        if (!this.currentSpaceId || !this.currentChannelId) return null;
-        const space = this.app.spaces.get(this.currentSpaceId);
-        if (!space) return null;
-        return (
-            space.channels.find((ch) => ch.id === this.currentChannelId) ?? null
-        );
+        const channelId = this.currentChannelId;
+        if (!channelId) return null;
+
+        const spaceId = this.currentSpaceId;
+        const space = spaceId ? this.app.spaces.get(spaceId) : null;
+
+        if (space)
+            return space.channels.find((ch) => ch.id === channelId) ?? null;
+
+        return this.app.channels.get(channelId) ?? null;
+    }
+
+    get hasActiveVoiceTarget() {
+        return !!this.currentVoiceTarget;
+    }
+
+    get isInSpaceVoice() {
+        return !!this.currentSpaceId;
     }
 
     get currentInputDevice() {
@@ -725,18 +739,23 @@ export class VoiceStore {
         if (syncedChannel) syncedChannel.voiceStates.clear();
 
         for (const state of payload.states) {
-            statesByUserId.set(state.userId, state);
+            const newState = new VoiceState(this.app, state);
 
-            this.syncSelfFromState(state);
+            statesByUserId.set(state.userId, newState);
 
-            const stateSpace = this.app.spaces.get(state.spaceId);
-            if (!stateSpace) continue;
+            this.syncSelfFromState(newState);
 
-            const member = stateSpace.members.get(state.userId);
-            if (member) member.setVoiceState(state);
+            if (state.spaceId) {
+                const stateSpace = this.app.spaces.get(state.spaceId);
+                if (!stateSpace) continue;
 
-            if (syncedChannel && state.channelId === payload.channelId)
-                syncedChannel.voiceStates.set(state.userId, state);
+                const member = stateSpace.members.get(state.userId);
+                if (member) member.setVoiceState(state);
+            }
+
+            if (syncedChannel && state.channelId === payload.channelId) {
+                syncedChannel.voiceStates.set(state.userId, newState);
+            }
         }
 
         this.channelStates.set(payload.channelId, statesByUserId);
@@ -745,7 +764,7 @@ export class VoiceStore {
     onVoiceStateUpdate(state: VoiceState) {
         this.syncSelfFromState(state);
 
-        const space = this.app.spaces.get(state.spaceId);
+        const space = state.spaceId ? this.app.spaces.get(state.spaceId) : null;
 
         const normalizedChannelId =
             state.channelId === "null" ? null : state.channelId;
@@ -768,14 +787,18 @@ export class VoiceStore {
         }
 
         for (const [existingChannelId, userMap] of this.channelStates) {
-            if (existingChannelId !== normalizedChannelId)
+            if (existingChannelId !== normalizedChannelId) {
                 userMap.delete(state.userId);
+            }
         }
 
-        if (space)
-            for (const channelItem of space.channels)
-                if (channelItem.id !== normalizedChannelId)
+        if (space) {
+            for (const channelItem of space.channels) {
+                if (channelItem.id !== normalizedChannelId) {
                     channelItem.voiceStates.delete(state.userId);
+                }
+            }
+        }
 
         let userStatesForChannel = this.channelStates.get(normalizedChannelId);
         if (!userStatesForChannel) {
@@ -787,24 +810,29 @@ export class VoiceStore {
         const channel =
             space?.channels.find(
                 (channelItem) => channelItem.id === normalizedChannelId,
-            ) ?? null;
+            ) ??
+            this.app.channels.get(normalizedChannelId) ??
+            null;
 
         if (channel) channel.voiceStates.set(state.userId, state);
         if (member) member.setVoiceState(state);
     }
 
-    async join(spaceId: Snowflake, channelId: Snowflake) {
+    async join(target: VoiceTarget) {
+        const spaceId = target.spaceId ?? null;
+        const channelId = target.channelId;
+
         if (
-            this.currentSpaceId === spaceId &&
-            this.currentChannelId === channelId
-        )
+            this.currentVoiceTarget?.spaceId === spaceId &&
+            this.currentVoiceTarget?.channelId === channelId
+        ) {
             return;
+        }
 
         await this.leave();
 
         runInAction(() => {
-            this.currentSpaceId = spaceId;
-            this.currentChannelId = channelId;
+            this.currentVoiceTarget = target;
             this.connectionStatus = "signaling";
             this.connectionError = null;
         });
@@ -878,7 +906,7 @@ export class VoiceStore {
     }
 
     async leave() {
-        if (!this.currentSpaceId || !this.currentChannelId) return;
+        if (!this.currentVoiceTarget) return;
 
         this.session.setSelfDeaf(false);
         this.session.setSelfMute(false);
@@ -886,7 +914,7 @@ export class VoiceStore {
         this.clearLocalVoiceStateForMe();
 
         runInAction(() => {
-            this.currentChannelId = null;
+            this.currentVoiceTarget = null;
 
             this.selfDeaf = this.spaceDeaf || this.preferredSelfDeaf;
             this.selfMute =
@@ -910,8 +938,7 @@ export class VoiceStore {
         this.clearLocalVoiceStateForMe();
 
         runInAction(() => {
-            this.currentSpaceId = null;
-            this.currentChannelId = null;
+            this.currentVoiceTarget = null;
             this.voiceEndpoint = null;
             this.voiceToken = null;
 
@@ -1015,8 +1042,7 @@ export class VoiceStore {
         const token = this.voiceToken;
 
         if (!endpoint || !token) return Promise.resolve();
-        if (!this.currentSpaceId || !this.currentChannelId)
-            return Promise.resolve();
+        if (!this.currentVoiceTarget) return Promise.resolve();
 
         if (this.connectPromise) return this.connectPromise;
 
@@ -1183,18 +1209,19 @@ export class VoiceStore {
     }
 
     private clearLocalVoiceStateForMe() {
-        const spaceId = this.currentSpaceId;
         const accountId = this.app.account?.id;
-        if (!spaceId || !accountId) return;
+        if (!accountId) return;
 
-        const space = this.app.spaces.get(spaceId);
-        if (!space) return;
+        const spaceId = this.currentSpaceId;
+        const space = spaceId ? this.app.spaces.get(spaceId) : null;
 
-        const me = space.members.get(accountId) ?? space.members.me;
-        if (me) me.setVoiceState(null);
+        if (space) {
+            const me = space.members.get(accountId) ?? space.members.me;
+            if (me) me.setVoiceState(null);
 
-        for (const channelItem of space.channels) {
-            channelItem.voiceStates.delete(accountId);
+            for (const channelItem of space.channels) {
+                channelItem.voiceStates.delete(accountId);
+            }
         }
 
         for (const [, userMap] of this.channelStates) {
@@ -1203,8 +1230,8 @@ export class VoiceStore {
     }
 
     private sendVoiceStateUpdate() {
-        const spaceId = this.currentSpaceId;
-        if (!spaceId) return;
+        const target = this.currentVoiceTarget;
+        if (!target) return;
 
         const forcedMute = this.spaceMute;
         const forcedDeaf = this.spaceDeaf;
@@ -1216,8 +1243,8 @@ export class VoiceStore {
         this.app.gateway.send({
             op: GatewayOpcodes.VoiceStateUpdate,
             d: {
-                spaceId,
-                channelId: this.currentChannelId,
+                spaceId: target.spaceId ?? undefined,
+                channelId: target.channelId,
                 selfMute: outgoingSelfMute,
                 selfDeaf: outgoingSelfDeaf,
             },

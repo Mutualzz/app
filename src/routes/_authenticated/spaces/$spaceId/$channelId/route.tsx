@@ -1,44 +1,77 @@
-import { ChannelHeader } from "@components/Channel/ChannelHeader";
-import { MemberList } from "@components/MemberList/MemberList";
-import { MessageInput } from "@components/Message/MessageInput";
-import { MessageList } from "@components/Message/MessageList";
 import { Paper } from "@components/Paper";
 import { useAppStore } from "@hooks/useStores";
 import { Stack, Typography } from "@mutualzz/ui-web";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { runInAction } from "mobx";
 import { observer } from "mobx-react-lite";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
+import { TextChannelView } from "@components/Views/TextChannelView.tsx";
+import { VoiceChannelView } from "@components/Views/VoiceChannelView.tsx";
 
 export const Route = createFileRoute(
     "/_authenticated/spaces/$spaceId/$channelId",
 )({
     component: observer(RouteComponent),
+    validateSearch: (search) => ({
+        ...(search.chat !== undefined ? { chat: search.chat } : {}),
+    }),
 });
 
 function RouteComponent() {
     const app = useAppStore();
     const { spaceId, channelId } = Route.useParams();
+    const { chat } = Route.useSearch();
+    const navigate = useNavigate();
+
+    const space = app.spaces.get(spaceId) ?? app.spaces.active;
+    const activeChannel = useMemo(() => {
+        if (!space) return null;
+
+        const channel =
+            space.channels.find((ch) => ch.id === channelId) ??
+            space.visibleChannels.find((ch) => ch.id === channelId) ??
+            null;
+
+        if (!channel) return null;
+        if (channel.isCategory) return null;
+
+        return channel;
+    }, [space, channelId]);
+
+    const openChat = useMemo(
+        () => activeChannel?.isVoiceChannel && chat === true,
+        [chat, activeChannel?.isVoiceChannel],
+    );
 
     useEffect(() => {
-        if (!app.channels.activeId || !app.spaces.activeId) return;
+        if (!space) return;
 
-        runInAction(() => {
-            app.gateway.onChannelOpen(
-                app.spaces.activeId!,
-                app.channels.activeId!,
-            );
-        });
-    }, [app.channels.activeId, app.spaces.activeId]);
+        if (!activeChannel) {
+            navigate({
+                to: "/spaces/$spaceId",
+                params: { spaceId },
+                replace: true,
+            });
+            return;
+        }
 
-    useEffect(() => {
         runInAction(() => {
             app.spaces.setActive(spaceId);
             app.channels.setActive(channelId);
         });
-    }, [spaceId, channelId]);
 
-    const activeChannel = app.channels.active;
+        app.gateway.onChannelOpen(spaceId, channelId);
+    }, [app, navigate, space, activeChannel, spaceId, channelId]);
+
+    if (!activeChannel) {
+        return (
+            <Paper direction="column" flex="1 1 auto" overflow="hidden">
+                <Stack alignItems="center" justifyContent="center" flex="1">
+                    <Typography level="h5">Loading channel…</Typography>
+                </Stack>
+            </Paper>
+        );
+    }
 
     return (
         <Paper
@@ -50,46 +83,11 @@ function RouteComponent() {
             borderRight="0 !important"
             borderBottom="0 !important"
         >
-            {!activeChannel && (
-                <Stack
-                    direction="column"
-                    flex="1 1 auto"
-                    alignItems="center"
-                    justifyContent="center"
-                    spacing={1}
-                >
-                    <Typography level="h5">Why are we still here?</Typography>
-                    <Typography level="h6" fontWeight="bold">
-                        Just to suffer?
-                    </Typography>
-                    <Typography level="body-lg">
-                        Every night, I can feel my leg...
-                    </Typography>
-                    <Typography level="body-md">
-                        And my arm... even my fingers... The body I've lost...
-                    </Typography>
-                    <Typography level="body-xs">
-                        the comrades I've lost... won't stop hurting... It's
-                        like they're all still there.
-                    </Typography>
-                </Stack>
+            {activeChannel.isTextChannel && (
+                <TextChannelView channel={activeChannel} />
             )}
-            {activeChannel && (
-                <>
-                    <ChannelHeader channel={activeChannel} />
-                    <Stack direction="row" flex="1 1 auto" overflow="hidden">
-                        <Stack
-                            direction="column"
-                            flex="1 1 auto"
-                            position="relative"
-                            overflow="hidden"
-                        >
-                            <MessageList channel={activeChannel} />
-                            <MessageInput channel={activeChannel} />
-                        </Stack>
-                        {app.memberListVisible && <MemberList />}
-                    </Stack>
-                </>
+            {activeChannel.isVoiceChannel && (
+                <VoiceChannelView channel={activeChannel} showChat={openChat} />
             )}
         </Paper>
     );

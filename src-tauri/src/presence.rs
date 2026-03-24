@@ -16,7 +16,7 @@ pub fn list_processes(filter_exes: Option<Vec<String>>) -> Vec<RunningProcess> {
 
     for (pid, process) in system.processes() {
         let process_name = process.name().to_string();
-        
+
         // If filter is provided, only include matching processes
         if let Some(ref exes) = filter_exes {
             let name_lower = process_name.to_lowercase();

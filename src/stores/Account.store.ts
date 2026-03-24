@@ -1,19 +1,11 @@
 import { Logger } from "@mutualzz/logger";
 import type { Snowflake } from "@mutualzz/types";
-import {
-    CDNRoutes,
-    ImageFormat,
-    type APIPrivateUser,
-    type AvatarFormat,
-    type Sizes,
-} from "@mutualzz/types";
+import { type APIPrivateUser, type AvatarFormat, CDNRoutes, ImageFormat, type Sizes, } from "@mutualzz/types";
 import { makeAutoObservable } from "mobx";
 import { REST } from "./REST.store";
+import type { AppStore } from "@stores/App.store.ts";
 
 export class AccountStore {
-    private readonly logger = new Logger({
-        tag: "AccountStore",
-    });
     id: Snowflake;
     username: string;
     defaultAvatar: {
@@ -26,10 +18,15 @@ export class AccountStore {
     email?: string | null = null;
     accentColor: string;
     createdAt: Date;
-
     raw: APIPrivateUser;
+    private readonly logger = new Logger({
+        tag: "AccountStore",
+    });
 
-    constructor(user: APIPrivateUser) {
+    constructor(
+        private readonly app: AppStore,
+        user: APIPrivateUser,
+    ) {
         this.id = user.id;
         this.username = user.username;
         this.defaultAvatar = user.defaultAvatar;
@@ -47,6 +44,33 @@ export class AccountStore {
 
     get avatarUrl() {
         return this.constructAvatarUrl(true);
+    }
+
+    get displayName() {
+        return this.globalName || this.username;
+    }
+
+    get presence() {
+        return this.app.presence.get(this.id);
+    }
+
+    get previousAvatarUrls(): Map<string, string> {
+        const map = new Map<string, string>();
+        for (const avatar of this.previousAvatars) {
+            const url = REST.makeCDNUrl(
+                avatar.startsWith("a_")
+                    ? CDNRoutes.userAvatar(this.id, avatar, ImageFormat.GIF)
+                    : CDNRoutes.userAvatar(this.id, avatar, ImageFormat.PNG),
+            );
+            map.set(avatar, url);
+        }
+        return map;
+    }
+
+    get defaultAvatarUrl() {
+        return REST.makeCDNUrl(
+            CDNRoutes.defaultUserAvatar(this.defaultAvatar.type),
+        );
     }
 
     constructAvatarUrl(
@@ -77,10 +101,6 @@ export class AccountStore {
         );
     }
 
-    get displayName() {
-        return this.globalName || this.username;
-    }
-
     removePreviousAvatar(avatar: string) {
         if (!this.previousAvatars.includes(avatar)) {
             this.logger.warn(`Avatar ${avatar} not found in previous avatars.`);
@@ -88,24 +108,5 @@ export class AccountStore {
         }
 
         this.previousAvatars = this.previousAvatars.filter((a) => a !== avatar);
-    }
-
-    get previousAvatarUrls(): Map<string, string> {
-        const map = new Map<string, string>();
-        for (const avatar of this.previousAvatars) {
-            const url = REST.makeCDNUrl(
-                avatar.startsWith("a_")
-                    ? CDNRoutes.userAvatar(this.id, avatar, ImageFormat.GIF)
-                    : CDNRoutes.userAvatar(this.id, avatar, ImageFormat.PNG),
-            );
-            map.set(avatar, url);
-        }
-        return map;
-    }
-
-    get defaultAvatarUrl() {
-        return REST.makeCDNUrl(
-            CDNRoutes.defaultUserAvatar(this.defaultAvatar.type),
-        );
     }
 }

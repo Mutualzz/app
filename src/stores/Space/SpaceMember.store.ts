@@ -1,11 +1,11 @@
-import type { APISpaceMember } from "@mutualzz/types";
+import type { APISpaceMember, Snowflake } from "@mutualzz/types";
 import { makeAutoObservable, observable, type ObservableMap } from "mobx";
 import type { AppStore } from "../App.store";
 import type { Space } from "../objects/Space";
 import { SpaceMember } from "../objects/SpaceMember";
 
 export class SpaceMemberStore {
-    private readonly members: ObservableMap<string, SpaceMember>; // userId(string) -> SpaceMember
+    private readonly members: ObservableMap<Snowflake, SpaceMember>; // userId(string) -> SpaceMember
     private readonly space: Space;
 
     constructor(

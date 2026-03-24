@@ -3,7 +3,6 @@ import { useModal } from "@contexts/Modal.context.tsx";
 import { useAppStore } from "@hooks/useStores.ts";
 import {
     Avatar,
-    IconButton,
     type PaperProps,
     Stack,
     Typography,
@@ -14,12 +13,21 @@ import type { Space } from "@stores/objects/Space.ts";
 import { useNavigate } from "@tanstack/react-router";
 import { observer } from "mobx-react-lite";
 import { useState } from "react";
-import { FaChevronDown, FaChevronRight, FaPlus } from "react-icons/fa";
+import {
+    FaChevronDown,
+    FaChevronRight,
+    FaCog,
+    FaPlus,
+    FaUserPlus,
+} from "react-icons/fa";
 import { ChannelCreateModal } from "./ChannelCreateModal.tsx";
 import { ChannelIcon } from "./ChannelIcon.tsx";
 import { ChannelType } from "@mutualzz/types";
 import { useMenu } from "@contexts/ContextMenu.context.tsx";
 import { ChannelMemberItem } from "@components/Channel/ChannelMemberItem.tsx";
+import { IconButton } from "@components/IconButton.tsx";
+import { SpaceInviteToSpaceModal } from "@components/Space/SpaceInviteToSpaceModal.tsx";
+import { MdChatBubble } from "react-icons/md";
 
 interface Props extends PaperProps {
     space: Space;
@@ -48,11 +56,11 @@ export const ChannelListItem = observer(
         const isCategory = channel.type === ChannelType.Category;
         const isVoice = channel.type === ChannelType.Voice;
 
-        const canModifyChannel =
-            app.account && space.owner && space.owner.id === app.account.id;
-
         const isActiveVoiceChannel =
             channel.isVoiceChannel && app.voice.currentChannelId === channel.id;
+
+        const canManageChannel = space.members.me?.canManageChannel(channel);
+        const canInvite = space.members.me?.canInviteToChannel(channel);
 
         const canConnect =
             channel.isVoiceChannel &&
@@ -70,8 +78,18 @@ export const ChannelListItem = observer(
             }
 
             if (isVoice) {
-                if (isActiveVoiceChannel) return;
-                app.voice.join(space.id, channel.id);
+                if (isActiveVoiceChannel) {
+                    navigate({
+                        to: "/spaces/$spaceId/$channelId",
+                        params: {
+                            spaceId: space.id,
+                            channelId: channel.id,
+                        },
+                    });
+                    return;
+                }
+                app.voice.join({ spaceId: space.id, channelId: channel.id });
+                return;
             }
 
             if (active) return;
@@ -87,19 +105,20 @@ export const ChannelListItem = observer(
         return (
             <>
                 <Stack
-                    ml={isCategory ? 1.5 : channel.parent ? 2.5 : 1.5}
-                    px={isCategory ? 1 : 1.5}
+                    ml={isCategory ? 1 : 1.5}
                     mr={isCategory ? 1 : 2.5}
+                    px={isCategory ? 1 : 1.5}
                     key={channel.id}
                     onContextMenu={(e) =>
                         openContextMenu(e, { type: "channel", space, channel })
                     }
                     borderLeft={
-                        isActiveVoiceChannel
+                        isActiveVoiceChannel || voiceStates.length > 0
                             ? `2px solid ${theme.colors.success}`
                             : 0
                     }
-                    borderRadius={6}
+                    borderTopLeftRadius={6}
+                    borderBottomLeftRadius={6}
                     direction="column"
                     onClick={handleChannel}
                     css={{
@@ -113,13 +132,17 @@ export const ChannelListItem = observer(
                         height="100%"
                         alignItems="center"
                         borderRadius={6}
+                        px={isCategory ? 1 : 1.5}
+                        py={isCategory ? 0 : 1}
                         justifyContent="space-between"
                         onMouseEnter={() => setWrapperHovered(true)}
                         onMouseLeave={() => setWrapperHovered(false)}
-                        variant={
-                            active || isActiveVoiceChannel ? "soft" : "plain"
+                        variant={active ? "soft" : "plain"}
+                        color={
+                            active
+                                ? theme.typography.colors.primary
+                                : (props.color as any)
                         }
-                        color={props.color as any}
                         {...props}
                     >
                         <Stack
@@ -177,28 +200,128 @@ export const ChannelListItem = observer(
                                 </>
                             )}
                         </Stack>
-                        {isCategory && canModifyChannel && (
-                            <IconButton
-                                size="sm"
-                                variant="plain"
-                                color="neutral"
-                                css={{
-                                    borderRadius: 9999,
-                                }}
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    openModal(
-                                        "create-channel",
-                                        <ChannelCreateModal
-                                            space={space}
-                                            parent={channel}
-                                        />,
-                                    );
-                                }}
-                            >
-                                <FaPlus size={12} />
-                            </IconButton>
-                        )}
+
+                        <Stack alignItems="center">
+                            {isCategory && canManageChannel && (
+                                <IconButton
+                                    size={12}
+                                    variant="plain"
+                                    color="neutral"
+                                    css={{
+                                        borderRadius: 9999,
+                                    }}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        openModal(
+                                            "create-channel",
+                                            <ChannelCreateModal
+                                                space={space}
+                                                parent={channel}
+                                            />,
+                                        );
+                                    }}
+                                >
+                                    <FaPlus />
+                                </IconButton>
+                            )}
+
+                            {!isCategory && (
+                                <Stack
+                                    direction="row"
+                                    alignItems="center"
+                                    spacing={0.5}
+                                    minWidth="2.5rem"
+                                    justifyContent="flex-end"
+                                >
+                                    {isVoice && (
+                                        <IconButton
+                                            css={{
+                                                borderRadius: 9999,
+                                                opacity:
+                                                    wrapperHovered || active
+                                                        ? 1
+                                                        : 0,
+                                                pointerEvents:
+                                                    wrapperHovered || active
+                                                        ? "auto"
+                                                        : "none",
+                                                transition:
+                                                    "opacity 0.15s ease",
+                                            }}
+                                            size={12}
+                                            variant="plain"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                navigate({
+                                                    to: "/spaces/$spaceId/$channelId",
+                                                    search: {
+                                                        chat: true,
+                                                    },
+                                                    params: {
+                                                        spaceId: space.id,
+                                                        channelId: channel.id,
+                                                    },
+                                                });
+                                            }}
+                                        >
+                                            <MdChatBubble />
+                                        </IconButton>
+                                    )}
+                                    {canInvite && (
+                                        <IconButton
+                                            css={{
+                                                borderRadius: 9999,
+                                                opacity:
+                                                    wrapperHovered || active
+                                                        ? 1
+                                                        : 0,
+                                                pointerEvents:
+                                                    wrapperHovered || active
+                                                        ? "auto"
+                                                        : "none",
+                                                transition:
+                                                    "opacity 0.15s ease",
+                                            }}
+                                            size={12}
+                                            variant="plain"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                openModal(
+                                                    "invite-to-space",
+                                                    <SpaceInviteToSpaceModal
+                                                        channel={channel}
+                                                    />,
+                                                );
+                                            }}
+                                        >
+                                            <FaUserPlus />
+                                        </IconButton>
+                                    )}
+
+                                    {canManageChannel && (
+                                        <IconButton
+                                            css={{
+                                                borderRadius: 9999,
+                                                opacity:
+                                                    wrapperHovered || active
+                                                        ? 1
+                                                        : 0,
+                                                pointerEvents:
+                                                    wrapperHovered || active
+                                                        ? "auto"
+                                                        : "none",
+                                                transition:
+                                                    "opacity 0.15s ease",
+                                            }}
+                                            size={12}
+                                            variant="plain"
+                                        >
+                                            <FaCog />
+                                        </IconButton>
+                                    )}
+                                </Stack>
+                            )}
+                        </Stack>
                     </Paper>
                     {channel.isVoiceChannel && voiceStates.length > 0 && (
                         <Stack

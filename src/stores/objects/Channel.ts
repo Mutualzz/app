@@ -8,7 +8,7 @@ import {
     ImageFormat,
     type Sizes,
     type Snowflake,
-    type VoiceState,
+    type VoiceState as MzVoiceState,
 } from "@mutualzz/types";
 import type { AppStore } from "@stores/App.store";
 import { MessageStore } from "@stores/Message.store";
@@ -17,9 +17,14 @@ import type { Space } from "@stores/objects/Space";
 import { makeAutoObservable, observable } from "mobx";
 import type { QueuedMessage } from "./QueuedMessage";
 import { ChannelPermissionOverwrite } from "./ChannelOverwrite";
-import { BitField, channelFlags, type ChannelFlags, } from "@mutualzz/permissions";
+import {
+    BitField,
+    channelFlags,
+    type ChannelFlags,
+} from "@mutualzz/permissions";
 import { murmur } from "@utils/index.ts";
 import { REST } from "@stores/REST.store.ts";
+import { VoiceState } from "@stores/objects/VoiceState.ts";
 
 function getOverwriteKey(ow: ChannelPermissionOverwrite): string {
     if (ow.roleId != null) return `r:${ow.roleId}`;
@@ -49,6 +54,7 @@ export class Channel {
     overwrites: ChannelPermissionOverwrite[] = [];
     icon?: string | null;
     voiceStates = observable.map<Snowflake, VoiceState>();
+
     private readonly logger = new Logger({
         tag: "Channel",
     });
@@ -169,6 +175,10 @@ export class Channel {
         return this.type === ChannelType.Category;
     }
 
+    get canRedirect() {
+        return !this.isCategory;
+    }
+
     static constructIconUrl(
         channelId: Snowflake,
         animated = false,
@@ -182,8 +192,9 @@ export class Channel {
         );
     }
 
-    addVoiceState(state: VoiceState) {
-        this.voiceStates.set(state.userId, state);
+    addVoiceState(state: MzVoiceState) {
+        const newState = new VoiceState(this.app, state);
+        this.voiceStates.set(state.userId, newState);
     }
 
     removeVoiceState(userId: Snowflake) {

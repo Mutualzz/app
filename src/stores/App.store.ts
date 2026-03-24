@@ -53,7 +53,11 @@ export class AppStore {
     presence = new PresenceStore();
     queryClient: QueryClient;
     memberListVisible = true;
+    voiceChatVisible = false;
     dontShowLinkWarning = false;
+
+    channelListWidth = 320;
+    voiceChatWidth = 500;
 
     customStatus = new CustomStatusStore();
 
@@ -85,16 +89,21 @@ export class AppStore {
         });
 
         makePersistable(this, {
-            name: "AppStore-Transient",
+            name: "AppStoreTransient",
             properties: ["joiningSpace", "joiningInviteCode"],
             storage: safeLocalStorage,
-            expireIn: 60 * 1000, // 1 minutes in milliseconds
+            expireIn: 60 * 1000, // 1 minute in milliseconds
             removeOnExpiration: true,
         });
 
         makePersistable(this, {
             name: "AppStore",
-            properties: ["memberListVisible", "dontShowLinkWarning"],
+            properties: [
+                "memberListVisible",
+                "dontShowLinkWarning",
+                "channelListWidth",
+                "voiceChatWidth",
+            ],
             storage: safeLocalStorage,
         });
     }
@@ -109,6 +118,18 @@ export class AppStore {
 
     get isReady() {
         return !this.isAppLoading && this.isGatewayReady;
+    }
+
+    setVoiceChatVisible(visible: boolean) {
+        this.voiceChatVisible = visible;
+    }
+
+    setVoiceChatWidth(width: number) {
+        this.voiceChatWidth = Math.min(1000, Math.max(380, width));
+    }
+
+    setChannelListWidth(width: number) {
+        this.channelListWidth = Math.min(480, Math.max(320, width));
     }
 
     setDontShowLinkWarning(val: boolean) {
@@ -137,7 +158,7 @@ export class AppStore {
     }
 
     setUser(user: APIPrivateUser, settings?: APIUserSettings) {
-        this.account = new AccountStore(user);
+        this.account = new AccountStore(this, user);
         if (settings) this.settings = new AccountSettingsStore(this, settings);
     }
 

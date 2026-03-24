@@ -12,3 +12,8 @@ export interface VoiceStateSyncPayload {
     channelId: Snowflake;
     states: VoiceState[];
 }
+
+export interface VoiceTarget {
+    spaceId?: Snowflake | null;
+    channelId: Snowflake;
+}

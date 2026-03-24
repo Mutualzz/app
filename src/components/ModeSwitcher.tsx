@@ -50,7 +50,7 @@ export const ModeSwitcher = observer(() => {
                                 24 +
                                 (app.channels.active != undefined &&
                                 app.mode === "spaces" &&
-                                !app.memberListVisible
+                                (!app.memberListVisible || app.voiceChatVisible)
                                     ? 60
                                     : 0),
                             right: 24,

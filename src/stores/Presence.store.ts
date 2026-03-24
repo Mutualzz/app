@@ -1,5 +1,5 @@
 import { makeAutoObservable, observable } from "mobx";
-import type { PresencePayload, PresenceSchedule, PresenceStatus, Snowflake, } from "@mutualzz/types";
+import type { PresencePayload, PresenceSchedule, Snowflake, } from "@mutualzz/types";
 import { makePersistable } from "mobx-persist-store";
 import { safeLocalStorage } from "@utils/safeLocalStorage";
 
@@ -30,14 +30,6 @@ export class PresenceStore {
     setScheduledStatus(schedule: PresenceSchedule | null) {
         this.scheduledStatus = schedule;
         this.rearmScheduledStatusTimer();
-    }
-
-    getEffectiveSelfStatus(selfUserId: Snowflake): PresenceStatus {
-        const now = Date.now();
-        if (this.scheduledStatus && this.scheduledStatus.until > now) {
-            return this.scheduledStatus.status;
-        }
-        return this.get(selfUserId)?.status ?? "online";
     }
 
     rearmScheduledStatusTimer(opts?: { onExpire?: () => void }) {

@@ -128,17 +128,9 @@ export const SpaceRoleEditPermissions = ({ changes, setChanges }: Props) => {
                 />
                 <Divider css={{ opacity: 0.5 }} />
                 <PermissionItem
-                    flag="ManageInvites"
-                    label="Manage Invites"
-                    description="Allows member to edit or delete invites. P.S Creating invites is on a different permission"
-                    hasPermission={permissions.has("ManageInvites")}
-                    togglePermission={togglePermission}
-                />
-                <Divider css={{ opacity: 0.5 }} />
-                <PermissionItem
                     flag="ManageSpace"
                     label="Manage Space"
-                    description="Allow members to change this space's name (currently not implemented fully)"
+                    description="Allow members to change this space"
                     hasPermission={permissions.has("ManageSpace")}
                     togglePermission={togglePermission}
                 />

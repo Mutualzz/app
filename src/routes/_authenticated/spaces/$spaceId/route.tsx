@@ -7,7 +7,7 @@ import {
     useParams,
 } from "@tanstack/react-router";
 import { observer } from "mobx-react-lite";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 
 export const Route = createFileRoute("/_authenticated/spaces/$spaceId")({
     component: observer(RouteComponent),
@@ -15,31 +15,46 @@ export const Route = createFileRoute("/_authenticated/spaces/$spaceId")({
 
 function RouteComponent() {
     const app = useAppStore();
-
+    const navigate = useNavigate();
     const { spaceId } = Route.useParams();
+
     const childParams = useParams({
         from: "/_authenticated/spaces/$spaceId/$channelId",
         shouldThrow: false,
     });
-    const navigate = useNavigate();
+
+    const space = app.spaces.get(spaceId) ?? app.spaces.active;
+
+    const preferredChannel = useMemo(() => {
+        if (!space) return null;
+
+        return (
+            space.channels.find((channel) => channel.canRedirect) ??
+            space.visibleChannels.find((channel) => channel.canRedirect) ??
+            null
+        );
+    }, [space]);
 
     useEffect(() => {
         app.spaces.setActive(spaceId);
-    }, [spaceId]);
+    }, [app, spaceId]);
 
     useEffect(() => {
         if (childParams?.channelId) return;
+        if (!space) return;
+        if (!preferredChannel) return;
 
-        const channel = app.channels.preferredChannel;
-        if (!channel) return;
-        if (channel.spaceId !== spaceId) return;
+        app.channels.setActive(preferredChannel.id);
 
         navigate({
             to: "/spaces/$spaceId/$channelId",
-            params: { spaceId, channelId: channel.id },
+            params: {
+                spaceId,
+                channelId: preferredChannel.id,
+            },
             replace: true,
         });
-    }, [childParams?.channelId, app.channels.preferredChannel, spaceId]);
+    }, [app, childParams?.channelId, space, preferredChannel, navigate, spaceId]);
 
     return (
         <Stack direction="row" width="100%" height="100%">

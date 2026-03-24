@@ -25,6 +25,7 @@ import {
 } from "react-icons/md";
 import { ImPhoneHangUp } from "react-icons/im";
 import { AnimatedIconButton } from "@components/Animated/AnimatedIconButton.tsx";
+import { SmallActivityStatus } from "@components/SmallActivityStatus.tsx";
 
 // NOTE: Instead of using hovered, you should use the Animated motion stuff, fix it.
 export const UserBar = observer(() => {
@@ -33,26 +34,6 @@ export const UserBar = observer(() => {
     const { openModal } = useModal();
     const { openContextMenu } = useMenu();
     const [hovered, setHovered] = useState(false);
-
-    const inSpace = Boolean(app.spaces.activeId) && app.mode === "spaces";
-
-    const conditionalProps = useMemo<Omit<PaperProps, "color">>(() => {
-        if (inSpace)
-            return {
-                minWidth: "12rem",
-                maxWidth: "20rem",
-                direction: "row",
-            };
-
-        return {
-            width: "4.25rem",
-            height: "25rem",
-            direction: "column",
-        };
-    }, [inSpace]);
-
-    const account = app.account;
-    if (!account) return <></>;
 
     const voiceChannel = app.voice.channel;
 
@@ -65,6 +46,25 @@ export const UserBar = observer(() => {
         voiceStatus === "connecting" ||
         voiceStatus === "reconnecting" ||
         voiceStatus === "failed";
+
+    const inSpace = Boolean(app.spaces.activeId) && app.mode === "spaces";
+
+    const conditionalProps = useMemo<Omit<PaperProps, "color">>(() => {
+        if (inSpace)
+            return {
+                minWidth: "12rem",
+                direction: "row",
+            };
+
+        return {
+            width: "4.25rem",
+            height: showVoicePill ? "25rem" : "17.5rem",
+            direction: "column",
+        };
+    }, [inSpace, showVoicePill]);
+
+    const account = app.account;
+    if (!account) return <></>;
 
     const voiceTitle = useMemo(() => {
         switch (voiceStatus) {
@@ -176,20 +176,12 @@ export const UserBar = observer(() => {
                             title={<TooltipWrapper>Disconnect</TooltipWrapper>}
                             placement="top"
                         >
-                            <AnimatedIconButton
-                                initial={{ rotate: 90 }}
-                                whileHover={{
-                                    rotate: 0,
-                                }}
-                                transition={{
-                                    duration: -2.5,
-                                    ease: "easeOut",
-                                }}
+                            <IconButton
                                 disabled={!canHangup}
                                 onClick={() => app.voice.leave()}
                             >
                                 <ImPhoneHangUp />
-                            </AnimatedIconButton>
+                            </IconButton>
                         </Tooltip>
                     </Stack>
                     <Tooltip
@@ -254,7 +246,7 @@ export const UserBar = observer(() => {
                     direction={inSpace ? "row" : "column"}
                     alignItems="center"
                     spacing={2.5}
-                    width="75%"
+                    width={inSpace && showVoicePill ? "75%" : "100%"}
                     px={1}
                     py={0.25}
                     borderRadius={6}
@@ -291,13 +283,23 @@ export const UserBar = observer(() => {
                 >
                     <UserAvatar user={account} size={48} badge />
                     <Stack direction="column">
-                        <Typography level="body-sm">
+                        <Typography
+                            textAlign={!inSpace ? "center" : undefined}
+                            level="body-sm"
+                        >
                             {account.displayName}
                         </Typography>
-                        {account.globalName && (
-                            <Typography level="body-xs" textColor="muted">
-                                {account.username}
-                            </Typography>
+                        {account.presence?.activities.length === 0 &&
+                            account.globalName && (
+                                <Typography level="body-xs" textColor="muted">
+                                    {account.username}
+                                </Typography>
+                            )}
+                        {account.presence && (
+                            <SmallActivityStatus
+                                vertical={!inSpace}
+                                presence={account.presence}
+                            />
                         )}
                     </Stack>
                 </Paper>
@@ -342,8 +344,8 @@ export const UserBar = observer(() => {
                                     {!hasCameras
                                         ? "No camera available"
                                         : cameraEnabled
-                                          ? "Disable camera"
-                                          : "Enable camera"}
+                                          ? "Turn off camera"
+                                          : "Turn on camera"}
                                 </TooltipWrapper>
                             }
                         >

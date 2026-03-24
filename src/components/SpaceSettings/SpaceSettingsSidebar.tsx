@@ -15,6 +15,7 @@ import { FaPaintBrush, FaPaperPlane, FaTrash } from "react-icons/fa";
 import { VscTypeHierarchySuper } from "react-icons/vsc";
 import { SpaceActionConfirm } from "@components/Modals/SpaceActionConfirm.tsx";
 import { useModal } from "@contexts/Modal.context.tsx";
+import type { PermissionFlag } from "@mutualzz/permissions";
 
 interface SpaceSettingsProps {
     space: Space;
@@ -22,28 +23,32 @@ interface SpaceSettingsProps {
     setDrawerOpen?: (open: boolean) => void;
 }
 
-interface Pages {
+export interface Page {
     label: SpaceSettingsPage;
     icon: JSX.Element;
+    permissions: PermissionFlag[];
 }
 
-type SettingsPages = Record<SpaceSettingsCategories, Pages[]>;
+type SettingsPages = Record<SpaceSettingsCategories, Page[]>;
 
 export const settingsPages: SettingsPages = {
     general: [
         {
             label: "profile",
             icon: <FaPaintBrush />,
+            permissions: ["ManageSpace"],
         },
     ],
     people: [
         {
             label: "roles",
             icon: <VscTypeHierarchySuper />,
+            permissions: ["ManageRoles"],
         },
         {
             label: "invites",
             icon: <FaPaperPlane />,
+            permissions: ["ManageSpace"],
         },
     ],
 };
@@ -72,6 +77,16 @@ export const SpaceSettingsSidebar = observer(
 
         const categories = Object.entries(settingsPages);
 
+        const shouldShowCategory = (category: SpaceSettingsCategories) => {
+            return settingsPages[category].some((page) =>
+                space.members.me?.hasAnyPermission(page.permissions),
+            );
+        };
+
+        const shouldShowPage = (page: Page) => {
+            return space.members.me?.hasAnyPermission(page.permissions);
+        };
+
         return (
             <Paper
                 direction="column"
@@ -90,58 +105,70 @@ export const SpaceSettingsSidebar = observer(
                         <Fragment
                             key={`settings-sidebar-category-fragment-${category}`}
                         >
-                            <Stack direction="column">
-                                {category === "general" ? (
-                                    <Typography
-                                        level="body-lg"
-                                        textColor="accent"
-                                        mb={2.5}
-                                        fontFamily="monospace"
-                                    >
-                                        {space.name}
-                                    </Typography>
-                                ) : (
-                                    <Typography
-                                        level="body-xs"
-                                        textColor="muted"
-                                        mb={1.5}
-                                    >
-                                        {startCase(category)}
-                                    </Typography>
-                                )}
-
-                                <ButtonGroup
-                                    size={{ xs: "sm", sm: "md" }}
-                                    orientation="vertical"
-                                    variant="plain"
-                                    spacing={5}
-                                >
-                                    {pages.map((page) => (
-                                        <Button
-                                            startDecorator={page.icon}
-                                            onClick={() =>
-                                                handlePageSwitch(
-                                                    category as SpaceSettingsCategories,
-                                                    page.label,
-                                                )
-                                            }
-                                            key={`user-settings-sidebar-${page.label}`}
-                                            horizontalAlign="left"
-                                            variant={
-                                                currentPage === page.label
-                                                    ? "soft"
-                                                    : "plain"
-                                            }
-                                            padding={5}
-                                            disabled={
-                                                currentPage === page.label
-                                            }
+                            {shouldShowCategory(
+                                category as SpaceSettingsCategories,
+                            ) && (
+                                <Stack direction="column">
+                                    {category === "general" ? (
+                                        <Typography
+                                            level="body-lg"
+                                            textColor="accent"
+                                            mb={2.5}
+                                            fontFamily="monospace"
                                         >
-                                            {startCase(page.label)}
-                                        </Button>
-                                    ))}
-                                </ButtonGroup>
-                            </Stack>
+                                            {space.name}
+                                        </Typography>
+                                    ) : (
+                                        <Typography
+                                            level="body-xs"
+                                            textColor="muted"
+                                            mb={1.5}
+                                        >
+                                            {startCase(category)}
+                                        </Typography>
+                                    )}
+
+                                    <ButtonGroup
+                                        size={{ xs: "sm", sm: "md" }}
+                                        orientation="vertical"
+                                        variant="plain"
+                                        spacing={5}
+                                    >
+                                        {pages.map(
+                                            (page) =>
+                                                shouldShowPage(page) && (
+                                                    <Button
+                                                        startDecorator={
+                                                            page.icon
+                                                        }
+                                                        onClick={() =>
+                                                            handlePageSwitch(
+                                                                category as SpaceSettingsCategories,
+                                                                page.label,
+                                                            )
+                                                        }
+                                                        key={`user-settings-sidebar-${page.label}`}
+                                                        horizontalAlign="left"
+                                                        variant={
+                                                            currentPage ===
+                                                            page.label
+                                                                ? "soft"
+                                                                : "plain"
+                                                        }
+                                                        padding={5}
+                                                        disabled={
+                                                            currentPage ===
+                                                            page.label
+                                                        }
+                                                    >
+                                                        {startCase(page.label)}
+                                                    </Button>
+                                                ),
+                                        )}
+                                    </ButtonGroup>
+                                </Stack>
+                            )}
+
                             {index < categories.length - 1 && (
                                 <Divider
                                     css={{

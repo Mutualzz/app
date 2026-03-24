@@ -8,29 +8,12 @@ import { useState } from "react";
 import { FaCrown } from "react-icons/fa";
 import type { ColorLike } from "@mutualzz/ui-core";
 import { useMenu } from "@contexts/ContextMenu.context.tsx";
-import type { PresencePayload } from "@mutualzz/types";
 import { useAppStore } from "@hooks/useStores.ts";
+import { SmallActivityStatus } from "@components/SmallActivityStatus.tsx";
 
 interface Props {
     member: SpaceMember;
     isOwner?: boolean;
-}
-
-function formatPresence(presence?: PresencePayload | null) {
-    if (!presence) return null;
-
-    const activities = Array.isArray(presence.activities)
-        ? presence.activities
-        : [];
-    const firstActivity = activities[0];
-
-    if (firstActivity?.type === "playing")
-        return `Playing ${firstActivity.name}`;
-    if (firstActivity?.type === "listening")
-        return `Listening to ${firstActivity.name}`;
-    if (firstActivity?.type === "custom") return firstActivity.name;
-
-    return null;
 }
 
 export const MemberListItem = observer(({ member, isOwner }: Props) => {
@@ -44,7 +27,6 @@ export const MemberListItem = observer(({ member, isOwner }: Props) => {
         (hovered ? theme.typography.colors.primary : "#99aab5");
 
     const presence = app.presence.get(member.userId);
-    const presenceActivity = formatPresence(app.presence.get(member.userId));
 
     return (
         <Paper
@@ -52,13 +34,11 @@ export const MemberListItem = observer(({ member, isOwner }: Props) => {
             onMouseOver={() => setHovered(true)}
             onMouseLeave={() => setHovered(false)}
             variant={hovered ? "soft" : "plain"}
-            py={1}
             borderRadius={8}
             direction="row"
             alignItems="center"
-            height={42}
             spacing={1}
-            px={1}
+            p={1}
             onContextMenu={(e) =>
                 openContextMenu(e, {
                     type: "member",
@@ -87,6 +67,7 @@ export const MemberListItem = observer(({ member, isOwner }: Props) => {
                     alignItems="center"
                     display="flex"
                     spacing={2}
+                    level="body-sm"
                     textColor={nameColor}
                 >
                     {member.displayName}
@@ -104,18 +85,7 @@ export const MemberListItem = observer(({ member, isOwner }: Props) => {
                         </Tooltip>
                     )}
                 </Typography>
-                {presenceActivity && (
-                    <Typography
-                        level="body-xs"
-                        whiteSpace="nowrap"
-                        overflow="hidden"
-                        textOverflow="ellipsis"
-                        textColor="secondary"
-                        css={{ opacity: 0.85 }}
-                    >
-                        {presenceActivity}
-                    </Typography>
-                )}
+                {presence && <SmallActivityStatus presence={presence} />}
             </Stack>
         </Paper>
     );

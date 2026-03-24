@@ -21,18 +21,11 @@ import {
 } from "@mutualzz/types";
 import { invoke } from "@tauri-apps/api/core";
 import { type Codec, createCodec, type Encoding } from "@utils/codec";
-import {
-    type Compression,
-    type Compressor,
-    createCompressor,
-} from "@utils/compressor";
+import { type Compression, type Compressor, createCompressor, } from "@utils/compressor";
 import { isTauri } from "@utils/index";
 import { makeAutoObservable } from "mobx";
 import type { AppStore } from "./App.store";
-import {
-    buildDesktopPresenceFromProcesses,
-    type PresenceUpdateDraft,
-} from "../presence/gamePresence.ts";
+import { buildDesktopPresenceFromProcesses, type PresenceUpdateDraft, } from "../presence/gamePresence.ts";
 import { normalizeJSON } from "@utils/JSON.ts";
 
 // We have to create our own GatewayStatus "enum" to avoid issues with SSR
@@ -51,12 +44,31 @@ const RECONNECT_TIMEOUT = 5000;
 function mergeActivities(opts: {
     processActivities: PresenceActivity[];
     customActivity: PresenceActivity | null;
+    previousActivities: PresenceActivity[];
 }): PresenceActivity[] {
+    const previousByName = new Map(
+        opts.previousActivities
+            .filter((a) => a.type === "playing" && a.name)
+            .map((a) => [a.name.toLowerCase(), a]),
+    );
+
+    const sortedGames = opts.processActivities
+        .map((act) => {
+            const prev = previousByName.get(act.name.toLowerCase());
+
+            return {
+                ...act,
+                timestamps: prev?.timestamps ?? { start: Date.now() },
+            };
+        })
+        .sort(
+            (a, b) => (b.timestamps?.start ?? 0) - (a.timestamps?.start ?? 0),
+        );
+
     const out: PresenceActivity[] = [];
 
-    for (const act of opts.processActivities ?? []) out.push(act);
-
     if (opts.customActivity) out.push(opts.customActivity);
+    out.push(...sortedGames);
 
     return out.slice(0, 5);
 }
@@ -69,8 +81,9 @@ function stableStringify(value: unknown) {
     }
 }
 
-// NOTE: Some normalizations are very cheap way of dealing with it since ETF is being an asshole
-// And eventually I will fix the ETF issues on Tauri and etc
+// NOTE: Some normalizations are a very cheap way of dealing with it since ETF is being an asshole
+// And eventually I will fix the ETF issues on Tauri etc.
+// TODO: Make it so that when resume gets called ready payload is not being sent but rather we send an identify on resuming
 export class GatewayStore {
     public readyState: GatewayStatus = GatewayStatus.CLOSED;
     public events: { t: string; d: any; s: number }[] = [];
@@ -98,7 +111,7 @@ export class GatewayStore {
     >();
     private presenceLoopInterval: number | null = null;
     private lastPresenceHash: string | null = null;
-    private lazyRequestChannels = new Map<string, string[]>(); // spaceId -> channelIdsq
+    private lazyRequestChannels = new Map<string, string[]>(); // spaceId -> channelIds
 
     constructor(private readonly app: AppStore) {
         makeAutoObservable(this);
@@ -201,13 +214,24 @@ export class GatewayStore {
     setCustomStatus(text: string) {
         this.app.customStatus.set(text);
 
+        const userId = this.app.account?.id;
+        if (!userId) return;
+
         const customActivity = this.app.customStatus.activity;
         const status = this.getEffectiveStatus();
+        const prev = this.app.presence.get(userId);
 
         const draft: PresenceUpdateDraft = {
             status,
             device: isTauri ? "desktop" : "web",
-            activities: customActivity ? [customActivity] : [],
+            activities: customActivity
+                ? [
+                      customActivity,
+                      ...(prev?.activities?.filter(
+                          (a) => a.type !== "custom",
+                      ) ?? []),
+                  ]
+                : (prev?.activities ?? []),
         };
 
         this.sendPresenceUpdate(draft);
@@ -692,7 +716,7 @@ export class GatewayStore {
             return;
         }
 
-        // To avoid issues with ETF mutability and etc, we do a cheap clone of the data for now
+        // To avoid issues with ETF mutability and etc., we do an inexpensive clone of the data for now
         const parsedData = normalizeJSON(d);
 
         handler(parsedData);
@@ -776,6 +800,9 @@ export class GatewayStore {
 
             if (isTauri) {
                 const baseDraft = await buildDesktopPresenceFromProcesses();
+                const previousActivities =
+                    this.app.presence.get(this.app.account.id)?.activities ??
+                    [];
 
                 const mergedDraft: PresenceUpdateDraft = {
                     ...baseDraft,
@@ -783,6 +810,7 @@ export class GatewayStore {
                     activities: mergeActivities({
                         processActivities: baseDraft.activities ?? [],
                         customActivity: this.app.customStatus.activity,
+                        previousActivities,
                     }),
                     status: this.getEffectiveStatus(),
                 };

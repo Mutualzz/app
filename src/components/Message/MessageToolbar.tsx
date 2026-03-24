@@ -21,6 +21,8 @@ const ToolbarContent = ({ message }: Props) => {
         mutationFn: () => message.delete(),
     });
 
+    const me = message.space?.members.me;
+
     const hideSwitcher = () => {
         if (!app.memberListVisible) {
             app.setHideSwitcher(true);
@@ -43,7 +45,8 @@ const ToolbarContent = ({ message }: Props) => {
             transparency={25}
         >
             <ButtonGroup color="neutral" size="sm" variant="plain">
-                {message.author?.id === app.account?.id && (
+                {(message.author?.id === app.account?.id ||
+                    me?.hasPermission("ManageMessages")) && (
                     <Tooltip
                         offset={16}
                         content={<TooltipWrapper>Delete</TooltipWrapper>}

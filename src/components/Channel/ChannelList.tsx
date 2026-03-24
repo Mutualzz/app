@@ -1,9 +1,4 @@
 import { Paper } from "@components/Paper.tsx";
-import { SpaceContextMenu } from "@components/ContextMenus/SpaceContextMenu.tsx";
-import { SpaceInviteToSpaceModal } from "@components/Space/SpaceInviteToSpaceModal.tsx";
-import { TooltipWrapper } from "@components/TooltipWrapper.tsx";
-import { useModal } from "@contexts/Modal.context.tsx";
-import { useMenu } from "@contexts/ContextMenu.context.tsx";
 import {
     closestCenter,
     DndContext,
@@ -26,24 +21,17 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { useAppStore } from "@hooks/useStores.ts";
-import { contextMenu } from "@mutualzz/contexify";
 import { ChannelType } from "@mutualzz/types";
-import {
-    ButtonGroup,
-    Portal,
-    Stack,
-    Tooltip,
-    Typography,
-} from "@mutualzz/ui-web";
+import { Portal, Stack } from "@mutualzz/ui-web";
 import type { Channel } from "@stores/objects/Channel.ts";
 import type { Space } from "@stores/objects/Space.ts";
 import { runInAction } from "mobx";
 import { observer } from "mobx-react-lite";
-import { type MouseEvent, useState } from "react";
-import { FaChevronDown, FaUserPlus } from "react-icons/fa";
+import { useState } from "react";
 import { ChannelListItem } from "./ChannelListItem.tsx";
 import { ChannelListContextMenu } from "../ContextMenus/ChannelListContextMenu.tsx";
-import { IconButton } from "@components/IconButton.tsx";
+import { useMenu } from "@contexts/ContextMenu.context.tsx";
+import { ChannelListHeader } from "@components/Channel/ChannelListHeader.tsx";
 
 interface SortableChannelItemProps {
     channel: Channel;
@@ -144,9 +132,9 @@ function getAllCategoryChildren(
 export const ChannelList = observer(() => {
     const app = useAppStore();
     const { openContextMenu } = useMenu();
+
     const [activeId, setActiveId] = useState<string | null>(null);
-    const [menuOpen, setMenuOpen] = useState(false);
-    const { openModal } = useModal();
+
     const inChannel = Boolean(app.channels.activeId);
 
     const sensors = useSensors(
@@ -248,104 +236,17 @@ export const ChannelList = observer(() => {
     const canMoveChannels =
         app.spaces.active?.members.me?.hasPermission("ManageChannels");
 
-    const showSpaceMenu = (e: MouseEvent) => {
-        if (!e.currentTarget) return;
-        const isClick = e.type === "click";
-        const rect = e.currentTarget.getBoundingClientRect();
-
-        if (isClick) {
-            openContextMenu(
-                e,
-                { type: "space", space },
-                {
-                    x: Math.round(rect.left + rect.width / 2 - 70),
-                    y: Math.round(rect.bottom + 5),
-                },
-            );
-            return;
-        }
-
-        openContextMenu(e, { type: "space", space });
-    };
-
-    const handleClick = (e: MouseEvent) => {
-        e.stopPropagation();
-        if (menuOpen) contextMenu.hideAll();
-        else showSpaceMenu(e);
-    };
-
     return (
         <>
             <Paper
                 borderRight={inChannel ? "0 !important" : undefined}
                 borderBottom="0 !important"
                 borderTopLeftRadius="0.75rem"
-                maxWidth="15rem"
                 direction="column"
                 width="100%"
                 elevation={app.settings?.preferEmbossed ? 4 : 0}
             >
-                <Paper
-                    elevation={app.settings?.preferEmbossed ? 5 : 0}
-                    borderLeft="0 !important"
-                    borderRight="0 !important"
-                    borderTop="0 !important"
-                    width="100%"
-                    maxHeight="2.95rem"
-                    height="100%"
-                    alignItems="center"
-                    p={2}
-                    justifyContent="space-between"
-                    onContextMenu={showSpaceMenu}
-                    onClick={handleClick}
-                    css={{
-                        cursor: "pointer",
-                    }}
-                >
-                    <Typography level="body-sm">{space.name}</Typography>
-                    <Stack
-                        justifyContent="flex-end"
-                        direction="row"
-                        spacing={1}
-                        alignItems="center"
-                    >
-                        <ButtonGroup spacing={2} variant="plain" size={12}>
-                            <Tooltip
-                                content={
-                                    <TooltipWrapper>
-                                        Invite to Space
-                                    </TooltipWrapper>
-                                }
-                                placement="bottom"
-                            >
-                                <IconButton
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        openModal(
-                                            `invite-to-space-${space.id}`,
-                                            <SpaceInviteToSpaceModal
-                                                channel={activeChannel}
-                                            />,
-                                        );
-                                    }}
-                                    size={16}
-                                >
-                                    <FaUserPlus />
-                                </IconButton>
-                            </Tooltip>
-                            <IconButton>
-                                {menuOpen ? (
-                                    <FaChevronDown
-                                        style={{ transform: "rotate(180deg)" }}
-                                    />
-                                ) : (
-                                    <FaChevronDown />
-                                )}
-                            </IconButton>
-                        </ButtonGroup>
-                    </Stack>
-                </Paper>
-
+                <ChannelListHeader space={space} />
                 <Stack
                     onContextMenu={(e) =>
                         openContextMenu(e, {
@@ -414,7 +315,6 @@ export const ChannelList = observer(() => {
                 </Stack>
             </Paper>
             <Portal>
-                <SpaceContextMenu space={space} setMenuOpen={setMenuOpen} />
                 <ChannelListContextMenu space={space} />
             </Portal>
         </>
