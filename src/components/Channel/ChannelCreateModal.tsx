@@ -8,11 +8,13 @@ import {
 } from "@mutualzz/types";
 import {
     ButtonGroup,
-    IconButton,
+    Checkbox,
+    Divider,
     Input,
     Radio,
     Slider,
     Stack,
+    Tooltip,
     Typography,
     useTheme,
 } from "@mutualzz/ui-web";
@@ -28,6 +30,8 @@ import { Button } from "@components/Button";
 import Cropper, { type Area, type Point } from "react-easy-crop";
 import { FaMagnifyingGlass, FaRotate } from "react-icons/fa6";
 import { FileUploader } from "@mateie/react-drag-drop-files";
+import { IconButton } from "@components/IconButton.tsx";
+import { TooltipWrapper } from "@components/TooltipWrapper.tsx";
 
 interface Props {
     // Usually a category channel under which to create a new channel
@@ -60,7 +64,13 @@ export const ChannelCreateModal = observer(({ space, parent }: Props) => {
     const [croppedAreaPixels, setCroppedAreaPixels] =
         useState<Partial<Area> | null>(null);
 
-    const [crop, setCrop] = useState<Point>({ x: 0, y: 0 });
+    const [crop, setCrop] = useState<Point>({
+        x: 0,
+        y: 0,
+    });
+
+    const [roundedIcon, setRoundedIcon] = useState(false);
+
     const [zoom, setZoom] = useState(1);
     const [rotation, setRotation] = useState(0);
 
@@ -73,6 +83,7 @@ export const ChannelCreateModal = observer(({ space, parent }: Props) => {
             if (parent) formData.append("parentId", parent.id);
             if (icon) formData.append("icon", icon);
             if (crop) formData.append("crop", JSON.stringify(crop));
+            if (roundedIcon) formData.append("roundedIcon", "true");
             if (space.id) formData.append("spaceId", space.id);
 
             return app.rest.postFormData<APIChannel>("channels", formData);
@@ -123,6 +134,7 @@ export const ChannelCreateModal = observer(({ space, parent }: Props) => {
         setCrop({ x: 0, y: 0 });
         setZoom(1);
         setType(ChannelType.Text);
+        setRoundedIcon(false);
         setName("");
     };
 
@@ -142,6 +154,7 @@ export const ChannelCreateModal = observer(({ space, parent }: Props) => {
             });
             return;
         }
+
         const shouldCrop =
             (crop.x !== 0 || crop.y !== 0 || zoom !== 1 || rotation !== 0) &&
             !!croppedAreaPixels;
@@ -194,7 +207,7 @@ export const ChannelCreateModal = observer(({ space, parent }: Props) => {
                                 zoom={zoom}
                                 rotation={rotation}
                                 aspect={1}
-                                cropShape="round"
+                                cropShape={roundedIcon ? "round" : "rect"}
                                 showGrid={false}
                                 onCropChange={setCrop}
                                 onZoomChange={setZoom}
@@ -214,33 +227,64 @@ export const ChannelCreateModal = observer(({ space, parent }: Props) => {
                         <Stack
                             direction="row"
                             alignItems="center"
-                            spacing={{ xs: 1, sm: 2.5, md: 3.75 }}
-                            width={{ xs: 180, sm: 220, md: 256 }}
+                            width="100%"
                             mt={{ xs: 1, sm: 2, md: 2.5 }}
+                            spacing={2.5}
                         >
-                            <FaMagnifyingGlass />
-                            <Slider
-                                min={1}
-                                max={3}
-                                step={0.01}
-                                value={zoom}
-                                onChange={(_, value) =>
-                                    setZoom(value as number)
-                                }
-                                disabled={creating}
-                                css={{
-                                    flex: 1,
-                                }}
-                            />
-                            <IconButton
-                                onClick={() => setRotation((prev) => prev + 90)}
-                                color={theme.typography.colors.primary}
-                                variant="plain"
-                                size="sm"
-                                disabled={creating}
+                            <Stack
+                                width="100%"
+                                spacing={3.75}
+                                alignItems="center"
+                                direction="row"
                             >
-                                <FaRotate />
-                            </IconButton>
+                                <FaMagnifyingGlass />
+                                <Slider
+                                    min={1}
+                                    max={3}
+                                    step={0.01}
+                                    value={zoom}
+                                    onChange={(_, value) =>
+                                        setZoom(value as number)
+                                    }
+                                    valueLabelDisplay="auto"
+                                    valueLabelFormat={(value) =>
+                                        `${value.toFixed(2)}x`
+                                    }
+                                    disabled={creating}
+                                />
+                            </Stack>
+                            <Divider orientation="vertical" />
+                            <Stack
+                                spacing={5}
+                                direction="row"
+                                alignItems="center"
+                            >
+                                <Tooltip
+                                    content={
+                                        <TooltipWrapper>Rotate</TooltipWrapper>
+                                    }
+                                >
+                                    <IconButton
+                                        onClick={() =>
+                                            setRotation((prev) => prev + 90)
+                                        }
+                                        color={theme.typography.colors.primary}
+                                        variant="plain"
+                                        size="sm"
+                                        disabled={creating}
+                                    >
+                                        <FaRotate />
+                                    </IconButton>
+                                </Tooltip>
+                                <Checkbox
+                                    checked={roundedIcon}
+                                    onChange={() =>
+                                        setRoundedIcon(!roundedIcon)
+                                    }
+                                    disabled={creating}
+                                    label="Rounded"
+                                />
+                            </Stack>
                         </Stack>
                     </>
                 ) : (

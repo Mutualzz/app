@@ -17,6 +17,7 @@ import { TooltipWrapper } from "@components/TooltipWrapper.tsx";
 import { ChannelIcon } from "@components/Channel/ChannelIcon.tsx";
 import { SpaceInviteToSpaceModal } from "@components/Space/SpaceInviteToSpaceModal.tsx";
 import { FaUserPlus } from "react-icons/fa";
+import { useModal } from "@contexts/Modal.context.tsx";
 
 interface Props {
     channel: Channel;
@@ -34,6 +35,7 @@ export const VoiceChannelView = observer(
         const { theme } = useTheme();
         const hostRef = useRef<HTMLDivElement>(null);
         const [hovered, setHovered] = useState(false);
+        const { openModal } = useModal();
 
         const [selectedUserId, setSelectedUserId] = useState<string | null>(
             null,
@@ -187,7 +189,7 @@ export const VoiceChannelView = observer(
                             {/** Top Stack **/}
                             <Stack
                                 position="absolute"
-                                top={4}
+                                top={2}
                                 width="100%"
                                 px={4}
                                 justifyContent="space-between"
@@ -234,7 +236,7 @@ export const VoiceChannelView = observer(
                             {/** Bottom Stack */}
                             <Stack
                                 position="absolute"
-                                bottom={4}
+                                bottom={2}
                                 width="100%"
                                 px={4}
                                 justifyContent="space-between"

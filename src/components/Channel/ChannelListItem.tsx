@@ -37,6 +37,7 @@ interface Props extends PaperProps {
     onToggleCollapse?: (channelId: string) => void;
 }
 
+// TODO: Fix it when a user leaves it updates the states properly and doesnt leave ghost users
 export const ChannelListItem = observer(
     ({
         channel,
