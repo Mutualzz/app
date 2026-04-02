@@ -290,7 +290,7 @@ function RootComponent() {
                                                 )}
                                             </Stack>
                                         </Loader>
-                                        {/*{import.meta.env.DEV && (*/}
+                                        {/*{import.meta..env.DEV && (*/}
                                         {/*    <>*/}
                                         {/*        <TanStackRouterDevtools />*/}
                                         {/*    </>*/}

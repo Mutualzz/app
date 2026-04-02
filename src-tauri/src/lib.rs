@@ -14,10 +14,12 @@ use tauri_plugin_log::{Target, TargetKind, WEBVIEW_TARGET};
 use tauri_plugin_notification;
 use tauri_plugin_opener;
 use tauri_plugin_os;
-use tauri_plugin_prevent_default::PlatformOptions;
+
 use tauri_plugin_single_instance;
 use tauri_plugin_updater;
-use tauri_plugin_media;
+
+#[cfg(all(target_os = "windows"))]
+use tauri_plugin_prevent_default::PlatformOptions;
 
 #[tauri::command]
 async fn gateway_decode(payload: Vec<u8>, encoding: Encoding) -> Result<Value, String> {
@@ -39,7 +41,6 @@ pub fn run() {
     let context = tauri::generate_context!();
 
     let app = tauri::Builder::default()
-        .plugin(tauri_plugin_media::init())
         .plugin(tauri_plugin_single_instance::init(|app, argv, _cwd| {
             if let Some(win) = app.get_webview_window("main") {
                 let _ = win.set_always_on_top(true);

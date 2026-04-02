@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 
-// if (!process.env.CI) {
+// if (!process..env.CI) {
 // 	console.log("Not running in CI, skipping. Please do not run this script manually!");
 // 	process.exit(0);
 // }

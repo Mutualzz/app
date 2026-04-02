@@ -7,6 +7,7 @@ import { readFileSync } from "fs";
 import { defineConfig } from "vite";
 import svgr from "vite-plugin-svgr";
 import tsconfigPaths from "vite-tsconfig-paths";
+import inject from "@rollup/plugin-inject";
 
 function getGitRevision() {
     try {
@@ -94,6 +95,12 @@ export default defineConfig({
 
     ssr: {
         noExternal: ["react-easy-crop", "tslib"],
+    },
+
+    build: {
+        rollupOptions: {
+            plugins: [inject({ Buffer: ["buffer", "Buffer"] })],
+        },
     },
 
     // Vite options tailored for Tauri development and only applied in `tauri dev` or `tauri build`
