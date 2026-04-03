@@ -147,14 +147,8 @@ export const ChannelList = observer(() => {
     const visibleChannels = space.visibleChannels;
     const activeChannel = app.channels.active;
 
-    const collapsedCategories = new Set<string>();
-    visibleChannels
-        .filter((c) => c.type === ChannelType.Category)
-        .forEach((c) => {
-            if (app.channels.isCategoryCollapsed(space.id, c.id)) {
-                collapsedCategories.add(c.id);
-            }
-        });
+    const collapsedCategories =
+        app.channels.collapsedCategories.get(space.id) ?? new Set<string>();
 
     const flatChannels = flattenChannels(visibleChannels, collapsedCategories);
 

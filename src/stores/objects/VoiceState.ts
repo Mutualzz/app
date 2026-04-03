@@ -1,5 +1,6 @@
 import type { Snowflake, VoiceState as MzVoiceState } from "@mutualzz/types";
 import type { AppStore } from "@stores/App.store.ts";
+import { makeAutoObservable } from "mobx";
 
 export class VoiceState {
     userId: Snowflake;
@@ -25,10 +26,20 @@ export class VoiceState {
         this.spaceDeaf = state.spaceDeaf;
         this.sessionId = state.sessionId;
         this.updatedAt = state.updatedAt;
+
+        makeAutoObservable(this);
     }
 
     get hasSpace() {
         return !!this.spaceId;
+    }
+
+    get member() {
+        if (!this.space) return null;
+
+        const member = this.space.members.get(this.userId);
+        if (!member) return null;
+        return member;
     }
 
     get user() {

@@ -4,10 +4,10 @@ import { useModal } from "@contexts/Modal.context";
 import { useAppStore } from "@hooks/useStores";
 import { CDNRoutes } from "@mutualzz/types";
 import {
+    type ColorLike,
     createColor,
     dynamicElevation,
     randomColor,
-    type ColorLike,
 } from "@mutualzz/ui-core";
 import {
     Avatar,
@@ -332,8 +332,6 @@ export const Avatars = observer(() => {
                     alignItems="center"
                     justifyContent="center"
                 >
-                    <Typography fontWeight="bold">Avatars</Typography>
-                    {"-"}
                     <RadioGroup
                         orientation="horizontal"
                         onChange={(_, val) => changePage(val)}

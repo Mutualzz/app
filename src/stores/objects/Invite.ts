@@ -4,6 +4,7 @@ import type { AppStore } from "@stores/App.store";
 import type { Channel } from "./Channel";
 import type { Space } from "./Space";
 import type { User } from "./User";
+import { makeAutoObservable } from "mobx";
 
 const prefixUrl = import.meta.env.DEV
     ? "http://localhost:1420/invite"
@@ -56,6 +57,8 @@ export class Invite {
         this.expiresAt = invite.expiresAt ? new Date(invite.expiresAt) : null;
 
         this.raw = invite;
+
+        makeAutoObservable(this);
     }
 
     get url() {

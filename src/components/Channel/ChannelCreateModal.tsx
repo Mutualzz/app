@@ -82,8 +82,11 @@ export const ChannelCreateModal = observer(({ space, parent }: Props) => {
             formData.append("type", type.toString());
             if (parent) formData.append("parentId", parent.id);
             if (icon) formData.append("icon", icon);
-            if (crop) formData.append("crop", JSON.stringify(crop));
-            if (roundedIcon) formData.append("roundedIcon", "true");
+            if (crop)
+                formData.append(
+                    "crop",
+                    JSON.stringify({ ...crop, rounded: roundedIcon }),
+                );
             if (space.id) formData.append("spaceId", space.id);
 
             return app.rest.postFormData<APIChannel>("channels", formData);
@@ -156,7 +159,11 @@ export const ChannelCreateModal = observer(({ space, parent }: Props) => {
         }
 
         const shouldCrop =
-            (crop.x !== 0 || crop.y !== 0 || zoom !== 1 || rotation !== 0) &&
+            (crop.x !== 0 ||
+                crop.y !== 0 ||
+                zoom !== 1 ||
+                rotation !== 0 ||
+                roundedIcon) &&
             !!croppedAreaPixels;
 
         createChannel({

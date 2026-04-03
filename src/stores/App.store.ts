@@ -28,6 +28,7 @@ import { getTauriVersion, getVersion } from "@tauri-apps/api/app";
 import { PresenceStore } from "@stores/Presence.store.ts";
 import { CustomStatusStore } from "@stores/CustomStatus.store.ts";
 import { VoiceStore } from "@stores/Voice.store.ts";
+import { VoiceStatesStore } from "@stores/VoiceStates.store.ts";
 
 export class AppStore {
     isGatewayReady = false;
@@ -62,12 +63,13 @@ export class AppStore {
     customStatus = new CustomStatusStore();
 
     voice = new VoiceStore(this);
+    voiceStates = new VoiceStatesStore(this);
 
     versions: {
         app: string | null;
         tauri: string | null;
     } = {
-        app: "4.0.1",
+        app: "4.1.0",
         tauri: null,
     };
 

@@ -14,7 +14,7 @@ import type { AppStore } from "@stores/App.store";
 import { MessageStore } from "@stores/Message.store";
 import { Message } from "@stores/objects/Message";
 import type { Space } from "@stores/objects/Space";
-import { makeAutoObservable, observable } from "mobx";
+import { makeAutoObservable } from "mobx";
 import type { QueuedMessage } from "./QueuedMessage";
 import { ChannelPermissionOverwrite } from "./ChannelOverwrite";
 import {
@@ -53,7 +53,6 @@ export class Channel {
     lastMessage?: Message | null;
     overwrites: ChannelPermissionOverwrite[] = [];
     icon?: string | null;
-    voiceStates = observable.map<Snowflake, VoiceState>();
 
     private readonly logger = new Logger({
         tag: "Channel",
@@ -177,6 +176,10 @@ export class Channel {
 
     get canRedirect() {
         return !this.isCategory;
+    }
+
+    get voiceStates() {
+        return this.app.voiceStates.getAllByChannel(this.id);
     }
 
     static constructIconUrl(

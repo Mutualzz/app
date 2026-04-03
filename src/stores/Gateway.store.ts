@@ -724,6 +724,7 @@ export class GatewayStore {
 
     private onResume = () => {
         this.logger.debug("[Resume] Session");
+        this.handleIdentify();
     };
 
     // NOTE: Dispatcher Handlers start here

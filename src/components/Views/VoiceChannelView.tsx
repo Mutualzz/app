@@ -63,7 +63,7 @@ export const VoiceChannelView = observer(
         };
 
         const selectedState = voiceStates.find(
-            (state) => state.user?.id === selectedUserId,
+            (state) => state.userId === selectedUserId,
         );
 
         if (!channel.spaceId) return null;
@@ -94,9 +94,12 @@ export const VoiceChannelView = observer(
                                 cursor: "pointer",
                             }}
                             variant="solid"
-                            color={selectedState.user?.accentColor}
+                            color={selectedState.member?.user?.accentColor}
                         >
-                            <UserAvatar user={selectedState.user} size={256} />
+                            <UserAvatar
+                                user={selectedState.member?.user}
+                                size={256}
+                            />
                         </Paper>
                     ) : voiceStates.length === 0 ? (
                         <Stack
@@ -168,15 +171,19 @@ export const VoiceChannelView = observer(
                                             cursor: "pointer",
                                         }}
                                         onClick={() =>
+                                            voiceStates.find(
+                                                (vs) =>
+                                                    vs.user === app.account?.id,
+                                            ) &&
                                             setSelectedUserId(
-                                                state.user?.id ?? null,
+                                                state.member?.user?.id ?? null,
                                             )
                                         }
                                         variant="solid"
-                                        color={state.user?.accentColor}
+                                        color={state.member?.user?.accentColor}
                                     >
                                         <UserAvatar
-                                            user={state.user}
+                                            user={state.member?.user}
                                             size={tileSize.avatar}
                                         />
                                     </Paper>

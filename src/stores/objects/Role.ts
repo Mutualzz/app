@@ -8,6 +8,7 @@ import {
     roleFlags,
     type RoleFlags,
 } from "@mutualzz/permissions";
+import { makeAutoObservable } from "mobx";
 
 export class Role {
     id: Snowflake;
@@ -51,6 +52,8 @@ export class Role {
         this.updatedAt = new Date(role.updatedAt);
 
         this.raw = role;
+
+        makeAutoObservable(this);
     }
 
     get isEveryone() {

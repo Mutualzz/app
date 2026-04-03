@@ -2,13 +2,11 @@ import {
     type IObservableArray,
     makeAutoObservable,
     observable,
-    type ObservableMap,
     runInAction,
 } from "mobx";
 import * as mediasoupClient from "mediasoup-client";
 import {
     GatewayOpcodes,
-    type Snowflake,
     VoiceDispatchEvents,
     type VoiceOpcode,
     VoiceOpcodes,
@@ -74,7 +72,9 @@ class MediasoupSession {
     private isDeafened = false;
     private isMuted = false;
 
-    constructor(private readonly onDisconnected: () => void) {}
+    constructor(private readonly onDisconnected: () => void) {
+        makeAutoObservable(this);
+    }
 
     setInputDeviceId(deviceId: string | null) {
         this.currentInputDeviceId = deviceId;
@@ -220,6 +220,35 @@ class MediasoupSession {
         return fn().finally(() => {
             this.suppressOnDisconnected--;
         });
+    }
+
+    private async requestWithRetry(
+        op: VoiceOpcode,
+        data: any,
+        retries = 4,
+        delayMs = 100,
+    ) {
+        let lastError: unknown;
+
+        for (let i = 0; i <= retries; i++) {
+            try {
+                return await this.request(op, data);
+            } catch (error) {
+                lastError = error;
+                const message =
+                    error instanceof Error ? error.message : String(error);
+
+                if (!message.includes("Voice state not found")) throw error;
+
+                if (i < retries) {
+                    await new Promise((resolve) =>
+                        setTimeout(resolve, delayMs * (i + 1)),
+                    );
+                }
+            }
+        }
+
+        throw lastError;
     }
 
     private async setup(attemptId: number) {
@@ -484,9 +513,12 @@ class MediasoupSession {
 
         if (!this.device || !this.receiverTransport) return;
 
-        const response = await this.request(VoiceOpcodes.VoiceConsume, {
-            producerId,
-        });
+        const response = await this.requestWithRetry(
+            VoiceOpcodes.VoiceConsume,
+            {
+                producerId,
+            },
+        );
 
         const options = response.consumerOptions;
 
@@ -610,10 +642,6 @@ export class VoiceStore {
     preferredSelfMute = false;
     preferredSelfDeaf = false;
     cameraEnabled = false;
-    channelStates = observable.map<
-        Snowflake,
-        ObservableMap<Snowflake, VoiceState>
-    >();
     connectionStatus: VoiceConnectionStatus = "idle";
     connectionError: string | null = null;
     inputs: IObservableArray<MediaDeviceInfo> =
@@ -710,6 +738,12 @@ export class VoiceStore {
         );
     }
 
+    get voiceStates() {
+        return this.app.voiceStates.getAllByChannel(
+            this.currentVoiceTarget?.channelId,
+        );
+    }
+
     onVoiceServerUpdate(payload: VoiceServerUpdatePayload) {
         this.voiceEndpoint = payload.voiceEndpoint;
         this.voiceToken = payload.voiceToken;
@@ -721,115 +755,12 @@ export class VoiceStore {
             void this.maybeConnectSession();
     }
 
-    onVoiceStateSync(payload: VoiceStateSyncPayload) {
-        const statesByUserId = observable.map<Snowflake, VoiceState>();
-
-        const currentSpace =
-            this.currentSpaceId != null
-                ? this.app.spaces.get(this.currentSpaceId)
-                : null;
-
-        const syncedChannel =
-            currentSpace && payload.channelId
-                ? (currentSpace.channels.find(
-                      (channelItem) => channelItem.id === payload.channelId,
-                  ) ?? null)
-                : null;
-
-        if (syncedChannel) syncedChannel.voiceStates.clear();
-
-        for (const state of payload.states) {
-            const newState = new VoiceState(this.app, state);
-
-            statesByUserId.set(state.userId, newState);
-
-            this.syncSelfFromState(newState);
-
-            if (state.spaceId) {
-                const stateSpace = this.app.spaces.get(state.spaceId);
-                if (!stateSpace) continue;
-
-                const member = stateSpace.members.get(state.userId);
-                if (member) member.setVoiceState(state);
-            }
-
-            if (syncedChannel && state.channelId === payload.channelId) {
-                syncedChannel.voiceStates.set(state.userId, newState);
-            }
-        }
-
-        this.channelStates.set(payload.channelId, statesByUserId);
-    }
-
-    onVoiceStateUpdate(state: VoiceState) {
-        this.syncSelfFromState(state);
-
-        const space = state.spaceId ? this.app.spaces.get(state.spaceId) : null;
-
-        const normalizedChannelId =
-            state.channelId === "null" ? null : state.channelId;
-
-        const member = space?.members.get(state.userId) ?? null;
-
-        if (!normalizedChannelId) {
-            for (const [, userMap] of this.channelStates) {
-                userMap.delete(state.userId);
-            }
-
-            if (space) {
-                for (const channelItem of space.channels) {
-                    channelItem.voiceStates.delete(state.userId);
-                }
-            }
-
-            if (member) member.setVoiceState(null);
-            return;
-        }
-
-        for (const [existingChannelId, userMap] of this.channelStates) {
-            if (existingChannelId !== normalizedChannelId) {
-                userMap.delete(state.userId);
-            }
-        }
-
-        if (space) {
-            for (const channelItem of space.channels) {
-                if (channelItem.id !== normalizedChannelId) {
-                    channelItem.voiceStates.delete(state.userId);
-                }
-            }
-        }
-
-        let userStatesForChannel = this.channelStates.get(normalizedChannelId);
-        if (!userStatesForChannel) {
-            userStatesForChannel = observable.map<Snowflake, VoiceState>();
-            this.channelStates.set(normalizedChannelId, userStatesForChannel);
-        }
-        userStatesForChannel.set(state.userId, state);
-
-        const channel =
-            space?.channels.find(
-                (channelItem) => channelItem.id === normalizedChannelId,
-            ) ??
-            this.app.channels.get(normalizedChannelId) ??
-            null;
-
-        if (channel) channel.voiceStates.set(state.userId, state);
-        if (member) member.setVoiceState(state);
-    }
-
     async join(target: VoiceTarget) {
-        const spaceId = target.spaceId ?? null;
-        const channelId = target.channelId;
+        const isSameTarget =
+            this.currentVoiceTarget?.spaceId === (target.spaceId ?? null) &&
+            this.currentVoiceTarget?.channelId === target.channelId;
 
-        if (
-            this.currentVoiceTarget?.spaceId === spaceId &&
-            this.currentVoiceTarget?.channelId === channelId
-        ) {
-            return;
-        }
-
-        await this.leave();
+        if (isSameTarget) return;
 
         runInAction(() => {
             this.currentVoiceTarget = target;
@@ -844,7 +775,7 @@ export class VoiceStore {
         this.session.setSelfMute(this.selfMute);
         this.session.setSelfDeaf(this.selfDeaf);
 
-        this.sendVoiceStateUpdate();
+        await this.sendVoiceStateUpdate(target);
         await this.waitForVoiceServerUpdate();
         this.startKeepAlive();
     }
@@ -906,29 +837,23 @@ export class VoiceStore {
     }
 
     async leave() {
-        if (!this.currentVoiceTarget) return;
-
         this.session.setSelfDeaf(false);
         this.session.setSelfMute(false);
 
-        this.clearLocalVoiceStateForMe();
+        const target = this.currentVoiceTarget;
 
         runInAction(() => {
             this.currentVoiceTarget = null;
-
-            this.selfDeaf = this.spaceDeaf || this.preferredSelfDeaf;
-            this.selfMute =
-                this.spaceDeaf || this.spaceMute
-                    ? true
-                    : this.preferredSelfMute;
-
-            if (this.selfDeaf) this.selfMute = true;
-
+            this.connectionStatus = "idle";
+            this.connectionError = null;
             this.cameraEnabled = false;
         });
 
-        this.sendVoiceStateUpdate();
-        await this.session.disconnect();
+        this.clearLocalVoiceStateForMe();
+
+        await this.sendVoiceStateUpdate(target ?? null);
+
+        void this.session.disconnect();
     }
 
     reset() {
@@ -952,8 +877,6 @@ export class VoiceStore {
             this.preferredSelfDeaf = false;
 
             this.cameraEnabled = false;
-
-            this.channelStates.clear();
         });
 
         void this.session.disconnect();
@@ -1142,6 +1065,64 @@ export class VoiceStore {
         );
     }
 
+    onVoiceStateSync(payload: VoiceStateSyncPayload) {
+        const channelId = payload.channelId;
+
+        for (const state of payload.states) {
+            this.syncSelfFromState(new VoiceState(this.app, state));
+            this.app.voiceStates.upsert(state);
+        }
+
+        const syncedUserIds = new Set(
+            payload.states.map((state) => state.userId),
+        );
+
+        for (const existing of this.app.voiceStates.getAllByChannel(
+            channelId,
+        )) {
+            if (!syncedUserIds.has(existing.userId)) {
+                this.app.voiceStates.remove(existing.userId);
+            }
+        }
+    }
+
+    onVoiceStateUpdate(state: VoiceState) {
+        this.syncSelfFromState(state);
+
+        const normalizedChannelId =
+            state.channelId === "null" ? null : state.channelId;
+
+        if (!normalizedChannelId) {
+            this.app.voiceStates.remove(state.userId);
+            return;
+        }
+
+        this.app.voiceStates.upsert({
+            ...state,
+            channelId: normalizedChannelId,
+            spaceId: state.spaceId ?? null,
+        });
+    }
+
+    private async transitionVoiceTarget(target: VoiceTarget) {
+        runInAction(() => {
+            this.currentVoiceTarget = target;
+            this.connectionStatus = "signaling";
+            this.connectionError = null;
+        });
+
+        this.session.setInputDeviceId(this.currentInputDeviceId ?? null);
+        this.session.setOutputDeviceId(this.currentOutputDeviceId ?? null);
+        this.session.setCameraDeviceId(this.currentCameraDeviceId ?? null);
+
+        this.session.setSelfMute(this.selfMute);
+        this.session.setSelfDeaf(this.selfDeaf);
+
+        await this.sendVoiceStateUpdate();
+        await this.waitForVoiceServerUpdate();
+        this.startKeepAlive();
+    }
+
     private waitForVoiceServerUpdate() {
         if (this.voiceEndpoint && this.voiceToken)
             return this.maybeConnectSession();
@@ -1212,27 +1193,10 @@ export class VoiceStore {
         const accountId = this.app.account?.id;
         if (!accountId) return;
 
-        const spaceId = this.currentSpaceId;
-        const space = spaceId ? this.app.spaces.get(spaceId) : null;
-
-        if (space) {
-            const me = space.members.get(accountId) ?? space.members.me;
-            if (me) me.setVoiceState(null);
-
-            for (const channelItem of space.channels) {
-                channelItem.voiceStates.delete(accountId);
-            }
-        }
-
-        for (const [, userMap] of this.channelStates) {
-            userMap.delete(accountId);
-        }
+        this.app.voiceStates.remove(accountId);
     }
 
-    private sendVoiceStateUpdate() {
-        const target = this.currentVoiceTarget;
-        if (!target) return;
-
+    private async sendVoiceStateUpdate(target = this.currentVoiceTarget) {
         const forcedMute = this.spaceMute;
         const forcedDeaf = this.spaceDeaf;
 
@@ -1240,11 +1204,11 @@ export class VoiceStore {
         const outgoingSelfMute =
             forcedDeaf || forcedMute ? true : this.preferredSelfMute;
 
-        this.app.gateway.send({
+        await this.app.gateway.send({
             op: GatewayOpcodes.VoiceStateUpdate,
             d: {
-                spaceId: target.spaceId ?? undefined,
-                channelId: target.channelId,
+                spaceId: target?.spaceId ?? null,
+                channelId: target?.channelId ?? null,
                 selfMute: outgoingSelfMute,
                 selfDeaf: outgoingSelfDeaf,
             },
@@ -1256,7 +1220,7 @@ export class VoiceStore {
 
         this.keepAliveTimer = window.setInterval(() => {
             this.sendVoiceStateUpdate();
-        }, 30_000);
+        }, 15_000);
     }
 
     private stopKeepAlive() {

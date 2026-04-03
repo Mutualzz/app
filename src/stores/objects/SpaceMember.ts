@@ -1,4 +1,4 @@
-import { type APISpaceMember, type Snowflake, type VoiceState, } from "@mutualzz/types";
+import { type APISpaceMember, type Snowflake } from "@mutualzz/types";
 import type { AppStore } from "@stores/App.store";
 import { makeAutoObservable, observable, ObservableMap } from "mobx";
 import type { Space } from "./Space";
@@ -35,7 +35,7 @@ export class SpaceMember {
 
     joinedAt: Date;
     updatedAt: Date;
-    voiceState?: VoiceState | null;
+
     private channelPermCache: ObservableMap<string, bigint> = observable.map();
 
     constructor(
@@ -43,8 +43,6 @@ export class SpaceMember {
         space: Space,
         member: APISpaceMember,
     ) {
-        makeAutoObservable(this);
-
         this.id = member.userId;
 
         this.spaceId = space.id;
@@ -67,6 +65,8 @@ export class SpaceMember {
 
         this.joinedAt = new Date(member.joinedAt);
         this.updatedAt = new Date(member.updatedAt);
+
+        makeAutoObservable(this);
     }
 
     get displayName() {
@@ -142,12 +142,8 @@ export class SpaceMember {
             .filter(Boolean) as Role[];
     }
 
-    setVoiceState(voiceState: VoiceState | null) {
-        this.voiceState = voiceState;
-    }
-
-    getVoiceState() {
-        return this.voiceState;
+    get voiceState() {
+        return this.app.voiceStates.get(this.userId);
     }
 
     update(member: APISpaceMember) {

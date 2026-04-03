@@ -1,6 +1,7 @@
 import type { APIUser, MessageType, Snowflake } from "@mutualzz/types";
 import type { AppStore } from "@stores/App.store";
 import { MessageBase } from "./MessageBase";
+import { makeAutoObservable } from "mobx";
 
 export enum QueuedMessageStatus {
     Sending = "sending",
@@ -33,6 +34,8 @@ export class QueuedMessage extends MessageBase {
         this.channelId = data.channelId;
         this.spaceId = data.spaceId ?? null;
         this.status = QueuedMessageStatus.Sending;
+
+        makeAutoObservable(this);
     }
 
     updateProgress(e: ProgressEvent) {
