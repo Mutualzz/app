@@ -1,22 +1,8 @@
-import {
-    type IObservableArray,
-    makeAutoObservable,
-    observable,
-    runInAction,
-} from "mobx";
+import { type IObservableArray, makeAutoObservable, observable, runInAction, } from "mobx";
 import * as mediasoupClient from "mediasoup-client";
-import {
-    GatewayOpcodes,
-    VoiceDispatchEvents,
-    type VoiceOpcode,
-    VoiceOpcodes,
-} from "@mutualzz/types";
+import { GatewayOpcodes, VoiceDispatchEvents, type VoiceOpcode, VoiceOpcodes, } from "@mutualzz/types";
 import type { AppStore } from "@stores/App.store.ts";
-import type {
-    VoiceServerUpdatePayload,
-    VoiceStateSyncPayload,
-    VoiceTarget,
-} from "@app-types/index.ts";
+import type { VoiceServerUpdatePayload, VoiceStateSyncPayload, VoiceTarget, } from "@app-types/index.ts";
 import { isSSR } from "@utils/index.ts";
 import { makePersistable } from "mobx-persist-store";
 import { safeLocalStorage } from "@utils/safeLocalStorage.ts";
@@ -1102,25 +1088,6 @@ export class VoiceStore {
             channelId: normalizedChannelId,
             spaceId: state.spaceId ?? null,
         });
-    }
-
-    private async transitionVoiceTarget(target: VoiceTarget) {
-        runInAction(() => {
-            this.currentVoiceTarget = target;
-            this.connectionStatus = "signaling";
-            this.connectionError = null;
-        });
-
-        this.session.setInputDeviceId(this.currentInputDeviceId ?? null);
-        this.session.setOutputDeviceId(this.currentOutputDeviceId ?? null);
-        this.session.setCameraDeviceId(this.currentCameraDeviceId ?? null);
-
-        this.session.setSelfMute(this.selfMute);
-        this.session.setSelfDeaf(this.selfDeaf);
-
-        await this.sendVoiceStateUpdate();
-        await this.waitForVoiceServerUpdate();
-        this.startKeepAlive();
     }
 
     private waitForVoiceServerUpdate() {
