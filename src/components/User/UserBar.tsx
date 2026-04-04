@@ -228,7 +228,8 @@ export const UserBar = observer(() => {
             <Paper
                 justifyContent="space-between"
                 alignItems="center"
-                p={2.5}
+                px={2.5}
+                py={1.25}
                 elevation={app.settings?.preferEmbossed ? 5 : 1}
                 color="neutral"
                 borderTop={showVoicePill ? "0 !important" : undefined}
