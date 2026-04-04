@@ -37,6 +37,12 @@ export class VoiceStatesStore {
     }
 
     set(states: JSONVoiceState[]) {
+        for (const state of states) {
+            this.upsert(state);
+        }
+    }
+
+    replace(states: JSONVoiceState[]) {
         const nextIds = new Set<Snowflake>();
 
         for (const state of states) {

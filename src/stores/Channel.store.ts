@@ -166,7 +166,7 @@ export class ChannelStore {
             const parentId = ch.parentId ?? null;
             return (
                 !(parentId && collapsed.has(parentId)) ||
-                ch.voiceStates.size > 0
+                ch.voiceStates.length > 0
             );
         });
 

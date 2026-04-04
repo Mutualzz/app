@@ -8,7 +8,6 @@ import {
     ImageFormat,
     type Sizes,
     type Snowflake,
-    type VoiceState as MzVoiceState,
 } from "@mutualzz/types";
 import type { AppStore } from "@stores/App.store";
 import { MessageStore } from "@stores/Message.store";
@@ -24,7 +23,6 @@ import {
 } from "@mutualzz/permissions";
 import { murmur } from "@utils/index.ts";
 import { REST } from "@stores/REST.store.ts";
-import { VoiceState } from "@stores/objects/VoiceState.ts";
 
 function getOverwriteKey(ow: ChannelPermissionOverwrite): string {
     if (ow.roleId != null) return `r:${ow.roleId}`;
@@ -193,15 +191,6 @@ export class Channel {
         return REST.makeCDNUrl(
             CDNRoutes.channelIcon(channelId, hash, format, size, animated),
         );
-    }
-
-    addVoiceState(state: MzVoiceState) {
-        const newState = new VoiceState(this.app, state);
-        this.voiceStates.set(state.userId, newState);
-    }
-
-    removeVoiceState(userId: Snowflake) {
-        this.voiceStates.delete(userId);
     }
 
     update(channel: APIChannel) {

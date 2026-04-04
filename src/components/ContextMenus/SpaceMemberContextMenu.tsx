@@ -85,7 +85,7 @@ export const SpaceMemberContextMenu = observer(({ space, member }: Props) => {
     const canMuteMembers = me?.hasPermission("MuteMembers");
     const canDeafenMembers = me?.hasPermission("DeafenMembers");
 
-    const voiceState = member.getVoiceState();
+    const voiceState = app.voiceStates.getBySpace(member.userId, space.id);
 
     const { mutate: createRole, isPending: creatingRole } = useMutation({
         mutationKey: ["create-role", space.id],

@@ -63,6 +63,7 @@ console.log(
 
 // https://vitejs.dev/config/
 export default defineConfig({
+    assetsInclude: ["**/*.ogg", "**/*.mp3"],
     plugins: [
         svgr(),
         replace({

@@ -1,13 +1,30 @@
-import { type IObservableArray, makeAutoObservable, observable, runInAction, } from "mobx";
+import {
+    type IObservableArray,
+    makeAutoObservable,
+    observable,
+    runInAction,
+} from "mobx";
 import * as mediasoupClient from "mediasoup-client";
-import { GatewayOpcodes, VoiceDispatchEvents, type VoiceOpcode, VoiceOpcodes, } from "@mutualzz/types";
+import {
+    GatewayOpcodes,
+    VoiceDispatchEvents,
+    type VoiceOpcode,
+    VoiceOpcodes,
+} from "@mutualzz/types";
 import type { AppStore } from "@stores/App.store.ts";
-import type { VoiceServerUpdatePayload, VoiceStateSyncPayload, VoiceTarget, } from "@app-types/index.ts";
+import type {
+    VoiceServerUpdatePayload,
+    VoiceStateSyncPayload,
+    VoiceTarget,
+} from "@app-types/index.ts";
 import { isSSR } from "@utils/index.ts";
 import { makePersistable } from "mobx-persist-store";
 import { safeLocalStorage } from "@utils/safeLocalStorage.ts";
 import { Logger } from "@mutualzz/logger";
 import { VoiceState } from "@stores/objects/VoiceState.ts";
+
+import joinChannelSound from "@assets/sounds/channelJoin.ogg";
+import leaveChannelSound from "@assets/sounds/channelLeave.ogg";
 
 export type VoiceConnectionStatus =
     | "idle"
@@ -181,13 +198,11 @@ class MediasoupSession {
             if (this.socket === socket) this.cleanup();
         };
 
-        socket.onerror = () => {
-            if (this.socket === socket) this.cleanup();
-        };
-
         await new Promise<void>((resolve, reject) => {
             socket.onopen = () => resolve();
-            socket.onerror = () => reject(new Error("Voice socket failed"));
+            socket.onerror = () => {
+                reject(new Error("Voice socket failed"));
+            };
         });
 
         await this.setup(attemptId);
@@ -199,7 +214,7 @@ class MediasoupSession {
         );
     }
 
-    private async withSuppressedDisconnectCallback<T>(
+    async withSuppressedDisconnectCallback<T>(
         fn: () => Promise<T>,
     ): Promise<T> {
         this.suppressOnDisconnected++;
@@ -641,6 +656,7 @@ export class VoiceStore {
     currentCameraDeviceId?: string | null = null;
     private connectPromise: Promise<void> | null = null;
     private connectGeneration = 0;
+    private connectingToken: string | null = null;
     private readonly session: MediasoupSession;
     private keepAliveTimer: number | null = null;
 
@@ -737,8 +753,40 @@ export class VoiceStore {
         if (
             this.connectionStatus === "signaling" ||
             this.connectionStatus === "reconnecting"
-        )
+        ) {
             void this.maybeConnectSession();
+            return;
+        }
+
+        // Already connected but received a new token — user moved channels.
+        // Reconnect to the new room immediately.
+        if (this.connectionStatus === "connected" && payload.roomId) {
+            runInAction(() => {
+                this.currentVoiceTarget = {
+                    spaceId: payload.spaceId ?? null,
+                    channelId: payload.channelId,
+                };
+                this.connectionStatus = "signaling";
+                this.connectionError = null;
+            });
+
+            void this.maybeConnectSession();
+            return;
+        }
+
+        if (this.connectionStatus === "idle" && payload.roomId) {
+            runInAction(() => {
+                this.currentVoiceTarget = {
+                    spaceId: payload.spaceId ?? null,
+                    channelId: payload.channelId,
+                };
+                this.connectionStatus = "signaling";
+                this.connectionError = null;
+            });
+
+            this.startKeepAlive();
+            void this.maybeConnectSession();
+        }
     }
 
     async join(target: VoiceTarget) {
@@ -761,9 +809,16 @@ export class VoiceStore {
         this.session.setSelfMute(this.selfMute);
         this.session.setSelfDeaf(this.selfDeaf);
 
-        await this.sendVoiceStateUpdate(target);
+        await this.sendVoiceStateUpdate();
         await this.waitForVoiceServerUpdate();
         this.startKeepAlive();
+
+        let joinAudio: HTMLAudioElement | null = new Audio(joinChannelSound);
+        await joinAudio.play();
+
+        joinAudio.onended = () => {
+            joinAudio = null;
+        };
     }
 
     setInputDeviceId(deviceId: string) {
@@ -826,8 +881,6 @@ export class VoiceStore {
         this.session.setSelfDeaf(false);
         this.session.setSelfMute(false);
 
-        const target = this.currentVoiceTarget;
-
         runInAction(() => {
             this.currentVoiceTarget = null;
             this.connectionStatus = "idle";
@@ -837,9 +890,16 @@ export class VoiceStore {
 
         this.clearLocalVoiceStateForMe();
 
-        await this.sendVoiceStateUpdate(target ?? null);
+        await this.sendVoiceStateUpdate();
 
         void this.session.disconnect();
+
+        let leaveAudio: HTMLAudioElement | null = new Audio(leaveChannelSound);
+        await leaveAudio.play();
+
+        leaveAudio.onended = () => {
+            leaveAudio = null;
+        };
     }
 
     reset() {
@@ -953,52 +1013,66 @@ export class VoiceStore {
         if (!endpoint || !token) return Promise.resolve();
         if (!this.currentVoiceTarget) return Promise.resolve();
 
-        if (this.connectPromise) return this.connectPromise;
+        // If a connection is already in-flight for the SAME token, reuse it.
+        // If the token has changed (user moved channels), drop the old promise
+        // so we reconnect with the new token.
+        if (this.connectPromise) {
+            if (this.connectingToken === token) return this.connectPromise;
+            // Token changed mid-connect: let the old attempt finish/cancel via
+            // the generation counter, then fall through to start a new one.
+            this.connectPromise = null;
+        }
+
+        this.connectingToken = token;
 
         const generation = ++this.connectGeneration;
 
-        this.connectPromise = (async () => {
-            runInAction(() => {
-                this.connectionStatus = "connecting";
-                this.connectionError = null;
-            });
-
-            try {
-                this.session.setInputDeviceId(
-                    this.currentInputDeviceId ?? null,
-                );
-                this.session.setOutputDeviceId(
-                    this.currentOutputDeviceId ?? null,
-                );
-                this.session.setCameraDeviceId(
-                    this.currentCameraDeviceId ?? null,
-                );
-
-                await this.session.connect({ endpoint, token });
-
-                if (generation !== this.connectGeneration) return;
-
-                this.session.setSelfMute(this.selfMute);
-                this.session.setSelfDeaf(this.selfDeaf);
-
+        this.connectPromise = this.session.withSuppressedDisconnectCallback(
+            async () => {
                 runInAction(() => {
-                    this.connectionStatus = "connected";
+                    this.connectionStatus = "connecting";
+                    this.connectionError = null;
                 });
-            } catch (error) {
-                if (generation !== this.connectGeneration) return;
 
-                runInAction(() => {
-                    this.connectionStatus = "failed";
-                    this.connectionError =
-                        error instanceof Error ? error.message : String(error);
-                });
-                throw error;
-            } finally {
-                if (generation === this.connectGeneration) {
-                    this.connectPromise = null;
+                try {
+                    this.session.setInputDeviceId(
+                        this.currentInputDeviceId ?? null,
+                    );
+                    this.session.setOutputDeviceId(
+                        this.currentOutputDeviceId ?? null,
+                    );
+                    this.session.setCameraDeviceId(
+                        this.currentCameraDeviceId ?? null,
+                    );
+
+                    await this.session.connect({ endpoint, token });
+
+                    if (generation !== this.connectGeneration) return;
+
+                    this.session.setSelfMute(this.selfMute);
+                    this.session.setSelfDeaf(this.selfDeaf);
+
+                    runInAction(() => {
+                        this.connectionStatus = "connected";
+                    });
+                } catch (error) {
+                    if (generation !== this.connectGeneration) return;
+
+                    runInAction(() => {
+                        this.connectionStatus = "failed";
+                        this.connectionError =
+                            error instanceof Error
+                                ? error.message
+                                : String(error);
+                    });
+                    throw error;
+                } finally {
+                    if (generation === this.connectGeneration) {
+                        this.connectPromise = null;
+                    }
                 }
-            }
-        })();
+            },
+        );
 
         return this.connectPromise;
     }
@@ -1079,6 +1153,7 @@ export class VoiceStore {
             state.channelId === "null" ? null : state.channelId;
 
         if (!normalizedChannelId) {
+            console.log("Left");
             this.app.voiceStates.remove(state.userId);
             return;
         }
@@ -1129,7 +1204,7 @@ export class VoiceStore {
         const forcedMute = state.spaceMute ?? false;
         const forcedDeaf = state.spaceDeaf ?? false;
 
-        const inVoice = state.channelId !== "null" && state.channelId != null;
+        const inVoice = state.channelId != null;
 
         runInAction(() => {
             this.spaceMute = forcedMute;
@@ -1163,7 +1238,7 @@ export class VoiceStore {
         this.app.voiceStates.remove(accountId);
     }
 
-    private async sendVoiceStateUpdate(target = this.currentVoiceTarget) {
+    private async sendVoiceStateUpdate() {
         const forcedMute = this.spaceMute;
         const forcedDeaf = this.spaceDeaf;
 
@@ -1171,11 +1246,14 @@ export class VoiceStore {
         const outgoingSelfMute =
             forcedDeaf || forcedMute ? true : this.preferredSelfMute;
 
+        const spaceId = this.currentVoiceTarget?.spaceId ?? null;
+        const channelId = this.currentVoiceTarget?.channelId ?? null;
+
         await this.app.gateway.send({
             op: GatewayOpcodes.VoiceStateUpdate,
             d: {
-                spaceId: target?.spaceId ?? null,
-                channelId: target?.channelId ?? null,
+                spaceId,
+                channelId,
                 selfMute: outgoingSelfMute,
                 selfDeaf: outgoingSelfDeaf,
             },

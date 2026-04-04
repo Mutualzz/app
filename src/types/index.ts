@@ -4,6 +4,8 @@ export const WINDOW_TITLEBAR_ZINDEX = 99999999;
 
 export interface VoiceServerUpdatePayload {
     roomId: string;
+    spaceId: string | null;
+    channelId: string;
     voiceEndpoint: string;
     voiceToken: string;
 }
