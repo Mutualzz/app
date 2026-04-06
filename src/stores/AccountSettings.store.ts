@@ -3,7 +3,7 @@ import { ObservableOrderedSet } from "@utils/ObservableOrderedSet";
 import { makeAutoObservable } from "mobx";
 import type { AppStore } from "./App.store";
 import { makePersistable } from "mobx-persist-store";
-import { safeLocalStorage } from "@utils/safeLocalStorage";
+import { safeLocalStorage } from "@storages/safeLocalStorage.ts";
 
 type SettingsPatch = Omit<APIUserSettings, "updatedAt">;
 
@@ -70,20 +70,6 @@ export class AccountSettingsStore {
             ],
             storage: safeLocalStorage,
         });
-    }
-
-    private getSyncPayload(): SettingsPatch {
-        return {
-            spacePositions: this.spacePositions.toArray(),
-            preferredMode: this.preferredMode,
-            preferEmbossed: this.preferEmbossed,
-            currentTheme: this.currentTheme,
-            currentIcon: this.currentIcon,
-        };
-    }
-
-    private computeHash(payload: SettingsPatch): string {
-        return JSON.stringify(payload);
     }
 
     private get isDirty(): boolean {
@@ -173,5 +159,19 @@ export class AccountSettingsStore {
             .catch(() => null);
 
         if (res) this.update(res);
+    }
+
+    private getSyncPayload(): SettingsPatch {
+        return {
+            spacePositions: this.spacePositions.toArray(),
+            preferredMode: this.preferredMode,
+            preferEmbossed: this.preferEmbossed,
+            currentTheme: this.currentTheme,
+            currentIcon: this.currentIcon,
+        };
+    }
+
+    private computeHash(payload: SettingsPatch): string {
+        return JSON.stringify(payload);
     }
 }

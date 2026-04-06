@@ -1,9 +1,7 @@
 import { type APISpaceMember, type Snowflake } from "@mutualzz/types";
 import type { AppStore } from "@stores/App.store";
 import { makeAutoObservable, observable, ObservableMap } from "mobx";
-import type { Space } from "./Space";
-import { User } from "./User";
-import type { Role } from "./Role";
+import { Role } from "./Role";
 import type { Channel } from "./Channel";
 import {
     ALL_BITS,
@@ -21,37 +19,31 @@ export class SpaceMember {
     id: Snowflake;
 
     spaceId: Snowflake;
-    space?: Space | null;
 
     userId: Snowflake;
-    user?: User | null;
-
     flags: BitField<MemberFlags>;
     nickname?: string | null;
     avatar?: string | null;
     banner?: string | null;
-
     roles = observable.set<string>();
-
     joinedAt: Date;
     updatedAt: Date;
-
     private channelPermCache: ObservableMap<string, bigint> = observable.map();
 
     constructor(
         private readonly app: AppStore,
-        space: Space,
         member: APISpaceMember,
     ) {
         this.id = member.userId;
 
-        this.spaceId = space.id;
-        this.space = space;
-
+        this.spaceId = member.spaceId;
         this.userId = member.userId;
-        if (member.user) this.user = this.app.users.add(member.user);
 
-        this.roles.add(space.id); // @everyone
+        this.roles.add(member.spaceId); // @everyone
+
+        if (member.roles && Array.isArray(member.roles)) {
+            for (const mr of member.roles) this.roles.add(mr.roleId);
+        }
 
         this.flags = BitField.fromString(memberFlags, member.flags.toString());
 
@@ -59,18 +51,27 @@ export class SpaceMember {
         this.avatar = member.avatar;
         this.banner = member.banner;
 
-        if (member.roles) {
-            for (const mr of member.roles) this.roles.add(mr.roleId);
-        }
-
         this.joinedAt = new Date(member.joinedAt);
         this.updatedAt = new Date(member.updatedAt);
+
+        if (member.user) {
+            const existing = this.app.users.get(member.userId);
+            if (!existing) this.app.users.add(member.user);
+        }
 
         makeAutoObservable(this);
     }
 
+    get user() {
+        return this.app.users.get(this.userId);
+    }
+
     get displayName() {
         return this.nickname ?? this.user?.displayName ?? "Unknown User";
+    }
+
+    get space() {
+        return this.app.spaces.get(this.spaceId);
     }
 
     get highestRole() {
@@ -147,24 +148,12 @@ export class SpaceMember {
     }
 
     update(member: APISpaceMember) {
-        const uid = member.userId ?? member.user?.id ?? this.userId;
+        const uid = member.userId ?? this.userId;
 
         this.userId = uid;
         this.id = uid;
 
         this.spaceId = member.spaceId ?? this.spaceId;
-
-        if (member.user) {
-            const userId = member.user.id ?? uid;
-            const existing = this.app.users.get?.(userId);
-
-            if (existing) this.app.users.update?.(member.user);
-            else this.app.users.add?.(member.user);
-
-            this.user = this.app.users.get?.(userId) ?? new User(member.user);
-        } else if (this.userId) {
-            this.user = this.app.users.get?.(this.userId) ?? this.user ?? null;
-        }
 
         this.nickname = member.nickname ?? null;
         this.avatar = member.avatar ?? null;
@@ -172,14 +161,20 @@ export class SpaceMember {
 
         this.flags = BitField.fromString(memberFlags, member.flags.toString());
 
-        if (member.joinedAt) this.joinedAt = new Date(member.joinedAt);
-        if (member.updatedAt) this.updatedAt = new Date(member.updatedAt);
+        this.joinedAt = new Date(member.joinedAt);
+        this.updatedAt = new Date(member.updatedAt);
 
         if (this.space) {
             this.roles.clear();
             this.roles.add(this.space.id);
             if (member.roles)
                 for (const mr of member.roles) this.roles.add(mr.roleId);
+        }
+
+        if (member.user) {
+            const existing = this.app.users.get(member.userId ?? this.userId);
+            if (existing) existing.update(member.user);
+            else this.app.users.add(member.user);
         }
 
         this.invalidateChannelPermCache();

@@ -1,11 +1,8 @@
 import type { APIMessage, APIMessageEmbed, Snowflake } from "@mutualzz/types";
 import type { AppStore } from "@stores/App.store";
-import type { Space } from "@stores/objects/Space";
 import { makeObservable } from "mobx";
-import type { Channel } from "./Channel";
 import { MessageBase } from "./MessageBase";
 import type { QueuedMessage, QueuedMessageData } from "./QueuedMessage";
-import type { SpaceMember } from "@stores/objects/SpaceMember.ts";
 
 export type MessageLike = Message | QueuedMessage;
 export type MessageLikeData = APIMessage | QueuedMessageData;
@@ -20,19 +17,13 @@ export class Message extends MessageBase {
 
     edited: boolean;
 
-    space?: Space | null;
-    channel?: Channel | null;
-    member?: SpaceMember | null;
-
     constructor(app: AppStore, data: APIMessage) {
         super(app, data);
 
         this.id = data.id;
 
         this.channelId = data.channelId;
-        if (data.channel) this.channel = this.app.channels.add(data.channel);
-
-        this.channel = this.app.channels.get(this.channelId);
+        if (data.channel) this._channel = this.app.channels.add(data.channel);
 
         this.content = data.content;
         this.createdAt = new Date(data.createdAt);
@@ -44,11 +35,7 @@ export class Message extends MessageBase {
         this.embeds = data.embeds;
 
         this.spaceId = data.spaceId;
-        if (data.space) this.space = this.app.spaces.add(data.space);
-        else if (this.spaceId)
-            this.space = this.app.spaces.get(this.spaceId) ?? null;
-
-        this.member = this.space?.members.get(data.authorId) ?? null;
+        if (data.space) this._space = this.app.spaces.add(data.space);
 
         makeObservable(this);
     }
@@ -58,16 +45,10 @@ export class Message extends MessageBase {
         this.channelId = message.channelId;
 
         if (message.channel)
-            this.channel = this.app.channels.add(message.channel);
-        else
-            this.channel =
-                this.app.channels.get(this.channelId) ?? this.channel ?? null;
+            this._channel = this.app.channels.add(message.channel);
 
         this.spaceId = message.spaceId ?? null;
-        if (message.space) this.space = this.app.spaces.add(message.space);
-        else if (this.spaceId)
-            this.space =
-                this.app.spaces.get(this.spaceId) ?? this.space ?? null;
+        if (message.space) this._space = this.app.spaces.add(message.space);
 
         this.content = message.content;
         this.nonce = message.nonce ?? null;
@@ -77,12 +58,6 @@ export class Message extends MessageBase {
         this.updatedAt = message.updatedAt ? new Date(message.updatedAt) : null;
 
         this.edited = message.edited ?? this.edited;
-
-        if (message.member && this.space)
-            this.member = this.space.members.add(message.member);
-        else if (this.space)
-            this.member =
-                this.space.members.get(message.authorId) ?? this.member ?? null;
     }
 
     async delete() {

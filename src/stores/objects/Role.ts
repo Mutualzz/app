@@ -14,79 +14,76 @@ export class Role {
     id: Snowflake;
     name: string;
     spaceId: Snowflake;
-    space?: Space | null;
-
     color: string;
     permissions: BitField<PermissionFlags>;
     position: number;
     hoist: boolean;
     flags: BitField<RoleFlags>;
     mentionable: boolean;
-
     createdAt: Date;
     updatedAt: Date;
-
     raw: APIRole;
 
     constructor(
         private readonly app: AppStore,
-        role: APIRole,
+        data: APIRole,
     ) {
-        this.id = role.id;
-        this.name = role.name;
-        this.spaceId = role.spaceId;
-        if (role.space) this.space = this.app.spaces.add(role.space);
+        this.id = data.id;
+        this.name = data.name;
+        this.spaceId = data.spaceId;
+        if (data.space) this._space = this.app.spaces.add(data.space);
 
-        this.color = role.color;
+        this.color = data.color;
         this.permissions = BitField.fromString(
             permissionFlags,
-            role.permissions.toString(),
+            data.permissions.toString(),
         );
 
-        this.position = role.position;
-        this.hoist = role.hoist;
-        this.flags = BitField.fromString(roleFlags, role.flags.toString());
-        this.mentionable = role.mentionable;
+        this.position = data.position;
+        this.hoist = data.hoist;
+        this.flags = BitField.fromString(roleFlags, data.flags.toString());
+        this.mentionable = data.mentionable;
 
-        this.createdAt = new Date(role.createdAt);
-        this.updatedAt = new Date(role.updatedAt);
+        this.createdAt = new Date(data.createdAt);
+        this.updatedAt = new Date(data.updatedAt);
 
-        this.raw = role;
+        this.raw = data;
 
         makeAutoObservable(this);
+    }
+
+    _space?: Space | null;
+
+    get space() {
+        return this.app.spaces.get(this.spaceId) || this._space;
     }
 
     get isEveryone() {
         return this.flags.has("Everyone");
     }
 
-    update(role: APIRole) {
-        this.id = role.id;
-        this.spaceId = role.spaceId;
+    update(data: APIRole) {
+        this.id = data.id;
+        this.spaceId = data.spaceId;
 
-        if (role.space) {
-            this.space = this.app.spaces.add(role.space);
-        } else {
-            this.space =
-                this.app.spaces.get(this.spaceId) ?? this.space ?? null;
-        }
+        if (data.space) this._space = this.app.spaces.add(data.space);
 
-        this.name = role.name;
-        this.color = role.color;
-        this.position = role.position;
-        this.hoist = role.hoist;
-        this.mentionable = role.mentionable;
+        this.name = data.name;
+        this.color = data.color;
+        this.position = data.position;
+        this.hoist = data.hoist;
+        this.mentionable = data.mentionable;
 
         this.permissions = BitField.fromString(
             permissionFlags,
-            role.permissions.toString(),
+            data.permissions.toString(),
         );
-        this.flags = BitField.fromString(roleFlags, role.flags.toString());
+        this.flags = BitField.fromString(roleFlags, data.flags.toString());
 
-        this.createdAt = new Date(role.createdAt);
-        this.updatedAt = new Date(role.updatedAt);
+        this.createdAt = new Date(data.createdAt);
+        this.updatedAt = new Date(data.updatedAt);
 
-        this.raw = role;
+        this.raw = data;
     }
 
     delete() {

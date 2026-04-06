@@ -1,5 +1,5 @@
 import type { APISpace, Snowflake } from "@mutualzz/types";
-import { safeLocalStorage } from "@utils/safeLocalStorage";
+import { safeLocalStorage } from "@storages/safeLocalStorage.ts";
 import { makeAutoObservable, observable, type ObservableMap } from "mobx";
 import { makePersistable } from "mobx-persist-store";
 import type { AppStore } from "../App.store";

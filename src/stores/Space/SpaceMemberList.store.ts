@@ -289,7 +289,6 @@ export class SpaceMemberListStore {
                         if (!memberObj) {
                             memberObj = new SpaceMember(
                                 this.app,
-                                this.space,
                                 memberWithoutPresence,
                             );
                         }
@@ -298,7 +297,7 @@ export class SpaceMemberListStore {
                     if (!memberObj) {
                         memberObj = new SpaceMember(
                             this.app,
-                            this.space,
+
                             item.member,
                         );
                     }

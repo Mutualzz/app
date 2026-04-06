@@ -3,7 +3,13 @@ import { Link } from "@components/Link";
 import { useModal } from "@contexts/Modal.context";
 import { useAppStore } from "@hooks/useStores";
 import type { APIInvite, APISpaceMember } from "@mutualzz/types";
-import { Button, ButtonGroup, Input, Stack, Typography, } from "@mutualzz/ui-web";
+import {
+    Button,
+    ButtonGroup,
+    Input,
+    Stack,
+    Typography,
+} from "@mutualzz/ui-web";
 import { useMutation } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { observer } from "mobx-react-lite";

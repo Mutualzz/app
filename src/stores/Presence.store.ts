@@ -1,7 +1,11 @@
 import { makeAutoObservable, observable } from "mobx";
-import type { PresencePayload, PresenceSchedule, Snowflake, } from "@mutualzz/types";
+import type {
+    PresencePayload,
+    PresenceSchedule,
+    Snowflake,
+} from "@mutualzz/types";
 import { makePersistable } from "mobx-persist-store";
-import { safeLocalStorage } from "@utils/safeLocalStorage";
+import { safeLocalStorage } from "@storages/safeLocalStorage.ts";
 
 export class PresenceStore {
     scheduledStatus: PresenceSchedule | null = null;

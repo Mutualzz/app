@@ -1,11 +1,10 @@
 import type { Theme as MzTheme } from "@emotion/react";
 import type { APITheme, ThemeType } from "@mutualzz/types";
-import { safeLocalStorage } from "@utils/safeLocalStorage";
+import { safeLocalStorage } from "@storages/safeLocalStorage.ts";
 import { makeAutoObservable, observable, type ObservableMap } from "mobx";
 import { makePersistable } from "mobx-persist-store";
 import type { AppStore } from "./App.store";
 import { Theme } from "./objects/Theme";
-
 import { baseDarkTheme } from "@mutualzz/ui-core";
 import { themes as baseThemes } from "@themes/index";
 
@@ -30,6 +29,10 @@ export class ThemeStore {
             properties: ["currentTheme", "currentIcon"],
             storage: safeLocalStorage,
         });
+    }
+
+    get all() {
+        return Array.from(this.themes.values());
     }
 
     setCurrentTheme(themeId: string | null) {
@@ -66,10 +69,6 @@ export class ThemeStore {
 
     get(id: string) {
         return this.themes.get(id) ?? baseDarkTheme;
-    }
-
-    get all() {
-        return Array.from(this.themes.values());
     }
 
     remove(id: string) {

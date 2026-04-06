@@ -53,7 +53,6 @@ export class Theme implements Partial<MzTheme> {
     raw: APITheme;
 
     authorId?: Snowflake | null;
-    author?: User | null;
 
     constructor(
         private readonly app: AppStore,
@@ -74,9 +73,16 @@ export class Theme implements Partial<MzTheme> {
         this.raw = theme;
 
         this.authorId = theme.authorId;
-        if (theme.author) this.author = this.app.users.add(theme.author);
+        if (theme.author) this._author = this.app.users.add(theme.author);
 
         makeAutoObservable(this);
+    }
+
+    _author?: User | null;
+
+    get author() {
+        if (!this.authorId) return null;
+        return this.app.users.get(this.authorId) || this._author;
     }
 
     static toEmotion(theme: APITheme | MzTheme | Theme): MzTheme {
@@ -137,11 +143,7 @@ export class Theme implements Partial<MzTheme> {
 
         this.authorId = theme.authorId ?? null;
 
-        if (theme.author) this.author = this.app.users.add(theme.author);
-        else if (this.authorId)
-            this.author =
-                this.app.users.get(this.authorId) ?? this.author ?? null;
-        else this.author = null;
+        if (theme.author) this._author = this.app.users.add(theme.author);
 
         this.raw = theme;
     }

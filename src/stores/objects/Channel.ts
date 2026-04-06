@@ -34,23 +34,27 @@ function getOverwriteKey(ow: ChannelPermissionOverwrite): string {
 export class Channel {
     id: Snowflake;
     type: ChannelType;
+
+    icon?: string | null;
     name?: string | null;
     topic?: string | null;
     position: number;
     nsfw: boolean;
+
     createdAt: Date;
     updatedAt: Date;
+
     flags: BitField<ChannelFlags>;
+
     messages: MessageStore;
+
     parentId?: Snowflake | null;
-    parent?: Channel | null;
     spaceId?: Snowflake | null;
-    space?: Space | null;
-    raw: APIChannel;
     lastMessageId?: Snowflake | null;
-    lastMessage?: Message | null;
+
+    raw: APIChannel;
+
     overwrites: ChannelPermissionOverwrite[] = [];
-    icon?: string | null;
 
     private readonly logger = new Logger({
         tag: "Channel",
@@ -70,11 +74,12 @@ export class Channel {
         this.topic = channel.topic;
 
         this.parentId = channel.parentId;
-        if (channel.parent) this.parent = this.app.channels.add(channel.parent);
+        if (channel.parent)
+            this._parent = this.app.channels.add(channel.parent);
 
         this.spaceId = channel.spaceId;
 
-        if (channel.space) this.space = this.app.spaces.add(channel.space);
+        if (channel.space) this._space = this.app.spaces.add(channel.space);
 
         this.position = channel.position;
 
@@ -98,13 +103,41 @@ export class Channel {
 
         this.lastMessageId = channel.lastMessageId;
         if (channel.lastMessage)
-            this.lastMessage = this.messages.add(channel.lastMessage);
+            this._lastMessage = this.messages.add(channel.lastMessage);
 
         this.overwrites = (channel.overwrites ?? []).map(
-            (ow) => new ChannelPermissionOverwrite(ow),
+            (ow) => new ChannelPermissionOverwrite(this.app, ow),
         );
 
         makeAutoObservable(this);
+    }
+
+    _lastMessage?: Message | null;
+
+    get lastMessage() {
+        if (!this.lastMessageId) return null;
+
+        return this.messages.get(this.lastMessageId);
+    }
+
+    _parent?: Channel | null;
+
+    get parent(): Channel | null | undefined {
+        if (!this.parentId) return null;
+
+        return (
+            this.app.channels.get(this.parentId) ||
+            this.space?.channels.find((ch) => ch.id === this.parentId) ||
+            this._parent
+        );
+    }
+
+    _space?: Space | null;
+
+    get space() {
+        if (!this.spaceId) return null;
+
+        return this.app.spaces.get(this.spaceId) || this._space;
     }
 
     get listId() {
@@ -147,7 +180,7 @@ export class Channel {
     }
 
     get hasChildren(): boolean {
-        return this.app.channels.all.some((ch) => ch.parent?.id === this.id);
+        return this.app.channels.all.some((ch) => ch.parentId === this.id);
     }
 
     get hasParent(): boolean {
@@ -201,17 +234,17 @@ export class Channel {
         this.nsfw = channel.nsfw;
 
         this.parentId = channel.parentId ?? null;
-        this.parent = channel.parent
+        this._parent = channel.parent
             ? this.app.channels.add(channel.parent)
             : null;
 
         this.spaceId = channel.spaceId ?? null;
-        this.space = channel.space
+        this._space = channel.space
             ? this.app.spaces.add(channel.space)
             : (this.space ?? null);
 
         this.overwrites = (channel.overwrites ?? []).map(
-            (ow) => new ChannelPermissionOverwrite(ow),
+            (ow) => new ChannelPermissionOverwrite(this.app, ow),
         );
 
         this.flags = BitField.fromString(
@@ -225,9 +258,9 @@ export class Channel {
         this.raw = channel;
 
         this.lastMessageId = channel.lastMessageId ?? null;
-        this.lastMessage = channel.lastMessage
+        this._lastMessage = channel.lastMessage
             ? this.messages.add(channel.lastMessage)
-            : (this.lastMessage ?? null);
+            : (this._lastMessage ?? null);
 
         this.space?.members.me?.invalidateChannelPermCache?.();
     }

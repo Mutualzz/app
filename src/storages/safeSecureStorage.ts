@@ -1,7 +1,7 @@
 import secureLocalStorage from "react-secure-storage";
-import { isSSR } from ".";
+import { isSSR } from "@utils/index.ts";
 
-export const secureStorageAdapter: Storage = {
+export const safeSecureStorage: Storage = {
     getItem: (key: string) =>
         (!isSSR ? secureLocalStorage.getItem(key) : null) as string | null,
     setItem: (key: string, value: string) => {

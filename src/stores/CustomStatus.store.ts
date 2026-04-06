@@ -1,7 +1,7 @@
 import { makeAutoObservable } from "mobx";
 import type { PresenceActivity } from "@mutualzz/types";
 import { makePersistable } from "mobx-persist-store";
-import { safeLocalStorage } from "@utils/safeLocalStorage.ts";
+import { safeLocalStorage } from "@storages/safeLocalStorage.ts";
 
 export class CustomStatusStore {
     text: string = "";

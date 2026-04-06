@@ -1,4 +1,4 @@
-import { isSSR } from ".";
+import { isSSR } from "@utils/index.ts";
 
 export const safeLocalStorage: Storage = {
     getItem: (k) => (!isSSR ? localStorage.getItem(k) : null),

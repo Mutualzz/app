@@ -15,21 +15,13 @@ export class Invite {
     type: InviteType;
 
     spaceId?: Snowflake | null;
-    space?: Space | null;
-
     channelId?: Snowflake | null;
-    channel?: Channel | null;
-
     inviterId: Snowflake;
-    inviter?: User | null;
-
     maxUses: number;
     uses: number;
-
     createdAt: Date;
     updatedAt: Date;
     expiresAt?: Date | null;
-
     raw: APIInvite;
 
     constructor(
@@ -40,14 +32,14 @@ export class Invite {
         this.type = invite.type;
 
         this.spaceId = invite.spaceId;
-        if (invite.space) this.space = this.app.spaces.add(invite.space);
+        if (invite.space) this._space = this.app.spaces.add(invite.space);
 
         this.channelId = invite.channelId;
         if (invite.channel)
-            this.channel = this.app.channels.add(invite.channel);
+            this._channel = this.app.channels.add(invite.channel);
 
         this.inviterId = invite.inviterId;
-        if (invite.inviter) this.inviter = this.app.users.add(invite.inviter);
+        if (invite.inviter) this._inviter = this.app.users.add(invite.inviter);
 
         this.maxUses = invite.maxUses;
         this.uses = invite.uses;
@@ -59,6 +51,30 @@ export class Invite {
         this.raw = invite;
 
         makeAutoObservable(this);
+    }
+
+    _inviter?: User | null;
+
+    get inviter() {
+        return this.app.users.get(this.inviterId) || this._inviter;
+    }
+
+    _channel?: Channel | null;
+
+    get channel() {
+        if (!this.channelId) return null;
+        return (
+            this.app.channels.get(this.channelId) ||
+            this.space?.channels.find((ch) => ch.id === this.channelId) ||
+            this._channel
+        );
+    }
+
+    _space?: Space | null;
+
+    get space() {
+        if (!this.spaceId) return null;
+        return this.app.spaces.get(this.spaceId) || this._space;
     }
 
     get url() {
@@ -85,10 +101,10 @@ export class Invite {
         this.updatedAt = new Date(invite.updatedAt);
         this.expiresAt = invite.expiresAt ? new Date(invite.expiresAt) : null;
 
-        if (invite.space) this.space = this.app.spaces.add(invite.space);
+        if (invite.space) this._space = this.app.spaces.add(invite.space);
         if (invite.channel)
-            this.channel = this.app.channels.add(invite.channel);
-        if (invite.inviter) this.inviter = this.app.users.add(invite.inviter);
+            this._channel = this.app.channels.add(invite.channel);
+        if (invite.inviter) this._inviter = this.app.users.add(invite.inviter);
 
         this.raw = invite;
     }

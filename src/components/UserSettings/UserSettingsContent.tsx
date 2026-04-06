@@ -14,6 +14,7 @@ import { AppAppearanceSettings } from "./pages/app/AppAppearanceSettings";
 import { UserAccountSettings } from "./pages/user/UserAccountSettings";
 import { UserProfileSettings } from "./pages/user/UserProfileSettings";
 import { AppVoiceVideoSettings } from "@components/UserSettings/pages/app/AppVoiceVideoSettings.tsx";
+import { UserExpressionsSettings } from "@components/UserSettings/pages/user/expressions/UserExpressionsSettings.tsx";
 
 interface UserSettingsContentProps {
     redirectTo?: UserSettingsPage;
@@ -63,7 +64,7 @@ export const UserSettingsContent = observer(
                         fontFamily="monospace"
                     >
                         {currentPage === "voice_and_video"
-                            ? "Voice & Video"
+                            ? "Voice & Video (Still WIP)"
                             : startCase(currentPage)}
                     </Typography>
                     <IconButton
@@ -98,6 +99,9 @@ export const UserSettingsContent = observer(
                     {currentPage === "appearance" && <AppAppearanceSettings />}
                     {currentPage === "voice_and_video" && (
                         <AppVoiceVideoSettings />
+                    )}
+                    {currentPage === "expressions" && (
+                        <UserExpressionsSettings />
                     )}
                 </Paper>
             </Stack>

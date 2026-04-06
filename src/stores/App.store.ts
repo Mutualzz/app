@@ -7,8 +7,8 @@ import {
 } from "@mutualzz/types";
 import { QueryClient } from "@tanstack/react-query";
 import { isTauri } from "@utils/index";
-import { safeLocalStorage } from "@utils/safeLocalStorage";
-import { secureStorageAdapter } from "@utils/secureStorageAdapter";
+import { safeLocalStorage } from "@storages/safeLocalStorage.ts";
+import { safeSecureStorage } from "@storages/safeSecureStorage.ts";
 import { makeAutoObservable } from "mobx";
 import { makePersistable } from "mobx-persist-store";
 import { AccountStore } from "./Account.store";
@@ -29,6 +29,7 @@ import { PresenceStore } from "@stores/Presence.store.ts";
 import { CustomStatusStore } from "@stores/CustomStatus.store.ts";
 import { VoiceStore } from "@stores/Voice.store.ts";
 import { VoiceStatesStore } from "@stores/VoiceStates.store.ts";
+import { ExpressionsStore } from "@stores/Expressions.store.ts";
 
 export class AppStore {
     isGatewayReady = false;
@@ -38,6 +39,7 @@ export class AppStore {
     account: AccountStore | null = null;
     channels = new ChannelStore(this);
     gateway = new GatewayStore(this);
+    expressions = new ExpressionsStore(this);
     drafts = new DraftStore();
     navigation = new NavigationStore(this);
     spaces = new SpaceStore(this);
@@ -87,7 +89,7 @@ export class AppStore {
         makePersistable(this, {
             name: "AppStoreSecure",
             properties: ["token"],
-            storage: secureStorageAdapter,
+            storage: safeSecureStorage,
         });
 
         makePersistable(this, {
@@ -202,7 +204,7 @@ export class AppStore {
 
         this.customStatus.clear();
 
-        secureStorageAdapter.clear();
+        safeSecureStorage.clear();
     }
 
     async loadSettings() {

@@ -24,6 +24,15 @@ export function mergeAppendAnything(
     });
 }
 
+export const generateHash = async (buffer: ArrayBuffer, animated: boolean) => {
+    const hashBuffer = await window.crypto.subtle.digest("SHA-256", buffer);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hashHex = hashArray
+        .map((b) => b.toString(16).padStart(2, "0"))
+        .join("");
+    return `${animated ? "a_" : ""}${hashHex}`;
+};
+
 export const formatPresenceStatus = (status: PresenceStatus) => {
     switch (status) {
         case "online":

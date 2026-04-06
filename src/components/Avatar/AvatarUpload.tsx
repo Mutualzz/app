@@ -98,10 +98,7 @@ export const AvatarUpload = observer(() => {
     const handleSave = async (skipCrop = false) => {
         if (!originalFile) return;
 
-        const shouldCrop =
-            !skipCrop &&
-            (crop.x !== 0 || crop.y !== 0 || zoom !== 1 || rotation !== 0) &&
-            !!croppedAreaPixels;
+        const shouldCrop = !skipCrop && !!croppedAreaPixels;
 
         updateAvatar({
             avatar: originalFile,

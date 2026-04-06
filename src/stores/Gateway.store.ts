@@ -1,4 +1,3 @@
-// frontend/src/stores/GatewayStore.ts
 import { Logger } from "@mutualzz/logger";
 import type {
     APIMessage,
@@ -21,11 +20,18 @@ import {
 } from "@mutualzz/types";
 import { invoke } from "@tauri-apps/api/core";
 import { type Codec, createCodec, type Encoding } from "@utils/codec";
-import { type Compression, type Compressor, createCompressor, } from "@utils/compressor";
+import {
+    type Compression,
+    type Compressor,
+    createCompressor,
+} from "@utils/compressor";
 import { isTauri } from "@utils/index";
 import { makeAutoObservable } from "mobx";
 import type { AppStore } from "./App.store";
-import { buildDesktopPresenceFromProcesses, type PresenceUpdateDraft, } from "../presence/gamePresence.ts";
+import {
+    buildDesktopPresenceFromProcesses,
+    type PresenceUpdateDraft,
+} from "../presence/gamePresence.ts";
 import { normalizeJSON } from "@utils/JSON.ts";
 
 // We have to create our own GatewayStatus "enum" to avoid issues with SSR
@@ -96,9 +102,11 @@ export class GatewayStore {
     private initialHeartbeatTimeout: NodeJS.Timeout | null = null;
     private heartbeatAck = true;
     private url?: string;
-    private encoding: Encoding = isTauri ? "etf" : "json";
-    private compress: Compression =
-        import.meta.env.DEV && !isTauri ? "none" : "zlib-stream";
+    private encoding: Encoding =
+        isTauri && !import.meta.env.DEV ? "etf" : "json";
+    private compress: Compression = import.meta.env.DEV
+        ? "none"
+        : "zlib-stream";
     private codec!: Codec;
     private compressor!: Compressor;
     private connectionStartTime?: number;
@@ -733,7 +741,8 @@ export class GatewayStore {
             `[Ready] took ${Date.now() - (this.identifyStartTime ?? 0)}ms`,
         );
 
-        const { sessionId, user, themes, spaces, settings } = payload;
+        const { sessionId, user, themes, spaces, settings, expressions } =
+            payload;
 
         this.sessionId = sessionId;
 
@@ -757,6 +766,8 @@ export class GatewayStore {
         // if we already persisted a schedule in local storage, rearm timer for UI
         const selfUserId = this.app.account?.id;
         if (selfUserId) this.app.presence.rearmScheduledStatusTimer();
+
+        this.app.expressions.addAll(expressions);
     };
 
     // Presence

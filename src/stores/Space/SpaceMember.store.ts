@@ -39,7 +39,7 @@ export class SpaceMemberStore {
             return exists;
         }
 
-        const m = new SpaceMember(this.app, this.space, member);
+        const m = new SpaceMember(this.app, member);
         this.members.set(member.userId, m);
         return m;
     }

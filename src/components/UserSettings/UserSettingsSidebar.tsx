@@ -22,6 +22,7 @@ import {
     FaPaintBrush,
     FaPalette,
     FaSignOutAlt,
+    FaSmile,
     FaUserCog,
 } from "react-icons/fa";
 import { FaPencil } from "react-icons/fa6";
@@ -51,6 +52,10 @@ const settingsPages: SettingsPages = {
         {
             label: "profile",
             icon: <FaPaintBrush />,
+        },
+        {
+            label: "expressions",
+            icon: <FaSmile />,
         },
     ],
     "app-settings": [

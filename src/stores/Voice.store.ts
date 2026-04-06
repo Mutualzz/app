@@ -19,12 +19,9 @@ import type {
 } from "@app-types/index.ts";
 import { isSSR } from "@utils/index.ts";
 import { makePersistable } from "mobx-persist-store";
-import { safeLocalStorage } from "@utils/safeLocalStorage.ts";
+import { safeLocalStorage } from "@storages/safeLocalStorage";
 import { Logger } from "@mutualzz/logger";
 import { VoiceState } from "@stores/objects/VoiceState.ts";
-
-import joinChannelSound from "@assets/sounds/channelJoin.ogg";
-import leaveChannelSound from "@assets/sounds/channelLeave.ogg";
 
 export type VoiceConnectionStatus =
     | "idle"
@@ -812,13 +809,6 @@ export class VoiceStore {
         await this.sendVoiceStateUpdate();
         await this.waitForVoiceServerUpdate();
         this.startKeepAlive();
-
-        let joinAudio: HTMLAudioElement | null = new Audio(joinChannelSound);
-        await joinAudio.play();
-
-        joinAudio.onended = () => {
-            joinAudio = null;
-        };
     }
 
     setInputDeviceId(deviceId: string) {
@@ -893,13 +883,6 @@ export class VoiceStore {
         await this.sendVoiceStateUpdate();
 
         void this.session.disconnect();
-
-        let leaveAudio: HTMLAudioElement | null = new Audio(leaveChannelSound);
-        await leaveAudio.play();
-
-        leaveAudio.onended = () => {
-            leaveAudio = null;
-        };
     }
 
     reset() {

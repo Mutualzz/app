@@ -1,6 +1,6 @@
 import { Logger } from "@mutualzz/logger";
 import type { APITheme } from "@mutualzz/types";
-import { safeLocalStorage } from "@utils/safeLocalStorage";
+import { safeLocalStorage } from "@storages/safeLocalStorage.ts";
 import { type IObservableArray, makeAutoObservable, observable } from "mobx";
 import { makePersistable } from "mobx-persist-store";
 import { type CanvasPath } from "react-sketch-canvas";

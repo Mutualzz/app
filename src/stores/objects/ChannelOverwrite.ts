@@ -8,6 +8,7 @@ import {
     permissionFlags,
     type PermissionFlags,
 } from "@mutualzz/permissions";
+import type { AppStore } from "@stores/App.store.ts";
 
 export class ChannelPermissionOverwrite {
     channelId: Snowflake;
@@ -22,7 +23,10 @@ export class ChannelPermissionOverwrite {
     createdAt: Date;
     updatedAt: Date;
 
-    constructor(overwrite: APIChannelPermissionOverwrite) {
+    constructor(
+        private readonly app: AppStore,
+        overwrite: APIChannelPermissionOverwrite,
+    ) {
         this.channelId = overwrite.channelId;
         this.spaceId = overwrite.spaceId;
         this.roleId = overwrite.roleId;
@@ -41,6 +45,32 @@ export class ChannelPermissionOverwrite {
         this.updatedAt = new Date(overwrite.updatedAt);
 
         makeAutoObservable(this);
+    }
+
+    get space() {
+        return this.app.spaces.get(this.spaceId);
+    }
+
+    get role() {
+        if (!this.roleId) return null;
+        return this.space?.roles.get(this.roleId);
+    }
+
+    get user() {
+        if (!this.userId) return null;
+        return this.app.users.get(this.userId);
+    }
+
+    get member() {
+        if (!this.userId) return null;
+        return this.space?.members.get(this.userId);
+    }
+
+    get channel() {
+        return (
+            this.app.channels.get(this.channelId) ??
+            this.space?.channels.find((ch) => ch.id === this.channelId)
+        );
     }
 
     update(overwrite: APIChannelPermissionOverwrite) {

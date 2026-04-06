@@ -29,7 +29,8 @@
             "@stores/*": ["stores/*"],
             "@themes": ["themes/index.ts"],
             "@themes/*": ["themes/*"],
-            "@utils/*": ["utils/*"]
+            "@utils/*": ["utils/*"],
+            "@storages/*": ["storages/*"]
         },
         "resolveJsonModule": true,
         "skipLibCheck": true,

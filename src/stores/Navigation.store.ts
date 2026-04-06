@@ -1,6 +1,6 @@
 import { makePersistable } from "mobx-persist-store";
 import { type IObservableArray, makeAutoObservable, observable } from "mobx";
-import { safeLocalStorage } from "@utils/safeLocalStorage";
+import { safeLocalStorage } from "@storages/safeLocalStorage.ts";
 import type { AppStore } from "./App.store";
 
 type Entry = { href: string; timestamp: number };
@@ -21,20 +21,6 @@ export class NavigationStore {
         });
     }
 
-    record(href: string) {
-        if (!this.app.account) return;
-        if (this.current?.href === href) return;
-
-        this.entries.push({ href, timestamp: Date.now() });
-        this.index = this.entries.length - 1;
-
-        if (this.entries.length > this.max) {
-            const overflow = this.entries.length - this.max;
-            this.entries.splice(0, overflow);
-            this.index = Math.max(0, this.index - overflow);
-        }
-    }
-
     get current() {
         if (!this.app.account) return null;
         return this.entries[this.index] || null;
@@ -48,6 +34,20 @@ export class NavigationStore {
     get canForward() {
         if (!this.app.account) return false;
         return this.index < this.entries.length - 1;
+    }
+
+    record(href: string) {
+        if (!this.app.account) return;
+        if (this.current?.href === href) return;
+
+        this.entries.push({ href, timestamp: Date.now() });
+        this.index = this.entries.length - 1;
+
+        if (this.entries.length > this.max) {
+            const overflow = this.entries.length - this.max;
+            this.entries.splice(0, overflow);
+            this.index = Math.max(0, this.index - overflow);
+        }
     }
 
     back(navigate: Navigate) {

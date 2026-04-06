@@ -1,7 +1,7 @@
 import type { Theme } from "@emotion/react";
 import { Image as TauriImage } from "@tauri-apps/api/image";
 import { getIconType, isTauri } from ".";
-import { getIconFromCache, putIconInCache } from "./indexedDb";
+import { getIconFromCache, putIconInCache } from "../storages/indexedDb.ts";
 
 const canvasToBlob = (
     canvas: HTMLCanvasElement,

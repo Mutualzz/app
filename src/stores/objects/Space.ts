@@ -42,7 +42,6 @@ export class Space {
     members: SpaceMemberStore;
     roles: SpaceRoleStore;
     ownerId: Snowflake;
-    owner?: User | null;
     memberLists: ObservableMap<string, SpaceMemberListStore> =
         new ObservableMap();
     raw: APISpace;
@@ -64,7 +63,7 @@ export class Space {
         this.invites = observable.map();
 
         this.ownerId = space.ownerId;
-        if (space.owner) this.owner = this.app.users.add(space.owner);
+        if (space.owner) this._owner = this.app.users.add(space.owner);
 
         this.createdAt = new Date(space.createdAt);
         this.updatedAt = new Date(space.updatedAt);
@@ -86,6 +85,12 @@ export class Space {
         this.raw = space;
 
         makeAutoObservable(this);
+    }
+
+    _owner?: User | null;
+
+    get owner() {
+        return this.app.users.get(this.ownerId) || this._owner;
     }
 
     get acronym() {
@@ -176,9 +181,7 @@ export class Space {
         this.icon = space.icon;
 
         this.ownerId = space.ownerId;
-        this.owner = space.owner
-            ? this.app.users.add(space.owner)
-            : (this.owner ?? null);
+        if (space.owner) this._owner = this.app.users.add(space.owner);
 
         this.createdAt = new Date(space.createdAt);
         this.updatedAt = new Date(space.updatedAt);

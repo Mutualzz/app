@@ -10,7 +10,8 @@ export type UserSettingsPage =
     | "my-account"
     | "profile"
     | "appearance"
-    | "voice_and_video";
+    | "voice_and_video"
+    | "expressions";
 export type UserSettingsCategories = "user-settings" | "app-settings";
 
 interface UserSettingsContextProps {

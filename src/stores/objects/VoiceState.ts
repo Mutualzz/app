@@ -30,10 +30,6 @@ export class VoiceState {
         makeAutoObservable(this);
     }
 
-    get hasSpace() {
-        return !!this.spaceId;
-    }
-
     get member() {
         if (!this.space) return null;
 
