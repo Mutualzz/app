@@ -3,54 +3,50 @@ import type { APIExpression, Snowflake } from "@mutualzz/types";
 import { ExpressionType } from "@mutualzz/types";
 import { Expression } from "@stores/objects/Expression.ts";
 import type { AppStore } from "@stores/App.store.ts";
-import { makePersistable } from "mobx-persist-store";
-import { idbStorage } from "@storages/idbStorage.ts";
-import { expressionBlobStorage } from "@storages/expressionBlobStorage.ts";
 
 export class ExpressionsStore {
-    readonly localExpressions: ObservableMap<Snowflake, Expression>;
     private readonly expressions: ObservableMap<Snowflake, Expression>;
 
     constructor(private readonly app: AppStore) {
         this.expressions = observable.map();
-        this.localExpressions = observable.map();
 
         makeAutoObservable(this);
-
-        makePersistable(this, {
-            name: "ExpressionStore",
-            properties: [
-                {
-                    key: "localExpressions",
-                    serialize: (map: ObservableMap<Snowflake, Expression>) =>
-                        Array.from(map.values()).map((exp) => exp.toJSON()),
-                    deserialize: (data: APIExpression[]) => {
-                        const map = observable.map<Snowflake, Expression>();
-                        data.forEach((raw) => {
-                            const exp = new Expression(this.app, raw);
-                            map.set(exp.id, exp);
-                        });
-                        return map;
-                    },
-                },
-            ],
-            storage: idbStorage,
-            stringify: false,
-        });
     }
 
     get emojis() {
-        return [
-            ...this.expressions.values(),
-            ...this.localExpressions.values(),
-        ].filter((exp) => exp.type === ExpressionType.Emoji);
+        return this.all.filter((exp) => exp.type === ExpressionType.Emoji);
+    }
+
+    get staticEmojis() {
+        return this.emojis.filter((ej) => !ej.animated);
+    }
+
+    get animatedEmojis() {
+        return this.emojis.filter((ej) => ej.animated);
+    }
+
+    get animated() {
+        return this.all.filter((exp) => exp.animated);
+    }
+
+    get static() {
+        return this.all.filter((exp) => !exp.animated);
     }
 
     get stickers() {
-        return [
-            ...this.expressions.values(),
-            ...this.localExpressions.values(),
-        ].filter((exp) => exp.type === ExpressionType.Sticker);
+        return this.all.filter((exp) => exp.type === ExpressionType.Sticker);
+    }
+
+    get animatedStickers() {
+        return this.stickers.filter((exp) => exp.animated);
+    }
+
+    get staticSticker() {
+        return this.all.filter((exp) => !exp.animated);
+    }
+
+    get all() {
+        return Array.from(this.expressions.values());
     }
 
     add(expression: APIExpression) {
@@ -61,31 +57,8 @@ export class ExpressionsStore {
         return newExpression;
     }
 
-    addLocal(expression: APIExpression, blob: Blob) {
-        const newExpression = new Expression(this.app, expression);
-        this.localExpressions.set(newExpression.id, newExpression);
-        expressionBlobStorage.save(newExpression.id, blob);
-        return newExpression;
-    }
-
-    removeLocal(id: Snowflake) {
-        expressionBlobStorage.remove(id);
-        return this.localExpressions.delete(id);
-    }
-
-    isLocal(id: Snowflake) {
-        return this.localExpressions.has(id);
-    }
-
     addAll(expressions: APIExpression[]) {
         expressions.forEach((expression) => this.add(expression));
-    }
-
-    list() {
-        return [
-            ...this.expressions.values(),
-            ...this.localExpressions.values(),
-        ];
     }
 
     remove(id: Snowflake) {

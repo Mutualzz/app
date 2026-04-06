@@ -3,7 +3,7 @@ import { type PropsWithChildren, useState } from "react";
 import { Stack } from "@mutualzz/ui-web";
 import startCase from "lodash-es/startCase";
 import styled from "@emotion/styled";
-import EmojisTab from "./emojis/EmojisTab.tsx";
+import EmojisTab from "./EmojisTab.tsx";
 
 type Tab = "emojis" | "stickers";
 

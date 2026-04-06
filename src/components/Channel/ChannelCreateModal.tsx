@@ -159,12 +159,7 @@ export const ChannelCreateModal = observer(({ space, parent }: Props) => {
         }
 
         const shouldCrop =
-            (crop.x !== 0 ||
-                crop.y !== 0 ||
-                zoom !== 1 ||
-                rotation !== 0 ||
-                roundedIcon) &&
-            !!croppedAreaPixels;
+            (crop.x !== 0 || crop.y !== 0) && !!croppedAreaPixels;
 
         createChannel({
             icon: originalFile,

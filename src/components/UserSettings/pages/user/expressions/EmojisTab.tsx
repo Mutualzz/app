@@ -1,5 +1,5 @@
 import { observer } from "mobx-react-lite";
-import { Box, Divider, Stack, Typography } from "@mutualzz/ui-web";
+import { Divider, Stack, Typography } from "@mutualzz/ui-web";
 import { Button } from "@components/Button.tsx";
 import { useAppStore } from "@hooks/useStores.ts";
 import { type ChangeEvent, useRef } from "react";
@@ -7,7 +7,7 @@ import Snowflake from "@utils/Snowflake.ts";
 import { ExpressionType } from "@mutualzz/types";
 import { generateHash } from "@utils/index.ts";
 import { useModal } from "@contexts/Modal.context.tsx";
-import { EmojiEditor } from "@components/Modals/EmojiEditor.tsx";
+import { ExpressionEditor } from "@components/Modals/ExpressionEditor.tsx";
 import { Paper } from "@components/Paper.tsx";
 
 const EmojisTab = observer(() => {
@@ -40,23 +40,23 @@ const EmojisTab = observer(() => {
             createdAt: new Date(),
         };
 
-        openModal("emoji-editor", <EmojiEditor emoji={emoji} file={file} />);
+        openModal(
+            "emoji-editor",
+            <ExpressionEditor emoji={emoji} file={file} />,
+        );
     };
 
     return (
         <Stack direction="column" spacing={2.5}>
-            <Box direction="column" justifyContent="center">
-                <Stack direction="column" mb={2.5}>
-                    <Typography color="warning" variant="plain">
-                        Sadly current limit of emojis you can upload are 10,
-                        since the app is in beta and storage is an issue for now
-                    </Typography>
-                    <Typography textColor="accent">
-                        Although you can save some emojis locally, which will
-                        take up disk space on your end (not too much don't worry
-                        xD)
-                    </Typography>
-                </Stack>
+            <Stack
+                direction="row"
+                alignItems="center"
+                justifyContent="space-between"
+            >
+                <Typography color="warning" variant="plain">
+                    Sadly current limit of emojis you can upload are 10, since
+                    the app is in beta and storage is an issue for now
+                </Typography>
                 <input
                     ref={fileInputRef}
                     type="file"
@@ -70,10 +70,13 @@ const EmojisTab = observer(() => {
                 <Button
                     color="success"
                     onClick={() => fileInputRef.current?.click()}
+                    css={{
+                        marginRight: 16,
+                    }}
                 >
                     Upload Emoji
                 </Button>
-            </Box>
+            </Stack>
 
             {staticEmojis.length > 0 && (
                 <Paper
@@ -116,12 +119,13 @@ const EmojisTab = observer(() => {
                     </Stack>
                     <Stack direction="column">
                         {staticEmojis.map((expression) => (
-                            <img src={expression.}></img>
+                            <img src={expression.url} />
                         ))}
                     </Stack>
                 </Paper>
             )}
-            {app.expressions.list().length === 0 && (
+
+            {app.expressions.emojis.length === 0 && (
                 <Stack justifyContent="center" alignItems="center" py="4rem">
                     <Typography textAlign="center" color="muted">
                         No emojis created yet
