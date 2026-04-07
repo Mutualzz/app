@@ -147,7 +147,7 @@ export class ExpressionsStore {
             return {
                 ...exp,
                 displayName: total > 1 ? `${exp.name}~${index}` : exp.name,
-            } satisfies ExpressionWithDisplayName;
+            } as ExpressionWithDisplayName;
         });
     }
 }

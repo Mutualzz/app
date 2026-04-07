@@ -70,8 +70,12 @@ const UserEmojisTab = observer(() => {
 
     const { openModal } = useModal();
 
-    const staticEmojis = app.expressions.emojis.filter((e) => !e.animated);
-    const animatedEmojis = app.expressions.emojis.filter((e) => e.animated);
+    const emojis = app.expressions.emojis.filter(
+        (em) => em.authorId === app.account?.id,
+    );
+
+    const staticEmojis = emojis.filter((e) => !e.animated);
+    const animatedEmojis = emojis.filter((e) => e.animated);
 
     const handleUpload = async (e: ChangeEvent<HTMLInputElement>) => {
         const file = e.target?.files?.[0];
@@ -113,7 +117,7 @@ const UserEmojisTab = observer(() => {
                         since the app is in beta and storage is an issue for now
                     </Typography>
                     <Typography textColor="muted" level="body-sm" mb={1.25}>
-                        {100 - app.expressions.emojis.length} slots available
+                        {100 - emojis.length} slots available
                     </Typography>
                 </Stack>
                 <input
@@ -132,6 +136,7 @@ const UserEmojisTab = observer(() => {
                     css={{
                         marginRight: 16,
                     }}
+                    disabled={emojis.length === 100}
                 >
                     Upload Emoji
                 </Button>
@@ -213,7 +218,7 @@ const UserEmojisTab = observer(() => {
                 </Paper>
             )}
 
-            {app.expressions.emojis.length === 0 && (
+            {emojis.length === 0 && (
                 <Stack justifyContent="center" alignItems="center" py="4rem">
                     <Typography textAlign="center" color="muted">
                         No emojis created yet
