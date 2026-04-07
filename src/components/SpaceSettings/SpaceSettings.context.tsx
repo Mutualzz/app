@@ -6,7 +6,7 @@ import {
     type PropsWithChildren,
 } from "react";
 
-export type SpaceSettingsPage = "invites" | "profile" | "roles";
+export type SpaceSettingsPage = "invites" | "profile" | "roles" | "expressions";
 export type SpaceSettingsCategories = "people" | "general";
 
 interface SpaceSettingsContextProps {

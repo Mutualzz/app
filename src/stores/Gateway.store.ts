@@ -1,5 +1,6 @@
 import { Logger } from "@mutualzz/logger";
 import type {
+    APIExpression,
     APIMessage,
     APIRole,
     GatewayReadyPayload,
@@ -291,7 +292,8 @@ export class GatewayStore {
                     : rawBytes;
 
             if (this.compress !== "none") {
-                this.socket.send(outBytes);
+                // As any works here since the app works without type inferring here
+                this.socket.send(outBytes as any);
             } else {
                 this.socket.send(new TextDecoder().decode(rawBytes));
             }
@@ -458,6 +460,16 @@ export class GatewayStore {
         this.dispatchHandlers.set(
             GatewayDispatchEvents.VoiceStateUpdate,
             this.app.voice.onVoiceStateUpdate,
+        );
+
+        // Expression
+        this.dispatchHandlers.set(
+            GatewayDispatchEvents.ExpressionCreate,
+            this.onExpressionCreate,
+        );
+        this.dispatchHandlers.set(
+            GatewayDispatchEvents.ExpressionDelete,
+            this.onExpressionDelete,
         );
     }
 
@@ -1094,5 +1106,31 @@ export class GatewayStore {
 
         member.roles.delete(payload.roleId);
         member.invalidateChannelPermCache();
+    };
+
+    private onExpressionCreate = (payload: APIExpression) => {
+        if (payload.spaceId) {
+            const space = this.app.spaces.get(payload.spaceId);
+            if (!space) return;
+
+            space.addExpression(payload);
+
+            return;
+        }
+
+        this.app.expressions.add(payload);
+    };
+
+    private onExpressionDelete = (payload: APIExpression) => {
+        if (payload.spaceId) {
+            const space = this.app.spaces.get(payload.spaceId);
+            if (!space) return;
+
+            space.removeExpression(payload.id);
+
+            return;
+        }
+
+        this.app.expressions.remove(payload.id);
     };
 }

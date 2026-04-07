@@ -70,6 +70,36 @@ export const Element = ({
                     />
                 </span>
             );
+        case "customEmoji":
+            return (
+                <span
+                    {...attributes}
+                    role="img"
+                    css={{
+                        display: "inline-block",
+                        width: "1.375em",
+                        height: "1.375em",
+                        verticalAlign: "middle",
+                        userSelect: "none",
+                        pointerEvents: "none",
+                    }}
+                    aria-label={`<${element.animated ? "a" : ""}:${element.id}:${element.name}>`}
+                    data-slate-void
+                    data-slate-inline
+                >
+                    <img
+                        css={{
+                            width: "100%",
+                            height: "100%",
+                            objectFit: "contain",
+                        }}
+                        src={element.url}
+                        alt={element.id}
+                        aria-label={`<${element.animated ? "a" : ""}:${element.id}:${element.name}>`}
+                        draggable={false}
+                    />
+                </span>
+            );
 
         case "line":
         default:

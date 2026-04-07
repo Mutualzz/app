@@ -1,11 +1,14 @@
-import type { EmojiElement } from "@app-types/slate";
-import { getEmoji } from "@utils/emojis";
+import type { CustomEmojiElement, EmojiElement } from "@app-types/slate";
+import { getCustomEmoji, getEmoji } from "@utils/emojis";
 import { slateToMarkdown } from "@utils/slateToMarkdown";
 import { TWEMOJI_URL } from "@utils/urls";
 import emojiRegex from "emojibase-regex";
 import baseEmoticonRegex from "emojibase-regex/emoticon";
 import shortcodeRegex from "emojibase-regex/shortcode";
-import { Element, Path, Range, Text, type Editor, type TextUnit } from "slate";
+import { type Editor, Element, Path, Range, Text, type TextUnit } from "slate";
+import type { Expression } from "@stores/objects/Expression.ts";
+import { useAppStore } from "@hooks/useStores.ts";
+import { canUseCustomEmoji } from "@utils/index.ts";
 
 const extendedEmoticons = [":3", ">.<", "T^T", "T_T", "x_x"];
 
@@ -17,6 +20,8 @@ const combinedPattern = `(?:${baseEmoticonRegex.source}|${escapedCustom})`;
 const emoticonRegex = new RegExp(`(${combinedPattern})(?=\\s)`, "g");
 
 export const withEmojis = (editor: Editor) => {
+    const app = useAppStore();
+
     const {
         deleteBackward,
         deleteForward,
@@ -27,22 +32,30 @@ export const withEmojis = (editor: Editor) => {
     } = editor;
 
     editor.isInline = (element: Element) => {
-        return element.type === "emoji" ? true : isInline(element);
+        return element.type === "emoji" || element.type === "customEmoji"
+            ? true
+            : isInline(element);
     };
 
     editor.isVoid = (element: Element) => {
-        return element.type === "emoji" ? true : isVoid(element);
+        return element.type === "emoji" || element.type === "customEmoji"
+            ? true
+            : isVoid(element);
     };
 
     editor.markableVoid = (element: Element) => {
-        return element.type === "emoji" || markableVoid(element);
+        return (
+            element.type === "emoji" ||
+            element.type === "customEmoji" ||
+            markableVoid(element)
+        );
     };
 
     editor.isSelectable = (element: Element) => {
-        return element.type !== "emoji";
+        return element.type !== "emoji" && element.type !== "customEmoji";
     };
 
-    editor.insertText = (text: string) => {
+    editor.insertText = async (text: string) => {
         const { selection } = editor;
 
         if (selection && Range.isCollapsed(selection)) {
@@ -56,8 +69,42 @@ export const withEmojis = (editor: Editor) => {
             const caretOffset = selection.anchor.offset;
             const combined = textNode.text.slice(0, caretOffset) + text;
 
+            const customEmojiRegex = /<a?:[^:]+:\d+>/g;
+            const customMatch = customEmojiRegex.exec(combined);
+            if (
+                customMatch &&
+                customMatch.index + customMatch[0].length === combined.length
+            ) {
+                const shortcode = customMatch[0];
+                const customEmoji = await getCustomEmoji(shortcode);
+                const me = app.account?.id;
+                if (customEmoji && canUseCustomEmoji(customEmoji, me)) {
+                    const distance = shortcode.length - text.length;
+                    if (distance <= caretOffset) {
+                        const shortcodeStart = editor.before(selection, {
+                            unit: "character",
+                            distance,
+                        });
+                        if (shortcodeStart) {
+                            const shortcodeRange: Range = {
+                                anchor: shortcodeStart,
+                                focus: selection.anchor,
+                            };
+                            editor.select(shortcodeRange);
+                            editor.delete();
+                            insertCustomEmoji(editor, customEmoji);
+                            return;
+                        }
+                    }
+                }
+            }
+
             const shortcodeMatch = shortcodeRegex.exec(combined);
-            if (shortcodeMatch) {
+            if (
+                shortcodeMatch &&
+                shortcodeMatch.index + shortcodeMatch[0].length ===
+                    combined.length
+            ) {
                 const shortcode = shortcodeMatch[0];
                 const distance = shortcode.length - 1;
 
@@ -151,7 +198,10 @@ export const withEmojis = (editor: Editor) => {
             const { path } = selection.anchor;
             const [node] = editor.node(path);
 
-            if (Element.isElement(node) && node.type === "emoji") {
+            if (
+                Element.isElement(node) &&
+                (node.type === "emoji" || node.type === "customEmoji")
+            ) {
                 editor.removeNodes({ at: path });
                 return;
             }
@@ -171,7 +221,11 @@ export const withEmojis = (editor: Editor) => {
                 const prevPath = Path.previous(path);
                 const [prevNode] = editor.node(prevPath);
 
-                if (Element.isElement(prevNode) && prevNode.type === "emoji") {
+                if (
+                    Element.isElement(prevNode) &&
+                    (prevNode.type === "emoji" ||
+                        prevNode.type === "customEmoji")
+                ) {
                     editor.removeNodes({ at: prevPath });
                     return;
                 }
@@ -181,29 +235,56 @@ export const withEmojis = (editor: Editor) => {
         deleteBackward(unit);
     };
 
-    editor.insertData = (data: DataTransfer) => {
+    editor.insertData = async (data: DataTransfer) => {
         const text = data.getData("text/plain");
         const parts: any[] = [];
         let lastIndex = 0;
 
-        const localRegex = new RegExp(shortcodeRegex.source, "g");
+        const customEmojiPattern = /<a?:[^:]+:\d+>/g;
+        const localShortcodeRegex = new RegExp(shortcodeRegex.source, "g");
+
+        const allMatches: { index: number; text: string; isCustom: boolean }[] =
+            [];
 
         let match;
-        while ((match = localRegex.exec(text)) !== null) {
-            const before = text.slice(lastIndex, match.index);
-            const shortcode = match[0];
-            const emoji = getEmoji(shortcode.slice(1, -1));
+        while ((match = localShortcodeRegex.exec(text)) !== null) {
+            allMatches.push({
+                index: match.index,
+                text: match[0],
+                isCustom: false,
+            });
+        }
+        while ((match = customEmojiPattern.exec(text)) !== null) {
+            allMatches.push({
+                index: match.index,
+                text: match[0],
+                isCustom: true,
+            });
+        }
+        allMatches.sort((a, b) => a.index - b.index);
 
+        for (const m of allMatches) {
+            if (m.index < lastIndex) continue; // skip overlapping
+
+            const before = text.slice(lastIndex, m.index);
             if (before) parts.push({ type: "text", text: before });
 
-            if (emoji)
-                parts.push({
-                    type: "emoji",
-                    emoji,
-                });
-            else parts.push({ type: "text", text: shortcode });
+            if (m.isCustom) {
+                const customEmoji = await getCustomEmoji(m.text);
+                const me = app.account?.id;
 
-            lastIndex = localRegex.lastIndex;
+                if (customEmoji && canUseCustomEmoji(customEmoji, me)) {
+                    parts.push({ type: "customEmoji", emoji: customEmoji });
+                } else {
+                    parts.push({ type: "text", text: m.text });
+                }
+            } else {
+                const emoji = getEmoji(m.text.slice(1, -1));
+                if (emoji) parts.push({ type: "emoji", emoji });
+                else parts.push({ type: "text", text: m.text });
+            }
+
+            lastIndex = m.index + m.text.length;
         }
 
         const after = text.slice(lastIndex);
@@ -212,6 +293,8 @@ export const withEmojis = (editor: Editor) => {
         for (const part of parts) {
             if (part.type === "text") editor.insertText(part.text);
             else if (part.type === "emoji") insertEmoji(editor, part.emoji);
+            else if (part.type === "customEmoji")
+                insertCustomEmoji(editor, part.emoji);
         }
     };
 
@@ -244,6 +327,30 @@ const insertEmoji = (editor: Editor, emoji: ReturnType<typeof getEmoji>) => {
         editor.insertNode(emojiElement, {
             at: selection.anchor,
         });
+
+        const pointAfter = editor.after(selection.focus);
+        if (pointAfter) editor.select(pointAfter);
+    }
+};
+
+const insertCustomEmoji = (editor: Editor, emoji: Expression) => {
+    const childrenText = emoji.animated
+        ? `<a:${emoji.name}:${emoji.id}>`
+        : `<:${emoji.name}:${emoji.id}>`;
+
+    const emojiElement: CustomEmojiElement = {
+        type: "customEmoji",
+        url: emoji.url,
+        children: [{ text: childrenText }],
+        name: emoji.name,
+        id: emoji.id,
+        animated: emoji.animated,
+    };
+
+    const { selection } = editor;
+
+    if (selection && Range.isCollapsed(selection)) {
+        editor.insertNode(emojiElement, { at: selection.anchor });
 
         const pointAfter = editor.after(selection.focus);
         if (pointAfter) editor.select(pointAfter);

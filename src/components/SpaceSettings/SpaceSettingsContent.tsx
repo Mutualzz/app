@@ -13,6 +13,7 @@ import { useEffect, useRef } from "react";
 import { FaX } from "react-icons/fa6";
 import { SpaceInvitesSettings } from "@components/SpaceSettings/pages/people/SpaceInvitesSettings";
 import { SpaceRolesSettings } from "@components/SpaceSettings/pages/people/roles/SpaceRolesSettings.tsx";
+import { SpaceExpressionsSettings } from "@components/SpaceSettings/pages/people/expressions/SpaceExpressionsSettings.tsx";
 
 interface SpaceSettingsContentProps {
     space: Space;
@@ -95,6 +96,9 @@ export const SpaceSettingsContent = observer(
                     )}
                     {currentPage === "roles" && (
                         <SpaceRolesSettings space={space} />
+                    )}
+                    {currentPage === "expressions" && (
+                        <SpaceExpressionsSettings space={space} />
                     )}
                 </Paper>
             </Stack>

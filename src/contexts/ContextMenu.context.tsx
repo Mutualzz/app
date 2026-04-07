@@ -38,7 +38,8 @@ export type ContextMenuPayload =
           space: Space;
           role: Role;
           [key: string]: any;
-      };
+      }
+    | { type: "custom"; id: string; [key: string]: any };
 
 export type MenuPosition = { x: number; y: number };
 type AnyMouseEvent = MouseEvent | { nativeEvent: MouseEvent };
@@ -53,6 +54,7 @@ interface ContextMenuContextProps {
         position?: MenuPosition | null,
     ) => void;
     clearMenu: () => void;
+    isOpen: boolean;
 }
 
 const ContextMenuContext = createContext<ContextMenuContextProps>({
@@ -60,6 +62,7 @@ const ContextMenuContext = createContext<ContextMenuContextProps>({
     setMenu: () => {},
     openContextMenu: () => {},
     clearMenu: () => {},
+    isOpen: false,
 });
 
 export const generateMenuIDs = {
@@ -93,6 +96,8 @@ function getMenuId(menu: ContextMenuPayload): string {
             return generateMenuIDs.account(menu.account.id);
         case "role":
             return generateMenuIDs.role(menu.space.id, menu.role.id);
+        case "custom":
+            return menu.id;
     }
 }
 
@@ -109,6 +114,8 @@ export const ContextMenuProvider = observer(
             setMenuState(nextMenu);
 
         const clearMenu = () => setMenuState(null);
+
+        const isOpen = !!menu;
 
         const openContextMenu = (
             e: AnyMouseEvent,
@@ -180,6 +187,7 @@ export const ContextMenuProvider = observer(
                 setMenu,
                 openContextMenu,
                 clearMenu,
+                isOpen,
             }),
             [menu],
         );

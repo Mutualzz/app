@@ -89,8 +89,6 @@ export const SpaceRoleEdit = observer(
                 if (Object.keys(patch).length === 0)
                     return currentRole.toJSON();
 
-                console.log("Updating role with patch:", patch);
-
                 return app.rest.patch<APIRole>(
                     `/spaces/${space.id}/roles/${currentRole.id}`,
                     patch,

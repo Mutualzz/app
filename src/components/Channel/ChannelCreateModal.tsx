@@ -32,6 +32,7 @@ import { FaMagnifyingGlass, FaRotate } from "react-icons/fa6";
 import { FileUploader } from "@mateie/react-drag-drop-files";
 import { IconButton } from "@components/IconButton.tsx";
 import { TooltipWrapper } from "@components/TooltipWrapper.tsx";
+import { cropImage } from "@utils/cropImage.ts";
 
 interface Props {
     // Usually a category channel under which to create a new channel
@@ -42,11 +43,6 @@ interface Props {
 interface Errors {
     name?: string;
     type?: string;
-}
-
-interface CreateChannel {
-    icon?: File | null;
-    crop?: unknown;
 }
 
 export const ChannelCreateModal = observer(({ space, parent }: Props) => {
@@ -76,20 +72,8 @@ export const ChannelCreateModal = observer(({ space, parent }: Props) => {
 
     const { mutate: createChannel, isPending: creating } = useMutation({
         mutationKey: ["create-channel", space.id, parent?.id, name, type],
-        mutationFn: async ({ crop, icon }: CreateChannel) => {
-            const formData = new FormData();
-            formData.append("name", name);
-            formData.append("type", type.toString());
-            if (parent) formData.append("parentId", parent.id);
-            if (icon) formData.append("icon", icon);
-            if (crop)
-                formData.append(
-                    "crop",
-                    JSON.stringify({ ...crop, rounded: roundedIcon }),
-                );
-            if (space.id) formData.append("spaceId", space.id);
-
-            return app.rest.postFormData<APIChannel>("channels", formData);
+        mutationFn: async (data: FormData) => {
+            return app.rest.postFormData<APIChannel>("channels", data);
         },
         onSuccess: (newChannel) => {
             if (!newChannel.spaceId) return;
@@ -105,7 +89,7 @@ export const ChannelCreateModal = observer(({ space, parent }: Props) => {
             });
         },
         onError: (err: HttpException) => {
-            err.errors?.forEach((error) => {
+            err.errors.forEach((error) => {
                 setErrors((prev) => ({
                     ...prev,
                     [error.path]: error.message,
@@ -115,27 +99,22 @@ export const ChannelCreateModal = observer(({ space, parent }: Props) => {
     });
 
     const onUpload = async (file: File | File[]) => {
-        let fileToUse: File;
-        if (Array.isArray(file)) fileToUse = file[0];
-        else fileToUse = file;
-
-        const reader = new FileReader();
-        reader.onload = () => {
-            setImageFile(reader.result as string);
-            setOriginalFile(fileToUse);
-        };
-        reader.readAsDataURL(fileToUse);
-
+        const fileToUse = Array.isArray(file) ? file[0] : file;
+        const url = URL.createObjectURL(fileToUse);
+        setImageFile(url);
+        setOriginalFile(fileToUse);
         setErrors({});
     };
 
     const onClear = () => {
+        if (imageFile) URL.revokeObjectURL(imageFile);
         setImageFile(null);
         setOriginalFile(null);
         setErrors({});
         setCroppedAreaPixels(null);
         setCrop({ x: 0, y: 0 });
         setZoom(1);
+        setRotation(0);
         setType(ChannelType.Text);
         setRoundedIcon(false);
         setName("");
@@ -152,19 +131,35 @@ export const ChannelCreateModal = observer(({ space, parent }: Props) => {
 
     const handleCreate = async () => {
         if (name.trim() === "") {
-            setErrors({
-                name: "Channel name cannot be empty.",
-            });
+            setErrors({ name: "Channel name cannot be empty." });
             return;
         }
 
-        const shouldCrop =
-            (crop.x !== 0 || crop.y !== 0) && !!croppedAreaPixels;
+        let iconFile: File | null = originalFile;
 
-        createChannel({
-            icon: originalFile,
-            crop: shouldCrop ? croppedAreaPixels : undefined,
-        });
+        if (originalFile && imageFile && croppedAreaPixels) {
+            iconFile = await cropImage(
+                imageFile,
+                originalFile,
+                croppedAreaPixels as Area,
+                rotation,
+            );
+        }
+
+        const formData = new FormData();
+        formData.append("name", name);
+        formData.append("type", type.toString());
+        if (parent) formData.append("parentId", parent.id);
+        if (iconFile) {
+            formData.append("icon", iconFile);
+            if (iconFile.type === "image/gif") {
+                formData.append("crop", JSON.stringify(croppedAreaPixels));
+            }
+        }
+        if (space.id) formData.append("spaceId", space.id);
+        if (roundedIcon) formData.append("rounded", "true");
+
+        createChannel(formData);
     };
 
     return (

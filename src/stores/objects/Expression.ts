@@ -22,8 +22,6 @@ export class Expression {
 
     createdAt: Date;
 
-    local?: boolean;
-
     constructor(
         private readonly app: AppStore,
         data: APIExpression,
@@ -50,13 +48,7 @@ export class Expression {
     }
 
     get url() {
-        if(this.local) return
-
-        return Expression.constructUrl(
-            this.id,
-            this.animated ?? this.assetHash.startsWith("a_"),
-            this.assetHash,
-        );
+        return Expression.constructUrl(this.id, this.animated, this.assetHash);
     }
 
     static constructUrl(
@@ -71,21 +63,18 @@ export class Expression {
         );
     }
 
-    setLocal(value: boolean) {
-        this.local = value;
+    update(data: APIExpression) {
+        this.id = data.id;
+        this.type = data.type;
+        this.name = data.name;
+        this.assetHash = data.assetHash;
+        this.authorId = data.authorId;
+        this.spaceId = data.spaceId;
+        this.animated = data.animated;
+        this.createdAt = new Date(data.createdAt);
     }
 
-    toJSON() {
-        return {
-            id: this.id,
-            type: this.type,
-            name: this.name,
-            assetHash: this.assetHash,
-            authorId: this.authorId,
-            spaceId: this.spaceId,
-            animated: this.animated,
-            createdAt: this.createdAt,
-            local: this.local,
-        };
+    delete() {
+        return this.app.rest.delete(`/expressions/${this.id}`);
     }
 }

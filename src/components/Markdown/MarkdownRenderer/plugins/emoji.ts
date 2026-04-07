@@ -1,12 +1,12 @@
 import { getEmoji } from "@utils/emojis";
 import { TWEMOJI_URL } from "@utils/urls";
 import shortcodeRegex from "emojibase-regex/shortcode";
-import MarkdownIt from "markdown-it";
 import Token from "markdown-it/lib/token.mjs";
+import type { MarkdownItAsync } from "@components/Markdown/MarkdownItAsync.ts";
 
 const emojiRegex = new RegExp(shortcodeRegex.source, "g");
 
-export const emojiPlugin = (md: MarkdownIt) => {
+export const emojiPlugin = (md: MarkdownItAsync) => {
     md.core.ruler.after("inline", "emoji", (state) => {
         const tokens = state.tokens;
 
@@ -62,8 +62,10 @@ export const emojiPlugin = (md: MarkdownIt) => {
                 if (
                     newTokens.length &&
                     newTokens.some((t) => t.type === "emoji")
-                )
+                ) {
                     tokens[i].children = newTokens;
+                    tokens[i].content = "";
+                }
             }
         }
     });
@@ -71,6 +73,6 @@ export const emojiPlugin = (md: MarkdownIt) => {
     md.renderer.rules.emoji = (tokens, idx) => {
         const token = tokens[idx];
 
-        return `<emoji data-name="${token.attrGet("name")}" data-url="${token.attrGet("url")}" data-unicode="${token.attrGet("unicode")}">${token.content}</span>`;
+        return `<emoji data-name="${token.attrGet("name")}" data-url="${token.attrGet("url")}" data-unicode="${token.attrGet("unicode")}">${token.content}</emoji>`;
     };
 };

@@ -1,5 +1,5 @@
-import MarkdownIt from "markdown-it";
 import Token from "markdown-it/lib/token.mjs";
+import type { MarkdownItAsync } from "@components/Markdown/MarkdownItAsync.ts";
 
 function processStrikethrough(tokens: Token[]) {
     for (let i = 0; i < tokens.length; i++) {
@@ -30,7 +30,7 @@ function processStrikethrough(tokens: Token[]) {
     }
 }
 
-export const strikethroughPlugin = (md: MarkdownIt) => {
+export const strikethroughPlugin = (md: MarkdownItAsync) => {
     md.core.ruler.after("inline", "strikethrough", (state) => {
         for (let i = 0; i < state.tokens.length; i++) {
             const token = state.tokens[i];

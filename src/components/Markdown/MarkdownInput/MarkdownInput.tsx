@@ -7,27 +7,27 @@ import { wrapSelectionWith } from "@utils/wrapSelectionWith";
 import isHotkey from "is-hotkey";
 import {
     forwardRef,
+    type KeyboardEvent,
     useCallback,
     useEffect,
     useMemo,
     useState,
-    type KeyboardEvent,
 } from "react";
 import {
     createEditor,
-    Range,
-    Element as SlateElement,
-    Text,
     type Descendant,
+    Element as SlateElement,
     type Node,
+    Range,
+    Text,
 } from "slate";
 import { withHistory } from "slate-history";
 import {
     Editable,
-    Slate,
-    withReact,
     type RenderElementProps,
     type RenderLeafProps,
+    Slate,
+    withReact,
 } from "slate-react";
 import { HoverToolbar } from "../HoverToolbar/HoverToolbar";
 import { Element } from "./Element";
@@ -41,6 +41,8 @@ import {
 import type { MarkdownInputProps } from "./MarkdownInput.types";
 import { withEmojis } from "./plugins/withEmojis";
 import { withSyntax } from "./plugins/withSyntax";
+import { EmojiPicker } from "@components/Emoji/EmojiPicker.tsx";
+import { EmojiToolbar } from "@components/Emoji/EmojiToolbar.tsx";
 
 const MarkdownInput = forwardRef<HTMLDivElement, MarkdownInputProps>(
     (
@@ -53,6 +55,7 @@ const MarkdownInput = forwardRef<HTMLDivElement, MarkdownInputProps>(
             autoFocus = false,
             emoticons = true,
             hoverToolbar = true,
+            emojiPicker = true,
 
             onChange,
             onKeyDown: onKeyDownProp,
@@ -225,6 +228,7 @@ const MarkdownInput = forwardRef<HTMLDivElement, MarkdownInputProps>(
                     activeFormats: formats,
                     enableEmoticons: emoticons,
                     enableHoverToolbar: hoverToolbar,
+                    enableEmojis: emojiPicker,
                 }}
             >
                 <Slate
@@ -236,6 +240,7 @@ const MarkdownInput = forwardRef<HTMLDivElement, MarkdownInputProps>(
                     editor={editor}
                 >
                     <HoverToolbar />
+                    <EmojiToolbar />
                     <Editable
                         ref={ref}
                         autoFocus={autoFocus}
@@ -296,6 +301,7 @@ const MarkdownInput = forwardRef<HTMLDivElement, MarkdownInputProps>(
                         disableDefaultStyles
                         spellCheck
                     />
+                    <EmojiPicker />
                 </Slate>
             </MarkdownInputContext.Provider>
         );

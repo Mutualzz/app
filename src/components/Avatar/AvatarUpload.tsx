@@ -18,11 +18,8 @@ import { useMutation } from "@tanstack/react-query";
 import { observer } from "mobx-react-lite";
 import { useCallback, useState } from "react";
 import { FaMagnifyingGlass, FaRotate } from "react-icons/fa6";
-
-interface UpdateAvatar {
-    avatar: File;
-    crop?: unknown;
-}
+import type { Area } from "react-easy-crop";
+import { cropImage } from "@utils/cropImage.ts";
 
 export const AvatarUpload = observer(() => {
     const { theme } = useTheme();
@@ -41,14 +38,8 @@ export const AvatarUpload = observer(() => {
 
     const { mutate: updateAvatar, isPending: saving } = useMutation({
         mutationKey: ["upload-avatar"],
-        mutationFn: ({ avatar, crop }: UpdateAvatar) => {
-            const formData = new FormData();
-            formData.append("avatar", avatar);
-
-            if (crop)
-                formData.append("crop", JSON.stringify(croppedAreaPixels));
-
-            return app.rest.patchFormData("@me", formData);
+        mutationFn: (data: FormData) => {
+            return app.rest.patchFormData("@me", data);
         },
         onSuccess: () => {
             setImageFile(null);
@@ -62,25 +53,21 @@ export const AvatarUpload = observer(() => {
     });
 
     const onUpload = async (file: File | File[]) => {
-        let fileToUse: File;
-        if (Array.isArray(file)) fileToUse = file[0];
-        else fileToUse = file;
-
-        const reader = new FileReader();
-        reader.onload = () => {
-            setImageFile(reader.result as string);
-            setOriginalFile(fileToUse);
-        };
-        reader.readAsDataURL(fileToUse);
+        const fileToUse = Array.isArray(file) ? file[0] : file;
+        const url = URL.createObjectURL(fileToUse);
+        setImageFile(url);
+        setOriginalFile(fileToUse);
     };
 
     const onClear = () => {
+        if (imageFile) URL.revokeObjectURL(imageFile);
         setImageFile(null);
         setOriginalFile(null);
         setError(null);
         setCroppedAreaPixels(null);
         setCrop({ x: 0, y: 0 });
         setZoom(1);
+        setRotation(0);
     };
 
     const onClose = () => {
@@ -96,14 +83,24 @@ export const AvatarUpload = observer(() => {
     }, []);
 
     const handleSave = async (skipCrop = false) => {
-        if (!originalFile) return;
+        if (!originalFile || !imageFile) return;
 
-        const shouldCrop = !skipCrop && !!croppedAreaPixels;
+        let fileToUpload = originalFile;
 
-        updateAvatar({
-            avatar: originalFile,
-            crop: shouldCrop ? croppedAreaPixels : undefined,
-        });
+        if (!skipCrop && croppedAreaPixels) {
+            fileToUpload = await cropImage(
+                imageFile,
+                originalFile,
+                croppedAreaPixels as Area,
+                rotation,
+            );
+        }
+
+        const formData = new FormData();
+        formData.append("avatar", fileToUpload);
+        if (fileToUpload.type === "image/gif")
+            formData.append("crop", JSON.stringify(croppedAreaPixels));
+        updateAvatar(formData);
     };
 
     if (!app.account) return <></>;

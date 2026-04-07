@@ -32,6 +32,15 @@ export interface EmojiElement {
     children: EmptyText[];
 }
 
+export interface CustomEmojiElement {
+    type: "customEmoji";
+    url: string;
+    id: string;
+    name: string;
+    animated: boolean;
+    children: EmptyText[];
+}
+
 export interface Text {
     bold?: boolean;
     italic?: boolean;
@@ -54,6 +63,7 @@ export type Element =
     | LineElement
     | HeadingElement
     | EmojiElement
+    | CustomEmojiElement
     | LinkElement;
 
 export type Editor = BaseEditor &

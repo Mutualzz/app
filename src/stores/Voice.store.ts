@@ -1136,7 +1136,6 @@ export class VoiceStore {
             state.channelId === "null" ? null : state.channelId;
 
         if (!normalizedChannelId) {
-            console.log("Left");
             this.app.voiceStates.remove(state.userId);
             return;
         }

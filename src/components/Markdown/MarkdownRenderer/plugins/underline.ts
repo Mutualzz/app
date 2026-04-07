@@ -1,5 +1,5 @@
-import MarkdownIt from "markdown-it";
 import Token from "markdown-it/lib/token.mjs";
+import type { MarkdownItAsync } from "@components/Markdown/MarkdownItAsync.ts";
 
 function processUnderline(tokens: Token[]) {
     const regex = /__([^_]+?)__/g;
@@ -40,7 +40,7 @@ function processUnderline(tokens: Token[]) {
     }
 }
 
-export const underlinePlugin = (md: MarkdownIt) => {
+export const underlinePlugin = (md: MarkdownItAsync) => {
     md.core.ruler.after("inline", "underline", (state) => {
         for (let i = 0; i < state.tokens.length; i++) {
             const token = state.tokens[i];

@@ -1,6 +1,6 @@
-import type MarkdownIt from "markdown-it";
+import type { MarkdownItAsync } from "@components/Markdown/MarkdownItAsync.ts";
 
-export const brOnEmpty = (md: MarkdownIt) => {
+export const brOnEmpty = (md: MarkdownItAsync) => {
     md.core.ruler.after("inline", "br-on-empty-lines", (state) => {
         const tokens = state.tokens;
 

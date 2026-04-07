@@ -1,7 +1,7 @@
-import MarkdownIt from "markdown-it";
 import Token from "markdown-it/lib/token.mjs";
+import type { MarkdownItAsync } from "@components/Markdown/MarkdownItAsync.ts";
 
-export const spoilerPlugin = (md: MarkdownIt) => {
+export const spoilerPlugin = (md: MarkdownItAsync) => {
     md.core.ruler.after("inline", "spoiler", (state) => {
         const tokens = state.tokens;
 

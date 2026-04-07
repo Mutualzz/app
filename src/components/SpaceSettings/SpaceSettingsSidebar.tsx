@@ -11,7 +11,7 @@ import type { Space } from "@stores/objects/Space";
 import startCase from "lodash-es/startCase";
 import { observer } from "mobx-react-lite";
 import { Fragment, type JSX } from "react";
-import { FaPaintBrush, FaPaperPlane, FaTrash } from "react-icons/fa";
+import { FaPaintBrush, FaPaperPlane, FaSmile, FaTrash } from "react-icons/fa";
 import { VscTypeHierarchySuper } from "react-icons/vsc";
 import { SpaceActionConfirm } from "@components/Modals/SpaceActionConfirm.tsx";
 import { useModal } from "@contexts/Modal.context.tsx";
@@ -49,6 +49,11 @@ export const settingsPages: SettingsPages = {
             label: "invites",
             icon: <FaPaperPlane />,
             permissions: ["ManageSpace"],
+        },
+        {
+            label: "expressions",
+            icon: <FaSmile />,
+            permissions: ["ManageExpressions"],
         },
     ],
 };

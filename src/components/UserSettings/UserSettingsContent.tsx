@@ -1,9 +1,6 @@
 import { Paper } from "@components/Paper";
 import { useModal } from "@contexts/Modal.context";
-import {
-    type UserSettingsPage,
-    useUserSettings,
-} from "@components/UserSettings/UserSettings.context.tsx";
+import { type UserSettingsPage, useUserSettings, } from "@components/UserSettings/UserSettings.context.tsx";
 import { useAppStore } from "@hooks/useStores";
 import { IconButton, Stack, Typography } from "@mutualzz/ui-web";
 import startCase from "lodash-es/startCase";

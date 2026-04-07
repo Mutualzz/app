@@ -6,6 +6,7 @@ import mergeWith from "lodash-es/mergeWith";
 import { isValidElement, type ReactNode } from "react";
 import MurmurHash from "imurmurhash";
 import type { PresenceStatus } from "@mutualzz/types";
+import type { Expression } from "@stores/objects/Expression.ts";
 
 export function mergeAppendAnything(
     ...objects: Record<string, string | string[]>[]
@@ -23,6 +24,17 @@ export function mergeAppendAnything(
         return undefined;
     });
 }
+
+export const canUseCustomEmoji = (emoji: Expression, me?: string | null) => {
+    if (!me) return false;
+
+    if (emoji.space) {
+        if (emoji.space.ownerId === me) return true;
+        if (emoji.space.members.has(me)) return true;
+    }
+
+    return emoji.authorId === me;
+};
 
 export const generateHash = async (buffer: ArrayBuffer, animated: boolean) => {
     const hashBuffer = await window.crypto.subtle.digest("SHA-256", buffer);

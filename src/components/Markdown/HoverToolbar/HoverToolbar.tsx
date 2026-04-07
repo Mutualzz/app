@@ -37,13 +37,13 @@ export const HoverToolbar = () => {
     const [visible, setVisible] = useState(false);
 
     useEffect(() => {
+        if (!enableHoverToolbar) return;
         const el = ref.current;
         if (!el) return;
 
         const { selection } = editor;
 
         if (
-            !enableHoverToolbar ||
             !selection ||
             !inFocus ||
             Range.isCollapsed(selection) ||

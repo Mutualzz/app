@@ -1,5 +1,5 @@
-import MarkdownIt from "markdown-it";
 import Token from "markdown-it/lib/token.mjs";
+import type { MarkdownItAsync } from "@components/Markdown/MarkdownItAsync.ts";
 
 function processEmphasis(tokens: Token[]) {
     for (let i = 0; i < tokens.length; i++) {
@@ -115,7 +115,7 @@ function processEmphasis(tokens: Token[]) {
     }
 }
 
-export const emphasisPlugin = (md: MarkdownIt) => {
+export const emphasisPlugin = (md: MarkdownItAsync) => {
     md.core.ruler.after("inline", "emphasis", (state) => {
         for (let i = 0; i < state.tokens.length; i++) {
             const token = state.tokens[i];

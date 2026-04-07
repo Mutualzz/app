@@ -20,6 +20,8 @@ function serializeNode(node: Descendant): string {
                 .join("\n");
         case "emoji":
             return `:${element.name.toLowerCase()}:`;
+        case "customEmoji":
+            return `<${element.animated ? "a" : ""}:${element.name}:${element.id}>`;
         case "line":
         default:
             return children;

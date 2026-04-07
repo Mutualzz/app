@@ -1,16 +1,75 @@
 import { observer } from "mobx-react-lite";
-import { Divider, Stack, Typography } from "@mutualzz/ui-web";
+import { Divider, Stack, Typography, useTheme } from "@mutualzz/ui-web";
 import { Button } from "@components/Button.tsx";
 import { useAppStore } from "@hooks/useStores.ts";
-import { type ChangeEvent, useRef } from "react";
+import { type ChangeEvent, useRef, useState } from "react";
 import Snowflake from "@utils/Snowflake.ts";
 import { ExpressionType } from "@mutualzz/types";
 import { generateHash } from "@utils/index.ts";
 import { useModal } from "@contexts/Modal.context.tsx";
 import { ExpressionEditor } from "@components/Modals/ExpressionEditor.tsx";
 import { Paper } from "@components/Paper.tsx";
+import type { Expression } from "@stores/objects/Expression.ts";
+import { AnimatedStack } from "@components/Animated/AnimatedStack.tsx";
+import { dynamicElevation, formatColor } from "@mutualzz/ui-core";
+import { IconButton } from "@components/IconButton.tsx";
+import { FaTrash } from "react-icons/fa";
+import type { Space } from "@stores/objects/Space.ts";
 
-const EmojisTab = observer(() => {
+const EmojiItem = observer(({ expression }: { expression: Expression }) => {
+    const { theme } = useTheme();
+
+    const [hover, setHover] = useState(false);
+
+    return (
+        <AnimatedStack
+            flex={1}
+            direction="row"
+            alignItems="center"
+            whileHover={{
+                background: formatColor(
+                    dynamicElevation(theme.colors.surface, 5),
+                    {
+                        alpha: 0.5,
+                    },
+                ),
+            }}
+            onMouseOver={() => setHover(true)}
+            onMouseOut={() => setHover(false)}
+            p="1rem"
+        >
+            <Stack direction="row" spacing={6.5} alignItems="center">
+                <img
+                    alt={expression.id}
+                    src={expression.url}
+                    css={{
+                        width: 32,
+                        height: 32,
+                    }}
+                />
+                {expression.name}
+            </Stack>
+
+            <Stack flex={1} justifyContent="flex-end">
+                {hover && (
+                    <IconButton
+                        onClick={() => expression.delete()}
+                        size="sm"
+                        color="danger"
+                    >
+                        <FaTrash />
+                    </IconButton>
+                )}
+            </Stack>
+        </AnimatedStack>
+    );
+});
+
+interface Props {
+    space: Space;
+}
+
+const SpaceEmojisTab = observer(({ space }: Props) => {
     const app = useAppStore();
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -33,7 +92,7 @@ const EmojisTab = observer(() => {
             type: ExpressionType.Emoji,
             name: file.name.split(".")[0],
             assetHash: hash,
-            spaceId: null,
+            spaceId: space.id,
             authorId: app.account!.id,
             animated,
             flags: 0n,
@@ -42,7 +101,7 @@ const EmojisTab = observer(() => {
 
         openModal(
             "emoji-editor",
-            <ExpressionEditor emoji={emoji} file={file} />,
+            <ExpressionEditor expression={emoji} file={file} />,
         );
     };
 
@@ -54,7 +113,7 @@ const EmojisTab = observer(() => {
                 justifyContent="space-between"
             >
                 <Typography color="warning" variant="plain">
-                    Sadly current limit of emojis you can upload are 10, since
+                    Sadly current limit of emojis you can upload are 100, since
                     the app is in beta and storage is an issue for now
                 </Typography>
                 <input
@@ -96,7 +155,8 @@ const EmojisTab = observer(() => {
                             ml={2.5}
                             mb={1.25}
                         >
-                            {10 - app.expressions.emojis.length} slots available
+                            {100 - app.expressions.emojis.length} slots
+                            available
                         </Typography>
                     </Stack>
                     <Divider
@@ -107,19 +167,56 @@ const EmojisTab = observer(() => {
                     />
 
                     <Stack
-                        flex={1}
+                        mb={2.5}
+                        spacing={5}
                         direction="row"
                         mt={2.5}
-                        spacing={2}
                         pl={2.5}
                     >
-                        <Typography flex={1}>Image</Typography>
+                        <Typography>Image</Typography>
                         <Typography flex={1}>Name</Typography>
-                        <Typography flex={1}>Local</Typography>
                     </Stack>
                     <Stack direction="column">
                         {staticEmojis.map((expression) => (
-                            <img src={expression.url} />
+                            <EmojiItem expression={expression} />
+                        ))}
+                    </Stack>
+                </Paper>
+            )}
+
+            {animatedEmojis.length > 0 && (
+                <Paper
+                    borderRadius={12}
+                    variant="outlined"
+                    direction="column"
+                    height={200}
+                    width={400}
+                >
+                    <Stack direction="column" spacing={0}>
+                        <Typography level="body-lg" ml={2.5} mt={2.5}>
+                            Animated Emojis
+                        </Typography>
+                    </Stack>
+                    <Divider
+                        lineColor="muted"
+                        css={{
+                            opacity: 0.5,
+                        }}
+                    />
+
+                    <Stack
+                        mb={2.5}
+                        spacing={5}
+                        direction="row"
+                        mt={2.5}
+                        pl={2.5}
+                    >
+                        <Typography>Image</Typography>
+                        <Typography flex={1}>Name</Typography>
+                    </Stack>
+                    <Stack direction="column">
+                        {animatedEmojis.map((expression) => (
+                            <EmojiItem expression={expression} />
                         ))}
                     </Stack>
                 </Paper>
@@ -135,4 +232,4 @@ const EmojisTab = observer(() => {
         </Stack>
     );
 });
-export default EmojisTab;
+export default SpaceEmojisTab;

@@ -13,10 +13,11 @@ export interface MarkdownInputProps {
     color?: Responsive<Color | ColorLike>;
     textColor?: Responsive<TypographyColor | ColorLike | "inherit">;
     variant?: Responsive<Variant>;
-
     autoFocus?: boolean;
+
     emoticons?: boolean;
     hoverToolbar?: boolean;
+    emojiPicker?: boolean;
 
     disabled?: boolean;
 

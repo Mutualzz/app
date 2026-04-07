@@ -3,7 +3,8 @@ import { type PropsWithChildren, useState } from "react";
 import { Stack } from "@mutualzz/ui-web";
 import startCase from "lodash-es/startCase";
 import styled from "@emotion/styled";
-import UserEmojisTab from "./UserEmojisTab.tsx";
+import SpaceEmojisTab from "./SpaceEmojisTab.tsx";
+import type { Space } from "@stores/objects/Space.ts";
 
 type Tab = "emojis" | "stickers";
 
@@ -29,7 +30,11 @@ const Tab = styled("div")<TabProps>(({ theme, selected }) => ({
     }),
 }));
 
-export const UserExpressionsSettings = observer(() => {
+interface Props {
+    space: Space;
+}
+
+export const SpaceExpressionsSettings = observer(({ space }: Props) => {
     const [currentTab, setCurrentTab] = useState<Tab>("emojis");
 
     return (
@@ -44,7 +49,7 @@ export const UserExpressionsSettings = observer(() => {
                     </Tab>
                 ))}
             </Stack>
-            {currentTab === "emojis" && <UserEmojisTab />}
+            {currentTab === "emojis" && <SpaceEmojisTab space={space} />}
         </Stack>
     );
 });

@@ -1,5 +1,5 @@
-import MarkdownIt from "markdown-it";
 import Token from "markdown-it/lib/token.mjs";
+import type { MarkdownItAsync } from "@components/Markdown/MarkdownItAsync.ts";
 
 const urlRegex = /https:\/\/[A-Za-z0-9\-._~:/?#\[\]@!$&'()*+,;=%]+/g;
 
@@ -65,7 +65,7 @@ function processTokens(tokens: Token[]) {
     }
 }
 
-export const linkPlugin = (md: MarkdownIt) => {
+export const linkPlugin = (md: MarkdownItAsync) => {
     md.core.ruler.after("inline", "link", (state) => {
         for (let i = 0; i < state.tokens.length; i++) {
             const token = state.tokens[i];

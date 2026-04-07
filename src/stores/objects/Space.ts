@@ -1,4 +1,5 @@
 import type {
+    APIExpression,
     APISpaceMember,
     Snowflake,
     SpaceIconFormat,
@@ -27,6 +28,7 @@ import type { Channel } from "./Channel";
 import { Invite } from "./Invite";
 import { SpaceRoleStore } from "@stores/Space/SpaceRole.store";
 import { BitField, type SpaceFlags, spaceFlags } from "@mutualzz/permissions";
+import { Expression } from "@stores/objects/Expression.ts";
 
 export class Space {
     id: Snowflake;
@@ -45,6 +47,8 @@ export class Space {
     memberLists: ObservableMap<string, SpaceMemberListStore> =
         new ObservableMap();
     raw: APISpace;
+    expressions = observable.map<Snowflake, Expression>();
+
     private readonly _channels: ObservableSet<string>;
 
     constructor(
@@ -227,6 +231,20 @@ export class Space {
         const newInvite = new Invite(this.app, invite);
         this.invites.set(invite.code, newInvite);
         return newInvite;
+    }
+
+    addExpression(expression: APIExpression) {
+        const newExpression = new Expression(this.app, expression);
+        this.expressions.set(expression.id, newExpression);
+        return newExpression;
+    }
+
+    updateExpression(expression: APIExpression) {
+        this.expressions.get(expression.id)?.update(expression);
+    }
+
+    removeExpression(expressionId: Snowflake) {
+        this.expressions.delete(expressionId);
     }
 
     updateInvite(invite: APIInvite) {

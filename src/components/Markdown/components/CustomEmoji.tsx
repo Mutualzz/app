@@ -1,11 +1,14 @@
-import type { EmojiElement } from "@app-types/slate";
+import type { CustomEmojiElement } from "@app-types/slate";
 import { styled } from "@mutualzz/ui-core";
 import { ContextMenu } from "@components/ContextMenu.tsx";
-import { DefaultEmojiPreviewPopup } from "@components/Preview/DefaultEmojiPreviewPopup.tsx";
+import { CustomEmojiPreviewPopup } from "@components/Preview/CustomEmojiPreviewPopup.tsx";
 import { Portal } from "@mutualzz/ui-web";
 import { useMenu } from "@contexts/ContextMenu.context.tsx";
 
-interface EmojiProps extends Omit<EmojiElement, "type" | "children"> {
+interface CustomEmojiProps extends Omit<
+    CustomEmojiElement,
+    "type" | "children"
+> {
     isEmojiOnly: boolean;
 }
 
@@ -15,7 +18,6 @@ const EmojiWrapper = styled("span")<{ isEmojiOnly: boolean }>(
         width: isEmojiOnly ? "2.25em" : "1.375em",
         height: isEmojiOnly ? "2.25em" : "1.375em",
         verticalAlign: "middle",
-        position: "relative",
         cursor: "pointer",
     }),
 );
@@ -26,8 +28,14 @@ const EmojiImage = styled("img")({
     objectFit: "contain",
 });
 
-const Emoji = ({ isEmojiOnly, url, unicode, name }: EmojiProps) => {
-    const { openContextMenu, isOpen, clearMenu } = useMenu();
+const CustomEmoji = ({
+    isEmojiOnly,
+    url,
+    name,
+    id,
+    animated,
+}: CustomEmojiProps) => {
+    const { clearMenu, isOpen, openContextMenu } = useMenu();
 
     return (
         <>
@@ -39,12 +47,12 @@ const Emoji = ({ isEmojiOnly, url, unicode, name }: EmojiProps) => {
                     openContextMenu(
                         event,
                         {
-                            id: `emoji-${name}`,
+                            id: `custom-emoji-${id}`,
                             type: "custom",
                         },
                         {
                             x: Math.round(rect.left - 55),
-                            y: Math.round(rect.bottom - 125),
+                            y: Math.round(rect.bottom - 200),
                         },
                     );
                 }}
@@ -52,18 +60,18 @@ const Emoji = ({ isEmojiOnly, url, unicode, name }: EmojiProps) => {
             >
                 <EmojiImage
                     src={url}
-                    alt={unicode}
+                    alt={id}
                     draggable={false}
-                    aria-label={`:${name}:`}
+                    aria-label={`<${animated ? "a" : ""}:${name}:${id}>`}
                 />
             </EmojiWrapper>
             <Portal>
-                <ContextMenu padding={0} id={`emoji-${name}`}>
-                    <DefaultEmojiPreviewPopup name={name} url={url} />
+                <ContextMenu padding={0} id={`custom-emoji-${id}`}>
+                    <CustomEmojiPreviewPopup emojiId={id} />
                 </ContextMenu>
             </Portal>
         </>
     );
 };
 
-export { Emoji };
+export { CustomEmoji };
