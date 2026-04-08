@@ -8,6 +8,10 @@ import shortcodesJoyPixels from "emojibase-data/en/shortcodes/joypixels.json";
 
 import { joinShortcodes } from "emojibase";
 import { useAppStore } from "@hooks/useStores.ts";
+import { type Editor, Range, Text } from "slate";
+import type { CustomEmojiElement, EmojiElement } from "@app-types/slate";
+import { TWEMOJI_URL } from "@utils/urls.ts";
+import type { Expression } from "@stores/objects/Expression.ts";
 
 const shortcodes = [
     shortcodesEmojiBase,
@@ -77,3 +81,79 @@ export async function getCustomEmoji(shortcode: string) {
 
     return expression;
 }
+
+export function useShortcodeQuery(editor: Editor): {
+    query: string | null;
+    range: Range | null;
+} {
+    const { selection } = editor;
+    if (!selection || !Range.isCollapsed(selection))
+        return { query: null, range: null };
+
+    const { anchor } = selection;
+    const [node] = editor.node(anchor.path);
+
+    if (!Text.isText(node)) return { query: null, range: null };
+
+    const textBefore = node.text.slice(0, anchor.offset);
+
+    const match = /:([\w+-]{2,})$/.exec(textBefore);
+    if (!match) return { query: null, range: null };
+
+    const colonOffset = match.index;
+    const [, query] = match;
+
+    const rangeStart = { path: anchor.path, offset: colonOffset };
+
+    return { query, range: { anchor: rangeStart, focus: anchor } };
+}
+
+export const insertEmoji = (
+    editor: Editor,
+    emoji: ReturnType<typeof getEmoji>,
+) => {
+    if (!emoji) return;
+
+    const emojiElement: EmojiElement = {
+        type: "emoji",
+        url: `${TWEMOJI_URL}/${emoji.hexcode.toLowerCase()}.svg`,
+        children: [{ text: emoji.emoji }],
+        unicode: emoji.emoji,
+        name: emoji.shortcodes?.[0] ?? emoji.emoji,
+    };
+
+    const { selection } = editor;
+
+    if (selection && Range.isCollapsed(selection)) {
+        editor.insertNode(emojiElement, {
+            at: selection.anchor,
+        });
+
+        const pointAfter = editor.after(selection.focus);
+        if (pointAfter) editor.select(pointAfter);
+    }
+};
+
+export const insertCustomEmoji = (editor: Editor, emoji: Expression) => {
+    const childrenText = emoji.animated
+        ? `<a:${emoji.name}:${emoji.id}>`
+        : `<:${emoji.name}:${emoji.id}>`;
+
+    const emojiElement: CustomEmojiElement = {
+        type: "customEmoji",
+        url: emoji.url,
+        children: [{ text: childrenText }],
+        name: emoji.name,
+        id: emoji.id,
+        animated: emoji.animated,
+    };
+
+    const { selection } = editor;
+
+    if (selection && Range.isCollapsed(selection)) {
+        editor.insertNode(emojiElement, { at: selection.anchor });
+
+        const pointAfter = editor.after(selection.focus);
+        if (pointAfter) editor.select(pointAfter);
+    }
+};

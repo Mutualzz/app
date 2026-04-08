@@ -1,12 +1,14 @@
-import type { CustomEmojiElement, EmojiElement } from "@app-types/slate";
-import { getCustomEmoji, getEmoji } from "@utils/emojis";
+import {
+    getCustomEmoji,
+    getEmoji,
+    insertCustomEmoji,
+    insertEmoji,
+} from "@utils/emojis";
 import { slateToMarkdown } from "@utils/slateToMarkdown";
-import { TWEMOJI_URL } from "@utils/urls";
 import emojiRegex from "emojibase-regex";
 import baseEmoticonRegex from "emojibase-regex/emoticon";
 import shortcodeRegex from "emojibase-regex/shortcode";
 import { type Editor, Element, Path, Range, Text, type TextUnit } from "slate";
-import type { Expression } from "@stores/objects/Expression.ts";
 import { useAppStore } from "@hooks/useStores.ts";
 import { canUseCustomEmoji } from "@utils/index.ts";
 
@@ -273,11 +275,9 @@ export const withEmojis = (editor: Editor) => {
                 const customEmoji = await getCustomEmoji(m.text);
                 const me = app.account?.id;
 
-                if (customEmoji && canUseCustomEmoji(customEmoji, me)) {
+                if (customEmoji && canUseCustomEmoji(customEmoji, me))
                     parts.push({ type: "customEmoji", emoji: customEmoji });
-                } else {
-                    parts.push({ type: "text", text: m.text });
-                }
+                else parts.push({ type: "text", text: m.text });
             } else {
                 const emoji = getEmoji(m.text.slice(1, -1));
                 if (emoji) parts.push({ type: "emoji", emoji });
@@ -308,51 +308,4 @@ export const withEmojis = (editor: Editor) => {
     };
 
     return editor;
-};
-
-const insertEmoji = (editor: Editor, emoji: ReturnType<typeof getEmoji>) => {
-    if (!emoji) return;
-
-    const emojiElement: EmojiElement = {
-        type: "emoji",
-        url: `${TWEMOJI_URL}/${emoji.hexcode.toLowerCase()}.svg`,
-        children: [{ text: emoji.emoji }],
-        unicode: emoji.emoji,
-        name: emoji.shortcodes?.[0] ?? emoji.emoji,
-    };
-
-    const { selection } = editor;
-
-    if (selection && Range.isCollapsed(selection)) {
-        editor.insertNode(emojiElement, {
-            at: selection.anchor,
-        });
-
-        const pointAfter = editor.after(selection.focus);
-        if (pointAfter) editor.select(pointAfter);
-    }
-};
-
-const insertCustomEmoji = (editor: Editor, emoji: Expression) => {
-    const childrenText = emoji.animated
-        ? `<a:${emoji.name}:${emoji.id}>`
-        : `<:${emoji.name}:${emoji.id}>`;
-
-    const emojiElement: CustomEmojiElement = {
-        type: "customEmoji",
-        url: emoji.url,
-        children: [{ text: childrenText }],
-        name: emoji.name,
-        id: emoji.id,
-        animated: emoji.animated,
-    };
-
-    const { selection } = editor;
-
-    if (selection && Range.isCollapsed(selection)) {
-        editor.insertNode(emojiElement, { at: selection.anchor });
-
-        const pointAfter = editor.after(selection.focus);
-        if (pointAfter) editor.select(pointAfter);
-    }
 };

@@ -1,13 +1,10 @@
 import Token from "markdown-it/lib/token.mjs";
 import type { MarkdownItAsync } from "@components/Markdown/MarkdownItAsync.ts";
 import { getCustomEmoji } from "@utils/emojis.ts";
-import { useAppStore } from "@hooks/useStores.ts";
 
 const customEmojiRegex = /<a?:[^:]+:\d+>/g;
 
 export const customEmojiPlugin = (md: MarkdownItAsync) => {
-    const app = useAppStore();
-
     md.core.ruler.after("emoji", "customEmoji", (state) => {
         const tokens = state.tokens;
 
