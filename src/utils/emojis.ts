@@ -12,6 +12,7 @@ import { type Editor, Range, Text } from "slate";
 import type { CustomEmojiElement, EmojiElement } from "@app-types/slate";
 import { TWEMOJI_URL } from "@utils/urls.ts";
 import type { Expression } from "@stores/objects/Expression.ts";
+import { ExpressionType } from "@mutualzz/types";
 
 const shortcodes = [
     shortcodesEmojiBase,
@@ -111,6 +112,7 @@ export function useShortcodeQuery(editor: Editor): {
 export const insertEmoji = (
     editor: Editor,
     emoji: ReturnType<typeof getEmoji>,
+    addSpace = false,
 ) => {
     if (!emoji) return;
 
@@ -130,11 +132,20 @@ export const insertEmoji = (
         });
 
         const pointAfter = editor.after(selection.focus);
-        if (pointAfter) editor.select(pointAfter);
+        if (pointAfter) {
+            editor.select(pointAfter);
+
+            if (addSpace) editor.insertText(" ");
+        }
     }
 };
 
-export const insertCustomEmoji = (editor: Editor, emoji: Expression) => {
+export const insertCustomEmoji = (
+    editor: Editor,
+    emoji: Expression,
+    addSpace = false,
+) => {
+    if (emoji.type !== ExpressionType.Emoji) return;
     const childrenText = emoji.animated
         ? `<a:${emoji.name}:${emoji.id}>`
         : `<:${emoji.name}:${emoji.id}>`;
@@ -154,6 +165,10 @@ export const insertCustomEmoji = (editor: Editor, emoji: Expression) => {
         editor.insertNode(emojiElement, { at: selection.anchor });
 
         const pointAfter = editor.after(selection.focus);
-        if (pointAfter) editor.select(pointAfter);
+        if (pointAfter) {
+            editor.select(pointAfter);
+
+            if (addSpace) editor.insertText(" ");
+        }
     }
 };

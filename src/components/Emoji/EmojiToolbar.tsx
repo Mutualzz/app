@@ -1,4 +1,4 @@
-import { useSlate } from "slate-react";
+import { ReactEditor, useSlate } from "slate-react";
 import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import { MarkdownInputContext } from "@components/Markdown/MarkdownInput/MarkdownInput.context.ts";
 import { defaultEmojis, insertCustomEmoji, insertEmoji, useShortcodeQuery, } from "@utils/emojis.ts";
@@ -10,6 +10,7 @@ import { ExpressionType } from "@mutualzz/types";
 import { canUseCustomEmoji } from "@utils/index.ts";
 import { TWEMOJI_URL } from "@utils/urls.ts";
 import { Paper } from "@components/Paper.tsx";
+import { UserAvatar } from "@components/User/UserAvatar.tsx";
 
 interface StandardSuggestion {
     kind: "standard";
@@ -46,9 +47,11 @@ export const EmojiToolbar = () => {
     const [activeIndex, setActiveIndex] = useState(0);
     const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
     const [visible, setVisible] = useState(false);
-    const [coords, setCoords] = useState<{ top: number; left: number } | null>(
-        null,
-    );
+    const [toolbarStyle, setToolbarStyle] = useState<{
+        top: number;
+        left: number;
+        width: number;
+    } | null>(null);
 
     const { query, range } = useShortcodeQuery(editor);
 
@@ -132,22 +135,22 @@ export const EmojiToolbar = () => {
             const caretRect = sel.getRangeAt(0).getBoundingClientRect();
             if (!caretRect.width && !caretRect.height) return;
 
+            const editorEl = ReactEditor.toDOMNode(editor, editor);
+            const editorRect = editorEl.getBoundingClientRect();
+
             const popupHeight = ref.current?.offsetHeight ?? 260;
             const spaceAbove = caretRect.top;
             const spaceBelow = window.innerHeight - caretRect.bottom;
             const showAbove =
-                spaceAbove >= popupHeight + 8 || spaceAbove > spaceBelow;
+                spaceAbove >= popupHeight + 12 || spaceAbove > spaceBelow;
 
-            const left = Math.min(
-                Math.max(0, caretRect.left - 30),
-                window.innerWidth - 296,
-            );
-
-            setCoords(
-                showAbove
-                    ? { top: caretRect.top - popupHeight - 25, left }
-                    : { top: caretRect.bottom + 8, left },
-            );
+            setToolbarStyle({
+                top: showAbove
+                    ? caretRect.top - popupHeight - 24
+                    : caretRect.bottom + 24,
+                left: editorRect.left,
+                width: editorRect.width,
+            });
         } catch {}
     }, [visible, suggestions]);
 
@@ -159,8 +162,8 @@ export const EmojiToolbar = () => {
             editor.delete();
 
             if (suggestion.kind === "standard")
-                insertEmoji(editor, suggestion.emoji);
-            else insertCustomEmoji(editor, suggestion.expression);
+                insertEmoji(editor, suggestion.emoji, true);
+            else insertCustomEmoji(editor, suggestion.expression, true);
 
             setVisible(false);
         },
@@ -185,6 +188,7 @@ export const EmojiToolbar = () => {
                     break;
                 case "Enter":
                 case "Tab": {
+                    e.stopPropagation();
                     const s = suggestions[activeIndex];
                     if (s) {
                         e.preventDefault();
@@ -209,9 +213,24 @@ export const EmojiToolbar = () => {
             ?.scrollIntoView({ block: "nearest" });
     }, [activeIndex]);
 
-    if (!visible || suggestions.length === 0) return null;
+    useEffect(() => {
+        if (!visible) return;
 
-    console.log(coords);
+        const onPointerDown = (e: PointerEvent) => {
+            const toolbarEl = ref.current;
+            const target = e.target as Node | null;
+            if (!toolbarEl || !target) return;
+
+            // Close only when clicking outside the toolbar.
+            if (!toolbarEl.contains(target)) setVisible(false);
+        };
+
+        window.addEventListener("pointerdown", onPointerDown, true);
+        return () =>
+            window.removeEventListener("pointerdown", onPointerDown, true);
+    }, [visible]);
+
+    if (!visible || suggestions.length === 0) return null;
 
     return (
         <Paper
@@ -220,25 +239,116 @@ export const EmojiToolbar = () => {
             onMouseDown={(e) => e.preventDefault()}
             css={{
                 position: "fixed",
-                top: coords?.top ?? -9999,
-                left: coords?.left ?? 0,
+                top: toolbarStyle?.top ?? -9999,
+                left: toolbarStyle?.left ?? 0,
+                width: toolbarStyle?.width ?? 0,
             }}
             zIndex={theme.zIndex.tooltip}
-            visibility={coords ? "visible" : "hidden"}
+            visibility={toolbarStyle ? "visible" : "hidden"}
             maxHeight={260}
-            width="50%"
             overflowY="auto"
             borderRadius={8}
-            p="4px 0"
+            px={2}
+            direction="column"
         >
-            <Stack p="4px 12px 6px">
+            <Stack ml={2} alignItems="center" my={2} spacing={1.25}>
                 <Typography
                     level="body-sm"
                     letterSpacing="0.06em"
                     fontWeight={200}
                 >
-                    Emoji matching <Typography>:{query}:</Typography>
+                    Emoji matching
                 </Typography>
+                <Typography
+                    level="body-sm"
+                    letterSpacing="0.06em"
+                    fontWeight={200}
+                >
+                    :{query}:
+                </Typography>
+            </Stack>
+            <Stack direction="column">
+                {suggestions.map((suggestion, index) => (
+                    <Paper
+                        key={suggestion.key}
+                        direction="row"
+                        alignItems="center"
+                        data-index={index}
+                        justifyContent="space-between"
+                        p={2}
+                        borderRadius={4}
+                        elevation={
+                            suggestion.key === suggestions[activeIndex].key
+                                ? 3
+                                : 0
+                        }
+                        variant={
+                            suggestion.key === suggestions[activeIndex].key
+                                ? "elevation"
+                                : "plain"
+                        }
+                        css={{
+                            cursor: "pointer",
+                            "&:hover": {
+                                backgroundColor: "rgba(0, 0, 0, 0.1)",
+                            },
+                        }}
+                        onMouseDown={(e) => {
+                            e.preventDefault();
+                            select(suggestion);
+                        }}
+                    >
+                        <Stack alignItems="center">
+                            <img
+                                src={suggestion.url}
+                                alt={suggestion.label}
+                                width={24}
+                                height={24}
+                                css={{
+                                    borderRadius: 4,
+                                    marginRight: 12,
+                                    objectFit: "cover",
+                                }}
+                            />
+                            <Typography>{suggestion.label}</Typography>
+                        </Stack>
+                        {suggestion.kind === "custom" && (
+                            <>
+                                {suggestion.expression.space && (
+                                    <Typography
+                                        level="body-sm"
+                                        textColor="secondary"
+                                    >
+                                        {suggestion.expression.space.name}
+                                    </Typography>
+                                )}
+                                {suggestion.expression.author &&
+                                    !suggestion.expression.space && (
+                                        <Stack
+                                            spacing={1.25}
+                                            alignItems="center"
+                                        >
+                                            <UserAvatar
+                                                user={
+                                                    suggestion.expression.author
+                                                }
+                                                size={16}
+                                            />
+                                            <Typography
+                                                level="body-sm"
+                                                textColor="secondary"
+                                            >
+                                                {
+                                                    suggestion.expression.author
+                                                        .displayName
+                                                }
+                                            </Typography>
+                                        </Stack>
+                                    )}
+                            </>
+                        )}
+                    </Paper>
+                ))}
             </Stack>
         </Paper>
     );
