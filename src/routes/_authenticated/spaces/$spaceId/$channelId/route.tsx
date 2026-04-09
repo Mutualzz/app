@@ -36,7 +36,7 @@ function RouteComponent() {
         if (channel.isCategory) return null;
 
         return channel;
-    }, [space, channelId]);
+    }, [channelId]);
 
     const openChat = useMemo(
         () => activeChannel?.isVoiceChannel && chat === true,
@@ -48,8 +48,7 @@ function RouteComponent() {
 
         if (!activeChannel) {
             navigate({
-                to: "/spaces/$spaceId",
-                params: { spaceId },
+                to: "/spaces",
                 replace: true,
             });
             return;

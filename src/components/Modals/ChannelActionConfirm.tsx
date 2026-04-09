@@ -22,12 +22,8 @@ export const ChannelActionConfirm = observer(({ channel }: Props) => {
         onSuccess: () => {
             if (app.channels.activeId === channel.id && channel.space)
                 navigate({
-                    to: "/spaces/$spaceId/$channelId",
-                    params: {
-                        spaceId: channel.space.id,
-                        channelId:
-                            channel.space.firstNavigableChannel?.id || "",
-                    },
+                    to: "/spaces",
+                    replace: true,
                 });
 
             closeModal();

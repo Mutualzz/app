@@ -4,7 +4,6 @@ import { useAppStore } from "@hooks/useStores";
 import { Button, ButtonGroup, Stack, Typography } from "@mutualzz/ui-web";
 import type { Channel } from "@stores/objects/Channel";
 import { useMutation } from "@tanstack/react-query";
-import { useNavigate } from "@tanstack/react-router";
 import { observer } from "mobx-react-lite";
 
 interface Props {
@@ -13,23 +12,13 @@ interface Props {
 
 export const CategoryDeleteModal = observer(({ channel }: Props) => {
     const app = useAppStore();
-    const navigate = useNavigate();
-    const { closeAllModals } = useModal();
+    const { closeModal } = useModal();
 
     const { mutate: deleteCategory, isPending: isDeleting } = useMutation({
         mutationKey: ["delete-category", channel.id],
         mutationFn: async (parentOnly: boolean) => channel.delete(parentOnly),
-        onSuccess: ({ spaceId, channelId }) => {
-            if (app.channels.activeId === channelId)
-                navigate({
-                    to: "/spaces/$spaceId/$channelId",
-                    params: {
-                        spaceId: spaceId ?? "",
-                        channelId: "",
-                    },
-                });
-
-            closeAllModals();
+        onSuccess: () => {
+            closeModal();
         },
     });
 
@@ -88,7 +77,7 @@ export const CategoryDeleteModal = observer(({ channel }: Props) => {
                         variant="solid"
                         fullWidth
                         color="success"
-                        onClick={closeAllModals}
+                        onClick={() => closeModal()}
                         disabled={isDeleting}
                     >
                         Cancel

@@ -147,14 +147,14 @@ const UserEmojisTab = observer(() => {
                     borderRadius={12}
                     variant="outlined"
                     direction="column"
-                    height={200}
-                    width={400}
+                    maxHeight={300}
+                    overflowY="auto"
+                    width={600}
                 >
-                    <Stack direction="column" spacing={0}>
-                        <Typography level="body-lg" ml={2.5} mt={2.5}>
-                            Emojis
-                        </Typography>
-                    </Stack>
+                    <Typography level="body-lg" ml={2.5} my={2.5}>
+                        Emojis
+                    </Typography>
+
                     <Divider
                         lineColor="muted"
                         css={{
@@ -185,14 +185,14 @@ const UserEmojisTab = observer(() => {
                     borderRadius={12}
                     variant="outlined"
                     direction="column"
-                    height={200}
-                    width={400}
+                    maxHeight={300}
+                    overflowY="auto"
+                    width={600}
                 >
-                    <Stack direction="column" spacing={0}>
-                        <Typography level="body-lg" ml={2.5} mt={2.5}>
-                            Animated Emojis
-                        </Typography>
-                    </Stack>
+                    <Typography level="body-lg" ml={2.5} my={2.5}>
+                        Animated Emojis
+                    </Typography>
+
                     <Divider
                         lineColor="muted"
                         css={{

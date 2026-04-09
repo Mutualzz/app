@@ -37,7 +37,7 @@ export const SpaceIcon = observer(({ space, selected, ...props }: Props) => {
                 onMouseOut={() => setHovered(false)}
                 {...props}
             >
-                <Typography level="body-sm">{asAcronym(space.name)}</Typography>
+                {asAcronym(space.name)}
             </Avatar>
         );
 

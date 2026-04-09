@@ -75,8 +75,10 @@ const SpaceEmojisTab = observer(({ space }: Props) => {
 
     const { openModal } = useModal();
 
-    const staticEmojis = app.expressions.emojis.filter((e) => !e.animated);
-    const animatedEmojis = app.expressions.emojis.filter((e) => e.animated);
+    const emojis = Array.from(space.expressions.values());
+
+    const staticEmojis = emojis.filter((e) => !e.animated);
+    const animatedEmojis = emojis.filter((e) => e.animated);
 
     const handleUpload = async (e: ChangeEvent<HTMLInputElement>) => {
         const file = e.target?.files?.[0];
@@ -142,23 +144,14 @@ const SpaceEmojisTab = observer(({ space }: Props) => {
                     borderRadius={12}
                     variant="outlined"
                     direction="column"
-                    height={200}
-                    width={400}
+                    maxHeight={300}
+                    overflowY="auto"
+                    width={600}
                 >
-                    <Stack direction="column" spacing={0}>
-                        <Typography level="body-lg" ml={2.5} mt={2.5}>
-                            Emojis
-                        </Typography>
-                        <Typography
-                            textColor="muted"
-                            level="body-sm"
-                            ml={2.5}
-                            mb={1.25}
-                        >
-                            {100 - app.expressions.emojis.length} slots
-                            available
-                        </Typography>
-                    </Stack>
+                    <Typography level="body-lg" ml={2.5} my={2.5}>
+                        Emojis
+                    </Typography>
+
                     <Divider
                         lineColor="muted"
                         css={{
@@ -189,14 +182,14 @@ const SpaceEmojisTab = observer(({ space }: Props) => {
                     borderRadius={12}
                     variant="outlined"
                     direction="column"
-                    height={200}
-                    width={400}
+                    maxHeight={300}
+                    overflowY="auto"
+                    width={600}
                 >
-                    <Stack direction="column" spacing={0}>
-                        <Typography level="body-lg" ml={2.5} mt={2.5}>
-                            Animated Emojis
-                        </Typography>
-                    </Stack>
+                    <Typography level="body-lg" ml={2.5} my={2.5}>
+                        Animated Emojis
+                    </Typography>
+
                     <Divider
                         lineColor="muted"
                         css={{
@@ -222,7 +215,7 @@ const SpaceEmojisTab = observer(({ space }: Props) => {
                 </Paper>
             )}
 
-            {app.expressions.emojis.length === 0 && (
+            {emojis.length === 0 && (
                 <Stack justifyContent="center" alignItems="center" py="4rem">
                     <Typography textAlign="center" color="muted">
                         No emojis created yet

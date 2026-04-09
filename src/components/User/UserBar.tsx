@@ -339,7 +339,7 @@ export const UserBar = observer(() => {
                             </IconButton>
                         </Tooltip>
                         <Tooltip
-                            placement={inSpace ? "top" : "right"}
+                            placement="right"
                             title={
                                 <TooltipWrapper>
                                     {!hasCameras
@@ -396,10 +396,8 @@ export const UserBar = observer(() => {
                 )}
 
                 <Stack
-                    spacing={2.5}
                     alignItems="center"
                     direction={inSpace ? "row" : "column"}
-                    ml={1.25}
                 >
                     <Tooltip
                         placement={inSpace ? "top" : "right"}
@@ -407,6 +405,7 @@ export const UserBar = observer(() => {
                     >
                         <IconButton
                             variant="plain"
+                            size="sm"
                             onClick={() =>
                                 app.voice.setMute(!app.voice.preferredSelfMute)
                             }
@@ -425,6 +424,7 @@ export const UserBar = observer(() => {
                         title={<TooltipWrapper>Deafen</TooltipWrapper>}
                     >
                         <IconButton
+                            size="sm"
                             variant="plain"
                             onClick={() =>
                                 app.voice.setDeaf(!app.voice.preferredSelfDeaf)
