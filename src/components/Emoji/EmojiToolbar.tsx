@@ -11,6 +11,7 @@ import { canUseCustomEmoji } from "@utils/index.ts";
 import { TWEMOJI_URL } from "@utils/urls.ts";
 import { Paper } from "@components/Paper.tsx";
 import { UserAvatar } from "@components/User/UserAvatar.tsx";
+import { SpaceIcon } from "@components/Space/SpaceIcon.tsx";
 
 interface StandardSuggestion {
     kind: "standard";
@@ -315,12 +316,18 @@ export const EmojiToolbar = () => {
                         {suggestion.kind === "custom" && (
                             <>
                                 {suggestion.expression.space && (
-                                    <Typography
-                                        level="body-sm"
-                                        textColor="secondary"
-                                    >
-                                        {suggestion.expression.space.name}
-                                    </Typography>
+                                    <Stack spacing={1.25} alignItems="center">
+                                        <SpaceIcon
+                                            space={suggestion.expression.space}
+                                            size={16}
+                                        />
+                                        <Typography
+                                            level="body-sm"
+                                            textColor="secondary"
+                                        >
+                                            {suggestion.expression.space.name}
+                                        </Typography>
+                                    </Stack>
                                 )}
                                 {suggestion.expression.author &&
                                     !suggestion.expression.space && (
