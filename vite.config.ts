@@ -95,7 +95,11 @@ export default defineConfig({
     ],
 
     ssr: {
-        noExternal: ["react-easy-crop", "tslib", "buffer"],
+        noExternal: ["react-easy-crop", "tslib", "buffer", "html-react-parser"],
+    },
+
+    optimizeDeps: {
+        include: ["html-react-parser"],
     },
 
     build: {
