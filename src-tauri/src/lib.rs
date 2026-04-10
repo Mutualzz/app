@@ -59,25 +59,6 @@ pub fn run() {
         .plugin(tauri_plugin_clipboard_manager::init())
         .plugin(tauri_plugin_os::init())
         .plugin(tauri_plugin_deep_link::init())
-        .plugin({
-            #[cfg(debug_assertions)]
-            {
-                tauri_plugin_prevent_default::debug()
-            }
-            #[cfg(not(debug_assertions))]
-            {
-                tauri_plugin_prevent_default::Builder::new()
-                    .platform(
-                        PlatformOptions::new()
-                            .general_autofill(false)
-                            .password_autosave(false)
-                            .browser_accelerator_keys(false)
-                            .default_context_menus(false)
-                            .default_script_dialogs(false),
-                    )
-                    .build()
-            }
-        })
         .plugin(
             tauri_plugin_log::Builder::default()
                 .clear_targets()
@@ -113,6 +94,14 @@ pub fn run() {
                 use tauri_plugin_deep_link::DeepLinkExt;
                 app.deep_link().register_all()?;
                 app.deep_link().register("mutualzz")?;
+            }
+
+            #[cfg(windows)]
+            {
+                app_handle.plugin(
+                    tauri_plugin_prevent_default::Builder::new()
+                        .build(),
+                )?;
             }
 
             #[cfg(desktop)]
