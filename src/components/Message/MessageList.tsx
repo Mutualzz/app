@@ -31,7 +31,27 @@ export const MessageList = observer(({ channel: channelProp }: Props) => {
 
     const channel = channelProp ?? app.channels.active;
 
-    const messageGroups = channel?.messages.groups;
+    // NOTE: Change this when adding DM channels
+    const canReadHistory = channel?.space
+        ? channel.space.members.me?.hasPermission("ReadMessageHistory", channel)
+        : false;
+
+    const rawGroups = channel?.messages.groups;
+
+    const messageGroups = (() => {
+        if (!rawGroups) return undefined;
+        if (canReadHistory) return rawGroups;
+
+        const lastId = channel?.lastMessageId;
+        if (!lastId) return rawGroups;
+
+        return rawGroups
+            .map((g) => ({
+                ...g,
+                messages: g.messages.filter((m) => m.id !== lastId),
+            }))
+            .filter((g) => (g.messages?.length ?? 0) > 0);
+    })();
 
     const { fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery(
         {
@@ -74,7 +94,7 @@ export const MessageList = observer(({ channel: channelProp }: Props) => {
 
                 return lastPage.earliestId;
             },
-            enabled: !!channel?.id,
+            enabled: !!channel?.id && canReadHistory,
         },
     );
 
@@ -124,10 +144,10 @@ export const MessageList = observer(({ channel: channelProp }: Props) => {
     const loader = isFetchingNextPage ? <></> : null;
 
     const totalMessages =
-        channel?.messages.groups.reduce(
-            (acc, g) => acc + (g.messages?.length ?? 0),
-            0,
-        ) ?? 0;
+        messageGroups?.reduce((acc, g) => acc + (g.messages?.length ?? 0), 0) ??
+        0;
+
+    console.log(messageGroups);
 
     return (
         <MessageAreaWidthContext.Provider
@@ -180,10 +200,17 @@ export const MessageList = observer(({ channel: channelProp }: Props) => {
                             >
                                 Welcome to #{channel?.name}!
                             </Typography>
-                            <Typography textColor="secondary">
-                                This is the start of the #{channel?.name}{" "}
-                                channel.
-                            </Typography>
+                            {canReadHistory ? (
+                                <Typography textColor="secondary">
+                                    This is the start of the #{channel?.name}{" "}
+                                    channel.
+                                </Typography>
+                            ) : (
+                                <Typography textColor="secondary">
+                                    You don't have permissions to read message
+                                    history
+                                </Typography>
+                            )}
                         </Stack>
                     }
                 >

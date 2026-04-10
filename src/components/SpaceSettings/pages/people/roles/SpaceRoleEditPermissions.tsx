@@ -31,31 +31,29 @@ const PermissionItem = ({
     description?: ReactNode;
     hasPermission: boolean;
     togglePermission: (flag: PermissionFlag) => void;
-}) => {
-    return (
-        <Stack
-            direction="row"
-            alignItems="center"
-            justifyContent="space-between"
-            mr={5}
-            flex={1}
-        >
-            <Stack direction="column" spacing={0.5}>
-                <Typography>{label}</Typography>
-                {description && (
-                    <Typography level="body-sm" textColor="muted">
-                        {description}
-                    </Typography>
-                )}
-            </Stack>
-            <Switch
-                checked={hasPermission}
-                color="primary"
-                onChange={() => togglePermission(flag)}
-            />
+}) => (
+    <Stack
+        direction="row"
+        alignItems="center"
+        justifyContent="space-between"
+        mr={5}
+        flex={1}
+    >
+        <Stack direction="column" spacing={0.5}>
+            <Typography>{label}</Typography>
+            {description && (
+                <Typography level="body-sm" textColor="muted">
+                    {description}
+                </Typography>
+            )}
         </Stack>
-    );
-};
+        <Switch
+            checked={hasPermission}
+            color="primary"
+            onChange={() => togglePermission(flag)}
+        />
+    </Stack>
+);
 
 export const SpaceRoleEditPermissions = ({ changes, setChanges }: Props) => {
     const permissions = useMemo<BitField<PermissionFlags>>(() => {
@@ -128,6 +126,22 @@ export const SpaceRoleEditPermissions = ({ changes, setChanges }: Props) => {
                 />
                 <Divider css={{ opacity: 0.5 }} />
                 <PermissionItem
+                    flag="CreateExpressions"
+                    label="Create Expressions"
+                    description="Allow members to create emoji and stickers in this space."
+                    hasPermission={permissions.has("CreateExpressions")}
+                    togglePermission={togglePermission}
+                />
+                <Divider css={{ opacity: 0.5 }} />
+                <PermissionItem
+                    flag="ManageExpressions"
+                    label="Manage Expressions"
+                    hasPermission={permissions.has("ManageExpressions")}
+                    description="Allow members to edit or delete emoji and stickers in this space."
+                    togglePermission={togglePermission}
+                />
+                <Divider css={{ opacity: 0.5 }} />
+                <PermissionItem
                     flag="ManageSpace"
                     label="Manage Space"
                     description="Allow members to change this space"
@@ -176,6 +190,41 @@ export const SpaceRoleEditPermissions = ({ changes, setChanges }: Props) => {
                     label="Send Messages"
                     description="Allow members to send messages in text channels"
                     hasPermission={permissions.has("SendMessages")}
+                    togglePermission={togglePermission}
+                />
+                <PermissionItem
+                    flag="EmbedLinks"
+                    label="Embed Links"
+                    hasPermission={permissions.has("EmbedLinks")}
+                    description="Allow members to embed links in messages"
+                    togglePermission={togglePermission}
+                />
+                <PermissionItem
+                    flag="AttachFiles"
+                    label="Attach Files"
+                    hasPermission={permissions.has("AttachFiles")}
+                    description="Allow members to attach files in messages"
+                    togglePermission={togglePermission}
+                />
+                <PermissionItem
+                    flag="UseExternalEmojis"
+                    label="Use External Emojis"
+                    hasPermission={permissions.has("UseExternalEmojis")}
+                    description="Allow members to use emojis from other spaces or their own in their messages"
+                    togglePermission={togglePermission}
+                />
+                <PermissionItem
+                    flag="ManageMessages"
+                    label="Manage Messages"
+                    hasPermission={permissions.has("ManageMessages")}
+                    description="Allow members to delete other members messages"
+                    togglePermission={togglePermission}
+                />
+                <PermissionItem
+                    flag="ReadMessageHistory"
+                    label="Read Message History"
+                    hasPermission={permissions.has("ReadMessageHistory")}
+                    description="Allow members to read message history"
                     togglePermission={togglePermission}
                 />
             </Stack>
