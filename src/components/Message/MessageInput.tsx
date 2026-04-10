@@ -1,17 +1,10 @@
-import { MarkdownInput } from "@components/Markdown/MarkdownInput/MarkdownInput";
+import { MarkdownInput, type MarkdownInputHandle, } from "@components/Markdown/MarkdownInput/MarkdownInput";
 import { Paper } from "@components/Paper";
 import { useAppStore } from "@hooks/useStores";
 import { MessageType } from "@mutualzz/types";
 import Snowflake from "@utils/Snowflake";
 import { observer } from "mobx-react-lite";
-import {
-    type KeyboardEvent,
-    useCallback,
-    useEffect,
-    useMemo,
-    useRef,
-    useState,
-} from "react";
+import { type KeyboardEvent, useCallback, useEffect, useRef, useState, } from "react";
 import type { Editor } from "slate";
 import { Message } from "@stores/objects/Message";
 import type { Channel } from "@stores/objects/Channel.ts";
@@ -35,7 +28,7 @@ export const MessageInput = observer(
         const channel = channelProp ?? app.channels.active;
         const [content, setContent] = useState(message?.content ?? "");
 
-        const inputRef = useRef<HTMLDivElement>(null);
+        const inputRef = useRef<MarkdownInputHandle>(null);
 
         const space =
             app.spaces.get(channel?.spaceId ?? "") ?? app.spaces.active ?? null;
@@ -44,60 +37,55 @@ export const MessageInput = observer(
 
         const denySendingMessages = !me?.canSendMessages(channel);
 
-        const canSendMessage = useMemo(
-            () =>
-                !(
-                    !content ||
-                    !content.trim() ||
-                    !content.replace(/\r?\n|\r/g, "")
-                ),
-            [content],
-        );
-
         const sendMessage = useCallback(
             async (editor: Editor) => {
                 if (!app.account) return;
-                if (!canSendMessage) return;
                 if (!channel) return;
 
-                const next = content.trim();
-                if (!next) return;
+                const trimmed = content.trim();
+                const original = (message?.content ?? "").trim();
+                const isEditing = !!message;
+
+                if (!isEditing && !trimmed) return;
+
+                if (isEditing && trimmed === original) {
+                    onStopEditing?.();
+                    return;
+                }
 
                 try {
                     if (message) {
                         onStopEditing?.();
-                        await message.edit(next);
-                    } else {
-                        const nonce = Snowflake.generate();
-                        const author = app.account.raw;
-                        const msg = app.queue.add({
-                            id: nonce,
-                            content: next,
-                            author,
-                            authorId: author.id,
-                            channelId: channel.id,
-                            spaceId: channel.spaceId ?? null,
-                            createdAt: new Date().toISOString(),
-                            type: MessageType.Default,
-                        });
-
-                        editor.select({
-                            anchor: editor.start([]),
-                            focus: editor.end([]),
-                        });
-                        editor.removeNodes();
-                        editor.delete();
-                        editor.insertNode({
-                            type: "line",
-                            children: [{ text: "" }],
-                        });
-                        setContent("");
-
-                        await channel.sendMessage(
-                            { content: next, nonce },
-                            msg,
-                        );
+                        await message.edit(trimmed);
+                        return;
                     }
+
+                    const nonce = Snowflake.generate();
+                    const author = app.account.raw;
+                    const msg = app.queue.add({
+                        id: nonce,
+                        content: trimmed,
+                        author,
+                        authorId: author.id,
+                        channelId: channel.id,
+                        spaceId: channel.spaceId ?? null,
+                        createdAt: new Date().toISOString(),
+                        type: MessageType.Default,
+                    });
+
+                    editor.select({
+                        anchor: editor.start([]),
+                        focus: editor.end([]),
+                    });
+                    editor.removeNodes();
+                    editor.delete();
+                    editor.insertNode({
+                        type: "line",
+                        children: [{ text: "" }],
+                    });
+                    setContent("");
+
+                    await channel.sendMessage({ content: trimmed, nonce }, msg);
                 } catch (e) {
                     const error =
                         e instanceof Error
@@ -113,14 +101,7 @@ export const MessageInput = observer(
                     }
                 }
             },
-            [
-                app.account,
-                app.queue,
-                canSendMessage,
-                content,
-                message,
-                onStopEditing,
-            ],
+            [app.account, app.queue, content, message, onStopEditing],
         );
 
         useEffect(() => {
@@ -128,9 +109,6 @@ export const MessageInput = observer(
         }, [message?.id]);
 
         useEffect(() => {
-            if (!message?.editing) return;
-            console.log("edit");
-
             requestAnimationFrame(() => {
                 inputRef.current?.focus();
             });

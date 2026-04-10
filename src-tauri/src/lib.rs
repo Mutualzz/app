@@ -5,7 +5,7 @@ mod presence;
 use crate::gateway::{decode_frame, encode_frame, Encoding};
 use crate::presence::list_processes;
 use serde_json::Value;
-use tauri::{Emitter, Manager, RunEvent};
+use tauri::{Manager, RunEvent};
 #[cfg(desktop)]
 use tauri_plugin_autostart::MacosLauncher;
 use tauri_plugin_clipboard_manager;

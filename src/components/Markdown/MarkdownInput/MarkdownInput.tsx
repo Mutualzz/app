@@ -10,6 +10,7 @@ import {
     type KeyboardEvent,
     useCallback,
     useEffect,
+    useImperativeHandle,
     useMemo,
     useState,
 } from "react";
@@ -24,6 +25,7 @@ import {
 import { withHistory } from "slate-history";
 import {
     Editable,
+    ReactEditor,
     type RenderElementProps,
     type RenderLeafProps,
     Slate,
@@ -44,7 +46,11 @@ import { withSyntax } from "./plugins/withSyntax";
 import { EmojiPicker } from "@components/Emoji/EmojiPicker.tsx";
 import { EmojiToolbar } from "@components/Emoji/EmojiToolbar.tsx";
 
-const MarkdownInput = forwardRef<HTMLDivElement, MarkdownInputProps>(
+export interface MarkdownInputHandle {
+    focus: (opts?: { at?: "start" | "end" | "selectAll" }) => void;
+}
+
+const MarkdownInput = forwardRef<MarkdownInputHandle, MarkdownInputProps>(
     (
         {
             color = "neutral",
@@ -79,6 +85,26 @@ const MarkdownInput = forwardRef<HTMLDivElement, MarkdownInputProps>(
         );
 
         const formats = getActiveFormats(editor, editor.selection);
+
+        useImperativeHandle(ref, () => ({
+            focus: (opts) => {
+                const at = opts?.at ?? "end";
+                ReactEditor.focus(editor);
+
+                if (at === "selectAll") {
+                    editor.select({
+                        anchor: editor.start([]),
+                        focus: editor.end([]),
+                    });
+                    return;
+                }
+
+                const point =
+                    at === "start" ? editor.start([]) : editor.end([]);
+
+                editor.select(point);
+            },
+        }));
 
         useEffect(() => {
             editor.enableEmoticons = emoticons;
@@ -243,7 +269,6 @@ const MarkdownInput = forwardRef<HTMLDivElement, MarkdownInputProps>(
                     <HoverToolbar />
                     <EmojiToolbar />
                     <Editable
-                        ref={ref}
                         autoFocus={autoFocus}
                         decorate={decorate}
                         renderElement={renderElement}
@@ -260,7 +285,7 @@ const MarkdownInput = forwardRef<HTMLDivElement, MarkdownInputProps>(
                                 lineHeight={1}
                                 position="absolute"
                                 top={2}
-                                left={2}
+                                left={1}
                                 textColor="muted"
                                 overflow="hidden"
                                 textOverflow="ellipsis"
