@@ -1,23 +1,17 @@
 import { MarkdownRenderer } from "@components/Markdown/MarkdownRenderer/MarkdownRenderer";
 import { UserAvatar } from "@components/User/UserAvatar";
 import { useAppStore } from "@hooks/useStores";
-import { Stack } from "@mutualzz/ui-web";
-import {
-    Message as MessageType,
-    type MessageLike,
-} from "@stores/objects/Message";
+import { Stack, Tooltip, Typography } from "@mutualzz/ui-web";
+import { Message as MessageType, type MessageLike, } from "@stores/objects/Message";
 import { QueuedMessageStatus } from "@stores/objects/QueuedMessage";
 import { observer } from "mobx-react-lite";
 import { MessageAuthor } from "./MessageAuthor";
-import {
-    MessageBase,
-    MessageContent,
-    MessageContentText,
-    MessageDetails,
-    MessageInfo,
-} from "./MessageBase";
+import { MessageBase, MessageContent, MessageContentText, MessageDetails, MessageInfo, } from "./MessageBase";
 import { MessageEmbed } from "./MessageEmbed";
 import { MessageToolbar } from "./MessageToolbar";
+import { MessageInput } from "./MessageInput";
+import { TooltipWrapper } from "@components/TooltipWrapper";
+import dayjs from "dayjs";
 
 interface Props {
     message: MessageLike;
@@ -41,8 +35,6 @@ export const Message = observer(({ message, header }: Props) => {
             app.setHideSwitcher(false);
         }
     };
-
-    if (!space) return <></>;
 
     const children = (
         <MessageBase
@@ -75,12 +67,44 @@ export const Message = observer(({ message, header }: Props) => {
                         message.status === QueuedMessageStatus.Failed
                     }
                 >
-                    {message.content && (
-                        <MarkdownRenderer
-                            variant="plain"
-                            textColor="primary"
-                            value={message.content}
+                    {isSent && message.editing ? (
+                        <MessageInput
+                            message={message}
+                            onStopEditing={() => message.setEditing(false)}
                         />
+                    ) : (
+                        message.content && (
+                            <Stack alignItems="center" spacing={1.25}>
+                                <MarkdownRenderer
+                                    variant="plain"
+                                    textColor="primary"
+                                    value={message.content}
+                                />
+                                {isSent && message.edited && (
+                                    <Tooltip
+                                        placement="right"
+                                        content={
+                                            <TooltipWrapper>
+                                                {dayjs(
+                                                    message.updatedAt,
+                                                ).format(
+                                                    "dddd, MMMM D, YYYY h:mm A",
+                                                )}
+                                            </TooltipWrapper>
+                                        }
+                                        offset={8}
+                                    >
+                                        <Typography
+                                            textColor="muted"
+                                            ml={0.25}
+                                            level="body-xs"
+                                        >
+                                            (edited)
+                                        </Typography>
+                                    </Tooltip>
+                                )}
+                            </Stack>
+                        )
                     )}
                 </MessageContentText>
 

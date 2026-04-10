@@ -113,10 +113,10 @@ export class MessageStore {
         const oldMessage = this.get(message.id);
         if (!oldMessage) return;
 
-        this.messages[this.messages.indexOf(oldMessage)] = new Message(
-            this.app,
-            message,
-        );
+        const nextMessage = new Message(this.app, message);
+        nextMessage.setEditing(oldMessage.editing);
+
+        this.messages[this.messages.indexOf(oldMessage)] = nextMessage;
     }
 
     async resolve(channelId: string, id: string, force = false) {

@@ -24,7 +24,7 @@ export interface MarkdownInputProps {
     value?: string;
     onChange?: (value: string, editor: Editor) => void;
     onKeyDown?: (event: KeyboardEvent, editor: Editor) => void;
-    placeholder?: string;
+    placeholder?: string | null;
 
     css?: CSSObject;
 }

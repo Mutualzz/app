@@ -6,6 +6,7 @@ import { useAppStore } from "@hooks/useStores.ts";
 import { MemberList } from "@components/MemberList/MemberList.tsx";
 import { TextChannelHeader } from "@components/Channel/TextChannelHeader.tsx";
 import { observer } from "mobx-react-lite";
+import { useCallback } from "react";
 
 interface Props {
     channel: Channel;
@@ -13,6 +14,21 @@ interface Props {
 
 export const TextChannelView = observer(({ channel }: Props) => {
     const app = useAppStore();
+
+    const handleRequestEditLatest = useCallback(() => {
+        if (!app.account) return;
+
+        const latestMine = [...channel.messages.all]
+            .filter(
+                (m) => m.authorId === app.account!.id && !!m.content?.trim(),
+            )
+            .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())[0];
+
+        if (!latestMine) return;
+
+        channel.messages.all.forEach((m) => m.setEditing(false));
+        latestMine.setEditing(true);
+    }, [app.account, channel.messages.all]);
 
     return (
         <>
@@ -25,7 +41,9 @@ export const TextChannelView = observer(({ channel }: Props) => {
                     overflow="hidden"
                 >
                     <MessageList channel={channel} />
-                    <MessageInput channel={channel} />
+                    <MessageInput
+                        onRequestEditLatest={handleRequestEditLatest}
+                    />
                 </Stack>
                 {app.memberListVisible && <MemberList />}
             </Stack>

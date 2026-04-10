@@ -7,6 +7,8 @@ import { isValidElement, type ReactNode } from "react";
 import MurmurHash from "imurmurhash";
 import type { PresenceStatus } from "@mutualzz/types";
 import type { Expression } from "@stores/objects/Expression.ts";
+import type { SpaceMember } from "@stores/objects/SpaceMember.ts";
+import type { Channel } from "@stores/objects/Channel.ts";
 
 export function mergeAppendAnything(
     ...objects: Record<string, string | string[]>[]
@@ -25,15 +27,19 @@ export function mergeAppendAnything(
     });
 }
 
-export const canUseCustomEmoji = (emoji: Expression, me?: string | null) => {
-    if (!me) return false;
+export const canUseCustomEmoji = (
+    emoji: Expression,
+    currentMember?: SpaceMember | null,
+    channel?: Channel | null,
+) => {
+    if (!currentMember) return false;
 
-    if (emoji.space) {
-        if (emoji.space.ownerId === me) return true;
-        if (emoji.space.members.has(me)) return true;
-    }
+    if (emoji.spaceId === currentMember.spaceId) return true;
 
-    return emoji.authorId === me;
+    return currentMember.hasPermission(
+        "UseExternalEmojis",
+        channel ?? undefined,
+    );
 };
 
 export const generateHash = async (buffer: ArrayBuffer, animated: boolean) => {

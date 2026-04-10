@@ -4,7 +4,7 @@ import type { MessageLikeData } from "./Message";
 import { User } from "./User";
 import type { Space } from "@stores/objects/Space.ts";
 import type { Channel } from "@stores/objects/Channel.ts";
-import { makeObservable } from "mobx";
+import { computed, makeObservable, observable } from "mobx";
 
 export class MessageBase {
     id: Snowflake;
@@ -29,7 +29,24 @@ export class MessageBase {
         this.authorId = data.authorId;
         if (data.author) this._author = this.app.users.add(data.author);
 
-        makeObservable(this);
+        makeObservable<this, "_author" | "_space" | "_channel">(this, {
+            id: observable,
+            content: observable,
+            createdAt: observable,
+            type: observable,
+            authorId: observable,
+            spaceId: observable,
+            channelId: observable,
+
+            _author: observable.ref,
+            _space: observable.ref,
+            _channel: observable.ref,
+
+            author: computed,
+            space: computed,
+            channel: computed,
+            member: computed,
+        });
     }
 
     _author?: User | null;

@@ -1,19 +1,20 @@
+import { IconButton } from "@components/IconButton";
 import { Paper } from "@components/Paper";
 import { TooltipWrapper } from "@components/TooltipWrapper";
 import { useAppStore } from "@hooks/useStores";
-import { ButtonGroup, IconButton, Tooltip } from "@mutualzz/ui-web";
+import { Stack, Tooltip } from "@mutualzz/ui-web";
 import type { Message } from "@stores/objects/Message";
 import { useMutation } from "@tanstack/react-query";
 import { observer } from "mobx-react-lite";
 import type { PropsWithChildren } from "react";
-import { FaTrash } from "react-icons/fa";
+import { FaEdit, FaTrash } from "react-icons/fa";
 
 interface Props extends PropsWithChildren {
     message: Message;
     header?: boolean;
 }
 
-const ToolbarContent = ({ message }: Props) => {
+const ToolbarContent = observer(({ message }: Props) => {
     const app = useAppStore();
 
     const { mutate: deleteMessage } = useMutation({
@@ -44,7 +45,21 @@ const ToolbarContent = ({ message }: Props) => {
             elevation={app.settings?.preferEmbossed ? 5 : 2}
             transparency={25}
         >
-            <ButtonGroup color="neutral" size="sm" variant="plain">
+            <Stack spacing={1.25}>
+                {message.author?.id === app.account?.id && (
+                    <Tooltip
+                        offset={16}
+                        content={<TooltipWrapper>Edit</TooltipWrapper>}
+                    >
+                        <IconButton
+                            onClick={() => message.setEditing(true)}
+                            variant="plain"
+                            size="sm"
+                        >
+                            <FaEdit />
+                        </IconButton>
+                    </Tooltip>
+                )}
                 {(message.author?.id === app.account?.id ||
                     me?.hasPermission("ManageMessages")) && (
                     <Tooltip
@@ -53,24 +68,28 @@ const ToolbarContent = ({ message }: Props) => {
                     >
                         <IconButton
                             color="danger"
+                            variant="plain"
+                            size="sm"
                             onClick={() => deleteMessage()}
                         >
                             <FaTrash />
                         </IconButton>
                     </Tooltip>
                 )}
-            </ButtonGroup>
+            </Stack>
         </Paper>
     );
-};
+});
 
 export const MessageToolbar = observer(
     ({ message, header, children }: Props) => {
+        if (message.editing) return children;
+
         return (
             <Tooltip
-                placement="right-start"
+                placement="right-end"
                 content={<ToolbarContent message={message} />}
-                offset={{ crossAxis: header ? -10 : -20, mainAxis: -65 }}
+                offset={{ crossAxis: header ? -10 : -20, mainAxis: -90 }}
                 disablePortal
             >
                 {children}

@@ -51,7 +51,7 @@ export class REST extends EventEmitter {
     ) {
         const normalizedPath = path.replace(/\/{2,}/g, "/").replace(/^\/+/, "");
         const url = new URL(
-            `${import.meta.env.VITE_API_URL}/v1/${normalizedPath}`,
+            `${import.meta.env.VITE_API_URL}/${normalizedPath}`,
         );
         Object.entries(queryParams).forEach(([key, value]) => {
             url.searchParams.append(key, value);

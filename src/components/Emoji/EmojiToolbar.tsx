@@ -64,7 +64,9 @@ export const EmojiToolbar = () => {
         }
 
         const lowerQuery = query.toLowerCase();
-        const me = app.account?.id;
+
+        const me = app.spaces.active?.members.me;
+        const channel = app.channels.active;
 
         const customResults: CustomSuggestion[] = [];
         const seenIds = new Set<string>();
@@ -74,7 +76,7 @@ export const EmojiToolbar = () => {
             if (customResults.length >= MAX_CUSTOM) break;
             if (exp.type !== ExpressionType.Emoji) continue;
             if (seenIds.has(exp.id)) continue;
-            if (!canUseCustomEmoji(exp, me)) continue;
+            if (!canUseCustomEmoji(exp, me, channel)) continue;
             if (!exp.name.toLowerCase().includes(lowerQuery)) continue;
 
             seenIds.add(exp.id);

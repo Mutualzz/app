@@ -207,6 +207,7 @@ const MarkdownInput = forwardRef<HTMLDivElement, MarkdownInputProps>(
                         });
                     }
                 }
+
                 onKeyDownProp?.(e, editor);
             },
             [editor, formats, onKeyDownProp],
@@ -248,7 +249,7 @@ const MarkdownInput = forwardRef<HTMLDivElement, MarkdownInputProps>(
                         renderElement={renderElement}
                         renderLeaf={renderLeaf}
                         onKeyDown={onKeyDown}
-                        placeholder={placeholder}
+                        placeholder={placeholder ?? ""}
                         renderPlaceholder={({
                             children,
                             attributes: { style, ref, ...attributes },
@@ -258,7 +259,7 @@ const MarkdownInput = forwardRef<HTMLDivElement, MarkdownInputProps>(
                                 {...attributes}
                                 lineHeight={1}
                                 position="absolute"
-                                top={2.75}
+                                top={2}
                                 left={2}
                                 textColor="muted"
                                 overflow="hidden"
@@ -279,7 +280,7 @@ const MarkdownInput = forwardRef<HTMLDivElement, MarkdownInputProps>(
                             position: "relative",
                             width: "100%",
                             height: "100%",
-                            padding: "0.5em",
+                            padding: "0.25em",
                             minWidth: 0,
                             boxSizing: "border-box",
                             overflowX: "auto",

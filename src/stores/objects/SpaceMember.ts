@@ -275,7 +275,8 @@ export class SpaceMember {
         return this.resolveChannelPermissions(channel).has("CreateInvites");
     }
 
-    canSendMessages(channel: Channel) {
+    canSendMessages(channel?: Channel | null) {
+        if (!channel) return false;
         const permissions = this.resolveChannelPermissions(channel);
         return (
             permissions.has("ViewChannel") && permissions.has("SendMessages")

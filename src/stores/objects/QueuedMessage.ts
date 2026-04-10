@@ -1,7 +1,7 @@
 import type { APIUser, MessageType, Snowflake } from "@mutualzz/types";
 import type { AppStore } from "@stores/App.store";
 import { MessageBase } from "./MessageBase";
-import { makeObservable } from "mobx";
+import { action, makeObservable, observable } from "mobx";
 
 export enum QueuedMessageStatus {
     Sending = "sending",
@@ -33,7 +33,16 @@ export class QueuedMessage extends MessageBase {
         this.spaceId = data.spaceId ?? null;
         this.status = QueuedMessageStatus.Sending;
 
-        makeObservable(this);
+        makeObservable(this, {
+            progress: observable,
+            status: observable,
+            error: observable,
+            abortCallback: observable.ref,
+            updateProgress: action.bound,
+            setAbortCallback: action.bound,
+            abort: action.bound,
+            fail: action.bound,
+        });
     }
 
     updateProgress(e: ProgressEvent) {

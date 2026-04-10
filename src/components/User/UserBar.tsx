@@ -4,25 +4,14 @@ import { UserAvatar } from "@components/User/UserAvatar";
 import { UserSettingsModal } from "@components/UserSettings/UserSettingsModal";
 import { useModal } from "@contexts/Modal.context";
 import { useAppStore } from "@hooks/useStores";
-import {
-    type PaperProps,
-    Stack,
-    Tooltip,
-    Typography,
-    useTheme,
-} from "@mutualzz/ui-web";
+import { type PaperProps, Stack, Tooltip, Typography, useTheme, } from "@mutualzz/ui-web";
 import { observer } from "mobx-react-lite";
 import { useMemo, useState } from "react";
 import { FaCogs, FaMicrophone, FaMicrophoneSlash } from "react-icons/fa";
 import { IconButton } from "@components/IconButton";
 import { generateMenuIDs, useMenu } from "@contexts/ContextMenu.context.tsx";
 import { formatColor } from "@mutualzz/ui-core";
-import {
-    MdHeadset,
-    MdHeadsetOff,
-    MdVideocam,
-    MdVideocamOff,
-} from "react-icons/md";
+import { MdHeadset, MdHeadsetOff, MdVideocam, MdVideocamOff, } from "react-icons/md";
 import { ImPhoneHangUp } from "react-icons/im";
 import { AnimatedIconButton } from "@components/Animated/AnimatedIconButton.tsx";
 import { SmallActivityStatus } from "@components/SmallActivityStatus.tsx";
@@ -52,7 +41,7 @@ export const UserBar = observer(() => {
     const conditionalProps = useMemo<Omit<PaperProps, "color">>(() => {
         if (inSpace)
             return {
-                minWidth: "12rem",
+                meinWidth: "12rem",
                 direction: "row",
             };
 
@@ -235,6 +224,7 @@ export const UserBar = observer(() => {
                 borderTop={showVoicePill ? "0 !important" : undefined}
                 width="100%"
                 zIndex={theme.zIndex.appBar + 1}
+                spacing={1.25}
                 {...(showVoicePill && inSpace
                     ? {
                           borderBottomRightRadius: 15,
@@ -398,6 +388,7 @@ export const UserBar = observer(() => {
                 <Stack
                     alignItems="center"
                     direction={inSpace ? "row" : "column"}
+                    spacing={1.25}
                 >
                     <Tooltip
                         placement={inSpace ? "top" : "right"}

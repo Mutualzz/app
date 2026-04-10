@@ -343,7 +343,7 @@ export const VoiceChannelView = observer(
                                 flex={1}
                             >
                                 <MessageList channel={channel} />
-                                <MessageInput channel={channel} />
+                                <MessageInput />
                             </Stack>
                         </Paper>
                     </>

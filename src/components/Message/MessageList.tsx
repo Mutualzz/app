@@ -10,6 +10,7 @@ import { FaHashtag } from "react-icons/fa";
 import InfiniteScroll from "react-infinite-scroll-component";
 import useResizeObserver from "use-resize-observer";
 import { MessageGroup } from "./MessageGroup";
+import { useAppStore } from "@hooks/useStores.ts";
 
 interface Props {
     channel?: Channel | null;
@@ -20,12 +21,15 @@ export const MESSAGE_AREA_PADDING = 82;
 
 const LIMIT = 50;
 
-export const MessageList = observer(({ channel }: Props) => {
+export const MessageList = observer(({ channel: channelProp }: Props) => {
+    const app = useAppStore();
     const ref = useRef<HTMLDivElement>(null);
     const { width } = useResizeObserver<HTMLDivElement>({ ref: ref.current });
     const logger = new Logger({
         tag: "MessageList",
     });
+
+    const channel = channelProp ?? app.channels.active;
 
     const messageGroups = channel?.messages.groups;
 

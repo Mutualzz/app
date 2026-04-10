@@ -1,6 +1,6 @@
 import { TooltipWrapper } from "@components/TooltipWrapper";
 import { styled } from "@mutualzz/ui-core";
-import { Box, Stack, Tooltip, Typography } from "@mutualzz/ui-web";
+import { Stack, Tooltip } from "@mutualzz/ui-web";
 import { Message, type MessageLike } from "@stores/objects/Message";
 import { calendarStrings } from "@utils/i18n";
 import dayjs from "dayjs";
@@ -23,12 +23,6 @@ export const MessageBase = styled("div")<Props>(({ header }) => ({
     }),
     paddingTop: "0.2rem",
     paddingBottom: "0.2rem",
-
-    ":hover": {
-        "time, .edited": {
-            opacity: 1,
-        },
-    },
 }));
 
 export const MessageInfo = styled("div")(({ theme }) => ({
@@ -113,22 +107,6 @@ export const MessageDetails = observer(
                                 {dayjs(message.createdAt).format("h:mm A")}
                             </time>
                         </Tooltip>
-                        <Box className="edited">
-                            <Tooltip
-                                placement="top"
-                                content={
-                                    <TooltipWrapper>
-                                        {dayjs(message.updatedAt).format(
-                                            "dddd, MMMM D, YYYY h:mm A",
-                                        )}
-                                    </TooltipWrapper>
-                                }
-                            >
-                                <Typography textColor="muted">
-                                    (edited)
-                                </Typography>
-                            </Tooltip>
-                        </Box>
                     </Stack>
                 );
             }
@@ -173,23 +151,6 @@ export const MessageDetails = observer(
                         )}
                     </time>
                 </Tooltip>
-                {message instanceof Message && message.edited && (
-                    <Tooltip
-                        placement="top"
-                        content={
-                            <TooltipWrapper>
-                                {dayjs(message.updatedAt).format(
-                                    "dddd, MMMM D, YYYY h:mm A",
-                                )}
-                            </TooltipWrapper>
-                        }
-                        offset={8}
-                    >
-                        <Typography textColor="muted" ml={1} className="edited">
-                            (edited)
-                        </Typography>
-                    </Tooltip>
-                )}
             </DetailsBase>
         );
     },

@@ -1,9 +1,4 @@
-import {
-    getCustomEmoji,
-    getEmoji,
-    insertCustomEmoji,
-    insertEmoji,
-} from "@utils/emojis";
+import { getCustomEmoji, getEmoji, insertCustomEmoji, insertEmoji, } from "@utils/emojis";
 import { slateToMarkdown } from "@utils/slateToMarkdown";
 import emojiRegex from "emojibase-regex";
 import baseEmoticonRegex from "emojibase-regex/emoticon";
@@ -79,8 +74,12 @@ export const withEmojis = (editor: Editor) => {
             ) {
                 const shortcode = customMatch[0];
                 const customEmoji = await getCustomEmoji(shortcode);
-                const me = app.account?.id;
-                if (customEmoji && canUseCustomEmoji(customEmoji, me)) {
+                const me = app.spaces.active?.members.me;
+                const channel = app.channels.active;
+                if (
+                    customEmoji &&
+                    canUseCustomEmoji(customEmoji, me, channel)
+                ) {
                     const distance = shortcode.length - text.length;
                     if (distance <= caretOffset) {
                         const shortcodeStart = editor.before(selection, {
@@ -273,9 +272,11 @@ export const withEmojis = (editor: Editor) => {
 
             if (m.isCustom) {
                 const customEmoji = await getCustomEmoji(m.text);
-                const me = app.account?.id;
 
-                if (customEmoji && canUseCustomEmoji(customEmoji, me))
+                const me = app.spaces.active?.members.me;
+                const channel = app.channels.active;
+
+                if (customEmoji && canUseCustomEmoji(customEmoji, me, channel))
                     parts.push({ type: "customEmoji", emoji: customEmoji });
                 else parts.push({ type: "text", text: m.text });
             } else {

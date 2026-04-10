@@ -7,13 +7,13 @@ import type { ColorLike } from "@mutualzz/ui-core";
 
 interface Props {
     message: MessageLike;
-    space: Space;
+    space?: Space | null;
 }
 
 export const MessageAuthor = observer(({ message, space }: Props) => {
     const member = useMemo(
-        () => space.members.get(message.authorId) ?? null,
-        [message.authorId, space.members],
+        () => space?.members.get(message.authorId) ?? null,
+        [message.authorId, space?.members],
     );
 
     const nameColor = useMemo(

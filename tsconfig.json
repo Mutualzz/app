@@ -1,7 +1,7 @@
 {
     "compilerOptions": {
         "allowImportingTsExtensions": true,
-        "baseUrl": "src",
+        "rootDir": "./src",
         "forceConsistentCasingInFileNames": true,
         "isolatedModules": true,
         "jsx": "react-jsx",
@@ -15,22 +15,20 @@
         "noUnusedLocals": true,
         "noUnusedParameters": true,
         "paths": {
-            "@assets": ["assets"],
-            "@assets/*": ["assets/*"],
-            "@app-types": ["types/index.d.ts"],
-            "@app-types/*": ["types/*"],
-            "@components/*": ["components/*"],
-            "@contexts/*": ["contexts/*"],
-            "@css/*": ["css/*"],
-            "@editor/*": ["editor/*"],
-            "@hooks/*": ["hooks/*"],
-            "@logger": ["Logger.ts"],
-            "@seo": ["seo.ts"],
-            "@stores/*": ["stores/*"],
-            "@themes": ["themes/index.ts"],
-            "@themes/*": ["themes/*"],
-            "@utils/*": ["utils/*"],
-            "@storages/*": ["storages/*"]
+            "@assets": ["./src/assets"],
+            "@assets/*": ["./src/assets/*"],
+            "@app-types": ["./src/types/index.d.ts"],
+            "@app-types/*": ["./src/types/*"],
+            "@components/*": ["./src/components/*"],
+            "@contexts/*": ["./src/contexts/*"],
+            "@hooks/*": ["./src/hooks/*"],
+            "@logger": ["./src/Logger.ts"],
+            "@seo": ["./src/seo.ts"],
+            "@stores/*": ["./src/stores/*"],
+            "@themes": ["./src/themes/index.ts"],
+            "@themes/*": ["./src/themes/*"],
+            "@utils/*": ["./src/utils/*"],
+            "@storages/*": ["./src/storages/*"]
         },
         "resolveJsonModule": true,
         "skipLibCheck": true,
@@ -41,7 +39,7 @@
         "useDefineForClassFields": true,
         "verbatimModuleSyntax": true
     },
-    "exclude": ["node_modules", "dist", "src-tauri"],
+    "exclude": ["node_modules", "dist", "**/dist/**", "dist/**", "src-tauri"],
     "include": ["src/**/*"],
     "references": [
         {

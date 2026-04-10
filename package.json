@@ -43,7 +43,7 @@
         "emojibase-data": "^17.0.0",
         "emojibase-regex": "^17.0.0",
         "highlight.js": "^11.11.1",
-        "html-react-parser": "^6.0.0",
+        "html-react-parser": "^6.0.1",
         "idb": "^8.0.3",
         "idb-keyval": "^6.2.2",
         "imurmurhash": "^0.1.4",
@@ -62,7 +62,7 @@
         "react-dom": "19.2.0",
         "react-easy-crop": "^5.5.7",
         "react-icons": "^5.6.0",
-        "react-infinite-scroll-component": "^7.0.0",
+        "react-infinite-scroll-component": "^7.0.1",
         "react-secure-storage": "^1.3.2",
         "react-sketch-canvas": "^7.0.0-next.5",
         "react-toastify": "^11.0.5",
@@ -134,5 +134,5 @@
         "vite:dev": "cross-env VITE_ENV_DEV=true vite"
     },
     "type": "module",
-    "version": "4.1.0"
+    "version": "5.0.0"
 }

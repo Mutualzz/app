@@ -47,7 +47,7 @@ const EmojiItem = observer(({ expression }: { expression: Expression }) => {
                         height: 32,
                     }}
                 />
-                {expression.name}
+                :{expression.name}:
             </Stack>
 
             <Stack flex={1} justifyContent="flex-end">
