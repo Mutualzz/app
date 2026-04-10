@@ -1,4 +1,4 @@
-import { MarkdownRendererClient as MarkdownRenderer } from "@components/Markdown/MarkdownRendererClient";
+import { MarkdownRenderer } from "@components/Markdown/MarkdownRenderer/MarkdownRenderer";
 import { UserAvatar } from "@components/User/UserAvatar";
 import { useAppStore } from "@hooks/useStores";
 import { Stack, Tooltip, Typography } from "@mutualzz/ui-web";
