@@ -1,5 +1,11 @@
 import { observer } from "mobx-react-lite";
-import { Divider, Stack, Typography, useTheme } from "@mutualzz/ui-web";
+import {
+    Divider,
+    Stack,
+    Tooltip,
+    Typography,
+    useTheme,
+} from "@mutualzz/ui-web";
 import { Button } from "@components/Button.tsx";
 import { useAppStore } from "@hooks/useStores.ts";
 import { type ChangeEvent, useRef, useState } from "react";
@@ -11,9 +17,10 @@ import { ExpressionEditor } from "@components/Modals/ExpressionEditor.tsx";
 import { Paper } from "@components/Paper.tsx";
 import type { Expression } from "@stores/objects/Expression.ts";
 import { AnimatedStack } from "@components/Animated/AnimatedStack.tsx";
-import { dynamicElevation, formatColor } from "@mutualzz/ui-core";
+import { dynamicElevation } from "@mutualzz/ui-core";
 import { IconButton } from "@components/IconButton.tsx";
 import { FaTrash } from "react-icons/fa";
+import { TooltipWrapper } from "@components/TooltipWrapper.tsx";
 
 const EmojiItem = observer(({ expression }: { expression: Expression }) => {
     const { theme } = useTheme();
@@ -26,12 +33,7 @@ const EmojiItem = observer(({ expression }: { expression: Expression }) => {
             direction="row"
             alignItems="center"
             whileHover={{
-                background: formatColor(
-                    dynamicElevation(theme.colors.surface, 5),
-                    {
-                        alpha: 0.5,
-                    },
-                ),
+                background: dynamicElevation(theme.colors.surface, 5),
             }}
             onMouseOver={() => setHover(true)}
             onMouseOut={() => setHover(false)}
@@ -51,13 +53,19 @@ const EmojiItem = observer(({ expression }: { expression: Expression }) => {
 
             <Stack flex={1} justifyContent="flex-end">
                 {hover && (
-                    <IconButton
-                        onClick={() => expression.delete()}
-                        size="sm"
-                        color="danger"
-                    >
-                        <FaTrash />
-                    </IconButton>
+                    <Stack gap={1.25}>
+                        <Tooltip
+                            content={<TooltipWrapper>Delete</TooltipWrapper>}
+                        >
+                            <IconButton
+                                onClick={() => expression.delete()}
+                                size="sm"
+                                color="danger"
+                            >
+                                <FaTrash />
+                            </IconButton>
+                        </Tooltip>
+                    </Stack>
                 )}
             </Stack>
         </AnimatedStack>
