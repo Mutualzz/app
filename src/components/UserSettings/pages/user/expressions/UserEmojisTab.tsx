@@ -13,7 +13,7 @@ import Snowflake from "@utils/Snowflake.ts";
 import { ExpressionType } from "@mutualzz/types";
 import { generateHash } from "@utils/index.ts";
 import { useModal } from "@contexts/Modal.context.tsx";
-import { ExpressionEditor } from "@components/Modals/ExpressionEditor.tsx";
+import { EmojiEditor } from "@components/Modals/EmojiEditor.tsx";
 import { Paper } from "@components/Paper.tsx";
 import type { Expression } from "@stores/objects/Expression.ts";
 import { AnimatedStack } from "@components/Animated/AnimatedStack.tsx";
@@ -106,10 +106,7 @@ const UserEmojisTab = observer(() => {
             createdAt: new Date(),
         };
 
-        openModal(
-            "emoji-editor",
-            <ExpressionEditor expression={emoji} file={file} />,
-        );
+        openModal("emoji-editor", <EmojiEditor emoji={emoji} file={file} />);
     };
 
     return (

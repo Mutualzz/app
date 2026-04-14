@@ -21,7 +21,7 @@ import { cropImage } from "@utils/cropImage.ts";
 
 // File needs to be passed
 interface Props {
-    expression: APIExpression;
+    emoji: APIExpression;
     file: File;
 }
 
@@ -29,12 +29,12 @@ interface Errors {
     name?: string;
 }
 
-export const ExpressionEditor = observer(({ expression, file }: Props) => {
+export const EmojiEditor = observer(({ emoji, file }: Props) => {
     const app = useAppStore();
     const { theme } = useTheme();
     const { closeModal } = useModal();
 
-    const [name, setName] = useState(expression.name);
+    const [name, setName] = useState(emoji.name);
 
     const [crop, setCrop] = useState<Point>({
         x: 0,
@@ -76,13 +76,8 @@ export const ExpressionEditor = observer(({ expression, file }: Props) => {
         return () => URL.revokeObjectURL(url);
     }, [file]);
 
-    const { mutate: createExpression, isPending: creating } = useMutation({
-        mutationKey: [
-            "create-expression",
-            expression.authorId,
-            name,
-            expression.type,
-        ],
+    const { mutate: createEmoji, isPending: creating } = useMutation({
+        mutationKey: ["create-emoji", emoji.authorId, name, emoji.type],
         mutationFn: async (data: FormData) => {
             return app.rest.putFormData("/expressions", data);
         },
@@ -110,10 +105,10 @@ export const ExpressionEditor = observer(({ expression, file }: Props) => {
             return;
         }
 
-        let expressionFile: File | null = file;
+        let emojiFile: File | null = file;
 
         if (file && final && croppedAreaPixels) {
-            expressionFile = await cropImage(
+            emojiFile = await cropImage(
                 final,
                 file,
                 croppedAreaPixels as Area,
@@ -122,14 +117,14 @@ export const ExpressionEditor = observer(({ expression, file }: Props) => {
         }
 
         const formData = new FormData();
-        formData.append("expression", expressionFile);
+        formData.append("expressionb", emojiFile);
         formData.append("name", name);
-        formData.append("type", expression.type.toString());
-        if (expression.spaceId) formData.append("spaceId", expression.spaceId);
+        formData.append("type", emoji.type.toString());
+        if (emoji.spaceId) formData.append("spaceId", emoji.spaceId);
         if (file.type === "image/gif")
             formData.append("crop", JSON.stringify(croppedAreaPixels));
 
-        createExpression(formData);
+        createEmoji(formData);
     };
 
     const getPreviewStyle = (size: number) => {
@@ -287,9 +282,13 @@ export const ExpressionEditor = observer(({ expression, file }: Props) => {
                     name="name"
                     type="text"
                     label="Expression Name"
-                    placeholder="expression_name"
+                    placeholder="emoji_name"
                     value={name}
-                    onChange={(e) => setName(e.target.value)}
+                    onChange={(e) =>
+                        setName(
+                            e.target.value.replaceAll(" ", "_").toLowerCase(),
+                        )
+                    }
                     endDecorator={
                         name.trim().length > 0 && (
                             <IconButton

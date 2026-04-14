@@ -57,10 +57,15 @@ export const customEmojiPlugin = (md: MarkdownItAsync) => {
 
     md.renderer.asyncRules.customEmoji = async (tokens, idx) => {
         const token = tokens[idx];
+        const raw = token.content;
 
-        const emoji = await getCustomEmoji(token.content);
+        let emoji = null;
+        try {
+            emoji = await getCustomEmoji(raw);
+        } catch {}
+
         if (!emoji) return token.content;
 
-        return `<customemoji data-name="${emoji.name}" data-url="${emoji.url}" data-id="${emoji.id}" data-animated="${emoji.animated}">${token.content}</customemoji>`;
+        return `<customemoji data-name="${emoji.name}" data-url="${emoji.url}" data-id="${emoji.id}" data-animated="${emoji.animated}"></customemoji>`;
     };
 };
