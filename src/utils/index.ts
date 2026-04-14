@@ -35,6 +35,7 @@ export const canUseCustomEmoji = (
     if (!currentMember) return false;
 
     if (emoji.spaceId === currentMember.spaceId) return true;
+    if (emoji.authorId !== currentMember.id) return false;
 
     return currentMember.hasPermission(
         "UseExternalEmojis",
