@@ -89,7 +89,7 @@ export const UserSettingsContent = observer(
                     borderTop="0 !important"
                     borderLeft="0 !important"
                     borderBottom="0 !important"
-                    py={{ xs: "0.5rem", sm: 1 }}
+                    py={{ xs: "0.5rem", sm: 3 }}
                 >
                     {currentPage === "profile" && <UserProfileSettings />}
                     {currentPage === "my-account" && <UserAccountSettings />}

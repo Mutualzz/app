@@ -6,25 +6,11 @@ import {
     useUserSettings,
 } from "@components/UserSettings/UserSettings.context.tsx";
 import { useAppStore } from "@hooks/useStores";
-import {
-    Box,
-    ButtonGroup,
-    Divider,
-    Link,
-    Stack,
-    Typography,
-} from "@mutualzz/ui-web";
+import { Box, ButtonGroup, Divider, Link, Stack, Typography, } from "@mutualzz/ui-web";
 import startCase from "lodash-es/startCase";
 import { observer } from "mobx-react-lite";
 import { Fragment, type JSX } from "react";
-import {
-    FaMicrophone,
-    FaPaintBrush,
-    FaPalette,
-    FaSignOutAlt,
-    FaSmile,
-    FaUserCog,
-} from "react-icons/fa";
+import { FaMicrophone, FaPalette, FaSignOutAlt, FaSmile, FaUserCog, } from "react-icons/fa";
 import { FaPencil } from "react-icons/fa6";
 import { UserAvatar } from "../User/UserAvatar";
 import { Button } from "@components/Button";
@@ -48,10 +34,6 @@ const settingsPages: SettingsPages = {
         {
             label: "my-account",
             icon: <FaUserCog />,
-        },
-        {
-            label: "profile",
-            icon: <FaPaintBrush />,
         },
         {
             label: "expressions",
@@ -109,13 +91,15 @@ export const UserSettingsSidebar = observer(
                     <Stack pt="1rem">
                         <Button
                             fullWidth
-                            variant="plain"
                             onClick={() =>
                                 handlePageSwitch("user-settings", "profile")
                             }
                             color="neutral"
                             padding={5}
                             horizontalAlign="left"
+                            variant={
+                                currentPage === "profile" ? "soft" : "plain"
+                            }
                         >
                             <Stack
                                 width="100%"
