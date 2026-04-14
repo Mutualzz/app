@@ -147,8 +147,6 @@ export const MessageList = observer(({ channel: channelProp }: Props) => {
         messageGroups?.reduce((acc, g) => acc + (g.messages?.length ?? 0), 0) ??
         0;
 
-    console.log(messageGroups);
-
     return (
         <MessageAreaWidthContext.Provider
             value={(width ?? 0) - MESSAGE_AREA_PADDING}
