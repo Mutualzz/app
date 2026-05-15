@@ -22,17 +22,10 @@ import {
     GatewayOpcodes
 } from "@mutualzz/types";
 import { type Codec, createCodec, type Encoding } from "@utils/codec";
-import {
-    type Compression,
-    type Compressor,
-    createCompressor
-} from "@utils/compressor";
+import { type Compression, type Compressor, createCompressor } from "@utils/compressor";
 import { makeAutoObservable } from "mobx";
 import type { AppStore } from "./App.store";
-import {
-    buildDesktopPresenceFromProcesses,
-    type PresenceUpdateDraft
-} from "../presence/gamePresence";
+import { buildDesktopPresenceFromProcesses, type PresenceUpdateDraft } from "../presence/gamePresence";
 import { normalizeJSON } from "@utils/JSON";
 import { isElectron } from "@utils/index"; // We have to create our own GatewayStatus "enum" to avoid issues with SSR
 
@@ -342,23 +335,33 @@ export class GatewayStore {
         }
 
         try {
-            const rawBytes: Uint8Array =
-                this.encoding === "etf"
-                    ? Uint8Array.from(await window.api.codec.etfEncode(payload))
-                    : this.codec.encode(payload);
+            let encodedBytes: any;
 
-            const outBytes =
-                this.compress !== "none"
-                    ? this.compressor.compress(rawBytes)
-                    : rawBytes;
+            if (this.encoding === "etf") {
+                if (!window.api) {
+                    this.logger.error("[send] window.api is not available");
+                    return;
+                }
+                if (!window.api.codec) {
+                    this.logger.error(
+                        "[send] window.api.codec is not available"
+                    );
+                    return;
+                }
 
-            if (this.compress !== "none") {
-                // As any works here since the app works without type inferring here
-                this.socket.send(outBytes as any);
+                const encoded = await window.api.codec.etfEncode(payload);
+
+                encodedBytes = Uint8Array.from(encoded);
             } else {
-                this.socket.send(new TextDecoder().decode(rawBytes));
+                encodedBytes = this.codec.encode(payload);
             }
 
+            const finalBytes =
+                this.compress !== "none"
+                    ? this.compressor.compress(encodedBytes)
+                    : encodedBytes;
+
+            this.socket.send(finalBytes);
             this.logger.debug(`[Gateway] <- ${payload.op}`);
         } catch (error) {
             this.logger.error("Failed to send message", error);
@@ -535,20 +538,39 @@ export class GatewayStore {
     }
 
     private onOpen = () => {
-        this.logger.debug(
+        this.logger.info(
             `[Connected] ${this.url} (took ${Date.now() - this.connectionStartTime!}ms)`
         );
         this.readyState = GatewayStatus.OPEN;
         this.reconnectTimeout = 0;
 
         if (this.sessionId) {
-            this.logger.debug("[Gateway] Resuming session");
+            this.logger.info("[Gateway] Resuming session");
             this.handleResume();
         } else {
-            this.logger.debug("[Gateway] Identifying");
+            this.logger.info("[Gateway] Identifying");
             this.handleIdentify();
         }
     };
+
+    private handleIdentify() {
+        this.logger.info(
+            `[Identify] Socket state: ${this.socket?.readyState}, token: ${this.app.token ? "set" : "not set"}`
+        );
+
+        if (!this.app.token) {
+            this.logger.error("Cannot identify, token is not set");
+            return;
+        }
+
+        this.identifyStartTime = Date.now();
+
+        this.logger.info("[Identify] Calling send()");
+        this.send({
+            op: GatewayOpcodes.Identify,
+            d: { token: this.app.token }
+        });
+    }
 
     private onMessage = async (event: MessageEvent) => {
         try {
@@ -570,10 +592,32 @@ export class GatewayStore {
                     ? this.compressor.decompress(rawBytes)
                     : rawBytes;
 
-            const payload =
-                this.encoding === "etf"
-                    ? await window.api!.codec.etfDecode(Array.from(bytes))
-                    : this.codec.decode(bytes);
+            let payload: any;
+
+            try {
+                // Try the configured encoding first
+                if (this.encoding === "etf") {
+                    payload = await window.api!.codec.etfDecode(
+                        Array.from(bytes)
+                    );
+                } else {
+                    payload = this.codec.decode(bytes);
+                }
+            } catch (etfError) {
+                // If ETF fails, try JSON as fallback
+                this.logger.warn(
+                    `[onMessage] ${this.encoding} decode failed, trying JSON fallback:`,
+                    etfError
+                );
+                try {
+                    payload = JSON.parse(new TextDecoder().decode(bytes));
+                } catch (jsonError) {
+                    this.logger.error(
+                        `[onMessage] Both ${this.encoding} and JSON decode failed`
+                    );
+                    throw jsonError;
+                }
+            }
 
             this.handlePayload(payload);
         } catch (error) {
@@ -620,20 +664,6 @@ export class GatewayStore {
         this.stopPresenceLoop();
         this.handleClose(event.code);
     };
-
-    private handleIdentify() {
-        if (!this.app.token) {
-            this.logger.error("Cannot identify, token is not set");
-            return;
-        }
-
-        this.identifyStartTime = Date.now();
-
-        this.send({
-            op: GatewayOpcodes.Identify,
-            d: { token: this.app.token }
-        });
-    }
 
     private handleInvalidSession = (resumable: boolean) => {
         this.cleanup();
