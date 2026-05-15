@@ -1,7 +1,7 @@
 import { Logger } from "@mutualzz/logger";
 import { HttpStatusCode } from "@mutualzz/types";
 import { normalizeJSON } from "@utils/JSON";
-import EventEmitter from "node:events";
+import EventEmitter from "events";
 import { detectBrowser } from "@utils/detect";
 
 const isElectron = !!window.api;
