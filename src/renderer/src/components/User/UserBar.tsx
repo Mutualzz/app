@@ -4,14 +4,25 @@ import { UserAvatar } from "@components/User/UserAvatar";
 import { UserSettingsModal } from "@components/UserSettings/UserSettingsModal";
 import { useModal } from "@contexts/Modal.context";
 import { useAppStore } from "@hooks/useStores";
-import { type PaperProps, Stack, Tooltip, Typography, useTheme } from "@mutualzz/ui-web";
+import {
+    type PaperProps,
+    Stack,
+    Tooltip,
+    Typography,
+    useTheme
+} from "@mutualzz/ui-web";
 import { observer } from "mobx-react-lite";
 import { useMemo, useState } from "react";
 import { FaCog, FaMicrophone, FaMicrophoneSlash } from "react-icons/fa";
 import { IconButton } from "@components/IconButton";
 import { generateMenuIDs, useMenu } from "@contexts/ContextMenu.context";
 import { formatColor } from "@mutualzz/ui-core";
-import { MdHeadset, MdHeadsetOff, MdVideocam, MdVideocamOff } from "react-icons/md";
+import {
+    MdHeadset,
+    MdHeadsetOff,
+    MdVideocam,
+    MdVideocamOff
+} from "react-icons/md";
 import { ImPhoneHangUp } from "react-icons/im";
 import { AnimatedIconButton } from "@components/Animated/AnimatedIconButton";
 import { SmallActivityStatus } from "@components/SmallActivityStatus";
