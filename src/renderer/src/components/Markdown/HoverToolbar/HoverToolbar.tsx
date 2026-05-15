@@ -1,0 +1,211 @@
+import { MarkdownInputContext } from "@components/Markdown/MarkdownInput/MarkdownInput.context";
+import { Paper } from "@components/Paper";
+import { ButtonGroup, Divider, Portal, useTheme } from "@mutualzz/ui-web";
+import { isBlockActive, toggleBlockquote } from "@utils/markdownUtils";
+import { wrapSelectionWith } from "@utils/wrapSelectionWith";
+import {
+    type MouseEvent,
+    useContext,
+    useEffect,
+    useRef,
+    useState,
+} from "react";
+import {
+    FaBold,
+    FaCode,
+    FaEye,
+    FaEyeSlash,
+    FaItalic,
+    FaQuoteLeft,
+    FaStrikethrough,
+    FaUnderline,
+} from "react-icons/fa";
+import { Range } from "slate";
+import { useFocused, useSlate } from "slate-react";
+import { useAppStore } from "@hooks/useStores";
+import { Button } from "@components/Button";
+
+export const HoverToolbar = () => {
+    const { theme } = useTheme();
+    const app = useAppStore();
+    const { activeFormats, enableHoverToolbar } =
+        useContext(MarkdownInputContext);
+    const ref = useRef<HTMLDivElement>(null);
+    const editor = useSlate();
+    const inFocus = useFocused();
+
+    const [visible, setVisible] = useState(false);
+
+    useEffect(() => {
+        if (!enableHoverToolbar) return;
+        const el = ref.current;
+        if (!el) return;
+
+        const { selection } = editor;
+
+        if (
+            !selection ||
+            !inFocus ||
+            Range.isCollapsed(selection) ||
+            !editor.selection
+        ) {
+            setVisible(false);
+            return;
+        }
+
+        const domSelection = window.getSelection();
+        if (!domSelection || domSelection.rangeCount === 0) {
+            setVisible(false);
+            return;
+        }
+
+        const domRange = domSelection.getRangeAt(0);
+        const rect = domRange.getBoundingClientRect();
+
+        const top = rect.top + window.scrollY - el.offsetHeight - 16;
+        const left =
+            rect.left + window.scrollX + rect.width / 2 - el.offsetWidth / 2;
+
+        el.style.top = `${top}px`;
+        el.style.left = `${left}px`;
+
+        setVisible(true);
+    }, [editor.selection, inFocus, enableHoverToolbar]);
+
+    useEffect(() => {
+        if (!inFocus) setVisible(false);
+    }, [inFocus]);
+
+    const textFormat = (e: MouseEvent<HTMLButtonElement>, syntax: string) => {
+        e.preventDefault();
+        wrapSelectionWith(editor, syntax, activeFormats);
+    };
+
+    return (
+        <Portal>
+            <Paper
+                elevation={app.settings?.preferEmbossed ? 3 : 2}
+                transparency={0}
+                ref={ref}
+                borderRadius={12}
+                p={1}
+                onMouseDown={(e) => e.preventDefault()}
+                css={{
+                    position: "absolute",
+                    top: visible ? undefined : "-9999px",
+                    left: visible ? undefined : "-9999px",
+                    opacity: visible ? 1 : 0,
+                    transform: visible ? "scale(1)" : "scale(0.95)",
+                    transition:
+                        "opacity 150ms ease-out, transform 150ms ease-out",
+                    zIndex: theme.zIndex.tooltip,
+                    boxShadow: theme.shadows[5],
+                    pointerEvents: visible ? "auto" : "none",
+                }}
+            >
+                <ButtonGroup spacing={1} variant="plain">
+                    <Button
+                        css={{
+                            borderRadius: 9999,
+                        }}
+                        title="Bold"
+                        color={
+                            activeFormats.includes("**") ? "success" : undefined
+                        }
+                        onClick={(e) => textFormat(e, "**")}
+                    >
+                        <FaBold />
+                    </Button>
+                    <Button
+                        title="Italic"
+                        css={{
+                            borderRadius: 9999,
+                        }}
+                        color={
+                            activeFormats.includes("*") ? "success" : undefined
+                        }
+                        onClick={(e) => textFormat(e, "*")}
+                    >
+                        <FaItalic />
+                    </Button>
+                    <Button
+                        title="Underline"
+                        css={{
+                            borderRadius: 9999,
+                        }}
+                        color={
+                            activeFormats.includes("__") ? "success" : undefined
+                        }
+                        onClick={(e) => textFormat(e, "__")}
+                    >
+                        <FaUnderline />
+                    </Button>
+                    <Button
+                        title="Strikethrough"
+                        css={{
+                            borderRadius: 9999,
+                        }}
+                        color={
+                            activeFormats.includes("~~") ? "success" : undefined
+                        }
+                        onClick={(e) => textFormat(e, "~~")}
+                    >
+                        <FaStrikethrough />
+                    </Button>
+                </ButtonGroup>
+                <Divider
+                    orientation="vertical"
+                    lineColor="muted"
+                    css={{
+                        opacity: 0.25,
+                        marginInline: 4,
+                    }}
+                />
+                <ButtonGroup spacing={1} variant="plain">
+                    <Button
+                        title="Blockquote"
+                        color={
+                            isBlockActive(editor, "blockquote")
+                                ? "success"
+                                : undefined
+                        }
+                        css={{
+                            borderRadius: 9999,
+                        }}
+                        onClick={() => toggleBlockquote(editor)}
+                    >
+                        <FaQuoteLeft />
+                    </Button>
+                    <Button
+                        title="Code"
+                        color={
+                            activeFormats.includes("`") ? "success" : undefined
+                        }
+                        css={{
+                            borderRadius: 9999,
+                        }}
+                        onClick={(e) => textFormat(e, "`")}
+                    >
+                        <FaCode />
+                    </Button>
+                    <Button
+                        title="Spoiler"
+                        color={
+                            activeFormats.includes("||") ? "success" : undefined
+                        }
+                        css={{
+                            borderRadius: 9999,
+                        }}
+                        onClick={(e) => textFormat(e, "||")}
+                    >
+                        {activeFormats.includes("||") ? (
+                            <FaEyeSlash />
+                        ) : (
+                            <FaEye />
+                        )}
+                    </Button>
+                </ButtonGroup>
+            </Paper>
+        </Portal>
+    );
+};
