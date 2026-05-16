@@ -38,13 +38,17 @@ export function createMainWindow(): BrowserWindow {
     mainWindow.webContents.session.setPermissionCheckHandler(
         (_webContents, permission) => {
             return [
-                "microphone",
-                "camera",
-                "speaker",
-                "display-capture",
                 "clipboard-read",
-                "clipboard-write",
-                "pointerLock"
+                "clipboard-sanitized-write",
+                "fullscreen",
+                "hid",
+                "idle-detection",
+                "media",
+                "mediaKeySystem",
+                "notifications",
+                "openExternal",
+                "pointerLock",
+                "usb"
             ].includes(permission);
         }
     );

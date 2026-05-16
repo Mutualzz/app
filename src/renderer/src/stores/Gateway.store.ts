@@ -554,7 +554,7 @@ export class GatewayStore {
     };
 
     private handleIdentify() {
-        this.logger.info(
+        this.logger.debug(
             `[Identify] Socket state: ${this.socket?.readyState}, token: ${this.app.token ? "set" : "not set"}`
         );
 
@@ -565,7 +565,6 @@ export class GatewayStore {
 
         this.identifyStartTime = Date.now();
 
-        this.logger.info("[Identify] Calling send()");
         this.send({
             op: GatewayOpcodes.Identify,
             d: { token: this.app.token }

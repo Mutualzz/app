@@ -11,7 +11,7 @@ import type {
     VoiceServerUpdatePayload,
     VoiceStateSyncPayload,
     VoiceTarget
-} from "@app-types/index";
+} from "@renderer/types";
 import { makePersistable } from "mobx-persist-store";
 import { Logger } from "@mutualzz/logger";
 import { VoiceState } from "@stores/objects/VoiceState";
@@ -61,6 +61,7 @@ class MediasoupSession {
     private cameraTrack: MediaStreamTrack | null = null;
     private micProducer: mediasoupClient.types.Producer | null = null;
     private cameraProducer: mediasoupClient.types.Producer | null = null;
+    private audioContext: AudioContext | null = null;
 
     private consumersByProducerId = new Map<
         string,
@@ -98,6 +99,12 @@ class MediasoupSession {
         makeAutoObservable(this, {}, { autoBind: true });
     }
 
+    unlockAudio() {
+        if (this.audioContext) return;
+        this.audioContext = new AudioContext();
+        void this.audioContext.resume();
+    }
+
     getLocalCameraStream() {
         return this.cameraTrack ? new MediaStream([this.cameraTrack]) : null;
     }
@@ -105,6 +112,7 @@ class MediasoupSession {
     setInputDeviceId(id: string | null) {
         this.currentInputDeviceId = id;
     }
+
     setOutputDeviceId(id: string | null) {
         this.currentOutputDeviceId = id;
         if (!id) return;
@@ -113,6 +121,7 @@ class MediasoupSession {
                 void safeSetSinkId(meta.element, id, this.logger, meta.kind);
         }
     }
+
     setCameraDeviceId(id: string | null) {
         this.currentCameraDeviceId = id;
     }
@@ -305,6 +314,28 @@ class MediasoupSession {
         );
         this.sendTransport = sendTransport;
 
+        sendTransport.on("icegatheringstatechange", (state) => {
+            this.logger.debug("sendTransport ICE state:", state);
+        });
+        recvTransport.on("icegatheringstatechange", (state) => {
+            this.logger.debug("recvTransport ICE state:", state);
+        });
+        sendTransport.on("connectionstatechange", (state) => {
+            this.logger.debug("sendTransport connection state:", state);
+        });
+        recvTransport.on("connectionstatechange", (state) => {
+            this.logger.debug("recvTransport connection state:", state);
+        });
+
+        this.logger.debug(
+            "recvTransport options:",
+            JSON.stringify(recvOptions, null, 2)
+        );
+        this.logger.debug(
+            "sendTransport options:",
+            JSON.stringify(sendOptions, null, 2)
+        );
+
         this.setupComplete = true;
         await this.flushPendingProducers(signal);
     }
@@ -440,6 +471,24 @@ class MediasoupSession {
         this.setSelfMute(this.isMuted);
     }
 
+    private async playElement(element: HTMLMediaElement) {
+        try {
+            await element.play();
+        } catch {
+            if (this.audioContext?.state === "suspended") {
+                await this.audioContext.resume();
+            }
+            try {
+                await element.play();
+            } catch (err) {
+                this.logger.debug(
+                    `${element instanceof HTMLVideoElement ? "Video" : "Audio"} cannot be played`,
+                    err
+                );
+            }
+        }
+    }
+
     private openSocket(url: string, signal: AbortSignal): Promise<WebSocket> {
         return new Promise((resolve, reject) => {
             if (signal.aborted) {
@@ -544,11 +593,7 @@ class MediasoupSession {
                 consumerId: consumer.id
             });
 
-            try {
-                await video.play();
-            } catch (err) {
-                this.logger.debug("Video cannot be played", err);
-            }
+            await this.playElement(video);
         } else {
             const audio = new Audio();
             audio.srcObject = stream;
@@ -574,11 +619,8 @@ class MediasoupSession {
             await this.rpc(VoiceOpcodes.VoiceResumeConsumer, {
                 consumerId: consumer.id
             });
-            try {
-                await audio.play();
-            } catch (err) {
-                this.logger.debug("Audio cannot be played", err);
-            }
+
+            await this.playElement(audio);
         }
     }
 
@@ -960,6 +1002,8 @@ export class VoiceStore {
             this.currentVoiceTarget?.spaceId === (target.spaceId ?? null) &&
             this.currentVoiceTarget?.channelId === target.channelId;
         if (isSame) return;
+
+        this.session.unlockAudio();
 
         runInAction(() => {
             this.disconnectBanner = null;
