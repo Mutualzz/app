@@ -30,14 +30,7 @@ import { Theme } from "@stores/objects/Theme";
 import { useMutation } from "@tanstack/react-query";
 import { getAdaptiveIcon } from "@utils/icons";
 import { observer } from "mobx-react-lite";
-import {
-    type CSSProperties,
-    forwardRef,
-    useEffect,
-    useMemo,
-    useRef,
-    useState
-} from "react";
+import { type CSSProperties, forwardRef, useEffect, useMemo, useRef, useState } from "react";
 import { FaCheck, FaTrash } from "react-icons/fa";
 import { FaRepeat } from "react-icons/fa6";
 import { VirtuosoGrid } from "react-virtuoso";

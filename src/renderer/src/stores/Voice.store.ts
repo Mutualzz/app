@@ -292,6 +292,7 @@ class MediasoupSession {
         if (signal.aborted) return;
 
         const sendTransport = device.createSendTransport(sendOptions);
+
         sendTransport.on("connect", ({ dtlsParameters }, callback, errback) => {
             void this.rpc(VoiceOpcodes.VoiceConnectTransport, {
                 transportId: sendTransport.id,
@@ -313,28 +314,6 @@ class MediasoupSession {
             }
         );
         this.sendTransport = sendTransport;
-
-        sendTransport.on("icegatheringstatechange", (state) => {
-            this.logger.debug("sendTransport ICE state:", state);
-        });
-        recvTransport.on("icegatheringstatechange", (state) => {
-            this.logger.debug("recvTransport ICE state:", state);
-        });
-        sendTransport.on("connectionstatechange", (state) => {
-            this.logger.debug("sendTransport connection state:", state);
-        });
-        recvTransport.on("connectionstatechange", (state) => {
-            this.logger.debug("recvTransport connection state:", state);
-        });
-
-        this.logger.debug(
-            "recvTransport options:",
-            JSON.stringify(recvOptions, null, 2)
-        );
-        this.logger.debug(
-            "sendTransport options:",
-            JSON.stringify(sendOptions, null, 2)
-        );
 
         this.setupComplete = true;
         await this.flushPendingProducers(signal);
