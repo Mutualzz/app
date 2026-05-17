@@ -35,7 +35,6 @@ dmg:
 linux:
     target:
         - AppImage
-        - snap
         - deb
     maintainer: Mutualzz
     category: Social Networking
