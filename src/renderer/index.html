@@ -24,17 +24,7 @@
   style-src 'self' 'unsafe-inline';
   img-src 'self' data: blob: https: localhost:3001;
   font-src 'self' data:;
-  connect-src 'self'
-    localhost:3000
-    ws://localhost:4000
-    ws://localhost:3030
-    ws://127.0.0.1:3030
-    https://*.mutualzz.com
-    https://api.mutualzz.com
-    wss://*.mutualzz.com
-    wss://gateway.mutualzz.com
-    https:
-    wss:;
+  connect-src *;
   object-src 'none';
   base-uri 'self';
   form-action 'self';

@@ -248,7 +248,6 @@ class MediasoupSession {
         }
 
         this.socket = socket;
-
         const { rtpCapabilities } = await this.rpc(
             VoiceOpcodes.VoiceGetRTPCapabilities,
             {}
