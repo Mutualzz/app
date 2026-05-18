@@ -34,9 +34,6 @@ nsis:
     artifactName: ${name}Setup.${ext}
     shortcutName: ${productName}
     uninstallDisplayName: ${productName}
-nodeModulesPaths:
-    - ../../node_modules
-    - node_modules
 npmRebuild: false
 mac:
     entitlementsInherit: build/entitlements.mac.plist
