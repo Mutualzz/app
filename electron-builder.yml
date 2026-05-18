@@ -5,12 +5,13 @@ directories:
     buildResources: resources
 files:
     - 'out/**'
+    - 'node_modules/**'
     - '!src/*'
     - '!electron.vite.config.{js,ts,mjs,cjs}'
     - '!{.env,.env.*,.npmrc,pnpm-lock.yaml}'
     - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
 asarUnpack:
-    - resources/**
+    - resources/**/*
 win:
     executableName: mutualzz
 nsis:

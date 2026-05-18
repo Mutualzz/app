@@ -14,19 +14,15 @@ function RouteComponent() {
         app.resetMode();
     }, [app]);
 
-    if (!app.settings) return null;
+    if (app.isAppLoading) return null;
 
     if (app.joiningSpace && app.joiningInviteCode) {
         return (
             <Navigate
                 to="/invite/$code"
                 replace
-                params={{
-                    code: app.joiningInviteCode
-                }}
-                search={{
-                    deepLink: false
-                }}
+                params={{ code: app.joiningInviteCode }}
+                search={{ deepLink: false }}
             />
         );
     }

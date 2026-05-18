@@ -7,7 +7,7 @@ import { Logger } from "@mutualzz/logger";
 import { GatewayCloseCodes } from "@mutualzz/types";
 import { CssBaseline, Stack } from "@mutualzz/ui-web";
 import { GatewayStatus } from "@stores/Gateway.store";
-import { createRootRoute, Outlet, useNavigate } from "@tanstack/react-router";
+import { createRootRoute, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import { isElectron } from "@utils/index";
 import dayjs from "dayjs";
 import calendar from "dayjs/plugin/calendar";
@@ -15,12 +15,7 @@ import duration from "dayjs/plugin/duration";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { reaction } from "mobx";
 import { observer } from "mobx-react-lite";
-import {
-    type PropsWithChildren,
-    type ReactNode,
-    useEffect,
-    useState
-} from "react";
+import { type PropsWithChildren, type ReactNode, useEffect, useState } from "react";
 
 import { DesktopShell } from "@components/Desktop/DesktopShell";
 import { InjectGlobal } from "@components/InjectGlobal";
@@ -86,6 +81,7 @@ function RootComponent() {
         tag: "App"
     });
     const [titleBarHeight, setTitleBarHeight] = useState(0);
+    const routerState = useRouterState();
 
     useEffect(() => {
         app.loadSettings();
@@ -157,6 +153,15 @@ function RootComponent() {
             stage === "installing" ||
             stage === "relaunching" ||
             stage === "error");
+
+    console.log("[Router DEBUG]", {
+        pathname: routerState.location.pathname,
+        matchedRouteId: routerState.matches[routerState.matches.length - 1]?.id,
+        allMatches: routerState.matches.map((m) => m.id),
+        href: window.location.href,
+        search: routerState.location.search,
+        hash: routerState.location.hash
+    });
 
     return (
         <QueryClientProvider client={app.queryClient}>

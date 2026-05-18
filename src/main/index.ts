@@ -23,9 +23,7 @@ app.whenReady().then(() => {
     setupProtocols(mainWindow);
     trayManager.initialize(mainWindow);
 
-    if (!is.dev) {
-        initUpdater(mainWindow);
-    }
+    if (!is.dev && app.isPackaged) initUpdater(mainWindow);
 
     app.setAsDefaultProtocolClient("mutualzz");
 

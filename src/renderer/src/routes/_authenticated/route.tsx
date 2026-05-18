@@ -9,8 +9,7 @@ export const Route = createFileRoute("/_authenticated")({
 function AuthenticatedRoute() {
     const app = useAppStore();
 
-    if (!app.settings) return null;
-
+    if (app.isAppLoading) return null;
     if (!app.token) return <Navigate to="/login" replace />;
 
     return <Outlet />;
