@@ -41,6 +41,8 @@ export const getAdaptiveIcon = async (
 
             const electronDataUrl = await window.api.theme.readIcon(relPath);
 
+            console.log(electronDataUrl);
+
             if (electronDataUrl) iconUrl = electronDataUrl;
             else iconUrl = getIconType(theme); // Fallback to web path (in case readIcon failed)
         } else iconUrl = getIconType(theme); // Web can directly use the path
