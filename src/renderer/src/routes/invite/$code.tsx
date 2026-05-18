@@ -29,7 +29,7 @@ function RouteComponent() {
         error
     } = useQuery({
         queryKey: ["space-invite", code],
-        queryFn: async () => app.rest.get<APIInvite>(`/invites/${code}`),
+        queryFn: () => app.rest.get<APIInvite>(`/invites/${code}`),
         retry: 2,
         enabled: !!code
     });
@@ -163,7 +163,7 @@ function RouteComponent() {
     const handleContinue = () => navigate({ to: "/", replace: true });
 
     if (!invite && error) return <Navigate to="/" replace />;
-    if (deepLink) return null;
+    if (deepLink) return <Navigate to="/" replace />;
 
     return (
         <Stack

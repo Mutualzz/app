@@ -7,7 +7,7 @@ import {
     Input,
     type InputProps,
     Stack,
-    Typography,
+    Typography
 } from "@mutualzz/ui-web";
 import { emailRegex } from "@mutualzz/validators";
 import { seo } from "@seo";
@@ -16,16 +16,19 @@ import { useMutation } from "@tanstack/react-query";
 import { createFileRoute, Navigate, useNavigate } from "@tanstack/react-router";
 import { observer } from "mobx-react-lite";
 import { useState } from "react";
+import { Link } from "@components/Link";
+import { useModal } from "@contexts/Modal.context";
+import { SuccessForgotSent } from "@components/Modals/SuccessForgotSent";
 
 export const Route = createFileRoute("/login")({
     component: observer(Login),
     head: () => ({
         meta: [
             ...seo({
-                title: "Mutualzz - Login",
-            }),
-        ],
-    }),
+                title: "Mutualzz - Login"
+            })
+        ]
+    })
 });
 
 const InputWithLabel = ({
@@ -67,12 +70,14 @@ const InputWithLabel = ({
 function Login() {
     const navigate = useNavigate();
     const app = useAppStore();
+    const { openModal } = useModal();
     const [error, setError] = useState<string | null>(null);
+    const [forgotError, setForgotError] = useState<string | null>(null);
 
     const { mutate: login, isPending } = useMutation({
         mutationFn: async (values: any) => {
             const requestBody: Record<string, string | undefined> = {
-                password: values.password,
+                password: values.password
             };
 
             if (emailRegex.test(values.usernameOrEmail))
@@ -81,7 +86,7 @@ function Login() {
 
             return app.rest.post<{ token: string }, any>(
                 "auth/login",
-                requestBody,
+                requestBody
             );
         },
         onSuccess: ({ token }) => {
@@ -89,17 +94,36 @@ function Login() {
         },
         onError: (error: HttpException) => {
             setError(error.message);
-        },
+        }
     });
+
+    const { mutate: forgotPassword, isPending: forgettingPassword } =
+        useMutation({
+            mutationKey: ["forgot-password"],
+            mutationFn: (value: string) => {
+                const requestBody: Record<string, string | undefined> = {};
+
+                if (emailRegex.test(value)) requestBody.email = value;
+                else requestBody.username = value;
+
+                return app.rest.post("auth/forgot-password", requestBody);
+            },
+            onSuccess: () => {
+                openModal("forgot-password-success", <SuccessForgotSent />);
+            },
+            onError: (err: HttpException) => {
+                setForgotError(err.message);
+            }
+        });
 
     const Form = useForm({
         defaultValues: {
             usernameOrEmail: "",
-            password: "",
+            password: ""
         },
         onSubmit: ({ value }) => {
             login(value);
-        },
+        }
     });
 
     if (app.token) return <Navigate to="/" replace />;
@@ -111,25 +135,24 @@ function Login() {
             direction="column"
             width="100%"
             minHeight="100%"
-            justifyContent="center"
             alignItems="center"
+            justifyContent="center"
         >
             <AnimatedPaper
                 direction="column"
-                justifyContent="center"
                 alignItems="center"
                 width={{
                     xs: "100%",
                     sm: "90%",
                     md: "70%",
                     lg: "50%",
-                    xl: "40%",
+                    xl: "40%"
                 }}
                 maxWidth={{
                     xs: "100%",
                     sm: "500px",
                     md: "520px",
-                    lg: "600px",
+                    lg: "600px"
                 }}
                 py={{ xs: "1.5rem", sm: "2rem", md: "2.5rem" }}
                 px={{ xs: "1rem", sm: "2rem", md: "2.5rem" }}
@@ -145,7 +168,7 @@ function Login() {
                         fontSize={{
                             xs: "1.25rem",
                             sm: "1.5rem",
-                            md: "1.75rem",
+                            md: "1.75rem"
                         }}
                         textAlign="center"
                     >
@@ -177,7 +200,7 @@ function Login() {
                 </Stack>
                 <form
                     css={{
-                        width: "100%",
+                        width: "100%"
                     }}
                     onSubmit={(e) => {
                         e.preventDefault();
@@ -185,36 +208,75 @@ function Login() {
                         Form.handleSubmit();
                     }}
                 >
-                    <Stack direction="column" spacing={3} width="100%">
+                    <Stack direction="column" spacing={2.5} width="100%">
                         <Form.Field
                             name="usernameOrEmail"
                             children={(field) => (
-                                <InputWithLabel
-                                    type="text"
-                                    label="Username or Email"
-                                    onChange={(e) =>
-                                        field.handleChange(e.target.value)
-                                    }
-                                    onBlur={field.handleBlur}
-                                    value={field.state.value}
-                                    required
-                                />
+                                <Stack direction="column" spacing={0.5}>
+                                    <InputWithLabel
+                                        type="text"
+                                        label="Username or Email"
+                                        onChange={(e) =>
+                                            field.handleChange(e.target.value)
+                                        }
+                                        onBlur={field.handleBlur}
+                                        value={field.state.value}
+                                        required
+                                    />
+                                    {forgotError && (
+                                        <Typography
+                                            variant="plain"
+                                            color="danger"
+                                            level="body-sm"
+                                        >
+                                            {forgotError}
+                                        </Typography>
+                                    )}
+                                </Stack>
                             )}
                         />
                         <Form.Field
                             name="password"
                             children={(field) => (
-                                <InputWithLabel
-                                    label="Password"
-                                    onChange={(e) =>
-                                        field.handleChange(e.target.value)
-                                    }
-                                    onBlur={field.handleBlur}
-                                    value={field.state.value}
-                                    apiError={error}
-                                    type="password"
-                                    required
-                                />
+                                <Stack direction="column" spacing={0.5}>
+                                    <InputWithLabel
+                                        label="Password"
+                                        onChange={(e) =>
+                                            field.handleChange(e.target.value)
+                                        }
+                                        onBlur={field.handleBlur}
+                                        value={field.state.value}
+                                        apiError={error}
+                                        type="password"
+                                        required
+                                    />
+                                    <Link
+                                        variant="plain"
+                                        color="info"
+                                        level="body-sm"
+                                        disabled={forgettingPassword}
+                                        css={{
+                                            marginRight: "auto"
+                                        }}
+                                        onClick={() => {
+                                            const usernameOrEmail =
+                                                Form.getFieldValue(
+                                                    "usernameOrEmail"
+                                                );
+
+                                            if (!usernameOrEmail) {
+                                                setForgotError(
+                                                    "Please enter your username or email to reset your password"
+                                                );
+                                                return;
+                                            }
+
+                                            forgotPassword(usernameOrEmail);
+                                        }}
+                                    >
+                                        Forgot your password?
+                                    </Link>
+                                </Stack>
                             )}
                         />
                         <Form.Subscribe
@@ -236,7 +298,7 @@ function Login() {
                         navigate({ to: "/register" });
                     }}
                     css={{
-                        cursor: "pointer",
+                        cursor: "pointer"
                     }}
                     level={{ xs: "body-sm", sm: "body-md", md: "body-lg" }}
                     fontSize={{ xs: "0.95rem", sm: "1.1rem", md: "1.2rem" }}

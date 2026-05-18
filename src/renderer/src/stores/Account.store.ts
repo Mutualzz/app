@@ -5,11 +5,12 @@ import {
     type AvatarFormat,
     CDNRoutes,
     ImageFormat,
-    type Sizes,
+    type Sizes
 } from "@mutualzz/types";
 import { makeAutoObservable } from "mobx";
 import { REST } from "./REST.store";
 import type { AppStore } from "@stores/App.store";
+import { BitField, userFlags, UserFlags } from "@mutualzz/bitfield";
 
 export class AccountStore {
     id: Snowflake;
@@ -24,14 +25,18 @@ export class AccountStore {
     email?: string | null = null;
     accentColor: string;
     createdAt: Date;
+    updatedAt: Date;
+    flags: BitField<UserFlags>;
+
     raw: APIPrivateUser;
+
     private readonly logger = new Logger({
-        tag: "AccountStore",
+        tag: "AccountStore"
     });
 
     constructor(
         private readonly app: AppStore,
-        user: APIPrivateUser,
+        user: APIPrivateUser
     ) {
         this.id = user.id;
         this.username = user.username;
@@ -42,6 +47,8 @@ export class AccountStore {
         this.globalName = user.globalName ?? null;
         this.email = user.email ?? null;
         this.createdAt = new Date(user.createdAt);
+        this.updatedAt = new Date(user.updatedAt);
+        this.flags = BitField.fromString(userFlags, user.flags.toString());
 
         this.raw = user;
 
@@ -66,7 +73,7 @@ export class AccountStore {
             const url = REST.makeCDNUrl(
                 avatar.startsWith("a_")
                     ? CDNRoutes.userAvatar(this.id, avatar, ImageFormat.GIF)
-                    : CDNRoutes.userAvatar(this.id, avatar, ImageFormat.PNG),
+                    : CDNRoutes.userAvatar(this.id, avatar, ImageFormat.PNG)
             );
             map.set(avatar, url);
         }
@@ -75,7 +82,7 @@ export class AccountStore {
 
     get defaultAvatarUrl() {
         return REST.makeCDNUrl(
-            CDNRoutes.defaultUserAvatar(this.defaultAvatar.type),
+            CDNRoutes.defaultUserAvatar(this.defaultAvatar.type)
         );
     }
 
@@ -84,7 +91,7 @@ export class AccountStore {
         version: "dark" | "light" = "light",
         size: Sizes = 128,
         format: AvatarFormat = ImageFormat.WebP,
-        hash?: string,
+        hash?: string
     ) {
         if (!this.avatar)
             return REST.makeCDNUrl(
@@ -92,8 +99,8 @@ export class AccountStore {
                     this.defaultAvatar.type,
                     version,
                     size,
-                    format,
-                ),
+                    format
+                )
             );
 
         return REST.makeCDNUrl(
@@ -102,8 +109,8 @@ export class AccountStore {
                 hash ?? this.avatar,
                 format,
                 size,
-                animated,
-            ),
+                animated
+            )
         );
     }
 

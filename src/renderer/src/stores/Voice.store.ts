@@ -62,6 +62,7 @@ class MediasoupSession {
     private micProducer: mediasoupClient.types.Producer | null = null;
     private cameraProducer: mediasoupClient.types.Producer | null = null;
     private audioContext: AudioContext | null = null;
+    private audioSourceNodes = new Map<string, AudioNode>(); // producerId → source node
 
     private consumersByProducerId = new Map<
         string,
@@ -100,9 +101,13 @@ class MediasoupSession {
     }
 
     unlockAudio() {
-        if (this.audioContext) return;
-        this.audioContext = new AudioContext();
-        void this.audioContext.resume();
+        if (!this.audioContext) {
+            this.audioContext = new AudioContext();
+        }
+        // Always attempt resume — Electron may suspend it even after creation
+        if (this.audioContext.state === "suspended") {
+            void this.audioContext.resume();
+        }
     }
 
     getLocalCameraStream() {
@@ -117,7 +122,8 @@ class MediasoupSession {
         this.currentOutputDeviceId = id;
         if (!id) return;
         for (const [, meta] of this.streamMetadata) {
-            if (meta.element)
+            // Audio is routed through AudioContext — only video elements use setSinkId
+            if (meta.kind !== "audio" && meta.element)
                 void safeSetSinkId(meta.element, id, this.logger, meta.kind);
         }
     }
@@ -141,8 +147,28 @@ class MediasoupSession {
 
     setSelfDeaf(deafened: boolean) {
         this.isDeafened = deafened;
+        // Audio streams are routed through AudioContext nodes, not HTMLAudioElement.
+        // Deafen = disconnect from destination; undeafen = reconnect.
+        if (this.audioContext) {
+            for (const [producerId, sourceNode] of this.audioSourceNodes) {
+                const meta = this.streamMetadata.get(producerId);
+                if (!meta || meta.kind !== "audio") continue;
+                try {
+                    if (deafened) {
+                        (sourceNode as AudioNode).disconnect();
+                    } else {
+                        (sourceNode as AudioNode).connect(
+                            this.audioContext.destination
+                        );
+                    }
+                } catch {
+                    // disconnect() throws if not connected — safe to ignore
+                }
+            }
+        }
+        // Still mute video elements if any
         for (const [, meta] of this.streamMetadata) {
-            if (meta.kind === "audio" && meta.element) {
+            if (meta.kind !== "audio" && meta.element) {
                 try {
                     meta.element.muted = deafened;
                 } catch {}
@@ -381,6 +407,14 @@ class MediasoupSession {
         }
         this.consumersByProducerId.clear();
 
+        // Disconnect all AudioContext source nodes
+        for (const [, sourceNode] of this.audioSourceNodes) {
+            try {
+                sourceNode.disconnect();
+            } catch {}
+        }
+        this.audioSourceNodes.clear();
+
         for (const [, meta] of this.streamMetadata) {
             if (meta.element) {
                 try {
@@ -481,13 +515,10 @@ class MediasoupSession {
                 reject(new Error("Voice socket closed before open"));
 
             ws.onopen = () => {
-                // Once opened, replace onclose handler with a long-running handler
                 ws.onclose = (ev: CloseEvent) => {
                     try {
-                        // notify parent (VoiceStore) about server-initiated closure
                         this.onSocketClosed?.(ev);
                     } catch {}
-                    // nothing to reject here — the promise is already resolved
                 };
                 resolve(ws);
             };
@@ -543,12 +574,12 @@ class MediasoupSession {
         const kind: MediaKind = consumer.kind === "video" ? "camera" : "audio";
 
         if (consumer.kind === "video") {
-            const video = document.createElement("video");
-            video.srcObject = stream;
+            const video = document.createElement("video") as HTMLVideoElement;
             video.autoplay = true;
             video.playsInline = true;
             video.style.display = "none";
             document.body.appendChild(video);
+            video.srcObject = stream;
 
             if (this.currentOutputDeviceId)
                 void safeSetSinkId(
@@ -564,7 +595,6 @@ class MediasoupSession {
                 element: video
             });
 
-            // Register mapping BEFORE play so UI can react immediately
             this.onVideoConsumed(userId, producerId);
 
             await this.rpc(VoiceOpcodes.VoiceResumeConsumer, {
@@ -573,32 +603,36 @@ class MediasoupSession {
 
             await this.playElement(video);
         } else {
-            const audio = new Audio();
-            audio.srcObject = stream;
-            audio.autoplay = true;
-            audio.muted = this.isDeafened;
-            audio.style.display = "none";
-            document.body.appendChild(audio);
+            if (!this.audioContext) {
+                this.audioContext = new AudioContext();
+            }
+            const audioCtx = this.audioContext;
 
-            if (this.currentOutputDeviceId)
-                void safeSetSinkId(
-                    audio,
-                    this.currentOutputDeviceId,
-                    this.logger,
-                    "audio"
-                );
+            if (audioCtx.state === "suspended") {
+                try {
+                    await audioCtx.resume();
+                } catch (err) {
+                    this.logger.warn("AudioContext resume failed", err);
+                }
+            }
+
+            const sourceNode = audioCtx.createMediaStreamSource(stream);
+
+            if (!this.isDeafened) {
+                sourceNode.connect(audioCtx.destination);
+            }
+
+            this.audioSourceNodes.set(producerId, sourceNode);
 
             this.streamMetadata.set(producerId, {
                 stream,
                 kind,
-                element: audio
+                element: undefined
             });
 
             await this.rpc(VoiceOpcodes.VoiceResumeConsumer, {
                 consumerId: consumer.id
             });
-
-            await this.playElement(audio);
         }
     }
 
@@ -625,6 +659,7 @@ class MediasoupSession {
         }
 
         // RPC response
+
         const pending = this.pendingRequests.get(envelope.id ?? "");
         if (!pending) return;
         this.pendingRequests.delete(envelope.id);
@@ -681,8 +716,6 @@ class MediasoupSession {
                 return;
             }
 
-            // We don't have a signal here because this is a push from the server.
-            // Use a never-aborting signal, teardown() will kill any in-flight consume.
             await this.consumeProducer(
                 producerId,
                 userId,

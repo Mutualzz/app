@@ -3,6 +3,7 @@ import react from "@vitejs/plugin-react";
 import { readFileSync } from "node:fs";
 import replace from "@rollup/plugin-replace";
 import svgr from "vite-plugin-svgr";
+import tanstackRouter from "@tanstack/router-plugin/vite";
 
 function getGitRevision() {
     try {
@@ -50,6 +51,11 @@ export default defineConfig({
                 __GIT_BRANCH__: getGitBranch(),
                 __APP_VERSION__: getVersion(),
                 preventAssignment: true
+            }),
+            tanstackRouter({
+                target: "react",
+                autoCodeSplitting: false,
+                quoteStyle: "double"
             }),
             react({
                 jsxImportSource: "@emotion/react"

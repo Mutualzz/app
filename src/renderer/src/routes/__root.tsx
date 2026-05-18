@@ -22,7 +22,6 @@ import {
     useState
 } from "react";
 
-import { APIErrorListener } from "@components/APIErrorListener";
 import { DesktopShell } from "@components/Desktop/DesktopShell";
 import { InjectGlobal } from "@components/InjectGlobal";
 import Loader from "@components/Loader/Loader";
@@ -182,7 +181,6 @@ function RootComponent() {
                                         {forceGate ? null : (
                                             <>
                                                 <InjectGlobal />
-                                                <APIErrorListener />
                                                 <Loader>
                                                     <Stack
                                                         direction="column"

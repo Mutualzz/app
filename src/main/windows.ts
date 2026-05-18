@@ -53,6 +53,23 @@ export function createMainWindow(): BrowserWindow {
         }
     );
 
+    mainWindow.webContents.session.setPermissionRequestHandler(
+        (_webContents, permission, callback) => {
+            const allowed = [
+                "media",
+                "mediaKeySystem",
+                "microphone",
+                "camera",
+                "notifications",
+                "fullscreen",
+                "pointerLock",
+                "usb",
+                "hid"
+            ];
+            callback(allowed.includes(permission));
+        }
+    );
+
     mainWindow.on("close", (event) => {
         if (closeBlocked) {
             event.preventDefault();

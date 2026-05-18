@@ -24,7 +24,8 @@
   style-src 'self' 'unsafe-inline';
   img-src 'self' data: blob: https: localhost:3001;
   font-src 'self' data:;
-  connect-src *;
+  connect-src * ws: wss:;
+  media-src 'self' blob: mediastream:;
   object-src 'none';
   base-uri 'self';
   form-action 'self';

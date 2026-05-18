@@ -17,7 +17,7 @@ export class SpaceStore {
         makePersistable(this, {
             name: "SpaceStore",
             properties: ["mostRecentSpaceId"],
-            storage: localStorage,
+            storage: localStorage
         });
     }
 
@@ -40,7 +40,7 @@ export class SpaceStore {
             .filter((space): space is Space => space !== undefined);
 
         const unpositionedSpaces = this.all.filter(
-            (space) => !positions.has(space.id),
+            (space) => !positions.has(space.id)
         );
 
         return [...positionedSpaces, ...unpositionedSpaces];
@@ -48,6 +48,14 @@ export class SpaceStore {
 
     get count() {
         return this.spaces.size;
+    }
+
+    get ownerOf() {
+        return Array.from(
+            this.spaces
+                .values()
+                .filter((space) => space.ownerId === this.app.account?.id)
+        );
     }
 
     setActive(id?: Snowflake) {
