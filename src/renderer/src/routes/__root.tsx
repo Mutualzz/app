@@ -154,15 +154,6 @@ function RootComponent() {
             stage === "relaunching" ||
             stage === "error");
 
-    console.log("[Router DEBUG]", {
-        pathname: routerState.location.pathname,
-        matchedRouteId: routerState.matches[routerState.matches.length - 1]?.id,
-        allMatches: routerState.matches.map((m) => m.id),
-        href: window.location.href,
-        search: routerState.location.search,
-        hash: routerState.location.hash
-    });
-
     return (
         <QueryClientProvider client={app.queryClient}>
             <HotkeysProvider>

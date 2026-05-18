@@ -40,7 +40,6 @@ export const ChangePassword = observer(() => {
                     confirmNewPassword: values.confirmNewPassword
                 }),
             onSuccess: () => {
-                console.log("here");
                 closeModal();
             },
             onError: (err: HttpException) => {
