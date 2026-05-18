@@ -186,20 +186,11 @@ export function setupIPC(): void {
 
     ipcMain.handle("theme:read-icon", async (_, relativePath: string) => {
         try {
-            let fullPath: string;
+            const baseDir = app.isPackaged
+                ? path.join(process.resourcesPath, "resources")
+                : path.join(__dirname, "..", "..", "resources");
 
-            if (app.isPackaged) {
-                fullPath = path.join(process.resourcesPath, relativePath);
-            } else {
-                fullPath = path.join(
-                    __dirname,
-                    "..",
-                    "..",
-                    "resources",
-                    relativePath
-                );
-            }
-
+            const fullPath = path.join(baseDir, relativePath);
             const buf = await fsPromises.readFile(fullPath);
             const ext = path.extname(fullPath).slice(1).toLowerCase();
 
