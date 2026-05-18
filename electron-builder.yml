@@ -1,7 +1,7 @@
 appId: com.mutualzz.app
 productName: mutualzz
 directories:
-    buildResources: build
+    buildResources: resources
 files:
     - '!**/.vscode/*'
     - '!src/*'
@@ -22,6 +22,10 @@ nsis:
     artifactName: ${name}Setup.${ext}
     shortcutName: ${productName}
     uninstallDisplayName: ${productName}
+nodeModulesPaths:
+    - ../../node_modules
+    - node_modules
+npmRebuild: false
 mac:
     entitlementsInherit: build/entitlements.mac.plist
     extendInfo:
@@ -40,7 +44,6 @@ linux:
     category: Social Networking
 appImage:
     artifactName: ${name}.${ext}
-npmRebuild: true
 publish:
     provider: github
     owner: mutualzz
