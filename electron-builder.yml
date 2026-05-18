@@ -1,5 +1,6 @@
 appId: com.mutualzz.app
 productName: Mutualzz
+icon: resources/icons/icon.png
 directories:
     buildResources: resources
 files:
