@@ -7,7 +7,7 @@ import { Logger } from "@mutualzz/logger";
 import { GatewayCloseCodes } from "@mutualzz/types";
 import { CssBaseline, Stack } from "@mutualzz/ui-web";
 import { GatewayStatus } from "@stores/Gateway.store";
-import { createRootRoute, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
+import { createRootRoute, Outlet, useNavigate } from "@tanstack/react-router";
 import { isElectron } from "@utils/index";
 import dayjs from "dayjs";
 import calendar from "dayjs/plugin/calendar";
@@ -81,7 +81,6 @@ function RootComponent() {
         tag: "App"
     });
     const [titleBarHeight, setTitleBarHeight] = useState(0);
-    const routerState = useRouterState();
 
     useEffect(() => {
         app.loadSettings();
