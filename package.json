@@ -1,7 +1,7 @@
 {
     "name": "@mutualzz/app",
     "version": "6.0.0",
-    "description": "An Electron application with React and TypeScript",
+    "description": "Social media app for everyone, especially alternative people",
     "main": "./out/main/index.js",
     "author": "Mutualzz",
     "homepage": "https://mutualzz.com",
