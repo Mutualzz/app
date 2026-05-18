@@ -116,7 +116,7 @@ function RootComponent() {
         logger.debug("Loading complete");
 
         return dispose;
-    }, [app, logger]);
+    }, []);
 
     useEffect(() => {
         if (!isElectron || !window.api) return;
