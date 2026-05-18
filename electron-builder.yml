@@ -6,9 +6,11 @@ directories:
 files:
     - 'out/**'
     - 'node_modules/**'
+    - 'resources/**/*'
     - '!src/*'
     - '!electron.vite.config.{js,ts,mjs,cjs}'
     - '!{.env,.env.*,.npmrc,pnpm-lock.yaml}'
+    - '!.env.production'
     - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
 asarUnpack:
     - resources/**/*
