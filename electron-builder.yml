@@ -1,5 +1,5 @@
 appId: com.mutualzz.app
-productName: mutualzz
+productName: Mutualzz
 directories:
     buildResources: resources
 files:
@@ -18,7 +18,7 @@ nsis:
     createDesktopShortcut: always
     createStartMenuShortcut: true
     runAfterFinish: true
-    artifactName: ${name}Setup.${ext}
+    artifactName: ${productName}Setup.${ext}
     shortcutName: ${productName}
     uninstallDisplayName: ${productName}
 npmRebuild: false
@@ -31,15 +31,16 @@ mac:
         -   NSDownloadsFolderUsageDescription: Application requests access to the user's Downloads folder.
     notarize: true
 dmg:
-    artifactName: ${name}.${ext}
+    artifactName: ${productName}.${ext}
 linux:
     target:
         - AppImage
         - deb
     maintainer: Mutualzz
     category: Social Networking
+    artifactName: ${productName}.${ext}
 appImage:
-    artifactName: ${name}.${ext}
+    artifactName: ${productName}.${ext}
 publish:
     provider: github
     owner: mutualzz
