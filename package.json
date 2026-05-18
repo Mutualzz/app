@@ -81,7 +81,7 @@
         "chroma-js": "^3.2.0",
         "dayjs": "^1.11.20",
         "electron": "42.1.0",
-        "electron-builder": "^26.10.0",
+        "electron-builder": "25.1.8",
         "electron-vite": "^5.0.0",
         "emojibase": "^17.0.0",
         "emojibase-data": "^17.0.0",
