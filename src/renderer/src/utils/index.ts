@@ -90,21 +90,12 @@ export const asAcronym = (str: string) =>
         .join("");
 
 export const getIconType = (theme: MzTheme): string => {
-    let iconUrl: string;
     const filename =
         theme.id === "baseDark" || theme.id === "baseLight"
             ? "icon.png"
             : "icon-adaptive.png";
 
-    if (isElectron) {
-        // In Electron, use a resource URL or relative path that works with file://
-        iconUrl = `./public/${filename}`;
-    } else {
-        // Web version uses absolute path from public folder
-        iconUrl = `/${filename}`;
-    }
-
-    return iconUrl;
+    return `/${filename}`;
 };
 
 /**
