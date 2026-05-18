@@ -90,10 +90,12 @@ export const asAcronym = (str: string) =>
         .join("");
 
 export const getIconType = (theme: MzTheme): string => {
-    const filename =
-        theme.id === "baseDark" || theme.id === "baseLight"
-            ? "icon.png"
-            : "icon-adaptive.png";
+    const isAdaptive = theme.id !== "baseDark" && theme.id !== "baseLight";
+
+    const filename = isAdaptive ? "icon-adaptive.png" : "icon.png";
+
+    if (isElectron)
+        return `/icons/${isAdaptive ? "adaptive" : "base"}/${filename}`;
 
     return `/${filename}`;
 };
