@@ -34,6 +34,7 @@ export interface MutualzzAPI {
 
     theme: {
         updateIcons(dataUrl: string): Promise<void>;
+        readIcon(relativePath: string): Promise<string | null>;
     };
 
     storage: {

@@ -52,7 +52,9 @@ const api = {
     },
     theme: {
         updateIcons: (dataUrl: string) =>
-            ipcRenderer.invoke("theme:update-icons", dataUrl)
+            ipcRenderer.invoke("theme:update-icons", dataUrl),
+        readIcon: (relativePath: string) =>
+            ipcRenderer.invoke("theme:read-icon", relativePath)
     },
     window: {
         minimize: () => ipcRenderer.invoke("window:minimize"),

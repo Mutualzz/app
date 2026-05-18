@@ -2,6 +2,8 @@ import { app, ipcMain } from "electron";
 import { trayManager } from "./tray";
 import { getMainWindow } from "./windows";
 import keytar from "keytar";
+import { promises as fsPromises } from "fs";
+import path from "path";
 
 const SERVICE = "mutualzz";
 const ACCOUNT = "default";
@@ -180,5 +182,40 @@ export function setupIPC(): void {
 
         // Update window icon
         trayManager.setWindowIcon(window, dataUrl);
+    });
+
+    ipcMain.handle("theme:read-icon", async (_, relativePath: string) => {
+        try {
+            let fullPath: string;
+
+            if (app.isPackaged) {
+                fullPath = path.join(process.resourcesPath, relativePath);
+            } else {
+                fullPath = path.join(
+                    __dirname,
+                    "..",
+                    "..",
+                    "resources",
+                    relativePath
+                );
+            }
+
+            const buf = await fsPromises.readFile(fullPath);
+            const ext = path.extname(fullPath).slice(1).toLowerCase();
+
+            const mime =
+                ext === "png"
+                    ? "image/png"
+                    : ext === "webp"
+                      ? "image/webp"
+                      : ext === "jpg" || ext === "jpeg"
+                        ? "image/jpeg"
+                        : "application/octet-stream";
+
+            return `data:${mime};base64,${buf.toString("base64")}`;
+        } catch (err) {
+            console.error("theme:read-icon failed:", err);
+            return null;
+        }
     });
 }

@@ -1,5 +1,5 @@
 import type { Theme } from "@emotion/react";
-import { getIconType } from ".";
+import { getIconType, isElectron } from ".";
 import { getIconFromCache, putIconInCache } from "@storages/indexedDb";
 
 const canvasToBlob = (
@@ -31,14 +31,25 @@ export const getAdaptiveIcon = async (
     mime = "image/webp",
     iconUrl?: string
 ): Promise<string> => {
-    if (!iconUrl) iconUrl = getIconType(theme);
+    // If no explicit iconUrl provided, derive one
+    if (!iconUrl) {
+        if (isElectron) {
+            const isBase = theme.id === "baseDark" || theme.id === "baseLight";
+            const relPath = isBase
+                ? "icons/base/icon.png"
+                : "icons/adaptive/icon-adaptive.png";
+
+            const electronDataUrl = await window.api.theme.readIcon(relPath);
+
+            if (electronDataUrl) iconUrl = electronDataUrl;
+            else iconUrl = getIconType(theme); // Fallback to web path (in case readIcon failed)
+        } else iconUrl = getIconType(theme); // Web can directly use the path
+    }
 
     const cacheKey = `${theme.id}-${theme.type}-${theme.colors.primary}-${mime}`;
 
     const cachedBlob = await getIconFromCache(cacheKey);
-    if (cachedBlob) {
-        return await blobToDataUrl(cachedBlob);
-    }
+    if (cachedBlob) return await blobToDataUrl(cachedBlob);
 
     const res = await fetch(iconUrl);
     if (!res.ok) throw new Error("Failed to fetch icon");
