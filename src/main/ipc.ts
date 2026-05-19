@@ -8,18 +8,6 @@ import path from "path";
 const SERVICE = "mutualzz";
 const ACCOUNT = "default";
 
-function ipcLog(...args: unknown[]) {
-    const line =
-        `[${new Date().toISOString()}] ` +
-        args
-            .map((v) => (typeof v === "string" ? v : JSON.stringify(v)))
-            .join(" ") +
-        "\n";
-
-    const logPath = path.join(app.getPath("userData"), "ipc.log");
-    appendFileSync(logPath, line, "utf8");
-}
-
 export function setupIPC(): void {
     // Token Storage
     ipcMain.handle("storage:get-token", async () => {
@@ -198,27 +186,11 @@ export function setupIPC(): void {
 
     ipcMain.handle("theme:read-icon", async (_, relativePath: string) => {
         try {
-            let fullPath: string;
+            const baseDir = app.isPackaged
+                ? process.resourcesPath
+                : path.join(__dirname, "..", "..", "resources");
 
-            if (app.isPackaged) {
-                fullPath = path.join(
-                    process.resourcesPath,
-                    "app",
-                    "resources",
-                    relativePath
-                );
-            } else {
-                fullPath = path.join(
-                    __dirname,
-                    "..",
-                    "..",
-                    "resources",
-                    relativePath
-                );
-            }
-
-            ipcLog("[theme:read-icon] fullPath:", fullPath);
-
+            const fullPath = path.join(baseDir, relativePath);
             const buf = await fsPromises.readFile(fullPath);
             const ext = path.extname(fullPath).slice(1).toLowerCase();
 
@@ -233,7 +205,7 @@ export function setupIPC(): void {
 
             return `data:${mime};base64,${buf.toString("base64")}`;
         } catch (err) {
-            ipcLog("[theme:read-icon] failed:", String(err));
+            console.error("[theme:read-icon] failed:", err);
             return null;
         }
     });
