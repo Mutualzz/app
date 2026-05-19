@@ -18,18 +18,16 @@
     <meta content="index, follow" name="robots" />
     <meta content="Mutualzz" name="author" />
 
-    <meta content="
-  default-src 'self';
+    <meta content="  default-src 'self';
   script-src 'self' https://static.cloudflareinsights.com;
   style-src 'self' 'unsafe-inline';
   img-src 'self' data: blob: https: localhost:3001;
   font-src 'self' data:;
-  connect-src * ws: wss:;
+  connect-src * ws: wss: data:;
   media-src 'self' blob: mediastream:;
   object-src 'none';
   base-uri 'self';
-  form-action 'self';
-" http-equiv="Content-Security-Policy" />
+  form-action 'self';" http-equiv="Content-Security-Policy" />
 
     <meta content="website" property="og:type" />
     <meta content="Mutualzz (Early Access)" property="og:title" />
