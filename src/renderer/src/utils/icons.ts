@@ -41,11 +41,11 @@ export const getAdaptiveIcon = async (
 
             const electronDataUrl = await window.api.theme.readIcon(relPath);
 
-            console.log(electronDataUrl);
+            if (!electronDataUrl)
+                throw new Error(`Failed to read Electron icon: ${relPath}`);
 
-            if (electronDataUrl) iconUrl = electronDataUrl;
-            else iconUrl = getIconType(theme); // Fallback to web path (in case readIcon failed)
-        } else iconUrl = getIconType(theme); // Web can directly use the path
+            iconUrl = electronDataUrl;
+        } else iconUrl = getIconType(theme);
     }
 
     const cacheKey = `${theme.id}-${theme.type}-${theme.colors.primary}-${mime}`;
