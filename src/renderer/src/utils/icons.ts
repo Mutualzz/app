@@ -37,7 +37,7 @@ export const getAdaptiveIcon = async (
             const isBase = theme.id === "baseDark" || theme.id === "baseLight";
             const relPath = isBase
                 ? "icons/base/icon.png"
-                : "icons/adaptive/icon-adaptive.png";
+                : "icons/adaptive/icon.png";
 
             const electronDataUrl = await window.api.theme.readIcon(relPath);
 
