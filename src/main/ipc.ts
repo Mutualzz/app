@@ -2,7 +2,7 @@ import { app, ipcMain } from "electron";
 import { trayManager } from "./tray";
 import { getMainWindow } from "./windows";
 import keytar from "keytar";
-import { promises as fsPromises } from "fs";
+import { existsSync, promises as fsPromises } from "fs";
 import path from "path";
 
 const SERVICE = "mutualzz";
@@ -186,11 +186,26 @@ export function setupIPC(): void {
 
     ipcMain.handle("theme:read-icon", async (_, relativePath: string) => {
         try {
-            const baseDir = app.isPackaged
-                ? process.resourcesPath
-                : path.join(__dirname, "..", "..", "resources");
+            const candidates = app.isPackaged
+                ? [
+                      path.join(
+                          process.resourcesPath,
+                          "app.asar.unpacked",
+                          "resources",
+                          relativePath
+                      ),
+                      path.join(process.resourcesPath, relativePath)
+                  ]
+                : [path.join(__dirname, "..", "..", "resources", relativePath)];
 
-            const fullPath = path.join(baseDir, relativePath);
+            const fullPath = candidates.find((p) => existsSync(p));
+
+            if (!fullPath) {
+                throw new Error(
+                    `Icon not found. Tried: ${candidates.join(" | ")}`
+                );
+            }
+
             const buf = await fsPromises.readFile(fullPath);
             const ext = path.extname(fullPath).slice(1).toLowerCase();
 
