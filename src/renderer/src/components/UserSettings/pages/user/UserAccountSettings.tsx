@@ -9,6 +9,8 @@ import { useModal } from "@contexts/Modal.context";
 import { EmailVerifyCode } from "@components/Modals/EmailVerifyCode";
 import { ChangePassword } from "@components/Modals/ChangePassword";
 import { Link } from "@components/Link";
+import { EmailChange } from "@components/Modals/EmailChange";
+import { UsernameChange } from "@components/Modals/UsernameChange";
 
 export const UserAccountSettings = observer(() => {
     const app = useAppStore();
@@ -24,6 +26,18 @@ export const UserAccountSettings = observer(() => {
             mutationFn: () => app.rest.post("/@me/send-email-code"),
             onSuccess: () => {
                 openModal("email-verification", <EmailVerifyCode />);
+            }
+        });
+
+    const { mutate: sendConfirmEmail, isPending: confirmingEmail } =
+        useMutation({
+            mutationKey: [`confirmEmail`, account?.id],
+            mutationFn: () => {
+                if (!account?.flags.has("Verified")) return Promise.resolve();
+                return app.rest.post("/@me/confirm-email");
+            },
+            onSuccess: () => {
+                openModal("email-change", <EmailChange />);
             }
         });
 
@@ -119,7 +133,12 @@ export const UserAccountSettings = observer(() => {
                             <Box>
                                 <Button
                                     color="neutral"
-                                    onClick={switchToProfile}
+                                    onClick={() =>
+                                        openModal(
+                                            "change-username",
+                                            <UsernameChange />
+                                        )
+                                    }
                                 >
                                     Edit
                                 </Button>
@@ -189,7 +208,10 @@ export const UserAccountSettings = observer(() => {
                             <Box>
                                 <Button
                                     color="neutral"
-                                    onClick={switchToProfile}
+                                    onClick={() => {
+                                        sendConfirmEmail();
+                                    }}
+                                    disabled={confirmingEmail}
                                 >
                                     Edit
                                 </Button>

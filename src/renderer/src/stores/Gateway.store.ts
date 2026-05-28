@@ -23,10 +23,17 @@ import {
     PresenceStatus
 } from "@mutualzz/types";
 import { type Codec, createCodec, type Encoding } from "@utils/codec";
-import { type Compression, type Compressor, createCompressor } from "@utils/compressor";
+import {
+    type Compression,
+    type Compressor,
+    createCompressor
+} from "@utils/compressor";
 import { makeAutoObservable } from "mobx";
 import type { AppStore } from "./App.store";
-import { buildDesktopPresenceFromProcesses, type PresenceUpdateDraft } from "../presence/gamePresence";
+import {
+    buildDesktopPresenceFromProcesses,
+    type PresenceUpdateDraft
+} from "../presence/gamePresence";
 import { normalizeJSON } from "@utils/JSON";
 import { isElectron } from "@utils/index";
 import { toast } from "react-toastify";
