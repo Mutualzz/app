@@ -2,7 +2,7 @@ import { observer } from "mobx-react-lite";
 import { useState } from "react";
 import { useAppStore } from "@hooks/useStores";
 import { Paper } from "@components/Paper";
-import { Box, Button, ButtonGroup, Typography } from "@mutualzz/ui-web";
+import { Button, Stack, Typography } from "@mutualzz/ui-web";
 import { useMutation } from "@tanstack/react-query";
 import { useModal } from "@contexts/Modal.context";
 import { HttpException } from "@mutualzz/types";
@@ -33,8 +33,6 @@ export const EmailVerifyCode = observer(() => {
     return (
         <Paper
             elevation={app.settings?.preferEmbossed ? 5 : 1}
-            width="25rem"
-            height="12.5rem"
             p={5}
             borderRadius={12}
             direction="column"
@@ -53,24 +51,26 @@ export const EmailVerifyCode = observer(() => {
                 type="text"
                 required
             />
-            <Box>
-                <ButtonGroup fullWidth size="lg" spacing={5}>
-                    <Button
-                        color="neutral"
-                        disabled={isVerifying}
-                        onClick={() => closeModal()}
-                    >
-                        Cancel
-                    </Button>
-                    <Button
-                        color="success"
-                        onClick={() => verifyCode()}
-                        disabled={isVerifying}
-                    >
-                        Verify
-                    </Button>
-                </ButtonGroup>
-            </Box>
+            <Stack spacing={1.25}>
+                <Button
+                    color="neutral"
+                    disabled={isVerifying}
+                    onClick={() => closeModal()}
+                    size="lg"
+                    expand
+                >
+                    Cancel
+                </Button>
+                <Button
+                    color="success"
+                    onClick={() => verifyCode()}
+                    disabled={isVerifying}
+                    size="lg"
+                    expand
+                >
+                    Verify
+                </Button>
+            </Stack>
         </Paper>
     );
 });

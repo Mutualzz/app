@@ -4,12 +4,12 @@ import {
     createColor,
     resolveResponsiveMerge,
     resolveSize,
-    type Size,
+    type Size
 } from "@mutualzz/ui-core";
 import {
     Avatar as MAvatar,
     type AvatarProps,
-    useTheme,
+    useTheme
 } from "@mutualzz/ui-web";
 import type { AccountStore } from "@stores/Account.store";
 import type { User } from "@stores/objects/User";
@@ -22,18 +22,24 @@ import { StatusBadge } from "@components/StatusBadge";
 
 interface UserAvatarProps extends AvatarProps {
     user?: AccountStore | User | null;
-
     badge?: boolean;
+    showInvisible?: boolean;
 }
 
 const baseSizeMap: Record<Size, number> = {
     sm: 28,
     md: 36,
-    lg: 48,
+    lg: 48
 };
 
 export const UserAvatar = observer(
-    ({ user, css, badge, ...props }: UserAvatarProps & { css?: CSSObject }) => {
+    ({
+        user,
+        css,
+        badge,
+        showInvisible,
+        ...props
+    }: UserAvatarProps & { css?: CSSObject }) => {
         const app = useAppStore();
         const { theme } = useTheme();
         const [focused, setFocused] = useState(false);
@@ -55,7 +61,7 @@ export const UserAvatar = observer(
         const { size } = resolveResponsiveMerge(
             theme,
             { size: sizeProp || "md" },
-            ({ size: s }) => ({ size: resolveSize(theme, s, baseSizeMap) }),
+            ({ size: s }) => ({ size: resolveSize(theme, s, baseSizeMap) })
         );
 
         if (!user) {
@@ -99,16 +105,21 @@ export const UserAvatar = observer(
                             ? user.constructAvatarUrl(
                                   !!user.avatar?.startsWith("a_"),
                                   version,
-                                  size,
+                                  size
                               )
                             : user.constructAvatarUrl(false, version, size)
                     }
                     {...restProps}
                 />
                 {status && badge && (
-                    <StatusBadge status={status} size={size} elevation={0} />
+                    <StatusBadge
+                        status={status}
+                        size={size}
+                        elevation={0}
+                        showInvisible={showInvisible}
+                    />
                 )}
             </Paper>
         );
-    },
+    }
 );

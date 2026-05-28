@@ -1,12 +1,13 @@
 import { observer } from "mobx-react-lite";
 import { Paper } from "@components/Paper";
 import { useAppStore } from "@hooks/useStores";
-import { Box, Button, ButtonGroup, Stack, Typography } from "@mutualzz/ui-web";
+import { Button, Stack, Typography } from "@mutualzz/ui-web";
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useModal } from "@contexts/Modal.context";
 import { HttpException } from "@mutualzz/types";
 import { InputWithLabel } from "@components/InputWithLabel";
+import { toast } from "react-toastify";
 
 type ChangePasswordErrors = {
     currentPassword: string | undefined;
@@ -40,6 +41,7 @@ export const ChangePassword = observer(() => {
                     confirmNewPassword: values.confirmNewPassword
                 }),
             onSuccess: () => {
+                toast.success("Your password was changed successfully");
                 closeModal();
             },
             onError: (err: HttpException) => {
@@ -58,9 +60,7 @@ export const ChangePassword = observer(() => {
     return (
         <Paper
             elevation={app.settings?.preferEmbossed ? 5 : 1}
-            width="30rem"
-            height="25rem"
-            p={5}
+           p={5}
             borderRadius={12}
             direction="column"
             justifyContent="space-between"
@@ -113,24 +113,27 @@ export const ChangePassword = observer(() => {
                     apiError={errors.confirmNewPassword}
                 />
             </Stack>
-            <Box>
-                <ButtonGroup fullWidth size="lg" spacing={5}>
-                    <Button
-                        color="neutral"
-                        disabled={changingPassword}
-                        onClick={() => closeModal()}
-                    >
-                        Cancel
-                    </Button>
-                    <Button
-                        color="success"
-                        onClick={() => changePassword()}
-                        disabled={changingPassword}
-                    >
-                        Change
-                    </Button>
-                </ButtonGroup>
-            </Box>
+
+            <Stack direction="row" spacing={1.25} justifyContent="flex-end">
+                <Button
+                    color="neutral"
+                    disabled={changingPassword}
+                    onClick={() => closeModal()}
+                    expand
+                    size="lg"
+                >
+                    Cancel
+                </Button>
+                <Button
+                    color="success"
+                    onClick={() => changePassword()}
+                    disabled={changingPassword}
+                    expand
+                    size="lg"
+                >
+                    Change
+                </Button>
+            </Stack>
         </Paper>
     );
 });

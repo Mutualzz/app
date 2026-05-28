@@ -19,19 +19,23 @@ export class ThemeStore {
 
     constructor(private readonly app: AppStore) {
         this.themes = observable.map(
-            baseThemes.map((t) => [t.id, new Theme(this.app, t)]),
+            baseThemes.map((t) => [t.id, new Theme(this.app, t)])
         );
         makeAutoObservable(this);
 
         makePersistable(this, {
             name: "ThemeStore",
             properties: ["currentTheme", "currentIcon"],
-            storage: localStorage,
+            storage: localStorage
         });
     }
 
     get all() {
         return Array.from(this.themes.values());
+    }
+
+    clear() {
+        this.reset();
     }
 
     setCurrentTheme(themeId: string | null) {

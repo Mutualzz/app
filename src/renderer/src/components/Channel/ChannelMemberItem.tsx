@@ -57,9 +57,10 @@ export const ChannelMemberItem = observer(({ space, state }: Props) => {
             justifyContent="space-between"
             onContextMenu={(e) =>
                 openContextMenu(e, {
-                    type: "member",
-                    space: member.space!,
-                    member
+                    type: "user",
+                    space: member.space,
+                    member,
+                    user: member.user!
                 })
             }
             css={{
@@ -95,7 +96,6 @@ export const ChannelMemberItem = observer(({ space, state }: Props) => {
                         <FaMicrophoneSlash />
                     </Tooltip>
                 )}
-
                 {state.spaceMute && (
                     <Tooltip
                         content={<TooltipWrapper>Space Muted</TooltipWrapper>}

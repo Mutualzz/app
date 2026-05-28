@@ -15,7 +15,12 @@ import duration from "dayjs/plugin/duration";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { reaction } from "mobx";
 import { observer } from "mobx-react-lite";
-import { type PropsWithChildren, type ReactNode, useEffect, useState } from "react";
+import {
+    type PropsWithChildren,
+    type ReactNode,
+    useEffect,
+    useState
+} from "react";
 
 import { DesktopShell } from "@components/Desktop/DesktopShell";
 import { InjectGlobal } from "@components/InjectGlobal";
@@ -34,6 +39,7 @@ import { ModalRoot } from "@components/Modals/ModalRoot";
 import { seo } from "@seo";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { HotkeysProvider } from "@tanstack/react-hotkeys";
+import { ToastContainer } from "react-toastify";
 
 dayjs.extend(relativeTime);
 dayjs.extend(calendar, calendarStrings);
@@ -166,6 +172,7 @@ function RootComponent() {
                                 />
                                 <DesktopShell>
                                     <ContextMenuProvider>
+                                        <ToastContainer position="top-center" />
                                         <ModalRoot />
                                         <NavigationTracker />
                                         {isElectron && app.updater && (

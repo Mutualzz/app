@@ -2,7 +2,7 @@ import { Paper } from "@components/Paper";
 import { useModal } from "@contexts/Modal.context";
 import {
     type SpaceSettingsPage,
-    useSpaceSettings,
+    useSpaceSettings
 } from "@components/SpaceSettings/SpaceSettings.context";
 import { useAppStore } from "@hooks/useStores";
 import { IconButton, Stack, Typography } from "@mutualzz/ui-web";
@@ -14,6 +14,7 @@ import { FaX } from "react-icons/fa6";
 import { SpaceInvitesSettings } from "@components/SpaceSettings/pages/people/SpaceInvitesSettings";
 import { SpaceRolesSettings } from "@components/SpaceSettings/pages/people/roles/SpaceRolesSettings";
 import { SpaceExpressionsSettings } from "@components/SpaceSettings/pages/people/expressions/SpaceExpressionsSettings";
+import { SpaceBansSettings } from "@components/SpaceSettings/pages/moderation/bans/SpaceBansSettings";
 
 interface SpaceSettingsContentProps {
     space: Space;
@@ -49,7 +50,7 @@ export const SpaceSettingsContent = observer(
                     borderTopRightRadius={{
                         xs: "0.75rem",
                         sm: "1.25rem",
-                        md: "1.5rem",
+                        md: "1.5rem"
                     }}
                     px={{ xs: "0.5rem", sm: 3 }}
                     py={{ xs: "0.5rem", sm: 4 }}
@@ -68,7 +69,7 @@ export const SpaceSettingsContent = observer(
                     <IconButton
                         color="neutral"
                         css={{
-                            marginRight: "0.5rem",
+                            marginRight: "0.5rem"
                         }}
                         variant="plain"
                         size="sm"
@@ -100,8 +101,11 @@ export const SpaceSettingsContent = observer(
                     {currentPage === "expressions" && (
                         <SpaceExpressionsSettings space={space} />
                     )}
+                    {currentPage === "bans" && (
+                        <SpaceBansSettings space={space} />
+                    )}
                 </Paper>
             </Stack>
         );
-    },
+    }
 );

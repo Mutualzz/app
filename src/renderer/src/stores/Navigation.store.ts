@@ -16,7 +16,7 @@ export class NavigationStore {
         makePersistable(this, {
             name: "NavigationStore",
             properties: ["entries", "index"],
-            storage: localStorage,
+            storage: localStorage
         });
     }
 
@@ -33,6 +33,11 @@ export class NavigationStore {
     get canForward() {
         if (!this.app.account) return false;
         return this.index < this.entries.length - 1;
+    }
+
+    clear() {
+        this.entries = observable.array([]);
+        this.index = -1;
     }
 
     record(href: string) {

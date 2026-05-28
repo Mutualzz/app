@@ -76,19 +76,19 @@ export class VoiceStatesStore {
 
     getAllByChannel(channelId?: Snowflake | null) {
         return this.all.filter(
-            (state) => state.channelId === (channelId ?? null),
+            (state) => state.channelId === (channelId ?? null)
         );
     }
 
     getBySpace(userId: Snowflake, spaceId: Snowflake) {
         return this.all.find(
-            (state) => state.spaceId === spaceId && state.userId === userId,
+            (state) => state.spaceId === spaceId && state.userId === userId
         );
     }
 
     getByChannel(userId: Snowflake, channelId: Snowflake) {
         return this.all.find(
-            (state) => state.channelId === channelId && state.userId === userId,
+            (state) => state.channelId === channelId && state.userId === userId
         );
     }
 }

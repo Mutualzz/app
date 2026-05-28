@@ -4,14 +4,19 @@ import { makeAutoObservable, observable, type ObservableMap } from "mobx";
 import { makePersistable } from "mobx-persist-store";
 import type { AppStore } from "./App.store";
 import { Channel } from "./objects/Channel";
+import { Logger } from "@mutualzz/logger";
 
 export class ChannelStore {
     collapsedCategories: ObservableMap<string, Set<string>>; // Space -> Set of collapsed category IDs
-    active?: Channel | null;
-    activeId?: Snowflake;
+
+    activeId: Snowflake | null = null;
     mostRecentBySpace: ObservableMap<string, Snowflake | null> =
         observable.map();
     private readonly channels: ObservableMap<string, Channel>;
+
+    private readonly logger = new Logger({
+        tag: "ChannelStore"
+    });
 
     constructor(private readonly app: AppStore) {
         this.channels = observable.map();
@@ -37,18 +42,23 @@ export class ChannelStore {
                             map.set(key, new Set(arr));
                         });
                         return map;
-                    },
+                    }
                 },
-                "mostRecentBySpace",
+                "mostRecentBySpace"
             ],
-            storage: localStorage,
+            storage: localStorage
         });
     }
 
     get preferredChannel() {
+        const spaceId = this.app.spaces.activeId ?? "@me";
+
+        if (spaceId === "@me")
+            return this.getMostRecentChannelForSpace("@me") ?? this.dms[0];
+
         return (
-            this.getMostRecentChannelForSpace(this.app.spaces.activeId ?? "") ??
-            this.getFirstNavigableChannel(this.app.spaces.activeId ?? "")
+            this.getMostRecentChannelForSpace(spaceId) ??
+            this.getFirstNavigableChannel(spaceId)
         );
     }
 
@@ -60,9 +70,76 @@ export class ChannelStore {
         return this.channels.size;
     }
 
+    get dms() {
+        return this.all.filter(
+            (ch) =>
+                ch.type === ChannelType.DM || ch.type === ChannelType.GroupDM
+        );
+    }
+
+    get active() {
+        return this.activeId ? (this.get(this.activeId) ?? null) : null;
+    }
+
+    clear() {
+        this.activeId = null;
+        this.mostRecentBySpace.clear();
+        this.channels.clear();
+    }
+
+    getDMChannel(userOne: Snowflake, userTwo: Snowflake) {
+        return this.all
+            .filter((ch) => ch.type === ChannelType.DM)
+            .filter(
+                (ch) =>
+                    ch.recipientIds?.includes(userOne) &&
+                    ch.recipientIds?.includes(userTwo)
+            )[0];
+    }
+
+    async openDM(recipientId: Snowflake): Promise<Channel> {
+        const existing = this.getDMChannel(this.app.account!.id, recipientId);
+        if (existing) {
+            this.setActive(existing.id);
+            return existing;
+        }
+
+        const data = await this.app.rest.post<APIChannel>(`/channels/@me`, {
+            recipientId
+        });
+
+        const hydrated: APIChannel = {
+            ...data,
+            recipientIds: data.recipientIds,
+            recipients: data.recipients
+        };
+
+        const channel = this.add(hydrated);
+        this.setActive(channel.id);
+        this.setMostRecentChannelForSpace("@me", channel.id);
+        return channel;
+    }
+
+    closeDM(channelId: Snowflake) {
+        this.remove(channelId);
+
+        if (this.activeId === channelId) this.unsetActive();
+
+        return this.app.rest.delete(`/channels/@me/${channelId}`);
+    }
+
     setPreferredActive() {
         const preferred = this.preferredChannel;
-        this.setActive(preferred?.id);
+        if (!preferred?.id) {
+            this.logger.warn(
+                "No preferred channel found, defaulting to first DM or null"
+            );
+            this.unsetActive();
+
+            return;
+        }
+
+        this.setActive(preferred.id);
     }
 
     getMostRecentChannelForSpace(spaceId: string): Channel | undefined {
@@ -78,13 +155,16 @@ export class ChannelStore {
     setMostRecentChannel(id?: string | null) {
         this.mostRecentBySpace.set(
             this.app.spaces.activeId ?? "@me",
-            id ?? null,
+            id ?? null
         );
     }
 
-    setActive(id?: Snowflake) {
-        this.active = (id ? this.get(id) : null) ?? null;
-        this.activeId = this.active?.id;
+    setActive(id: Snowflake) {
+        this.activeId = id;
+    }
+
+    unsetActive() {
+        this.activeId = null;
     }
 
     add(channel: APIChannel): Channel {
@@ -139,7 +219,7 @@ export class ChannelStore {
 
     getSpaceVisibleChannels(
         spaceId: Snowflake,
-        types?: ChannelType[],
+        types?: ChannelType[]
     ): Channel[] {
         const space = this.app.spaces.get(spaceId);
         if (!space) return [];
@@ -161,7 +241,7 @@ export class ChannelStore {
         const categoryIdsToShow = new Set(
             viewableNonCats
                 .map((c) => c.parentId)
-                .filter((id): id is string => Boolean(id)),
+                .filter((id): id is string => Boolean(id))
         );
 
         const visibleNonCats = viewableNonCats.filter((ch) => {
@@ -189,7 +269,7 @@ export class ChannelStore {
 
     getLastPositionInCategory(
         categoryId: Snowflake | null,
-        channels: Channel[],
+        channels: Channel[]
     ): number {
         const inCategory = channels.filter((c) => c.parent?.id === categoryId);
         if (inCategory.length === 0) return -1;
@@ -198,7 +278,7 @@ export class ChannelStore {
 
     getFirstNavigableChannel(
         spaceId: Snowflake,
-        types?: ChannelType[],
+        types?: ChannelType[]
     ): Channel | undefined {
         const visibleChannels = this.getSpaceVisibleChannels(spaceId);
 
@@ -230,13 +310,13 @@ export class ChannelStore {
         const payload = order.map((channel) => ({
             id: channel.id,
             parentId: channel.parentId ? channel.parentId : null,
-            position: channel.position,
+            position: channel.position
         }));
 
         // Update the channels in the backend as well
         this.app.rest.patch(`/channels/bulk`, {
             spaceId,
-            channels: payload,
+            channels: payload
         });
     }
 

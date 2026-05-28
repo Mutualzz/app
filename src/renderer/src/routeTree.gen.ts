@@ -19,7 +19,9 @@ import { Route as IndexRouteImport } from "./routes/index"
 import { Route as InviteCodeRouteImport } from "./routes/invite/$code"
 import { Route as AuthenticatedSpacesRouteRouteImport } from "./routes/_authenticated/spaces/route"
 import { Route as AuthenticatedFeedRouteRouteImport } from "./routes/_authenticated/feed/route"
+import { Route as AuthenticatedAtmeRouteRouteImport } from "./routes/_authenticated/@me/route"
 import { Route as AuthenticatedSpacesSpaceIdRouteRouteImport } from "./routes/_authenticated/spaces/$spaceId/route"
+import { Route as AuthenticatedAtmeChannelIdRouteRouteImport } from "./routes/_authenticated/@me/$channelId/route"
 import { Route as AuthenticatedSpacesSpaceIdChannelIdRouteRouteImport } from "./routes/_authenticated/spaces/$spaceId/$channelId/route"
 
 const ResetRoute = ResetRouteImport.update({
@@ -72,11 +74,22 @@ const AuthenticatedFeedRouteRoute = AuthenticatedFeedRouteRouteImport.update({
   path: "/feed",
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedAtmeRouteRoute = AuthenticatedAtmeRouteRouteImport.update({
+  id: "/@me",
+  path: "/@me",
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedSpacesSpaceIdRouteRoute =
   AuthenticatedSpacesSpaceIdRouteRouteImport.update({
     id: "/$spaceId",
     path: "/$spaceId",
     getParentRoute: () => AuthenticatedSpacesRouteRoute,
+  } as any)
+const AuthenticatedAtmeChannelIdRouteRoute =
+  AuthenticatedAtmeChannelIdRouteRouteImport.update({
+    id: "/$channelId",
+    path: "/$channelId",
+    getParentRoute: () => AuthenticatedAtmeRouteRoute,
   } as any)
 const AuthenticatedSpacesSpaceIdChannelIdRouteRoute =
   AuthenticatedSpacesSpaceIdChannelIdRouteRouteImport.update({
@@ -92,9 +105,11 @@ export interface FileRoutesByFullPath {
   "/privacy": typeof PrivacyRoute
   "/register": typeof RegisterRoute
   "/reset": typeof ResetRoute
+  "/@me": typeof AuthenticatedAtmeRouteRouteWithChildren
   "/feed": typeof AuthenticatedFeedRouteRoute
   "/spaces": typeof AuthenticatedSpacesRouteRouteWithChildren
   "/invite/$code": typeof InviteCodeRoute
+  "/@me/$channelId": typeof AuthenticatedAtmeChannelIdRouteRoute
   "/spaces/$spaceId": typeof AuthenticatedSpacesSpaceIdRouteRouteWithChildren
   "/spaces/$spaceId/$channelId": typeof AuthenticatedSpacesSpaceIdChannelIdRouteRoute
 }
@@ -105,9 +120,11 @@ export interface FileRoutesByTo {
   "/privacy": typeof PrivacyRoute
   "/register": typeof RegisterRoute
   "/reset": typeof ResetRoute
+  "/@me": typeof AuthenticatedAtmeRouteRouteWithChildren
   "/feed": typeof AuthenticatedFeedRouteRoute
   "/spaces": typeof AuthenticatedSpacesRouteRouteWithChildren
   "/invite/$code": typeof InviteCodeRoute
+  "/@me/$channelId": typeof AuthenticatedAtmeChannelIdRouteRoute
   "/spaces/$spaceId": typeof AuthenticatedSpacesSpaceIdRouteRouteWithChildren
   "/spaces/$spaceId/$channelId": typeof AuthenticatedSpacesSpaceIdChannelIdRouteRoute
 }
@@ -120,9 +137,11 @@ export interface FileRoutesById {
   "/privacy": typeof PrivacyRoute
   "/register": typeof RegisterRoute
   "/reset": typeof ResetRoute
+  "/_authenticated/@me": typeof AuthenticatedAtmeRouteRouteWithChildren
   "/_authenticated/feed": typeof AuthenticatedFeedRouteRoute
   "/_authenticated/spaces": typeof AuthenticatedSpacesRouteRouteWithChildren
   "/invite/$code": typeof InviteCodeRoute
+  "/_authenticated/@me/$channelId": typeof AuthenticatedAtmeChannelIdRouteRoute
   "/_authenticated/spaces/$spaceId": typeof AuthenticatedSpacesSpaceIdRouteRouteWithChildren
   "/_authenticated/spaces/$spaceId/$channelId": typeof AuthenticatedSpacesSpaceIdChannelIdRouteRoute
 }
@@ -135,9 +154,11 @@ export interface FileRouteTypes {
     | "/privacy"
     | "/register"
     | "/reset"
+    | "/@me"
     | "/feed"
     | "/spaces"
     | "/invite/$code"
+    | "/@me/$channelId"
     | "/spaces/$spaceId"
     | "/spaces/$spaceId/$channelId"
   fileRoutesByTo: FileRoutesByTo
@@ -148,9 +169,11 @@ export interface FileRouteTypes {
     | "/privacy"
     | "/register"
     | "/reset"
+    | "/@me"
     | "/feed"
     | "/spaces"
     | "/invite/$code"
+    | "/@me/$channelId"
     | "/spaces/$spaceId"
     | "/spaces/$spaceId/$channelId"
   id:
@@ -162,9 +185,11 @@ export interface FileRouteTypes {
     | "/privacy"
     | "/register"
     | "/reset"
+    | "/_authenticated/@me"
     | "/_authenticated/feed"
     | "/_authenticated/spaces"
     | "/invite/$code"
+    | "/_authenticated/@me/$channelId"
     | "/_authenticated/spaces/$spaceId"
     | "/_authenticated/spaces/$spaceId/$channelId"
   fileRoutesById: FileRoutesById
@@ -252,12 +277,26 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof AuthenticatedFeedRouteRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    "/_authenticated/@me": {
+      id: "/_authenticated/@me"
+      path: "/@me"
+      fullPath: "/@me"
+      preLoaderRoute: typeof AuthenticatedAtmeRouteRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     "/_authenticated/spaces/$spaceId": {
       id: "/_authenticated/spaces/$spaceId"
       path: "/$spaceId"
       fullPath: "/spaces/$spaceId"
       preLoaderRoute: typeof AuthenticatedSpacesSpaceIdRouteRouteImport
       parentRoute: typeof AuthenticatedSpacesRouteRoute
+    }
+    "/_authenticated/@me/$channelId": {
+      id: "/_authenticated/@me/$channelId"
+      path: "/$channelId"
+      fullPath: "/@me/$channelId"
+      preLoaderRoute: typeof AuthenticatedAtmeChannelIdRouteRouteImport
+      parentRoute: typeof AuthenticatedAtmeRouteRoute
     }
     "/_authenticated/spaces/$spaceId/$channelId": {
       id: "/_authenticated/spaces/$spaceId/$channelId"
@@ -268,6 +307,20 @@ declare module "@tanstack/react-router" {
     }
   }
 }
+
+interface AuthenticatedAtmeRouteRouteChildren {
+  AuthenticatedAtmeChannelIdRouteRoute: typeof AuthenticatedAtmeChannelIdRouteRoute
+}
+
+const AuthenticatedAtmeRouteRouteChildren: AuthenticatedAtmeRouteRouteChildren =
+  {
+    AuthenticatedAtmeChannelIdRouteRoute: AuthenticatedAtmeChannelIdRouteRoute,
+  }
+
+const AuthenticatedAtmeRouteRouteWithChildren =
+  AuthenticatedAtmeRouteRoute._addFileChildren(
+    AuthenticatedAtmeRouteRouteChildren,
+  )
 
 interface AuthenticatedSpacesSpaceIdRouteRouteChildren {
   AuthenticatedSpacesSpaceIdChannelIdRouteRoute: typeof AuthenticatedSpacesSpaceIdChannelIdRouteRoute
@@ -300,11 +353,13 @@ const AuthenticatedSpacesRouteRouteWithChildren =
   )
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAtmeRouteRoute: typeof AuthenticatedAtmeRouteRouteWithChildren
   AuthenticatedFeedRouteRoute: typeof AuthenticatedFeedRouteRoute
   AuthenticatedSpacesRouteRoute: typeof AuthenticatedSpacesRouteRouteWithChildren
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAtmeRouteRoute: AuthenticatedAtmeRouteRouteWithChildren,
   AuthenticatedFeedRouteRoute: AuthenticatedFeedRouteRoute,
   AuthenticatedSpacesRouteRoute: AuthenticatedSpacesRouteRouteWithChildren,
 }

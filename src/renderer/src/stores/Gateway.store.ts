@@ -1,25 +1,26 @@
 import { Logger } from "@mutualzz/logger";
-import type {
+import {
+    type APIChannel,
     APIExpression,
+    type APIInvite,
     APIMemberRole,
     APIMessage,
+    type APIPrivateUser,
+    APIRelationship,
     APIRole,
+    type APISpace,
+    APISpaceBan,
     APISpaceMember,
+    type APIUser,
+    type APIUserSettings,
+    ChannelType,
+    GatewayCloseCodes,
+    GatewayDispatchEvents,
+    GatewayOpcodes,
     GatewayReadyPayload,
     PresenceActivity,
     PresenceSchedule,
     PresenceStatus
-} from "@mutualzz/types";
-import {
-    type APIChannel,
-    type APIInvite,
-    type APIPrivateUser,
-    type APISpace,
-    type APIUser,
-    type APIUserSettings,
-    GatewayCloseCodes,
-    GatewayDispatchEvents,
-    GatewayOpcodes
 } from "@mutualzz/types";
 import { type Codec, createCodec, type Encoding } from "@utils/codec";
 import { type Compression, type Compressor, createCompressor } from "@utils/compressor";
@@ -27,7 +28,8 @@ import { makeAutoObservable } from "mobx";
 import type { AppStore } from "./App.store";
 import { buildDesktopPresenceFromProcesses, type PresenceUpdateDraft } from "../presence/gamePresence";
 import { normalizeJSON } from "@utils/JSON";
-import { isElectron } from "@utils/index"; // We have to create our own GatewayStatus "enum" to avoid issues with SSR
+import { isElectron } from "@utils/index";
+import { toast } from "react-toastify";
 
 // We have to create our own GatewayStatus "enum" to avoid issues with SSR
 // since WebSocket is not available in the server environment.
@@ -114,8 +116,10 @@ export class GatewayStore {
     private lastPresenceHash: string | null = null;
     private lazyRequestChannels = new Map<string, string[]>(); // spaceId -> channelIds
 
-    private memberListRanges = new Map<string, [number, number][]>(); // key: `${spaceId}:${channelId}` -> list of [start, end] ranges we have
+    // key: `${spaceId}:${channelId}` -> list of [start, end] ranges we have
+    private memberListRanges = new Map<string, [number, number][]>();
     private memberListFetching = new Set<string>(); // Keys we are fetching
+    private manualDisconnect = false;
 
     constructor(private readonly app: AppStore) {
         makeAutoObservable(this);
@@ -196,6 +200,7 @@ export class GatewayStore {
         this.logger.debug(`[Connect] Gateway URL ${this.url}`);
         this.connectionStartTime = Date.now();
 
+        this.manualDisconnect = false;
         this.socket = new WebSocket(this.url);
         this.socket.binaryType = "arraybuffer";
         this.readyState = GatewayStatus.CONNECTING;
@@ -213,6 +218,7 @@ export class GatewayStore {
         this.app.voice.reset();
         this.readyState = GatewayStatus.CLOSING;
         this.logger.debug(`[Disconnect] ${this.url}`);
+        this.manualDisconnect = true;
         this.socket.close(code, reason);
     }
 
@@ -357,9 +363,9 @@ export class GatewayStore {
             }
 
             const finalBytes =
-                this.compress !== "none"
-                    ? this.compressor.compress(encodedBytes)
-                    : encodedBytes;
+                this.compress === "none"
+                    ? encodedBytes
+                    : this.compressor.compress(encodedBytes);
 
             this.socket.send(finalBytes);
             this.logger.debug(`[Gateway] <- ${payload.op}`);
@@ -535,6 +541,30 @@ export class GatewayStore {
             GatewayDispatchEvents.ExpressionDelete,
             this.onExpressionDelete
         );
+
+        // Relationships
+        this.dispatchHandlers.set(
+            GatewayDispatchEvents.RelationshipCreate,
+            this.onRelationshipCreate
+        );
+        this.dispatchHandlers.set(
+            GatewayDispatchEvents.RelationshipUpdate,
+            this.onRelationshipUpdate
+        );
+        this.dispatchHandlers.set(
+            GatewayDispatchEvents.RelationshipDelete,
+            this.onRelationshipDelete
+        );
+
+        // Space Bans
+        this.dispatchHandlers.set(
+            GatewayDispatchEvents.SpaceBanAdd,
+            this.onSpaceBanAdd
+        );
+        this.dispatchHandlers.set(
+            GatewayDispatchEvents.SpaceBanRemove,
+            this.onSpaceBanRemove
+        );
     }
 
     private onOpen = () => {
@@ -587,9 +617,9 @@ export class GatewayStore {
             }
 
             const bytes =
-                this.compress !== "none"
-                    ? this.compressor.decompress(rawBytes)
-                    : rawBytes;
+                this.compress === "none"
+                    ? rawBytes
+                    : this.compressor.decompress(rawBytes);
 
             let payload: any;
 
@@ -715,6 +745,13 @@ export class GatewayStore {
     }
 
     private handleClose = (code?: number) => {
+        if (this.manualDisconnect) {
+            this.manualDisconnect = false;
+            this.cleanup();
+            this.reset();
+            return;
+        }
+
         this.cleanup();
 
         if (code === GatewayCloseCodes.NotAuthenticated) return;
@@ -840,8 +877,16 @@ export class GatewayStore {
             `[Ready] took ${Date.now() - (this.identifyStartTime ?? 0)}ms`
         );
 
-        const { sessionId, user, themes, spaces, settings, expressions } =
-            payload;
+        const {
+            sessionId,
+            user,
+            themes,
+            spaces,
+            channels,
+            relationships,
+            settings,
+            expressions
+        } = payload;
 
         this.sessionId = sessionId;
 
@@ -849,6 +894,8 @@ export class GatewayStore {
         this.app.users.add(user);
         this.app.themes.addAll(themes);
         this.app.spaces.addAll(spaces);
+        this.app.channels.addAll(channels);
+        this.app.relationships.addAll(relationships);
 
         this.reconnectTimeout = 0;
         this.app.setGatewayReady(true);
@@ -856,7 +903,8 @@ export class GatewayStore {
         const space =
             this.app.spaces.mostRecentSpace || this.app.spaces.positioned[0];
 
-        if (space) this.app.spaces.setActive(space.id);
+        if (space && this.app.mode !== "@me")
+            this.app.spaces.setActive(space.id);
 
         this.app.channels.setPreferredActive();
 
@@ -973,7 +1021,9 @@ export class GatewayStore {
         this.app.channels.setPreferredActive();
     };
 
-    private onSpaceDelete = (payload: Pick<APISpace, "id">) => {
+    private onSpaceDelete = (
+        payload: Pick<APISpace, "id"> & { reason?: string }
+    ) => {
         const space = this.app.spaces.get(payload.id);
         if (!space) return;
 
@@ -981,10 +1031,16 @@ export class GatewayStore {
         this.lazyRequestChannels.delete(space.id);
         this.app.spaces.setPreferredActive();
         this.app.channels.setPreferredActive();
+
+        if (payload.reason === "banned" || payload.reason === "kicked")
+            toast.warn(`You were ${payload.reason} from ${space.name}`);
     };
 
     private onChannelCreate = (payload: APIChannel) => {
-        if (!payload.spaceId) return;
+        if (!payload.spaceId) {
+            this.app.channels.add(payload);
+            return;
+        }
         const space = this.app.spaces.get(payload.spaceId);
         if (!space) return;
 
@@ -996,7 +1052,21 @@ export class GatewayStore {
     };
 
     private onChannelUpdate = (payload: APIChannel) => {
+        const isDM =
+            payload.type === ChannelType.DM ||
+            payload.type === ChannelType.GroupDM ||
+            payload.spaceId == null;
+
+        if (isDM) {
+            const existing = this.app.channels.get(payload.id);
+            if (existing) existing.update(payload);
+            else this.app.channels.add(payload);
+
+            return;
+        }
+
         if (!payload.spaceId) return;
+
         const space = this.app.spaces.get(payload.spaceId);
         if (!space) return;
 
@@ -1005,7 +1075,20 @@ export class GatewayStore {
 
     private onBulkChannelUpdate = (payload: APIChannel[]) => {
         for (const channel of payload) {
+            const isDM =
+                channel.type === ChannelType.DM ||
+                channel.type === ChannelType.GroupDM ||
+                channel.spaceId == null;
+
+            if (isDM) {
+                const existing = this.app.channels.get(channel.id);
+                if (existing) existing.update(channel);
+                else this.app.channels.add(channel);
+                continue;
+            }
+
             if (!channel.spaceId) continue;
+
             const space = this.app.spaces.get(channel.spaceId);
             if (!space) continue;
             space.updateChannel(channel);
@@ -1013,8 +1096,11 @@ export class GatewayStore {
     };
 
     private onChannelDelete = (payload: Pick<APIChannel, "id" | "spaceId">) => {
-        // NOTE: since DMs are not implemented yet, we do an early return
-        if (!payload.spaceId) return;
+        if (!payload.spaceId) {
+            this.app.channels.remove(payload.id);
+            return;
+        }
+
         const space = this.app.spaces.get(payload.spaceId);
         if (!space) return;
 
@@ -1128,7 +1214,9 @@ export class GatewayStore {
     };
 
     private onSpaceMemberRemove = (
-        payload: Pick<APISpaceMember, "spaceId" | "userId">
+        payload: Pick<APISpaceMember, "spaceId" | "userId"> & {
+            reason?: string | null;
+        }
     ) => {
         const space = this.app.spaces.get(payload.spaceId);
         if (!space) return;
@@ -1226,5 +1314,35 @@ export class GatewayStore {
         }
 
         this.app.expressions.remove(payload.id);
+    };
+
+    private onRelationshipCreate = (payload: APIRelationship) => {
+        this.app.relationships.add(payload);
+    };
+
+    private onRelationshipUpdate = (payload: APIRelationship) => {
+        this.app.relationships.update(payload);
+    };
+
+    private onRelationshipDelete = (
+        payload: Pick<APIRelationship, "userId" | "otherUserId">
+    ) => {
+        this.app.relationships.remove(payload.userId, payload.otherUserId);
+    };
+
+    private onSpaceBanAdd = (payload: APISpaceBan) => {
+        const space = this.app.spaces.get(payload.spaceId);
+        if (!space) return;
+
+        space.addBan(payload);
+    };
+
+    private onSpaceBanRemove = (
+        payload: Pick<APISpaceBan, "spaceId" | "userId">
+    ) => {
+        const space = this.app.spaces.get(payload.spaceId);
+        if (!space) return;
+
+        space.removeBan(payload.userId);
     };
 }

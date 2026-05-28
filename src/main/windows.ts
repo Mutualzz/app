@@ -6,9 +6,14 @@ import iconIco from "../../resources/icons/base/icon.ico?asset";
 
 let mainWindow: BrowserWindow | null = null;
 let closeBlocked = false;
+let quitting = false;
 
 export function setCloseBlocked(value: boolean) {
     closeBlocked = value;
+}
+
+export function setQuitting(value: boolean) {
+    quitting = value;
 }
 
 export function createMainWindow(): BrowserWindow {
@@ -73,6 +78,12 @@ export function createMainWindow(): BrowserWindow {
     mainWindow.on("close", (event) => {
         if (closeBlocked) {
             event.preventDefault();
+            return;
+        }
+
+        if (!quitting) {
+            event.preventDefault();
+            mainWindow?.hide();
         }
     });
 
@@ -86,11 +97,9 @@ export function createMainWindow(): BrowserWindow {
         return { action: "deny" };
     });
 
-    if (is.dev && process.env["ELECTRON_RENDERER_URL"]) {
+    if (is.dev && process.env["ELECTRON_RENDERER_URL"])
         mainWindow.loadURL(process.env["ELECTRON_RENDERER_URL"]);
-    } else {
-        mainWindow.loadFile(join(__dirname, "../renderer/index.html"));
-    }
+    else mainWindow.loadFile(join(__dirname, "../renderer/index.html"));
 
     ipcMain.handle("window:minimize", () => {
         const win = getMainWindow();
@@ -106,7 +115,7 @@ export function createMainWindow(): BrowserWindow {
 
     ipcMain.handle("window:close", () => {
         const win = getMainWindow();
-        if (win) win.close();
+        if (win) win.hide();
     });
 
     ipcMain.handle("window:is-maximized", () => {

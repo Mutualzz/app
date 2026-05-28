@@ -1,13 +1,18 @@
 import { observer } from "mobx-react-lite";
 import {
     createContext,
-    useContext,
-    useState,
     type PropsWithChildren,
+    useContext,
+    useState
 } from "react";
 
-export type SpaceSettingsPage = "invites" | "profile" | "roles" | "expressions";
-export type SpaceSettingsCategories = "people" | "general";
+export type SpaceSettingsPage =
+    | "invites"
+    | "profile"
+    | "roles"
+    | "expressions"
+    | "bans";
+export type SpaceSettingsCategories = "people" | "general" | "moderation";
 
 interface SpaceSettingsContextProps {
     currentPage: SpaceSettingsPage;
@@ -24,7 +29,7 @@ const SpaceSettingsContext = createContext<SpaceSettingsContextProps | null>({
     },
     setCurrentCategory: () => {
         return;
-    },
+    }
 });
 
 export const SpaceSettingsProvider = observer(
@@ -41,20 +46,20 @@ export const SpaceSettingsProvider = observer(
                     currentPage,
                     setCurrentPage,
                     currentCategory,
-                    setCurrentCategory,
+                    setCurrentCategory
                 }}
             >
                 {children}
             </SpaceSettingsContext.Provider>
         );
-    },
+    }
 );
 
 export function useSpaceSettings() {
     const ctx = useContext(SpaceSettingsContext);
     if (!ctx)
         throw new Error(
-            "useSpaceSettings must be used within a SettingsSidebarProvider",
+            "useSpaceSettings must be used within a SettingsSidebarProvider"
         );
     return ctx;
 }

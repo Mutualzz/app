@@ -4,8 +4,6 @@ import { TooltipWrapper } from "@components/TooltipWrapper";
 import { UserAvatar } from "@components/User/UserAvatar";
 import { useModal } from "@contexts/Modal.context";
 import type { Theme } from "@emotion/react";
-import { useAppStore } from "@hooks/useStores";
-import type { APIInvite } from "@mutualzz/types";
 import { dynamicElevation, formatColor } from "@mutualzz/ui-core";
 import {
     Button,
@@ -19,13 +17,12 @@ import {
 } from "@mutualzz/ui-web";
 import { Invite } from "@stores/objects/Invite";
 import type { Space } from "@stores/objects/Space";
-import { useMutation } from "@tanstack/react-query";
 import dayjs from "dayjs";
-import { reaction } from "mobx";
 import { observer } from "mobx-react-lite";
 import { useEffect, useState } from "react";
 import { FaClipboard, FaTrash } from "react-icons/fa";
 import { isElectron } from "@utils/index";
+import { useQuery } from "@tanstack/react-query";
 
 interface Props {
     space: Space;
@@ -172,39 +169,14 @@ const InviteItem = observer(({ theme, invite, last, now }: InviteItemProps) => {
     );
 });
 
-// TODO: Eventually start using Tables instead of making Stack and stuff manually
 export const SpaceInvitesSettings = observer(({ space }: Props) => {
-    const app = useAppStore();
     const { theme } = useTheme();
     const { openModal } = useModal();
 
-    const [invites, setInvites] = useState<Invite[]>([]);
-
-    const { mutate: fetchInvites } = useMutation({
-        mutationKey: ["space-invites", space.id],
-        mutationFn: async () =>
-            app.rest.get<APIInvite[]>(`/spaces/${space.id}/invites`),
-        onSuccess: (data) => {
-            const newInvites = data.map((inv) => space.addInvite(inv));
-            setInvites(newInvites);
-        }
+    const { data: invites = [] } = useQuery({
+        queryKey: ["space-invites", space.id],
+        queryFn: () => space.fetchInvites()
     });
-
-    useEffect(() => {
-        if (invites.length > 0) return;
-        fetchInvites();
-    }, [invites.length]);
-
-    useEffect(() => {
-        const dispose = reaction(
-            () => space.invites.size,
-            () => {
-                setInvites(Array.from(space.invites.values()));
-            }
-        );
-
-        return dispose;
-    }, []);
 
     const [now, setNow] = useState(new Date());
     useEffect(() => {

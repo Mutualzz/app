@@ -11,6 +11,7 @@ import InfiniteScroll from "react-infinite-scroll-component";
 import useResizeObserver from "use-resize-observer";
 import { MessageGroup } from "./MessageGroup";
 import { useAppStore } from "@hooks/useStores";
+import { UserAvatar } from "@components/User/UserAvatar";
 
 interface Props {
     channel?: Channel | null;
@@ -26,15 +27,29 @@ export const MessageList = observer(({ channel: channelProp }: Props) => {
     const ref = useRef<HTMLDivElement>(null);
     const { width } = useResizeObserver<HTMLDivElement>({ ref: ref.current });
     const logger = new Logger({
-        tag: "MessageList",
+        tag: "MessageList"
     });
 
     const channel = channelProp ?? app.channels.active;
 
-    // NOTE: Change this when adding DM channels
-    const canReadHistory = channel?.space
-        ? channel.space.members.me?.hasPermission("ReadMessageHistory", channel)
-        : false;
+    const isDM = channel?.isDM ?? false;
+    const dmRecipient = channel?.dmRecipient ?? null;
+
+    const canReadHistory = (() => {
+        if (isDM) return true;
+
+        if (!channel) return false;
+
+        const space = channel.space;
+
+        if (!space) return false;
+
+        const me = space.members.me;
+
+        if (!me) return false;
+
+        return me.hasPermission("ReadMessageHistory", channel);
+    })();
 
     const rawGroups = channel?.messages.groups;
 
@@ -42,13 +57,21 @@ export const MessageList = observer(({ channel: channelProp }: Props) => {
         if (!rawGroups) return undefined;
         if (canReadHistory) return rawGroups;
 
-        const lastId = channel?.lastMessageId;
+        const getLastMessageId = () => {
+            if (!rawGroups || rawGroups.length === 0) return undefined;
+            const lastGroup = rawGroups[rawGroups.length - 1];
+            if (!lastGroup.messages || lastGroup.messages.length === 0)
+                return undefined;
+            return lastGroup.messages[lastGroup.messages.length - 1]?.id;
+        };
+
+        const lastId = getLastMessageId();
         if (!lastId) return rawGroups;
 
         return rawGroups
             .map((g) => ({
                 ...g,
-                messages: g.messages.filter((m) => m.id !== lastId),
+                messages: g.messages.filter((m) => m.id !== lastId)
             }))
             .filter((g) => (g.messages?.length ?? 0) > 0);
     })();
@@ -74,7 +97,7 @@ export const MessageList = observer(({ channel: channelProp }: Props) => {
                 const count = await channel?.getMessages(
                     false,
                     LIMIT,
-                    pageParam,
+                    pageParam
                 );
 
                 const lastGroup =
@@ -94,8 +117,8 @@ export const MessageList = observer(({ channel: channelProp }: Props) => {
 
                 return lastPage.earliestId;
             },
-            enabled: !!channel?.id && canReadHistory,
-        },
+            enabled: !!channel?.id && canReadHistory
+        }
     );
 
     const fetchMore = useCallback(() => {
@@ -123,13 +146,7 @@ export const MessageList = observer(({ channel: channelProp }: Props) => {
         fetchNextPage().catch((err) => {
             logger.error("Error fetching next page", err);
         });
-    }, [
-        messageGroups,
-        hasNextPage,
-        fetchNextPage,
-        channel?.messages.count,
-        channel?.id,
-    ]);
+    }, [messageGroups, hasNextPage, fetchNextPage]);
 
     const renderGroup = useCallback(
         (group: MessageGroupType) => (
@@ -138,7 +155,7 @@ export const MessageList = observer(({ channel: channelProp }: Props) => {
                 group={group}
             />
         ),
-        [],
+        []
     );
 
     const loader = isFetchingNextPage ? <></> : null;
@@ -165,7 +182,7 @@ export const MessageList = observer(({ channel: channelProp }: Props) => {
                         display: "flex",
                         flexDirection: "column-reverse",
                         marginBottom: 30,
-                        overflow: "hidden",
+                        overflow: "hidden"
                     }}
                     hasMore={hasNextPage}
                     inverse={true}
@@ -178,27 +195,42 @@ export const MessageList = observer(({ channel: channelProp }: Props) => {
                             spacing={1}
                             margin="16px 16px 0 16px"
                         >
-                            <Paper
-                                width={64}
-                                height={64}
-                                elevation={10}
-                                padding={3}
-                                borderRadius="50%"
-                                alignItems="center"
-                                justifyContent="center"
-                                display="flex"
-                                boxShadow="none"
-                            >
-                                <FaHashtag size={48} />
-                            </Paper>
+                            {isDM && dmRecipient ? (
+                                <UserAvatar user={dmRecipient} size={56} />
+                            ) : (
+                                <Paper
+                                    width={64}
+                                    height={64}
+                                    elevation={10}
+                                    padding={3}
+                                    borderRadius="50%"
+                                    alignItems="center"
+                                    justifyContent="center"
+                                    display="flex"
+                                    boxShadow="none"
+                                >
+                                    <FaHashtag size={48} />
+                                </Paper>
+                            )}
+
                             <Typography
                                 level="h1"
                                 fontWeight={700}
                                 margin="8px 0"
                             >
-                                Welcome to #{channel?.name}!
+                                {isDM && dmRecipient
+                                    ? `Send your first message to ${dmRecipient.displayName}`
+                                    : `Welcome to #${channel?.name}!`}
                             </Typography>
-                            {canReadHistory ? (
+
+                            {isDM && dmRecipient ? (
+                                <Typography textColor="secondary">
+                                    This is the beginning of your conversation
+                                    with{" "}
+                                    <strong>{dmRecipient.displayName}</strong>.
+                                    Say hi — your message will appear here.
+                                </Typography>
+                            ) : canReadHistory ? (
                                 <Typography textColor="secondary">
                                     This is the start of the #{channel?.name}{" "}
                                     channel.

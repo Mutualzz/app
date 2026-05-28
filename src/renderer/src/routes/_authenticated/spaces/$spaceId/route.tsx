@@ -4,13 +4,13 @@ import {
     createFileRoute,
     Outlet,
     useNavigate,
-    useParams,
+    useParams
 } from "@tanstack/react-router";
 import { observer } from "mobx-react-lite";
 import { useEffect } from "react";
 
 export const Route = createFileRoute("/_authenticated/spaces/$spaceId")({
-    component: observer(RouteComponent),
+    component: observer(RouteComponent)
 });
 
 function RouteComponent() {
@@ -20,32 +20,12 @@ function RouteComponent() {
 
     const childParams = useParams({
         from: "/_authenticated/spaces/$spaceId/$channelId",
-        shouldThrow: false,
+        shouldThrow: false
     });
 
     const space = app.spaces.get(spaceId) ?? app.spaces.active;
 
-    const preferredChannel = !space
-        ? null
-        : (() => {
-              const mostRecent =
-                  app.channels.getMostRecentChannelForSpace(spaceId);
-
-              if (
-                  mostRecent &&
-                  mostRecent.canRedirect &&
-                  space.visibleChannels.some((ch) => ch.id === mostRecent.id)
-              ) {
-                  return mostRecent;
-              }
-
-              // Fallback to first visible channel user can open.
-              return (
-                  space.visibleChannels.find(
-                      (channel) => channel.canRedirect,
-                  ) ?? null
-              );
-          })();
+    const preferredChannel = app.channels.preferredChannel;
 
     useEffect(() => {
         app.spaces.setActive(spaceId);
@@ -62,9 +42,9 @@ function RouteComponent() {
             to: "/spaces/$spaceId/$channelId",
             params: {
                 spaceId,
-                channelId: preferredChannel.id,
+                channelId: preferredChannel.id
             },
-            replace: true,
+            replace: true
         });
     }, [
         app,
@@ -72,7 +52,7 @@ function RouteComponent() {
         space,
         preferredChannel,
         navigate,
-        spaceId,
+        spaceId
     ]);
 
     return (

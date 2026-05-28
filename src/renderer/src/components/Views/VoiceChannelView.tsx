@@ -1,7 +1,7 @@
 import type { Channel } from "@stores/objects/Channel";
 import { Paper, Stack, Tooltip, Typography, useTheme } from "@mutualzz/ui-web";
 import { MessageList } from "@components/Message/MessageList";
-import { MessageInput } from "@components/Message/MessageInput";
+import { SpaceChannelMessageInput } from "@components/Channel/SpaceChannelMessageInput";
 import { VoiceChannelHeader } from "@components/Channel/VoiceChannelHeader";
 import { useAppStore } from "@hooks/useStores";
 import { observer } from "mobx-react-lite";
@@ -69,7 +69,7 @@ const Tile = observer(({ userId, user, size, selected }: TileProps) => {
                 borderRadius: selected ? 0 : 16,
                 display: "block",
                 boxSizing: "border-box",
-                objectFit: "cover",
+                objectFit: "cover"
             }}
         />
     );
@@ -85,7 +85,7 @@ export const VoiceChannelView = observer(
         const { openModal } = useModal();
 
         const [selectedUserId, setSelectedUserId] = useState<string | null>(
-            null,
+            null
         );
 
         useEffect(() => {
@@ -106,11 +106,11 @@ export const VoiceChannelView = observer(
         const tileSize = {
             width: tileWidth,
             height: tileHeight,
-            avatar: Math.round(96 * shrinkFactor),
+            avatar: Math.round(96 * shrinkFactor)
         };
 
         const selectedState = voiceStates.find(
-            (state) => state.userId === selectedUserId,
+            (state) => state.userId === selectedUserId
         );
 
         if (!channel.spaceId) return null;
@@ -138,7 +138,7 @@ export const VoiceChannelView = observer(
                             my="auto"
                             onClick={() => setSelectedUserId(null)}
                             css={{
-                                cursor: "pointer",
+                                cursor: "pointer"
                             }}
                             overflow="hidden"
                             variant="solid"
@@ -170,7 +170,7 @@ export const VoiceChannelView = observer(
                                 onClick={() => {
                                     app.voice.join({
                                         spaceId: channel.spaceId,
-                                        channelId: channel.id,
+                                        channelId: channel.id
                                     });
                                 }}
                             >
@@ -205,7 +205,7 @@ export const VoiceChannelView = observer(
                                     gridAutoColumns: "max-content",
                                     gridTemplateRows:
                                         "repeat(auto-fill, minmax(0, max-content))",
-                                    justifyItems: "center",
+                                    justifyItems: "center"
                                 }}
                             >
                                 {voiceStates.map((state) => (
@@ -219,16 +219,16 @@ export const VoiceChannelView = observer(
                                         alignItems="center"
                                         position="relative"
                                         css={{
-                                            cursor: "pointer",
+                                            cursor: "pointer"
                                         }}
                                         onClick={() =>
                                             voiceStates.find(
                                                 (vs) =>
                                                     vs.userId ===
-                                                    app.account?.id,
+                                                    app.account?.id
                                             ) &&
                                             setSelectedUserId(
-                                                state.member?.user?.id ?? null,
+                                                state.member?.user?.id ?? null
                                             )
                                         }
                                         variant="solid"
@@ -302,13 +302,13 @@ export const VoiceChannelView = observer(
                                                 navigate({
                                                     to: "/spaces/$spaceId/$channelId",
                                                     search: {
-                                                        chat: true,
+                                                        chat: true
                                                     },
                                                     params: {
                                                         spaceId:
                                                             channel.spaceId!,
-                                                        channelId: channel.id,
-                                                    },
+                                                        channelId: channel.id
+                                                    }
                                                 });
                                             }}
                                         >
@@ -338,7 +338,7 @@ export const VoiceChannelView = observer(
                                                 "invite-to-space",
                                                 <SpaceInviteToSpaceModal
                                                     channel={channel}
-                                                />,
+                                                />
                                             );
                                         }}
                                     >
@@ -371,11 +371,11 @@ export const VoiceChannelView = observer(
                                 const onUp = () => {
                                     window.removeEventListener(
                                         "pointermove",
-                                        onMove,
+                                        onMove
                                     );
                                     window.removeEventListener(
                                         "pointerup",
-                                        onUp,
+                                        onUp
                                     );
                                 };
 
@@ -384,18 +384,20 @@ export const VoiceChannelView = observer(
                             }}
                             style={{
                                 width: 2,
+                                marginLeft: -1,
+                                marginRight: -1,
                                 cursor: "col-resize",
                                 flexShrink: 0,
                                 touchAction: "none",
                                 userSelect: "none",
                                 backgroundColor: app.settings?.preferEmbossed
                                     ? dynamicElevation(theme.colors.surface, 3)
-                                    : "transparent",
+                                    : "transparent"
                             }}
                             whileHover={{
                                 backgroundColor: app.settings?.preferEmbossed
                                     ? dynamicElevation(theme.colors.surface, 6)
-                                    : dynamicElevation(theme.colors.surface, 2),
+                                    : dynamicElevation(theme.colors.surface, 2)
                             }}
                         />
                         <Paper
@@ -408,7 +410,7 @@ export const VoiceChannelView = observer(
                             width={app.voiceChatWidth}
                             css={{
                                 flexShrink: 0,
-                                minWidth: 0,
+                                minWidth: 0
                             }}
                         >
                             <VoiceChannelHeader channel={channel} />
@@ -420,12 +422,12 @@ export const VoiceChannelView = observer(
                                 flex={1}
                             >
                                 <MessageList channel={channel} />
-                                <MessageInput />
+                                <SpaceChannelMessageInput channel={channel} />
                             </Stack>
                         </Paper>
                     </>
                 )}
             </Stack>
         );
-    },
+    }
 );

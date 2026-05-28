@@ -16,7 +16,7 @@ import { DraftStore } from "./Draft.store";
 import { GatewayStore } from "./Gateway.store";
 import { MessageQueue } from "./MessageQueue.store";
 import { REST } from "./REST.store";
-import { SpaceStore } from "./Space/Space.store";
+import { SpaceStore } from "./Space.store";
 import { ThemeStore } from "./Theme.store";
 import { UpdaterStore } from "./Updater.store";
 import { UserStore } from "./User.store";
@@ -30,6 +30,7 @@ import { ExpressionsStore } from "@stores/Expressions.store";
 import { webTokenStorage } from "@storages/webTokenStorage";
 import type { TokenStorage } from "@renderer/types";
 import { electronTokenStorage } from "@storages/electronTokenStorage";
+import { RelationshipStore } from "@stores/Relationship.store";
 
 export class AppStore {
     isGatewayReady = false;
@@ -43,6 +44,7 @@ export class AppStore {
     drafts = new DraftStore();
     navigation = new NavigationStore(this);
     spaces = new SpaceStore(this);
+    relationships = new RelationshipStore(this);
     queue = new MessageQueue(this);
     themes = new ThemeStore(this);
     themeCreator = new ThemeCreatorStore();
@@ -60,6 +62,7 @@ export class AppStore {
     dontShowLinkWarning = false;
 
     channelListWidth = 320;
+    dmChannelListWidth = 320;
     voiceChatWidth = 500;
 
     customStatus = new CustomStatusStore();
@@ -70,11 +73,11 @@ export class AppStore {
     versions: {
         app: string | null;
     } = {
-        app: "6.0.0"
+        app: "6.1.0"
     };
 
     readonly tokenStorage: TokenStorage;
-
+    composerCount = 0;
     private readonly logger = new Logger({
         tag: "AppStore"
     });
@@ -109,6 +112,10 @@ export class AppStore {
         this.tokenStorage = isElectron ? electronTokenStorage : webTokenStorage;
     }
 
+    get composerVisible() {
+        return this.composerCount > 0;
+    }
+
     get targetMode(): AppMode {
         const preferredMode = this.settings?.preferredMode;
 
@@ -119,6 +126,18 @@ export class AppStore {
 
     get isReady() {
         return !this.isAppLoading && this.isGatewayReady;
+    }
+
+    popComposer() {
+        this.composerCount = Math.max(0, this.composerCount - 1);
+    }
+
+    pushComposer() {
+        this.composerCount = Math.max(0, this.composerCount) + 1;
+    }
+
+    setDmChannelListWidth(value: number) {
+        this.dmChannelListWidth = Math.min(480, Math.max(320, value));
     }
 
     setVoiceChatVisible(visible: boolean) {
@@ -221,11 +240,35 @@ export class AppStore {
 
         await this.voice.leave();
         this.voice.reset();
+        await this.gateway.disconnect();
 
         this.customStatus.clear();
 
+        this.channels.clear();
+        this.expressions.clear();
+        this.drafts.clear();
+        this.navigation.clear();
+        this.spaces.clear();
+        this.relationships.clear();
+        this.queue.clear();
+        this.themes.clear();
+        this.themeCreator.resetValues();
+        this.users.clear();
+        this.mode = null;
+        this.presence.clear();
+        await this.queryClient.cancelQueries();
+        this.queryClient.clear();
+        this.queryClient.removeQueries();
+        this.queryClient.getMutationCache().clear();
+        this.spaces.unsetActive();
+        this.spaces.setMostRecentSpace(null);
+        this.channels.unsetActive?.();
+
         localStorage.removeItem("AppStore");
         localStorage.removeItem("AppStoreTransient");
+        localStorage.removeItem("SpaceStore");
+        localStorage.removeItem("PresenceStore");
+        localStorage.removeItem("NavigationStore");
     }
 
     async loadSettings() {

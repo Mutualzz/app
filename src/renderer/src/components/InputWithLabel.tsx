@@ -10,7 +10,7 @@ export const InputWithLabel = ({
 }: {
     name: string;
     description?: ReactNode;
-    label: string;
+    label?: string;
     apiError?: string;
 } & InputProps) => (
     <Stack

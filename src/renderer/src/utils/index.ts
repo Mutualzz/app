@@ -5,10 +5,11 @@ import type { useNavigate } from "@tanstack/react-router";
 import mergeWith from "lodash-es/mergeWith";
 import { isValidElement, type ReactNode } from "react";
 import MurmurHash from "imurmurhash";
-import type { PresenceStatus } from "@mutualzz/types";
+import { APIMessage, MessageType, PresenceStatus } from "@mutualzz/types";
 import type { Expression } from "@stores/objects/Expression";
 import type { SpaceMember } from "@stores/objects/SpaceMember";
 import type { Channel } from "@stores/objects/Channel";
+import Snowflake from "@utils/Snowflake";
 
 export function mergeAppendAnything(
     ...objects: Record<string, string | string[]>[]
@@ -26,6 +27,32 @@ export function mergeAppendAnything(
         return undefined;
     });
 }
+
+export const createSystemMessage = async (
+    app: AppStore,
+    channelId: string,
+    content: string,
+    flags?: bigint
+): Promise<APIMessage | null> => {
+    const systemUser = await app.users.resolveSystem();
+    if (!systemUser) return null;
+
+    return {
+        author: systemUser.toJSON(),
+        authorId: systemUser.id,
+        channelId,
+        embeds: [],
+        content,
+        edited: false,
+        id: Snowflake.generate(),
+        nonce: null,
+        spaceId: null,
+        type: MessageType.System,
+        flags: flags || 0n,
+        createdAt: new Date(),
+        updatedAt: new Date()
+    };
+};
 
 export const canUseCustomEmoji = (
     emoji: Expression,
@@ -148,7 +175,7 @@ export const switchMode = (
             });
     }
 
-    if (!app.mode && app.account) {
+    if ((!app.mode || app.mode === "@me") && app.account) {
         const preferredMode = app.settings?.preferredMode;
         if (navigate)
             navigate({

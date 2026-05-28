@@ -16,6 +16,7 @@ asarUnpack:
     - resources/**/*
 win:
     executableName: mutualzz
+    icon: resources/icons/icon.ico
 nsis:
     oneClick: true
     perMachine: false
@@ -25,6 +26,9 @@ nsis:
     artifactName: ${productName}Setup.${ext}
     shortcutName: ${productName}
     uninstallDisplayName: ${productName}
+    warningsAsErrors: false
+    include: "resources/installer.nsh"
+    installerIcon: "resources/icons/icon.ico"
 npmRebuild: false
 mac:
     extendInfo:

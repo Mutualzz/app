@@ -2,7 +2,7 @@ import { makeAutoObservable, observable } from "mobx";
 import type {
     PresencePayload,
     PresenceSchedule,
-    Snowflake,
+    Snowflake
 } from "@mutualzz/types";
 import { makePersistable } from "mobx-persist-store";
 
@@ -18,8 +18,12 @@ export class PresenceStore {
         makePersistable(this, {
             name: "PresenceStore",
             properties: ["scheduledStatus"],
-            storage: localStorage,
+            storage: localStorage
         });
+    }
+
+    clear() {
+        this.presences.clear();
     }
 
     upsert(userId: Snowflake, presence: PresencePayload) {

@@ -45,7 +45,7 @@ export class MessageBase {
             author: computed,
             space: computed,
             channel: computed,
-            member: computed,
+            member: computed
         });
     }
 

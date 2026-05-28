@@ -29,7 +29,7 @@ import { runInAction } from "mobx";
 import { observer } from "mobx-react-lite";
 import { useState } from "react";
 import { ChannelListItem } from "./ChannelListItem";
-import { ChannelListContextMenu } from "../ContextMenus/ChannelListContextMenu";
+import { ChannelListContextMenu } from "@components/ContextMenu/ChannelListContextMenu";
 import { useMenu } from "@contexts/ContextMenu.context";
 import { ChannelListHeader } from "@components/Channel/ChannelListHeader";
 

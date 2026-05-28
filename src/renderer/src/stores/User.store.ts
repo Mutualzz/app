@@ -19,6 +19,14 @@ export class UserStore {
         return this.users.size;
     }
 
+    get system() {
+        return this.get("1");
+    }
+
+    clear() {
+        this.users.clear();
+    }
+
     add(user: APIUser): User {
         const exists = this.users.get(user.id);
         if (exists) return exists;
@@ -46,6 +54,14 @@ export class UserStore {
 
     has(id: Snowflake) {
         return this.users.has(id);
+    }
+
+    async resolveSystem() {
+        const id = "1";
+        if (this.has(id)) return this.get(id);
+        const user = await this.app.rest.get<APIUser>(`/users/${id}`);
+        if (!user) return undefined;
+        return this.add(user);
     }
 
     async resolve(id: Snowflake, force = false) {

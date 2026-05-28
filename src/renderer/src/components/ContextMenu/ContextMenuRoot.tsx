@@ -2,12 +2,12 @@ import { observer } from "mobx-react-lite";
 import { Portal } from "@mutualzz/ui-web";
 import { useMenu } from "@contexts/ContextMenu.context";
 
-import { SpaceContextMenu } from "@components/ContextMenus/SpaceContextMenu";
-import { ChannelListContextMenu } from "@components/ContextMenus/ChannelListContextMenu";
-import { RoleContextMenu } from "@components/ContextMenus/RoleContextMenu";
-import { ChannelItemContextMenu } from "@components/ContextMenus/ChannelItemContextMenu";
-import { SpaceMemberContextMenu } from "@components/ContextMenus/SpaceMemberContextMenu";
-import { AccountContextMenu } from "@components/ContextMenus/AccountContextMenu";
+import { SpaceContextMenu } from "@components/ContextMenu/SpaceContextMenu";
+import { ChannelListContextMenu } from "@components/ContextMenu/ChannelListContextMenu";
+import { RoleContextMenu } from "@components/ContextMenu/RoleContextMenu";
+import { ChannelItemContextMenu } from "@components/ContextMenu/ChannelItemContextMenu";
+import { UserContextMenu } from "@components/ContextMenu/UserContextMenu";
+import { AccountContextMenu } from "@components/ContextMenu/AccountContextMenu";
 
 export const ContextMenuRoot = observer(() => {
     const { menu } = useMenu();
@@ -33,17 +33,6 @@ export const ContextMenuRoot = observer(() => {
                     <ChannelItemContextMenu {...menu} />
                 </Portal>
             );
-
-        case "member":
-            return (
-                <Portal>
-                    <SpaceMemberContextMenu
-                        space={menu.space}
-                        member={menu.member}
-                    />
-                </Portal>
-            );
-
         case "account":
             return (
                 <Portal>
@@ -52,10 +41,11 @@ export const ContextMenuRoot = observer(() => {
             );
 
         case "user":
-            return null;
-        // <Portal>
-        //     <UserContextMenu user={menu.user} />
-        // </Portal>
+            return (
+                <Portal>
+                    <UserContextMenu {...menu} />
+                </Portal>
+            );
 
         case "role":
             return (

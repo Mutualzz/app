@@ -3,14 +3,15 @@ import { Paper } from "@components/Paper";
 import { TooltipWrapper } from "@components/TooltipWrapper";
 import { useAppStore } from "@hooks/useStores";
 import { Stack, Tooltip } from "@mutualzz/ui-web";
-import type { Message } from "@stores/objects/Message";
+import { Message } from "@stores/objects/Message";
 import { useMutation } from "@tanstack/react-query";
 import { observer } from "mobx-react-lite";
 import type { PropsWithChildren } from "react";
 import { FaEdit, FaTrash } from "react-icons/fa";
+import { QueuedMessage } from "@stores/objects/QueuedMessage";
 
 interface Props extends PropsWithChildren {
-    message: Message;
+    message: Message | QueuedMessage;
     header?: boolean;
 }
 
@@ -19,7 +20,7 @@ const ToolbarContent = observer(({ message }: Props) => {
 
     const { mutate: deleteMessage } = useMutation({
         mutationKey: ["delete-message", message.id],
-        mutationFn: () => message.delete(),
+        mutationFn: (): any => message.delete()
     });
 
     const me = message.space?.members.me;
@@ -36,6 +37,8 @@ const ToolbarContent = observer(({ message }: Props) => {
         }
     };
 
+    const isSent = message instanceof Message;
+
     return (
         <Paper
             onMouseEnter={hideSwitcher}
@@ -46,7 +49,7 @@ const ToolbarContent = observer(({ message }: Props) => {
             transparency={25}
         >
             <Stack spacing={1.25}>
-                {message.author?.id === app.account?.id && (
+                {message.author?.id === app.account?.id && isSent && (
                     <Tooltip
                         offset={16}
                         content={<TooltipWrapper>Edit</TooltipWrapper>}
@@ -83,7 +86,7 @@ const ToolbarContent = observer(({ message }: Props) => {
 
 export const MessageToolbar = observer(
     ({ message, header, children }: Props) => {
-        if (message.editing) return children;
+        if (message instanceof Message && message.editing) return children;
 
         return (
             <Tooltip
@@ -95,5 +98,5 @@ export const MessageToolbar = observer(
                 {children}
             </Tooltip>
         );
-    },
+    }
 );

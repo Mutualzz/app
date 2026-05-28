@@ -1,6 +1,5 @@
 import { Link } from "@components/Link";
-import { Paper } from "@components/Paper";
-import { Typography } from "@mutualzz/ui-web";
+import { Stack, Typography } from "@mutualzz/ui-web";
 import emojiRegexOrig from "emojibase-regex";
 import shortcodeRegexOrig from "emojibase-regex/shortcode";
 import parse, {
@@ -28,9 +27,7 @@ const emojiRegex = new RegExp(emojiRegexOrig.source, "gu");
 
 // TODO: add code blocks in the future
 export const MarkdownRenderer = ({
-    color = "neutral",
     textColor = "primary",
-    variant = "outlined",
     enlargeEmojiOnly = true,
     value,
     ...props
@@ -95,6 +92,7 @@ export const MarkdownRenderer = ({
                                     level="h3"
                                     fontWeight="bold"
                                     display="block"
+                                    textColor={textColor}
                                 >
                                     {children}
                                 </Typography>
@@ -110,6 +108,7 @@ export const MarkdownRenderer = ({
                                     level="h4"
                                     fontWeight="bold"
                                     display="block"
+                                    textColor={textColor}
                                 >
                                     {children}
                                 </Typography>
@@ -125,6 +124,7 @@ export const MarkdownRenderer = ({
                                     whiteSpace="pre-wrap"
                                     fontSize="inherit"
                                     display="block"
+                                    textColor={textColor}
                                 >
                                     {children}
                                 </Typography>
@@ -140,6 +140,7 @@ export const MarkdownRenderer = ({
                                     level="h5"
                                     fontWeight="bold"
                                     display="block"
+                                    textColor={textColor}
                                 >
                                     {children}
                                 </Typography>
@@ -162,6 +163,7 @@ export const MarkdownRenderer = ({
                                     whiteSpace="pre-wrap"
                                     fontSize="inherit"
                                     fontWeight="bold"
+                                    textColor={textColor}
                                 >
                                     {children}
                                 </Typography>
@@ -177,6 +179,7 @@ export const MarkdownRenderer = ({
                                     whiteSpace="pre-wrap"
                                     fontSize="inherit"
                                     fontStyle="italic"
+                                    textColor={textColor}
                                 >
                                     {children}
                                 </Typography>
@@ -191,6 +194,7 @@ export const MarkdownRenderer = ({
                                 <Typography
                                     fontSize="inherit"
                                     textDecoration="line-through"
+                                    textColor={textColor}
                                 >
                                     {children}
                                 </Typography>
@@ -206,6 +210,7 @@ export const MarkdownRenderer = ({
                                     whiteSpace="pre-wrap"
                                     fontSize="inherit"
                                     textDecoration="underline"
+                                    textColor={textColor}
                                 >
                                     {children}
                                 </Typography>
@@ -263,7 +268,7 @@ export const MarkdownRenderer = ({
                                     href={href}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    textColor="muted"
+                                    textColor={textColor ?? "muted"}
                                 >
                                     {children}
                                 </Link>
@@ -284,16 +289,8 @@ export const MarkdownRenderer = ({
     }, [value]);
 
     return (
-        <Paper
-            color={color as any}
-            textColor={textColor}
-            variant={variant}
-            display="block"
-            height="100%"
-            overflowY="auto"
-            {...props}
-        >
+        <Stack display="block" height="100%" overflowY="auto" {...props}>
             {content}
-        </Paper>
+        </Stack>
     );
 };

@@ -7,7 +7,7 @@ import {
     ChannelType,
     ImageFormat,
     type Sizes,
-    type Snowflake,
+    type Snowflake
 } from "@mutualzz/types";
 import type { AppStore } from "@stores/App.store";
 import { MessageStore } from "@stores/Message.store";
@@ -19,6 +19,7 @@ import { ChannelPermissionOverwrite } from "./ChannelOverwrite";
 import { BitField, channelFlags, type ChannelFlags } from "@mutualzz/bitfield";
 import { murmur } from "@utils/index";
 import { REST } from "@stores/REST.store";
+import { User } from "@stores/objects/User";
 
 function getOverwriteKey(ow: ChannelPermissionOverwrite): string {
     if (ow.roleId != null) return `r:${ow.roleId}`;
@@ -46,23 +47,20 @@ export class Channel {
 
     parentId?: Snowflake | null;
     spaceId?: Snowflake | null;
-    lastMessageId?: Snowflake | null;
+    recipientIds?: Snowflake[] | null;
 
     raw: APIChannel;
 
     overwrites: ChannelPermissionOverwrite[] = [];
-
     private readonly logger = new Logger({
-        tag: "Channel",
+        tag: "Channel"
     });
     private hasFetchedInitialMessages = false;
 
     constructor(
         private readonly app: AppStore,
-        channel: APIChannel,
+        channel: APIChannel
     ) {
-        this.app = app;
-
         this.id = channel.id;
         this.type = channel.type;
 
@@ -83,7 +81,7 @@ export class Channel {
 
         this.flags = BitField.fromString(
             channelFlags,
-            channel.flags.toString(),
+            channel.flags.toString()
         );
 
         this.icon = channel.icon;
@@ -97,12 +95,15 @@ export class Channel {
 
         if (channel.messages) this.messages.addAll(channel.messages);
 
-        this.lastMessageId = channel.lastMessageId;
         if (channel.lastMessage)
             this._lastMessage = this.messages.add(channel.lastMessage);
 
+        this.recipientIds = channel.recipientIds ?? this.recipientIds ?? null;
+        if (channel.recipients)
+            this._recipients = this.app.users.addAll(channel.recipients);
+
         this.overwrites = (channel.overwrites ?? []).map(
-            (ow) => new ChannelPermissionOverwrite(this.app, ow),
+            (ow) => new ChannelPermissionOverwrite(this.app, ow)
         );
 
         makeAutoObservable(this);
@@ -111,9 +112,25 @@ export class Channel {
     _lastMessage?: Message | null;
 
     get lastMessage() {
-        if (!this.lastMessageId) return null;
+        if (this._lastMessage) return this._lastMessage;
 
-        return this.messages.get(this.lastMessageId);
+        try {
+            const local = Array.from(this.messages.all || []);
+            const queued = Array.from(this.app.queue.messages.values()).filter(
+                (m) => m.channelId === this.id
+            );
+
+            const combined: (Message | QueuedMessage)[] = [...local, ...queued];
+
+            if (combined.length === 0) return null;
+
+            combined.sort(
+                (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
+            );
+            return combined[0] ?? null;
+        } catch {
+            return null;
+        }
     }
 
     _parent?: Channel | null;
@@ -136,6 +153,12 @@ export class Channel {
         return this.app.spaces.get(this.spaceId) || this._space;
     }
 
+    _recipients?: User[] | null;
+
+    get recipients() {
+        return this._recipients ?? null;
+    }
+
     get listId() {
         const parts: string[] = [];
 
@@ -143,7 +166,7 @@ export class Channel {
         // c = channel
         const add = (
             prefix: "p" | "c",
-            overwrites?: ChannelPermissionOverwrite[] | null,
+            overwrites?: ChannelPermissionOverwrite[] | null
         ) => {
             if (!overwrites?.length) return;
 
@@ -171,7 +194,7 @@ export class Channel {
         return Channel.constructIconUrl(
             this.id,
             this.icon.startsWith("a_"),
-            this.icon,
+            this.icon
         );
     }
 
@@ -201,6 +224,27 @@ export class Channel {
         return this.type === ChannelType.Category;
     }
 
+    get dmRecipients() {
+        const ids = this.recipientIds ?? [];
+        if (!ids.length) return [];
+
+        const meId = this.app.account?.id;
+
+        const filteredIds = ids.filter((id) => id !== meId);
+
+        const fromStore = filteredIds
+            .map((id) => this.app.users.get(id))
+            .filter((u): u is NonNullable<typeof u> => !!u);
+
+        if (fromStore.length) return fromStore;
+
+        return this._recipients?.filter((u) => u.id !== meId) ?? [];
+    }
+
+    get dmRecipient() {
+        return this.type === ChannelType.DM ? this.dmRecipients[0] : undefined;
+    }
+
     get canRedirect() {
         return !this.isCategory;
     }
@@ -214,12 +258,16 @@ export class Channel {
         animated = false,
         hash?: string | null,
         size: Sizes = 128,
-        format: ChannelIconFormat = ImageFormat.WebP,
+        format: ChannelIconFormat = ImageFormat.WebP
     ) {
         if (!hash) return null;
         return REST.makeCDNUrl(
-            CDNRoutes.channelIcon(channelId, hash, format, size, animated),
+            CDNRoutes.channelIcon(channelId, hash, format, size, animated)
         );
+    }
+
+    close() {
+        return this.app.channels.closeDM(this.id);
     }
 
     update(channel: APIChannel) {
@@ -239,13 +287,19 @@ export class Channel {
             ? this.app.spaces.add(channel.space)
             : (this.space ?? null);
 
+        this.icon = channel.icon ?? this.icon;
+
+        this.recipientIds = channel.recipientIds ?? this.recipientIds ?? null;
+        if (channel.recipients)
+            this._recipients = this.app.users.addAll(channel.recipients);
+
         this.overwrites = (channel.overwrites ?? []).map(
-            (ow) => new ChannelPermissionOverwrite(this.app, ow),
+            (ow) => new ChannelPermissionOverwrite(this.app, ow)
         );
 
         this.flags = BitField.fromString(
             channelFlags,
-            channel.flags.toString(),
+            channel.flags.toString()
         );
 
         this.createdAt = new Date(channel.createdAt);
@@ -253,10 +307,9 @@ export class Channel {
 
         this.raw = channel;
 
-        this.lastMessageId = channel.lastMessageId ?? null;
         this._lastMessage = channel.lastMessage
             ? this.messages.add(channel.lastMessage)
-            : (this._lastMessage ?? null);
+            : null;
 
         this.space?.members.me?.invalidateChannelPermCache?.();
     }
@@ -271,13 +324,13 @@ export class Channel {
         limit?: number,
         before?: string,
         after?: string,
-        around?: string,
+        around?: string
     ): Promise<number> {
         return new Promise((resolve, reject) => {
             if (isInitial && this.hasFetchedInitialMessages) return;
 
             let opts: Record<string, any> = {
-                limit: limit || 50,
+                limit: limit || 50
             };
 
             if (before) opts = { ...opts, before };
@@ -290,14 +343,14 @@ export class Channel {
                 this.logger.info(`Fetching initial messages for ${this.id}`);
             else
                 this.logger.info(
-                    `Fetching messages for ${this.id} before ${before}`,
+                    `Fetching messages for ${this.id} before ${before}`
                 );
 
             this.app.rest
                 .get<APIMessage[]>(`/channels/${this.id}/messages`, opts)
                 .then((res) => {
                     this.messages.addAll(
-                        res.filter((x) => !this.messages.has(x.id)),
+                        res.filter((x) => !this.messages.has(x.id))
                     );
                     this.hasFetchedInitialMessages = true;
                     resolve(res.length);
@@ -311,7 +364,7 @@ export class Channel {
 
     async sendMessage(
         data: { content: string; nonce: string } | FormData,
-        msg?: QueuedMessage,
+        msg?: QueuedMessage
     ) {
         if (data instanceof FormData)
             return this.app.rest
@@ -320,7 +373,7 @@ export class Channel {
                     data,
                     undefined,
                     undefined,
-                    msg,
+                    msg
                 )
                 .catch((err) => {
                     this.logger.error(err);
@@ -344,7 +397,7 @@ export class Channel {
             channelId: string;
         }>(`/channels/${this.id}`, {
             parentOnly,
-            spaceId: this.raw.spaceId ?? undefined,
+            spaceId: this.raw.spaceId ?? undefined
         });
     }
 }

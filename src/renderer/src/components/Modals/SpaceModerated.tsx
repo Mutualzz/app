@@ -20,7 +20,6 @@ export const SpaceModerated: FC<Props> = ({ type }) => {
     return (
         <Paper
             elevation={app.settings?.preferEmbossed ? 5 : 1}
-            width="25rem"
             px={8}
             py={4}
             borderRadius={12}

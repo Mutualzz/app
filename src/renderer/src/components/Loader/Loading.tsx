@@ -15,16 +15,16 @@ const Loading = () => {
                     width: 256,
                     maxWidth: 256,
                     minWidth: 64,
-                    height: "auto",
+                    height: "auto"
                 }}
-                animate={{ opacity: [0.5, 1, 0.5] }}
+                animate={{ scale: [0.95, 1, 0.95] }}
                 transition={{
                     opacity: {
                         duration: 2.5,
                         repeat: Infinity,
                         repeatType: "loop",
-                        ease: "easeInOut",
-                    },
+                        ease: "easeInOut"
+                    }
                 }}
             />
         </Stack>

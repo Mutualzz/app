@@ -4,7 +4,7 @@ import type { AppStore } from "./App.store";
 import {
     QueuedMessage,
     type QueuedMessageData,
-    QueuedMessageStatus,
+    QueuedMessageStatus
 } from "./objects/QueuedMessage";
 
 export class MessageQueue {
@@ -14,6 +14,10 @@ export class MessageQueue {
         this.messages = observable.array([]);
 
         makeAutoObservable(this);
+    }
+
+    clear() {
+        this.messages.clear();
     }
 
     add(data: QueuedMessageData) {

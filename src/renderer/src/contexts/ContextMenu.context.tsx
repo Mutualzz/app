@@ -6,11 +6,11 @@ import {
     useEffect,
     useMemo,
     useRef,
-    useState,
+    useState
 } from "react";
 import { observer } from "mobx-react-lite";
 import { contextMenu } from "@mutualzz/contexify";
-import { ContextMenuRoot } from "@components/ContextMenus/ContextMenuRoot";
+import { ContextMenuRoot } from "@components/ContextMenu/ContextMenuRoot";
 import type { Space } from "@stores/objects/Space";
 import type { Channel } from "@stores/objects/Channel";
 import type { SpaceMember } from "@stores/objects/SpaceMember";
@@ -19,19 +19,24 @@ import type { Role } from "@stores/objects/Role";
 import type { AccountStore } from "@stores/Account.store";
 
 export type ContextMenuPayload =
-    | { type: "space"; space: Space; fromSidebar?: boolean; [key: string]: any }
+    | {
+          type: "space";
+          space: Space;
+
+          fromSidebar?: boolean;
+          [key: string]: any;
+      }
     | { type: "channelList"; space: Space; [key: string]: any }
     | { type: "channel"; space: Space; channel: Channel; [key: string]: any }
     | {
-          type: "member";
-          space: Space;
-          member: SpaceMember;
-
+          type: "user";
+          user: User;
+          space?: Space;
+          member?: SpaceMember;
+          insideDMs?: boolean;
           submenuArrowDirection?: "left" | "right";
-
           [key: string]: any;
       }
-    | { type: "user"; user: User; [key: string]: any }
     | { type: "account"; account: AccountStore; [key: string]: any }
     | {
           type: "role";
@@ -51,7 +56,7 @@ interface ContextMenuContextProps {
     openContextMenu: (
         e: AnyMouseEvent,
         menu: ContextMenuPayload,
-        position?: MenuPosition | null,
+        position?: MenuPosition | null
     ) => void;
     clearMenu: () => void;
     isOpen: boolean;
@@ -62,7 +67,7 @@ const ContextMenuContext = createContext<ContextMenuContextProps>({
     setMenu: () => {},
     openContextMenu: () => {},
     clearMenu: () => {},
-    isOpen: false,
+    isOpen: false
 });
 
 export const generateMenuIDs = {
@@ -73,11 +78,16 @@ export const generateMenuIDs = {
         `context-channel-${spaceId}-${channelId}`,
     member: (spaceId: string, memberId: string) =>
         `context-member-${spaceId}-${memberId}`,
-    user: (userId: string) => `context-user-${userId}`,
+    user: (userId: string, spaceId?: string) => {
+        let id = `context-user-${userId}`;
+        if (spaceId) id += `-${spaceId}`;
+
+        return id;
+    },
     role: (spaceId: string, roleId: string) =>
         `context-role-${spaceId}-${roleId}`,
 
-    account: (userId: string) => `context-account-${userId}`,
+    account: (userId: string) => `context-account-${userId}`
 };
 
 function getMenuId(menu: ContextMenuPayload): string {
@@ -88,10 +98,8 @@ function getMenuId(menu: ContextMenuPayload): string {
             return generateMenuIDs.channelList(menu.space.id);
         case "channel":
             return generateMenuIDs.channel(menu.space.id, menu.channel.id);
-        case "member":
-            return generateMenuIDs.member(menu.space.id, menu.member.id);
         case "user":
-            return generateMenuIDs.user(menu.user.id);
+            return generateMenuIDs.user(menu.user.id, menu.space?.id);
         case "account":
             return generateMenuIDs.account(menu.account.id);
         case "role":
@@ -120,7 +128,7 @@ export const ContextMenuProvider = observer(
         const openContextMenu = (
             e: AnyMouseEvent,
             nextMenu: ContextMenuPayload,
-            position?: MenuPosition | null,
+            position?: MenuPosition | null
         ) => {
             if ("stopPropagation" in e) e.stopPropagation();
             if ("preventDefault" in e) e.preventDefault();
@@ -135,7 +143,7 @@ export const ContextMenuProvider = observer(
 
         useEffect(() => {
             const pending = pendingShowRef.current;
-            if (!pending || !menu) return;
+            if (!pending || !menu) return () => {};
 
             const id = getMenuId(menu);
 
@@ -143,7 +151,7 @@ export const ContextMenuProvider = observer(
                 contextMenu.show({
                     event: pending.event,
                     id,
-                    position: pending.position,
+                    position: pending.position
                 });
             });
 
@@ -172,12 +180,12 @@ export const ContextMenuProvider = observer(
 
             window.addEventListener(
                 "mutualzz:contextmenu:visibility",
-                onVisible,
+                onVisible
             );
             return () =>
                 window.removeEventListener(
                     "mutualzz:contextmenu:visibility",
-                    onVisible,
+                    onVisible
                 );
         }, [menu]);
 
@@ -187,9 +195,9 @@ export const ContextMenuProvider = observer(
                 setMenu,
                 openContextMenu,
                 clearMenu,
-                isOpen,
+                isOpen
             }),
-            [menu],
+            [menu]
         );
 
         return (
@@ -198,7 +206,7 @@ export const ContextMenuProvider = observer(
                 <ContextMenuRoot />
             </ContextMenuContext.Provider>
         );
-    },
+    }
 );
 
 export function useMenu() {

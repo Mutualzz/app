@@ -9,6 +9,19 @@ import { setupCodecIPC } from "./codec";
 
 let mainWindow: BrowserWindow | null = null;
 
+const gotSingleInstanceLock = app.requestSingleInstanceLock();
+
+if (!gotSingleInstanceLock) app.quit();
+
+app.on("second-instance", () => {
+    const win = mainWindow;
+    if (!win) return;
+
+    if (win.isMinimized()) win.restore();
+    if (!win.isVisible()) win.show();
+    win.focus();
+});
+
 app.whenReady().then(() => {
     electronApp.setAppUserModelId("com.mutualzz.app");
 
@@ -28,16 +41,18 @@ app.whenReady().then(() => {
     app.setAsDefaultProtocolClient("mutualzz");
 
     app.on("activate", () => {
-        if (!mainWindow || mainWindow.isDestroyed()) {
+        if (!mainWindow || mainWindow.isDestroyed())
             mainWindow = createMainWindow();
+        else {
+            if (mainWindow.isMinimized()) mainWindow.restore();
+            mainWindow.show();
+            mainWindow.focus();
         }
     });
 });
 
 app.on("window-all-closed", () => {
-    if (process.platform !== "darwin") {
-        app.quit();
-    }
+    if (process.platform !== "darwin") app.quit();
 });
 
 app.on("before-quit", () => {

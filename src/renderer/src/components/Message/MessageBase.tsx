@@ -1,5 +1,5 @@
 import { TooltipWrapper } from "@components/TooltipWrapper";
-import { styled } from "@mutualzz/ui-core";
+import { formatColor, styled } from "@mutualzz/ui-core";
 import { Stack, Tooltip } from "@mutualzz/ui-web";
 import { Message, type MessageLike } from "@stores/objects/Message";
 import { calendarStrings } from "@utils/i18n";
@@ -9,21 +9,28 @@ import type { HTMLAttributes, PropsWithChildren } from "react";
 
 interface Props extends PropsWithChildren, HTMLAttributes<HTMLDivElement> {
     header?: boolean;
+    highlight?: boolean | string;
 }
 
-export const MessageBase = styled("div")<Props>(({ header }) => ({
-    display: "flex",
-    overflow: "hidden",
-    flexDirection: "row",
-    ...(!header && {
-        alignItems: "center",
-    }),
-    ...(header && {
-        marginTop: 10,
-    }),
-    paddingTop: "0.2rem",
-    paddingBottom: "0.2rem",
-}));
+export const MessageBase = styled("div")<Props>(
+    ({ header, highlight, theme }) => ({
+        display: "flex",
+        overflow: "hidden",
+        flexDirection: "row",
+        ...(!header && {
+            alignItems: "center"
+        }),
+        ...(header && {
+            marginTop: 10
+        }),
+        paddingTop: "0.2rem",
+        paddingBottom: "0.2rem",
+        ...(highlight && {
+            borderLeft: `1px solid ${typeof highlight === "string" ? highlight : theme.colors.info}`,
+            background: `linear-gradient(135deg, ${formatColor(theme.colors.info, { alpha: 12, format: "hexa" })} 0%, rgba(255, 255, 255, 0) 100%)`
+        })
+    })
+);
 
 export const MessageInfo = styled("div")(({ theme }) => ({
     width: 62,
@@ -36,8 +43,8 @@ export const MessageInfo = styled("div")(({ theme }) => ({
     "time, .edited": {
         opacity: 0,
         fontSize: 12,
-        color: theme.typography.colors.muted,
-    },
+        color: theme.typography.colors.muted
+    }
 }));
 
 export const MessageContent = styled("div")({
@@ -48,20 +55,15 @@ export const MessageContent = styled("div")({
     justifyContent: "center",
     paddingRight: 48,
     wordWrap: "break-word",
-    flex: 1,
+    flex: 1
 });
 
 export const MessageContentText = styled("div")<{
     sending?: boolean;
-    failed?: boolean;
-}>(({ theme, sending, failed }) => ({
+}>(({ sending }) => ({
     ...(sending && {
-        opacity: 0.5,
-    }),
-    ...(failed && {
-        color: theme.colors.danger,
-    }),
-    margin: "2px 0",
+        opacity: 0.5
+    })
 }));
 
 export const DetailsBase = styled("div")(({ theme }) => ({
@@ -74,14 +76,14 @@ export const DetailsBase = styled("div")(({ theme }) => ({
 
     ".edited": {
         cursor: "default",
-        userSelect: "none",
-    },
+        userSelect: "none"
+    }
 }));
 
 export const MessageDetails = observer(
     ({
         message,
-        position,
+        position
     }: {
         message: MessageLike;
         position: "left" | "top";
@@ -95,7 +97,7 @@ export const MessageDetails = observer(
                             content={
                                 <TooltipWrapper>
                                     {dayjs(message.createdAt).format(
-                                        "dddd, MMMM D, YYYY h:mm A",
+                                        "dddd, MMMM D, YYYY h:mm A"
                                     )}
                                 </TooltipWrapper>
                             }
@@ -117,7 +119,7 @@ export const MessageDetails = observer(
                     content={
                         <TooltipWrapper>
                             {dayjs(message.createdAt).format(
-                                "dddd, MMMM D, YYYY h:mm A",
+                                "dddd, MMMM D, YYYY h:mm A"
                             )}
                         </TooltipWrapper>
                     }
@@ -136,7 +138,7 @@ export const MessageDetails = observer(
                     content={
                         <TooltipWrapper>
                             {dayjs(message.createdAt).format(
-                                "dddd, MMMM D, YYYY h:mm A",
+                                "dddd, MMMM D, YYYY h:mm A"
                             )}
                         </TooltipWrapper>
                     }
@@ -147,11 +149,11 @@ export const MessageDetails = observer(
                     >
                         {dayjs(message.createdAt).calendar(
                             undefined,
-                            calendarStrings,
+                            calendarStrings
                         )}
                     </time>
                 </Tooltip>
             </DetailsBase>
         );
-    },
+    }
 );

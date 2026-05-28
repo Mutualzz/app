@@ -4,17 +4,16 @@ import { VoiceChannelView } from "@components/Views/VoiceChannelView";
 import { useAppStore } from "@hooks/useStores";
 import { Stack, Typography } from "@mutualzz/ui-web";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { runInAction } from "mobx";
 import { observer } from "mobx-react-lite";
 import { useEffect } from "react";
 
 export const Route = createFileRoute(
-    "/_authenticated/spaces/$spaceId/$channelId",
+    "/_authenticated/spaces/$spaceId/$channelId"
 )({
     component: observer(RouteComponent),
     validateSearch: (search) => ({
-        ...(search.chat !== undefined ? { chat: search.chat } : {}),
-    }),
+        ...(search.chat === undefined ? {} : { chat: search.chat })
+    })
 });
 
 function RouteComponent() {
@@ -28,7 +27,7 @@ function RouteComponent() {
     // Restrict to currently visible navigable channels in this space.
     const activeChannel =
         space?.visibleChannels.find(
-            (ch) => ch.id === channelId && ch.canRedirect,
+            (ch) => ch.id === channelId && ch.canRedirect
         ) ?? null;
 
     const openChat = Boolean(activeChannel?.isVoiceChannel && chat === true);
@@ -37,21 +36,18 @@ function RouteComponent() {
         if (!space) return;
 
         if (!activeChannel) {
-            // Let /spaces/$spaceId apply remembered-channel or fallback logic.
             navigate({
                 to: "/spaces/$spaceId",
                 params: { spaceId },
-                replace: true,
+                replace: true
             });
             return;
         }
 
-        runInAction(() => {
-            app.spaces.setActive(spaceId);
-            app.spaces.setMostRecentSpace(spaceId);
-            app.channels.setActive(channelId);
-            app.channels.setMostRecentChannelForSpace(spaceId, channelId);
-        });
+        app.spaces.setActive(spaceId);
+        app.spaces.setMostRecentSpace(spaceId);
+        app.channels.setActive(channelId);
+        app.channels.setMostRecentChannelForSpace(spaceId, channelId);
 
         app.gateway.onChannelOpen(spaceId, channelId);
     }, [app, navigate, space, activeChannel, spaceId, channelId]);

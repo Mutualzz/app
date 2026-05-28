@@ -41,18 +41,19 @@ export const MemberListItem = observer(({ member, isOwner }: Props) => {
             p={1}
             onContextMenu={(e) =>
                 openContextMenu(e, {
-                    type: "member",
-                    space: member.space!,
+                    type: "user",
+                    space: member.space,
                     member,
+                    user: member.user!
                 })
             }
             css={{
                 cursor: "pointer",
                 ...(presence &&
-                    presence.status == "offline" &&
+                    presence.status === "offline" &&
                     !hovered && {
-                        opacity: 0.5,
-                    }),
+                        opacity: 0.5
+                    })
             }}
         >
             <UserAvatar user={member.user} badge />
@@ -78,7 +79,7 @@ export const MemberListItem = observer(({ member, isOwner }: Props) => {
                             <FaCrown
                                 color={theme.colors.warning}
                                 css={{
-                                    marginBottom: 4,
+                                    marginBottom: 4
                                 }}
                                 size={14}
                             />

@@ -46,21 +46,18 @@ export const UserBar = observer(() => {
         voiceStatus === "connecting" ||
         voiceStatus === "failed";
 
-    const inSpace = Boolean(app.spaces.activeId) && app.mode === "spaces";
+    const inFeed = !!app.channels.activeId && app.mode === "feed";
 
-    const conditionalProps = useMemo<Omit<PaperProps, "color">>(() => {
-        if (inSpace)
-            return {
-                minWidth: "10rem",
-                direction: "row"
-            };
-
-        return {
-            width: "4.25rem",
-            height: showVoicePill ? "25rem" : "17.5rem",
-            direction: "column"
-        };
-    }, [inSpace, showVoicePill]);
+    const conditionalProps: Omit<PaperProps, "color"> = !inFeed
+        ? {
+              minWidth: "10rem",
+              direction: "row"
+          }
+        : {
+              width: "4.25rem",
+              height: showVoicePill ? "25rem" : "17.5rem",
+              direction: "column"
+          };
 
     const account = app.account;
 
@@ -117,7 +114,7 @@ export const UserBar = observer(() => {
             width="97.5%"
             direction="column"
         >
-            {showVoicePill && inSpace && (
+            {showVoicePill && !inFeed && (
                 <Paper
                     borderTopRightRadius={15}
                     borderTopLeftRadius={15}
@@ -174,7 +171,7 @@ export const UserBar = observer(() => {
                     </Stack>
 
                     <Tooltip
-                        placement={inSpace ? "top" : "right"}
+                        placement={!inFeed ? "top" : "right"}
                         title={
                             <TooltipWrapper>
                                 {cameraEnabled
@@ -216,7 +213,7 @@ export const UserBar = observer(() => {
                 width="100%"
                 zIndex={theme.zIndex.appBar + 1}
                 spacing={1.25}
-                {...(showVoicePill && inSpace
+                {...(showVoicePill && !inFeed
                     ? {
                           borderBottomRightRadius: 15,
                           borderBottomLeftRadius: 15
@@ -225,10 +222,10 @@ export const UserBar = observer(() => {
                 {...conditionalProps}
             >
                 <Paper
-                    direction={inSpace ? "row" : "column"}
+                    direction={!inFeed ? "row" : "column"}
                     alignItems="center"
                     spacing={2.5}
-                    width={inSpace && showVoicePill ? "75%" : "100%"}
+                    width={!inFeed && showVoicePill ? "75%" : "100%"}
                     px={1}
                     py={0.25}
                     borderRadius={6}
@@ -248,10 +245,10 @@ export const UserBar = observer(() => {
                                 account
                             },
                             {
-                                x: inSpace
+                                x: !inFeed
                                     ? Math.round(rect.left)
                                     : Math.round(rect.left + 55),
-                                y: inSpace
+                                y: !inFeed
                                     ? Math.round(rect.bottom - 120)
                                     : Math.round(rect.top + 10)
                             }
@@ -266,7 +263,7 @@ export const UserBar = observer(() => {
                     <UserAvatar user={account} size={48} badge />
                     <Stack direction="column">
                         <Typography
-                            textAlign={!inSpace ? "center" : undefined}
+                            textAlign={!!inFeed ? "center" : undefined}
                             level="body-sm"
                         >
                             {account.displayName}
@@ -279,14 +276,14 @@ export const UserBar = observer(() => {
                             )}
                         {account.presence && (
                             <SmallActivityStatus
-                                vertical={!inSpace}
+                                vertical={!!inFeed}
                                 presence={account.presence}
                             />
                         )}
                     </Stack>
                 </Paper>
 
-                {!inSpace && showVoicePill && (
+                {!!inFeed && showVoicePill && (
                     <Stack
                         direction="column"
                         spacing={1.25}
@@ -372,12 +369,12 @@ export const UserBar = observer(() => {
 
                 <Stack
                     alignItems="center"
-                    direction={inSpace ? "row" : "column"}
-                    spacing={inSpace ? 2.5 : undefined}
-                    mr={inSpace ? 1.25 : undefined}
+                    direction={!inFeed ? "row" : "column"}
+                    spacing={!inFeed ? 2.5 : undefined}
+                    mr={!inFeed ? 1.25 : undefined}
                 >
                     <Tooltip
-                        placement={inSpace ? "top" : "right"}
+                        placement={!inFeed ? "top" : "right"}
                         title={<TooltipWrapper>Mute</TooltipWrapper>}
                     >
                         <IconButton
@@ -411,7 +408,7 @@ export const UserBar = observer(() => {
                         </IconButton>
                     </Tooltip>
                     <Tooltip
-                        placement={inSpace ? "top" : "right"}
+                        placement={!inFeed ? "top" : "right"}
                         title={<TooltipWrapper>Deafen</TooltipWrapper>}
                     >
                         <IconButton
@@ -445,7 +442,7 @@ export const UserBar = observer(() => {
                     </Tooltip>
 
                     <Tooltip
-                        placement={inSpace ? "top" : "right"}
+                        placement={!inFeed ? "top" : "right"}
                         title={<TooltipWrapper>Settings</TooltipWrapper>}
                     >
                         <IconButton

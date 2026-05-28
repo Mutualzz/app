@@ -11,13 +11,13 @@ import {
     KeyboardSensor,
     PointerSensor,
     useSensor,
-    useSensors,
+    useSensors
 } from "@dnd-kit/core";
 import {
     SortableContext,
     sortableKeyboardCoordinates,
     useSortable,
-    verticalListSortingStrategy,
+    verticalListSortingStrategy
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import type { CSSObject } from "@emotion/react";
@@ -30,14 +30,14 @@ import capitalize from "lodash-es/capitalize";
 import { observer } from "mobx-react-lite";
 import { useEffect, useState } from "react";
 import { FaPlus } from "react-icons/fa";
-import { SpaceContextMenu } from "../ContextMenus/SpaceContextMenu";
+import { SpaceContextMenu } from "@components/ContextMenu/SpaceContextMenu";
 import { useMenu } from "@contexts/ContextMenu.context";
 
 const SortableSpace = observer(
     ({
         space,
         onClick,
-        selected,
+        selected
     }: {
         space: Space;
         onClick: () => void;
@@ -51,7 +51,7 @@ const SortableSpace = observer(
             setNodeRef,
             transform,
             transition,
-            isDragging,
+            isDragging
         } = useSortable({ id: space.id });
         const { theme } = useTheme();
 
@@ -68,7 +68,7 @@ const SortableSpace = observer(
         const style: CSSObject = {
             transform: CSS.Transform.toString(transform),
             transition,
-            opacity: isDragging ? 0.5 : 1,
+            opacity: isDragging ? 0.5 : 1
         };
 
         return (
@@ -92,10 +92,10 @@ const SortableSpace = observer(
                                             theme.colors.neutral,
                                             {
                                                 alpha: 30,
-                                                format: "hexa",
-                                            },
-                                        )}`,
-                                    },
+                                                format: "hexa"
+                                            }
+                                        )}`
+                                    }
                                 }}
                                 typographyProps={{ level: "body-sm" }}
                             >
@@ -112,7 +112,7 @@ const SortableSpace = observer(
                                     openContextMenu(e, {
                                         type: "space",
                                         space,
-                                        fromSidebar: true,
+                                        fromSidebar: true
                                     })
                                 }
                                 onMouseEnter={() => setIsHovered(true)}
@@ -121,7 +121,7 @@ const SortableSpace = observer(
                                 onClick={onClick}
                                 selected={selected}
                                 css={{
-                                    cursor: isDragging ? "grabbing" : "pointer",
+                                    cursor: isDragging ? "grabbing" : "pointer"
                                 }}
                             />
                         </Stack>
@@ -132,7 +132,7 @@ const SortableSpace = observer(
                 </Portal>
             </>
         );
-    },
+    }
 );
 
 export const SpacesSidebar = observer(() => {
@@ -143,12 +143,12 @@ export const SpacesSidebar = observer(() => {
     const sensors = useSensors(
         useSensor(PointerSensor, {
             activationConstraint: {
-                distance: 8,
-            },
+                distance: 8
+            }
         }),
         useSensor(KeyboardSensor, {
-            coordinateGetter: sortableKeyboardCoordinates,
-        }),
+            coordinateGetter: sortableKeyboardCoordinates
+        })
     );
 
     const handleDragEnd = (event: any) => {
@@ -157,10 +157,10 @@ export const SpacesSidebar = observer(() => {
         if (!over || active.id === over.id) return;
 
         const oldIndex = app.spaces.positioned.findIndex(
-            (s) => s.id === active.id,
+            (s) => s.id === active.id
         );
         const newIndex = app.spaces.positioned.findIndex(
-            (s) => s.id === over.id,
+            (s) => s.id === over.id
         );
 
         if (oldIndex !== -1 && newIndex !== -1) {
@@ -186,9 +186,9 @@ export const SpacesSidebar = observer(() => {
                         <TooltipWrapper>
                             Switch to{" "}
                             {capitalize(
-                                app.mode
+                                app.mode !== "@me"
                                     ? "Direct Messages"
-                                    : (app.settings?.preferredMode ?? "Spaces"),
+                                    : (app.settings?.preferredMode ?? "Spaces")
                             )}
                         </TooltipWrapper>
                     }
@@ -198,16 +198,17 @@ export const SpacesSidebar = observer(() => {
                         css={{
                             width: 48,
                             cursor: "pointer",
-                            marginBottom: 5,
+                            marginBottom: 5
                         }}
                         initial={{ scale: 1 }}
                         whileHover={{ scale: 1.1 }}
                         onClick={() => {
                             navigate({
-                                to: app.mode
-                                    ? "/@me"
-                                    : `/${app.settings?.preferredMode ?? "spaces"}`,
-                                replace: true,
+                                to:
+                                    app.mode !== "@me"
+                                        ? "/@me"
+                                        : `/${app.settings?.preferredMode ?? "spaces"}`,
+                                replace: true
                             });
                         }}
                     />
@@ -232,8 +233,8 @@ export const SpacesSidebar = observer(() => {
                                 navigate({
                                     to: "/spaces/$spaceId",
                                     params: {
-                                        spaceId: space.id,
-                                    },
+                                        spaceId: space.id
+                                    }
                                 });
                             }}
                             key={space.id}
@@ -251,7 +252,7 @@ export const SpacesSidebar = observer(() => {
                     <IconButton
                         size={36}
                         css={{
-                            borderRadius: 9999,
+                            borderRadius: 9999
                         }}
                         color="success"
                         variant="outlined"
@@ -261,7 +262,7 @@ export const SpacesSidebar = observer(() => {
                     >
                         <FaPlus
                             css={{
-                                padding: 6,
+                                padding: 6
                             }}
                         />
                     </IconButton>

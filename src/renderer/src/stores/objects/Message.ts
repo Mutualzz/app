@@ -3,6 +3,7 @@ import type { AppStore } from "@stores/App.store";
 import { action, makeObservable, observable } from "mobx";
 import { MessageBase } from "./MessageBase";
 import type { QueuedMessage, QueuedMessageData } from "./QueuedMessage";
+import { BitField, messageFlags, MessageFlags } from "@mutualzz/bitfield";
 
 export type MessageLike = Message | QueuedMessage;
 export type MessageLikeData = APIMessage | QueuedMessageData;
@@ -14,6 +15,7 @@ export class Message extends MessageBase {
     nonce?: Snowflake | null;
     declare spaceId?: Snowflake | null;
     embeds: APIMessageEmbed[];
+    flags: BitField<MessageFlags>;
 
     edited: boolean;
 
@@ -34,6 +36,7 @@ export class Message extends MessageBase {
         this.edited = data.edited ?? false;
 
         this.embeds = data.embeds;
+        this.flags = BitField.fromString(messageFlags, data.flags.toString());
 
         this.spaceId = data.spaceId;
         if (data.space) this._space = this.app.spaces.add(data.space);
@@ -45,7 +48,7 @@ export class Message extends MessageBase {
             edited: observable,
             editing: observable,
             update: action.bound,
-            setEditing: action.bound,
+            setEditing: action.bound
         });
     }
 
@@ -87,7 +90,11 @@ export class Message extends MessageBase {
 
     async delete() {
         return this.app.rest.delete(
-            `/channels/${this.channelId}/messages/${this.id}`,
+            `/channels/${this.channelId}/messages/${this.id}`
         );
+    }
+
+    dismiss() {
+        this.channel?.messages.remove(this.id);
     }
 }

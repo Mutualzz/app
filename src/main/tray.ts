@@ -1,6 +1,7 @@
 import { app, BrowserWindow, Menu, nativeImage, Tray } from "electron";
 import { EventEmitter } from "events";
 import iconPng from "../../resources/icons/base/icon.png?asset";
+import { setQuitting } from "./windows";
 import NativeImage = Electron.NativeImage;
 
 class TrayManager extends EventEmitter {
@@ -22,7 +23,10 @@ class TrayManager extends EventEmitter {
                 { type: "separator" },
                 {
                     label: "Quit",
-                    click: () => app.quit()
+                    click: () => {
+                        setQuitting(true);
+                        app.quit();
+                    }
                 }
             ]);
 
@@ -40,10 +44,6 @@ class TrayManager extends EventEmitter {
         this.createTray();
     }
 
-    /**
-     * Update the tray icon from a data URL (e.g., canvas data)
-     * This is called directly from the theme system, not via IPC
-     */
     updateIcon(dataUrl: string): void {
         if (!this.tray) return;
 
@@ -98,14 +98,16 @@ class TrayManager extends EventEmitter {
                 { type: "separator" },
                 {
                     label: "Quit",
-                    click: () => app.quit()
+                    click: () => {
+                        setQuitting(true);
+                        app.quit();
+                    }
                 }
             ]);
 
             this.tray.setContextMenu(contextMenu);
             this.tray.setToolTip("Mutualzz");
 
-            // Toggle window visibility on left click
             this.tray.on("click", () => {
                 if (this.mainWindow) {
                     if (this.mainWindow.isVisible()) {

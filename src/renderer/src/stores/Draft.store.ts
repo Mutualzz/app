@@ -16,6 +16,11 @@ export class DraftStore {
         tag: "DraftStore",
     });
 
+    clear() {
+        this.themes.clear();
+        this.avatars.clear();
+    }
+
     constructor() {
         makeAutoObservable(this);
 

@@ -17,7 +17,7 @@ import { IconButton } from "@components/IconButton";
 import { TooltipWrapper } from "@components/TooltipWrapper";
 import { SpaceInviteToSpaceModal } from "@components/Space/SpaceInviteToSpaceModal";
 import { FaChevronDown, FaCogs, FaUserPlus } from "react-icons/fa";
-import { SpaceContextMenu } from "@components/ContextMenus/SpaceContextMenu";
+import { SpaceContextMenu } from "@components/ContextMenu/SpaceContextMenu";
 import { SpaceSettingsModal } from "@components/SpaceSettings/SpaceSettingsModal";
 
 interface Props {

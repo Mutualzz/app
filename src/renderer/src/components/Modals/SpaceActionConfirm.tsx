@@ -38,8 +38,6 @@ export const SpaceActionConfirm = observer(({ space, action }: Props) => {
     return (
         <Paper
             elevation={app.settings?.preferEmbossed ? 5 : 1}
-            width="25rem"
-            height="10rem"
             padding={5}
             borderRadius={12}
             direction="column"

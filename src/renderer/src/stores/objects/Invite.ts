@@ -26,7 +26,7 @@ export class Invite {
 
     constructor(
         private readonly app: AppStore,
-        invite: APIInvite,
+        invite: APIInvite
     ) {
         this.code = invite.code;
         this.type = invite.type;
@@ -111,7 +111,7 @@ export class Invite {
 
     delete() {
         return this.app.rest.delete(
-            `/spaces/${this.spaceId}/invites/${this.code}`,
+            `/spaces/${this.spaceId}/invites/${this.code}`
         );
     }
 }

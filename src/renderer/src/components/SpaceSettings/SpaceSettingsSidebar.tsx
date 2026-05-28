@@ -3,7 +3,7 @@ import { Paper } from "@components/Paper";
 import {
     type SpaceSettingsCategories,
     type SpaceSettingsPage,
-    useSpaceSettings,
+    useSpaceSettings
 } from "@components/SpaceSettings/SpaceSettings.context";
 import { useAppStore } from "@hooks/useStores";
 import { ButtonGroup, Divider, Stack, Typography } from "@mutualzz/ui-web";
@@ -11,7 +11,13 @@ import type { Space } from "@stores/objects/Space";
 import startCase from "lodash-es/startCase";
 import { observer } from "mobx-react-lite";
 import { Fragment, type JSX } from "react";
-import { FaPaintBrush, FaPaperPlane, FaSmile, FaTrash } from "react-icons/fa";
+import {
+    FaHammer,
+    FaPaintBrush,
+    FaPaperPlane,
+    FaSmile,
+    FaTrash
+} from "react-icons/fa";
 import { VscTypeHierarchySuper } from "react-icons/vsc";
 import { SpaceActionConfirm } from "@components/Modals/SpaceActionConfirm";
 import { useModal } from "@contexts/Modal.context";
@@ -36,26 +42,33 @@ export const settingsPages: SettingsPages = {
         {
             label: "profile",
             icon: <FaPaintBrush />,
-            permissions: ["ManageSpace"],
-        },
+            permissions: ["ManageSpace"]
+        }
     ],
     people: [
         {
             label: "roles",
             icon: <VscTypeHierarchySuper />,
-            permissions: ["ManageRoles"],
+            permissions: ["ManageRoles"]
         },
         {
             label: "invites",
             icon: <FaPaperPlane />,
-            permissions: ["ManageSpace"],
+            permissions: ["ManageSpace"]
         },
         {
             label: "expressions",
             icon: <FaSmile />,
-            permissions: ["ManageExpressions"],
-        },
+            permissions: ["ManageExpressions"]
+        }
     ],
+    moderation: [
+        {
+            label: "bans",
+            icon: <FaHammer />,
+            permissions: ["BanMembers"]
+        }
+    ]
 };
 
 // TODO: add a determinate category and page visibility based on bitfield
@@ -69,7 +82,7 @@ export const SpaceSettingsSidebar = observer(
 
         const handlePageSwitch = (
             category: SpaceSettingsCategories,
-            page: SpaceSettingsPage,
+            page: SpaceSettingsPage
         ) => {
             setCurrentPage(page);
             setCurrentCategory(category);
@@ -84,7 +97,7 @@ export const SpaceSettingsSidebar = observer(
 
         const shouldShowCategory = (category: SpaceSettingsCategories) => {
             return settingsPages[category].some((page) =>
-                space.members.me?.hasAnyPermission(page.permissions),
+                space.members.me?.hasAnyPermission(page.permissions)
             );
         };
 
@@ -111,7 +124,7 @@ export const SpaceSettingsSidebar = observer(
                             key={`settings-sidebar-category-fragment-${category}`}
                         >
                             {shouldShowCategory(
-                                category as SpaceSettingsCategories,
+                                category as SpaceSettingsCategories
                             ) && (
                                 <Stack direction="column">
                                     {category === "general" ? (
@@ -149,7 +162,7 @@ export const SpaceSettingsSidebar = observer(
                                                         onClick={() =>
                                                             handlePageSwitch(
                                                                 category as SpaceSettingsCategories,
-                                                                page.label,
+                                                                page.label
                                                             )
                                                         }
                                                         key={`user-settings-sidebar-${page.label}`}
@@ -168,7 +181,7 @@ export const SpaceSettingsSidebar = observer(
                                                     >
                                                         {startCase(page.label)}
                                                     </Button>
-                                                ),
+                                                )
                                         )}
                                     </ButtonGroup>
                                 </Stack>
@@ -177,7 +190,7 @@ export const SpaceSettingsSidebar = observer(
                             {index < categories.length - 1 && (
                                 <Divider
                                     css={{
-                                        opacity: 0.25,
+                                        opacity: 0.25
                                     }}
                                     lineColor="muted"
                                 />
@@ -193,7 +206,7 @@ export const SpaceSettingsSidebar = observer(
                                 <SpaceActionConfirm
                                     space={space}
                                     action="delete"
-                                />,
+                                />
                             )
                         }
                         color="danger"
@@ -206,5 +219,5 @@ export const SpaceSettingsSidebar = observer(
                 )}
             </Paper>
         );
-    },
+    }
 );

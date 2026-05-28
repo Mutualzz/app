@@ -1,7 +1,7 @@
 import type { Channel } from "@stores/objects/Channel";
 import { Stack } from "@mutualzz/ui-web";
 import { MessageList } from "@components/Message/MessageList";
-import { MessageInput } from "@components/Message/MessageInput";
+import { SpaceChannelMessageInput } from "@components/Channel/SpaceChannelMessageInput";
 import { useAppStore } from "@hooks/useStores";
 import { MemberList } from "@components/MemberList/MemberList";
 import { TextChannelHeader } from "@components/Channel/TextChannelHeader";
@@ -20,7 +20,7 @@ export const TextChannelView = observer(({ channel }: Props) => {
 
         const latestMine = [...channel.messages.all]
             .filter(
-                (m) => m.authorId === app.account!.id && !!m.content?.trim(),
+                (m) => m.authorId === app.account!.id && !!m.content?.trim()
             )
             .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())[0];
 
@@ -41,11 +41,14 @@ export const TextChannelView = observer(({ channel }: Props) => {
                     overflow="hidden"
                 >
                     <MessageList channel={channel} />
-                    <MessageInput
+                    <SpaceChannelMessageInput
+                        channel={channel}
                         onRequestEditLatest={handleRequestEditLatest}
                     />
                 </Stack>
-                {app.memberListVisible && <MemberList />}
+                {app.mode === "spaces" && app.memberListVisible && (
+                    <MemberList />
+                )}
             </Stack>
         </>
     );

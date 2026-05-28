@@ -39,7 +39,6 @@ export function setupIPC(): void {
 
     // OS/App Info
     ipcMain.handle("app:get-version", () => app.getVersion());
-
     ipcMain.handle("app:get-name", () => app.getName());
 
     ipcMain.handle("system:get-os-info", () => {

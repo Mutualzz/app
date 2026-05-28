@@ -7,19 +7,21 @@ import {
     createFileRoute,
     Outlet,
     useNavigate,
-    useParams,
+    useParams
 } from "@tanstack/react-router";
 import { observer } from "mobx-react-lite";
 import { useEffect } from "react";
-import { runInAction } from "mobx";
 import { dynamicElevation } from "@mutualzz/ui-core";
 import { motion } from "motion/react";
 
 export const Route = createFileRoute("/_authenticated/spaces")({
-    component: observer(RouteComponent),
+    component: observer(RouteComponent)
 });
 
 const ResizeBar = motion.create("div");
+
+const MIN_WIDTH = 240;
+const MAX_WIDTH = 480;
 
 function RouteComponent() {
     const app = useAppStore();
@@ -27,7 +29,7 @@ function RouteComponent() {
     const navigate = useNavigate();
     const params = useParams({
         from: "/_authenticated/spaces/$spaceId",
-        shouldThrow: false,
+        shouldThrow: false
     });
 
     useEffect(() => {
@@ -39,17 +41,19 @@ function RouteComponent() {
     }, []);
 
     useEffect(() => {
-        runInAction(() => {
-            if (params?.spaceId) return;
+        if (params?.spaceId) return;
 
-            const space = app.spaces.setPreferredActive();
-            if (!space) return;
+        const space = app.spaces.setPreferredActive();
+        if (!space) return;
 
-            navigate({
-                to: "/spaces/$spaceId",
-                params: { spaceId: space.id },
-                replace: true,
-            });
+        app.channels.setPreferredActive();
+
+        if (space.id === app.spaces.activeId) return;
+
+        navigate({
+            to: "/spaces/$spaceId",
+            params: { spaceId: space.id },
+            replace: true
         });
     }, [params?.spaceId]);
 
@@ -57,9 +61,9 @@ function RouteComponent() {
         <Stack width="100%" height="100%" direction="row">
             <Stack
                 position="relative"
-                width={`${app.channelListWidth}px`}
-                minWidth="240px"
-                maxWidth="480px"
+                width={app.channelListWidth}
+                minWidth={MIN_WIDTH}
+                maxWidth={MAX_WIDTH}
                 direction="column"
                 flexShrink={0}
             >
@@ -78,14 +82,14 @@ function RouteComponent() {
 
                             const onMove = (moveEvent: PointerEvent) => {
                                 app.setChannelListWidth(
-                                    startWidth + (moveEvent.clientX - startX),
+                                    startWidth + (moveEvent.clientX - startX)
                                 );
                             };
 
                             const onUp = () => {
                                 window.removeEventListener(
                                     "pointermove",
-                                    onMove,
+                                    onMove
                                 );
                                 window.removeEventListener("pointerup", onUp);
                             };
@@ -95,18 +99,20 @@ function RouteComponent() {
                         }}
                         style={{
                             width: 2,
+                            marginLeft: -1,
+                            marginRight: -1,
                             cursor: "col-resize",
                             flexShrink: 0,
                             touchAction: "none",
                             userSelect: "none",
                             backgroundColor: app.settings?.preferEmbossed
                                 ? dynamicElevation(theme.colors.surface, 4)
-                                : "transparent",
+                                : "transparent"
                         }}
                         whileHover={{
                             backgroundColor: app.settings?.preferEmbossed
                                 ? dynamicElevation(theme.colors.surface, 6)
-                                : dynamicElevation(theme.colors.surface, 2),
+                                : dynamicElevation(theme.colors.surface, 2)
                         }}
                     />
                 </Stack>

@@ -8,12 +8,13 @@ import {
     ButtonGroup,
     Input,
     Stack,
-    Typography,
+    Typography
 } from "@mutualzz/ui-web";
 import { useMutation } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { observer } from "mobx-react-lite";
 import { type ChangeEvent, useState } from "react";
+import { toast } from "react-toastify";
 
 interface Props {
     setCreating: (creating: boolean) => void;
@@ -41,9 +42,9 @@ export const SpaceJoin = observer(({ setCreating }: Props) => {
                     `/spaces/${invite.space?.id}/members`,
                     {
                         channelId: invite.channelId,
-                        code: invite.code,
-                    },
-                ),
+                        code: invite.code
+                    }
+                )
             };
         },
         onSuccess: ({ invite, member }) => {
@@ -54,20 +55,23 @@ export const SpaceJoin = observer(({ setCreating }: Props) => {
                     to: "/spaces/$spaceId/$channelId",
                     params: {
                         spaceId: member.spaceId,
-                        channelId: invite.channelId,
+                        channelId: invite.channelId
                     },
-                    replace: true,
+                    replace: true
                 });
             } else {
                 navigate({
                     to: "/spaces/$spaceId",
                     params: { spaceId: member.spaceId },
-                    replace: true,
+                    replace: true
                 });
             }
 
             closeModal();
         },
+        onError: (err) => {
+            toast.error(err.message);
+        }
     });
 
     const { mutate: getInvite, isPending: isGettingInvite } = useMutation({
@@ -76,7 +80,7 @@ export const SpaceJoin = observer(({ setCreating }: Props) => {
             const match = inviteLink.match(regex);
             if (!match) {
                 setError("Invalid invite link format.");
-                return;
+                return null;
             }
 
             const code = match[1];
@@ -87,7 +91,7 @@ export const SpaceJoin = observer(({ setCreating }: Props) => {
             if (!invite) return;
 
             joinSpace(invite);
-        },
+        }
     });
 
     const handleJoin = () => {

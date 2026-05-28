@@ -24,6 +24,10 @@ export const ModeSwitcher = observer(() => {
 
     if (app.isAppLoading) return null;
 
+    const shouldLift = app.composerVisible;
+
+    const bottomOffset = shouldLift ? 84 : 24;
+
     return (
         <AnimatePresence>
             {!app.hideSwitcher && (
@@ -33,10 +37,10 @@ export const ModeSwitcher = observer(() => {
                         <TooltipWrapper
                             paperProps={{
                                 elevation: app.settings?.preferEmbossed ? 5 : 1,
-                                p: 1,
+                                p: 1
                             }}
                             typographyProps={{
-                                level: "body-sm",
+                                level: "body-sm"
                             }}
                         >
                             {title}
@@ -46,16 +50,10 @@ export const ModeSwitcher = observer(() => {
                     <AnimatedIconButton
                         css={{
                             position: "fixed",
-                            bottom:
-                                24 +
-                                (app.channels.active != undefined &&
-                                app.mode === "spaces" &&
-                                (!app.memberListVisible || app.voiceChatVisible)
-                                    ? 60
-                                    : 0),
+                            bottom: bottomOffset,
                             right: 24,
                             borderRadius: 9999,
-                            zIndex: theme.zIndex.fab,
+                            zIndex: theme.zIndex.fab
                         }}
                         color="primary"
                         size={30}
@@ -70,12 +68,12 @@ export const ModeSwitcher = observer(() => {
                                 duration: 1,
                                 repeat: Infinity,
                                 repeatType: "loop",
-                                ease: "easeInOut",
+                                ease: "easeInOut"
                             },
                             opacity: {
                                 duration: 0.4,
-                                ease: "easeOut",
-                            },
+                                ease: "easeOut"
+                            }
                         }}
                     >
                         {targetMode === "feed" ? <ImFeed /> : <GiGalaxy />}

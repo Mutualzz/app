@@ -76,6 +76,10 @@ export class ExpressionsStore {
         return [...this.fromSpaces, ...this.nonSpaces];
     }
 
+    clear() {
+        this.expressions.clear();
+    }
+
     add(expression: APIExpression) {
         const newExpression = new Expression(this.app, expression);
 
@@ -162,7 +166,7 @@ export class ExpressionsStore {
 
             return {
                 ...exp,
-                displayName: total > 1 ? `${exp.name}~${index}` : exp.name,
+                displayName: total > 1 ? `${exp.name}~${index}` : exp.name
             } as ExpressionWithDisplayName;
         });
     }

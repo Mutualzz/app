@@ -10,8 +10,6 @@ export const SuccessForgotSent = () => {
     return (
         <Paper
             elevation={app.settings?.preferEmbossed ? 5 : 1}
-            width="27.5rem"
-            height="10rem"
             p={5}
             borderRadius={12}
             direction="column"

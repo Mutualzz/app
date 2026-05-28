@@ -4,7 +4,7 @@ import {
     Stack,
     Tooltip,
     Typography,
-    useTheme,
+    useTheme
 } from "@mutualzz/ui-web";
 import { Button } from "@components/Button";
 import { useAppStore } from "@hooks/useStores";
@@ -33,7 +33,7 @@ const EmojiItem = observer(({ expression }: { expression: Expression }) => {
             direction="row"
             alignItems="center"
             whileHover={{
-                background: dynamicElevation(theme.colors.surface, 5),
+                background: dynamicElevation(theme.colors.surface, 5)
             }}
             onMouseOver={() => setHover(true)}
             onMouseOut={() => setHover(false)}
@@ -45,7 +45,7 @@ const EmojiItem = observer(({ expression }: { expression: Expression }) => {
                     src={expression.url}
                     css={{
                         width: 32,
-                        height: 32,
+                        height: 32
                     }}
                 />
                 :{expression.name}:
@@ -78,9 +78,9 @@ const UserEmojisTab = observer(() => {
 
     const { openModal } = useModal();
 
-    const emojis = app.expressions.emojis.filter(
-        (em) => em.authorId === app.account?.id,
-    );
+    const emojis = app.expressions.emojis
+        .filter((em) => em.authorId === app.account?.id)
+        .filter((em) => !em.spaceId);
 
     const staticEmojis = emojis.filter((e) => !e.animated);
     const animatedEmojis = emojis.filter((e) => e.animated);
@@ -103,7 +103,7 @@ const UserEmojisTab = observer(() => {
             authorId: app.account!.id,
             animated,
             flags: 0n,
-            createdAt: new Date(),
+            createdAt: new Date()
         };
 
         openModal("emoji-editor", <EmojiEditor emoji={emoji} file={file} />);
@@ -132,14 +132,14 @@ const UserEmojisTab = observer(() => {
                     onChange={handleUpload}
                     multiple={false}
                     css={{
-                        display: "none",
+                        display: "none"
                     }}
                 />
                 <Button
                     color="success"
                     onClick={() => fileInputRef.current?.click()}
                     css={{
-                        marginRight: 16,
+                        marginRight: 16
                     }}
                     disabled={emojis.length === 100}
                 >
@@ -163,7 +163,7 @@ const UserEmojisTab = observer(() => {
                     <Divider
                         lineColor="muted"
                         css={{
-                            opacity: 0.5,
+                            opacity: 0.5
                         }}
                     />
 
@@ -201,7 +201,7 @@ const UserEmojisTab = observer(() => {
                     <Divider
                         lineColor="muted"
                         css={{
-                            opacity: 0.5,
+                            opacity: 0.5
                         }}
                     />
 

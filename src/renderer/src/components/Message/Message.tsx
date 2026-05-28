@@ -1,10 +1,10 @@
 import { MarkdownRenderer } from "@components/Markdown/MarkdownRenderer/MarkdownRenderer";
 import { UserAvatar } from "@components/User/UserAvatar";
 import { useAppStore } from "@hooks/useStores";
-import { Stack, Tooltip, Typography } from "@mutualzz/ui-web";
+import { Stack, Tooltip, Typography, useTheme } from "@mutualzz/ui-web";
 import {
     Message as MessageType,
-    type MessageLike,
+    type MessageLike
 } from "@stores/objects/Message";
 import { QueuedMessageStatus } from "@stores/objects/QueuedMessage";
 import { observer } from "mobx-react-lite";
@@ -14,13 +14,15 @@ import {
     MessageContent,
     MessageContentText,
     MessageDetails,
-    MessageInfo,
+    MessageInfo
 } from "./MessageBase";
 import { MessageEmbed } from "./MessageEmbed";
 import { MessageToolbar } from "./MessageToolbar";
-import { MessageInput } from "./MessageInput";
+import { SpaceChannelMessageInput } from "../Channel/SpaceChannelMessageInput";
 import { TooltipWrapper } from "@components/TooltipWrapper";
 import dayjs from "dayjs";
+import { ChannelType } from "@mutualzz/types";
+import { DMChannelMessageInput } from "@components/DMChannel/DMChannelMessageInput";
 
 interface Props {
     message: MessageLike;
@@ -29,9 +31,14 @@ interface Props {
 
 export const Message = observer(({ message, header }: Props) => {
     const app = useAppStore();
+    const { theme } = useTheme();
+    const channel = app.channels.active;
     const space = message.spaceId ? app.spaces.get(message.spaceId) : null;
 
     const isSent = message instanceof MessageType;
+    const isDM =
+        channel?.type === ChannelType.DM ||
+        channel?.type === ChannelType.GroupDM;
 
     const hideSwitcher = () => {
         if (!app.memberListVisible) {
@@ -44,6 +51,10 @@ export const Message = observer(({ message, header }: Props) => {
             app.setHideSwitcher(false);
         }
     };
+
+    const isFailed =
+        "status" in message && message.status === QueuedMessageStatus.Failed;
+
 
     const children = (
         <MessageBase
@@ -71,22 +82,30 @@ export const Message = observer(({ message, header }: Props) => {
                         "status" in message &&
                         message.status === QueuedMessageStatus.Sending
                     }
-                    failed={
-                        "status" in message &&
-                        message.status === QueuedMessageStatus.Failed
-                    }
                 >
                     {isSent && message.editing ? (
-                        <MessageInput
-                            message={message}
-                            onStopEditing={() => message.setEditing(false)}
-                        />
+                        isDM ? (
+                            <DMChannelMessageInput
+                                channel={channel}
+                                message={message}
+                                onStopEditing={() => message.setEditing(false)}
+                            />
+                        ) : (
+                            <SpaceChannelMessageInput
+                                channel={channel}
+                                message={message}
+                                onStopEditing={() => message.setEditing(false)}
+                            />
+                        )
                     ) : (
                         message.content && (
                             <Stack alignItems="center" spacing={1.25}>
                                 <MarkdownRenderer
-                                    variant="plain"
-                                    textColor="primary"
+                                    textColor={
+                                        isFailed
+                                            ? theme.colors.danger
+                                            : "primary"
+                                    }
                                     value={message.content}
                                 />
                                 {isSent && message.edited && (
@@ -95,9 +114,9 @@ export const Message = observer(({ message, header }: Props) => {
                                         content={
                                             <TooltipWrapper>
                                                 {dayjs(
-                                                    message.updatedAt,
+                                                    message.updatedAt
                                                 ).format(
-                                                    "dddd, MMMM D, YYYY h:mm A",
+                                                    "dddd, MMMM D, YYYY h:mm A"
                                                 )}
                                             </TooltipWrapper>
                                         }
@@ -128,7 +147,7 @@ export const Message = observer(({ message, header }: Props) => {
         </MessageBase>
     );
 
-    return isSent ? (
+    return isSent || isFailed ? (
         <MessageToolbar header={header} message={message}>
             {children}
         </MessageToolbar>

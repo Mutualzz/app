@@ -5,7 +5,7 @@ import { action, makeObservable, observable } from "mobx";
 
 export enum QueuedMessageStatus {
     Sending = "sending",
-    Failed = "failed",
+    Failed = "failed"
 }
 
 export type QueuedMessageData = {
@@ -41,7 +41,7 @@ export class QueuedMessage extends MessageBase {
             updateProgress: action.bound,
             setAbortCallback: action.bound,
             abort: action.bound,
-            fail: action.bound,
+            fail: action.bound
         });
     }
 
@@ -62,5 +62,10 @@ export class QueuedMessage extends MessageBase {
     fail(error: string) {
         this.error = error;
         this.status = QueuedMessageStatus.Failed;
+    }
+
+    delete() {
+        this.app.queue.remove(this.id);
+        return null;
     }
 }

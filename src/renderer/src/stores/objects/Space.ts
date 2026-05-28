@@ -1,8 +1,9 @@
 import type {
     APIExpression,
+    APISpaceBan,
     APISpaceMember,
     Snowflake,
-    SpaceIconFormat,
+    SpaceIconFormat
 } from "@mutualzz/types";
 import {
     type APIChannel,
@@ -10,25 +11,26 @@ import {
     type APISpace,
     CDNRoutes,
     ImageFormat,
-    type Sizes,
+    type Sizes
 } from "@mutualzz/types";
 import type { AppStore } from "@stores/App.store";
-import { SpaceMemberListStore } from "@stores/Space/SpaceMemberList.store";
+import { SpaceMemberListStore } from "@stores/SpaceMemberList.store";
 import type { User } from "@stores/objects/User";
 import { REST } from "@stores/REST.store";
-import { SpaceMemberStore } from "@stores/Space/SpaceMember.store";
+import { SpaceMemberStore } from "@stores/SpaceMember.store";
 import { asAcronym } from "@utils/index";
 import {
     makeAutoObservable,
     observable,
     ObservableMap,
-    ObservableSet,
+    ObservableSet
 } from "mobx";
 import type { Channel } from "./Channel";
 import { Invite } from "./Invite";
-import { SpaceRoleStore } from "@stores/Space/SpaceRole.store";
+import { SpaceRoleStore } from "@stores/SpaceRole.store";
 import { BitField, type SpaceFlags, spaceFlags } from "@mutualzz/bitfield";
 import { Expression } from "@stores/objects/Expression";
+import { SpaceBan } from "@stores/objects/SpaceBan";
 
 export class Space {
     id: Snowflake;
@@ -40,7 +42,9 @@ export class Space {
 
     flags: BitField<SpaceFlags>;
 
-    invites = observable.map<string, Invite>();
+    invites = observable.map<Snowflake, Invite>();
+    bans = observable.map<Snowflake, SpaceBan>();
+
     members: SpaceMemberStore;
     roles: SpaceRoleStore;
     ownerId: Snowflake;
@@ -48,15 +52,16 @@ export class Space {
         new ObservableMap();
     raw: APISpace;
     expressions = observable.map<Snowflake, Expression>();
-
+    bansLoaded = false;
+    bansLoading = false;
+    invitesLoaded = false;
+    invitesLoading = false;
     private readonly _channels: ObservableSet<string>;
 
     constructor(
         private readonly app: AppStore,
-        space: APISpace,
+        space: APISpace
     ) {
-        this.app = app;
-
         this.id = space.id;
         this.name = space.name;
         this.description = space.description;
@@ -101,13 +106,17 @@ export class Space {
         return asAcronym(this.name);
     }
 
+    get banList() {
+        return Array.from(this.bans.values());
+    }
+
     get channels(): Channel[] {
         const spaceChannels = this.app.channels.all.filter((ch) =>
-            this._channels.has(ch.id),
+            this._channels.has(ch.id)
         );
 
         const topLevelChannels = spaceChannels.filter(
-            (channel) => !channel.parent,
+            (channel) => !channel.parent
         );
 
         return topLevelChannels
@@ -116,9 +125,9 @@ export class Space {
                 topLevelChannel,
                 ...spaceChannels
                     .filter(
-                        (channel) => channel.parent?.id === topLevelChannel.id,
+                        (channel) => channel.parent?.id === topLevelChannel.id
                     )
-                    .sort(this.app.channels.compareChannels),
+                    .sort(this.app.channels.compareChannels)
             ]);
     }
 
@@ -135,8 +144,12 @@ export class Space {
         return Space.constructIconUrl(
             this.id,
             this.icon.startsWith("a_"),
-            this.icon,
+            this.icon
         );
+    }
+
+    get inviteList() {
+        return Array.from(this.invites.values());
     }
 
     static constructIconUrl(
@@ -144,12 +157,64 @@ export class Space {
         animated = false,
         hash?: string | null,
         size: Sizes = 128,
-        format: SpaceIconFormat = ImageFormat.WebP,
+        format: SpaceIconFormat = ImageFormat.WebP
     ) {
         if (!hash) return null;
         return REST.makeCDNUrl(
-            CDNRoutes.spaceIcon(spaceId, hash, format, size, animated),
+            CDNRoutes.spaceIcon(spaceId, hash, format, size, animated)
         );
+    }
+
+    async fetchBans(force = false) {
+        if (this.bansLoaded && !force) return this.banList;
+
+        this.bansLoading = true;
+        const result = await this.app.rest.get<APISpaceBan[]>(
+            `/spaces/${this.id}/bans`
+        );
+
+        if (result) {
+            this.bans.clear();
+            for (const ban of result) {
+                this.bans.set(ban.userId, new SpaceBan(this.app, ban));
+            }
+            this.bansLoaded = true;
+        }
+
+        this.bansLoading = false;
+        return this.banList;
+    }
+
+    async fetchInvites(force = false) {
+        if (this.invitesLoaded && !force) return this.inviteList;
+
+        this.invitesLoading = true;
+        const result = await this.app.rest.get<APIInvite[]>(
+            `/spaces/${this.id}/invites`
+        );
+
+        if (result) {
+            this.invites.clear();
+            for (const invite of result) {
+                this.invites.set(invite.code, new Invite(this.app, invite));
+            }
+            this.invitesLoaded = true;
+        }
+
+        this.invitesLoading = false;
+        return this.inviteList;
+    }
+
+    addBan(data: APISpaceBan) {
+        this.bans.set(data.userId, new SpaceBan(this.app, data));
+    }
+
+    removeBan(userId: Snowflake) {
+        this.bans.delete(userId);
+    }
+
+    isBanned(userId: Snowflake) {
+        return this.bans.has(userId);
     }
 
     updateMemberList(data: any) {
@@ -159,7 +224,7 @@ export class Space {
         } else {
             this.memberLists.set(
                 data.id,
-                new SpaceMemberListStore(this.app, this, data),
+                new SpaceMemberListStore(this.app, this, data)
             );
         }
     }
@@ -170,7 +235,7 @@ export class Space {
 
     leave() {
         return this.app.rest.delete<APISpaceMember>(
-            `/spaces/${this.id}/members/@me`,
+            `/spaces/${this.id}/members/@me`
         );
     }
 
@@ -210,7 +275,7 @@ export class Space {
             channelId:
                 channelId ||
                 this.app.channels.activeId ||
-                this.firstNavigableChannel?.id,
+                this.firstNavigableChannel?.id
         });
     }
 
@@ -218,7 +283,7 @@ export class Space {
         if (this.invites.size === 0) return;
         this.invites.clear();
         return this.app.rest.delete<{ spaceId: string }>(
-            `/spaces/${this.id}/invites`,
+            `/spaces/${this.id}/invites`
         );
     }
 

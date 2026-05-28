@@ -1,12 +1,11 @@
 import type { APISpace, Snowflake } from "@mutualzz/types";
 import { makeAutoObservable, observable, type ObservableMap } from "mobx";
 import { makePersistable } from "mobx-persist-store";
-import type { AppStore } from "../App.store";
-import { Space } from "../objects/Space";
+import type { AppStore } from "./App.store";
+import { Space } from "./objects/Space";
 
 export class SpaceStore {
-    active?: Space | null;
-    activeId?: Snowflake;
+    activeId: Snowflake | null = null;
     mostRecentSpaceId?: string | null;
     private readonly spaces: ObservableMap<string, Space>;
 
@@ -58,15 +57,34 @@ export class SpaceStore {
         );
     }
 
-    setActive(id?: Snowflake) {
-        this.active = (id ? this.get(id) : null) ?? null;
-        this.activeId = this.active?.id;
+    get active() {
+        return this.activeId ? this.spaces.get(this.activeId) : null;
+    }
+
+    setActive(id: Snowflake) {
+        this.activeId = id;
+    }
+
+    unsetActive() {
+        this.activeId = null;
     }
 
     setPreferredActive() {
         const preferred = this.mostRecentSpace ?? this.all[0];
-        this.setActive(preferred?.id);
+        if (!preferred) {
+            this.unsetActive();
+            return undefined;
+        }
+
+        if (this.activeId !== preferred.id) this.setActive(preferred.id);
+
         return preferred;
+    }
+
+    clear() {
+        this.activeId = null;
+        this.mostRecentSpaceId = null;
+        this.spaces.clear();
     }
 
     setMostRecentSpace(id?: Snowflake | null) {

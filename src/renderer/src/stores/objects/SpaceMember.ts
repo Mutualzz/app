@@ -12,7 +12,7 @@ import {
     permissionFlags,
     type PermissionFlags,
     resolveBaseBits,
-    resolveEffectiveChannelBits,
+    resolveEffectiveChannelBits
 } from "@mutualzz/bitfield";
 import type { User } from "@stores/objects/User";
 
@@ -33,7 +33,7 @@ export class SpaceMember {
 
     constructor(
         private readonly app: AppStore,
-        member: APISpaceMember,
+        member: APISpaceMember
     ) {
         this.id = member.userId;
 
@@ -57,8 +57,9 @@ export class SpaceMember {
 
         if (member.user) {
             const existing = this.app.users.get(member.userId);
-            if (!existing) this._user = this.app.users.add(member.user);
-            else this._user = existing;
+            if (existing) {
+                this._user = existing;
+            } else this._user = this.app.users.add(member.user);
         }
 
         makeAutoObservable(this);
@@ -121,7 +122,7 @@ export class SpaceMember {
 
         const roles = space.roles.all.map((r) => ({
             id: r.id,
-            permissions: r.permissions.bits,
+            permissions: r.permissions.bits
         }));
 
         return resolveBaseBits(space.id, roles, this.memberRoleIds);
@@ -245,7 +246,7 @@ export class SpaceMember {
                   roleId: o.roleId ?? null,
                   userId: o.userId ?? null,
                   allow: o.allow.bits,
-                  deny: o.deny.bits,
+                  deny: o.deny.bits
               }))
             : null;
 
@@ -253,7 +254,7 @@ export class SpaceMember {
             roleId: o.roleId ?? null,
             userId: o.userId ?? null,
             allow: o.allow.bits,
-            deny: o.deny.bits,
+            deny: o.deny.bits
         }));
 
         const effectiveBits = resolveEffectiveChannelBits({
@@ -262,7 +263,7 @@ export class SpaceMember {
             everyoneRoleId: space.id,
             memberRoleIds: this.memberRoleIds,
             parentOverwrites,
-            channelOverwrites,
+            channelOverwrites
         });
 
         this.channelPermCache.set(channel.id, effectiveBits);
@@ -313,12 +314,11 @@ export class SpaceMember {
         return aid > bid ? 1 : -1;
     }
 
-    canManageMember(target: SpaceMember): boolean {
+    canManageMember(target: SpaceMember, permission: PermissionFlag): boolean {
         const space = this.space;
         if (!space) return false;
 
-        // must have ManageRoles
-        if (!this.hasPermission("ManageRoles")) return false;
+        if (!this.hasPermission(permission)) return false;
 
         const actorIsOwner = space.ownerId === this.userId;
         if (actorIsOwner) return true;
@@ -336,7 +336,7 @@ export class SpaceMember {
 
         try {
             return this.app.rest.put(
-                `/spaces/${this.spaceId}/members/${this.userId}/roles/${role.id}`,
+                `/spaces/${this.spaceId}/members/${this.userId}/roles/${role.id}`
             );
         } catch (e) {
             this.roles.delete(rid);
@@ -352,7 +352,7 @@ export class SpaceMember {
 
         try {
             return this.app.rest.delete(
-                `/spaces/${this.spaceId}/members/${this.userId}/roles/${role.id}`,
+                `/spaces/${this.spaceId}/members/${this.userId}/roles/${role.id}`
             );
         } catch (e) {
             this.roles.add(rid);
