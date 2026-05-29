@@ -476,7 +476,7 @@ export const UserContextMenu = observer(
                                 </Stack>
                             </ContextItem>
                         )}
-                        {canDisconnectMembers && (
+                        {canDisconnectMembers && voiceState && (
                             <ContextItem
                                 variant="plain"
                                 disabled={moderating}
