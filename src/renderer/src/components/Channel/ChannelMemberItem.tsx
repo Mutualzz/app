@@ -1,6 +1,7 @@
 import { observer } from "mobx-react-lite";
 import { Paper } from "@components/Paper";
 import { useState } from "react";
+import { useAppStore } from "@hooks/useStores";
 import { useMenu } from "@contexts/ContextMenu.context";
 import { UserAvatar } from "@components/User/UserAvatar";
 import type { ColorLike } from "@mutualzz/ui-core";
@@ -8,7 +9,6 @@ import { Stack, Tooltip, Typography, useTheme } from "@mutualzz/ui-web";
 import { FaMicrophoneSlash } from "react-icons/fa";
 import { MdHeadsetOff, MdVideocam } from "react-icons/md";
 import type { Space } from "@stores/objects/Space";
-import { useAppStore } from "@hooks/useStores";
 import { TooltipWrapper } from "@components/TooltipWrapper";
 import type { VoiceState } from "@stores/objects/VoiceState.ts";
 
@@ -24,7 +24,6 @@ export const ChannelMemberItem = observer(({ space, state }: Props) => {
     const { theme } = useTheme();
 
     const member = space.members.get(state.userId);
-
     if (!member) return null;
 
     const videoOn =
@@ -57,6 +56,9 @@ export const ChannelMemberItem = observer(({ space, state }: Props) => {
             height={32}
             px={1}
             justifyContent="space-between"
+            css={{
+                opacity: isSubtle ? 0.55 : 1
+            }}
             onContextMenu={(e) =>
                 openContextMenu(e, {
                     type: "user",
@@ -65,10 +67,6 @@ export const ChannelMemberItem = observer(({ space, state }: Props) => {
                     user: member.user!
                 })
             }
-            css={{
-                opacity: isSubtle ? 0.55 : 1,
-                transition: "opacity 120ms ease"
-            }}
         >
             <Stack spacing={1} alignItems="center">
                 <UserAvatar user={member.user} size={24} speaking={speaking} />

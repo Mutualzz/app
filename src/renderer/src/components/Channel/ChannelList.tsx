@@ -3,21 +3,19 @@ import {
     closestCenter,
     DndContext,
     type DragEndEvent,
-    DragOverlay,
     PointerSensor,
     useSensor,
-    useSensors,
+    useSensors
 } from "@dnd-kit/core";
 import {
-    restrictToParentElement,
     restrictToVerticalAxis,
-    restrictToWindowEdges,
+    restrictToWindowEdges
 } from "@dnd-kit/modifiers";
 import {
     arrayMove,
     SortableContext,
     useSortable,
-    verticalListSortingStrategy,
+    verticalListSortingStrategy
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { useAppStore } from "@hooks/useStores";
@@ -27,7 +25,6 @@ import type { Channel } from "@stores/objects/Channel";
 import type { Space } from "@stores/objects/Space";
 import { runInAction } from "mobx";
 import { observer } from "mobx-react-lite";
-import { useState } from "react";
 import { ChannelListItem } from "./ChannelListItem";
 import { ChannelListContextMenu } from "@components/ContextMenu/ChannelListContextMenu";
 import { useMenu } from "@contexts/ContextMenu.context";
@@ -39,6 +36,7 @@ interface SortableChannelItemProps {
     isCollapsed: boolean;
     space: Space;
     onToggleCollapse?: () => void;
+    canMoveChannels: boolean;
 }
 
 const SortableChannelItem = observer(
@@ -48,7 +46,7 @@ const SortableChannelItem = observer(
         isCollapsed,
         space,
         onToggleCollapse,
-        ...props
+        canMoveChannels
     }: SortableChannelItemProps) => {
         const {
             attributes,
@@ -56,9 +54,15 @@ const SortableChannelItem = observer(
             setNodeRef,
             transform,
             transition,
-            isDragging,
+            isDragging
         } = useSortable({
             id: channel.id,
+            data: {
+                type: "channel",
+                channelId: channel.id,
+                spaceId: space.id
+            },
+            disabled: !canMoveChannels
         });
 
         return (
@@ -72,7 +76,7 @@ const SortableChannelItem = observer(
                     marginTop:
                         channel.type === ChannelType.Category
                             ? "1rem"
-                            : "0.5rem",
+                            : "0.5rem"
                 }}
                 {...attributes}
                 {...listeners}
@@ -83,16 +87,15 @@ const SortableChannelItem = observer(
                     active={active}
                     isCollapsed={isCollapsed}
                     onToggleCollapse={onToggleCollapse}
-                    {...props}
                 />
             </div>
         );
-    },
+    }
 );
 
 function flattenChannels(
     allChannels: Channel[],
-    collapsedCategories: Set<string>,
+    collapsedCategories: Set<string>
 ): Channel[] {
     const rootChannels = allChannels
         .filter((c) => !c.parentId)
@@ -120,7 +123,7 @@ function flattenChannels(
 
 function getAllCategoryChildren(
     allChannels: Channel[],
-    categoryId: string,
+    categoryId: string
 ): Channel[] {
     const category = allChannels.find((c) => c.id === categoryId);
     if (!category) return [];
@@ -133,12 +136,10 @@ export const ChannelList = observer(() => {
     const app = useAppStore();
     const { openContextMenu } = useMenu();
 
-    const [activeId, setActiveId] = useState<string | null>(null);
-
     const inChannel = Boolean(app.channels.activeId);
 
     const sensors = useSensors(
-        useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+        useSensor(PointerSensor, { activationConstraint: { distance: 8 } })
     );
 
     const space = app.spaces.active;
@@ -158,8 +159,9 @@ export const ChannelList = observer(() => {
 
     const handleDragEnd = (event: DragEndEvent) => {
         const { active, over } = event;
-        setActiveId(null);
-        if (!over || active.id === over.id) return;
+
+        if (!over) return;
+        if (active.id === over.id) return;
 
         const oldIndex = flatChannels.findIndex((c) => c.id === active.id);
         const newIndex = flatChannels.findIndex((c) => c.id === over.id);
@@ -173,7 +175,7 @@ export const ChannelList = observer(() => {
             if (movingChannel.type === ChannelType.Category) {
                 const group = getAllCategoryChildren(
                     visibleChannels,
-                    movingChannel.id,
+                    movingChannel.id
                 );
 
                 newOrder = flatChannels.filter((c) => !group.includes(c));
@@ -181,13 +183,13 @@ export const ChannelList = observer(() => {
                 let insertAt = newIndex;
                 if (newIndex > oldIndex) {
                     const visibleGroupSize = group.filter((c) =>
-                        flatChannels.includes(c),
+                        flatChannels.includes(c)
                     ).length;
                     insertAt = newIndex - visibleGroupSize + 1;
                 }
 
                 const visibleGroup = group.filter((c) =>
-                    flatChannels.includes(c),
+                    flatChannels.includes(c)
                 );
                 newOrder.splice(insertAt, 0, ...visibleGroup);
             } else {
@@ -196,37 +198,28 @@ export const ChannelList = observer(() => {
 
             const completeOrder: Channel[] = [];
             let currentCategory: Channel | null = null;
+            const siblingPositions = new Map<string | null, number>();
 
             for (const channel of newOrder) {
-                if (channel.type === ChannelType.Category) {
-                    currentCategory = channel;
-                    completeOrder.push(channel);
-
-                    const allChildren = visibleChannels
-                        .filter((c) => c.parentId === channel.id)
-                        .sort((a, b) => (a.position ?? 0) - (b.position ?? 0));
-                    completeOrder.push(...allChildren);
-                } else {
-                    completeOrder.push(channel);
-                }
-            }
-
-            currentCategory = null;
-            completeOrder.forEach((channel, idx) => {
                 if (channel.type === ChannelType.Category) {
                     currentCategory = channel;
                     channel.parentId = null;
                 } else {
                     channel.parentId = currentCategory?.id ?? null;
                 }
-                channel.position = idx;
-            });
+
+                const parentKey = channel.parentId ?? null;
+                const nextPosition = siblingPositions.get(parentKey) ?? 0;
+                channel.position = nextPosition;
+                siblingPositions.set(parentKey, nextPosition + 1);
+
+                completeOrder.push(channel);
+            }
 
             app.channels.setChannelOrder(space.id, completeOrder);
         });
     };
 
-    const activeChannelDrag = flatChannels.find((c) => c.id === activeId);
     const canMoveChannels =
         app.spaces.active?.members.me?.hasPermission("ManageChannels");
 
@@ -245,66 +238,46 @@ export const ChannelList = observer(() => {
                     onContextMenu={(e) =>
                         openContextMenu(e, {
                             type: "channelList",
-                            space,
+                            space
                         })
                     }
                     flex={1}
                     height="100%"
                     direction="column"
                     pt="2rem"
+                    css={{
+                        overflowX: "hidden"
+                    }}
                 >
                     <DndContext
                         sensors={sensors}
                         collisionDetection={closestCenter}
-                        onDragStart={(e) => setActiveId(e.active.id as string)}
-                        onDragEnd={handleDragEnd}
                         modifiers={[
-                            restrictToWindowEdges,
-                            restrictToParentElement,
                             restrictToVerticalAxis,
+                            restrictToWindowEdges
                         ]}
+                        onDragEnd={handleDragEnd}
                     >
                         <SortableContext
                             items={flatChannels.map((c) => c.id)}
                             strategy={verticalListSortingStrategy}
-                            disabled={!canMoveChannels}
                         >
                             {flatChannels.map((channel) => (
                                 <SortableChannelItem
                                     key={channel.id}
                                     channel={channel}
-                                    active={activeChannel?.id === channel.id}
                                     space={space}
-                                    isCollapsed={app.channels.isCategoryCollapsed(
-                                        space.id,
-                                        channel.id,
+                                    active={activeChannel?.id === channel.id}
+                                    isCollapsed={collapsedCategories.has(
+                                        channel.id
                                     )}
-                                    onToggleCollapse={
-                                        channel.type === ChannelType.Category
-                                            ? () => toggleCategory(channel.id)
-                                            : undefined
+                                    onToggleCollapse={() =>
+                                        toggleCategory(channel.id)
                                     }
+                                    canMoveChannels={!!canMoveChannels}
                                 />
                             ))}
                         </SortableContext>
-                        <Portal>
-                            <DragOverlay>
-                                {activeChannelDrag && (
-                                    <ChannelListItem
-                                        channel={activeChannelDrag}
-                                        active={false}
-                                        space={space}
-                                        isCollapsed={app.channels.isCategoryCollapsed(
-                                            space.id,
-                                            activeChannelDrag.id,
-                                        )}
-                                        css={{
-                                            opacity: 0.8,
-                                        }}
-                                    />
-                                )}
-                            </DragOverlay>
-                        </Portal>
                     </DndContext>
                 </Stack>
             </Paper>

@@ -1,12 +1,12 @@
 import {
     type APIChannelPermissionOverwrite,
-    type Snowflake,
+    type Snowflake
 } from "@mutualzz/types";
 import { makeAutoObservable } from "mobx";
 import {
     BitField,
     permissionFlags,
-    type PermissionFlags,
+    type PermissionFlags
 } from "@mutualzz/bitfield";
 import type { AppStore } from "@stores/App.store";
 
@@ -25,7 +25,7 @@ export class ChannelPermissionOverwrite {
 
     constructor(
         private readonly app: AppStore,
-        overwrite: APIChannelPermissionOverwrite,
+        overwrite: APIChannelPermissionOverwrite
     ) {
         this.channelId = overwrite.channelId;
         this.spaceId = overwrite.spaceId;
@@ -34,11 +34,11 @@ export class ChannelPermissionOverwrite {
 
         this.allow = BitField.fromString(
             permissionFlags,
-            overwrite.allow.toString(),
+            overwrite.allow.toString()
         );
         this.deny = BitField.fromString(
             permissionFlags,
-            overwrite.deny.toString(),
+            overwrite.deny.toString()
         );
 
         this.createdAt = new Date(overwrite.createdAt);
@@ -77,17 +77,16 @@ export class ChannelPermissionOverwrite {
         this.channelId = overwrite.channelId;
         this.spaceId = overwrite.spaceId;
 
-        // target
         this.roleId = overwrite.roleId;
         this.userId = overwrite.userId;
 
         this.allow = BitField.fromString(
             permissionFlags,
-            overwrite.allow.toString(),
+            overwrite.allow.toString()
         );
         this.deny = BitField.fromString(
             permissionFlags,
-            overwrite.deny.toString(),
+            overwrite.deny.toString()
         );
 
         this.createdAt = new Date(overwrite.createdAt);

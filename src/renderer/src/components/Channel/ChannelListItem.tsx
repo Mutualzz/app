@@ -1,12 +1,13 @@
 import { Paper } from "@components/Paper";
 import { useModal } from "@contexts/Modal.context";
+import { useDroppable } from "@dnd-kit/core";
 import { useAppStore } from "@hooks/useStores";
 import {
     Avatar,
     type PaperProps,
     Stack,
     Typography,
-    useTheme,
+    useTheme
 } from "@mutualzz/ui-web";
 import type { Channel } from "@stores/objects/Channel";
 import type { Space } from "@stores/objects/Space";
@@ -19,7 +20,7 @@ import {
     FaCog,
     FaLock,
     FaPlus,
-    FaUserPlus,
+    FaUserPlus
 } from "react-icons/fa";
 import { ChannelCreateModal } from "./ChannelCreateModal";
 import { ChannelIcon } from "./ChannelIcon";
@@ -28,7 +29,6 @@ import { useMenu } from "@contexts/ContextMenu.context";
 import { ChannelMemberItem } from "@components/Channel/ChannelMemberItem";
 import { IconButton } from "@components/IconButton";
 import { SpaceInviteToSpaceModal } from "@components/Space/SpaceInviteToSpaceModal";
-import { MdChatBubble } from "react-icons/md";
 
 interface Props extends PaperProps {
     space: Space;
@@ -57,6 +57,16 @@ export const ChannelListItem = observer(
         const isCategory = channel.type === ChannelType.Category;
         const isVoice = channel.type === ChannelType.Voice;
 
+        const { setNodeRef, isOver } = useDroppable({
+            id: `channel-drop:${channel.id}`,
+            disabled: !isVoice,
+            data: {
+                type: "voice-channel",
+                channelId: channel.id,
+                spaceId: space.id
+            }
+        });
+
         const isActiveVoiceChannel =
             channel.isVoiceChannel && app.voice.currentChannelId === channel.id;
 
@@ -84,16 +94,15 @@ export const ChannelListItem = observer(
                         to: "/spaces/$spaceId/$channelId",
                         params: {
                             spaceId: space.id,
-                            channelId: channel.id,
-                        },
+                            channelId: channel.id
+                        }
                     });
-
                     return;
                 }
 
                 app.voice.join({
                     spaceId: space.id,
-                    channelId: channel.id,
+                    channelId: channel.id
                 });
                 return;
             }
@@ -102,7 +111,7 @@ export const ChannelListItem = observer(
 
             navigate({
                 to: "/spaces/$spaceId/$channelId",
-                params: { spaceId: space.id, channelId: channel.id },
+                params: { spaceId: space.id, channelId: channel.id }
             });
         };
 
@@ -110,6 +119,7 @@ export const ChannelListItem = observer(
 
         return (
             <Stack
+                ref={setNodeRef}
                 ml={isCategory ? 1 : 1.5}
                 mr={isCategory ? 1 : 2.5}
                 px={isCategory ? 1 : 1.5}
@@ -129,6 +139,12 @@ export const ChannelListItem = observer(
                 css={{
                     cursor: isDisabled ? "not-allowed" : "pointer",
                     ...(isDisabled && { opacity: 0.5 }),
+                    ...(isOver &&
+                        isVoice && {
+                            outline: `2px solid ${theme.colors.primary}`,
+                            outlineOffset: 2,
+                            borderRadius: 6
+                        })
                 }}
             >
                 <Paper
@@ -167,7 +183,7 @@ export const ChannelListItem = observer(
                                                 size={16}
                                                 shape={
                                                     channel.flags.has(
-                                                        "RoundedIcon",
+                                                        "RoundedIcon"
                                                     )
                                                         ? "circle"
                                                         : "square"
@@ -226,7 +242,7 @@ export const ChannelListItem = observer(
                                 variant="plain"
                                 color="neutral"
                                 css={{
-                                    borderRadius: 9999,
+                                    borderRadius: 9999
                                 }}
                                 onClick={(e) => {
                                     e.stopPropagation();
@@ -235,7 +251,7 @@ export const ChannelListItem = observer(
                                         <ChannelCreateModal
                                             space={space}
                                             parent={channel}
-                                        />,
+                                        />
                                     );
                                 }}
                             >
@@ -251,39 +267,6 @@ export const ChannelListItem = observer(
                                 minWidth="2.5rem"
                                 justifyContent="flex-end"
                             >
-                                {isVoice && (
-                                    <IconButton
-                                        css={{
-                                            borderRadius: 9999,
-                                            opacity:
-                                                wrapperHovered || active
-                                                    ? 1
-                                                    : 0,
-                                            pointerEvents:
-                                                wrapperHovered || active
-                                                    ? "auto"
-                                                    : "none",
-                                            transition: "opacity 0.15s ease",
-                                        }}
-                                        size={12}
-                                        variant="plain"
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            navigate({
-                                                to: "/spaces/$spaceId/$channelId",
-                                                search: {
-                                                    chat: true,
-                                                },
-                                                params: {
-                                                    spaceId: space.id,
-                                                    channelId: channel.id,
-                                                },
-                                            });
-                                        }}
-                                    >
-                                        <MdChatBubble />
-                                    </IconButton>
-                                )}
                                 {canInvite && (
                                     <IconButton
                                         css={{
@@ -296,7 +279,7 @@ export const ChannelListItem = observer(
                                                 wrapperHovered || active
                                                     ? "auto"
                                                     : "none",
-                                            transition: "opacity 0.15s ease",
+                                            transition: "opacity 0.15s ease"
                                         }}
                                         size={12}
                                         variant="plain"
@@ -306,7 +289,7 @@ export const ChannelListItem = observer(
                                                 "invite-to-space",
                                                 <SpaceInviteToSpaceModal
                                                     channel={channel}
-                                                />,
+                                                />
                                             );
                                         }}
                                     >
@@ -326,7 +309,7 @@ export const ChannelListItem = observer(
                                                 wrapperHovered || active
                                                     ? "auto"
                                                     : "none",
-                                            transition: "opacity 0.15s ease",
+                                            transition: "opacity 0.15s ease"
                                         }}
                                         size={12}
                                         variant="plain"
@@ -346,7 +329,7 @@ export const ChannelListItem = observer(
                         direction="column"
                         css={{
                             maxHeight: 100,
-                            overflowY: "auto",
+                            overflowY: "auto"
                         }}
                     >
                         {voiceStates.map((state) => (
@@ -360,5 +343,5 @@ export const ChannelListItem = observer(
                 )}
             </Stack>
         );
-    },
+    }
 );
