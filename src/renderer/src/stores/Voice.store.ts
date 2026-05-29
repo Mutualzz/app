@@ -87,7 +87,14 @@ class MediasoupSession {
     private currentCameraDeviceId: string | null = null;
     private readonly logger = new Logger({ tag: "VoiceSession" });
 
+    private speakingAnalyser: AnalyserNode | null = null;
+    private speakingSourceNode: MediaStreamAudioSourceNode | null = null;
+    private speakingTimer: number | null = null;
+    private speakingState = false;
+    private speakingUserId: string | null = null;
+
     constructor(
+        private readonly app: AppStore,
         private readonly onVideoConsumed: (
             userId: string,
             producerId: string
@@ -95,6 +102,10 @@ class MediasoupSession {
         private readonly onVideoClosed: (producerId: string) => void,
         private readonly onSocketClosed: (
             event?: CloseEvent | { code?: number; reason?: string }
+        ) => void,
+        private readonly onSpeakingChange: (
+            userId: string,
+            speaking: boolean
         ) => void
     ) {
         makeAutoObservable(this, {}, { autoBind: true });
@@ -182,9 +193,9 @@ class MediasoupSession {
 
     getVideoElement(producerId: string): HTMLVideoElement | null {
         const meta = this.streamMetadata.get(producerId);
-        return meta?.kind !== "audio"
-            ? ((meta?.element as HTMLVideoElement) ?? null)
-            : null;
+        return meta?.kind === "audio"
+            ? null
+            : ((meta?.element as HTMLVideoElement) ?? null);
     }
 
     getProducerIds(kind?: MediaKind): string[] {
@@ -476,11 +487,102 @@ class MediasoupSession {
         }
 
         this.micTrack = audioTrack;
+        const userId = this.app.account?.id;
+        if (userId) {
+            const localStream = new MediaStream([audioTrack]);
+            this.startSpeakingDetection(localStream, userId);
+        }
         this.micProducer = await this.sendTransport.produce({
             track: audioTrack,
             codecOptions: { opusStereo: true, opusDtx: true }
         });
+
         this.setSelfMute(this.isMuted);
+    }
+
+    private startSpeakingDetection(stream: MediaStream, userId: string) {
+        this.stopSpeakingDetection();
+
+        const AudioContextCtor =
+            window.AudioContext || (window as any).webkitAudioContext;
+        if (!AudioContextCtor) return;
+
+        if (!this.audioContext) {
+            this.audioContext = new AudioContextCtor();
+        }
+
+        this.speakingUserId = userId;
+        this.speakingAnalyser = this.audioContext.createAnalyser();
+        this.speakingAnalyser.fftSize = 512;
+
+        this.speakingSourceNode =
+            this.audioContext.createMediaStreamSource(stream);
+        this.speakingSourceNode.connect(this.speakingAnalyser);
+
+        const data = new Uint8Array(this.speakingAnalyser.frequencyBinCount);
+        const threshold = 0.02; // Update this when we add settings for sensitivity
+        const onDelay = 120;
+        const offDelay = 180;
+
+        let lastAbove = 0;
+        let lastBelow = 0;
+
+        const tick = () => {
+            if (!this.speakingAnalyser || !this.speakingUserId) return;
+
+            this.speakingAnalyser.getByteTimeDomainData(data);
+
+            let sum = 0;
+            for (const v of data) {
+                const x = (v - 128) / 128;
+                sum += x * x;
+            }
+            const rms = Math.sqrt(sum / data.length);
+            const now = performance.now();
+            const above = rms > threshold;
+
+            if (above) {
+                lastAbove = now;
+                if (!this.speakingState && now - lastBelow > offDelay) {
+                    this.speakingState = true;
+                    this.onSpeakingChange(this.speakingUserId, true);
+                }
+            } else {
+                lastBelow = now;
+                if (this.speakingState && now - lastAbove > onDelay) {
+                    this.speakingState = false;
+                    this.onSpeakingChange(this.speakingUserId, false);
+                }
+            }
+
+            this.speakingTimer = window.setTimeout(tick, 50);
+        };
+
+        tick();
+    }
+
+    private stopSpeakingDetection() {
+        if (this.speakingTimer != null) {
+            clearTimeout(this.speakingTimer);
+            this.speakingTimer = null;
+        }
+
+        try {
+            this.speakingSourceNode?.disconnect();
+        } catch {}
+
+        try {
+            this.speakingAnalyser?.disconnect();
+        } catch {}
+
+        this.speakingSourceNode = null;
+        this.speakingAnalyser = null;
+        this.speakingState = false;
+
+        if (this.speakingUserId) {
+            this.onSpeakingChange(this.speakingUserId, false);
+            this.speakingUserId = null;
+        }
     }
 
     private async playElement(element: HTMLMediaElement) {
@@ -572,6 +674,8 @@ class MediasoupSession {
 
         const stream = new MediaStream([consumer.track]);
         const kind: MediaKind = consumer.kind === "video" ? "camera" : "audio";
+
+        if (kind === "audio") this.startSpeakingDetection(stream, userId);
 
         if (consumer.kind === "video") {
             const video = document.createElement("video") as HTMLVideoElement;
@@ -822,8 +926,11 @@ export class VoiceStore {
     private pendingEndpoint: string | null = null;
     private pendingToken: string | null = null;
 
+    private speakingUsers = observable.map<string, boolean>();
+
     constructor(private readonly app: AppStore) {
         this.session = new MediasoupSession(
+            app,
             (userId, producerId) => {
                 runInAction(() => {
                     this.voiceStateProducerMap.set(userId, producerId);
@@ -864,6 +971,11 @@ export class VoiceStore {
                     this.clearLocalVoiceStateForMe();
                     this.stopKeepAlive();
                 } catch {}
+            },
+            (userId, speaking) => {
+                runInAction(() => {
+                    this.setUserSpeaking(userId, speaking);
+                });
             }
         );
 
@@ -943,6 +1055,15 @@ export class VoiceStore {
         return this.app.settings?.preferredSelfMute ?? false;
     }
 
+    isUserSpeaking(userId: string) {
+        return this.speakingUsers.get(userId) ?? false;
+    }
+
+    setUserSpeaking(userId: string, speaking: boolean) {
+        if (speaking) this.speakingUsers.set(userId, true);
+        else this.speakingUsers.delete(userId);
+    }
+
     clearDisconnectBanner() {
         this.disconnectBanner = null;
     }
@@ -993,6 +1114,7 @@ export class VoiceStore {
             });
 
             this.voiceStateProducerMap.delete(state.userId);
+            this.speakingUsers.delete(state.userId);
             return;
         }
 
@@ -1053,6 +1175,7 @@ export class VoiceStore {
         });
 
         this.clearLocalVoiceStateForMe();
+        this.speakingUsers.clear();
 
         await this.sendVoiceStateUpdate();
     }
@@ -1077,6 +1200,7 @@ export class VoiceStore {
             this.spaceDeaf = false;
         });
 
+        this.speakingUsers.clear();
         this.clearLocalVoiceStateForMe();
     }
 

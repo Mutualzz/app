@@ -16,7 +16,7 @@ export class VoiceState {
 
     constructor(
         private readonly app: AppStore,
-        state: MzVoiceState,
+        state: MzVoiceState
     ) {
         this.userId = state.userId;
         this.spaceId = state.spaceId ?? null;

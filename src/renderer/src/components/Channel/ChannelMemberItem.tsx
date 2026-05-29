@@ -44,6 +44,8 @@ export const ChannelMemberItem = observer(({ space, state }: Props) => {
         : ((member.highestRole?.color as ColorLike) ??
           (hovered ? theme.typography.colors.primary : "#99aab5"));
 
+    const speaking = app.voice.isUserSpeaking(member.id);
+
     return (
         <Paper
             width="100%"
@@ -69,7 +71,7 @@ export const ChannelMemberItem = observer(({ space, state }: Props) => {
             }}
         >
             <Stack spacing={1} alignItems="center">
-                <UserAvatar user={member.user} size={24} />
+                <UserAvatar user={member.user} size={24} speaking={speaking} />
                 <Typography
                     flex={1}
                     whiteSpace="nowrap"

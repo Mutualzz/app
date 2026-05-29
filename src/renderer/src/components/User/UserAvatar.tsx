@@ -3,6 +3,7 @@ import {
     type ColorLike,
     createColor,
     resolveResponsiveMerge,
+    resolveShapeValue,
     resolveSize,
     type Size
 } from "@mutualzz/ui-core";
@@ -24,6 +25,7 @@ interface UserAvatarProps extends AvatarProps {
     user?: AccountStore | User | null;
     badge?: boolean;
     showInvisible?: boolean;
+    speaking?: boolean;
 }
 
 const baseSizeMap: Record<Size, number> = {
@@ -38,11 +40,23 @@ export const UserAvatar = observer(
         css,
         badge,
         showInvisible,
+        speaking,
+        shape,
         ...props
     }: UserAvatarProps & { css?: CSSObject }) => {
         const app = useAppStore();
         const { theme } = useTheme();
         const [focused, setFocused] = useState(false);
+
+        const { radius } = resolveResponsiveMerge(
+            theme,
+            {
+                shape
+            },
+            ({ shape: sp = "circle" }) => ({
+                radius: resolveShapeValue(sp)
+            })
+        );
 
         const version = useMemo(() => {
             if (!user) return theme.type === "light" ? "dark" : "light";
@@ -68,7 +82,7 @@ export const UserAvatar = observer(
             return (
                 <MAvatar
                     elevation={5}
-                    shape="circle"
+                    shape={shape}
                     variant="elevation"
                     size={size}
                     {...restProps}
@@ -93,8 +107,14 @@ export const UserAvatar = observer(
                           ? "solid"
                           : "elevation"
                 }
+                borderRadius={radius}
                 elevation={hasAvatar ? 0 : 5}
-                borderRadius={9999}
+                style={{
+                    borderRadius: radius,
+                    outline: speaking
+                        ? `2px solid ${theme.colors.success}`
+                        : "none"
+                }}
             >
                 <MAvatar
                     size={size}
@@ -109,6 +129,7 @@ export const UserAvatar = observer(
                               )
                             : user.constructAvatarUrl(false, version, size)
                     }
+                    shape={shape}
                     {...restProps}
                 />
                 {status && badge && (
