@@ -481,7 +481,6 @@ export const UserContextMenu = observer(
                                 variant="plain"
                                 disabled={moderating}
                                 onClick={() => moderateMember("disconnect")}
-                                closeOnClick={false}
                                 style={{ flex: 0 }}
                                 size="sm"
                                 color="danger"
@@ -496,7 +495,6 @@ export const UserContextMenu = observer(
                         {canKickMember && !isSelf && (
                             <ContextItem
                                 variant="plain"
-                                closeOnClick={false}
                                 style={{ flex: 0 }}
                                 size="sm"
                                 color="danger"
@@ -516,7 +514,6 @@ export const UserContextMenu = observer(
                         {canBanMember && !isSelf && (
                             <ContextItem
                                 variant="plain"
-                                closeOnClick={false}
                                 style={{ flex: 0 }}
                                 size="sm"
                                 color="danger"
