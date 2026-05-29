@@ -19,6 +19,7 @@ import { SpaceInviteToSpaceModal } from "@components/Space/SpaceInviteToSpaceMod
 import { FaUserPlus } from "react-icons/fa";
 import { useModal } from "@contexts/Modal.context";
 import type { User } from "@stores/objects/User";
+import { useMenu } from "@contexts/ContextMenu.context";
 
 interface Props {
     channel: Channel;
@@ -36,6 +37,7 @@ interface TileProps {
 
 const Tile = observer(({ userId, user, size, selected }: TileProps) => {
     const app = useAppStore();
+
     const videoRef = useRef<HTMLVideoElement>(null);
 
     const isSelf = app.account?.id === userId;
@@ -83,6 +85,8 @@ export const VoiceChannelView = observer(
         const hostRef = useRef<HTMLDivElement>(null);
         const [hovered, setHovered] = useState(false);
         const { openModal } = useModal();
+
+        const { openContextMenu } = useMenu();
 
         const [selectedUserId, setSelectedUserId] = useState<string | null>(
             null
@@ -143,6 +147,21 @@ export const VoiceChannelView = observer(
                             overflow="hidden"
                             variant="solid"
                             color={selectedState.member?.user?.accentColor}
+                            onContextMenu={(e) => {
+                                if (
+                                    !selectedState?.member ||
+                                    !selectedState.user ||
+                                    !selectedState.space
+                                )
+                                    return;
+
+                                openContextMenu(e, {
+                                    type: "user",
+                                    user: selectedState.user,
+                                    space: selectedState.space,
+                                    member: selectedState.member
+                                });
+                            }}
                         >
                             <Tile
                                 userId={selectedState.userId}
@@ -233,6 +252,21 @@ export const VoiceChannelView = observer(
                                         }
                                         variant="solid"
                                         color={state.member?.user?.accentColor}
+                                        onContextMenu={(e) => {
+                                            if (
+                                                !state?.member ||
+                                                !state.user ||
+                                                !state.space
+                                            )
+                                                return;
+
+                                            openContextMenu(e, {
+                                                type: "user",
+                                                user: state.user,
+                                                space: state.space,
+                                                member: state.member
+                                            });
+                                        }}
                                     >
                                         <Tile
                                             userId={state.userId}
