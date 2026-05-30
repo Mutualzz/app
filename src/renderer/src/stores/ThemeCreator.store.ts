@@ -2,14 +2,13 @@ import {
     baseDarkTheme,
     baseLightTheme,
     type ThemeStyle,
-    type ThemeType,
+    type ThemeType
 } from "@mutualzz/ui-core";
 import type { APITheme } from "@mutualzz/types";
 import type { Theme as MzTheme } from "@emotion/react";
 import { type IObservableArray, makeAutoObservable, observable } from "mobx";
 import { Theme } from "@stores/objects/Theme";
 import { adaptColors } from "@utils/adaptation";
-import { usePrefersDark } from "@hooks/usePrefersDark";
 
 type ApiErrors = Record<string, string>;
 
@@ -38,8 +37,8 @@ export class ThemeCreatorStore {
     userInteracted = false;
     private readonly prefersDark: boolean;
 
-    constructor() {
-        this.prefersDark = usePrefersDark();
+    constructor(prefersDark: boolean) {
+        this.prefersDark = prefersDark;
 
         const base = this.prefersDark ? baseDarkTheme : baseLightTheme;
 
@@ -47,15 +46,15 @@ export class ThemeCreatorStore {
             ...base,
             id: "",
             name: "",
-            description: "",
+            description: ""
         });
 
         makeAutoObservable(
             this,
             {},
             {
-                autoBind: true,
-            },
+                autoBind: true
+            }
         );
     }
 
@@ -77,17 +76,37 @@ export class ThemeCreatorStore {
 
     setValues(newValues: Partial<APITheme>) {
         this.values = Theme.serialize({ ...this.values, ...newValues });
+
         if (!this.userInteracted) this.userInteracted = true;
         if (this.loadedType === "default") this.loadedType = "custom";
+        this.errors = {};
+    }
+
+    resetToBaseTheme() {
+        const base = this.prefersDark ? baseDarkTheme : baseLightTheme;
+
+        this.values = Theme.serialize({
+            ...base,
+            id: "",
+            name: "",
+            description: ""
+        });
+
+        this.loadedType = "default";
+        this.userInteracted = false;
+        this.errors = {};
+        this.currentPage = "details";
+        this.currentCategory = "general";
     }
 
     loadValues(theme: APITheme) {
         if (this.loadedType === "default") {
             this.values = Theme.serialize({
                 ...this.values,
+                ...theme,
                 id: "",
                 name: "",
-                description: "",
+                description: ""
             });
             if (this.userInteracted) this.userInteracted = false;
             return;
@@ -104,7 +123,7 @@ export class ThemeCreatorStore {
             ...base,
             id: "",
             name: "",
-            description: "",
+            description: ""
         });
 
         if (this.userInteracted) this.userInteracted = false;
@@ -136,12 +155,12 @@ export class ThemeCreatorStore {
         if (this.filters.length === 0) return themes;
 
         return themes.filter((theme) =>
-            this.filters.every(
+            this.filters.some(
                 (filter) =>
                     theme.type === filter ||
                     theme.style === filter ||
-                    (filter === "adaptive" && theme.adaptive),
-            ),
+                    (filter === "adaptive" && theme.adaptive)
+            )
         );
     }
 
@@ -151,7 +170,7 @@ export class ThemeCreatorStore {
 
     startPreview(
         changeTheme: (theme: MzTheme) => void,
-        currentThemeValues?: APITheme,
+        currentThemeValues?: APITheme
     ) {
         if (this.inPreview) return;
 
@@ -163,8 +182,8 @@ export class ThemeCreatorStore {
                 ...(adaptColors({
                     baseColor: this.values.colors.background,
                     primaryColor: this.values.colors.primary,
-                    primaryText: this.values.typography.colors.primary,
-                }) as Partial<APITheme>),
+                    primaryText: this.values.typography.colors.primary
+                }) as Partial<APITheme>)
             });
 
         if (!this.themeBeforePreview && currentThemeValues)

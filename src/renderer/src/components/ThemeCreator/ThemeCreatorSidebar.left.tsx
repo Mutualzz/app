@@ -5,17 +5,17 @@ import {
     Checkbox,
     Divider,
     Stack,
-    Typography,
+    Typography
 } from "@mutualzz/ui-web";
 import startCase from "lodash-es/startCase";
 import { observer } from "mobx-react-lite";
-import { Fragment, type JSX, useMemo } from "react";
+import { Fragment, type JSX } from "react";
 import { CiTextAlignJustify, CiWarning } from "react-icons/ci";
 import { FaPalette } from "react-icons/fa6";
 import { IoText } from "react-icons/io5";
 import type {
     ThemeCreatorCategory,
-    ThemeCreatorPage,
+    ThemeCreatorPage
 } from "@stores/ThemeCreator.store";
 import { Button } from "@components/Button";
 
@@ -42,50 +42,47 @@ export const ThemeCreatorSidebarLeft = observer(
             setValues,
             currentPage,
             setCurrentPage,
-            setCurrentCategory,
+            setCurrentCategory
         } = app.themeCreator;
+
+        const creatorPages: ThemeCreatorPages = {
+            general: [
+                {
+                    label: "details",
+                    icon: <CiTextAlignJustify />
+                }
+            ],
+            colors: values.adaptive
+                ? [
+                      {
+                          label: "adaptive",
+                          icon: <FaPalette />
+                      }
+                  ]
+                : [
+                      {
+                          label: "base",
+                          icon: <FaPalette />
+                      },
+                      {
+                          label: "feedback",
+                          icon: <CiWarning />
+                      },
+                      {
+                          label: "typography",
+                          icon: <IoText />
+                      }
+                  ]
+        };
 
         const handlePageSwitch = (
             category: ThemeCreatorCategory,
-            page: ThemeCreatorPage,
+            page: ThemeCreatorPage
         ) => {
             setCurrentPage(page);
             setCurrentCategory(category);
             if (drawerOpen && setDrawerOpen) setDrawerOpen(false);
         };
-
-        const creatorPages = useMemo<ThemeCreatorPages>(
-            () => ({
-                general: [
-                    {
-                        label: "details",
-                        icon: <CiTextAlignJustify />,
-                    },
-                ],
-                colors: values.adaptive
-                    ? [
-                          {
-                              label: "adaptive",
-                              icon: <FaPalette />,
-                          },
-                      ]
-                    : [
-                          {
-                              label: "base",
-                              icon: <FaPalette />,
-                          },
-                          {
-                              label: "feedback",
-                              icon: <CiWarning />,
-                          },
-                          {
-                              label: "typography",
-                              icon: <IoText />,
-                          },
-                      ],
-            }),
-            [values.adaptive],
-        );
 
         const categories = Object.entries(creatorPages);
 
@@ -140,7 +137,7 @@ export const ThemeCreatorSidebarLeft = observer(
                                             onClick={() =>
                                                 handlePageSwitch(
                                                     category as ThemeCreatorCategory,
-                                                    page.label,
+                                                    page.label
                                                 )
                                             }
                                             key={`user-settings-sidebar-${page.label}`}
@@ -162,7 +159,7 @@ export const ThemeCreatorSidebarLeft = observer(
                             {index < categories.length - 1 && (
                                 <Divider
                                     css={{
-                                        opacity: 0.25,
+                                        opacity: 0.25
                                     }}
                                     lineColor="muted"
                                 />
@@ -172,5 +169,5 @@ export const ThemeCreatorSidebarLeft = observer(
                 </Stack>
             </Paper>
         );
-    },
+    }
 );

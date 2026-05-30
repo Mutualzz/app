@@ -1,6 +1,6 @@
 {
     "name": "@mutualzz/app",
-    "version": "6.2.0",
+    "version": "6.2.1",
     "description": "Social media app for everyone, especially alternative people",
     "main": "./out/main/index.js",
     "author": "Mutualzz",

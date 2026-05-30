@@ -12,17 +12,14 @@ import {
     Select,
     Stack,
     Typography,
-    useTheme,
+    useTheme
 } from "@mutualzz/ui-web";
 import { useMediaQuery } from "@react-hookz/web";
 import { useMutation } from "@tanstack/react-query";
 import { observer } from "mobx-react-lite";
 import { useRef, useState } from "react";
 import { FaEraser, FaPaintBrush } from "react-icons/fa";
-import {
-    ReactSketchCanvas,
-    type ReactSketchCanvasRef,
-} from "react-sketch-canvas";
+import { ReactSketchCanvas, type ReactSketchCanvasRef } from "react-sketch-canvas";
 
 // NOTE: Eventually fork ReactSketchCanvas to fit our usage case
 export const AvatarDraw = observer(() => {
@@ -35,16 +32,16 @@ export const AvatarDraw = observer(() => {
         useState<ColorLike>("#ffffff");
 
     const isMobile = useMediaQuery(
-        theme.breakpoints.down("md").replace("@media", ""),
+        theme.breakpoints.down("md").replace("@media", "")
     );
 
     const [eraserMode, setEraserMode] = useState(false);
     const [emptyCanvas, setEmptyCanvas] = useState(true);
 
     const [selectedAvatarValue, setSelectedAvatarValue] = useState("");
-    const [selectedAvatarIndex, setSelectedAvatarIndex] = useState<
-        number | null
-    >(null);
+    const [selectedAvatarId, setSelectedAvatarId] = useState<string | null>(
+        null
+    );
 
     const [size, setSize] = useState(6);
 
@@ -53,7 +50,7 @@ export const AvatarDraw = observer(() => {
         mutationFn: async (avatar: string) => {
             const blob = await (await fetch(avatar)).blob();
             const file = new File([blob], "new-avatar.png", {
-                type: "image/png",
+                type: "image/png"
             });
 
             const formData = new FormData();
@@ -61,7 +58,6 @@ export const AvatarDraw = observer(() => {
             return app.rest.patchFormData("@me", formData);
         },
         onSuccess: () => {
-            setSelectedAvatarIndex(null);
             setSelectedAvatarValue("");
             canvasRef.current?.clearCanvas();
             setBrushColor("#000000");
@@ -69,11 +65,11 @@ export const AvatarDraw = observer(() => {
             setSize(6);
             setEraserMode(false);
             setEmptyCanvas(true);
-            if (selectedAvatarIndex)
-                app.drafts.deleteAvatarDraft(selectedAvatarIndex);
+            if (selectedAvatarId)
+                app.drafts.deleteAvatarDraft(selectedAvatarId);
 
             closeAllModals();
-        },
+        }
     });
 
     const onChange = async () => {
@@ -102,18 +98,18 @@ export const AvatarDraw = observer(() => {
         app.drafts.saveAvatarDraft(image, paths);
     };
 
-    const selectAvatar = (index: number) => {
-        const avatar = app.drafts.avatars[index];
+    const selectAvatar = (id: string) => {
+        const avatar = app.drafts.getAvatarDraft(id);
         if (!avatar) return;
 
         canvasRef.current?.clearCanvas();
         canvasRef.current?.loadPaths(avatar.paths);
-        setSelectedAvatarIndex(index);
+        setSelectedAvatarId(id);
         setSelectedAvatarValue("");
     };
 
     const onClose = () => {
-        setSelectedAvatarIndex(null);
+        setSelectedAvatarId(null);
         setSelectedAvatarValue("");
         canvasRef.current?.clearCanvas();
         setBrushColor("#000000");
@@ -151,44 +147,48 @@ export const AvatarDraw = observer(() => {
             >
                 <Typography>Saved Avatars</Typography>
                 <Select
-                    disabled={app.drafts.avatars.length === 0 || isPending}
-                    placeholder={`${app.drafts.avatars.length > 0 ? app.drafts.avatars.length : "No Saved"} Avatars`}
-                    onValueChange={(value) => selectAvatar(Number(value))}
+                    disabled={app.drafts.avatars.size === 0 || isPending}
+                    placeholder={`${app.drafts.avatars.size > 0 ? app.drafts.avatars.size : "No Saved"} Avatars`}
+                    onValueChange={(value) => selectAvatar(value.toString())}
                     value={selectedAvatarValue}
                     size={isMobile ? "sm" : "md"}
                 >
-                    {app.drafts.avatars.map((avatar, index) => (
-                        <Option variant="plain" key={index} value={index}>
+                    {Array.from(app.drafts.avatars.values()).map((avatar) => (
+                        <Option
+                            variant="plain"
+                            key={avatar.id}
+                            value={avatar.id}
+                        >
                             <Stack
                                 direction="row"
                                 justifyContent="space-between"
                                 alignItems="center"
                             >
                                 <Typography level="body-sm">
-                                    Avatar {index + 1}
+                                    {avatar.id}
                                 </Typography>
                                 <img
                                     src={`data:image/svg+xml;utf8,${encodeURIComponent(avatar.image)}`}
-                                    alt={`Avatar ${index + 1}`}
+                                    alt={`Avatar ${avatar.id}`}
                                     css={{
                                         width: isMobile ? 48 : "100%",
                                         height: isMobile ? 48 : "100%",
                                         maxWidth: 64,
-                                        maxHeight: 64,
+                                        maxHeight: 64
                                     }}
                                 />
                             </Stack>
                         </Option>
                     ))}
                 </Select>
-                {selectedAvatarIndex !== null && (
+                {selectedAvatarId !== null && (
                     <Button
                         color="danger"
                         variant="outlined"
                         onClick={() => {
-                            if (selectedAvatarIndex === null) return;
-                            app.drafts.deleteAvatarDraft(selectedAvatarIndex);
-                            setSelectedAvatarIndex(null);
+                            if (selectedAvatarId === null) return;
+                            app.drafts.deleteAvatarDraft(selectedAvatarId);
+                            setSelectedAvatarId(null);
                             canvasRef.current?.clearCanvas();
                         }}
                         size={isMobile ? "sm" : "md"}
@@ -218,7 +218,7 @@ export const AvatarDraw = observer(() => {
                         lineColor="muted"
                         css={{
                             marginBlock: "0.5rem",
-                            opacity: 0.25,
+                            opacity: 0.25
                         }}
                     />
                     <Stack spacing={5} direction="column">
@@ -340,10 +340,10 @@ export const AvatarDraw = observer(() => {
                     width={isMobile ? "256px" : "512px"}
                     height={isMobile ? "256px" : "512px"}
                     svgStyle={{
-                        borderRadius: "50%",
+                        borderRadius: "50%"
                     }}
                     style={{
-                        borderRadius: "50%",
+                        borderRadius: "50%"
                     }}
                     withTimestamp
                     readOnly={isPending}

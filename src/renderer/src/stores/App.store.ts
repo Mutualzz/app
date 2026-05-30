@@ -31,6 +31,9 @@ import { webTokenStorage } from "@storages/webTokenStorage";
 import type { TokenStorage } from "@renderer/types";
 import { electronTokenStorage } from "@storages/electronTokenStorage";
 import { RelationshipStore } from "@stores/Relationship.store";
+import { usePrefersDark } from "@hooks/usePrefersDark";
+
+const prefersDark = usePrefersDark();
 
 export class AppStore {
     isGatewayReady = false;
@@ -47,7 +50,7 @@ export class AppStore {
     relationships = new RelationshipStore(this);
     queue = new MessageQueue(this);
     themes = new ThemeStore(this);
-    themeCreator = new ThemeCreatorStore();
+    themeCreator = new ThemeCreatorStore(prefersDark);
     rest = new REST();
     users = new UserStore(this);
     updater: UpdaterStore | null = null;

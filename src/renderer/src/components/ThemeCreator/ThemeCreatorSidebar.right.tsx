@@ -15,7 +15,7 @@ import {
     Select,
     Stack,
     Typography,
-    useTheme,
+    useTheme
 } from "@mutualzz/ui-web";
 import { Theme } from "@stores/objects/Theme";
 import { useMutation } from "@tanstack/react-query";
@@ -23,12 +23,11 @@ import { adaptColors } from "@utils/adaptation";
 import { sortThemes } from "@utils/index";
 import startCase from "lodash-es/startCase";
 import { observer } from "mobx-react-lite";
-import { useMemo } from "react";
 import Snowflake from "@utils/Snowflake";
 import { usePrefersDark } from "@hooks/usePrefersDark";
 import type {
     ThemeCreatorFilter,
-    ThemeCreatorLoadedType,
+    ThemeCreatorLoadedType
 } from "@stores/ThemeCreator.store";
 
 const availableFilters = [
@@ -36,7 +35,7 @@ const availableFilters = [
     "dark",
     "adaptive",
     "normal",
-    "gradient",
+    "gradient"
 ] as const;
 
 export const ThemeCreatorSidebarRight = observer(() => {
@@ -60,32 +59,28 @@ export const ThemeCreatorSidebarRight = observer(() => {
         startPreview,
         stopPreview,
         userInteracted,
-        nameEmpty,
+        nameEmpty
     } = app.themeCreator;
     const { closeAllModals } = useModal();
 
-    const themes = useMemo(() => {
-        const base =
-            loadedType === "custom"
-                ? app.themes.all.filter((theme) => theme.authorId)
-                : loadedType === "draft"
-                  ? app.drafts.themes.map((draft) => new Theme(app, draft))
-                  : app.themes.all.filter((theme) => !theme.author);
-
-        return app.themeCreator.filter(base);
-    }, [app.drafts.themes, loadedType, app]);
-
-    const ownedByUser = useMemo(
-        () => !!values.id && app.account?.id === values.authorId,
-        [values.id, values.authorId, app.account?.id],
+    const themes = app.themeCreator.filter(
+        loadedType === "custom"
+            ? app.themes.all.filter((theme) => theme.authorId)
+            : loadedType === "draft"
+              ? Array.from(app.drafts.themes.values()).map(
+                    (draft) => new Theme(app, draft)
+                )
+              : app.themes.all.filter((theme) => !theme.author)
     );
+
+    const ownedByUser = !!values.id && app.account?.id === values.authorId;
 
     const { mutate: putTheme } = useMutation({
         mutationKey: ["put-theme", values.name],
         mutationFn: async () => {
             let dataToPut = {
                 ...values,
-                id: Snowflake.generate(),
+                id: Snowflake.generate()
             };
             if (values.adaptive) {
                 dataToPut = {
@@ -93,8 +88,8 @@ export const ThemeCreatorSidebarRight = observer(() => {
                     ...(adaptColors({
                         baseColor: values.colors.background,
                         primaryColor: values.colors.primary,
-                        primaryText: values.typography.colors.primary,
-                    }) as Partial<MzTheme>),
+                        primaryText: values.typography.colors.primary
+                    }) as Partial<MzTheme>)
                 };
             }
 
@@ -117,7 +112,7 @@ export const ThemeCreatorSidebarRight = observer(() => {
                 next[e.path] = e.message;
             });
             setErrors(next);
-        },
+        }
     });
 
     const { mutate: patchTheme } = useMutation({
@@ -130,14 +125,14 @@ export const ThemeCreatorSidebarRight = observer(() => {
                     ...(adaptColors({
                         baseColor: values.colors.background,
                         primaryColor: values.colors.primary,
-                        primaryText: values.typography.colors.primary,
-                    }) as Partial<MzTheme>),
+                        primaryText: values.typography.colors.primary
+                    }) as Partial<MzTheme>)
                 };
             }
 
             return app.rest.patch<APITheme, APITheme>(
                 `@me/themes/${values.id}`,
-                dataToPatch,
+                dataToPatch
             );
         },
         onSuccess: (data) => {
@@ -155,7 +150,7 @@ export const ThemeCreatorSidebarRight = observer(() => {
                 next[e.path] = e.message;
             });
             setErrors(next);
-        },
+        }
     });
 
     const { mutate: deleteTheme } = useMutation({
@@ -168,25 +163,31 @@ export const ThemeCreatorSidebarRight = observer(() => {
         onSuccess: ({ id: themeId }: { id: string }) => {
             const deletingCurrent = currentTheme.id === themeId;
 
-            // Remove theme from store first
             app.themes.remove(themeId);
 
-            if (deletingCurrent) {
-                const fallback = prefersDark ? baseDarkTheme : baseLightTheme;
+            const remainingCustomThemes = app.themes.all.filter(
+                (theme) => theme.authorId
+            );
 
+            if (remainingCustomThemes.length === 0) {
+                app.themeCreator.resetToBaseTheme();
+                const fallback = prefersDark ? baseDarkTheme : baseLightTheme;
+                changeTheme(Theme.toEmotion(fallback));
+            } else if (deletingCurrent) {
+                const fallback = prefersDark ? baseDarkTheme : baseLightTheme;
                 app.settings?.setCurrentTheme(fallback.id);
                 app.themes.setCurrentTheme(fallback.id);
-
                 changeTheme(Theme.toEmotion(fallback));
             }
-        },
+        }
     });
 
     const handleChange = (value: any) => {
         const theme = themes.find((theme) => theme.id === value);
+        console.log(theme);
         if (!theme) return;
 
-        loadValues(Theme.toEmotion(theme));
+        loadValues(Theme.serialize(theme));
     };
 
     const toggleFilter = (filter: ThemeCreatorFilter) => {
@@ -216,8 +217,9 @@ export const ThemeCreatorSidebarRight = observer(() => {
         >
             <Stack direction="column" spacing={2}>
                 <Stack direction="column">
-                    <ButtonGroup fullWidth spacing={5}>
+                    <ButtonGroup spacing={5}>
                         <Button
+                            expand
                             color="danger"
                             onClick={() => resetThemeCreator()}
                             disabled={!userInteracted || inPreview}
@@ -225,6 +227,7 @@ export const ThemeCreatorSidebarRight = observer(() => {
                             Reset
                         </Button>
                         <Button
+                            expand
                             onClick={() => {
                                 if (inPreview) {
                                     stopPreview(changeTheme);
@@ -248,7 +251,7 @@ export const ThemeCreatorSidebarRight = observer(() => {
                 </Stack>
                 <Divider
                     css={{
-                        opacity: 0.25,
+                        opacity: 0.25
                     }}
                     lineColor="muted"
                 />
@@ -274,19 +277,12 @@ export const ThemeCreatorSidebarRight = observer(() => {
                         color="primary"
                         placeholder="Pick a theme"
                         disabled={themes.length === 0}
-                        value={loadedType === "draft" ? values.name : values.id}
+                        value={values.id}
                     >
                         {sortThemes(themes).map((theme) => (
                             <Option
-                                key={
-                                    theme.id ||
-                                    `${theme.name}-${theme.authorId}`
-                                }
-                                value={
-                                    loadedType === "draft"
-                                        ? values.name
-                                        : values.id
-                                }
+                                key={theme.id}
+                                value={theme.id}
                                 variant="soft"
                             >
                                 {theme.name}
@@ -317,7 +313,7 @@ export const ThemeCreatorSidebarRight = observer(() => {
                 </Stack>
                 <Divider
                     css={{
-                        opacity: 0.25,
+                        opacity: 0.25
                     }}
                     lineColor="muted"
                 />

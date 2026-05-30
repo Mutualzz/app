@@ -68,7 +68,7 @@ export const ChannelMemberItem = observer(({ space, state }: Props) => {
                 })
             }
         >
-            <Stack spacing={1} alignItems="center">
+            <Stack spacing={1.75} alignItems="center">
                 <UserAvatar user={member.user} size={24} speaking={speaking} />
                 <Typography
                     flex={1}
@@ -85,7 +85,7 @@ export const ChannelMemberItem = observer(({ space, state }: Props) => {
                     {member.displayName}
                 </Typography>
             </Stack>
-            <Stack spacing={1.25} alignItems="center">
+            <Stack spacing={1.75} alignItems="center">
                 {videoOn && (
                     <Tooltip content={<TooltipWrapper>Video</TooltipWrapper>}>
                         <MdVideocam />

@@ -1,4 +1,3 @@
-import { Button } from "@components/Button";
 import { ThemeCreatorModal } from "@components/ThemeCreator/ThemeCreatorModal";
 import { TooltipWrapper } from "@components/TooltipWrapper";
 import { useModal } from "@contexts/Modal.context";
@@ -19,19 +18,26 @@ import {
     type BoxProps,
     Checkbox,
     Divider,
-    IconButton,
     Paper,
     Stack,
     Tooltip,
     Typography,
     useTheme
 } from "@mutualzz/ui-web";
+import { IconButton } from "@renderer/components/IconButton";
 import { Theme } from "@stores/objects/Theme";
 import { useMutation } from "@tanstack/react-query";
 import { getAdaptiveIcon } from "@utils/icons";
 import { observer } from "mobx-react-lite";
-import { type CSSProperties, forwardRef, useEffect, useMemo, useRef, useState } from "react";
-import { FaCheck, FaTrash } from "react-icons/fa";
+import {
+    type CSSProperties,
+    forwardRef,
+    useEffect,
+    useMemo,
+    useRef,
+    useState
+} from "react";
+import { FaCheck, FaPalette, FaTrash } from "react-icons/fa";
 import { FaRepeat } from "react-icons/fa6";
 import { VirtuosoGrid } from "react-virtuoso";
 
@@ -398,44 +404,43 @@ export const AppAppearanceSettings = observer(() => {
                 spacing={2.5}
                 borderRadius={10}
             >
-                <Typography
-                    display="flex"
-                    alignItems="center"
-                    level="body-lg"
-                    fontWeight="bolder"
+                <Stack
+                    justifyContent="space-between"
                     spacing={1.25}
+                    alignItems="center"
                 >
-                    Themes -
-                    <Tooltip
-                        content={
-                            <TooltipWrapper>
-                                Not available currently
-                            </TooltipWrapper>
-                        }
-                    >
-                        <Button
-                            variant="soft"
-                            horizontalAlign="left"
-                            disabled={!import.meta.env.DEV}
-                            onClick={() =>
-                                import.meta.env.DEV &&
-                                openModal(
-                                    "theme-creator",
-                                    <ThemeCreatorModal />
-                                )
+                    <Stack spacing={1.25} alignItems="center">
+                        <Typography fontWeight="bold" level="body-lg">
+                            Themes
+                        </Typography>
+                        <Tooltip
+                            content={
+                                <TooltipWrapper>
+                                    Create Custom Theme
+                                </TooltipWrapper>
                             }
+                            placement="top"
                         >
-                            Open Editor
-                        </Button>
-                    </Tooltip>
-                    -{" "}
+                            <IconButton
+                                variant="soft"
+                                onClick={() =>
+                                    openModal(
+                                        "theme-creator",
+                                        <ThemeCreatorModal />
+                                    )
+                                }
+                                size="sm"
+                            >
+                                <FaPalette />
+                            </IconButton>
+                        </Tooltip>
+                    </Stack>
                     <Checkbox
-                        rtl
                         label="Prefer Embossed Style"
                         checked={app.settings?.preferEmbossed}
                         onClick={() => app.settings?.togglePreferEmbossed()}
                     />
-                </Typography>
+                </Stack>
                 <Stack direction="column">
                     <Divider lineColor="muted" inset="half-start">
                         <Typography fontWeight="bold" level="body-sm">
