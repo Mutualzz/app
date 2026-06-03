@@ -1,4 +1,9 @@
-import type { APIMessage, APIMessageEmbed, Snowflake } from "@mutualzz/types";
+import type {
+    APIMessage,
+    APIMessageEmbed,
+    APIMessageMention,
+    Snowflake
+} from "@mutualzz/types";
 import type { AppStore } from "@stores/App.store";
 import { action, makeObservable, observable } from "mobx";
 import { MessageBase } from "./MessageBase";
@@ -16,6 +21,7 @@ export class Message extends MessageBase {
     declare spaceId?: Snowflake | null;
     embeds: APIMessageEmbed[];
     flags: BitField<MessageFlags>;
+    mentions: APIMessageMention[];
 
     edited: boolean;
 
@@ -34,6 +40,8 @@ export class Message extends MessageBase {
         this.updatedAt = data.updatedAt ? new Date(data.updatedAt) : null;
         this.nonce = data.nonce;
         this.edited = data.edited ?? false;
+
+        this.mentions = data.mentions ?? [];
 
         this.embeds = data.embeds;
         this.flags = BitField.fromString(messageFlags, data.flags.toString());

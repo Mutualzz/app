@@ -54,7 +54,7 @@ const PermissionItem = ({
             css={{
                 cursor: "pointer",
                 ":hover": {
-                    backgroundColor: `${theme.colors.info}22`
+                    background: `${theme.colors.info}22`
                 }
             }}
             onClick={() => togglePermission(flag)}

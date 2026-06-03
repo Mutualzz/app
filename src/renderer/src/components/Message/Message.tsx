@@ -4,9 +4,13 @@ import { useAppStore } from "@hooks/useStores";
 import { Stack, Tooltip, Typography, useTheme } from "@mutualzz/ui-web";
 import {
     Message as MessageType,
+    Message as MessageInstance,
     type MessageLike
 } from "@stores/objects/Message";
-import { QueuedMessageStatus } from "@stores/objects/QueuedMessage";
+import {
+    QueuedMessage,
+    QueuedMessageStatus
+} from "@stores/objects/QueuedMessage";
 import { observer } from "mobx-react-lite";
 import { MessageAuthor } from "./MessageAuthor";
 import {
@@ -32,6 +36,7 @@ export const Message = observer(({ message, header }: Props) => {
     const { theme } = useTheme();
     const channel = app.channels.active;
     const space = message.spaceId ? app.spaces.get(message.spaceId) : null;
+    const me = space?.members.me;
 
     const isSent = message instanceof MessageType;
 
@@ -48,13 +53,28 @@ export const Message = observer(({ message, header }: Props) => {
     };
 
     const isFailed =
-        "status" in message && message.status === QueuedMessageStatus.Failed;
+        message instanceof QueuedMessage &&
+        message.status === QueuedMessageStatus.Failed;
+
+    const hasProperMention =
+        message instanceof MessageInstance &&
+        message.mentions.some(
+            (mention) =>
+                // Check if the user has been mentioned
+                (mention.type === "user" && mention.id === app.account?.id) ||
+                // Check if here or everyone was mentioned
+                mention.type === "here" ||
+                mention.type === "everyone" ||
+                // Check if a role has been mentioned that the user belongs to
+                (mention.type === "role" && me?.roles.has(mention.id))
+        );
 
     const children = (
         <MessageBase
             onMouseEnter={hideSwitcher}
             onMouseLeave={showSwitcher}
             header={header}
+            highlight={hasProperMention ? theme.colors.warning : null}
         >
             <MessageInfo>
                 {header ? (

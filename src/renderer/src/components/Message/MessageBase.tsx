@@ -9,7 +9,7 @@ import type { HTMLAttributes, PropsWithChildren } from "react";
 
 interface Props extends PropsWithChildren, HTMLAttributes<HTMLDivElement> {
     header?: boolean;
-    highlight?: boolean | string;
+    highlight?: boolean | string | null;
 }
 
 export const MessageBase = styled("div")<Props>(
@@ -27,7 +27,10 @@ export const MessageBase = styled("div")<Props>(
         paddingBottom: "0.2rem",
         ...(highlight && {
             borderLeft: `1px solid ${typeof highlight === "string" ? highlight : theme.colors.info}`,
-            background: `linear-gradient(135deg, ${formatColor(theme.colors.info, { alpha: 12, format: "hexa" })} 0%, rgba(255, 255, 255, 0) 100%)`
+            background: `linear-gradient(135deg, ${formatColor(
+                typeof highlight === "string" ? highlight : theme.colors.info,
+                { alpha: 12, format: "hexa" }
+            )} 0%, rgba(255, 255, 255, 0) 100%)`
         })
     })
 );
