@@ -20,7 +20,8 @@ import {
     GatewayReadyPayload,
     PresenceActivity,
     PresenceSchedule,
-    PresenceStatus
+    PresenceStatus,
+    Snowflake
 } from "@mutualzz/types";
 import { type Codec, createCodec, type Encoding } from "@utils/codec";
 import {
@@ -37,6 +38,7 @@ import {
 import { normalizeJSON } from "@utils/JSON";
 import { isElectron } from "@utils/index";
 import { toast } from "react-toastify";
+import { MessageToast } from "@renderer/components/Toast/MessageToast";
 
 // We have to create our own GatewayStatus "enum" to avoid issues with SSR
 // since WebSocket is not available in the server environment.
@@ -456,6 +458,14 @@ export class GatewayStore {
         );
 
         // Messages
+        this.dispatchHandlers.set(
+            GatewayDispatchEvents.MessageAck,
+            this.onMessageAck
+        );
+        this.dispatchHandlers.set(
+            GatewayDispatchEvents.MessageAckBulk,
+            this.onMessageAckBulk
+        );
         this.dispatchHandlers.set(
             GatewayDispatchEvents.MessageCreate,
             this.onMessageCreate
@@ -892,7 +902,8 @@ export class GatewayStore {
             channels,
             relationships,
             settings,
-            expressions
+            expressions,
+            readStates
         } = payload;
 
         this.sessionId = sessionId;
@@ -903,9 +914,11 @@ export class GatewayStore {
         this.app.spaces.addAll(spaces);
         this.app.channels.addAll(channels);
         this.app.relationships.addAll(relationships);
+        this.app.readStates.addAll(readStates);
 
         this.reconnectTimeout = 0;
         this.app.setGatewayReady(true);
+        this.app.startBadgeWatch();
 
         const space =
             this.app.spaces.mostRecentSpace || this.app.spaces.positioned[0];
@@ -1128,12 +1141,70 @@ export class GatewayStore {
         this.app.channels.setPreferredActive();
     };
 
+    private onMessageAck = (payload: {
+        channelId: Snowflake;
+        lastMessageId: Snowflake;
+    }) => {
+        this.app.readStates.updateLocal(
+            payload.channelId,
+            payload.lastMessageId
+        );
+    };
+
+    private onMessageAckBulk = (
+        payload: Array<{
+            channelId: Snowflake;
+            lastMessageId: Snowflake;
+        } | null>
+    ) => {
+        for (const state of payload) {
+            if (!state) continue;
+            this.app.readStates.updateLocal(
+                state.channelId,
+                state.lastMessageId
+            );
+        }
+    };
+
     private onMessageCreate = (payload: APIMessage) => {
         const channel = this.app.channels.get(payload.channelId);
         if (!channel) return;
 
-        channel.messages.add(payload);
+        const message = channel.messages.add(payload);
         this.app.queue.handleIncomingMessage(payload);
+
+        if (this.app.channels.activeId === payload.channelId) return;
+
+        const isMentioned = payload.mentions?.some((m) => {
+            if (m.type === "user") return m.id === this.app.account?.id;
+            if (m.type === "role") {
+                const space = this.app.spaces.get(channel.spaceId ?? "");
+                const member = space?.members.get(this.app.account!.id);
+                return member?.roles?.has(m.id) ?? false;
+            }
+            return m.type === "everyone" || m.type === "here";
+        });
+
+        if (isMentioned && payload.authorId !== this.app.account?.id) {
+            const readState = this.app.readStates.get(payload.channelId);
+            if (readState) {
+                readState.incrementMentionCount();
+                toast(
+                    (toastProps) => (
+                        <MessageToast {...toastProps} data={message} />
+                    ),
+                    {
+                        closeOnClick: true,
+                        style: {
+                            maxWidth: "520px",
+                            width: "100%",
+                            height: "auto"
+                        },
+                        position: "top-right"
+                    }
+                );
+            }
+        }
     };
 
     private onMessageUpdate = (payload: APIMessage) => {

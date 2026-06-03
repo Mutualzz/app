@@ -1,0 +1,45 @@
+import { observer } from "mobx-react-lite";
+import { Snowflake } from "@mutualzz/types";
+import { useAppStore } from "@hooks/useStores";
+import { Stack, Typography, useTheme } from "@mutualzz/ui-web";
+import { UserAvatar } from "@components/User/UserAvatar";
+import { RenderElementProps } from "slate-react";
+
+interface Props {
+    userId: Snowflake;
+    attributes?: RenderElementProps["attributes"];
+}
+
+export const UserMention = observer(({ userId, attributes }: Props) => {
+    const app = useAppStore();
+    const { theme } = useTheme();
+    const space = app.spaces.active;
+
+    const memberOrUser = space?.members.get(userId) ?? app.users.get(userId);
+
+    if (!memberOrUser) return null;
+
+    return (
+        <Stack
+            {...attributes}
+            contentEditable={false}
+            spacing={0.75}
+            px={0.5}
+            inline
+            css={{
+                background: `${theme.colors.info}22`,
+                borderRadius: 4,
+                userSelect: "none",
+                "&:hover": {
+                    background: `${theme.colors.info}66`
+                },
+                overflow: "hidden"
+            }}
+        >
+            <span style={{ position: "relative", top: 3 }}>
+                <UserAvatar size={16} user={memberOrUser} />
+            </span>
+            <Typography>@{memberOrUser.displayName}</Typography>
+        </Stack>
+    );
+});

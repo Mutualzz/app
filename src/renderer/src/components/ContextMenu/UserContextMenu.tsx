@@ -65,6 +65,11 @@ export const UserContextMenu = observer(
         const meId = app.account?.id;
         const iBlockedThem = isBlocked && relationship?.userId === meId;
 
+        const dmChannel = insideDMs
+            ? app.channels.getDMChannel(meId!, user.id)
+            : null;
+        const readState = dmChannel ? app.readStates.get(dmChannel.id) : null;
+
         const { mutate: openDm, isPending: openingDm } = useMutation({
             mutationKey: ["open-dm", user.id],
             mutationFn: async () =>
@@ -233,6 +238,17 @@ export const UserContextMenu = observer(
                 transparency={0}
                 key={id}
             >
+                {readState && (
+                    <>
+                        <ContextItem
+                            onClick={() => readState.ack()}
+                            disabled={!readState.isUnread}
+                        >
+                            Mark as read
+                        </ContextItem>
+                        <Divider css={{ opacity: 0.5 }} />
+                    </>
+                )}
                 {!isSelf && (
                     <>
                         {!insideDMs && (

@@ -17,9 +17,14 @@ import { FaTrash } from "react-icons/fa";
 import type { Space } from "@stores/objects/Space";
 
 const EmojiItem = observer(({ expression }: { expression: Expression }) => {
+    const app = useAppStore();
     const { theme } = useTheme();
 
     const [hover, setHover] = useState(false);
+
+    const canManage =
+        expression.space?.members.me?.hasPermission("ManageExpressions");
+    const ownIt = expression.authorId === app.account?.id;
 
     return (
         <AnimatedStack
@@ -30,9 +35,9 @@ const EmojiItem = observer(({ expression }: { expression: Expression }) => {
                 background: formatColor(
                     dynamicElevation(theme.colors.surface, 5),
                     {
-                        alpha: 0.5,
-                    },
-                ),
+                        alpha: 0.5
+                    }
+                )
             }}
             onMouseOver={() => setHover(true)}
             onMouseOut={() => setHover(false)}
@@ -44,14 +49,14 @@ const EmojiItem = observer(({ expression }: { expression: Expression }) => {
                     src={expression.url}
                     css={{
                         width: 32,
-                        height: 32,
+                        height: 32
                     }}
                 />
                 :{expression.name}:
             </Stack>
 
             <Stack flex={1} justifyContent="flex-end">
-                {hover && (
+                {hover && (canManage || ownIt) && (
                     <IconButton
                         onClick={() => expression.delete()}
                         size="sm"
@@ -98,7 +103,7 @@ const SpaceEmojisTab = observer(({ space }: Props) => {
             authorId: app.account!.id,
             animated,
             flags: 0n,
-            createdAt: new Date(),
+            createdAt: new Date()
         };
 
         openModal("emoji-editor", <EmojiEditor emoji={emoji} file={file} />);
@@ -122,14 +127,14 @@ const SpaceEmojisTab = observer(({ space }: Props) => {
                     onChange={handleUpload}
                     multiple={false}
                     css={{
-                        display: "none",
+                        display: "none"
                     }}
                 />
                 <Button
                     color="success"
                     onClick={() => fileInputRef.current?.click()}
                     css={{
-                        marginRight: 16,
+                        marginRight: 16
                     }}
                 >
                     Upload Emoji
@@ -152,7 +157,7 @@ const SpaceEmojisTab = observer(({ space }: Props) => {
                     <Divider
                         lineColor="muted"
                         css={{
-                            opacity: 0.5,
+                            opacity: 0.5
                         }}
                     />
 
@@ -190,7 +195,7 @@ const SpaceEmojisTab = observer(({ space }: Props) => {
                     <Divider
                         lineColor="muted"
                         css={{
-                            opacity: 0.5,
+                            opacity: 0.5
                         }}
                     />
 

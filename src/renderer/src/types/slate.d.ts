@@ -32,6 +32,14 @@ export interface EmojiElement {
     children: EmptyText[];
 }
 
+export interface MentionElement {
+    type: "mention";
+    mentionType: MentionType;
+    id: string;
+    spaceId?: string | null;
+    children: [{ text: "" }];
+}
+
 export interface CustomEmojiElement {
     type: "customEmoji";
     url: string;
@@ -64,7 +72,8 @@ export type Element =
     | HeadingElement
     | EmojiElement
     | CustomEmojiElement
-    | LinkElement;
+    | LinkElement
+    | MentionElement;
 
 export type Editor = BaseEditor &
     ReactEditor &

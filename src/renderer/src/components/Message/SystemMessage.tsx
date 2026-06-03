@@ -30,7 +30,10 @@ export const SystemMessage = observer(({ message }: Props) => {
             <MessageContent>
                 <MessageAuthor message={message} />
                 {message.content && (
-                    <MarkdownRenderer value={message.content} />
+                    <MarkdownRenderer
+                        value={message.content}
+                        spaceId={message.spaceId}
+                    />
                 )}
                 {"embeds" in message && message.embeds.length > 0 && (
                     <Stack pb={0.25}>

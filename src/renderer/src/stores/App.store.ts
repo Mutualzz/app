@@ -7,7 +7,7 @@ import {
 } from "@mutualzz/types";
 import { QueryClient } from "@tanstack/react-query";
 import { isElectron } from "@utils/index";
-import { makeAutoObservable, runInAction } from "mobx";
+import { makeAutoObservable, reaction, runInAction } from "mobx";
 import { makePersistable } from "mobx-persist-store";
 import { AccountStore } from "./Account.store";
 import { AccountSettingsStore } from "./AccountSettings.store";
@@ -32,6 +32,7 @@ import type { TokenStorage } from "@renderer/types";
 import { electronTokenStorage } from "@storages/electronTokenStorage";
 import { RelationshipStore } from "@stores/Relationship.store";
 import { usePrefersDark } from "@hooks/usePrefersDark";
+import { ReadStateStore } from "@stores/ReadState.store";
 
 const prefersDark = usePrefersDark();
 
@@ -56,6 +57,7 @@ export class AppStore {
     updater: UpdaterStore | null = null;
     settings: AccountSettingsStore | null = null;
     mode: AppMode | null = null;
+    readStates = new ReadStateStore(this);
     joiningSpace?: APISpacePartial | null = null;
     joiningInviteCode?: string | null = null;
     presence = new PresenceStore();
@@ -129,6 +131,40 @@ export class AppStore {
 
     get isReady() {
         return !this.isAppLoading && this.isGatewayReady;
+    }
+
+    public startBadgeWatch() {
+        reaction(
+            () =>
+                [...this.channels.all].reduce((acc, ch) => {
+                    return (
+                        acc + (this.readStates.get(ch.id)?.mentionCount ?? 0)
+                    );
+                }, 0),
+            (total) => {
+                window.api?.badge?.set(total);
+            },
+            { fireImmediately: true }
+        );
+    }
+
+    getSuggestedGroupDMRecipients() {
+        const relationships = new Set(
+            this.relationships.all
+                .map((rel) => rel.otherUser)
+                .filter((user) => !!user)
+        );
+
+        const otherUsers = new Set(
+            this.channels.dms.flatMap(
+                (dm) =>
+                    dm.recipients?.filter(
+                        (rcp) => rcp.id !== this.account?.id
+                    ) ?? []
+            ) ?? []
+        );
+
+        return [...relationships, ...otherUsers];
     }
 
     popComposer() {

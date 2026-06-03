@@ -11,7 +11,7 @@ import React, {
     useImperativeHandle,
     useMemo,
     useRef,
-    useState,
+    useState
 } from "react";
 import {
     createEditor,
@@ -19,7 +19,7 @@ import {
     Element as SlateElement,
     type Node,
     Range,
-    Text,
+    Text
 } from "slate";
 import { withHistory } from "slate-history";
 import {
@@ -28,7 +28,7 @@ import {
     type RenderElementProps,
     type RenderLeafProps,
     Slate,
-    withReact,
+    withReact
 } from "slate-react";
 import { HoverToolbar } from "../HoverToolbar/HoverToolbar";
 import { Element } from "./Element";
@@ -37,7 +37,7 @@ import { MarkdownInputContext } from "./MarkdownInput.context";
 import {
     parseMarkdownToRanges,
     parseSpoilerRanges,
-    resolveMarkdownStyles,
+    resolveMarkdownStyles
 } from "./MarkdownInput.helpers";
 import type { MarkdownInputProps } from "./MarkdownInput.types";
 import { withEmojis } from "./plugins/withEmojis";
@@ -45,6 +45,11 @@ import { withSyntax } from "./plugins/withSyntax";
 import { EmojiPicker } from "@components/Emoji/EmojiPicker";
 import { EmojiToolbar } from "@components/Emoji/EmojiToolbar";
 import { useHotkeys } from "@tanstack/react-hotkeys";
+import {
+    insertMention,
+    withMentions
+} from "@components/Markdown/MarkdownInput/plugins/withMentions";
+import { MentionPicker } from "@components/MentionPicker";
 
 export interface MarkdownInputHandle {
     focus: (opts?: { at?: "start" | "end" | "selectAll" }) => void;
@@ -68,24 +73,33 @@ const MarkdownInput = forwardRef<MarkdownInputHandle, MarkdownInputProps>(
             placeholder,
             value,
 
-            css,
+            css
         },
-        ref,
+        ref
     ) => {
         const { theme } = useTheme();
         const inputRef = useRef<HTMLInputElement | null>(null);
 
         const [editorValue, setEditorValue] = useState(
-            markdownToSlate(value ?? ""),
+            markdownToSlate(value ?? "")
         );
 
         const editor = useMemo(
             () =>
-                withSyntax(withEmojis(withHistory(withReact(createEditor())))),
-            [],
+                withSyntax(
+                    withEmojis(
+                        withMentions(withHistory(withReact(createEditor())))
+                    )
+                ),
+            []
         );
 
         const formats = getActiveFormats(editor, editor.selection);
+
+        const [mentionSearch, setMentionSearch] = useState<string | null>(null);
+        const [mentionAnchor, setMentionAnchor] = useState<DOMRect | null>(
+            null
+        );
 
         useImperativeHandle(ref, () => ({
             focus: (opts) => {
@@ -95,7 +109,7 @@ const MarkdownInput = forwardRef<MarkdownInputHandle, MarkdownInputProps>(
                 if (at === "selectAll") {
                     editor.select({
                         anchor: editor.start([]),
-                        focus: editor.end([]),
+                        focus: editor.end([])
                     });
                     return;
                 }
@@ -104,7 +118,7 @@ const MarkdownInput = forwardRef<MarkdownInputHandle, MarkdownInputProps>(
                     at === "start" ? editor.start([]) : editor.end([]);
 
                 editor.select(point);
-            },
+            }
         }));
 
         useEffect(() => {
@@ -117,12 +131,12 @@ const MarkdownInput = forwardRef<MarkdownInputHandle, MarkdownInputProps>(
 
         const renderElement = useCallback(
             (props: RenderElementProps) => <Element {...props} />,
-            [],
+            []
         );
 
         const renderLeaf = useCallback(
             (props: RenderLeafProps) => <Leaf {...props} />,
-            [],
+            []
         );
 
         const decorate = useCallback(
@@ -132,7 +146,7 @@ const MarkdownInput = forwardRef<MarkdownInputHandle, MarkdownInputProps>(
 
                 return parseSpoilerRanges([node, path]);
             },
-            [],
+            []
         );
 
         const handleShiftEnter = (e: KeyboardEvent) => {
@@ -150,20 +164,20 @@ const MarkdownInput = forwardRef<MarkdownInputHandle, MarkdownInputProps>(
                 callback: () => {
                     editor.select({
                         anchor: editor.start([]),
-                        focus: editor.end([]),
+                        focus: editor.end([])
                     });
                 },
                 options: {
                     preventDefault: true,
-                    target: inputRef,
-                },
+                    target: inputRef
+                }
             },
             {
                 hotkey: "Mod+B",
                 callback: () => {
                     wrapSelectionWith(editor, "**", formats);
                 },
-                options: { preventDefault: true, target: inputRef },
+                options: { preventDefault: true, target: inputRef }
             },
             {
                 hotkey: "Mod+I",
@@ -172,8 +186,8 @@ const MarkdownInput = forwardRef<MarkdownInputHandle, MarkdownInputProps>(
                 },
                 options: {
                     preventDefault: true,
-                    target: inputRef,
-                },
+                    target: inputRef
+                }
             },
             {
                 hotkey: "Mod+U",
@@ -182,8 +196,8 @@ const MarkdownInput = forwardRef<MarkdownInputHandle, MarkdownInputProps>(
                 },
                 options: {
                     preventDefault: true,
-                    target: inputRef,
-                },
+                    target: inputRef
+                }
             },
             {
                 hotkey: "Mod+S",
@@ -192,8 +206,8 @@ const MarkdownInput = forwardRef<MarkdownInputHandle, MarkdownInputProps>(
                 },
                 options: {
                     preventDefault: true,
-                    target: inputRef,
-                },
+                    target: inputRef
+                }
             },
             {
                 hotkey: "Backspace",
@@ -203,7 +217,7 @@ const MarkdownInput = forwardRef<MarkdownInputHandle, MarkdownInputProps>(
                     if (selection && Range.isExpanded(selection)) {
                         const blockEntry = editor.above({
                             match: (n) =>
-                                SlateElement.isElement(n) && editor.isBlock(n),
+                                SlateElement.isElement(n) && editor.isBlock(n)
                         });
 
                         if (blockEntry) {
@@ -222,20 +236,20 @@ const MarkdownInput = forwardRef<MarkdownInputHandle, MarkdownInputProps>(
                                     editor.delete();
                                     editor.setNodes(
                                         { type: "line" },
-                                        { at: blockPath },
+                                        { at: blockPath }
                                     );
                                     return;
                                 }
                             }
                         }
                     }
-                },
+                }
             },
             {
                 hotkey: "Shift+Enter",
                 callback: (e) => {
                     handleShiftEnter(e);
-                },
+                }
             },
             {
                 hotkey: "ArrowLeft",
@@ -246,10 +260,10 @@ const MarkdownInput = forwardRef<MarkdownInputHandle, MarkdownInputProps>(
                         e.preventDefault();
                         editor.move({
                             unit: "offset",
-                            reverse: true,
+                            reverse: true
                         });
                     }
-                },
+                }
             },
             {
                 hotkey: "ArrowRight",
@@ -260,18 +274,18 @@ const MarkdownInput = forwardRef<MarkdownInputHandle, MarkdownInputProps>(
                         e.preventDefault();
                         editor.move({
                             unit: "offset",
-                            reverse: false,
+                            reverse: false
                         });
                     }
-                },
-            },
+                }
+            }
         ]);
 
         const onKeyDown = useCallback(
             (e: React.KeyboardEvent) => {
                 onKeyDownProp?.(e, editor);
             },
-            [editor, onKeyDownProp],
+            [editor, onKeyDownProp]
         );
 
         const handleChange = useCallback(
@@ -280,8 +294,51 @@ const MarkdownInput = forwardRef<MarkdownInputHandle, MarkdownInputProps>(
                     const markdown = slateToMarkdown(newValue);
                     onChange(markdown, editor);
                 }
+
+                const { selection } = editor;
+                if (selection && Range.isCollapsed(selection)) {
+                    const [start] = Range.edges(selection);
+
+                    let beforeIndex = start.offset - 1;
+                    let textBefore = "";
+
+                    const [node] = editor.node(start.path);
+                    if (node && Text.isText(node)) {
+                        while (beforeIndex >= 0) {
+                            const char = node.text[beforeIndex];
+                            if (char === "@") {
+                                textBefore = node.text.substring(
+                                    beforeIndex + 1,
+                                    start.offset
+                                );
+                                break;
+                            }
+                            if (char === " ") break;
+                            beforeIndex--;
+                        }
+                    }
+
+                    if (
+                        beforeIndex >= 0 &&
+                        Text.isText(node) &&
+                        node.text[beforeIndex] === "@"
+                    ) {
+                        setMentionSearch(textBefore);
+                        const domSelection = window.getSelection();
+                        if (domSelection && domSelection.rangeCount > 0) {
+                            setMentionAnchor(
+                                domSelection
+                                    .getRangeAt(0)
+                                    .getBoundingClientRect()
+                            );
+                        }
+                    } else {
+                        setMentionSearch(null);
+                        setMentionAnchor(null);
+                    }
+                }
             },
-            [editor, onChange],
+            [editor, onChange]
         );
 
         return (
@@ -290,7 +347,7 @@ const MarkdownInput = forwardRef<MarkdownInputHandle, MarkdownInputProps>(
                     activeFormats: formats,
                     enableEmoticons: emoticons,
                     enableHoverToolbar: hoverToolbar,
-                    enableEmojis: emojiPicker,
+                    enableEmojis: emojiPicker
                 }}
             >
                 <Slate
@@ -313,7 +370,7 @@ const MarkdownInput = forwardRef<MarkdownInputHandle, MarkdownInputProps>(
                         placeholder={placeholder ?? ""}
                         renderPlaceholder={({
                             children,
-                            attributes: { style, ref, ...attributes },
+                            attributes: { style, ref, ...attributes }
                         }) => (
                             <Typography
                                 ref={ref ? (ref as any) : undefined}
@@ -330,7 +387,7 @@ const MarkdownInput = forwardRef<MarkdownInputHandle, MarkdownInputProps>(
                                     pointerEvents: "none",
                                     userSelect: "none",
                                     opacity: 0.75,
-                                    verticalAlign: "middle",
+                                    verticalAlign: "middle"
                                 }}
                             >
                                 {children}
@@ -349,25 +406,56 @@ const MarkdownInput = forwardRef<MarkdownInputHandle, MarkdownInputProps>(
                                 theme,
                                 { color, textColor, variant },
                                 ({ color: c, textColor: tc, variant: v }) => ({
-                                    ...resolveMarkdownStyles(theme, c, tc)[v],
-                                }),
+                                    ...resolveMarkdownStyles(theme, c, tc)[v]
+                                })
                             ),
                             ...(disabled && {
                                 opacity: 0.5,
                                 pointerEvents: "none",
-                                cursor: "not-allowed",
+                                cursor: "not-allowed"
                             }),
-                            ...css,
+                            ...css
                         }}
                         disabled={disabled}
                         disableDefaultStyles
                         spellCheck
                     />
                     <EmojiPicker />
+                    {mentionSearch !== null && mentionAnchor && (
+                        <MentionPicker
+                            search={mentionSearch}
+                            onSelect={(mentionType, userId) => {
+                                const { selection } = editor;
+                                if (selection) {
+                                    const start = editor.before(
+                                        selection.anchor,
+                                        {
+                                            unit: "word",
+                                            distance: mentionSearch.length + 1
+                                        }
+                                    );
+                                    if (start) {
+                                        editor.select({
+                                            anchor: start,
+                                            focus: selection.anchor
+                                        });
+                                        editor.delete();
+                                    }
+                                }
+                                insertMention(editor, mentionType, userId);
+                                setMentionSearch(null);
+                                setMentionAnchor(null);
+                            }}
+                            onClose={() => {
+                                setMentionSearch(null);
+                                setMentionAnchor(null);
+                            }}
+                        />
+                    )}
                 </Slate>
             </MarkdownInputContext.Provider>
         );
-    },
+    }
 );
 
 MarkdownInput.displayName = "MarkdownInput";

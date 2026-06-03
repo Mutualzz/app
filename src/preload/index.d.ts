@@ -16,6 +16,9 @@ export interface MutualzzAPI {
             filterExes: string[]
         ): Promise<Array<{ name: string; pid: number }>>;
     };
+    badge: {
+        set(count: number): void;
+    };
     shell: {
         openExternal(url: string): Promise<void>;
     };

@@ -1,7 +1,7 @@
 import type { Channel } from "@stores/objects/Channel";
 import { Stack } from "@mutualzz/ui-web";
 import { MessageList } from "@components/Message/MessageList";
-import { SpaceChannelMessageInput } from "@components/Channel/SpaceChannelMessageInput";
+import { MessageInput } from "@components/Message/MessageInput";
 import { useAppStore } from "@hooks/useStores";
 import { MemberList } from "@components/MemberList/MemberList";
 import { TextChannelHeader } from "@components/Channel/TextChannelHeader";
@@ -41,14 +41,12 @@ export const TextChannelView = observer(({ channel }: Props) => {
                     overflow="hidden"
                 >
                     <MessageList channel={channel} />
-                    <SpaceChannelMessageInput
+                    <MessageInput
                         channel={channel}
                         onRequestEditLatest={handleRequestEditLatest}
                     />
                 </Stack>
-                {app.mode === "spaces" && app.memberListVisible && (
-                    <MemberList />
-                )}
+                {app.memberListVisible && <MemberList />}
             </Stack>
         </>
     );

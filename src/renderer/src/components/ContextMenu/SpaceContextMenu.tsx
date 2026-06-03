@@ -3,10 +3,10 @@ import { ContextSubmenu } from "@components/ContextSubmenu";
 import { SpaceSettingsModal } from "@components/SpaceSettings/SpaceSettingsModal";
 import { useModal } from "@contexts/Modal.context";
 import { useAppStore } from "@hooks/useStores";
-import { Box, Stack } from "@mutualzz/ui-web";
+import { Box, Divider, Stack } from "@mutualzz/ui-web";
 import type { Space } from "@stores/objects/Space";
 import { observer } from "mobx-react-lite";
-import { type Dispatch, type SetStateAction, useMemo } from "react";
+import { type Dispatch, type SetStateAction } from "react";
 import { FaArrowRight, FaDoorOpen } from "react-icons/fa";
 import {
     type Page,
@@ -29,20 +29,7 @@ export const SpaceContextMenu = observer(
         const app = useAppStore();
         const { openModal } = useModal();
 
-        const canModifySpace = useMemo(
-            () =>
-                space.members.me?.hasAnyPermission([
-                    "ManageSpace",
-                    "ManageChannels",
-                    "ManageRoles"
-                ]),
-            [space.members.me]
-        );
-
-        const spaceSettings = useMemo(
-            () => (canModifySpace ? Object.entries(settingsPages) : null),
-            [canModifySpace]
-        );
+        const spaceSettings = Object.entries(settingsPages);
 
         const onVisibilityChange = (visible: boolean) => {
             setMenuOpen?.(visible);
@@ -60,6 +47,8 @@ export const SpaceContextMenu = observer(
             return space.members.me?.hasAnyPermission(page.permissions);
         };
 
+        const hasUnread = space.hasUnread();
+
         return (
             <ContextMenu
                 elevation={app.settings?.preferEmbossed ? 5 : 1}
@@ -68,7 +57,18 @@ export const SpaceContextMenu = observer(
                 onVisibilityChange={onVisibilityChange}
                 key={space.id}
             >
-                {canModifySpace && spaceSettings && (
+                {fromSidebar && (
+                    <>
+                        <ContextItem
+                            onClick={() => space.markAsRead()}
+                            disabled={!hasUnread}
+                        >
+                            Mark as read
+                        </ContextItem>
+                        <Divider css={{ opacity: 0.5 }} />
+                    </>
+                )}
+                {spaceSettings && (
                     <Stack direction="column" spacing={1.25}>
                         {spaceSettings.map(([category, pages]) => (
                             <Box
@@ -141,7 +141,7 @@ export const SpaceContextMenu = observer(
                         id={`space-leave-${space.id}`}
                         textColor={undefined}
                     >
-                        Leave Server
+                        Leave Space
                     </ContextItem>
                 )}
             </ContextMenu>

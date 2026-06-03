@@ -6,7 +6,7 @@ import {
     permissionFlags,
     type PermissionFlags,
     roleFlags,
-    type RoleFlags,
+    type RoleFlags
 } from "@mutualzz/bitfield";
 import { makeAutoObservable } from "mobx";
 
@@ -15,7 +15,8 @@ export class Role {
     name: string;
     spaceId: Snowflake;
     color: string;
-    permissions: BitField<PermissionFlags>;
+    allow: BitField<PermissionFlags>;
+    deny: BitField<PermissionFlags>;
     position: number;
     hoist: boolean;
     flags: BitField<RoleFlags>;
@@ -26,7 +27,7 @@ export class Role {
 
     constructor(
         private readonly app: AppStore,
-        data: APIRole,
+        data: APIRole
     ) {
         this.id = data.id;
         this.name = data.name;
@@ -34,9 +35,13 @@ export class Role {
         if (data.space) this._space = this.app.spaces.add(data.space);
 
         this.color = data.color;
-        this.permissions = BitField.fromString(
+
+        // Support both old "permissions" field and new "allow" field
+        const allowVal = data.allow ?? 0n;
+        this.allow = BitField.fromString(permissionFlags, allowVal.toString());
+        this.deny = BitField.fromString(
             permissionFlags,
-            data.permissions.toString(),
+            (data.deny ?? 0n).toString()
         );
 
         this.position = data.position;
@@ -62,6 +67,11 @@ export class Role {
         return this.flags.has("Everyone");
     }
 
+    // Backwards-compat getter for anything still reading .permissions
+    get permissions() {
+        return this.allow;
+    }
+
     update(data: APIRole) {
         this.id = data.id;
         this.spaceId = data.spaceId;
@@ -74,10 +84,10 @@ export class Role {
         this.hoist = data.hoist;
         this.mentionable = data.mentionable;
 
-        this.permissions = BitField.fromString(
-            permissionFlags,
-            data.permissions.toString(),
-        );
+        const allowVal = data.allow ?? 0n;
+        this.allow = BitField.fromString(permissionFlags, allowVal.toString());
+        this.deny = BitField.fromString(permissionFlags, data.deny.toString());
+
         this.flags = BitField.fromString(roleFlags, data.flags.toString());
 
         this.createdAt = new Date(data.createdAt);

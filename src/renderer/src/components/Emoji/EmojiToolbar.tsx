@@ -5,7 +5,7 @@ import {
     defaultEmojis,
     insertCustomEmoji,
     insertEmoji,
-    useShortcodeQuery,
+    useShortcodeQuery
 } from "@utils/emojis";
 import type { Emoji } from "emojibase";
 import { Stack, Typography, useTheme } from "@mutualzz/ui-web";
@@ -91,7 +91,7 @@ export const EmojiToolbar = () => {
                 shortcode: exp.name,
                 label: `:${exp.name}:`,
                 url: exp.url,
-                expression: exp,
+                expression: exp
             });
         }
 
@@ -108,19 +108,19 @@ export const EmojiToolbar = () => {
                 shortcode: match,
                 label: `:${match}:`,
                 url: `${TWEMOJI_URL}/${em.hexcode.toLowerCase()}.svg`,
-                emoji: em,
+                emoji: em
             });
         }
 
         standardResults.sort(
             (a, b) =>
                 (a.shortcode.startsWith(lowerQuery) ? 0 : 1) -
-                (b.shortcode.startsWith(lowerQuery) ? 0 : 1),
+                (b.shortcode.startsWith(lowerQuery) ? 0 : 1)
         );
 
         const merged: Suggestion[] = [
             ...customResults,
-            ...standardResults,
+            ...standardResults
         ].slice(0, MAX_TOTAL);
 
         if (merged.length === 0) {
@@ -157,7 +157,7 @@ export const EmojiToolbar = () => {
                     ? caretRect.top - popupHeight - 24
                     : caretRect.bottom + 24,
                 left: editorRect.left,
-                width: editorRect.width,
+                width: editorRect.width
             });
         } catch {}
     }, [visible, suggestions]);
@@ -175,7 +175,7 @@ export const EmojiToolbar = () => {
 
             setVisible(false);
         },
-        [editor, range],
+        [editor, range]
     );
 
     useEffect(() => {
@@ -190,8 +190,7 @@ export const EmojiToolbar = () => {
                 case "ArrowUp":
                     e.preventDefault();
                     setActiveIndex(
-                        (i) =>
-                            (i - 1 + suggestions.length) % suggestions.length,
+                        (i) => (i - 1 + suggestions.length) % suggestions.length
                     );
                     break;
                 case "Enter":
@@ -249,7 +248,7 @@ export const EmojiToolbar = () => {
                 position: "fixed",
                 top: toolbarStyle?.top ?? -9999,
                 left: toolbarStyle?.left ?? 0,
-                width: toolbarStyle?.width ?? 0,
+                width: toolbarStyle?.width ?? 0
             }}
             zIndex={theme.zIndex.tooltip}
             visibility={toolbarStyle ? "visible" : "hidden"}
@@ -298,8 +297,8 @@ export const EmojiToolbar = () => {
                         css={{
                             cursor: "pointer",
                             "&:hover": {
-                                backgroundColor: "rgba(0, 0, 0, 0.1)",
-                            },
+                                backgroundColor: "rgba(0, 0, 0, 0.1)"
+                            }
                         }}
                         onMouseDown={(e) => {
                             e.preventDefault();
@@ -315,7 +314,7 @@ export const EmojiToolbar = () => {
                                 css={{
                                     borderRadius: 4,
                                     marginRight: 12,
-                                    objectFit: "cover",
+                                    objectFit: "cover"
                                 }}
                             />
                             <Typography>{suggestion.label}</Typography>

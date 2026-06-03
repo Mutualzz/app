@@ -1,7 +1,7 @@
 import type { Channel } from "@stores/objects/Channel";
 import { Paper, Stack, Tooltip, Typography, useTheme } from "@mutualzz/ui-web";
 import { MessageList } from "@components/Message/MessageList";
-import { SpaceChannelMessageInput } from "@components/Channel/SpaceChannelMessageInput";
+import { MessageInput } from "@components/Message/MessageInput";
 import { VoiceChannelHeader } from "@components/Channel/VoiceChannelHeader";
 import { useAppStore } from "@hooks/useStores";
 import { observer } from "mobx-react-lite";
@@ -456,7 +456,7 @@ export const VoiceChannelView = observer(
                                 flex={1}
                             >
                                 <MessageList channel={channel} />
-                                <SpaceChannelMessageInput channel={channel} />
+                                <MessageInput channel={channel} />
                             </Stack>
                         </Paper>
                     </>

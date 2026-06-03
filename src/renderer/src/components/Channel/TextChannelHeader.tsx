@@ -7,7 +7,7 @@ import {
     IconButton,
     Stack,
     Tooltip,
-    Typography,
+    Typography
 } from "@mutualzz/ui-web";
 import type { Channel } from "@stores/objects/Channel";
 import { observer } from "mobx-react-lite";
@@ -48,7 +48,7 @@ export const TextChannelHeader = observer(({ channel }: Props) => {
                         <>
                             <Divider
                                 style={{
-                                    margin: "0 8px",
+                                    margin: "0 8px"
                                 }}
                                 orientation="vertical"
                             />
@@ -59,28 +59,24 @@ export const TextChannelHeader = observer(({ channel }: Props) => {
                     )}
                 </Stack>
             </Stack>
-            <Stack direction="row" alignItems="center" spacing={1}>
-                <ButtonGroup variant="plain" spacing={10}>
-                    <Tooltip
-                        content={
-                            <TooltipWrapper>
-                                {app.memberListVisible ? "Hide" : "Show"} Member
-                                List
-                            </TooltipWrapper>
-                        }
-                        placement="bottom"
+            <ButtonGroup variant="plain" spacing={10}>
+                <Tooltip
+                    content={
+                        <TooltipWrapper>
+                            {app.memberListVisible ? "Hide" : "Show"} Member
+                            List
+                        </TooltipWrapper>
+                    }
+                    placement="bottom"
+                >
+                    <IconButton
+                        color={app.memberListVisible ? "success" : "neutral"}
+                        onClick={() => app.toggleMemberList()}
                     >
-                        <IconButton
-                            color={
-                                app.memberListVisible ? "success" : "neutral"
-                            }
-                            onClick={() => app.toggleMemberList()}
-                        >
-                            <FaUsers />
-                        </IconButton>
-                    </Tooltip>
-                </ButtonGroup>
-            </Stack>
+                        <FaUsers />
+                    </IconButton>
+                </Tooltip>
+            </ButtonGroup>
         </Paper>
     );
 });

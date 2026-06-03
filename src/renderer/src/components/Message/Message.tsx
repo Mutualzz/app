@@ -18,11 +18,9 @@ import {
 } from "./MessageBase";
 import { MessageEmbed } from "./MessageEmbed";
 import { MessageToolbar } from "./MessageToolbar";
-import { SpaceChannelMessageInput } from "../Channel/SpaceChannelMessageInput";
+import { MessageInput } from "./MessageInput";
 import { TooltipWrapper } from "@components/TooltipWrapper";
 import dayjs from "dayjs";
-import { ChannelType } from "@mutualzz/types";
-import { DMChannelMessageInput } from "@components/DMChannel/DMChannelMessageInput";
 
 interface Props {
     message: MessageLike;
@@ -36,9 +34,6 @@ export const Message = observer(({ message, header }: Props) => {
     const space = message.spaceId ? app.spaces.get(message.spaceId) : null;
 
     const isSent = message instanceof MessageType;
-    const isDM =
-        channel?.type === ChannelType.DM ||
-        channel?.type === ChannelType.GroupDM;
 
     const hideSwitcher = () => {
         if (!app.memberListVisible) {
@@ -54,7 +49,6 @@ export const Message = observer(({ message, header }: Props) => {
 
     const isFailed =
         "status" in message && message.status === QueuedMessageStatus.Failed;
-
 
     const children = (
         <MessageBase
@@ -84,19 +78,11 @@ export const Message = observer(({ message, header }: Props) => {
                     }
                 >
                     {isSent && message.editing ? (
-                        isDM ? (
-                            <DMChannelMessageInput
-                                channel={channel}
-                                message={message}
-                                onStopEditing={() => message.setEditing(false)}
-                            />
-                        ) : (
-                            <SpaceChannelMessageInput
-                                channel={channel}
-                                message={message}
-                                onStopEditing={() => message.setEditing(false)}
-                            />
-                        )
+                        <MessageInput
+                            channel={channel}
+                            message={message}
+                            onStopEditing={() => message.setEditing(false)}
+                        />
                     ) : (
                         message.content && (
                             <Stack alignItems="center" spacing={1.25}>
@@ -107,6 +93,7 @@ export const Message = observer(({ message, header }: Props) => {
                                             : "primary"
                                     }
                                     value={message.content}
+                                    spaceId={message.spaceId}
                                 />
                                 {isSent && message.edited && (
                                     <Tooltip

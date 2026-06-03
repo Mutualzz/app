@@ -12,14 +12,15 @@ import {
 } from "@mutualzz/ui-web";
 import { useNavigate } from "@tanstack/react-router";
 import { isElectron, toSpotifyUri } from "@utils/index";
-import { type MouseEvent, useMemo } from "react";
+import { type MouseEvent } from "react";
+import { observer } from "mobx-react-lite";
 
 interface Props {
     url: URL;
     unsafe?: boolean;
 }
 
-export const OpenLink = ({ url, unsafe }: Props) => {
+export const OpenLink = observer(({ url, unsafe }: Props) => {
     const { closeModal } = useModal();
     const app = useAppStore();
 
@@ -130,22 +131,15 @@ export const OpenLink = ({ url, unsafe }: Props) => {
             </Box>
         </AnimatedPaper>
     );
-};
+});
 
-export const Link = ({ href, onClick, ...props }: LinkProps) => {
+export const Link = observer(({ href, onClick, ...props }: LinkProps) => {
     const { openModal } = useModal();
     const navigate = useNavigate();
-    const url = useMemo(() => URL.parse(href || ""), [href]);
-    const isUnsafe = useMemo(
-        () =>
-            !!url &&
-            (url.protocol === "http:" || url.host.startsWith("localhost")),
-        [url]
-    );
-    const isInternal = useMemo(
-        () => !!url && url.hostname.endsWith("mutualzz.com"),
-        [url]
-    );
+    const url = URL.parse(href || "");
+    const isUnsafe =
+        !!url && (url.protocol === "http:" || url.host.startsWith("localhost"));
+    const isInternal = !!url && url.hostname.endsWith("mutualzz.com");
 
     const handleClick = (e: MouseEvent<HTMLAnchorElement>) => {
         if (!url) {
@@ -171,4 +165,4 @@ export const Link = ({ href, onClick, ...props }: LinkProps) => {
     };
 
     return <MLink href={href} onClick={handleClick} {...props} />;
-};
+});

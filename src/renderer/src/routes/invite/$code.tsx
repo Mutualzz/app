@@ -6,7 +6,7 @@ import { Button, Stack, Typography } from "@mutualzz/ui-web";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { createFileRoute, Navigate, useNavigate } from "@tanstack/react-router";
 import { observer } from "mobx-react-lite";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { isElectron } from "@utils/index";
 
 export const Route = createFileRoute("/invite/$code")({
@@ -34,10 +34,10 @@ function RouteComponent() {
         enabled: !!code
     });
 
-    const isInSpace = useMemo(() => {
-        if (!invite?.space?.members || !app.account?.id) return false;
-        return invite.space.members.some((m) => m.userId === app.account!.id);
-    }, [invite?.space?.members, app.account]);
+    const isInSpace =
+        !invite?.space?.members || !app.account?.id
+            ? false
+            : invite?.space.members.some((m) => m.userId === app.account?.id);
 
     useEffect(() => {
         if (!invite) return;
@@ -228,7 +228,7 @@ function RouteComponent() {
 
                         <Stack px={10} mb={4} spacing={1.5}>
                             <Button
-                                fullWidth
+                                expand
                                 onClick={
                                     isInSpace
                                         ? handleGoToSpace
@@ -245,7 +245,7 @@ function RouteComponent() {
                             {!isElectron && (
                                 <Button
                                     variant="outlined"
-                                    fullWidth
+                                    expand
                                     onClick={() => {
                                         setDeepLinkTried(false);
                                         setDeepLinkFailed(false);

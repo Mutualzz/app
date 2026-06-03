@@ -20,9 +20,10 @@ import { FaUser } from "react-icons/fa";
 import { useAppStore } from "@hooks/useStores";
 import { Paper } from "@components/Paper";
 import { StatusBadge } from "@components/StatusBadge";
+import { SpaceMember } from "@stores/objects/SpaceMember";
 
 interface UserAvatarProps extends AvatarProps {
-    user?: AccountStore | User | null;
+    user?: AccountStore | User | SpaceMember | null;
     badge?: boolean;
     showInvisible?: boolean;
     speaking?: boolean;
@@ -36,17 +37,20 @@ const baseSizeMap: Record<Size, number> = {
 
 export const UserAvatar = observer(
     ({
-        user,
+        user: userProp,
         css,
         badge,
         showInvisible,
         speaking,
         shape,
+        style,
         ...props
     }: UserAvatarProps & { css?: CSSObject }) => {
         const app = useAppStore();
         const { theme } = useTheme();
         const [focused, setFocused] = useState(false);
+
+        const user = userProp instanceof SpaceMember ? userProp.user : userProp;
 
         const { radius } = resolveResponsiveMerge(
             theme,
@@ -86,6 +90,7 @@ export const UserAvatar = observer(
                     variant="elevation"
                     size={size}
                     {...restProps}
+                    draggable={false}
                 >
                     <FaUser />
                 </MAvatar>
@@ -113,8 +118,10 @@ export const UserAvatar = observer(
                     borderRadius: radius,
                     outline: speaking
                         ? `2px solid ${theme.colors.success}`
-                        : "none"
+                        : "none",
+                    ...style
                 }}
+                draggable={false}
             >
                 <MAvatar
                     size={size}

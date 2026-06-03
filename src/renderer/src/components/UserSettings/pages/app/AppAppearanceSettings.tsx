@@ -177,33 +177,21 @@ export const AppAppearanceSettings = observer(() => {
         }
     });
 
-    const defaultThemes = useMemo(() => [baseDarkTheme, baseLightTheme], []);
+    const defaultThemes = [baseDarkTheme, baseLightTheme];
 
-    const defaultColorThemes = useMemo(
-        () =>
-            app.themes.all
-                .filter((theme) => !theme.author)
-                .filter(
-                    (theme) =>
-                        theme.id !== "baseDark" && theme.id !== "baseLight"
-                ),
-        [app.themes.all]
+    const defaultColorThemes = app.themes.all
+        .filter((theme) => !theme.author)
+        .filter((theme) => theme.id !== "baseDark" && theme.id !== "baseLight");
+
+    const normalThemes = defaultColorThemes.filter(
+        (theme) => theme.style === "normal"
     );
 
-    const normalThemes = useMemo(
-        () => defaultColorThemes.filter((theme) => theme.style === "normal"),
-        [defaultColorThemes]
+    const gradientThemes = defaultColorThemes.filter(
+        (theme) => theme.style === "gradient"
     );
 
-    const gradientThemes = useMemo(
-        () => defaultColorThemes.filter((theme) => theme.style === "gradient"),
-        [defaultColorThemes]
-    );
-
-    const userThemes = useMemo(
-        () => app.themes.all.filter((theme) => theme.author),
-        [app.themes.all]
-    );
+    const userThemes = app.themes.all.filter((theme) => theme.author);
 
     const icons = iconsRef.current;
 
@@ -404,7 +392,7 @@ export const AppAppearanceSettings = observer(() => {
                 spacing={2.5}
                 borderRadius={10}
             >
-                <Stack
+      `          <Stack
                     justifyContent="space-between"
                     spacing={1.25}
                     alignItems="center"

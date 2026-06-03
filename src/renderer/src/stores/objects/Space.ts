@@ -11,6 +11,7 @@ import {
     type APISpace,
     CDNRoutes,
     ImageFormat,
+    ReadStateType,
     type Sizes
 } from "@mutualzz/types";
 import type { AppStore } from "@stores/App.store";
@@ -163,6 +164,36 @@ export class Space {
         return REST.makeCDNUrl(
             CDNRoutes.spaceIcon(spaceId, hash, format, size, animated)
         );
+    }
+
+    async markAsRead() {
+        const payload = this.channels
+            .map((channel) => {
+                const lastMessage = channel.lastMessage;
+                if (!lastMessage || "status" in lastMessage) return null;
+
+                return {
+                    channelId: channel.id,
+                    lastMessageId: lastMessage.id,
+                    type: ReadStateType.Messages
+                };
+            })
+            .filter((p) => !!p);
+
+        if (!payload.length) return;
+
+        for (const { channelId, lastMessageId } of payload) {
+            this.app.readStates.updateLocal(channelId, lastMessageId);
+        }
+
+        await this.app.readStates.ackBulk(payload);
+    }
+
+    hasUnread() {
+        return this.channels.some((channel) => {
+            const state = this.app.readStates.get(channel.id);
+            return state?.isUnread;
+        });
     }
 
     async fetchBans(force = false) {

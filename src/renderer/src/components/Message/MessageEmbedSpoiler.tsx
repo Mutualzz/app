@@ -1,6 +1,6 @@
 import { Paper } from "@components/Paper";
 import { useAppStore } from "@hooks/useStores";
-import { useMemo, useState, type PropsWithChildren } from "react";
+import { type PropsWithChildren, useState } from "react";
 
 type Props = PropsWithChildren<{
     spoiler?: boolean;
@@ -16,16 +16,13 @@ export const MessageEmbedSpoiler = ({
     width,
     height,
     borderRadius,
-    maxWidth,
+    maxWidth
 }: Props) => {
     const app = useAppStore();
     const [revealed, setRevealed] = useState(false);
     const [hovered, setHovered] = useState(false);
 
-    const prefersEmbossed = useMemo(
-        () => app.settings?.preferEmbossed,
-        [app.settings?.preferEmbossed],
-    );
+    const prefersEmbossed = app.settings?.preferEmbossed;
 
     if (!spoiler) return children;
 
@@ -49,13 +46,13 @@ export const MessageEmbedSpoiler = ({
 
                 "& img": {
                     opacity: revealed ? 1 : 0,
-                    transition: "opacity 0.2s ease-in-out",
+                    transition: "opacity 0.2s ease-in-out"
                 },
 
                 "& > *": {
                     opacity: revealed ? 1 : 0,
-                    pointerEvents: revealed ? "auto" : "none",
-                },
+                    pointerEvents: revealed ? "auto" : "none"
+                }
             }}
             onClick={() => setRevealed(true)}
             onMouseEnter={() => setHovered(true)}

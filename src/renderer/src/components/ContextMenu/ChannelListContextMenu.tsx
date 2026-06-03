@@ -9,7 +9,6 @@ import { FaClipboard, FaHashtag, FaPaperPlane } from "react-icons/fa";
 import { CategoryCreateModal } from "../Channel/Category/CategoryCreateModal";
 import { ChannelCreateModal } from "../Channel/ChannelCreateModal";
 import { generateMenuIDs } from "@contexts/ContextMenu.context";
-import { useMemo } from "react";
 import { ContextItem } from "@components/ContextItem";
 
 interface Props {
@@ -20,15 +19,8 @@ export const ChannelListContextMenu = observer(({ space }: Props) => {
     const app = useAppStore();
     const { openModal } = useModal();
 
-    const canManageChannels = useMemo(
-        () => space.members.me?.hasPermission("ManageChannels"),
-        [space.members.me],
-    );
-
-    const canInvite = useMemo(
-        () => space.members.me?.hasPermission("CreateInvites"),
-        [space.members.me],
-    );
+    const canManageChannels = space.members.me?.hasPermission("ManageChannels");
+    const canInvite = space.members.me?.hasPermission("CreateInvites");
 
     return (
         <ContextMenu
@@ -43,7 +35,7 @@ export const ChannelListContextMenu = observer(({ space }: Props) => {
                         onClick={() =>
                             openModal(
                                 "create-channel",
-                                <ChannelCreateModal space={space} />,
+                                <ChannelCreateModal space={space} />
                             )
                         }
                         endDecorator={<FaHashtag />}
@@ -54,7 +46,7 @@ export const ChannelListContextMenu = observer(({ space }: Props) => {
                         onClick={() =>
                             openModal(
                                 "create-category",
-                                <CategoryCreateModal space={space} />,
+                                <CategoryCreateModal space={space} />
                             )
                         }
                         endDecorator={<FaClipboard />}
@@ -68,7 +60,7 @@ export const ChannelListContextMenu = observer(({ space }: Props) => {
                     onClick={() =>
                         openModal(
                             `invite-to-space-${space.id}`,
-                            <SpaceInviteToSpaceModal />,
+                            <SpaceInviteToSpaceModal />
                         )
                     }
                     endDecorator={<FaPaperPlane />}

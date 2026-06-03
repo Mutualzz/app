@@ -1,4 +1,4 @@
-import { app, ipcMain } from "electron";
+import { app, BrowserWindow, ipcMain, nativeImage } from "electron";
 import { trayManager } from "./tray";
 import { getMainWindow } from "./windows";
 import keytar from "keytar";
@@ -7,6 +7,32 @@ import path from "path";
 
 const SERVICE = "mutualzz";
 const ACCOUNT = "default";
+
+function setWindowsBadge(win: BrowserWindow, count: number) {
+    if (count === 0) {
+        win.setOverlayIcon(null, "");
+        return;
+    }
+
+    const size = 20;
+    const { createCanvas } = require("canvas");
+    const canvas = createCanvas(size, size);
+    const ctx = canvas.getContext("2d");
+
+    ctx.fillStyle = "#e03131";
+    ctx.beginPath();
+    ctx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "bold 11px Arial";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(count > 99 ? "99+" : String(count), size / 2, size / 2 + 1);
+
+    const image = nativeImage.createFromDataURL(canvas.toDataURL());
+    win.setOverlayIcon(image, `${count} unread mentions`);
+}
 
 export function setupIPC(): void {
     // Token Storage
@@ -222,5 +248,12 @@ export function setupIPC(): void {
             console.error("[theme:read-icon] failed:", err);
             return null;
         }
+    });
+
+    ipcMain.on("badge:set", (_, count: number) => {
+        app.setBadgeCount(count);
+
+        const win = getMainWindow();
+        if (win) setWindowsBadge(win, count);
     });
 }

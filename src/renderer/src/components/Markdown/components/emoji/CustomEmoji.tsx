@@ -1,33 +1,43 @@
-import type { EmojiElement } from "@app-types/slate";
+import type { CustomEmojiElement } from "@app-types/slate";
 import { styled } from "@mutualzz/ui-core";
 import { ContextMenu } from "@components/ContextMenu";
-import { DefaultEmojiPreviewPopup } from "@components/Preview/DefaultEmojiPreviewPopup";
+import { CustomEmojiPreviewPopup } from "@components/Preview/CustomEmojiPreviewPopup";
 import { Portal } from "@mutualzz/ui-web";
 import { useMenu } from "@contexts/ContextMenu.context";
+import { RenderElementProps } from "slate-react";
 
-interface EmojiProps extends Omit<EmojiElement, "type" | "children"> {
-    isEmojiOnly: boolean;
+interface CustomEmojiProps extends Omit<
+    CustomEmojiElement,
+    "type" | "children"
+> {
+    isEmojiOnly?: boolean;
+    attributes?: RenderElementProps["attributes"];
 }
 
-const EmojiWrapper = styled("span")<{ isEmojiOnly: boolean }>(
+const EmojiWrapper = styled("span")<{ isEmojiOnly?: boolean }>(
     ({ isEmojiOnly }) => ({
         display: "inline-block",
         width: isEmojiOnly ? "2.25em" : "1.375em",
         height: isEmojiOnly ? "2.25em" : "1.375em",
         verticalAlign: "middle",
-        position: "relative",
-        cursor: "pointer",
-    }),
+        cursor: "pointer"
+    })
 );
 
 const EmojiImage = styled("img")({
     width: "100%",
     height: "100%",
-    objectFit: "contain",
+    objectFit: "contain"
 });
 
-const Emoji = ({ isEmojiOnly, url, unicode, name }: EmojiProps) => {
-    const { openContextMenu, isOpen, clearMenu } = useMenu();
+const CustomEmoji = ({
+    isEmojiOnly,
+    url,
+    name,
+    id,
+    animated
+}: CustomEmojiProps) => {
+    const { clearMenu, isOpen, openContextMenu } = useMenu();
 
     return (
         <>
@@ -39,31 +49,31 @@ const Emoji = ({ isEmojiOnly, url, unicode, name }: EmojiProps) => {
                     openContextMenu(
                         event,
                         {
-                            id: `emoji-${name}`,
-                            type: "custom",
+                            id: `custom-emoji-${id}`,
+                            type: "custom"
                         },
                         {
                             x: Math.round(rect.left - 55),
-                            y: Math.round(rect.bottom - 125),
-                        },
+                            y: Math.round(rect.bottom - 200)
+                        }
                     );
                 }}
                 isEmojiOnly={isEmojiOnly}
             >
                 <EmojiImage
                     src={url}
-                    alt={unicode}
+                    alt={id}
                     draggable={false}
-                    aria-label={`:${name}:`}
+                    aria-label={`<${animated ? "a" : ""}:${name}:${id}>`}
                 />
             </EmojiWrapper>
             <Portal>
-                <ContextMenu padding={0} id={`emoji-${name}`}>
-                    <DefaultEmojiPreviewPopup name={name} url={url} />
+                <ContextMenu padding={0} id={`custom-emoji-${id}`}>
+                    <CustomEmojiPreviewPopup emojiId={id} />
                 </ContextMenu>
             </Portal>
         </>
     );
 };
 
-export { Emoji };
+export { CustomEmoji };

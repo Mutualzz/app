@@ -1,12 +1,12 @@
 import type { Space } from "@stores/objects/Space";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import {
     Divider,
     Input,
     Stack,
     Tooltip,
     Typography,
-    useTheme,
+    useTheme
 } from "@mutualzz/ui-web";
 import { IoPeople } from "react-icons/io5";
 import { Button } from "@components/Button";
@@ -58,19 +58,19 @@ const RoleItem = observer(
                         background: formatColor(
                             dynamicElevation(theme.colors.surface, 5),
                             {
-                                alpha: 50,
-                            },
-                        ),
+                                alpha: 50
+                            }
+                        )
                     }}
                     onClick={onClick}
                     css={{
-                        cursor: "pointer",
+                        cursor: "pointer"
                     }}
                     onContextMenu={(e) =>
                         openContextMenu(e, {
                             type: "role",
                             space,
-                            role,
+                            role
                         })
                     }
                 >
@@ -118,7 +118,7 @@ const RoleItem = observer(
                                         e.stopPropagation();
                                         openModal(
                                             "delete-role",
-                                            <RoleActionConfirm role={role} />,
+                                            <RoleActionConfirm role={role} />
                                         );
                                     }}
                                     color="danger"
@@ -136,13 +136,13 @@ const RoleItem = observer(
                     <Divider
                         lineColor="muted"
                         css={{
-                            opacity: 0.25,
+                            opacity: 0.25
                         }}
                     />
                 )}
             </>
         );
-    },
+    }
 );
 
 export const SpaceRolesSettings = observer(({ space }: Props) => {
@@ -154,7 +154,7 @@ export const SpaceRolesSettings = observer(({ space }: Props) => {
     const { mutate: fetchRoles } = useMutation({
         mutationKey: ["fetch-roles", space.id],
         mutationFn: async () =>
-            app.rest.get<APIRole>(`/spaces/${space.id}/roles`),
+            app.rest.get<APIRole>(`/spaces/${space.id}/roles`)
     });
 
     const { mutate: createRole, isPending: creatingRole } = useMutation({
@@ -163,35 +163,24 @@ export const SpaceRolesSettings = observer(({ space }: Props) => {
         onSuccess: (data) => {
             const newRole = space.roles.add(data);
             setCurrentRole(newRole);
-        },
+        }
     });
 
     useEffect(() => {
         if (space.roles.all.length === 0) fetchRoles();
     }, [space.roles.all.length]);
 
-    const roles = useMemo(
-        () => space.roles.assignable,
-        [space.roles.assignable],
-    );
+    const roles = space.roles.assignable;
+    const everyoneRole = space.roles.get(space.id);
 
-    const everyoneRole = useMemo(
-        () => space.roles.get(space.id),
-        [space.roles, space.id],
-    );
-
-    const otherRoles = useMemo(
-        () =>
-            roles
-                .filter((r) => r.id !== space.id)
-                .filter((r) =>
-                    search.trim() !== ""
-                        ? r.name.toLowerCase().includes(search.toLowerCase()) ||
-                          r.id.toLowerCase().includes(search.toLowerCase())
-                        : true,
-                ),
-        [space.id, search, roles],
-    );
+    const otherRoles = roles
+        .filter((r) => r.id !== space.id)
+        .filter((r) =>
+            search.trim() === ""
+                ? true
+                : r.name.toLowerCase().includes(search.toLowerCase()) ||
+                  r.id.toLowerCase().includes(search.toLowerCase())
+        );
 
     const calculateMembersWithRole = (roleId: string) => {
         return space.members.all.filter((m) => m.roles.has(roleId)).length;
@@ -233,7 +222,7 @@ export const SpaceRolesSettings = observer(({ space }: Props) => {
                             </Stack>
                             <FaArrowRight
                                 css={{
-                                    marginLeft: "auto",
+                                    marginLeft: "auto"
                                 }}
                                 size={16}
                             />
@@ -276,7 +265,7 @@ export const SpaceRolesSettings = observer(({ space }: Props) => {
                         <Divider
                             lineColor="muted"
                             css={{
-                                opacity: 0.25,
+                                opacity: 0.25
                             }}
                         />
                     </Stack>

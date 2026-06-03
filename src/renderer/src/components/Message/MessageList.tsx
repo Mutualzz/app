@@ -3,15 +3,17 @@ import { Logger } from "@mutualzz/logger";
 import { Stack, Typography } from "@mutualzz/ui-web";
 import type { MessageGroup as MessageGroupType } from "@stores/Message.store";
 import type { Channel } from "@stores/objects/Channel";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useMutation } from "@tanstack/react-query";
 import { observer } from "mobx-react-lite";
-import { createContext, useCallback, useRef } from "react";
+import { createContext, UIEvent, useCallback, useEffect, useRef } from "react";
 import { FaHashtag } from "react-icons/fa";
 import InfiniteScroll from "react-infinite-scroll-component";
 import useResizeObserver from "use-resize-observer";
-import { MessageGroup } from "./MessageGroup";
+import { MessageGroup } from "@components/Message/MessageGroup";
 import { useAppStore } from "@hooks/useStores";
+import { ChannelType } from "@mutualzz/types";
 import { UserAvatar } from "@components/User/UserAvatar";
+import { DMGroupAvatar } from "@components/DMChannel/DMGroupAvatar";
 
 interface Props {
     channel?: Channel | null;
@@ -22,40 +24,101 @@ export const MESSAGE_AREA_PADDING = 82;
 
 const LIMIT = 50;
 
+const SpaceEndMessage = ({
+    channel,
+    canReadHistory
+}: {
+    channel: Channel | null;
+    canReadHistory: boolean;
+}) => (
+    <Stack direction="column" spacing={1} margin="16px 16px 0 16px">
+        <Paper
+            width={64}
+            height={64}
+            elevation={10}
+            padding={3}
+            borderRadius="50%"
+            alignItems="center"
+            justifyContent="center"
+            display="flex"
+            boxShadow="none"
+        >
+            <FaHashtag size={48} />
+        </Paper>
+
+        <Typography level="h1" fontWeight={700} margin="8px 0">
+            Welcome to #{channel?.name}!
+        </Typography>
+
+        {canReadHistory ? (
+            <Typography textColor="secondary">
+                This is the start of the #{channel?.name} channel.
+            </Typography>
+        ) : (
+            <Typography textColor="secondary">
+                You don't have permissions to read message history
+            </Typography>
+        )}
+    </Stack>
+);
+
+const DMEndMessage = ({
+    channel,
+    isGroupDM
+}: {
+    channel: Channel;
+    isGroupDM: boolean;
+}) => (
+    <Stack direction="column" spacing={1} margin="16px 16px 0 16px">
+        {isGroupDM ? (
+            <DMGroupAvatar users={channel?.dmRecipients || []} size={96} />
+        ) : (
+            <UserAvatar user={channel?.dmRecipient} size={64} />
+        )}
+
+        <Typography level="h1" fontWeight={700} margin="8px 0">
+            {isGroupDM
+                ? channel?.name ||
+                  channel?.dmRecipients?.map((r) => r.displayName).join(", ")
+                : `Send your first message to ${channel?.dmRecipient?.displayName}`}
+        </Typography>
+
+        <Typography textColor="secondary">
+            Welcome to the beginning of the{" "}
+            {channel?.name ||
+                channel?.dmRecipients?.map((r) => r.displayName).join(", ")}
+        </Typography>
+    </Stack>
+);
+
 export const MessageList = observer(({ channel: channelProp }: Props) => {
     const app = useAppStore();
     const ref = useRef<HTMLDivElement>(null);
     const { width } = useResizeObserver<HTMLDivElement>({ ref: ref.current });
-    const logger = new Logger({
-        tag: "MessageList"
-    });
+    const logger = new Logger({ tag: "MessageList" });
 
     const channel = channelProp ?? app.channels.active;
 
-    const isDM = channel?.isDM ?? false;
-    const dmRecipient = channel?.dmRecipient ?? null;
+    const isDM =
+        channel?.type === ChannelType.DM ||
+        channel?.type === ChannelType.GroupDM;
+    const isGroupDM = channel?.type === ChannelType.GroupDM;
 
-    const canReadHistory = (() => {
-        if (isDM) return true;
+    const isAtBottom = useRef(true);
 
-        if (!channel) return false;
-
-        const space = channel.space;
-
-        if (!space) return false;
-
-        const me = space.members.me;
-
-        if (!me) return false;
-
-        return me.hasPermission("ReadMessageHistory", channel);
-    })();
+    const canReadHistory = isDM
+        ? true
+        : (() => {
+              const me = channel?.space?.members.me;
+              return me?.hasPermission("ReadMessageHistory", channel!) ?? false;
+          })();
 
     const rawGroups = channel?.messages.groups;
 
     const messageGroups = (() => {
         if (!rawGroups) return undefined;
-        if (canReadHistory) return rawGroups;
+
+        if (!isDM && canReadHistory) return rawGroups;
 
         const getLastMessageId = () => {
             if (!rawGroups || rawGroups.length === 0) return undefined;
@@ -83,7 +146,6 @@ export const MessageList = observer(({ channel: channelProp }: Props) => {
             queryFn: async ({ pageParam }: any) => {
                 if (!pageParam) {
                     const count = await channel?.getMessages(true);
-
                     const lastGroup =
                         channel?.messages.groups[
                             channel.messages.groups.length - 1
@@ -99,7 +161,6 @@ export const MessageList = observer(({ channel: channelProp }: Props) => {
                     LIMIT,
                     pageParam
                 );
-
                 const lastGroup =
                     channel?.messages.groups[
                         channel.messages.groups.length - 1
@@ -112,14 +173,46 @@ export const MessageList = observer(({ channel: channelProp }: Props) => {
             getNextPageParam: (lastPage) => {
                 if (lastPage?.count != null && lastPage.count < LIMIT)
                     return undefined;
-
                 if (!lastPage?.earliestId) return undefined;
-
                 return lastPage.earliestId;
             },
-            enabled: !!channel?.id && canReadHistory
+            // Space channels respect history permission; DMs always fetch
+            enabled: !!channel?.id && (isDM || canReadHistory)
         }
     );
+
+    const { mutate: sendAck } = useMutation({
+        mutationFn: async (messageId: string) => {
+            if (!channel?.id) return null;
+
+            return app.rest.post(
+                `/channels/${channel.id}/messages/${messageId}/ack`
+            );
+        }
+    });
+
+    const ackLatest = useCallback(() => {
+        if (!channel?.id) return;
+
+        const lastMessage = channel.lastMessage;
+        if (!lastMessage || "status" in lastMessage) return;
+
+        const readState = app.readStates.get(channel.id);
+        if (readState?.lastMessageId === lastMessage.id) return;
+
+        app.readStates.updateLocal(channel.id, lastMessage.id);
+        sendAck(lastMessage.id);
+    }, [channel?.id, channel?.messages.groups, sendAck]);
+
+    useEffect(() => {
+        if (!channel?.id) return;
+        ackLatest();
+    }, [channel?.id]);
+
+    const onScroll = useCallback((e: UIEvent<HTMLDivElement>) => {
+        const el = e.currentTarget;
+        isAtBottom.current = el.scrollTop >= -50;
+    }, []);
 
     const fetchMore = useCallback(() => {
         if (!channel?.messages.count) {
@@ -174,6 +267,7 @@ export const MessageList = observer(({ channel: channelProp }: Props) => {
                 flex="1 1 auto"
                 ref={ref}
                 id="scrollable-div"
+                onScroll={onScroll}
             >
                 <InfiniteScroll
                     dataLength={totalMessages}
@@ -190,58 +284,17 @@ export const MessageList = observer(({ channel: channelProp }: Props) => {
                     scrollThreshold={0.5}
                     scrollableTarget="scrollable-div"
                     endMessage={
-                        <Stack
-                            direction="column"
-                            spacing={1}
-                            margin="16px 16px 0 16px"
-                        >
-                            {isDM && dmRecipient ? (
-                                <UserAvatar user={dmRecipient} size={56} />
-                            ) : (
-                                <Paper
-                                    width={64}
-                                    height={64}
-                                    elevation={10}
-                                    padding={3}
-                                    borderRadius="50%"
-                                    alignItems="center"
-                                    justifyContent="center"
-                                    display="flex"
-                                    boxShadow="none"
-                                >
-                                    <FaHashtag size={48} />
-                                </Paper>
-                            )}
-
-                            <Typography
-                                level="h1"
-                                fontWeight={700}
-                                margin="8px 0"
-                            >
-                                {isDM && dmRecipient
-                                    ? `Send your first message to ${dmRecipient.displayName}`
-                                    : `Welcome to #${channel?.name}!`}
-                            </Typography>
-
-                            {isDM && dmRecipient ? (
-                                <Typography textColor="secondary">
-                                    This is the beginning of your conversation
-                                    with{" "}
-                                    <strong>{dmRecipient.displayName}</strong>.
-                                    Say hi — your message will appear here.
-                                </Typography>
-                            ) : canReadHistory ? (
-                                <Typography textColor="secondary">
-                                    This is the start of the #{channel?.name}{" "}
-                                    channel.
-                                </Typography>
-                            ) : (
-                                <Typography textColor="secondary">
-                                    You don't have permissions to read message
-                                    history
-                                </Typography>
-                            )}
-                        </Stack>
+                        isDM ? (
+                            <DMEndMessage
+                                channel={channel}
+                                isGroupDM={isGroupDM ?? false}
+                            />
+                        ) : (
+                            <SpaceEndMessage
+                                channel={channel}
+                                canReadHistory={canReadHistory}
+                            />
+                        )
                     }
                 >
                     {messageGroups?.map(renderGroup)}

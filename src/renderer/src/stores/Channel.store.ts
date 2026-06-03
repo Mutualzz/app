@@ -43,8 +43,7 @@ export class ChannelStore {
                         });
                         return map;
                     }
-                },
-                "mostRecentBySpace"
+                }
             ],
             storage: localStorage
         });
@@ -71,10 +70,27 @@ export class ChannelStore {
     }
 
     get dms() {
-        return this.all.filter(
+        const dms = this.all.filter(
             (ch) =>
                 ch.type === ChannelType.DM || ch.type === ChannelType.GroupDM
         );
+
+        return dms.slice().sort((a, b) => {
+            // Filter with mentions
+            const aMentions = this.app.readStates.get(a.id)?.mentionCount ?? 0;
+            const bMentions = this.app.readStates.get(b.id)?.mentionCount ?? 0;
+            if (aMentions > 0 !== bMentions > 0) return bMentions > 0 ? 1 : -1;
+
+            // Filter with unread
+            const aUnread = this.app.readStates.get(a.id)?.isUnread ? 1 : 0;
+            const bUnread = this.app.readStates.get(b.id)?.isUnread ? 1 : 0;
+            if (aUnread !== bUnread) return bUnread - aUnread; // unread first
+
+            // Sort by recent messages
+            const aTime = a.lastMessage?.createdAt?.getTime() ?? 0;
+            const bTime = b.lastMessage?.createdAt?.getTime() ?? 0;
+            return bTime - aTime;
+        });
     }
 
     get active() {
@@ -97,6 +113,18 @@ export class ChannelStore {
             )[0];
     }
 
+    getGroupDMChannel(users: Snowflake[]) {
+        return this.all
+            .filter((ch) => ch.type === ChannelType.GroupDM)
+            .filter((ch) => {
+                const recipientIds = ch.recipientIds ?? [];
+                return (
+                    users.every((u) => recipientIds.includes(u)) &&
+                    recipientIds.length === users.length
+                );
+            })[0];
+    }
+
     async openDM(recipientId: Snowflake): Promise<Channel> {
         const existing = this.getDMChannel(this.app.account!.id, recipientId);
         if (existing) {
@@ -115,6 +143,33 @@ export class ChannelStore {
         };
 
         const channel = this.add(hydrated);
+        this.setActive(channel.id);
+        this.setMostRecentChannelForSpace("@me", channel.id);
+        return channel;
+    }
+
+    async openGroupDM(recipientIds: Snowflake[]): Promise<Channel> {
+        if (recipientIds.length > 9)
+            throw new Error(
+                "Group DMs cannot exceed 9 recipients (10 including you)"
+            );
+
+        // Include yourself so the length check matches the server's recipientIds
+        const allIds = [this.app.account!.id, ...recipientIds];
+        const existing = this.getGroupDMChannel(allIds);
+
+        if (existing) {
+            this.setActive(existing.id);
+            return existing;
+        }
+
+        // Still only send the OTHER recipients to the server
+        const data = await this.app.rest.post<APIChannel>(
+            `/channels/@me/group`,
+            { recipientIds }
+        );
+
+        const channel = this.add(data);
         this.setActive(channel.id);
         this.setMostRecentChannelForSpace("@me", channel.id);
         return channel;
@@ -172,6 +227,12 @@ export class ChannelStore {
         if (exists) return exists;
 
         const newChannel = new Channel(this.app, channel);
+        if (channel.recipients) {
+            channel.recipients.forEach((user) => {
+                if (user.presence)
+                    this.app.presence.upsert(user.id, user.presence);
+            });
+        }
         this.channels.set(channel.id, newChannel);
         return newChannel;
     }

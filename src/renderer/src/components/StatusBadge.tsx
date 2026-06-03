@@ -1,6 +1,5 @@
 import { observer } from "mobx-react-lite";
 import type { PresenceStatus } from "@mutualzz/types";
-import { useMemo } from "react";
 import { Stack, useTheme } from "@mutualzz/ui-web";
 import { type ColorLike, dynamicElevation } from "@mutualzz/ui-core";
 
@@ -51,7 +50,7 @@ const BadgeVisual = observer(
         cutColor,
         fillColor,
         drawOuterRing,
-        overlay,
+        overlay
     }: BadgeVisualProps) => {
         const geometryInset = drawOuterRing ? ringThickness : 0;
         const innerDiameter = Math.max(1, diameter - geometryInset * 2);
@@ -64,7 +63,7 @@ const BadgeVisual = observer(
 
         const invisibleRingThickness = Math.max(
             2,
-            roundPx(innerDiameter * 0.18),
+            roundPx(innerDiameter * 0.18)
         );
 
         return (
@@ -77,13 +76,13 @@ const BadgeVisual = observer(
                 borderRadius={9999}
                 css={{
                     ...(overlay && {
-                        transform: `translate(50%, 50%) translate(-${overlay.xNudgePx}px, -${overlay.yNudgePx}px)`,
+                        transform: `translate(50%, 50%) translate(-${overlay.xNudgePx}px, -${overlay.yNudgePx}px)`
                     }),
 
                     boxSizing: "border-box",
 
                     ...(drawOuterRing && {
-                        border: `${ringThickness}px solid ${cutColor}`,
+                        border: `${ringThickness}px solid ${cutColor}`
                     }),
 
                     backgroundClip: "padding-box",
@@ -91,7 +90,7 @@ const BadgeVisual = observer(
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    pointerEvents: "none",
+                    pointerEvents: "none"
                 }}
             >
                 {status === "dnd" && (
@@ -110,7 +109,7 @@ const BadgeVisual = observer(
                         borderRadius={9999}
                         css={{
                             backgroundColor: cutColor,
-                            transform: `translate(-${idleCutoutOffset}px, -${idleCutoutOffset}px)`,
+                            transform: `translate(-${idleCutoutOffset}px, -${idleCutoutOffset}px)`
                         }}
                     />
                 )}
@@ -123,16 +122,16 @@ const BadgeVisual = observer(
                         css={{
                             border: `${invisibleRingThickness}px solid ${dynamicElevation(
                                 cutColor,
-                                10,
+                                10
                             )}`,
                             backgroundColor: "transparent",
-                            boxSizing: "border-box",
+                            boxSizing: "border-box"
                         }}
                     />
                 )}
             </Stack>
         );
-    },
+    }
 );
 
 export const StatusBadge = observer(
@@ -142,11 +141,11 @@ export const StatusBadge = observer(
         cutColor,
         elevation = 0,
         inPicker = false,
-        showInvisible = false,
+        showInvisible = false
     }: StatusBadgeProps) => {
         const { theme } = useTheme();
 
-        const fillColor = useMemo(() => {
+        const fillColor = (() => {
             switch (status) {
                 case "online":
                     return theme.colors.success;
@@ -160,19 +159,14 @@ export const StatusBadge = observer(
                 default:
                     return null;
             }
-        }, [
-            status,
-            theme.colors.success,
-            theme.colors.warning,
-            theme.colors.danger,
-        ]);
+        })();
 
         if (!showInvisible && status === "invisible") return null;
         if (fillColor == null) return null;
 
         const effectiveCutColor = dynamicElevation(
             (cutColor as ColorLike) ?? theme.colors.surface,
-            elevation,
+            elevation
         );
 
         const { badgeDiameter, ringThickness, xNudgePx, yNudgePx } =
@@ -192,7 +186,7 @@ export const StatusBadge = observer(
                     css={{
                         flex: "0 0 auto",
                         minWidth: pickerBoxSize,
-                        minHeight: pickerBoxSize,
+                        minHeight: pickerBoxSize
                     }}
                 >
                     <BadgeVisual
@@ -218,5 +212,5 @@ export const StatusBadge = observer(
                 overlay={{ xNudgePx, yNudgePx }}
             />
         );
-    },
+    }
 );

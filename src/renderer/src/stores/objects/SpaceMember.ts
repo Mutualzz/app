@@ -120,9 +120,13 @@ export class SpaceMember {
 
         if (space.roles.all.length === 0) return 0n;
 
+        // Pass allow + deny for each role so resolveBaseBits can apply denies
         const roles = space.roles.all.map((r) => ({
             id: r.id,
-            permissions: r.permissions.bits
+            allow: r.allow.bits,
+            deny: r.deny.bits,
+            // Keep permissions for backwards compat with engine RoleLike type
+            permissions: r.allow.bits
         }));
 
         return resolveBaseBits(space.id, roles, this.memberRoleIds);
@@ -191,7 +195,7 @@ export class SpaceMember {
         this.channelPermCache.clear();
     }
 
-    hasPermission(flag: PermissionFlag, channel?: Channel) {
+    hasPermission(flag: PermissionFlag, channel?: Channel | null) {
         if (!channel) return this.basePermissions.has(flag);
 
         const permissions = this.resolveChannelPermissions(channel);

@@ -12,11 +12,11 @@ import {
     useTheme
 } from "@mutualzz/ui-web";
 import { observer } from "mobx-react-lite";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { FaCog, FaMicrophone, FaMicrophoneSlash } from "react-icons/fa";
 import { IconButton } from "@components/IconButton";
 import { generateMenuIDs, useMenu } from "@contexts/ContextMenu.context";
-import { formatColor } from "@mutualzz/ui-core";
+import { Color, formatColor } from "@mutualzz/ui-core";
 import {
     MdHeadset,
     MdHeadsetOff,
@@ -48,54 +48,47 @@ export const UserBar = observer(() => {
 
     const inFeed = !!app.channels.activeId && app.mode === "feed";
 
-    const conditionalProps: Omit<PaperProps, "color"> = !inFeed
+    const conditionalProps: Omit<PaperProps, "color"> = inFeed
         ? {
-              minWidth: "10rem",
-              direction: "row"
-          }
-        : {
               width: "4.25rem",
               height: showVoicePill ? "25rem" : "17.5rem",
               direction: "column"
+          }
+        : {
+              minWidth: "10rem",
+              direction: "row"
           };
 
     const account = app.account;
 
-    const voiceTitle = useMemo(() => {
-        switch (voiceStatus) {
-            case "connecting":
-                return "RTC Connecting";
-            case "connected":
-                return "Voice Connected";
-            case "failed":
-                return "Connection Failed";
-            case "idle":
-            default:
-                return "Voice";
-        }
-    }, [voiceStatus]);
+    let voiceTitle: string;
+    let voiceTitleColor: Color;
+    switch (voiceStatus) {
+        case "connecting":
+            voiceTitle = "RTC Connecting";
+            voiceTitleColor = "warning";
+            break;
+        case "connected":
+            voiceTitle = "Voice Connected";
+            voiceTitleColor = "success";
+            break;
+        case "failed":
+            voiceTitle = "Connection Failed";
+            voiceTitleColor = "danger";
+            break;
+        case "idle":
+        default:
+            voiceTitle = "Voice";
+            voiceTitleColor = "neutral";
+    }
 
-    const voiceTitleColor = useMemo(() => {
-        switch (voiceStatus) {
-            case "connected":
-                return "success";
-            case "failed":
-                return "danger";
-            case "connecting":
-                return "warning";
-            default:
-                return "neutral";
-        }
-    }, [voiceStatus]);
-
-    const voiceSubtitle = useMemo(() => {
-        if (voiceChannel)
-            return `${voiceChannel.name} / ${voiceChannel.space?.name ?? ""}`.trim();
-
-        if (voiceStatus === "failed") return voiceError ?? "Unable to connect";
-
-        return "Attempting to restore connection…";
-    }, [voiceChannel, voiceStatus, voiceError]);
+    let voiceSubtitle: string | undefined;
+    if (voiceChannel) {
+        voiceSubtitle =
+            `${voiceChannel.name} / ${voiceChannel.space?.name ?? ""}`.trim();
+    } else if (voiceStatus === "failed") {
+        voiceSubtitle = voiceError ?? "Unable to connect";
+    }
 
     const canHangup =
         Boolean(app.voice.currentSpaceId) &&

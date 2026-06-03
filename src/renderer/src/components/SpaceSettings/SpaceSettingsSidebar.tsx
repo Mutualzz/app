@@ -59,7 +59,7 @@ export const settingsPages: SettingsPages = {
         {
             label: "expressions",
             icon: <FaSmile />,
-            permissions: ["ManageExpressions"]
+            permissions: ["ManageExpressions", "CreateExpressions"]
         }
     ],
     moderation: [

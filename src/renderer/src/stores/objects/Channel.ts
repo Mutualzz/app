@@ -49,8 +49,8 @@ export class Channel {
     spaceId?: Snowflake | null;
     recipientIds?: Snowflake[] | null;
 
+    ownerId?: Snowflake | null;
     raw: APIChannel;
-
     overwrites: ChannelPermissionOverwrite[] = [];
     private readonly logger = new Logger({
         tag: "Channel"
@@ -102,11 +102,22 @@ export class Channel {
         if (channel.recipients)
             this._recipients = this.app.users.addAll(channel.recipients);
 
+        this.ownerId = channel.ownerId;
+        if (channel.owner) this._owner = this.app.users.add(channel.owner);
+
         this.overwrites = (channel.overwrites ?? []).map(
             (ow) => new ChannelPermissionOverwrite(this.app, ow)
         );
 
         makeAutoObservable(this);
+    }
+
+    _owner?: User | null;
+
+    get owner() {
+        if (!this.ownerId) return null;
+
+        return this.app.users.get(this.ownerId) || this._owner || null;
     }
 
     _lastMessage?: Message | null;
@@ -207,9 +218,11 @@ export class Channel {
     }
 
     get isDM() {
-        return (
-            this.type === ChannelType.DM || this.type === ChannelType.GroupDM
-        );
+        return this.type === ChannelType.DM;
+    }
+
+    get isGroupDM() {
+        return this.type === ChannelType.GroupDM;
     }
 
     get isTextChannel() {

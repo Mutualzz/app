@@ -1,5 +1,5 @@
 import { Link } from "@components/Link";
-import { Stack, Typography } from "@mutualzz/ui-web";
+import { Box, Typography } from "@mutualzz/ui-web";
 import emojiRegexOrig from "emojibase-regex";
 import shortcodeRegexOrig from "emojibase-regex/shortcode";
 import parse, {
@@ -8,8 +8,8 @@ import parse, {
 } from "html-react-parser";
 import { type ReactNode, useEffect, useMemo, useState } from "react";
 import { Blockquote } from "../components/Blockquote";
-import { Emoji } from "../components/Emoji";
-import { CustomEmoji } from "../components/CustomEmoji";
+import { Emoji } from "../components/emoji/Emoji";
+import { CustomEmoji } from "../components/emoji/CustomEmoji";
 import { Spoiler } from "../components/Spoiler";
 import type { MarkdownRendererProps } from "./MarkdownRenderer.types";
 import { emphasisPlugin } from "./plugins/emphasis";
@@ -21,6 +21,11 @@ import { linkPlugin } from "./plugins/links";
 import { MarkdownItAsync } from "@components/Markdown/MarkdownItAsync";
 import { customEmojiPlugin } from "@components/Markdown/MarkdownRenderer/plugins/customEmoji";
 import { emojiPlugin } from "@components/Markdown/MarkdownRenderer/plugins/emoji";
+import { mentionPlugin } from "@components/Markdown/MarkdownRenderer/plugins/mention";
+import { MentionType } from "@mutualzz/types";
+import { UserMention } from "@components/Markdown/components/mention/UserMention";
+import { RoleMention } from "@components/Markdown/components/mention/RoleMention";
+import { DefaultMention } from "@components/Markdown/components/mention/DefaultMention";
 
 const shortcodeRegex = new RegExp(shortcodeRegexOrig.source, "g");
 const emojiRegex = new RegExp(emojiRegexOrig.source, "gu");
@@ -64,6 +69,7 @@ export const MarkdownRenderer = ({
         instance.use(spoilerPlugin);
         instance.use(emojiPlugin);
         instance.use(customEmojiPlugin);
+        instance.use(mentionPlugin);
         instance.use(strikethroughPlugin);
         instance.use(emphasisPlugin);
         instance.use(underlinePlugin);
@@ -257,6 +263,22 @@ export const MarkdownRenderer = ({
                                 />
                             );
                         }
+                        case "mention": {
+                            const { ["data-type"]: mType, ["data-id"]: mId } =
+                                domNode.attribs ?? {};
+                            const type = mType as MentionType | undefined;
+                            const id = mId ?? "";
+
+                            switch (type) {
+                                case "user":
+                                    return <UserMention userId={id} />;
+                                case "role":
+                                    return <RoleMention roleId={id} />;
+                                case "here":
+                                case "everyone":
+                                    return <DefaultMention mentionId={id} />;
+                            }
+                        }
                         case "a": {
                             const children = domToReact(
                                 (domNode.children ?? []) as any,
@@ -289,8 +311,8 @@ export const MarkdownRenderer = ({
     }, [value]);
 
     return (
-        <Stack display="block" height="100%" overflowY="auto" {...props}>
+        <Box display="block" height="100%" overflowY="auto" {...props}>
             {content}
-        </Stack>
+        </Box>
     );
 };

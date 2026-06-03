@@ -55,6 +55,7 @@ export class MessageBase {
         return this.app.users.get(this.authorId) || this._author;
     }
 
+
     _space?: Space | null;
 
     get space() {

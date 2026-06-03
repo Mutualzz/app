@@ -27,18 +27,18 @@ interface Props {
     space: Space;
 }
 
-type Tab = "display" | "permissions" | "manage-members";
+type RoleTab = "display" | "permissions" | "manage-members";
 
 const RoleColorBlob = styled("span")<{ color: string }>(({ color }) => ({
     width: 12,
     height: 12,
     backgroundColor: color,
-    borderRadius: "50%",
+    borderRadius: "50%"
 }));
 
 type RoleEditable = Pick<
     APIRole,
-    "name" | "color" | "position" | "permissions" | "hoist"
+    "name" | "color" | "position" | "allow" | "hoist"
 >;
 
 export const SpaceRoleEdit = observer(
@@ -47,8 +47,8 @@ export const SpaceRoleEdit = observer(
         const { openContextMenu } = useMenu();
         const { openModal } = useModal();
 
-        const [tab, setTab] = useState<Tab>(
-            currentRole.id === space.id ? "permissions" : "display",
+        const [tab, setTab] = useState<RoleTab>(
+            currentRole.id === space.id ? "permissions" : "display"
         );
 
         useEffect(() => {
@@ -62,15 +62,15 @@ export const SpaceRoleEdit = observer(
                 name: json.name,
                 color: json.color ?? "#ffffff",
                 position: json.position,
-                permissions: json.permissions,
-                hoist: json.hoist,
+                allow: json.allow ?? 0n,
+                hoist: json.hoist
             };
         };
 
         const { draft, dirty, reset, setDraft, diff, commitBase } =
             useDraft<RoleEditable>(
                 () => pickEditable(currentRole),
-                [currentRole.id],
+                [currentRole.id]
             );
 
         const { mutate: createRole, isPending: creatingRole } = useMutation({
@@ -79,7 +79,7 @@ export const SpaceRoleEdit = observer(
             onSuccess: (data) => {
                 const newRole = space.roles.add(data);
                 setCurrentRole(newRole);
-            },
+            }
         });
 
         const { mutate: updateRole, isPending: updatingRole } = useMutation({
@@ -91,7 +91,7 @@ export const SpaceRoleEdit = observer(
 
                 return app.rest.patch<APIRole>(
                     `/spaces/${space.id}/roles/${currentRole.id}`,
-                    patch,
+                    patch
                 );
             },
             onSuccess: (data) => {
@@ -107,7 +107,7 @@ export const SpaceRoleEdit = observer(
             },
             onError: (error) => {
                 console.error(error);
-            },
+            }
         });
 
         if (!currentRole) return null;
@@ -178,7 +178,7 @@ export const SpaceRoleEdit = observer(
                                             onDelete: () => {
                                                 if (currentRole.id === role.id)
                                                     setCurrentRole(null);
-                                            },
+                                            }
                                         })
                                     }
                                 >
@@ -212,9 +212,7 @@ export const SpaceRoleEdit = observer(
                                 onClick={() =>
                                     openModal(
                                         "delete-role",
-                                        <RoleActionConfirm
-                                            role={currentRole}
-                                        />,
+                                        <RoleActionConfirm role={currentRole} />
                                     )
                                 }
                                 size="sm"
@@ -255,9 +253,9 @@ export const SpaceRoleEdit = observer(
                                     selected={tab === "manage-members"}
                                 >
                                     Manage Members
-                                    {currentRole.id !== space.id
-                                        ? ` (${membersWithRole})`
-                                        : ""}
+                                    {currentRole.id === space.id
+                                        ? ""
+                                        : ` (${membersWithRole})`}
                                 </Button>
                             </ButtonGroup>
                         </Box>
@@ -272,10 +270,10 @@ export const SpaceRoleEdit = observer(
                                         typeof next === "function"
                                             ? (
                                                   next as (
-                                                      p: RoleEditable,
+                                                      p: RoleEditable
                                                   ) => RoleEditable
                                               )(prev)
-                                            : (next as RoleEditable),
+                                            : (next as RoleEditable)
                                     )
                                 }
                             />
@@ -289,10 +287,10 @@ export const SpaceRoleEdit = observer(
                                         typeof next === "function"
                                             ? (
                                                   next as (
-                                                      p: RoleEditable,
+                                                      p: RoleEditable
                                                   ) => RoleEditable
                                               )(prev)
-                                            : (next as RoleEditable),
+                                            : (next as RoleEditable)
                                     )
                                 }
                             />
@@ -349,5 +347,5 @@ export const SpaceRoleEdit = observer(
                 </Stack>
             </Stack>
         );
-    },
+    }
 );

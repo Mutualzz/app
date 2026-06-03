@@ -6,10 +6,14 @@ import { Stack, Tooltip, Typography } from "@mutualzz/ui-web";
 import { IconButton } from "@components/IconButton";
 import { FaPlus } from "react-icons/fa";
 import { TooltipWrapper } from "@components/TooltipWrapper";
+import { useModal } from "@contexts/Modal.context";
+import { DMChannelCreate } from "@components/DMChannel/DMChannelCreate";
 
 export const DMChannelList = observer(() => {
     const app = useAppStore();
     const dms = app.channels.dms;
+
+    const { openModal } = useModal();
 
     return (
         <Paper
@@ -26,10 +30,15 @@ export const DMChannelList = observer(() => {
             <Stack alignItems="center" justifyContent="space-between">
                 <Typography level="body-xs">Direct Messages</Typography>
                 <Tooltip
-                    content={<TooltipWrapper>New DM</TooltipWrapper>}
+                    content={<TooltipWrapper>New Message</TooltipWrapper>}
                     placement="top"
                 >
-                    <IconButton size={12}>
+                    <IconButton
+                        onClick={() =>
+                            openModal("create-group-dm", <DMChannelCreate />)
+                        }
+                        size={12}
+                    >
                         <FaPlus />
                     </IconButton>
                 </Tooltip>

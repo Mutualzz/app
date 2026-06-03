@@ -30,6 +30,11 @@ const DEFAULT_HEADERS = {
     "X-Mutualzz-Client-Type": clientMeta.type
 };
 
+async function parseResponse<Data>(res: Response): Promise<Data> {
+    const text = await res.text();
+    return text ? normalizeJSON<Data>(JSON.parse(text)) : (null as Data);
+}
+
 export class REST extends EventEmitter {
     private readonly logger = new Logger({
         tag: "REST"
@@ -96,7 +101,7 @@ export class REST extends EventEmitter {
                         this.emit("rateLimited");
                     }
 
-                    const data = normalizeJSON<Data>(await res.json());
+                    const data = await parseResponse<Data>(res);
 
                     if (!res.ok) return reject(data);
 
@@ -131,7 +136,7 @@ export class REST extends EventEmitter {
                         this.emit("rateLimited");
                     }
 
-                    const data = normalizeJSON<Data>(await res.json());
+                    const data = await parseResponse<Data>(res);
 
                     if (!res.ok) return reject(data);
 
@@ -166,7 +171,7 @@ export class REST extends EventEmitter {
                         this.emit("rateLimited");
                     }
 
-                    const data = normalizeJSON<Data>(await res.json());
+                    const data = await parseResponse<Data>(res);
 
                     if (!res.ok) return reject(data);
 
@@ -188,13 +193,11 @@ export class REST extends EventEmitter {
             this.logger.debug(`PUT ${url}; payload:`, body);
             const xhr = new XMLHttpRequest();
             if (msg) {
-                // add abort callback
                 msg.setAbortCallback(() => {
                     this.logger.debug("[PutFormData]: Message called abort");
                     xhr.abort();
                     reject("aborted");
                 });
-                // add progress listener
                 xhr.upload.addEventListener("progress", (e: ProgressEvent) =>
                     msg.updateProgress(e)
                 );
@@ -206,15 +209,15 @@ export class REST extends EventEmitter {
                     this.emit("rateLimited");
                 }
 
-                const data = JSON.parse(normalizeJSON(xhr.response));
+                const data = xhr.responseText
+                    ? JSON.parse(normalizeJSON(xhr.responseText))
+                    : null;
 
-                // if success, resolve text or json
                 if (xhr.status >= 200 && xhr.status < 300) return resolve(data);
 
                 return reject(data);
             });
             xhr.open("PUT", url);
-            // set headers
             Object.entries({ ...headers, ...this.headers }).forEach(
                 ([key, value]) => {
                     xhr.setRequestHeader(key, value);
@@ -249,7 +252,7 @@ export class REST extends EventEmitter {
                         this.emit("rateLimited");
                     }
 
-                    const data = normalizeJSON<Data>(await res.json());
+                    const data = await parseResponse<Data>(res);
 
                     if (!res.ok) return reject(data);
 
@@ -271,13 +274,11 @@ export class REST extends EventEmitter {
             this.logger.debug(`POST ${url}; payload:`, body);
             const xhr = new XMLHttpRequest();
             if (msg) {
-                // add abort callback
                 msg.setAbortCallback(() => {
                     this.logger.debug("[PostFormData]: Message called abort");
                     xhr.abort();
                     reject("aborted");
                 });
-                // add progress listener
                 xhr.upload.addEventListener("progress", (e: ProgressEvent) =>
                     msg.updateProgress(e)
                 );
@@ -288,15 +289,15 @@ export class REST extends EventEmitter {
                     this.emit("rateLimited");
                 }
 
-                const data = JSON.parse(normalizeJSON(xhr.response));
+                const data = xhr.responseText
+                    ? JSON.parse(normalizeJSON(xhr.responseText))
+                    : null;
 
-                // if success, resolve text or json
                 if (xhr.status >= 200 && xhr.status < 300) return resolve(data);
 
                 return reject(data);
             });
             xhr.open("POST", url);
-            // set headers
             Object.entries({ ...headers, ...this.headers }).forEach(
                 ([key, value]) => {
                     xhr.setRequestHeader(key, value);
@@ -318,13 +319,11 @@ export class REST extends EventEmitter {
             this.logger.debug(`PATCH ${url}; payload:`, body);
             const xhr = new XMLHttpRequest();
             if (msg) {
-                // add abort callback
                 msg.setAbortCallback(() => {
                     this.logger.debug("[PatchFormData]: Message called abort");
                     xhr.abort();
                     reject("aborted");
                 });
-                // add progress listener
                 xhr.upload.addEventListener("progress", (e: ProgressEvent) =>
                     msg.updateProgress(e)
                 );
@@ -335,15 +334,15 @@ export class REST extends EventEmitter {
                     this.emit("rateLimited");
                 }
 
-                const data = JSON.parse(normalizeJSON(xhr.response));
+                const data = xhr.responseText
+                    ? JSON.parse(normalizeJSON(xhr.responseText))
+                    : null;
 
-                // if success, resolve text or json
                 if (xhr.status >= 200 && xhr.status < 300) return resolve(data);
 
                 return reject(data);
             });
             xhr.open("PATCH", url);
-            // set headers
             Object.entries({ ...headers, ...this.headers }).forEach(
                 ([key, value]) => {
                     xhr.setRequestHeader(key, value);
@@ -375,7 +374,7 @@ export class REST extends EventEmitter {
                         this.emit("rateLimited");
                     }
 
-                    const data = normalizeJSON<Data>(await res.json());
+                    const data = await parseResponse<Data>(res);
 
                     if (!res.ok) return reject(data);
 

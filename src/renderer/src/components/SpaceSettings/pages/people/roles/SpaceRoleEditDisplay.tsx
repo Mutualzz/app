@@ -8,8 +8,8 @@ interface Props {
         next:
             | Partial<Omit<APIRole, "id">>
             | ((
-                  prev: Partial<Omit<APIRole, "id">>,
-              ) => Partial<Omit<APIRole, "id">>),
+                  prev: Partial<Omit<APIRole, "id">>
+              ) => Partial<Omit<APIRole, "id">>)
     ) => void;
 }
 
@@ -25,7 +25,7 @@ export const SpaceRoleEditDisplay = ({ changes, setChanges }: Props) => {
                     const value = e.target.value;
                     setChanges((prev) => ({
                         ...prev,
-                        name: value,
+                        name: value
                     }));
                 }}
                 value={changes.name ?? ""}
@@ -41,7 +41,7 @@ export const SpaceRoleEditDisplay = ({ changes, setChanges }: Props) => {
                         ...prev,
                         color: result.hex?.startsWith("#")
                             ? result.hex
-                            : `#${result.hex}`,
+                            : `#${result.hex}`
                     }));
                 }}
             />
@@ -61,7 +61,36 @@ export const SpaceRoleEditDisplay = ({ changes, setChanges }: Props) => {
                         onChange={() => {
                             setChanges((prev) => ({
                                 ...prev,
-                                hoist: !prev.hoist,
+                                hoist: !prev.hoist
+                            }));
+                        }}
+                    />
+                </Box>
+            </Stack>
+            <Divider css={{ opacity: 0.5 }} />
+            <Stack
+                direction="row"
+                justifyContent="space-between"
+                alignItems="center"
+                spacing={2}
+            >
+                <Stack direction="column" spacing={1.25}>
+                    <Typography textColor="secondary">
+                        Allow anyone to @mention this role
+                    </Typography>
+                    <Typography level="body-sm">
+                        Members with the "Mention @everyone, @here, and All
+                        Roles" permission can mention this role regardless of
+                        this setting.
+                    </Typography>
+                </Stack>
+                <Box mr={2}>
+                    <Switch
+                        checked={changes.mentionable}
+                        onChange={() => {
+                            setChanges((prev) => ({
+                                ...prev,
+                                mentionable: !prev.mentionable
                             }));
                         }}
                     />

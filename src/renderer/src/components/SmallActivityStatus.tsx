@@ -3,7 +3,6 @@ import type { PresencePayload } from "@mutualzz/types";
 import { FaGamepad, FaHeadphones } from "react-icons/fa";
 import { BiSolidNotepad } from "react-icons/bi";
 import { Stack, Typography, useTheme } from "@mutualzz/ui-web";
-import { useMemo } from "react";
 
 interface Props {
     presence?: PresencePayload;
@@ -23,7 +22,7 @@ const PresenceIcon = ({ color, type }: { color: string; type: string }) => {
 
 export const SmallActivityStatus = observer(({ presence, vertical }: Props) => {
     const { theme } = useTheme();
-    const color = useMemo(() => theme.colors.success, [theme.colors.success]);
+    const color = theme.colors.success;
 
     if (!presence) return null;
 

@@ -28,7 +28,7 @@ import type { Space } from "@stores/objects/Space";
 import { useNavigate } from "@tanstack/react-router";
 import capitalize from "lodash-es/capitalize";
 import { observer } from "mobx-react-lite";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { FaPlus } from "react-icons/fa";
 import { SpaceContextMenu } from "@components/ContextMenu/SpaceContextMenu";
 import { useMenu } from "@contexts/ContextMenu.context";
@@ -55,15 +55,17 @@ const SortableSpace = observer(
         } = useSortable({ id: space.id });
         const { theme } = useTheme();
 
-        const [pillType, setPillType] = useState<PillType>("none");
         const [isHovered, setIsHovered] = useState(false);
 
-        useEffect(() => {
-            if (app.spaces.activeId === space.id) return setPillType("active");
-            else if (isHovered) return setPillType("hover");
-            // TODO: unread
-            else return setPillType("none");
-        }, [app.spaces.activeId, isHovered]);
+        const pillType: PillType = (() => {
+            if (app.spaces.activeId === space.id) return "active";
+            if (isHovered) return "hover";
+            if (
+                space.channels.some((ch) => app.readStates.get(ch.id)?.isUnread)
+            )
+                return "unread";
+            return "none";
+        })();
 
         const style: CSSObject = {
             transform: CSS.Transform.toString(transform),
@@ -186,9 +188,9 @@ export const SpacesSidebar = observer(() => {
                         <TooltipWrapper>
                             Switch to{" "}
                             {capitalize(
-                                app.mode !== "@me"
-                                    ? "Direct Messages"
-                                    : (app.settings?.preferredMode ?? "Spaces")
+                                app.mode === "@me"
+                                    ? (app.settings?.preferredMode ?? "Spaces")
+                                    : "Direct Messages"
                             )}
                         </TooltipWrapper>
                     }
@@ -205,9 +207,9 @@ export const SpacesSidebar = observer(() => {
                         onClick={() => {
                             navigate({
                                 to:
-                                    app.mode !== "@me"
-                                        ? "/@me"
-                                        : `/${app.settings?.preferredMode ?? "spaces"}`,
+                                    app.mode === "@me"
+                                        ? `/${app.settings?.preferredMode ?? "spaces"}`
+                                        : "/@me",
                                 replace: true
                             });
                         }}

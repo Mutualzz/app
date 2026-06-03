@@ -22,6 +22,14 @@ function serializeNode(node: Descendant): string {
             return `:${element.name.toLowerCase()}:`;
         case "customEmoji":
             return `<${element.animated ? "a" : ""}:${element.name}:${element.id}>`;
+        case "mention":
+            const mentionType = element.mentionType;
+            const mentionId = element.id;
+
+            if (mentionType === "role") return `<@&${mentionId}>`;
+            if (mentionType === "everyone") return `@everyone`;
+            if (mentionType === "here") return `@here`;
+            return `<@${mentionId}>`;
         case "line":
         default:
             return children;

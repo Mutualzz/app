@@ -57,6 +57,10 @@ export const ChannelListItem = observer(
         const isCategory = channel.type === ChannelType.Category;
         const isVoice = channel.type === ChannelType.Voice;
 
+        const readState = app.readStates.get(channel.id);
+        const isUnread = readState?.isUnread ?? false;
+        const mentionCount = readState?.mentionCount ?? 0;
+
         const { setNodeRef, isOver } = useDroppable({
             id: `channel-drop:${channel.id}`,
             disabled: !isVoice,
@@ -209,7 +213,13 @@ export const ChannelListItem = observer(
                                     : "secondary"
                             }
                             fontSize={isCategory ? 12 : 14}
-                            fontWeight={isCategory ? 400 : 600}
+                            fontWeight={
+                                isCategory
+                                    ? 400
+                                    : isUnread || active
+                                      ? 700
+                                      : 600
+                            }
                             letterSpacing={isCategory ? 0.5 : 0}
                         >
                             {channel.name}
@@ -267,7 +277,46 @@ export const ChannelListItem = observer(
                                 minWidth="2.5rem"
                                 justifyContent="flex-end"
                             >
-                                {canInvite && (
+                                {mentionCount > 0 && (
+                                    <Stack
+                                        alignItems="center"
+                                        justifyContent="center"
+                                        css={{
+                                            minWidth: 16,
+                                            height: 16,
+                                            borderRadius: 9999,
+                                            backgroundColor:
+                                                theme.colors.danger,
+                                            padding: "0 4px"
+                                        }}
+                                    >
+                                        <Typography
+                                            level="body-xs"
+                                            fontWeight="bold"
+                                            css={{
+                                                color: "#fff",
+                                                fontSize: 10,
+                                                lineHeight: 1
+                                            }}
+                                        >
+                                            {mentionCount > 99
+                                                ? "99+"
+                                                : mentionCount}
+                                        </Typography>
+                                    </Stack>
+                                )}
+                                {isUnread && mentionCount === 0 && !active && (
+                                    <Stack
+                                        css={{
+                                            width: 8,
+                                            height: 8,
+                                            borderRadius: "50%",
+                                            backgroundColor:
+                                                theme.typography.colors.primary
+                                        }}
+                                    />
+                                )}
+                                {canInvite && (wrapperHovered || active) && (
                                     <IconButton
                                         css={{
                                             borderRadius: 9999,
@@ -297,26 +346,27 @@ export const ChannelListItem = observer(
                                     </IconButton>
                                 )}
 
-                                {canManageChannel && (
-                                    <IconButton
-                                        css={{
-                                            borderRadius: 9999,
-                                            opacity:
-                                                wrapperHovered || active
-                                                    ? 1
-                                                    : 0,
-                                            pointerEvents:
-                                                wrapperHovered || active
-                                                    ? "auto"
-                                                    : "none",
-                                            transition: "opacity 0.15s ease"
-                                        }}
-                                        size={12}
-                                        variant="plain"
-                                    >
-                                        <FaCog />
-                                    </IconButton>
-                                )}
+                                {canManageChannel &&
+                                    (wrapperHovered || active) && (
+                                        <IconButton
+                                            css={{
+                                                borderRadius: 9999,
+                                                opacity:
+                                                    wrapperHovered || active
+                                                        ? 1
+                                                        : 0,
+                                                pointerEvents:
+                                                    wrapperHovered || active
+                                                        ? "auto"
+                                                        : "none",
+                                                transition: "opacity 0.15s ease"
+                                            }}
+                                            size={12}
+                                            variant="plain"
+                                        >
+                                            <FaCog />
+                                        </IconButton>
+                                    )}
                             </Stack>
                         )}
                     </Stack>

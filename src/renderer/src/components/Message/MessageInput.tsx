@@ -1,21 +1,28 @@
-import { observer } from "mobx-react-lite";
-import { Channel } from "@stores/objects/Channel";
-import { Message } from "@stores/objects/Message";
 import { useAppStore } from "@hooks/useStores";
-import { type KeyboardEvent, useEffect, useRef, useState } from "react";
+import { observer } from "mobx-react-lite";
+import { KeyboardEvent, useEffect, useRef, useState } from "react";
+import { Message } from "@stores/objects/Message";
+import type { Channel } from "@stores/objects/Channel";
 import {
     MarkdownInput,
     MarkdownInputHandle
 } from "@components/Markdown/MarkdownInput/MarkdownInput";
-import type { Editor } from "slate";
-import Snowflake from "@utils/Snowflake";
-import { HttpException, HttpStatusCode, MessageType } from "@mutualzz/types";
-import { Paper } from "@components/Paper";
-import { Link, Stack, Typography } from "@mutualzz/ui-web";
+import {
+    ChannelType,
+    HttpException,
+    HttpStatusCode,
+    MessageType
+} from "@mutualzz/types";
 import { useMutation } from "@tanstack/react-query";
-import { createSystemMessage } from "@utils/index";
+import { Editor } from "slate";
+import Snowflake from "@utils/Snowflake";
 import { messageFlags } from "@mutualzz/bitfield";
+import { createSystemMessage } from "@utils/index";
+import { Stack, Typography } from "@mutualzz/ui-web";
+import { Link } from "@components/Link";
+import { Paper } from "@components/Paper";
 
+// If message is present it means we are editing
 interface Props {
     channel: Channel | null;
     message?: Message | null;
@@ -23,7 +30,7 @@ interface Props {
     onRequestEditLatest?: () => void;
 }
 
-export const DMChannelMessageInput = observer(
+export const MessageInput = observer(
     ({ channel, message, onStopEditing, onRequestEditLatest }: Props) => {
         const app = useAppStore();
         const [content, setContent] = useState(message?.content ?? "");
@@ -31,18 +38,28 @@ export const DMChannelMessageInput = observer(
 
         const inputRef = useRef<MarkdownInputHandle>(null);
 
-        const relationship = app.relationships.getForMe(
-            channel?.dmRecipient?.id ?? ""
-        );
+        const isDM =
+            channel?.type === ChannelType.DM ||
+            channel?.type === ChannelType.GroupDM;
+        const isGroupDM = channel?.type === ChannelType.GroupDM;
+
+        const relationship = isDM
+            ? app.relationships.getForMe(channel.dmRecipient?.id ?? "")
+            : null;
+
         const meId = app.account?.id;
         const iBlockedThem =
-            relationship?.isBlocked && relationship.userId === meId;
+            !!relationship?.isBlocked && relationship.userId === meId;
         const theyBlockedMe =
-            relationship?.isBlocked && relationship.userId !== meId;
+            !!relationship?.isBlocked && relationship.userId !== meId;
 
-        const denySendingMessages = !!channel?.dmRecipients.find(
-            (r) => r.flags.has("System") || iBlockedThem
-        );
+        const denySendingMessages = isDM
+            ? !!channel?.dmRecipients.find(
+                  (r) => r.flags.has("System") || iBlockedThem
+              )
+            : !(
+                  app.spaces.get(channel?.spaceId ?? "") ?? app.spaces.active
+              )?.members.me?.canSendMessages(channel);
 
         useEffect(() => {
             app.pushComposer();
@@ -53,15 +70,14 @@ export const DMChannelMessageInput = observer(
 
         useEffect(() => {
             setContent(message?.content ?? "");
-        }, []);
+        }, [message?.id]);
 
         useEffect(() => {
             requestAnimationFrame(() => {
-                if (denySendingMessages) return;
-
+                if (denySendingMessages && !message) return;
                 inputRef.current?.focus();
             });
-        }, []);
+        }, [message?.editing, message?.id]);
 
         const { mutate: sendMessage } = useMutation({
             mutationKey: ["send-message", channel?.id],
@@ -111,7 +127,7 @@ export const DMChannelMessageInput = observer(
                 setContent("");
                 setNonce(nonce);
 
-                if (theyBlockedMe)
+                if (isDM && theyBlockedMe)
                     throw new HttpException(
                         HttpStatusCode.Forbidden,
                         "You cannot message this person"
@@ -133,19 +149,22 @@ export const DMChannelMessageInput = observer(
                 if (!message) {
                     const queued = app.queue
                         .get(channel?.id ?? "")
-                        .find((x) => x.id === nonce);
+                        // DM tracks by nonce; space tracks by content
+                        .find((x) =>
+                            isDM ? x.id === nonce : x.content === content
+                        );
 
                     queued?.fail(error);
-                    const sysMessage = await createSystemMessage(
-                        app,
-                        channel?.id ?? "",
-                        "You cannot send a message to this person",
-                        messageFlags.Ephemeral
-                    );
 
-                    if (!sysMessage) return;
-
-                    channel?.messages.add(sysMessage);
+                    if (isDM) {
+                        const sysMessage = await createSystemMessage(
+                            app,
+                            channel?.id ?? "",
+                            "You cannot send a message to this person",
+                            messageFlags.Ephemeral
+                        );
+                        if (sysMessage) channel?.messages.add(sysMessage);
+                    }
                 }
             },
             onSuccess: () => {
@@ -182,11 +201,26 @@ export const DMChannelMessageInput = observer(
             }
         };
 
-        const placeholder = denySendingMessages
-            ? "You cannot message this person, because you have them blocked"
-            : `Message ${channel?.dmRecipient ? channel.dmRecipient.displayName : (channel?.name ?? "in this conversation")}`;
+        const placeholder = (() => {
+            if (denySendingMessages) {
+                return isDM
+                    ? "You cannot message this person, because you have them blocked"
+                    : "You are not allowed to send messages in this channel.";
+            }
 
-        const InputContent = (
+            if (isDM) {
+                return `Message ${
+                    isGroupDM
+                        ? (channel?.name ?? "the group")
+                        : (channel?.dmRecipient?.displayName ??
+                          "in this conversation")
+                }`;
+            }
+
+            return `Message #${channel?.name ?? "in this channel"}`;
+        })();
+
+        const inputContent = (
             <Paper
                 p={2}
                 elevation={app.settings?.preferEmbossed ? 5 : 1}
@@ -194,6 +228,7 @@ export const DMChannelMessageInput = observer(
                 display="block"
                 mb={message?.editing ? 0 : 3.5}
                 ml={message?.editing ? 0 : 1.25}
+                mr={message?.editing ? 0 : 1.75}
             >
                 <MarkdownInput
                     autoFocus
@@ -213,7 +248,7 @@ export const DMChannelMessageInput = observer(
 
         return message?.editing ? (
             <Stack direction="column" spacing={1.25}>
-                {InputContent}
+                {inputContent}
                 <Typography level="body-xs" textColor="secondary">
                     escape to{" "}
                     <Link textColor="accent" onClick={() => onStopEdit()}>
@@ -226,7 +261,7 @@ export const DMChannelMessageInput = observer(
                 </Typography>
             </Stack>
         ) : (
-            InputContent
+            inputContent
         );
     }
 );
