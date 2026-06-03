@@ -520,7 +520,7 @@ class MediasoupSession {
         this.speakingSourceNode.connect(this.speakingAnalyser);
 
         const data = new Uint8Array(this.speakingAnalyser.frequencyBinCount);
-        const threshold = 0.02; // Update this when we add settings for sensitivity
+        const threshold = 0.2; // Update this when we add settings for sensitivity
         const onDelay = 120;
         const offDelay = 180;
 

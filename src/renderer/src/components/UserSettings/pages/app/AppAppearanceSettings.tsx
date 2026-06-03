@@ -392,7 +392,8 @@ export const AppAppearanceSettings = observer(() => {
                 spacing={2.5}
                 borderRadius={10}
             >
-      `          <Stack
+                `{" "}
+                <Stack
                     justifyContent="space-between"
                     spacing={1.25}
                     alignItems="center"
