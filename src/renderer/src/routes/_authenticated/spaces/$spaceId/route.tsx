@@ -23,37 +23,30 @@ function RouteComponent() {
         shouldThrow: false
     });
 
-    const space = app.spaces.get(spaceId) ?? app.spaces.active;
-
-    const preferredChannel = app.channels.preferredChannel;
-
     useEffect(() => {
         app.spaces.setActive(spaceId);
     }, [app, spaceId]);
 
     useEffect(() => {
         if (childParams?.channelId) return;
-        if (!space) return;
-        if (!preferredChannel) return;
+        if (!app.isGatewayReady) return;
 
-        app.channels.setActive(preferredChannel.id);
+        const space = app.spaces.get(spaceId);
+        if (!space) return;
+
+        const preferred =
+            app.channels.getMostRecentChannelForSpace(spaceId) ??
+            app.channels.getFirstNavigableChannel(spaceId);
+        if (!preferred) return;
+
+        app.channels.setActive(preferred.id);
 
         navigate({
             to: "/spaces/$spaceId/$channelId",
-            params: {
-                spaceId,
-                channelId: preferredChannel.id
-            },
+            params: { spaceId, channelId: preferred.id },
             replace: true
         });
-    }, [
-        app,
-        childParams?.channelId,
-        space,
-        preferredChannel,
-        navigate,
-        spaceId
-    ]);
+    }, [childParams?.channelId, spaceId, app.isGatewayReady, navigate, app]);
 
     return (
         <Stack direction="row" width="100%" height="100%">

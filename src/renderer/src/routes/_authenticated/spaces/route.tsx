@@ -42,20 +42,17 @@ function RouteComponent() {
 
     useEffect(() => {
         if (params?.spaceId) return;
+        if (!app.isGatewayReady) return;
 
         const space = app.spaces.setPreferredActive();
         if (!space) return;
-
-        app.channels.setPreferredActive();
-
-        if (space.id === app.spaces.activeId) return;
 
         navigate({
             to: "/spaces/$spaceId",
             params: { spaceId: space.id },
             replace: true
         });
-    }, [params?.spaceId]);
+    }, [params?.spaceId, app.isGatewayReady]);
 
     return (
         <Stack width="100%" height="100%" direction="row">
