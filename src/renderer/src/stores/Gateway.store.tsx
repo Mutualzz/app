@@ -131,7 +131,7 @@ export class GatewayStore {
     private manualDisconnect = false;
 
     constructor(private readonly app: AppStore) {
-        makeAutoObservable(this);
+        makeAutoObservable(this, {}, { autoBind: true });
     }
 
     requestMemberListRange(spaceId: string, channelId: string, pageSize = 50) {
@@ -581,6 +581,12 @@ export class GatewayStore {
         this.dispatchHandlers.set(
             GatewayDispatchEvents.SpaceBanRemove,
             this.onSpaceBanRemove
+        );
+
+        // Typing
+        this.dispatchHandlers.set(
+            GatewayDispatchEvents.TypingStart,
+            this.onTypingStart
         );
     }
 
@@ -1166,12 +1172,26 @@ export class GatewayStore {
         }
     };
 
+    private onTypingStart = (payload: {
+        channelId: Snowflake;
+        userId: Snowflake;
+    }) => {
+        const channel = this.app.channels.get(payload.channelId);
+        if (!channel) return;
+
+        const user = this.app.users.get(payload.userId);
+        if (!user) return;
+
+        this.app.typing.startedTyping(payload.channelId, payload.userId);
+    };
+
     private onMessageCreate = (payload: APIMessage) => {
         const channel = this.app.channels.get(payload.channelId);
         if (!channel) return;
 
         const message = channel.messages.add(payload);
         this.app.queue.handleIncomingMessage(payload);
+        this.app.typing.stoppedTyping(payload.channelId, payload.authorId);
 
         if (this.app.channels.activeId === payload.channelId) return;
 

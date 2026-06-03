@@ -30,7 +30,7 @@ export class ReadState {
         this.flags = BitField.fromString(readStateFlags, data.flags.toString());
         this.type = data.type;
 
-        makeAutoObservable(this);
+        makeAutoObservable(this, {}, { autoBind: true });
     }
 
     get channel() {

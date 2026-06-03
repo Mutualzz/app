@@ -28,7 +28,7 @@ export class VoiceState {
         this.sessionId = state.sessionId;
         this.updatedAt = state.updatedAt;
 
-        makeAutoObservable(this);
+        makeAutoObservable(this, {}, { autoBind: true });
     }
 
     get member() {

@@ -44,7 +44,7 @@ export class ChannelPermissionOverwrite {
         this.createdAt = new Date(overwrite.createdAt);
         this.updatedAt = new Date(overwrite.updatedAt);
 
-        makeAutoObservable(this);
+        makeAutoObservable(this, {}, { autoBind: true });
     }
 
     get space() {

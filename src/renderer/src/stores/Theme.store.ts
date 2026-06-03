@@ -21,7 +21,7 @@ export class ThemeStore {
         this.themes = observable.map(
             baseThemes.map((t) => [t.id, new Theme(this.app, t)])
         );
-        makeAutoObservable(this);
+        makeAutoObservable(this, {}, { autoBind: true });
 
         makePersistable(this, {
             name: "ThemeStore",

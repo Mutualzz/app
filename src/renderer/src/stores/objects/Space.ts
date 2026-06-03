@@ -94,7 +94,7 @@ export class Space {
 
         this.raw = space;
 
-        makeAutoObservable(this);
+        makeAutoObservable(this, {}, { autoBind: true });
     }
 
     private _owner?: User | null;

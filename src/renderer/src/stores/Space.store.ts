@@ -11,7 +11,7 @@ export class SpaceStore {
 
     constructor(private readonly app: AppStore) {
         this.spaces = observable.map();
-        makeAutoObservable(this);
+        makeAutoObservable(this, {}, { autoBind: true });
 
         makePersistable(this, {
             name: "SpaceStore",

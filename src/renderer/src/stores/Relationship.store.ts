@@ -13,7 +13,7 @@ export class RelationshipStore {
     private readonly relationships = observable.map<string, Relationship>();
 
     constructor(private readonly app: AppStore) {
-        makeAutoObservable(this);
+        makeAutoObservable(this, {}, { autoBind: true });
     }
 
     get all() {

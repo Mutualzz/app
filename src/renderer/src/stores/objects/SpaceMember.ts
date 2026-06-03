@@ -62,7 +62,7 @@ export class SpaceMember {
             } else this._user = this.app.users.add(member.user);
         }
 
-        makeAutoObservable(this);
+        makeAutoObservable(this, {}, { autoBind: true });
     }
 
     private _user?: User | null;

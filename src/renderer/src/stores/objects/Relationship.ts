@@ -25,7 +25,7 @@ export class Relationship {
 
         this.raw = data;
 
-        makeAutoObservable(this);
+        makeAutoObservable(this, {}, { autoBind: true });
     }
 
     get me() {

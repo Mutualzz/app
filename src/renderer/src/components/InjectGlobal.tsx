@@ -137,6 +137,19 @@ export const InjectGlobal = observer(() => {
                 .Toastify__close-button:focus {
                     opacity: 1;
                 }
+
+                @keyframes typingDot {
+                    0%,
+                    60%,
+                    100% {
+                        transform: translateY(0);
+                        opacity: 0.4;
+                    }
+                    30% {
+                        transform: translateY(-3px);
+                        opacity: 1;
+                    }
+                }
             `}
         />
     );

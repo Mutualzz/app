@@ -10,12 +10,12 @@ export class SpaceRoleStore {
 
     constructor(
         private readonly app: AppStore,
-        space: Space,
+        space: Space
     ) {
         this.space = space;
         this.roles = observable.map();
 
-        makeAutoObservable(this);
+        makeAutoObservable(this, {}, { autoBind: true });
     }
 
     get all() {

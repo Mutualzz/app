@@ -2,6 +2,7 @@ import { observer } from "mobx-react-lite";
 import type { PresenceStatus } from "@mutualzz/types";
 import { Stack, useTheme } from "@mutualzz/ui-web";
 import { type ColorLike, dynamicElevation } from "@mutualzz/ui-core";
+import { badgePillAnimation, typingDotAnimation } from "@components/keyframes";
 
 function roundPx(value: number) {
     return Math.max(1, Math.round(value));
@@ -22,20 +23,20 @@ interface StatusBadgeProps {
     size?: number;
     cutColor?: string;
     elevation?: number;
-
     inPicker?: boolean;
     showInvisible?: boolean;
+    typing?: boolean;
 }
 
 interface BadgeVisualProps {
     status: PresenceStatus;
     diameter: number;
+    pillWidth: number;
     ringThickness: number;
     cutColor: ColorLike;
     fillColor: string;
-
     drawOuterRing: boolean;
-
+    typing?: boolean;
     overlay?: {
         xNudgePx: number;
         yNudgePx: number;
@@ -46,10 +47,12 @@ const BadgeVisual = observer(
     ({
         status,
         diameter,
+        pillWidth,
         ringThickness,
         cutColor,
         fillColor,
         drawOuterRing,
+        typing,
         overlay
     }: BadgeVisualProps) => {
         const geometryInset = drawOuterRing ? ringThickness : 0;
@@ -66,68 +69,95 @@ const BadgeVisual = observer(
             roundPx(innerDiameter * 0.18)
         );
 
+        const dotSize = Math.max(3, roundPx(innerDiameter * 0.28));
+        const dotGap = Math.max(2, roundPx(innerDiameter * 0.2));
+
+        const width = typing ? pillWidth : diameter;
+
         return (
             <Stack
                 position={overlay ? "absolute" : "relative"}
                 bottom={overlay ? 0 : undefined}
                 right={overlay ? 0 : undefined}
-                width={diameter}
+                width={width}
                 height={diameter}
                 borderRadius={9999}
                 css={{
                     ...(overlay && {
                         transform: `translate(50%, 50%) translate(-${overlay.xNudgePx}px, -${overlay.yNudgePx}px)`
                     }),
-
                     boxSizing: "border-box",
-
                     ...(drawOuterRing && {
                         border: `${ringThickness}px solid ${cutColor}`
                     }),
-
                     backgroundClip: "padding-box",
                     backgroundColor: fillColor,
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    pointerEvents: "none"
+                    gap: dotGap,
+                    pointerEvents: "none",
+                    ...(typing && {
+                        animation: `${badgePillAnimation} 0.2s ease forwards`
+                    })
                 }}
             >
-                {status === "dnd" && (
-                    <Stack
-                        width={dndBarWidth}
-                        height={dndBarHeight}
-                        borderRadius={9999}
-                        css={{ backgroundColor: cutColor }}
-                    />
-                )}
+                {typing ? (
+                    <>
+                        {[0, 1, 2].map((i) => (
+                            <span
+                                key={i}
+                                style={{
+                                    width: dotSize,
+                                    height: dotSize,
+                                    borderRadius: "50%",
+                                    backgroundColor: "#ffffff",
+                                    flexShrink: 0,
+                                    animation: `${typingDotAnimation} 1.2s infinite ease-in-out`,
+                                    animationDelay: `${i * 0.2}s`
+                                }}
+                            />
+                        ))}
+                    </>
+                ) : (
+                    <>
+                        {status === "dnd" && (
+                            <Stack
+                                width={dndBarWidth}
+                                height={dndBarHeight}
+                                borderRadius={9999}
+                                css={{ backgroundColor: cutColor }}
+                            />
+                        )}
 
-                {status === "idle" && (
-                    <Stack
-                        width={idleCutoutDiameter}
-                        height={idleCutoutDiameter}
-                        borderRadius={9999}
-                        css={{
-                            backgroundColor: cutColor,
-                            transform: `translate(-${idleCutoutOffset}px, -${idleCutoutOffset}px)`
-                        }}
-                    />
-                )}
+                        {status === "idle" && (
+                            <Stack
+                                width={idleCutoutDiameter}
+                                height={idleCutoutDiameter}
+                                borderRadius={9999}
+                                css={{
+                                    backgroundColor: cutColor,
+                                    transform: `translate(-${idleCutoutOffset}px, -${idleCutoutOffset}px)`
+                                }}
+                            />
+                        )}
 
-                {status === "invisible" && (
-                    <Stack
-                        width={innerDiameter}
-                        height={innerDiameter}
-                        borderRadius={9999}
-                        css={{
-                            border: `${invisibleRingThickness}px solid ${dynamicElevation(
-                                cutColor,
-                                10
-                            )}`,
-                            backgroundColor: "transparent",
-                            boxSizing: "border-box"
-                        }}
-                    />
+                        {status === "invisible" && (
+                            <Stack
+                                width={innerDiameter}
+                                height={innerDiameter}
+                                borderRadius={9999}
+                                css={{
+                                    border: `${invisibleRingThickness}px solid ${dynamicElevation(
+                                        cutColor,
+                                        10
+                                    )}`,
+                                    backgroundColor: "transparent",
+                                    boxSizing: "border-box"
+                                }}
+                            />
+                        )}
+                    </>
                 )}
             </Stack>
         );
@@ -141,7 +171,8 @@ export const StatusBadge = observer(
         cutColor,
         elevation = 0,
         inPicker = false,
-        showInvisible = false
+        showInvisible = false,
+        typing = false
     }: StatusBadgeProps) => {
         const { theme } = useTheme();
 
@@ -172,6 +203,15 @@ export const StatusBadge = observer(
         const { badgeDiameter, ringThickness, xNudgePx, yNudgePx } =
             getStatusMetrics(size);
 
+        // pill is wider than tall — same height as normal badge, ~2x wider
+        const pillWidth = roundPx(badgeDiameter * 2.2);
+
+        // nudge accounts for pill width so it stays anchored bottom-right
+        const effectiveXNudge = typing ? roundPx(pillWidth * 0.6) : xNudgePx;
+        const effectiveYNudge = typing
+            ? roundPx(badgeDiameter * 0.45)
+            : yNudgePx;
+
         if (inPicker) {
             const pickerBoxSize = roundPx(size * 0.6);
             const pickerDotSize = roundPx(size * 0.3);
@@ -192,10 +232,12 @@ export const StatusBadge = observer(
                     <BadgeVisual
                         status={status}
                         diameter={pickerDotSize}
+                        pillWidth={roundPx(pickerDotSize * 2.2)}
                         ringThickness={pickerRingThickness}
                         cutColor={effectiveCutColor}
                         fillColor={fillColor}
                         drawOuterRing={false}
+                        typing={typing}
                     />
                 </Stack>
             );
@@ -205,11 +247,16 @@ export const StatusBadge = observer(
             <BadgeVisual
                 status={status}
                 diameter={badgeDiameter}
+                pillWidth={pillWidth}
                 ringThickness={ringThickness}
                 cutColor={effectiveCutColor}
                 fillColor={fillColor}
                 drawOuterRing={true}
-                overlay={{ xNudgePx, yNudgePx }}
+                typing={typing}
+                overlay={{
+                    xNudgePx: effectiveXNudge,
+                    yNudgePx: effectiveYNudge
+                }}
             />
         );
     }

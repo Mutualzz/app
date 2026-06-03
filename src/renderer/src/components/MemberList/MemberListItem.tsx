@@ -28,6 +28,8 @@ export const MemberListItem = observer(({ member, isOwner }: Props) => {
 
     const presence = app.presence.get(member.userId);
 
+    const channelId = app.channels.activeId;
+
     return (
         <Paper
             maxWidth={224}
@@ -56,7 +58,15 @@ export const MemberListItem = observer(({ member, isOwner }: Props) => {
                     })
             }}
         >
-            <UserAvatar user={member.user} badge />
+            <UserAvatar
+                user={member.user}
+                badge
+                typing={
+                    channelId && member.userId
+                        ? app.typing.isUserTyping(channelId, member.userId)
+                        : false
+                }
+            />
             <Stack direction="column">
                 <Typography
                     flex={1}

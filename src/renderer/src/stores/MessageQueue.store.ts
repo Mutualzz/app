@@ -13,7 +13,7 @@ export class MessageQueue {
     constructor(private readonly app: AppStore) {
         this.messages = observable.array([]);
 
-        makeAutoObservable(this);
+        makeAutoObservable(this, {}, { autoBind: true });
     }
 
     clear() {

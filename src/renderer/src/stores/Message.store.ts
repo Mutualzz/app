@@ -23,7 +23,7 @@ export class MessageStore {
 
         this.messages = observable.array([]);
 
-        makeAutoObservable(this);
+        makeAutoObservable(this, {}, { autoBind: true });
     }
 
     get count() {
@@ -35,8 +35,8 @@ export class MessageStore {
         const sortedMessages: MessageLike[] = [
             ...this.messages,
             ...Array.from(this.app.queue.messages.values()).filter(
-                (x) => x.channelId === this.channelId,
-            ),
+                (x) => x.channelId === this.channelId
+            )
         ];
 
         return sortedMessages
@@ -63,7 +63,7 @@ export class MessageStore {
                     groups.push({
                         author: message.author!,
                         messages: [message],
-                        createdAt: message.createdAt,
+                        createdAt: message.createdAt
                     });
                 }
                 return groups;
@@ -122,7 +122,7 @@ export class MessageStore {
     async resolve(channelId: Snowflake, id: Snowflake, force = false) {
         if (this.has(id) && !force) return this.get(id);
         const message = await this.app.rest.get<APIMessage>(
-            `/channels/${channelId}/messages/${id}`,
+            `/channels/${channelId}/messages/${id}`
         );
         if (!message) return undefined;
         return this.add(message);

@@ -15,7 +15,7 @@ export class SpaceMemberStore {
         this.space = space;
         this.members = observable.map();
 
-        makeAutoObservable(this);
+        makeAutoObservable(this, {}, { autoBind: true });
     }
 
     get all() {

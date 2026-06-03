@@ -6,7 +6,7 @@ import {
     ExpressionType,
     ImageFormat,
     type Sizes,
-    type Snowflake,
+    type Snowflake
 } from "@mutualzz/types";
 import type { AppStore } from "@stores/App.store";
 import { REST } from "@stores/REST.store";
@@ -26,7 +26,7 @@ export class Expression {
 
     constructor(
         private readonly app: AppStore,
-        data: APIExpression,
+        data: APIExpression
     ) {
         this.id = data.id;
         this.type = data.type;
@@ -37,7 +37,7 @@ export class Expression {
         this.animated = data.animated;
         this.createdAt = new Date(data.createdAt);
 
-        makeAutoObservable(this);
+        makeAutoObservable(this, {}, { autoBind: true });
     }
 
     get space() {
@@ -58,10 +58,10 @@ export class Expression {
         animated = false,
         hash: string,
         size: Sizes = 128,
-        format: ExpressionFormat = ImageFormat.WebP,
+        format: ExpressionFormat = ImageFormat.WebP
     ) {
         return REST.makeCDNUrl(
-            CDNRoutes.expression(expressionId, hash, format, size, animated),
+            CDNRoutes.expression(expressionId, hash, format, size, animated)
         );
     }
 

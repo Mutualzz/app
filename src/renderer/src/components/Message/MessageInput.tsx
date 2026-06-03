@@ -21,8 +21,8 @@ import { createSystemMessage } from "@utils/index";
 import { Stack, Typography } from "@mutualzz/ui-web";
 import { Link } from "@components/Link";
 import { Paper } from "@components/Paper";
+import { TypingIndicator } from "@components/TypingIndicator";
 
-// If message is present it means we are editing
 interface Props {
     channel: Channel | null;
     message?: Message | null;
@@ -37,6 +37,9 @@ export const MessageInput = observer(
         const [nonce, setNonce] = useState("");
 
         const inputRef = useRef<MarkdownInputHandle>(null);
+        const typingCooldownRef = useRef<ReturnType<typeof setTimeout> | null>(
+            null
+        );
 
         const isDM =
             channel?.type === ChannelType.DM ||
@@ -52,6 +55,8 @@ export const MessageInput = observer(
             !!relationship?.isBlocked && relationship.userId === meId;
         const theyBlockedMe =
             !!relationship?.isBlocked && relationship.userId !== meId;
+
+        const areTyping = app.typing.areTyping(channel?.id || "");
 
         const denySendingMessages = isDM
             ? !!channel?.dmRecipients.find(
@@ -79,11 +84,36 @@ export const MessageInput = observer(
             });
         }, [message?.editing, message?.id]);
 
+        // Cleanup typing cooldown on unmount
+        useEffect(() => {
+            return () => clearTimeout(typingCooldownRef.current!);
+        }, []);
+
+        const triggerTyping = () => {
+            if (!channel || message?.editing) return; // don't send typing when editing a message
+
+            if (!typingCooldownRef.current) {
+                app.rest.post(`/channels/${channel.id}/typing`).catch(() => {});
+            }
+
+            clearTimeout(typingCooldownRef.current!);
+            typingCooldownRef.current = setTimeout(() => {
+                typingCooldownRef.current = null;
+            }, 8_000);
+        };
+
+        const stopTyping = () => {
+            clearTimeout(typingCooldownRef.current!);
+            typingCooldownRef.current = null;
+        };
+
         const { mutate: sendMessage } = useMutation({
             mutationKey: ["send-message", channel?.id],
             mutationFn: async (editor?: Editor | null) => {
                 if (!app.account) return null;
                 if (!channel) return null;
+
+                stopTyping(); // clear cooldown when sending
 
                 const trimmed = content.trim();
                 const original = (message?.content ?? "").trim();
@@ -149,7 +179,6 @@ export const MessageInput = observer(
                 if (!message) {
                     const queued = app.queue
                         .get(channel?.id ?? "")
-                        // DM tracks by nonce; space tracks by content
                         .find((x) =>
                             isDM ? x.id === nonce : x.content === content
                         );
@@ -199,6 +228,8 @@ export const MessageInput = observer(
                 onRequestEditLatest?.();
                 return;
             }
+
+            triggerTyping();
         };
 
         const placeholder = (() => {
@@ -220,15 +251,20 @@ export const MessageInput = observer(
             return `Message #${channel?.name ?? "in this channel"}`;
         })();
 
+        const typingIndicator = !message?.editing && channel && (
+            <TypingIndicator channelId={channel.id} />
+        );
+
         const inputContent = (
             <Paper
                 p={2}
                 elevation={app.settings?.preferEmbossed ? 5 : 1}
-                borderRadius={6}
+                borderTopLeftRadius={areTyping ? 0 : 6}
+                borderTopRightRadius={areTyping ? 0 : 6}
+                borderBottomLeftRadius={6}
+                borderBottomRightRadius={6}
                 display="block"
                 mb={message?.editing ? 0 : 3.5}
-                ml={message?.editing ? 0 : 1.25}
-                mr={message?.editing ? 0 : 1.75}
             >
                 <MarkdownInput
                     autoFocus
@@ -261,7 +297,10 @@ export const MessageInput = observer(
                 </Typography>
             </Stack>
         ) : (
-            inputContent
+            <Stack direction="column" spacing={0} ml={1.25} mr={1.75}>
+                {typingIndicator}
+                {inputContent}
+            </Stack>
         );
     }
 );

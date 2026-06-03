@@ -23,13 +23,13 @@ export class AccountSettingsStore {
 
     constructor(
         private readonly app: AppStore,
-        settings: APIUserSettings,
+        settings: APIUserSettings
     ) {
         this.currentTheme = settings.currentTheme;
         this.currentIcon = settings.currentIcon;
         this.preferredMode = settings.preferredMode;
         this.spacePositions = new ObservableOrderedSet(
-            settings.spacePositions.map(String),
+            settings.spacePositions.map(String)
         );
         this.preferEmbossed = settings.preferEmbossed;
         this.updatedAt = new Date(settings.updatedAt);
@@ -39,7 +39,7 @@ export class AccountSettingsStore {
 
         this.lastSyncedHash = this.computeHash(this.getSyncPayload());
 
-        makeAutoObservable(this);
+        makeAutoObservable(this, {}, { autoBind: true });
 
         makePersistable(this, {
             name: "AccountSettingsStore",
@@ -66,17 +66,17 @@ export class AccountSettingsStore {
                     },
                     deserialize: (v: unknown) =>
                         new ObservableOrderedSet<string>(
-                            Array.isArray(v) ? v.map(String) : [],
-                        ),
+                            Array.isArray(v) ? v.map(String) : []
+                        )
                 },
                 {
                     key: "updatedAt",
                     serialize: (d: unknown) =>
                         d instanceof Date ? d.toISOString() : d,
-                    deserialize: (v: unknown) => new Date(v as any),
-                },
+                    deserialize: (v: unknown) => new Date(v as any)
+                }
             ],
-            storage: localStorage,
+            storage: localStorage
         });
     }
 
@@ -142,7 +142,7 @@ export class AccountSettingsStore {
             () => {
                 this.sync();
             },
-            10 * 60 * 1000,
+            10 * 60 * 1000
         ); // Sync every 10 minutes, send only if there are changes
     }
 
@@ -191,7 +191,7 @@ export class AccountSettingsStore {
             currentTheme: this.currentTheme,
             currentIcon: this.currentIcon,
             preferredSelfMute: this.preferredSelfMute,
-            preferredSelfDeaf: this.preferredSelfDeaf,
+            preferredSelfDeaf: this.preferredSelfDeaf
         };
     }
 

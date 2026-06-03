@@ -22,7 +22,7 @@ export class ChannelStore {
         this.channels = observable.map();
         this.collapsedCategories = observable.map();
 
-        makeAutoObservable(this);
+        makeAutoObservable(this, {}, { autoBind: true });
 
         makePersistable(this, {
             name: "ChannelStore",

@@ -27,6 +27,7 @@ interface UserAvatarProps extends AvatarProps {
     badge?: boolean;
     showInvisible?: boolean;
     speaking?: boolean;
+    typing?: boolean;
 }
 
 const baseSizeMap: Record<Size, number> = {
@@ -42,6 +43,7 @@ export const UserAvatar = observer(
         badge,
         showInvisible,
         speaking,
+        typing,
         shape,
         style,
         ...props
@@ -145,6 +147,7 @@ export const UserAvatar = observer(
                         size={size}
                         elevation={0}
                         showInvisible={showInvisible}
+                        typing={typing}
                     />
                 )}
             </Paper>

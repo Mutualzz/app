@@ -40,7 +40,7 @@ export class User {
 
         this.raw = user;
 
-        makeAutoObservable(this);
+        makeAutoObservable(this, {}, { autoBind: true });
     }
 
     get avatarUrl() {

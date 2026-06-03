@@ -109,7 +109,7 @@ export class Channel {
             (ow) => new ChannelPermissionOverwrite(this.app, ow)
         );
 
-        makeAutoObservable(this);
+        makeAutoObservable(this, {}, { autoBind: true });
     }
 
     _owner?: User | null;

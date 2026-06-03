@@ -13,7 +13,7 @@ interface Props {
     channel: Channel;
 }
 
-const AVATAR_SIZE = 36;
+const AVATAR_SIZE = 40;
 
 export const DMChannelItem = observer(({ channel }: Props) => {
     const app = useAppStore();
@@ -93,6 +93,14 @@ export const DMChannelItem = observer(({ channel }: Props) => {
                         size={AVATAR_SIZE}
                         badge
                         showInvisible
+                        typing={
+                            recipient
+                                ? app.typing.isUserTyping(
+                                      channel.id,
+                                      recipient.id
+                                  )
+                                : false
+                        }
                     />
                 ) : (
                     <DMGroupAvatar users={recipients} />

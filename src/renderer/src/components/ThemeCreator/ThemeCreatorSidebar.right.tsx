@@ -184,7 +184,6 @@ export const ThemeCreatorSidebarRight = observer(() => {
 
     const handleChange = (value: any) => {
         const theme = themes.find((theme) => theme.id === value);
-        console.log(theme);
         if (!theme) return;
 
         loadValues(Theme.serialize(theme));

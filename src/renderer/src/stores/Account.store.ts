@@ -52,7 +52,7 @@ export class AccountStore {
 
         this.raw = user;
 
-        makeAutoObservable(this);
+        makeAutoObservable(this, {}, { autoBind: true });
     }
 
     get avatarUrl() {

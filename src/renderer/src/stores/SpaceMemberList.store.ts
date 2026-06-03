@@ -12,14 +12,14 @@ export class SpaceMemberListStore {
     list: { name: string; items: SpaceMember[] }[] = [];
     groups: any[] = [];
     private readonly logger = new Logger({
-        tag: "SpaceMemberListStore",
+        tag: "SpaceMemberListStore"
     });
     private readonly space: Space;
 
     constructor(
         private readonly app: AppStore,
         space: Space,
-        data: any,
+        data: any
     ) {
         this.space = space;
 
@@ -30,7 +30,7 @@ export class SpaceMemberListStore {
         this.memberCount = memberCount;
         this.computeListData(ops);
 
-        makeAutoObservable(this);
+        makeAutoObservable(this, {}, { autoBind: true });
     }
 
     update(data: any) {
@@ -50,7 +50,7 @@ export class SpaceMemberListStore {
 
     private upsertPresence(
         userId: Snowflake,
-        presence?: PresencePayload | null,
+        presence?: PresencePayload | null
     ) {
         if (!presence) return;
 
@@ -74,7 +74,7 @@ export class SpaceMemberListStore {
                             listData.push({
                                 id: entry.group.id,
                                 title: this.getGroupName(entry.group),
-                                data: [],
+                                data: []
                             });
                             continue;
                         }
@@ -82,7 +82,7 @@ export class SpaceMemberListStore {
                         if (listData.length === 0) {
                             this.logger.warn(
                                 "SYNC: member without group header",
-                                entry,
+                                entry
                             );
                             continue;
                         }
@@ -102,12 +102,12 @@ export class SpaceMemberListStore {
                         if (member) member.update?.(memberWithoutPresence);
                         else
                             member = this.space.members.add(
-                                memberWithoutPresence,
+                                memberWithoutPresence
                             );
 
                         listData[listData.length - 1].data.push({
                             member,
-                            index: entry.index,
+                            index: entry.index
                         });
                     }
 
@@ -116,7 +116,7 @@ export class SpaceMemberListStore {
                     listData = listData.map((x) => ({
                         ...x,
                         id: x.id,
-                        title: `${x.title} - ${x.data.length}`,
+                        title: `${x.title} - ${x.data.length}`
                     }));
 
                     // hide offline group if it has more than 100 members
@@ -125,7 +125,7 @@ export class SpaceMemberListStore {
                             !(
                                 x.id.toLowerCase().startsWith("offline") &&
                                 x.data.length >= 100
-                            ),
+                            )
                     );
 
                     this.list = listData.map((x) => ({
@@ -136,18 +136,15 @@ export class SpaceMemberListStore {
                                 const ua = a.member.displayName ?? "";
                                 const ub = b.member.displayName ?? "";
                                 return ua.localeCompare(ub, undefined, {
-                                    sensitivity: "base",
+                                    sensitivity: "base"
                                 });
                             })
-                            .map((y) => y.member),
+                            .map((y) => y.member)
                     }));
 
                     this.logger.debug("SYNC built list", {
                         groups: this.list.length,
-                        total: this.list.reduce(
-                            (n, g) => n + g.items.length,
-                            0,
-                        ),
+                        total: this.list.reduce((n, g) => n + g.items.length, 0)
                     });
 
                     break;
@@ -169,7 +166,7 @@ export class SpaceMemberListStore {
                     if ("group" in entry) {
                         this.logger.debug(
                             `Delete group ${entry.group.id} from ${this.id}`,
-                            i,
+                            i
                         );
                         this.list.splice(groupIndex, 1);
                         break;
@@ -179,7 +176,7 @@ export class SpaceMemberListStore {
 
                     this.logger.debug(
                         `Delete member ${entry.member.user?.username} from ${this.id}`,
-                        i,
+                        i
                     );
                     this.list[groupIndex].items.splice(memberIndex, 1);
 
@@ -205,7 +202,7 @@ export class SpaceMemberListStore {
                         this.list[groupIndex].name = first.group.id;
                         this.logger.debug(
                             `Update group ${first.group.id} from ${this.id}`,
-                            i,
+                            i
                         );
                         break;
                     }
@@ -232,7 +229,7 @@ export class SpaceMemberListStore {
                             visibleMember.update?.(memberWithoutPresence);
                         } else {
                             const idx = this.list[groupIndex].items.findIndex(
-                                (x) => x.userId === memberKey,
+                                (x) => x.userId === memberKey
                             );
                             if (idx !== -1)
                                 this.list[groupIndex].items[idx].update?.(m);
@@ -241,7 +238,7 @@ export class SpaceMemberListStore {
 
                     this.logger.debug(
                         `Update member ${m.user?.username} from ${this.id}`,
-                        i,
+                        i
                     );
                     break;
                 }
@@ -255,7 +252,7 @@ export class SpaceMemberListStore {
 
                         this.list.splice(at, 0, {
                             name: `${capitalize(item.group.id)}`,
-                            items: [],
+                            items: []
                         });
                         break;
                     }
@@ -289,7 +286,7 @@ export class SpaceMemberListStore {
                         if (!memberObj) {
                             memberObj = new SpaceMember(
                                 this.app,
-                                memberWithoutPresence,
+                                memberWithoutPresence
                             );
                         }
                     }
@@ -298,14 +295,14 @@ export class SpaceMemberListStore {
                         memberObj = new SpaceMember(
                             this.app,
 
-                            item.member,
+                            item.member
                         );
                     }
 
                     this.list[groupIndex].items.splice(
                         memberIndex,
                         0,
-                        memberObj,
+                        memberObj
                     );
                     break;
                 }

@@ -54,7 +54,7 @@ export class Role {
 
         this.raw = data;
 
-        makeAutoObservable(this);
+        makeAutoObservable(this, {}, { autoBind: true });
     }
 
     _space?: Space | null;

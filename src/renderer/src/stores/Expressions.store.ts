@@ -19,7 +19,7 @@ export class ExpressionsStore {
     constructor(private readonly app: AppStore) {
         this.expressions = observable.map();
 
-        makeAutoObservable(this);
+        makeAutoObservable(this, {}, { autoBind: true });
     }
 
     get emojis() {

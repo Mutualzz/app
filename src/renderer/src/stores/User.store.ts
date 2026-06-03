@@ -8,7 +8,7 @@ export class UserStore {
 
     constructor(private readonly app: AppStore) {
         this.users = observable.map();
-        makeAutoObservable(this);
+        makeAutoObservable(this, {}, { autoBind: true });
     }
 
     get all() {

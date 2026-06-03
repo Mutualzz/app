@@ -3,14 +3,14 @@ import type {
     APITheme,
     Snowflake,
     ThemeStyle,
-    ThemeType,
+    ThemeType
 } from "@mutualzz/types";
 import {
     baseDarkTheme,
     baseLightTheme,
     type ColorLike,
     type TypographyLevel,
-    type TypographyLevelObj,
+    type TypographyLevelObj
 } from "@mutualzz/ui-core";
 import type { AppStore } from "@stores/App.store";
 import type { User } from "@stores/objects/User";
@@ -56,7 +56,7 @@ export class Theme implements Partial<MzTheme> {
 
     constructor(
         private readonly app: AppStore,
-        theme: APITheme,
+        theme: APITheme
     ) {
         this.id = theme.id;
         this.name = theme.name;
@@ -75,7 +75,7 @@ export class Theme implements Partial<MzTheme> {
         this.authorId = theme.authorId;
         if (theme.author) this._author = this.app.users.add(theme.author);
 
-        makeAutoObservable(this);
+        makeAutoObservable(this, {}, { autoBind: true });
     }
 
     _author?: User | null;
@@ -96,16 +96,16 @@ export class Theme implements Partial<MzTheme> {
             ...themeToUse,
             colors: {
                 ...toMergeWith.colors,
-                ...themeToUse.colors,
+                ...themeToUse.colors
             },
             typography: {
                 ...toMergeWith.typography,
                 ...themeToUse.typography,
                 colors: {
                     ...toMergeWith.typography.colors,
-                    ...themeToUse.typography?.colors,
-                },
-            },
+                    ...themeToUse.typography?.colors
+                }
+            }
         };
     }
 
@@ -121,7 +121,7 @@ export class Theme implements Partial<MzTheme> {
             typography: theme.typography,
             createdAt: theme.createdAt,
             updatedAt: theme.updatedAt,
-            authorId: theme.authorId,
+            authorId: theme.authorId
         };
     }
 

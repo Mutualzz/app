@@ -32,15 +32,6 @@ export const brOnEmpty = (md: MarkdownItAsync) => {
 
             if (emptyLines <= 0) continue;
 
-            console.log(
-                "prevMap:",
-                prevMap,
-                "nextMap:",
-                nextMap,
-                "emptyLines:",
-                emptyLines
-            );
-
             const brCount = emptyLines > 0 ? emptyLines + 1 : 0;
 
             const children = prevInline.children || (prevInline.children = []);

@@ -50,7 +50,7 @@ export class Invite {
 
         this.raw = invite;
 
-        makeAutoObservable(this);
+        makeAutoObservable(this, {}, { autoBind: true });
     }
 
     _inviter?: User | null;

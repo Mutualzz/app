@@ -33,6 +33,7 @@ import { electronTokenStorage } from "@storages/electronTokenStorage";
 import { RelationshipStore } from "@stores/Relationship.store";
 import { usePrefersDark } from "@hooks/usePrefersDark";
 import { ReadStateStore } from "@stores/ReadState.store";
+import { TypingStore } from "@stores/Typing.store";
 
 const prefersDark = usePrefersDark();
 
@@ -53,6 +54,7 @@ export class AppStore {
     themes = new ThemeStore(this);
     themeCreator = new ThemeCreatorStore(prefersDark);
     rest = new REST();
+    typing = new TypingStore(this);
     users = new UserStore(this);
     updater: UpdaterStore | null = null;
     settings: AccountSettingsStore | null = null;
@@ -91,7 +93,7 @@ export class AppStore {
         if (isElectron && !import.meta.env.DEV)
             this.updater = new UpdaterStore(this);
 
-        makeAutoObservable(this);
+        makeAutoObservable(this, {}, { autoBind: true });
 
         this.queryClient = new QueryClient();
 

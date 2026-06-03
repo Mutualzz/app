@@ -23,7 +23,7 @@ export class DraftStore {
     });
 
     constructor() {
-        makeAutoObservable(this);
+        makeAutoObservable(this, {}, { autoBind: true });
 
         makePersistable(this, {
             name: "DraftStore",
