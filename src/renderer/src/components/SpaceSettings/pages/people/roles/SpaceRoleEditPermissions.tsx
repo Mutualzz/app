@@ -49,8 +49,7 @@ const PermissionItem = ({
             justifyContent="space-between"
             mr={5}
             flex={1}
-            py={1.25}
-            px={1.25}
+            p={1.25}
             borderRadius={6}
             css={{
                 cursor: "pointer",
