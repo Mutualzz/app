@@ -1,5 +1,12 @@
 import type { APIRole } from "@mutualzz/types";
-import { Button, Divider, Stack, Switch, Typography } from "@mutualzz/ui-web";
+import {
+    Button,
+    Divider,
+    Stack,
+    Switch,
+    Typography,
+    useTheme
+} from "@mutualzz/ui-web";
 import {
     BitField,
     type PermissionFlag,
@@ -32,30 +39,44 @@ const PermissionItem = ({
     description?: ReactNode;
     hasPermission: boolean;
     togglePermission: (flag: PermissionFlag) => void;
-}) => (
-    <Stack
-        direction="row"
-        alignItems="center"
-        justifyContent="space-between"
-        mr={5}
-        flex={1}
-    >
-        <Stack direction="column" spacing={0.5}>
-            <Typography>{label}</Typography>
-            {description && (
-                <Typography level="body-sm" textColor="muted">
-                    {description}
-                </Typography>
-            )}
+}) => {
+    const { theme } = useTheme();
+
+    return (
+        <Stack
+            direction="row"
+            alignItems="center"
+            justifyContent="space-between"
+            mr={5}
+            flex={1}
+            py={1.25}
+            px={1.25}
+            borderRadius={6}
+            css={{
+                cursor: "pointer",
+                ":hover": {
+                    backgroundColor: `${theme.colors.info}22`
+                }
+            }}
+            onClick={() => togglePermission(flag)}
+        >
+            <Stack direction="column" spacing={0.5}>
+                <Typography>{label}</Typography>
+                {description && (
+                    <Typography level="body-sm" textColor="muted">
+                        {description}
+                    </Typography>
+                )}
+            </Stack>
+            <Switch
+                checked={hasPermission}
+                color="primary"
+                shape="circle"
+                onChange={() => togglePermission(flag)}
+            />
         </Stack>
-        <Switch
-            checked={hasPermission}
-            color="primary"
-            shape="circle"
-            onChange={() => togglePermission(flag)}
-        />
-    </Stack>
-);
+    );
+};
 
 export const SpaceRoleEditPermissions = observer(
     ({ changes, setChanges }: Props) => {
