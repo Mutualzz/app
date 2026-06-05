@@ -4,14 +4,14 @@ import { KeyboardEvent, useEffect, useRef, useState } from "react";
 import { Message } from "@stores/objects/Message";
 import type { Channel } from "@stores/objects/Channel";
 import {
-    MarkdownInput,
-    MarkdownInputHandle
+  MarkdownInput,
+  MarkdownInputHandle
 } from "@components/Markdown/MarkdownInput/MarkdownInput";
 import {
-    ChannelType,
-    HttpException,
-    HttpStatusCode,
-    MessageType
+  ChannelType,
+  HttpException,
+  HttpStatusCode,
+  MessageType
 } from "@mutualzz/types";
 import { useMutation } from "@tanstack/react-query";
 import { Editor } from "slate";
@@ -24,283 +24,276 @@ import { Paper } from "@components/Paper";
 import { TypingIndicator } from "@components/TypingIndicator";
 
 interface Props {
-    channel: Channel | null;
-    message?: Message | null;
-    onStopEditing?: () => void;
-    onRequestEditLatest?: () => void;
+  channel: Channel | null;
+  message?: Message | null;
+  onStopEditing?: () => void;
+  onRequestEditLatest?: () => void;
 }
 
 export const MessageInput = observer(
-    ({ channel, message, onStopEditing, onRequestEditLatest }: Props) => {
-        const app = useAppStore();
-        const [content, setContent] = useState(message?.content ?? "");
-        const [nonce, setNonce] = useState("");
+  ({ channel, message, onStopEditing, onRequestEditLatest }: Props) => {
+    const app = useAppStore();
+    const [content, setContent] = useState(message?.content ?? "");
+    const [nonce, setNonce] = useState("");
 
-        const inputRef = useRef<MarkdownInputHandle>(null);
-        const typingCooldownRef = useRef<ReturnType<typeof setTimeout> | null>(
-            null
-        );
+    const inputRef = useRef<MarkdownInputHandle>(null);
+    const typingCooldownRef = useRef<ReturnType<typeof setTimeout> | null>(
+      null
+    );
 
-        const isDM =
-            channel?.type === ChannelType.DM ||
-            channel?.type === ChannelType.GroupDM;
-        const isGroupDM = channel?.type === ChannelType.GroupDM;
+    const isDM =
+      channel?.type === ChannelType.DM || channel?.type === ChannelType.GroupDM;
+    const isGroupDM = channel?.type === ChannelType.GroupDM;
 
-        const relationship = isDM
-            ? app.relationships.getForMe(channel.dmRecipient?.id ?? "")
-            : null;
+    const relationship = isDM
+      ? app.relationships.getForMe(channel.dmRecipient?.id ?? "")
+      : null;
 
-        const meId = app.account?.id;
-        const iBlockedThem =
-            !!relationship?.isBlocked && relationship.userId === meId;
-        const theyBlockedMe =
-            !!relationship?.isBlocked && relationship.userId !== meId;
+    const meId = app.account?.id;
+    const iBlockedThem =
+      !!relationship?.isBlocked && relationship.userId === meId;
+    const theyBlockedMe =
+      !!relationship?.isBlocked && relationship.userId !== meId;
 
-        const areTyping = app.typing.areTyping(channel?.id || "");
+    const areTyping = app.typing.areTyping(channel?.id || "");
 
-        const denySendingMessages = isDM
-            ? !!channel?.dmRecipients.find(
-                  (r) => r.flags.has("System") || iBlockedThem
-              )
-            : !(
-                  app.spaces.get(channel?.spaceId ?? "") ?? app.spaces.active
-              )?.members.me?.canSendMessages(channel);
+    const denySendingMessages = isDM
+      ? !!channel?.dmRecipients.find(
+          (r) => r.flags.has("System") || iBlockedThem
+        )
+      : !(
+          app.spaces.get(channel?.spaceId ?? "") ?? app.spaces.active
+        )?.members.me?.canSendMessages(channel);
 
-        useEffect(() => {
-            app.pushComposer();
-            return () => {
-                app.popComposer();
-            };
-        }, []);
+    useEffect(() => {
+      app.pushComposer();
+      return () => {
+        app.popComposer();
+      };
+    }, []);
 
-        useEffect(() => {
-            setContent(message?.content ?? "");
-        }, [message?.id]);
+    useEffect(() => {
+      setContent(message?.content ?? "");
+    }, [message?.id]);
 
-        useEffect(() => {
-            requestAnimationFrame(() => {
-                if (denySendingMessages && !message) return;
-                inputRef.current?.focus();
-            });
-        }, [message?.editing, message?.id]);
+    useEffect(() => {
+      requestAnimationFrame(() => {
+        if (denySendingMessages && !message) return;
+        inputRef.current?.focus();
+      });
+    }, [message?.editing, message?.id]);
 
-        // Cleanup typing cooldown on unmount
-        useEffect(() => {
-            return () => clearTimeout(typingCooldownRef.current!);
-        }, []);
+    useEffect(() => {
+      return () => clearTimeout(typingCooldownRef.current!);
+    }, []);
 
-        const triggerTyping = () => {
-            if (!channel || message?.editing) return; // don't send typing when editing a message
+    const triggerTyping = () => {
+      if (!channel || message?.editing) return;
 
-            if (!typingCooldownRef.current) {
-                app.rest.post(`/channels/${channel.id}/typing`).catch(() => {});
-            }
+      if (!typingCooldownRef.current) {
+        app.rest.post(`/channels/${channel.id}/typing`).catch(() => {});
+      }
 
-            clearTimeout(typingCooldownRef.current!);
-            typingCooldownRef.current = setTimeout(() => {
-                typingCooldownRef.current = null;
-            }, 8_000);
-        };
+      clearTimeout(typingCooldownRef.current!);
+      typingCooldownRef.current = setTimeout(() => {
+        typingCooldownRef.current = null;
+      }, 8_000);
+    };
 
-        const stopTyping = () => {
-            clearTimeout(typingCooldownRef.current!);
-            typingCooldownRef.current = null;
-        };
+    const stopTyping = () => {
+      clearTimeout(typingCooldownRef.current!);
+      typingCooldownRef.current = null;
+    };
 
-        const { mutate: sendMessage } = useMutation({
-            mutationKey: ["send-message", channel?.id],
-            mutationFn: async (editor?: Editor | null) => {
-                if (!app.account) return null;
-                if (!channel) return null;
+    const { mutate: sendMessage } = useMutation({
+      mutationKey: ["send-message", channel?.id],
+      mutationFn: async (editor?: Editor | null) => {
+        if (!app.account) return null;
+        if (!channel) return null;
 
-                stopTyping(); // clear cooldown when sending
+        stopTyping();
 
-                const trimmed = content.trim();
-                const original = (message?.content ?? "").trim();
-                const isEditing = !!message;
+        const trimmed = content.trim();
+        const original = (message?.content ?? "").trim();
+        const isEditing = !!message;
 
-                if (!isEditing && !trimmed) return null;
+        if (!isEditing && !trimmed) return null;
 
-                if (isEditing && trimmed === original) {
-                    onStopEditing?.();
-                    return null;
-                }
+        if (isEditing && trimmed === original) {
+          onStopEditing?.();
+          return null;
+        }
 
-                if (message) {
-                    onStopEditing?.();
-                    return message.edit(trimmed);
-                }
+        if (message) {
+          onStopEditing?.();
+          return message.edit(trimmed);
+        }
 
-                const nonce = Snowflake.generate();
-                const author = app.account.raw;
-                const msg = app.queue.add({
-                    id: nonce,
-                    content: trimmed,
-                    author,
-                    authorId: author.id,
-                    channelId: channel.id,
-                    spaceId: channel.spaceId ?? null,
-                    createdAt: new Date().toISOString(),
-                    type: MessageType.Default
-                });
-
-                editor?.select({
-                    anchor: editor.start([]),
-                    focus: editor.end([])
-                });
-                editor?.removeNodes();
-                editor?.delete();
-                editor?.insertNode({
-                    type: "line",
-                    children: [{ text: "" }]
-                });
-                setContent("");
-                setNonce(nonce);
-
-                if (isDM && theyBlockedMe)
-                    throw new HttpException(
-                        HttpStatusCode.Forbidden,
-                        "You cannot message this person"
-                    );
-
-                return await channel.sendMessage(
-                    { content: trimmed, nonce },
-                    msg
-                );
-            },
-            onError: async (err) => {
-                const error =
-                    err instanceof Error
-                        ? err.message
-                        : typeof err === "string"
-                          ? err
-                          : "Unknown error";
-
-                if (!message) {
-                    const queued = app.queue
-                        .get(channel?.id ?? "")
-                        .find((x) =>
-                            isDM ? x.id === nonce : x.content === content
-                        );
-
-                    queued?.fail(error);
-
-                    if (isDM) {
-                        const sysMessage = await createSystemMessage(
-                            app,
-                            channel?.id ?? "",
-                            "You cannot send a message to this person",
-                            messageFlags.Ephemeral
-                        );
-                        if (sysMessage) channel?.messages.add(sysMessage);
-                    }
-                }
-            },
-            onSuccess: () => {
-                setNonce("");
-            }
+        const nonce = Snowflake.generate();
+        const author = app.account.raw;
+        const msg = app.queue.add({
+          id: nonce,
+          content: trimmed,
+          author,
+          authorId: author.id,
+          channelId: channel.id,
+          spaceId: channel.spaceId ?? null,
+          createdAt: new Date().toISOString(),
+          type: MessageType.Default
         });
 
-        const onChange = (value: string) => {
-            setContent(value);
-        };
+        editor?.select({
+          anchor: editor.start([]),
+          focus: editor.end([])
+        });
+        editor?.removeNodes();
+        editor?.delete();
+        editor?.insertNode({
+          type: "line",
+          children: [{ text: "" }]
+        });
+        setContent("");
+        setNonce(nonce);
 
-        const onStopEdit = (e?: KeyboardEvent) => {
-            e?.preventDefault();
-            message?.setEditing(false);
-            onStopEditing?.();
-        };
+        if (isDM && theyBlockedMe)
+          throw new HttpException(
+            HttpStatusCode.Forbidden,
+            "You cannot message this person"
+          );
 
-        const onKeyDown = (e: KeyboardEvent, editor: Editor) => {
-            if (e.key === "Enter" && !e.shiftKey) {
-                e.preventDefault();
-                sendMessage(editor);
-                return;
-            }
+        return await channel.sendMessage({ content: trimmed, nonce }, msg);
+      },
+      onError: async (err) => {
+        const error =
+          err instanceof Error
+            ? err.message
+            : typeof err === "string"
+              ? err
+              : "Unknown error";
 
-            if (e.key === "Escape" && message) {
-                onStopEdit(e);
-                return;
-            }
+        if (!message) {
+          const queued = app.queue
+            .get(channel?.id ?? "")
+            .find((x) => (isDM ? x.id === nonce : x.content === content));
 
-            if (e.key === "ArrowUp" && !message && !content.trim()) {
-                e.preventDefault();
-                onRequestEditLatest?.();
-                return;
-            }
+          queued?.fail(error);
 
-            triggerTyping();
-        };
+          if (isDM) {
+            const sysMessage = await createSystemMessage(
+              app,
+              channel?.id ?? "",
+              "You cannot send a message to this person",
+              messageFlags.Ephemeral
+            );
+            if (sysMessage) channel?.messages.add(sysMessage);
+          }
+        }
+      },
+      onSuccess: () => {
+        setNonce("");
+      }
+    });
 
-        const placeholder = (() => {
-            if (denySendingMessages) {
-                return isDM
-                    ? "You cannot message this person, because you have them blocked"
-                    : "You are not allowed to send messages in this channel.";
-            }
+    const onChange = (value: string) => {
+      setContent(value);
+    };
 
-            if (isDM) {
-                return `Message ${
-                    isGroupDM
-                        ? (channel?.name ?? "the group")
-                        : (channel?.dmRecipient?.displayName ??
-                          "in this conversation")
-                }`;
-            }
+    const onStopEdit = (e?: KeyboardEvent) => {
+      e?.preventDefault();
+      message?.setEditing(false);
+      onStopEditing?.();
+    };
 
-            return `Message #${channel?.name ?? "in this channel"}`;
-        })();
+    const onKeyDown = (e: KeyboardEvent, editor: Editor) => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage(editor);
+        return;
+      }
 
-        const typingIndicator = !message?.editing && channel && (
-            <TypingIndicator channelId={channel.id} />
-        );
+      if (e.key === "Escape" && message) {
+        onStopEdit(e);
+        return;
+      }
 
-        const inputContent = (
-            <Paper
-                p={2}
-                elevation={app.settings?.preferEmbossed ? 5 : 1}
-                borderTopLeftRadius={areTyping ? 0 : 6}
-                borderTopRightRadius={areTyping ? 0 : 6}
-                borderBottomLeftRadius={6}
-                borderBottomRightRadius={6}
-                display="block"
-                mb={message?.editing ? 0 : 3.5}
-            >
-                <MarkdownInput
-                    autoFocus
-                    color="success"
-                    value={content}
-                    variant="plain"
-                    ref={inputRef}
-                    onChange={onChange}
-                    placeholder={
-                        message?.editing ? message.content : placeholder
-                    }
-                    onKeyDown={onKeyDown}
-                    disabled={denySendingMessages}
-                />
-            </Paper>
-        );
+      if (e.key === "ArrowUp" && !message && !content.trim()) {
+        e.preventDefault();
+        onRequestEditLatest?.();
+        return;
+      }
 
-        return message?.editing ? (
-            <Stack direction="column" spacing={1.25}>
-                {inputContent}
-                <Typography level="body-xs" textColor="secondary">
-                    escape to{" "}
-                    <Link textColor="accent" onClick={() => onStopEdit()}>
-                        cancel
-                    </Link>{" "}
-                    • enter to{"  "}
-                    <Link textColor="accent" onClick={() => sendMessage(null)}>
-                        save
-                    </Link>
-                </Typography>
-            </Stack>
-        ) : (
-            <Stack direction="column" spacing={0} ml={1.25} mr={1.75}>
-                {typingIndicator}
-                {inputContent}
-            </Stack>
-        );
-    }
+      triggerTyping();
+    };
+
+    const placeholder = (() => {
+      if (denySendingMessages) {
+        return isDM
+          ? "You cannot message this person, because you have them blocked"
+          : "You are not allowed to send messages in this channel.";
+      }
+
+      if (isDM) {
+        return `Message ${
+          isGroupDM
+            ? (channel?.name ?? "the group")
+            : (channel?.dmRecipient?.displayName ?? "in this conversation")
+        }`;
+      }
+
+      return `Message #${channel?.name ?? "in this channel"}`;
+    })();
+
+    const typingIndicator = !message?.editing && channel && (
+      <TypingIndicator channelId={channel.id} />
+    );
+
+    const inputContent = (
+      <Paper
+        p={2}
+        elevation={app.settings?.preferEmbossed ? 5 : 1}
+        borderTopLeftRadius={areTyping ? 0 : 6}
+        borderTopRightRadius={areTyping ? 0 : 6}
+        borderBottomLeftRadius={6}
+        borderBottomRightRadius={6}
+        display="block"
+        mb={message?.editing ? 0 : 3.5}
+      >
+        <MarkdownInput
+          autoFocus
+          color="success"
+          value={content}
+          variant="plain"
+          ref={inputRef}
+          onChange={onChange}
+          placeholder={message?.editing ? message.content : placeholder}
+          onKeyDown={onKeyDown}
+          onSendMessage={() => sendMessage(inputRef.current?.editor ?? null)}
+          disabled={denySendingMessages}
+          emojiPicker={!denySendingMessages}
+          gifPicker={!denySendingMessages && !message?.editing}
+        />
+      </Paper>
+    );
+
+    return message?.editing ? (
+      <Stack direction="column" spacing={1.25}>
+        {inputContent}
+        <Typography level="body-xs" textColor="secondary">
+          escape to{" "}
+          <Link textColor="accent" onClick={() => onStopEdit()}>
+            cancel
+          </Link>{" "}
+          • enter to{"  "}
+          <Link textColor="accent" onClick={() => sendMessage(null)}>
+            save
+          </Link>
+        </Typography>
+      </Stack>
+    ) : (
+      <Stack direction="column" spacing={0} ml={1.25} mr={1.75}>
+        {typingIndicator}
+        {inputContent}
+      </Stack>
+    );
+  }
 );

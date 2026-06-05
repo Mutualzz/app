@@ -4,7 +4,7 @@ import type {
     ColorLike,
     Responsive,
     TypographyColor,
-    Variant,
+    Variant
 } from "@mutualzz/ui-core";
 import type { KeyboardEvent } from "react";
 import type { Editor } from "slate";
@@ -18,12 +18,15 @@ export interface MarkdownInputProps {
     emoticons?: boolean;
     hoverToolbar?: boolean;
     emojiPicker?: boolean;
+    gifPicker?: boolean;
 
     disabled?: boolean;
 
     value?: string;
     onChange?: (value: string, editor: Editor) => void;
     onKeyDown?: (event: KeyboardEvent, editor: Editor) => void;
+    onSendMessage?: () => void;
+
     placeholder?: string | null;
 
     css?: CSSObject;

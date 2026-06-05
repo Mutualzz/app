@@ -115,7 +115,7 @@ class MediasoupSession {
         if (!this.audioContext) {
             this.audioContext = new AudioContext();
         }
-        // Always attempt resume — Electron may suspend it even after creation
+        // Always attempt resume - Electron may suspend it even after creation
         if (this.audioContext.state === "suspended") {
             void this.audioContext.resume();
         }
@@ -133,7 +133,7 @@ class MediasoupSession {
         this.currentOutputDeviceId = id;
         if (!id) return;
         for (const [, meta] of this.streamMetadata) {
-            // Audio is routed through AudioContext — only video elements use setSinkId
+            // Audio is routed through AudioContext - only video elements use setSinkId
             if (meta.kind !== "audio" && meta.element)
                 void safeSetSinkId(meta.element, id, this.logger, meta.kind);
         }
@@ -173,7 +173,7 @@ class MediasoupSession {
                         );
                     }
                 } catch {
-                    // disconnect() throws if not connected — safe to ignore
+                    // disconnect() throws if not connected - safe to ignore
                 }
             }
         }
@@ -470,7 +470,7 @@ class MediasoupSession {
                 signal
             );
         } catch {
-            // Mic permission denied — continue without mic, just muted
+            // Mic permission denied - continue without mic, just muted
             this.setSelfMute(true);
             return;
         }

@@ -13,218 +13,199 @@ import type { Expression } from "@stores/objects/Expression";
 import { AnimatedStack } from "@components/Animated/AnimatedStack";
 import { dynamicElevation, formatColor } from "@mutualzz/ui-core";
 import { IconButton } from "@components/IconButton";
-import { FaTrash } from "react-icons/fa";
 import type { Space } from "@stores/objects/Space";
+import { TrashIcon } from "@phosphor-icons/react";
 
 const EmojiItem = observer(({ expression }: { expression: Expression }) => {
-    const app = useAppStore();
-    const { theme } = useTheme();
+  const app = useAppStore();
+  const { theme } = useTheme();
 
-    const [hover, setHover] = useState(false);
+  const [hover, setHover] = useState(false);
 
-    const canManage =
-        expression.space?.members.me?.hasPermission("ManageExpressions");
-    const ownIt = expression.authorId === app.account?.id;
+  const canManage =
+    expression.space?.members.me?.hasPermission("ManageExpressions");
+  const ownIt = expression.authorId === app.account?.id;
 
-    return (
-        <AnimatedStack
-            flex={1}
-            direction="row"
-            alignItems="center"
-            whileHover={{
-                background: formatColor(
-                    dynamicElevation(theme.colors.surface, 5),
-                    {
-                        alpha: 0.5
-                    }
-                )
-            }}
-            onMouseOver={() => setHover(true)}
-            onMouseOut={() => setHover(false)}
-            p="1rem"
-        >
-            <Stack direction="row" spacing={6.5} alignItems="center">
-                <img
-                    alt={expression.id}
-                    src={expression.url}
-                    css={{
-                        width: 32,
-                        height: 32
-                    }}
-                />
-                :{expression.name}:
-            </Stack>
+  return (
+    <AnimatedStack
+      flex={1}
+      direction="row"
+      alignItems="center"
+      whileHover={{
+        background: formatColor(dynamicElevation(theme.colors.surface, 5), {
+          alpha: 0.5
+        })
+      }}
+      onMouseOver={() => setHover(true)}
+      onMouseOut={() => setHover(false)}
+      p="1rem"
+    >
+      <Stack direction="row" spacing={6.5} alignItems="center">
+        <img
+          alt={expression.id}
+          src={expression.url}
+          css={{
+            width: 32,
+            height: 32
+          }}
+        />
+        :{expression.name}:
+      </Stack>
 
-            <Stack flex={1} justifyContent="flex-end">
-                {hover && (canManage || ownIt) && (
-                    <IconButton
-                        onClick={() => expression.delete()}
-                        size="sm"
-                        color="danger"
-                    >
-                        <FaTrash />
-                    </IconButton>
-                )}
-            </Stack>
-        </AnimatedStack>
-    );
+      <Stack flex={1} justifyContent="flex-end">
+        {hover && (canManage || ownIt) && (
+          <IconButton
+            onClick={() => expression.delete()}
+            size="sm"
+            color="danger"
+          >
+            <TrashIcon weight="fill" />
+          </IconButton>
+        )}
+      </Stack>
+    </AnimatedStack>
+  );
 });
 
 interface Props {
-    space: Space;
+  space: Space;
 }
 
 const SpaceEmojisTab = observer(({ space }: Props) => {
-    const app = useAppStore();
-    const fileInputRef = useRef<HTMLInputElement>(null);
+  const app = useAppStore();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-    const { openModal } = useModal();
+  const { openModal } = useModal();
 
-    const emojis = Array.from(space.expressions.values());
+  const emojis = Array.from(space.expressions.values());
 
-    const staticEmojis = emojis.filter((e) => !e.animated);
-    const animatedEmojis = emojis.filter((e) => e.animated);
+  const staticEmojis = emojis.filter((e) => !e.animated);
+  const animatedEmojis = emojis.filter((e) => e.animated);
 
-    const handleUpload = async (e: ChangeEvent<HTMLInputElement>) => {
-        const file = e.target?.files?.[0];
-        if (!file) return;
+  const handleUpload = async (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target?.files?.[0];
+    if (!file) return;
 
-        const buffer = await file.arrayBuffer();
+    const buffer = await file.arrayBuffer();
 
-        const animated = file.type.includes("gif");
-        const hash = await generateHash(buffer, animated);
+    const animated = file.type.includes("gif");
+    const hash = await generateHash(buffer, animated);
 
-        const emoji = {
-            id: Snowflake.generate(),
-            type: ExpressionType.Emoji,
-            name: file.name.split(".")[0],
-            assetHash: hash,
-            spaceId: space.id,
-            authorId: app.account!.id,
-            animated,
-            flags: 0n,
-            createdAt: new Date()
-        };
-
-        openModal("emoji-editor", <EmojiEditor emoji={emoji} file={file} />);
+    const emoji = {
+      id: Snowflake.generate(),
+      type: ExpressionType.Emoji,
+      name: file.name.split(".")[0],
+      assetHash: hash,
+      spaceId: space.id,
+      authorId: app.account!.id,
+      animated,
+      flags: 0n,
+      createdAt: new Date()
     };
 
-    return (
-        <Stack direction="column" spacing={2.5}>
-            <Stack
-                direction="row"
-                alignItems="center"
-                justifyContent="space-between"
-            >
-                <Typography color="warning" variant="plain">
-                    Sadly current limit of emojis you can upload are 100, since
-                    the app is in beta and storage is an issue for now
-                </Typography>
-                <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/gif,image/png,image/jpeg,image/webp"
-                    onChange={handleUpload}
-                    multiple={false}
-                    css={{
-                        display: "none"
-                    }}
-                />
-                <Button
-                    color="success"
-                    onClick={() => fileInputRef.current?.click()}
-                    css={{
-                        marginRight: 16
-                    }}
-                >
-                    Upload Emoji
-                </Button>
-            </Stack>
+    openModal("emoji-editor", <EmojiEditor emoji={emoji} file={file} />);
+  };
 
-            {staticEmojis.length > 0 && (
-                <Paper
-                    borderRadius={12}
-                    variant="outlined"
-                    direction="column"
-                    maxHeight={300}
-                    overflowY="auto"
-                    width={600}
-                >
-                    <Typography level="body-lg" ml={2.5} my={2.5}>
-                        Emojis
-                    </Typography>
+  return (
+    <Stack direction="column" spacing={2.5}>
+      <Stack direction="row" alignItems="center" justifyContent="space-between">
+        <Typography color="warning" variant="plain">
+          Sadly current limit of emojis you can upload are 100, since the app is
+          in beta and storage is an issue for now
+        </Typography>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/gif,image/png,image/jpeg,image/webp"
+          onChange={handleUpload}
+          multiple={false}
+          css={{
+            display: "none"
+          }}
+        />
+        <Button
+          color="success"
+          onClick={() => fileInputRef.current?.click()}
+          css={{
+            marginRight: 16
+          }}
+        >
+          Upload Emoji
+        </Button>
+      </Stack>
 
-                    <Divider
-                        lineColor="muted"
-                        css={{
-                            opacity: 0.5
-                        }}
-                    />
+      {staticEmojis.length > 0 && (
+        <Paper
+          borderRadius={12}
+          variant="outlined"
+          direction="column"
+          maxHeight={300}
+          overflowY="auto"
+          width={600}
+        >
+          <Typography level="body-lg" ml={2.5} my={2.5}>
+            Emojis
+          </Typography>
 
-                    <Stack
-                        mb={2.5}
-                        spacing={5}
-                        direction="row"
-                        mt={2.5}
-                        pl={2.5}
-                    >
-                        <Typography>Image</Typography>
-                        <Typography flex={1}>Name</Typography>
-                    </Stack>
-                    <Stack direction="column">
-                        {staticEmojis.map((expression) => (
-                            <EmojiItem expression={expression} />
-                        ))}
-                    </Stack>
-                </Paper>
-            )}
+          <Divider
+            lineColor="muted"
+            css={{
+              opacity: 0.5
+            }}
+          />
 
-            {animatedEmojis.length > 0 && (
-                <Paper
-                    borderRadius={12}
-                    variant="outlined"
-                    direction="column"
-                    maxHeight={300}
-                    overflowY="auto"
-                    width={600}
-                >
-                    <Typography level="body-lg" ml={2.5} my={2.5}>
-                        Animated Emojis
-                    </Typography>
+          <Stack mb={2.5} spacing={5} direction="row" mt={2.5} pl={2.5}>
+            <Typography>Image</Typography>
+            <Typography flex={1}>Name</Typography>
+          </Stack>
+          <Stack direction="column">
+            {staticEmojis.map((expression) => (
+              <EmojiItem expression={expression} />
+            ))}
+          </Stack>
+        </Paper>
+      )}
 
-                    <Divider
-                        lineColor="muted"
-                        css={{
-                            opacity: 0.5
-                        }}
-                    />
+      {animatedEmojis.length > 0 && (
+        <Paper
+          borderRadius={12}
+          variant="outlined"
+          direction="column"
+          maxHeight={300}
+          overflowY="auto"
+          width={600}
+        >
+          <Typography level="body-lg" ml={2.5} my={2.5}>
+            Animated Emojis
+          </Typography>
 
-                    <Stack
-                        mb={2.5}
-                        spacing={5}
-                        direction="row"
-                        mt={2.5}
-                        pl={2.5}
-                    >
-                        <Typography>Image</Typography>
-                        <Typography flex={1}>Name</Typography>
-                    </Stack>
-                    <Stack direction="column">
-                        {animatedEmojis.map((expression) => (
-                            <EmojiItem expression={expression} />
-                        ))}
-                    </Stack>
-                </Paper>
-            )}
+          <Divider
+            lineColor="muted"
+            css={{
+              opacity: 0.5
+            }}
+          />
 
-            {emojis.length === 0 && (
-                <Stack justifyContent="center" alignItems="center" py="4rem">
-                    <Typography textAlign="center" color="muted">
-                        No emojis created yet
-                    </Typography>
-                </Stack>
-            )}
+          <Stack mb={2.5} spacing={5} direction="row" mt={2.5} pl={2.5}>
+            <Typography>Image</Typography>
+            <Typography flex={1}>Name</Typography>
+          </Stack>
+          <Stack direction="column">
+            {animatedEmojis.map((expression) => (
+              <EmojiItem expression={expression} />
+            ))}
+          </Stack>
+        </Paper>
+      )}
+
+      {emojis.length === 0 && (
+        <Stack justifyContent="center" alignItems="center" py="4rem">
+          <Typography textAlign="center" color="muted">
+            No emojis created yet
+          </Typography>
         </Stack>
-    );
+      )}
+    </Stack>
+  );
 });
 export default SpaceEmojisTab;

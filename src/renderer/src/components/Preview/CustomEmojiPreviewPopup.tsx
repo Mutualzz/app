@@ -56,7 +56,7 @@ export const CustomEmojiPreviewPopup = observer(
                         draggable={false}
                         css={{
                             width: 48,
-                            height: 48,
+                            height: 48
                         }}
                     />
 
@@ -77,7 +77,7 @@ export const CustomEmojiPreviewPopup = observer(
                 <Divider
                     lineColor="muted"
                     css={{
-                        opacity: 0.5,
+                        opacity: 0.5
                     }}
                 />
                 <Stack spacing={2.5}>
@@ -91,7 +91,7 @@ export const CustomEmojiPreviewPopup = observer(
                                 spacing={1.25}
                                 alignItems="center"
                             >
-                                <SpaceIcon space={emoji.space} size="md" />
+                                <SpaceIcon space={emoji.space} />
                                 <Typography fontWeight="bold" level="body-sm">
                                     {emoji.space.name}
                                 </Typography>
@@ -117,5 +117,5 @@ export const CustomEmojiPreviewPopup = observer(
                 </Stack>
             </Paper>
         );
-    },
+    }
 );

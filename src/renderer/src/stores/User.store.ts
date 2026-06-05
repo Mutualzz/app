@@ -33,7 +33,6 @@ export class UserStore {
 
         const newUser = new User(user);
         this.users.set(user.id, newUser);
-        if (user.presence) this.app.presence.upsert(user.id, user.presence);
         return newUser;
     }
 

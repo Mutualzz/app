@@ -5,7 +5,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 
 export const Route = createFileRoute("/privacy")({
-    component: Privacy,
+    component: Privacy
 });
 
 function Privacy() {
@@ -72,10 +72,10 @@ function Privacy() {
                                         <Typography>
                                             • <b>Content You Share:</b> Feed
                                             activity (posts, videos, images,
-                                            comments — similar to
+                                            comments - similar to
                                             TikTok/Instagram). Spaces activity
                                             (discussions, group messages, shared
-                                            media, and voice chats — similar to
+                                            media, and voice chats - similar to
                                             Discord servers). Statuses and
                                             reactions you use across profiles,
                                             the Feed, and Spaces.
@@ -358,7 +358,7 @@ function Section({
     title,
     content,
     mt,
-    my = 6,
+    my = 6
 }: {
     title: string;
     content: ReactNode;

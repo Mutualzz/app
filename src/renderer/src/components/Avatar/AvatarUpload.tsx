@@ -7,262 +7,254 @@ import { useAppStore } from "@hooks/useStores";
 import { FileUploader } from "@mateie/react-drag-drop-files";
 import type { HttpException } from "@mutualzz/types";
 import {
-    Button,
-    ButtonGroup,
-    IconButton,
-    Slider,
-    Stack,
-    Typography,
-    useTheme,
+  Button,
+  ButtonGroup,
+  IconButton,
+  Slider,
+  Stack,
+  Typography,
+  useTheme
 } from "@mutualzz/ui-web";
 import { useMutation } from "@tanstack/react-query";
 import { observer } from "mobx-react-lite";
 import { useCallback, useState } from "react";
-import { FaMagnifyingGlass, FaRotate } from "react-icons/fa6";
 import { cropImage } from "@utils/cropImage";
+import { ArrowClockwiseIcon, MagnifyingGlassIcon } from "@phosphor-icons/react";
 
 export const AvatarUpload = observer(() => {
-    const { theme } = useTheme();
-    const app = useAppStore();
-    const { closeModal, closeAllModals } = useModal();
+  const { theme } = useTheme();
+  const app = useAppStore();
+  const { closeModal, closeAllModals } = useModal();
 
-    const [imageFile, setImageFile] = useState<string | null>(null);
-    const [originalFile, setOriginalFile] = useState<File | null>(null);
-    const [croppedAreaPixels, setCroppedAreaPixels] = useState<any>(null);
+  const [imageFile, setImageFile] = useState<string | null>(null);
+  const [originalFile, setOriginalFile] = useState<File | null>(null);
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState<any>(null);
 
-    const [crop, setCrop] = useState({ x: 0, y: 0 });
-    const [zoom, setZoom] = useState(1);
-    const [rotation, setRotation] = useState(0);
+  const [crop, setCrop] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
+  const [rotation, setRotation] = useState(0);
 
-    const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-    const { mutate: updateAvatar, isPending: saving } = useMutation({
-        mutationKey: ["upload-avatar"],
-        mutationFn: (data: FormData) => {
-            return app.rest.patchFormData("@me", data);
-        },
-        onSuccess: () => {
-            setImageFile(null);
-            setError(null);
-            setOriginalFile(null);
-            closeAllModals();
-        },
-        onError: (err: HttpException) => {
-            setError(err.message ?? "An error occurred");
-        },
-    });
+  const { mutate: updateAvatar, isPending: saving } = useMutation({
+    mutationKey: ["upload-avatar"],
+    mutationFn: (data: FormData) => {
+      return app.rest.patchFormData("@me", data);
+    },
+    onSuccess: () => {
+      setImageFile(null);
+      setError(null);
+      setOriginalFile(null);
+      closeAllModals();
+    },
+    onError: (err: HttpException) => {
+      setError(err.message ?? "An error occurred");
+    }
+  });
 
-    const onUpload = async (file: File | File[]) => {
-        const fileToUse = Array.isArray(file) ? file[0] : file;
-        const url = URL.createObjectURL(fileToUse);
-        setImageFile(url);
-        setOriginalFile(fileToUse);
-    };
+  const onUpload = async (file: File | File[]) => {
+    const fileToUse = Array.isArray(file) ? file[0] : file;
+    const url = URL.createObjectURL(fileToUse);
+    setImageFile(url);
+    setOriginalFile(fileToUse);
+  };
 
-    const onClear = () => {
-        if (imageFile) URL.revokeObjectURL(imageFile);
-        setImageFile(null);
-        setOriginalFile(null);
-        setError(null);
-        setCroppedAreaPixels(null);
-        setCrop({ x: 0, y: 0 });
-        setZoom(1);
-        setRotation(0);
-    };
+  const onClear = () => {
+    if (imageFile) URL.revokeObjectURL(imageFile);
+    setImageFile(null);
+    setOriginalFile(null);
+    setError(null);
+    setCroppedAreaPixels(null);
+    setCrop({ x: 0, y: 0 });
+    setZoom(1);
+    setRotation(0);
+  };
 
-    const onClose = () => {
-        setImageFile(null);
-        setOriginalFile(null);
-        setError(null);
-        setCroppedAreaPixels(null);
-        closeModal();
-    };
+  const onClose = () => {
+    setImageFile(null);
+    setOriginalFile(null);
+    setError(null);
+    setCroppedAreaPixels(null);
+    closeModal();
+  };
 
-    const onCropComplete = useCallback((_: any, croppedAreaPixels: any) => {
-        setCroppedAreaPixels(croppedAreaPixels);
-    }, []);
+  const onCropComplete = useCallback((_: any, croppedAreaPixels: any) => {
+    setCroppedAreaPixels(croppedAreaPixels);
+  }, []);
 
-    const handleSave = async (skipCrop = false) => {
-        if (!originalFile || !imageFile) return;
+  const handleSave = async (skipCrop = false) => {
+    if (!originalFile || !imageFile) return;
 
-        let fileToUpload = originalFile;
+    let fileToUpload = originalFile;
 
-        if (!skipCrop && croppedAreaPixels) {
-            fileToUpload = await cropImage(
-                imageFile,
-                originalFile,
-                croppedAreaPixels as Area,
-                rotation,
-            );
-        }
+    if (!skipCrop && croppedAreaPixels) {
+      fileToUpload = await cropImage(
+        imageFile,
+        originalFile,
+        croppedAreaPixels as Area,
+        rotation
+      );
+    }
 
-        const formData = new FormData();
-        formData.append("avatar", fileToUpload);
-        if (fileToUpload.type === "image/gif")
-            formData.append("crop", JSON.stringify(croppedAreaPixels));
-        updateAvatar(formData);
-    };
+    const formData = new FormData();
+    formData.append("avatar", fileToUpload);
+    if (fileToUpload.type === "image/gif")
+      formData.append("crop", JSON.stringify(croppedAreaPixels));
+    updateAvatar(formData);
+  };
 
-    if (!app.account) return <></>;
+  if (!app.account) return <></>;
 
-    return (
-        <AnimatedPaper
-            elevation={4}
-            borderRadius={40}
-            minWidth={{ xs: "90vw", sm: 340, md: 420, lg: 500 }}
-            maxWidth={500}
-            direction="column"
-            minHeight={300}
-            initial={{ scale: 0.95 }}
-            animate={{ scale: 1 }}
-        >
+  return (
+    <AnimatedPaper
+      elevation={4}
+      borderRadius={40}
+      minWidth={{ xs: "90vw", sm: 340, md: 420, lg: 500 }}
+      maxWidth={500}
+      direction="column"
+      minHeight={300}
+      initial={{ scale: 0.95 }}
+      animate={{ scale: 1 }}
+    >
+      <Stack
+        width="100%"
+        height="100%"
+        position="relative"
+        direction="column"
+        px={{ xs: "1rem", sm: "2rem" }}
+        py={{ xs: "1.5rem", sm: "2.5rem", md: "3rem" }}
+        alignItems="center"
+        justifyContent="center"
+      >
+        {imageFile ? (
+          <>
             <Stack
-                width="100%"
-                height="100%"
-                position="relative"
-                direction="column"
-                px={{ xs: "1rem", sm: "2rem" }}
-                py={{ xs: "1.5rem", sm: "2.5rem", md: "3rem" }}
-                alignItems="center"
-                justifyContent="center"
+              alignItems="center"
+              justifyContent="center"
+              position="relative"
+              width={{ xs: 180, sm: 220, md: 256 }}
+              height={{ xs: 180, sm: 220, md: 256 }}
+              css={{
+                pointerEvents: saving ? "none" : "all",
+                filter: saving ? "blur(4px)" : "none"
+              }}
             >
-                {imageFile ? (
-                    <>
-                        <Stack
-                            alignItems="center"
-                            justifyContent="center"
-                            position="relative"
-                            width={{ xs: 180, sm: 220, md: 256 }}
-                            height={{ xs: 180, sm: 220, md: 256 }}
-                            css={{
-                                pointerEvents: saving ? "none" : "all",
-                                filter: saving ? "blur(4px)" : "none",
-                            }}
-                        >
-                            <Cropper
-                                image={imageFile}
-                                crop={crop}
-                                zoom={zoom}
-                                rotation={rotation}
-                                aspect={1}
-                                cropShape="round"
-                                showGrid={false}
-                                onCropChange={setCrop}
-                                onZoomChange={setZoom}
-                                onCropComplete={onCropComplete}
-                                style={{
-                                    containerStyle: {
-                                        width: "100%",
-                                        height: "100%",
-                                        background: theme.colors.surface,
-                                    },
-                                    cropAreaStyle: {
-                                        border: `2px solid ${theme.colors.neutral}`,
-                                    },
-                                }}
-                            />
-                        </Stack>
-                        <Stack
-                            direction="row"
-                            alignItems="center"
-                            spacing={{ xs: 1, sm: 2.5, md: 3.75 }}
-                            width={{ xs: 180, sm: 220, md: 256 }}
-                            mt={{ xs: 1, sm: 2, md: 2.5 }}
-                        >
-                            <FaMagnifyingGlass />
-                            <Slider
-                                min={1}
-                                max={3}
-                                step={0.01}
-                                value={zoom}
-                                onChange={(_, value) =>
-                                    setZoom(value as number)
-                                }
-                                disabled={saving}
-                                css={{
-                                    flex: 1,
-                                }}
-                            />
-                            <IconButton
-                                onClick={() => setRotation((prev) => prev + 90)}
-                                color={theme.typography.colors.primary}
-                                variant="plain"
-                                size="sm"
-                                disabled={saving}
-                            >
-                                <FaRotate />
-                            </IconButton>
-                        </Stack>
-                        {error && (
-                            <Typography
-                                color="danger"
-                                variant="plain"
-                                mt="2rem"
-                            >
-                                {error}
-                            </Typography>
-                        )}
-                    </>
-                ) : (
-                    <FileUploader
-                        types={["png", "gif", "webp", "jpeg", "jpg"]}
-                        handleChange={onUpload}
-                        required
-                        disabled={saving}
-                    >
-                        <Stack
-                            alignItems="center"
-                            justifyContent="center"
-                            spacing={{ xs: 2, sm: 4, md: 6.25 }}
-                            direction="column"
-                            css={{
-                                cursor: "pointer",
-                            }}
-                        >
-                            <UserAvatar user={app.account} size={256} />
-                            <Typography level="body-xs">
-                                (Click or Drag and drop)
-                            </Typography>
-                        </Stack>
-                    </FileUploader>
-                )}
+              <Cropper
+                image={imageFile}
+                crop={crop}
+                zoom={zoom}
+                rotation={rotation}
+                aspect={1}
+                cropShape="round"
+                showGrid={false}
+                onCropChange={setCrop}
+                onZoomChange={setZoom}
+                onCropComplete={onCropComplete}
+                style={{
+                  containerStyle: {
+                    width: "100%",
+                    height: "100%",
+                    background: theme.colors.surface
+                  },
+                  cropAreaStyle: {
+                    border: `2px solid ${theme.colors.neutral}`
+                  }
+                }}
+              />
             </Stack>
             <Stack
-                pb={{ xs: "1rem", sm: "2rem" }}
-                px={{ xs: "1rem", sm: "2rem" }}
-                direction="row"
-                justifyContent="space-between"
+              direction="row"
+              alignItems="center"
+              spacing={{ xs: 1, sm: 2.5, md: 3.75 }}
+              width={{ xs: 180, sm: 220, md: 256 }}
+              mt={{ xs: 1, sm: 2, md: 2.5 }}
             >
-                {imageFile && croppedAreaPixels && (
-                    <ButtonGroup spacing={{ xs: 2, sm: 5 }}>
-                        <Button
-                            onClick={() => handleSave(false)}
-                            color="success"
-                            loading={saving}
-                        >
-                            Save
-                        </Button>
-                        <Button
-                            onClick={() => handleSave(true)}
-                            loading={saving}
-                            color="neutral"
-                            variant="outlined"
-                        >
-                            Skip
-                        </Button>
-                    </ButtonGroup>
-                )}
-                <ButtonGroup color="danger" spacing={{ xs: 2, sm: 5 }}>
-                    <Button disabled={saving} onClick={onClose}>
-                        Cancel
-                    </Button>
-                    {imageFile && (
-                        <Button disabled={saving} onClick={onClear}>
-                            Reset
-                        </Button>
-                    )}
-                </ButtonGroup>
+              <MagnifyingGlassIcon />
+              <Slider
+                min={1}
+                max={3}
+                step={0.01}
+                value={zoom}
+                onChange={(_, value) => setZoom(value as number)}
+                disabled={saving}
+                css={{
+                  flex: 1
+                }}
+              />
+              <IconButton
+                onClick={() => setRotation((prev) => prev + 90)}
+                color={theme.typography.colors.primary}
+                variant="plain"
+                size="sm"
+                disabled={saving}
+              >
+                <ArrowClockwiseIcon />
+              </IconButton>
             </Stack>
-        </AnimatedPaper>
-    );
+            {error && (
+              <Typography color="danger" variant="plain" mt="2rem">
+                {error}
+              </Typography>
+            )}
+          </>
+        ) : (
+          <FileUploader
+            types={["png", "gif", "webp", "jpeg", "jpg"]}
+            handleChange={onUpload}
+            required
+            disabled={saving}
+          >
+            <Stack
+              alignItems="center"
+              justifyContent="center"
+              spacing={{ xs: 2, sm: 4, md: 6.25 }}
+              direction="column"
+              css={{
+                cursor: "pointer"
+              }}
+            >
+              <UserAvatar user={app.account} size={256} />
+              <Typography level="body-xs">(Click or Drag and drop)</Typography>
+            </Stack>
+          </FileUploader>
+        )}
+      </Stack>
+      <Stack
+        pb={{ xs: "1rem", sm: "2rem" }}
+        px={{ xs: "1rem", sm: "2rem" }}
+        direction="row"
+        justifyContent="space-between"
+      >
+        {imageFile && croppedAreaPixels && (
+          <ButtonGroup spacing={{ xs: 2, sm: 5 }}>
+            <Button
+              onClick={() => handleSave(false)}
+              color="success"
+              loading={saving}
+            >
+              Save
+            </Button>
+            <Button
+              onClick={() => handleSave(true)}
+              loading={saving}
+              color="neutral"
+              variant="outlined"
+            >
+              Skip
+            </Button>
+          </ButtonGroup>
+        )}
+        <ButtonGroup color="danger" spacing={{ xs: 2, sm: 5 }}>
+          <Button disabled={saving} onClick={onClose}>
+            Cancel
+          </Button>
+          {imageFile && (
+            <Button disabled={saving} onClick={onClear}>
+              Reset
+            </Button>
+          )}
+        </ButtonGroup>
+      </Stack>
+    </AnimatedPaper>
+  );
 });

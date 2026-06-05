@@ -1,6 +1,6 @@
 import Token from "markdown-it/lib/token.mjs";
 import type { MarkdownItAsync } from "@components/Markdown/MarkdownItAsync";
-import { getCustomEmoji } from "@utils/emojis";
+import { getCustomEmoji } from "@utils/emojis/emojis";
 import { Expression } from "@stores/objects/Expression";
 
 const customEmojiRegex = /<a?:[^:]+:\d+>/g;

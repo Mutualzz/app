@@ -1,6 +1,6 @@
 import shortcodeRegex from "emojibase-regex/shortcode";
 import type { Descendant, Text } from "slate";
-import { getEmoji } from "./emojis";
+import { getEmoji } from "./emojis/emojis";
 import { TWEMOJI_URL } from "./urls";
 
 export function markdownToSlate(markdown: string): Descendant[] {
@@ -21,7 +21,7 @@ export function markdownToSlate(markdown: string): Descendant[] {
             result.push({
                 type: "heading",
                 level,
-                children: parseInlineMarkdown(trimmed.slice(level + 1)),
+                children: parseInlineMarkdown(trimmed.slice(level + 1))
             });
             continue;
         }
@@ -33,17 +33,17 @@ export function markdownToSlate(markdown: string): Descendant[] {
                     {
                         type: "line",
                         children: parseInlineMarkdown(
-                            trimmed.replace(/^>\s?/, ""),
-                        ),
-                    },
-                ],
+                            trimmed.replace(/^>\s?/, "")
+                        )
+                    }
+                ]
             });
             continue;
         }
 
         result.push({
             type: "line",
-            children: parseInlineMarkdown(trimmed),
+            children: parseInlineMarkdown(trimmed)
         });
     }
 
@@ -66,9 +66,9 @@ function parseInlineMarkdown(input: string): Descendant[] {
                 {
                     type: "link",
                     url,
-                    children: tokenize(label),
+                    children: tokenize(label)
                 },
-                ...tokenize(after),
+                ...tokenize(after)
             ];
         }
 
@@ -79,7 +79,7 @@ function parseInlineMarkdown(input: string): Descendant[] {
             [/`(.*?)`/s, { code: true }],
             [/__([^_]+)__/s, { underline: true }],
             [/\*(.*?)\*/s, { italic: true }],
-            [/\|\|(.+?)\|\|/s, { spoiler: true }],
+            [/\|\|(.+?)\|\|/s, { spoiler: true }]
         ];
 
         for (const [pattern, mark] of patterns) {
@@ -92,9 +92,9 @@ function parseInlineMarkdown(input: string): Descendant[] {
                 return [
                     ...tokenize(before),
                     ...tokenize(inner).map((node) =>
-                        "text" in node ? { ...mark, text: node.text } : node,
+                        "text" in node ? { ...mark, text: node.text } : node
                     ),
-                    ...tokenize(after),
+                    ...tokenize(after)
                 ];
             }
         }
@@ -112,7 +112,7 @@ function parseInlineMarkdown(input: string): Descendant[] {
                       name: `:${emoji.shortcodes?.[0]}:`,
                       url: `${TWEMOJI_URL}/${emoji.hexcode.toLowerCase()}.png`,
                       unicode: emoji.emoji,
-                      children: [{ text: "" }],
+                      children: [{ text: "" }]
                   }
                 : { text: `:${shortcode}:` };
 

@@ -104,42 +104,53 @@ export const Message = observer(({ message, header }: Props) => {
                             onStopEditing={() => message.setEditing(false)}
                         />
                     ) : (
-                        message.content && (
-                            <Stack alignItems="center" spacing={1.25}>
-                                <MarkdownRenderer
-                                    textColor={
-                                        isFailed
-                                            ? theme.colors.danger
-                                            : "primary"
-                                    }
-                                    value={message.content}
-                                    spaceId={message.spaceId}
-                                />
-                                {isSent && message.edited && (
-                                    <Tooltip
-                                        placement="right"
-                                        content={
-                                            <TooltipWrapper>
-                                                {dayjs(
-                                                    message.updatedAt
-                                                ).format(
-                                                    "dddd, MMMM D, YYYY h:mm A"
-                                                )}
-                                            </TooltipWrapper>
+                        message.content &&
+                        (() => {
+                            const hasGifEmbed =
+                                "embeds" in message &&
+                                message.embeds?.some((e) => e.type === "gifv");
+                            const isGiphyUrl =
+                                /^https:\/\/giphy\.com\/gifs\/\S+$/.test(
+                                    message.content.trim()
+                                );
+                            if (hasGifEmbed && isGiphyUrl) return null;
+                            return (
+                                <Stack alignItems="center" spacing={1.25}>
+                                    <MarkdownRenderer
+                                        textColor={
+                                            isFailed
+                                                ? theme.colors.danger
+                                                : "primary"
                                         }
-                                        offset={8}
-                                    >
-                                        <Typography
-                                            textColor="muted"
-                                            ml={0.25}
-                                            level="body-xs"
+                                        value={message.content}
+                                        spaceId={message.spaceId}
+                                    />
+                                    {isSent && message.edited && (
+                                        <Tooltip
+                                            placement="right"
+                                            content={
+                                                <TooltipWrapper>
+                                                    {dayjs(
+                                                        message.updatedAt
+                                                    ).format(
+                                                        "dddd, MMMM D, YYYY h:mm A"
+                                                    )}
+                                                </TooltipWrapper>
+                                            }
+                                            offset={8}
                                         >
-                                            (edited)
-                                        </Typography>
-                                    </Tooltip>
-                                )}
-                            </Stack>
-                        )
+                                            <Typography
+                                                textColor="muted"
+                                                ml={0.25}
+                                                level="body-xs"
+                                            >
+                                                (edited)
+                                            </Typography>
+                                        </Tooltip>
+                                    )}
+                                </Stack>
+                            );
+                        })()
                     )}
                 </MessageContentText>
 

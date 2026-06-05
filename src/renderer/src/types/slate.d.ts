@@ -36,7 +36,6 @@ export interface MentionElement {
     type: "mention";
     mentionType: MentionType;
     id: string;
-    spaceId?: string | null;
     children: [{ text: "" }];
 }
 

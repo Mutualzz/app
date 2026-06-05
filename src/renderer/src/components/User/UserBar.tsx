@@ -5,454 +5,428 @@ import { UserSettingsModal } from "@components/UserSettings/UserSettingsModal";
 import { useModal } from "@contexts/Modal.context";
 import { useAppStore } from "@hooks/useStores";
 import {
-    type PaperProps,
-    Stack,
-    Tooltip,
-    Typography,
-    useTheme
+  type PaperProps,
+  Stack,
+  Tooltip,
+  Typography,
+  useTheme
 } from "@mutualzz/ui-web";
 import { observer } from "mobx-react-lite";
 import { useState } from "react";
-import { FaCog, FaMicrophone, FaMicrophoneSlash } from "react-icons/fa";
 import { IconButton } from "@components/IconButton";
 import { generateMenuIDs, useMenu } from "@contexts/ContextMenu.context";
 import { Color, formatColor } from "@mutualzz/ui-core";
-import {
-    MdHeadset,
-    MdHeadsetOff,
-    MdVideocam,
-    MdVideocamOff
-} from "react-icons/md";
-import { ImPhoneHangUp } from "react-icons/im";
-import { AnimatedIconButton } from "@components/Animated/AnimatedIconButton";
 import { SmallActivityStatus } from "@components/SmallActivityStatus";
 import { SpaceModerated } from "@components/Modals/SpaceModerated";
+import {
+  GearIcon,
+  HeadphonesIcon,
+  MicrophoneIcon,
+  MicrophoneSlashIcon,
+  PhoneIcon,
+  VideoCameraIcon,
+  VideoCameraSlashIcon
+} from "@phosphor-icons/react";
+import { HeadphonesOffIcon } from "@components/icons/HeadphonesOffIcon";
 
 // NOTE: Instead of using hovered, you should use the Animated motion stuff, fix it.
 export const UserBar = observer(() => {
-    const app = useAppStore();
-    const { theme } = useTheme();
-    const { openModal } = useModal();
-    const { openContextMenu } = useMenu();
-    const [hovered, setHovered] = useState(false);
+  const app = useAppStore();
+  const { theme } = useTheme();
+  const { openModal } = useModal();
+  const { openContextMenu } = useMenu();
+  const [hovered, setHovered] = useState(false);
 
-    const voiceChannel = app.voice.channel;
+  const voiceChannel = app.voice.channel;
 
-    const voiceStatus = app.voice.connectionStatus;
-    const voiceError = app.voice.connectionError;
+  const voiceStatus = app.voice.connectionStatus;
+  const voiceError = app.voice.connectionError;
 
-    const showVoicePill =
-        Boolean(voiceChannel) ||
-        voiceStatus === "connecting" ||
-        voiceStatus === "failed";
+  const showVoicePill =
+    Boolean(voiceChannel) ||
+    voiceStatus === "connecting" ||
+    voiceStatus === "failed";
 
-    const inFeed = !!app.channels.activeId && app.mode === "feed";
+  const inFeed = !!app.channels.activeId && app.mode === "feed";
 
-    const conditionalProps: Omit<PaperProps, "color"> = inFeed
-        ? {
-              width: "4.25rem",
-              height: showVoicePill ? "25rem" : "17.5rem",
-              direction: "column"
-          }
-        : {
-              minWidth: "10rem",
-              direction: "row"
-          };
+  const conditionalProps: Omit<PaperProps, "color"> = inFeed
+    ? {
+        width: "4.25rem",
+        height: showVoicePill ? "25rem" : "17.5rem",
+        direction: "column"
+      }
+    : {
+        minWidth: "10rem",
+        direction: "row"
+      };
 
-    const account = app.account;
+  const account = app.account;
 
-    let voiceTitle: string;
-    let voiceTitleColor: Color;
-    switch (voiceStatus) {
-        case "connecting":
-            voiceTitle = "RTC Connecting";
-            voiceTitleColor = "warning";
-            break;
-        case "connected":
-            voiceTitle = "Voice Connected";
-            voiceTitleColor = "success";
-            break;
-        case "failed":
-            voiceTitle = "Connection Failed";
-            voiceTitleColor = "danger";
-            break;
-        case "idle":
-        default:
-            voiceTitle = "Voice";
-            voiceTitleColor = "neutral";
-    }
+  let voiceTitle: string;
+  let voiceTitleColor: Color;
+  switch (voiceStatus) {
+    case "connecting":
+      voiceTitle = "RTC Connecting";
+      voiceTitleColor = "warning";
+      break;
+    case "connected":
+      voiceTitle = "Voice Connected";
+      voiceTitleColor = "success";
+      break;
+    case "failed":
+      voiceTitle = "Connection Failed";
+      voiceTitleColor = "danger";
+      break;
+    case "idle":
+    default:
+      voiceTitle = "Voice";
+      voiceTitleColor = "neutral";
+  }
 
-    let voiceSubtitle: string | undefined;
-    if (voiceChannel) {
-        voiceSubtitle =
-            `${voiceChannel.name} / ${voiceChannel.space?.name ?? ""}`.trim();
-    } else if (voiceStatus === "failed") {
-        voiceSubtitle = voiceError ?? "Unable to connect";
-    }
+  let voiceSubtitle: string | undefined;
+  if (voiceChannel) {
+    voiceSubtitle =
+      `${voiceChannel.name} / ${voiceChannel.space?.name ?? ""}`.trim();
+  } else if (voiceStatus === "failed") {
+    voiceSubtitle = voiceError ?? "Unable to connect";
+  }
 
-    const canHangup =
-        Boolean(app.voice.currentSpaceId) &&
-        Boolean(app.voice.currentChannelId);
+  const canHangup =
+    Boolean(app.voice.currentSpaceId) && Boolean(app.voice.currentChannelId);
 
-    const cameraEnabled = app.voice.cameraEnabled;
+  const cameraEnabled = app.voice.cameraEnabled;
 
-    if (!account) return null;
+  if (!account) return null;
 
-    return (
-        <Stack
-            mb={2}
-            ml={1}
-            position="absolute"
-            bottom={0}
-            width="97.5%"
-            direction="column"
+  return (
+    <Stack
+      mb={2}
+      ml={1}
+      position="absolute"
+      bottom={0}
+      width="97.5%"
+      direction="column"
+    >
+      {showVoicePill && !inFeed && (
+        <Paper
+          borderTopRightRadius={15}
+          borderTopLeftRadius={15}
+          elevation={app.settings?.preferEmbossed ? 5 : 1}
+          color="neutral"
+          p={2.5}
+          zIndex={theme.zIndex.appBar + 1}
+          direction="column"
+          spacing={2.5}
         >
-            {showVoicePill && !inFeed && (
-                <Paper
-                    borderTopRightRadius={15}
-                    borderTopLeftRadius={15}
-                    elevation={app.settings?.preferEmbossed ? 5 : 1}
-                    color="neutral"
-                    p={2.5}
-                    zIndex={theme.zIndex.appBar + 1}
-                    direction="column"
-                    spacing={2.5}
+          <Stack
+            width="100%"
+            alignItems="center"
+            justifyContent="space-between"
+          >
+            <Stack spacing={1.25} direction="column">
+              <Typography
+                variant="plain"
+                color={voiceTitleColor}
+                level="body-sm"
+              >
+                {voiceTitle}
+              </Typography>
+
+              {voiceSubtitle && (
+                <Typography
+                  level="body-xs"
+                  textColor="secondary"
+                  fontFamily="monospace"
+                  css={{
+                    maxWidth: "17rem",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap"
+                  }}
+                  title={voiceSubtitle}
                 >
-                    <Stack
-                        width="100%"
-                        alignItems="center"
-                        justifyContent="space-between"
-                    >
-                        <Stack spacing={1.25} direction="column">
-                            <Typography
-                                variant="plain"
-                                color={voiceTitleColor}
-                                level="body-sm"
-                            >
-                                {voiceTitle}
-                            </Typography>
+                  {voiceSubtitle}
+                </Typography>
+              )}
+            </Stack>
 
-                            {voiceSubtitle && (
-                                <Typography
-                                    level="body-xs"
-                                    textColor="secondary"
-                                    fontFamily="monospace"
-                                    css={{
-                                        maxWidth: "17rem",
-                                        overflow: "hidden",
-                                        textOverflow: "ellipsis",
-                                        whiteSpace: "nowrap"
-                                    }}
-                                    title={voiceSubtitle}
-                                >
-                                    {voiceSubtitle}
-                                </Typography>
-                            )}
-                        </Stack>
-
-                        <Tooltip
-                            title={<TooltipWrapper>Disconnect</TooltipWrapper>}
-                            placement="top"
-                        >
-                            <IconButton
-                                disabled={!canHangup}
-                                onClick={() => app.voice.leave()}
-                            >
-                                <ImPhoneHangUp />
-                            </IconButton>
-                        </Tooltip>
-                    </Stack>
-
-                    <Tooltip
-                        placement={!inFeed ? "top" : "right"}
-                        title={
-                            <TooltipWrapper>
-                                {cameraEnabled
-                                    ? "Disable camera"
-                                    : "Enable camera"}
-                            </TooltipWrapper>
-                        }
-                    >
-                        <Stack
-                            justifyContent="space-between"
-                            alignItems="center"
-                        >
-                            <IconButton
-                                variant="soft"
-                                onClick={() => app.voice.toggleCamera()}
-                                css={{
-                                    flex: 1
-                                }}
-                            >
-                                {cameraEnabled ? (
-                                    <MdVideocam color={theme.colors.success} />
-                                ) : (
-                                    <MdVideocamOff />
-                                )}
-                            </IconButton>
-                        </Stack>
-                    </Tooltip>
-                </Paper>
-            )}
-
-            <Paper
-                justifyContent="space-between"
-                alignItems="center"
-                px={2.5}
-                py={1.25}
-                elevation={app.settings?.preferEmbossed ? 5 : 1}
-                color="neutral"
-                borderTop={showVoicePill ? "0 !important" : undefined}
-                width="100%"
-                zIndex={theme.zIndex.appBar + 1}
-                spacing={1.25}
-                {...(showVoicePill && !inFeed
-                    ? {
-                          borderBottomRightRadius: 15,
-                          borderBottomLeftRadius: 15
-                      }
-                    : { borderRadius: 15 })}
-                {...conditionalProps}
+            <Tooltip
+              title={<TooltipWrapper>Disconnect</TooltipWrapper>}
+              placement="top"
             >
-                <Paper
-                    direction={!inFeed ? "row" : "column"}
-                    alignItems="center"
-                    spacing={2.5}
-                    width={!inFeed && showVoicePill ? "75%" : "100%"}
-                    px={1}
-                    py={0.25}
-                    borderRadius={6}
-                    variant={hovered ? "soft" : "plain"}
-                    color={formatColor(theme.colors.neutral, { alpha: 90 })}
-                    onMouseEnter={() => setHovered(true)}
-                    onMouseLeave={() => setHovered(false)}
-                    onClick={(event) => {
-                        const rect =
-                            event.currentTarget.getBoundingClientRect();
+              <IconButton
+                disabled={!canHangup}
+                onClick={() => app.voice.leave()}
+              >
+                <PhoneIcon
+                  weight="fill"
+                  css={{
+                    transform: "rotate(135deg)"
+                  }}
+                />
+              </IconButton>
+            </Tooltip>
+          </Stack>
 
-                        openContextMenu(
-                            event,
-                            {
-                                id: generateMenuIDs.user(account.id),
-                                type: "account",
-                                account
-                            },
-                            {
-                                x: !inFeed
-                                    ? Math.round(rect.left)
-                                    : Math.round(rect.left + 55),
-                                y: !inFeed
-                                    ? Math.round(rect.bottom - 120)
-                                    : Math.round(rect.top + 10)
-                            }
-                        );
-                    }}
-                    css={{
-                        cursor: "pointer",
-                        userSelect: "none",
-                        transition: "background-color 0.2s"
-                    }}
-                >
-                    <UserAvatar user={account} size={48} badge />
-                    <Stack direction="column">
-                        <Typography
-                            textAlign={!!inFeed ? "center" : undefined}
-                            level="body-sm"
-                        >
-                            {account.displayName}
-                        </Typography>
-                        {account.presence?.activities.length === 0 &&
-                            account.globalName && (
-                                <Typography level="body-xs" textColor="muted">
-                                    {account.username}
-                                </Typography>
-                            )}
-                        {account.presence && (
-                            <SmallActivityStatus
-                                vertical={!!inFeed}
-                                presence={account.presence}
-                            />
-                        )}
-                    </Stack>
-                </Paper>
-
-                {!!inFeed && showVoicePill && (
-                    <Stack
-                        direction="column"
-                        spacing={1.25}
-                        alignItems="center"
-                    >
-                        <Tooltip
-                            title={
-                                <TooltipWrapper>
-                                    <Stack direction="column" spacing={0.5}>
-                                        <Typography
-                                            level="body-sm"
-                                            color={voiceTitleColor}
-                                        >
-                                            {voiceTitle}
-                                        </Typography>
-                                        {voiceSubtitle && (
-                                            <Typography
-                                                level="body-xs"
-                                                textColor="muted"
-                                            >
-                                                {voiceSubtitle}
-                                            </Typography>
-                                        )}
-                                    </Stack>
-                                </TooltipWrapper>
-                            }
-                            placement="right"
-                        >
-                            <IconButton variant="plain" color={voiceTitleColor}>
-                                <MdHeadset />
-                            </IconButton>
-                        </Tooltip>
-
-                        <Tooltip
-                            placement="right"
-                            title={
-                                <TooltipWrapper>
-                                    {cameraEnabled
-                                        ? "Turn off camera"
-                                        : "Turn on camera"}
-                                </TooltipWrapper>
-                            }
-                        >
-                            <IconButton
-                                variant="plain"
-                                onClick={() => app.voice.toggleCamera()}
-                            >
-                                {cameraEnabled ? (
-                                    <MdVideocam color={theme.colors.success} />
-                                ) : (
-                                    <MdVideocamOff
-                                        color={theme.colors.neutral}
-                                    />
-                                )}
-                            </IconButton>
-                        </Tooltip>
-
-                        {canHangup && (
-                            <Tooltip
-                                title={
-                                    <TooltipWrapper>Disconnect</TooltipWrapper>
-                                }
-                                placement="right"
-                            >
-                                <AnimatedIconButton
-                                    initial={{ rotate: 90 }}
-                                    whileHover={{
-                                        rotate: 0
-                                    }}
-                                    transition={{
-                                        duration: -2.5,
-                                        ease: "easeOut"
-                                    }}
-                                    size="sm"
-                                    onClick={() => app.voice.leave()}
-                                >
-                                    <ImPhoneHangUp />
-                                </AnimatedIconButton>
-                            </Tooltip>
-                        )}
-                    </Stack>
+          <Tooltip
+            placement={inFeed ? "right" : "top"}
+            title={
+              <TooltipWrapper>
+                {cameraEnabled ? "Disable camera" : "Enable camera"}
+              </TooltipWrapper>
+            }
+          >
+            <Stack justifyContent="space-between" alignItems="center">
+              <IconButton
+                variant="soft"
+                onClick={() => app.voice.toggleCamera()}
+                css={{
+                  flex: 1
+                }}
+              >
+                {cameraEnabled ? (
+                  <VideoCameraIcon weight="fill" color={theme.colors.success} />
+                ) : (
+                  <VideoCameraSlashIcon weight="fill" />
                 )}
+              </IconButton>
+            </Stack>
+          </Tooltip>
+        </Paper>
+      )}
 
-                <Stack
-                    alignItems="center"
-                    direction={!inFeed ? "row" : "column"}
-                    spacing={!inFeed ? 2.5 : undefined}
-                    mr={!inFeed ? 1.25 : undefined}
-                >
-                    <Tooltip
-                        placement={!inFeed ? "top" : "right"}
-                        title={<TooltipWrapper>Mute</TooltipWrapper>}
-                    >
-                        <IconButton
-                            variant="plain"
-                            onClick={() => {
-                                if (app.voice.spaceMute) {
-                                    openModal(
-                                        "space-muted",
-                                        <SpaceModerated type="muted" />
-                                    );
-                                    return;
-                                }
+      <Paper
+        justifyContent="space-between"
+        alignItems="center"
+        px={2.5}
+        py={1.25}
+        elevation={app.settings?.preferEmbossed ? 5 : 1}
+        color="neutral"
+        borderTop={showVoicePill ? "0 !important" : undefined}
+        width="100%"
+        zIndex={theme.zIndex.appBar + 1}
+        spacing={1.25}
+        {...(showVoicePill && !inFeed
+          ? {
+              borderBottomRightRadius: 15,
+              borderBottomLeftRadius: 15
+            }
+          : { borderRadius: 15 })}
+        {...conditionalProps}
+      >
+        <Paper
+          direction={inFeed ? "column" : "row"}
+          alignItems="center"
+          spacing={2.5}
+          width={!inFeed && showVoicePill ? "75%" : "100%"}
+          px={1}
+          py={0.25}
+          borderRadius={6}
+          variant={hovered ? "soft" : "plain"}
+          color={formatColor(theme.colors.neutral, { alpha: 90 })}
+          onMouseEnter={() => setHovered(true)}
+          onMouseLeave={() => setHovered(false)}
+          onClick={(event) => {
+            const rect = event.currentTarget.getBoundingClientRect();
 
-                                app.voice.setMute(
-                                    !app.settings?.preferredSelfMute
-                                );
-                            }}
-                            size="sm"
-                        >
-                            {app.voice.effectiveSelfMute ? (
-                                <FaMicrophoneSlash
-                                    color={
-                                        app.voice.spaceMute
-                                            ? theme.colors.danger
-                                            : undefined
-                                    }
-                                />
-                            ) : (
-                                <FaMicrophone />
-                            )}
-                        </IconButton>
-                    </Tooltip>
-                    <Tooltip
-                        placement={!inFeed ? "top" : "right"}
-                        title={<TooltipWrapper>Deafen</TooltipWrapper>}
-                    >
-                        <IconButton
-                            variant="plain"
-                            onClick={() => {
-                                if (app.voice.spaceDeaf) {
-                                    openModal(
-                                        "space-deafened",
-                                        <SpaceModerated type="deafened" />
-                                    );
-                                    return;
-                                }
-                                app.voice.setDeaf(
-                                    !app.settings?.preferredSelfDeaf
-                                );
-                            }}
-                            size="sm"
-                        >
-                            {app.voice.effectiveSelfDeaf ? (
-                                <MdHeadsetOff
-                                    color={
-                                        app.voice.spaceDeaf
-                                            ? theme.colors.danger
-                                            : undefined
-                                    }
-                                />
-                            ) : (
-                                <MdHeadset />
-                            )}
-                        </IconButton>
-                    </Tooltip>
+            openContextMenu(
+              event,
+              {
+                id: generateMenuIDs.user(account.id),
+                type: "account",
+                account
+              },
+              {
+                x: inFeed ? Math.round(rect.left + 55) : Math.round(rect.left),
+                y: inFeed
+                  ? Math.round(rect.top + 10)
+                  : Math.round(rect.bottom - 120)
+              }
+            );
+          }}
+          css={{
+            cursor: "pointer",
+            userSelect: "none",
+            transition: "background-color 0.2s"
+          }}
+        >
+          <UserAvatar user={account} size={48} badge />
+          <Stack direction="column">
+            <Typography
+              textAlign={inFeed ? "center" : undefined}
+              level="body-sm"
+            >
+              {account.displayName}
+            </Typography>
+            {account.presence?.activities.length === 0 &&
+              account.globalName && (
+                <Typography level="body-xs" textColor="muted">
+                  {account.username}
+                </Typography>
+              )}
+            {account.presence && (
+              <SmallActivityStatus
+                vertical={inFeed}
+                presence={account.presence}
+              />
+            )}
+          </Stack>
+        </Paper>
 
-                    <Tooltip
-                        placement={!inFeed ? "top" : "right"}
-                        title={<TooltipWrapper>Settings</TooltipWrapper>}
-                    >
-                        <IconButton
-                            onClick={() =>
-                                openModal(
-                                    "user-settings",
-                                    <UserSettingsModal />
-                                )
-                            }
-                            variant="plain"
-                            size="sm"
-                        >
-                            <FaCog />
-                        </IconButton>
-                    </Tooltip>
-                </Stack>
-            </Paper>
+        {inFeed && showVoicePill && (
+          <Stack direction="column" spacing={1.25} alignItems="center">
+            <Tooltip
+              title={
+                <TooltipWrapper>
+                  <Stack direction="column" spacing={0.5}>
+                    <Typography level="body-sm" color={voiceTitleColor}>
+                      {voiceTitle}
+                    </Typography>
+                    {voiceSubtitle && (
+                      <Typography level="body-xs" textColor="muted">
+                        {voiceSubtitle}
+                      </Typography>
+                    )}
+                  </Stack>
+                </TooltipWrapper>
+              }
+              placement="right"
+            >
+              <IconButton variant="plain" color={voiceTitleColor}>
+                <HeadphonesIcon weight="fill" />
+              </IconButton>
+            </Tooltip>
+
+            <Tooltip
+              placement="right"
+              title={
+                <TooltipWrapper>
+                  {cameraEnabled ? "Turn off camera" : "Turn on camera"}
+                </TooltipWrapper>
+              }
+            >
+              <IconButton
+                variant="plain"
+                onClick={() => app.voice.toggleCamera()}
+              >
+                {cameraEnabled ? (
+                  <VideoCameraIcon weight="fill" color={theme.colors.success} />
+                ) : (
+                  <VideoCameraSlashIcon
+                    weight="fill"
+                    color={theme.colors.neutral}
+                  />
+                )}
+              </IconButton>
+            </Tooltip>
+
+            {canHangup && (
+              <Tooltip
+                title={<TooltipWrapper>Disconnect</TooltipWrapper>}
+                placement="right"
+              >
+                <IconButton onClick={() => app.voice.leave()}>
+                  <PhoneIcon
+                    css={{
+                      transform: "rotate(135deg)"
+                    }}
+                    weight="fill"
+                  />
+                </IconButton>
+              </Tooltip>
+            )}
+          </Stack>
+        )}
+
+        <Stack
+          alignItems="center"
+          direction={inFeed ? "column" : "row"}
+          spacing={inFeed ? undefined : 0.25}
+          mr={inFeed ? undefined : 1.25}
+          flexShrink={0}
+        >
+          <Tooltip
+            placement={inFeed ? "right" : "top"}
+            title={
+              <TooltipWrapper>
+                {app.voice.spaceMute
+                  ? "Space Muted"
+                  : app.voice.effectiveSelfMute
+                    ? "Muted"
+                    : "Mute"}
+              </TooltipWrapper>
+            }
+          >
+            <IconButton
+              variant="plain"
+              onClick={() => {
+                if (app.voice.spaceMute) {
+                  openModal("space-muted", <SpaceModerated type="muted" />);
+                  return;
+                }
+
+                app.voice.setMute(!app.settings?.preferredSelfMute);
+              }}
+            >
+              {app.voice.effectiveSelfMute ? (
+                <MicrophoneSlashIcon
+                  weight="fill"
+                  color={app.voice.spaceMute ? theme.colors.danger : undefined}
+                />
+              ) : (
+                <MicrophoneIcon weight="fill" />
+              )}
+            </IconButton>
+          </Tooltip>
+          <Tooltip
+            placement={inFeed ? "right" : "top"}
+            title={
+              <TooltipWrapper>
+                {app.voice.spaceDeaf
+                  ? "Space Deafened"
+                  : app.voice.effectiveSelfDeaf
+                    ? "Deafened"
+                    : "Deafen"}
+              </TooltipWrapper>
+            }
+          >
+            <IconButton
+              variant="plain"
+              onClick={() => {
+                if (app.voice.spaceDeaf) {
+                  openModal(
+                    "space-deafened",
+                    <SpaceModerated type="deafened" />
+                  );
+                  return;
+                }
+                app.voice.setDeaf(!app.settings?.preferredSelfDeaf);
+              }}
+            >
+              {app.voice.effectiveSelfDeaf ? (
+                <HeadphonesOffIcon
+                  weight="fill"
+                  color={app.voice.spaceDeaf ? theme.colors.danger : undefined}
+                />
+              ) : (
+                <HeadphonesIcon weight="fill" />
+              )}
+            </IconButton>
+          </Tooltip>
+
+          <Tooltip
+            placement={inFeed ? "right" : "top"}
+            title={<TooltipWrapper>Settings</TooltipWrapper>}
+          >
+            <IconButton
+              onClick={() => openModal("user-settings", <UserSettingsModal />)}
+              variant="plain"
+            >
+              <GearIcon weight="fill" />
+            </IconButton>
+          </Tooltip>
         </Stack>
-    );
+      </Paper>
+    </Stack>
+  );
 });

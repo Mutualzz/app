@@ -1,201 +1,245 @@
 import type { APIUserSettings, AppMode, Snowflake } from "@mutualzz/types";
 import { ObservableOrderedSet } from "@utils/ObservableOrderedSet";
-import { makeAutoObservable } from "mobx";
+import { makeAutoObservable, observable } from "mobx";
 import type { AppStore } from "./App.store";
 import { makePersistable } from "mobx-persist-store";
 
 type SettingsPatch = Omit<APIUserSettings, "updatedAt">;
 
 export class AccountSettingsStore {
-    currentTheme?: string | null;
-    currentIcon?: string | null;
-    preferredMode: AppMode;
-    preferEmbossed: boolean = true;
-    spacePositions: ObservableOrderedSet<string>;
+  currentTheme?: string | null;
+  currentIcon?: string | null;
+  preferredMode: AppMode;
+  preferEmbossed: boolean = true;
+  spacePositions: ObservableOrderedSet<string>;
 
-    preferredSelfMute = false;
-    preferredSelfDeaf = false;
+  preferredSelfMute = false;
+  preferredSelfDeaf = false;
 
-    updatedAt: Date;
+  favoriteEmojis = observable.array<string>([]);
+  favoriteGifs = observable.array<string>([]);
 
-    private lastSyncedHash: string;
-    private syncIntervalId?: ReturnType<typeof setInterval>;
+  updatedAt: Date;
 
-    constructor(
-        private readonly app: AppStore,
-        settings: APIUserSettings
-    ) {
-        this.currentTheme = settings.currentTheme;
-        this.currentIcon = settings.currentIcon;
-        this.preferredMode = settings.preferredMode;
-        this.spacePositions = new ObservableOrderedSet(
-            settings.spacePositions.map(String)
-        );
-        this.preferEmbossed = settings.preferEmbossed;
-        this.updatedAt = new Date(settings.updatedAt);
+  private lastSyncedHash: string;
+  private syncIntervalId?: ReturnType<typeof setInterval>;
 
-        this.preferredSelfMute = settings.preferredSelfMute;
-        this.preferredSelfDeaf = settings.preferredSelfDeaf;
+  constructor(
+    private readonly app: AppStore,
+    settings: APIUserSettings
+  ) {
+    this.currentTheme = settings.currentTheme;
+    this.currentIcon = settings.currentIcon;
+    this.preferredMode = settings.preferredMode;
+    this.spacePositions = new ObservableOrderedSet(
+      settings.spacePositions.map(String)
+    );
+    this.preferEmbossed = settings.preferEmbossed;
+    this.updatedAt = new Date(settings.updatedAt);
 
-        this.lastSyncedHash = this.computeHash(this.getSyncPayload());
+    this.preferredSelfMute = settings.preferredSelfMute;
+    this.preferredSelfDeaf = settings.preferredSelfDeaf;
 
-        makeAutoObservable(this, {}, { autoBind: true });
+    this.lastSyncedHash = this.computeHash(this.getSyncPayload());
 
-        makePersistable(this, {
-            name: "AccountSettingsStore",
-            properties: [
-                "currentTheme",
-                "currentIcon",
-                "preferredMode",
-                "preferEmbossed",
-                "preferredSelfMute",
-                "preferredSelfDeaf",
-                {
-                    key: "spacePositions",
-                    serialize: (v: unknown) => {
-                        if (v instanceof ObservableOrderedSet)
-                            return v.toArray();
-                        if (Array.isArray(v)) return v.map(String);
-                        if (
-                            v &&
-                            typeof v === "object" &&
-                            "toArray" in (v as any)
-                        )
-                            return (v as any).toArray().map(String);
-                        return [];
-                    },
-                    deserialize: (v: unknown) =>
-                        new ObservableOrderedSet<string>(
-                            Array.isArray(v) ? v.map(String) : []
-                        )
-                },
-                {
-                    key: "updatedAt",
-                    serialize: (d: unknown) =>
-                        d instanceof Date ? d.toISOString() : d,
-                    deserialize: (v: unknown) => new Date(v as any)
-                }
-            ],
-            storage: localStorage
-        });
-    }
+    makeAutoObservable(this, {}, { autoBind: true });
 
-    private get isDirty(): boolean {
-        return this.computeHash(this.getSyncPayload()) !== this.lastSyncedHash;
-    }
+    makePersistable(this, {
+      name: "AccountSettingsStore",
+      properties: [
+        "currentTheme",
+        "currentIcon",
+        "preferredMode",
+        "preferEmbossed",
+        "preferredSelfMute",
+        "preferredSelfDeaf",
+        {
+          key: "favoriteEmojis",
+          serialize: (v: unknown) => (Array.isArray(v) ? [...v] : []),
+          deserialize: (v: unknown) =>
+            observable.array(Array.isArray(v) ? v : [])
+        },
+        {
+          key: "favoriteGifs",
+          serialize: (v: unknown) => (Array.isArray(v) ? [...v] : []),
+          deserialize: (v: unknown) =>
+            observable.array(Array.isArray(v) ? v : [])
+        },
+        {
+          key: "spacePositions",
+          serialize: (v: unknown) => {
+            if (v instanceof ObservableOrderedSet) return v.toArray();
+            if (Array.isArray(v)) return v.map(String);
+            if (v && typeof v === "object" && "toArray" in (v as any))
+              return (v as any).toArray().map(String);
+            return [];
+          },
+          deserialize: (v: unknown) =>
+            new ObservableOrderedSet<string>(
+              Array.isArray(v) ? v.map(String) : []
+            )
+        },
+        {
+          key: "updatedAt",
+          serialize: (d: unknown) => (d instanceof Date ? d.toISOString() : d),
+          deserialize: (v: unknown) => new Date(v as any)
+        }
+      ],
+      storage: localStorage
+    });
+  }
 
-    setPreferEmbossed(prefer: boolean) {
-        this.preferEmbossed = prefer;
-    }
+  private get isDirty(): boolean {
+    return this.computeHash(this.getSyncPayload()) !== this.lastSyncedHash;
+  }
 
-    togglePreferEmbossed() {
-        this.preferEmbossed = !this.preferEmbossed;
-    }
+  setPreferEmbossed(prefer: boolean) {
+    this.preferEmbossed = prefer;
+  }
 
-    setCurrentTheme(theme: string | null) {
-        this.currentTheme = theme;
-    }
+  togglePreferEmbossed() {
+    this.preferEmbossed = !this.preferEmbossed;
+  }
 
-    setPreferredMode(mode: AppMode) {
-        this.preferredMode = mode;
-    }
+  setCurrentTheme(theme: string | null) {
+    this.currentTheme = theme;
+  }
 
-    setCurrentIcon(icon?: string | null) {
-        this.currentIcon = icon;
-    }
+  toggleFavoriteEmoji(unified: string, skinTone: string | null = null) {
+    const key = unified.startsWith("custom:")
+      ? unified
+      : `${unified}:${skinTone ?? ""}`;
+    const idx = this.favoriteEmojis.indexOf(key);
+    if (idx === -1) {
+      this.favoriteEmojis.push(key);
+    } else this.favoriteEmojis.splice(idx, 1);
+  }
 
-    update(settings: Partial<APIUserSettings>) {
-        if (settings.spacePositions != undefined)
-            this.spacePositions.replace(settings.spacePositions.map(String));
+  isFavoriteEmoji(unified: string, skinTone: string | null = null) {
+    const key = unified.startsWith("custom:")
+      ? unified
+      : `${unified}:${skinTone ?? ""}`;
+    return this.favoriteEmojis.includes(key);
+  }
 
-        if (settings.currentTheme != undefined)
-            this.currentTheme = settings.currentTheme;
+  toggleFavoriteGif(url: string) {
+    const idx = this.favoriteGifs.indexOf(url);
+    if (idx === -1) {
+      this.favoriteGifs.push(url);
+    } else this.favoriteGifs.splice(idx, 1);
+  }
 
-        if (settings.currentIcon != undefined)
-            this.currentIcon = settings.currentIcon;
+  isFavoriteGif(url: string) {
+    return this.favoriteGifs.includes(url);
+  }
 
-        if (settings.preferredMode != undefined)
-            this.preferredMode = settings.preferredMode;
+  setPreferredMode(mode: AppMode) {
+    this.preferredMode = mode;
+  }
 
-        if (settings.updatedAt != undefined)
-            this.updatedAt = new Date(settings.updatedAt);
+  setCurrentIcon(icon?: string | null) {
+    this.currentIcon = icon;
+  }
 
-        if (settings.preferredSelfMute != undefined)
-            this.preferredSelfMute = settings.preferredSelfMute;
+  update(settings: Partial<APIUserSettings>) {
+    if (settings.spacePositions != undefined)
+      this.spacePositions.replace(settings.spacePositions.map(String));
 
-        if (settings.preferredSelfDeaf != undefined)
-            this.preferredSelfDeaf = settings.preferredSelfDeaf;
+    if (settings.currentTheme != undefined)
+      this.currentTheme = settings.currentTheme;
 
-        this.lastSyncedHash = this.computeHash(this.getSyncPayload());
-    }
+    if (settings.currentIcon != undefined)
+      this.currentIcon = settings.currentIcon;
 
-    setPreferredSelfMute(value: boolean) {
-        this.preferredSelfMute = value;
-    }
+    if (settings.preferredMode != undefined)
+      this.preferredMode = settings.preferredMode;
 
-    setPreferredSelfDeaf(value: boolean) {
-        this.preferredSelfDeaf = value;
-    }
+    if (settings.updatedAt != undefined)
+      this.updatedAt = new Date(settings.updatedAt);
 
-    startSyncing() {
-        this.syncIntervalId = setInterval(
-            () => {
-                this.sync();
-            },
-            10 * 60 * 1000
-        ); // Sync every 10 minutes, send only if there are changes
-    }
+    if (settings.preferredSelfMute != undefined)
+      this.preferredSelfMute = settings.preferredSelfMute;
 
-    stopSyncing() {
-        clearInterval(this.syncIntervalId);
-    }
+    if (settings.preferredSelfDeaf != undefined)
+      this.preferredSelfDeaf = settings.preferredSelfDeaf;
 
-    addPosition(spaceId: Snowflake) {
-        this.spacePositions.addFirst(spaceId);
-    }
+    if (settings.favoriteEmojis != undefined)
+      this.favoriteEmojis = observable.array(settings.favoriteEmojis);
+    if (settings.favoriteGifs != undefined)
+      this.favoriteGifs = observable.array(settings.favoriteGifs);
 
-    removePosition(spaceId: Snowflake) {
-        this.spacePositions.delete(spaceId);
-    }
+    this.lastSyncedHash = this.computeHash(this.getSyncPayload());
+  }
 
-    reorderSpaces(newOrder: Snowflake[]) {
-        this.spacePositions.clear();
-        newOrder.forEach((id) => this.spacePositions.addLast(id));
-    }
+  setPreferredSelfMute(value: boolean) {
+    this.preferredSelfMute = value;
+  }
 
-    moveSpace(fromIndex: number, toIndex: number) {
-        const items = this.spacePositions.toArray();
-        const [removed] = items.splice(fromIndex, 1);
-        items.splice(toIndex, 0, removed);
-        this.reorderSpaces(items);
-    }
+  setPreferredSelfDeaf(value: boolean) {
+    this.preferredSelfDeaf = value;
+  }
 
-    async sync() {
-        if (!this.app.account) return;
-        if (!this.isDirty) return;
+  startSyncing() {
+    this.syncIntervalId = setInterval(
+      () => {
+        this.sync();
+      },
+      10 * 60 * 1000
+    ); // Sync every 10 minutes, send only if there are changes
+  }
 
-        const payload = this.getSyncPayload();
+  stopSyncing() {
+    clearInterval(this.syncIntervalId);
+  }
 
-        const res = await this.app.rest
-            .patch<APIUserSettings, SettingsPatch>("/@me/settings", payload)
-            .catch(() => null);
+  addPosition(spaceId: Snowflake) {
+    this.spacePositions.addFirst(spaceId);
+  }
 
-        if (res) this.update(res);
-    }
+  removePosition(spaceId: Snowflake) {
+    this.spacePositions.delete(spaceId);
+  }
 
-    private getSyncPayload(): SettingsPatch {
-        return {
-            spacePositions: this.spacePositions.toArray(),
-            preferredMode: this.preferredMode,
-            preferEmbossed: this.preferEmbossed,
-            currentTheme: this.currentTheme,
-            currentIcon: this.currentIcon,
-            preferredSelfMute: this.preferredSelfMute,
-            preferredSelfDeaf: this.preferredSelfDeaf
-        };
-    }
+  reorderSpaces(newOrder: Snowflake[]) {
+    this.spacePositions.clear();
+    newOrder.forEach((id) => this.spacePositions.addLast(id));
+  }
 
-    private computeHash(payload: SettingsPatch): string {
-        return JSON.stringify(payload);
-    }
+  moveSpace(fromIndex: number, toIndex: number) {
+    const items = this.spacePositions.toArray();
+    const [removed] = items.splice(fromIndex, 1);
+    items.splice(toIndex, 0, removed);
+    this.reorderSpaces(items);
+  }
+
+  async sync() {
+    if (!this.app.account) return;
+    if (!this.isDirty) return;
+
+    const payload = this.getSyncPayload();
+
+    const res = await this.app.rest
+      .patch<APIUserSettings, SettingsPatch>("/@me/settings", payload)
+      .catch(() => null);
+
+    if (res) this.update(res);
+  }
+
+  private getSyncPayload(): SettingsPatch {
+    return {
+      spacePositions: this.spacePositions.toArray(),
+      preferredMode: this.preferredMode,
+      preferEmbossed: this.preferEmbossed,
+      currentTheme: this.currentTheme,
+      currentIcon: this.currentIcon,
+      preferredSelfMute: this.preferredSelfMute,
+      preferredSelfDeaf: this.preferredSelfDeaf,
+      favoriteEmojis: [...this.favoriteEmojis],
+      favoriteGifs: [...this.favoriteGifs]
+    };
+  }
+
+  private computeHash(payload: SettingsPatch): string {
+    return JSON.stringify(payload);
+  }
 }

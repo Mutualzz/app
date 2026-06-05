@@ -2,8 +2,8 @@ import {
     getCustomEmoji,
     getEmoji,
     insertCustomEmoji,
-    insertEmoji,
-} from "@utils/emojis";
+    insertEmoji
+} from "@utils/emojis/emojis";
 import { slateToMarkdown } from "@utils/slateToMarkdown";
 import emojiRegex from "emojibase-regex";
 import baseEmoticonRegex from "emojibase-regex/emoticon";
@@ -30,7 +30,7 @@ export const withEmojis = (editor: Editor) => {
         isInline,
         isVoid,
         markableVoid,
-        insertText,
+        insertText
     } = editor;
 
     editor.isInline = (element: Element) => {
@@ -89,12 +89,12 @@ export const withEmojis = (editor: Editor) => {
                     if (distance <= caretOffset) {
                         const shortcodeStart = editor.before(selection, {
                             unit: "character",
-                            distance,
+                            distance
                         });
                         if (shortcodeStart) {
                             const shortcodeRange: Range = {
                                 anchor: shortcodeStart,
-                                focus: selection.anchor,
+                                focus: selection.anchor
                             };
                             editor.select(shortcodeRange);
                             editor.delete();
@@ -123,13 +123,13 @@ export const withEmojis = (editor: Editor) => {
                 if (distance <= caretOffset) {
                     const shortcodeStart = editor.before(selection, {
                         unit: "character",
-                        distance,
+                        distance
                     });
 
                     if (shortcodeStart) {
                         const shortcodeRange: Range = {
                             anchor: shortcodeStart,
-                            focus: selection.anchor,
+                            focus: selection.anchor
                         };
 
                         editor.select(shortcodeRange);
@@ -149,7 +149,7 @@ export const withEmojis = (editor: Editor) => {
                         editor.select(selection.focus);
                         insertEmoji(editor, emoji);
                         const pointAfter = editor.after(selection.focus, {
-                            unit: "character",
+                            unit: "character"
                         });
                         if (pointAfter) {
                             editor.select(pointAfter);
@@ -173,13 +173,13 @@ export const withEmojis = (editor: Editor) => {
                     if (distance <= caretOffset) {
                         const emoticonStart = editor.before(selection, {
                             unit: "character",
-                            distance,
+                            distance
                         });
 
                         if (emoticonStart) {
                             const emoticonRange: Range = {
                                 anchor: emoticonStart,
-                                focus: selection.anchor,
+                                focus: selection.anchor
                             };
 
                             editor.select(emoticonRange);
@@ -257,14 +257,14 @@ export const withEmojis = (editor: Editor) => {
             allMatches.push({
                 index: match.index,
                 text: match[0],
-                isCustom: false,
+                isCustom: false
             });
         }
         while ((match = customEmojiPattern.exec(text)) !== null) {
             allMatches.push({
                 index: match.index,
                 text: match[0],
-                isCustom: true,
+                isCustom: true
             });
         }
         allMatches.sort((a, b) => a.index - b.index);

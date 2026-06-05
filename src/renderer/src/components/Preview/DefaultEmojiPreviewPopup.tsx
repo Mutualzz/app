@@ -39,7 +39,7 @@ export const DefaultEmojiPreviewPopup = observer(
                         draggable={false}
                         css={{
                             width: 48,
-                            height: 48,
+                            height: 48
                         }}
                     />
 
@@ -55,5 +55,5 @@ export const DefaultEmojiPreviewPopup = observer(
                 </Stack>
             </Paper>
         );
-    },
+    }
 );

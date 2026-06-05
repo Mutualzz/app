@@ -8,155 +8,143 @@ import { observer } from "mobx-react-lite";
 import type { HTMLAttributes, PropsWithChildren } from "react";
 
 interface Props extends PropsWithChildren, HTMLAttributes<HTMLDivElement> {
-    header?: boolean;
-    highlight?: boolean | string | null;
+  header?: boolean;
+  highlight?: boolean | string | null;
 }
 
 export const MessageBase = styled("div")<Props>(
-    ({ header, highlight, theme }) => ({
-        display: "flex",
-        overflow: "hidden",
-        flexDirection: "row",
-        ...(!header && {
-            alignItems: "center"
-        }),
-        ...(header && {
-            marginTop: 10
-        }),
-        paddingTop: "0.2rem",
-        paddingBottom: "0.2rem",
-        ...(highlight && {
-            borderLeft: `1px solid ${typeof highlight === "string" ? highlight : theme.colors.info}`,
-            background: `linear-gradient(135deg, ${formatColor(
-                typeof highlight === "string" ? highlight : theme.colors.info,
-                { alpha: 12, format: "hexa" }
-            )} 0%, rgba(255, 255, 255, 0) 100%)`
-        })
+  ({ header, highlight, theme }) => ({
+    display: "flex",
+    overflow: "hidden",
+    flexDirection: "row",
+    ...(!header && {
+      alignItems: "center"
+    }),
+    ...(header && {
+      marginTop: 10
+    }),
+    paddingTop: "0.2rem",
+    paddingBottom: "0.2rem",
+    ...(highlight && {
+      borderLeft: `2px solid ${typeof highlight === "string" ? highlight : theme.colors.info}`,
+      background: `linear-gradient(135deg, ${formatColor(
+        typeof highlight === "string" ? highlight : theme.colors.info,
+        { alpha: 12, format: "hexa" }
+      )} 0%, rgba(255, 255, 255, 0) 100%)`
     })
+  })
 );
 
 export const MessageInfo = styled("div")(({ theme }) => ({
-    width: 62,
-    display: "flex",
-    flexShrink: 0,
-    paddingTop: 2,
-    flexDirection: "row",
-    justifyContent: "center",
+  width: 62,
+  display: "flex",
+  flexShrink: 0,
+  paddingTop: 2,
+  flexDirection: "row",
+  justifyContent: "center",
 
-    "time, .edited": {
-        opacity: 0,
-        fontSize: 12,
-        color: theme.typography.colors.muted
-    }
+  "time, .edited": {
+    opacity: 0,
+    fontSize: 12,
+    color: theme.typography.colors.muted
+  }
 }));
 
 export const MessageContent = styled("div")({
-    position: "relative",
-    minWidth: 0,
-    display: "flex",
-    flexDirection: "column",
-    justifyContent: "center",
-    paddingRight: 48,
-    wordWrap: "break-word",
-    flex: 1
+  position: "relative",
+  minWidth: 0,
+  display: "flex",
+  flexDirection: "column",
+  justifyContent: "center",
+  paddingRight: 48,
+  wordWrap: "break-word",
+  flex: 1
 });
 
 export const MessageContentText = styled("div")<{
-    sending?: boolean;
+  sending?: boolean;
 }>(({ sending }) => ({
-    ...(sending && {
-        opacity: 0.5
-    })
+  ...(sending && {
+    opacity: 0.5
+  })
 }));
 
 export const DetailsBase = styled("div")(({ theme }) => ({
-    flexShrink: 0,
-    fontSize: 12,
-    display: "inline-flex",
-    color: theme.typography.colors.secondary,
-    paddingLeft: 4,
-    alignSelf: "center",
+  flexShrink: 0,
+  fontSize: 12,
+  display: "inline-flex",
+  color: theme.typography.colors.secondary,
+  paddingLeft: 4,
+  alignSelf: "center",
 
-    ".edited": {
-        cursor: "default",
-        userSelect: "none"
-    }
+  ".edited": {
+    cursor: "default",
+    userSelect: "none"
+  }
 }));
 
 export const MessageDetails = observer(
-    ({
-        message,
-        position
-    }: {
-        message: MessageLike;
-        position: "left" | "top";
-    }) => {
-        if (position === "left") {
-            if (message instanceof Message && message.edited) {
-                return (
-                    <Stack direction="column">
-                        <Tooltip
-                            placement="top"
-                            content={
-                                <TooltipWrapper>
-                                    {dayjs(message.createdAt).format(
-                                        "dddd, MMMM D, YYYY h:mm A"
-                                    )}
-                                </TooltipWrapper>
-                            }
-                        >
-                            <time
-                                className="copyTime"
-                                dateTime={message.createdAt.toISOString()}
-                            >
-                                {dayjs(message.createdAt).format("h:mm A")}
-                            </time>
-                        </Tooltip>
-                    </Stack>
-                );
-            }
-
-            return (
-                <Tooltip
-                    placement="left"
-                    content={
-                        <TooltipWrapper>
-                            {dayjs(message.createdAt).format(
-                                "dddd, MMMM D, YYYY h:mm A"
-                            )}
-                        </TooltipWrapper>
-                    }
-                >
-                    <time dateTime={message.createdAt.toISOString()}>
-                        {dayjs(message.createdAt).format("h:mm A")}
-                    </time>
-                </Tooltip>
-            );
-        }
-
+  ({
+    message,
+    position
+  }: {
+    message: MessageLike;
+    position: "left" | "top";
+  }) => {
+    if (position === "left") {
+      if (message instanceof Message && message.edited) {
         return (
-            <DetailsBase>
-                <Tooltip
-                    placement="top"
-                    content={
-                        <TooltipWrapper>
-                            {dayjs(message.createdAt).format(
-                                "dddd, MMMM D, YYYY h:mm A"
-                            )}
-                        </TooltipWrapper>
-                    }
-                >
-                    <time
-                        className="copyTime"
-                        dateTime={message.createdAt.toISOString()}
-                    >
-                        {dayjs(message.createdAt).calendar(
-                            undefined,
-                            calendarStrings
-                        )}
-                    </time>
-                </Tooltip>
-            </DetailsBase>
+          <Stack direction="column">
+            <Tooltip
+              placement="top"
+              content={
+                <TooltipWrapper>
+                  {dayjs(message.createdAt).format("dddd, MMMM D, YYYY h:mm A")}
+                </TooltipWrapper>
+              }
+            >
+              <time
+                className="copyTime"
+                dateTime={message.createdAt.toISOString()}
+              >
+                {dayjs(message.createdAt).format("h:mm A")}
+              </time>
+            </Tooltip>
+          </Stack>
         );
+      }
+
+      return (
+        <Tooltip
+          placement="left"
+          content={
+            <TooltipWrapper>
+              {dayjs(message.createdAt).format("dddd, MMMM D, YYYY h:mm A")}
+            </TooltipWrapper>
+          }
+        >
+          <time dateTime={message.createdAt.toISOString()}>
+            {dayjs(message.createdAt).format("h:mm A")}
+          </time>
+        </Tooltip>
+      );
     }
+
+    return (
+      <DetailsBase>
+        <Tooltip
+          placement="top"
+          content={
+            <TooltipWrapper>
+              {dayjs(message.createdAt).format("dddd, MMMM D, YYYY h:mm A")}
+            </TooltipWrapper>
+          }
+        >
+          <time className="copyTime" dateTime={message.createdAt.toISOString()}>
+            {dayjs(message.createdAt).calendar(undefined, calendarStrings)}
+          </time>
+        </Tooltip>
+      </DetailsBase>
+    );
+  }
 );

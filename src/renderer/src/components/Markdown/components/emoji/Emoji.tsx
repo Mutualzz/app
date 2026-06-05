@@ -28,7 +28,13 @@ const EmojiImage = styled("img")({
     objectFit: "contain"
 });
 
-const Emoji = ({ isEmojiOnly, url, unicode, name, ...props }: EmojiProps) => {
+export const Emoji = ({
+    isEmojiOnly,
+    url,
+    unicode,
+    name,
+    ...props
+}: EmojiProps) => {
     const { openContextMenu, isOpen, clearMenu } = useMenu();
 
     return (
@@ -68,5 +74,3 @@ const Emoji = ({ isEmojiOnly, url, unicode, name, ...props }: EmojiProps) => {
         </>
     );
 };
-
-export { Emoji };

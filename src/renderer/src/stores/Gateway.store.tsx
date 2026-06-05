@@ -1,39 +1,39 @@
 import { Logger } from "@mutualzz/logger";
 import {
-    type APIChannel,
-    APIExpression,
-    type APIInvite,
-    APIMemberRole,
-    APIMessage,
-    type APIPrivateUser,
-    APIRelationship,
-    APIRole,
-    type APISpace,
-    APISpaceBan,
-    APISpaceMember,
-    type APIUser,
-    type APIUserSettings,
-    ChannelType,
-    GatewayCloseCodes,
-    GatewayDispatchEvents,
-    GatewayOpcodes,
-    GatewayReadyPayload,
-    PresenceActivity,
-    PresenceSchedule,
-    PresenceStatus,
-    Snowflake
+  type APIChannel,
+  APIExpression,
+  type APIInvite,
+  APIMemberRole,
+  APIMessage,
+  type APIPrivateUser,
+  APIRelationship,
+  APIRole,
+  type APISpace,
+  APISpaceBan,
+  APISpaceMember,
+  type APIUser,
+  type APIUserSettings,
+  ChannelType,
+  GatewayCloseCodes,
+  GatewayDispatchEvents,
+  GatewayOpcodes,
+  GatewayReadyPayload,
+  PresenceActivity,
+  PresenceSchedule,
+  PresenceStatus,
+  Snowflake
 } from "@mutualzz/types";
 import { type Codec, createCodec, type Encoding } from "@utils/codec";
 import {
-    type Compression,
-    type Compressor,
-    createCompressor
+  type Compression,
+  type Compressor,
+  createCompressor
 } from "@utils/compressor";
 import { makeAutoObservable } from "mobx";
 import type { AppStore } from "./App.store";
 import {
-    buildDesktopPresenceFromProcesses,
-    type PresenceUpdateDraft
+  buildDesktopPresenceFromProcesses,
+  type PresenceUpdateDraft
 } from "../presence/gamePresence";
 import { normalizeJSON } from "@utils/JSON";
 import { isElectron } from "@utils/index";
@@ -43,10 +43,10 @@ import { MessageToast } from "@renderer/components/Toast/MessageToast";
 // We have to create our own GatewayStatus "enum" to avoid issues with SSR
 // since WebSocket is not available in the server environment.
 export const GatewayStatus = {
-    CONNECTING: 0,
-    OPEN: 1,
-    CLOSING: 2,
-    CLOSED: 3
+  CONNECTING: 0,
+  OPEN: 1,
+  CLOSING: 2,
+  CLOSED: 3
 } as const;
 
 export type GatewayStatus = (typeof GatewayStatus)[keyof typeof GatewayStatus];
@@ -54,1393 +54,1361 @@ export type GatewayStatus = (typeof GatewayStatus)[keyof typeof GatewayStatus];
 const RECONNECT_TIMEOUT = 5000;
 
 function mergeActivities(opts: {
-    processActivities: PresenceActivity[];
-    customActivity: PresenceActivity | null;
-    previousActivities: PresenceActivity[];
+  processActivities: PresenceActivity[];
+  customActivity: PresenceActivity | null;
+  previousActivities: PresenceActivity[];
 }): PresenceActivity[] {
-    const previousByName = new Map(
-        opts.previousActivities
-            .filter((a) => a.type === "playing" && a.name)
-            .map((a) => [a.name.toLowerCase(), a])
-    );
+  const previousByName = new Map(
+    opts.previousActivities
+      .filter((a) => a.type === "playing" && a.name)
+      .map((a) => [a.name.toLowerCase(), a])
+  );
 
-    const sortedGames = opts.processActivities
-        .map((act) => {
-            const prev = previousByName.get(act.name.toLowerCase());
+  const sortedGames = opts.processActivities
+    .map((act) => {
+      const prev = previousByName.get(act.name.toLowerCase());
 
-            return {
-                ...act,
-                timestamps: prev?.timestamps ?? { start: Date.now() }
-            };
-        })
-        .sort(
-            (a, b) => (b.timestamps?.start ?? 0) - (a.timestamps?.start ?? 0)
-        );
+      return {
+        ...act,
+        timestamps: prev?.timestamps ?? { start: Date.now() }
+      };
+    })
+    .sort((a, b) => (b.timestamps?.start ?? 0) - (a.timestamps?.start ?? 0));
 
-    const out: PresenceActivity[] = [];
+  const out: PresenceActivity[] = [];
 
-    if (opts.customActivity) out.push(opts.customActivity);
-    out.push(...sortedGames);
+  if (opts.customActivity) out.push(opts.customActivity);
+  out.push(...sortedGames);
 
-    return out.slice(0, 5);
+  return out.slice(0, 5);
 }
 
 function stableStringify(value: unknown) {
-    try {
-        return JSON.stringify(value);
-    } catch {
-        return "";
-    }
+  try {
+    return JSON.stringify(value);
+  } catch {
+    return "";
+  }
 }
 
 export class GatewayStore {
-    public readyState: GatewayStatus = GatewayStatus.CLOSED;
-    public events: { t: string; d: any; s: number }[] = [];
-    private socket: WebSocket | null = null;
-    private readonly logger = new Logger({ tag: "GatewayStore" });
-    private sessionId: string | null = null;
-    private sequence = 0;
-    private heartbeatInterval: number | null = null;
-    private heartbeat: ReturnType<typeof setInterval> | null = null;
-    private initialHeartbeatTimeout: ReturnType<typeof setTimeout> | null =
-        null;
-    private heartbeatAck = true;
-    private url?: string;
-    private encoding: Encoding =
-        isElectron && !import.meta.env.DEV ? "etf" : "json";
-    private compress: Compression = import.meta.env.DEV
-        ? "none"
-        : "zlib-stream";
-    private codec!: Codec;
-    private compressor!: Compressor;
-    private connectionStartTime?: number;
-    private identifyStartTime?: number;
-    private reconnectTimeout = 0;
-    private reconnecting = false;
-    private readonly dispatchHandlers = new Map<
-        string,
-        (...args: any[]) => any
-    >();
-    private presenceLoopInterval: number | null = null;
-    private lastPresenceHash: string | null = null;
-    private lazyRequestChannels = new Map<string, string[]>(); // spaceId -> channelIds
+  public readyState: GatewayStatus = GatewayStatus.CLOSED;
+  public events: { t: string; d: any; s: number }[] = [];
+  private socket: WebSocket | null = null;
+  private readonly logger = new Logger({ tag: "GatewayStore" });
+  private sessionId: string | null = null;
+  private sequence = 0;
+  private heartbeatInterval: number | null = null;
+  private heartbeat: ReturnType<typeof setInterval> | null = null;
+  private initialHeartbeatTimeout: ReturnType<typeof setTimeout> | null = null;
+  private heartbeatAck = true;
+  private url?: string;
+  private encoding: Encoding =
+    isElectron && !import.meta.env.DEV ? "etf" : "json";
+  private compress: Compression = import.meta.env.DEV ? "none" : "zlib-stream";
+  private codec!: Codec;
+  private compressor!: Compressor;
+  private connectionStartTime?: number;
+  private identifyStartTime?: number;
+  private reconnectTimeout = 0;
+  private reconnecting = false;
+  private readonly dispatchHandlers = new Map<
+    string,
+    (...args: any[]) => any
+  >();
+  private presenceLoopInterval: number | null = null;
+  private lastPresenceHash: string | null = null;
+  private lazyRequestChannels = new Map<string, string[]>(); // spaceId -> channelIds
 
-    // key: `${spaceId}:${channelId}` -> list of [start, end] ranges we have
-    private memberListRanges = new Map<string, [number, number][]>();
-    private memberListFetching = new Set<string>(); // Keys we are fetching
-    private manualDisconnect = false;
+  // key: `${spaceId}:${channelId}` -> list of [start, end] ranges we have
+  private memberListRanges = new Map<string, [number, number][]>();
+  private memberListFetching = new Set<string>(); // Keys we are fetching
+  private manualDisconnect = false;
 
-    constructor(private readonly app: AppStore) {
-        makeAutoObservable(this, {}, { autoBind: true });
+  constructor(private readonly app: AppStore) {
+    makeAutoObservable(this, {}, { autoBind: true });
+  }
+
+  requestMemberListRange(spaceId: string, channelId: string, pageSize = 50) {
+    if (!spaceId || !channelId) return;
+
+    const key = `${spaceId}:${channelId}`;
+    if (this.memberListFetching.has(key)) return;
+
+    let loadedCount: number;
+    try {
+      const space = this.app.spaces.get(spaceId);
+      const channel = this.app.channels.get(channelId);
+      const listStore =
+        space && channel ? space.memberLists.get(channel.listId) : null;
+
+      if (listStore)
+        loadedCount = listStore.list.reduce(
+          (acc: number, g) => acc + (g.items?.length ?? 0),
+          0
+        );
+      else {
+        const prevRanges = this.memberListRanges.get(key) ?? [];
+        loadedCount = prevRanges.reduce((acc, r) => acc + (r[1] - r[0] + 1), 0);
+      }
+    } catch {
+      loadedCount = 0;
     }
 
-    requestMemberListRange(spaceId: string, channelId: string, pageSize = 50) {
-        if (!spaceId || !channelId) return;
+    const nextStart = loadedCount;
+    const nextEnd = Math.max(nextStart, nextStart + pageSize - 1);
 
-        const key = `${spaceId}:${channelId}`;
-        if (this.memberListFetching.has(key)) return;
+    // Avoid requesting zero-length page
+    if (nextEnd < nextStart) return;
 
-        let loadedCount: number;
-        try {
-            const space = this.app.spaces.get(spaceId);
-            const channel = this.app.channels.get(channelId);
-            const listStore =
-                space && channel ? space.memberLists.get(channel.listId) : null;
+    const prev = this.memberListRanges.get(key) ?? [];
 
-            if (listStore)
-                loadedCount = listStore.list.reduce(
-                    (acc: number, g) => acc + (g.items?.length ?? 0),
-                    0
-                );
-            else {
-                const prevRanges = this.memberListRanges.get(key) ?? [];
-                loadedCount = prevRanges.reduce(
-                    (acc, r) => acc + (r[1] - r[0] + 1),
-                    0
-                );
-            }
-        } catch {
-            loadedCount = 0;
-        }
-
-        const nextStart = loadedCount;
-        const nextEnd = Math.max(nextStart, nextStart + pageSize - 1);
-
-        // Avoid requesting zero-length page
-        if (nextEnd < nextStart) return;
-
-        const prev = this.memberListRanges.get(key) ?? [];
-
-        // if any existing range already covers nextStart, skip
-        for (const r of prev) {
-            if (r[0] <= nextStart && r[1] >= nextStart) return;
-        }
-
-        const newRanges = [...prev, [nextStart, nextEnd]];
-        this.memberListRanges.set(key, newRanges as [number, number][]);
-
-        this.memberListFetching.add(key);
-
-        const payload = {
-            spaceId,
-            channels: {
-                [channelId]: newRanges
-            }
-        };
-
-        try {
-            this.send({
-                op: GatewayOpcodes.LazyRequest,
-                d: payload
-            });
-        } finally {
-            setTimeout(() => this.memberListFetching.delete(key), 250);
-        }
+    // if any existing range already covers nextStart, skip
+    for (const r of prev) {
+      if (r[0] <= nextStart && r[1] >= nextStart) return;
     }
 
-    async connect(url: string = import.meta.env.VITE_WS_URL) {
-        if (!this.url) {
-            const newUrl = new URL(url);
-            newUrl.searchParams.set("encoding", this.encoding);
-            newUrl.searchParams.set("compress", this.compress);
-            this.url = newUrl.href;
-        }
+    const newRanges = [...prev, [nextStart, nextEnd]];
+    this.memberListRanges.set(key, newRanges as [number, number][]);
 
-        this.logger.debug(`[Connect] Gateway URL ${this.url}`);
-        this.connectionStartTime = Date.now();
+    this.memberListFetching.add(key);
 
-        this.manualDisconnect = false;
-        this.socket = new WebSocket(this.url);
-        this.socket.binaryType = "arraybuffer";
-        this.readyState = GatewayStatus.CONNECTING;
+    const payload = {
+      spaceId,
+      channels: {
+        [channelId]: newRanges
+      }
+    };
 
-        this.codec = await createCodec();
-        this.compressor = await createCompressor(this.compress);
+    try {
+      this.send({
+        op: GatewayOpcodes.LazyRequest,
+        d: payload
+      });
+    } finally {
+      setTimeout(() => this.memberListFetching.delete(key), 250);
+    }
+  }
 
-        this.setupListeners();
-        this.setupDispatchHandlers();
+  async connect(url: string = import.meta.env.VITE_WS_URL) {
+    if (!this.url) {
+      const newUrl = new URL(url);
+      newUrl.searchParams.set("encoding", this.encoding);
+      newUrl.searchParams.set("compress", this.compress);
+      this.url = newUrl.href;
     }
 
-    async disconnect(code?: number, reason?: string) {
-        if (!this.socket) return;
+    this.logger.debug(`[Connect] Gateway URL ${this.url}`);
+    this.connectionStartTime = Date.now();
 
-        this.app.voice.reset();
-        this.readyState = GatewayStatus.CLOSING;
-        this.logger.debug(`[Disconnect] ${this.url}`);
-        this.manualDisconnect = true;
-        this.socket.close(code, reason);
+    this.manualDisconnect = false;
+    this.socket = new WebSocket(this.url);
+    this.socket.binaryType = "arraybuffer";
+    this.readyState = GatewayStatus.CONNECTING;
+
+    this.codec = await createCodec();
+    this.compressor = await createCompressor(this.compress);
+
+    this.setupListeners();
+    this.setupDispatchHandlers();
+  }
+
+  async disconnect(code?: number, reason?: string) {
+    if (!this.socket) return;
+
+    this.app.voice.reset();
+    this.readyState = GatewayStatus.CLOSING;
+    this.logger.debug(`[Disconnect] ${this.url}`);
+    this.manualDisconnect = true;
+    this.socket.close(code, reason);
+  }
+
+  startReconnect() {
+    if (this.reconnecting) return;
+
+    this.reconnecting = true;
+    setTimeout(() => {
+      this.reconnecting = false;
+      this.logger.debug(`[Reconnect] ${this.url}`);
+      this.connect(this.url);
+    }, this.reconnectTimeout);
+  }
+
+  onChannelOpen = (spaceId: string, channelId: string) => {
+    const prev = this.lazyRequestChannels.get(spaceId) ?? [];
+    if (prev.includes(channelId)) return;
+
+    const payload = {
+      spaceId,
+      channels: {
+        [channelId]: [[0, 99]]
+      }
+    };
+
+    this.lazyRequestChannels.set(spaceId, [...prev, channelId]);
+
+    this.send({
+      op: GatewayOpcodes.LazyRequest,
+      d: payload
+    });
+  };
+
+  sendPresenceUpdate(
+    presence: PresenceUpdateDraft,
+    opts?: { persist?: boolean }
+  ) {
+    this.send({
+      op: GatewayOpcodes.PresenceUpdate,
+      d: { presence, persist: !!opts?.persist }
+    });
+  }
+
+  setStatus(status: PresenceStatus, opts?: { persist?: boolean }) {
+    const userId = this.app.account?.id;
+    if (!userId) return;
+
+    const prev = this.app.presence.get(userId);
+
+    this.app.presence.upsert(userId, {
+      ...(prev ?? { activities: [] }),
+      status,
+      device: isElectron ? "desktop" : "web",
+      updatedAt: Date.now()
+    });
+
+    this.sendPresenceUpdate(
+      {
+        status,
+        device: isElectron ? "desktop" : "web",
+        activities: prev?.activities ?? []
+      },
+      { persist: Boolean(opts?.persist) }
+    );
+  }
+
+  setCustomStatus(text: string) {
+    this.app.customStatus.set(text);
+
+    const userId = this.app.account?.id;
+    if (!userId) return;
+
+    const customActivity = this.app.customStatus.activity;
+    const status = this.getEffectiveStatus();
+    const prev = this.app.presence.get(userId);
+
+    const draft: PresenceUpdateDraft = {
+      status,
+      device: isElectron ? "desktop" : "web",
+      activities: customActivity
+        ? [
+            customActivity,
+            ...(prev?.activities?.filter((a) => a.type !== "custom") ?? [])
+          ]
+        : (prev?.activities ?? [])
+    };
+
+    this.sendPresenceUpdate(draft);
+  }
+
+  scheduleStatus(opts: { status: PresenceStatus; durationMs: number }) {
+    this.send({
+      op: GatewayOpcodes.PresenceScheduleSet,
+      d: {
+        status: opts.status,
+        durationMs: opts.durationMs
+      }
+    });
+  }
+
+  clearScheduledStatus() {
+    this.send({
+      op: GatewayOpcodes.PresenceScheduleClear,
+      d: {}
+    });
+  }
+
+  send = async (payload: any) => {
+    if (!this.socket) {
+      this.logger.error("Socket is not open");
+      return;
+    }
+    if (this.socket.readyState !== WebSocket.OPEN) {
+      this.logger.error(
+        `Socket is not open; readyState: ${this.socket.readyState}`
+      );
+      return;
     }
 
-    startReconnect() {
-        if (this.reconnecting) return;
+    try {
+      let encodedBytes: any;
 
-        this.reconnecting = true;
-        setTimeout(() => {
-            this.reconnecting = false;
-            this.logger.debug(`[Reconnect] ${this.url}`);
-            this.connect(this.url);
-        }, this.reconnectTimeout);
+      if (this.encoding === "etf") {
+        if (!window.api) {
+          this.logger.error("[send] window.api is not available");
+          return;
+        }
+        if (!window.api.codec) {
+          this.logger.error("[send] window.api.codec is not available");
+          return;
+        }
+
+        const encoded = await window.api.codec.etfEncode(payload);
+
+        encodedBytes = Uint8Array.from(encoded);
+      } else {
+        encodedBytes = this.codec.encode(payload);
+      }
+
+      const finalBytes =
+        this.compress === "none"
+          ? encodedBytes
+          : this.compressor.compress(encodedBytes);
+
+      this.socket.send(finalBytes);
+      this.logger.debug(`[Gateway] <- ${payload.op}`);
+    } catch (error) {
+      this.logger.error("Failed to send message", error);
     }
-
-    onChannelOpen = (spaceId: string, channelId: string) => {
-        const prev = this.lazyRequestChannels.get(spaceId) ?? [];
-        if (prev.includes(channelId)) return;
-
-        const payload = {
-            spaceId,
-            channels: {
-                [channelId]: [[0, 99]]
-            }
-        };
-
-        this.lazyRequestChannels.set(spaceId, [...prev, channelId]);
-
-        this.send({
-            op: GatewayOpcodes.LazyRequest,
-            d: payload
-        });
-    };
-
-    sendPresenceUpdate(
-        presence: PresenceUpdateDraft,
-        opts?: { persist?: boolean }
-    ) {
-        this.send({
-            op: GatewayOpcodes.PresenceUpdate,
-            d: { presence, persist: !!opts?.persist }
-        });
-    }
-
-    setStatus(status: PresenceStatus, opts?: { persist?: boolean }) {
-        const userId = this.app.account?.id;
-        if (!userId) return;
-
-        const prev = this.app.presence.get(userId);
-
-        this.app.presence.upsert(userId, {
-            ...(prev ?? { activities: [] }),
-            status,
-            device: isElectron ? "desktop" : "web",
-            updatedAt: Date.now()
-        });
-
-        this.sendPresenceUpdate(
-            {
-                status,
-                device: isElectron ? "desktop" : "web",
-                activities: prev?.activities ?? []
-            },
-            { persist: Boolean(opts?.persist) }
-        );
-    }
-
-    setCustomStatus(text: string) {
-        this.app.customStatus.set(text);
-
-        const userId = this.app.account?.id;
-        if (!userId) return;
-
-        const customActivity = this.app.customStatus.activity;
-        const status = this.getEffectiveStatus();
-        const prev = this.app.presence.get(userId);
-
-        const draft: PresenceUpdateDraft = {
-            status,
-            device: isElectron ? "desktop" : "web",
-            activities: customActivity
-                ? [
-                      customActivity,
-                      ...(prev?.activities?.filter(
-                          (a) => a.type !== "custom"
-                      ) ?? [])
-                  ]
-                : (prev?.activities ?? [])
-        };
-
-        this.sendPresenceUpdate(draft);
-    }
-
-    scheduleStatus(opts: { status: PresenceStatus; durationMs: number }) {
-        this.send({
-            op: GatewayOpcodes.PresenceScheduleSet,
-            d: {
-                status: opts.status,
-                durationMs: opts.durationMs
-            }
-        });
-    }
-
-    clearScheduledStatus() {
-        this.send({
-            op: GatewayOpcodes.PresenceScheduleClear,
-            d: {}
-        });
-    }
-
-    send = async (payload: any) => {
-        if (!this.socket) {
-            this.logger.error("Socket is not open");
-            return;
-        }
-        if (this.socket.readyState !== WebSocket.OPEN) {
-            this.logger.error(
-                `Socket is not open; readyState: ${this.socket.readyState}`
-            );
-            return;
-        }
-
-        try {
-            let encodedBytes: any;
-
-            if (this.encoding === "etf") {
-                if (!window.api) {
-                    this.logger.error("[send] window.api is not available");
-                    return;
-                }
-                if (!window.api.codec) {
-                    this.logger.error(
-                        "[send] window.api.codec is not available"
-                    );
-                    return;
-                }
-
-                const encoded = await window.api.codec.etfEncode(payload);
-
-                encodedBytes = Uint8Array.from(encoded);
-            } else {
-                encodedBytes = this.codec.encode(payload);
-            }
-
-            const finalBytes =
-                this.compress === "none"
-                    ? encodedBytes
-                    : this.compressor.compress(encodedBytes);
-
-            this.socket.send(finalBytes);
-            this.logger.debug(`[Gateway] <- ${payload.op}`);
-        } catch (error) {
-            this.logger.error("Failed to send message", error);
-        }
-    };
-
-    private getEffectiveStatus(): PresenceStatus {
-        const userId = this.app.account?.id;
-        if (!userId) return "online";
-
-        const scheduled = this.app.presence.scheduledStatus;
-        if (scheduled && scheduled.until > Date.now()) return scheduled.status;
-
-        return this.app.presence.get(userId)?.status ?? "online";
-    }
-
-    private setupListeners() {
-        this.socket!.onopen = this.onOpen;
-        this.socket!.onmessage = this.onMessage;
-        this.socket!.onerror = this.onError;
-        this.socket!.onclose = this.onClose;
-    }
-
-    private setupDispatchHandlers() {
-        // Connection
-        this.dispatchHandlers.set(GatewayDispatchEvents.Ready, this.onReady);
-        this.dispatchHandlers.set(GatewayDispatchEvents.Resume, this.onResume);
-
-        // Presence
-        this.dispatchHandlers.set(
-            GatewayDispatchEvents.PresenceUpdate,
-            this.onPresenceUpdate
-        );
-        this.dispatchHandlers.set(
-            GatewayDispatchEvents.PresenceScheduleUpdate,
-            this.onPresenceScheduleUpdate
-        );
-
-        // User
-        this.dispatchHandlers.set(
-            GatewayDispatchEvents.UserUpdate,
-            this.onUserUpdate
-        );
-        this.dispatchHandlers.set(
-            GatewayDispatchEvents.UserSettingsUpdate,
-            this.onUserSettingsUpdate
-        );
-
-        // Spaces
-        this.dispatchHandlers.set(
-            GatewayDispatchEvents.SpaceCreate,
-            this.onSpaceCreate
-        );
-        this.dispatchHandlers.set(
-            GatewayDispatchEvents.SpaceDelete,
-            this.onSpaceDelete
-        );
-
-        // Channels
-        this.dispatchHandlers.set(
-            GatewayDispatchEvents.ChannelCreate,
-            this.onChannelCreate
-        );
-        this.dispatchHandlers.set(
-            GatewayDispatchEvents.ChannelUpdate,
-            this.onChannelUpdate
-        );
-        this.dispatchHandlers.set(
-            GatewayDispatchEvents.BulkChannelUpdate,
-            this.onBulkChannelUpdate
-        );
-        this.dispatchHandlers.set(
-            GatewayDispatchEvents.BulkChannelDelete,
-            this.onBulkChannelDelete
-        );
-        this.dispatchHandlers.set(
-            GatewayDispatchEvents.ChannelDelete,
-            this.onChannelDelete
-        );
-
-        // Messages
-        this.dispatchHandlers.set(
-            GatewayDispatchEvents.MessageAck,
-            this.onMessageAck
-        );
-        this.dispatchHandlers.set(
-            GatewayDispatchEvents.MessageAckBulk,
-            this.onMessageAckBulk
-        );
-        this.dispatchHandlers.set(
-            GatewayDispatchEvents.MessageCreate,
-            this.onMessageCreate
-        );
-        this.dispatchHandlers.set(
-            GatewayDispatchEvents.MessageUpdate,
-            this.onMessageUpdate
-        );
-        this.dispatchHandlers.set(
-            GatewayDispatchEvents.MessageDelete,
-            this.onMessageDelete
-        );
-        this.dispatchHandlers.set(
-            GatewayDispatchEvents.MessageDeleteBulk,
-            this.onMessageDeleteBulk
-        );
-
-        // Invites
-        this.dispatchHandlers.set(
-            GatewayDispatchEvents.InviteCreate,
-            this.onInviteCreate
-        );
-        this.dispatchHandlers.set(
-            GatewayDispatchEvents.InviteDelete,
-            this.onInviteDelete
-        );
-        this.dispatchHandlers.set(
-            GatewayDispatchEvents.InviteUpdate,
-            this.onInviteUpdate
-        );
-
-        // Members
-        this.dispatchHandlers.set(
-            GatewayDispatchEvents.SpaceMemberAdd,
-            this.onSpaceMemberAdd
-        );
-        this.dispatchHandlers.set(
-            GatewayDispatchEvents.SpaceMemberRemove,
-            this.onSpaceMemberRemove
-        );
-        this.dispatchHandlers.set(
-            GatewayDispatchEvents.SpaceMemberListUpdate,
-            this.onSpaceMemberListUpdate
-        );
-
-        // Roles
-        this.dispatchHandlers.set(
-            GatewayDispatchEvents.RoleCreate,
-            this.onRoleCreate
-        );
-        this.dispatchHandlers.set(
-            GatewayDispatchEvents.RoleUpdate,
-            this.onRoleUpdate
-        );
-        this.dispatchHandlers.set(
-            GatewayDispatchEvents.RoleDelete,
-            this.onRoleDelete
-        );
-
-        // Role assignments
-        this.dispatchHandlers.set(
-            GatewayDispatchEvents.SpaceMemberRoleAdd,
-            this.onMemberRoleAdd
-        );
-        this.dispatchHandlers.set(
-            GatewayDispatchEvents.SpaceMemberRoleRemove,
-            this.onMemberRoleRemove
-        );
-
-        // Voice
-        this.dispatchHandlers.set(
-            GatewayDispatchEvents.VoiceServerUpdate,
-            this.app.voice.onVoiceServerUpdate
-        );
-        this.dispatchHandlers.set(
-            GatewayDispatchEvents.VoiceStateSync,
-            this.app.voice.onVoiceStateSync
-        );
-        this.dispatchHandlers.set(
-            GatewayDispatchEvents.VoiceStateUpdate,
-            this.app.voice.onVoiceStateUpdate
-        );
-
-        // Expression
-        this.dispatchHandlers.set(
-            GatewayDispatchEvents.ExpressionCreate,
-            this.onExpressionCreate
-        );
-        this.dispatchHandlers.set(
-            GatewayDispatchEvents.ExpressionDelete,
-            this.onExpressionDelete
-        );
-
-        // Relationships
-        this.dispatchHandlers.set(
-            GatewayDispatchEvents.RelationshipCreate,
-            this.onRelationshipCreate
-        );
-        this.dispatchHandlers.set(
-            GatewayDispatchEvents.RelationshipUpdate,
-            this.onRelationshipUpdate
-        );
-        this.dispatchHandlers.set(
-            GatewayDispatchEvents.RelationshipDelete,
-            this.onRelationshipDelete
-        );
-
-        // Space Bans
-        this.dispatchHandlers.set(
-            GatewayDispatchEvents.SpaceBanAdd,
-            this.onSpaceBanAdd
-        );
-        this.dispatchHandlers.set(
-            GatewayDispatchEvents.SpaceBanRemove,
-            this.onSpaceBanRemove
-        );
-
-        // Typing
-        this.dispatchHandlers.set(
-            GatewayDispatchEvents.TypingStart,
-            this.onTypingStart
-        );
-    }
-
-    private onOpen = () => {
-        this.logger.info(
-            `[Connected] ${this.url} (took ${Date.now() - this.connectionStartTime!}ms)`
-        );
-        this.readyState = GatewayStatus.OPEN;
-        this.reconnectTimeout = 0;
-
-        if (this.sessionId) {
-            this.logger.info("[Gateway] Resuming session");
-            this.handleResume();
-        } else {
-            this.logger.info("[Gateway] Identifying");
-            this.handleIdentify();
-        }
-    };
-
-    private handleIdentify() {
-        this.logger.debug(
-            `[Identify] Socket state: ${this.socket?.readyState}, token: ${this.app.token ? "set" : "not set"}`
-        );
-
-        if (!this.app.token) {
-            this.logger.error("Cannot identify, token is not set");
-            return;
-        }
-
-        this.identifyStartTime = Date.now();
-
-        this.send({
-            op: GatewayOpcodes.Identify,
-            d: { token: this.app.token }
-        });
-    }
-
-    private onMessage = async (event: MessageEvent) => {
-        try {
-            let rawBytes: Uint8Array;
-
-            if (typeof event.data === "string") {
-                rawBytes = new TextEncoder().encode(event.data);
-            } else if (event.data instanceof ArrayBuffer) {
-                rawBytes = new Uint8Array(event.data);
-            } else if (event.data instanceof Blob) {
-                rawBytes = new Uint8Array(await event.data.arrayBuffer());
-            } else {
-                this.logger.error("Unknown message data type");
-                return;
-            }
-
-            const bytes =
-                this.compress === "none"
-                    ? rawBytes
-                    : this.compressor.decompress(rawBytes);
-
-            let payload: any;
-
-            try {
-                // Try the configured encoding first
-                if (this.encoding === "etf") {
-                    payload = await window.api!.codec.etfDecode(
-                        Array.from(bytes)
-                    );
-                } else {
-                    payload = this.codec.decode(bytes);
-                }
-            } catch (etfError) {
-                // If ETF fails, try JSON as fallback
-                this.logger.warn(
-                    `[onMessage] ${this.encoding} decode failed, trying JSON fallback:`,
-                    etfError
-                );
-                try {
-                    payload = JSON.parse(new TextDecoder().decode(bytes));
-                } catch (jsonError) {
-                    this.logger.error(
-                        `[onMessage] Both ${this.encoding} and JSON decode failed`
-                    );
-                    throw jsonError;
-                }
-            }
-
-            this.handlePayload(payload);
-        } catch (error) {
-            this.logger.error("Failed to decode gateway message", error);
-        }
-    };
-
-    private handlePayload = (payload: any) => {
-        if (payload.op !== GatewayOpcodes.Dispatch) {
-            this.logger.debug(`[Gateway] -> ${payload.op}`);
-        }
-
-        switch (payload.op) {
-            case GatewayOpcodes.Dispatch:
-                this.handleDispatch(payload);
-                break;
-            case GatewayOpcodes.Heartbeat:
-                this.sendHeartbeat();
-                break;
-            case GatewayOpcodes.Reconnect:
-                this.handleReconnect();
-                break;
-            case GatewayOpcodes.InvalidSession:
-                this.handleInvalidSession(payload.d);
-                break;
-            case GatewayOpcodes.Hello:
-                this.handleHello(payload.d);
-                break;
-            case GatewayOpcodes.HeartbeatAck:
-                this.handleHeartbeatAck();
-                break;
-            default:
-                this.logger.debug("Received unknown opcode");
-                break;
-        }
-    };
-
-    private onError = (event: Event) => {
-        this.logger.error(`[Socket Error]`, event);
-    };
-
-    private onClose = (event: CloseEvent) => {
-        this.readyState = GatewayStatus.CLOSED;
-        this.stopPresenceLoop();
-        this.handleClose(event.code);
-    };
-
-    private handleInvalidSession = (resumable: boolean) => {
-        this.cleanup();
-
-        this.logger.debug(`Received invalid session; Can Resume: ${resumable}`);
-        if (!resumable) {
-            this.handleIdentify();
-            return;
-        }
-
-        this.handleResume();
-    };
-
-    private handleReconnect() {
-        this.cleanup();
-        this.logger.debug(`[Gateway] -> Reconnect`);
-        this.startReconnect();
-    }
-
-    private handleResume() {
-        if (!this.app.token || !this.sessionId) {
-            this.logger.error("Cannot resume, token or sessionId is not set");
-            this.reset();
-            this.app.logout();
-            return;
-        }
-
-        this.send({
-            op: GatewayOpcodes.Resume,
-            d: {
-                token: this.app.token,
-                sessionId: this.sessionId,
-                seq: this.sequence
-            }
-        });
-
-        this.logger.debug(`[Gateway] -> ${GatewayOpcodes.Resume}`, {
-            sessionId: this.sessionId,
-            seq: this.sequence
-        });
-    }
-
-    private handleHello(data: any) {
-        this.heartbeatInterval = data.heartbeatInterval;
-        this.reconnectTimeout = this.heartbeatInterval!;
-        this.logger.info(
-            `[Hello] heartbeat interval: ${data.heartbeatInterval} (took ${Date.now() - this.connectionStartTime!}ms)`
-        );
-        this.startHeartbeat();
-    }
-
-    private handleClose = (code?: number) => {
-        if (this.manualDisconnect) {
-            this.manualDisconnect = false;
-            this.cleanup();
-            this.reset();
-            return;
-        }
-
-        this.cleanup();
-
-        if (code === GatewayCloseCodes.NotAuthenticated) return;
-
-        if (this.reconnectTimeout === 0)
-            this.reconnectTimeout = RECONNECT_TIMEOUT;
-        else this.reconnectTimeout += RECONNECT_TIMEOUT;
-
-        this.logger.debug(
-            `Websocket closed with code ${code}; Will reconnect in ${(
-                this.reconnectTimeout / 1000
-            ).toFixed(2)} seconds.`
-        );
-
-        this.startReconnect();
-    };
-
-    private reset = () => {
-        this.sessionId = null;
-        this.sequence = 0;
-        this.readyState = GatewayStatus.CLOSED;
-    };
-
-    private startHeartbeat = () => {
-        if (this.heartbeat) {
-            clearInterval(this.heartbeat);
-            this.heartbeat = null;
-        }
-
-        const heartbeatFn = () => {
-            if (this.heartbeatAck) {
-                this.heartbeatAck = false;
-                this.sendHeartbeat();
-            } else {
-                this.handleHeartbeatTimeout();
-            }
-        };
-
-        this.initialHeartbeatTimeout = setTimeout(
-            () => {
-                this.initialHeartbeatTimeout = null;
-                this.heartbeat = setInterval(
-                    heartbeatFn,
-                    this.heartbeatInterval!
-                );
-                heartbeatFn();
-            },
-            Math.floor(Math.random() * this.heartbeatInterval!)
-        );
-    };
-
-    private stopHeartbeat = () => {
-        if (this.heartbeat) {
-            clearInterval(this.heartbeat);
-            this.heartbeat = null;
-        }
-
-        if (this.initialHeartbeatTimeout) {
-            clearTimeout(this.initialHeartbeatTimeout);
-            this.initialHeartbeatTimeout = null;
-        }
-    };
-
-    private handleHeartbeatTimeout = () => {
-        this.logger.warn(
-            `[Heartbeat ACK Timeout] should reconnect in ${(RECONNECT_TIMEOUT / 1000).toFixed(2)} seconds`
-        );
-
-        this.socket?.close(4009);
-
-        this.cleanup();
-        this.reset();
-
-        this.startReconnect();
-    };
-
-    private sendHeartbeat = () => {
-        const payload = {
-            op: GatewayOpcodes.Heartbeat,
-            d: this.sequence
-        };
-        this.logger.debug("Sending heartbeat");
-        this.send(payload);
-    };
-
-    private cleanup = () => {
-        this.logger.debug("Cleaning up");
-        this.stopHeartbeat();
-        this.socket = null;
-        this.sessionId = null;
-    };
-
-    private handleHeartbeatAck = () => {
-        this.logger.debug("Received heartbeat ack");
-        this.heartbeatAck = true;
-    };
-
-    private handleDispatch = (data: any) => {
-        const { d, t, s } = data;
-        this.logger.debug(`[Gateway] -> ${t}`);
-        this.sequence = s;
-
-        const handler = this.dispatchHandlers.get(t);
-        if (!handler) {
-            this.logger.debug(`No handler for dispatch event ${t}`);
-            return;
-        }
-
-        // To avoid issues with ETF mutability and etc., we do an inexpensive clone of the data for now
-        const parsedData = normalizeJSON(d);
-
-        handler(parsedData);
-    };
-
-    private onResume = () => {
-        this.logger.debug("[Resume] Session");
-        this.handleIdentify();
-    };
-
-    // NOTE: Dispatcher Handlers start here
-    private onReady = async (payload: GatewayReadyPayload) => {
-        this.logger.info(
-            `[Ready] took ${Date.now() - (this.identifyStartTime ?? 0)}ms`
-        );
-
-        const {
-            sessionId,
-            user,
-            themes,
-            spaces,
-            channels,
-            relationships,
-            settings,
-            expressions,
-            readStates
-        } = payload;
-
-        this.sessionId = sessionId;
-
-        this.app.setUser(user, settings);
-        this.app.users.add(user);
-        this.app.themes.addAll(themes);
-        this.app.spaces.addAll(spaces);
-        this.app.channels.addAll(channels);
-        this.app.relationships.addAll(relationships);
-        this.app.readStates.addAll(readStates);
-
-        this.reconnectTimeout = 0;
-        this.app.setGatewayReady(true);
-        this.app.startBadgeWatch();
-
-        const space =
-            this.app.spaces.mostRecentSpace || this.app.spaces.positioned[0];
-
-        if (space && this.app.mode !== "@me")
-            this.app.spaces.setActive(space.id);
-
-        this.app.channels.setPreferredActive();
-
-        this.startPresenceLoop();
-
-        // if we already persisted a schedule in local storage, rearm timer for UI
-        const selfUserId = this.app.account?.id;
-        if (selfUserId) this.app.presence.rearmScheduledStatusTimer();
-
-        this.app.expressions.addAll(expressions);
-    };
+  };
+
+  private getEffectiveStatus(): PresenceStatus {
+    const userId = this.app.account?.id;
+    if (!userId) return "online";
+
+    const scheduled = this.app.presence.scheduledStatus;
+    if (scheduled && scheduled.until > Date.now()) return scheduled.status;
+
+    return this.app.presence.get(userId)?.status ?? "online";
+  }
+
+  private setupListeners() {
+    this.socket!.onopen = this.onOpen;
+    this.socket!.onmessage = this.onMessage;
+    this.socket!.onerror = this.onError;
+    this.socket!.onclose = this.onClose;
+  }
+
+  private setupDispatchHandlers() {
+    // Connection
+    this.dispatchHandlers.set(GatewayDispatchEvents.Ready, this.onReady);
+    this.dispatchHandlers.set(GatewayDispatchEvents.Resume, this.onResume);
 
     // Presence
-    private onPresenceUpdate = (payload: any) => {
-        if (payload?.userId && payload?.presence) {
-            this.app.presence.upsert(payload.userId, payload.presence);
-            return;
-        }
+    this.dispatchHandlers.set(
+      GatewayDispatchEvents.PresenceUpdate,
+      this.onPresenceUpdate
+    );
+    this.dispatchHandlers.set(
+      GatewayDispatchEvents.PresenceScheduleUpdate,
+      this.onPresenceScheduleUpdate
+    );
 
-        const list = payload?.presences;
-        if (Array.isArray(list)) {
-            for (const item of list) {
-                if (!item?.userId || !item?.presence) continue;
-                this.app.presence.upsert(item.userId, item.presence);
-            }
-            return;
-        }
+    // User
+    this.dispatchHandlers.set(
+      GatewayDispatchEvents.UserUpdate,
+      this.onUserUpdate
+    );
+    this.dispatchHandlers.set(
+      GatewayDispatchEvents.UserSettingsUpdate,
+      this.onUserSettingsUpdate
+    );
 
-        this.logger.debug("[Presence] unknown payload shape", payload);
+    // Spaces
+    this.dispatchHandlers.set(
+      GatewayDispatchEvents.SpaceCreate,
+      this.onSpaceCreate
+    );
+    this.dispatchHandlers.set(
+      GatewayDispatchEvents.SpaceDelete,
+      this.onSpaceDelete
+    );
+
+    // Channels
+    this.dispatchHandlers.set(
+      GatewayDispatchEvents.ChannelCreate,
+      this.onChannelCreate
+    );
+    this.dispatchHandlers.set(
+      GatewayDispatchEvents.ChannelUpdate,
+      this.onChannelUpdate
+    );
+    this.dispatchHandlers.set(
+      GatewayDispatchEvents.BulkChannelUpdate,
+      this.onBulkChannelUpdate
+    );
+    this.dispatchHandlers.set(
+      GatewayDispatchEvents.BulkChannelDelete,
+      this.onBulkChannelDelete
+    );
+    this.dispatchHandlers.set(
+      GatewayDispatchEvents.ChannelDelete,
+      this.onChannelDelete
+    );
+
+    // Messages
+    this.dispatchHandlers.set(
+      GatewayDispatchEvents.MessageAck,
+      this.onMessageAck
+    );
+    this.dispatchHandlers.set(
+      GatewayDispatchEvents.MessageAckBulk,
+      this.onMessageAckBulk
+    );
+    this.dispatchHandlers.set(
+      GatewayDispatchEvents.MessageCreate,
+      this.onMessageCreate
+    );
+    this.dispatchHandlers.set(
+      GatewayDispatchEvents.MessageUpdate,
+      this.onMessageUpdate
+    );
+    this.dispatchHandlers.set(
+      GatewayDispatchEvents.MessageDelete,
+      this.onMessageDelete
+    );
+    this.dispatchHandlers.set(
+      GatewayDispatchEvents.MessageDeleteBulk,
+      this.onMessageDeleteBulk
+    );
+
+    // Invites
+    this.dispatchHandlers.set(
+      GatewayDispatchEvents.InviteCreate,
+      this.onInviteCreate
+    );
+    this.dispatchHandlers.set(
+      GatewayDispatchEvents.InviteDelete,
+      this.onInviteDelete
+    );
+    this.dispatchHandlers.set(
+      GatewayDispatchEvents.InviteUpdate,
+      this.onInviteUpdate
+    );
+
+    // Members
+    this.dispatchHandlers.set(
+      GatewayDispatchEvents.SpaceMemberAdd,
+      this.onSpaceMemberAdd
+    );
+    this.dispatchHandlers.set(
+      GatewayDispatchEvents.SpaceMemberRemove,
+      this.onSpaceMemberRemove
+    );
+    this.dispatchHandlers.set(
+      GatewayDispatchEvents.SpaceMemberListUpdate,
+      this.onSpaceMemberListUpdate
+    );
+
+    // Roles
+    this.dispatchHandlers.set(
+      GatewayDispatchEvents.RoleCreate,
+      this.onRoleCreate
+    );
+    this.dispatchHandlers.set(
+      GatewayDispatchEvents.RoleUpdate,
+      this.onRoleUpdate
+    );
+    this.dispatchHandlers.set(
+      GatewayDispatchEvents.RoleDelete,
+      this.onRoleDelete
+    );
+
+    // Role assignments
+    this.dispatchHandlers.set(
+      GatewayDispatchEvents.SpaceMemberRoleAdd,
+      this.onMemberRoleAdd
+    );
+    this.dispatchHandlers.set(
+      GatewayDispatchEvents.SpaceMemberRoleRemove,
+      this.onMemberRoleRemove
+    );
+
+    // Voice
+    this.dispatchHandlers.set(
+      GatewayDispatchEvents.VoiceServerUpdate,
+      this.app.voice.onVoiceServerUpdate
+    );
+    this.dispatchHandlers.set(
+      GatewayDispatchEvents.VoiceStateSync,
+      this.app.voice.onVoiceStateSync
+    );
+    this.dispatchHandlers.set(
+      GatewayDispatchEvents.VoiceStateUpdate,
+      this.app.voice.onVoiceStateUpdate
+    );
+
+    // Expression
+    this.dispatchHandlers.set(
+      GatewayDispatchEvents.ExpressionCreate,
+      this.onExpressionCreate
+    );
+    this.dispatchHandlers.set(
+      GatewayDispatchEvents.ExpressionDelete,
+      this.onExpressionDelete
+    );
+
+    // Relationships
+    this.dispatchHandlers.set(
+      GatewayDispatchEvents.RelationshipCreate,
+      this.onRelationshipCreate
+    );
+    this.dispatchHandlers.set(
+      GatewayDispatchEvents.RelationshipUpdate,
+      this.onRelationshipUpdate
+    );
+    this.dispatchHandlers.set(
+      GatewayDispatchEvents.RelationshipDelete,
+      this.onRelationshipDelete
+    );
+
+    // Space Bans
+    this.dispatchHandlers.set(
+      GatewayDispatchEvents.SpaceBanAdd,
+      this.onSpaceBanAdd
+    );
+    this.dispatchHandlers.set(
+      GatewayDispatchEvents.SpaceBanRemove,
+      this.onSpaceBanRemove
+    );
+
+    // Typing
+    this.dispatchHandlers.set(
+      GatewayDispatchEvents.TypingStart,
+      this.onTypingStart
+    );
+  }
+
+  private onOpen = () => {
+    this.logger.info(
+      `[Connected] ${this.url} (took ${Date.now() - this.connectionStartTime!}ms)`
+    );
+    this.readyState = GatewayStatus.OPEN;
+    this.reconnectTimeout = 0;
+
+    if (this.sessionId) {
+      this.logger.info("[Gateway] Resuming session");
+      this.handleResume();
+    } else {
+      this.logger.info("[Gateway] Identifying");
+      this.handleIdentify();
+    }
+  };
+
+  private handleIdentify() {
+    this.logger.debug(
+      `[Identify] Socket state: ${this.socket?.readyState}, token: ${this.app.token ? "set" : "not set"}`
+    );
+
+    if (!this.app.token) {
+      this.logger.error("Cannot identify, token is not set");
+      return;
+    }
+
+    this.identifyStartTime = Date.now();
+
+    this.send({
+      op: GatewayOpcodes.Identify,
+      d: { token: this.app.token }
+    });
+  }
+
+  private onMessage = async (event: MessageEvent) => {
+    try {
+      let rawBytes: Uint8Array;
+
+      if (typeof event.data === "string") {
+        rawBytes = new TextEncoder().encode(event.data);
+      } else if (event.data instanceof ArrayBuffer) {
+        rawBytes = new Uint8Array(event.data);
+      } else if (event.data instanceof Blob) {
+        rawBytes = new Uint8Array(await event.data.arrayBuffer());
+      } else {
+        this.logger.error("Unknown message data type");
+        return;
+      }
+
+      const bytes =
+        this.compress === "none"
+          ? rawBytes
+          : this.compressor.decompress(rawBytes);
+
+      let payload: any;
+
+      try {
+        // Try the configured encoding first
+        if (this.encoding === "etf") {
+          payload = await window.api!.codec.etfDecode(Array.from(bytes));
+        } else {
+          payload = this.codec.decode(bytes);
+        }
+      } catch (etfError) {
+        // If ETF fails, try JSON as fallback
+        this.logger.warn(
+          `[onMessage] ${this.encoding} decode failed, trying JSON fallback:`,
+          etfError
+        );
+        try {
+          payload = JSON.parse(new TextDecoder().decode(bytes));
+        } catch (jsonError) {
+          this.logger.error(
+            `[onMessage] Both ${this.encoding} and JSON decode failed`
+          );
+          throw jsonError;
+        }
+      }
+
+      this.handlePayload(payload);
+    } catch (error) {
+      this.logger.error("Failed to decode gateway message", error);
+    }
+  };
+
+  private handlePayload = (payload: any) => {
+    if (payload.op !== GatewayOpcodes.Dispatch) {
+      this.logger.debug(`[Gateway] -> ${payload.op}`);
+    }
+
+    switch (payload.op) {
+      case GatewayOpcodes.Dispatch:
+        this.handleDispatch(payload);
+        break;
+      case GatewayOpcodes.Heartbeat:
+        this.sendHeartbeat();
+        break;
+      case GatewayOpcodes.Reconnect:
+        this.handleReconnect();
+        break;
+      case GatewayOpcodes.InvalidSession:
+        this.handleInvalidSession(payload.d);
+        break;
+      case GatewayOpcodes.Hello:
+        this.handleHello(payload.d);
+        break;
+      case GatewayOpcodes.HeartbeatAck:
+        this.handleHeartbeatAck();
+        break;
+      default:
+        this.logger.debug("Received unknown opcode");
+        break;
+    }
+  };
+
+  private onError = (event: Event) => {
+    this.logger.error(`[Socket Error]`, event);
+  };
+
+  private onClose = (event: CloseEvent) => {
+    this.readyState = GatewayStatus.CLOSED;
+    this.stopPresenceLoop();
+    this.handleClose(event.code);
+  };
+
+  private handleInvalidSession = (resumable: boolean) => {
+    this.cleanup();
+
+    this.logger.debug(`Received invalid session; Can Resume: ${resumable}`);
+    if (!resumable) {
+      this.handleIdentify();
+      return;
+    }
+
+    this.handleResume();
+  };
+
+  private handleReconnect() {
+    this.cleanup();
+    this.logger.debug(`[Gateway] -> Reconnect`);
+    this.startReconnect();
+  }
+
+  private handleResume() {
+    if (!this.app.token || !this.sessionId) {
+      this.logger.error("Cannot resume, token or sessionId is not set");
+      this.reset();
+      this.app.logout();
+      return;
+    }
+
+    this.send({
+      op: GatewayOpcodes.Resume,
+      d: {
+        token: this.app.token,
+        sessionId: this.sessionId,
+        seq: this.sequence
+      }
+    });
+
+    this.logger.debug(`[Gateway] -> ${GatewayOpcodes.Resume}`, {
+      sessionId: this.sessionId,
+      seq: this.sequence
+    });
+  }
+
+  private handleHello(data: any) {
+    this.heartbeatInterval = data.heartbeatInterval;
+    this.reconnectTimeout = this.heartbeatInterval!;
+    this.logger.info(
+      `[Hello] heartbeat interval: ${data.heartbeatInterval} (took ${Date.now() - this.connectionStartTime!}ms)`
+    );
+    this.startHeartbeat();
+  }
+
+  private handleClose = (code?: number) => {
+    if (this.manualDisconnect) {
+      this.manualDisconnect = false;
+      this.cleanup();
+      this.reset();
+      return;
+    }
+
+    this.cleanup();
+
+    if (code === GatewayCloseCodes.NotAuthenticated) return;
+
+    if (this.reconnectTimeout === 0) this.reconnectTimeout = RECONNECT_TIMEOUT;
+    else this.reconnectTimeout += RECONNECT_TIMEOUT;
+
+    this.logger.debug(
+      `Websocket closed with code ${code}; Will reconnect in ${(
+        this.reconnectTimeout / 1000
+      ).toFixed(2)} seconds.`
+    );
+
+    this.startReconnect();
+  };
+
+  private reset = () => {
+    this.sessionId = null;
+    this.sequence = 0;
+    this.readyState = GatewayStatus.CLOSED;
+  };
+
+  private startHeartbeat = () => {
+    if (this.heartbeat) {
+      clearInterval(this.heartbeat);
+      this.heartbeat = null;
+    }
+
+    const heartbeatFn = () => {
+      if (this.heartbeatAck) {
+        this.heartbeatAck = false;
+        this.sendHeartbeat();
+      } else {
+        this.handleHeartbeatTimeout();
+      }
     };
 
-    private onPresenceScheduleUpdate = (payload: any) => {
-        const userId = payload?.userId;
-        const schedule: PresenceSchedule | null = payload?.schedule ?? null;
+    this.initialHeartbeatTimeout = setTimeout(
+      () => {
+        this.initialHeartbeatTimeout = null;
+        this.heartbeat = setInterval(heartbeatFn, this.heartbeatInterval!);
+        heartbeatFn();
+      },
+      Math.floor(Math.random() * this.heartbeatInterval!)
+    );
+  };
 
-        const selfId = this.app.account?.id;
-        if (!selfId || !userId) return;
+  private stopHeartbeat = () => {
+    if (this.heartbeat) {
+      clearInterval(this.heartbeat);
+      this.heartbeat = null;
+    }
 
-        if (String(userId) === String(selfId)) {
-            this.app.presence.setScheduledStatus(schedule);
-        }
+    if (this.initialHeartbeatTimeout) {
+      clearTimeout(this.initialHeartbeatTimeout);
+      this.initialHeartbeatTimeout = null;
+    }
+  };
+
+  private handleHeartbeatTimeout = () => {
+    this.logger.warn(
+      `[Heartbeat ACK Timeout] should reconnect in ${(RECONNECT_TIMEOUT / 1000).toFixed(2)} seconds`
+    );
+
+    this.socket?.close(4009);
+
+    this.cleanup();
+    this.reset();
+
+    this.startReconnect();
+  };
+
+  private sendHeartbeat = () => {
+    const payload = {
+      op: GatewayOpcodes.Heartbeat,
+      d: this.sequence
     };
+    this.logger.debug("Sending heartbeat");
+    this.send(payload);
+  };
 
-    private startPresenceLoop() {
-        if (this.presenceLoopInterval) return;
+  private cleanup = () => {
+    this.logger.debug("Cleaning up");
+    this.stopHeartbeat();
+    this.socket = null;
+    this.sessionId = null;
+  };
 
-        const intervalMs = 15_000;
+  private handleHeartbeatAck = () => {
+    this.logger.debug("Received heartbeat ack");
+    this.heartbeatAck = true;
+  };
 
-        const tick = async () => {
-            if (!this.socket || this.readyState !== GatewayStatus.OPEN) return;
-            if (!this.app.account?.id) return;
+  private handleDispatch = (data: any) => {
+    const { d, t, s } = data;
+    this.logger.debug(`[Gateway] -> ${t}`);
+    this.sequence = s;
 
-            if (isElectron) {
-                const baseDraft = await buildDesktopPresenceFromProcesses();
-                const previousActivities =
-                    this.app.presence.get(this.app.account.id)?.activities ??
-                    [];
+    const handler = this.dispatchHandlers.get(t);
+    if (!handler) {
+      this.logger.debug(`No handler for dispatch event ${t}`);
+      return;
+    }
 
-                const mergedDraft: PresenceUpdateDraft = {
-                    ...baseDraft,
-                    device: "desktop",
-                    activities: mergeActivities({
-                        processActivities: baseDraft.activities ?? [],
-                        customActivity: this.app.customStatus.activity,
-                        previousActivities
-                    }),
-                    status: this.getEffectiveStatus()
-                };
+    // To avoid issues with ETF mutability and etc., we do an inexpensive clone of the data for now
+    const parsedData = normalizeJSON(d);
 
-                const draftHash = stableStringify(mergedDraft);
-                if (this.lastPresenceHash === draftHash) return;
-                this.lastPresenceHash = draftHash;
+    handler(parsedData);
+  };
 
-                this.sendPresenceUpdate(mergedDraft);
-                return;
-            }
+  private onResume = () => {
+    this.logger.debug("[Resume] Session");
+    this.handleIdentify();
+  };
 
-            const webDraft: PresenceUpdateDraft = {
-                status: this.getEffectiveStatus(),
-                device: "web",
-                activities: this.app.customStatus.activity
-                    ? [this.app.customStatus.activity]
-                    : []
-            };
+  // NOTE: Dispatcher Handlers start here
+  private onReady = async (payload: GatewayReadyPayload) => {
+    this.logger.info(
+      `[Ready] took ${Date.now() - (this.identifyStartTime ?? 0)}ms`
+    );
 
-            const draftHash = stableStringify(webDraft);
-            if (this.lastPresenceHash === draftHash) return;
-            this.lastPresenceHash = draftHash;
+    const {
+      sessionId,
+      user,
+      themes,
+      spaces,
+      channels,
+      relationships,
+      settings,
+      expressions,
+      readStates,
+      mergedPresences
+    } = payload;
 
-            this.sendPresenceUpdate(webDraft);
+    this.sessionId = sessionId;
+
+    this.app.setUser(user, settings);
+    this.app.users.add(user);
+    this.app.themes.addAll(themes);
+    this.app.spaces.addAll(spaces);
+    this.app.channels.addAll(channels);
+    this.app.relationships.addAll(relationships);
+    this.app.readStates.addAll(readStates);
+
+    if(mergedPresences) {
+      for(const [userId, presence] of Object.entries(mergedPresences)) {
+        this.app.presence.upsert(userId, presence);
+      }
+     }
+
+    this.reconnectTimeout = 0;
+    this.app.setGatewayReady(true);
+    this.app.startBadgeWatch();
+
+    const space =
+      this.app.spaces.mostRecentSpace || this.app.spaces.positioned[0];
+
+    if (space && this.app.mode !== "@me") this.app.spaces.setActive(space.id);
+
+    this.app.channels.setPreferredActive();
+
+    this.startPresenceLoop();
+
+    // if we already persisted a schedule in local storage, rearm timer for UI
+    const selfUserId = this.app.account?.id;
+    if (selfUserId) this.app.presence.rearmScheduledStatusTimer();
+
+    this.app.expressions.addAll(expressions);
+  };
+
+  // Presence
+  private onPresenceUpdate = (payload: any) => {
+    if (payload?.userId && payload?.presence) {
+      this.app.presence.upsert(payload.userId, payload.presence);
+      return;
+    }
+
+    const list = payload?.presences;
+    if (Array.isArray(list)) {
+      for (const item of list) {
+        if (!item?.userId || !item?.presence) continue;
+        this.app.presence.upsert(item.userId, item.presence);
+      }
+      return;
+    }
+
+    this.logger.debug("[Presence] unknown payload shape", payload);
+  };
+
+  private onPresenceScheduleUpdate = (payload: any) => {
+    const userId = payload?.userId;
+    const schedule: PresenceSchedule | null = payload?.schedule ?? null;
+
+    const selfId = this.app.account?.id;
+    if (!selfId || !userId) return;
+
+    if (String(userId) === String(selfId)) {
+      this.app.presence.setScheduledStatus(schedule);
+    }
+  };
+
+  private startPresenceLoop() {
+    if (this.presenceLoopInterval) return;
+
+    const intervalMs = 15_000;
+
+    const tick = async () => {
+      if (!this.socket || this.readyState !== GatewayStatus.OPEN) return;
+      if (!this.app.account?.id) return;
+
+      if (isElectron) {
+        const baseDraft = await buildDesktopPresenceFromProcesses();
+        const previousActivities =
+          this.app.presence.get(this.app.account.id)?.activities ?? [];
+
+        const mergedDraft: PresenceUpdateDraft = {
+          ...baseDraft,
+          device: "desktop",
+          activities: mergeActivities({
+            processActivities: baseDraft.activities ?? [],
+            customActivity: this.app.customStatus.activity,
+            previousActivities
+          }),
+          status: this.getEffectiveStatus()
         };
 
-        tick();
-        this.presenceLoopInterval = window.setInterval(tick, intervalMs);
+        const draftHash = stableStringify(mergedDraft);
+        if (this.lastPresenceHash === draftHash) return;
+        this.lastPresenceHash = draftHash;
+
+        this.sendPresenceUpdate(mergedDraft);
+        return;
+      }
+
+      const webDraft: PresenceUpdateDraft = {
+        status: this.getEffectiveStatus(),
+        device: "web",
+        activities: this.app.customStatus.activity
+          ? [this.app.customStatus.activity]
+          : []
+      };
+
+      const draftHash = stableStringify(webDraft);
+      if (this.lastPresenceHash === draftHash) return;
+      this.lastPresenceHash = draftHash;
+
+      this.sendPresenceUpdate(webDraft);
+    };
+
+    tick();
+    this.presenceLoopInterval = window.setInterval(tick, intervalMs);
+  }
+
+  private stopPresenceLoop() {
+    if (this.presenceLoopInterval) {
+      window.clearInterval(this.presenceLoopInterval);
+      this.presenceLoopInterval = null;
+    }
+    this.lastPresenceHash = null;
+  }
+
+  // Space
+  private onSpaceCreate = (payload: APISpace) => {
+    const space = this.app.spaces.add(payload);
+    space.members.addAll(payload.members ?? []);
+    for (const channel of payload.channels ?? []) {
+      space.addChannel(channel);
     }
 
-    private stopPresenceLoop() {
-        if (this.presenceLoopInterval) {
-            window.clearInterval(this.presenceLoopInterval);
-            this.presenceLoopInterval = null;
-        }
-        this.lastPresenceHash = null;
+    this.app.spaces.setActive(space.id);
+    this.app.channels.setPreferredActive();
+  };
+
+  private onSpaceDelete = (
+    payload: Pick<APISpace, "id"> & { reason?: string }
+  ) => {
+    const space = this.app.spaces.get(payload.id);
+    if (!space) return;
+
+    this.app.spaces.remove(space.id);
+    this.lazyRequestChannels.delete(space.id);
+    this.app.spaces.setPreferredActive();
+    this.app.channels.setPreferredActive();
+
+    if (payload.reason === "banned" || payload.reason === "kicked")
+      toast.warn(`You were ${payload.reason} from ${space.name}`);
+  };
+
+  private onChannelCreate = (payload: APIChannel) => {
+    if (!payload.spaceId) {
+      this.app.channels.add(payload);
+      return;
+    }
+    const space = this.app.spaces.get(payload.spaceId);
+    if (!space) return;
+
+    const channel = space.addChannel(payload);
+    if (!channel) {
+      this.logger.error("Failed to add channel to space");
+      return;
+    }
+  };
+
+  private onChannelUpdate = (payload: APIChannel) => {
+    const isDM =
+      payload.type === ChannelType.DM ||
+      payload.type === ChannelType.GroupDM ||
+      payload.spaceId == null;
+
+    if (isDM) {
+      const existing = this.app.channels.get(payload.id);
+      if (existing) existing.update(payload);
+      else this.app.channels.add(payload);
+
+      return;
     }
 
-    // Space
-    private onSpaceCreate = (payload: APISpace) => {
-        const space = this.app.spaces.add(payload);
-        space.members.addAll(payload.members ?? []);
-        for (const channel of payload.channels ?? []) {
-            space.addChannel(channel);
-        }
+    if (!payload.spaceId) return;
 
-        this.app.spaces.setActive(space.id);
-        this.app.channels.setPreferredActive();
-    };
+    const space = this.app.spaces.get(payload.spaceId);
+    if (!space) return;
 
-    private onSpaceDelete = (
-        payload: Pick<APISpace, "id"> & { reason?: string }
-    ) => {
-        const space = this.app.spaces.get(payload.id);
-        if (!space) return;
+    space.updateChannel(payload);
+  };
 
-        this.app.spaces.remove(space.id);
-        this.lazyRequestChannels.delete(space.id);
-        this.app.spaces.setPreferredActive();
-        this.app.channels.setPreferredActive();
+  private onBulkChannelUpdate = (payload: APIChannel[]) => {
+    for (const channel of payload) {
+      const isDM =
+        channel.type === ChannelType.DM ||
+        channel.type === ChannelType.GroupDM ||
+        channel.spaceId == null;
 
-        if (payload.reason === "banned" || payload.reason === "kicked")
-            toast.warn(`You were ${payload.reason} from ${space.name}`);
-    };
+      if (isDM) {
+        const existing = this.app.channels.get(channel.id);
+        if (existing) existing.update(channel);
+        else this.app.channels.add(channel);
+        continue;
+      }
 
-    private onChannelCreate = (payload: APIChannel) => {
-        if (!payload.spaceId) {
-            this.app.channels.add(payload);
-            return;
-        }
-        const space = this.app.spaces.get(payload.spaceId);
-        if (!space) return;
+      if (!channel.spaceId) continue;
 
-        const channel = space.addChannel(payload);
-        if (!channel) {
-            this.logger.error("Failed to add channel to space");
-            return;
-        }
-    };
+      const space = this.app.spaces.get(channel.spaceId);
+      if (!space) continue;
+      space.updateChannel(channel);
+    }
+  };
 
-    private onChannelUpdate = (payload: APIChannel) => {
-        const isDM =
-            payload.type === ChannelType.DM ||
-            payload.type === ChannelType.GroupDM ||
-            payload.spaceId == null;
+  private onChannelDelete = (payload: Pick<APIChannel, "id" | "spaceId">) => {
+    if (!payload.spaceId) {
+      this.app.channels.remove(payload.id);
+      return;
+    }
 
-        if (isDM) {
-            const existing = this.app.channels.get(payload.id);
-            if (existing) existing.update(payload);
-            else this.app.channels.add(payload);
+    const space = this.app.spaces.get(payload.spaceId);
+    if (!space) return;
 
-            return;
-        }
+    space.removeChannel(payload.id);
+    this.app.channels.setPreferredActive();
+  };
 
-        if (!payload.spaceId) return;
+  private onBulkChannelDelete = (
+    payload: Pick<APIChannel, "id" | "spaceId">[]
+  ) => {
+    for (const channel of payload) {
+      if (!channel.spaceId) continue;
+      const space = this.app.spaces.get(channel.spaceId);
+      if (!space) continue;
+      space.removeChannel(channel.id);
+    }
 
-        const space = this.app.spaces.get(payload.spaceId);
-        if (!space) return;
+    this.app.channels.setPreferredActive();
+  };
 
-        space.updateChannel(payload);
-    };
+  private onMessageAck = (payload: {
+    channelId: Snowflake;
+    lastMessageId: Snowflake;
+  }) => {
+    this.app.readStates.updateLocal(payload.channelId, payload.lastMessageId);
+  };
 
-    private onBulkChannelUpdate = (payload: APIChannel[]) => {
-        for (const channel of payload) {
-            const isDM =
-                channel.type === ChannelType.DM ||
-                channel.type === ChannelType.GroupDM ||
-                channel.spaceId == null;
+  private onMessageAckBulk = (
+    payload: Array<{
+      channelId: Snowflake;
+      lastMessageId: Snowflake;
+    } | null>
+  ) => {
+    for (const state of payload) {
+      if (!state) continue;
+      this.app.readStates.updateLocal(state.channelId, state.lastMessageId);
+    }
+  };
 
-            if (isDM) {
-                const existing = this.app.channels.get(channel.id);
-                if (existing) existing.update(channel);
-                else this.app.channels.add(channel);
-                continue;
-            }
+  private onTypingStart = (payload: {
+    channelId: Snowflake;
+    userId: Snowflake;
+  }) => {
+    const channel = this.app.channels.get(payload.channelId);
+    if (!channel) return;
 
-            if (!channel.spaceId) continue;
+    const user = this.app.users.get(payload.userId);
+    if (!user) return;
 
-            const space = this.app.spaces.get(channel.spaceId);
-            if (!space) continue;
-            space.updateChannel(channel);
-        }
-    };
+    this.app.typing.startedTyping(payload.channelId, payload.userId);
+  };
 
-    private onChannelDelete = (payload: Pick<APIChannel, "id" | "spaceId">) => {
-        if (!payload.spaceId) {
-            this.app.channels.remove(payload.id);
-            return;
-        }
+  private onMessageCreate = (payload: APIMessage) => {
+    const channel = this.app.channels.get(payload.channelId);
+    if (!channel) return;
 
-        const space = this.app.spaces.get(payload.spaceId);
-        if (!space) return;
+    const message = channel.messages.add(payload);
+    this.app.queue.handleIncomingMessage(payload);
+    this.app.typing.stoppedTyping(payload.channelId, payload.authorId);
 
-        space.removeChannel(payload.id);
-        this.app.channels.setPreferredActive();
-    };
+    if (this.app.channels.activeId === payload.channelId) return;
 
-    private onBulkChannelDelete = (
-        payload: Pick<APIChannel, "id" | "spaceId">[]
-    ) => {
-        for (const channel of payload) {
-            if (!channel.spaceId) continue;
-            const space = this.app.spaces.get(channel.spaceId);
-            if (!space) continue;
-            space.removeChannel(channel.id);
-        }
+    const isMentioned = payload.mentions?.some((m) => {
+      if (m.type === "user") return m.id === this.app.account?.id;
+      if (m.type === "role") {
+        const space = this.app.spaces.get(channel.spaceId ?? "");
+        const member = space?.members.get(this.app.account!.id);
+        return member?.roles?.has(m.id) ?? false;
+      }
+      return m.type === "everyone" || m.type === "here";
+    });
 
-        this.app.channels.setPreferredActive();
-    };
-
-    private onMessageAck = (payload: {
-        channelId: Snowflake;
-        lastMessageId: Snowflake;
-    }) => {
-        this.app.readStates.updateLocal(
-            payload.channelId,
-            payload.lastMessageId
-        );
-    };
-
-    private onMessageAckBulk = (
-        payload: Array<{
-            channelId: Snowflake;
-            lastMessageId: Snowflake;
-        } | null>
-    ) => {
-        for (const state of payload) {
-            if (!state) continue;
-            this.app.readStates.updateLocal(
-                state.channelId,
-                state.lastMessageId
-            );
-        }
-    };
-
-    private onTypingStart = (payload: {
-        channelId: Snowflake;
-        userId: Snowflake;
-    }) => {
-        const channel = this.app.channels.get(payload.channelId);
-        if (!channel) return;
-
-        const user = this.app.users.get(payload.userId);
-        if (!user) return;
-
-        this.app.typing.startedTyping(payload.channelId, payload.userId);
-    };
-
-    private onMessageCreate = (payload: APIMessage) => {
-        const channel = this.app.channels.get(payload.channelId);
-        if (!channel) return;
-
-        const message = channel.messages.add(payload);
-        this.app.queue.handleIncomingMessage(payload);
-        this.app.typing.stoppedTyping(payload.channelId, payload.authorId);
-
-        if (this.app.channels.activeId === payload.channelId) return;
-
-        const isMentioned = payload.mentions?.some((m) => {
-            if (m.type === "user") return m.id === this.app.account?.id;
-            if (m.type === "role") {
-                const space = this.app.spaces.get(channel.spaceId ?? "");
-                const member = space?.members.get(this.app.account!.id);
-                return member?.roles?.has(m.id) ?? false;
-            }
-            return m.type === "everyone" || m.type === "here";
+    if (isMentioned && payload.authorId !== this.app.account?.id) {
+      const readState = this.app.readStates.get(payload.channelId);
+      if (readState) {
+        readState.incrementMentionCount();
+        toast((toastProps) => <MessageToast {...toastProps} data={message} />, {
+          closeOnClick: true,
+          style: {
+            maxWidth: "520px",
+            width: "100%",
+            height: "auto"
+          },
+          position: "top-right"
         });
+      }
+    }
+  };
 
-        if (isMentioned && payload.authorId !== this.app.account?.id) {
-            const readState = this.app.readStates.get(payload.channelId);
-            if (readState) {
-                readState.incrementMentionCount();
-                toast(
-                    (toastProps) => (
-                        <MessageToast {...toastProps} data={message} />
-                    ),
-                    {
-                        closeOnClick: true,
-                        style: {
-                            maxWidth: "520px",
-                            width: "100%",
-                            height: "auto"
-                        },
-                        position: "top-right"
-                    }
-                );
-            }
-        }
-    };
+  private onMessageUpdate = (payload: APIMessage) => {
+    const channel = this.app.channels.get(payload.channelId);
+    if (!channel) return;
 
-    private onMessageUpdate = (payload: APIMessage) => {
-        const channel = this.app.channels.get(payload.channelId);
-        if (!channel) return;
+    channel.messages.update(payload);
+  };
 
-        channel.messages.update(payload);
-    };
+  private onMessageDeleteBulk = (
+    payload: Pick<APIMessage, "id" | "channelId">[]
+  ) => {
+    const sortMessagesByChannel = payload.reduce(
+      (acc, message) => {
+        if (!acc[message.channelId]) acc[message.channelId] = [];
+        acc[message.channelId].push(message.id);
+        return acc;
+      },
+      {} as Record<string, string[]>
+    );
 
-    private onMessageDeleteBulk = (
-        payload: Pick<APIMessage, "id" | "channelId">[]
-    ) => {
-        const sortMessagesByChannel = payload.reduce(
-            (acc, message) => {
-                if (!acc[message.channelId]) acc[message.channelId] = [];
-                acc[message.channelId].push(message.id);
-                return acc;
-            },
-            {} as Record<string, string[]>
-        );
+    for (const channelId in sortMessagesByChannel) {
+      const channel = this.app.channels.get(channelId);
+      if (!channel) continue;
 
-        for (const channelId in sortMessagesByChannel) {
-            const channel = this.app.channels.get(channelId);
-            if (!channel) continue;
+      const messageIds = sortMessagesByChannel[channelId];
+      channel.messages.removeBulk(messageIds);
+    }
+  };
 
-            const messageIds = sortMessagesByChannel[channelId];
-            channel.messages.removeBulk(messageIds);
-        }
-    };
+  private onMessageDelete = (payload: Pick<APIMessage, "id" | "channelId">) => {
+    const channel = this.app.channels.get(payload.channelId);
+    if (!channel) return;
 
-    private onMessageDelete = (
-        payload: Pick<APIMessage, "id" | "channelId">
-    ) => {
-        const channel = this.app.channels.get(payload.channelId);
-        if (!channel) return;
+    channel.messages.remove(payload.id);
+  };
 
-        channel.messages.remove(payload.id);
-    };
+  private onUserUpdate = (payload: APIUser | APIPrivateUser) => {
+    this.app.users.update(payload as APIUser);
 
-    private onUserUpdate = (payload: APIUser | APIPrivateUser) => {
-        this.app.users.update(payload as APIUser);
+    if (payload.id === this.app.account?.id)
+      this.app.setUser(payload as APIPrivateUser);
+  };
 
-        if (payload.id === this.app.account?.id)
-            this.app.setUser(payload as APIPrivateUser);
-    };
+  private onUserSettingsUpdate = (payload: APIUserSettings) => {
+    this.app.settings?.update(payload);
+  };
 
-    private onUserSettingsUpdate = (payload: APIUserSettings) => {
-        this.app.settings?.update(payload);
-    };
+  private onInviteCreate = (payload: APIInvite) => {
+    // NOTE: since we dont have friend invites yet we just return early
+    if (!payload.spaceId || !payload.channelId) return;
 
-    private onInviteCreate = (payload: APIInvite) => {
-        // NOTE: since we dont have friend invites yet we just return early
-        if (!payload.spaceId || !payload.channelId) return;
+    const space = this.app.spaces.get(payload.spaceId);
+    if (!space) return;
 
-        const space = this.app.spaces.get(payload.spaceId);
-        if (!space) return;
+    space.addInvite(payload);
+  };
 
-        space.addInvite(payload);
-    };
+  private onInviteUpdate = (payload: APIInvite) => {
+    // NOTE: since we dont have friend invites yet we just return early
+    if (!payload.spaceId || !payload.channelId) return;
 
-    private onInviteUpdate = (payload: APIInvite) => {
-        // NOTE: since we dont have friend invites yet we just return early
-        if (!payload.spaceId || !payload.channelId) return;
+    const space = this.app.spaces.get(payload.spaceId);
+    if (!space) return;
 
-        const space = this.app.spaces.get(payload.spaceId);
-        if (!space) return;
+    space.updateInvite(payload);
+  };
 
-        space.updateInvite(payload);
-    };
+  private onInviteDelete = (payload: Pick<APIInvite, "spaceId" | "code">) => {
+    // NOTE: since we dont have friend invites yet we just return early
+    if (!payload.spaceId) return;
+    const space = this.app.spaces.get(payload.spaceId);
+    if (!space) return;
 
-    private onInviteDelete = (payload: Pick<APIInvite, "spaceId" | "code">) => {
-        // NOTE: since we dont have friend invites yet we just return early
-        if (!payload.spaceId) return;
-        const space = this.app.spaces.get(payload.spaceId);
-        if (!space) return;
+    space.removeInvite(payload.code);
+  };
 
-        space.removeInvite(payload.code);
-    };
+  private onSpaceMemberAdd = (payload: APISpaceMember) => {
+    const space = this.app.spaces.get(payload.spaceId);
+    if (!space) return;
 
-    private onSpaceMemberAdd = (payload: APISpaceMember) => {
-        const space = this.app.spaces.get(payload.spaceId);
-        if (!space) return;
+    space.members.add(payload);
+  };
 
-        space.members.add(payload);
-    };
+  private onSpaceMemberRemove = (
+    payload: Pick<APISpaceMember, "spaceId" | "userId"> & {
+      reason?: string | null;
+    }
+  ) => {
+    const space = this.app.spaces.get(payload.spaceId);
+    if (!space) return;
 
-    private onSpaceMemberRemove = (
-        payload: Pick<APISpaceMember, "spaceId" | "userId"> & {
-            reason?: string | null;
-        }
-    ) => {
-        const space = this.app.spaces.get(payload.spaceId);
-        if (!space) return;
+    space.members.remove(payload.userId);
+  };
 
-        space.members.remove(payload.userId);
-    };
+  private onSpaceMemberListUpdate = (data: any) => {
+    const { spaceId } = data;
+    const space = this.app.spaces.get(spaceId);
+    if (!space) return;
 
-    private onSpaceMemberListUpdate = (data: any) => {
-        const { spaceId } = data;
-        const space = this.app.spaces.get(spaceId);
-        if (!space) return;
+    space.updateMemberList(data);
+  };
 
-        space.updateMemberList(data);
-    };
+  private onRoleCreate = (role: APIRole) => {
+    const space = this.app.spaces.get(role.spaceId);
+    if (!space) return;
 
-    private onRoleCreate = (role: APIRole) => {
-        const space = this.app.spaces.get(role.spaceId);
-        if (!space) return;
+    space.roles.add(role);
+    space.members.all.forEach((member) => member.invalidateChannelPermCache());
+  };
 
-        space.roles.add(role);
-        space.members.all.forEach((member) =>
-            member.invalidateChannelPermCache()
-        );
-    };
+  private onRoleUpdate = (role: APIRole) => {
+    const space = this.app.spaces.get(role.spaceId);
+    if (!space) return;
 
-    private onRoleUpdate = (role: APIRole) => {
-        const space = this.app.spaces.get(role.spaceId);
-        if (!space) return;
+    space.roles.update(role);
+    space.members.all.forEach((member) => member.invalidateChannelPermCache());
+  };
 
-        space.roles.update(role);
-        space.members.all.forEach((member) =>
-            member.invalidateChannelPermCache()
-        );
-    };
+  private onRoleDelete = (role: Pick<APIRole, "id" | "spaceId">) => {
+    const space = this.app.spaces.get(role.spaceId);
+    if (!space) return;
 
-    private onRoleDelete = (role: Pick<APIRole, "id" | "spaceId">) => {
-        const space = this.app.spaces.get(role.spaceId);
-        if (!space) return;
+    space.roles.remove(role.id);
+    space.members.all.forEach((member) => member.invalidateChannelPermCache());
+  };
 
-        space.roles.remove(role.id);
-        space.members.all.forEach((member) =>
-            member.invalidateChannelPermCache()
-        );
-    };
+  private onMemberRoleAdd = (
+    payload: Pick<APIMemberRole, "spaceId" | "userId" | "roleId">
+  ) => {
+    const space = this.app.spaces.get(payload.spaceId);
+    if (!space) return;
 
-    private onMemberRoleAdd = (
-        payload: Pick<APIMemberRole, "spaceId" | "userId" | "roleId">
-    ) => {
-        const space = this.app.spaces.get(payload.spaceId);
-        if (!space) return;
+    const member = space.members.get(payload.userId);
+    if (!member) return;
 
-        const member = space.members.get(payload.userId);
-        if (!member) return;
+    member.roles.add(payload.roleId);
+    member.invalidateChannelPermCache();
+  };
 
-        member.roles.add(payload.roleId);
-        member.invalidateChannelPermCache();
-    };
+  private onMemberRoleRemove = (
+    payload: Pick<APIMemberRole, "spaceId" | "userId" | "roleId">
+  ) => {
+    const space = this.app.spaces.get(payload.spaceId);
+    if (!space) return;
 
-    private onMemberRoleRemove = (
-        payload: Pick<APIMemberRole, "spaceId" | "userId" | "roleId">
-    ) => {
-        const space = this.app.spaces.get(payload.spaceId);
-        if (!space) return;
+    const member = space.members.get(payload.userId);
+    if (!member) return;
 
-        const member = space.members.get(payload.userId);
-        if (!member) return;
+    member.roles.delete(payload.roleId);
+    member.invalidateChannelPermCache();
+  };
 
-        member.roles.delete(payload.roleId);
-        member.invalidateChannelPermCache();
-    };
+  private onExpressionCreate = (payload: APIExpression) => {
+    if (payload.spaceId) {
+      const space = this.app.spaces.get(payload.spaceId);
+      if (!space) return;
 
-    private onExpressionCreate = (payload: APIExpression) => {
-        if (payload.spaceId) {
-            const space = this.app.spaces.get(payload.spaceId);
-            if (!space) return;
+      space.addExpression(payload);
 
-            space.addExpression(payload);
+      return;
+    }
 
-            return;
-        }
+    this.app.expressions.add(payload);
+  };
 
-        this.app.expressions.add(payload);
-    };
+  private onExpressionDelete = (
+    payload: Pick<APIExpression, "id" | "spaceId">
+  ) => {
+    if (payload.spaceId) {
+      const space = this.app.spaces.get(payload.spaceId);
+      if (!space) return;
 
-    private onExpressionDelete = (
-        payload: Pick<APIExpression, "id" | "spaceId">
-    ) => {
-        if (payload.spaceId) {
-            const space = this.app.spaces.get(payload.spaceId);
-            if (!space) return;
+      space.removeExpression(payload.id);
 
-            space.removeExpression(payload.id);
+      return;
+    }
 
-            return;
-        }
+    this.app.expressions.remove(payload.id);
+  };
 
-        this.app.expressions.remove(payload.id);
-    };
+  private onRelationshipCreate = (payload: APIRelationship) => {
+    this.app.relationships.add(payload);
+  };
 
-    private onRelationshipCreate = (payload: APIRelationship) => {
-        this.app.relationships.add(payload);
-    };
+  private onRelationshipUpdate = (payload: APIRelationship) => {
+    this.app.relationships.update(payload);
+  };
 
-    private onRelationshipUpdate = (payload: APIRelationship) => {
-        this.app.relationships.update(payload);
-    };
+  private onRelationshipDelete = (
+    payload: Pick<APIRelationship, "userId" | "otherUserId">
+  ) => {
+    this.app.relationships.remove(payload.userId, payload.otherUserId);
+  };
 
-    private onRelationshipDelete = (
-        payload: Pick<APIRelationship, "userId" | "otherUserId">
-    ) => {
-        this.app.relationships.remove(payload.userId, payload.otherUserId);
-    };
+  private onSpaceBanAdd = (payload: APISpaceBan) => {
+    const space = this.app.spaces.get(payload.spaceId);
+    if (!space) return;
 
-    private onSpaceBanAdd = (payload: APISpaceBan) => {
-        const space = this.app.spaces.get(payload.spaceId);
-        if (!space) return;
+    space.addBan(payload);
+  };
 
-        space.addBan(payload);
-    };
+  private onSpaceBanRemove = (
+    payload: Pick<APISpaceBan, "spaceId" | "userId">
+  ) => {
+    const space = this.app.spaces.get(payload.spaceId);
+    if (!space) return;
 
-    private onSpaceBanRemove = (
-        payload: Pick<APISpaceBan, "spaceId" | "userId">
-    ) => {
-        const space = this.app.spaces.get(payload.spaceId);
-        if (!space) return;
-
-        space.removeBan(payload.userId);
-    };
+    space.removeBan(payload.userId);
+  };
 }

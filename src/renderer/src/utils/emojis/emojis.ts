@@ -20,7 +20,7 @@ const shortcodes = [
     shortcodesCldrNative,
     shortcodesGithub,
     shortcodesIamcal,
-    shortcodesCldr,
+    shortcodesCldr
 ];
 
 export const defaultEmojis = joinShortcodes(emojiData, shortcodes);
@@ -33,9 +33,9 @@ export function getEmoji(shortcodeOrUnicodeOrEmoticon: string) {
             e.skins?.some(
                 (skin) =>
                     skin.shortcodes?.includes(shortcodeOrUnicodeOrEmoticon) ||
-                    skin.emoji === shortcodeOrUnicodeOrEmoticon,
+                    skin.emoji === shortcodeOrUnicodeOrEmoticon
             ) ||
-            e.emoticon === shortcodeOrUnicodeOrEmoticon,
+            e.emoticon === shortcodeOrUnicodeOrEmoticon
     );
 
     return (
@@ -43,7 +43,7 @@ export function getEmoji(shortcodeOrUnicodeOrEmoticon: string) {
             (skin) =>
                 skin.shortcodes?.includes(shortcodeOrUnicodeOrEmoticon) ||
                 skin.emoji === shortcodeOrUnicodeOrEmoticon ||
-                skin.emoticon === shortcodeOrUnicodeOrEmoticon,
+                skin.emoticon === shortcodeOrUnicodeOrEmoticon
         ) ?? emoji
     );
 }
@@ -81,7 +81,7 @@ export function findCustomEmoji(shortcode: string) {
 
     return (
         app.expressions.emojis.find(
-            (e) => e.name === name && e.id === id && e.animated === isAnimated,
+            (e) => e.name === name && e.id === id && e.animated === isAnimated
         ) ||
         app.spaces.all
             .map((sp) =>
@@ -89,8 +89,8 @@ export function findCustomEmoji(shortcode: string) {
                     (exp) =>
                         exp.id === id &&
                         exp.name === name &&
-                        exp.animated === isAnimated,
-                ),
+                        exp.animated === isAnimated
+                )
             )
             .find((exp) => exp !== undefined) ||
         null
@@ -126,7 +126,7 @@ export function useShortcodeQuery(editor: Editor): {
 export const insertEmoji = (
     editor: Editor,
     emoji: ReturnType<typeof getEmoji>,
-    addSpace = false,
+    addSpace = false
 ) => {
     if (!emoji) return;
 
@@ -135,14 +135,14 @@ export const insertEmoji = (
         url: `${TWEMOJI_URL}/${emoji.hexcode.toLowerCase()}.svg`,
         children: [{ text: emoji.emoji }],
         unicode: emoji.emoji,
-        name: emoji.shortcodes?.[0] ?? emoji.emoji,
+        name: emoji.shortcodes?.[0] ?? emoji.emoji
     };
 
     const { selection } = editor;
 
     if (selection && Range.isCollapsed(selection)) {
         editor.insertNode(emojiElement, {
-            at: selection.anchor,
+            at: selection.anchor
         });
 
         const pointAfter = editor.after(selection.focus);
@@ -157,7 +157,7 @@ export const insertEmoji = (
 export const insertCustomEmoji = (
     editor: Editor,
     emoji: Expression,
-    addSpace = false,
+    addSpace = false
 ) => {
     if (emoji.type !== ExpressionType.Emoji) return;
     const childrenText = emoji.animated
@@ -170,7 +170,7 @@ export const insertCustomEmoji = (
         children: [{ text: childrenText }],
         name: emoji.name,
         id: emoji.id,
-        animated: emoji.animated,
+        animated: emoji.animated
     };
 
     const { selection } = editor;

@@ -203,7 +203,6 @@ export const StatusBadge = observer(
         const { badgeDiameter, ringThickness, xNudgePx, yNudgePx } =
             getStatusMetrics(size);
 
-        // pill is wider than tall — same height as normal badge, ~2x wider
         const pillWidth = roundPx(badgeDiameter * 2.2);
 
         // nudge accounts for pill width so it stays anchored bottom-right

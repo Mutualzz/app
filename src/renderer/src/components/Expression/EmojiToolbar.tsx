@@ -6,7 +6,7 @@ import {
     insertCustomEmoji,
     insertEmoji,
     useShortcodeQuery
-} from "@utils/emojis";
+} from "@utils/emojis/emojis";
 import type { Emoji } from "emojibase";
 import { Stack, Typography, useTheme } from "@mutualzz/ui-web";
 import type { Expression } from "@stores/objects/Expression";
