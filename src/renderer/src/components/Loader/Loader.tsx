@@ -4,11 +4,11 @@ import type { PropsWithChildren } from "react";
 import Loading from "./Loading";
 
 const Loader = (props: PropsWithChildren) => {
-    const app = useAppStore();
+  const app = useAppStore();
 
-    if (!app.isReady) return <Loading />;
+  if (!app.isReady) return <Loading />;
 
-    return <>{props.children}</>;
+  return <>{props.children}</>;
 };
 
 export default observer(Loader);

@@ -8,75 +8,75 @@ import { baseDarkTheme } from "@mutualzz/ui-core";
 import { themes as baseThemes } from "@themes/index";
 
 export class ThemeStore {
-    readonly themes: ObservableMap<string, Theme>;
+  readonly themes: ObservableMap<string, Theme>;
 
-    currentType: ThemeType | null = null;
+  currentType: ThemeType | null = null;
 
-    // NOTE: If the currentTheme is null, it means using the system preference
-    currentTheme: string | null = null;
-    // NOTE: If the currentIcon is null, it means its adaptive to the theme
-    currentIcon: string | null = null;
+  // NOTE: If the currentTheme is null, it means using the system preference
+  currentTheme: string | null = null;
+  // NOTE: If the currentIcon is null, it means its adaptive to the theme
+  currentIcon: string | null = null;
 
-    constructor(private readonly app: AppStore) {
-        this.themes = observable.map(
-            baseThemes.map((t) => [t.id, new Theme(this.app, t)])
-        );
-        makeAutoObservable(this, {}, { autoBind: true });
+  constructor(private readonly app: AppStore) {
+    this.themes = observable.map(
+      baseThemes.map((t) => [t.id, new Theme(this.app, t)])
+    );
+    makeAutoObservable(this, {}, { autoBind: true });
 
-        makePersistable(this, {
-            name: "ThemeStore",
-            properties: ["currentTheme", "currentIcon"],
-            storage: localStorage
-        });
-    }
+    makePersistable(this, {
+      name: "ThemeStore",
+      properties: ["currentTheme", "currentIcon"],
+      storage: localStorage
+    });
+  }
 
-    get all() {
-        return Array.from(this.themes.values());
-    }
+  get all() {
+    return Array.from(this.themes.values());
+  }
 
-    clear() {
-        this.reset();
-    }
+  clear() {
+    this.reset();
+  }
 
-    setCurrentTheme(themeId: string | null) {
-        this.currentTheme = themeId;
-    }
+  setCurrentTheme(themeId: string | null) {
+    this.currentTheme = themeId;
+  }
 
-    setCurrentType(type: ThemeType | null) {
-        this.currentType = type;
-    }
+  setCurrentType(type: ThemeType | null) {
+    this.currentType = type;
+  }
 
-    setCurrentIcon(icon: string | null) {
-        this.currentIcon = icon;
-    }
+  setCurrentIcon(icon: string | null) {
+    this.currentIcon = icon;
+  }
 
-    addAll(themes: (APITheme | MzTheme)[]) {
-        themes.forEach((theme) => this.add(theme));
-    }
+  addAll(themes: (APITheme | MzTheme)[]) {
+    themes.forEach((theme) => this.add(theme));
+  }
 
-    reset() {
-        this.themes.forEach((theme) => {
-            if (theme.author) this.themes.delete(theme.id);
-        });
-    }
+  reset() {
+    this.themes.forEach((theme) => {
+      if (theme.author) this.themes.delete(theme.id);
+    });
+  }
 
-    add(theme: APITheme | MzTheme) {
-        const newTheme = new Theme(this.app, theme);
-        this.themes.set(theme.id, newTheme);
-        return newTheme;
-    }
+  add(theme: APITheme | MzTheme) {
+    const newTheme = new Theme(this.app, theme);
+    this.themes.set(theme.id, newTheme);
+    return newTheme;
+  }
 
-    update(theme: APITheme) {
-        return this.themes.get(theme.id)?.update(theme);
-    }
+  update(theme: APITheme) {
+    return this.themes.get(theme.id)?.update(theme);
+  }
 
-    get(id: Snowflake) {
-        return this.themes.get(id) ?? baseDarkTheme;
-    }
+  get(id: Snowflake) {
+    return this.themes.get(id) ?? baseDarkTheme;
+  }
 
-    remove(id: Snowflake) {
-        this.themes.delete(id);
+  remove(id: Snowflake) {
+    this.themes.delete(id);
 
-        if (this.currentTheme === id) this.currentTheme = null;
-    }
+    if (this.currentTheme === id) this.currentTheme = null;
+  }
 }

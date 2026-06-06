@@ -1,8 +1,8 @@
 import type {
-    APIMessage,
-    APIMessageEmbed,
-    APIMessageMention,
-    Snowflake
+  APIMessage,
+  APIMessageEmbed,
+  APIMessageMention,
+  Snowflake
 } from "@mutualzz/types";
 import type { AppStore } from "@stores/App.store";
 import { action, makeObservable, observable } from "mobx";
@@ -14,95 +14,95 @@ export type MessageLike = Message | QueuedMessage;
 export type MessageLikeData = APIMessage | QueuedMessageData;
 
 export class Message extends MessageBase {
-    declare channelId: Snowflake;
-    updatedAt?: Date | null;
+  declare channelId: Snowflake;
+  updatedAt?: Date | null;
 
-    nonce?: Snowflake | null;
-    declare spaceId?: Snowflake | null;
-    embeds: APIMessageEmbed[];
-    flags: BitField<MessageFlags>;
-    mentions: APIMessageMention[];
+  nonce?: Snowflake | null;
+  declare spaceId?: Snowflake | null;
+  embeds: APIMessageEmbed[];
+  flags: BitField<MessageFlags>;
+  mentions: APIMessageMention[];
 
-    edited: boolean;
+  edited: boolean;
 
-    // We store this value to allow users edit their messages
-    editing = false;
+  // We store this value to allow users edit their messages
+  editing = false;
 
-    constructor(app: AppStore, data: APIMessage) {
-        super(app, data);
+  constructor(app: AppStore, data: APIMessage) {
+    super(app, data);
 
-        this.id = data.id;
+    this.id = data.id;
 
-        if (data.channel) this._channel = this.app.channels.add(data.channel);
+    if (data.channel) this._channel = this.app.channels.add(data.channel);
 
-        this.content = data.content;
-        this.createdAt = new Date(data.createdAt);
-        this.updatedAt = data.updatedAt ? new Date(data.updatedAt) : null;
-        this.nonce = data.nonce;
-        this.edited = data.edited ?? false;
+    this.content = data.content;
+    this.createdAt = new Date(data.createdAt);
+    this.updatedAt = data.updatedAt ? new Date(data.updatedAt) : null;
+    this.nonce = data.nonce;
+    this.edited = data.edited ?? false;
 
-        this.mentions = data.mentions ?? [];
+    this.mentions = data.mentions ?? [];
 
-        this.embeds = data.embeds;
-        this.flags = BitField.fromString(messageFlags, data.flags.toString());
+    this.embeds = data.embeds;
+    this.flags = BitField.fromString(messageFlags, data.flags.toString());
 
-        this.spaceId = data.spaceId;
-        if (data.space) this._space = this.app.spaces.add(data.space);
+    this.spaceId = data.spaceId;
+    if (data.space) this._space = this.app.spaces.add(data.space);
 
-        makeObservable(this, {
-            updatedAt: observable,
-            nonce: observable,
-            embeds: observable.shallow,
-            edited: observable,
-            editing: observable,
-            update: action.bound,
-            setEditing: action.bound
-        });
+    makeObservable(this, {
+      updatedAt: observable,
+      nonce: observable,
+      embeds: observable.shallow,
+      edited: observable,
+      editing: observable,
+      update: action.bound,
+      setEditing: action.bound
+    });
+  }
+
+  update(message: APIMessage) {
+    this.id = message.id;
+    this.channelId = message.channelId;
+
+    if (message.channel) {
+      this._channel = this.app.channels.add(message.channel);
     }
 
-    update(message: APIMessage) {
-        this.id = message.id;
-        this.channelId = message.channelId;
+    this.spaceId = message.spaceId ?? null;
+    if (message.space) this._space = this.app.spaces.add(message.space);
 
-        if (message.channel) {
-            this._channel = this.app.channels.add(message.channel);
-        }
+    this.content = message.content;
+    this.nonce = message.nonce ?? null;
+    this.embeds = message.embeds ?? this.embeds ?? [];
 
-        this.spaceId = message.spaceId ?? null;
-        if (message.space) this._space = this.app.spaces.add(message.space);
+    this.createdAt = new Date(message.createdAt);
+    this.updatedAt = message.updatedAt ? new Date(message.updatedAt) : null;
 
-        this.content = message.content;
-        this.nonce = message.nonce ?? null;
-        this.embeds = message.embeds ?? this.embeds ?? [];
+    this.edited = message.edited ?? this.edited;
+  }
 
-        this.createdAt = new Date(message.createdAt);
-        this.updatedAt = message.updatedAt ? new Date(message.updatedAt) : null;
+  setEditing(value: boolean) {
+    this.editing = value;
+  }
 
-        this.edited = message.edited ?? this.edited;
-    }
+  async edit(content: string) {
+    const updated = await this.app.rest.patch<APIMessage, { content: string }>(
+      `/channels/${this.channelId}/messages/${this.id}`,
+      { content }
+    );
 
-    setEditing(value: boolean) {
-        this.editing = value;
-    }
+    this.update(updated);
+    this.setEditing(false);
+    return updated;
+  }
 
-    async edit(content: string) {
-        const updated = await this.app.rest.patch<
-            APIMessage,
-            { content: string }
-        >(`/channels/${this.channelId}/messages/${this.id}`, { content });
+  async delete() {
+    return this.app.rest.delete(
+      `/channels/${this.channelId}/messages/${this.id}`
+    );
+  }
 
-        this.update(updated);
-        this.setEditing(false);
-        return updated;
-    }
-
-    async delete() {
-        return this.app.rest.delete(
-            `/channels/${this.channelId}/messages/${this.id}`
-        );
-    }
-
-    dismiss() {
-        this.channel?.messages.remove(this.id);
-    }
+  dismiss() {
+    this.channel?.messages.remove(this.id);
+  }
 }

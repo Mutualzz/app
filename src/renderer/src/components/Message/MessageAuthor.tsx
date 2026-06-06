@@ -5,17 +5,17 @@ import { observer } from "mobx-react-lite";
 import { ColorLike } from "@mutualzz/ui-core";
 
 interface Props {
-    message: MessageLike;
-    space?: Space | null;
+  message: MessageLike;
+  space?: Space | null;
 }
 
 export const MessageAuthor = observer(({ message, space }: Props) => {
-    const member = space?.members.get(message.authorId) || null;
-    const nameColor = (member?.highestRole?.color ?? "#99958ed") as ColorLike;
+  const member = space?.members.get(message.authorId) || null;
+  const nameColor = (member?.highestRole?.color ?? "#99958ed") as ColorLike;
 
-    return (
-        <Typography textColor={nameColor}>
-            {member ? member.displayName : message.author?.displayName}
-        </Typography>
-    );
+  return (
+    <Typography textColor={nameColor}>
+      {member ? member.displayName : message.author?.displayName}
+    </Typography>
+  );
 });

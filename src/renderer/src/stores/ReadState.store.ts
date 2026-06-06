@@ -4,63 +4,63 @@ import { makeAutoObservable, observable } from "mobx";
 import { AppStore } from "@stores/App.store";
 
 interface AckPayload {
-    channelId: Snowflake;
-    lastMessageId: Snowflake;
-    type: ReadStateType;
+  channelId: Snowflake;
+  lastMessageId: Snowflake;
+  type: ReadStateType;
 }
 
 export class ReadStateStore {
-    private states = observable.map<Snowflake, ReadState>(); // channelId -> ReadState
+  private states = observable.map<Snowflake, ReadState>(); // channelId -> ReadState
 
-    constructor(private readonly app: AppStore) {
-        makeAutoObservable(this, {}, { autoBind: true });
+  constructor(private readonly app: AppStore) {
+    makeAutoObservable(this, {}, { autoBind: true });
+  }
+
+  addAll(states: APIReadState[]) {
+    for (const state of states) {
+      const existing = this.states.get(state.id);
+      if (existing) existing.update(state);
+      else this.states.set(state.id, new ReadState(this.app, state));
     }
+  }
 
-    addAll(states: APIReadState[]) {
-        for (const state of states) {
-            const existing = this.states.get(state.id);
-            if (existing) existing.update(state);
-            else this.states.set(state.id, new ReadState(this.app, state));
-        }
+  get(channelId: string): ReadState | undefined {
+    return this.states.get(channelId);
+  }
+
+  updateLocal(channelId: Snowflake, lastMessageId: Snowflake) {
+    const existing = this.states.get(channelId);
+    if (existing) {
+      existing.update({ lastMessageId, mentionCount: 0 });
+    } else {
+      this.states.set(
+        channelId,
+        new ReadState(this.app, {
+          id: channelId,
+          lastMessageId,
+          lastAckedId: null,
+          notificationsCursor: null,
+          mentionCount: 0,
+          badgeCount: 0,
+          lastPinTimestamp: null,
+          flags: 0n,
+          type: 0
+        })
+      );
     }
+  }
 
-    get(channelId: string): ReadState | undefined {
-        return this.states.get(channelId);
-    }
+  ack(channelId: Snowflake, lastMessageId: Snowflake) {
+    this.updateLocal(channelId, lastMessageId);
 
-    updateLocal(channelId: Snowflake, lastMessageId: Snowflake) {
-        const existing = this.states.get(channelId);
-        if (existing) {
-            existing.update({ lastMessageId, mentionCount: 0 });
-        } else {
-            this.states.set(
-                channelId,
-                new ReadState(this.app, {
-                    id: channelId,
-                    lastMessageId,
-                    lastAckedId: null,
-                    notificationsCursor: null,
-                    mentionCount: 0,
-                    badgeCount: 0,
-                    lastPinTimestamp: null,
-                    flags: 0n,
-                    type: 0
-                })
-            );
-        }
-    }
+    return this.app.rest.post(
+      `/channels/${channelId}/messages/${lastMessageId}/ack`
+    );
+  }
 
-    ack(channelId: Snowflake, lastMessageId: Snowflake) {
-        this.updateLocal(channelId, lastMessageId);
-
-        return this.app.rest.post(
-            `/channels/${channelId}/messages/${lastMessageId}/ack`
-        );
-    }
-
-    ackBulk(payload: AckPayload[]) {
-        return this.app.rest.post("/channels/ack-bulk", {
-            readStates: payload
-        });
-    }
+  ackBulk(payload: AckPayload[]) {
+    return this.app.rest.post("/channels/ack-bulk", {
+      readStates: payload
+    });
+  }
 }

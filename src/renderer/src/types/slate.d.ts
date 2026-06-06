@@ -3,88 +3,88 @@ import { type HistoryEditor } from "slate-history";
 import { type ReactEditor } from "slate-react";
 
 export interface BlockQuoteElement {
-    type: "blockquote";
-    children: Descendant[];
+  type: "blockquote";
+  children: Descendant[];
 }
 
 export interface LineElement {
-    type: "line";
-    children: Descendant[];
+  type: "line";
+  children: Descendant[];
 }
 
 export interface HeadingElement {
-    type: "heading";
-    level: 1 | 2 | 3;
-    children: Descendant[];
+  type: "heading";
+  level: 1 | 2 | 3;
+  children: Descendant[];
 }
 
 export interface LinkElement {
-    type: "link";
-    url: string;
-    children: Descendant[];
+  type: "link";
+  url: string;
+  children: Descendant[];
 }
 
 export interface EmojiElement {
-    type: "emoji";
-    url: string;
-    unicode: string;
-    name: string;
-    children: EmptyText[];
+  type: "emoji";
+  url: string;
+  unicode: string;
+  name: string;
+  children: EmptyText[];
 }
 
 export interface MentionElement {
-    type: "mention";
-    mentionType: MentionType;
-    id: string;
-    children: [{ text: "" }];
+  type: "mention";
+  mentionType: MentionType;
+  id: string;
+  children: [{ text: "" }];
 }
 
 export interface CustomEmojiElement {
-    type: "customEmoji";
-    url: string;
-    id: string;
-    name: string;
-    animated: boolean;
-    children: EmptyText[];
+  type: "customEmoji";
+  url: string;
+  id: string;
+  name: string;
+  animated: boolean;
+  children: EmptyText[];
 }
 
 export interface Text {
-    bold?: boolean;
-    italic?: boolean;
-    code?: boolean;
-    underline?: boolean;
-    strikethrough?: boolean;
-    spoiler?: boolean;
-    isMarker?: boolean; // Used to mark ranges for markers like **bold** or *italic*
-    text: string;
+  bold?: boolean;
+  italic?: boolean;
+  code?: boolean;
+  underline?: boolean;
+  strikethrough?: boolean;
+  spoiler?: boolean;
+  isMarker?: boolean; // Used to mark ranges for markers like **bold** or *italic*
+  text: string;
 }
 
 export interface EmptyText {
-    text: string;
+  text: string;
 }
 
 export type FormatKey = keyof Omit<Text, "text" | "isMarker"> | "blockquote";
 
 export type Element =
-    | BlockQuoteElement
-    | LineElement
-    | HeadingElement
-    | EmojiElement
-    | CustomEmojiElement
-    | LinkElement
-    | MentionElement;
+  | BlockQuoteElement
+  | LineElement
+  | HeadingElement
+  | EmojiElement
+  | CustomEmojiElement
+  | LinkElement
+  | MentionElement;
 
 export type Editor = BaseEditor &
-    ReactEditor &
-    HistoryEditor & {
-        enableEmoticons?: boolean;
-    };
+  ReactEditor &
+  HistoryEditor & {
+    enableEmoticons?: boolean;
+  };
 
 declare module "slate" {
-    interface CustomTypes {
-        Editor: Editor;
-        Element: Element;
-        Text: Text;
-        Range: BaseRange & Record<string, any>;
-    }
+  interface CustomTypes {
+    Editor: Editor;
+    Element: Element;
+    Text: Text;
+    Range: BaseRange & Record<string, any>;
+  }
 }

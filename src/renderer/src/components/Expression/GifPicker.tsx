@@ -267,7 +267,6 @@ export const GifPicker = observer(({ onSelectGif }: GifPickerProps) => {
     gif: GifResult
   ) => {
     e.stopPropagation();
-    console.log(gif);
     app.settings?.toggleFavoriteGif(
       `https://klipy.com/gifs/${gif.slug}|${gif.preview}`
     );
@@ -404,7 +403,6 @@ export const GifPicker = observer(({ onSelectGif }: GifPickerProps) => {
                 <GifGrid>
                   {favoriteGifs.map((entry: string) => {
                     const [klipyUrl, previewUrl] = entry.split("|");
-                    console.log(previewUrl);
                     const slug = klipyUrl.split("/").pop() ?? "";
                     const fav: GifResult = {
                       id: slug,

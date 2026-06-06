@@ -297,7 +297,7 @@ export const ChannelListItem = observer(
                       );
                     }}
                   >
-                    <UserPlusIcon />
+                    <UserPlusIcon weight="fill" />
                   </IconButton>
                 )}
 
@@ -311,7 +311,7 @@ export const ChannelListItem = observer(
                     size={12}
                     variant="plain"
                   >
-                    <GearIcon />
+                    <GearIcon weight="fill" />
                   </IconButton>
                 )}
               </Stack>

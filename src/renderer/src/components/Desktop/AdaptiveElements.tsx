@@ -9,22 +9,22 @@ import { useLayoutEffect } from "react";
 const logger = new Logger({ tag: "AdaptiveElements" });
 
 export const AdaptiveElements = observer(() => {
-    const app = useAppStore();
-    const { theme } = useTheme();
+  const app = useAppStore();
+  const { theme } = useTheme();
 
-    useLayoutEffect(() => {
-        (async () => {
-            try {
-                const themeToUse = app.themes.currentIcon
-                    ? Theme.toEmotion(app.themes.get(app.themes.currentIcon))
-                    : theme;
+  useLayoutEffect(() => {
+    (async () => {
+      try {
+        const themeToUse = app.themes.currentIcon
+          ? Theme.toEmotion(app.themes.get(app.themes.currentIcon))
+          : theme;
 
-                await updateTrayProperties(themeToUse);
-            } catch (e) {
-                logger.error("Failed to load window icon:", e);
-            }
-        })();
-    }, [theme.id, theme.type, app.themes.currentIcon]);
+        await updateTrayProperties(themeToUse);
+      } catch (e) {
+        logger.error("Failed to load window icon:", e);
+      }
+    })();
+  }, [theme.id, theme.type, app.themes.currentIcon]);
 
-    return null;
+  return null;
 });

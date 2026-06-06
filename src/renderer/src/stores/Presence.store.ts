@@ -1,67 +1,67 @@
 import { makeAutoObservable, observable } from "mobx";
 import type {
-    PresencePayload,
-    PresenceSchedule,
-    Snowflake
+  PresencePayload,
+  PresenceSchedule,
+  Snowflake
 } from "@mutualzz/types";
 import { makePersistable } from "mobx-persist-store";
 
 export class PresenceStore {
-    scheduledStatus: PresenceSchedule | null = null;
+  scheduledStatus: PresenceSchedule | null = null;
 
-    private readonly presences = observable.map<Snowflake, PresencePayload>();
-    private scheduledTimer: number | null = null;
+  private readonly presences = observable.map<Snowflake, PresencePayload>();
+  private scheduledTimer: number | null = null;
 
-    constructor() {
-        makeAutoObservable(this, {}, { autoBind: true });
+  constructor() {
+    makeAutoObservable(this, {}, { autoBind: true });
 
-        makePersistable(this, {
-            name: "PresenceStore",
-            properties: ["scheduledStatus"],
-            storage: localStorage
-        });
+    makePersistable(this, {
+      name: "PresenceStore",
+      properties: ["scheduledStatus"],
+      storage: localStorage
+    });
+  }
+
+  clear() {
+    this.presences.clear();
+  }
+
+  upsert(userId: Snowflake, presence: PresencePayload) {
+    this.presences.set(userId, presence);
+  }
+
+  get(userId: Snowflake) {
+    return this.presences.get(userId) ?? null;
+  }
+
+  setScheduledStatus(schedule: PresenceSchedule | null) {
+    this.scheduledStatus = schedule;
+    this.rearmScheduledStatusTimer();
+  }
+
+  rearmScheduledStatusTimer(opts?: { onExpire?: () => void }) {
+    if (this.scheduledTimer) {
+      window.clearTimeout(this.scheduledTimer);
+      this.scheduledTimer = null;
     }
 
-    clear() {
-        this.presences.clear();
+    const schedule = this.scheduledStatus;
+    if (!schedule) return;
+
+    const now = Date.now();
+    const delay = schedule.until - now;
+
+    if (delay <= 0) {
+      this.scheduledStatus = null;
+      opts?.onExpire?.();
+      return;
     }
 
-    upsert(userId: Snowflake, presence: PresencePayload) {
-        this.presences.set(userId, presence);
-    }
+    this.scheduledTimer = window.setTimeout(() => {
+      this.scheduledTimer = null;
 
-    get(userId: Snowflake) {
-        return this.presences.get(userId) ?? null;
-    }
-
-    setScheduledStatus(schedule: PresenceSchedule | null) {
-        this.scheduledStatus = schedule;
-        this.rearmScheduledStatusTimer();
-    }
-
-    rearmScheduledStatusTimer(opts?: { onExpire?: () => void }) {
-        if (this.scheduledTimer) {
-            window.clearTimeout(this.scheduledTimer);
-            this.scheduledTimer = null;
-        }
-
-        const schedule = this.scheduledStatus;
-        if (!schedule) return;
-
-        const now = Date.now();
-        const delay = schedule.until - now;
-
-        if (delay <= 0) {
-            this.scheduledStatus = null;
-            opts?.onExpire?.();
-            return;
-        }
-
-        this.scheduledTimer = window.setTimeout(() => {
-            this.scheduledTimer = null;
-
-            this.scheduledStatus = null;
-            opts?.onExpire?.();
-        }, delay);
-    }
+      this.scheduledStatus = null;
+      opts?.onExpire?.();
+    }, delay);
+  }
 }

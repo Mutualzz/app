@@ -107,13 +107,19 @@ export const MessageInput = observer(
 
     const { mutate: sendMessage } = useMutation({
       mutationKey: ["send-message", channel?.id],
-      mutationFn: async (editor?: Editor | null) => {
+      mutationFn: async ({
+        editor,
+        contentOverride
+      }: {
+        editor?: Editor | null;
+        contentOverride?: string;
+      }) => {
         if (!app.account) return null;
         if (!channel) return null;
 
         stopTyping();
 
-        const trimmed = content.trim();
+        const trimmed = (contentOverride ?? content).trim();
         const original = (message?.content ?? "").trim();
         const isEditing = !!message;
 
@@ -130,6 +136,7 @@ export const MessageInput = observer(
         }
 
         const nonce = Snowflake.generate();
+        setNonce(nonce);
         const author = app.account.raw;
         const msg = app.queue.add({
           id: nonce,
@@ -152,8 +159,12 @@ export const MessageInput = observer(
           type: "line",
           children: [{ text: "" }]
         });
-        setContent("");
-        setNonce(nonce);
+
+        if (content.length >= 2000)
+          throw new HttpException(
+            HttpStatusCode.Forbidden,
+            "Message cannot exceed 2000 characters"
+          );
 
         if (isDM && theyBlockedMe)
           throw new HttpException(
@@ -161,32 +172,29 @@ export const MessageInput = observer(
             "You cannot message this person"
           );
 
+        setContent("");
+
         return await channel.sendMessage({ content: trimmed, nonce }, msg);
       },
-      onError: async (err) => {
-        const error =
-          err instanceof Error
-            ? err.message
-            : typeof err === "string"
-              ? err
-              : "Unknown error";
+      onError: async (err: HttpException) => {
+        const error = err.errors?.[0]?.message || err.message;
+        console.log(nonce);
 
         if (!message) {
           const queued = app.queue
             .get(channel?.id ?? "")
-            .find((x) => (isDM ? x.id === nonce : x.content === content));
+            .find((x) => x.id === nonce || x.content === content);
+          console.log("queued", queued);
 
           queued?.fail(error);
 
-          if (isDM) {
-            const sysMessage = await createSystemMessage(
-              app,
-              channel?.id ?? "",
-              "You cannot send a message to this person",
-              messageFlags.Ephemeral
-            );
-            if (sysMessage) channel?.messages.add(sysMessage);
-          }
+          const sysMessage = await createSystemMessage(
+            app,
+            channel?.id ?? "",
+            error,
+            messageFlags.Ephemeral
+          );
+          if (sysMessage) channel?.messages.add(sysMessage);
         }
       },
       onSuccess: () => {
@@ -207,7 +215,7 @@ export const MessageInput = observer(
     const onKeyDown = (e: KeyboardEvent, editor: Editor) => {
       if (e.key === "Enter" && !e.shiftKey) {
         e.preventDefault();
-        sendMessage(editor);
+        sendMessage({ editor });
         return;
       }
 
@@ -267,7 +275,12 @@ export const MessageInput = observer(
           onChange={onChange}
           placeholder={message?.editing ? message.content : placeholder}
           onKeyDown={onKeyDown}
-          onSendMessage={() => sendMessage(inputRef.current?.editor ?? null)}
+          onSendMessage={(message) =>
+            sendMessage({
+              editor: inputRef.current?.editor ?? null,
+              contentOverride: message
+            })
+          }
           disabled={denySendingMessages}
           emojiPicker={!denySendingMessages}
           gifPicker={!denySendingMessages && !message?.editing}
@@ -284,7 +297,10 @@ export const MessageInput = observer(
             cancel
           </Link>{" "}
           • enter to{"  "}
-          <Link textColor="accent" onClick={() => sendMessage(null)}>
+          <Link
+            textColor="accent"
+            onClick={() => sendMessage({ editor: null })}
+          >
             save
           </Link>
         </Typography>

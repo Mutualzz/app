@@ -37,9 +37,6 @@ function RouteComponent() {
   useEffect(() => {
     if (app.mode !== "@me") app.setMode("@me");
 
-    app.spaces.unsetActive();
-    app.channels.setPreferredActive();
-
     return () => {
       if (app.mode === "@me") app.resetMode();
     };
@@ -47,10 +44,13 @@ function RouteComponent() {
 
   useEffect(() => {
     if (childParams?.channelId) return;
+    app.spaces.setActive("@me");
 
     const preferredDM =
       app.channels.getMostRecentChannelForSpace("@me") ?? app.channels.dms[0];
     if (!preferredDM) return;
+
+    console.log("navigating to preferred DM", { preferredDM });
 
     navigate({
       to: "/@me/$channelId",
@@ -59,7 +59,7 @@ function RouteComponent() {
       },
       replace: true
     });
-  }, [childParams?.channelId, navigate, app.channels.dms, app]);
+  }, [childParams?.channelId, app.channels.dms]);
 
   return (
     <Stack width="100%" height="100%" direction="row">

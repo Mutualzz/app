@@ -5,30 +5,30 @@ import { Message } from "./Message";
 import { SystemMessage } from "@components/Message/SystemMessage";
 
 interface Props {
-    group: MessageGroupType;
+  group: MessageGroupType;
 }
 
 export const MessageGroup = observer(({ group }: Props) => {
-    const { messages } = group;
+  const { messages } = group;
 
-    return (
-        <>
-            {messages.map((message, index) => {
-                if (
-                    message.type === MessageType.Default ||
-                    message.type === MessageType.Reply
-                ) {
-                    return (
-                        <Message
-                            key={message.id}
-                            message={message}
-                            header={index === messages.length - 1}
-                        />
-                    );
-                }
+  return (
+    <>
+      {messages.map((message, index) => {
+        if (
+          message.type === MessageType.Default ||
+          message.type === MessageType.Reply
+        ) {
+          return (
+            <Message
+              key={message.id}
+              message={message}
+              header={index === messages.length - 1}
+            />
+          );
+        }
 
-                return <SystemMessage key={message.id} message={message} />;
-            })}
-        </>
-    );
+        return <SystemMessage key={message.id} message={message} />;
+      })}
+    </>
+  );
 });

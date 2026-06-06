@@ -4,38 +4,38 @@ import { observer } from "mobx-react-lite";
 import { useEffect } from "react";
 
 export const Route = createFileRoute("/")({
-    component: observer(RouteComponent)
+  component: observer(RouteComponent)
 });
 
 function RouteComponent() {
-    const app = useAppStore();
+  const app = useAppStore();
 
-    useEffect(() => {
-        app.resetMode();
-    }, [app]);
+  useEffect(() => {
+    app.resetMode();
+  }, [app]);
 
-    if (app.isAppLoading) return null;
+  if (app.isAppLoading) return null;
 
-    if (app.joiningSpace && app.joiningInviteCode) {
-        return (
-            <Navigate
-                to="/invite/$code"
-                replace
-                params={{ code: app.joiningInviteCode }}
-                search={{ deepLink: false }}
-            />
-        );
-    }
+  if (app.joiningSpace && app.joiningInviteCode) {
+    return (
+      <Navigate
+        to="/invite/$code"
+        replace
+        params={{ code: app.joiningInviteCode }}
+        search={{ deepLink: false }}
+      />
+    );
+  }
 
-    if (!app.token) return <Navigate to="/login" replace />;
+  if (!app.token) return <Navigate to="/login" replace />;
 
-    const lastHref = app.navigation.current?.href;
-    if (
-        lastHref &&
-        (lastHref.startsWith("/spaces") || lastHref.startsWith("/feed"))
-    ) {
-        return <Navigate to={lastHref} replace />;
-    }
+  const lastHref = app.navigation.current?.href;
+  if (
+    lastHref &&
+    (lastHref.startsWith("/spaces") || lastHref.startsWith("/feed"))
+  ) {
+    return <Navigate to={lastHref} replace />;
+  }
 
-    return <Navigate to={`/${app.targetMode as "feed" | "spaces"}`} replace />;
+  return <Navigate to={`/${app.targetMode as "feed" | "spaces"}`} replace />;
 }

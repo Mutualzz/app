@@ -904,31 +904,23 @@ export class GatewayStore {
     this.app.channels.addAll(channels);
     this.app.relationships.addAll(relationships);
     this.app.readStates.addAll(readStates);
+    this.app.expressions.addAll(expressions);
 
-    if(mergedPresences) {
-      for(const [userId, presence] of Object.entries(mergedPresences)) {
+    if (mergedPresences) {
+      for (const [userId, presence] of Object.entries(mergedPresences)) {
         this.app.presence.upsert(userId, presence);
       }
-     }
+    }
 
     this.reconnectTimeout = 0;
     this.app.setGatewayReady(true);
     this.app.startBadgeWatch();
-
-    const space =
-      this.app.spaces.mostRecentSpace || this.app.spaces.positioned[0];
-
-    if (space && this.app.mode !== "@me") this.app.spaces.setActive(space.id);
-
-    this.app.channels.setPreferredActive();
 
     this.startPresenceLoop();
 
     // if we already persisted a schedule in local storage, rearm timer for UI
     const selfUserId = this.app.account?.id;
     if (selfUserId) this.app.presence.rearmScheduledStatusTimer();
-
-    this.app.expressions.addAll(expressions);
   };
 
   // Presence

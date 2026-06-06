@@ -7,72 +7,66 @@ import type { MarkdownItAsync } from "@components/Markdown/MarkdownItAsync";
 const emojiRegex = new RegExp(shortcodeRegex.source, "g");
 
 export const emojiPlugin = (md: MarkdownItAsync) => {
-    md.core.ruler.after("inline", "emoji", (state) => {
-        const tokens = state.tokens;
+  md.core.ruler.after("inline", "emoji", (state) => {
+    const tokens = state.tokens;
 
-        for (let i = 0; i < tokens.length; i++) {
-            if (tokens[i].type === "inline") {
-                const content = tokens[i].content;
-                const newTokens: Token[] = [];
-                let lastIndex = 0;
-                let match;
+    for (let i = 0; i < tokens.length; i++) {
+      if (tokens[i].type === "inline") {
+        const content = tokens[i].content;
+        const newTokens: Token[] = [];
+        let lastIndex = 0;
+        let match;
 
-                emojiRegex.lastIndex = 0;
+        emojiRegex.lastIndex = 0;
 
-                while ((match = emojiRegex.exec(content))) {
-                    const emojiName = match[0].slice(1, -1);
-                    const emojiData = getEmoji(emojiName);
+        while ((match = emojiRegex.exec(content))) {
+          const emojiName = match[0].slice(1, -1);
+          const emojiData = getEmoji(emojiName);
 
-                    if (emojiData) {
-                        if (lastIndex < match.index) {
-                            const textToken = new Token("text", "", 0);
-                            textToken.content = content.slice(
-                                lastIndex,
-                                match.index
-                            );
-                            textToken.level = tokens[i].level;
-                            newTokens.push(textToken);
-                        }
-
-                        const emojiToken = new Token("emoji", "", 0);
-                        emojiToken.content = emojiData.emoji;
-                        emojiToken.attrSet(
-                            "name",
-                            emojiData.shortcodes?.[0] || emojiData.emoji
-                        );
-                        emojiToken.attrSet(
-                            "url",
-                            `${TWEMOJI_URL}/${emojiData.hexcode.toLowerCase()}.svg`
-                        );
-                        emojiToken.attrSet("unicode", emojiData.emoji);
-                        emojiToken.level = tokens[i].level;
-                        newTokens.push(emojiToken);
-
-                        lastIndex = match.index + match[0].length;
-                    }
-                }
-
-                if (lastIndex < content.length) {
-                    const textToken = new Token("text", "", 0);
-                    textToken.content = content.slice(lastIndex);
-                    textToken.level = tokens[i].level;
-                    newTokens.push(textToken);
-                }
-
-                if (
-                    newTokens.length &&
-                    newTokens.some((t) => t.type === "emoji")
-                ) {
-                    tokens[i].children = newTokens;
-                    tokens[i].content = "";
-                }
+          if (emojiData) {
+            if (lastIndex < match.index) {
+              const textToken = new Token("text", "", 0);
+              textToken.content = content.slice(lastIndex, match.index);
+              textToken.level = tokens[i].level;
+              newTokens.push(textToken);
             }
+
+            const emojiToken = new Token("emoji", "", 0);
+            emojiToken.content = emojiData.emoji;
+            emojiToken.attrSet(
+              "name",
+              emojiData.shortcodes?.[0] || emojiData.emoji
+            );
+            emojiToken.attrSet(
+              "url",
+              `${TWEMOJI_URL}/${emojiData.hexcode.toLowerCase()}.svg`
+            );
+            emojiToken.attrSet("unicode", emojiData.emoji);
+            emojiToken.level = tokens[i].level;
+            newTokens.push(emojiToken);
+
+            lastIndex = match.index + match[0].length;
+          }
         }
-    });
 
-    md.renderer.rules.emoji = (tokens, idx) => {
-        const token = tokens[idx];
+        if (lastIndex < content.length) {
+          const textToken = new Token("text", "", 0);
+          textToken.content = content.slice(lastIndex);
+          textToken.level = tokens[i].level;
+          newTokens.push(textToken);
+        }
 
-        return `<emoji data-name="${token.attrGet("name")}" data-url="${token.attrGet("url")}" data-unicode="${token.attrGet("unicode")}">${token.content}</emoji>`;
-    };
+        if (newTokens.length && newTokens.some((t) => t.type === "emoji")) {
+          tokens[i].children = newTokens;
+          tokens[i].content = "";
+        }
+      }
+    }
+  });
+
+  md.renderer.rules.emoji = (tokens, idx) => {
+    const token = tokens[idx];
+
+    return `<emoji data-name="${token.attrGet("name")}" data-url="${token.attrGet("url")}" data-unicode="${token.attrGet("unicode")}">${token.content}</emoji>`;
+  };
 };

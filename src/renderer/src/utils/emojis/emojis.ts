@@ -15,174 +15,172 @@ import type { Expression } from "@stores/objects/Expression";
 import { ExpressionType } from "@mutualzz/types";
 
 const shortcodes = [
-    shortcodesEmojiBase,
-    shortcodesJoyPixels,
-    shortcodesCldrNative,
-    shortcodesGithub,
-    shortcodesIamcal,
-    shortcodesCldr
+  shortcodesEmojiBase,
+  shortcodesJoyPixels,
+  shortcodesCldrNative,
+  shortcodesGithub,
+  shortcodesIamcal,
+  shortcodesCldr
 ];
 
 export const defaultEmojis = joinShortcodes(emojiData, shortcodes);
 
 export function getEmoji(shortcodeOrUnicodeOrEmoticon: string) {
-    const emoji = defaultEmojis.find(
-        (e) =>
-            e.shortcodes?.includes(shortcodeOrUnicodeOrEmoticon) ||
-            e.emoji === shortcodeOrUnicodeOrEmoticon ||
-            e.skins?.some(
-                (skin) =>
-                    skin.shortcodes?.includes(shortcodeOrUnicodeOrEmoticon) ||
-                    skin.emoji === shortcodeOrUnicodeOrEmoticon
-            ) ||
-            e.emoticon === shortcodeOrUnicodeOrEmoticon
-    );
+  const emoji = defaultEmojis.find(
+    (e) =>
+      e.shortcodes?.includes(shortcodeOrUnicodeOrEmoticon) ||
+      e.emoji === shortcodeOrUnicodeOrEmoticon ||
+      e.skins?.some(
+        (skin) =>
+          skin.shortcodes?.includes(shortcodeOrUnicodeOrEmoticon) ||
+          skin.emoji === shortcodeOrUnicodeOrEmoticon
+      ) ||
+      e.emoticon === shortcodeOrUnicodeOrEmoticon
+  );
 
-    return (
-        emoji?.skins?.find(
-            (skin) =>
-                skin.shortcodes?.includes(shortcodeOrUnicodeOrEmoticon) ||
-                skin.emoji === shortcodeOrUnicodeOrEmoticon ||
-                skin.emoticon === shortcodeOrUnicodeOrEmoticon
-        ) ?? emoji
-    );
+  return (
+    emoji?.skins?.find(
+      (skin) =>
+        skin.shortcodes?.includes(shortcodeOrUnicodeOrEmoticon) ||
+        skin.emoji === shortcodeOrUnicodeOrEmoticon ||
+        skin.emoticon === shortcodeOrUnicodeOrEmoticon
+    ) ?? emoji
+  );
 }
 
 export async function getCustomEmoji(shortcode: string) {
-    const found = findCustomEmoji(shortcode);
-    if (found) return found;
+  const found = findCustomEmoji(shortcode);
+  if (found) return found;
 
-    if (!shortcode.startsWith("<") || !shortcode.endsWith(">")) return null;
+  if (!shortcode.startsWith("<") || !shortcode.endsWith(">")) return null;
 
-    const inner = shortcode.slice(1, -1);
-    const parts = inner.split(":");
-    if (parts.length !== 3) return null;
+  const inner = shortcode.slice(1, -1);
+  const parts = inner.split(":");
+  if (parts.length !== 3) return null;
 
-    const [, , id] = parts;
-    if (!id) return null;
+  const [, , id] = parts;
+  if (!id) return null;
 
-    const app = useAppStore();
-    return (await app.expressions.resolve(id)) ?? null;
+  const app = useAppStore();
+  return (await app.expressions.resolve(id)) ?? null;
 }
 
 export function findCustomEmoji(shortcode: string) {
-    if (!shortcode.startsWith("<") || !shortcode.endsWith(">")) return null;
+  if (!shortcode.startsWith("<") || !shortcode.endsWith(">")) return null;
 
-    const app = useAppStore();
-    const inner = shortcode.slice(1, -1);
-    const parts = inner.split(":");
+  const app = useAppStore();
+  const inner = shortcode.slice(1, -1);
+  const parts = inner.split(":");
 
-    if (parts.length !== 3) return null;
+  if (parts.length !== 3) return null;
 
-    const [animatedFlag, name, id] = parts;
-    if (!name || !id) return null;
+  const [animatedFlag, name, id] = parts;
+  if (!name || !id) return null;
 
-    const isAnimated = animatedFlag === "a";
+  const isAnimated = animatedFlag === "a";
 
-    return (
-        app.expressions.emojis.find(
-            (e) => e.name === name && e.id === id && e.animated === isAnimated
-        ) ||
-        app.spaces.all
-            .map((sp) =>
-                Array.from(sp.expressions.values()).find(
-                    (exp) =>
-                        exp.id === id &&
-                        exp.name === name &&
-                        exp.animated === isAnimated
-                )
-            )
-            .find((exp) => exp !== undefined) ||
-        null
-    );
+  return (
+    app.expressions.emojis.find(
+      (e) => e.name === name && e.id === id && e.animated === isAnimated
+    ) ||
+    app.spaces.all
+      .map((sp) =>
+        Array.from(sp.expressions.values()).find(
+          (exp) =>
+            exp.id === id && exp.name === name && exp.animated === isAnimated
+        )
+      )
+      .find((exp) => exp !== undefined) ||
+    null
+  );
 }
 
 export function useShortcodeQuery(editor: Editor): {
-    query: string | null;
-    range: Range | null;
+  query: string | null;
+  range: Range | null;
 } {
-    const { selection } = editor;
-    if (!selection || !Range.isCollapsed(selection))
-        return { query: null, range: null };
+  const { selection } = editor;
+  if (!selection || !Range.isCollapsed(selection))
+    return { query: null, range: null };
 
-    const { anchor } = selection;
-    const [node] = editor.node(anchor.path);
+  const { anchor } = selection;
+  const [node] = editor.node(anchor.path);
 
-    if (!Text.isText(node)) return { query: null, range: null };
+  if (!Text.isText(node)) return { query: null, range: null };
 
-    const textBefore = node.text.slice(0, anchor.offset);
+  const textBefore = node.text.slice(0, anchor.offset);
 
-    const match = /:([\w+-]{2,})$/.exec(textBefore);
-    if (!match) return { query: null, range: null };
+  const match = /:([\w+-]{2,})$/.exec(textBefore);
+  if (!match) return { query: null, range: null };
 
-    const colonOffset = match.index;
-    const [, query] = match;
+  const colonOffset = match.index;
+  const [, query] = match;
 
-    const rangeStart = { path: anchor.path, offset: colonOffset };
+  const rangeStart = { path: anchor.path, offset: colonOffset };
 
-    return { query, range: { anchor: rangeStart, focus: anchor } };
+  return { query, range: { anchor: rangeStart, focus: anchor } };
 }
 
 export const insertEmoji = (
-    editor: Editor,
-    emoji: ReturnType<typeof getEmoji>,
-    addSpace = false
+  editor: Editor,
+  emoji: ReturnType<typeof getEmoji>,
+  addSpace = false
 ) => {
-    if (!emoji) return;
+  if (!emoji) return;
 
-    const emojiElement: EmojiElement = {
-        type: "emoji",
-        url: `${TWEMOJI_URL}/${emoji.hexcode.toLowerCase()}.svg`,
-        children: [{ text: emoji.emoji }],
-        unicode: emoji.emoji,
-        name: emoji.shortcodes?.[0] ?? emoji.emoji
-    };
+  const emojiElement: EmojiElement = {
+    type: "emoji",
+    url: `${TWEMOJI_URL}/${emoji.hexcode.toLowerCase()}.svg`,
+    children: [{ text: emoji.emoji }],
+    unicode: emoji.emoji,
+    name: emoji.shortcodes?.[0] ?? emoji.emoji
+  };
 
-    const { selection } = editor;
+  const { selection } = editor;
 
-    if (selection && Range.isCollapsed(selection)) {
-        editor.insertNode(emojiElement, {
-            at: selection.anchor
-        });
+  if (selection && Range.isCollapsed(selection)) {
+    editor.insertNode(emojiElement, {
+      at: selection.anchor
+    });
 
-        const pointAfter = editor.after(selection.focus);
-        if (pointAfter) {
-            editor.select(pointAfter);
+    const pointAfter = editor.after(selection.focus);
+    if (pointAfter) {
+      editor.select(pointAfter);
 
-            if (addSpace) editor.insertText(" ");
-        }
+      if (addSpace) editor.insertText(" ");
     }
+  }
 };
 
 export const insertCustomEmoji = (
-    editor: Editor,
-    emoji: Expression,
-    addSpace = false
+  editor: Editor,
+  emoji: Expression,
+  addSpace = false
 ) => {
-    if (emoji.type !== ExpressionType.Emoji) return;
-    const childrenText = emoji.animated
-        ? `<a:${emoji.name}:${emoji.id}>`
-        : `<:${emoji.name}:${emoji.id}>`;
+  if (emoji.type !== ExpressionType.Emoji) return;
+  const childrenText = emoji.animated
+    ? `<a:${emoji.name}:${emoji.id}>`
+    : `<:${emoji.name}:${emoji.id}>`;
 
-    const emojiElement: CustomEmojiElement = {
-        type: "customEmoji",
-        url: emoji.url,
-        children: [{ text: childrenText }],
-        name: emoji.name,
-        id: emoji.id,
-        animated: emoji.animated
-    };
+  const emojiElement: CustomEmojiElement = {
+    type: "customEmoji",
+    url: emoji.url,
+    children: [{ text: childrenText }],
+    name: emoji.name,
+    id: emoji.id,
+    animated: emoji.animated
+  };
 
-    const { selection } = editor;
+  const { selection } = editor;
 
-    if (selection && Range.isCollapsed(selection)) {
-        editor.insertNode(emojiElement, { at: selection.anchor });
+  if (selection && Range.isCollapsed(selection)) {
+    editor.insertNode(emojiElement, { at: selection.anchor });
 
-        const pointAfter = editor.after(selection.focus);
-        if (pointAfter) {
-            editor.select(pointAfter);
+    const pointAfter = editor.after(selection.focus);
+    if (pointAfter) {
+      editor.select(pointAfter);
 
-            if (addSpace) editor.insertText(" ");
-        }
+      if (addSpace) editor.insertText(" ");
     }
+  }
 };

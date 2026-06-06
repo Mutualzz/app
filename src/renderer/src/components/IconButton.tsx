@@ -1,17 +1,17 @@
 import {
-    IconButton as MzIconButton,
-    type IconButtonProps,
-    useTheme
+  IconButton as MzIconButton,
+  type IconButtonProps,
+  useTheme
 } from "@mutualzz/ui-web";
 
 export const IconButton = ({ color, variant, ...props }: IconButtonProps) => {
-    const { theme } = useTheme();
+  const { theme } = useTheme();
 
-    return (
-        <MzIconButton
-            color={color ?? theme.typography.colors.primary}
-            variant={variant ?? "plain"}
-            {...props}
-        />
-    );
+  return (
+    <MzIconButton
+      color={color ?? theme.typography.colors.primary}
+      variant={variant ?? "plain"}
+      {...props}
+    />
+  );
 };

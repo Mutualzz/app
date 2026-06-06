@@ -7,83 +7,82 @@ import { useMutation } from "@tanstack/react-query";
 import { observer } from "mobx-react-lite";
 
 interface Props {
-    channel: Channel;
+  channel: Channel;
 }
 
 export const CategoryDeleteModal = observer(({ channel }: Props) => {
-    const app = useAppStore();
-    const { closeModal } = useModal();
+  const app = useAppStore();
+  const { closeModal } = useModal();
 
-    const { mutate: deleteCategory, isPending: isDeleting } = useMutation({
-        mutationKey: ["delete-category", channel.id],
-        mutationFn: async (parentOnly: boolean) => channel.delete(parentOnly),
-        onSuccess: () => {
-            closeModal();
-        },
-    });
+  const { mutate: deleteCategory, isPending: isDeleting } = useMutation({
+    mutationKey: ["delete-category", channel.id],
+    mutationFn: async (parentOnly: boolean) => channel.delete(parentOnly),
+    onSuccess: () => {
+      closeModal();
+    }
+  });
 
-    return (
-        <AnimatedPaper
-            borderRadius={12}
-            direction="column"
-            initial={{ scale: 0.95 }}
-            animate={{ scale: 1 }}
-            elevation={app.settings?.preferEmbossed ? 5 : 1}
-            justifyContent="center"
-            spacing={5}
-            alignItems="center"
-            p="1rem"
-            transparency={65}
-            width="25vw"
-        >
-            <Stack
-                width="100%"
-                flex={1}
-                position="relative"
-                direction="column"
-                alignItems="center"
-                justifyContent="center"
-                mt={10}
-            >
-                <Typography level="h6">
-                    Would you like to delete this category and all of its
-                    channels?
-                </Typography>
-            </Stack>
-            <Stack
-                direction="row"
-                justifyContent="center"
-                alignItems="center"
-                width="100%"
-            >
-                <ButtonGroup spacing={{ xs: 2, sm: 5 }}>
-                    <Button
-                        variant="solid"
-                        color="danger"
-                        onClick={() => deleteCategory(true)}
-                        disabled={isDeleting}
-                    >
-                        Just the category
-                    </Button>
-                    <Button
-                        variant="soft"
-                        color="danger"
-                        onClick={() => deleteCategory(false)}
-                        disabled={isDeleting}
-                    >
-                        Category and all channels related
-                    </Button>
-                    <Button
-                        variant="solid"
-                        fullWidth
-                        color="success"
-                        onClick={() => closeModal()}
-                        disabled={isDeleting}
-                    >
-                        Cancel
-                    </Button>
-                </ButtonGroup>
-            </Stack>
-        </AnimatedPaper>
-    );
+  return (
+    <AnimatedPaper
+      borderRadius={12}
+      direction="column"
+      initial={{ scale: 0.95 }}
+      animate={{ scale: 1 }}
+      elevation={app.settings?.preferEmbossed ? 5 : 1}
+      justifyContent="center"
+      spacing={5}
+      alignItems="center"
+      p="1rem"
+      transparency={65}
+      width="25vw"
+    >
+      <Stack
+        width="100%"
+        flex={1}
+        position="relative"
+        direction="column"
+        alignItems="center"
+        justifyContent="center"
+        mt={10}
+      >
+        <Typography level="h6">
+          Would you like to delete this category and all of its channels?
+        </Typography>
+      </Stack>
+      <Stack
+        direction="row"
+        justifyContent="center"
+        alignItems="center"
+        width="100%"
+      >
+        <ButtonGroup spacing={{ xs: 2, sm: 5 }}>
+          <Button
+            variant="solid"
+            color="danger"
+            onClick={() => deleteCategory(true)}
+            disabled={isDeleting}
+          >
+            Just the category
+          </Button>
+          <Button
+            variant="soft"
+            color="danger"
+            onClick={() => deleteCategory(false)}
+            disabled={isDeleting}
+          >
+            Category and all channels related
+          </Button>
+          <Button
+            variant="solid"
+            fullWidth
+            color="success"
+            onClick={() => closeModal()}
+            disabled={isDeleting}
+          >
+            Cancel
+          </Button>
+        </ButtonGroup>
+      </Stack>
+    </AnimatedPaper>
+  );
 });

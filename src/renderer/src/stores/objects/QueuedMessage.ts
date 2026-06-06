@@ -4,68 +4,68 @@ import { MessageBase } from "./MessageBase";
 import { action, makeObservable, observable } from "mobx";
 
 export enum QueuedMessageStatus {
-    Sending = "sending",
-    Failed = "failed"
+  Sending = "sending",
+  Failed = "failed"
 }
 
 export type QueuedMessageData = {
-    id: Snowflake;
-    channelId: Snowflake;
-    spaceId?: Snowflake | null;
-    content: string;
-    type: MessageType;
-    createdAt: string;
-    authorId: Snowflake;
-    author?: APIUser;
+  id: Snowflake;
+  channelId: Snowflake;
+  spaceId?: Snowflake | null;
+  content: string;
+  type: MessageType;
+  createdAt: string;
+  authorId: Snowflake;
+  author?: APIUser;
 };
 
 export class QueuedMessage extends MessageBase {
-    progress = 0;
-    status: QueuedMessageStatus;
-    error?: string;
+  progress = 0;
+  status: QueuedMessageStatus;
+  error?: string;
 
-    abortCallback?: () => void;
+  abortCallback?: () => void;
 
-    constructor(app: AppStore, data: QueuedMessageData) {
-        super(app, data);
-        this.id = data.id;
-        this.channelId = data.channelId;
-        this.spaceId = data.spaceId ?? null;
-        this.status = QueuedMessageStatus.Sending;
+  constructor(app: AppStore, data: QueuedMessageData) {
+    super(app, data);
+    this.id = data.id;
+    this.channelId = data.channelId;
+    this.spaceId = data.spaceId ?? null;
+    this.status = QueuedMessageStatus.Sending;
 
-        makeObservable(this, {
-            progress: observable,
-            status: observable,
-            error: observable,
-            abortCallback: observable.ref,
-            updateProgress: action.bound,
-            setAbortCallback: action.bound,
-            abort: action.bound,
-            fail: action.bound
-        });
+    makeObservable(this, {
+      progress: observable,
+      status: observable,
+      error: observable,
+      abortCallback: observable.ref,
+      updateProgress: action.bound,
+      setAbortCallback: action.bound,
+      abort: action.bound,
+      fail: action.bound
+    });
+  }
+
+  updateProgress(e: ProgressEvent) {
+    this.progress = Math.round((e.loaded / e.total) * 100);
+  }
+
+  setAbortCallback(cb: () => void) {
+    this.abortCallback = cb;
+  }
+
+  abort() {
+    if (this.abortCallback) {
+      this.abortCallback();
     }
+  }
 
-    updateProgress(e: ProgressEvent) {
-        this.progress = Math.round((e.loaded / e.total) * 100);
-    }
+  fail(error: string) {
+    this.error = error;
+    this.status = QueuedMessageStatus.Failed;
+  }
 
-    setAbortCallback(cb: () => void) {
-        this.abortCallback = cb;
-    }
-
-    abort() {
-        if (this.abortCallback) {
-            this.abortCallback();
-        }
-    }
-
-    fail(error: string) {
-        this.error = error;
-        this.status = QueuedMessageStatus.Failed;
-    }
-
-    delete() {
-        this.app.queue.remove(this.id);
-        return null;
-    }
+  delete() {
+    this.app.queue.remove(this.id);
+    return null;
+  }
 }

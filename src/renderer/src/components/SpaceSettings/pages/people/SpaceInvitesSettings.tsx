@@ -157,9 +157,11 @@ export const SpaceInvitesSettings = observer(({ space }: Props) => {
   const { theme } = useTheme();
   const { openModal } = useModal();
 
-  const { data: invites = [] } = useQuery({
+  const invites = space.inviteList;
+
+  useQuery({
     queryKey: ["space-invites", space.id],
-    queryFn: () => space.fetchInvites()
+    queryFn: async () => space.fetchInvites()
   });
 
   const [now, setNow] = useState(new Date());

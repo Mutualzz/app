@@ -5,123 +5,123 @@ import { setQuitting } from "./windows";
 import NativeImage = Electron.NativeImage;
 
 class TrayManager extends EventEmitter {
-    private tray: Tray | null = null;
-    private mainWindow: BrowserWindow | null = null;
+  private tray: Tray | null = null;
+  private mainWindow: BrowserWindow | null = null;
 
-    constructor() {
-        super();
-    }
+  constructor() {
+    super();
+  }
 
-    updateMenu(icon: NativeImage) {
-        try {
-            const contextMenu = Menu.buildFromTemplate([
-                {
-                    label: "Mutualzz",
-                    icon,
-                    enabled: false
-                },
-                { type: "separator" },
-                {
-                    label: "Quit",
-                    click: () => {
-                        setQuitting(true);
-                        app.quit();
-                    }
-                }
-            ]);
-
-            if (this.tray) {
-                this.tray.setContextMenu(contextMenu);
-                this.tray.setToolTip("Mutualzz");
-            }
-        } catch (err) {
-            console.error("Failed to update tray menu:", err);
+  updateMenu(icon: NativeImage) {
+    try {
+      const contextMenu = Menu.buildFromTemplate([
+        {
+          label: "Mutualzz",
+          icon,
+          enabled: false
+        },
+        { type: "separator" },
+        {
+          label: "Quit",
+          click: () => {
+            setQuitting(true);
+            app.quit();
+          }
         }
+      ]);
+
+      if (this.tray) {
+        this.tray.setContextMenu(contextMenu);
+        this.tray.setToolTip("Mutualzz");
+      }
+    } catch (err) {
+      console.error("Failed to update tray menu:", err);
     }
+  }
 
-    initialize(mainWindow: BrowserWindow): void {
-        this.mainWindow = mainWindow;
-        this.createTray();
+  initialize(mainWindow: BrowserWindow): void {
+    this.mainWindow = mainWindow;
+    this.createTray();
+  }
+
+  updateIcon(dataUrl: string): void {
+    if (!this.tray) return;
+
+    try {
+      const icon = nativeImage
+        .createFromDataURL(dataUrl)
+        .resize({ width: 16, height: 16 });
+
+      this.tray.setImage(icon);
+      this.updateMenu(icon);
+
+      this.emit("icon-updated");
+    } catch (err) {
+      console.error("Failed to update tray icon:", err);
     }
+  }
 
-    updateIcon(dataUrl: string): void {
-        if (!this.tray) return;
+  /**
+   * Set window icon from data URL
+   */
+  setWindowIcon(mainWindow: BrowserWindow, dataUrl: string): void {
+    if (!mainWindow) return;
 
-        try {
-            const icon = nativeImage
-                .createFromDataURL(dataUrl)
-                .resize({ width: 16, height: 16 });
+    try {
+      const icon = nativeImage.createFromDataURL(dataUrl);
+      mainWindow.setIcon(icon);
+      this.emit("window-icon-updated");
+    } catch (err) {
+      console.error("Failed to set window icon:", err);
+    }
+  }
 
-            this.tray.setImage(icon);
-            this.updateMenu(icon);
+  destroy(): void {
+    if (this.tray) {
+      this.tray.destroy();
+      this.tray = null;
+    }
+  }
 
-            this.emit("icon-updated");
-        } catch (err) {
-            console.error("Failed to update tray icon:", err);
+  private createTray(): void {
+    try {
+      const icon = nativeImage.createFromPath(iconPng);
+
+      this.tray = new Tray(icon.resize({ width: 16, height: 16 }));
+
+      const contextMenu = Menu.buildFromTemplate([
+        {
+          label: "Mutualzz",
+          icon: icon.resize({ width: 16, height: 16 }),
+          enabled: false
+        },
+        { type: "separator" },
+        {
+          label: "Quit",
+          click: () => {
+            setQuitting(true);
+            app.quit();
+          }
         }
-    }
+      ]);
 
-    /**
-     * Set window icon from data URL
-     */
-    setWindowIcon(mainWindow: BrowserWindow, dataUrl: string): void {
-        if (!mainWindow) return;
+      this.tray.setContextMenu(contextMenu);
+      this.tray.setToolTip("Mutualzz");
 
-        try {
-            const icon = nativeImage.createFromDataURL(dataUrl);
-            mainWindow.setIcon(icon);
-            this.emit("window-icon-updated");
-        } catch (err) {
-            console.error("Failed to set window icon:", err);
+      this.tray.on("click", () => {
+        if (this.mainWindow) {
+          if (this.mainWindow.isVisible()) {
+            this.mainWindow.hide();
+          } else {
+            this.mainWindow.show();
+            this.mainWindow.focus();
+          }
         }
+      });
+    } catch (err) {
+      console.error("Failed to create tray:", err);
     }
-
-    destroy(): void {
-        if (this.tray) {
-            this.tray.destroy();
-            this.tray = null;
-        }
-    }
-
-    private createTray(): void {
-        try {
-            const icon = nativeImage.createFromPath(iconPng);
-
-            this.tray = new Tray(icon.resize({ width: 16, height: 16 }));
-
-            const contextMenu = Menu.buildFromTemplate([
-                {
-                    label: "Mutualzz",
-                    icon: icon.resize({ width: 16, height: 16 }),
-                    enabled: false
-                },
-                { type: "separator" },
-                {
-                    label: "Quit",
-                    click: () => {
-                        setQuitting(true);
-                        app.quit();
-                    }
-                }
-            ]);
-
-            this.tray.setContextMenu(contextMenu);
-            this.tray.setToolTip("Mutualzz");
-
-            this.tray.on("click", () => {
-                if (this.mainWindow) {
-                    if (this.mainWindow.isVisible()) {
-                        this.mainWindow.hide();
-                    } else {
-                        this.mainWindow.show();
-                        this.mainWindow.focus();
-                    }
-                }
-            });
-        } catch (err) {
-            console.error("Failed to create tray:", err);
-        }
-    }
+  }
 }
 
 export const trayManager = new TrayManager();

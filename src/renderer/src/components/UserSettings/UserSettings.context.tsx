@@ -1,74 +1,73 @@
 import { observer } from "mobx-react-lite";
 import {
-    createContext,
-    type PropsWithChildren,
-    useContext,
-    useState,
+  createContext,
+  type PropsWithChildren,
+  useContext,
+  useState
 } from "react";
 
 export type UserSettingsPage =
-    | "my-account"
-    | "profile"
-    | "appearance"
-    | "voice_and_video"
-    | "expressions";
+  | "my-account"
+  | "profile"
+  | "appearance"
+  | "voice_and_video"
+  | "expressions";
 export type UserSettingsCategories = "user-settings" | "app-settings";
 
 interface UserSettingsContextProps {
-    currentPage: UserSettingsPage;
-    currentCategory: UserSettingsCategories;
-    setCurrentPage: (page: UserSettingsPage) => void;
-    setCurrentCategory: (category: UserSettingsCategories) => void;
-    reset: () => void;
+  currentPage: UserSettingsPage;
+  currentCategory: UserSettingsCategories;
+  setCurrentPage: (page: UserSettingsPage) => void;
+  setCurrentCategory: (category: UserSettingsCategories) => void;
+  reset: () => void;
 }
 
 const UserSettingsContext = createContext<UserSettingsContextProps | null>({
-    currentPage: "my-account",
-    currentCategory: "user-settings",
-    setCurrentPage: () => {
-        return;
-    },
-    setCurrentCategory: () => {
-        return;
-    },
-    reset: () => {
-        return;
-    },
+  currentPage: "my-account",
+  currentCategory: "user-settings",
+  setCurrentPage: () => {
+    return;
+  },
+  setCurrentCategory: () => {
+    return;
+  },
+  reset: () => {
+    return;
+  }
 });
 
 export const UserSettingsProvider = observer(
-    ({ children }: PropsWithChildren) => {
-        const [currentPage, setCurrentPage] =
-            useState<UserSettingsPage>("profile");
-        const [currentCategory, setCurrentCategory] =
-            useState<UserSettingsCategories>("user-settings");
+  ({ children }: PropsWithChildren) => {
+    const [currentPage, setCurrentPage] = useState<UserSettingsPage>("profile");
+    const [currentCategory, setCurrentCategory] =
+      useState<UserSettingsCategories>("user-settings");
 
-        const reset = () => {
-            setCurrentPage("profile");
-            setCurrentCategory("user-settings");
-        };
+    const reset = () => {
+      setCurrentPage("profile");
+      setCurrentCategory("user-settings");
+    };
 
-        return (
-            <UserSettingsContext.Provider
-                value={{
-                    currentPage,
-                    setCurrentPage,
-                    currentCategory,
-                    setCurrentCategory,
-                    reset,
-                }}
-            >
-                {children}
-            </UserSettingsContext.Provider>
-        );
-    },
+    return (
+      <UserSettingsContext.Provider
+        value={{
+          currentPage,
+          setCurrentPage,
+          currentCategory,
+          setCurrentCategory,
+          reset
+        }}
+      >
+        {children}
+      </UserSettingsContext.Provider>
+    );
+  }
 );
 
 export function useUserSettings() {
-    const ctx = useContext(UserSettingsContext);
-    if (!ctx)
-        throw new Error(
-            "useUserSettings must be used within a UserSettingsProvider",
-        );
-    return ctx;
+  const ctx = useContext(UserSettingsContext);
+  if (!ctx)
+    throw new Error(
+      "useUserSettings must be used within a UserSettingsProvider"
+    );
+  return ctx;
 }

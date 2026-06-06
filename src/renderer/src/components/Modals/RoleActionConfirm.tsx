@@ -7,48 +7,48 @@ import { useModal } from "@contexts/Modal.context";
 import type { Role } from "@stores/objects/Role";
 
 interface Props {
-    role: Role;
+  role: Role;
 }
 
 export const RoleActionConfirm = observer(({ role }: Props) => {
-    const app = useAppStore();
-    const { closeModal } = useModal();
+  const app = useAppStore();
+  const { closeModal } = useModal();
 
-    const { mutate: deleteRole, isPending } = useMutation({
-        mutationKey: ["delete-role", role.id],
-        mutationFn: async () => role.delete(),
-        onSuccess: () => {
-            closeModal();
-        }
-    });
+  const { mutate: deleteRole, isPending } = useMutation({
+    mutationKey: ["delete-role", role.id],
+    mutationFn: async () => role.delete(),
+    onSuccess: () => {
+      closeModal();
+    }
+  });
 
-    return (
-        <Paper
-            elevation={app.settings?.preferEmbossed ? 5 : 1}
-            padding={5}
-            borderRadius={12}
-            direction="column"
+  return (
+    <Paper
+      elevation={app.settings?.preferEmbossed ? 5 : 1}
+      padding={5}
+      borderRadius={12}
+      direction="column"
+    >
+      <Typography level="h5" fontWeight="bold" marginBottom={2}>
+        Delete Role
+      </Typography>
+      <Typography mb={2.5}>
+        Are you sure you want to delete <b>{role.name}</b> role? This Action
+        cannot be undone.
+      </Typography>
+      <Stack spacing={1.25}>
+        <Button color="neutral" size="lg" onClick={() => closeModal()}>
+          Cancel
+        </Button>
+        <Button
+          color="danger"
+          onClick={() => deleteRole()}
+          disabled={isPending}
+          size="lg"
         >
-            <Typography level="h5" fontWeight="bold" marginBottom={2}>
-                Delete Role
-            </Typography>
-            <Typography mb={2.5}>
-                Are you sure you want to delete <b>{role.name}</b> role? This
-                Action cannot be undone.
-            </Typography>
-            <Stack spacing={1.25}>
-                <Button color="neutral" size="lg" onClick={() => closeModal()}>
-                    Cancel
-                </Button>
-                <Button
-                    color="danger"
-                    onClick={() => deleteRole()}
-                    disabled={isPending}
-                    size="lg"
-                >
-                    Delete
-                </Button>
-            </Stack>
-        </Paper>
-    );
+          Delete
+        </Button>
+      </Stack>
+    </Paper>
+  );
 });

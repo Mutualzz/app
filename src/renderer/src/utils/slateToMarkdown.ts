@@ -1,50 +1,50 @@
 import type { Descendant, Text } from "slate";
 
 export function slateToMarkdown(value: Descendant[]): string {
-    return value.map(serializeNode).join("\n");
+  return value.map(serializeNode).join("\n");
 }
 
 function serializeNode(node: Descendant): string {
-    if ("text" in node) return serializeText(node);
+  if ("text" in node) return serializeText(node);
 
-    const element = node;
-    const children = element.children.map(serializeNode).join("");
+  const element = node;
+  const children = element.children.map(serializeNode).join("");
 
-    switch (element.type) {
-        case "heading":
-            return `${children}`;
-        case "blockquote":
-            return children
-                .split("\n")
-                .map((line) => `> ${line}`)
-                .join("\n");
-        case "emoji":
-            return `:${element.name.toLowerCase()}:`;
-        case "customEmoji":
-            return `<${element.animated ? "a" : ""}:${element.name}:${element.id}>`;
-        case "mention":
-            const mentionType = element.mentionType;
-            const mentionId = element.id;
+  switch (element.type) {
+    case "heading":
+      return `${children}`;
+    case "blockquote":
+      return children
+        .split("\n")
+        .map((line) => `> ${line}`)
+        .join("\n");
+    case "emoji":
+      return `:${element.name.toLowerCase()}:`;
+    case "customEmoji":
+      return `<${element.animated ? "a" : ""}:${element.name}:${element.id}>`;
+    case "mention":
+      const mentionType = element.mentionType;
+      const mentionId = element.id;
 
-            if (mentionType === "role") return `<@&${mentionId}>`;
-            if (mentionType === "everyone") return `@everyone`;
-            if (mentionType === "here") return `@here`;
-            return `<@${mentionId}>`;
-        case "line":
-        default:
-            return children;
-    }
+      if (mentionType === "role") return `<@&${mentionId}>`;
+      if (mentionType === "everyone") return `@everyone`;
+      if (mentionType === "here") return `@here`;
+      return `<@${mentionId}>`;
+    case "line":
+    default:
+      return children;
+  }
 }
 
 function serializeText(textNode: Text): string {
-    let text = textNode.text.replace(/\n/g, "  \n");
+  let text = textNode.text.replace(/\n/g, "  \n");
 
-    if (textNode.code) text = `\`${text}\``;
-    if (textNode.bold) text = `**${text}**`;
-    if (textNode.italic) text = `*${text}*`;
-    if (textNode.underline) text = `__${text}__`;
-    if (textNode.strikethrough) text = `~~${text}~~`;
-    if (textNode.spoiler) text = `||${text}||`;
+  if (textNode.code) text = `\`${text}\``;
+  if (textNode.bold) text = `**${text}**`;
+  if (textNode.italic) text = `*${text}*`;
+  if (textNode.underline) text = `__${text}__`;
+  if (textNode.strikethrough) text = `~~${text}~~`;
+  if (textNode.spoiler) text = `||${text}||`;
 
-    return text;
+  return text;
 }

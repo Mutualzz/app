@@ -8,45 +8,45 @@ import { observer } from "mobx-react-lite";
 import { useEffect } from "react";
 
 export const Route = createFileRoute("/_authenticated/feed")({
-    component: observer(RouteComponent),
+  component: observer(RouteComponent)
 });
 
 function RouteComponent() {
-    const app = useAppStore();
+  const app = useAppStore();
 
-    useEffect(() => {
-        if (app.mode !== "feed") app.setMode("feed");
+  useEffect(() => {
+    if (app.mode !== "feed") app.setMode("feed");
 
-        return () => {
-            if (app.mode === "feed") app.resetMode();
-        };
-    }, []);
+    return () => {
+      if (app.mode === "feed") app.resetMode();
+    };
+  }, []);
 
-    return (
-        <Stack width="100%" height="100%" direction="row">
-            <Stack
-                position="relative"
-                maxWidth="5rem"
-                width="100%"
-                direction="column"
-            >
-                <FeedSidebar />
-                <UserBar />
-            </Stack>
-            <Paper
-                borderRight="0 !important"
-                borderBottom="0 !important"
-                borderTopLeftRadius="0.75rem"
-                width="100%"
-                p={5}
-                height="100%"
-            >
-                <Typography>
-                    This is your feed. Here you will see posts from your
-                    algorithmically generated interests.
-                </Typography>
-                <Outlet />
-            </Paper>
-        </Stack>
-    );
+  return (
+    <Stack width="100%" height="100%" direction="row">
+      <Stack
+        position="relative"
+        maxWidth="5rem"
+        width="100%"
+        direction="column"
+      >
+        <FeedSidebar />
+        <UserBar />
+      </Stack>
+      <Paper
+        borderRight="0 !important"
+        borderBottom="0 !important"
+        borderTopLeftRadius="0.75rem"
+        width="100%"
+        p={5}
+        height="100%"
+      >
+        <Typography>
+          This is your feed. Here you will see posts from your algorithmically
+          generated interests.
+        </Typography>
+        <Outlet />
+      </Paper>
+    </Stack>
+  );
 }

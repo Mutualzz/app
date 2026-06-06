@@ -11,45 +11,42 @@ type Tab = "emojis" | "stickers";
 const tabs: Tab[] = ["emojis", "stickers"];
 
 interface TabProps extends PropsWithChildren {
-    selected: boolean;
+  selected: boolean;
 }
 
 const Tab = styled("div")<TabProps>(({ theme, selected }) => ({
-    ...(selected && {
-        borderBottom: `1px solid ${theme.typography.colors.accent}`,
-        borderRadius: 6,
-    }),
-    userSelect: "none",
-    cursor: "pointer",
-    padding: "5px 10px",
-    ...(!selected && {
-        "&:hover": {
-            borderBottom: `1px solid ${theme.typography.colors.muted}`,
-            borderRadius: 6,
-        },
-    }),
+  ...(selected && {
+    borderBottom: `1px solid ${theme.typography.colors.accent}`,
+    borderRadius: 6
+  }),
+  userSelect: "none",
+  cursor: "pointer",
+  padding: "5px 10px",
+  ...(!selected && {
+    "&:hover": {
+      borderBottom: `1px solid ${theme.typography.colors.muted}`,
+      borderRadius: 6
+    }
+  })
 }));
 
 interface Props {
-    space: Space;
+  space: Space;
 }
 
 export const SpaceExpressionsSettings = observer(({ space }: Props) => {
-    const [currentTab, setCurrentTab] = useState<Tab>("emojis");
+  const [currentTab, setCurrentTab] = useState<Tab>("emojis");
 
-    return (
-        <Stack direction="column" width="100%" height="100%">
-            <Stack direction="row" gap={5} mb={2}>
-                {tabs.map((tab) => (
-                    <Tab
-                        onClick={() => setCurrentTab(tab)}
-                        selected={currentTab === tab}
-                    >
-                        {startCase(tab)}
-                    </Tab>
-                ))}
-            </Stack>
-            {currentTab === "emojis" && <SpaceEmojisTab space={space} />}
-        </Stack>
-    );
+  return (
+    <Stack direction="column" width="100%" height="100%">
+      <Stack direction="row" gap={5} mb={2}>
+        {tabs.map((tab) => (
+          <Tab onClick={() => setCurrentTab(tab)} selected={currentTab === tab}>
+            {startCase(tab)}
+          </Tab>
+        ))}
+      </Stack>
+      {currentTab === "emojis" && <SpaceEmojisTab space={space} />}
+    </Stack>
+  );
 });

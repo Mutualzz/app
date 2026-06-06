@@ -3,11 +3,11 @@ import { SpaceIcon } from "@components/Space/SpaceIcon";
 import { useAppStore } from "@hooks/useStores";
 import type { HttpException } from "@mutualzz/types";
 import {
-    Button,
-    Input,
-    type InputProps,
-    Stack,
-    Typography
+  Button,
+  Input,
+  type InputProps,
+  Stack,
+  Typography
 } from "@mutualzz/ui-web";
 import { emailRegex } from "@mutualzz/validators";
 import { seo } from "@seo";
@@ -21,301 +21,284 @@ import { useModal } from "@contexts/Modal.context";
 import { SuccessForgotSent } from "@components/Modals/SuccessForgotSent";
 
 export const Route = createFileRoute("/login")({
-    component: observer(Login),
-    head: () => ({
-        meta: [
-            ...seo({
-                title: "Mutualzz - Login"
-            })
-        ]
-    })
+  component: observer(Login),
+  head: () => ({
+    meta: [
+      ...seo({
+        title: "Mutualzz - Login"
+      })
+    ]
+  })
 });
 
 const InputWithLabel = ({
-    label,
-    apiError,
-    ...props
+  label,
+  apiError,
+  ...props
 }: InputProps & {
-    label: string;
-    apiError?: string | null;
+  label: string;
+  apiError?: string | null;
 }) => (
-    <Stack
-        direction="column"
-        spacing={{ xs: 0.5, sm: 0.75, md: 0.875 }}
-        width="100%"
-    >
-        <Typography fontWeight={500} level={{ xs: "body-sm", sm: "body-md" }}>
-            {label}{" "}
-            {props.required && (
-                <Typography variant="plain" color="danger">
-                    *
-                </Typography>
-            )}
+  <Stack
+    direction="column"
+    spacing={{ xs: 0.5, sm: 0.75, md: 0.875 }}
+    width="100%"
+  >
+    <Typography fontWeight={500} level={{ xs: "body-sm", sm: "body-md" }}>
+      {label}{" "}
+      {props.required && (
+        <Typography variant="plain" color="danger">
+          *
         </Typography>
-        <Input
-            fullWidth
-            size={{ xs: "md", sm: "lg", md: "lg" }}
-            {...props}
-            autoComplete="off"
-            autoCapitalize="off"
-        />
-        {apiError && (
-            <Typography variant="plain" color="danger" level="body-sm">
-                {apiError}
-            </Typography>
-        )}
-    </Stack>
+      )}
+    </Typography>
+    <Input
+      fullWidth
+      size={{ xs: "md", sm: "lg", md: "lg" }}
+      {...props}
+      autoComplete="off"
+      autoCapitalize="off"
+    />
+    {apiError && (
+      <Typography variant="plain" color="danger" level="body-sm">
+        {apiError}
+      </Typography>
+    )}
+  </Stack>
 );
 
 function Login() {
-    const navigate = useNavigate();
-    const app = useAppStore();
-    const { openModal } = useModal();
-    const [error, setError] = useState<string | null>(null);
-    const [forgotError, setForgotError] = useState<string | null>(null);
+  const navigate = useNavigate();
+  const app = useAppStore();
+  const { openModal } = useModal();
+  const [error, setError] = useState<string | null>(null);
+  const [forgotError, setForgotError] = useState<string | null>(null);
 
-    const { mutate: login, isPending } = useMutation({
-        mutationFn: async (values: any) => {
-            const requestBody: Record<string, string | undefined> = {
-                password: values.password
-            };
+  const { mutate: login, isPending } = useMutation({
+    mutationFn: async (values: any) => {
+      const requestBody: Record<string, string | undefined> = {
+        password: values.password
+      };
 
-            if (emailRegex.test(values.usernameOrEmail))
-                requestBody.email = values.usernameOrEmail;
-            else requestBody.username = values.usernameOrEmail;
+      if (emailRegex.test(values.usernameOrEmail))
+        requestBody.email = values.usernameOrEmail;
+      else requestBody.username = values.usernameOrEmail;
 
-            return app.rest.post<{ token: string }, any>(
-                "auth/login",
-                requestBody
-            );
-        },
-        onSuccess: ({ token }) => {
-            app.setToken(token);
-        },
-        onError: (error: HttpException) => {
-            setError(error.message);
-        }
-    });
+      return app.rest.post<{ token: string }, any>("auth/login", requestBody);
+    },
+    onSuccess: ({ token }) => {
+      app.setToken(token);
+    },
+    onError: (error: HttpException) => {
+      setError(error.message);
+    }
+  });
 
-    const { mutate: forgotPassword, isPending: forgettingPassword } =
-        useMutation({
-            mutationKey: ["forgot-password"],
-            mutationFn: (value: string) => {
-                const requestBody: Record<string, string | undefined> = {};
+  const { mutate: forgotPassword, isPending: forgettingPassword } = useMutation(
+    {
+      mutationKey: ["forgot-password"],
+      mutationFn: (value: string) => {
+        const requestBody: Record<string, string | undefined> = {};
 
-                if (emailRegex.test(value)) requestBody.email = value;
-                else requestBody.username = value;
+        if (emailRegex.test(value)) requestBody.email = value;
+        else requestBody.username = value;
 
-                return app.rest.post("auth/forgot-password", requestBody);
-            },
-            onSuccess: () => {
-                openModal("forgot-password-success", <SuccessForgotSent />);
-            },
-            onError: (err: HttpException) => {
-                setForgotError(err.message);
-            }
-        });
+        return app.rest.post("auth/forgot-password", requestBody);
+      },
+      onSuccess: () => {
+        openModal("forgot-password-success", <SuccessForgotSent />);
+      },
+      onError: (err: HttpException) => {
+        setForgotError(err.message);
+      }
+    }
+  );
 
-    const Form = useForm({
-        defaultValues: {
-            usernameOrEmail: "",
-            password: ""
-        },
-        onSubmit: ({ value }) => {
-            login(value);
-        }
-    });
+  const Form = useForm({
+    defaultValues: {
+      usernameOrEmail: "",
+      password: ""
+    },
+    onSubmit: ({ value }) => {
+      login(value);
+    }
+  });
 
-    if (app.token) return <Navigate to="/" replace />;
+  if (app.token) return <Navigate to="/" replace />;
 
-    const space = app.joiningSpace;
+  const space = app.joiningSpace;
 
-    return (
-        <Stack
-            direction="column"
-            width="100%"
-            minHeight="100%"
-            alignItems="center"
-            justifyContent="center"
-        >
-            <AnimatedPaper
-                direction="column"
-                alignItems="center"
-                width={{
-                    xs: "100%",
-                    sm: "90%",
-                    md: "70%",
-                    lg: "50%",
-                    xl: "40%"
-                }}
-                maxWidth={{
-                    xs: "100%",
-                    sm: "500px",
-                    md: "520px",
-                    lg: "600px"
-                }}
-                py={{ xs: "1.5rem", sm: "2rem", md: "2.5rem" }}
-                px={{ xs: "1rem", sm: "2rem", md: "2.5rem" }}
-                borderRadius={{ xs: "0.75rem", sm: "1.25rem", md: "1.5rem" }}
-                spacing={{ xs: "1rem", sm: "1.5rem", md: "2rem" }}
-                boxShadow={{ xs: 2, sm: 5, md: 8 }}
-                initial={{ opacity: 0, y: -200 }}
-                animate={{ opacity: 1, y: 0 }}
+  return (
+    <Stack
+      direction="column"
+      width="100%"
+      minHeight="100%"
+      alignItems="center"
+      justifyContent="center"
+    >
+      <AnimatedPaper
+        direction="column"
+        alignItems="center"
+        width={{
+          xs: "100%",
+          sm: "90%",
+          md: "70%",
+          lg: "50%",
+          xl: "40%"
+        }}
+        maxWidth={{
+          xs: "100%",
+          sm: "500px",
+          md: "520px",
+          lg: "600px"
+        }}
+        py={{ xs: "1.5rem", sm: "2rem", md: "2.5rem" }}
+        px={{ xs: "1rem", sm: "2rem", md: "2.5rem" }}
+        borderRadius={{ xs: "0.75rem", sm: "1.25rem", md: "1.5rem" }}
+        spacing={{ xs: "1rem", sm: "1.5rem", md: "2rem" }}
+        boxShadow={{ xs: 2, sm: 5, md: 8 }}
+        initial={{ opacity: 0, y: -200 }}
+        animate={{ opacity: 1, y: 0 }}
+      >
+        <Stack direction="column" spacing={1.5} width="100%">
+          <Typography
+            level={{ xs: "h5", sm: "h4", md: "h3" }}
+            fontSize={{
+              xs: "1.25rem",
+              sm: "1.5rem",
+              md: "1.75rem"
+            }}
+            textAlign="center"
+          >
+            Login to an account
+          </Typography>
+          {space && (
+            <Stack
+              direction="row"
+              justifyContent="center"
+              alignItems="center"
+              spacing={3}
             >
-                <Stack direction="column" spacing={1.5} width="100%">
-                    <Typography
-                        level={{ xs: "h5", sm: "h4", md: "h3" }}
-                        fontSize={{
-                            xs: "1.25rem",
-                            sm: "1.5rem",
-                            md: "1.75rem"
-                        }}
-                        textAlign="center"
-                    >
-                        Login to an account
-                    </Typography>
-                    {space && (
-                        <Stack
-                            direction="row"
-                            justifyContent="center"
-                            alignItems="center"
-                            spacing={3}
-                        >
-                            <Typography
-                                level="body-sm"
-                                color="primary"
-                                textAlign="center"
-                            >
-                                You are logging in to accept an invite to join a
-                                space:{" "}
-                            </Typography>
-                            <Stack alignItems="center" spacing={1}>
-                                <SpaceIcon size={36} space={space} />
-                                <Typography level="body-sm" textAlign="center">
-                                    {space.name}
-                                </Typography>
-                            </Stack>
-                        </Stack>
-                    )}
-                </Stack>
-                <form
-                    css={{
-                        width: "100%"
-                    }}
-                    onSubmit={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        Form.handleSubmit();
-                    }}
-                >
-                    <Stack direction="column" spacing={2.5} width="100%">
-                        <Form.Field
-                            name="usernameOrEmail"
-                            children={(field) => (
-                                <Stack direction="column" spacing={0.5}>
-                                    <InputWithLabel
-                                        type="text"
-                                        label="Username or Email"
-                                        onChange={(e) =>
-                                            field.handleChange(e.target.value)
-                                        }
-                                        onBlur={field.handleBlur}
-                                        value={field.state.value}
-                                        required
-                                    />
-                                    {forgotError && (
-                                        <Typography
-                                            variant="plain"
-                                            color="danger"
-                                            level="body-sm"
-                                        >
-                                            {forgotError}
-                                        </Typography>
-                                    )}
-                                </Stack>
-                            )}
-                        />
-                        <Form.Field
-                            name="password"
-                            children={(field) => (
-                                <Stack direction="column" spacing={0.5}>
-                                    <InputWithLabel
-                                        label="Password"
-                                        onChange={(e) =>
-                                            field.handleChange(e.target.value)
-                                        }
-                                        onBlur={field.handleBlur}
-                                        value={field.state.value}
-                                        apiError={error}
-                                        type="password"
-                                        required
-                                    />
-                                    <Link
-                                        variant="plain"
-                                        color="info"
-                                        level="body-sm"
-                                        disabled={forgettingPassword}
-                                        css={{
-                                            marginRight: "auto"
-                                        }}
-                                        onClick={() => {
-                                            const usernameOrEmail =
-                                                Form.getFieldValue(
-                                                    "usernameOrEmail"
-                                                );
-
-                                            if (!usernameOrEmail) {
-                                                setForgotError(
-                                                    "Please enter your username or email to reset your password"
-                                                );
-                                                return;
-                                            }
-
-                                            forgotPassword(usernameOrEmail);
-                                        }}
-                                    >
-                                        Forgot your password?
-                                    </Link>
-                                </Stack>
-                            )}
-                        />
-                        <Form.Subscribe
-                            selector={(state) => [state.isSubmitting]}
-                            children={([isSubmitting]) => (
-                                <Button
-                                    type="submit"
-                                    size={{ xs: "md", sm: "lg", md: "lg" }}
-                                    disabled={isSubmitting || isPending}
-                                >
-                                    {isSubmitting ? "..." : "Login"}
-                                </Button>
-                            )}
-                        />
-                    </Stack>
-                </form>
-                <Typography
-                    onClick={() => {
-                        navigate({ to: "/register" });
-                    }}
-                    css={{
-                        cursor: "pointer"
-                    }}
-                    level={{ xs: "body-sm", sm: "body-md", md: "body-lg" }}
-                    fontSize={{ xs: "0.95rem", sm: "1.1rem", md: "1.2rem" }}
-                    textAlign="center"
-                >
-                    Don&apos;t have an account?{" "}
-                    <Typography
-                        color="info"
-                        textDecoration="underline"
-                        variant="plain"
-                        level={{ xs: "body-sm", sm: "body-md", md: "body-lg" }}
-                        fontSize={{ xs: "0.95rem", sm: "1.1rem", md: "1.2rem" }}
-                    >
-                        Register
-                    </Typography>
+              <Typography level="body-sm" color="primary" textAlign="center">
+                You are logging in to accept an invite to join a space:{" "}
+              </Typography>
+              <Stack alignItems="center" spacing={1}>
+                <SpaceIcon size={36} space={space} />
+                <Typography level="body-sm" textAlign="center">
+                  {space.name}
                 </Typography>
-            </AnimatedPaper>
+              </Stack>
+            </Stack>
+          )}
         </Stack>
-    );
+        <form
+          css={{
+            width: "100%"
+          }}
+          onSubmit={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            Form.handleSubmit();
+          }}
+        >
+          <Stack direction="column" spacing={2.5} width="100%">
+            <Form.Field
+              name="usernameOrEmail"
+              children={(field) => (
+                <Stack direction="column" spacing={0.5}>
+                  <InputWithLabel
+                    type="text"
+                    label="Username or Email"
+                    onChange={(e) => field.handleChange(e.target.value)}
+                    onBlur={field.handleBlur}
+                    value={field.state.value}
+                    required
+                  />
+                  {forgotError && (
+                    <Typography variant="plain" color="danger" level="body-sm">
+                      {forgotError}
+                    </Typography>
+                  )}
+                </Stack>
+              )}
+            />
+            <Form.Field
+              name="password"
+              children={(field) => (
+                <Stack direction="column" spacing={0.5}>
+                  <InputWithLabel
+                    label="Password"
+                    onChange={(e) => field.handleChange(e.target.value)}
+                    onBlur={field.handleBlur}
+                    value={field.state.value}
+                    apiError={error}
+                    type="password"
+                    required
+                  />
+                  <Link
+                    variant="plain"
+                    color="info"
+                    level="body-sm"
+                    disabled={forgettingPassword}
+                    css={{
+                      marginRight: "auto"
+                    }}
+                    onClick={() => {
+                      const usernameOrEmail =
+                        Form.getFieldValue("usernameOrEmail");
+
+                      if (!usernameOrEmail) {
+                        setForgotError(
+                          "Please enter your username or email to reset your password"
+                        );
+                        return;
+                      }
+
+                      forgotPassword(usernameOrEmail);
+                    }}
+                  >
+                    Forgot your password?
+                  </Link>
+                </Stack>
+              )}
+            />
+            <Form.Subscribe
+              selector={(state) => [state.isSubmitting]}
+              children={([isSubmitting]) => (
+                <Button
+                  type="submit"
+                  size={{ xs: "md", sm: "lg", md: "lg" }}
+                  disabled={isSubmitting || isPending}
+                >
+                  {isSubmitting ? "..." : "Login"}
+                </Button>
+              )}
+            />
+          </Stack>
+        </form>
+        <Typography
+          onClick={() => {
+            navigate({ to: "/register" });
+          }}
+          css={{
+            cursor: "pointer"
+          }}
+          level={{ xs: "body-sm", sm: "body-md", md: "body-lg" }}
+          fontSize={{ xs: "0.95rem", sm: "1.1rem", md: "1.2rem" }}
+          textAlign="center"
+        >
+          Don&apos;t have an account?{" "}
+          <Typography
+            color="info"
+            textDecoration="underline"
+            variant="plain"
+            level={{ xs: "body-sm", sm: "body-md", md: "body-lg" }}
+            fontSize={{ xs: "0.95rem", sm: "1.1rem", md: "1.2rem" }}
+          >
+            Register
+          </Typography>
+        </Typography>
+      </AnimatedPaper>
+    </Stack>
+  );
 }

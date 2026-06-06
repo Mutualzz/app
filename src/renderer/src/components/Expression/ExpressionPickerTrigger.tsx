@@ -13,6 +13,7 @@ import { IconButton } from "@components/IconButton";
 interface Props {
   emojiPicker?: boolean;
   gifPicker?: boolean;
+  stickerPicker?: boolean;
 }
 
 export const ExpressionPickerTrigger = ({ emojiPicker, gifPicker }: Props) => {
@@ -67,10 +68,8 @@ export const ExpressionPickerTrigger = ({ emojiPicker, gifPicker }: Props) => {
     width: number;
     height: number;
   }) => {
-    ReactEditor.focus(editor);
-    editor.insertText(`https://klipy.com/gifs/${gif.slug} `);
     toggle();
-    setTimeout(() => onSendMessage?.(), 0);
+    setTimeout(() => onSendMessage?.(`https://klipy.com/gifs/${gif.slug}`), 0);
   };
 
   return (

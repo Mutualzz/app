@@ -14,47 +14,47 @@ const gotSingleInstanceLock = app.requestSingleInstanceLock();
 if (!gotSingleInstanceLock) app.quit();
 
 app.on("second-instance", () => {
-    const win = mainWindow;
-    if (!win) return;
+  const win = mainWindow;
+  if (!win) return;
 
-    if (win.isMinimized()) win.restore();
-    if (!win.isVisible()) win.show();
-    win.focus();
+  if (win.isMinimized()) win.restore();
+  if (!win.isVisible()) win.show();
+  win.focus();
 });
 
 app.whenReady().then(() => {
-    electronApp.setAppUserModelId("com.mutualzz.app");
+  electronApp.setAppUserModelId("com.mutualzz.app");
 
-    app.on("browser-window-created", (_, window) => {
-        optimizer.watchWindowShortcuts(window);
-    });
+  app.on("browser-window-created", (_, window) => {
+    optimizer.watchWindowShortcuts(window);
+  });
 
-    mainWindow = createMainWindow();
+  mainWindow = createMainWindow();
 
-    setupCodecIPC();
-    setupIPC();
-    setupProtocols(mainWindow);
-    trayManager.initialize(mainWindow);
+  setupCodecIPC();
+  setupIPC();
+  setupProtocols(mainWindow);
+  trayManager.initialize(mainWindow);
 
-    if (!is.dev && app.isPackaged) initUpdater(mainWindow);
+  if (!is.dev && app.isPackaged) initUpdater(mainWindow);
 
-    app.setAsDefaultProtocolClient("mutualzz");
+  app.setAsDefaultProtocolClient("mutualzz");
 
-    app.on("activate", () => {
-        if (!mainWindow || mainWindow.isDestroyed())
-            mainWindow = createMainWindow();
-        else {
-            if (mainWindow.isMinimized()) mainWindow.restore();
-            mainWindow.show();
-            mainWindow.focus();
-        }
-    });
+  app.on("activate", () => {
+    if (!mainWindow || mainWindow.isDestroyed())
+      mainWindow = createMainWindow();
+    else {
+      if (mainWindow.isMinimized()) mainWindow.restore();
+      mainWindow.show();
+      mainWindow.focus();
+    }
+  });
 });
 
 app.on("window-all-closed", () => {
-    if (process.platform !== "darwin") app.quit();
+  if (process.platform !== "darwin") app.quit();
 });
 
 app.on("before-quit", () => {
-    trayManager.destroy();
+  trayManager.destroy();
 });

@@ -174,7 +174,6 @@ export const MessageEmbed = observer(
           </GifWrapper>
         </MessageEmbedSpoiler>
       );
-    console.log(embed);
 
     return (
       <MessageEmbedSpoiler spoiler={embed.spoiler}>

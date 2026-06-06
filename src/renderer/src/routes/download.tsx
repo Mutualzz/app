@@ -5,46 +5,46 @@ import { useEffect } from "react";
 import { isElectron } from "@utils/index";
 
 export const Route = createFileRoute("/download")({
-    component: DownloadAndRedirect
+  component: DownloadAndRedirect
 });
 
 function DownloadAndRedirect() {
-    const navigate = useNavigate();
-    const fileUrl = detectDownloadURL();
+  const navigate = useNavigate();
+  const fileUrl = detectDownloadURL();
 
-    useEffect(() => {
-        if (fileUrl && !isElectron) {
-            const a = document.createElement("a");
-            a.href = fileUrl;
-            a.download = "";
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
+  useEffect(() => {
+    if (fileUrl && !isElectron) {
+      const a = document.createElement("a");
+      a.href = fileUrl;
+      a.download = "";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
 
-            // Add a short delay before navigating
-            const timeout = setTimeout(() => {
-                navigate({ to: "/", replace: true });
-            }, 300);
+      // Add a short delay before navigating
+      const timeout = setTimeout(() => {
+        navigate({ to: "/", replace: true });
+      }, 300);
 
-            return () => clearTimeout(timeout);
-        }
+      return () => clearTimeout(timeout);
+    }
 
-        return () => {};
-    }, [fileUrl, navigate]);
+    return () => {};
+  }, [fileUrl, navigate]);
 
-    if (isElectron) return <Navigate to="/" replace />;
+  if (isElectron) return <Navigate to="/" replace />;
 
-    return (
-        <Stack
-            direction="column"
-            height="100vh"
-            width="100vw"
-            justifyContent="center"
-            alignItems="center"
-            spacing={5}
-        >
-            Downloading...
-            <LinearProgress />
-        </Stack>
-    );
+  return (
+    <Stack
+      direction="column"
+      height="100vh"
+      width="100vw"
+      justifyContent="center"
+      alignItems="center"
+      spacing={5}
+    >
+      Downloading...
+      <LinearProgress />
+    </Stack>
+  );
 }

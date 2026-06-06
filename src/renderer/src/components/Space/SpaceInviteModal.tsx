@@ -4,9 +4,9 @@ import { observer } from "mobx-react-lite";
 import { useState } from "react";
 
 export const SpaceInviteModal = observer(() => {
-    const [creating, setCreating] = useState(false);
+  const [creating, setCreating] = useState(false);
 
-    if (creating) return <SpaceCreate setCreating={setCreating} />;
+  if (creating) return <SpaceCreate setCreating={setCreating} />;
 
-    return <SpaceJoin setCreating={setCreating} />;
+  return <SpaceJoin setCreating={setCreating} />;
 });

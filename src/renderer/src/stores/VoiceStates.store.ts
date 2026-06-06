@@ -4,91 +4,89 @@ import type { Snowflake, VoiceState as JSONVoiceState } from "@mutualzz/types";
 import { VoiceState } from "@stores/objects/VoiceState";
 
 export class VoiceStatesStore {
-    private readonly states: ObservableMap<Snowflake, VoiceState>;
+  private readonly states: ObservableMap<Snowflake, VoiceState>;
 
-    constructor(private readonly app: AppStore) {
-        this.states = observable.map();
+  constructor(private readonly app: AppStore) {
+    this.states = observable.map();
 
-        makeAutoObservable(this, {}, { autoBind: true });
+    makeAutoObservable(this, {}, { autoBind: true });
+  }
+
+  get all() {
+    return Array.from(this.states.values());
+  }
+
+  upsert(state: JSONVoiceState & { disconnectedAt?: number | null }) {
+    const existing = this.states.get(state.userId);
+
+    if (existing) {
+      existing.spaceId = state.spaceId ?? null;
+      existing.channelId = state.channelId ?? null;
+      existing.selfMute = state.selfMute;
+      existing.selfDeaf = state.selfDeaf;
+      existing.spaceMute = state.spaceMute;
+      existing.spaceDeaf = state.spaceDeaf;
+      existing.sessionId = state.sessionId;
+      existing.updatedAt = state.updatedAt;
+      existing.disconnectedAt = state.disconnectedAt ?? null;
+      return existing;
     }
 
-    get all() {
-        return Array.from(this.states.values());
+    const newVoiceState = new VoiceState(this.app, state);
+    this.states.set(state.userId, newVoiceState);
+    return newVoiceState;
+  }
+
+  set(states: JSONVoiceState[]) {
+    for (const state of states) {
+      this.upsert(state);
+    }
+  }
+
+  replace(states: JSONVoiceState[]) {
+    const nextIds = new Set<Snowflake>();
+
+    for (const state of states) {
+      nextIds.add(state.userId);
+      this.upsert(state);
     }
 
-    upsert(state: JSONVoiceState & { disconnectedAt?: number | null }) {
-        const existing = this.states.get(state.userId);
-
-        if (existing) {
-            existing.spaceId = state.spaceId ?? null;
-            existing.channelId = state.channelId ?? null;
-            existing.selfMute = state.selfMute;
-            existing.selfDeaf = state.selfDeaf;
-            existing.spaceMute = state.spaceMute;
-            existing.spaceDeaf = state.spaceDeaf;
-            existing.sessionId = state.sessionId;
-            existing.updatedAt = state.updatedAt;
-            existing.disconnectedAt = state.disconnectedAt ?? null;
-            return existing;
-        }
-
-        const newVoiceState = new VoiceState(this.app, state);
-        this.states.set(state.userId, newVoiceState);
-        return newVoiceState;
+    for (const existingId of this.states.keys()) {
+      if (!nextIds.has(existingId)) {
+        this.states.delete(existingId);
+      }
     }
+  }
 
-    set(states: JSONVoiceState[]) {
-        for (const state of states) {
-            this.upsert(state);
-        }
-    }
+  remove(userId: Snowflake) {
+    this.states.delete(userId);
+  }
 
-    replace(states: JSONVoiceState[]) {
-        const nextIds = new Set<Snowflake>();
+  clear() {
+    this.states.clear();
+  }
 
-        for (const state of states) {
-            nextIds.add(state.userId);
-            this.upsert(state);
-        }
+  get(userId: Snowflake) {
+    return this.states.get(userId);
+  }
 
-        for (const existingId of this.states.keys()) {
-            if (!nextIds.has(existingId)) {
-                this.states.delete(existingId);
-            }
-        }
-    }
+  getAllBySpace(spaceId?: Snowflake | null) {
+    return this.all.filter((state) => state.spaceId === (spaceId ?? null));
+  }
 
-    remove(userId: Snowflake) {
-        this.states.delete(userId);
-    }
+  getAllByChannel(channelId?: Snowflake | null) {
+    return this.all.filter((state) => state.channelId === (channelId ?? null));
+  }
 
-    clear() {
-        this.states.clear();
-    }
+  getBySpace(userId: Snowflake, spaceId: Snowflake) {
+    return this.all.find(
+      (state) => state.spaceId === spaceId && state.userId === userId
+    );
+  }
 
-    get(userId: Snowflake) {
-        return this.states.get(userId);
-    }
-
-    getAllBySpace(spaceId?: Snowflake | null) {
-        return this.all.filter((state) => state.spaceId === (spaceId ?? null));
-    }
-
-    getAllByChannel(channelId?: Snowflake | null) {
-        return this.all.filter(
-            (state) => state.channelId === (channelId ?? null)
-        );
-    }
-
-    getBySpace(userId: Snowflake, spaceId: Snowflake) {
-        return this.all.find(
-            (state) => state.spaceId === spaceId && state.userId === userId
-        );
-    }
-
-    getByChannel(userId: Snowflake, channelId: Snowflake) {
-        return this.all.find(
-            (state) => state.channelId === channelId && state.userId === userId
-        );
-    }
+  getByChannel(userId: Snowflake, channelId: Snowflake) {
+    return this.all.find(
+      (state) => state.channelId === channelId && state.userId === userId
+    );
+  }
 }
