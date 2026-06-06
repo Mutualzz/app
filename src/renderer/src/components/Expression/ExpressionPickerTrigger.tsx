@@ -60,6 +60,7 @@ export const ExpressionPickerTrigger = ({ emojiPicker, gifPicker }: Props) => {
 
   const handleSelectGif = (gif: {
     id: string;
+    slug: string;
     title: string;
     url: string;
     preview: string;
@@ -67,7 +68,7 @@ export const ExpressionPickerTrigger = ({ emojiPicker, gifPicker }: Props) => {
     height: number;
   }) => {
     ReactEditor.focus(editor);
-    editor.insertText(`https://giphy.com/gifs/${gif.id} `);
+    editor.insertText(`https://klipy.com/gifs/${gif.slug} `);
     toggle();
     setTimeout(() => onSendMessage?.(), 0);
   };

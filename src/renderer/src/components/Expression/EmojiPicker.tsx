@@ -277,7 +277,7 @@ const PlaceholderPane = styled(Stack)(({ theme }) => ({
   flexDirection: "column"
 }));
 
-function SpriteEmoji({
+const SpriteEmoji = ({
   sheetX,
   sheetY,
   title
@@ -285,7 +285,7 @@ function SpriteEmoji({
   sheetX: number;
   sheetY: number;
   title: string;
-}) {
+}) => {
   return (
     <span
       style={getSpriteStyle(sheetX, sheetY, EMOJI_SIZE)}
@@ -293,9 +293,9 @@ function SpriteEmoji({
       aria-label={title}
     />
   );
-}
+};
 
-function SidebarButton({
+const SidebarButton = ({
   active,
   label,
   onClick,
@@ -305,7 +305,7 @@ function SidebarButton({
   label: string;
   onClick: () => void;
   children: ReactNode;
-}) {
+}) => {
   const [tooltip, setTooltip] = useState<{ x: number; y: number } | null>(null);
   return (
     <>
@@ -325,7 +325,7 @@ function SidebarButton({
       )}
     </>
   );
-}
+};
 
 export interface EmojiPickerProps {
   onSelectEmoji: (emoji: PickerEmoji, skinTone: SkinTone) => void;
@@ -334,6 +334,7 @@ export interface EmojiPickerProps {
     id: string;
     title: string;
     url: string;
+    slug: string;
     preview: string;
     width: number;
     height: number;

@@ -1,21 +1,21 @@
-import { MouseEvent, useEffect, useRef, useState } from "react";
+import { type MouseEvent, useEffect, useRef, useState } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
-import { Stack, Typography, useTheme } from "@mutualzz/ui-web";
-import { useAppStore } from "@hooks/useStores";
-import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
-import styled from "@emotion/styled";
-import { observer } from "mobx-react-lite";
-import { observable } from "mobx";
-import { IconButton } from "../IconButton";
 import {
   ArrowLeftIcon,
   MagnifyingGlassIcon,
   StarIcon,
   XIcon
 } from "@phosphor-icons/react";
+import { Stack, Typography, useTheme } from "@mutualzz/ui-web";
+import { useAppStore } from "@hooks/useStores";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import styled from "@emotion/styled";
+import { observer } from "mobx-react-lite";
+import { IconButton } from "../IconButton";
 
 interface GifResult {
   id: string;
+  slug: string;
   title: string;
   url: string;
   preview: string;
@@ -29,7 +29,7 @@ interface GifsResponse {
 }
 
 interface TagsResponse {
-  tags: Array<{ name: string; preview: string }>;
+  tags: { name: string; preview: string }[];
 }
 
 export interface GifPickerProps {
@@ -56,86 +56,92 @@ const GifButton = styled("button")(({ theme }) => ({
 }));
 
 const GifVideo = styled("video")({
+  display: "block",
   width: "100%",
   height: "100%",
   objectFit: "cover",
-  display: "block",
-  borderRadius: 6
+  aspectRatio: "1 / 1"
 });
 
 const GifImg = styled("img")({
+  display: "block",
   width: "100%",
   height: "100%",
   objectFit: "cover",
-  display: "block",
-  borderRadius: 6
+  aspectRatio: "1 / 1"
+});
+
+const GifItemWrapper = styled("div")({
+  position: "relative",
+  "&:hover .gif-fav-btn": { opacity: 1 }
+});
+
+const FavoriteBtn = styled("button")<{ favorited?: boolean }>(
+  ({ theme, favorited }) => ({
+    position: "absolute",
+    top: 4,
+    right: 4,
+    width: 22,
+    height: 22,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    background: "rgba(0,0,0,0.55)",
+    border: "none",
+    borderRadius: 6,
+    cursor: "pointer",
+    opacity: favorited ? 1 : 0,
+    transition: "opacity 0.1s ease",
+    color: favorited ? theme.colors.warning : "#fff",
+    padding: 0,
+    "&:hover": {
+      background: "rgba(0,0,0,0.7)"
+    }
+  })
+);
+
+const TagGrid = styled("div")({
+  display: "grid",
+  gridTemplateColumns: "1fr 1fr",
+  gap: 4,
+  padding: "4px 0 8px"
 });
 
 const TagButton = styled("button")(({ theme }) => ({
   position: "relative",
-  width: "100%",
-  aspectRatio: "16/9",
-  padding: 0,
-  border: "none",
+  height: 100,
   borderRadius: 8,
-  cursor: "pointer",
   overflow: "hidden",
+  border: "none",
+  cursor: "pointer",
   background: theme.colors.surface,
-  transition: "opacity 0.1s ease",
-  "&:hover": { opacity: 0.85 }
+  padding: 0,
+  "&:hover img, &:hover video": { opacity: 0.7 }
 }));
 
-const TagLabel = styled("span")({
+const TagMedia = styled("img")({
+  position: "absolute",
+  inset: 0,
+  width: "100%",
+  height: "100%",
+  objectFit: "cover",
+  opacity: 0.85,
+  transition: "opacity 0.15s ease"
+});
+
+const TagLabel = styled("span")(({ theme }) => ({
   position: "absolute",
   inset: 0,
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
-  background: "rgba(0,0,0,0.35)",
-  color: "#fff",
-  fontSize: 13,
-  fontWeight: 600,
+  fontSize: 12,
+  fontWeight: 700,
+  color: theme.typography.colors.primary,
+  textShadow: "0 1px 3px rgba(0,0,0,0.7)",
   textTransform: "capitalize",
-  textShadow: "0 1px 3px rgba(0,0,0,0.6)"
-});
-
-function TagItem({
-  tag,
-  onClick
-}: {
-  tag: { name: string; preview: string };
-  onClick: () => void;
-}) {
-  const isVideo = String(tag.preview ?? "").includes("mp4");
-
-  return (
-    <TagButton onClick={onClick}>
-      {isVideo ? (
-        <GifVideo
-          src={tag.preview}
-          autoPlay
-          loop
-          muted
-          playsInline
-          style={{
-            width: "100%",
-            height: "100%",
-            objectFit: "cover"
-          }}
-        />
-      ) : (
-        <GifImg src={tag.preview} alt={tag.name} />
-      )}
-      <TagLabel>{tag.name}</TagLabel>
-    </TagButton>
-  );
-}
-
-const TagGrid = styled("div")({
-  display: "grid",
-  gridTemplateColumns: "1fr 1fr",
-  gap: 6
-});
+  zIndex: 1
+}));
 
 const ScrollArea = styled("div")({
   flex: 1,
@@ -167,44 +173,42 @@ const SearchWrapper = styled(Stack)(({ theme }) => ({
 
 const SectionLabel = styled(Typography)({
   display: "block",
-  padding: "10px 2px 6px",
+  padding: "10px 2px 4px",
   fontSize: 11,
   fontWeight: 600,
   textTransform: "uppercase",
   letterSpacing: "0.05em"
 });
 
-const GifItemWrapper = styled("div")({
-  position: "relative",
-  "&:hover .gif-fav-btn": {
-    opacity: 1
-  }
-});
+const BackBtn = styled("button")(({ theme }) => ({
+  display: "inline-flex",
+  alignItems: "center",
+  gap: 4,
+  background: "none",
+  border: "none",
+  cursor: "pointer",
+  fontSize: 12,
+  color: theme.typography.colors.muted,
+  padding: 0,
+  "&:hover": { color: theme.typography.colors.primary }
+}));
 
-const FavoriteBtn = styled("button")<{ favorited?: boolean }>(
-  ({ theme, favorited }) => ({
-    position: "absolute",
-    top: 4,
-    right: 4,
-    width: 24,
-    height: 24,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    background: "rgba(0,0,0,0.5)",
-    border: "none",
-    borderRadius: 4,
-    cursor: "pointer",
-    opacity: favorited ? 1 : 0,
-    transition: "opacity 0.1s ease",
-    color: favorited ? theme.colors.warning : "#fff",
-    "&:hover": {
-      background: "rgba(0,0,0,0.7)"
-    }
-  })
-);
+const TagItem = ({
+  tag,
+  onClick
+}: {
+  tag: { name: string; preview: string };
+  onClick: () => void;
+}) => {
+  return (
+    <TagButton onClick={onClick}>
+      <TagMedia src={tag.preview} alt={tag.name} draggable={false} />
+      <TagLabel>{tag.name}</TagLabel>
+    </TagButton>
+  );
+};
 
-function GifItem({
+const GifItem = ({
   gif,
   onClick,
   onToggleFavorite,
@@ -212,9 +216,9 @@ function GifItem({
 }: {
   gif: GifResult;
   onClick: () => void;
-  onToggleFavorite: (e: MouseEvent) => void;
+  onToggleFavorite: (e: MouseEvent<HTMLButtonElement>) => void;
   isFavorited: boolean;
-}) {
+}) => {
   const isVideo = String(gif.url ?? "").includes("mp4");
 
   return (
@@ -230,7 +234,7 @@ function GifItem({
             playsInline
           />
         ) : (
-          <GifImg src={gif.url ?? gif.preview} alt={gif.title} />
+          <GifImg src={gif.preview ?? gif.url} alt={gif.title} />
         )}
       </GifButton>
       <FavoriteBtn
@@ -239,15 +243,13 @@ function GifItem({
         onClick={onToggleFavorite}
         title={isFavorited ? "Remove from favorites" : "Add to favorites"}
       >
-        <StarIcon size={12} weight={isFavorited ? "fill" : undefined} />
+        <StarIcon size={14} weight={isFavorited ? "fill" : "regular"} />
       </FavoriteBtn>
     </GifItemWrapper>
   );
-}
+};
 
-export const GifPicker = observer(function GifPicker({
-  onSelectGif
-}: GifPickerProps) {
+export const GifPicker = observer(({ onSelectGif }: GifPickerProps) => {
   const { theme } = useTheme();
   const app = useAppStore();
 
@@ -256,18 +258,21 @@ export const GifPicker = observer(function GifPicker({
   const searchRef = useRef<HTMLInputElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const favoriteGifs =
-    app.settings?.favoriteGifs || observable.array<string>([]);
+  const favoriteGifs = app.settings?.favoriteGifs || [];
 
   const [viewingFavorites, setViewingFavorites] = useState(false);
 
-  const handleToggleFavorite = (e: MouseEvent, gif: GifResult) => {
+  const handleToggleFavorite = (
+    e: MouseEvent<HTMLButtonElement>,
+    gif: GifResult
+  ) => {
     e.stopPropagation();
-    app.settings?.toggleFavoriteGif(`https://giphy.com/gifs/${gif.id}`);
-    app.settings?.sync();
+    console.log(gif);
+    app.settings?.toggleFavoriteGif(
+      `https://klipy.com/gifs/${gif.slug}|${gif.preview}`
+    );
   };
 
-  // Debounce search
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => setDebouncedSearch(search), 400);
@@ -277,14 +282,12 @@ export const GifPicker = observer(function GifPicker({
     };
   }, [search]);
 
-  // Tags — fetched once, cached indefinitely for the session
   const { data: tagsData } = useQuery({
     queryKey: ["gifs", "tags"],
     queryFn: () => app.rest.get<TagsResponse>("/gifs/tags"),
     staleTime: Infinity
   });
 
-  // Search only — no trending
   const { data, fetchNextPage, hasNextPage, isLoading } = useInfiniteQuery({
     queryKey: ["gifs", "search", debouncedSearch],
     queryFn: ({ pageParam }) =>
@@ -299,7 +302,6 @@ export const GifPicker = observer(function GifPicker({
   });
 
   const gifs = data?.pages.flatMap((p) => p.results) ?? [];
-
   const showTags = !debouncedSearch.trim() && !!tagsData?.tags.length;
 
   return (
@@ -316,10 +318,8 @@ export const GifPicker = observer(function GifPicker({
               setSearch("");
               setViewingFavorites(false);
             }}
-            variant="plain"
-            size="sm"
           >
-            <ArrowLeftIcon />
+            <ArrowLeftIcon size={16} />
           </IconButton>
         )}
 
@@ -330,7 +330,7 @@ export const GifPicker = observer(function GifPicker({
           />
           <SearchInput
             ref={searchRef}
-            placeholder="Search GIFs…"
+            placeholder="Search Klipy…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             onKeyDown={(e) => {
@@ -343,6 +343,7 @@ export const GifPicker = observer(function GifPicker({
           {search && (
             <IconButton
               variant="plain"
+              color="neutral"
               size={12}
               padding="2px"
               onClick={() => setSearch("")}
@@ -368,7 +369,7 @@ export const GifPicker = observer(function GifPicker({
                   <TagItem
                     tag={{
                       name: "Favorites",
-                      preview: `https://media.giphy.com/media/${favoriteGifs[0].split("/").pop()}/giphy.mp4`
+                      preview: favoriteGifs[0].split("|")[1] ?? ""
                     }}
                     onClick={() => setViewingFavorites(true)}
                   />
@@ -389,27 +390,34 @@ export const GifPicker = observer(function GifPicker({
                   direction="row"
                   alignItems="center"
                   gap={6}
-                  padding="6px 2px 4px"
+                  padding="6px 2px 8px"
                   flexShrink={0}
                 >
-                  <SectionLabel textColor="muted" css={{ padding: "4px 0" }}>
+                  <BackBtn onClick={() => setViewingFavorites(false)}>
+                    <ArrowLeftIcon size={13} />
+                    Back
+                  </BackBtn>
+                  <SectionLabel textColor="muted" css={{ padding: "0" }}>
                     Favorites
                   </SectionLabel>
                 </Stack>
                 <GifGrid>
-                  {favoriteGifs.map((url) => {
-                    const id = url.split("/").pop() ?? "";
+                  {favoriteGifs.map((entry: string) => {
+                    const [klipyUrl, previewUrl] = entry.split("|");
+                    console.log(previewUrl);
+                    const slug = klipyUrl.split("/").pop() ?? "";
                     const fav: GifResult = {
-                      id,
+                      id: slug,
+                      slug,
                       title: "",
-                      url: `https://media.giphy.com/media/${id}/giphy.mp4`,
-                      preview: `https://media.giphy.com/media/${id}/giphy-preview.gif`,
+                      url: klipyUrl,
+                      preview: previewUrl ?? "",
                       width: 0,
                       height: 0
                     };
                     return (
                       <GifItem
-                        key={id}
+                        key={klipyUrl}
                         gif={fav}
                         onClick={() => onSelectGif(fav)}
                         onToggleFavorite={(e) => handleToggleFavorite(e, fav)}
@@ -446,8 +454,8 @@ export const GifPicker = observer(function GifPicker({
                       gif={gif}
                       onClick={() => onSelectGif(gif)}
                       onToggleFavorite={(e) => handleToggleFavorite(e, gif)}
-                      isFavorited={favoriteGifs.includes(
-                        `https://giphy.com/gifs/${gif.id}`
+                      isFavorited={favoriteGifs.some((f) =>
+                        f.startsWith(`https://klipy.com/gifs/${gif.slug}`)
                       )}
                     />
                   ))}
