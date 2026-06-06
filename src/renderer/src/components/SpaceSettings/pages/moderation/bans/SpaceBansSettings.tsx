@@ -9,6 +9,7 @@ import { UserAvatar } from "@components/User/UserAvatar";
 import { InputWithLabel } from "@components/InputWithLabel";
 import { useModal } from "@contexts/Modal.context";
 import { SpaceMemberUnban } from "@components/SpaceSettings/pages/moderation/bans/SpaceMemberUnban";
+import { useAppStore } from "@hooks/useStores";
 
 interface Props {
   space: Space;
@@ -19,6 +20,7 @@ interface BanItemProps {
 }
 
 const BanItem = observer(({ ban }: BanItemProps) => {
+  const app = useAppStore();
   const [hover, setHover] = useState(false);
   const { openModal } = useModal();
 
@@ -39,7 +41,10 @@ const BanItem = observer(({ ban }: BanItemProps) => {
       }}
     >
       <Stack direction="row" spacing={2.5}>
-        <UserAvatar user={ban.user} />
+        <UserAvatar
+          user={ban.user}
+          member={app.spaces.active?.members.get(ban.userId)}
+        />
         <Stack direction="column">
           {ban.user?.globalName && (
             <Typography fontWeight={500}>{ban.user.globalName}</Typography>

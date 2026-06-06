@@ -92,7 +92,10 @@ export const CustomEmojiPreviewPopup = observer(
             <Stack spacing={1.25} direction="column">
               <Typography level="body-xs">This emoji is from a user</Typography>
               <Stack direction="row" spacing={1.25} alignItems="center">
-                <UserAvatar user={emoji.author} />
+                <UserAvatar
+                  user={emoji.author}
+                  member={app.spaces.active?.members.get(emoji.authorId)}
+                />
                 <Typography fontWeight="bold" level="body-sm">
                   {emoji.author?.displayName}
                 </Typography>

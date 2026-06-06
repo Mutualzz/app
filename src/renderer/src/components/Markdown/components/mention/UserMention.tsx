@@ -15,9 +15,8 @@ export const UserMention = observer(({ userId, attributes }: Props) => {
   const { theme } = useTheme();
   const space = app.spaces.active;
 
-  const memberOrUser = space?.members.get(userId) ?? app.users.get(userId);
-
-  if (!memberOrUser) return null;
+  const member = space?.members.get(userId);
+  const user = app.users.get(userId);
 
   return (
     <Stack
@@ -37,9 +36,11 @@ export const UserMention = observer(({ userId, attributes }: Props) => {
       }}
     >
       <span style={{ position: "relative", top: 3 }}>
-        <UserAvatar size={16} user={memberOrUser} />
+        <UserAvatar size={16} user={user} member={member} />
       </span>
-      <Typography>@{memberOrUser.displayName}</Typography>
+      <Typography>
+        @{member?.displayName || user?.displayName || "Deleted User"}
+      </Typography>
     </Stack>
   );
 });

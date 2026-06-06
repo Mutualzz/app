@@ -44,6 +44,8 @@ const Tile = observer(({ userId, user, size, selected }: TileProps) => {
     ? app.voice.getLocalCameraStream()
     : app.voice.getVideoStreamForUser(userId);
 
+  const member = app.spaces.active?.members.get(userId);
+
   useEffect(() => {
     const el = videoRef.current;
     if (!el) return;
@@ -53,7 +55,8 @@ const Tile = observer(({ userId, user, size, selected }: TileProps) => {
     };
   }, [videoStream]);
 
-  if (!videoStream) return <UserAvatar user={user} size={size} />;
+  if (!videoStream)
+    return <UserAvatar member={member} user={user} size={size} />;
 
   return (
     <video
@@ -269,7 +272,7 @@ export const VoiceChannelView = observer(
                         <Typography>
                           {state.member
                             ? state.member.displayName
-                            : state.user?.displayName || "Unknown User"}
+                            : state.user?.displayName || "Deleted User"}
                         </Typography>
                       </Paper>
                     )}

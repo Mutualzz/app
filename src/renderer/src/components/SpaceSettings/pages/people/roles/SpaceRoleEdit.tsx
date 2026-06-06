@@ -18,6 +18,7 @@ import { normalizeJSON } from "@utils/JSON";
 import { RoleActionConfirm } from "@components/Modals/RoleActionConfirm";
 import { useModal } from "@contexts/Modal.context";
 import { ArrowLeftIcon, PlusIcon, TrashIcon } from "@phosphor-icons/react";
+import { SpaceRoleEditManageMembers } from "./SpaceRoleEditManageMembers";
 
 interface Props {
   membersWithRole: number;
@@ -262,6 +263,10 @@ export const SpaceRoleEdit = observer(
                   )
                 }
               />
+            )}
+
+            {tab === "manage-members" && (
+              <SpaceRoleEditManageMembers role={currentRole} />
             )}
           </Stack>
 

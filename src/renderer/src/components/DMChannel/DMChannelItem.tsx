@@ -32,7 +32,7 @@ export const DMChannelItem = observer(({ channel }: Props) => {
 
   const title = (() => {
     if (channel.type === ChannelType.DM)
-      return recipient?.displayName ?? "Unknown User";
+      return recipient?.displayName ?? "Deleted User";
 
     if (channel.name) return channel.name;
 

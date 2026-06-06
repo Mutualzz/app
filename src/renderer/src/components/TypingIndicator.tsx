@@ -29,7 +29,13 @@ export const TypingIndicator = observer(
       >
         <Stack direction="row" spacing={-2.5}>
           {users.slice(0, 3).map((user) => (
-            <UserAvatar key={user.id} user={user} size="sm" badge={false} />
+            <UserAvatar
+              key={user.id}
+              user={user}
+              member={app.spaces.active?.members.get(user.id)}
+              size="sm"
+              badge={false}
+            />
           ))}
         </Stack>
         <Typography textColor="secondary">{text}</Typography>

@@ -25,7 +25,7 @@ export const SystemMessage = observer(({ message }: Props) => {
   return (
     <MessageBase header highlight={highlight}>
       <MessageInfo>
-        <UserAvatar user={message.author} size="lg" />
+        <UserAvatar user={message.author} member={message.member} size="lg" />
       </MessageInfo>
       <MessageContent>
         <MessageAuthor message={message} />

@@ -60,6 +60,7 @@ export const MemberListItem = observer(({ member, isOwner }: Props) => {
     >
       <UserAvatar
         user={member.user}
+        member={member}
         badge
         typing={
           channelId && member.userId

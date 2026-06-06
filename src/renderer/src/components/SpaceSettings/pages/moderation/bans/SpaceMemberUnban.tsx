@@ -39,7 +39,10 @@ export const SpaceMemberUnban = observer(({ ban }: Props) => {
       spacing={5}
     >
       <Stack direction="row" alignItems="center" flex={1} spacing={1.25}>
-        <UserAvatar user={ban.user} />
+        <UserAvatar
+          user={ban.user}
+          member={app.spaces.active?.members.get(ban.userId)}
+        />
         <Stack direction="column">
           {ban.user?.globalName && (
             <Typography>{ban.user.globalName}</Typography>
@@ -66,7 +69,10 @@ export const SpaceMemberUnban = observer(({ ban }: Props) => {
             Banned by
           </Typography>
           <Stack direction="row" spacing={1.25}>
-            <UserAvatar user={ban.bannedBy} />
+            <UserAvatar
+              user={ban.bannedBy}
+              member={app.spaces.active?.members.get(ban.bannedById)}
+            />
             <Stack direction="column">
               {ban.bannedBy?.globalName && (
                 <Typography>{ban.bannedBy.globalName}</Typography>

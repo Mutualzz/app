@@ -32,7 +32,7 @@ export type ContextMenuPayload =
   | { type: "channel"; space: Space; channel: Channel; [key: string]: any }
   | {
       type: "user";
-      user: User;
+      user: User | AccountStore;
       space?: Space;
       member?: SpaceMember;
       insideDMs?: boolean;

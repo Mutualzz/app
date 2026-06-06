@@ -69,7 +69,12 @@ export const ChannelMemberItem = observer(({ space, state }: Props) => {
       }
     >
       <Stack spacing={1.75} alignItems="center">
-        <UserAvatar user={member.user} size={24} speaking={speaking} />
+        <UserAvatar
+          user={member.user}
+          member={member}
+          size={24}
+          speaking={speaking}
+        />
         <Typography
           flex={1}
           whiteSpace="nowrap"

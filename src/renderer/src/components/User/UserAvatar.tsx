@@ -15,19 +15,22 @@ import {
 import type { AccountStore } from "@stores/Account.store";
 import type { User } from "@stores/objects/User";
 import { observer } from "mobx-react-lite";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useAppStore } from "@hooks/useStores";
 import { Paper } from "@components/Paper";
 import { StatusBadge } from "@components/StatusBadge";
 import { SpaceMember } from "@stores/objects/SpaceMember";
 import { UserIcon } from "@phosphor-icons/react";
+import { useMenu } from "@contexts/ContextMenu.context";
 
 interface UserAvatarProps extends AvatarProps {
-  user?: AccountStore | User | SpaceMember | null;
+  user?: AccountStore | User | null;
+  member?: SpaceMember;
   badge?: boolean;
   showInvisible?: boolean;
   speaking?: boolean;
   typing?: boolean;
+  disableContextMenu?: boolean;
 }
 
 const baseSizeMap: Record<Size, number> = {
@@ -38,7 +41,8 @@ const baseSizeMap: Record<Size, number> = {
 
 export const UserAvatar = observer(
   ({
-    user: userProp,
+    user,
+    member,
     css,
     badge,
     showInvisible,
@@ -46,13 +50,13 @@ export const UserAvatar = observer(
     typing,
     shape,
     style,
+    disableContextMenu,
     ...props
   }: UserAvatarProps & { css?: CSSObject }) => {
     const app = useAppStore();
+    const { openContextMenu } = useMenu();
     const { theme } = useTheme();
     const [focused, setFocused] = useState(false);
-
-    const user = userProp instanceof SpaceMember ? userProp.user : userProp;
 
     const { radius } = resolveResponsiveMerge(
       theme,
@@ -64,7 +68,7 @@ export const UserAvatar = observer(
       })
     );
 
-    const version = useMemo(() => {
+    const version = (() => {
       if (!user) return theme.type === "light" ? "dark" : "light";
 
       return user.defaultAvatar.color
@@ -74,7 +78,7 @@ export const UserAvatar = observer(
         : theme.type === "light"
           ? "dark"
           : "light";
-    }, [theme.type, user]);
+    })();
 
     const { size: sizeProp, ...restProps } = props;
 
@@ -118,6 +122,14 @@ export const UserAvatar = observer(
           ...style
         }}
         draggable={false}
+        onContextMenu={(e) => {
+          if (disableContextMenu) return;
+          openContextMenu(e, {
+            type: "user",
+            user,
+            member
+          });
+        }}
       >
         <MAvatar
           size={size}

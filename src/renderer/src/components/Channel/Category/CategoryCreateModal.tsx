@@ -2,14 +2,7 @@ import { Paper } from "@components/Paper";
 import { useModal } from "@contexts/Modal.context";
 import { useAppStore } from "@hooks/useStores";
 import { ChannelType, HttpException } from "@mutualzz/types";
-import {
-  Box,
-  Button,
-  ButtonGroup,
-  Input,
-  Stack,
-  Typography
-} from "@mutualzz/ui-web";
+import { Button, Input, Stack, Typography } from "@mutualzz/ui-web";
 import type { Space } from "@stores/objects/Space";
 import { useMutation } from "@tanstack/react-query";
 import { observer } from "mobx-react-lite";
@@ -64,7 +57,7 @@ export const CategoryCreateModal = observer(({ space }: Props) => {
         <Stack direction="column" spacing={1.25}>
           <Typography>Category Name</Typography>
           <Input
-            startDecorator={<FolderSimpleIcon color="gray" />}
+            startDecorator={<FolderSimpleIcon weight="fill" />}
             fullWidth
             color="neutral"
             name="channel-name"
@@ -77,23 +70,23 @@ export const CategoryCreateModal = observer(({ space }: Props) => {
           {errors.name && <Typography color="danger">{errors.name}</Typography>}
         </Stack>
       </Stack>
-      <Box mb={5}>
-        <ButtonGroup fullWidth spacing={5}>
-          <Button
-            color="danger"
-            onClick={() => closeModal()}
-            disabled={isCreating}
-          >
-            Cancel
-          </Button>
-          <Button
-            disabled={isCreating || name.length === 0}
-            onClick={() => createCategory()}
-          >
-            Create Category
-          </Button>
-        </ButtonGroup>
-      </Box>
+      <Stack mb={2.5} spacing={1.25}>
+        <Button
+          color="danger"
+          onClick={() => closeModal()}
+          disabled={isCreating}
+          expand
+        >
+          Cancel
+        </Button>
+        <Button
+          disabled={isCreating || name.length === 0}
+          onClick={() => createCategory()}
+          expand
+        >
+          Create Category
+        </Button>
+      </Stack>
     </Paper>
   );
 });

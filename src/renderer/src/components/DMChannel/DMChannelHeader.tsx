@@ -30,7 +30,7 @@ export const DMChannelHeader = observer(({ channel }: Props) => {
         .map((u) => u.displayName)
         .filter(Boolean)
         .join(", ")
-    : (channel.dmRecipient?.displayName ?? "Unknown User");
+    : (channel.dmRecipient?.displayName ?? "Deleted User");
 
   return (
     <Paper

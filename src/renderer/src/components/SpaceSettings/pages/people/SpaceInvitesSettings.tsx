@@ -23,6 +23,7 @@ import { useEffect, useState } from "react";
 import { isElectron } from "@utils/index";
 import { useQuery } from "@tanstack/react-query";
 import { ClipboardIcon, TrashIcon } from "@phosphor-icons/react";
+import { useAppStore } from "@hooks/useStores";
 
 interface Props {
   space: Space;
@@ -51,6 +52,7 @@ const formatCountdown = (expiresAt: Date, now: Date) => {
 };
 
 const InviteItem = observer(({ theme, invite, last, now }: InviteItemProps) => {
+  const app = useAppStore();
   const [hover, setHover] = useState(false);
   const [copied, setCopied] = useState(false);
 
@@ -81,7 +83,10 @@ const InviteItem = observer(({ theme, invite, last, now }: InviteItemProps) => {
         <Stack flex={1} direction="row" alignItems="center" spacing={2}>
           {invite.inviter && (
             <>
-              <UserAvatar user={invite.inviter} />
+              <UserAvatar
+                user={invite.inviter}
+                member={app.spaces.active?.members.get(invite.inviterId)}
+              />
               <Stack direction="column">
                 <Typography>{invite.inviter.displayName}</Typography>
                 {invite.channel && (

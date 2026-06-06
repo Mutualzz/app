@@ -67,6 +67,12 @@ export class Role {
     return this.flags.has("Everyone");
   }
 
+  get members() {
+    return this.space?.members.all.filter((member) =>
+      member.roles.has(this.id)
+    );
+  }
+
   // Backwards-compat getter for anything still reading .permissions
   get permissions() {
     return this.allow;

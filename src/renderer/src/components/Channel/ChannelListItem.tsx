@@ -219,11 +219,6 @@ export const ChannelListItem = observer(
             {isCategory && canManageChannel && (
               <IconButton
                 size={12}
-                variant="plain"
-                color="neutral"
-                css={{
-                  borderRadius: 9999
-                }}
                 onClick={(e) => {
                   e.stopPropagation();
                   openModal(
