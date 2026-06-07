@@ -1,6 +1,6 @@
 import { app, BrowserWindow } from "electron";
 import { electronApp, is, optimizer } from "@electron-toolkit/utils";
-import { createMainWindow } from "./windows";
+import { createMainWindow, setQuitting } from "./windows";
 import { setupIPC } from "./ipc";
 import { setupProtocols } from "./protocols";
 import { initUpdater } from "./updater";
@@ -56,5 +56,6 @@ app.on("window-all-closed", () => {
 });
 
 app.on("before-quit", () => {
+  setQuitting(true);
   trayManager.destroy();
 });
