@@ -36,6 +36,8 @@ nsis:
 npmRebuild: false
 mac:
   x64ArchFiles: "Contents/MacOS/Mutualzz"
+  signIgnore:
+    - "Contents/MacOS/Mutualzz$"
   hardenedRuntime: true
   gatekeeperAssess: false
   entitlements: "build/entitlements.mac.plist"

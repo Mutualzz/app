@@ -18,7 +18,6 @@ exports.default = async ({ appOutDir, packager }) => {
   const updaterSrc = path.join(packager.projectDir, "resources", "updater");
   const updaterDest = path.join(macosDir, productName); // Mutualzz (updater)
 
-  // Already wired — happens on 2nd/3rd afterPack calls during universal build
   if (fs.existsSync(renamedBin) && fs.existsSync(updaterDest)) {
     console.log("[afterPack] Already wired, skipping");
     return;
@@ -34,30 +33,31 @@ exports.default = async ({ appOutDir, packager }) => {
     );
   }
 
-  console.log("[afterPack] Stripping signatures from universal updater binary");
-  try {
-    execSync(
-      `
-      lipo "${updaterSrc}" -thin x86_64 -output /tmp/updater-x64 &&
-      lipo "${updaterSrc}" -thin arm64  -output /tmp/updater-arm64 &&
-      codesign --remove-signature /tmp/updater-x64  2>/dev/null || true &&
-      codesign --remove-signature /tmp/updater-arm64 2>/dev/null || true &&
-      lipo -create /tmp/updater-x64 /tmp/updater-arm64 -output "${updaterSrc}.clean" &&
-      mv "${updaterSrc}.clean" "${updaterSrc}"
-    `,
-      { stdio: "inherit", shell: true }
-    );
-    console.log("[afterPack] Signatures stripped successfully");
-  } catch (e) {
-    console.log("[afterPack] Strip failed, continuing anyway:", e.message);
-  }
-
-  console.log("[afterPack] Renaming Electron binary -> MutualzzApp");
+  console.log("[afterPack] Renaming Electron binary → MutualzzApp");
   fs.renameSync(electronBin, renamedBin);
 
-  console.log("[afterPack] Copying updater binary -> Mutualzz");
+  console.log("[afterPack] Copying updater binary → Mutualzz");
   fs.copyFileSync(updaterSrc, updaterDest);
   fs.chmodSync(updaterDest, 0o755);
+
+  // Sign the updater manually since electron-builder is configured to skip it
+  // Electron builder doesnt like it apparently
+  console.log("[afterPack] Signing updater binary manually");
+  try {
+    execSync(
+      `codesign --sign "${process.env.APPLE_SIGNING_IDENTITY}" \
+        --options runtime \
+        --timestamp \
+        --entitlements "${path.join(packager.projectDir, "build/entitlements.mac.inherit.plist")}" \
+        --force \
+        "${updaterDest}"`,
+      { stdio: "inherit", shell: true }
+    );
+    console.log("[afterPack] Updater signed successfully");
+  } catch (e) {
+    console.error("[afterPack] Failed to sign updater:", e.message);
+    throw e;
+  }
 
   console.log("[afterPack] macOS entry point wiring complete");
 };
