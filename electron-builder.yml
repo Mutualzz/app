@@ -38,6 +38,7 @@ mac:
   x64ArchFiles: "Contents/MacOS/Mutualzz"
   signIgnore:
     - "Contents/MacOS/Mutualzz$"
+    - "Contents/MacOS/MutualzzApp$"
   hardenedRuntime: true
   gatekeeperAssess: false
   entitlements: "build/entitlements.mac.plist"

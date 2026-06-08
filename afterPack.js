@@ -18,6 +18,7 @@ exports.default = async ({ appOutDir, packager }) => {
   const updaterSrc = path.join(packager.projectDir, "resources", "updater");
   const updaterDest = path.join(macosDir, productName); // Mutualzz (updater)
 
+  // Already wired — happens on 2nd/3rd afterPack calls during universal build
   if (fs.existsSync(renamedBin) && fs.existsSync(updaterDest)) {
     console.log("[afterPack] Already wired, skipping");
     return;
@@ -40,15 +41,37 @@ exports.default = async ({ appOutDir, packager }) => {
   fs.copyFileSync(updaterSrc, updaterDest);
   fs.chmodSync(updaterDest, 0o755);
 
-  // Sign the updater manually since electron-builder is configured to skip it
-  // Electron builder doesnt like it apparently
-  console.log("[afterPack] Signing updater binary manually");
+  const entitlements = path.join(
+    packager.projectDir,
+    "build/entitlements.mac.inherit.plist"
+  );
+  const identity = process.env.APPLE_SIGNING_IDENTITY;
+
+  console.log("[afterPack] Signing Electron binary (MutualzzApp)");
   try {
     execSync(
-      `codesign --sign "${process.env.APPLE_SIGNING_IDENTITY}" \
+      `codesign --sign "${identity}" \
         --options runtime \
         --timestamp \
-        --entitlements "${path.join(packager.projectDir, "build/entitlements.mac.inherit.plist")}" \
+        --entitlements "${entitlements}" \
+        --force \
+        "${renamedBin}"`,
+      { stdio: "inherit", shell: true }
+    );
+    console.log("[afterPack] MutualzzApp signed successfully");
+  } catch (e) {
+    console.error("[afterPack] Failed to sign MutualzzApp:", e.message);
+    throw e;
+  }
+
+  // Sign updater binary (Mutualzz) after Electron binary is signed
+  console.log("[afterPack] Signing updater binary (Mutualzz)");
+  try {
+    execSync(
+      `codesign --sign "${identity}" \
+        --options runtime \
+        --timestamp \
+        --entitlements "${entitlements}" \
         --force \
         "${updaterDest}"`,
       { stdio: "inherit", shell: true }
