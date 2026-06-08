@@ -1,3 +1,6 @@
+const path = require("path");
+const fs = require("fs");
+
 exports.default = async ({ appOutDir, packager }) => {
   if (packager.platform.name !== "mac") return;
 
