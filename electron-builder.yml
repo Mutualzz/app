@@ -16,7 +16,7 @@ files:
   - "!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}"
 asarUnpack:
   - resources/**/*
-  - node_modules/keytar/**/*
+  - "**/{keytar,keytar.node}/**"
 win:
   executableName: mutualzz
   icon: resources/icons/icon.ico
