@@ -34,18 +34,15 @@ export interface MutualzzAPI {
     setAutostart(enabled: boolean): Promise<void>;
     getAutostart(): Promise<boolean>;
   };
-
   theme: {
     updateIcons(dataUrl: string): Promise<void>;
     readIcon(relativePath: string): Promise<string | null>;
   };
-
   storage: {
     getToken(): Promise<string | null>;
     setToken(token: string): Promise<void>;
     deleteToken(): Promise<void>;
   };
-
   window: {
     minimize(): Promise<void>;
     maximize(): Promise<void>;
@@ -59,13 +56,16 @@ export interface MutualzzAPI {
     checkOnStartup(): Promise<void>;
   };
   events: {
-    onDeepLink(callback: (url: string) => void): void;
-    onUpdaterChecking(callback: () => void): void;
-    onUpdaterAvailable(callback: (info: any) => void): void;
-    onUpdaterError(callback: (error: string) => void): void;
-    onUpdaterProgress(callback: (progress: any) => void): void;
-    onUpdaterDownloaded(callback: () => void): void;
-    onUpdaterNotAvailable(callback: () => void): void;
+    /** Returns an unsubscribe function */
+    onDeepLink(callback: (url: string) => void): () => void;
+    onUpdaterChecking(callback: () => void): () => void;
+    onUpdaterAvailable(callback: (info: any) => void): () => void;
+    /** Emitted when the bootstrapper starts downloading an update */
+    onUpdaterDownloading(callback: () => void): () => void;
+    onUpdaterProgress(callback: (progress: any) => void): () => void;
+    onUpdaterDownloaded(callback: () => void): () => void;
+    onUpdaterNotAvailable(callback: () => void): () => void;
+    onUpdaterError(callback: (error: string) => void): () => void;
   };
 }
 

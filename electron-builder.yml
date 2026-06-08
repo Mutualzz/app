@@ -1,6 +1,7 @@
 appId: com.mutualzz.app
 productName: Mutualzz
 icon: resources/icons/icon.png
+afterPack: afterPack.js
 directories:
   buildResources: resources
 files:
@@ -17,6 +18,9 @@ asarUnpack:
 win:
   executableName: mutualzz
   icon: resources/icons/icon.ico
+  extraFiles:
+    - from: resources/updater.exe
+      to: updater.exe
 nsis:
   oneClick: true
   perMachine: false
@@ -51,6 +55,11 @@ linux:
   maintainer: Mutualzz
   category: Social Networking
   artifactName: ${productName}.${ext}
+  desktop:
+    Exec: updater
+  extraFiles:
+    - from: resources/updater
+      to: updater
 appImage:
   artifactName: ${productName}.${ext}
 publish:

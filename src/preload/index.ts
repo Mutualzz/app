@@ -20,6 +20,13 @@ const electronBridge = {
   }
 };
 
+/** Helper: registers a listener and returns an unsubscribe fn */
+function on(channel: string, callback: (...args: any[]) => void) {
+  const wrapped = (_event: unknown, ...args: unknown[]) => callback(...args);
+  ipcRenderer.on(channel, wrapped);
+  return () => ipcRenderer.removeListener(channel, wrapped);
+}
+
 const api = {
   app: {
     getVersion: () => ipcRenderer.invoke("app:get-version"),
@@ -77,29 +84,29 @@ const api = {
     checkOnStartup: () => ipcRenderer.invoke("updater:check-on-startup")
   },
   events: {
-    onDeepLink: (callback: (url: string) => void) => {
-      ipcRenderer.on("deep-link", (_, url) => callback(url));
-    },
-    onUpdaterChecking: (callback: () => void) => {
-      ipcRenderer.on("updater:checking", () => callback());
-    },
-    onUpdaterAvailable: (callback: (info: any) => void) => {
-      ipcRenderer.on("updater:update-available", (_, info) => callback(info));
-    },
-    onUpdaterError: (callback: (error: string) => void) => {
-      ipcRenderer.on("updater:error", (_, error) => callback(error));
-    },
-    onUpdaterProgress: (callback: (progress: any) => void) => {
-      ipcRenderer.on("updater:download-progress", (_, progress) =>
-        callback(progress)
-      );
-    },
-    onUpdaterDownloaded: (callback: () => void) => {
-      ipcRenderer.on("updater:update-downloaded", () => callback());
-    },
-    onUpdaterNotAvailable: (callback: () => void) => {
-      ipcRenderer.on("updater:no-update", () => callback());
-    }
+    onDeepLink: (callback: (url: string) => void) => on("deep-link", callback),
+
+    onUpdaterChecking: (callback: () => void) =>
+      on("updater:checking", callback),
+
+    onUpdaterAvailable: (callback: (info: any) => void) =>
+      on("updater:update-available", callback),
+
+    // Emitted by bootstrapper.ts when download starts
+    onUpdaterDownloading: (callback: () => void) =>
+      on("updater:downloading", callback),
+
+    onUpdaterProgress: (callback: (progress: any) => void) =>
+      on("updater:download-progress", callback),
+
+    onUpdaterDownloaded: (callback: () => void) =>
+      on("updater:update-downloaded", callback),
+
+    onUpdaterNotAvailable: (callback: () => void) =>
+      on("updater:no-update", callback),
+
+    onUpdaterError: (callback: (error: string) => void) =>
+      on("updater:error", callback)
   }
 };
 

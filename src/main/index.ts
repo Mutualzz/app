@@ -3,7 +3,7 @@ import { electronApp, is, optimizer } from "@electron-toolkit/utils";
 import { createMainWindow, setQuitting } from "./windows";
 import { setupIPC } from "./ipc";
 import { setupProtocols } from "./protocols";
-import { initUpdater } from "./updater";
+import { initBootstrapper } from "./bootstrapper"; // <-- replaces initUpdater
 import { trayManager } from "./tray";
 import { setupCodecIPC } from "./codec";
 
@@ -36,7 +36,9 @@ app.whenReady().then(() => {
   setupProtocols(mainWindow);
   trayManager.initialize(mainWindow);
 
-  if (!is.dev && app.isPackaged) initUpdater(mainWindow);
+  // Only connect to bootstrapper IPC when packaged — bootstrapper won't be
+  // running in dev, so we skip entirely (same guard as before)
+  if (!is.dev && app.isPackaged) initBootstrapper(mainWindow);
 
   app.setAsDefaultProtocolClient("mutualzz");
 

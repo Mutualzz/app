@@ -73,6 +73,7 @@ export class UpdaterStore {
     }
 
     try {
+      // Trigger an initial check via bootstrapper IPC
       await window.api.updater.checkOnStartup();
 
       if (
@@ -88,12 +89,10 @@ export class UpdaterStore {
 
       if (this.autoCheckTimer) clearInterval(this.autoCheckTimer);
 
-      // Check for updates every hour
+      // Periodic checks are now handled by the bootstrapper itself,
+      // but we keep this as a fallback in case bootstrapper is not running
       this.autoCheckTimer = setInterval(() => {
-        void this.checkForUpdates({
-          isLaunchCheck: false,
-          forceOnLaunch: false
-        });
+        void this.checkForUpdates({ isLaunchCheck: false });
       }, 36e5);
     } catch (err: any) {
       this.logger.error("Failed to start auto-checker:", err);
@@ -127,7 +126,7 @@ export class UpdaterStore {
 
   async installUpdate() {
     if (!this.updateInfo) {
-      this.logger.error("Update not downloaded, cannot install");
+      this.logger.error("Update not ready, cannot install");
       return;
     }
 
@@ -142,6 +141,7 @@ export class UpdaterStore {
     this.setError(null);
 
     try {
+      // Tells bootstrapper to apply the already-downloaded update
       await window.api.updater.install();
       this.setStage("relaunching");
     } catch (err: any) {
@@ -162,11 +162,16 @@ export class UpdaterStore {
     window.api.events.onUpdaterAvailable((info: UpdateInfo) => {
       this.logger.info("Update available:", info.version);
       this.setUpdateInfo(info);
+      // Bootstrapper auto-downloads — we just move to downloading stage here
+      // and wait for onUpdaterDownloaded
       this.setStage("downloading");
-      void this.downloadUpdate();
     });
 
-    // Ensure preload exposes this callback (see note below)
+    // bootstrapper.ts emits this via "updater:downloading" when download starts
+    window.api.events.onUpdaterDownloading?.(() => {
+      this.setStage("downloading");
+    });
+
     window.api.events.onUpdaterNotAvailable(() => {
       this.setStage("idle");
       this.setForceUpdate(false);
@@ -190,26 +195,6 @@ export class UpdaterStore {
       this.setStage("ready");
       this.app.setAppLoading(false);
     });
-  }
-
-  private async downloadUpdate() {
-    if (!window.api) {
-      this.logger.error("API not available, cannot download update");
-      this.setStage("error");
-      this.setError("API not available");
-      return;
-    }
-
-    this.setStage("downloading");
-
-    try {
-      await window.api.updater.download();
-    } catch (err: any) {
-      this.logger.error("Failed to download update", err);
-      this.setStage("error");
-      this.setError(err?.message ?? String(err));
-      this.app.setAppLoading(false);
-    }
   }
 
   private setUpdateInfo(info: UpdateInfo) {
