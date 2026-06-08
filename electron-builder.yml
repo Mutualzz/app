@@ -2,6 +2,7 @@ appId: com.mutualzz.app
 productName: Mutualzz
 icon: resources/icons/icon.png
 afterPack: afterPack.js
+afterSign: afterSign.js
 directories:
   buildResources: resources
 files:
@@ -35,14 +36,12 @@ nsis:
   installerIcon: "resources/icons/icon.ico"
 npmRebuild: false
 mac:
-  x64ArchFiles: "Contents/MacOS/Mutualzz"
-  signIgnore:
-    - "Contents/MacOS/Mutualzz$"
-    - "Contents/MacOS/MutualzzApp$"
   hardenedRuntime: true
   gatekeeperAssess: false
   entitlements: "build/entitlements.mac.plist"
   entitlementsInherit: "build/entitlements.mac.inherit.plist"
+  signIgnore:
+    - "Contents/MacOS/Mutualzz$"
   extendInfo:
     - NSCameraUsageDescription: Application requests access to the device's camera.
     - NSMicrophoneUsageDescription: Application requests access to the device's microphone.
@@ -50,16 +49,17 @@ mac:
   target:
     - target: dmg
       arch: universal
+  x64ArchFiles: "Contents/MacOS/Mutualzz"
 dmg:
   artifactName: ${productName}.${ext}
 linux:
+  executableName: updater
   target:
     - AppImage
     - deb
   maintainer: Mutualzz
   category: Social Networking
   artifactName: ${productName}.${ext}
-  executableName: updater
 appImage:
   artifactName: ${productName}.${ext}
 publish:

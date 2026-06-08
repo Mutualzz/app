@@ -1,6 +1,5 @@
 const path = require("path");
 const fs = require("fs");
-const { execSync } = require("child_process");
 
 exports.default = async ({ appOutDir, packager }) => {
   if (packager.platform.name !== "mac") return;
@@ -34,53 +33,12 @@ exports.default = async ({ appOutDir, packager }) => {
     );
   }
 
-  console.log("[afterPack] Renaming Electron binary → MutualzzApp");
+  console.log("[afterPack] Renaming Electron binary -> MutualzzApp");
   fs.renameSync(electronBin, renamedBin);
 
-  console.log("[afterPack] Copying updater binary → Mutualzz");
+  console.log("[afterPack] Copying updater binary -> Mutualzz");
   fs.copyFileSync(updaterSrc, updaterDest);
   fs.chmodSync(updaterDest, 0o755);
-
-  const entitlements = path.join(
-    packager.projectDir,
-    "build/entitlements.mac.inherit.plist"
-  );
-  const identity = process.env.APPLE_SIGNING_IDENTITY;
-
-  console.log("[afterPack] Signing Electron binary (MutualzzApp)");
-  try {
-    execSync(
-      `codesign --sign "${identity}" \
-        --options runtime \
-        --timestamp \
-        --entitlements "${entitlements}" \
-        --force \
-        "${renamedBin}"`,
-      { stdio: "inherit", shell: true }
-    );
-    console.log("[afterPack] MutualzzApp signed successfully");
-  } catch (e) {
-    console.error("[afterPack] Failed to sign MutualzzApp:", e.message);
-    throw e;
-  }
-
-  // Sign updater binary (Mutualzz) after Electron binary is signed
-  console.log("[afterPack] Signing updater binary (Mutualzz)");
-  try {
-    execSync(
-      `codesign --sign "${identity}" \
-        --options runtime \
-        --timestamp \
-        --entitlements "${entitlements}" \
-        --force \
-        "${updaterDest}"`,
-      { stdio: "inherit", shell: true }
-    );
-    console.log("[afterPack] Updater signed successfully");
-  } catch (e) {
-    console.error("[afterPack] Failed to sign updater:", e.message);
-    throw e;
-  }
 
   console.log("[afterPack] macOS entry point wiring complete");
 };
