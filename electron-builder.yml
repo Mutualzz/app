@@ -16,6 +16,7 @@ files:
   - "!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}"
 asarUnpack:
   - resources/**/*
+  - node_modules/keytar/**/*
 win:
   executableName: mutualzz
   icon: resources/icons/icon.ico
@@ -45,7 +46,7 @@ mac:
   extendInfo:
     - NSCameraUsageDescription: Application requests access to the device's camera.
     - NSMicrophoneUsageDescription: Application requests access to the device's microphone.
-  notarize: true
+  notarize: false
   target:
     - target: dmg
       arch: universal
