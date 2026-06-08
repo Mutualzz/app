@@ -34,7 +34,7 @@ nsis:
   warningsAsErrors: false
   include: "resources/installer.nsh"
   installerIcon: "resources/icons/icon.ico"
-npmRebuild: false
+npmRebuild: true
 mac:
   hardenedRuntime: true
   gatekeeperAssess: false
