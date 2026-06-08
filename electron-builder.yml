@@ -55,8 +55,7 @@ linux:
   maintainer: Mutualzz
   category: Social Networking
   artifactName: ${productName}.${ext}
-  desktop:
-    Exec: updater
+  executableName: updater
   extraFiles:
     - from: resources/updater
       to: updater
