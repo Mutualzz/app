@@ -34,8 +34,6 @@ export class UpdaterStore {
   downloadedBytes = 0;
   totalBytes = 0;
   error: string | null = null;
-  showDownloadOverlay = true;
-  forceUpdate = false;
   updateInfo: UpdateInfo | null = null;
   hasUpdate = false;
 
@@ -55,12 +53,6 @@ export class UpdaterStore {
     return this.downloadedBytes / this.totalBytes;
   }
 
-  debugSetForceGate(active: boolean) {
-    if (!import.meta.env.DEV) return;
-    this.forceUpdate = active;
-    this.showDownloadOverlay = active;
-  }
-
   debugSetStage(stage: UpdaterStage) {
     if (!import.meta.env.DEV) return;
     this.stage = stage;
@@ -73,24 +65,11 @@ export class UpdaterStore {
     }
 
     try {
-      // Trigger an initial check via bootstrapper IPC
       await window.api.updater.checkOnStartup();
-
-      if (
-        this.forceUpdate &&
-        (this.stage === "downloading" ||
-          this.stage === "installing" ||
-          this.stage === "relaunching")
-      ) {
-        return;
-      }
-
-      this.setDownloadOverlay(false);
 
       if (this.autoCheckTimer) clearInterval(this.autoCheckTimer);
 
-      // Periodic checks are now handled by the bootstrapper itself,
-      // but we keep this as a fallback in case bootstrapper is not running
+      // Fallback periodic check - bootstrapper also does this hourly
       this.autoCheckTimer = setInterval(() => {
         void this.checkForUpdates({ isLaunchCheck: false });
       }, 36e5);
@@ -120,7 +99,6 @@ export class UpdaterStore {
       this.logger.error("Failed to check updates", err);
       this.setStage("error");
       this.setError(err?.message ?? String(err));
-      this.app.setAppLoading(false);
     }
   }
 
@@ -141,7 +119,6 @@ export class UpdaterStore {
     this.setError(null);
 
     try {
-      // Tells bootstrapper to apply the already-downloaded update
       await window.api.updater.install();
       this.setStage("relaunching");
     } catch (err: any) {
@@ -162,19 +139,15 @@ export class UpdaterStore {
     window.api.events.onUpdaterAvailable((info: UpdateInfo) => {
       this.logger.info("Update available:", info.version);
       this.setUpdateInfo(info);
-      // Bootstrapper auto-downloads — we just move to downloading stage here
-      // and wait for onUpdaterDownloaded
       this.setStage("downloading");
     });
 
-    // bootstrapper.ts emits this via "updater:downloading" when download starts
     window.api.events.onUpdaterDownloading?.(() => {
       this.setStage("downloading");
     });
 
     window.api.events.onUpdaterNotAvailable(() => {
       this.setStage("idle");
-      this.setForceUpdate(false);
       this.logger.debug("No new update found");
       this.app.setAppLoading(false);
     });
@@ -202,20 +175,12 @@ export class UpdaterStore {
     this.hasUpdate = true;
   }
 
-  private setForceUpdate(active: boolean) {
-    this.forceUpdate = active;
-  }
-
   private setStage(stage: UpdaterStage) {
     this.stage = stage;
   }
 
   private setError(error: string | null) {
     this.error = error;
-  }
-
-  private setDownloadOverlay(visible: boolean) {
-    this.showDownloadOverlay = visible;
   }
 
   private setDownloadingProgress(downloaded: number, total: number) {

@@ -15,12 +15,7 @@ import duration from "dayjs/plugin/duration";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { reaction } from "mobx";
 import { observer } from "mobx-react-lite";
-import {
-  type PropsWithChildren,
-  type ReactNode,
-  useEffect,
-  useState
-} from "react";
+import { type PropsWithChildren, type ReactNode, useEffect, useState } from "react";
 
 import { DesktopShell } from "@components/Desktop/DesktopShell";
 import { InjectGlobal } from "@components/InjectGlobal";
@@ -31,7 +26,6 @@ import { AppTheme } from "@contexts/AppTheme.context";
 import { DesktopShellProvider } from "@contexts/DesktopShell.context";
 import { ModalProvider } from "@contexts/Modal.context";
 import { calendarStrings } from "@utils/i18n";
-import { UpdatingOverlay } from "@components/UpdatingOverlay";
 import { NavigationTracker } from "@components/NavigationTracker";
 import { AppHotkeys } from "@components/AppHotkeys";
 import { ContextMenuProvider } from "@contexts/ContextMenu.context";
@@ -149,14 +143,6 @@ function RootComponent() {
     window.api.events.onDeepLink(handleDeepLink);
   }, [navigate, logger]);
 
-  const stage = app.updater?.stage;
-  const forceGate =
-    !!app.updater?.forceUpdate &&
-    (stage === "downloading" ||
-      stage === "installing" ||
-      stage === "relaunching" ||
-      stage === "error");
-
   return (
     <QueryClientProvider client={app.queryClient}>
       <HotkeysProvider>
@@ -171,36 +157,30 @@ function RootComponent() {
                     <ToastContainer position="top-center" />
                     <ModalRoot />
                     <NavigationTracker />
-                    {isElectron && app.updater && <UpdatingOverlay />}
                     <AppHotkeys />
-
-                    {forceGate ? null : (
-                      <>
-                        <InjectGlobal />
-                        <Loader>
-                          <Stack
-                            direction="column"
-                            height="100vh"
-                            width="100vw"
-                            flex={1}
-                            minHeight={0}
-                            css={{
-                              paddingTop: titleBarHeight
-                            }}
-                          >
-                            <Stack
-                              width="100%"
-                              flex={1}
-                              minHeight={0}
-                              overflow="hidden"
-                            >
-                              <Outlet />
-                            </Stack>
-                            {app.account && <ModeSwitcher />}
-                          </Stack>
-                        </Loader>
-                      </>
-                    )}
+                    <InjectGlobal />
+                    <Loader>
+                      <Stack
+                        direction="column"
+                        height="100vh"
+                        width="100vw"
+                        flex={1}
+                        minHeight={0}
+                        css={{
+                          paddingTop: titleBarHeight
+                        }}
+                      >
+                        <Stack
+                          width="100%"
+                          flex={1}
+                          minHeight={0}
+                          overflow="hidden"
+                        >
+                          <Outlet />
+                        </Stack>
+                        {app.account && <ModeSwitcher />}
+                      </Stack>
+                    </Loader>
                   </ContextMenuProvider>
                 </DesktopShell>
               </DesktopShellProvider>

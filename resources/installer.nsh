@@ -1,12 +1,25 @@
 ; installer.nsh
 ; Custom NSIS hooks for Mutualzz
 
+!macro customHeader
+  ; Hide the installer window before it's ever shown
+  ShowWindow $HWNDPARENT 0
+!macroend
+
 !macro customInstall
-  ; Remove default shortcuts pointing to mutualzz.exe
+  ; ── Visual C++ Redistributable ──────────────────────────────────────────
+  ReadRegDword $0 HKLM "SOFTWARE\Microsoft\VisualStudio\14.0\VC\Runtimes\X64" "Installed"
+  ${If} $0 != 1
+    DetailPrint "Installing Visual C++ Redistributable..."
+    File "/oname=$TEMP\vc_redist.x64.exe" "${BUILD_RESOURCES_DIR}\vc_redist.x64.exe"
+    ExecWait '"$TEMP\vc_redist.x64.exe" /install /quiet /norestart'
+    Delete "$TEMP\vc_redist.x64.exe"
+  ${EndIf}
+
+  ; ── Shortcuts ────────────────────────────────────────────────────────────
   Delete "$DESKTOP\Mutualzz.lnk"
   Delete "$SMPROGRAMS\Mutualzz\Mutualzz.lnk"
 
-  ; Re-create shortcuts pointing to updater.exe
   CreateShortcut "$DESKTOP\Mutualzz.lnk" \
     "$INSTDIR\updater.exe" \
     "" \
@@ -19,14 +32,12 @@
     "$INSTDIR\resources\app.asar.unpacked\resources\icons\icon.ico" \
     0
 
-  ; Fix run-on-startup registry entry to point to updater
   WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Run" \
     "Mutualzz" "$INSTDIR\updater.exe"
-!macroend
 
-!macro customInstallMode
-  ; Launch updater after install instead of mutualzz.exe directly
-  Exec "$INSTDIR\updater.exe"
+  ; Launch updater as a detached GUI process — avoids console flash
+  ; from NSIS inheriting its own console when using plain Exec
+  ShellExecAsUser "open" "$INSTDIR\updater.exe"
 !macroend
 
 !macro customUninstall
