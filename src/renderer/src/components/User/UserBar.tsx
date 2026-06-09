@@ -4,13 +4,7 @@ import { UserAvatar } from "@components/User/UserAvatar";
 import { UserSettingsModal } from "@components/UserSettings/UserSettingsModal";
 import { useModal } from "@contexts/Modal.context";
 import { useAppStore } from "@hooks/useStores";
-import {
-  type PaperProps,
-  Stack,
-  Tooltip,
-  Typography,
-  useTheme
-} from "@mutualzz/ui-web";
+import { type PaperProps, Stack, Tooltip, Typography, useTheme } from "@mutualzz/ui-web";
 import { observer } from "mobx-react-lite";
 import { useState } from "react";
 import { IconButton } from "@components/IconButton";
@@ -28,10 +22,12 @@ import {
   VideoCameraSlashIcon
 } from "@phosphor-icons/react";
 import { HeadphonesOffIcon } from "@components/icons/HeadphonesOffIcon";
+import { useNavigate } from "@tanstack/react-router";
 
 // NOTE: Instead of using hovered, you should use the Animated motion stuff, fix it.
 export const UserBar = observer(() => {
   const app = useAppStore();
+  const navigate = useNavigate();
   const { theme } = useTheme();
   const { openModal } = useModal();
   const { openContextMenu } = useMenu();
@@ -179,7 +175,31 @@ export const UserBar = observer(() => {
             <Stack justifyContent="space-between" alignItems="center">
               <IconButton
                 variant="soft"
-                onClick={() => app.voice.toggleCamera()}
+                onClick={() => {
+                  app.voice.toggleCamera();
+                  if (
+                    voiceChannel &&
+                    app.channels.activeId != voiceChannel?.id &&
+                    !cameraEnabled
+                  ) {
+                    if (voiceChannel.spaceId) {
+                      navigate({
+                        to: "/spaces/$spaceId/$channelId",
+                        params: {
+                          spaceId: voiceChannel.spaceId,
+                          channelId: voiceChannel.id
+                        }
+                      });
+                    } else {
+                      navigate({
+                        to: "/@me/$channelId",
+                        params: {
+                          channelId: voiceChannel.id
+                        }
+                      });
+                    }
+                  }
+                }}
                 css={{
                   flex: 1
                 }}
