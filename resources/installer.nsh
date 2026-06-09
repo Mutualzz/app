@@ -1,9 +1,10 @@
 ; installer.nsh
 ; Custom NSIS hooks for Mutualzz
 
-!macro customHeader
-  ; Hide the installer window before it's ever shown
-  ShowWindow $HWNDPARENT 0
+!macro customInit
+  ; Run installer completely silently — no window, no progress UI
+  ; The updater splash handles all visual feedback after install
+  SetSilent silent
 !macroend
 
 !macro customInstall
@@ -32,11 +33,11 @@
     "$INSTDIR\resources\app.asar.unpacked\resources\icons\icon.ico" \
     0
 
+  ; Fix run-on-startup registry entry to point to updater
   WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Run" \
     "Mutualzz" "$INSTDIR\updater.exe"
 
-  ; Launch updater as a detached GUI process — avoids console flash
-  ; from NSIS inheriting its own console when using plain Exec
+  ; Launch updater as detached GUI process after install
   ShellExecAsUser "open" "$INSTDIR\updater.exe"
 !macroend
 
