@@ -33,16 +33,9 @@
     "$INSTDIR\resources\app.asar.unpacked\resources\icons\icon.ico" \
     0
 
-  ; Fix run-on-startup registry entry to point to updater
   WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Run" \
     "Mutualzz" "$INSTDIR\updater.exe"
 
-  ; Launch updater as detached GUI process after install
-  ShellExecAsUser "open" "$INSTDIR\updater.exe"
-!macroend
-
-!macro customUninstall
-  Delete "$DESKTOP\Mutualzz.lnk"
-  Delete "$SMPROGRAMS\Mutualzz\Mutualzz.lnk"
-  DeleteRegValue HKCU "Software\Microsoft\Windows\CurrentVersion\Run" "Mutualzz"
+  ; Launch updater after install
+  Exec '"$INSTDIR\updater.exe"'
 !macroend
