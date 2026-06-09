@@ -45,6 +45,7 @@ mac:
   extendInfo:
     - NSCameraUsageDescription: Application requests access to the device's camera.
     - NSMicrophoneUsageDescription: Application requests access to the device's microphone.
+    - CFBundleName: Mutualzz
   notarize: false
   target:
     - target: dmg
