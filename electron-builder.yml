@@ -28,14 +28,13 @@ nsis:
   perMachine: false
   createDesktopShortcut: always
   createStartMenuShortcut: true
-  runAfterFinish: true
+  runAfterFinish: false
   artifactName: ${productName}Setup.${ext}
   shortcutName: ${productName}
   uninstallDisplayName: ${productName}
   warningsAsErrors: false
   include: "resources/installer.nsh"
   installerIcon: "resources/icons/icon.ico"
-npmRebuild: true
 mac:
   hardenedRuntime: true
   gatekeeperAssess: false
@@ -44,15 +43,12 @@ mac:
   signIgnore:
     - "Contents/MacOS/Mutualzz$"
   extendInfo:
-    - LSUIElement: false
-    - CFBundleName: Mutualzz
     - NSCameraUsageDescription: Application requests access to the device's camera.
     - NSMicrophoneUsageDescription: Application requests access to the device's microphone.
   notarize: false
   target:
     - target: dmg
       arch: universal
-  x64ArchFiles: "Contents/MacOS/Mutualzz"
 dmg:
   artifactName: ${productName}.${ext}
 linux:

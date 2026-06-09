@@ -6,13 +6,11 @@ import { setCloseBlocked } from "./windows";
 
 const logger = new Logger({ tag: "Bootstrapper" });
 
-// Must match SOCKET_NAME in Rust ipc.rs
 const SOCKET_NAME =
   process.platform === "win32"
-    ? "\\\\.\\pipe\\mutualzz-updater"
+    ? "mutualzz-updater"
     : "/tmp/mutualzz-updater.sock";
 
-// Mirrors OutboundMsg in Rust
 type OutboundMsg =
   | { type: "UPDATE_AVAILABLE"; version: string }
   | {
@@ -39,14 +37,12 @@ export function initBootstrapper(window: BrowserWindow): void {
   setupIPC();
 }
 
-// ─── IPC handlers (same interface as before so UpdaterStore needs no changes) ─
-
 function setupIPC(): void {
   ipcMain.handle("updater:check", async () => {
     send({ type: "CHECK_UPDATE" });
   });
 
-  // download is now handled automatically by the bootstrapper — no-op here
+  // download is handled automatically by the bootstrapper
   ipcMain.handle("updater:download", async () => {});
 
   ipcMain.handle("updater:install", async () => {
@@ -58,8 +54,6 @@ function setupIPC(): void {
     send({ type: "CHECK_UPDATE" });
   });
 }
-
-// ─── Socket connection ────────────────────────────────────────────────────────
 
 function attemptConnect(retries = 10, delayMs = 1000): void {
   if (retries <= 0) {
@@ -112,8 +106,6 @@ function send(msg: InboundMsg): void {
   }
 }
 
-// ─── Message handler — forwards to renderer via same events as before ─────────
-
 function handleMessage(msg: OutboundMsg): void {
   const win = mainWindow;
   if (!win || win.isDestroyed()) return;
@@ -121,13 +113,11 @@ function handleMessage(msg: OutboundMsg): void {
   switch (msg.type) {
     case "UPDATE_AVAILABLE":
       logger.info("Update available:", msg.version);
-      // Auto-download happens in bootstrapper — emit available to trigger UI
       win.webContents.send("updater:update-available", {
         version: msg.version,
         releaseDate: "",
         releaseNotes: ""
       });
-      // Also emit downloading so UpdaterStore moves to downloading stage
       win.webContents.send("updater:downloading");
       break;
 
