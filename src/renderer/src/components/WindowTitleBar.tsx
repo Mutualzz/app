@@ -3,15 +3,7 @@ import { Paper } from "@components/Paper";
 import { useDesktopShell } from "@contexts/DesktopShell.context";
 import { useModal } from "@contexts/Modal.context";
 import { useAppStore } from "@hooks/useStores";
-import {
-  Box,
-  ButtonGroup,
-  Divider,
-  Stack,
-  Tooltip,
-  Typography,
-  useTheme
-} from "@mutualzz/ui-web";
+import { Box, Divider, Stack, Tooltip, Typography, useTheme } from "@mutualzz/ui-web";
 import { observer } from "mobx-react-lite";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -180,36 +172,36 @@ const WindowTitleBar = ({ onHeightChange }: WindowTitleBarProps) => {
               pl={isMac ? 20 : 1.25}
               direction="row"
               alignItems="center"
-              spacing={2}
+              spacing={2.5}
             >
-              <ButtonGroup variant="plain" spacing={0.001} size="sm">
-                <IconButton
-                  disabled={!app.navigation.canBack}
-                  onClick={() => app.navigation.back(navigate)}
-                  css={{
-                    WebkitAppRegion: "no-drag",
-                    userSelect: "auto"
-                  }}
-                >
-                  <Tooltip content={<TooltipWrapper>Go Back</TooltipWrapper>}>
+              <Stack spacing={0.75} alignItems="center" mt={1.75}>
+                <Tooltip content={<TooltipWrapper>Go Back</TooltipWrapper>}>
+                  <IconButton
+                    disabled={!app.navigation.canBack}
+                    onClick={() => app.navigation.back(navigate)}
+                    css={{
+                      WebkitAppRegion: "no-drag",
+                      userSelect: "auto"
+                    }}
+                    size="sm"
+                  >
                     <ArrowLeftIcon weight="fill" />
-                  </Tooltip>
-                </IconButton>
-                <IconButton
-                  disabled={!app.navigation.canForward}
-                  onClick={() => app.navigation.forward(navigate)}
-                  css={{
-                    WebkitAppRegion: "no-drag",
-                    userSelect: "auto"
-                  }}
-                >
-                  <Tooltip
-                    content={<TooltipWrapper>Go Forward</TooltipWrapper>}
+                  </IconButton>
+                </Tooltip>
+                <Tooltip content={<TooltipWrapper>Go Forward</TooltipWrapper>}>
+                  <IconButton
+                    disabled={!app.navigation.canForward}
+                    onClick={() => app.navigation.forward(navigate)}
+                    css={{
+                      WebkitAppRegion: "no-drag",
+                      userSelect: "auto"
+                    }}
+                    size="sm"
                   >
                     <ArrowRightIcon weight="fill" />
-                  </Tooltip>
-                </IconButton>
-              </ButtonGroup>
+                  </IconButton>
+                </Tooltip>
+              </Stack>
               {inPreview && (
                 <Stack spacing={5} alignItems="center">
                   <Typography
