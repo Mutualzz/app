@@ -30,9 +30,9 @@
   WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Run" \
     "Mutualzz" "$INSTDIR\updater.exe"
 
-  ; Launch updater using ShellExecAsUser plugin to avoid console flash
-  !addplugindir "${BUILD_RESOURCES_DIR}"
-  ShellExecAsUser::ShellExecAsUser "open" "$INSTDIR\updater.exe"
+  ; ExecShell "open" uses Windows shell to launch — respects PE subsystem flag
+  ; so the console window doesn't appear unlike plain Exec
+  ExecShell "open" "$INSTDIR\updater.exe"
 !macroend
 
 !macro customUninstall
