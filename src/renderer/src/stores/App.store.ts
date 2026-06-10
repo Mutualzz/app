@@ -1,10 +1,5 @@
 import { Logger } from "@mutualzz/logger";
-import {
-  type APIPrivateUser,
-  type APISpacePartial,
-  type APIUserSettings,
-  type AppMode
-} from "@mutualzz/types";
+import { type APIPrivateUser, type APISpacePartial, type APIUserSettings, type AppMode } from "@mutualzz/types";
 import { QueryClient } from "@tanstack/react-query";
 import { isElectron } from "@utils/index";
 import { makeAutoObservable, reaction, runInAction } from "mobx";
@@ -322,5 +317,7 @@ export class AppStore {
         this.logger.error("Failed to load version", err);
       }
     }
+
+    this.setAppLoading(false);
   }
 }

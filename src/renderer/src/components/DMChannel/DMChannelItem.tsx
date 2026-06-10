@@ -8,6 +8,8 @@ import { Stack, Typography, useTheme } from "@mutualzz/ui-web";
 import { UserAvatar } from "@components/User/UserAvatar";
 import { DMGroupAvatar } from "@components/DMChannel/DMGroupAvatar";
 import { useMenu } from "@contexts/ContextMenu.context";
+import { Tooltip } from "@components/Tooltip";
+import { ChatCircleSlashIcon } from "@phosphor-icons/react";
 
 interface Props {
   channel: Channel;
@@ -23,12 +25,20 @@ export const DMChannelItem = observer(({ channel }: Props) => {
   const navigate = useNavigate();
   const { openContextMenu } = useMenu();
 
+  const meId = app.account?.id;
   const recipient = channel.dmRecipient;
   const recipients = channel.dmRecipients;
 
   const readState = app.readStates.get(channel.id);
   const isUnread = readState?.isUnread ?? false;
   const mentionCount = readState?.mentionCount ?? 0;
+
+  const relationship =
+    channel.type === ChannelType.DM && recipient
+      ? app.relationships.getForMe(recipient.id)
+      : null;
+  const iBlockedThem =
+    !!relationship?.isBlocked && relationship.userId === meId;
 
   const title = (() => {
     if (channel.type === ChannelType.DM)
@@ -58,7 +68,7 @@ export const DMChannelItem = observer(({ channel }: Props) => {
       py={0.75}
       css={{
         cursor: "pointer",
-        opacity: active ? 1 : 0.94,
+        opacity: iBlockedThem ? 0.6 : active ? 1 : 0.94,
         transition: "background-color 120ms ease, opacity 120ms ease",
         "&:hover": active ? {} : { opacity: 1 }
       }}
@@ -161,6 +171,11 @@ export const DMChannelItem = observer(({ channel }: Props) => {
             />
           ) : null}
         </Stack>
+      )}
+      {iBlockedThem && (
+        <Tooltip content="Blocked">
+          <ChatCircleSlashIcon />
+        </Tooltip>
       )}
     </Paper>
   );
