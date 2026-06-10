@@ -1,12 +1,6 @@
 ; installer.nsh
 ; Custom NSIS hooks for Mutualzz
 
-!macro customInit
-  ; Run installer completely silently — no window, no progress UI
-  ; The updater splash handles all visual feedback after install
-  SetSilent silent
-!macroend
-
 !macro customInstall
   ; ── Visual C++ Redistributable ──────────────────────────────────────────
   ReadRegDword $0 HKLM "SOFTWARE\Microsoft\VisualStudio\14.0\VC\Runtimes\X64" "Installed"
@@ -36,6 +30,13 @@
   WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Run" \
     "Mutualzz" "$INSTDIR\updater.exe"
 
-  ; Launch updater after install
-  Exec '"$INSTDIR\updater.exe"'
+  ; Launch updater using ShellExecAsUser plugin to avoid console flash
+  !addplugindir "${BUILD_RESOURCES_DIR}"
+  ShellExecAsUser::ShellExecAsUser "open" "$INSTDIR\updater.exe"
+!macroend
+
+!macro customUninstall
+  Delete "$DESKTOP\Mutualzz.lnk"
+  Delete "$SMPROGRAMS\Mutualzz\Mutualzz.lnk"
+  DeleteRegValue HKCU "Software\Microsoft\Windows\CurrentVersion\Run" "Mutualzz"
 !macroend
