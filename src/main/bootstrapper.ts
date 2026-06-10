@@ -6,11 +6,13 @@ import { setCloseBlocked } from "./windows";
 
 const logger = new Logger({ tag: "Bootstrapper" });
 
+// Must match SOCKET_NAME in Rust ipc.rs
 const SOCKET_NAME =
   process.platform === "win32"
     ? "mutualzz-updater"
     : "/tmp/mutualzz-updater.sock";
 
+// Mirrors OutboundMsg in Rust
 type OutboundMsg =
   | { type: "UPDATE_AVAILABLE"; version: string }
   | {
@@ -33,7 +35,7 @@ let connected = false;
 
 export function initBootstrapper(window: BrowserWindow): void {
   mainWindow = window;
-  attemptConnect();
+  setTimeout(() => attemptConnect(), 1000);
   setupIPC();
 }
 
@@ -55,7 +57,7 @@ function setupIPC(): void {
   });
 }
 
-function attemptConnect(retries = 10, delayMs = 1000): void {
+function attemptConnect(retries = 20, delayMs = 1500): void {
   if (retries <= 0) {
     logger.warn("Bootstrapper IPC: gave up connecting after all retries");
     return;

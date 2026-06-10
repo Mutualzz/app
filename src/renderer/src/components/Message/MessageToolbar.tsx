@@ -1,14 +1,14 @@
 import { IconButton } from "@components/IconButton";
 import { Paper } from "@components/Paper";
 import { useAppStore } from "@hooks/useStores";
-import { Stack } from "@mutualzz/ui-web";
+import { Stack, Tooltip as MzTooltip } from "@mutualzz/ui-web";
 import { Message } from "@stores/objects/Message";
 import { useMutation } from "@tanstack/react-query";
 import { observer } from "mobx-react-lite";
 import type { PropsWithChildren } from "react";
 import { QueuedMessage } from "@stores/objects/QueuedMessage";
 import { PencilSimpleIcon, TrashIcon } from "@phosphor-icons/react";
-import { Tooltip } from "@components/Tooltip";
+import { Tooltip } from "../Tooltip";
 
 interface Props extends PropsWithChildren {
   message: Message | QueuedMessage;
@@ -83,14 +83,14 @@ export const MessageToolbar = observer(
     if (message instanceof Message && message.editing) return children;
 
     return (
-      <Tooltip
+      <MzTooltip
         placement="right-start"
         content={<ToolbarContent message={message} />}
         offset={{ crossAxis: header ? -20 : -30, mainAxis: -90 }}
         disablePortal
       >
         {children}
-      </Tooltip>
+      </MzTooltip>
     );
   }
 );
