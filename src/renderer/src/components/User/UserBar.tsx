@@ -1,10 +1,9 @@
 import { Paper } from "@components/Paper";
-import { TooltipWrapper } from "@components/TooltipWrapper";
 import { UserAvatar } from "@components/User/UserAvatar";
 import { UserSettingsModal } from "@components/UserSettings/UserSettingsModal";
 import { useModal } from "@contexts/Modal.context";
 import { useAppStore } from "@hooks/useStores";
-import { type PaperProps, Stack, Tooltip, Typography, useTheme } from "@mutualzz/ui-web";
+import { type PaperProps, Stack, Typography, useTheme } from "@mutualzz/ui-web";
 import { observer } from "mobx-react-lite";
 import { useState } from "react";
 import { IconButton } from "@components/IconButton";
@@ -23,6 +22,7 @@ import {
 } from "@phosphor-icons/react";
 import { HeadphonesOffIcon } from "@components/icons/HeadphonesOffIcon";
 import { useNavigate } from "@tanstack/react-router";
+import { Tooltip } from "@components/Tooltip";
 
 // NOTE: Instead of using hovered, you should use the Animated motion stuff, fix it.
 export const UserBar = observer(() => {
@@ -146,10 +146,7 @@ export const UserBar = observer(() => {
               )}
             </Stack>
 
-            <Tooltip
-              title={<TooltipWrapper>Disconnect</TooltipWrapper>}
-              placement="top"
-            >
+            <Tooltip content="Disconnect" placement="top">
               <IconButton
                 disabled={!canHangup}
                 onClick={() => app.voice.leave()}
@@ -166,11 +163,7 @@ export const UserBar = observer(() => {
 
           <Tooltip
             placement={inFeed ? "right" : "top"}
-            title={
-              <TooltipWrapper>
-                {cameraEnabled ? "Disable camera" : "Enable camera"}
-              </TooltipWrapper>
-            }
+            content={cameraEnabled ? "Disable camera" : "Enable camera"}
           >
             <Stack justifyContent="space-between" alignItems="center">
               <IconButton
@@ -296,19 +289,17 @@ export const UserBar = observer(() => {
         {inFeed && showVoicePill && (
           <Stack direction="column" spacing={1.25} alignItems="center">
             <Tooltip
-              title={
-                <TooltipWrapper>
-                  <Stack direction="column" spacing={0.5}>
-                    <Typography level="body-sm" color={voiceTitleColor}>
-                      {voiceTitle}
+              content={
+                <Stack direction="column" spacing={0.5}>
+                  <Typography level="body-sm" color={voiceTitleColor}>
+                    {voiceTitle}
+                  </Typography>
+                  {voiceSubtitle && (
+                    <Typography level="body-xs" textColor="muted">
+                      {voiceSubtitle}
                     </Typography>
-                    {voiceSubtitle && (
-                      <Typography level="body-xs" textColor="muted">
-                        {voiceSubtitle}
-                      </Typography>
-                    )}
-                  </Stack>
-                </TooltipWrapper>
+                  )}
+                </Stack>
               }
               placement="right"
             >
@@ -319,11 +310,7 @@ export const UserBar = observer(() => {
 
             <Tooltip
               placement="right"
-              title={
-                <TooltipWrapper>
-                  {cameraEnabled ? "Turn off camera" : "Turn on camera"}
-                </TooltipWrapper>
-              }
+              content={cameraEnabled ? "Turn off camera" : "Turn on camera"}
             >
               <IconButton
                 variant="plain"
@@ -341,10 +328,7 @@ export const UserBar = observer(() => {
             </Tooltip>
 
             {canHangup && (
-              <Tooltip
-                title={<TooltipWrapper>Disconnect</TooltipWrapper>}
-                placement="right"
-              >
+              <Tooltip content="Disconnect" placement="right">
                 <IconButton onClick={() => app.voice.leave()}>
                   <PhoneIcon
                     css={{
@@ -367,14 +351,12 @@ export const UserBar = observer(() => {
         >
           <Tooltip
             placement={inFeed ? "right" : "top"}
-            title={
-              <TooltipWrapper>
-                {app.voice.spaceMute
-                  ? "Space Muted"
-                  : app.voice.effectiveSelfMute
-                    ? "Muted"
-                    : "Mute"}
-              </TooltipWrapper>
+            content={
+              app.voice.spaceMute
+                ? "Space Muted"
+                : app.voice.effectiveSelfMute
+                  ? "Muted"
+                  : "Mute"
             }
           >
             <IconButton
@@ -400,14 +382,12 @@ export const UserBar = observer(() => {
           </Tooltip>
           <Tooltip
             placement={inFeed ? "right" : "top"}
-            title={
-              <TooltipWrapper>
-                {app.voice.spaceDeaf
-                  ? "Space Deafened"
-                  : app.voice.effectiveSelfDeaf
-                    ? "Deafened"
-                    : "Deafen"}
-              </TooltipWrapper>
+            content={
+              app.voice.spaceDeaf
+                ? "Space Deafened"
+                : app.voice.effectiveSelfDeaf
+                  ? "Deafened"
+                  : "Deafen"
             }
           >
             <IconButton
@@ -434,10 +414,7 @@ export const UserBar = observer(() => {
             </IconButton>
           </Tooltip>
 
-          <Tooltip
-            placement={inFeed ? "right" : "top"}
-            title={<TooltipWrapper>Settings</TooltipWrapper>}
-          >
+          <Tooltip placement={inFeed ? "right" : "top"} content="Settings">
             <IconButton
               onClick={() => openModal("user-settings", <UserSettingsModal />)}
               variant="plain"

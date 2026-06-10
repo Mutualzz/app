@@ -1,20 +1,5 @@
-import {
-  FC,
-  type KeyboardEvent,
-  MouseEvent,
-  ReactNode,
-  RefObject,
-  useCallback,
-  useRef,
-  useState
-} from "react";
-import {
-  Divider,
-  IconButton,
-  Stack,
-  Typography,
-  useTheme
-} from "@mutualzz/ui-web";
+import { FC, type KeyboardEvent, MouseEvent, ReactNode, RefObject, useCallback, useRef, useState } from "react";
+import { Divider, IconButton, Stack, Typography, useTheme } from "@mutualzz/ui-web";
 import { Paper } from "@components/Paper";
 import { SpaceIcon } from "@components/Space/SpaceIcon";
 import { GifPicker } from "./GifPicker";
@@ -22,17 +7,8 @@ import type { Expression } from "@stores/objects/Expression";
 import { useAppStore } from "@hooks/useStores";
 import { observer } from "mobx-react-lite";
 import styled from "@emotion/styled";
-import {
-  ALL_EMOJIS,
-  PICKER_CATEGORIES,
-  PickerEmoji,
-  searchEmojis
-} from "@renderer/utils/emojis/emojiPickerData";
-import {
-  getSpriteStyle,
-  SKIN_TONE_MODIFIERS,
-  SkinTone
-} from "@renderer/utils/emojis/emojiSprite";
+import { ALL_EMOJIS, PICKER_CATEGORIES, PickerEmoji, searchEmojis } from "@renderer/utils/emojis/emojiPickerData";
+import { getSpriteStyle, SKIN_TONE_MODIFIERS, SkinTone } from "@renderer/utils/emojis/emojiSprite";
 import { useRecentEmojis } from "@renderer/hooks/useRecentEmojis";
 import { ExpressionType } from "@mutualzz/types";
 import { useMenu } from "@contexts/ContextMenu.context";
@@ -53,6 +29,7 @@ import {
   XIcon
 } from "@phosphor-icons/react";
 import { observable } from "mobx";
+import { Tooltip } from "@components/Tooltip";
 
 const PICKER_WIDTH = 500;
 const PICKER_HEIGHT = 500;
@@ -171,21 +148,6 @@ const SidebarBtn = styled("button")<{ active?: boolean }>(
     }
   })
 );
-
-const Tooltip = styled("span")(({ theme }) => ({
-  position: "fixed",
-  background: theme.colors.background,
-  color: theme.typography.colors.primary,
-  fontSize: 11,
-  padding: "3px 7px",
-  borderRadius: 5,
-  whiteSpace: "nowrap",
-  pointerEvents: "none",
-  zIndex: 10000,
-  boxShadow: "0 2px 8px rgba(0,0,0,0.25)",
-  border: `1px solid ${theme.colors.surface}`,
-  transform: "translateY(-50%)"
-}));
 
 const ScrollArea = styled("div")({
   flex: 1,
@@ -306,24 +268,12 @@ const SidebarButton = ({
   onClick: () => void;
   children: ReactNode;
 }) => {
-  const [tooltip, setTooltip] = useState<{ x: number; y: number } | null>(null);
   return (
-    <>
-      <SidebarBtn
-        active={active}
-        onClick={onClick}
-        onMouseEnter={(e) => {
-          const rect = e.currentTarget.getBoundingClientRect();
-          setTooltip({ x: rect.right + 6, y: rect.top + rect.height / 2 });
-        }}
-        onMouseLeave={() => setTooltip(null)}
-      >
+    <Tooltip placement="right" content={label}>
+      <SidebarBtn active={active} onClick={onClick}>
         {children}
       </SidebarBtn>
-      {tooltip && (
-        <Tooltip style={{ left: tooltip.x, top: tooltip.y }}>{label}</Tooltip>
-      )}
-    </>
+    </Tooltip>
   );
 };
 

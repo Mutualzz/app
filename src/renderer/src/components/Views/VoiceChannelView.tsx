@@ -1,5 +1,5 @@
 import type { Channel } from "@stores/objects/Channel";
-import { Paper, Stack, Tooltip, Typography, useTheme } from "@mutualzz/ui-web";
+import { Paper, Stack, Typography, useTheme } from "@mutualzz/ui-web";
 import { MessageList } from "@components/Message/MessageList";
 import { MessageInput } from "@components/Message/MessageInput";
 import { VoiceChannelHeader } from "@components/Channel/VoiceChannelHeader";
@@ -12,13 +12,13 @@ import { UserAvatar } from "@components/User/UserAvatar";
 import { Button } from "@components/Button";
 import { IconButton } from "@components/IconButton";
 import { useNavigate } from "@tanstack/react-router";
-import { TooltipWrapper } from "@components/TooltipWrapper";
 import { ChannelIcon } from "@components/Channel/ChannelIcon";
 import { SpaceInviteToSpaceModal } from "@components/Space/SpaceInviteToSpaceModal";
 import { useModal } from "@contexts/Modal.context";
 import type { User } from "@stores/objects/User";
 import { useMenu } from "@contexts/ContextMenu.context";
 import { ChatCircleIcon, UserPlusIcon } from "@phosphor-icons/react";
+import { Tooltip } from "@components/Tooltip";
 
 interface Props {
   channel: Channel;
@@ -296,10 +296,7 @@ export const VoiceChannelView = observer(
                   <ChannelIcon type={channel.type} /> {channel.name}
                 </Typography>
                 {!showChat && (
-                  <Tooltip
-                    placement="left"
-                    content={<TooltipWrapper>Open Chat</TooltipWrapper>}
-                  >
+                  <Tooltip placement="left" content="Open Chat">
                     <IconButton
                       onClick={(e) => {
                         e.stopPropagation();
@@ -329,7 +326,7 @@ export const VoiceChannelView = observer(
                 justifyContent="space-between"
                 zIndex={1}
               >
-                <Tooltip content={<TooltipWrapper>Invite</TooltipWrapper>}>
+                <Tooltip content="Invite">
                   <IconButton
                     onClick={(e) => {
                       e.stopPropagation();

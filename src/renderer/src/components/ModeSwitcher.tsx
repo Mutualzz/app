@@ -1,12 +1,12 @@
 import { useAppStore } from "@hooks/useStores";
-import { Tooltip, useTheme } from "@mutualzz/ui-web";
+import { useTheme } from "@mutualzz/ui-web";
 import { useNavigate } from "@tanstack/react-router";
 import { switchMode } from "@utils/index";
 import { observer } from "mobx-react-lite";
 import { AnimatePresence } from "motion/react";
 import { AnimatedIconButton } from "./Animated/AnimatedIconButton";
-import { TooltipWrapper } from "./TooltipWrapper";
 import { PlanetIcon, ScribbleIcon } from "@phosphor-icons/react";
+import { Tooltip } from "@components/Tooltip";
 
 export const ModeSwitcher = observer(() => {
   const app = useAppStore();
@@ -32,19 +32,14 @@ export const ModeSwitcher = observer(() => {
       {!app.hideSwitcher && (
         <Tooltip
           placement="left"
-          content={
-            <TooltipWrapper
-              paperProps={{
-                elevation: app.settings?.preferEmbossed ? 5 : 1,
-                p: 1
-              }}
-              typographyProps={{
-                level: "body-sm"
-              }}
-            >
-              {title}
-            </TooltipWrapper>
-          }
+          paperProps={{
+            elevation: app.settings?.preferEmbossed ? 5 : 1,
+            p: 1
+          }}
+          typographyProps={{
+            level: "body-sm"
+          }}
+          content={title}
         >
           <AnimatedIconButton
             css={{

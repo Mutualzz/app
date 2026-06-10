@@ -19,9 +19,10 @@ import { toast } from "react-toastify";
 import { MemberKick } from "@components/Modals/MemberKick";
 import { MemberBan } from "@components/Modals/MemberBan";
 import { ArrowLeftIcon } from "@phosphor-icons/react";
+import { AccountStore } from "@stores/Account.store";
 
 interface Props {
-  user: User;
+  user: User | AccountStore;
   space?: Space;
   member?: SpaceMember;
   insideDMs?: boolean;

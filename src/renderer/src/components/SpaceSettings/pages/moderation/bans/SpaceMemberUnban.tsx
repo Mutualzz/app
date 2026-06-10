@@ -2,14 +2,14 @@ import { observer } from "mobx-react-lite";
 import { SpaceBan } from "@stores/objects/SpaceBan";
 import { Paper } from "@components/Paper";
 import { useAppStore } from "@hooks/useStores";
-import { Stack, Tooltip, Typography } from "@mutualzz/ui-web";
+import { Stack, Typography } from "@mutualzz/ui-web";
 import { UserAvatar } from "@components/User/UserAvatar";
 import { Button } from "@components/Button";
 import dayjs from "dayjs";
-import { TooltipWrapper } from "@components/TooltipWrapper";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import { useModal } from "@contexts/Modal.context";
+import { Tooltip } from "@components/Tooltip";
 
 interface Props {
   ban: SpaceBan;
@@ -87,11 +87,7 @@ export const SpaceMemberUnban = observer(({ ban }: Props) => {
           <Typography level="body-sm" textColor="secondary">
             Banned at
           </Typography>
-          <Tooltip
-            content={
-              <TooltipWrapper>{dayjs(ban.createdAt).toString()}</TooltipWrapper>
-            }
-          >
+          <Tooltip content={dayjs(ban.createdAt).toString()}>
             <Typography level="body-xs">
               {dayjs(ban.createdAt).fromNow()}
             </Typography>

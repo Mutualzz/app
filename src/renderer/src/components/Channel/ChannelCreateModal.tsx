@@ -14,7 +14,6 @@ import {
   Radio,
   Slider,
   Stack,
-  Tooltip,
   Typography,
   useTheme
 } from "@mutualzz/ui-web";
@@ -29,7 +28,6 @@ import { Button } from "@components/Button";
 import Cropper, { type Area, type Point } from "react-easy-crop";
 import { FileUploader } from "@mateie/react-drag-drop-files";
 import { IconButton } from "@components/IconButton";
-import { TooltipWrapper } from "@components/TooltipWrapper";
 import { cropImage } from "@utils/cropImage";
 import {
   ArrowClockwiseIcon,
@@ -38,6 +36,7 @@ import {
   MagnifyingGlassIcon,
   SpeakerSimpleHighIcon
 } from "@phosphor-icons/react";
+import { Tooltip } from "@components/Tooltip";
 
 interface Props {
   // Usually a category channel under which to create a new channel
@@ -253,7 +252,7 @@ export const ChannelCreateModal = observer(({ space, parent }: Props) => {
               </Stack>
               <Divider orientation="vertical" />
               <Stack spacing={5} direction="row" alignItems="center">
-                <Tooltip content={<TooltipWrapper>Rotate</TooltipWrapper>}>
+                <Tooltip content="Rotate">
                   <IconButton
                     onClick={() => setRotation((prev) => prev + 90)}
                     color={theme.typography.colors.primary}

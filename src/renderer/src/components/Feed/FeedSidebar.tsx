@@ -1,8 +1,7 @@
 import { AnimatedLogo } from "@components/Animated/AnimatedLogo";
 import { Paper } from "@components/Paper";
-import { TooltipWrapper } from "@components/TooltipWrapper";
 import { useAppStore } from "@hooks/useStores";
-import { ButtonGroup, Stack, Tooltip } from "@mutualzz/ui-web";
+import { ButtonGroup, Stack } from "@mutualzz/ui-web";
 import { useNavigate } from "@tanstack/react-router";
 import capitalize from "lodash-es/capitalize";
 import { observer } from "mobx-react-lite";
@@ -14,6 +13,7 @@ import {
   StarIcon,
   UsersIcon
 } from "@phosphor-icons/react";
+import { Tooltip } from "@components/Tooltip";
 
 const links = [
   {
@@ -56,16 +56,11 @@ export const FeedSidebar = observer(() => {
     >
       <Stack width="100%" alignItems="center" justifyContent="center">
         <Tooltip
-          title={
-            <TooltipWrapper>
-              Switch to{" "}
-              {capitalize(
-                app.mode
-                  ? "Direct Messages"
-                  : (app.settings?.preferredMode ?? "Spaces")
-              )}
-            </TooltipWrapper>
-          }
+          content={`Switch to ${capitalize(
+            app.mode
+              ? "Direct Messages"
+              : (app.settings?.preferredMode ?? "Spaces")
+          )}`}
           placement="right"
         >
           <AnimatedLogo
@@ -95,11 +90,7 @@ export const FeedSidebar = observer(() => {
         size="lg"
       >
         {links.map((link) => (
-          <Tooltip
-            title={<TooltipWrapper>{link.label}</TooltipWrapper>}
-            placement="right"
-            key={link.label}
-          >
+          <Tooltip content={link.label} placement="right" key={link.label}>
             <IconButton key={`feed-sidebar-link-${link.label}`}>
               {link.icon}
             </IconButton>

@@ -313,14 +313,6 @@ export class AppStore {
     if (this.settings) this.settings.startSyncing();
     await this.loadToken();
 
-    const isForcedUpdateBlocking =
-      this.updater?.forceUpdate &&
-      (this.updater.stage === "downloading" ||
-        this.updater.stage === "installing" ||
-        this.updater.stage === "relaunching");
-
-    if (!isForcedUpdateBlocking) this.setAppLoading(false);
-
     if (window.api) {
       try {
         this.versions = {

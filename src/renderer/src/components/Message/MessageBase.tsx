@@ -1,11 +1,11 @@
-import { TooltipWrapper } from "@components/TooltipWrapper";
 import { formatColor, styled } from "@mutualzz/ui-core";
-import { Stack, Tooltip } from "@mutualzz/ui-web";
+import { Stack } from "@mutualzz/ui-web";
 import { Message, type MessageLike } from "@stores/objects/Message";
 import { calendarStrings } from "@utils/i18n";
 import dayjs from "dayjs";
 import { observer } from "mobx-react-lite";
 import type { HTMLAttributes, PropsWithChildren } from "react";
+import { Tooltip } from "@components/Tooltip";
 
 interface Props extends PropsWithChildren, HTMLAttributes<HTMLDivElement> {
   header?: boolean;
@@ -97,11 +97,9 @@ export const MessageDetails = observer(
           <Stack direction="column">
             <Tooltip
               placement="top"
-              content={
-                <TooltipWrapper>
-                  {dayjs(message.createdAt).format("dddd, MMMM D, YYYY h:mm A")}
-                </TooltipWrapper>
-              }
+              content={dayjs(message.createdAt).format(
+                "dddd, MMMM D, YYYY h:mm A"
+              )}
             >
               <time
                 className="copyTime"
@@ -117,11 +115,7 @@ export const MessageDetails = observer(
       return (
         <Tooltip
           placement="left"
-          content={
-            <TooltipWrapper>
-              {dayjs(message.createdAt).format("dddd, MMMM D, YYYY h:mm A")}
-            </TooltipWrapper>
-          }
+          content={dayjs(message.createdAt).format("dddd, MMMM D, YYYY h:mm A")}
         >
           <time dateTime={message.createdAt.toISOString()}>
             {dayjs(message.createdAt).format("h:mm A")}
@@ -134,11 +128,7 @@ export const MessageDetails = observer(
       <DetailsBase>
         <Tooltip
           placement="top"
-          content={
-            <TooltipWrapper>
-              {dayjs(message.createdAt).format("dddd, MMMM D, YYYY h:mm A")}
-            </TooltipWrapper>
-          }
+          content={dayjs(message.createdAt).format("dddd, MMMM D, YYYY h:mm A")}
         >
           <time className="copyTime" dateTime={message.createdAt.toISOString()}>
             {dayjs(message.createdAt).calendar(undefined, calendarStrings)}

@@ -5,12 +5,12 @@ import { useAppStore } from "@hooks/useStores";
 import { useMenu } from "@contexts/ContextMenu.context";
 import { UserAvatar } from "@components/User/UserAvatar";
 import type { ColorLike } from "@mutualzz/ui-core";
-import { Stack, Tooltip, Typography, useTheme } from "@mutualzz/ui-web";
+import { Stack, Typography, useTheme } from "@mutualzz/ui-web";
 import type { Space } from "@stores/objects/Space";
-import { TooltipWrapper } from "@components/TooltipWrapper";
 import type { VoiceState } from "@stores/objects/VoiceState.ts";
 import { MicrophoneSlashIcon, VideoCameraIcon } from "@phosphor-icons/react";
 import { HeadphonesOffIcon } from "../icons/HeadphonesOffIcon";
+import { Tooltip } from "@components/Tooltip";
 
 interface Props {
   space: Space;
@@ -92,27 +92,27 @@ export const ChannelMemberItem = observer(({ space, state }: Props) => {
       </Stack>
       <Stack spacing={1.75} alignItems="center">
         {videoOn && (
-          <Tooltip content={<TooltipWrapper>Video</TooltipWrapper>}>
+          <Tooltip content="Video">
             <VideoCameraIcon weight="fill" />
           </Tooltip>
         )}
         {state.selfMute && !state.spaceMute && (
-          <Tooltip content={<TooltipWrapper>Muted</TooltipWrapper>}>
+          <Tooltip content="Muted">
             <MicrophoneSlashIcon weight="fill" />
           </Tooltip>
         )}
         {state.spaceMute && (
-          <Tooltip content={<TooltipWrapper>Space Muted</TooltipWrapper>}>
+          <Tooltip content="Space Muted">
             <MicrophoneSlashIcon weight="fill" color={theme.colors.danger} />
           </Tooltip>
         )}
         {state.selfDeaf && (
-          <Tooltip content={<TooltipWrapper>Deafened</TooltipWrapper>}>
+          <Tooltip content="Deafened">
             <HeadphonesOffIcon weight="fill" />
           </Tooltip>
         )}
         {state.spaceDeaf && (
-          <Tooltip content={<TooltipWrapper>Space Deafened</TooltipWrapper>}>
+          <Tooltip content="Space Deafened">
             <HeadphonesOffIcon weight="fill" color={theme.colors.danger} />
           </Tooltip>
         )}

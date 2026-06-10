@@ -1,17 +1,11 @@
 import { Paper } from "@components/Paper";
-import { TooltipWrapper } from "@components/TooltipWrapper";
 import { useAppStore } from "@hooks/useStores";
-import {
-  ButtonGroup,
-  Divider,
-  Stack,
-  Tooltip,
-  Typography
-} from "@mutualzz/ui-web";
+import { ButtonGroup, Divider, Stack, Typography } from "@mutualzz/ui-web";
 import type { Channel } from "@stores/objects/Channel";
 import { observer } from "mobx-react-lite";
 import { HashIcon, UsersIcon } from "@phosphor-icons/react";
 import { IconButton } from "../IconButton";
+import { Tooltip } from "@components/Tooltip";
 
 interface Props {
   channel?: Channel | null;
@@ -59,11 +53,7 @@ export const TextChannelHeader = observer(({ channel }: Props) => {
       </Stack>
       <ButtonGroup variant="plain" spacing={10}>
         <Tooltip
-          content={
-            <TooltipWrapper>
-              {app.memberListVisible ? "Hide" : "Show"} Member List
-            </TooltipWrapper>
-          }
+          content={`${app.memberListVisible ? "Hide" : "Show"} Member List`}
           placement="bottom"
         >
           <IconButton

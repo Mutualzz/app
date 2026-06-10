@@ -1,7 +1,7 @@
 import { MarkdownRenderer } from "@components/Markdown/MarkdownRenderer/MarkdownRenderer";
 import { UserAvatar } from "@components/User/UserAvatar";
 import { useAppStore } from "@hooks/useStores";
-import { Stack, Tooltip, Typography, useTheme } from "@mutualzz/ui-web";
+import { Stack, Typography, useTheme } from "@mutualzz/ui-web";
 import {
   Message as MessageType,
   Message as MessageInstance,
@@ -23,8 +23,8 @@ import {
 import { MessageEmbed } from "./MessageEmbed";
 import { MessageToolbar } from "./MessageToolbar";
 import { MessageInput } from "./MessageInput";
-import { TooltipWrapper } from "@components/TooltipWrapper";
 import dayjs from "dayjs";
+import { Tooltip } from "@components/Tooltip";
 
 interface Props {
   message: MessageLike;
@@ -123,13 +123,9 @@ export const Message = observer(({ message, header }: Props) => {
                   {isSent && message.edited && (
                     <Tooltip
                       placement="right"
-                      content={
-                        <TooltipWrapper>
-                          {dayjs(message.updatedAt).format(
-                            "dddd, MMMM D, YYYY h:mm A"
-                          )}
-                        </TooltipWrapper>
-                      }
+                      content={dayjs(message.updatedAt).format(
+                        "dddd, MMMM D, YYYY h:mm A"
+                      )}
                       offset={8}
                     >
                       <Typography textColor="muted" ml={0.25} level="body-xs">

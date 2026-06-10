@@ -2,12 +2,12 @@ import { observer } from "mobx-react-lite";
 import { Paper } from "@components/Paper";
 import { useAppStore } from "@hooks/useStores";
 import { DMChannelItem } from "@components/DMChannel/DMChannelItem";
-import { Stack, Tooltip, Typography } from "@mutualzz/ui-web";
+import { Stack, Typography } from "@mutualzz/ui-web";
 import { IconButton } from "@components/IconButton";
-import { TooltipWrapper } from "@components/TooltipWrapper";
 import { useModal } from "@contexts/Modal.context";
 import { DMChannelCreate } from "@components/DMChannel/DMChannelCreate";
 import { PlusIcon } from "@phosphor-icons/react";
+import { Tooltip } from "@components/Tooltip";
 
 export const DMChannelList = observer(() => {
   const app = useAppStore();
@@ -29,10 +29,7 @@ export const DMChannelList = observer(() => {
     >
       <Stack alignItems="center" justifyContent="space-between">
         <Typography level="body-xs">Direct Messages</Typography>
-        <Tooltip
-          content={<TooltipWrapper>New Message</TooltipWrapper>}
-          placement="top"
-        >
+        <Tooltip content="New Message" placement="top">
           <IconButton
             onClick={() => openModal("create-group-dm", <DMChannelCreate />)}
             size={12}

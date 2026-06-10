@@ -12,7 +12,6 @@ import { useAppStore } from "@hooks/useStores";
 import { Paper } from "@components/Paper";
 import { Button } from "@components/Button";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { TooltipWrapper } from "@components/TooltipWrapper";
 import { XIcon } from "@phosphor-icons/react";
 
 export const AppVoiceVideoSettings = observer(() => {
@@ -232,9 +231,7 @@ export const AppVoiceVideoSettings = observer(() => {
                     objectFit: "cover"
                   }}
                 />
-                <Tooltip
-                  content={<TooltipWrapper>Stop testing</TooltipWrapper>}
-                >
+                <Tooltip content="Stop testing">
                   <IconButton
                     css={{
                       position: "absolute",

@@ -1,14 +1,14 @@
 import { IconButton } from "@components/IconButton";
 import { Paper } from "@components/Paper";
-import { TooltipWrapper } from "@components/TooltipWrapper";
 import { useAppStore } from "@hooks/useStores";
-import { Stack, Tooltip } from "@mutualzz/ui-web";
+import { Stack } from "@mutualzz/ui-web";
 import { Message } from "@stores/objects/Message";
 import { useMutation } from "@tanstack/react-query";
 import { observer } from "mobx-react-lite";
 import type { PropsWithChildren } from "react";
 import { QueuedMessage } from "@stores/objects/QueuedMessage";
 import { PencilSimpleIcon, TrashIcon } from "@phosphor-icons/react";
+import { Tooltip } from "@components/Tooltip";
 
 interface Props extends PropsWithChildren {
   message: Message | QueuedMessage;
@@ -50,7 +50,7 @@ const ToolbarContent = observer(({ message }: Props) => {
     >
       <Stack spacing={1.25}>
         {message.author?.id === app.account?.id && isSent && (
-          <Tooltip offset={16} content={<TooltipWrapper>Edit</TooltipWrapper>}>
+          <Tooltip offset={16} content="Edit">
             <IconButton
               onClick={() => message.setEditing(true)}
               variant="plain"
@@ -62,10 +62,7 @@ const ToolbarContent = observer(({ message }: Props) => {
         )}
         {(message.author?.id === app.account?.id ||
           me?.hasPermission("ManageMessages")) && (
-          <Tooltip
-            offset={16}
-            content={<TooltipWrapper>Delete</TooltipWrapper>}
-          >
+          <Tooltip offset={16} content="Delete">
             <IconButton
               color="danger"
               variant="plain"

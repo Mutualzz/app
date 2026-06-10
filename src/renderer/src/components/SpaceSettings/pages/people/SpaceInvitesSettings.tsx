@@ -1,6 +1,5 @@
 import { AnimatedStack } from "@components/Animated/AnimatedStack";
 import { SpaceInviteToSpaceModal } from "@components/Space/SpaceInviteToSpaceModal";
-import { TooltipWrapper } from "@components/TooltipWrapper";
 import { UserAvatar } from "@components/User/UserAvatar";
 import { useModal } from "@contexts/Modal.context";
 import type { Theme } from "@emotion/react";
@@ -11,7 +10,6 @@ import {
   Divider,
   IconButton,
   Stack,
-  Tooltip,
   Typography,
   useTheme
 } from "@mutualzz/ui-web";
@@ -24,6 +22,7 @@ import { isElectron } from "@utils/index";
 import { useQuery } from "@tanstack/react-query";
 import { ClipboardIcon, TrashIcon } from "@phosphor-icons/react";
 import { useAppStore } from "@hooks/useStores";
+import { Tooltip } from "@components/Tooltip";
 
 interface Props {
   space: Space;
@@ -100,13 +99,7 @@ const InviteItem = observer(({ theme, invite, last, now }: InviteItemProps) => {
         </Stack>
         <Stack direction="row" flex={1}>
           <Typography fontFamily="monospace">{invite.code}</Typography>
-          <Tooltip
-            content={
-              <TooltipWrapper>
-                {copied ? "Copied to clipboard" : "Copy Invite URL"}
-              </TooltipWrapper>
-            }
-          >
+          <Tooltip content={copied ? "Copied to clipboard" : "Copy Invite URL"}>
             <IconButton
               variant="plain"
               size="sm"

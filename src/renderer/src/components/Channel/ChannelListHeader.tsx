@@ -6,19 +6,13 @@ import { useMenu } from "@contexts/ContextMenu.context";
 import { useModal } from "@contexts/Modal.context";
 import type { Space } from "@stores/objects/Space";
 import { contextMenu } from "@mutualzz/contexify";
-import {
-  ButtonGroup,
-  Portal,
-  Stack,
-  Tooltip,
-  Typography
-} from "@mutualzz/ui-web";
+import { ButtonGroup, Portal, Stack, Typography } from "@mutualzz/ui-web";
 import { IconButton } from "@components/IconButton";
-import { TooltipWrapper } from "@components/TooltipWrapper";
 import { SpaceInviteToSpaceModal } from "@components/Space/SpaceInviteToSpaceModal";
 import { SpaceContextMenu } from "@components/ContextMenu/SpaceContextMenu";
 import { SpaceSettingsModal } from "@components/SpaceSettings/SpaceSettingsModal";
 import { CaretDownIcon, GearIcon, UserPlusIcon } from "@phosphor-icons/react";
+import { Tooltip } from "@components/Tooltip";
 
 interface Props {
   space: Space;
@@ -93,10 +87,7 @@ export const ChannelListHeader = observer(({ space }: Props) => {
         >
           <ButtonGroup spacing={2} variant="plain" size={12}>
             {canManage && (
-              <Tooltip
-                content={<TooltipWrapper>Space Settings</TooltipWrapper>}
-                placement="bottom"
-              >
+              <Tooltip content="Space Settings" placement="bottom">
                 <IconButton
                   onClick={(e) => {
                     e.stopPropagation();
@@ -113,10 +104,7 @@ export const ChannelListHeader = observer(({ space }: Props) => {
             )}
 
             {canInvite && (
-              <Tooltip
-                content={<TooltipWrapper>Invite to Space</TooltipWrapper>}
-                placement="bottom"
-              >
+              <Tooltip content="Invite to Space" placement="bottom">
                 <IconButton
                   onClick={(e) => {
                     e.stopPropagation();

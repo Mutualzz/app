@@ -1,11 +1,5 @@
 import { observer } from "mobx-react-lite";
-import {
-  Divider,
-  Stack,
-  Tooltip,
-  Typography,
-  useTheme
-} from "@mutualzz/ui-web";
+import { Divider, Stack, Typography, useTheme } from "@mutualzz/ui-web";
 import { Button } from "@components/Button";
 import { useAppStore } from "@hooks/useStores";
 import { type ChangeEvent, useRef, useState } from "react";
@@ -19,8 +13,8 @@ import type { Expression } from "@stores/objects/Expression";
 import { AnimatedStack } from "@components/Animated/AnimatedStack";
 import { dynamicElevation } from "@mutualzz/ui-core";
 import { IconButton } from "@components/IconButton";
-import { TooltipWrapper } from "@components/TooltipWrapper";
 import { TrashIcon } from "@phosphor-icons/react";
+import { Tooltip } from "@components/Tooltip";
 
 const EmojiItem = observer(({ expression }: { expression: Expression }) => {
   const { theme } = useTheme();
@@ -54,7 +48,7 @@ const EmojiItem = observer(({ expression }: { expression: Expression }) => {
       <Stack flex={1} justifyContent="flex-end">
         {hover && (
           <Stack gap={1.25}>
-            <Tooltip content={<TooltipWrapper>Delete</TooltipWrapper>}>
+            <Tooltip content="Delete">
               <IconButton
                 onClick={() => expression.delete()}
                 size="sm"

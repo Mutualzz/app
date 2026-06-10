@@ -3,7 +3,7 @@ import { Paper } from "@components/Paper";
 import { useDesktopShell } from "@contexts/DesktopShell.context";
 import { useModal } from "@contexts/Modal.context";
 import { useAppStore } from "@hooks/useStores";
-import { Box, Divider, Stack, Tooltip, Typography, useTheme } from "@mutualzz/ui-web";
+import { Box, Divider, Stack, Typography, useTheme } from "@mutualzz/ui-web";
 import { observer } from "mobx-react-lite";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -19,12 +19,12 @@ import {
 } from "@phosphor-icons/react";
 import { ThemeCreatorModal } from "./ThemeCreator/ThemeCreatorModal";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
-import { TooltipWrapper } from "@components/TooltipWrapper";
 import { IconButton } from "./IconButton";
 import { DownloadButton } from "./DownloadButton";
 import { useNetworkState } from "@react-hookz/web";
 import { Button } from "@components/Button";
 import { isElectron } from "@utils/index";
+import { Tooltip } from "@components/Tooltip";
 
 interface WindowTitleBarProps {
   onHeightChange?: (height: number) => void;
@@ -53,7 +53,7 @@ const WindowTitleBar = ({ onHeightChange }: WindowTitleBarProps) => {
     location.pathname === "/login" || location.pathname === "/register";
 
   useEffect(() => {
-    if (isUpdating || app.updater?.forceUpdate) return;
+    if (isUpdating) return;
     const el = rootRef.current;
     if (!el) return;
 
@@ -70,7 +70,7 @@ const WindowTitleBar = ({ onHeightChange }: WindowTitleBarProps) => {
       ro.disconnect();
       onHeightChange?.(0);
     };
-  }, [isMac, isUpdating, onHeightChange, app.updater?.forceUpdate]);
+  }, [isMac, isUpdating, onHeightChange]);
 
   const handleMinimize = () => {
     window.api?.window.minimize();
@@ -84,7 +84,7 @@ const WindowTitleBar = ({ onHeightChange }: WindowTitleBarProps) => {
     window.api?.window.close();
   };
 
-  if (isUpdating || app.updater?.forceUpdate) return null;
+  if (isUpdating) return null;
 
   return (
     <Stack
@@ -175,7 +175,7 @@ const WindowTitleBar = ({ onHeightChange }: WindowTitleBarProps) => {
               spacing={2.5}
             >
               <Stack spacing={0.75} alignItems="center" mt={1.75}>
-                <Tooltip content={<TooltipWrapper>Go Back</TooltipWrapper>}>
+                <Tooltip content="Go Back">
                   <IconButton
                     disabled={!app.navigation.canBack}
                     onClick={() => app.navigation.back(navigate)}
@@ -188,7 +188,7 @@ const WindowTitleBar = ({ onHeightChange }: WindowTitleBarProps) => {
                     <ArrowLeftIcon weight="fill" />
                   </IconButton>
                 </Tooltip>
-                <Tooltip content={<TooltipWrapper>Go Forward</TooltipWrapper>}>
+                <Tooltip content="Go Forward">
                   <IconButton
                     disabled={!app.navigation.canForward}
                     onClick={() => app.navigation.forward(navigate)}

@@ -1,7 +1,6 @@
 import { Paper } from "@components/Paper";
-import { TooltipWrapper } from "@components/TooltipWrapper";
 import { UserAvatar } from "@components/User/UserAvatar";
-import { Stack, Tooltip, Typography, useTheme } from "@mutualzz/ui-web";
+import { Stack, Typography, useTheme } from "@mutualzz/ui-web";
 import { observer } from "mobx-react-lite";
 import { useState } from "react";
 import type { ColorLike } from "@mutualzz/ui-core";
@@ -10,6 +9,7 @@ import { useAppStore } from "@hooks/useStores";
 import { SmallActivityStatus } from "@components/SmallActivityStatus";
 import { User } from "@stores/objects/User";
 import { CrownSimpleIcon } from "@phosphor-icons/react";
+import { Tooltip } from "@components/Tooltip";
 
 interface Props {
   user: User;
@@ -69,7 +69,7 @@ export const DMGroupMemberListItem = observer(({ user, isOwner }: Props) => {
         >
           {user.displayName}
           {isOwner && (
-            <Tooltip content={<TooltipWrapper>Owner</TooltipWrapper>}>
+            <Tooltip content="Owner">
               <CrownSimpleIcon
                 weight="fill"
                 color={theme.colors.warning}

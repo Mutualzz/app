@@ -1,19 +1,13 @@
-import {
-  ButtonGroup,
-  IconButton,
-  Stack,
-  Tooltip,
-  Typography
-} from "@mutualzz/ui-web";
+import { ButtonGroup, IconButton, Stack, Typography } from "@mutualzz/ui-web";
 import { Paper } from "@components/Paper";
 import { useAppStore } from "@hooks/useStores";
 import { observer } from "mobx-react-lite";
 import { Channel } from "@stores/objects/Channel";
 import { UserAvatar } from "@components/User/UserAvatar";
 import { DMGroupAvatar } from "@components/DMChannel/DMGroupAvatar";
-import { TooltipWrapper } from "@components/TooltipWrapper";
 import { ChannelType } from "@mutualzz/types";
 import { UsersIcon } from "@phosphor-icons/react";
+import { Tooltip } from "@components/Tooltip";
 
 interface Props {
   channel: Channel;
@@ -64,11 +58,7 @@ export const DMChannelHeader = observer(({ channel }: Props) => {
       <ButtonGroup variant="plain" spacing={10}>
         {channel.type === ChannelType.GroupDM && (
           <Tooltip
-            content={
-              <TooltipWrapper>
-                {app.memberListVisible ? "Hide" : "Show"} Member List
-              </TooltipWrapper>
-            }
+            content={`${app.memberListVisible ? "Hide" : "Show"} Member List`}
             placement="bottom"
           >
             <IconButton

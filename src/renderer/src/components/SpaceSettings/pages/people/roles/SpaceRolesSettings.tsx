@@ -1,13 +1,6 @@
 import type { Space } from "@stores/objects/Space";
 import { useEffect, useState } from "react";
-import {
-  Divider,
-  Input,
-  Stack,
-  Tooltip,
-  Typography,
-  useTheme
-} from "@mutualzz/ui-web";
+import { Divider, Input, Stack, Typography, useTheme } from "@mutualzz/ui-web";
 import { Button } from "@components/Button";
 import { useMutation } from "@tanstack/react-query";
 import type { APIRole } from "@mutualzz/types";
@@ -19,7 +12,6 @@ import type { Theme } from "@emotion/react";
 import { AnimatedStack } from "@components/Animated/AnimatedStack";
 import { dynamicElevation, formatColor } from "@mutualzz/ui-core";
 import { IconButton } from "@components/IconButton";
-import { TooltipWrapper } from "@components/TooltipWrapper";
 import { useMenu } from "@contexts/ContextMenu.context";
 import { useModal } from "@contexts/Modal.context";
 import { RoleActionConfirm } from "@components/Modals/RoleActionConfirm";
@@ -32,6 +24,7 @@ import {
   UserIcon,
   UsersFourIcon
 } from "@phosphor-icons/react";
+import { Tooltip } from "@components/Tooltip";
 
 interface Props {
   space: Space;
@@ -90,10 +83,7 @@ const RoleItem = observer(
               {membersWithRole} <UserIcon />
             </Typography>
             <Stack spacing={2} ml="auto">
-              <Tooltip
-                content={<TooltipWrapper>Edit</TooltipWrapper>}
-                placement="top"
-              >
+              <Tooltip content="Edit" placement="top">
                 <IconButton
                   variant="soft"
                   onClick={onClick}
@@ -103,10 +93,7 @@ const RoleItem = observer(
                   <PencilIcon weight="fill" />
                 </IconButton>
               </Tooltip>
-              <Tooltip
-                content={<TooltipWrapper>Delete</TooltipWrapper>}
-                placement="top"
-              >
+              <Tooltip content="Delete" placement="top">
                 <IconButton
                   onClick={(e) => {
                     e.stopPropagation();

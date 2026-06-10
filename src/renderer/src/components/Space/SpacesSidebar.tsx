@@ -3,7 +3,6 @@ import { Paper } from "@components/Paper";
 import { type PillType, SidebarPill } from "@components/SidebarPill";
 import { SpaceIcon } from "@components/Space/SpaceIcon";
 import { SpaceInviteModal } from "@components/Space/SpaceInviteModal";
-import { TooltipWrapper } from "@components/TooltipWrapper";
 import { useModal } from "@contexts/Modal.context";
 import {
   closestCenter,
@@ -23,16 +22,17 @@ import { CSS } from "@dnd-kit/utilities";
 import type { CSSObject } from "@emotion/react";
 import { useAppStore } from "@hooks/useStores";
 import { formatColor } from "@mutualzz/ui-core";
-import { Portal, Stack, Tooltip, useTheme } from "@mutualzz/ui-web";
+import { Portal, Stack, useTheme } from "@mutualzz/ui-web";
 import type { Space } from "@stores/objects/Space";
 import { useNavigate } from "@tanstack/react-router";
-import capitalize from "lodash-es/capitalize";
 import { observer } from "mobx-react-lite";
 import { useState } from "react";
 import { SpaceContextMenu } from "@components/ContextMenu/SpaceContextMenu";
 import { useMenu } from "@contexts/ContextMenu.context";
 import { IconButton } from "@components/IconButton";
 import { PlusCircleIcon } from "@phosphor-icons/react";
+import { Tooltip } from "@components/Tooltip";
+import capitalize from "lodash-es/capitalize";
 
 const SortableSpace = observer(
   ({
@@ -76,25 +76,20 @@ const SortableSpace = observer(
       <>
         <div ref={setNodeRef} css={style} {...attributes} {...listeners}>
           <Tooltip
-            title={
-              <TooltipWrapper
-                paperProps={{
-                  borderRadius: 5,
-                  variant: "elevation",
-                  elevation: 3,
-                  boxShadow: "unset",
-                  css: {
-                    border: `1px solid ${formatColor(theme.colors.neutral, {
-                      alpha: 30,
-                      format: "hexa"
-                    })}`
-                  }
-                }}
-                typographyProps={{ level: "body-sm" }}
-              >
-                {space.name}
-              </TooltipWrapper>
-            }
+            content={space.name}
+            paperProps={{
+              borderRadius: 5,
+              variant: "elevation",
+              elevation: 3,
+              boxShadow: "unset",
+              css: {
+                border: `1px solid ${formatColor(theme.colors.neutral, {
+                  alpha: 30,
+                  format: "hexa"
+                })}`
+              }
+            }}
+            typographyProps={{ level: "body-sm" }}
             placement="right"
           >
             <Stack justifyContent="center" position="relative">
@@ -171,16 +166,11 @@ export const SpacesSidebar = observer(() => {
     >
       <Stack width="100%" alignItems="center" justifyContent="center">
         <Tooltip
-          title={
-            <TooltipWrapper>
-              Switch to{" "}
-              {capitalize(
-                app.mode === "@me"
-                  ? (app.settings?.preferredMode ?? "Spaces")
-                  : "Direct Messages"
-              )}
-            </TooltipWrapper>
-          }
+          content={`Switch to ${capitalize(
+            app.mode === "@me"
+              ? (app.settings?.preferredMode ?? "Spaces")
+              : "Direct Messages"
+          )}`}
           placement="right"
         >
           <AnimatedLogo
@@ -234,10 +224,7 @@ export const SpacesSidebar = observer(() => {
         </SortableContext>
       </DndContext>
       <Stack>
-        <Tooltip
-          title={<TooltipWrapper>Create a space</TooltipWrapper>}
-          placement="right"
-        >
+        <Tooltip content="Create a space" placement="right">
           <IconButton
             size={36}
             css={{

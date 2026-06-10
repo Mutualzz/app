@@ -1,5 +1,4 @@
 import { ThemeCreatorModal } from "@components/ThemeCreator/ThemeCreatorModal";
-import { TooltipWrapper } from "@components/TooltipWrapper";
 import { useModal } from "@contexts/Modal.context";
 import type { Theme as MzTheme } from "@emotion/react";
 import { usePrefersDark } from "@hooks/usePrefersDark";
@@ -20,7 +19,6 @@ import {
   Divider,
   Paper,
   Stack,
-  Tooltip,
   Typography,
   useTheme
 } from "@mutualzz/ui-web";
@@ -44,6 +42,7 @@ import {
   useState
 } from "react";
 import { VirtuosoGrid } from "react-virtuoso";
+import { Tooltip } from "@components/Tooltip";
 
 const ImageBlob = styled("img")<{
   current: boolean;
@@ -241,20 +240,13 @@ export const AppAppearanceSettings = observer(() => {
       return (
         <Tooltip
           key={`${theme.id}-top`}
-          title={
-            <TooltipWrapper typographyProps={{ level: "body-sm" }}>
-              {theme.name}
-            </TooltipWrapper>
-          }
+          title={theme.name}
+          typographyProps={{ level: "body-sm" }}
           placement="top"
         >
           <Tooltip
             key={`${theme.id}-bottom`}
-            title={
-              <TooltipWrapper typographyProps={{ level: "body-xs" }}>
-                {description}
-              </TooltipWrapper>
-            }
+            title={description}
             placement="bottom"
           >
             <Box
@@ -327,11 +319,8 @@ export const AppAppearanceSettings = observer(() => {
         <Tooltip
           key={`${icon.theme.id}-icon`}
           placement="top"
-          title={
-            <TooltipWrapper typographyProps={{ level: "body-sm" }}>
-              {icon.theme.name} Icon
-            </TooltipWrapper>
-          }
+          typographyProps={{ level: "body-sm" }}
+          title={`${icon.theme.name} Icon`}
         >
           <Box
             position="relative"
@@ -388,10 +377,7 @@ export const AppAppearanceSettings = observer(() => {
             <Typography fontWeight="bold" level="body-lg">
               Themes
             </Typography>
-            <Tooltip
-              content={<TooltipWrapper>Create Custom Theme</TooltipWrapper>}
-              placement="top"
-            >
+            <Tooltip content="Create Custom Theme" placement="top">
               <IconButton
                 variant="soft"
                 onClick={() =>
@@ -424,11 +410,8 @@ export const AppAppearanceSettings = observer(() => {
               )(idx)
             )}
             <Tooltip
-              title={
-                <TooltipWrapper typographyProps={{ level: "body-sm" }}>
-                  Sync with System
-                </TooltipWrapper>
-              }
+              title="Sync with System"
+              typographyProps={{ level: "body-sm" }}
               placement="top"
             >
               <Box position="relative">
@@ -584,18 +567,13 @@ export const AppAppearanceSettings = observer(() => {
                 if (index === 0) {
                   return (
                     <Tooltip
-                      title={
-                        <TooltipWrapper
-                          paperProps={{
-                            borderRadius: 10
-                          }}
-                          typographyProps={{
-                            level: "body-sm"
-                          }}
-                        >
-                          Adapt with current theme
-                        </TooltipWrapper>
-                      }
+                      paperProps={{
+                        borderRadius: 10
+                      }}
+                      typographyProps={{
+                        level: "body-sm"
+                      }}
+                      title="Adapt with current theme"
                       placement="top"
                     >
                       <Box
