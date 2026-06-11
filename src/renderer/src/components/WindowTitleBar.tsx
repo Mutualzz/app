@@ -47,7 +47,7 @@ const WindowTitleBar = ({ onHeightChange }: WindowTitleBarProps) => {
 
   const stage = app.updater?.stage;
 
-  const isUpdating = stage === "installing" || stage === "relaunching";
+  const isUpdating = stage === "installing";
 
   const isAuthPage =
     location.pathname === "/login" || location.pathname === "/register";
@@ -277,7 +277,7 @@ const WindowTitleBar = ({ onHeightChange }: WindowTitleBarProps) => {
               size="lg"
             />
           )}
-          {isElectron && app.updater?.updateInfo && (
+          {isElectron && app.updater?.hasUpdate && (
             <Stack px={isMac ? 3.75 : 0} alignItems="center" spacing={2}>
               <IconButton
                 onClick={() => app.updater?.installUpdate()}

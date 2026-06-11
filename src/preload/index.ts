@@ -86,8 +86,8 @@ const api = {
       ipcRenderer.invoke("updater:get-save-path", version),
     download: (url: string, savePath: string): Promise<{ path: string }> =>
       ipcRenderer.invoke("updater:download", url, savePath),
-    apply: (updatePath: string): Promise<void> =>
-      ipcRenderer.invoke("updater:apply", updatePath)
+    apply: (updatePath: string, version: string): Promise<void> =>
+      ipcRenderer.invoke("updater:apply", updatePath, version)
   },
   events: {
     onDeepLink: (callback: (url: string) => void) => on("deep-link", callback),

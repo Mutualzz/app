@@ -24,6 +24,7 @@ interface LatestJson {
 
 const LATEST_JSON_URL =
   "https://proxy.mutualzz.com/releases/latest/latest.json";
+const CHECK_INTERVAL = import.meta.env.DEV ? 5 * 60 * 1000 : 60 * 60 * 1000;
 
 export class UpdaterStore {
   stage: UpdaterStage = "idle";
@@ -54,7 +55,7 @@ export class UpdaterStore {
     if (this.autoCheckTimer) clearInterval(this.autoCheckTimer);
     this.autoCheckTimer = setInterval(() => {
       void this.checkForUpdates();
-    }, 36e5); // every hour
+    }, CHECK_INTERVAL);
   }
 
   async checkForUpdates() {
@@ -69,7 +70,7 @@ export class UpdaterStore {
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
       const latest: LatestJson = await res.json();
-      const currentVersion = await window.api.app.getVersion();
+      const currentVersion = await window.api.updater.getVersion();
 
       if (!this.isNewerVersion(latest.version, currentVersion)) {
         this.logger.info("No update available");
@@ -87,7 +88,9 @@ export class UpdaterStore {
       });
 
       const asset = await this.getAssetForPlatform(latest);
-      if (!asset) throw new Error("No asset for current platform");
+      if (!asset) {
+        throw new Error("No asset for current platform");
+      }
 
       await this.downloadUpdate(asset, latest.version);
     } catch (err: any) {
@@ -99,8 +102,8 @@ export class UpdaterStore {
   }
 
   async installUpdate() {
-    if (!this.updateFilePath) {
-      this.logger.error("No update file path, cannot install");
+    if (!this.updateFilePath || !this.updateVersion) {
+      this.logger.error("No update file path or version, cannot install");
       return;
     }
 
@@ -113,7 +116,7 @@ export class UpdaterStore {
     this.setStage("installing");
 
     try {
-      await window.api.updater.apply(this.updateFilePath);
+      await window.api.updater.apply(this.updateFilePath, this.updateVersion);
     } catch (err: any) {
       this.logger.error("Install failed:", err);
       this.setStage("error");
@@ -125,6 +128,14 @@ export class UpdaterStore {
     this.logger.info("Downloading update from:", asset.url);
 
     const savePath = await window.api.updater.getSavePath(version);
+
+    // Listen for download progress
+    const unsubscribe = window.api.events.onUpdaterDownloadProgress((data) => {
+      runInAction(() => {
+        this.downloadedBytes = data.downloaded;
+        this.totalBytes = data.total;
+      });
+    });
 
     try {
       const result = await window.api.updater.download(asset.url, savePath);
@@ -141,6 +152,8 @@ export class UpdaterStore {
       this.setStage("error");
       this.setError(err?.message ?? String(err));
       this.app.setAppLoading(false);
+    } finally {
+      unsubscribe();
     }
   }
 

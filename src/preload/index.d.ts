@@ -54,7 +54,7 @@ export interface MutualzzAPI {
     getPlatform(): Promise<string>;
     getSavePath(version: string): Promise<string>;
     download(url: string, savePath: string): Promise<{ path: string }>;
-    apply(updatePath: string): Promise<void>;
+    apply(updatePath: string, version: string): Promise<void>;
   };
   events: {
     onDeepLink(callback: (url: string) => void): () => void;

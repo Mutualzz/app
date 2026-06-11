@@ -1,22 +1,19 @@
 import { app, ipcMain } from "electron";
 import { join } from "path";
 import { spawn } from "child_process";
-import { createWriteStream, existsSync, mkdirSync } from "fs";
+import { createWriteStream, existsSync, mkdirSync, unlinkSync } from "fs";
 import { get as httpsGet } from "https";
 import { get as httpGet } from "http";
 
 export function initUpdaterHandlers() {
-  // Get current app version
   ipcMain.handle("updater:get-version", () => {
     return app.getVersion();
   });
 
-  // Get platform
   ipcMain.handle("updater:get-platform", () => {
     return process.platform;
   });
 
-  // Get save path for update file
   ipcMain.handle("updater:get-save-path", (_event, version: string) => {
     const dir = join(app.getPath("temp"), "mutualzz-updates");
     if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
@@ -31,7 +28,6 @@ export function initUpdaterHandlers() {
     return join(dir, `Mutualzz-${version}.${ext}`);
   });
 
-  // Download update file with progress
   ipcMain.handle(
     "updater:download",
     async (event, url: string, savePath: string) => {
@@ -40,7 +36,7 @@ export function initUpdaterHandlers() {
 
         // Delete stale file if exists
         if (existsSync(savePath)) {
-          require("fs").unlinkSync(savePath);
+          unlinkSync(savePath);
         }
 
         const file = createWriteStream(savePath);
@@ -76,29 +72,28 @@ export function initUpdaterHandlers() {
     }
   );
 
-  ipcMain.handle("updater:apply", async (_event, updatePath: string) => {
-    const updaterPath = getUpdaterPath();
+  ipcMain.handle(
+    "updater:apply",
+    async (_event, updatePath: string, version: string) => {
+      const updaterPath = getUpdaterPath();
 
-    spawn(updaterPath, ["--apply", updatePath], {
-      detached: true,
-      stdio: "ignore"
-    }).unref();
+      spawn(updaterPath, ["--apply", updatePath, "--version", version], {
+        detached: true,
+        stdio: "ignore"
+      }).unref();
 
-    // Give the updater a moment to start before we quit
-    await new Promise((r) => setTimeout(r, 500));
-    app.quit();
-  });
+      await new Promise((r) => setTimeout(r, 500));
+      app.quit();
+    }
+  );
 }
 
 function getUpdaterPath(): string {
   if (process.platform === "darwin") {
     return join(process.execPath, "..", "Mutualzz");
   }
-
   if (process.platform === "win32") {
     return join(process.execPath, "..", "updater.exe");
   }
-
-  // Linux
   return join(process.execPath, "..", "updater");
 }
