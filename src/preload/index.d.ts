@@ -50,22 +50,26 @@ export interface MutualzzAPI {
     isMaximized(): Promise<boolean>;
   };
   updater: {
-    check(): Promise<void>;
-    download(): Promise<void>;
-    install(): Promise<void>;
-    checkOnStartup(): Promise<void>;
+    getVersion(): Promise<string>;
+    getPlatform(): Promise<string>;
+    getSavePath(version: string): Promise<string>;
+    download(url: string, savePath: string): Promise<{ path: string }>;
+    apply(updatePath: string): Promise<void>;
   };
   events: {
-    /** Returns an unsubscribe function */
     onDeepLink(callback: (url: string) => void): () => void;
     onUpdaterChecking(callback: () => void): () => void;
     onUpdaterAvailable(callback: (info: any) => void): () => void;
-    /** Emitted when the bootstrapper starts downloading an update */
     onUpdaterDownloading(callback: () => void): () => void;
     onUpdaterProgress(callback: (progress: any) => void): () => void;
     onUpdaterDownloaded(callback: () => void): () => void;
     onUpdaterNotAvailable(callback: () => void): () => void;
     onUpdaterError(callback: (error: string) => void): () => void;
+    onUpdaterDownloadProgress(callback: (data: {
+      percent: number;
+      downloaded: number;
+      total: number;
+    }) => void): () => void;
   };
 }
 

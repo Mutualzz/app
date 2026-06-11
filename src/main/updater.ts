@@ -1,107 +1,104 @@
-import { BrowserWindow, ipcMain } from "electron";
-import { autoUpdater } from "electron-updater";
-import { Logger } from "@mutualzz/logger";
-import { setCloseBlocked } from "./windows";
+import { app, ipcMain } from "electron";
+import { join } from "path";
+import { spawn } from "child_process";
+import { createWriteStream, existsSync, mkdirSync } from "fs";
+import { get as httpsGet } from "https";
+import { get as httpGet } from "http";
 
-const logger = new Logger({ tag: "Updater" });
-
-let mainWindow: BrowserWindow | null = null;
-
-export function initUpdater(window: BrowserWindow) {
-  mainWindow = window;
-
-  autoUpdater.logger = logger;
-  autoUpdater.autoDownload = false;
-  autoUpdater.autoInstallOnAppQuit = true;
-
-  setTimeout(() => {
-    checkForUpdates();
-  }, 2000);
-
-  autoUpdater.on("checking-for-update", () => {
-    logger.info("Checking for update...");
-    mainWindow?.webContents.send("updater:checking");
+export function initUpdaterHandlers() {
+  // Get current app version
+  ipcMain.handle("updater:get-version", () => {
+    return app.getVersion();
   });
 
-  autoUpdater.on("update-available", (info) => {
-    logger.info("Update available:", info.version);
-    mainWindow?.webContents.send("updater:update-available", {
-      version: info.version,
-      releaseDate: info.releaseDate,
-      releaseNotes: info.releaseNotes
-    });
+  // Get platform
+  ipcMain.handle("updater:get-platform", () => {
+    return process.platform;
   });
 
-  autoUpdater.on("update-not-available", () => {
-    logger.info("No update available");
-    mainWindow?.webContents.send("updater:no-update");
-    setCloseBlocked(false);
+  // Get save path for update file
+  ipcMain.handle("updater:get-save-path", (_event, version: string) => {
+    const dir = join(app.getPath("temp"), "mutualzz-updates");
+    if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
+
+    const ext =
+      process.platform === "darwin"
+        ? "dmg"
+        : process.platform === "win32"
+          ? "exe"
+          : "AppImage";
+
+    return join(dir, `Mutualzz-${version}.${ext}`);
   });
 
-  autoUpdater.on("error", (error) => {
-    logger.error("Updater error:", error);
-    mainWindow?.webContents.send("updater:error", error.message);
-    setCloseBlocked(false);
-  });
+  // Download update file with progress
+  ipcMain.handle(
+    "updater:download",
+    async (event, url: string, savePath: string) => {
+      return new Promise<{ path: string }>((resolve, reject) => {
+        const getter = url.startsWith("https") ? httpsGet : httpGet;
 
-  autoUpdater.on("download-progress", (progressObj) => {
-    logger.debug("Download progress:", progressObj.percent);
-    mainWindow?.webContents.send("updater:download-progress", {
-      percent: progressObj.percent,
-      bytesPerSecond: progressObj.bytesPerSecond,
-      transferred: progressObj.transferred,
-      total: progressObj.total
-    });
-  });
+        // Delete stale file if exists
+        if (existsSync(savePath)) {
+          require("fs").unlinkSync(savePath);
+        }
 
-  autoUpdater.on("update-downloaded", () => {
-    logger.info("Update downloaded");
-    mainWindow?.webContents.send("updater:update-downloaded");
-    setCloseBlocked(true);
-  });
+        const file = createWriteStream(savePath);
+        let downloaded = 0;
+        let total = 0;
 
-  ipcMain.handle("updater:check", async () => {
-    return checkForUpdates();
-  });
+        getter(url, (res) => {
+          total = parseInt(res.headers["content-length"] ?? "0", 10);
 
-  ipcMain.handle("updater:download", async () => {
-    try {
-      await autoUpdater.downloadUpdate();
-    } catch (err) {
-      logger.error("Failed to download update:", err);
-      throw err;
+          res.on("data", (chunk: Buffer) => {
+            downloaded += chunk.length;
+            const percent = total > 0 ? (downloaded / total) * 100 : 0;
+            event.sender.send("updater:download-progress", {
+              percent,
+              downloaded,
+              total
+            });
+          });
+
+          res.pipe(file);
+
+          file.on("finish", () => {
+            file.close();
+            resolve({ path: savePath });
+          });
+
+          file.on("error", (err) => {
+            file.close();
+            reject(err);
+          });
+        }).on("error", reject);
+      });
     }
-  });
+  );
 
-  ipcMain.handle("updater:install", async () => {
-    try {
-      setCloseBlocked(false);
-      autoUpdater.quitAndInstall();
-    } catch (err) {
-      logger.error("Failed to install update:", err);
-      throw err;
-    }
-  });
+  ipcMain.handle("updater:apply", async (_event, updatePath: string) => {
+    const updaterPath = getUpdaterPath();
 
-  ipcMain.handle("updater:check-on-startup", async () => {
-    return checkForUpdates(true);
+    spawn(updaterPath, ["--apply", updatePath], {
+      detached: true,
+      stdio: "ignore"
+    }).unref();
+
+    // Give the updater a moment to start before we quit
+    await new Promise((r) => setTimeout(r, 500));
+    app.quit();
   });
 }
 
-async function checkForUpdates(isLaunchCheck = false): Promise<void> {
-  try {
-    if (process.env.NODE_ENV !== "production" && !isLaunchCheck) {
-      logger.debug("Skipping update check in development");
-      return;
-    }
-
-    await autoUpdater.checkForUpdates();
-  } catch (err) {
-    logger.error("Error checking for updates:", err);
+function getUpdaterPath(): string {
+  if (process.platform === "darwin") {
+    return join(process.execPath, "..", "Mutualzz");
   }
-}
 
-export function quitAndInstall(): void {
-  setCloseBlocked(false);
-  autoUpdater.quitAndInstall();
+  if (process.platform === "win32") {
+    return join(process.execPath, "..", "updater.exe");
+  }
+
+  // Linux
+  return join(process.execPath, "..", "updater");
 }

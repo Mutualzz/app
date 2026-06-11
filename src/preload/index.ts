@@ -78,35 +78,40 @@ const api = {
       ipcRenderer.invoke("codec:etf-decode", payload)
   },
   updater: {
-    check: () => ipcRenderer.invoke("updater:check"),
-    download: () => ipcRenderer.invoke("updater:download"),
-    install: () => ipcRenderer.invoke("updater:install"),
-    checkOnStartup: () => ipcRenderer.invoke("updater:check-on-startup")
+    getVersion: (): Promise<string> =>
+      ipcRenderer.invoke("updater:get-version"),
+    getPlatform: (): Promise<string> =>
+      ipcRenderer.invoke("updater:get-platform"),
+    getSavePath: (version: string): Promise<string> =>
+      ipcRenderer.invoke("updater:get-save-path", version),
+    download: (url: string, savePath: string): Promise<{ path: string }> =>
+      ipcRenderer.invoke("updater:download", url, savePath),
+    apply: (updatePath: string): Promise<void> =>
+      ipcRenderer.invoke("updater:apply", updatePath)
   },
   events: {
     onDeepLink: (callback: (url: string) => void) => on("deep-link", callback),
-
     onUpdaterChecking: (callback: () => void) =>
       on("updater:checking", callback),
-
     onUpdaterAvailable: (callback: (info: any) => void) =>
       on("updater:update-available", callback),
-
-    // Emitted by bootstrapper.ts when download starts
     onUpdaterDownloading: (callback: () => void) =>
       on("updater:downloading", callback),
-
     onUpdaterProgress: (callback: (progress: any) => void) =>
       on("updater:download-progress", callback),
-
     onUpdaterDownloaded: (callback: () => void) =>
       on("updater:update-downloaded", callback),
-
     onUpdaterNotAvailable: (callback: () => void) =>
       on("updater:no-update", callback),
-
     onUpdaterError: (callback: (error: string) => void) =>
-      on("updater:error", callback)
+      on("updater:error", callback),
+    onUpdaterDownloadProgress: (
+      callback: (data: {
+        percent: number;
+        downloaded: number;
+        total: number;
+      }) => void
+    ) => on("updater:download-progress", callback)
   }
 };
 
