@@ -281,7 +281,7 @@ const WindowTitleBar = ({ onHeightChange }: WindowTitleBarProps) => {
             <Stack px={isMac ? 3.75 : 0} alignItems="center" spacing={2}>
               <IconButton
                 onClick={() => app.updater?.installUpdate()}
-                size={18}
+                size={16}
                 variant="plain"
                 color="success"
                 padding={4}
@@ -306,11 +306,9 @@ const WindowTitleBar = ({ onHeightChange }: WindowTitleBarProps) => {
           {!isMac && isElectron && (
             <Stack direction="row" alignItems="center">
               <IconButton
+                size={16}
                 css={{
-                  width: 32,
-                  height: 32,
-                  WebkitAppRegion: "no-drag",
-                  userSelect: "auto"
+                  WebkitAppRegion: "no-drag"
                 }}
                 shape="square"
                 padding={4}
@@ -321,9 +319,8 @@ const WindowTitleBar = ({ onHeightChange }: WindowTitleBarProps) => {
               </IconButton>
               <IconButton
                 shape="square"
+                size={16}
                 css={{
-                  width: 32,
-                  height: 32,
                   WebkitAppRegion: "no-drag",
                   userSelect: "auto"
                 }}
@@ -334,11 +331,10 @@ const WindowTitleBar = ({ onHeightChange }: WindowTitleBarProps) => {
                 <SquareIcon />
               </IconButton>
               <IconButton
+                size={16}
                 css={{
                   opacity: isUpdating ? 0.45 : 1,
                   pointerEvents: isUpdating ? "none" : "auto",
-                  width: 32,
-                  height: 32,
                   WebkitAppRegion: "no-drag",
                   userSelect: "auto"
                 }}
@@ -349,7 +345,6 @@ const WindowTitleBar = ({ onHeightChange }: WindowTitleBarProps) => {
                 onMouseLeave={() => setCloseDanger(false)}
                 variant={closeDanger ? "solid" : "plain"}
                 onClick={handleClose}
-                size={18}
                 title={isUpdating ? "Updating… please wait" : "Close"}
               >
                 <XIcon />
