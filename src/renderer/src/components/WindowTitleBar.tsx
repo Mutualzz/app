@@ -284,17 +284,12 @@ const WindowTitleBar = ({ onHeightChange }: WindowTitleBarProps) => {
                 size={18}
                 variant="plain"
                 color="success"
+                padding={4}
                 css={{
-                  height: 32,
-                  width: 32,
-                  padding: 4,
-                  borderRadius: 6,
-                  transition: "background .12s, color .12s",
-                  WebkitAppRegion: "no-drag",
-                  userSelect: "auto"
+                  WebkitAppRegion: "no-drag"
                 }}
               >
-                <DownloadIcon />
+                <DownloadIcon weight="fill" />
               </IconButton>
               {!isMac && (
                 <Divider
