@@ -1,6 +1,6 @@
 import { Paper } from "@components/Paper";
 import { Logger } from "@mutualzz/logger";
-import { Stack, Typography } from "@mutualzz/ui-web";
+import { Avatar, Stack, Typography } from "@mutualzz/ui-web";
 import type { MessageGroup as MessageGroupType } from "@stores/Message.store";
 import type { Channel } from "@stores/objects/Channel";
 import { useInfiniteQuery, useMutation } from "@tanstack/react-query";
@@ -71,7 +71,15 @@ const DMEndMessage = ({
 }) => (
   <Stack direction="column" spacing={1} margin="16px 16px 0 16px">
     {isGroupDM ? (
-      <DMGroupAvatar users={channel?.dmRecipients || []} size={96} />
+      channel.iconUrl ? (
+        <Avatar
+          src={channel.iconUrl}
+          size={96}
+          shape={channel.flags.has("RoundedIcon") ? "circle" : "square"}
+        />
+      ) : (
+        <DMGroupAvatar users={channel?.dmRecipientsList || []} size={96} />
+      )
     ) : (
       <UserAvatar user={channel?.dmRecipient} size={64} />
     )}

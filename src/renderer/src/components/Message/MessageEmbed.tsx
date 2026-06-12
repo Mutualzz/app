@@ -45,12 +45,15 @@ export const MessageEmbed = observer(
     const app = useAppStore();
 
     const gifUrl = embed.type === "gifv" ? (embed.url ?? "") : "";
-    const isFavoritedGif = app.settings?.isFavoriteGif(gifUrl) ?? false;
+    const gifPreview = embed.image ?? embed.media ?? "";
+    const isFavoritedGif =
+      app.settings?.favoriteGifs?.some((f) => f.startsWith(gifUrl)) ?? false;
 
     const handleToggleGifFavorite = (e: MouseEvent) => {
       e.stopPropagation();
       if (!gifUrl) return;
-      app.settings?.toggleFavoriteGif(gifUrl);
+      const entry = gifPreview ? `${gifUrl}|${gifPreview}` : gifUrl;
+      app.settings?.toggleFavoriteGif(entry);
     };
 
     if (embed.spotify)
@@ -213,7 +216,7 @@ export const MessageEmbed = observer(
               target="_blank"
               rel="noreferrer noopener"
             >
-              <img src={embed.image} alt={embed.title} />
+              <img src={embed.image} alt={embed.title || "Embed title"} />
             </Link>
           )}
         </Paper>

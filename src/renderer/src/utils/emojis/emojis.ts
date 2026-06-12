@@ -110,7 +110,7 @@ export function useShortcodeQuery(editor: Editor): {
 
   const textBefore = node.text.slice(0, anchor.offset);
 
-  const match = /:([\w+-]{2,})$/.exec(textBefore);
+  const match = /:([^\s:]{1,})$/.exec(textBefore);
   if (!match) return { query: null, range: null };
 
   const colonOffset = match.index;

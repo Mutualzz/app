@@ -13,7 +13,7 @@ import type { AppStore } from "@stores/App.store";
 import { MessageStore } from "@stores/Message.store";
 import { Message } from "@stores/objects/Message";
 import type { Space } from "@stores/objects/Space";
-import { makeAutoObservable } from "mobx";
+import { makeAutoObservable, observable } from "mobx";
 import type { QueuedMessage } from "./QueuedMessage";
 import { ChannelPermissionOverwrite } from "./ChannelOverwrite";
 import { BitField, channelFlags, type ChannelFlags } from "@mutualzz/bitfield";
@@ -45,6 +45,8 @@ export class Channel {
 
   messages: MessageStore;
 
+  lastMessageId?: Snowflake | null;
+
   parentId?: Snowflake | null;
   spaceId?: Snowflake | null;
   recipientIds?: Snowflake[] | null;
@@ -74,6 +76,8 @@ export class Channel {
 
     if (channel.space) this._space = this.app.spaces.add(channel.space);
 
+    this.lastMessageId = channel.lastMessageId;
+
     this.position = channel.position;
 
     this.nsfw = channel.nsfw;
@@ -96,7 +100,9 @@ export class Channel {
 
     this.recipientIds = channel.recipientIds ?? this.recipientIds ?? null;
     if (channel.recipients)
-      this._recipients = this.app.users.addAll(channel.recipients);
+      this._recipients = observable.array(
+        this.app.users.addAll(channel.recipients)
+      );
 
     this.ownerId = channel.ownerId;
     if (channel.owner) this._owner = this.app.users.add(channel.owner);
@@ -158,10 +164,10 @@ export class Channel {
     return this.app.spaces.get(this.spaceId) || this._space;
   }
 
-  _recipients?: User[] | null;
+  _recipients = observable.array<User>();
 
   get recipients() {
-    return this._recipients ?? null;
+    return this._recipients;
   }
 
   get listId() {
@@ -243,7 +249,20 @@ export class Channel {
 
     if (fromStore.length) return fromStore;
 
-    return this._recipients?.filter((u) => u.id !== meId) ?? [];
+    return this._recipients.filter((u) => u.id !== meId);
+  }
+
+  get dmRecipientsList() {
+    const ids = this.recipientIds ?? [];
+    if (!ids.length) return [];
+
+    const fromStore = ids
+      .map((id) => this.app.users.get(id))
+      .filter((u) => !!u);
+
+    if (fromStore.length) return fromStore;
+
+    return this._recipients;
   }
 
   get dmRecipient() {
@@ -271,6 +290,18 @@ export class Channel {
     );
   }
 
+  addRecipient(user: User) {
+    if (!this._recipients.some((r) => r.id === user.id))
+      this._recipients.push(user);
+  }
+
+  removeRecipient(userId: Snowflake) {
+    const idx = this._recipients.findIndex((r) => r.id === userId);
+    if (idx !== -1) this._recipients.splice(idx, 1);
+    this.recipientIds =
+      this.recipientIds?.filter((id) => id !== userId) ?? null;
+  }
+
   close() {
     return this.app.channels.closeDM(this.id);
   }
@@ -292,11 +323,11 @@ export class Channel {
       ? this.app.spaces.add(channel.space)
       : (this.space ?? null);
 
-    this.icon = channel.icon ?? this.icon;
+    this.icon = channel.icon ?? null;
 
     this.recipientIds = channel.recipientIds ?? this.recipientIds ?? null;
     if (channel.recipients)
-      this._recipients = this.app.users.addAll(channel.recipients);
+      this._recipients.replace(this.app.users.addAll(channel.recipients));
 
     this.overwrites = (channel.overwrites ?? []).map(
       (ow) => new ChannelPermissionOverwrite(this.app, ow)

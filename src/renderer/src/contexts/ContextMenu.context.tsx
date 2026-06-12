@@ -24,12 +24,12 @@ export type ContextMenuPayload =
   | {
       type: "space";
       space: Space;
-
       fromSidebar?: boolean;
       [key: string]: any;
     }
-  | { type: "channelList"; space: Space; [key: string]: any }
+  | { type: "channel-list"; space: Space; [key: string]: any }
   | { type: "channel"; space: Space; channel: Channel; [key: string]: any }
+  | { type: "group-dm"; channel: Channel; [key: string]: any }
   | {
       type: "user";
       user: User | AccountStore;
@@ -113,7 +113,7 @@ function getMenuId(menu: ContextMenuPayload): string {
   switch (menu.type) {
     case "space":
       return generateMenuIDs.space(menu.space.id, menu.fromSidebar);
-    case "channelList":
+    case "channel-list":
       return generateMenuIDs.channelList(menu.space.id);
     case "channel":
       return generateMenuIDs.channel(menu.space.id, menu.channel.id);
@@ -127,6 +127,8 @@ function getMenuId(menu: ContextMenuPayload): string {
       return menu.kind === "standard"
         ? `emoji-${menu.emoji.unified}`
         : `emoji-custom-${menu.id}`;
+    case "group-dm":
+      return `group-dm-${menu.channel.id}`;
     case "custom":
       return menu.id;
   }

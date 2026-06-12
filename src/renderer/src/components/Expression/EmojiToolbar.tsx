@@ -43,6 +43,34 @@ const MAX_CUSTOM = 7;
 const MAX_STANDARD = 7;
 const MAX_TOTAL = 10;
 
+function buildDeduplicatedLabels(
+  expressions: Expression[]
+): Map<Expression, string> {
+  const counts = new Map<string, number>();
+  for (const exp of expressions) {
+    const key = exp.name.trim().toLowerCase();
+    counts.set(key, (counts.get(key) ?? 0) + 1);
+  }
+
+  const seen = new Map<string, number>();
+  const labels = new Map<Expression, string>();
+
+  for (const exp of expressions) {
+    const key = exp.name.trim().toLowerCase();
+    const total = counts.get(key) ?? 0;
+
+    if (total === 1) {
+      labels.set(exp, exp.name);
+    } else {
+      const index = seen.get(key) ?? 0;
+      seen.set(key, index + 1);
+      labels.set(exp, index === 0 ? exp.name : `${exp.name}_${index}`);
+    }
+  }
+
+  return labels;
+}
+
 export const EmojiToolbar = () => {
   const editor = useSlate();
   const { enableEmojis } = useContext(MarkdownInputContext);
@@ -73,29 +101,40 @@ export const EmojiToolbar = () => {
     const me = app.spaces.active?.members.me;
     const channel = app.channels.active;
 
+    const allCustomEmojis = app.expressions.all.filter(
+      (exp) =>
+        exp.type === ExpressionType.Emoji &&
+        canUseCustomEmoji(app.account?.id || "", exp, me, channel)
+    );
+
+    const deduplicatedLabels = buildDeduplicatedLabels(allCustomEmojis);
+
     const customResults: CustomSuggestion[] = [];
     const seenIds = new Set<string>();
 
-    // Custom Emojis
-    for (const exp of app.expressions.all) {
+    for (const exp of allCustomEmojis) {
       if (customResults.length >= MAX_CUSTOM) break;
-      if (exp.type !== ExpressionType.Emoji) continue;
       if (seenIds.has(exp.id)) continue;
-      if (!canUseCustomEmoji(exp, me, channel)) continue;
-      if (!exp.name.toLowerCase().includes(lowerQuery)) continue;
+
+      const displayName = deduplicatedLabels.get(exp) ?? exp.name;
+      const matchesQuery =
+        exp.name.toLowerCase().includes(lowerQuery) ||
+        displayName.toLowerCase().includes(lowerQuery);
+
+      if (!matchesQuery) continue;
 
       seenIds.add(exp.id);
       customResults.push({
         kind: "custom",
         key: `custom-${exp.id}`,
         shortcode: exp.name,
-        label: `:${exp.name}:`,
+        label: `:${displayName}:`,
         url: exp.url,
         expression: exp
       });
     }
 
-    // Default Emojis
+    // Default emojis
     const standardResults: StandardSuggestion[] = [];
     for (const em of defaultEmojis) {
       if (standardResults.length >= MAX_STANDARD) break;
@@ -112,6 +151,7 @@ export const EmojiToolbar = () => {
       });
     }
 
+    // Exact-prefix matches first for standard results
     standardResults.sort(
       (a, b) =>
         (a.shortcode.startsWith(lowerQuery) ? 0 : 1) -
@@ -228,7 +268,6 @@ export const EmojiToolbar = () => {
       const target = e.target as Node | null;
       if (!toolbarEl || !target) return;
 
-      // Close only when clicking outside the toolbar.
       if (!toolbarEl.contains(target)) setVisible(false);
     };
 

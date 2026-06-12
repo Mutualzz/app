@@ -38,7 +38,8 @@ import {
 import { normalizeJSON } from "@utils/JSON";
 import { isElectron } from "@utils/index";
 import { toast } from "react-toastify";
-import { MessageToast } from "@renderer/components/Toast/MessageToast";
+import { MessageToast } from "@renderer/components/Toast/MessageToast"; // We have to create our own GatewayStatus "enum" to avoid issues with SSR
+import { Channel } from "./objects/Channel";
 
 // We have to create our own GatewayStatus "enum" to avoid issues with SSR
 // since WebSocket is not available in the server environment.
@@ -124,6 +125,10 @@ export class GatewayStore {
   private memberListRanges = new Map<string, [number, number][]>();
   private memberListFetching = new Set<string>(); // Keys we are fetching
   private manualDisconnect = false;
+  private resolvingChannels = new Map<
+    Snowflake,
+    Promise<Channel | undefined>
+  >();
 
   constructor(private readonly app: AppStore) {
     makeAutoObservable(this, {}, { autoBind: true });
@@ -433,16 +438,24 @@ export class GatewayStore {
       this.onChannelUpdate
     );
     this.dispatchHandlers.set(
-      GatewayDispatchEvents.BulkChannelUpdate,
-      this.onBulkChannelUpdate
+      GatewayDispatchEvents.ChannelUpdateBulk,
+      this.onChannelUpdateBulk
     );
     this.dispatchHandlers.set(
-      GatewayDispatchEvents.BulkChannelDelete,
-      this.onBulkChannelDelete
+      GatewayDispatchEvents.ChannelDeleteBulk,
+      this.onChannelDeleteBulk
     );
     this.dispatchHandlers.set(
       GatewayDispatchEvents.ChannelDelete,
       this.onChannelDelete
+    );
+    this.dispatchHandlers.set(
+      GatewayDispatchEvents.ChannelRecipientAdd,
+      this.onChannelRecipientAdd
+    );
+    this.dispatchHandlers.set(
+      GatewayDispatchEvents.ChannelRecipientRemove,
+      this.onChannelRecipientRemove
     );
 
     // Messages
@@ -576,6 +589,21 @@ export class GatewayStore {
       GatewayDispatchEvents.TypingStart,
       this.onTypingStart
     );
+  }
+
+  private resolveChannel(channelId: Snowflake): Promise<Channel | undefined> {
+    const existing = this.app.channels.get(channelId);
+    if (existing) return Promise.resolve(existing);
+
+    if (this.resolvingChannels.has(channelId))
+      return this.resolvingChannels.get(channelId)!;
+
+    const promise = this.app.channels
+      .resolve(channelId)
+      .finally(() => this.resolvingChannels.delete(channelId));
+
+    this.resolvingChannels.set(channelId, promise);
+    return promise;
   }
 
   private onOpen = () => {
@@ -1078,7 +1106,7 @@ export class GatewayStore {
     space.updateChannel(payload);
   };
 
-  private onBulkChannelUpdate = (payload: APIChannel[]) => {
+  private onChannelUpdateBulk = (payload: APIChannel[]) => {
     for (const channel of payload) {
       const isDM =
         channel.type === ChannelType.DM ||
@@ -1113,7 +1141,40 @@ export class GatewayStore {
     this.app.channels.setPreferredActive();
   };
 
-  private onBulkChannelDelete = (
+  private onChannelRecipientAdd = (payload: {
+    channelId: Snowflake;
+    userId: Snowflake;
+    user: APIUser | null;
+  }) => {
+    const channel = this.app.channels.get(payload.channelId);
+    if (!channel) return;
+
+    const user = payload.user
+      ? this.app.users.add(payload.user)
+      : this.app.users.get(payload.userId);
+
+    if (!user) return;
+
+    channel.addRecipient(user);
+  };
+
+  private onChannelRecipientRemove = (payload: {
+    channelId: Snowflake;
+    userId: Snowflake;
+  }) => {
+    const channel = this.app.channels.get(payload.channelId);
+    if (!channel) return;
+
+    channel.removeRecipient(payload.userId);
+
+    if (payload.userId === this.app.account?.id) {
+      this.app.channels.remove(payload.channelId);
+      if (this.app.channels.activeId === payload.channelId)
+        this.app.channels.setPreferredActive();
+    }
+  };
+
+  private onChannelDeleteBulk = (
     payload: Pick<APIChannel, "id" | "spaceId">[]
   ) => {
     for (const channel of payload) {
@@ -1158,9 +1219,13 @@ export class GatewayStore {
     this.app.typing.startedTyping(payload.channelId, payload.userId);
   };
 
-  private onMessageCreate = (payload: APIMessage) => {
-    const channel = this.app.channels.get(payload.channelId);
-    if (!channel) return;
+  private onMessageCreate = async (payload: APIMessage) => {
+    let channel = this.app.channels.get(payload.channelId);
+
+    if (!channel) {
+      channel = (await this.resolveChannel(payload.channelId)) ?? undefined;
+      if (!channel) return;
+    }
 
     const message = channel.messages.add(payload);
     this.app.queue.handleIncomingMessage(payload);

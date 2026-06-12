@@ -1,11 +1,6 @@
 import { type MouseEvent, useEffect, useRef, useState } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
-import {
-  ArrowLeftIcon,
-  MagnifyingGlassIcon,
-  StarIcon,
-  XIcon
-} from "@phosphor-icons/react";
+import { ArrowLeftIcon, MagnifyingGlassIcon, StarIcon, XIcon } from "@phosphor-icons/react";
 import { Stack, Typography, useTheme } from "@mutualzz/ui-web";
 import { useAppStore } from "@hooks/useStores";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
@@ -180,19 +175,6 @@ const SectionLabel = styled(Typography)({
   letterSpacing: "0.05em"
 });
 
-const BackBtn = styled("button")(({ theme }) => ({
-  display: "inline-flex",
-  alignItems: "center",
-  gap: 4,
-  background: "none",
-  border: "none",
-  cursor: "pointer",
-  fontSize: 12,
-  color: theme.typography.colors.muted,
-  padding: 0,
-  "&:hover": { color: theme.typography.colors.primary }
-}));
-
 const TagItem = ({
   tag,
   onClick
@@ -267,9 +249,8 @@ export const GifPicker = observer(({ onSelectGif }: GifPickerProps) => {
     gif: GifResult
   ) => {
     e.stopPropagation();
-    app.settings?.toggleFavoriteGif(
-      `https://klipy.com/gifs/${gif.slug}|${gif.preview}`
-    );
+    const entry = gif.preview ? `${gif.url}|${gif.preview}` : gif.url;
+    app.settings?.toggleFavoriteGif(entry);
   };
 
   useEffect(() => {
@@ -392,10 +373,6 @@ export const GifPicker = observer(({ onSelectGif }: GifPickerProps) => {
                   padding="6px 2px 8px"
                   flexShrink={0}
                 >
-                  <BackBtn onClick={() => setViewingFavorites(false)}>
-                    <ArrowLeftIcon size={13} />
-                    Back
-                  </BackBtn>
                   <SectionLabel textColor="muted" css={{ padding: "0" }}>
                     Favorites
                   </SectionLabel>

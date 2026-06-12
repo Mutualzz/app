@@ -2,24 +2,11 @@ import { MarkdownRenderer } from "@components/Markdown/MarkdownRenderer/Markdown
 import { UserAvatar } from "@components/User/UserAvatar";
 import { useAppStore } from "@hooks/useStores";
 import { Stack, Typography, useTheme } from "@mutualzz/ui-web";
-import {
-  Message as MessageType,
-  Message as MessageInstance,
-  type MessageLike
-} from "@stores/objects/Message";
-import {
-  QueuedMessage,
-  QueuedMessageStatus
-} from "@stores/objects/QueuedMessage";
+import { Message as MessageType, Message as MessageInstance, type MessageLike } from "@stores/objects/Message";
+import { QueuedMessage, QueuedMessageStatus } from "@stores/objects/QueuedMessage";
 import { observer } from "mobx-react-lite";
 import { MessageAuthor } from "./MessageAuthor";
-import {
-  MessageBase,
-  MessageContent,
-  MessageContentText,
-  MessageDetails,
-  MessageInfo
-} from "./MessageBase";
+import { MessageBase, MessageContent, MessageContentText, MessageDetails, MessageInfo } from "./MessageBase";
 import { MessageEmbed } from "./MessageEmbed";
 import { MessageToolbar } from "./MessageToolbar";
 import { MessageInput } from "./MessageInput";
@@ -106,13 +93,19 @@ export const Message = observer(({ message, header }: Props) => {
           ) : (
             message.content &&
             (() => {
+              const GIF_URL_PATTERN =
+                /^https?:\/\/(klipy\.com\/gifs\/|tenor\.com\/|c\.tenor\.com\/|media\.tenor\.com\/|giphy\.com\/|media\.giphy\.com\/|i\.giphy\.com\/|imgur\.com\/|i\.imgur\.com\/|redgifs\.com\/|.*\.gif(\?\S*)?$)\S*$/i;
+
               const hasGifEmbed =
                 "embeds" in message &&
                 message.embeds?.some((e) => e.type === "gifv");
-              const isKlipyUrl = /^https:\/\/klipy\.com\/gifs\/\S+$/.test(
-                message.content.trim()
-              );
-              if (hasGifEmbed && isKlipyUrl) return null;
+
+              const isOnlyGifUrl =
+                hasGifEmbed &&
+                GIF_URL_PATTERN.test(message.content.trim()) &&
+                !message.content.trim().includes(" ");
+
+              if (isOnlyGifUrl) return null;
               return (
                 <Stack alignItems="center" spacing={1.25}>
                   <MarkdownRenderer

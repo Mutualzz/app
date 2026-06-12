@@ -12,12 +12,7 @@ import { Paper } from "@components/Paper";
 import { InputWithLabel } from "@components/InputWithLabel";
 import { IconButton } from "@components/IconButton";
 import { cropImage } from "@utils/cropImage";
-import {
-  ArrowClockwise,
-  MagnifyingGlassMinusIcon,
-  MagnifyingGlassPlusIcon,
-  XIcon
-} from "@phosphor-icons/react";
+import { ArrowClockwiseIcon, MagnifyingGlassMinusIcon, MagnifyingGlassPlusIcon, XIcon } from "@phosphor-icons/react";
 
 // File needs to be passed
 interface Props {
@@ -225,7 +220,7 @@ export const EmojiEditor = observer(({ emoji, file }: Props) => {
         >
           <Stack spacing={0.5}>
             <IconButton>
-              <ArrowClockwise
+              <ArrowClockwiseIcon
                 onClick={() => setRotation((x) => (x === 360 ? 0 : x + 90))}
               />
             </IconButton>
@@ -272,9 +267,15 @@ export const EmojiEditor = observer(({ emoji, file }: Props) => {
           label="Expression Name"
           placeholder="emoji_name"
           value={name}
-          onChange={(e) =>
-            setName(e.target.value.replaceAll(" ", "_").toLowerCase())
-          }
+          onChange={(e) => {
+            const sanitized = e.target.value
+              .toLowerCase()
+              .replace(/[\s.\-]+/g, "_")
+              .replace(/[^a-z0-9_]/g, "")
+              .replace(/_{2,}/g, "_")
+              .replace(/^_+/, "");
+            setName(sanitized);
+          }}
           endDecorator={
             name.trim().length > 0 && (
               <IconButton

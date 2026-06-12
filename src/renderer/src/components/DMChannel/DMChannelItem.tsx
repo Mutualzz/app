@@ -4,7 +4,7 @@ import { Channel } from "@stores/objects/Channel";
 import { useAppStore } from "@hooks/useStores";
 import { ChannelType } from "@mutualzz/types";
 import { Paper } from "@components/Paper";
-import { Stack, Typography, useTheme } from "@mutualzz/ui-web";
+import { Avatar, Stack, Typography, useTheme } from "@mutualzz/ui-web";
 import { UserAvatar } from "@components/User/UserAvatar";
 import { DMGroupAvatar } from "@components/DMChannel/DMGroupAvatar";
 import { useMenu } from "@contexts/ContextMenu.context";
@@ -27,7 +27,7 @@ export const DMChannelItem = observer(({ channel }: Props) => {
 
   const meId = app.account?.id;
   const recipient = channel.dmRecipient;
-  const recipients = channel.dmRecipients;
+  const recipients = channel.dmRecipientsList;
 
   const readState = app.readStates.get(channel.id);
   const isUnread = readState?.isUnread ?? false;
@@ -73,12 +73,20 @@ export const DMChannelItem = observer(({ channel }: Props) => {
         "&:hover": active ? {} : { opacity: 1 }
       }}
       onContextMenu={(e) => {
-        if (!recipient) return;
-        openContextMenu(e, {
-          type: "user",
-          user: recipient,
-          insideDMs: true
-        });
+        if (recipient && channel.type === ChannelType.DM) {
+          openContextMenu(e, {
+            type: "user",
+            user: recipient,
+            insideDMs: true
+          });
+        }
+
+        if (channel.type === ChannelType.GroupDM) {
+          openContextMenu(e, {
+            type: "group-dm",
+            channel
+          });
+        }
       }}
       onClick={() => {
         if (!active) {
@@ -103,6 +111,12 @@ export const DMChannelItem = observer(({ channel }: Props) => {
                 ? app.typing.isUserTyping(channel.id, recipient.id)
                 : false
             }
+          />
+        ) : channel.iconUrl ? (
+          <Avatar
+            src={channel.iconUrl}
+            size={AVATAR_SIZE}
+            shape={channel.flags.has("RoundedIcon") ? "circle" : "square"}
           />
         ) : (
           <DMGroupAvatar users={recipients} />

@@ -18,7 +18,7 @@ import { User } from "@stores/objects/User";
 import { toast } from "react-toastify";
 import { MemberKick } from "@components/Modals/MemberKick";
 import { MemberBan } from "@components/Modals/MemberBan";
-import { ArrowLeftIcon } from "@phosphor-icons/react";
+import { ArrowLeftIcon, UserMinusIcon } from "@phosphor-icons/react";
 import { AccountStore } from "@stores/Account.store";
 
 interface Props {
@@ -37,6 +37,14 @@ export const UserContextMenu = observer(
     const { clearMenu } = useMenu();
 
     const isSelf = app.account?.id === user.id;
+
+    const activeChannel = app.channels.active;
+    const isActiveGroupDM = activeChannel?.isGroupDM ?? false;
+    const isGroupDMOwner =
+      isActiveGroupDM &&
+      !!activeChannel?.ownerId &&
+      activeChannel.ownerId === app.account?.id;
+    const canRemoveFromGroup = isActiveGroupDM && isGroupDMOwner && !isSelf;
 
     const canManageRoles = member
       ? (me?.canManageMember(member, "ManageRoles") ?? false)
@@ -97,6 +105,16 @@ export const UserContextMenu = observer(
         clearMenu();
       }
     });
+
+    const { mutate: removeFromGroup, isPending: removingFromGroup } =
+      useMutation({
+        mutationKey: ["remove-group-dm-recipient", activeChannel?.id, user.id],
+        mutationFn: async () => {
+          if (!activeChannel) return null;
+          return app.channels.removeGroupDMRecipient(activeChannel.id, user.id);
+        },
+        onSuccess: () => clearMenu()
+      });
 
     const { mutate: createRole, isPending: creatingRole } = useMutation({
       mutationKey: ["create-role", space?.id],
@@ -246,6 +264,17 @@ export const UserContextMenu = observer(
             {insideDMs && (
               <ContextItem onClick={() => closeDm()} disabled={closingDm}>
                 Close DM
+              </ContextItem>
+            )}
+
+            {canRemoveFromGroup && (
+              <ContextItem
+                onClick={() => removeFromGroup()}
+                disabled={removingFromGroup}
+                color="danger"
+                endDecorator={<UserMinusIcon weight="fill" />}
+              >
+                Remove from Group
               </ContextItem>
             )}
 

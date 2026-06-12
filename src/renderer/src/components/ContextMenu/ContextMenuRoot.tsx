@@ -9,6 +9,7 @@ import { ChannelItemContextMenu } from "@components/ContextMenu/ChannelItemConte
 import { UserContextMenu } from "@components/ContextMenu/UserContextMenu";
 import { AccountContextMenu } from "@components/ContextMenu/AccountContextMenu";
 import { EmojiContextMenu } from "@components/ContextMenu/EmojiContextMenu";
+import { GroupDMContextMenu } from "@components/ContextMenu/GroupDMContextMenu";
 
 export const ContextMenuRoot = observer(() => {
   const { menu } = useMenu();
@@ -21,8 +22,7 @@ export const ContextMenuRoot = observer(() => {
           <SpaceContextMenu {...menu} />
         </Portal>
       );
-
-    case "channelList":
+    case "channel-list":
       return (
         <Portal>
           <ChannelListContextMenu {...menu} />
@@ -58,6 +58,13 @@ export const ContextMenuRoot = observer(() => {
       return (
         <Portal>
           <EmojiContextMenu {...menu} />
+        </Portal>
+      );
+
+    case "group-dm":
+      return (
+        <Portal>
+          <GroupDMContextMenu {...menu} />
         </Portal>
       );
 

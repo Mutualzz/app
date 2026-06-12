@@ -1,9 +1,4 @@
-import {
-  createFileRoute,
-  Outlet,
-  useNavigate,
-  useParams
-} from "@tanstack/react-router";
+import { createFileRoute, Outlet, useNavigate, useParams } from "@tanstack/react-router";
 import { useAppStore } from "@hooks/useStores";
 import { useEffect } from "react";
 import { Stack, useTheme } from "@mutualzz/ui-web";
@@ -49,8 +44,6 @@ function RouteComponent() {
     const preferredDM =
       app.channels.getMostRecentChannelForSpace("@me") ?? app.channels.dms[0];
     if (!preferredDM) return;
-
-    console.log("navigating to preferred DM", { preferredDM });
 
     navigate({
       to: "/@me/$channelId",

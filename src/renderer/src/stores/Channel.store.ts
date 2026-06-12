@@ -1,10 +1,17 @@
 import type { Snowflake } from "@mutualzz/types";
-import { type APIChannel, ChannelType } from "@mutualzz/types";
+import { type APIChannel, ChannelType, ReadStateType } from "@mutualzz/types";
 import { makeAutoObservable, observable, type ObservableMap } from "mobx";
 import { makePersistable } from "mobx-persist-store";
 import type { AppStore } from "./App.store";
 import { Channel } from "./objects/Channel";
 import { Logger } from "@mutualzz/logger";
+
+export interface OpenGroupDMOptions {
+  recipientIds: Snowflake[];
+  name?: string;
+  iconFile?: File | null;
+  rounded?: boolean;
+}
 
 export class ChannelStore {
   collapsedCategories: ObservableMap<string, Set<string>>; // Space -> Set of collapsed category IDs
@@ -85,8 +92,10 @@ export class ChannelStore {
       if (aUnread !== bUnread) return bUnread - aUnread; // unread first
 
       // Sort by recent messages
-      const aTime = a.lastMessage?.createdAt?.getTime() ?? 0;
-      const bTime = b.lastMessage?.createdAt?.getTime() ?? 0;
+      const aTime =
+        a.lastMessage?.createdAt?.getTime() ?? a.createdAt.getTime();
+      const bTime =
+        b.lastMessage?.createdAt?.getTime() ?? b.createdAt.getTime();
       return bTime - aTime;
     });
   }
@@ -146,25 +155,29 @@ export class ChannelStore {
     return channel;
   }
 
-  async openGroupDM(recipientIds: Snowflake[]): Promise<Channel> {
+  async openGroupDM({
+    recipientIds,
+    name,
+    iconFile,
+    rounded
+  }: OpenGroupDMOptions): Promise<Channel> {
     if (recipientIds.length > 9)
       throw new Error(
         "Group DMs cannot exceed 9 recipients (10 including you)"
       );
 
-    // Include yourself so the length check matches the server's recipientIds
-    const allIds = [this.app.account!.id, ...recipientIds];
-    const existing = this.getGroupDMChannel(allIds);
+    const formData = new FormData();
 
-    if (existing) {
-      this.setActive(existing.id);
-      return existing;
-    }
+    formData.append("recipientIds", JSON.stringify(recipientIds));
 
-    // Still only send the OTHER recipients to the server
-    const data = await this.app.rest.post<APIChannel>(`/channels/@me/group`, {
-      recipientIds
-    });
+    if (name?.trim()) formData.append("name", name.trim());
+    if (iconFile) formData.append("icon", iconFile);
+    if (rounded) formData.append("rounded", "true");
+
+    const data = await this.app.rest.postFormData<APIChannel>(
+      `/channels/@me/group`,
+      formData
+    );
 
     const channel = this.add(data);
     this.setActive(channel.id);
@@ -178,6 +191,41 @@ export class ChannelStore {
     if (this.activeId === channelId) this.unsetActive();
 
     return this.app.rest.delete(`/channels/@me/${channelId}`);
+  }
+
+  leaveGroupDM(channelId: Snowflake) {
+    this.remove(channelId);
+
+    if (this.activeId === channelId) this.unsetActive();
+
+    return this.app.rest.delete(`/channels/@me/group/${channelId}`);
+  }
+
+  addGroupDMRecipient(channelId: Snowflake, recipientId: Snowflake) {
+    return this.app.rest.put(`/channels/@me/group/${channelId}/recipients`, {
+      recipientId
+    });
+  }
+
+  removeGroupDMRecipient(channelId: Snowflake, userId: Snowflake) {
+    return this.app.rest.delete(
+      `/channels/@me/group/${channelId}/recipients/${userId}`
+    );
+  }
+
+  updateGroupDM(channelId: Snowflake, formData: FormData) {
+    return this.app.rest.patchFormData<APIChannel>(
+      `/channels/${channelId}`,
+      formData
+    );
+  }
+
+  deleteGroupDM(channelId: Snowflake) {
+    this.remove(channelId);
+
+    if (this.activeId === channelId) this.unsetActive();
+
+    return this.app.rest.delete(`/channels/@me/group/${channelId}/delete`);
   }
 
   setPreferredActive() {
@@ -222,6 +270,26 @@ export class ChannelStore {
 
     const newChannel = new Channel(this.app, channel);
     this.channels.set(channel.id, newChannel);
+
+    const isDM =
+      channel.type === ChannelType.DM || channel.type === ChannelType.GroupDM;
+
+    if (isDM && !this.app.readStates.get(channel.id)) {
+      this.app.readStates.addAll([
+        {
+          id: channel.id,
+          lastMessageId: channel.lastMessageId ?? null,
+          lastAckedId: channel.lastMessageId ?? null,
+          notificationsCursor: null,
+          mentionCount: 0,
+          badgeCount: 0,
+          lastPinTimestamp: null,
+          flags: 0n,
+          type: ReadStateType.Messages
+        }
+      ]);
+    }
+
     return newChannel;
   }
 

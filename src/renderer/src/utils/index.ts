@@ -53,14 +53,16 @@ export const createSystemMessage = async (
 };
 
 export const canUseCustomEmoji = (
+  meId: Snowflake,
   emoji: Expression,
   currentMember?: SpaceMember | null,
   channel?: Channel | null
 ) => {
-  if (!currentMember) return false;
+  if (!emoji.spaceId && meId !== emoji.authorId) return false;
+
+  if (!currentMember) return true;
 
   if (emoji.spaceId === currentMember.spaceId) return true;
-  if (emoji.authorId !== currentMember.id) return false;
 
   return currentMember.hasPermission("UseExternalEmojis", channel ?? undefined);
 };

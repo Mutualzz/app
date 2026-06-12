@@ -59,17 +59,11 @@ export const ExpressionPickerTrigger = ({ emojiPicker, gifPicker }: Props) => {
     toggle();
   };
 
-  const handleSelectGif = (gif: {
-    id: string;
-    slug: string;
-    title: string;
-    url: string;
-    preview: string;
-    width: number;
-    height: number;
-  }) => {
+  const handleSelectGif = (gif) => {
     toggle();
-    setTimeout(() => onSendMessage?.(`https://klipy.com/gifs/${gif.slug}`), 0);
+    const isKlipy = gif.url.includes("klipy.com") || gif.slug;
+    const sendUrl = isKlipy ? `https://klipy.com/gifs/${gif.slug}` : gif.url;
+    setTimeout(() => onSendMessage?.(sendUrl), 0);
   };
 
   return (

@@ -1,9 +1,4 @@
-import {
-  getCustomEmoji,
-  getEmoji,
-  insertCustomEmoji,
-  insertEmoji
-} from "@utils/emojis/emojis";
+import { getCustomEmoji, getEmoji, insertCustomEmoji, insertEmoji } from "@utils/emojis/emojis";
 import { slateToMarkdown } from "@utils/slateToMarkdown";
 import emojiRegex from "emojibase-regex";
 import baseEmoticonRegex from "emojibase-regex/emoticon";
@@ -11,6 +6,7 @@ import shortcodeRegex from "emojibase-regex/shortcode";
 import { type Editor, Element, Path, Range, Text, type TextUnit } from "slate";
 import { useAppStore } from "@hooks/useStores";
 import { canUseCustomEmoji } from "@utils/index";
+import { ExpressionType } from "@mutualzz/types";
 
 const extendedEmoticons = [":3", ">.<", "T^T", "T_T", "x_x"];
 
@@ -81,7 +77,10 @@ export const withEmojis = (editor: Editor) => {
         const customEmoji = await getCustomEmoji(shortcode);
         const me = app.spaces.active?.members.me;
         const channel = app.channels.active;
-        if (customEmoji && canUseCustomEmoji(customEmoji, me, channel)) {
+        if (
+          customEmoji &&
+          canUseCustomEmoji(app.account?.id ?? "", customEmoji, me, channel)
+        ) {
           const distance = shortcode.length - text.length;
           if (distance <= caretOffset) {
             const shortcodeStart = editor.before(selection, {
@@ -96,6 +95,36 @@ export const withEmojis = (editor: Editor) => {
               editor.select(shortcodeRange);
               editor.delete();
               insertCustomEmoji(editor, customEmoji);
+              return;
+            }
+          }
+        }
+      }
+
+      const namedCustomMatch = /:[^\s:]+:$/.exec(combined);
+      if (namedCustomMatch && namedCustomMatch[0].endsWith(text)) {
+        const rawName = namedCustomMatch[0].slice(1, -1); // strip surrounding colons
+        const me = app.spaces.active?.members.me;
+        const channel = app.channels.active;
+
+        const matchedCustomEmoji = app.expressions.all.find(
+          (exp) =>
+            exp.type === ExpressionType.Emoji &&
+            exp.name.toLowerCase() === rawName.toLowerCase() &&
+            canUseCustomEmoji(app.account?.id || "", exp, me, channel)
+        );
+
+        if (matchedCustomEmoji) {
+          const distance = namedCustomMatch[0].length - text.length;
+          if (distance <= caretOffset) {
+            const matchStart = editor.before(selection, {
+              unit: "character",
+              distance
+            });
+            if (matchStart) {
+              editor.select({ anchor: matchStart, focus: selection.anchor });
+              editor.delete();
+              insertCustomEmoji(editor, matchedCustomEmoji);
               return;
             }
           }
@@ -275,7 +304,10 @@ export const withEmojis = (editor: Editor) => {
         const me = app.spaces.active?.members.me;
         const channel = app.channels.active;
 
-        if (customEmoji && canUseCustomEmoji(customEmoji, me, channel))
+        if (
+          customEmoji &&
+          canUseCustomEmoji(app.account?.id || "", customEmoji, me, channel)
+        )
           parts.push({ type: "customEmoji", emoji: customEmoji });
         else parts.push({ type: "text", text: m.text });
       } else {

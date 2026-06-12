@@ -32,7 +32,6 @@ export class RelationshipStore {
     const key = relationshipKey(data.userId, data.otherUserId);
     const exists = this.relationships.get(key);
     if (exists) return exists;
-    ``;
 
     const relationship = new Relationship(this.app, data);
     this.relationships.set(key, relationship);
@@ -73,6 +72,13 @@ export class RelationshipStore {
 
   getIncoming() {
     return this.all.filter((r) => r.isIncomingRequest);
+  }
+
+  getOnline() {
+    return this.all.filter((r) => {
+      const presence = this.app.presence.get(r.userId);
+      return presence?.status === "online";
+    });
   }
 
   getOutgoing() {

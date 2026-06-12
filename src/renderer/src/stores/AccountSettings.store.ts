@@ -122,15 +122,19 @@ export class AccountSettingsStore {
     return this.favoriteEmojis.includes(key);
   }
 
-  toggleFavoriteGif(url: string) {
-    const idx = this.favoriteGifs.indexOf(url);
+  toggleFavoriteGif(entry: string) {
+    const url = entry.split("|")[0];
+    const idx = this.favoriteGifs.findIndex((f) => f.split("|")[0] === url);
     if (idx === -1) {
-      this.favoriteGifs.push(url);
-    } else this.favoriteGifs.splice(idx, 1);
+      this.favoriteGifs.push(entry);
+    } else {
+      this.favoriteGifs.splice(idx, 1);
+    }
   }
 
   isFavoriteGif(url: string) {
-    return this.favoriteGifs.includes(url);
+    const bare = url.split("|")[0];
+    return this.favoriteGifs.some((f) => f.split("|")[0] === bare);
   }
 
   setPreferredMode(mode: AppMode) {

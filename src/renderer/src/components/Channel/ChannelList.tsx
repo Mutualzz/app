@@ -229,7 +229,7 @@ export const ChannelList = observer(() => {
         <Stack
           onContextMenu={(e) =>
             openContextMenu(e, {
-              type: "channelList",
+              type: "channel-list",
               space
             })
           }
