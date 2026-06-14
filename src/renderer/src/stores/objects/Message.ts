@@ -102,6 +102,12 @@ export class Message extends MessageBase {
       { content }
     );
 
+    if (!content.trim()) {
+      this.channel?.messages.remove(this.id);
+      this.setEditing(false);
+      return updated;
+    }
+
     this.update(updated);
     this.setEditing(false);
     return updated;

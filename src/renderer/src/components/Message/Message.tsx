@@ -2,16 +2,31 @@ import { MarkdownRenderer } from "@components/Markdown/MarkdownRenderer/Markdown
 import { UserAvatar } from "@components/User/UserAvatar";
 import { useAppStore } from "@hooks/useStores";
 import { Stack, Typography, useTheme } from "@mutualzz/ui-web";
-import { Message as MessageType, Message as MessageInstance, type MessageLike } from "@stores/objects/Message";
-import { QueuedMessage, QueuedMessageStatus } from "@stores/objects/QueuedMessage";
+import {
+  Message as MessageType,
+  Message as MessageInstance,
+  type MessageLike
+} from "@stores/objects/Message";
+import {
+  QueuedMessage,
+  QueuedMessageStatus
+} from "@stores/objects/QueuedMessage";
 import { observer } from "mobx-react-lite";
 import { MessageAuthor } from "./MessageAuthor";
-import { MessageBase, MessageContent, MessageContentText, MessageDetails, MessageInfo } from "./MessageBase";
+import {
+  MessageBase,
+  MessageContent,
+  MessageContentText,
+  MessageDetails,
+  MessageInfo
+} from "./MessageBase";
 import { MessageEmbed } from "./MessageEmbed";
 import { MessageToolbar } from "./MessageToolbar";
 import { MessageInput } from "./MessageInput";
+import { MessageSticker } from "./MessageSticker";
 import dayjs from "dayjs";
 import { Tooltip } from "@components/Tooltip";
+import { ExpressionType } from "@mutualzz/types";
 
 interface Props {
   message: MessageLike;
@@ -42,6 +57,11 @@ export const Message = observer(({ message, header }: Props) => {
   const isFailed =
     message instanceof QueuedMessage &&
     message.status === QueuedMessageStatus.Failed;
+
+  const stickerExpressions =
+    "expressions" in message
+      ? message.expressions.filter((e) => e.type === ExpressionType.Sticker)
+      : [];
 
   const hasProperMention =
     message instanceof MessageInstance &&
@@ -84,6 +104,13 @@ export const Message = observer(({ message, header }: Props) => {
             message.status === QueuedMessageStatus.Sending
           }
         >
+          {stickerExpressions.length > 0 && (
+            <Stack direction="row" spacing={1} flexWrap="wrap" mb={1}>
+              {stickerExpressions.map((sticker) => (
+                <MessageSticker key={sticker.id} sticker={sticker} />
+              ))}
+            </Stack>
+          )}
           {isSent && message.editing ? (
             <MessageInput
               channel={channel}

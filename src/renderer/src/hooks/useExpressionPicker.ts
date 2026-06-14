@@ -2,11 +2,12 @@ import { RefObject, useCallback, useEffect, useRef, useState } from "react";
 
 type TopTab = "emoji" | "gifs" | "stickers";
 
-export function useEmojiPicker() {
+export function useExpressionPicker() {
   const [isOpen, setIsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<TopTab>("emoji");
   const [position, setPosition] = useState({ top: 0, left: 0 });
   const triggerRef = useRef<HTMLButtonElement>(null);
+  const activeTriggerRef = useRef<HTMLButtonElement | null>(null);
   const pickerRef = useRef<HTMLDivElement>(null);
 
   const computePosition = useCallback((ref: RefObject<HTMLButtonElement>) => {
@@ -26,7 +27,8 @@ export function useEmojiPicker() {
   }, []);
 
   const open = useCallback(() => {
-    computePosition(triggerRef as any);
+    activeTriggerRef.current = triggerRef.current;
+    computePosition(triggerRef as RefObject<HTMLButtonElement>);
     setIsOpen(true);
   }, [computePosition]);
 
@@ -38,30 +40,35 @@ export function useEmojiPicker() {
   }, [isOpen, open, close]);
 
   const openToTab = useCallback(
-    (tab: TopTab) => {
+    (tab: TopTab, anchorRef?: RefObject<HTMLButtonElement>) => {
+      const ref = anchorRef ?? (triggerRef as RefObject<HTMLButtonElement>);
+      activeTriggerRef.current = ref.current;
       setActiveTab(tab);
-      computePosition(triggerRef as any);
+      computePosition(ref);
       setIsOpen(true);
     },
     [computePosition]
   );
 
-  // Close on outside click
   useEffect(() => {
     if (!isOpen) return;
 
     const handleMouseDown = (e: MouseEvent) => {
       if (e.button === 2) return;
 
-      // Don't close if clicking inside a context menu
       const contextMenuEl = document.querySelector("[role='menu']");
       if (contextMenuEl?.contains(e.target as Node)) return;
 
+      const target = e.target as Node;
+      const clickedActiveTrigger =
+        activeTriggerRef.current?.contains(target) ?? false;
+      const clickedEmojiTrigger = triggerRef.current?.contains(target) ?? false;
+
       if (
         pickerRef.current &&
-        !pickerRef.current.contains(e.target as Node) &&
-        triggerRef.current &&
-        !triggerRef.current.contains(e.target as Node)
+        !pickerRef.current.contains(target) &&
+        !clickedActiveTrigger &&
+        !clickedEmojiTrigger
       ) {
         close();
       }
@@ -71,7 +78,6 @@ export function useEmojiPicker() {
     return () => document.removeEventListener("mousedown", handleMouseDown);
   }, [isOpen, close]);
 
-  // Close on Escape
   useEffect(() => {
     if (!isOpen) return;
     const handleKey = (e: KeyboardEvent) => {

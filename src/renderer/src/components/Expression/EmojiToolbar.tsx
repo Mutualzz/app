@@ -98,8 +98,10 @@ export const EmojiToolbar = () => {
 
     const lowerQuery = query.toLowerCase();
 
-    const me = app.spaces.active?.members.me;
     const channel = app.channels.active;
+    const me = channel?.spaceId
+      ? app.spaces.get(channel.spaceId)?.members.me
+      : null;
 
     const allCustomEmojis = app.expressions.all.filter(
       (exp) =>

@@ -18,10 +18,12 @@ import { Editor } from "slate";
 import Snowflake from "@utils/Snowflake";
 import { messageFlags } from "@mutualzz/bitfield";
 import { createSystemMessage } from "@utils/index";
-import { Stack, Typography } from "@mutualzz/ui-web";
+import { IconButton, Stack, Typography, useTheme } from "@mutualzz/ui-web";
 import { Link } from "@components/Link";
 import { Paper } from "@components/Paper";
 import { TypingIndicator } from "@components/TypingIndicator";
+import { Expression } from "@renderer/stores/objects/Expression";
+import { XIcon } from "@phosphor-icons/react";
 
 interface Props {
   channel: Channel | null;
@@ -30,10 +32,14 @@ interface Props {
   onRequestEditLatest?: () => void;
 }
 
+const MAX_STICKERS = 3;
+
 export const MessageInput = observer(
   ({ channel, message, onStopEditing, onRequestEditLatest }: Props) => {
     const app = useAppStore();
+    const { theme } = useTheme();
     const [content, setContent] = useState(message?.content ?? "");
+    const [stickers, setStickers] = useState<Expression[]>([]);
     const [nonce, setNonce] = useState("");
 
     const inputRef = useRef<MarkdownInputHandle>(null);
@@ -123,7 +129,7 @@ export const MessageInput = observer(
         const original = (message?.content ?? "").trim();
         const isEditing = !!message;
 
-        if (!isEditing && !trimmed) return null;
+        if (!isEditing && !trimmed && stickers.length === 0) return null;
 
         if (isEditing && trimmed === original) {
           onStopEditing?.();
@@ -136,6 +142,7 @@ export const MessageInput = observer(
         }
 
         const nonce = Snowflake.generate();
+        const stickerIds = stickers.map((s) => s.id);
         setNonce(nonce);
         const author = app.account.raw;
         const msg = app.queue.add({
@@ -146,7 +153,9 @@ export const MessageInput = observer(
           channelId: channel.id,
           spaceId: channel.spaceId ?? null,
           createdAt: new Date().toISOString(),
-          type: MessageType.Default
+          type: MessageType.Default,
+          expressionIds: stickerIds,
+          expressions: stickers.map((s) => s.toJSON())
         });
 
         editor?.select({
@@ -172,13 +181,22 @@ export const MessageInput = observer(
             "You cannot message this person"
           );
 
-        setContent("");
+        const result = await channel.sendMessage(
+          {
+            content: trimmed,
+            nonce,
+            ...(stickerIds.length > 0 ? { expressionIds: stickerIds } : {})
+          },
+          msg
+        );
 
-        return await channel.sendMessage({ content: trimmed, nonce }, msg);
+        setContent("");
+        setStickers([]);
+
+        return result;
       },
       onError: async (err: HttpException) => {
         const error = err.errors?.[0]?.message || err.message;
-        console.log(nonce);
 
         if (!message) {
           const queued = app.queue
@@ -199,11 +217,23 @@ export const MessageInput = observer(
       },
       onSuccess: () => {
         setNonce("");
+        setStickers([]);
       }
     });
 
     const onChange = (value: string) => {
       setContent(value);
+    };
+
+    const handleSelectSticker = (sticker: Expression) => {
+      setStickers((prev) => {
+        if (prev.some((s) => s.id === sticker.id)) return prev;
+        if (prev.length >= MAX_STICKERS) return prev;
+        return [...prev, sticker];
+      });
+    };
+    const handleRemoveSticker = (stickerId: string) => {
+      setStickers((prev) => prev.filter((s) => s.id !== stickerId));
     };
 
     const onStopEdit = (e?: KeyboardEvent) => {
@@ -224,7 +254,12 @@ export const MessageInput = observer(
         return;
       }
 
-      if (e.key === "ArrowUp" && !message && !content.trim()) {
+      if (
+        e.key === "ArrowUp" &&
+        !message &&
+        !content.trim() &&
+        stickers.length === 0
+      ) {
         e.preventDefault();
         onRequestEditLatest?.();
         return;
@@ -266,6 +301,39 @@ export const MessageInput = observer(
         display="block"
         mb={message?.editing ? 0 : 3.5}
       >
+        {stickers.length > 0 && (
+          <Stack
+            direction="row"
+            spacing={1}
+            mb={1}
+            flexWrap="wrap"
+            borderBottom={`1px solid ${theme.colors.surface}`}
+          >
+            {stickers.map((sticker) => (
+              <Stack
+                key={sticker.id}
+                position="relative"
+                alignItems="center"
+                justifyContent="center"
+              >
+                <img
+                  src={sticker.url}
+                  alt={sticker.name}
+                  css={{ width: 80, height: 80, objectFit: "contain" }}
+                />
+                <IconButton
+                  variant="plain"
+                  size="sm"
+                  onClick={() => handleRemoveSticker(sticker.id)}
+                  css={{ position: "absolute", top: -4, right: -4 }}
+                  title="Remove sticker"
+                >
+                  <XIcon size={14} />
+                </IconButton>
+              </Stack>
+            ))}
+          </Stack>
+        )}
         <MarkdownInput
           autoFocus
           color="success"
@@ -281,9 +349,11 @@ export const MessageInput = observer(
               contentOverride: message
             })
           }
+          onSelectSticker={handleSelectSticker}
           disabled={denySendingMessages}
           emojiPicker={!denySendingMessages}
           gifPicker={!denySendingMessages && !message?.editing}
+          stickerPicker={!denySendingMessages && !message?.editing}
         />
       </Paper>
     );

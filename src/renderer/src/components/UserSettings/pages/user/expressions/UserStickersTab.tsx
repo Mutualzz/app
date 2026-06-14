@@ -10,21 +10,16 @@ import { useModal } from "@contexts/Modal.context";
 import { Paper } from "@components/Paper";
 import type { Expression } from "@stores/objects/Expression";
 import { AnimatedStack } from "@components/Animated/AnimatedStack";
-import { dynamicElevation, formatColor } from "@mutualzz/ui-core";
+import { dynamicElevation } from "@mutualzz/ui-core";
 import { IconButton } from "@components/IconButton";
-import type { Space } from "@stores/objects/Space";
 import { TrashIcon } from "@phosphor-icons/react";
+import { Tooltip } from "@components/Tooltip";
 import { ExpressionEditor } from "@renderer/components/Expression/ExpressionEditor";
 
-const EmojiItem = observer(({ expression }: { expression: Expression }) => {
-  const app = useAppStore();
+const StickerItem = observer(({ expression }: { expression: Expression }) => {
   const { theme } = useTheme();
 
   const [hover, setHover] = useState(false);
-
-  const canManage =
-    expression.space?.members.me?.hasPermission("ManageExpressions");
-  const ownIt = expression.authorId === app.account?.id;
 
   return (
     <AnimatedStack
@@ -32,9 +27,7 @@ const EmojiItem = observer(({ expression }: { expression: Expression }) => {
       direction="row"
       alignItems="center"
       whileHover={{
-        background: formatColor(dynamicElevation(theme.colors.surface, 5), {
-          alpha: 0.5
-        })
+        background: dynamicElevation(theme.colors.surface, 5)
       }}
       onMouseOver={() => setHover(true)}
       onMouseOut={() => setHover(false)}
@@ -53,36 +46,36 @@ const EmojiItem = observer(({ expression }: { expression: Expression }) => {
       </Stack>
 
       <Stack flex={1} justifyContent="flex-end">
-        {hover && (canManage || ownIt) && (
-          <IconButton
-            onClick={() => expression.delete()}
-            size="sm"
-            color="danger"
-          >
-            <TrashIcon weight="fill" />
-          </IconButton>
+        {hover && (
+          <Stack gap={1.25}>
+            <Tooltip content="Delete">
+              <IconButton
+                onClick={() => expression.delete()}
+                size="sm"
+                color="danger"
+              >
+                <TrashIcon weight="fill" />
+              </IconButton>
+            </Tooltip>
+          </Stack>
         )}
       </Stack>
     </AnimatedStack>
   );
 });
 
-interface Props {
-  space: Space;
-}
-
-const SpaceEmojisTab = observer(({ space }: Props) => {
+const UserStickersTab = observer(() => {
   const app = useAppStore();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { openModal } = useModal();
 
-  const emojis = Array.from(space.expressions.values()).filter(
-    (exp) => exp.type === ExpressionType.Emoji
-  );
+  const stickers = app.expressions.stickers
+    .filter((em) => em.authorId === app.account?.id)
+    .filter((em) => !em.spaceId);
 
-  const staticEmojis = emojis.filter((e) => !e.animated);
-  const animatedEmojis = emojis.filter((e) => e.animated);
+  const staticStickers = stickers.filter((e) => !e.animated);
+  const animatedStickers = stickers.filter((e) => e.animated);
 
   const handleUpload = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target?.files?.[0];
@@ -93,12 +86,12 @@ const SpaceEmojisTab = observer(({ space }: Props) => {
     const animated = file.type.includes("gif");
     const hash = await generateHash(buffer, animated);
 
-    const emoji = {
+    const sticker = {
       id: Snowflake.generate(),
-      type: ExpressionType.Emoji,
+      type: ExpressionType.Sticker,
       name: file.name.split(".")[0],
       assetHash: hash,
-      spaceId: space.id,
+      spaceId: null,
       authorId: app.account!.id,
       animated,
       flags: 0n,
@@ -107,17 +100,22 @@ const SpaceEmojisTab = observer(({ space }: Props) => {
 
     openModal(
       "expression-editor",
-      <ExpressionEditor expression={emoji} file={file} />
+      <ExpressionEditor expression={sticker} file={file} />
     );
   };
 
   return (
     <Stack direction="column" spacing={2.5}>
       <Stack direction="row" alignItems="center" justifyContent="space-between">
-        <Typography color="warning" variant="plain">
-          Sadly current limit of emojis you can upload are 100, since the app is
-          in beta and storage is an issue for now
-        </Typography>
+        <Stack direction="column">
+          <Typography color="warning" variant="plain">
+            Sadly current limit of stickers you can upload are 100, since the
+            app is in beta and storage is an issue for now
+          </Typography>
+          <Typography textColor="muted" level="body-sm" mb={1.25}>
+            {100 - stickers.length} slots available
+          </Typography>
+        </Stack>
         <input
           ref={fileInputRef}
           type="file"
@@ -134,12 +132,13 @@ const SpaceEmojisTab = observer(({ space }: Props) => {
           css={{
             marginRight: 16
           }}
+          disabled={stickers.length === 100}
         >
-          Upload Emoji
+          Upload Sticker
         </Button>
       </Stack>
 
-      {staticEmojis.length > 0 && (
+      {staticStickers.length > 0 && (
         <Paper
           borderRadius={12}
           variant="outlined"
@@ -149,7 +148,7 @@ const SpaceEmojisTab = observer(({ space }: Props) => {
           width={600}
         >
           <Typography level="body-lg" ml={2.5} my={2.5}>
-            Emojis
+            Stickers
           </Typography>
 
           <Divider
@@ -164,14 +163,14 @@ const SpaceEmojisTab = observer(({ space }: Props) => {
             <Typography flex={1}>Name</Typography>
           </Stack>
           <Stack direction="column">
-            {staticEmojis.map((expression) => (
-              <EmojiItem expression={expression} />
+            {staticStickers.map((expression) => (
+              <StickerItem expression={expression} />
             ))}
           </Stack>
         </Paper>
       )}
 
-      {animatedEmojis.length > 0 && (
+      {animatedStickers.length > 0 && (
         <Paper
           borderRadius={12}
           variant="outlined"
@@ -181,7 +180,7 @@ const SpaceEmojisTab = observer(({ space }: Props) => {
           width={600}
         >
           <Typography level="body-lg" ml={2.5} my={2.5}>
-            Animated Emojis
+            Animated Stickers
           </Typography>
 
           <Divider
@@ -196,21 +195,22 @@ const SpaceEmojisTab = observer(({ space }: Props) => {
             <Typography flex={1}>Name</Typography>
           </Stack>
           <Stack direction="column">
-            {animatedEmojis.map((expression) => (
-              <EmojiItem expression={expression} />
+            {animatedStickers.map((expression) => (
+              <StickerItem expression={expression} />
             ))}
           </Stack>
         </Paper>
       )}
 
-      {emojis.length === 0 && (
+      {stickers.length === 0 && (
         <Stack justifyContent="center" alignItems="center" py="4rem">
           <Typography textAlign="center" color="muted">
-            No emojis created yet
+            No stickers created yet
           </Typography>
         </Stack>
       )}
     </Stack>
   );
 });
-export default SpaceEmojisTab;
+
+export default UserStickersTab;

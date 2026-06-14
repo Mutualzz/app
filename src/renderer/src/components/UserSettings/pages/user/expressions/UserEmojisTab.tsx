@@ -7,7 +7,6 @@ import Snowflake from "@utils/Snowflake";
 import { ExpressionType } from "@mutualzz/types";
 import { generateHash } from "@utils/index";
 import { useModal } from "@contexts/Modal.context";
-import { EmojiEditor } from "@components/Modals/EmojiEditor";
 import { Paper } from "@components/Paper";
 import type { Expression } from "@stores/objects/Expression";
 import { AnimatedStack } from "@components/Animated/AnimatedStack";
@@ -15,6 +14,7 @@ import { dynamicElevation } from "@mutualzz/ui-core";
 import { IconButton } from "@components/IconButton";
 import { TrashIcon } from "@phosphor-icons/react";
 import { Tooltip } from "@components/Tooltip";
+import { ExpressionEditor } from "@renderer/components/Expression/ExpressionEditor";
 
 const EmojiItem = observer(({ expression }: { expression: Expression }) => {
   const { theme } = useTheme();
@@ -98,7 +98,10 @@ const UserEmojisTab = observer(() => {
       createdAt: new Date()
     };
 
-    openModal("emoji-editor", <EmojiEditor emoji={emoji} file={file} />);
+    openModal(
+      "expression-editor",
+      <ExpressionEditor expression={emoji} file={file} />
+    );
   };
 
   return (

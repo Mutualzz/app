@@ -67,6 +67,6 @@ export const emojiPlugin = (md: MarkdownItAsync) => {
   md.renderer.rules.emoji = (tokens, idx) => {
     const token = tokens[idx];
 
-    return `<emoji data-name="${token.attrGet("name")}" data-url="${token.attrGet("url")}" data-unicode="${token.attrGet("unicode")}">${token.content}</emoji>`;
+    return `<emoji data-name="${md.utils.escapeHtml(token.attrGet("name") ?? "")}" data-url="${md.utils.escapeHtml(token.attrGet("url") ?? "")}" data-unicode="${md.utils.escapeHtml(token.attrGet("unicode") ?? "")}">${token.content}</emoji>`;
   };
 };

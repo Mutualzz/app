@@ -78,6 +78,6 @@ export const linkPlugin = (md: MarkdownItAsync) => {
   md.renderer.rules.link = (tokens, idx) => {
     const token = tokens[idx];
     const href = token.attrGet("href");
-    return `<a href="${href}" target="_blank" rel="noopener noreferrer">${md.utils.escapeHtml(token.content)}</a>`;
+    return `<a href="${md.utils.escapeHtml(href ?? "")}" target="_blank" rel="noopener noreferrer">${md.utils.escapeHtml(token.content)}</a>`;
   };
 };

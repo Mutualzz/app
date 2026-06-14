@@ -1,7 +1,13 @@
-import type { APIUser, MessageType, Snowflake } from "@mutualzz/types";
+import type {
+  APIExpression,
+  APIUser,
+  MessageType,
+  Snowflake
+} from "@mutualzz/types";
 import type { AppStore } from "@stores/App.store";
 import { MessageBase } from "./MessageBase";
 import { action, makeObservable, observable } from "mobx";
+import { Expression } from "./Expression";
 
 export enum QueuedMessageStatus {
   Sending = "sending",
@@ -17,12 +23,15 @@ export type QueuedMessageData = {
   createdAt: string;
   authorId: Snowflake;
   author?: APIUser;
+  expressionIds?: Snowflake[];
+  expressions?: APIExpression[];
 };
 
 export class QueuedMessage extends MessageBase {
   progress = 0;
   status: QueuedMessageStatus;
   error?: string;
+  expressions = observable.array<Expression>();
 
   abortCallback?: () => void;
 
@@ -32,11 +41,15 @@ export class QueuedMessage extends MessageBase {
     this.channelId = data.channelId;
     this.spaceId = data.spaceId ?? null;
     this.status = QueuedMessageStatus.Sending;
+    this.expressions = observable.array<Expression>(
+      data.expressions ? app.expressions.addAll(data.expressions) : []
+    );
 
     makeObservable(this, {
       progress: observable,
       status: observable,
       error: observable,
+      expressions: observable,
       abortCallback: observable.ref,
       updateProgress: action.bound,
       setAbortCallback: action.bound,

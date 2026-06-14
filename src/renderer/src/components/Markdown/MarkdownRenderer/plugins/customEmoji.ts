@@ -64,6 +64,6 @@ export const customEmojiPlugin = (md: MarkdownItAsync) => {
 
     if (!emoji) return token.content;
 
-    return `<customemoji data-name="${emoji.name}" data-url="${emoji.url}" data-id="${emoji.id}" data-animated="${emoji.animated}"></customemoji>`;
+    return `<customemoji data-name="${md.utils.escapeHtml(emoji.name)}" data-url="${md.utils.escapeHtml(emoji.url)}" data-id="${md.utils.escapeHtml(emoji.id)}" data-animated="${emoji.animated}"></customemoji>`;
   };
 };

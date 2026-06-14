@@ -5,6 +5,7 @@ import startCase from "lodash-es/startCase";
 import styled from "@emotion/styled";
 import SpaceEmojisTab from "./SpaceEmojisTab";
 import type { Space } from "@stores/objects/Space";
+import SpaceStickersTab from "./SpaceStickersTab";
 
 type Tab = "emojis" | "stickers";
 
@@ -47,6 +48,7 @@ export const SpaceExpressionsSettings = observer(({ space }: Props) => {
         ))}
       </Stack>
       {currentTab === "emojis" && <SpaceEmojisTab space={space} />}
+      {currentTab === "stickers" && <SpaceStickersTab space={space} />}
     </Stack>
   );
 });

@@ -6,6 +6,7 @@ import type {
   TypographyColor,
   Variant
 } from "@mutualzz/ui-core";
+import type { Expression } from "@stores/objects/Expression";
 import type { KeyboardEvent } from "react";
 import type { Editor } from "slate";
 
@@ -19,6 +20,7 @@ export interface MarkdownInputProps {
   hoverToolbar?: boolean;
   emojiPicker?: boolean;
   gifPicker?: boolean;
+  stickerPicker?: boolean;
 
   disabled?: boolean;
 
@@ -26,6 +28,7 @@ export interface MarkdownInputProps {
   onChange?: (value: string, editor: Editor) => void;
   onKeyDown?: (event: KeyboardEvent, editor: Editor) => void;
   onSendMessage?: (message?: string) => void;
+  onSelectSticker?: (sticker: Expression) => void;
 
   placeholder?: string | null;
 

@@ -4,7 +4,7 @@ import { useModal } from "@contexts/Modal.context";
 import { useCallback, useEffect, useState } from "react";
 import { Slider, Stack, Typography, useTheme } from "@mutualzz/ui-web";
 import type { APIExpression } from "@mutualzz/types";
-import { HttpException } from "@mutualzz/types";
+import { ExpressionType, HttpException } from "@mutualzz/types";
 import { Button } from "@components/Button";
 import Cropper, { type Area, type Point } from "react-easy-crop";
 import { useMutation } from "@tanstack/react-query";
@@ -12,11 +12,20 @@ import { Paper } from "@components/Paper";
 import { InputWithLabel } from "@components/InputWithLabel";
 import { IconButton } from "@components/IconButton";
 import { cropImage } from "@utils/cropImage";
-import { ArrowClockwiseIcon, MagnifyingGlassMinusIcon, MagnifyingGlassPlusIcon, XIcon } from "@phosphor-icons/react";
+import {
+  sanitizeEmojiName,
+  sanitizeStickerName
+} from "@mutualzz/validators";
+import {
+  ArrowClockwiseIcon,
+  MagnifyingGlassMinusIcon,
+  MagnifyingGlassPlusIcon,
+  XIcon
+} from "@phosphor-icons/react";
 
 // File needs to be passed
 interface Props {
-  emoji: APIExpression;
+  expression: APIExpression;
   file: File;
 }
 
@@ -24,12 +33,21 @@ interface Errors {
   name?: string;
 }
 
-export const EmojiEditor = observer(({ emoji, file }: Props) => {
+export const ExpressionEditor = observer(({ expression, file }: Props) => {
   const app = useAppStore();
   const { theme } = useTheme();
   const { closeModal } = useModal();
 
-  const [name, setName] = useState(emoji.name);
+  const isSticker = expression.type === ExpressionType.Sticker;
+
+  const sanitizeName = (value: string) => {
+    const sanitized = isSticker
+      ? sanitizeStickerName(value)
+      : sanitizeEmojiName(value);
+    return sanitized.slice(0, 32);
+  };
+
+  const [name, setName] = useState(() => sanitizeName(expression.name));
 
   const [crop, setCrop] = useState<Point>({
     x: 0,
@@ -71,8 +89,13 @@ export const EmojiEditor = observer(({ emoji, file }: Props) => {
     return () => URL.revokeObjectURL(url);
   }, [file]);
 
-  const { mutate: createEmoji, isPending: creating } = useMutation({
-    mutationKey: ["create-emoji", emoji.authorId, name, emoji.type],
+  const { mutate: createExpression, isPending: creating } = useMutation({
+    mutationKey: [
+      "create-expression",
+      expression.authorId,
+      name,
+      expression.type
+    ],
     mutationFn: async (data: FormData) => {
       return app.rest.putFormData("/expressions", data);
     },
@@ -100,10 +123,10 @@ export const EmojiEditor = observer(({ emoji, file }: Props) => {
       return;
     }
 
-    let emojiFile: File | null = file;
+    let expressionFile: File | null = file;
 
     if (file && final && croppedAreaPixels) {
-      emojiFile = await cropImage(
+      expressionFile = await cropImage(
         final,
         file,
         croppedAreaPixels as Area,
@@ -112,14 +135,14 @@ export const EmojiEditor = observer(({ emoji, file }: Props) => {
     }
 
     const formData = new FormData();
-    formData.append("expression", emojiFile);
+    formData.append("expression", expressionFile);
     formData.append("name", name);
-    formData.append("type", emoji.type.toString());
-    if (emoji.spaceId) formData.append("spaceId", emoji.spaceId);
+    formData.append("type", expression.type.toString());
+    if (expression.spaceId) formData.append("spaceId", expression.spaceId);
     if (file.type === "image/gif")
       formData.append("crop", JSON.stringify(croppedAreaPixels));
 
-    createEmoji(formData);
+    createExpression(formData);
   };
 
   const getPreviewStyle = (size: number) => {
@@ -264,18 +287,10 @@ export const EmojiEditor = observer(({ emoji, file }: Props) => {
         <InputWithLabel
           name="name"
           type="text"
-          label="Expression Name"
-          placeholder="emoji_name"
+          label={isSticker ? "Sticker Name" : "Expression Name"}
+          placeholder={isSticker ? "My Cool Sticker" : "expression_name"}
           value={name}
-          onChange={(e) => {
-            const sanitized = e.target.value
-              .toLowerCase()
-              .replace(/[\s.\-]+/g, "_")
-              .replace(/[^a-z0-9_]/g, "")
-              .replace(/_{2,}/g, "_")
-              .replace(/^_+/, "");
-            setName(sanitized);
-          }}
+          onChange={(e) => setName(sanitizeName(e.target.value))}
           endDecorator={
             name.trim().length > 0 && (
               <IconButton

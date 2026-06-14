@@ -18,6 +18,7 @@ export class AccountSettingsStore {
 
   favoriteEmojis = observable.array<string>([]);
   favoriteGifs = observable.array<string>([]);
+  favoriteStickers = observable.array<string>([]);
 
   updatedAt: Date;
 
@@ -40,6 +41,10 @@ export class AccountSettingsStore {
     this.preferredSelfMute = settings.preferredSelfMute;
     this.preferredSelfDeaf = settings.preferredSelfDeaf;
 
+    this.favoriteEmojis = observable.array(settings.favoriteEmojis ?? []);
+    this.favoriteGifs = observable.array(settings.favoriteGifs ?? []);
+    this.favoriteStickers = observable.array(settings.favoriteStickers ?? []);
+
     this.lastSyncedHash = this.computeHash(this.getSyncPayload());
 
     makeAutoObservable(this, {}, { autoBind: true });
@@ -61,6 +66,12 @@ export class AccountSettingsStore {
         },
         {
           key: "favoriteGifs",
+          serialize: (v: unknown) => (Array.isArray(v) ? [...v] : []),
+          deserialize: (v: unknown) =>
+            observable.array(Array.isArray(v) ? v : [])
+        },
+        {
+          key: "favoriteStickers",
           serialize: (v: unknown) => (Array.isArray(v) ? [...v] : []),
           deserialize: (v: unknown) =>
             observable.array(Array.isArray(v) ? v : [])
@@ -137,6 +148,19 @@ export class AccountSettingsStore {
     return this.favoriteGifs.some((f) => f.split("|")[0] === bare);
   }
 
+  toggleFavoriteSticker(id: string) {
+    const idx = this.favoriteStickers.indexOf(id);
+    if (idx === -1) {
+      this.favoriteStickers.push(id);
+    } else {
+      this.favoriteStickers.splice(idx, 1);
+    }
+  }
+
+  isFavoriteSticker(id: string) {
+    return this.favoriteStickers.includes(id);
+  }
+
   setPreferredMode(mode: AppMode) {
     this.preferredMode = mode;
   }
@@ -171,6 +195,8 @@ export class AccountSettingsStore {
       this.favoriteEmojis = observable.array(settings.favoriteEmojis);
     if (settings.favoriteGifs != undefined)
       this.favoriteGifs = observable.array(settings.favoriteGifs);
+    if (settings.favoriteStickers != undefined)
+      this.favoriteStickers = observable.array(settings.favoriteStickers);
 
     this.lastSyncedHash = this.computeHash(this.getSyncPayload());
   }
@@ -239,7 +265,8 @@ export class AccountSettingsStore {
       preferredSelfMute: this.preferredSelfMute,
       preferredSelfDeaf: this.preferredSelfDeaf,
       favoriteEmojis: [...this.favoriteEmojis],
-      favoriteGifs: [...this.favoriteGifs]
+      favoriteGifs: [...this.favoriteGifs],
+      favoriteStickers: [...this.favoriteStickers]
     };
   }
 

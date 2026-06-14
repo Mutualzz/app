@@ -1,4 +1,5 @@
 import { createContext, useContext } from "react";
+import type { Expression } from "@stores/objects/Expression";
 
 interface MarkdownInputContext {
   activeFormats: string[];
@@ -6,6 +7,7 @@ interface MarkdownInputContext {
   enableHoverToolbar?: boolean;
   enableEmojis?: boolean;
   onSendMessage?: (message?: string) => void;
+  onSelectSticker?: (sticker: Expression) => void;
 }
 
 export const MarkdownInputContext = createContext<MarkdownInputContext>({

@@ -2,13 +2,14 @@ import { Portal, Stack } from "@mutualzz/ui-web";
 import { EmojiPicker } from "./EmojiPicker";
 import type { Expression } from "@stores/objects/Expression";
 import { ReactEditor, useSlate } from "slate-react";
-import { useEmojiPicker } from "@hooks/useEmojiPicker";
+import { useExpressionPicker } from "@renderer/hooks/useExpressionPicker";
 import { PickerEmoji } from "@utils/emojis/emojiPickerData";
 import { SkinTone } from "@utils/emojis/emojiSprite";
 import { getEmoji, insertCustomEmoji, insertEmoji } from "@utils/emojis/emojis";
-import { GifIcon, SmileyIcon } from "@phosphor-icons/react";
+import { GifIcon, SmileyIcon, StickerIcon } from "@phosphor-icons/react";
 import { useMarkdownInputContext } from "@components/Markdown/MarkdownInput/MarkdownInput.context";
 import { IconButton } from "@components/IconButton";
+import { useRef } from "react";
 
 interface Props {
   emojiPicker?: boolean;
@@ -16,9 +17,13 @@ interface Props {
   stickerPicker?: boolean;
 }
 
-export const ExpressionPickerTrigger = ({ emojiPicker, gifPicker }: Props) => {
+export const ExpressionPickerTrigger = ({
+  emojiPicker,
+  gifPicker,
+  stickerPicker
+}: Props) => {
   const editor = useSlate();
-  const { onSendMessage } = useMarkdownInputContext();
+  const { onSendMessage, onSelectSticker } = useMarkdownInputContext();
   const {
     isOpen,
     toggle,
@@ -28,7 +33,10 @@ export const ExpressionPickerTrigger = ({ emojiPicker, gifPicker }: Props) => {
     position,
     triggerRef,
     pickerRef
-  } = useEmojiPicker();
+  } = useExpressionPicker();
+
+  const stickerTriggerRef = useRef<HTMLButtonElement>(null);
+  const gifTriggerRef = useRef<HTMLButtonElement>(null);
 
   const handleSelectEmoji = (pickerEmoji: PickerEmoji, skinTone: SkinTone) => {
     const emoji = getEmoji(pickerEmoji.shortName);
@@ -66,12 +74,29 @@ export const ExpressionPickerTrigger = ({ emojiPicker, gifPicker }: Props) => {
     setTimeout(() => onSendMessage?.(sendUrl), 0);
   };
 
+  const handleSelectSticker = (sticker: Expression) => {
+    onSelectSticker?.(sticker);
+    toggle();
+  };
+
   return (
     <Stack spacing={0.75}>
+      {stickerPicker && (
+        <IconButton
+          ref={stickerTriggerRef as any}
+          variant="plain"
+          onClick={() => openToTab("stickers", stickerTriggerRef as any)}
+          title="Sticker picker"
+          aria-label="Open Sticker picker"
+        >
+          <StickerIcon weight="fill" size={24} />
+        </IconButton>
+      )}
       {gifPicker && (
         <IconButton
+          ref={gifTriggerRef as any}
           variant="plain"
-          onClick={() => openToTab("gifs")}
+          onClick={() => openToTab("gifs", gifTriggerRef as any)}
           title="GIF picker"
           aria-label="Open GIF picker"
         >
@@ -107,6 +132,7 @@ export const ExpressionPickerTrigger = ({ emojiPicker, gifPicker }: Props) => {
               onSelectEmoji={handleSelectEmoji}
               onSelectCustomEmoji={handleSelectCustomEmoji}
               onSelectGif={handleSelectGif}
+              onSelectSticker={handleSelectSticker}
               activeTab={activeTab}
               onTabChange={setActiveTab}
             />

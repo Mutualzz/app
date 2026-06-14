@@ -75,8 +75,10 @@ export const withEmojis = (editor: Editor) => {
       ) {
         const shortcode = customMatch[0];
         const customEmoji = await getCustomEmoji(shortcode);
-        const me = app.spaces.active?.members.me;
         const channel = app.channels.active;
+        const me = channel?.spaceId
+          ? app.spaces.get(channel.spaceId)?.members.me
+          : null;
         if (
           customEmoji &&
           canUseCustomEmoji(app.account?.id ?? "", customEmoji, me, channel)
@@ -104,8 +106,10 @@ export const withEmojis = (editor: Editor) => {
       const namedCustomMatch = /:[^\s:]+:$/.exec(combined);
       if (namedCustomMatch && namedCustomMatch[0].endsWith(text)) {
         const rawName = namedCustomMatch[0].slice(1, -1); // strip surrounding colons
-        const me = app.spaces.active?.members.me;
         const channel = app.channels.active;
+        const me = channel?.spaceId
+          ? app.spaces.get(channel.spaceId)?.members.me
+          : null;
 
         const matchedCustomEmoji = app.expressions.all.find(
           (exp) =>
@@ -301,8 +305,10 @@ export const withEmojis = (editor: Editor) => {
       if (m.isCustom) {
         const customEmoji = await getCustomEmoji(m.text);
 
-        const me = app.spaces.active?.members.me;
         const channel = app.channels.active;
+        const me = channel?.spaceId
+          ? app.spaces.get(channel.spaceId)?.members.me
+          : null;
 
         if (
           customEmoji &&

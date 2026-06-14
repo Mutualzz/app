@@ -63,6 +63,14 @@ export type ContextMenuPayload =
       animated: boolean;
       [key: string]: any;
     }
+  | {
+      type: "sticker";
+      id: string;
+      name: string;
+      url: string;
+      animated: boolean;
+      [key: string]: any;
+    }
   | { type: "custom"; id: string; [key: string]: any };
 
 export type MenuPosition = { x: number; y: number };
@@ -128,6 +136,8 @@ function getMenuId(menu: ContextMenuPayload): string {
       return menu.kind === "standard"
         ? `emoji-${menu.emoji.unified}`
         : `emoji-custom-${menu.id}`;
+    case "sticker":
+      return `sticker-${menu.id}`;
     case "group-dm":
       return `group-dm-${menu.channel.id}`;
     case "custom":

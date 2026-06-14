@@ -12,7 +12,7 @@ interface Props {
   css?: CSSObject;
 }
 
-export const CustomEmojiPreviewPopup = observer(
+export const StickerPreviewPopup = observer(
   ({ expression, ...props }: Props) => {
     const app = useAppStore();
 
@@ -31,25 +31,25 @@ export const CustomEmojiPreviewPopup = observer(
         <Stack width="100%" direction="row" spacing={2.5} alignItems="center">
           <img
             src={expression.url}
-            alt={expression.id}
-            aria-label={`<${expression.animated ? "a" : ""}:${expression.name}:${expression.id}>`}
+            alt={expression.name}
             draggable={false}
             css={{
-              width: 48,
-              height: 48
+              width: 64,
+              height: 64,
+              objectFit: "contain"
             }}
           />
 
           <Stack spacing={1.25} direction="column">
-            <Typography level="body-sm" textColor="accent">
-              :{expression.name}:
+            <Typography level="body-sm" textColor="accent" fontWeight="bold">
+              {expression.name}
             </Typography>
             <Typography level="body-xs">
-              This emoji is
+              {expression.animated ? "Animated sticker" : "Sticker"}
               {expression.spaceId
                 ? " from one of the spaces you belong in"
                 : expression.authorId === app.account?.id
-                  ? " from you, you can use it in any chats"
+                  ? " from you"
                   : " from a user"}
             </Typography>
           </Stack>
@@ -64,7 +64,7 @@ export const CustomEmojiPreviewPopup = observer(
           {expression.space ? (
             <Stack spacing={1.25} direction="column">
               <Typography level="body-sm">
-                This emoji is from a space
+                This sticker is from a space
               </Typography>
               <Stack direction="row" spacing={1.25} alignItems="center">
                 <SpaceIcon space={expression.space} />
@@ -75,7 +75,9 @@ export const CustomEmojiPreviewPopup = observer(
             </Stack>
           ) : (
             <Stack spacing={1.25} direction="column">
-              <Typography level="body-xs">This emoji is from a user</Typography>
+              <Typography level="body-xs">
+                This sticker is from a user
+              </Typography>
               <Stack direction="row" spacing={1.25} alignItems="center">
                 <UserAvatar
                   user={expression.author}

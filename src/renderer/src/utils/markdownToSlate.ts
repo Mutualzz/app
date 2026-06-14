@@ -1,6 +1,7 @@
 import type { Descendant } from "slate";
 import { getEmoji } from "./emojis/emojis";
 import { TWEMOJI_URL } from "./urls";
+import { useAppStore } from "@hooks/useStores";
 
 export function markdownToSlate(markdown: string): Descendant[] {
   const lines = markdown.split(/\r?\n/);
@@ -60,12 +61,15 @@ function parseInlineMarkdown(input: string): Descendant[] {
     // custom emoji  <a:name:id>  or  <:name:id>
     const customEmojiMatch = /^<(a)?:([^:]+):(\d+)>$/.exec(part);
     if (customEmojiMatch) {
+      const id = customEmojiMatch[3];
+      const expression = useAppStore().expressions.get(id);
+
       nodes.push({
         type: "customEmoji",
         name: customEmojiMatch[2],
-        id: customEmojiMatch[3],
+        id,
         animated: !!customEmojiMatch[1],
-        url: "",
+        url: expression?.url ?? "",
         children: [{ text: "" }]
       });
       continue;

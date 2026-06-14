@@ -9,6 +9,7 @@ import { ChannelItemContextMenu } from "@components/ContextMenu/ChannelItemConte
 import { UserContextMenu } from "@components/ContextMenu/UserContextMenu";
 import { AccountContextMenu } from "@components/ContextMenu/AccountContextMenu";
 import { EmojiContextMenu } from "@components/ContextMenu/EmojiContextMenu";
+import { StickerContextMenu } from "@components/ContextMenu/StickerContextMenu";
 import { GroupDMContextMenu } from "@components/ContextMenu/GroupDMContextMenu";
 
 export const ContextMenuRoot = observer(() => {
@@ -58,6 +59,13 @@ export const ContextMenuRoot = observer(() => {
       return (
         <Portal>
           <EmojiContextMenu {...menu} />
+        </Portal>
+      );
+
+    case "sticker":
+      return (
+        <Portal>
+          <StickerContextMenu {...menu} />
         </Portal>
       );
 

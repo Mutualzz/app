@@ -5,7 +5,12 @@ import type { useNavigate } from "@tanstack/react-router";
 import mergeWith from "lodash-es/mergeWith";
 import { isValidElement, type ReactNode } from "react";
 import MurmurHash from "imurmurhash";
-import { APIMessage, MessageType, PresenceStatus } from "@mutualzz/types";
+import {
+  APIMessage,
+  ExpressionType,
+  MessageType,
+  PresenceStatus
+} from "@mutualzz/types";
 import type { Expression } from "@stores/objects/Expression";
 import type { SpaceMember } from "@stores/objects/SpaceMember";
 import type { Channel } from "@stores/objects/Channel";
@@ -58,13 +63,38 @@ export const canUseCustomEmoji = (
   currentMember?: SpaceMember | null,
   channel?: Channel | null
 ) => {
+  if (emoji.type !== ExpressionType.Emoji) return false;
+
   if (!emoji.spaceId && meId !== emoji.authorId) return false;
 
-  if (!currentMember) return true;
+  const inSpace = !!channel?.spaceId && !!currentMember;
+
+  if (!inSpace) {
+    return !emoji.spaceId && meId === emoji.authorId;
+  }
 
   if (emoji.spaceId === currentMember.spaceId) return true;
 
   return currentMember.hasPermission("UseExternalEmojis", channel ?? undefined);
+};
+
+export const canUseSticker = (
+  meId: Snowflake,
+  sticker: Expression,
+  currentMember?: SpaceMember | null,
+  channel?: Channel | null
+) => {
+  if (sticker.type !== ExpressionType.Sticker) return false;
+  if (!sticker.spaceId && meId !== sticker.authorId) return false;
+
+  if (!currentMember) return true;
+
+  if (sticker.spaceId === currentMember.spaceId) return true;
+
+  return currentMember.hasPermission(
+    "UseExternalStickers",
+    channel ?? undefined
+  );
 };
 
 export const generateHash = async (buffer: ArrayBuffer, animated: boolean) => {

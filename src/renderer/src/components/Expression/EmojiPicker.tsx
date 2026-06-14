@@ -1,5 +1,20 @@
-import { FC, type KeyboardEvent, MouseEvent, ReactNode, RefObject, useCallback, useRef, useState } from "react";
-import { Divider, IconButton, Stack, Typography, useTheme } from "@mutualzz/ui-web";
+import {
+  FC,
+  type KeyboardEvent,
+  MouseEvent,
+  ReactNode,
+  RefObject,
+  useCallback,
+  useRef,
+  useState
+} from "react";
+import {
+  Divider,
+  IconButton,
+  Stack,
+  Typography,
+  useTheme
+} from "@mutualzz/ui-web";
 import { Paper } from "@components/Paper";
 import { SpaceIcon } from "@components/Space/SpaceIcon";
 import { GifPicker } from "./GifPicker";
@@ -7,8 +22,17 @@ import type { Expression } from "@stores/objects/Expression";
 import { useAppStore } from "@hooks/useStores";
 import { observer } from "mobx-react-lite";
 import styled from "@emotion/styled";
-import { ALL_EMOJIS, PICKER_CATEGORIES, PickerEmoji, searchEmojis } from "@renderer/utils/emojis/emojiPickerData";
-import { getSpriteStyle, SKIN_TONE_MODIFIERS, SkinTone } from "@renderer/utils/emojis/emojiSprite";
+import {
+  ALL_EMOJIS,
+  PICKER_CATEGORIES,
+  PickerEmoji,
+  searchEmojis
+} from "@renderer/utils/emojis/emojiPickerData";
+import {
+  getSpriteStyle,
+  SKIN_TONE_MODIFIERS,
+  SkinTone
+} from "@renderer/utils/emojis/emojiSprite";
 import { useRecentEmojis } from "@renderer/hooks/useRecentEmojis";
 import { ExpressionType } from "@mutualzz/types";
 import { useMenu } from "@contexts/ContextMenu.context";
@@ -30,6 +54,8 @@ import {
 } from "@phosphor-icons/react";
 import { observable } from "mobx";
 import { Tooltip } from "@components/Tooltip";
+import { StickerPicker } from "./StickerPicker";
+import { canUseCustomEmoji } from "@utils/index";
 
 const PICKER_WIDTH = 500;
 const PICKER_HEIGHT = 500;
@@ -229,16 +255,6 @@ const SkinToneBtn = styled("button")<{ active?: boolean }>(
   })
 );
 
-const PlaceholderPane = styled(Stack)(({ theme }) => ({
-  flex: 1,
-  alignItems: "center",
-  justifyContent: "center",
-  color: theme.typography.colors.muted,
-  fontSize: 13,
-  gap: 8,
-  flexDirection: "column"
-}));
-
 const SpriteEmoji = ({
   sheetX,
   sheetY,
@@ -289,6 +305,7 @@ export interface EmojiPickerProps {
     width: number;
     height: number;
   }) => void;
+  onSelectSticker: (sticker: Expression) => void;
   pickerRef: RefObject<HTMLDivElement>;
   activeTab: TopTab;
   onTabChange: (tab: TopTab) => void;
@@ -299,6 +316,7 @@ export const EmojiPicker = observer(
     onSelectEmoji,
     onSelectCustomEmoji,
     onSelectGif,
+    onSelectSticker,
     pickerRef,
     activeTab,
     onTabChange
@@ -315,16 +333,26 @@ export const EmojiPicker = observer(
     const scrollRef = useRef<HTMLDivElement>(null);
     const searchRef = useRef<HTMLInputElement>(null);
 
+    const channel = app.channels.active;
+    const me = channel?.spaceId
+      ? app.spaces.get(channel.spaceId)?.members.me
+      : null;
+
+    const canUseEmoji = (emoji: Expression) =>
+      canUseCustomEmoji(app.account?.id ?? "", emoji, me, channel);
+
     const myEmojis = app.expressions.emojis
       .filter((e) => !e.spaceId)
-      .filter((e) => e.type === ExpressionType.Emoji);
+      .filter((e) => e.authorId === app.account?.id)
+      .filter((e) => e.type === ExpressionType.Emoji)
+      .filter(canUseEmoji);
 
     const spaceEmojiGroups = app.spaces.all
       .map((space) => ({
         space,
-        emojis: Array.from(space.expressions.values()).filter(
-          (e) => e.type === ExpressionType.Emoji
-        )
+        emojis: Array.from(space.expressions.values())
+          .filter((e) => e.type === ExpressionType.Emoji)
+          .filter(canUseEmoji)
       }))
       .filter((g) => g.emojis.length > 0);
 
@@ -585,11 +613,7 @@ export const EmojiPicker = observer(
           {activeTab === "gifs" ? (
             <GifPicker onSelectGif={onSelectGif} />
           ) : activeTab === "stickers" ? (
-            <PlaceholderPane>
-              <Typography level="body-sm" textColor="muted">
-                Stickers coming soon
-              </Typography>
-            </PlaceholderPane>
+            <StickerPicker onSelectSticker={onSelectSticker} />
           ) : (
             <>
               <Stack

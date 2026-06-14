@@ -4,7 +4,15 @@ import { markdownToSlate } from "@utils/markdownToSlate";
 import { getActiveFormats } from "@utils/markdownUtils";
 import { slateToMarkdown } from "@utils/slateToMarkdown";
 import { wrapSelectionWith } from "@utils/wrapSelectionWith";
-import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
+import React, {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState
+} from "react";
 import {
   createEditor,
   type Descendant,
@@ -15,18 +23,32 @@ import {
   Text
 } from "slate";
 import { withHistory } from "slate-history";
-import { Editable, ReactEditor, type RenderElementProps, type RenderLeafProps, Slate, withReact } from "slate-react";
+import {
+  Editable,
+  ReactEditor,
+  type RenderElementProps,
+  type RenderLeafProps,
+  Slate,
+  withReact
+} from "slate-react";
 import { HoverToolbar } from "../HoverToolbar/HoverToolbar";
 import { Element } from "./Element";
 import { Leaf } from "./Leaf";
 import { MarkdownInputContext } from "./MarkdownInput.context";
-import { parseMarkdownToRanges, parseSpoilerRanges, resolveMarkdownStyles } from "./MarkdownInput.helpers";
+import {
+  parseMarkdownToRanges,
+  parseSpoilerRanges,
+  resolveMarkdownStyles
+} from "./MarkdownInput.helpers";
 import type { MarkdownInputProps } from "./MarkdownInput.types";
 import { withEmojis } from "./plugins/withEmojis";
 import { withSyntax } from "./plugins/withSyntax";
 import { EmojiToolbar } from "@components/Expression/EmojiToolbar";
 import { useHotkeys } from "@tanstack/react-hotkeys";
-import { insertMention, withMentions } from "@components/Markdown/MarkdownInput/plugins/withMentions";
+import {
+  insertMention,
+  withMentions
+} from "@components/Markdown/MarkdownInput/plugins/withMentions";
 import { MentionPicker } from "@components/MentionPicker";
 import { ExpressionPickerTrigger } from "@components/Expression/ExpressionPickerTrigger";
 
@@ -49,10 +71,12 @@ const MarkdownInput = forwardRef<MarkdownInputHandle, MarkdownInputProps>(
       hoverToolbar = true,
       emojiPicker = true,
       gifPicker = true,
+      stickerPicker = true,
 
       onChange,
       onKeyDown: onKeyDownProp,
       onSendMessage,
+      onSelectSticker,
       placeholder,
       value,
 
@@ -314,7 +338,8 @@ const MarkdownInput = forwardRef<MarkdownInputHandle, MarkdownInputProps>(
           enableEmoticons: emoticons,
           enableHoverToolbar: hoverToolbar,
           enableEmojis: emojiPicker,
-          onSendMessage
+          onSendMessage,
+          onSelectSticker
         }}
       >
         <Slate
@@ -404,6 +429,7 @@ const MarkdownInput = forwardRef<MarkdownInputHandle, MarkdownInputProps>(
               <ExpressionPickerTrigger
                 emojiPicker={emojiPicker}
                 gifPicker={gifPicker}
+                stickerPicker={stickerPicker}
               />
             )}
 

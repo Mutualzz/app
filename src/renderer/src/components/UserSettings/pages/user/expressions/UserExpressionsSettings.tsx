@@ -4,6 +4,7 @@ import { Stack } from "@mutualzz/ui-web";
 import startCase from "lodash-es/startCase";
 import styled from "@emotion/styled";
 import UserEmojisTab from "./UserEmojisTab";
+import UserStickersTab from "./UserStickersTab";
 
 type Tab = "emojis" | "stickers";
 
@@ -42,6 +43,7 @@ export const UserExpressionsSettings = observer(() => {
         ))}
       </Stack>
       {currentTab === "emojis" && <UserEmojisTab />}
+      {currentTab === "stickers" && <UserStickersTab />}
     </Stack>
   );
 });
