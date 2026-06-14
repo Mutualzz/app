@@ -112,7 +112,6 @@ export const MessageToast = observer(
                   wordBreak: "break-word",
                   maxWidth: "100%"
                 }}
-                spaceId={message.spaceId}
               />
               <Stack direction="row" spacing={0.5} style={{ marginTop: 8 }}>
                 <Link
@@ -126,10 +125,7 @@ export const MessageToast = observer(
             </>
           ) : (
             <Stack direction="column" style={{ marginTop: 6 }}>
-              <MarkdownRenderer
-                value={contentWithoutMentions || ""}
-                spaceId={message.spaceId}
-              />
+              <MarkdownRenderer value={contentWithoutMentions || ""} />
               <Stack direction="row" spacing={0.5} style={{ marginTop: 8 }}>
                 <Link
                   textColor="accent"

@@ -36,7 +36,7 @@ export interface MentionElement {
   type: "mention";
   mentionType: MentionType;
   id: string;
-  children: [{ text: "" }];
+  children: EmptyText[];
 }
 
 export interface CustomEmojiElement {
@@ -47,6 +47,12 @@ export interface CustomEmojiElement {
   animated: boolean;
   children: EmptyText[];
 }
+
+type CodeBlockElement = {
+  type: "codeBlock";
+  lang: string;
+  children: Descendant[];
+};
 
 export interface Text {
   bold?: boolean;
@@ -72,7 +78,8 @@ export type Element =
   | EmojiElement
   | CustomEmojiElement
   | LinkElement
-  | MentionElement;
+  | MentionElement
+  | CodeBlockElement;
 
 export type Editor = BaseEditor &
   ReactEditor &

@@ -2,13 +2,7 @@ import { Paper } from "@components/Paper";
 import { useModal } from "@contexts/Modal.context";
 import { useDroppable } from "@dnd-kit/core";
 import { useAppStore } from "@hooks/useStores";
-import {
-  Avatar,
-  type PaperProps,
-  Stack,
-  Typography,
-  useTheme
-} from "@mutualzz/ui-web";
+import { Avatar, type PaperProps, Stack, Typography, useTheme } from "@mutualzz/ui-web";
 import type { Channel } from "@stores/objects/Channel";
 import type { Space } from "@stores/objects/Space";
 import { useNavigate } from "@tanstack/react-router";
@@ -21,13 +15,8 @@ import { useMenu } from "@contexts/ContextMenu.context";
 import { ChannelMemberItem } from "@components/Channel/ChannelMemberItem";
 import { IconButton } from "@components/IconButton";
 import { SpaceInviteToSpaceModal } from "@components/Space/SpaceInviteToSpaceModal";
-import {
-  CaretRightIcon,
-  GearIcon,
-  LockIcon,
-  PlusIcon,
-  UserPlusIcon
-} from "@phosphor-icons/react";
+import { CaretRightIcon, GearIcon, LockIcon, PlusIcon, UserPlusIcon } from "@phosphor-icons/react";
+import { ChannelSettingsModal } from "@components/ChannelSettings/ChannelSettingsModal";
 
 interface Props extends PaperProps {
   space: Space;
@@ -305,6 +294,13 @@ export const ChannelListItem = observer(
                     }}
                     size={12}
                     variant="plain"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      openModal(
+                        `channel-settings-${channel.id}`,
+                        <ChannelSettingsModal space={space} channel={channel} />
+                      );
+                    }}
                   >
                     <GearIcon weight="fill" />
                   </IconButton>

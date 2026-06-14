@@ -76,7 +76,6 @@ export const settingsPages: SettingsPages = {
   ]
 };
 
-// TODO: add a determinate category and page visibility based on bitfield
 export const SpaceSettingsSidebar = observer(
   ({ space, drawerOpen, setDrawerOpen }: SpaceSettingsProps) => {
     const app = useAppStore();
@@ -160,7 +159,7 @@ export const SpaceSettingsSidebar = observer(
                                 page.label
                               )
                             }
-                            key={`user-settings-sidebar-${page.label}`}
+                            key={`space-settings-sidebar-${page.label}`}
                             horizontalAlign="left"
                             variant={
                               currentPage === page.label ? "soft" : "plain"

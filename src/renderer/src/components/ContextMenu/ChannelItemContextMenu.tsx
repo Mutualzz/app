@@ -2,7 +2,7 @@ import { ContextMenu } from "@components/ContextMenu";
 import { SpaceInviteToSpaceModal } from "@components/Space/SpaceInviteToSpaceModal";
 import { useModal } from "@contexts/Modal.context";
 import { useAppStore } from "@hooks/useStores";
-import { Box, Divider } from "@mutualzz/ui-web";
+import { Divider } from "@mutualzz/ui-web";
 import type { Channel } from "@stores/objects/Channel";
 import type { Space } from "@stores/objects/Space";
 import { observer } from "mobx-react-lite";
@@ -11,7 +11,8 @@ import { ChannelType } from "@mutualzz/types";
 import { generateMenuIDs } from "@contexts/ContextMenu.context";
 import { ChannelActionConfirm } from "@components/Modals/ChannelActionConfirm";
 import { ContextItem } from "@components/ContextItem";
-import { PaperPlaneTiltIcon, TrashIcon } from "@phosphor-icons/react";
+import { GearIcon, PaperPlaneTiltIcon, TrashIcon } from "@phosphor-icons/react";
+import { ChannelSettingsModal } from "@components/ChannelSettings/ChannelSettingsModal";
 
 interface Props {
   space: Space;
@@ -70,7 +71,20 @@ export const ChannelItemContextMenu = observer(({ space, channel }: Props) => {
       )}
 
       {canModifyChannel && (
-        <Box>
+        <>
+          <ContextItem
+            onClick={() =>
+              openModal(
+                `channel-settings-${channel.id}`,
+                <ChannelSettingsModal space={space} channel={channel} />
+              )
+            }
+            size="sm"
+            endDecorator={<GearIcon weight="fill" />}
+          >
+            Edit{" "}
+            {channel.type === ChannelType.Category ? "Category" : "Channel"}
+          </ContextItem>
           <ContextItem
             onClick={() =>
               isCategory && channel.hasChildren
@@ -89,7 +103,7 @@ export const ChannelItemContextMenu = observer(({ space, channel }: Props) => {
           >
             Delete {isCategory ? "Category" : "Channel"}
           </ContextItem>
-        </Box>
+        </>
       )}
     </ContextMenu>
   );

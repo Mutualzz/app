@@ -1,11 +1,6 @@
 import { useAppStore } from "@hooks/useStores";
 import { Stack } from "@mutualzz/ui-web";
-import {
-  createFileRoute,
-  Outlet,
-  useNavigate,
-  useParams
-} from "@tanstack/react-router";
+import { createFileRoute, Outlet, useNavigate, useParams } from "@tanstack/react-router";
 import { observer } from "mobx-react-lite";
 import { useEffect } from "react";
 
@@ -34,9 +29,17 @@ function RouteComponent() {
     const space = app.spaces.get(spaceId);
     if (!space) return;
 
+    const mostRecent = app.channels.getMostRecentChannelForSpace(spaceId);
+
     const preferred =
-      app.channels.getMostRecentChannelForSpace(spaceId) ??
-      app.channels.getFirstNavigableChannel(spaceId);
+      (mostRecent?.canRedirect && space.members.me?.canViewChannel(mostRecent)
+        ? mostRecent
+        : null) ??
+      app.channels.getFirstNavigableChannel(spaceId) ??
+      space.channels.find(
+        (ch) => ch.canRedirect && space.members.me?.canViewChannel(ch)
+      );
+
     if (!preferred) return;
 
     app.channels.setActive(preferred.id);

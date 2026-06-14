@@ -1,4 +1,4 @@
-import { Element, Range, type Editor, type Selection } from "slate";
+import { type Editor, Element, Range, type Selection } from "slate";
 
 export const isBlockActive = (editor: Editor, block: string) => {
   const [match] = editor.nodes({
@@ -24,7 +24,6 @@ export const getActiveFormats = (
 ): string[] => {
   if (!selection || Range.isCollapsed(selection)) return [];
 
-  // 1. Get block node (assumes single block selection)
   const [blockEntry] = editor.nodes({
     at: selection,
     match: (n) => Element.isElement(n) && editor.isBlock(n)
@@ -35,7 +34,6 @@ export const getActiveFormats = (
   const [, blockPath] = blockEntry;
   const blockText = editor.string(blockPath);
 
-  // 2. Get absolute offsets of selection in block
   const pointOffset = (point: any) => {
     const range = { anchor: { ...point, offset: 0 }, focus: point };
     return editor.string(range).length;
@@ -44,52 +42,58 @@ export const getActiveFormats = (
   const selStart = pointOffset(start);
   const selEnd = pointOffset(end);
 
-  // 3. Find all marker locations
-  const MARKERS: { marker: string; type: string }[] = [
+  const MARKERS = [
     { marker: "**", type: "bold" },
-    { marker: "*", type: "italic" },
     { marker: "__", type: "underline" },
     { marker: "~~", type: "strikethrough" },
+    { marker: "||", type: "spoiler" },
+    { marker: "*", type: "italic" },
     { marker: "`", type: "code" },
-    { marker: "||", type: "spoiler" }
-  ];
-  const markers: { pos: number; marker: string; type: string }[] = [];
-  for (const { marker, type } of MARKERS) {
-    let idx = 0;
-    while ((idx = blockText.indexOf(marker, idx)) !== -1) {
-      markers.push({ pos: idx, marker, type });
-      idx += marker.length;
-    }
-  }
-  markers.sort((a, b) => a.pos - b.pos);
+    { marker: "_", type: "italic" }
+  ] as const;
 
-  // 4. Build a stack of active formats at each position
-  const stack: { marker: string; type: string }[] = [];
-  const activeAt: Set<string>[] = Array(blockText.length + 1)
-    .fill(null)
-    .map(() => new Set());
-  let m = 0;
-  for (let i = 0; i <= blockText.length; ++i) {
-    // Toggle marker at this position
-    while (m < markers.length && markers[m].pos === i) {
-      const top = stack[stack.length - 1];
-      if (
-        top &&
-        top.marker === markers[m].marker &&
-        top.type === markers[m].type
-      ) {
-        stack.pop();
+  type MarkerType = (typeof MARKERS)[number]["type"];
+
+  const stacks: Record<MarkerType, number[]> = {
+    bold: [],
+    underline: [],
+    strikethrough: [],
+    spoiler: [],
+    italic: [],
+    code: []
+  };
+  const activeAt: Set<string>[] = Array.from(
+    { length: blockText.length + 1 },
+    () => new Set<string>()
+  );
+
+  let i = 0;
+  while (i < blockText.length) {
+    const hit = MARKERS.find(({ marker }) => blockText.startsWith(marker, i));
+    if (hit) {
+      const { marker, type } = hit;
+      const stack = stacks[type];
+      if (stack.length > 0) {
+        const openPos = stack.pop()!;
+        const contentStart = openPos + marker.length;
+        const contentEnd = i;
+        if (contentEnd > contentStart) {
+          for (let j = contentStart; j < contentEnd; j++) {
+            activeAt[j].add(type);
+          }
+        }
       } else {
-        stack.push(markers[m]);
+        stack.push(i);
       }
-      m++;
+      i += marker.length;
+    } else {
+      i++;
     }
-    for (const fmt of stack) activeAt[i].add(fmt.marker);
   }
 
   const formatsInSelection = new Set<string>();
-  for (let i = selStart; i < selEnd; ++i) {
-    for (const type of activeAt[i] || []) {
+  for (let i = selStart; i < selEnd; i++) {
+    for (const type of activeAt[i]) {
       formatsInSelection.add(type);
     }
   }

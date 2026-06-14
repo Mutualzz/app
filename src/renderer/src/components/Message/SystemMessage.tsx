@@ -29,9 +29,7 @@ export const SystemMessage = observer(({ message }: Props) => {
       </MessageInfo>
       <MessageContent>
         <MessageAuthor message={message} />
-        {message.content && (
-          <MarkdownRenderer value={message.content} spaceId={message.spaceId} />
-        )}
+        {message.content && <MarkdownRenderer value={message.content} />}
         {"embeds" in message && message.embeds.length > 0 && (
           <Stack pb={0.25}>
             {message.embeds.map((embed, index) => (

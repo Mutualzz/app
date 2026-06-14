@@ -4,6 +4,7 @@ import { useAppStore } from "@hooks/useStores";
 import { Stack, Typography, useTheme } from "@mutualzz/ui-web";
 import { UserAvatar } from "@components/User/UserAvatar";
 import { RenderElementProps } from "slate-react";
+import { useMenu } from "@contexts/ContextMenu.context";
 
 interface Props {
   userId: Snowflake;
@@ -13,10 +14,13 @@ interface Props {
 export const UserMention = observer(({ userId, attributes }: Props) => {
   const app = useAppStore();
   const { theme } = useTheme();
+  const { openContextMenu } = useMenu();
   const space = app.spaces.active;
 
   const member = space?.members.get(userId);
   const user = app.users.get(userId);
+
+  if (!user) return null;
 
   return (
     <Stack
@@ -34,6 +38,13 @@ export const UserMention = observer(({ userId, attributes }: Props) => {
         },
         overflow: "hidden"
       }}
+      onContextMenu={(e) =>
+        openContextMenu(e, {
+          type: "user",
+          user,
+          member
+        })
+      }
     >
       <span style={{ position: "relative", top: 3 }}>
         <UserAvatar size={16} user={user} member={member} />

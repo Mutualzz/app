@@ -25,7 +25,8 @@ export const MemberList = observer(() => {
     : 0;
   const memberCount =
     typeof store?.memberCount === "number" ? store.memberCount : 0;
-  const hasMore = memberCount === 0 || loadedCount < memberCount;
+
+  const hasMore = !store ? true : loadedCount < memberCount;
 
   const handleLoadMore = useCallback(() => {
     if (!space || !channel) return;

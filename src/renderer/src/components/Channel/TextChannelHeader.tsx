@@ -6,6 +6,7 @@ import { observer } from "mobx-react-lite";
 import { HashIcon, UsersIcon } from "@phosphor-icons/react";
 import { IconButton } from "../IconButton";
 import { Tooltip } from "@components/Tooltip";
+import { MarkdownRenderer } from "@components/Markdown/MarkdownRenderer/MarkdownRenderer";
 
 interface Props {
   channel?: Channel | null;
@@ -37,7 +38,7 @@ export const TextChannelHeader = observer(({ channel }: Props) => {
         >
           <HashIcon /> {channel?.name}
         </Typography>
-        <Stack flex="1 1 auto">
+        <Stack flex="1 1 auto" alignItems="center">
           {channel?.topic && (
             <>
               <Divider
@@ -46,7 +47,7 @@ export const TextChannelHeader = observer(({ channel }: Props) => {
                 }}
                 orientation="vertical"
               />
-              <Typography textColor="muted">{channel.topic}</Typography>
+              <MarkdownRenderer value={channel.topic} />
             </>
           )}
         </Stack>

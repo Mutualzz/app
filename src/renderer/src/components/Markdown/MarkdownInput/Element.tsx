@@ -14,7 +14,6 @@ export const Element = ({
   element
 }: RenderElementProps) => {
   const { theme } = useTheme();
-
   switch (element.type) {
     case "blockquote":
       return (
@@ -30,6 +29,29 @@ export const Element = ({
         >
           {children}
         </blockquote>
+      );
+
+    case "codeBlock":
+      // The fence line (```lang) and closing ``` are kept as editable text
+      // inside the block — Discord-style. No separate label needed.
+      return (
+        <pre
+          {...attributes}
+          css={{
+            margin: "0.25em 0",
+            padding: "0.5em 0.75em",
+            borderRadius: 4,
+            backgroundColor: theme.colors.surface,
+            border: `1px solid ${theme.typography.colors.muted}`,
+            fontFamily: "monospace",
+            fontSize: "0.875em",
+            whiteSpace: "pre-wrap",
+            wordBreak: "break-all",
+            color: theme.typography.colors.primary
+          }}
+        >
+          {children}
+        </pre>
       );
 
     case "heading":
@@ -76,7 +98,6 @@ export const Element = ({
       switch (mentionType) {
         case "user":
           return <UserMention userId={mentionId} attributes={attributes} />;
-
         case "role":
           return <RoleMention roleId={mentionId} attributes={attributes} />;
         case "here":

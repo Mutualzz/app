@@ -111,7 +111,6 @@ export const Message = observer(({ message, header }: Props) => {
                   <MarkdownRenderer
                     textColor={isFailed ? theme.colors.danger : "primary"}
                     value={message.content}
-                    spaceId={message.spaceId}
                   />
                   {isSent && message.edited && (
                     <Tooltip

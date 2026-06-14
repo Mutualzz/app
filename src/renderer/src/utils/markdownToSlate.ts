@@ -1,5 +1,4 @@
-import shortcodeRegex from "emojibase-regex/shortcode";
-import type { Descendant, Text } from "slate";
+import type { Descendant } from "slate";
 import { getEmoji } from "./emojis/emojis";
 import { TWEMOJI_URL } from "./urls";
 
@@ -48,78 +47,93 @@ export function markdownToSlate(markdown: string): Descendant[] {
   return result;
 }
 
+const VOID_INLINE_PATTERN =
+  /(<a?:[^:]+:\d+>|<@&?\d+>|@everyone|@here|:[a-zA-Z0-9_]+:)/g;
+
 function parseInlineMarkdown(input: string): Descendant[] {
+  const parts = input.split(VOID_INLINE_PATTERN);
   const nodes: Descendant[] = [];
 
-  function tokenize(text: string): (Text | Descendant)[] {
-    const linkMatch = /\[([^[\]\n]+)\]\(([^()\s]+)\)/.exec(text);
-    if (linkMatch) {
-      const before = text.slice(0, linkMatch.index);
-      const label = linkMatch[1];
-      const url = linkMatch[2];
-      const after = text.slice(linkMatch.index + linkMatch[0].length);
+  for (const part of parts) {
+    if (!part) continue;
 
-      return [
-        ...tokenize(before),
-        {
-          type: "link",
-          url,
-          children: tokenize(label)
-        },
-        ...tokenize(after)
-      ];
+    // custom emoji  <a:name:id>  or  <:name:id>
+    const customEmojiMatch = /^<(a)?:([^:]+):(\d+)>$/.exec(part);
+    if (customEmojiMatch) {
+      nodes.push({
+        type: "customEmoji",
+        name: customEmojiMatch[2],
+        id: customEmojiMatch[3],
+        animated: !!customEmojiMatch[1],
+        url: "",
+        children: [{ text: "" }]
+      });
+      continue;
     }
 
-    const patterns: [RegExp, Partial<Text>][] = [
-      [/\*\*(.*?)\*\*/s, { bold: true }],
-      [/_(.*?)_/s, { italic: true }],
-      [/~~(.*?)~~/s, { strikethrough: true }],
-      [/`(.*?)`/s, { code: true }],
-      [/__([^_]+)__/s, { underline: true }],
-      [/\*(.*?)\*/s, { italic: true }],
-      [/\|\|(.+?)\|\|/s, { spoiler: true }]
-    ];
+    // user mention  <@id>
+    const userMentionMatch = /^<@(\d+)>$/.exec(part);
+    if (userMentionMatch) {
+      nodes.push({
+        type: "mention",
+        mentionType: "user",
+        id: userMentionMatch[1],
+        children: [{ text: "" }]
+      });
+      continue;
+    }
 
-    for (const [pattern, mark] of patterns) {
-      const match = pattern.exec(text);
-      if (match) {
-        const before = text.slice(0, match.index);
-        const inner = match[1];
-        const after = text.slice(match.index + match[0].length);
+    // role mention  <@&id>
+    const roleMentionMatch = /^<@&(\d+)>$/.exec(part);
+    if (roleMentionMatch) {
+      nodes.push({
+        type: "mention",
+        mentionType: "role",
+        id: roleMentionMatch[1],
+        children: [{ text: "" }]
+      });
+      continue;
+    }
 
-        return [
-          ...tokenize(before),
-          ...tokenize(inner).map((node) =>
-            "text" in node ? { ...mark, text: node.text } : node
-          ),
-          ...tokenize(after)
-        ];
+    if (part === "@everyone") {
+      nodes.push({
+        type: "mention",
+        mentionType: "everyone",
+        id: "everyone",
+        children: [{ text: "" }]
+      });
+      continue;
+    }
+    if (part === "@here") {
+      nodes.push({
+        type: "mention",
+        mentionType: "here",
+        id: "here",
+        children: [{ text: "" }]
+      });
+      continue;
+    }
+
+    // standard emoji shortcode  :smile:
+    const shortcodeMatch = /^:[a-zA-Z0-9_]+:$/.exec(part);
+    if (shortcodeMatch) {
+      const shortcode = part.slice(1, -1).toLowerCase();
+      const emoji = getEmoji(shortcode);
+      if (emoji) {
+        nodes.push({
+          type: "emoji",
+          name: `:${emoji.shortcodes?.[0]}:`,
+          url: `${TWEMOJI_URL}/${emoji.hexcode.toLowerCase()}.png`,
+          unicode: emoji.emoji,
+          children: [{ text: "" }]
+        });
+        continue;
       }
     }
 
-    const emojiMatch = shortcodeRegex.exec(text);
-    if (emojiMatch) {
-      const before = text.slice(0, emojiMatch.index);
-      const shortcode = emojiMatch[0].toLowerCase().replaceAll(/:/g, "");
-      const after = text.slice(emojiMatch.index + emojiMatch[0].length);
-
-      const emoji = getEmoji(shortcode);
-      const emojiNode: Descendant = emoji
-        ? {
-            type: "emoji",
-            name: `:${emoji.shortcodes?.[0]}:`,
-            url: `${TWEMOJI_URL}/${emoji.hexcode.toLowerCase()}.png`,
-            unicode: emoji.emoji,
-            children: [{ text: "" }]
-          }
-        : { text: `:${shortcode}:` };
-
-      return [...tokenize(before), emojiNode, ...tokenize(after)];
-    }
-
-    return text ? [{ text }] : [];
+    // Plain text — raw markdown preserved for decorate
+    nodes.push({ text: part });
   }
 
-  nodes.push(...tokenize(input));
   return nodes;
 }

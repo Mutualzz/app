@@ -19,6 +19,7 @@ import type { Role } from "@stores/objects/Role";
 import type { AccountStore } from "@stores/Account.store";
 import { SkinTone } from "@utils/emojis/emojiSprite";
 import { PickerEmoji } from "@utils/emojis/emojiPickerData";
+import { useAppStore } from "@hooks/useStores";
 
 export type ContextMenuPayload =
   | {
@@ -136,6 +137,7 @@ function getMenuId(menu: ContextMenuPayload): string {
 
 export const ContextMenuProvider = observer(
   ({ children }: PropsWithChildren): ReactElement => {
+    const app = useAppStore();
     const [menu, setMenuState] = useState<ContextMenuPayload | null>(null);
 
     const pendingShowRef = useRef<{
@@ -157,6 +159,9 @@ export const ContextMenuProvider = observer(
     ) => {
       if ("stopPropagation" in e) e.stopPropagation();
       if ("preventDefault" in e) e.preventDefault();
+
+      if (nextMenu.type === "user" && app.account?.id === nextMenu.user.id)
+        return;
 
       const mouseEvent = "nativeEvent" in e ? e.nativeEvent : e;
       mouseEvent.preventDefault?.();

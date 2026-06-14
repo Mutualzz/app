@@ -75,7 +75,7 @@ export class AppStore {
   versions: {
     app: string | null;
   } = {
-    app: "6.1.0"
+    app: "6.6.0"
   };
 
   readonly tokenStorage: TokenStorage;

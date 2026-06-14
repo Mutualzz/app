@@ -54,7 +54,6 @@ export const SpaceSettingsContent = observer(
           }}
           px={{ xs: "0.5rem", sm: 3 }}
           py={{ xs: "0.5rem", sm: 4 }}
-          borderLeftWidth="0px !important"
           elevation={app.settings?.preferEmbossed ? 3 : 1}
           justifyContent="space-between"
           borderTop="0 !important"

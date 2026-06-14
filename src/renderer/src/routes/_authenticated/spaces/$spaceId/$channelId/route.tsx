@@ -24,11 +24,11 @@ function RouteComponent() {
 
   const space = app.spaces.get(spaceId);
 
-  // Restrict to currently visible navigable channels in this space.
+  const channel = space?.channels.find((ch) => ch.id === channelId) ?? null;
   const activeChannel =
-    space?.visibleChannels.find(
-      (ch) => ch.id === channelId && ch.canRedirect
-    ) ?? null;
+    channel?.canRedirect && space?.members.me?.canViewChannel(channel)
+      ? channel
+      : null;
 
   const openChat = Boolean(activeChannel?.isVoiceChannel && chat === true);
 

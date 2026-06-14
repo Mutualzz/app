@@ -15,7 +15,7 @@ import { Message } from "@stores/objects/Message";
 import type { Space } from "@stores/objects/Space";
 import { makeAutoObservable, observable } from "mobx";
 import type { QueuedMessage } from "./QueuedMessage";
-import { ChannelPermissionOverwrite } from "./ChannelOverwrite";
+import { ChannelPermissionOverwrite } from "./ChannelPermissionOverwrite";
 import { BitField, channelFlags, type ChannelFlags } from "@mutualzz/bitfield";
 import { murmur } from "@utils/index";
 import { REST } from "@stores/REST.store";
@@ -53,7 +53,7 @@ export class Channel {
 
   ownerId?: Snowflake | null;
   raw: APIChannel;
-  overwrites: ChannelPermissionOverwrite[] = [];
+  overwrites = observable.array<ChannelPermissionOverwrite>();
   private readonly logger = new Logger({
     tag: "Channel"
   });
@@ -107,8 +107,10 @@ export class Channel {
     this.ownerId = channel.ownerId;
     if (channel.owner) this._owner = this.app.users.add(channel.owner);
 
-    this.overwrites = (channel.overwrites ?? []).map(
-      (ow) => new ChannelPermissionOverwrite(this.app, ow)
+    this.overwrites = observable.array(
+      (channel.overwrites || []).map(
+        (ow) => new ChannelPermissionOverwrite(this.app, ow)
+      )
     );
 
     makeAutoObservable(this, {}, { autoBind: true });
@@ -329,8 +331,10 @@ export class Channel {
     if (channel.recipients)
       this._recipients.replace(this.app.users.addAll(channel.recipients));
 
-    this.overwrites = (channel.overwrites ?? []).map(
-      (ow) => new ChannelPermissionOverwrite(this.app, ow)
+    this.overwrites = observable.array(
+      (channel.overwrites || []).map(
+        (ow) => new ChannelPermissionOverwrite(this.app, ow)
+      )
     );
 
     this.flags = BitField.fromString(channelFlags, channel.flags.toString());
@@ -428,5 +432,9 @@ export class Channel {
       parentOnly,
       spaceId: this.raw.spaceId ?? undefined
     });
+  }
+
+  toJSON() {
+    return this.raw;
   }
 }

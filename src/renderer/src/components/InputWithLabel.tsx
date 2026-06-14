@@ -1,18 +1,20 @@
 import { Input, type InputProps, Stack, Typography } from "@mutualzz/ui-web";
 import type { ReactNode } from "react";
 
+type InputWithLabelProps = InputProps & {
+  name: string;
+  description?: ReactNode;
+  label?: ReactNode;
+  apiError?: ReactNode;
+};
+
 export const InputWithLabel = ({
   label,
   name,
   description,
   apiError,
   ...props
-}: {
-  name: string;
-  description?: ReactNode;
-  label?: string;
-  apiError?: string;
-} & InputProps) => (
+}: InputWithLabelProps) => (
   <Stack
     direction="column"
     spacing={{ xs: 0.125, sm: 0.25, md: 0.5 }}

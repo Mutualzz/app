@@ -4,51 +4,29 @@ import { markdownToSlate } from "@utils/markdownToSlate";
 import { getActiveFormats } from "@utils/markdownUtils";
 import { slateToMarkdown } from "@utils/slateToMarkdown";
 import { wrapSelectionWith } from "@utils/wrapSelectionWith";
-import React, {
-  forwardRef,
-  useCallback,
-  useEffect,
-  useImperativeHandle,
-  useMemo,
-  useRef,
-  useState
-} from "react";
+import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
 import {
   createEditor,
   type Descendant,
   type Editor as SlateEditor,
   Element as SlateElement,
-  type Node,
+  Node,
   Range,
   Text
 } from "slate";
 import { withHistory } from "slate-history";
-import {
-  Editable,
-  ReactEditor,
-  type RenderElementProps,
-  type RenderLeafProps,
-  Slate,
-  withReact
-} from "slate-react";
+import { Editable, ReactEditor, type RenderElementProps, type RenderLeafProps, Slate, withReact } from "slate-react";
 import { HoverToolbar } from "../HoverToolbar/HoverToolbar";
 import { Element } from "./Element";
 import { Leaf } from "./Leaf";
 import { MarkdownInputContext } from "./MarkdownInput.context";
-import {
-  parseMarkdownToRanges,
-  parseSpoilerRanges,
-  resolveMarkdownStyles
-} from "./MarkdownInput.helpers";
+import { parseMarkdownToRanges, parseSpoilerRanges, resolveMarkdownStyles } from "./MarkdownInput.helpers";
 import type { MarkdownInputProps } from "./MarkdownInput.types";
 import { withEmojis } from "./plugins/withEmojis";
 import { withSyntax } from "./plugins/withSyntax";
 import { EmojiToolbar } from "@components/Expression/EmojiToolbar";
 import { useHotkeys } from "@tanstack/react-hotkeys";
-import {
-  insertMention,
-  withMentions
-} from "@components/Markdown/MarkdownInput/plugins/withMentions";
+import { insertMention, withMentions } from "@components/Markdown/MarkdownInput/plugins/withMentions";
 import { MentionPicker } from "@components/MentionPicker";
 import { ExpressionPickerTrigger } from "@components/Expression/ExpressionPickerTrigger";
 
@@ -108,9 +86,11 @@ const MarkdownInput = forwardRef<MarkdownInputHandle, MarkdownInputProps>(
         ReactEditor.focus(editor);
 
         if (at === "selectAll") {
+          const [, firstPath] = Node.first(editor, []);
+          const [, lastPath] = Node.last(editor, []);
           editor.select({
-            anchor: editor.start([]),
-            focus: editor.end([])
+            anchor: editor.start(firstPath),
+            focus: editor.end(lastPath)
           });
           return;
         }
@@ -160,9 +140,11 @@ const MarkdownInput = forwardRef<MarkdownInputHandle, MarkdownInputProps>(
       {
         hotkey: "Mod+A",
         callback: () => {
+          const [, firstPath] = Node.first(editor, []);
+          const [, lastPath] = Node.last(editor, []);
           editor.select({
-            anchor: editor.start([]),
-            focus: editor.end([])
+            anchor: editor.start(firstPath),
+            focus: editor.end(lastPath)
           });
         },
         options: {
@@ -299,7 +281,7 @@ const MarkdownInput = forwardRef<MarkdownInputHandle, MarkdownInputProps>(
                 textBefore = node.text.substring(beforeIndex + 1, start.offset);
                 break;
               }
-              if (char === " ") break;
+              if (/[\s*_`~|]/.test(char)) break;
               beforeIndex--;
             }
           }
@@ -345,7 +327,22 @@ const MarkdownInput = forwardRef<MarkdownInputHandle, MarkdownInputProps>(
         >
           <div
             css={{
-              position: "relative"
+              position: "relative",
+              display: "flex",
+              alignItems: "center",
+              ...resolveResponsiveMerge(
+                theme,
+                { color, textColor, variant },
+                ({ color: c, textColor: tc, variant: v }) => ({
+                  ...resolveMarkdownStyles(theme, c, tc)[v]
+                })
+              ),
+              ...(disabled && {
+                opacity: 0.5,
+                pointerEvents: "none",
+                cursor: "not-allowed"
+              }),
+              ...css
             }}
           >
             <HoverToolbar />
@@ -386,25 +383,17 @@ const MarkdownInput = forwardRef<MarkdownInputHandle, MarkdownInputProps>(
               css={{
                 display: "block",
                 position: "relative",
-                width: "100%",
-                height: "100%",
-                padding: "0.25em",
+                flex: 1,
                 minWidth: 0,
+                padding: "0.25em",
                 boxSizing: "border-box",
-                overflowX: "auto",
-                ...resolveResponsiveMerge(
-                  theme,
-                  { color, textColor, variant },
-                  ({ color: c, textColor: tc, variant: v }) => ({
-                    ...resolveMarkdownStyles(theme, c, tc)[v]
-                  })
-                ),
-                ...(disabled && {
-                  opacity: 0.5,
-                  pointerEvents: "none",
-                  cursor: "not-allowed"
-                }),
-                ...css
+                overflowX: "hidden",
+                wordBreak: "break-word",
+                overflowWrap: "break-word",
+                background: "transparent",
+                border: "none",
+                outline: "none",
+                borderRadius: 0
               }}
               disabled={disabled}
               disableDefaultStyles
@@ -412,19 +401,10 @@ const MarkdownInput = forwardRef<MarkdownInputHandle, MarkdownInputProps>(
             />
 
             {!disabled && (
-              <div
-                style={{
-                  position: "absolute",
-                  right: 0,
-                  top: 0,
-                  zIndex: 1
-                }}
-              >
-                <ExpressionPickerTrigger
-                  emojiPicker={emojiPicker}
-                  gifPicker={gifPicker}
-                />
-              </div>
+              <ExpressionPickerTrigger
+                emojiPicker={emojiPicker}
+                gifPicker={gifPicker}
+              />
             )}
 
             {mentionSearch !== null && mentionAnchor && (
@@ -434,7 +414,7 @@ const MarkdownInput = forwardRef<MarkdownInputHandle, MarkdownInputProps>(
                   const { selection } = editor;
                   if (selection) {
                     const start = editor.before(selection.anchor, {
-                      unit: "word",
+                      unit: "character",
                       distance: mentionSearch.length + 1
                     });
                     if (start) {

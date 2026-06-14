@@ -1,15 +1,15 @@
 import type { CSSObject, Theme } from "@emotion/react";
 import {
+  type Color,
+  type ColorLike,
   createColor,
   formatColor,
   isValidColorInput,
   resolveColor,
   resolveTypographyColor,
-  type Color,
-  type ColorLike,
   type TypographyColor
 } from "@mutualzz/ui-core";
-import { Node, Text, type Range } from "slate";
+import { Node, type Range, Text } from "slate";
 
 const tokenDefs = [
   { symbol: "**", type: "bold" },
@@ -17,7 +17,6 @@ const tokenDefs = [
   { symbol: "__", type: "underline" },
   { symbol: "~~", type: "strikethrough" },
   { symbol: "`", type: "code" },
-  { symbol: "||", type: "spoiler" },
   { symbol: "_", type: "italic" }
 ] as const;
 
@@ -33,7 +32,6 @@ export const parseMarkdownToRanges = (
     italic: [],
     strikethrough: [],
     underline: [],
-    spoiler: [],
     code: []
   };
 
@@ -171,7 +169,6 @@ export const resolveMarkdownStyles = (
   color: Color | ColorLike,
   textColor: TypographyColor | ColorLike | "inherit"
 ): Record<string, CSSObject> => {
-  const { colors } = theme;
   const resolvedColor = resolveColor(color, theme);
 
   const parsedTextColor = resolveTypographyColor(textColor, theme);
@@ -191,8 +188,8 @@ export const resolveMarkdownStyles = (
 
   return {
     outlined: {
-      background: colors.background,
-      border: `1px solid ${formatColor(resolvedColor, { alpha: 30, format: "hexa" })}`,
+      background: "transparent",
+      border: `1px solid ${formatColor(resolvedColor)}`,
       color: textColorFinal,
       borderRadius: 8,
       ":focus": {

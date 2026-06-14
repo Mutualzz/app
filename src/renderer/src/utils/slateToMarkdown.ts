@@ -12,7 +12,7 @@ function serializeNode(node: Descendant): string {
 
   switch (element.type) {
     case "heading":
-      return `${children}`;
+      return `${"#".repeat(element.level)} ${children}`;
     case "blockquote":
       return children
         .split("\n")
