@@ -9,6 +9,7 @@ import { action, makeObservable, observable } from "mobx";
 import { MessageBase } from "./MessageBase";
 import type { QueuedMessage, QueuedMessageData } from "./QueuedMessage";
 import { BitField, messageFlags, MessageFlags } from "@mutualzz/bitfield";
+import { Expression } from "@stores/objects/Expression";
 
 export type MessageLike = Message | QueuedMessage;
 export type MessageLikeData = APIMessage | QueuedMessageData;
@@ -22,6 +23,7 @@ export class Message extends MessageBase {
   embeds: APIMessageEmbed[];
   flags: BitField<MessageFlags>;
   mentions: APIMessageMention[];
+  expressions = observable.array<Expression>();
 
   edited: boolean;
 
@@ -43,7 +45,10 @@ export class Message extends MessageBase {
 
     this.mentions = data.mentions ?? [];
 
-    this.embeds = data.embeds;
+    this.embeds = data.embeds ?? [];
+    this.expressions = observable.array<Expression>(
+      this.app.expressions.addAll(data.expressions ?? [])
+    );
     this.flags = BitField.fromString(messageFlags, data.flags.toString());
 
     this.spaceId = data.spaceId;
@@ -53,6 +58,7 @@ export class Message extends MessageBase {
       updatedAt: observable,
       nonce: observable,
       embeds: observable.shallow,
+      expressions: observable,
       edited: observable,
       editing: observable,
       update: action.bound,
@@ -74,6 +80,11 @@ export class Message extends MessageBase {
     this.content = message.content;
     this.nonce = message.nonce ?? null;
     this.embeds = message.embeds ?? this.embeds ?? [];
+    this.expressions = observable.array<Expression>(
+      this.app.expressions.addAll(
+        message.expressions ?? this.expressions.map((exp) => exp.toJSON()) ?? []
+      )
+    );
 
     this.createdAt = new Date(message.createdAt);
     this.updatedAt = message.updatedAt ? new Date(message.updatedAt) : null;

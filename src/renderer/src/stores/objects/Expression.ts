@@ -10,6 +10,7 @@ import {
 } from "@mutualzz/types";
 import type { AppStore } from "@stores/App.store";
 import { REST } from "@stores/REST.store";
+import { BitField, ExpressionFlags, expressionFlags } from "@mutualzz/bitfield";
 
 export class Expression {
   id: Snowflake;
@@ -24,6 +25,8 @@ export class Expression {
 
   createdAt: Date;
 
+  flags: BitField<ExpressionFlags>;
+
   constructor(
     private readonly app: AppStore,
     data: APIExpression
@@ -36,6 +39,7 @@ export class Expression {
     this.spaceId = data.spaceId;
     this.animated = data.animated;
     this.createdAt = new Date(data.createdAt);
+    this.flags = BitField.fromString(expressionFlags, data.flags.toString());
 
     makeAutoObservable(this, {}, { autoBind: true });
   }
@@ -78,5 +82,19 @@ export class Expression {
 
   delete() {
     return this.app.rest.delete(`/expressions/${this.id}`);
+  }
+
+  toJSON(): APIExpression {
+    return {
+      id: this.id,
+      type: this.type,
+      name: this.name,
+      assetHash: this.assetHash,
+      authorId: this.authorId,
+      spaceId: this.spaceId,
+      createdAt: this.createdAt,
+      animated: this.animated,
+      flags: this.flags.toBigInt()
+    };
   }
 }

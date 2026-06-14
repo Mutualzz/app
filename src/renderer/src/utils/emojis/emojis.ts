@@ -62,7 +62,7 @@ export async function getCustomEmoji(shortcode: string) {
   if (!id) return null;
 
   const app = useAppStore();
-  return (await app.expressions.resolve(id)) ?? null;
+  return app.expressions.get(id) ?? null;
 }
 
 export function findCustomEmoji(shortcode: string) {

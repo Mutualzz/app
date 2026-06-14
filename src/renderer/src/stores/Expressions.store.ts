@@ -97,7 +97,7 @@ export class ExpressionsStore {
   }
 
   addAll(expressions: APIExpression[]) {
-    expressions.forEach((expression) => this.add(expression));
+    return expressions.map((expression) => this.add(expression));
   }
 
   remove(id: Snowflake) {
