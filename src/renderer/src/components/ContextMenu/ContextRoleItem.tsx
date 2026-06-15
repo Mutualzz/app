@@ -3,6 +3,7 @@ import { ContextItem } from "@components/ContextItem";
 import { Checkbox, Stack, Typography } from "@mutualzz/ui-web";
 import styled from "@emotion/styled";
 import { Role } from "@stores/objects/Role";
+import { RoleHierarchyLock, ROLE_HIERARCHY_ASSIGN_TOOLTIP } from "@components/SpaceSettings/pages/people/roles/RoleHierarchyLock";
 
 const RoleColorBlob = styled("span")<{ color: string }>(({ color }) => ({
   width: 12,
@@ -14,19 +15,29 @@ const RoleColorBlob = styled("span")<{ color: string }>(({ color }) => ({
 interface RoleItemProps {
   role: Role;
   canManage: boolean;
-  toggleRole: Function;
+  toggleRole: (role: Role) => void;
   hasRole: boolean;
   toggling: boolean;
+  locked?: boolean;
 }
 
 export const ContextRoleItem = observer(
-  ({ role, hasRole, canManage, toggleRole, toggling }: RoleItemProps) => {
+  ({
+    role,
+    hasRole,
+    canManage,
+    toggleRole,
+    toggling,
+    locked = false
+  }: RoleItemProps) => {
+    const interactive = canManage && !locked;
+
     return (
       <ContextItem
         variant="plain"
-        disabled={toggling}
+        disabled={toggling || locked}
         onClick={() => {
-          toggleRole(role);
+          if (interactive) toggleRole(role);
         }}
         closeOnClick={false}
         style={{
@@ -39,7 +50,12 @@ export const ContextRoleItem = observer(
             <Typography level="body-sm">{role.name}</Typography>
           </Stack>
 
-          {canManage ? (
+          {locked ? (
+            <RoleHierarchyLock
+              size={14}
+              tooltip={ROLE_HIERARCHY_ASSIGN_TOOLTIP}
+            />
+          ) : canManage ? (
             <Checkbox
               disabled={toggling}
               color="neutral"

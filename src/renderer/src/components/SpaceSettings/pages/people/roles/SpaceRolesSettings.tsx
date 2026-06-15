@@ -1,5 +1,5 @@
 import type { Space } from "@stores/objects/Space";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { Divider, Input, Stack, Typography, useTheme } from "@mutualzz/ui-web";
 import { Button } from "@components/Button";
 import { useMutation } from "@tanstack/react-query";
@@ -17,6 +17,7 @@ import { useModal } from "@contexts/Modal.context";
 import { RoleActionConfirm } from "@components/Modals/RoleActionConfirm";
 import {
   ArrowRightIcon,
+  DotsSixVerticalIcon,
   MagnifyingGlassIcon,
   PencilIcon,
   ShieldIcon,
@@ -25,6 +26,101 @@ import {
   UsersFourIcon
 } from "@phosphor-icons/react";
 import { Tooltip } from "@components/Tooltip";
+import {
+  closestCenter,
+  DndContext,
+  type DragEndEvent,
+  PointerSensor,
+  useSensor,
+  useSensors
+} from "@dnd-kit/core";
+import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
+import {
+  SortableContext,
+  useSortable,
+  verticalListSortingStrategy
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import {
+  filterRoles,
+  getHierarchyContext,
+  getPositionCeiling,
+  reorderRolesFromDrag,
+  splitRolesByHierarchy
+} from "./roleHierarchy.utils";
+import { RoleHierarchyLock } from "./RoleHierarchyLock";
+
+const ROLE_DRAG_WIDTH = "1.75rem";
+const ROLE_MEMBERS_WIDTH = "8rem";
+const ROLE_ACTIONS_WIDTH = "6.5rem";
+
+interface RoleListColumnsProps {
+  isHeader?: boolean;
+  reserveDragColumn?: boolean;
+  dragHandle?: ReactNode;
+  locked?: boolean;
+  name: ReactNode;
+  members: ReactNode;
+  actions: ReactNode;
+}
+
+const RoleListColumns = ({
+  isHeader = false,
+  reserveDragColumn = false,
+  dragHandle,
+  locked = false,
+  name,
+  members,
+  actions
+}: RoleListColumnsProps) => (
+  <Stack direction="row" alignItems="center" width="100%" spacing={5}>
+    {isHeader ? (
+      <Stack
+        flex={1}
+        minWidth={0}
+        direction="row"
+        alignItems="center"
+        spacing={2.5}
+      >
+        {name}
+      </Stack>
+    ) : (
+      <>
+        {reserveDragColumn && (
+          <Stack
+            width={ROLE_DRAG_WIDTH}
+            flexShrink={0}
+            alignItems="center"
+            justifyContent="center"
+          >
+            {dragHandle ?? (locked ? <RoleHierarchyLock /> : null)}
+          </Stack>
+        )}
+        <Stack flex={1} minWidth={0} direction="row" alignItems="center">
+          {name}
+        </Stack>
+      </>
+    )}
+    <Stack
+      width={ROLE_MEMBERS_WIDTH}
+      flexShrink={0}
+      direction="row"
+      alignItems="center"
+      spacing={1.25}
+    >
+      {members}
+    </Stack>
+    <Stack
+      width={ROLE_ACTIONS_WIDTH}
+      flexShrink={0}
+      direction="row"
+      spacing={2}
+      justifyContent="flex-end"
+    >
+      {actions}
+    </Stack>
+  </Stack>
+);
 
 interface Props {
   space: Space;
@@ -37,10 +133,23 @@ interface RoleItemProps {
   last: boolean;
   space: Space;
   onClick: () => void;
+  dragHandle?: ReactNode;
+  reserveDragColumn?: boolean;
+  locked?: boolean;
 }
 
 const RoleItem = observer(
-  ({ theme, role, last, space, onClick, membersWithRole }: RoleItemProps) => {
+  ({
+    theme,
+    role,
+    last,
+    space,
+    onClick,
+    membersWithRole,
+    dragHandle,
+    reserveDragColumn = false,
+    locked = false
+  }: RoleItemProps) => {
     const { openModal } = useModal();
     const { openContextMenu } = useMenu();
 
@@ -69,46 +178,68 @@ const RoleItem = observer(
             })
           }
         >
-          <Stack width="100%" direction="row" alignItems="center">
-            <Stack direction="row" spacing={2.5} alignItems="center">
-              <ShieldIcon weight="fill" size={16} color={role.color} />
-              <Typography fontWeight="bold">{role.name}</Typography>
-            </Stack>
-            <Typography
-              display="flex"
-              spacing={1.25}
-              alignItems="center"
-              mx="auto"
-            >
-              {membersWithRole} <UserIcon />
-            </Typography>
-            <Stack spacing={2} ml="auto">
-              <Tooltip content="Edit" placement="top">
-                <IconButton
-                  variant="soft"
-                  onClick={onClick}
-                  padding={8}
-                  size="sm"
-                >
-                  <PencilIcon weight="fill" />
-                </IconButton>
-              </Tooltip>
-              <Tooltip content="Delete" placement="top">
-                <IconButton
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    openModal("delete-role", <RoleActionConfirm role={role} />);
+          <RoleListColumns
+            reserveDragColumn={reserveDragColumn}
+            dragHandle={dragHandle}
+            locked={locked}
+            name={
+              <Stack
+                direction="row"
+                spacing={2.5}
+                alignItems="center"
+                css={{ minWidth: 0, width: "100%" }}
+              >
+                <ShieldIcon weight="fill" size={16} color={role.color} />
+                <Typography
+                  fontWeight="bold"
+                  title={role.name}
+                  css={{
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap"
                   }}
-                  color="danger"
-                  padding={8}
-                  variant="soft"
-                  size="sm"
                 >
-                  <TrashIcon weight="fill" />
-                </IconButton>
-              </Tooltip>
-            </Stack>
-          </Stack>
+                  {role.name}
+                </Typography>
+              </Stack>
+            }
+            members={
+              <>
+                {membersWithRole} <UserIcon />
+              </>
+            }
+            actions={
+              <>
+                <Tooltip content="Edit" placement="top">
+                  <IconButton
+                    variant="soft"
+                    onClick={onClick}
+                    padding={8}
+                    size="sm"
+                  >
+                    <PencilIcon weight="fill" />
+                  </IconButton>
+                </Tooltip>
+                <Tooltip content="Delete" placement="top">
+                  <IconButton
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      openModal(
+                        "delete-role",
+                        <RoleActionConfirm role={role} />
+                      );
+                    }}
+                    color="danger"
+                    padding={8}
+                    variant="soft"
+                    size="sm"
+                  >
+                    <TrashIcon weight="fill" />
+                  </IconButton>
+                </Tooltip>
+              </>
+            }
+          />
         </AnimatedStack>
         {!last && (
           <Divider
@@ -123,11 +254,100 @@ const RoleItem = observer(
   }
 );
 
+interface SortableRoleItemProps {
+  theme: Theme;
+  role: Role;
+  membersWithRole: number;
+  last: boolean;
+  space: Space;
+  onClick: () => void;
+  disabled: boolean;
+  reserveDragColumn?: boolean;
+  locked?: boolean;
+}
+
+const SortableRoleItem = observer(
+  ({
+    theme,
+    role,
+    last,
+    space,
+    onClick,
+    membersWithRole,
+    disabled,
+    reserveDragColumn = false,
+    locked = false
+  }: SortableRoleItemProps) => {
+    const {
+      attributes,
+      listeners,
+      setNodeRef,
+      setActivatorNodeRef,
+      transform,
+      transition,
+      isDragging
+    } = useSortable({
+      id: role.id,
+      disabled
+    });
+
+    const dragHandle = (
+      <Tooltip content="Drag to reorder" placement="top">
+        <Stack
+          ref={setActivatorNodeRef}
+          {...attributes}
+          {...listeners}
+          alignItems="center"
+          justifyContent="center"
+          css={{
+            cursor: disabled ? "default" : "grab",
+            opacity: disabled ? 0.35 : 0.6,
+            touchAction: "none",
+            "&:hover": disabled ? undefined : { opacity: 1 }
+          }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <DotsSixVerticalIcon size={18} weight="bold" />
+        </Stack>
+      </Tooltip>
+    );
+
+    return (
+      <div
+        ref={setNodeRef}
+        style={{
+          transform: CSS.Transform.toString(transform),
+          transition,
+          opacity: isDragging ? 0.5 : 1,
+          zIndex: isDragging ? 999 : undefined
+        }}
+      >
+        <RoleItem
+          theme={theme}
+          role={role}
+          last={last}
+          space={space}
+          onClick={onClick}
+          membersWithRole={membersWithRole}
+          dragHandle={disabled ? undefined : dragHandle}
+          reserveDragColumn={reserveDragColumn}
+          locked={locked}
+        />
+      </div>
+    );
+  }
+);
+
 export const SpaceRolesSettings = observer(({ space }: Props) => {
   const app = useAppStore();
   const { theme } = useTheme();
   const [search, setSearch] = useState("");
   const [currentRole, setCurrentRole] = useState<Role | null>(null);
+  const [isReordering, setIsReordering] = useState(false);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } })
+  );
 
   const { mutate: fetchRoles } = useMutation({
     mutationKey: ["fetch-roles", space.id],
@@ -147,20 +367,48 @@ export const SpaceRolesSettings = observer(({ space }: Props) => {
     if (space.roles.all.length === 0) fetchRoles();
   }, [space.roles.all.length]);
 
-  const roles = space.roles.assignable;
   const everyoneRole = space.roles.get(space.id);
+  const me = space.members.me;
 
-  const otherRoles = roles
-    .filter((r) => r.id !== space.id)
-    .filter((r) =>
-      search.trim() === ""
-        ? true
-        : r.name.toLowerCase().includes(search.toLowerCase()) ||
-          r.id.toLowerCase().includes(search.toLowerCase())
-    );
+  const hierarchyContext = getHierarchyContext(space, me);
+  const { fixedRoles, reorderableRoles } = splitRolesByHierarchy(
+    space.roles.byHierarchy,
+    hierarchyContext
+  );
+
+  const isSearching = search.trim() !== "";
+  const visibleFixedRoles = filterRoles(fixedRoles, search);
+  const visibleReorderableRoles = filterRoles(reorderableRoles, search);
+  const visibleRoles = [...visibleFixedRoles, ...visibleReorderableRoles];
+  const canDragRoles =
+    hierarchyContext.canReorder && !isSearching && !isReordering;
+
+  const positionCeiling = getPositionCeiling(
+    fixedRoles,
+    reorderableRoles.length
+  );
 
   const calculateMembersWithRole = (roleId: string) => {
     return space.members.all.filter((m) => m.roles.has(roleId)).length;
+  };
+
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    setIsReordering(true);
+    try {
+      await reorderRolesFromDrag(
+        space,
+        reorderableRoles,
+        active.id,
+        over.id,
+        hierarchyContext,
+        positionCeiling
+      );
+    } finally {
+      setIsReordering(false);
+    }
   };
 
   if (currentRole)
@@ -170,10 +418,39 @@ export const SpaceRolesSettings = observer(({ space }: Props) => {
         membersWithRole={calculateMembersWithRole(currentRole.id)}
         currentRole={currentRole}
         setCurrentRole={setCurrentRole}
-        roles={everyoneRole ? [...otherRoles, everyoneRole] : otherRoles}
         space={space}
       />
     );
+
+  const renderRoleItem = (
+    role: Role,
+    last: boolean,
+    sortable: boolean,
+    locked = false
+  ) => {
+    const props = {
+      theme,
+      role,
+      last,
+      space,
+      membersWithRole: calculateMembersWithRole(role.id),
+      onClick: () => setCurrentRole(role),
+      reserveDragColumn: canDragRoles,
+      locked: locked && canDragRoles
+    };
+
+    if (sortable) {
+      return (
+        <SortableRoleItem
+          key={`role-${role.id}`}
+          {...props}
+          disabled={!canDragRoles}
+        />
+      );
+    }
+
+    return <RoleItem key={`role-${role.id}`} {...props} />;
+  };
 
   return (
     <Stack px={3} direction="column" pt={2.5} spacing={10}>
@@ -223,13 +500,21 @@ export const SpaceRolesSettings = observer(({ space }: Props) => {
         </Button>
       </Stack>
       <Stack direction="column">
-        {otherRoles.length > 0 && (
-          <Stack direction="column" spacing={2}>
-            <Stack flex={1} direction="row" alignItems="center" px="1rem">
-              <Typography flex={1}>Roles - {otherRoles.length}</Typography>
-              <Typography flex={1}>Members</Typography>
-              <Typography flex={1}>Actions</Typography>
-            </Stack>
+        {visibleRoles.length > 0 && (
+          <Stack direction="column" spacing={2} px={2.5}>
+            <RoleListColumns
+              isHeader
+              reserveDragColumn={canDragRoles}
+              name={<Typography>Roles - {visibleRoles.length}</Typography>}
+              members={<Typography>Members</Typography>}
+              actions={<Typography>Actions</Typography>}
+            />
+            {canDragRoles && (
+              <Typography level="body-xs" color="muted">
+                Roles higher in the list have more authority. Drag roles to
+                change their hierarchy.
+              </Typography>
+            )}
             <Divider
               lineColor="muted"
               css={{
@@ -239,25 +524,56 @@ export const SpaceRolesSettings = observer(({ space }: Props) => {
           </Stack>
         )}
 
-        {otherRoles.length === 0 && (
+        {visibleRoles.length === 0 && (
           <Stack justifyContent="center" alignItems="center" py="4rem">
             <Typography textAlign="center" color="muted">
-              No roles have been created for this space yet.
+              {isSearching
+                ? "No roles match your search."
+                : "No roles have been created for this space yet."}
             </Typography>
           </Stack>
         )}
+
         <Stack direction="column" justifyContent="center">
-          {otherRoles.map((role, i) => (
-            <RoleItem
-              membersWithRole={calculateMembersWithRole(role.id)}
-              key={`role-${role.id}`}
-              space={space}
-              theme={theme}
-              role={role}
-              last={i === roles.length - 1}
-              onClick={() => setCurrentRole(role)}
-            />
-          ))}
+          {visibleFixedRoles.map((role, i) =>
+            renderRoleItem(
+              role,
+              visibleReorderableRoles.length === 0 &&
+                i === visibleFixedRoles.length - 1,
+              false,
+              true
+            )
+          )}
+
+          {canDragRoles && visibleReorderableRoles.length > 0 ? (
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              modifiers={[restrictToVerticalAxis]}
+              onDragEnd={handleDragEnd}
+            >
+              <SortableContext
+                items={visibleReorderableRoles.map((r) => r.id)}
+                strategy={verticalListSortingStrategy}
+              >
+                {visibleReorderableRoles.map((role, i) =>
+                  renderRoleItem(
+                    role,
+                    i === visibleReorderableRoles.length - 1,
+                    true
+                  )
+                )}
+              </SortableContext>
+            </DndContext>
+          ) : (
+            visibleReorderableRoles.map((role, i) =>
+              renderRoleItem(
+                role,
+                i === visibleReorderableRoles.length - 1,
+                false
+              )
+            )
+          )}
         </Stack>
       </Stack>
     </Stack>

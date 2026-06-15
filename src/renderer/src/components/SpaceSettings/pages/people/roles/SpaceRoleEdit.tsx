@@ -7,8 +7,6 @@ import { Button } from "@components/Button";
 import { IconButton } from "@components/IconButton";
 import { useMutation } from "@tanstack/react-query";
 import type { Space } from "@stores/objects/Space";
-import { styled } from "@mutualzz/ui-core";
-import { useMenu } from "@contexts/ContextMenu.context";
 import { useAppStore } from "@hooks/useStores";
 import { SpaceRoleEditDisplay } from "@components/SpaceSettings/pages/people/roles/SpaceRoleEditDisplay";
 import type { APIRole } from "@mutualzz/types";
@@ -19,23 +17,16 @@ import { RoleActionConfirm } from "@components/Modals/RoleActionConfirm";
 import { useModal } from "@contexts/Modal.context";
 import { ArrowLeftIcon, PlusIcon, TrashIcon } from "@phosphor-icons/react";
 import { SpaceRoleEditManageMembers } from "./SpaceRoleEditManageMembers";
+import { SpaceRoleEditRoleList } from "./SpaceRoleEditRoleList";
 
 interface Props {
   membersWithRole: number;
   currentRole: Role;
   setCurrentRole: (role: Role | null) => void;
-  roles: Role[];
   space: Space;
 }
 
 type RoleTab = "display" | "permissions" | "manage-members";
-
-const RoleColorBlob = styled("span")<{ color: string }>(({ color }) => ({
-  width: 12,
-  height: 12,
-  backgroundColor: color,
-  borderRadius: "50%"
-}));
 
 type RoleEditable = Pick<
   APIRole,
@@ -43,9 +34,8 @@ type RoleEditable = Pick<
 >;
 
 export const SpaceRoleEdit = observer(
-  ({ space, currentRole, setCurrentRole, membersWithRole, roles }: Props) => {
+  ({ space, currentRole, setCurrentRole, membersWithRole }: Props) => {
     const app = useAppStore();
-    const { openContextMenu } = useMenu();
     const { openModal } = useModal();
 
     const [tab, setTab] = useState<RoleTab>(
@@ -116,7 +106,7 @@ export const SpaceRoleEdit = observer(
           borderTop="0 !important"
           borderBottom="0 !important"
           spacing={2.5}
-          maxWidth="10em"
+          maxWidth="12em"
           width="100%"
           elevation={app.settings?.preferEmbossed ? 3 : 1}
           py={2.5}
@@ -140,36 +130,12 @@ export const SpaceRoleEdit = observer(
             </IconButton>
           </Stack>
 
-          <Stack direction="column">
-            <ButtonGroup
-              color="neutral"
-              spacing={2.5}
-              orientation="vertical"
-              horizontalAlign="left"
-            >
-              {roles.map((role) => (
-                <Button
-                  key={`space-role-${role.id}`}
-                  variant={role.id === currentRole.id ? "soft" : "plain"}
-                  disabled={role.id === currentRole.id}
-                  onClick={() => setCurrentRole(role)}
-                  startDecorator={<RoleColorBlob color={role.color} />}
-                  onContextMenu={(e) =>
-                    openContextMenu(e, {
-                      type: "role",
-                      space,
-                      role,
-                      onDelete: () => {
-                        if (currentRole.id === role.id) setCurrentRole(null);
-                      }
-                    })
-                  }
-                >
-                  {role.name}
-                </Button>
-              ))}
-            </ButtonGroup>
-          </Stack>
+          <SpaceRoleEditRoleList
+            space={space}
+            currentRole={currentRole}
+            setCurrentRole={setCurrentRole}
+            onRoleDeleted={() => setCurrentRole(null)}
+          />
         </Paper>
 
         <Stack

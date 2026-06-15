@@ -106,6 +106,40 @@ export class Role {
     return this.app.rest.delete(`/spaces/${this.spaceId}/roles/${this.id}`);
   }
 
+  async addMembers(userIds: Snowflake[]) {
+    const space = this.space;
+    if (!space) throw new Error("Space not found");
+
+    const touched = userIds
+      .map((userId) => space.members.get(userId))
+      .filter(Boolean);
+
+    const snapshot = touched.map((member) => ({
+      member: member!,
+      hadRole: member!.roles.has(this.id)
+    }));
+
+    for (const { member, hadRole } of snapshot) {
+      if (hadRole) continue;
+      member.roles.add(this.id);
+      member.invalidateChannelPermCache();
+    }
+
+    try {
+      await this.app.rest.put(
+        `/spaces/${this.spaceId}/members/roles/${this.id}`,
+        { userIds }
+      );
+    } catch (error) {
+      for (const { member, hadRole } of snapshot) {
+        if (hadRole) continue;
+        member.roles.delete(this.id);
+        member.invalidateChannelPermCache();
+      }
+      throw error;
+    }
+  }
+
   toJSON() {
     return this.raw;
   }

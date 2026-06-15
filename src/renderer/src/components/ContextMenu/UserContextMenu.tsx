@@ -20,6 +20,10 @@ import { MemberKick } from "@components/Modals/MemberKick";
 import { MemberBan } from "@components/Modals/MemberBan";
 import { ArrowLeftIcon, UserMinusIcon } from "@phosphor-icons/react";
 import { AccountStore } from "@stores/Account.store";
+import {
+  canAssignRole,
+  getHierarchyContext
+} from "@components/SpaceSettings/pages/people/roles/roleHierarchy.utils";
 
 interface Props {
   user: User | AccountStore;
@@ -160,9 +164,21 @@ export const UserContextMenu = observer(
 
         if (!member) return null;
 
+        if (
+          hierarchyContext &&
+          !canAssignRole(hierarchyContext, role)
+        ) {
+          throw new Error("Role hierarchy prevents modifying this role");
+        }
+
         if (member.roles.has(role.id)) return member.removeRole(role);
 
         return member.addRole(role);
+      },
+      onError: (error) => {
+        toast.error(
+          error instanceof Error ? error.message : "Failed to update role"
+        );
       }
     });
 
@@ -223,12 +239,30 @@ export const UserContextMenu = observer(
       }
     });
 
-    const manageableRoles = canManageRoles ? space?.roles.assignable : [];
+    const hierarchyContext =
+      space && me ? getHierarchyContext(space, me) : null;
 
-    const assignedRoles = space?.roles.assignable.filter(
-      (r) =>
-        member?.roles.has(r.id) || manageableRoles?.some((mr) => mr.id === r.id)
-    );
+    const manageableRoles =
+      canManageRoles && hierarchyContext && space
+        ? space.roles.byHierarchy.filter((role) =>
+            canAssignRole(hierarchyContext, role)
+          )
+        : [];
+
+    const lockedMemberRoles =
+      canManageRoles && hierarchyContext && member && space
+        ? space.roles.byHierarchy.filter(
+            (role) =>
+              member.roles.has(role.id) &&
+              !canAssignRole(hierarchyContext, role)
+          )
+        : [];
+
+    const visibleRoleCount = manageableRoles.length + lockedMemberRoles.length;
+
+    const assignedRoles = member
+      ? space?.roles.byHierarchy.filter((role) => member.roles.has(role.id))
+      : [];
 
     const id = generateMenuIDs.user(user.id, space?.id);
 
@@ -250,8 +284,48 @@ export const UserContextMenu = observer(
             <Divider css={{ opacity: 0.5 }} />
           </>
         )}
-        {!isSelf && (
+        {isSelf ? (
           <>
+            <ContextItem
+              onClick={() => {
+                clearMenu();
+                navigate({
+                  to: "/users/$userId",
+                  params: { userId: user.id },
+                  search: { spaceId: space?.id },
+                });
+              }}
+            >
+              View Profile
+            </ContextItem>
+            <ContextItem
+              onClick={() => {
+                clearMenu();
+                navigate({
+                  to: "/profile",
+                  search: space?.id
+                    ? { scope: "space", spaceId: space.id }
+                    : { scope: "global", spaceId: undefined },
+                });
+              }}
+            >
+              Edit Profile
+            </ContextItem>
+          </>
+        ) : (
+          <>
+            <ContextItem
+              onClick={() => {
+                clearMenu();
+                navigate({
+                  to: "/users/$userId",
+                  params: { userId: user.id },
+                  search: { spaceId: space?.id },
+                });
+              }}
+            >
+              View Profile
+            </ContextItem>
             {!insideDMs && (
               <ContextItem
                 onClick={() => openDm()}
@@ -347,7 +421,7 @@ export const UserContextMenu = observer(
             label="Roles"
             style={{
               height:
-                assignedRoles?.length === 0 && !canManageRoles
+                visibleRoleCount === 0 && !canManageRoles
                   ? "2.5rem"
                   : "15rem",
               maxHeight: "15rem",
@@ -355,7 +429,7 @@ export const UserContextMenu = observer(
             }}
           >
             {canManageRoles ? (
-              manageableRoles?.length === 0 ? (
+              visibleRoleCount === 0 ? (
                 <Stack
                   direction="column"
                   justifyContent="center"
@@ -374,18 +448,31 @@ export const UserContextMenu = observer(
                   </Button>
                 </Stack>
               ) : (
-                manageableRoles?.map((role) => (
-                  <ContextRoleItem
-                    key={role.id}
-                    role={role}
-                    canManage={canManageRoles}
-                    hasRole={member.roles.has(role.id)}
-                    toggleRole={toggleRole}
-                    toggling={togglingRole}
-                  />
-                ))
+                <>
+                  {lockedMemberRoles.map((role) => (
+                    <ContextRoleItem
+                      key={role.id}
+                      role={role}
+                      canManage={false}
+                      hasRole
+                      locked
+                      toggleRole={toggleRole}
+                      toggling={togglingRole}
+                    />
+                  ))}
+                  {manageableRoles.map((role) => (
+                    <ContextRoleItem
+                      key={role.id}
+                      role={role}
+                      canManage={canManageRoles}
+                      hasRole={member.roles.has(role.id)}
+                      toggleRole={toggleRole}
+                      toggling={togglingRole}
+                    />
+                  ))}
+                </>
               )
-            ) : assignedRoles?.length === 0 ? (
+            ) : (assignedRoles?.length ?? 0) === 0 ? (
               <Stack
                 direction="column"
                 justifyContent="center"
@@ -395,18 +482,16 @@ export const UserContextMenu = observer(
                 <Typography level="body-sm">No roles assigned</Typography>
               </Stack>
             ) : (
-              assignedRoles
-                ?.filter((r) => member.roles.has(r.id))
-                .map((role) => (
-                  <ContextRoleItem
-                    key={role.id}
-                    role={role}
-                    canManage={canManageRoles}
-                    toggleRole={toggleRole}
-                    hasRole={member.roles.has(role.id)}
-                    toggling={togglingRole}
-                  />
-                ))
+              assignedRoles?.map((role) => (
+                <ContextRoleItem
+                  key={role.id}
+                  role={role}
+                  canManage={false}
+                  toggleRole={toggleRole}
+                  hasRole={member.roles.has(role.id)}
+                  toggling={togglingRole}
+                />
+              ))
             )}
           </ContextSubmenu>
         )}

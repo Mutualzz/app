@@ -2,7 +2,18 @@ import type { APIRole, Snowflake } from "@mutualzz/types";
 import type { AppStore } from "@stores/App.store";
 import { Role } from "@stores/objects/Role";
 import type { Space } from "@stores/objects/Space";
+import { runInAction } from "mobx";
 import { makeAutoObservable, observable, ObservableMap } from "mobx";
+
+export const compareRolesByHierarchy = (a: Role, b: Role): number => {
+  if (a.position !== b.position) return b.position - a.position;
+
+  const aid = BigInt(a.id);
+  const bid = BigInt(b.id);
+  if (aid > bid) return -1;
+  if (aid < bid) return 1;
+  return 0;
+};
 
 export class SpaceRoleStore {
   private readonly roles: ObservableMap<string, Role>;
@@ -23,13 +34,15 @@ export class SpaceRoleStore {
   }
 
   get sorted() {
-    return this.all.sort((a, b) => a.position - b.position);
+    return this.all.slice().sort((a, b) => a.position - b.position);
   }
 
   get assignable() {
-    return this.sorted
-      .filter((r) => r.id !== this.space.id)
-      .sort((a, b) => a.position - b.position);
+    return this.sorted.filter((r) => r.id !== this.space.id);
+  }
+
+  get byHierarchy() {
+    return this.assignable.slice().sort(compareRolesByHierarchy);
   }
 
   get size() {
@@ -70,6 +83,52 @@ export class SpaceRoleStore {
 
     r.update(role);
     this.invalidateMePermCache();
+  }
+
+  async reorderRoles(orderedRoles: Role[], positionCeiling?: number) {
+    const ceiling = positionCeiling ?? orderedRoles.length;
+    const updates: { role: Role; position: number }[] = [];
+
+    orderedRoles.forEach((role, index) => {
+      const newPosition = ceiling - index;
+      if (role.position !== newPosition) {
+        updates.push({ role, position: newPosition });
+      }
+    });
+
+    if (updates.length === 0) return;
+
+    const snapshot = updates.map(({ role }) => ({
+      id: role.id,
+      position: role.position
+    }));
+
+    runInAction(() => {
+      for (const { role, position } of updates) {
+        role.position = position;
+      }
+    });
+
+    try {
+      const results = await Promise.all(
+        updates.map(({ role, position }) =>
+          this.app.rest.patch<APIRole>(
+            `/spaces/${this.space.id}/roles/${role.id}`,
+            { position }
+          )
+        )
+      );
+
+      for (const data of results) this.update(data);
+    } catch (error) {
+      runInAction(() => {
+        for (const { id, position } of snapshot) {
+          const role = this.roles.get(id);
+          if (role) role.position = position;
+        }
+      });
+      throw error;
+    }
   }
 
   get(id: Snowflake) {
