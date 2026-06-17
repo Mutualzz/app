@@ -68,7 +68,9 @@ export const CustomStatusEmojiPicker = ({ value, onChange }: Props) => {
         "1F3FF": "\u{1F3FF}"
       };
       const modifier = skinModifierMap[skinTone];
-      const skinVariant = emoji.skins?.find((skin) => skin.emoji.includes(modifier));
+      const skinVariant = emoji.skins?.find((skin) =>
+        skin.emoji.includes(modifier)
+      );
       if (skinVariant) emojiToInsert = skinVariant;
     }
 
@@ -120,7 +122,7 @@ export const CustomStatusEmojiPicker = ({ value, onChange }: Props) => {
             }}
           >
             <EmojiPicker
-              pickerRef={pickerRef}
+              pickerRef={pickerRef as any}
               onSelectEmoji={handleSelectEmoji}
               onSelectCustomEmoji={handleSelectCustomEmoji}
               onSelectGif={() => setIsOpen(false)}

@@ -59,8 +59,8 @@ async function getElectronDesktopStream(
         chromeMediaSource: "desktop",
         chromeMediaSourceId: sourceId,
         maxFrameRate: getScreenShareQualityPreset(config.quality).maxFrameRate
-      } as MediaTrackConstraints
-    });
+      }
+    } as MediaStreamConstraints);
   }
 }
 
