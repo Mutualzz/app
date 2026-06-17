@@ -16,7 +16,10 @@ import {
   HeadphonesIcon,
   MicrophoneIcon,
   MicrophoneSlashIcon,
+  MonitorArrowUpIcon,
   PhoneIcon,
+  SpeakerHighIcon,
+  SpeakerSlashIcon,
   VideoCameraIcon,
   VideoCameraSlashIcon
 } from "@phosphor-icons/react";
@@ -43,7 +46,7 @@ export const UserBar = observer(() => {
     voiceStatus === "connecting" ||
     voiceStatus === "failed";
 
-  const inFeed = !!app.channels.activeId && app.mode === "feed";
+  const inFeed = app.mode === "feed";
 
   const conditionalProps: Omit<PaperProps, "color"> = inFeed
     ? {
@@ -91,6 +94,7 @@ export const UserBar = observer(() => {
     Boolean(app.voice.currentSpaceId) && Boolean(app.voice.currentChannelId);
 
   const cameraEnabled = app.voice.cameraEnabled;
+  const screenShareEnabled = app.voice.screenShareEnabled;
 
   if (!account) return null;
 
@@ -161,11 +165,11 @@ export const UserBar = observer(() => {
             </Tooltip>
           </Stack>
 
-          <Tooltip
-            placement={inFeed ? "right" : "top"}
-            content={cameraEnabled ? "Disable camera" : "Enable camera"}
-          >
-            <Stack justifyContent="space-between" alignItems="center">
+          <Stack direction="row" spacing={1.25} width="100%">
+            <Tooltip
+              placement={inFeed ? "right" : "top"}
+              content={cameraEnabled ? "Disable camera" : "Enable camera"}
+            >
               <IconButton
                 variant="soft"
                 onClick={() => {
@@ -203,8 +207,51 @@ export const UserBar = observer(() => {
                   <VideoCameraSlashIcon weight="fill" />
                 )}
               </IconButton>
-            </Stack>
-          </Tooltip>
+            </Tooltip>
+
+            <Tooltip
+              placement={inFeed ? "right" : "top"}
+              content={
+                screenShareEnabled ? "Stop sharing" : "Share your screen"
+              }
+            >
+              <IconButton
+                variant="soft"
+                onClick={() => app.voice.toggleScreenShare()}
+                css={{
+                  flex: 1
+                }}
+                color={screenShareEnabled ? theme.colors.success : undefined}
+              >
+                <MonitorArrowUpIcon weight="fill" />
+              </IconButton>
+            </Tooltip>
+
+            {screenShareEnabled && app.voice.screenShareSupportsAudio && (
+              <Tooltip
+                placement={inFeed ? "right" : "top"}
+                content={
+                  app.voice.screenShareAudioEnabled
+                    ? "Mute stream audio"
+                    : "Unmute stream audio"
+                }
+              >
+                <IconButton
+                  variant="soft"
+                  onClick={() => app.voice.toggleScreenShareAudio()}
+                >
+                  {app.voice.screenShareAudioEnabled ? (
+                    <SpeakerHighIcon
+                      weight="fill"
+                      color={theme.colors.success}
+                    />
+                  ) : (
+                    <SpeakerSlashIcon weight="fill" />
+                  )}
+                </IconButton>
+              </Tooltip>
+            )}
+          </Stack>
         </Paper>
       )}
 
@@ -253,7 +300,7 @@ export const UserBar = observer(() => {
                 x: inFeed ? Math.round(rect.left + 55) : Math.round(rect.left),
                 y: inFeed
                   ? Math.round(rect.top + 10)
-                  : Math.round(rect.bottom - 120)
+                  : Math.round(Math.max(8, rect.top - 415))
               }
             );
           }}
@@ -308,24 +355,78 @@ export const UserBar = observer(() => {
               </IconButton>
             </Tooltip>
 
-            <Tooltip
-              placement="right"
-              content={cameraEnabled ? "Turn off camera" : "Turn on camera"}
-            >
-              <IconButton
-                variant="plain"
-                onClick={() => app.voice.toggleCamera()}
+            <Stack direction="row" spacing={1.25} alignItems="center">
+              <Tooltip
+                placement="right"
+                content={cameraEnabled ? "Turn off camera" : "Turn on camera"}
               >
-                {cameraEnabled ? (
-                  <VideoCameraIcon weight="fill" color={theme.colors.success} />
-                ) : (
-                  <VideoCameraSlashIcon
+                <IconButton
+                  variant="plain"
+                  onClick={() => app.voice.toggleCamera()}
+                >
+                  {cameraEnabled ? (
+                    <VideoCameraIcon
+                      weight="fill"
+                      color={theme.colors.success}
+                    />
+                  ) : (
+                    <VideoCameraSlashIcon
+                      weight="fill"
+                      color={theme.colors.neutral}
+                    />
+                  )}
+                </IconButton>
+              </Tooltip>
+
+              <Tooltip
+                placement="right"
+                content={
+                  screenShareEnabled ? "Stop sharing" : "Share your screen"
+                }
+              >
+                <IconButton
+                  variant="plain"
+                  onClick={() => app.voice.toggleScreenShare()}
+                >
+                  <MonitorArrowUpIcon
                     weight="fill"
-                    color={theme.colors.neutral}
+                    color={
+                      screenShareEnabled
+                        ? theme.colors.success
+                        : theme.colors.neutral
+                    }
                   />
-                )}
-              </IconButton>
-            </Tooltip>
+                </IconButton>
+              </Tooltip>
+            </Stack>
+
+            {screenShareEnabled && app.voice.screenShareSupportsAudio && (
+              <Tooltip
+                placement="right"
+                content={
+                  app.voice.screenShareAudioEnabled
+                    ? "Mute stream audio"
+                    : "Unmute stream audio"
+                }
+              >
+                <IconButton
+                  variant="plain"
+                  onClick={() => app.voice.toggleScreenShareAudio()}
+                >
+                  {app.voice.screenShareAudioEnabled ? (
+                    <SpeakerHighIcon
+                      weight="fill"
+                      color={theme.colors.success}
+                    />
+                  ) : (
+                    <SpeakerSlashIcon
+                      weight="fill"
+                      color={theme.colors.neutral}
+                    />
+                  )}
+                </IconButton>
+              </Tooltip>
+            )}
 
             {canHangup && (
               <Tooltip content="Disconnect" placement="right">

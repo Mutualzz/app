@@ -4,6 +4,10 @@ import { getMainWindow } from "./windows";
 import keytar from "keytar";
 import { existsSync, promises as fsPromises } from "fs";
 import path from "path";
+import {
+  getScreenCaptureAccessStatus,
+  listDesktopCaptureSources
+} from "./displayMedia";
 
 const SERVICE = "mutualzz";
 const ACCOUNT = "default";
@@ -66,6 +70,7 @@ export function setupIPC(): void {
   // OS/App Info
   ipcMain.handle("app:get-version", () => app.getVersion());
   ipcMain.handle("app:get-name", () => app.getName());
+  ipcMain.handle("app:is-packaged", () => app.isPackaged);
 
   ipcMain.handle("system:get-os-info", () => {
     const os = require("os");
@@ -193,6 +198,37 @@ export function setupIPC(): void {
     } catch (err) {
       console.error("Failed to get autostart:", err);
       return false;
+    }
+  });
+
+  ipcMain.handle("desktop:list-capture-sources", async () => {
+    try {
+      return await listDesktopCaptureSources();
+    } catch (err) {
+      console.error("Failed to list desktop capture sources:", err);
+      return [];
+    }
+  });
+
+  ipcMain.handle("desktop:get-screen-capture-access", () => {
+    return getScreenCaptureAccessStatus();
+  });
+
+  ipcMain.handle("desktop:open-screen-capture-settings", async () => {
+    try {
+      const { shell } = await import("electron");
+      if (process.platform === "darwin") {
+        await shell.openExternal(
+          "x-apple.systempreferences:com.apple.preference.security?Privacy_ScreenCapture"
+        );
+        return;
+      }
+      if (process.platform === "win32") {
+        await shell.openExternal("ms-settings:privacy");
+      }
+    } catch (err) {
+      console.error("Failed to open screen capture settings:", err);
+      throw err;
     }
   });
 

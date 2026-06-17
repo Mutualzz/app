@@ -1,6 +1,7 @@
 import { Paper } from "@components/Paper";
 import { useModal } from "@contexts/Modal.context";
-import { useDroppable } from "@dnd-kit/core";
+import { useDroppable, type DraggableAttributes } from "@dnd-kit/core";
+import type { SyntheticListenerMap } from "@dnd-kit/core/dist/hooks/utilities";
 import { useAppStore } from "@hooks/useStores";
 import { Avatar, type PaperProps, Stack, Typography, useTheme } from "@mutualzz/ui-web";
 import type { Channel } from "@stores/objects/Channel";
@@ -24,6 +25,10 @@ interface Props extends PaperProps {
   active: boolean;
   isCollapsed?: boolean;
   onToggleCollapse?: (channelId: string) => void;
+  channelDragHandle?: {
+    attributes: DraggableAttributes;
+    listeners: SyntheticListenerMap | undefined;
+  };
 }
 
 export const ChannelListItem = observer(
@@ -33,6 +38,7 @@ export const ChannelListItem = observer(
     isCollapsed,
     space,
     onToggleCollapse,
+    channelDragHandle,
     ...props
   }: Props) => {
     const { openContextMenu } = useMenu();
@@ -49,9 +55,11 @@ export const ChannelListItem = observer(
     const isUnread = readState?.isUnread ?? false;
     const mentionCount = readState?.mentionCount ?? 0;
 
+    const canMoveMembers = space.members.me?.hasPermission("MoveMembers");
+
     const { setNodeRef, isOver } = useDroppable({
       id: `channel-drop:${channel.id}`,
-      disabled: !isVoice,
+      disabled: !isVoice || !canMoveMembers,
       data: {
         type: "voice-channel",
         channelId: channel.id,
@@ -153,6 +161,11 @@ export const ChannelListItem = observer(
           color={
             active ? theme.typography.colors.primary : (props.color as any)
           }
+          css={{
+            ...(channelDragHandle && { cursor: "grab" })
+          }}
+          {...channelDragHandle?.attributes}
+          {...channelDragHandle?.listeners}
           {...props}
         >
           <Stack
@@ -315,6 +328,7 @@ export const ChannelListItem = observer(
             spacing={0.125}
             pl={2}
             direction="column"
+            onPointerDown={(e) => e.stopPropagation()}
             css={{
               maxHeight: 100,
               overflowY: "auto"

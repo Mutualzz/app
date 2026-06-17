@@ -125,7 +125,7 @@ export const MessageList = observer(({ channel: channelProp }: Props) => {
   const messageGroups = (() => {
     if (!rawGroups) return undefined;
 
-    if (!isDM && canReadHistory) return rawGroups;
+    if (isDM || canReadHistory) return rawGroups;
 
     const getLastMessageId = () => {
       if (!rawGroups || rawGroups.length === 0) return undefined;

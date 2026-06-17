@@ -2,15 +2,15 @@ import { Paper } from "@components/Paper";
 import {
   closestCenter,
   DndContext,
+  type CollisionDetection,
   type DragEndEvent,
+  type DragStartEvent,
+  DragOverlay,
   PointerSensor,
+  pointerWithin,
   useSensor,
   useSensors
 } from "@dnd-kit/core";
-import {
-  restrictToVerticalAxis,
-  restrictToWindowEdges
-} from "@dnd-kit/modifiers";
 import {
   arrayMove,
   SortableContext,
@@ -25,10 +25,17 @@ import type { Channel } from "@stores/objects/Channel";
 import type { Space } from "@stores/objects/Space";
 import { runInAction } from "mobx";
 import { observer } from "mobx-react-lite";
+import { useState } from "react";
 import { ChannelListItem } from "./ChannelListItem";
+import { VoiceMemberDragOverlay } from "./VoiceMemberDragOverlay";
 import { ChannelListContextMenu } from "@components/ContextMenu/ChannelListContextMenu";
 import { useMenu } from "@contexts/ContextMenu.context";
 import { ChannelListHeader } from "@components/Channel/ChannelListHeader";
+import { toast } from "react-toastify";
+import {
+  restrictToVerticalAxis,
+  restrictToWindowEdges
+} from "@dnd-kit/modifiers";
 
 interface SortableChannelItemProps {
   channel: Channel;
@@ -75,8 +82,6 @@ const SortableChannelItem = observer(
           zIndex: isDragging ? 999 : undefined,
           marginTop: channel.type === ChannelType.Category ? "1rem" : "0.5rem"
         }}
-        {...attributes}
-        {...listeners}
       >
         <ChannelListItem
           channel={channel}
@@ -84,6 +89,9 @@ const SortableChannelItem = observer(
           active={active}
           isCollapsed={isCollapsed}
           onToggleCollapse={onToggleCollapse}
+          channelDragHandle={
+            canMoveChannels ? { attributes, listeners } : undefined
+          }
         />
       </div>
     );
@@ -129,9 +137,44 @@ function getAllCategoryChildren(
   return [category, ...children];
 }
 
+function resolveVoiceDropChannelId(
+  over: DragEndEvent["over"],
+  visibleChannels: Channel[]
+): string | undefined {
+  if (!over) return undefined;
+
+  const overData = over.data.current;
+  if (overData?.type === "voice-channel") {
+    return overData.channelId as string;
+  }
+
+  if (overData?.type === "channel") {
+    const channel = visibleChannels.find((c) => c.id === over.id);
+    if (channel?.isVoiceChannel) return channel.id;
+  }
+
+  const overId = String(over.id);
+  if (overId.startsWith("channel-drop:")) {
+    return overId.slice("channel-drop:".length);
+  }
+
+  return undefined;
+}
+
+const voiceMemberCollisionDetection: CollisionDetection = (args) => {
+  const pointerHits = pointerWithin(args);
+  const voiceChannelHit = pointerHits.find((collision) =>
+    String(collision.id).startsWith("channel-drop:")
+  );
+  if (voiceChannelHit) return [voiceChannelHit];
+
+  return closestCenter(args);
+};
+
 export const ChannelList = observer(() => {
   const app = useAppStore();
   const { openContextMenu } = useMenu();
+  const [activeDragType, setActiveDragType] = useState<string | null>(null);
 
   const inChannel = Boolean(app.channels.activeId);
 
@@ -154,62 +197,99 @@ export const ChannelList = observer(() => {
     app.channels.toggleCategoryCollapse(space.id, categoryId);
   };
 
-  const handleDragEnd = (event: DragEndEvent) => {
+  const handleDragStart = (event: DragStartEvent) => {
+    const type = event.active.data.current?.type as string | undefined;
+    setActiveDragType(type ?? null);
+  };
+
+  const clearDragState = () => {
+    setActiveDragType(null);
+  };
+
+  const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
+    const activeData = active.data.current;
 
-    if (!over) return;
-    if (active.id === over.id) return;
+    try {
+      if (!over) return;
 
-    const oldIndex = flatChannels.findIndex((c) => c.id === active.id);
-    const newIndex = flatChannels.findIndex((c) => c.id === over.id);
-    if (oldIndex === -1 || newIndex === -1) return;
+      if (activeData?.type === "voice-member") {
+        const targetChannelId = resolveVoiceDropChannelId(
+          over,
+          visibleChannels
+        );
 
-    runInAction(() => {
-      const movingChannel = flatChannels[oldIndex];
+        if (!targetChannelId) return;
+        if (targetChannelId === activeData.channelId) return;
 
-      let newOrder: Channel[];
-
-      if (movingChannel.type === ChannelType.Category) {
-        const group = getAllCategoryChildren(visibleChannels, movingChannel.id);
-
-        newOrder = flatChannels.filter((c) => !group.includes(c));
-
-        let insertAt = newIndex;
-        if (newIndex > oldIndex) {
-          const visibleGroupSize = group.filter((c) =>
-            flatChannels.includes(c)
-          ).length;
-          insertAt = newIndex - visibleGroupSize + 1;
-        }
-
-        const visibleGroup = group.filter((c) => flatChannels.includes(c));
-        newOrder.splice(insertAt, 0, ...visibleGroup);
-      } else {
-        newOrder = arrayMove(flatChannels, oldIndex, newIndex);
+        await app.rest.patch(
+          `/spaces/${activeData.spaceId}/members/${activeData.userId}/voice`,
+          { channelId: targetChannelId }
+        );
+        return;
       }
 
-      const completeOrder: Channel[] = [];
-      let currentCategory: Channel | null = null;
-      const siblingPositions = new Map<string | null, number>();
+      if (active.id === over.id) return;
 
-      for (const channel of newOrder) {
-        if (channel.type === ChannelType.Category) {
-          currentCategory = channel;
-          channel.parentId = null;
+      const oldIndex = flatChannels.findIndex((c) => c.id === active.id);
+      const newIndex = flatChannels.findIndex((c) => c.id === over.id);
+      if (oldIndex === -1 || newIndex === -1) return;
+
+      runInAction(() => {
+        const movingChannel = flatChannels[oldIndex];
+
+        let newOrder: Channel[];
+
+        if (movingChannel.type === ChannelType.Category) {
+          const group = getAllCategoryChildren(visibleChannels, movingChannel.id);
+
+          newOrder = flatChannels.filter((c) => !group.includes(c));
+
+          let insertAt = newIndex;
+          if (newIndex > oldIndex) {
+            const visibleGroupSize = group.filter((c) =>
+              flatChannels.includes(c)
+            ).length;
+            insertAt = newIndex - visibleGroupSize + 1;
+          }
+
+          const visibleGroup = group.filter((c) => flatChannels.includes(c));
+          newOrder.splice(insertAt, 0, ...visibleGroup);
         } else {
-          channel.parentId = currentCategory?.id ?? null;
+          newOrder = arrayMove(flatChannels, oldIndex, newIndex);
         }
 
-        const parentKey = channel.parentId ?? null;
-        const nextPosition = siblingPositions.get(parentKey) ?? 0;
-        channel.position = nextPosition;
-        siblingPositions.set(parentKey, nextPosition + 1);
+        const completeOrder: Channel[] = [];
+        let currentCategory: Channel | null = null;
+        const siblingPositions = new Map<string | null, number>();
 
-        completeOrder.push(channel);
+        for (const channel of newOrder) {
+          if (channel.type === ChannelType.Category) {
+            currentCategory = channel;
+            channel.parentId = null;
+          } else {
+            channel.parentId = currentCategory?.id ?? null;
+          }
+
+          const parentKey = channel.parentId ?? null;
+          const nextPosition = siblingPositions.get(parentKey) ?? 0;
+          channel.position = nextPosition;
+          siblingPositions.set(parentKey, nextPosition + 1);
+
+          completeOrder.push(channel);
+        }
+
+        app.channels.setChannelOrder(space.id, completeOrder);
+      });
+    } catch (error) {
+      if (activeData?.type === "voice-member") {
+        toast.error(
+          error instanceof Error ? error.message : "Failed to move member"
+        );
       }
-
-      app.channels.setChannelOrder(space.id, completeOrder);
-    });
+    } finally {
+      clearDragState();
+    }
   };
 
   const canMoveChannels =
@@ -243,8 +323,18 @@ export const ChannelList = observer(() => {
         >
           <DndContext
             sensors={sensors}
-            collisionDetection={closestCenter}
-            modifiers={[restrictToVerticalAxis, restrictToWindowEdges]}
+            collisionDetection={
+              activeDragType === "voice-member"
+                ? voiceMemberCollisionDetection
+                : closestCenter
+            }
+            modifiers={
+              activeDragType === "channel"
+                ? [restrictToVerticalAxis, restrictToWindowEdges]
+                : undefined
+            }
+            onDragStart={handleDragStart}
+            onDragCancel={clearDragState}
             onDragEnd={handleDragEnd}
           >
             <SortableContext
@@ -263,6 +353,9 @@ export const ChannelList = observer(() => {
                 />
               ))}
             </SortableContext>
+            <DragOverlay dropAnimation={null} zIndex={10000}>
+              <VoiceMemberDragOverlay space={space} />
+            </DragOverlay>
           </DndContext>
         </Stack>
       </Paper>

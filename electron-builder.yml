@@ -45,6 +45,7 @@ mac:
   extendInfo:
     - NSCameraUsageDescription: Application requests access to the device's camera.
     - NSMicrophoneUsageDescription: Application requests access to the device's microphone.
+    - NSScreenCaptureDescription: Application requests access to record your screen for voice channel screen sharing.
     - CFBundleName: Mutualzz
   notarize: false
   target:

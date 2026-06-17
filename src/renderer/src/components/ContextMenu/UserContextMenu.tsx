@@ -6,7 +6,7 @@ import { useAppStore } from "@hooks/useStores";
 import { ContextSubmenu } from "@components/ContextSubmenu";
 import type { Role } from "@stores/objects/Role";
 import { generateMenuIDs, useMenu } from "@contexts/ContextMenu.context";
-import { Checkbox, Divider, Stack, Typography } from "@mutualzz/ui-web";
+import { Checkbox, Divider, Slider, Stack, Typography } from "@mutualzz/ui-web";
 import { useMutation } from "@tanstack/react-query";
 import { Button } from "@components/Button";
 import { useModal } from "@contexts/Modal.context";
@@ -68,6 +68,16 @@ export const UserContextMenu = observer(
       space && member
         ? app.voiceStates.getBySpace(member.userId, space.id)
         : null;
+
+    const isSharingScreen = !isSelf && app.voice.isUserScreenSharing(user.id);
+    const isWatchingStream = app.voice.isWatchingScreenShare(user.id);
+    const streamVolume = app.voice.getScreenStreamVolume(user.id);
+    const streamMuted = app.voice.isScreenStreamMuted(user.id);
+    const userVoiceVolume = app.voice.getUserVoiceVolume(user.id);
+    const userVoiceMuted = app.voice.isUserVoiceMuted(user.id);
+    const inSameVoiceChannel =
+      Boolean(voiceState?.channelId) &&
+      voiceState?.channelId === app.voice.currentChannelId;
 
     const relationship = app.relationships.getForMe(user.id);
     const isBlocked = relationship?.isBlocked ?? false;
@@ -164,10 +174,7 @@ export const UserContextMenu = observer(
 
         if (!member) return null;
 
-        if (
-          hierarchyContext &&
-          !canAssignRole(hierarchyContext, role)
-        ) {
+        if (hierarchyContext && !canAssignRole(hierarchyContext, role)) {
           throw new Error("Role hierarchy prevents modifying this role");
         }
 
@@ -290,9 +297,8 @@ export const UserContextMenu = observer(
               onClick={() => {
                 clearMenu();
                 navigate({
-                  to: "/users/$userId",
-                  params: { userId: user.id },
-                  search: { spaceId: space?.id },
+                  to: "/users/$username",
+                  params: { username: user.username }
                 });
               }}
             >
@@ -301,12 +307,7 @@ export const UserContextMenu = observer(
             <ContextItem
               onClick={() => {
                 clearMenu();
-                navigate({
-                  to: "/profile",
-                  search: space?.id
-                    ? { scope: "space", spaceId: space.id }
-                    : { scope: "global", spaceId: undefined },
-                });
+                navigate({ to: "/profile" });
               }}
             >
               Edit Profile
@@ -318,9 +319,8 @@ export const UserContextMenu = observer(
               onClick={() => {
                 clearMenu();
                 navigate({
-                  to: "/users/$userId",
-                  params: { userId: user.id },
-                  search: { spaceId: space?.id },
+                  to: "/users/$username",
+                  params: { username: user.username }
                 });
               }}
             >
@@ -409,7 +409,7 @@ export const UserContextMenu = observer(
               </ContextItem>
             )}
 
-            <Divider />
+            <Divider css={{ opacity: 0.5 }} />
           </>
         )}
 
@@ -421,9 +421,7 @@ export const UserContextMenu = observer(
             label="Roles"
             style={{
               height:
-                visibleRoleCount === 0 && !canManageRoles
-                  ? "2.5rem"
-                  : "15rem",
+                visibleRoleCount === 0 && !canManageRoles ? "2.5rem" : "15rem",
               maxHeight: "15rem",
               overflowY: "auto"
             }}
@@ -494,6 +492,137 @@ export const UserContextMenu = observer(
               ))
             )}
           </ContextSubmenu>
+        )}
+        {!isSelf && inSameVoiceChannel && (
+          <>
+            <Divider css={{ opacity: 0.5 }} />
+            <ContextItem
+              variant="plain"
+              closeOnClick={false}
+              style={{ flex: 0 }}
+              size="sm"
+              onClick={() => app.voice.toggleUserVoiceMuted(user.id)}
+            >
+              <Stack
+                justifyContent="space-between"
+                flex={1}
+                alignItems="center"
+              >
+                <Typography level="body-xs">Mute User</Typography>
+                <Checkbox
+                  color="neutral"
+                  checked={userVoiceMuted}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    app.voice.toggleUserVoiceMuted(user.id);
+                  }}
+                />
+              </Stack>
+            </ContextItem>
+            <ContextItem
+              variant="plain"
+              closeOnClick={false}
+              style={{ flex: 0, minWidth: 220 }}
+              size="sm"
+            >
+              <Stack direction="column" spacing={1} width="100%">
+                <Stack justifyContent="space-between" alignItems="center">
+                  <Typography level="body-xs">User Volume</Typography>
+                  <Typography level="body-xs" textColor="muted">
+                    {userVoiceVolume}%
+                  </Typography>
+                </Stack>
+                <Slider
+                  min={0}
+                  max={200}
+                  color="neutral"
+                  value={userVoiceVolume}
+                  disabled={userVoiceMuted}
+                  onChange={(_, value) => {
+                    if (typeof value === "number") {
+                      app.voice.setUserVoiceVolume(user.id, value);
+                    }
+                  }}
+                />
+              </Stack>
+            </ContextItem>
+          </>
+        )}
+        {isSharingScreen && inSameVoiceChannel && (
+          <>
+            <Divider css={{ opacity: 0.5 }} />
+            {!isWatchingStream ? (
+              <ContextItem
+                onClick={() => {
+                  void app.voice.watchScreenShare(user.id);
+                  clearMenu();
+                }}
+              >
+                Watch Stream
+              </ContextItem>
+            ) : (
+              <>
+                <ContextItem
+                  onClick={() => {
+                    app.voice.stopWatchingScreenShare(user.id);
+                    clearMenu();
+                  }}
+                >
+                  Stop Watching
+                </ContextItem>
+                <ContextItem
+                  variant="plain"
+                  closeOnClick={false}
+                  style={{ flex: 0 }}
+                  size="sm"
+                  onClick={() => app.voice.toggleScreenStreamMuted(user.id)}
+                >
+                  <Stack
+                    justifyContent="space-between"
+                    flex={1}
+                    alignItems="center"
+                  >
+                    <Typography level="body-xs">Mute Stream</Typography>
+                    <Checkbox
+                      color="neutral"
+                      checked={streamMuted}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        app.voice.toggleScreenStreamMuted(user.id);
+                      }}
+                    />
+                  </Stack>
+                </ContextItem>
+                <ContextItem
+                  variant="plain"
+                  closeOnClick={false}
+                  style={{ flex: 0, minWidth: 220 }}
+                  size="sm"
+                >
+                  <Stack direction="column" spacing={1} width="100%">
+                    <Stack justifyContent="space-between" alignItems="center">
+                      <Typography level="body-xs">Stream Volume</Typography>
+                      <Typography level="body-xs" textColor="muted">
+                        {streamVolume}%
+                      </Typography>
+                    </Stack>
+                    <Slider
+                      min={0}
+                      max={200}
+                      color="neutral"
+                      value={streamVolume}
+                      disabled={streamMuted}
+                      onChange={(_, value) => {
+                        if (typeof value === "number") {
+                          app.voice.setScreenStreamVolume(user.id, value);
+                        }
+                      }}
+                    />
+                  </Stack>
+                </ContextItem>
+              </>
+            )}
+          </>
         )}
         {voiceState && (
           <>

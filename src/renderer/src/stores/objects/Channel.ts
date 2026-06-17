@@ -356,6 +356,18 @@ export class Channel {
     this.space?.members.me?.invalidateChannelPermCache?.();
   }
 
+  updateLastMessage(message: Message) {
+    if (
+      this._lastMessage &&
+      BigInt(message.id) <= BigInt(this._lastMessage.id)
+    ) {
+      return;
+    }
+
+    this._lastMessage = message;
+    this.lastMessageId = message.id;
+  }
+
   getMessages(
     isInitial: boolean,
     limit?: number,
@@ -364,7 +376,10 @@ export class Channel {
     around?: string
   ): Promise<number> {
     return new Promise((resolve, reject) => {
-      if (isInitial && this.hasFetchedInitialMessages) return;
+      if (isInitial && this.hasFetchedInitialMessages) {
+        resolve(Math.min(this.messages.count, limit ?? 50));
+        return;
+      }
 
       let opts: Record<string, any> = {
         limit: limit || 50

@@ -3,6 +3,13 @@ import { ObservableOrderedSet } from "@utils/ObservableOrderedSet";
 import { makeAutoObservable, observable } from "mobx";
 import type { AppStore } from "./App.store";
 import { makePersistable } from "mobx-persist-store";
+import {
+  DEFAULT_PUSH_TO_TALK_KEY,
+  DEFAULT_SCREEN_SHARE_QUALITY,
+  DEFAULT_VOICE_INPUT_SENSITIVITY,
+  type ScreenShareQuality,
+  type VoiceInputMode
+} from "@utils/voiceSettings.utils";
 
 type SettingsPatch = Omit<APIUserSettings, "updatedAt">;
 
@@ -15,6 +22,13 @@ export class AccountSettingsStore {
 
   preferredSelfMute = false;
   preferredSelfDeaf = false;
+
+  voiceInputMode: VoiceInputMode = "voice_activity";
+  voiceInputSensitivity = DEFAULT_VOICE_INPUT_SENSITIVITY;
+  voiceInputSensitivityAuto = true;
+  pushToTalkKey = DEFAULT_PUSH_TO_TALK_KEY;
+  screenShareIncludeAudio = false;
+  screenShareQuality: ScreenShareQuality = DEFAULT_SCREEN_SHARE_QUALITY;
 
   favoriteEmojis = observable.array<string>([]);
   favoriteGifs = observable.array<string>([]);
@@ -58,6 +72,12 @@ export class AccountSettingsStore {
         "preferEmbossed",
         "preferredSelfMute",
         "preferredSelfDeaf",
+        "voiceInputMode",
+        "voiceInputSensitivity",
+        "voiceInputSensitivityAuto",
+        "pushToTalkKey",
+        "screenShareIncludeAudio",
+        "screenShareQuality",
         {
           key: "favoriteEmojis",
           serialize: (v: unknown) => (Array.isArray(v) ? [...v] : []),
@@ -207,6 +227,33 @@ export class AccountSettingsStore {
 
   setPreferredSelfDeaf(value: boolean) {
     this.preferredSelfDeaf = value;
+  }
+
+  setVoiceInputMode(mode: VoiceInputMode) {
+    this.voiceInputMode = mode;
+    this.app.voice?.applyVoiceSettings();
+  }
+
+  setVoiceInputSensitivity(value: number) {
+    this.voiceInputSensitivity = Math.min(100, Math.max(0, value));
+    this.app.voice?.applyVoiceSettings();
+  }
+
+  setVoiceInputSensitivityAuto(value: boolean) {
+    this.voiceInputSensitivityAuto = value;
+    this.app.voice?.applyVoiceSettings();
+  }
+
+  setPushToTalkKey(code: string) {
+    this.pushToTalkKey = code;
+  }
+
+  setScreenShareIncludeAudio(value: boolean) {
+    this.screenShareIncludeAudio = value;
+  }
+
+  setScreenShareQuality(value: ScreenShareQuality) {
+    this.screenShareQuality = value;
   }
 
   startSyncing() {

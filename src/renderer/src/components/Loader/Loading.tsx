@@ -1,25 +1,25 @@
 import { AnimatedLogo } from "@components/Animated/AnimatedLogo";
 import { Stack } from "@mutualzz/ui-web";
-import { observer } from "mobx-react-lite";
 
 const Loading = () => {
   return (
     <Stack
       direction="column"
       alignItems="center"
-      height="100%"
       justifyContent="center"
+      width="100%"
+      height="100%"
+      minHeight="100vh"
     >
       <AnimatedLogo
         css={{
-          width: 256,
-          maxWidth: 256,
-          minWidth: 64,
-          height: "auto"
+          width: 72,
+          height: "auto",
+          display: "block"
         }}
         animate={{ scale: [0.95, 1, 0.95] }}
         transition={{
-          opacity: {
+          scale: {
             duration: 2.5,
             repeat: Infinity,
             repeatType: "loop",
@@ -31,4 +31,4 @@ const Loading = () => {
   );
 };
 
-export default observer(Loading);
+export default Loading;

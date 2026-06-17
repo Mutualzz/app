@@ -105,11 +105,14 @@ export class ExpressionsStore {
   }
 
   get(id: Snowflake) {
-    return this.expressions.get(id);
+    return (
+      this.expressions.get(id) ??
+      this.fromSpaces.find((expression) => expression.id === id)
+    );
   }
 
   has(id: Snowflake) {
-    return this.expressions.has(id);
+    return Boolean(this.get(id));
   }
 
   async resolve(id: Snowflake, force = false) {

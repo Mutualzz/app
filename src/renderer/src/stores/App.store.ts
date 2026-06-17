@@ -1,5 +1,10 @@
 import { Logger } from "@mutualzz/logger";
-import { type APIPrivateUser, type APISpacePartial, type APIUserSettings, type AppMode } from "@mutualzz/types";
+import {
+  type APIPrivateUser,
+  type APISpacePartial,
+  type APIUserSettings,
+  type AppMode
+} from "@mutualzz/types";
 import { QueryClient } from "@tanstack/react-query";
 import { isElectron } from "@utils/index";
 import { makeAutoObservable, reaction, runInAction } from "mobx";
@@ -26,6 +31,7 @@ import { webTokenStorage } from "@storages/webTokenStorage";
 import type { TokenStorage } from "@renderer/types";
 import { electronTokenStorage } from "@storages/electronTokenStorage";
 import { RelationshipStore } from "@stores/Relationship.store";
+import { ProfileStore } from "@stores/Profile.store";
 import { usePrefersDark } from "@hooks/usePrefersDark";
 import { ReadStateStore } from "@stores/ReadState.store";
 import { TypingStore } from "@stores/Typing.store";
@@ -38,6 +44,8 @@ export class AppStore {
   hideSwitcher = false;
   token: string | null = null;
   account: AccountStore | null = null;
+  presence = new PresenceStore();
+  customStatus = new CustomStatusStore();
   channels = new ChannelStore(this);
   gateway = new GatewayStore(this);
   expressions = new ExpressionsStore(this);
@@ -51,13 +59,13 @@ export class AppStore {
   rest = new REST();
   typing = new TypingStore(this);
   users = new UserStore(this);
+  profiles = new ProfileStore(this);
   updater: UpdaterStore | null = null;
   settings: AccountSettingsStore | null = null;
   mode: AppMode | null = null;
   readStates = new ReadStateStore(this);
   joiningSpace?: APISpacePartial | null = null;
   joiningInviteCode?: string | null = null;
-  presence = new PresenceStore();
   queryClient: QueryClient;
   memberListVisible = true;
   voiceChatVisible = false;
@@ -66,8 +74,6 @@ export class AppStore {
   channelListWidth = 320;
   dmChannelListWidth = 320;
   voiceChatWidth = 500;
-
-  customStatus = new CustomStatusStore();
 
   voice = new VoiceStore(this);
   voiceStates = new VoiceStatesStore(this);
@@ -157,7 +163,18 @@ export class AppStore {
       ) ?? []
     );
 
-    return [...relationships, ...otherUsers];
+    const mutualSpaceUsers = new Set(
+      this.spaces.all.flatMap((space) =>
+        space.members.all
+          .map((member) => member.user)
+          .filter((user) => !!user)
+          .filter((user) => user.id !== this.account?.id)
+      )
+    );
+
+    return Array.from(
+      new Set([...relationships, ...otherUsers, ...mutualSpaceUsers])
+    );
   }
 
   popComposer() {

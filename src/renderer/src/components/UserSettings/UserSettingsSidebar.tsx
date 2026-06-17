@@ -135,7 +135,7 @@ export const UserSettingsSidebar = observer(
                     direction="row"
                     spacing={1}
                   >
-                    Edit Profiles
+                    Avatar &amp; profile
                     <PencilIcon css={{ marginBottom: 5 }} />
                   </Typography>
                 </Stack>

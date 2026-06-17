@@ -6,6 +6,7 @@ import {
   HeadphonesIcon,
   NotepadIcon
 } from "@phosphor-icons/react";
+import { CustomStatusDisplay } from "@components/CustomStatus/CustomStatusDisplay";
 
 interface Props {
   presence?: PresencePayload;
@@ -34,6 +35,25 @@ export const SmallActivityStatus = observer(({ presence, vertical }: Props) => {
     : null;
 
   if (!activity) return null;
+
+  if (activity.type === "custom") {
+    return (
+      <Stack
+        alignItems="center"
+        justifyContent="center"
+        direction={vertical ? "column" : "row"}
+        spacing={0.5}
+        minWidth={0}
+      >
+        <CustomStatusDisplay activity={activity} fontSize={12} />
+        {!vertical && presence.activities.length > 1 && (
+          <Typography fontSize={12} textColor="accent">
+            +{presence.activities.length - 1}
+          </Typography>
+        )}
+      </Stack>
+    );
+  }
 
   return (
     <Stack

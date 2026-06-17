@@ -2,6 +2,7 @@ export interface MutualzzAPI {
   app: {
     getVersion(): Promise<string>;
     getName(): Promise<string>;
+    isPackaged(): Promise<boolean>;
     relaunch(): Promise<void>;
   };
   system: {
@@ -33,6 +34,18 @@ export interface MutualzzAPI {
   desktop: {
     setAutostart(enabled: boolean): Promise<void>;
     getAutostart(): Promise<boolean>;
+    listCaptureSources(): Promise<
+      Array<{
+        id: string;
+        name: string;
+        thumbnail: string;
+        appIcon: string | null;
+      }>
+    >;
+    getScreenCaptureAccess(): Promise<
+      "not-determined" | "granted" | "denied" | "restricted" | "unknown"
+    >;
+    openScreenCaptureSettings(): Promise<void>;
   };
   theme: {
     updateIcons(dataUrl: string): Promise<void>;

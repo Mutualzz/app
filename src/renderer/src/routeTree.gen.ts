@@ -17,8 +17,11 @@ import { Route as DownloadRouteImport } from "./routes/download"
 import { Route as AuthenticatedRouteRouteImport } from "./routes/_authenticated/route"
 import { Route as IndexRouteImport } from "./routes/index"
 import { Route as InviteCodeRouteImport } from "./routes/invite/$code"
+import { Route as UsersUsernameRouteRouteImport } from "./routes/users/$username/route"
 import { Route as AuthenticatedSpacesRouteRouteImport } from "./routes/_authenticated/spaces/route"
+import { Route as AuthenticatedProfileRouteRouteImport } from "./routes/_authenticated/profile/route"
 import { Route as AuthenticatedFeedRouteRouteImport } from "./routes/_authenticated/feed/route"
+import { Route as AuthenticatedAvatarRouteRouteImport } from "./routes/_authenticated/avatar/route"
 import { Route as AuthenticatedAtmeRouteRouteImport } from "./routes/_authenticated/@me/route"
 import { Route as AuthenticatedSpacesSpaceIdRouteRouteImport } from "./routes/_authenticated/spaces/$spaceId/route"
 import { Route as AuthenticatedAtmeChannelIdRouteRouteImport } from "./routes/_authenticated/@me/$channelId/route"
@@ -63,10 +66,21 @@ const InviteCodeRoute = InviteCodeRouteImport.update({
   path: "/invite/$code",
   getParentRoute: () => rootRouteImport,
 } as any)
+const UsersUsernameRouteRoute = UsersUsernameRouteRouteImport.update({
+  id: "/users/$username",
+  path: "/users/$username",
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedSpacesRouteRoute =
   AuthenticatedSpacesRouteRouteImport.update({
     id: "/spaces",
     path: "/spaces",
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedProfileRouteRoute =
+  AuthenticatedProfileRouteRouteImport.update({
+    id: "/profile",
+    path: "/profile",
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedFeedRouteRoute = AuthenticatedFeedRouteRouteImport.update({
@@ -74,6 +88,12 @@ const AuthenticatedFeedRouteRoute = AuthenticatedFeedRouteRouteImport.update({
   path: "/feed",
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedAvatarRouteRoute =
+  AuthenticatedAvatarRouteRouteImport.update({
+    id: "/avatar",
+    path: "/avatar",
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAtmeRouteRoute = AuthenticatedAtmeRouteRouteImport.update({
   id: "/@me",
   path: "/@me",
@@ -106,8 +126,11 @@ export interface FileRoutesByFullPath {
   "/register": typeof RegisterRoute
   "/reset": typeof ResetRoute
   "/@me": typeof AuthenticatedAtmeRouteRouteWithChildren
+  "/avatar": typeof AuthenticatedAvatarRouteRoute
   "/feed": typeof AuthenticatedFeedRouteRoute
+  "/profile": typeof AuthenticatedProfileRouteRoute
   "/spaces": typeof AuthenticatedSpacesRouteRouteWithChildren
+  "/users/$username": typeof UsersUsernameRouteRoute
   "/invite/$code": typeof InviteCodeRoute
   "/@me/$channelId": typeof AuthenticatedAtmeChannelIdRouteRoute
   "/spaces/$spaceId": typeof AuthenticatedSpacesSpaceIdRouteRouteWithChildren
@@ -121,8 +144,11 @@ export interface FileRoutesByTo {
   "/register": typeof RegisterRoute
   "/reset": typeof ResetRoute
   "/@me": typeof AuthenticatedAtmeRouteRouteWithChildren
+  "/avatar": typeof AuthenticatedAvatarRouteRoute
   "/feed": typeof AuthenticatedFeedRouteRoute
+  "/profile": typeof AuthenticatedProfileRouteRoute
   "/spaces": typeof AuthenticatedSpacesRouteRouteWithChildren
+  "/users/$username": typeof UsersUsernameRouteRoute
   "/invite/$code": typeof InviteCodeRoute
   "/@me/$channelId": typeof AuthenticatedAtmeChannelIdRouteRoute
   "/spaces/$spaceId": typeof AuthenticatedSpacesSpaceIdRouteRouteWithChildren
@@ -138,8 +164,11 @@ export interface FileRoutesById {
   "/register": typeof RegisterRoute
   "/reset": typeof ResetRoute
   "/_authenticated/@me": typeof AuthenticatedAtmeRouteRouteWithChildren
+  "/_authenticated/avatar": typeof AuthenticatedAvatarRouteRoute
   "/_authenticated/feed": typeof AuthenticatedFeedRouteRoute
+  "/_authenticated/profile": typeof AuthenticatedProfileRouteRoute
   "/_authenticated/spaces": typeof AuthenticatedSpacesRouteRouteWithChildren
+  "/users/$username": typeof UsersUsernameRouteRoute
   "/invite/$code": typeof InviteCodeRoute
   "/_authenticated/@me/$channelId": typeof AuthenticatedAtmeChannelIdRouteRoute
   "/_authenticated/spaces/$spaceId": typeof AuthenticatedSpacesSpaceIdRouteRouteWithChildren
@@ -155,8 +184,11 @@ export interface FileRouteTypes {
     | "/register"
     | "/reset"
     | "/@me"
+    | "/avatar"
     | "/feed"
+    | "/profile"
     | "/spaces"
+    | "/users/$username"
     | "/invite/$code"
     | "/@me/$channelId"
     | "/spaces/$spaceId"
@@ -170,8 +202,11 @@ export interface FileRouteTypes {
     | "/register"
     | "/reset"
     | "/@me"
+    | "/avatar"
     | "/feed"
+    | "/profile"
     | "/spaces"
+    | "/users/$username"
     | "/invite/$code"
     | "/@me/$channelId"
     | "/spaces/$spaceId"
@@ -186,8 +221,11 @@ export interface FileRouteTypes {
     | "/register"
     | "/reset"
     | "/_authenticated/@me"
+    | "/_authenticated/avatar"
     | "/_authenticated/feed"
+    | "/_authenticated/profile"
     | "/_authenticated/spaces"
+    | "/users/$username"
     | "/invite/$code"
     | "/_authenticated/@me/$channelId"
     | "/_authenticated/spaces/$spaceId"
@@ -202,6 +240,7 @@ export interface RootRouteChildren {
   PrivacyRoute: typeof PrivacyRoute
   RegisterRoute: typeof RegisterRoute
   ResetRoute: typeof ResetRoute
+  UsersUsernameRouteRoute: typeof UsersUsernameRouteRoute
   InviteCodeRoute: typeof InviteCodeRoute
 }
 
@@ -263,6 +302,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof InviteCodeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    "/users/$username": {
+      id: "/users/$username"
+      path: "/users/$username"
+      fullPath: "/users/$username"
+      preLoaderRoute: typeof UsersUsernameRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     "/_authenticated/spaces": {
       id: "/_authenticated/spaces"
       path: "/spaces"
@@ -270,11 +316,25 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof AuthenticatedSpacesRouteRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    "/_authenticated/profile": {
+      id: "/_authenticated/profile"
+      path: "/profile"
+      fullPath: "/profile"
+      preLoaderRoute: typeof AuthenticatedProfileRouteRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     "/_authenticated/feed": {
       id: "/_authenticated/feed"
       path: "/feed"
       fullPath: "/feed"
       preLoaderRoute: typeof AuthenticatedFeedRouteRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    "/_authenticated/avatar": {
+      id: "/_authenticated/avatar"
+      path: "/avatar"
+      fullPath: "/avatar"
+      preLoaderRoute: typeof AuthenticatedAvatarRouteRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     "/_authenticated/@me": {
@@ -354,13 +414,17 @@ const AuthenticatedSpacesRouteRouteWithChildren =
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAtmeRouteRoute: typeof AuthenticatedAtmeRouteRouteWithChildren
+  AuthenticatedAvatarRouteRoute: typeof AuthenticatedAvatarRouteRoute
   AuthenticatedFeedRouteRoute: typeof AuthenticatedFeedRouteRoute
+  AuthenticatedProfileRouteRoute: typeof AuthenticatedProfileRouteRoute
   AuthenticatedSpacesRouteRoute: typeof AuthenticatedSpacesRouteRouteWithChildren
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAtmeRouteRoute: AuthenticatedAtmeRouteRouteWithChildren,
+  AuthenticatedAvatarRouteRoute: AuthenticatedAvatarRouteRoute,
   AuthenticatedFeedRouteRoute: AuthenticatedFeedRouteRoute,
+  AuthenticatedProfileRouteRoute: AuthenticatedProfileRouteRoute,
   AuthenticatedSpacesRouteRoute: AuthenticatedSpacesRouteRouteWithChildren,
 }
 
@@ -375,6 +439,7 @@ const rootRouteChildren: RootRouteChildren = {
   PrivacyRoute: PrivacyRoute,
   RegisterRoute: RegisterRoute,
   ResetRoute: ResetRoute,
+  UsersUsernameRouteRoute: UsersUsernameRouteRoute,
   InviteCodeRoute: InviteCodeRoute,
 }
 export const routeTree = rootRouteImport

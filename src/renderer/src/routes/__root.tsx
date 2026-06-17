@@ -29,7 +29,9 @@ import { calendarStrings } from "@utils/i18n";
 import { NavigationTracker } from "@components/NavigationTracker";
 import { AppHotkeys } from "@components/AppHotkeys";
 import { ContextMenuProvider } from "@contexts/ContextMenu.context";
+import { WindowTitleBarProvider } from "@contexts/WindowTitleBar.context";
 import { ModalRoot } from "@components/Modals/ModalRoot";
+import { ScreenSharePicker } from "@components/Voice/ScreenSharePicker";
 import { seo } from "@seo";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { HotkeysProvider } from "@tanstack/react-hotkeys";
@@ -151,38 +153,41 @@ function RootComponent() {
             <ModalProvider>
               <CssBaseline adaptiveScrollbar />
               <DesktopShellProvider>
-                <WindowTitleBar onHeightChange={setTitleBarHeight} />
-                <DesktopShell>
-                  <ContextMenuProvider>
-                    <ToastContainer position="top-center" />
-                    <ModalRoot />
-                    <NavigationTracker />
-                    <AppHotkeys />
-                    <InjectGlobal />
-                    <Loader>
-                      <Stack
-                        direction="column"
-                        height="100vh"
-                        width="100vw"
-                        flex={1}
-                        minHeight={0}
-                        css={{
-                          paddingTop: titleBarHeight
-                        }}
-                      >
+                <WindowTitleBarProvider>
+                  <WindowTitleBar onHeightChange={setTitleBarHeight} />
+                  <DesktopShell>
+                    <ContextMenuProvider>
+                      <ToastContainer position="top-center" />
+                      <ModalRoot />
+                      <ScreenSharePicker />
+                      <NavigationTracker />
+                      <AppHotkeys />
+                      <InjectGlobal />
+                      <Loader>
                         <Stack
-                          width="100%"
+                          direction="column"
+                          height="100vh"
+                          width="100vw"
                           flex={1}
                           minHeight={0}
-                          overflow="hidden"
+                          css={{
+                            paddingTop: titleBarHeight
+                          }}
                         >
-                          <Outlet />
+                          <Stack
+                            width="100%"
+                            flex={1}
+                            minHeight={0}
+                            overflow="hidden"
+                          >
+                            <Outlet />
+                          </Stack>
+                          {app.account && <ModeSwitcher />}
                         </Stack>
-                        {app.account && <ModeSwitcher />}
-                      </Stack>
-                    </Loader>
-                  </ContextMenuProvider>
-                </DesktopShell>
+                      </Loader>
+                    </ContextMenuProvider>
+                  </DesktopShell>
+                </WindowTitleBarProvider>
               </DesktopShellProvider>
             </ModalProvider>
           </AppTheme>

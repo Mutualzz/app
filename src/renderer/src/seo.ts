@@ -3,6 +3,7 @@ interface SEO {
   description?: string;
   image?: string;
   keywords?: string | string[];
+  url?: string;
 }
 
 const defaultTitle = "Mutualzz (Early Access)";
@@ -14,7 +15,8 @@ export const seo = (params?: SEO) => {
     title = defaultTitle,
     description = defaultDescription,
     image,
-    keywords
+    keywords,
+    url
   } = params ?? {};
 
   return [
@@ -58,6 +60,12 @@ export const seo = (params?: SEO) => {
     { name: "og:type", content: "website" },
     { name: "og:title", content: title },
     { name: "og:description", content: description },
+    ...(url
+      ? [
+          { name: "og:url", content: url },
+          { property: "og:url", content: url }
+        ]
+      : []),
     {
       name: "application-name",
       content: "Mutualzz"

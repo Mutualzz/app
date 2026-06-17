@@ -21,6 +21,7 @@ export interface MarkdownInputProps {
   emojiPicker?: boolean;
   gifPicker?: boolean;
   stickerPicker?: boolean;
+  mentions?: boolean;
 
   disabled?: boolean;
 

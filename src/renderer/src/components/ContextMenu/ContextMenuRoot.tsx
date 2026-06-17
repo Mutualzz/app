@@ -7,7 +7,7 @@ import { ChannelListContextMenu } from "@components/ContextMenu/ChannelListConte
 import { RoleContextMenu } from "@components/ContextMenu/RoleContextMenu";
 import { ChannelItemContextMenu } from "@components/ContextMenu/ChannelItemContextMenu";
 import { UserContextMenu } from "@components/ContextMenu/UserContextMenu";
-import { AccountContextMenu } from "@components/ContextMenu/AccountContextMenu";
+import { AccountContextMenu } from "@components/ContextMenu/AccountContextMenu/AccountContextMenu";
 import { EmojiContextMenu } from "@components/ContextMenu/EmojiContextMenu";
 import { StickerContextMenu } from "@components/ContextMenu/StickerContextMenu";
 import { GroupDMContextMenu } from "@components/ContextMenu/GroupDMContextMenu";

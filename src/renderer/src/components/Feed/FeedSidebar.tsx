@@ -18,23 +18,25 @@ import { Tooltip } from "@components/Tooltip";
 const links = [
   {
     label: "My Profile",
-    icon: <HouseIcon />
+    icon: <HouseIcon weight="fill" />,
+    to: "my-profile"
   },
   {
     label: "Friends",
-    icon: <UsersIcon />
+    icon: <UsersIcon weight="fill" />
   },
   {
     label: "Favorites",
-    icon: <StarIcon />
+    icon: <StarIcon weight="fill" />
   },
   {
     label: "Explore / Discover",
-    icon: <CompassIcon />
+    icon: <CompassIcon weight="fill" />
   },
   {
     label: "Customize Profile",
-    icon: <PaletteIcon />
+    icon: <PaletteIcon weight="fill" />,
+    to: "customize-profile"
   }
 ];
 
@@ -91,7 +93,22 @@ export const FeedSidebar = observer(() => {
       >
         {links.map((link) => (
           <Tooltip content={link.label} placement="right" key={link.label}>
-            <IconButton key={`feed-sidebar-link-${link.label}`}>
+            <IconButton
+              key={`feed-sidebar-link-${link.label}`}
+              onClick={() => {
+                if (!app.account) return;
+                if (link.to === "my-profile") {
+                  navigate({
+                    to: "/users/$username",
+                    params: { username: app.account.username }
+                  });
+                  return;
+                }
+                if (link.to === "customize-profile") {
+                  navigate({ to: "/profile" });
+                }
+              }}
+            >
               {link.icon}
             </IconButton>
           </Tooltip>

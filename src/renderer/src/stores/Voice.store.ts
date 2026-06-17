@@ -15,6 +15,22 @@ import type {
 import { makePersistable } from "mobx-persist-store";
 import { Logger } from "@mutualzz/logger";
 import { VoiceState } from "@stores/objects/VoiceState";
+import {
+  formatKeyCode,
+  getScreenShareCodecOptions,
+  isEditableTarget,
+  sensitivityToThreshold,
+  clampUserVolume,
+  type ScreenShareCaptureConfig,
+  type ScreenShareQuality,
+  type VoiceInputMode
+} from "@utils/voiceSettings.utils";
+import {
+  acquireScreenCaptureStream,
+  isScreenCaptureSource,
+  openScreenCaptureSettings,
+  type ScreenCaptureSource
+} from "@utils/screenCapture.utils";
 
 export type VoiceConnectionStatus =
   | "idle"
@@ -22,13 +38,60 @@ export type VoiceConnectionStatus =
   | "connected"
   | "failed";
 
-type MediaKind = "camera" | "screen" | "audio";
+type MediaKind = "camera" | "screen" | "audio" | "screen-audio";
+
+type ProducerMediaKind = Exclude<MediaKind, "audio">;
 
 interface StreamMetadata {
   stream: MediaStream;
   kind: MediaKind;
   element?: HTMLAudioElement | HTMLVideoElement;
 }
+
+interface SpeakingDetector {
+  analyser: AnalyserNode;
+  sourceNode: MediaStreamAudioSourceNode;
+  data: Uint8Array;
+  speaking: boolean;
+  lastAbove: number;
+  lastBelow: number;
+}
+
+const SPEAKING_ON_DELAY_MS = 50;
+const SPEAKING_OFF_DELAY_MS = 250;
+const SPEAKING_TICK_MS = 20;
+const VOICE_JOIN_TIMEOUT_MS = 30_000;
+
+type UserMix = { muted: boolean; volume: number };
+
+function serializeVolumeMap(value: unknown) {
+  if (!(value instanceof Map)) return {};
+  return Object.fromEntries(value.entries());
+}
+
+function deserializeVolumeMap(value: unknown) {
+  const entries =
+    value && typeof value === "object"
+      ? Object.entries(value as Record<string, number>)
+      : [];
+  return observable.map<string, number>(
+    entries.map(([userId, volume]) => [userId, Number(volume)])
+  );
+}
+
+function serializeMutedUsers(value: unknown) {
+  if (!(value instanceof Map)) return [];
+  return Array.from(value.entries())
+    .filter(([, muted]) => muted)
+    .map(([userId]) => userId);
+}
+
+function deserializeMutedUsers(value: unknown) {
+  const userIds = Array.isArray(value) ? value.map(String) : [];
+  return observable.map<string, boolean>(userIds.map((userId) => [userId, true]));
+}
+
+export type { VoiceInputMode };
 
 function canSetSinkId(
   element: HTMLMediaElement
@@ -59,10 +122,15 @@ class MediasoupSession {
 
   private micTrack: MediaStreamTrack | null = null;
   private cameraTrack: MediaStreamTrack | null = null;
+  private screenTrack: MediaStreamTrack | null = null;
+  private screenAudioTrack: MediaStreamTrack | null = null;
   private micProducer: mediasoupClient.types.Producer | null = null;
   private cameraProducer: mediasoupClient.types.Producer | null = null;
+  private screenProducer: mediasoupClient.types.Producer | null = null;
+  private screenAudioProducer: mediasoupClient.types.Producer | null = null;
   private audioContext: AudioContext | null = null;
-  private audioSourceNodes = new Map<string, AudioNode>(); // producerId → source node
+  private audioSourceNodes = new Map<string, AudioNode>();
+  private audioGainNodes = new Map<string, GainNode>();
 
   private consumersByProducerId = new Map<
     string,
@@ -78,26 +146,34 @@ class MediasoupSession {
       timer: ReturnType<typeof setTimeout>;
     }
   >();
-  private pendingProducerIds = new Map<string, string>(); // producerId → userId
+  private pendingProducerIds = new Map<
+    string,
+    { userId: string; mediaKind: MediaKind }
+  >();
+  private producerUserMap = new Map<string, string>(); // producerId → userId
   private setupComplete = false;
+  private consumeAbortSignal: AbortSignal | null = null;
   private isMuted = false;
   private isDeafened = false;
+  private spaceMuted = false;
+  private inputMode: VoiceInputMode = "voice_activity";
+  private pushToTalkPressed = false;
+  private getSpeakingThreshold: () => number = () => 0.05;
+  private shouldReportSpeaking: (userId: string) => boolean = () => true;
   private currentInputDeviceId: string | null = null;
   private currentOutputDeviceId: string | null = null;
   private currentCameraDeviceId: string | null = null;
   private readonly logger = new Logger({ tag: "VoiceSession" });
 
-  private speakingAnalyser: AnalyserNode | null = null;
-  private speakingSourceNode: MediaStreamAudioSourceNode | null = null;
-  private speakingTimer: number | null = null;
-  private speakingState = false;
-  private speakingUserId: string | null = null;
+  private speakingDetectors = new Map<string, SpeakingDetector>();
+  private speakingTickTimer: number | null = null;
 
   constructor(
     private readonly app: AppStore,
     private readonly onVideoConsumed: (
       userId: string,
-      producerId: string
+      producerId: string,
+      mediaKind: Exclude<MediaKind, "audio">
     ) => void,
     private readonly onVideoClosed: (producerId: string) => void,
     private readonly onSocketClosed: (
@@ -106,8 +182,22 @@ class MediasoupSession {
     private readonly onSpeakingChange: (
       userId: string,
       speaking: boolean
-    ) => void
+    ) => void,
+    private readonly onScreenShareAvailable: (
+      userId: string,
+      producerId: string,
+      mediaKind: "screen" | "screen-audio"
+    ) => void,
+    private readonly onAudioConsumed: (
+      userId: string,
+      producerId: string,
+      kind: "audio" | "screen-audio"
+    ) => void,
+    getSpeakingThreshold: () => number,
+    shouldReportSpeaking: (userId: string) => boolean
   ) {
+    this.getSpeakingThreshold = getSpeakingThreshold;
+    this.shouldReportSpeaking = shouldReportSpeaking;
     makeAutoObservable(this, {}, { autoBind: true });
   }
 
@@ -123,6 +213,10 @@ class MediasoupSession {
 
   getLocalCameraStream() {
     return this.cameraTrack ? new MediaStream([this.cameraTrack]) : null;
+  }
+
+  getLocalScreenStream() {
+    return this.screenTrack ? new MediaStream([this.screenTrack]) : null;
   }
 
   setInputDeviceId(id: string | null) {
@@ -143,46 +237,114 @@ class MediasoupSession {
     this.currentCameraDeviceId = id;
   }
 
-  setSelfMute(muted: boolean) {
-    this.isMuted = muted;
+  setInputMode(mode: VoiceInputMode) {
+    this.inputMode = mode;
+    if (mode === "voice_activity") {
+      this.pushToTalkPressed = false;
+    }
+    this.applyMicTransmission();
+  }
+
+  setSpaceMute(muted: boolean) {
+    this.spaceMuted = muted;
+    this.applyMicTransmission();
+  }
+
+  setPushToTalkPressed(pressed: boolean) {
+    if (this.inputMode !== "push_to_talk") return;
+    if (this.pushToTalkPressed === pressed) return;
+    this.pushToTalkPressed = pressed;
+    this.applyMicTransmission();
+  }
+
+  private applyMicTransmission() {
+    const selfId = this.app.account?.id;
+    const selfSpeaking = selfId
+      ? (this.speakingDetectors.get(selfId)?.speaking ?? false)
+      : false;
+
+    const inputOpen =
+      this.inputMode === "voice_activity"
+        ? selfSpeaking
+        : this.pushToTalkPressed;
+
+    const shouldTransmit = !this.isMuted && !this.spaceMuted && inputOpen;
+
     if (this.micProducer) {
       try {
-        muted ? this.micProducer.pause() : this.micProducer.resume();
-      } catch {}
-    } else if (this.micTrack) {
-      try {
-        this.micTrack.enabled = !muted;
+        shouldTransmit ? this.micProducer.resume() : this.micProducer.pause();
       } catch {}
     }
+
+    if (this.micTrack) {
+      try {
+        this.micTrack.enabled = shouldTransmit;
+      } catch {}
+    }
+
+    if (!selfId || shouldTransmit) return;
+
+    const detector = this.speakingDetectors.get(selfId);
+    if (detector?.speaking) {
+      detector.speaking = false;
+      this.onSpeakingChange(selfId, false);
+    }
+  }
+
+  setSelfMute(muted: boolean) {
+    this.isMuted = muted;
+    this.applyMicTransmission();
   }
 
   setSelfDeaf(deafened: boolean) {
     this.isDeafened = deafened;
-    // Audio streams are routed through AudioContext nodes, not HTMLAudioElement.
-    // Deafen = disconnect from destination; undeafen = reconnect.
     if (this.audioContext) {
-      for (const [producerId, sourceNode] of this.audioSourceNodes) {
-        const meta = this.streamMetadata.get(producerId);
-        if (!meta || meta.kind !== "audio") continue;
+      for (const [, gainNode] of this.audioGainNodes) {
         try {
           if (deafened) {
-            (sourceNode as AudioNode).disconnect();
+            gainNode.disconnect();
           } else {
-            (sourceNode as AudioNode).connect(this.audioContext.destination);
+            gainNode.connect(this.audioContext.destination);
           }
-        } catch {
-          // disconnect() throws if not connected - safe to ignore
-        }
+        } catch {}
       }
     }
-    // Still mute video elements if any
     for (const [, meta] of this.streamMetadata) {
-      if (meta.kind !== "audio" && meta.element) {
+      if (
+        meta.kind !== "audio" &&
+        meta.kind !== "screen-audio" &&
+        meta.element
+      ) {
         try {
           meta.element.muted = deafened;
         } catch {}
       }
     }
+  }
+
+  applyAudioForUser(
+    userId: string,
+    kind: "audio" | "screen-audio",
+    mix: UserMix
+  ) {
+    for (const [producerId, uid] of this.producerUserMap) {
+      if (uid !== userId) continue;
+      if (this.streamMetadata.get(producerId)?.kind !== kind) continue;
+      this.applyAudioGain(producerId, mix.muted, mix.volume);
+    }
+  }
+
+  private applyAudioGain(producerId: string, muted: boolean, volume: number) {
+    const gain = this.audioGainNodes.get(producerId);
+    if (!gain) return;
+    gain.gain.value = muted ? 0 : Math.min(2, volume / 100);
+  }
+
+  private connectAudioGain(gainNode: GainNode) {
+    if (!this.audioContext || this.isDeafened) return;
+    try {
+      gainNode.connect(this.audioContext.destination);
+    } catch {}
   }
 
   getVideoStream(producerId: string): MediaStream | null {
@@ -227,12 +389,117 @@ class MediasoupSession {
       this.cameraTrack = videoTrack;
       this.cameraProducer = await this.sendTransport!.produce({
         track: videoTrack,
+        appData: { mediaKind: "camera" },
         codecOptions: {
           videoGoogleStartBitrate: 1000,
           videoGoogleMaxBitrate: 9000
         }
       });
     });
+  }
+
+  async startScreenShare(
+    signal: AbortSignal,
+    getStream: () => Promise<MediaStream>,
+    config: ScreenShareCaptureConfig
+  ) {
+    if (!this.sendTransport) return;
+
+    const media = await getStream();
+
+    if (signal.aborted) {
+      media.getTracks().forEach((t) => t.stop());
+      return;
+    }
+
+    const [videoTrack] = media.getVideoTracks();
+    if (!videoTrack) {
+      media.getTracks().forEach((t) => t.stop());
+      return;
+    }
+
+    videoTrack.addEventListener("ended", () => {
+      void this.stopScreenShare();
+    });
+
+    this.screenTrack = videoTrack;
+    const codecOptions = getScreenShareCodecOptions(config.quality);
+    this.screenProducer = await this.sendTransport.produce({
+      track: videoTrack,
+      appData: { mediaKind: "screen" },
+      codecOptions
+    });
+
+    const [audioTrack] = media.getAudioTracks();
+    if (config.includeAudio && audioTrack) {
+      this.screenAudioTrack = audioTrack;
+      this.screenAudioProducer = await this.sendTransport.produce({
+        track: audioTrack,
+        appData: { mediaKind: "screen-audio" }
+      });
+    } else {
+      for (const track of media.getAudioTracks()) {
+        try {
+          track.stop();
+        } catch {}
+      }
+    }
+  }
+
+  setScreenShareAudioMuted(muted: boolean) {
+    if (this.screenAudioProducer) {
+      try {
+        muted
+          ? this.screenAudioProducer.pause()
+          : this.screenAudioProducer.resume();
+      } catch {}
+    }
+    if (this.screenAudioTrack) {
+      try {
+        this.screenAudioTrack.enabled = !muted;
+      } catch {}
+    }
+  }
+
+  async stopScreenShare() {
+    const producerId = this.screenProducer?.id ?? null;
+    const audioProducerId = this.screenAudioProducer?.id ?? null;
+
+    try {
+      this.screenAudioProducer?.close();
+    } catch {}
+    this.screenAudioProducer = null;
+
+    if (this.screenAudioTrack) {
+      try {
+        this.screenAudioTrack.stop();
+      } catch {}
+      this.screenAudioTrack = null;
+    }
+
+    try {
+      this.screenProducer?.close();
+    } catch {}
+    this.screenProducer = null;
+    if (this.screenTrack) {
+      try {
+        this.screenTrack.stop();
+      } catch {}
+      this.screenTrack = null;
+    }
+    if (audioProducerId) {
+      try {
+        await this.rpc(VoiceOpcodes.VoiceCloseProducer, {
+          producerId: audioProducerId
+        });
+      } catch {}
+    }
+    if (producerId) {
+      try {
+        await this.rpc(VoiceOpcodes.VoiceCloseProducer, { producerId });
+      } catch {}
+      this.onVideoClosed(producerId);
+    }
   }
 
   async stopCamera() {
@@ -272,6 +539,7 @@ class MediasoupSession {
 
   async connect(endpoint: string, token: string, signal: AbortSignal) {
     this.setupComplete = false;
+    this.consumeAbortSignal = signal;
 
     const url = new URL(endpoint);
     url.searchParams.set("token", token);
@@ -337,11 +605,12 @@ class MediasoupSession {
     });
     sendTransport.on(
       "produce",
-      ({ kind, rtpParameters }, callback, errback) => {
+      ({ kind, rtpParameters, appData }, callback, errback) => {
         void this.rpc(VoiceOpcodes.VoiceProduce, {
           transportId: sendTransport.id,
           kind,
-          rtpParameters
+          rtpParameters,
+          appData
         })
           .then((data) => callback({ id: data.producerId }))
           .catch(errback);
@@ -355,7 +624,10 @@ class MediasoupSession {
 
   teardown() {
     this.setupComplete = false;
+    this.consumeAbortSignal = null;
     this.pendingProducerIds.clear();
+    this.producerUserMap.clear();
+    this.stopAllSpeakingDetection();
 
     // Reject all in-flight RPCs immediately
     for (const [, pending] of this.pendingRequests) {
@@ -408,6 +680,28 @@ class MediasoupSession {
       this.cameraTrack = null;
     }
 
+    try {
+      this.screenAudioProducer?.close();
+    } catch {}
+    this.screenAudioProducer = null;
+    if (this.screenAudioTrack) {
+      try {
+        this.screenAudioTrack.stop();
+      } catch {}
+      this.screenAudioTrack = null;
+    }
+
+    try {
+      this.screenProducer?.close();
+    } catch {}
+    this.screenProducer = null;
+    if (this.screenTrack) {
+      try {
+        this.screenTrack.stop();
+      } catch {}
+      this.screenTrack = null;
+    }
+
     // Stop all remote streams and remove from DOM
     for (const [, consumer] of this.consumersByProducerId) {
       try {
@@ -423,6 +717,13 @@ class MediasoupSession {
       } catch {}
     }
     this.audioSourceNodes.clear();
+
+    for (const [, gainNode] of this.audioGainNodes) {
+      try {
+        gainNode.disconnect();
+      } catch {}
+    }
+    this.audioGainNodes.clear();
 
     for (const [, meta] of this.streamMetadata) {
       if (meta.element) {
@@ -492,14 +793,15 @@ class MediasoupSession {
     }
     this.micProducer = await this.sendTransport.produce({
       track: audioTrack,
+      appData: { mediaKind: "audio" },
       codecOptions: { opusStereo: true, opusDtx: true }
     });
 
-    this.setSelfMute(this.isMuted);
+    this.applyMicTransmission();
   }
 
   private startSpeakingDetection(stream: MediaStream, userId: string) {
-    this.stopSpeakingDetection();
+    this.stopSpeakingDetectionForUser(userId);
 
     const AudioContextCtor =
       window.AudioContext || (window as any).webkitAudioContext;
@@ -509,76 +811,180 @@ class MediasoupSession {
       this.audioContext = new AudioContextCtor();
     }
 
-    this.speakingUserId = userId;
-    this.speakingAnalyser = this.audioContext.createAnalyser();
-    this.speakingAnalyser.fftSize = 512;
+    const analyser = this.audioContext.createAnalyser();
+    analyser.fftSize = 512;
 
-    this.speakingSourceNode = this.audioContext.createMediaStreamSource(stream);
-    this.speakingSourceNode.connect(this.speakingAnalyser);
+    const sourceNode = this.audioContext.createMediaStreamSource(stream);
+    sourceNode.connect(analyser);
 
-    const data = new Uint8Array(this.speakingAnalyser.frequencyBinCount);
-    const threshold = 0.2; // Update this when we add settings for sensitivity
-    const onDelay = 120;
-    const offDelay = 180;
+    this.speakingDetectors.set(userId, {
+      analyser,
+      sourceNode,
+      data: new Uint8Array(analyser.frequencyBinCount),
+      speaking: false,
+      lastAbove: 0,
+      lastBelow: 0
+    });
 
-    let lastAbove = 0;
-    let lastBelow = 0;
+    this.ensureSpeakingTick();
+  }
+
+  private stopSpeakingDetectionForUser(userId: string) {
+    const detector = this.speakingDetectors.get(userId);
+    if (!detector) return;
+
+    try {
+      detector.sourceNode.disconnect();
+    } catch {}
+
+    try {
+      detector.analyser.disconnect();
+    } catch {}
+
+    if (detector.speaking) {
+      this.onSpeakingChange(userId, false);
+    }
+
+    this.speakingDetectors.delete(userId);
+
+    if (this.speakingDetectors.size === 0) {
+      this.stopSpeakingTick();
+    }
+  }
+
+  private stopAllSpeakingDetection() {
+    for (const userId of Array.from(this.speakingDetectors.keys())) {
+      this.stopSpeakingDetectionForUser(userId);
+    }
+  }
+
+  private ensureSpeakingTick() {
+    if (this.speakingTickTimer != null) return;
 
     const tick = () => {
-      if (!this.speakingAnalyser || !this.speakingUserId) return;
-
-      this.speakingAnalyser.getByteTimeDomainData(data);
-
-      let sum = 0;
-      for (const v of data) {
-        const x = (v - 128) / 128;
-        sum += x * x;
+      if (this.speakingDetectors.size === 0) {
+        this.speakingTickTimer = null;
+        return;
       }
-      const rms = Math.sqrt(sum / data.length);
+
       const now = performance.now();
-      const above = rms > threshold;
 
-      if (above) {
-        lastAbove = now;
-        if (!this.speakingState && now - lastBelow > offDelay) {
-          this.speakingState = true;
-          this.onSpeakingChange(this.speakingUserId, true);
+      const threshold = this.getSpeakingThreshold();
+
+      for (const [userId, detector] of this.speakingDetectors) {
+        if (!this.shouldReportSpeaking(userId)) {
+          if (detector.speaking) {
+            detector.speaking = false;
+            this.onSpeakingChange(userId, false);
+          }
+          continue;
         }
-      } else {
-        lastBelow = now;
-        if (this.speakingState && now - lastAbove > onDelay) {
-          this.speakingState = false;
-          this.onSpeakingChange(this.speakingUserId, false);
+
+        detector.analyser.getByteTimeDomainData(
+          detector.data as Uint8Array<ArrayBuffer>
+        );
+
+        let sum = 0;
+        for (const v of detector.data) {
+          const x = (v - 128) / 128;
+          sum += x * x;
+        }
+        const rms = Math.sqrt(sum / detector.data.length);
+        const above = rms > threshold;
+
+        if (above) {
+          detector.lastAbove = now;
+          if (
+            !detector.speaking &&
+            now - detector.lastBelow > SPEAKING_ON_DELAY_MS
+          ) {
+            detector.speaking = true;
+            this.onSpeakingChange(userId, true);
+            if (userId === this.app.account?.id) {
+              this.applyMicTransmission();
+            }
+          }
+        } else {
+          detector.lastBelow = now;
+          if (
+            detector.speaking &&
+            now - detector.lastAbove > SPEAKING_OFF_DELAY_MS
+          ) {
+            detector.speaking = false;
+            this.onSpeakingChange(userId, false);
+            if (userId === this.app.account?.id) {
+              this.applyMicTransmission();
+            }
+          }
         }
       }
 
-      this.speakingTimer = window.setTimeout(tick, 50);
+      this.speakingTickTimer = window.setTimeout(tick, SPEAKING_TICK_MS);
     };
 
     tick();
   }
 
-  private stopSpeakingDetection() {
-    if (this.speakingTimer != null) {
-      clearTimeout(this.speakingTimer);
-      this.speakingTimer = null;
+  private stopSpeakingTick() {
+    if (this.speakingTickTimer != null) {
+      clearTimeout(this.speakingTickTimer);
+      this.speakingTickTimer = null;
+    }
+  }
+
+  private cleanupProducer(producerId: string) {
+    const consumer = this.consumersByProducerId.get(producerId);
+    if (consumer) {
+      try {
+        consumer.close();
+      } catch {}
+      this.consumersByProducerId.delete(producerId);
     }
 
-    try {
-      this.speakingSourceNode?.disconnect();
-    } catch {}
+    const sourceNode = this.audioSourceNodes.get(producerId);
+    if (sourceNode) {
+      try {
+        sourceNode.disconnect();
+      } catch {}
+      this.audioSourceNodes.delete(producerId);
+    }
 
-    try {
-      this.speakingAnalyser?.disconnect();
-    } catch {}
+    const gainNode = this.audioGainNodes.get(producerId);
+    if (gainNode) {
+      try {
+        gainNode.disconnect();
+      } catch {}
+      this.audioGainNodes.delete(producerId);
+    }
 
-    this.speakingSourceNode = null;
-    this.speakingAnalyser = null;
-    this.speakingState = false;
+    const userId = this.producerUserMap.get(producerId);
+    if (userId) {
+      const hasOtherAudio = Array.from(this.producerUserMap.entries()).some(
+        ([id, uid]) => id !== producerId && uid === userId
+      );
+      if (!hasOtherAudio) {
+        this.stopSpeakingDetectionForUser(userId);
+      }
+      this.producerUserMap.delete(producerId);
+    }
 
-    if (this.speakingUserId) {
-      this.onSpeakingChange(this.speakingUserId, false);
-      this.speakingUserId = null;
+    const meta = this.streamMetadata.get(producerId);
+    if (meta) {
+      if (meta.element) {
+        try {
+          meta.element.pause();
+        } catch {}
+        meta.element.srcObject = null;
+        try {
+          meta.element.remove();
+        } catch {}
+      }
+      for (const track of meta.stream.getTracks()) {
+        try {
+          track.stop();
+        } catch {}
+      }
+      this.streamMetadata.delete(producerId);
     }
   }
 
@@ -639,7 +1045,8 @@ class MediasoupSession {
   private async consumeProducer(
     producerId: string,
     userId: string,
-    signal: AbortSignal
+    signal: AbortSignal,
+    mediaKind: MediaKind = "audio"
   ) {
     if (!this.device || !this.receiverTransport) return;
     if (this.consumersByProducerId.has(producerId)) return;
@@ -667,9 +1074,17 @@ class MediasoupSession {
     }
 
     this.consumersByProducerId.set(producerId, consumer);
+    this.producerUserMap.set(producerId, userId);
 
     const stream = new MediaStream([consumer.track]);
-    const kind: MediaKind = consumer.kind === "video" ? "camera" : "audio";
+    const kind: MediaKind =
+      consumer.kind === "video"
+        ? mediaKind === "screen"
+          ? "screen"
+          : "camera"
+        : mediaKind === "screen-audio"
+          ? "screen-audio"
+          : "audio";
 
     if (kind === "audio") this.startSpeakingDetection(stream, userId);
 
@@ -695,7 +1110,11 @@ class MediasoupSession {
         element: video
       });
 
-      this.onVideoConsumed(userId, producerId);
+      this.onVideoConsumed(
+        userId,
+        producerId,
+        kind === "screen" ? "screen" : "camera"
+      );
 
       await this.rpc(VoiceOpcodes.VoiceResumeConsumer, {
         consumerId: consumer.id
@@ -717,18 +1136,24 @@ class MediasoupSession {
       }
 
       const sourceNode = audioCtx.createMediaStreamSource(stream);
+      const gainNode = audioCtx.createGain();
+      gainNode.gain.value = kind === "screen-audio" ? 0 : 1;
 
-      if (!this.isDeafened) {
-        sourceNode.connect(audioCtx.destination);
-      }
+      sourceNode.connect(gainNode);
+      this.connectAudioGain(gainNode);
 
       this.audioSourceNodes.set(producerId, sourceNode);
+      this.audioGainNodes.set(producerId, gainNode);
 
       this.streamMetadata.set(producerId, {
         stream,
         kind,
         element: undefined
       });
+
+      if (kind === "screen-audio" || kind === "audio") {
+        this.onAudioConsumed(userId, producerId, kind);
+      }
 
       await this.rpc(VoiceOpcodes.VoiceResumeConsumer, {
         consumerId: consumer.id
@@ -739,10 +1164,47 @@ class MediasoupSession {
   private async flushPendingProducers(signal: AbortSignal) {
     const queued = Array.from(this.pendingProducerIds.entries());
     this.pendingProducerIds.clear();
-    for (const [producerId, userId] of queued) {
+    for (const [producerId, { userId, mediaKind }] of queued) {
       if (signal.aborted) return;
-      await this.consumeProducer(producerId, userId, signal);
+      await this.handleNewProducer(producerId, userId, mediaKind, signal);
     }
+  }
+
+  private shouldDeferScreenConsume(userId: string, mediaKind: MediaKind) {
+    return (
+      (mediaKind === "screen" || mediaKind === "screen-audio") &&
+      userId !== this.app.account?.id
+    );
+  }
+
+  private async handleNewProducer(
+    producerId: string,
+    userId: string,
+    mediaKind: MediaKind,
+    signal: AbortSignal
+  ) {
+    if (this.shouldDeferScreenConsume(userId, mediaKind)) {
+      this.onScreenShareAvailable(
+        userId,
+        producerId,
+        mediaKind === "screen-audio" ? "screen-audio" : "screen"
+      );
+      return;
+    }
+    await this.consumeProducer(producerId, userId, signal, mediaKind);
+  }
+
+  async consumeRemoteProducer(
+    producerId: string,
+    userId: string,
+    signal: AbortSignal,
+    mediaKind: MediaKind
+  ) {
+    await this.consumeProducer(producerId, userId, signal, mediaKind);
+  }
+
+  releaseConsumer(producerId: string) {
+    this.cleanupProducer(producerId);
   }
 
   private onMessage(raw: string) {
@@ -754,7 +1216,9 @@ class MediasoupSession {
     }
 
     if (envelope.id == null && envelope.op != null) {
-      void this.onPush(envelope.op, envelope.data);
+      void this.onPush(envelope.op, envelope.data).catch((err) =>
+        this.logger.debug("onPush failed", err)
+      );
       return;
     }
 
@@ -774,51 +1238,36 @@ class MediasoupSession {
       const { producerId } = data ?? {};
       if (!producerId) return;
 
-      const consumer = this.consumersByProducerId.get(producerId);
-      if (consumer) {
-        try {
-          consumer.close();
-        } catch {}
-        this.consumersByProducerId.delete(producerId);
-      }
-
-      const meta = this.streamMetadata.get(producerId);
-      if (meta) {
-        if (meta.element) {
-          try {
-            meta.element.pause();
-          } catch {}
-          meta.element.srcObject = null;
-          try {
-            meta.element.remove();
-          } catch {}
-        }
-        for (const track of meta.stream.getTracks()) {
-          try {
-            track.stop();
-          } catch {}
-        }
-        this.streamMetadata.delete(producerId);
-      }
-
+      this.cleanupProducer(producerId);
       this.onVideoClosed(producerId);
       return;
     }
 
     if (op === VoiceDispatchEvents.VoiceNewProducer) {
-      const { producerId, userId } = data ?? {};
+      const { producerId, userId, mediaKind } = data ?? {};
       if (!producerId || !userId) return;
 
+      const resolvedKind: MediaKind =
+        mediaKind === "screen"
+          ? "screen"
+          : mediaKind === "screen-audio"
+            ? "screen-audio"
+            : mediaKind === "camera"
+              ? "camera"
+              : "audio";
+
       if (!this.setupComplete) {
-        this.pendingProducerIds.set(producerId, userId);
+        this.pendingProducerIds.set(producerId, {
+          userId,
+          mediaKind: resolvedKind
+        });
         return;
       }
 
-      await this.consumeProducer(
-        producerId,
-        userId,
-        new AbortController().signal
-      );
+      const signal = this.consumeAbortSignal;
+      if (!signal || signal.aborted) return;
+
+      await this.handleNewProducer(producerId, userId, resolvedKind, signal);
     }
   }
 
@@ -900,6 +1349,16 @@ export class VoiceStore {
   spaceDeaf = false;
 
   cameraEnabled = false;
+  screenShareEnabled = false;
+  pushToTalkActive = false;
+  recordingPushToTalkKey = false;
+  screenSharePickerOpen = false;
+  screenSharePickerSources: ScreenCaptureSource[] = [];
+  screenSharePickerSelectedId: string | null = null;
+  screenSharePickerIncludeAudio = false;
+  screenSharePickerQuality: ScreenShareQuality = "1080p30";
+  screenShareAudioEnabled = false;
+  screenShareSupportsAudio = false;
 
   inputs = observable.array<MediaDeviceInfo>([]);
   outputs = observable.array<MediaDeviceInfo>([]);
@@ -910,32 +1369,74 @@ export class VoiceStore {
   currentCameraDeviceId: string | null = null;
   disconnectBanner: string | null = null;
   currentSessionId: string | null = null;
-  private voiceStateProducerMap = new Map<string, string>();
+  private cameraProducerByUser = new Map<string, string>();
+  private screenProducerByUser = new Map<string, string>();
+  availableScreenShares = observable.map<string, string>();
+  availableScreenAudioShares = observable.map<string, string>();
+  watchedScreenShares = observable.set<string>();
+  screenStreamVolumeByUser = observable.map<string, number>();
+  screenStreamMutedByUser = observable.map<string, boolean>();
+  userVoiceVolumeByUser = observable.map<string, number>();
+  userVoiceMutedByUser = observable.map<string, boolean>();
   private producerToUserMap = new Map<string, string>();
+  private producerMediaKind = new Map<string, ProducerMediaKind>();
+  private screenAudioProducerByUser = new Map<string, string>();
   private readonly session: MediasoupSession;
   private readonly logger = new Logger({ tag: "VoiceStore" });
   private keepAliveTimer: number | null = null;
   private abortController: AbortController | null = null;
   private pendingEndpoint: string | null = null;
   private pendingToken: string | null = null;
+  private joinTimeoutTimer: number | null = null;
+  private lastScreenShareConfig: ScreenShareCaptureConfig | null = null;
 
   private speakingUsers = observable.map<string, boolean>();
 
   constructor(private readonly app: AppStore) {
     this.session = new MediasoupSession(
       app,
-      (userId, producerId) => {
+      (userId, producerId, mediaKind) => {
         runInAction(() => {
-          this.voiceStateProducerMap.set(userId, producerId);
           this.producerToUserMap.set(producerId, userId);
+          this.producerMediaKind.set(producerId, mediaKind);
+          if (mediaKind === "screen") {
+            this.screenProducerByUser.set(userId, producerId);
+          } else {
+            this.cameraProducerByUser.set(userId, producerId);
+          }
         });
       },
       (producerId) => {
         const userId = this.producerToUserMap.get(producerId);
-        if (userId) {
+        const mediaKind = this.producerMediaKind.get(producerId);
+        if (userId && mediaKind) {
           runInAction(() => {
-            this.voiceStateProducerMap.delete(userId);
+            if (mediaKind === "screen") {
+              this.availableScreenShares.delete(userId);
+              this.availableScreenAudioShares.delete(userId);
+              this.watchedScreenShares.delete(userId);
+              if (this.screenProducerByUser.get(userId) === producerId) {
+                this.screenProducerByUser.delete(userId);
+              }
+              const audioProducerId =
+                this.screenAudioProducerByUser.get(userId);
+              if (audioProducerId) {
+                this.session.releaseConsumer(audioProducerId);
+                this.screenAudioProducerByUser.delete(userId);
+              }
+              if (userId === this.app.account?.id) {
+                this.screenShareEnabled = false;
+              }
+            } else if (mediaKind === "screen-audio") {
+              this.availableScreenAudioShares.delete(userId);
+              if (this.screenAudioProducerByUser.get(userId) === producerId) {
+                this.screenAudioProducerByUser.delete(userId);
+              }
+            } else if (this.cameraProducerByUser.get(userId) === producerId) {
+              this.cameraProducerByUser.delete(userId);
+            }
             this.producerToUserMap.delete(producerId);
+            this.producerMediaKind.delete(producerId);
           });
         }
       },
@@ -957,6 +1458,8 @@ export class VoiceStore {
           this.connectionError = reason;
           this.currentVoiceTarget = null;
           this.cameraEnabled = false;
+          this.screenShareEnabled = false;
+          this.pushToTalkActive = false;
         });
         try {
           this.abortAndTeardown();
@@ -966,19 +1469,77 @@ export class VoiceStore {
       },
       (userId, speaking) => {
         runInAction(() => {
+          if (userId === this.app.account?.id && this.effectiveSelfMute) {
+            if (!speaking) this.setUserSpeaking(userId, false);
+            return;
+          }
           this.setUserSpeaking(userId, speaking);
         });
-      }
+      },
+      (userId, producerId, mediaKind) => {
+        runInAction(() => {
+          if (mediaKind === "screen-audio") {
+            this.availableScreenAudioShares.set(userId, producerId);
+          } else {
+            this.availableScreenShares.set(userId, producerId);
+          }
+          this.producerToUserMap.set(producerId, userId);
+          this.producerMediaKind.set(producerId, mediaKind);
+        });
+
+        if (
+          mediaKind === "screen-audio" &&
+          this.watchedScreenShares.has(userId)
+        ) {
+          void this.consumeDeferredScreenAudio(userId, producerId);
+        }
+      },
+      (userId, producerId, kind) => {
+        if (kind === "screen-audio") {
+          runInAction(() => {
+            this.screenAudioProducerByUser.set(userId, producerId);
+            this.producerToUserMap.set(producerId, userId);
+            this.producerMediaKind.set(producerId, "screen-audio");
+          });
+        }
+        this.syncUserAudioMix(userId, kind);
+      },
+      () => this.getSpeakingThreshold(),
+      (userId) => this.shouldReportSpeakingForUser(userId)
     );
 
     makeAutoObservable(this, {}, { autoBind: true });
+
+    window.addEventListener("keydown", this.onPttKeyDown);
+    window.addEventListener("keyup", this.onPttKeyUp);
+    window.addEventListener("blur", this.onPttBlur);
 
     makePersistable(this, {
       name: "VoiceStore",
       properties: [
         "currentInputDeviceId",
         "currentOutputDeviceId",
-        "currentCameraDeviceId"
+        "currentCameraDeviceId",
+        {
+          key: "screenStreamVolumeByUser",
+          serialize: serializeVolumeMap,
+          deserialize: deserializeVolumeMap
+        },
+        {
+          key: "screenStreamMutedByUser",
+          serialize: serializeMutedUsers,
+          deserialize: deserializeMutedUsers
+        },
+        {
+          key: "userVoiceVolumeByUser",
+          serialize: serializeVolumeMap,
+          deserialize: deserializeVolumeMap
+        },
+        {
+          key: "userVoiceMutedByUser",
+          serialize: serializeMutedUsers,
+          deserialize: deserializeMutedUsers
+        }
       ],
       storage: localStorage
     });
@@ -1038,6 +1599,83 @@ export class VoiceStore {
     return this.app.settings?.preferredSelfMute ?? false;
   }
 
+  get pushToTalkKeyLabel() {
+    return formatKeyCode(this.app.settings?.pushToTalkKey ?? "Space");
+  }
+
+  private getSpeakingThreshold() {
+    const settings = this.app.settings;
+    if (!settings) return 0.05;
+    return sensitivityToThreshold(
+      settings.voiceInputSensitivity,
+      settings.voiceInputSensitivityAuto
+    );
+  }
+
+  private shouldReportSpeakingForUser(userId: string) {
+    const accountId = this.app.account?.id;
+    if (userId !== accountId) return true;
+    if (this.effectiveSelfMute) return false;
+    if (this.app.settings?.voiceInputMode === "push_to_talk") {
+      return this.pushToTalkActive;
+    }
+    return true;
+  }
+
+  applyVoiceSettings() {
+    const settings = this.app.settings;
+    if (!settings) return;
+    this.session.setInputMode(settings.voiceInputMode);
+    this.session.setSpaceMute(this.spaceMute);
+  }
+
+  startRecordingPushToTalkKey() {
+    this.recordingPushToTalkKey = true;
+  }
+
+  stopRecordingPushToTalkKey() {
+    this.recordingPushToTalkKey = false;
+  }
+
+  private onPttKeyDown = (event: KeyboardEvent) => {
+    if (this.recordingPushToTalkKey) {
+      event.preventDefault();
+      this.app.settings?.setPushToTalkKey(event.code);
+      this.recordingPushToTalkKey = false;
+      return;
+    }
+
+    if (this.app.settings?.voiceInputMode !== "push_to_talk") return;
+    if (!this.hasActiveVoiceTarget) return;
+    if (isEditableTarget(event.target)) return;
+    if (event.code !== this.app.settings.pushToTalkKey) return;
+    if (event.repeat) return;
+
+    event.preventDefault();
+    runInAction(() => {
+      this.pushToTalkActive = true;
+    });
+    this.session.setPushToTalkPressed(true);
+  };
+
+  private onPttKeyUp = (event: KeyboardEvent) => {
+    if (this.app.settings?.voiceInputMode !== "push_to_talk") return;
+    if (event.code !== this.app.settings?.pushToTalkKey) return;
+
+    runInAction(() => {
+      this.pushToTalkActive = false;
+    });
+    this.session.setPushToTalkPressed(false);
+  };
+
+  private onPttBlur = () => {
+    if (!this.pushToTalkActive) return;
+    runInAction(() => {
+      this.pushToTalkActive = false;
+    });
+    this.session.setPushToTalkPressed(false);
+  };
+
   isUserSpeaking(userId: string) {
     return this.speakingUsers.get(userId) ?? false;
   }
@@ -1045,6 +1683,10 @@ export class VoiceStore {
   setUserSpeaking(userId: string, speaking: boolean) {
     if (speaking) this.speakingUsers.set(userId, true);
     else this.speakingUsers.delete(userId);
+  }
+
+  onGatewayDisconnected() {
+    this.stopKeepAlive();
   }
 
   clearDisconnectBanner() {
@@ -1087,6 +1729,17 @@ export class VoiceStore {
     this.syncSelfFromState(state);
 
     const channelId = state.channelId === "null" ? null : state.channelId;
+    const accountId = this.app.account?.id;
+
+    if (
+      !channelId &&
+      accountId &&
+      state.userId === accountId &&
+      this.connectionStatus === "connecting"
+    ) {
+      this.failJoin("Unable to join voice channel", { notifyServer: false });
+      return;
+    }
 
     if (!channelId) {
       this.app.voiceStates.upsert({
@@ -1096,7 +1749,12 @@ export class VoiceStore {
         disconnectedAt: Date.now()
       });
 
-      this.voiceStateProducerMap.delete(state.userId);
+      this.cameraProducerByUser.delete(state.userId);
+      this.screenProducerByUser.delete(state.userId);
+      this.screenAudioProducerByUser.delete(state.userId);
+      this.availableScreenShares.delete(state.userId);
+      this.availableScreenAudioShares.delete(state.userId);
+      this.watchedScreenShares.delete(state.userId);
       this.speakingUsers.delete(state.userId);
       return;
     }
@@ -1113,11 +1771,183 @@ export class VoiceStore {
     return this.session.getLocalCameraStream();
   }
 
+  getLocalScreenStream() {
+    return this.session.getLocalScreenStream();
+  }
+
+  isUserScreenSharing(userId: string) {
+    if (userId === this.app.account?.id) {
+      return this.screenShareEnabled;
+    }
+    return (
+      this.availableScreenShares.has(userId) ||
+      this.screenProducerByUser.has(userId)
+    );
+  }
+
+  isWatchingScreenShare(userId: string) {
+    if (userId === this.app.account?.id) {
+      return this.screenShareEnabled;
+    }
+    return this.watchedScreenShares.has(userId);
+  }
+
+  async watchScreenShare(userId: string) {
+    if (userId === this.app.account?.id) return;
+    if (this.watchedScreenShares.has(userId)) return;
+
+    const producerId = this.availableScreenShares.get(userId);
+    if (!producerId || !this.abortController) return;
+
+    const signal = this.abortController.signal;
+
+    await this.session.consumeRemoteProducer(
+      producerId,
+      userId,
+      signal,
+      "screen"
+    );
+
+    const audioProducerId = this.availableScreenAudioShares.get(userId);
+    if (audioProducerId) {
+      await this.session.consumeRemoteProducer(
+        audioProducerId,
+        userId,
+        signal,
+        "screen-audio"
+      );
+    }
+
+    runInAction(() => {
+      this.watchedScreenShares.add(userId);
+      this.screenProducerByUser.set(userId, producerId);
+    });
+
+    this.syncUserAudioMix(userId, "screen-audio");
+  }
+
+  stopWatchingScreenShare(userId: string) {
+    if (userId === this.app.account?.id) return;
+
+    const producerId = this.screenProducerByUser.get(userId);
+    const audioProducerId = this.screenAudioProducerByUser.get(userId);
+    if (!producerId) return;
+
+    this.session.releaseConsumer(producerId);
+    if (audioProducerId) {
+      this.session.releaseConsumer(audioProducerId);
+    }
+
+    runInAction(() => {
+      this.watchedScreenShares.delete(userId);
+      this.screenProducerByUser.delete(userId);
+      this.screenAudioProducerByUser.delete(userId);
+    });
+  }
+
+  getScreenStreamVolume(userId: string) {
+    return this.screenStreamVolumeByUser.get(userId) ?? 100;
+  }
+
+  setScreenStreamVolume(userId: string, volume: number) {
+    const clamped = clampUserVolume(volume);
+    runInAction(() => {
+      if (clamped === 100) {
+        this.screenStreamVolumeByUser.delete(userId);
+      } else {
+        this.screenStreamVolumeByUser.set(userId, clamped);
+      }
+    });
+    this.syncUserAudioMix(userId, "screen-audio");
+  }
+
+  isScreenStreamMuted(userId: string) {
+    return this.screenStreamMutedByUser.get(userId) ?? false;
+  }
+
+  setScreenStreamMuted(userId: string, muted: boolean) {
+    runInAction(() => {
+      if (muted) {
+        this.screenStreamMutedByUser.set(userId, true);
+      } else {
+        this.screenStreamMutedByUser.delete(userId);
+      }
+    });
+    this.syncUserAudioMix(userId, "screen-audio");
+  }
+
+  toggleScreenStreamMuted(userId: string) {
+    this.setScreenStreamMuted(userId, !this.isScreenStreamMuted(userId));
+  }
+
+  getUserVoiceVolume(userId: string) {
+    return this.userVoiceVolumeByUser.get(userId) ?? 100;
+  }
+
+  setUserVoiceVolume(userId: string, volume: number) {
+    const clamped = clampUserVolume(volume);
+    runInAction(() => {
+      if (clamped === 100) {
+        this.userVoiceVolumeByUser.delete(userId);
+      } else {
+        this.userVoiceVolumeByUser.set(userId, clamped);
+      }
+    });
+    this.syncUserAudioMix(userId, "audio");
+  }
+
+  isUserVoiceMuted(userId: string) {
+    return this.userVoiceMutedByUser.get(userId) ?? false;
+  }
+
+  setUserVoiceMuted(userId: string, muted: boolean) {
+    runInAction(() => {
+      if (muted) {
+        this.userVoiceMutedByUser.set(userId, true);
+      } else {
+        this.userVoiceMutedByUser.delete(userId);
+      }
+    });
+    this.syncUserAudioMix(userId, "audio");
+  }
+
+  toggleUserVoiceMuted(userId: string) {
+    this.setUserVoiceMuted(userId, !this.isUserVoiceMuted(userId));
+  }
+
+  private syncUserAudioMix(userId: string, kind: "audio" | "screen-audio") {
+    if (kind === "screen-audio") {
+      this.session.applyAudioForUser(userId, kind, {
+        muted: this.isScreenStreamMuted(userId),
+        volume: this.getScreenStreamVolume(userId)
+      });
+      return;
+    }
+
+    this.session.applyAudioForUser(userId, kind, {
+      muted: this.isUserVoiceMuted(userId),
+      volume: this.getUserVoiceVolume(userId)
+    });
+  }
+
+  private async consumeDeferredScreenAudio(userId: string, producerId: string) {
+    if (!this.abortController || this.screenAudioProducerByUser.has(userId)) {
+      return;
+    }
+
+    await this.session.consumeRemoteProducer(
+      producerId,
+      userId,
+      this.abortController.signal,
+      "screen-audio"
+    );
+  }
+
   async join(target: VoiceTarget) {
     const isSame =
       this.currentVoiceTarget?.spaceId === (target.spaceId ?? null) &&
       this.currentVoiceTarget?.channelId === target.channelId;
-    if (isSame) return;
+    if (isSame && this.connectionStatus !== "failed") return;
 
     this.session.unlockAudio();
 
@@ -1136,12 +1966,15 @@ export class VoiceStore {
 
     this.session.setSelfMute(preferredSelfMute);
     this.session.setSelfDeaf(preferredSelfDeaf);
+    this.applyVoiceSettings();
 
+    this.startJoinTimeout();
     await this.sendVoiceStateUpdate();
     this.startKeepAlive();
   }
 
   async leave() {
+    this.clearJoinTimeout();
     this.abortAndTeardown();
 
     this.pendingEndpoint = null;
@@ -1155,15 +1988,21 @@ export class VoiceStore {
       this.connectionStatus = "idle";
       this.connectionError = null;
       this.cameraEnabled = false;
+      this.screenShareEnabled = false;
+      this.pushToTalkActive = false;
     });
 
     this.clearLocalVoiceStateForMe();
     this.speakingUsers.clear();
+    this.availableScreenShares.clear();
+    this.availableScreenAudioShares.clear();
+    this.watchedScreenShares.clear();
 
     await this.sendVoiceStateUpdate();
   }
 
   reset() {
+    this.clearJoinTimeout();
     this.abortAndTeardown();
 
     this.pendingEndpoint = null;
@@ -1177,6 +2016,8 @@ export class VoiceStore {
       this.disconnectBanner = null;
       this.currentSessionId = null;
       this.cameraEnabled = false;
+      this.screenShareEnabled = false;
+      this.pushToTalkActive = false;
       this.selfMute = false;
       this.selfDeaf = false;
       this.spaceMute = false;
@@ -1184,6 +2025,9 @@ export class VoiceStore {
     });
 
     this.speakingUsers.clear();
+    this.availableScreenShares.clear();
+    this.availableScreenAudioShares.clear();
+    this.watchedScreenShares.clear();
     this.clearLocalVoiceStateForMe();
   }
 
@@ -1207,6 +2051,10 @@ export class VoiceStore {
       this.selfMute = value;
     });
 
+    if (value && this.app.account?.id) {
+      this.setUserSpeaking(this.app.account.id, false);
+    }
+
     this.app.settings?.setPreferredSelfMute(value);
     void this.sendVoiceStateUpdate();
     this.session.setSelfMute(value);
@@ -1228,6 +2076,138 @@ export class VoiceStore {
     void this.sendVoiceStateUpdate();
     this.session.setSelfDeaf(this.selfDeaf);
     this.session.setSelfMute(this.selfMute);
+  }
+
+  toggleScreenShare() {
+    if (this.screenShareEnabled) {
+      this.stopActiveScreenShare();
+      return;
+    }
+    void this.openScreenSharePicker();
+  }
+
+  async openScreenSharePicker() {
+    if (this.connectionStatus !== "connected") return;
+
+    const settings = this.app.settings;
+    const includeAudio = settings?.screenShareIncludeAudio ?? false;
+    const quality = settings?.screenShareQuality ?? "1080p30";
+
+    let sources: ScreenCaptureSource[] = [];
+    if (window.api?.desktop?.listCaptureSources) {
+      try {
+        sources = await window.api.desktop.listCaptureSources();
+      } catch (err) {
+        this.logger.warn("listCaptureSources failed", err);
+      }
+    }
+
+    const screens = sources.filter(isScreenCaptureSource);
+
+    runInAction(() => {
+      this.screenSharePickerSources = sources;
+      this.screenSharePickerSelectedId =
+        screens[0]?.id ?? sources[0]?.id ?? null;
+      this.screenSharePickerIncludeAudio = includeAudio;
+      this.screenSharePickerQuality = quality;
+      this.screenSharePickerOpen = true;
+    });
+  }
+
+  setScreenSharePickerSelectedId(sourceId: string) {
+    this.screenSharePickerSelectedId = sourceId;
+  }
+
+  setScreenSharePickerIncludeAudio(value: boolean) {
+    this.screenSharePickerIncludeAudio = value;
+  }
+
+  setScreenSharePickerQuality(value: ScreenShareQuality) {
+    this.screenSharePickerQuality = value;
+  }
+
+  confirmScreenSharePicker() {
+    const isDesktopPicker = Boolean(window.api?.desktop?.listCaptureSources);
+    if (isDesktopPicker && !this.screenSharePickerSelectedId) return;
+
+    const config: ScreenShareCaptureConfig = {
+      sourceId: this.screenSharePickerSelectedId,
+      includeAudio: this.screenSharePickerIncludeAudio,
+      quality: this.screenSharePickerQuality
+    };
+
+    this.app.settings?.setScreenShareIncludeAudio(config.includeAudio);
+    this.app.settings?.setScreenShareQuality(config.quality);
+
+    runInAction(() => {
+      this.screenSharePickerOpen = false;
+      this.screenSharePickerSources = [];
+      this.screenSharePickerSelectedId = null;
+    });
+
+    void this.startScreenShareWithConfig(config);
+  }
+
+  cancelScreenSharePicker() {
+    runInAction(() => {
+      this.screenSharePickerOpen = false;
+      this.screenSharePickerSources = [];
+      this.screenSharePickerSelectedId = null;
+    });
+  }
+
+  toggleScreenShareAudio() {
+    if (!this.screenShareEnabled) return;
+    const next = !this.screenShareAudioEnabled;
+    runInAction(() => {
+      this.screenShareAudioEnabled = next;
+    });
+    this.session.setScreenShareAudioMuted(!next);
+  }
+
+  private stopActiveScreenShare() {
+    runInAction(() => {
+      this.screenShareEnabled = false;
+      this.screenShareAudioEnabled = false;
+      this.screenShareSupportsAudio = false;
+    });
+    void this.session.stopScreenShare().catch((err) => {
+      this.logger.warn("stopScreenShare failed", err);
+    });
+  }
+
+  private async startScreenShareWithConfig(config: ScreenShareCaptureConfig) {
+    if (this.connectionStatus !== "connected" || !this.abortController) return;
+
+    this.lastScreenShareConfig = config;
+    const signal = this.abortController.signal;
+
+    runInAction(() => {
+      this.screenShareEnabled = true;
+      this.screenShareAudioEnabled = config.includeAudio;
+      this.screenShareSupportsAudio = config.includeAudio;
+    });
+
+    try {
+      await this.session.startScreenShare(
+        signal,
+        () => acquireScreenCaptureStream(config, signal),
+        config
+      );
+      if (!config.includeAudio) {
+        this.session.setScreenShareAudioMuted(true);
+      }
+    } catch (err) {
+      this.logger.warn("startScreenShare failed", err);
+      runInAction(() => {
+        this.screenShareEnabled = false;
+        this.screenShareAudioEnabled = false;
+      });
+      const message = err instanceof Error ? err.message : String(err);
+      if (message === "SCREEN_CAPTURE_DENIED") {
+        void openScreenCaptureSettings();
+      }
+    }
   }
 
   toggleCamera() {
@@ -1389,23 +2369,53 @@ export class VoiceStore {
   }
 
   getVideoStreamForUser(userId: string) {
-    const producerId = this.voiceStateProducerMap.get(userId);
-    if (!producerId) return null;
-    return this.session.getVideoStream(producerId);
+    const screenId = this.screenProducerByUser.get(userId);
+    if (screenId) return this.session.getVideoStream(screenId);
+
+    const cameraId = this.cameraProducerByUser.get(userId);
+    if (cameraId) return this.session.getVideoStream(cameraId);
+
+    return null;
+  }
+
+  getScreenStreamForUser(userId: string) {
+    if (
+      userId !== this.app.account?.id &&
+      !this.watchedScreenShares.has(userId)
+    ) {
+      return null;
+    }
+
+    const screenId = this.screenProducerByUser.get(userId);
+    return screenId ? this.session.getVideoStream(screenId) : null;
+  }
+
+  getCameraStreamForUser(userId: string) {
+    const cameraId = this.cameraProducerByUser.get(userId);
+    return cameraId ? this.session.getVideoStream(cameraId) : null;
   }
 
   getVideoElementForUser(userId: string) {
-    const producerId = this.voiceStateProducerMap.get(userId);
-    if (!producerId) return null;
-    return this.session.getVideoElement(producerId);
+    const screenId = this.screenProducerByUser.get(userId);
+    if (screenId) return this.session.getVideoElement(screenId);
+
+    const cameraId = this.cameraProducerByUser.get(userId);
+    if (!cameraId) return null;
+    return this.session.getVideoElement(cameraId);
   }
 
-  getProducerIdsOfKind(kind: MediaKind) {
-    return this.session.getProducerIds(kind);
-  }
-
-  setVoiceStateProducerId(userId: string, producerId: string) {
-    this.voiceStateProducerMap.set(userId, producerId);
+  setVoiceStateProducerId(
+    userId: string,
+    producerId: string,
+    mediaKind: Exclude<MediaKind, "audio"> = "camera"
+  ) {
+    this.producerToUserMap.set(producerId, userId);
+    this.producerMediaKind.set(producerId, mediaKind);
+    if (mediaKind === "screen") {
+      this.screenProducerByUser.set(userId, producerId);
+    } else {
+      this.cameraProducerByUser.set(userId, producerId);
+    }
   }
 
   private async startConnection() {
@@ -1436,6 +2446,7 @@ export class VoiceStore {
       );
       this.session.setSelfMute(this.selfMute);
       this.session.setSelfDeaf(this.selfDeaf);
+      this.applyVoiceSettings();
 
       await this.session.connect(endpoint, token, signal);
 
@@ -1463,9 +2474,33 @@ export class VoiceStore {
 
       if (signal.aborted) return;
 
+      if (this.screenShareEnabled && this.lastScreenShareConfig) {
+        try {
+          const config = this.lastScreenShareConfig;
+          await this.session.startScreenShare(
+            signal,
+            () => acquireScreenCaptureStream(config, signal),
+            config
+          );
+          if (!config.includeAudio) {
+            this.session.setScreenShareAudioMuted(true);
+          }
+        } catch (err) {
+          this.logger.warn("startScreenShare after connect failed", err);
+          runInAction(() => {
+            this.screenShareEnabled = false;
+            this.screenShareAudioEnabled = false;
+          });
+        }
+      }
+
+      if (signal.aborted) return;
+
       runInAction(() => {
         this.connectionStatus = "connected";
       });
+      this.clearJoinTimeout();
+      this.startKeepAlive();
       this.logger.debug("Voice connected");
     } catch (err) {
       if (signal.aborted) return; // not an error. we were told to stop
@@ -1477,6 +2512,45 @@ export class VoiceStore {
         this.connectionStatus = "failed";
         this.connectionError = message;
       });
+      this.clearJoinTimeout();
+    }
+  }
+
+  private failJoin(message: string, options: { notifyServer?: boolean } = {}) {
+    this.clearJoinTimeout();
+    this.abortAndTeardown();
+    this.stopKeepAlive();
+
+    runInAction(() => {
+      this.connectionStatus = "failed";
+      this.connectionError = message;
+      this.currentVoiceTarget = null;
+      this.currentSessionId = null;
+      this.cameraEnabled = false;
+      this.screenShareEnabled = false;
+    });
+
+    this.clearLocalVoiceStateForMe();
+    this.speakingUsers.clear();
+
+    if (options.notifyServer !== false) {
+      void this.sendVoiceStateUpdate();
+    }
+  }
+
+  private startJoinTimeout() {
+    this.clearJoinTimeout();
+    this.joinTimeoutTimer = window.setTimeout(() => {
+      if (this.connectionStatus === "connecting") {
+        this.failJoin("Voice connection timed out");
+      }
+    }, VOICE_JOIN_TIMEOUT_MS);
+  }
+
+  private clearJoinTimeout() {
+    if (this.joinTimeoutTimer != null) {
+      clearTimeout(this.joinTimeoutTimer);
+      this.joinTimeoutTimer = null;
     }
   }
 
@@ -1492,7 +2566,12 @@ export class VoiceStore {
     const id = this.app.account?.id;
     if (!id) return;
     this.app.voiceStates.remove(id);
-    this.voiceStateProducerMap.delete(id);
+    this.cameraProducerByUser.delete(id);
+    this.screenProducerByUser.delete(id);
+    this.screenAudioProducerByUser.delete(id);
+    this.availableScreenShares.delete(id);
+    this.availableScreenAudioShares.delete(id);
+    this.watchedScreenShares.delete(id);
   }
 
   private syncSelfFromState(state: VoiceState) {
@@ -1525,6 +2604,7 @@ export class VoiceStore {
 
     this.session.setSelfMute(this.selfMute);
     this.session.setSelfDeaf(this.selfDeaf);
+    this.session.setSpaceMute(this.spaceMute);
   }
 
   private async sendVoiceStateUpdate() {

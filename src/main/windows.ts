@@ -45,6 +45,7 @@ export function createMainWindow(): BrowserWindow {
       return [
         "clipboard-read",
         "clipboard-sanitized-write",
+        "display-capture",
         "fullscreen",
         "hid",
         "idle-detection",
@@ -65,6 +66,7 @@ export function createMainWindow(): BrowserWindow {
         "mediaKeySystem",
         "microphone",
         "camera",
+        "display-capture",
         "notifications",
         "fullscreen",
         "pointerLock",

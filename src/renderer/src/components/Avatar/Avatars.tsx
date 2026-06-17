@@ -1,4 +1,5 @@
 import { AnimatedPaper } from "@components/Animated/AnimatedPaper";
+import type { AvatarEditorContentProps } from "@components/Avatar/avatarEditor.types";
 import { Paper } from "@components/Paper";
 import { useModal } from "@contexts/Modal.context";
 import { useAppStore } from "@hooks/useStores";
@@ -31,10 +32,12 @@ import { useState } from "react";
 
 type AvatarType = "default" | "previous";
 
-export const Avatars = observer(() => {
+export const Avatars = observer(
+  ({ variant = "modal", onSuccess }: AvatarEditorContentProps) => {
   const { theme } = useTheme();
   const app = useAppStore();
   const { closeAllModals, closeModal } = useModal();
+  const isEmbedded = variant === "embedded";
 
   const [focusedAvatar, setFocusedAvatar] = useState("");
   const [customColor, setCustomColor] = useState<ColorLike | null>(null);
@@ -76,6 +79,10 @@ export const Avatars = observer(() => {
       });
     },
     onSuccess: () => {
+      if (isEmbedded) {
+        onSuccess?.();
+        return;
+      }
       closeAllModals();
     }
   });
@@ -120,29 +127,20 @@ export const Avatars = observer(() => {
     (typeof selectedAvatar.avatar === "string" &&
       selectedAvatar.avatar.length > 0);
 
-  return (
-    <AnimatedPaper
-      elevation={4}
-      borderRadius={40}
-      minWidth={{ xs: "90vw", sm: 340, md: 420, lg: 500 }}
-      maxWidth={600}
-      direction="column"
-      minHeight={300}
-      justifyContent="center"
-      alignItems="center"
-      initial={{ scale: 0.95 }}
-      animate={{ scale: 1 }}
-      height="35rem"
-    >
+  const content = (
+    <>
       <Stack
         width="100%"
         height="100%"
+        flex={isEmbedded ? 1 : undefined}
         position="relative"
         direction="column"
-        px="5rem"
-        py={{ xs: "1rem", sm: "4rem", md: "4.5rem" }}
+        px={isEmbedded ? 2 : "5rem"}
+        py={isEmbedded ? 2 : { xs: "1rem", sm: "4rem", md: "4.5rem" }}
         alignItems="center"
         justifyContent="center"
+        minHeight={0}
+        overflow="auto"
       >
         {currentPage === "default" && (
           <Stack
@@ -288,11 +286,12 @@ export const Avatars = observer(() => {
       </Stack>
       <Stack
         spacing="1rem"
-        pb={{ xs: "1rem", sm: "2rem" }}
-        px={{ xs: "1rem", sm: "2rem", md: "4rem" }}
+        pb={isEmbedded ? 1.5 : { xs: "1rem", sm: "2rem" }}
+        px={isEmbedded ? 2 : { xs: "1rem", sm: "2rem", md: "4rem" }}
         justifyContent="space-between"
         alignItems="center"
         width="100%"
+        flexShrink={0}
       >
         <Stack spacing={1.75} alignItems="center" justifyContent="center">
           <RadioGroup
@@ -316,11 +315,45 @@ export const Avatars = observer(() => {
               Save
             </Button>
           )}
-          <Button color="danger" onClick={() => closeModal()}>
-            Cancel
-          </Button>
+          {!isEmbedded && (
+            <Button color="danger" onClick={() => closeModal()}>
+              Cancel
+            </Button>
+          )}
         </ButtonGroup>
       </Stack>
+    </>
+  );
+
+  if (isEmbedded) {
+    return (
+      <Stack
+        direction="column"
+        width="100%"
+        height="100%"
+        minHeight={0}
+        overflow="hidden"
+      >
+        {content}
+      </Stack>
+    );
+  }
+
+  return (
+    <AnimatedPaper
+      elevation={4}
+      borderRadius={40}
+      minWidth={{ xs: "90vw", sm: 340, md: 420, lg: 500 }}
+      maxWidth={600}
+      direction="column"
+      minHeight={300}
+      justifyContent="center"
+      alignItems="center"
+      initial={{ scale: 0.95 }}
+      animate={{ scale: 1 }}
+      height="35rem"
+    >
+      {content}
     </AnimatedPaper>
   );
 });

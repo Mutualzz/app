@@ -1,6 +1,6 @@
 import { useAppStore } from "@hooks/useStores";
 import { useTheme } from "@mutualzz/ui-web";
-import { useNavigate } from "@tanstack/react-router";
+import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { switchMode } from "@utils/index";
 import { observer } from "mobx-react-lite";
 import { AnimatePresence } from "motion/react";
@@ -8,12 +8,16 @@ import { AnimatedIconButton } from "./Animated/AnimatedIconButton";
 import { PlanetIcon, ScribbleIcon } from "@phosphor-icons/react";
 import { Tooltip } from "@components/Tooltip";
 
+const EDITOR_ROUTES = new Set(["/profile", "/avatar"]);
+
 export const ModeSwitcher = observer(() => {
   const app = useAppStore();
   const navigate = useNavigate();
   const { theme } = useTheme();
+  const pathname = useRouterState({ select: (state) => state.location.pathname });
 
   const targetMode = app.targetMode;
+  const hideForEditor = EDITOR_ROUTES.has(pathname);
 
   const title = `Switch to ${targetMode === "feed" ? "Feed" : "Spaces"}`;
 
@@ -29,7 +33,7 @@ export const ModeSwitcher = observer(() => {
 
   return (
     <AnimatePresence>
-      {!app.hideSwitcher && (
+      {!app.hideSwitcher && !hideForEditor && (
         <Tooltip
           placement="left"
           paperProps={{

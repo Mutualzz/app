@@ -6,6 +6,9 @@ import { setupProtocols } from "./protocols";
 import { trayManager } from "./tray";
 import { setupCodecIPC } from "./codec";
 import { initUpdaterHandlers } from "./updater";
+import { setupDisplayMedia } from "./displayMedia";
+
+app.setName("Mutualzz");
 
 let mainWindow: BrowserWindow | null = null;
 
@@ -24,6 +27,7 @@ app.on("second-instance", () => {
 
 app.whenReady().then(() => {
   electronApp.setAppUserModelId("com.mutualzz.app");
+  setupDisplayMedia();
 
   app.on("browser-window-created", (_, window) => {
     optimizer.watchWindowShortcuts(window);

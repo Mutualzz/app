@@ -11,11 +11,13 @@ import { ChangePassword } from "@components/Modals/ChangePassword";
 import { Link } from "@components/Link";
 import { EmailChange } from "@components/Modals/EmailChange";
 import { UsernameChange } from "@components/Modals/UsernameChange";
+import { useNavigate } from "@tanstack/react-router";
 
 export const UserAccountSettings = observer(() => {
   const app = useAppStore();
   const { setCurrentPage } = useUserSettings();
-  const { openModal } = useModal();
+  const { openModal, closeModal } = useModal();
+  const navigate = useNavigate();
   const account = app.account;
 
   const [hideEmail, setHideEmail] = useState(true);
@@ -43,6 +45,11 @@ export const UserAccountSettings = observer(() => {
 
   const switchToProfile = () => {
     setCurrentPage("profile");
+  };
+
+  const openAvatarStudio = () => {
+    closeModal();
+    navigate({ to: "/avatar", search: { method: "upload" } });
   };
 
   const toggleEmail = () => setHideEmail(!hideEmail);
@@ -83,8 +90,8 @@ export const UserAccountSettings = observer(() => {
             <Typography level="title-md" ml={22.5}>
               {account.displayName}
             </Typography>
-            <Button color="primary" onClick={switchToProfile}>
-              Edit User Profile
+            <Button color="primary" onClick={openAvatarStudio}>
+              Edit Avatar
             </Button>
           </Stack>
           <Paper

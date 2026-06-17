@@ -85,7 +85,7 @@ export const Message = observer(({ message, header }: Props) => {
     >
       <MessageInfo>
         {header ? (
-          <UserAvatar user={message.author} member={message.member} size="lg" />
+          <UserAvatar user={message.author} member={message.member} size="lg" popout />
         ) : (
           <MessageDetails message={message} position="left" />
         )}

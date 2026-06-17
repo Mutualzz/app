@@ -8,6 +8,7 @@ import { makePersistable } from "mobx-persist-store";
 
 export class PresenceStore {
   scheduledStatus: PresenceSchedule | null = null;
+  onScheduledStatusExpire?: (schedule: PresenceSchedule) => void;
 
   private readonly presences = observable.map<Snowflake, PresencePayload>();
   private scheduledTimer: number | null = null;
@@ -39,7 +40,7 @@ export class PresenceStore {
     this.rearmScheduledStatusTimer();
   }
 
-  rearmScheduledStatusTimer(opts?: { onExpire?: () => void }) {
+  rearmScheduledStatusTimer() {
     if (this.scheduledTimer) {
       window.clearTimeout(this.scheduledTimer);
       this.scheduledTimer = null;
@@ -52,16 +53,18 @@ export class PresenceStore {
     const delay = schedule.until - now;
 
     if (delay <= 0) {
-      this.scheduledStatus = null;
-      opts?.onExpire?.();
+      this.finishScheduledStatus(schedule);
       return;
     }
 
     this.scheduledTimer = window.setTimeout(() => {
       this.scheduledTimer = null;
-
-      this.scheduledStatus = null;
-      opts?.onExpire?.();
+      this.finishScheduledStatus(schedule);
     }, delay);
+  }
+
+  private finishScheduledStatus(schedule: PresenceSchedule) {
+    this.scheduledStatus = null;
+    this.onScheduledStatusExpire?.(schedule);
   }
 }

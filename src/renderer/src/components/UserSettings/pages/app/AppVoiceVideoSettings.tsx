@@ -3,8 +3,12 @@ import {
   Divider,
   IconButton,
   Option,
+  Radio,
+  RadioGroup,
   Select,
+  Slider,
   Stack,
+  Switch,
   Tooltip,
   Typography
 } from "@mutualzz/ui-web";
@@ -13,6 +17,7 @@ import { Paper } from "@components/Paper";
 import { Button } from "@components/Button";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { XIcon } from "@phosphor-icons/react";
+import { formatKeyCode } from "@utils/voiceSettings.utils";
 
 export const AppVoiceVideoSettings = observer(() => {
   const app = useAppStore();
@@ -21,6 +26,7 @@ export const AppVoiceVideoSettings = observer(() => {
   const videoRef = useRef<HTMLVideoElement>(null);
 
   const voice = app.voice;
+  const settings = app.settings;
 
   const inputs = voice.inputs;
   const outputs = voice.outputs;
@@ -96,6 +102,8 @@ export const AppVoiceVideoSettings = observer(() => {
     };
   }, [showCamera, fallbackCameraId]);
 
+  if (!settings) return null;
+
   return (
     <Stack spacing={25} mt={7.5} mx={50} direction="column">
       <Stack spacing={2.5} direction="column">
@@ -156,6 +164,82 @@ export const AppVoiceVideoSettings = observer(() => {
             </Select>
           </Stack>
         </Stack>
+
+        <Stack direction="column" spacing={2} mt={2}>
+          <Typography level="body-sm" textColor="muted">
+            Input mode
+          </Typography>
+          <RadioGroup
+            value={settings.voiceInputMode}
+            color="neutral"
+            onChange={(_, value) => {
+              if (value === "voice_activity" || value === "push_to_talk") {
+                settings.setVoiceInputMode(value);
+              }
+            }}
+          >
+            <Radio value="voice_activity" label="Voice Activity" />
+            <Radio value="push_to_talk" label="Push to Talk" />
+          </RadioGroup>
+        </Stack>
+
+        {settings.voiceInputMode === "push_to_talk" && (
+          <Stack direction="column" spacing={1.5}>
+            <Typography level="body-sm" textColor="muted">
+              Shortcut
+            </Typography>
+            <Button
+              variant="soft"
+              color="neutral"
+              onClick={() => voice.startRecordingPushToTalkKey()}
+              css={{ alignSelf: "flex-start" }}
+            >
+              {voice.recordingPushToTalkKey
+                ? "Press a key..."
+                : `Edit Keybind (${voice.pushToTalkKeyLabel})`}
+            </Button>
+            <Typography level="body-xs" textColor="muted">
+              Current key: {formatKeyCode(settings.pushToTalkKey)}
+            </Typography>
+          </Stack>
+        )}
+
+        <Stack direction="row" alignItems="center" justifyContent="space-between">
+          <Stack direction="column" spacing={0.5}>
+            <Typography>Automatically determine input sensitivity</Typography>
+            <Typography level="body-xs" textColor="muted">
+              Let Mutualzz decide when your mic activates
+            </Typography>
+          </Stack>
+          <Switch
+            checked={settings.voiceInputSensitivityAuto}
+            onChange={() =>
+              settings.setVoiceInputSensitivityAuto(
+                !settings.voiceInputSensitivityAuto
+              )
+            }
+          />
+        </Stack>
+
+        {!settings.voiceInputSensitivityAuto && (
+          <Stack direction="column" spacing={1.5}>
+            <Typography level="body-sm" textColor="muted">
+              Input sensitivity
+            </Typography>
+            <Slider
+              min={0}
+              max={100}
+              color="neutral"
+              value={settings.voiceInputSensitivity}
+              onChange={(_, value) =>
+                settings.setVoiceInputSensitivity(
+                  typeof value === "number" ? value : value[0]
+                )
+              }
+              valueLabelDisplay="auto"
+            />
+          </Stack>
+        )}
       </Stack>
 
       <Stack direction="column" spacing={2.5}>
@@ -183,7 +267,7 @@ export const AppVoiceVideoSettings = observer(() => {
             {!showCamera && (
               <Stack direction="column" spacing={2.5}>
                 <Button
-                  color="primary"
+                  color="neutral"
                   onClick={() => {
                     if (!voice.currentCameraDeviceId && fallbackCameraId) {
                       voice.setCameraDeviceId(fallbackCameraId);

@@ -31,6 +31,7 @@ const api = {
   app: {
     getVersion: () => ipcRenderer.invoke("app:get-version"),
     getName: () => ipcRenderer.invoke("app:get-name"),
+    isPackaged: () => ipcRenderer.invoke("app:is-packaged"),
     relaunch: () => ipcRenderer.invoke("app:relaunch")
   },
   system: {
@@ -57,7 +58,13 @@ const api = {
   desktop: {
     setAutostart: (enabled: boolean) =>
       ipcRenderer.invoke("desktop:set-autostart", enabled),
-    getAutostart: () => ipcRenderer.invoke("desktop:get-autostart")
+    getAutostart: () => ipcRenderer.invoke("desktop:get-autostart"),
+    listCaptureSources: () =>
+      ipcRenderer.invoke("desktop:list-capture-sources"),
+    getScreenCaptureAccess: () =>
+      ipcRenderer.invoke("desktop:get-screen-capture-access"),
+    openScreenCaptureSettings: () =>
+      ipcRenderer.invoke("desktop:open-screen-capture-settings")
   },
   theme: {
     updateIcons: (dataUrl: string) =>

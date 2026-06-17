@@ -1,4 +1,5 @@
 import { Paper } from "@components/Paper";
+import { UserProfilePopoutTrigger } from "@components/Profile/popout/UserProfilePopoutTrigger";
 import { UserAvatar } from "@components/User/UserAvatar";
 import { Stack, Typography, useTheme } from "@mutualzz/ui-web";
 import type { SpaceMember } from "@stores/objects/SpaceMember";
@@ -31,44 +32,51 @@ export const MemberListItem = observer(({ member, isOwner }: Props) => {
   const channelId = app.channels.activeId;
 
   return (
-    <Paper
-      maxWidth={224}
-      onMouseOver={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      variant={hovered ? "soft" : "plain"}
-      borderRadius={8}
-      direction="row"
-      alignItems="center"
-      spacing={1.75}
-      p={1}
-      onContextMenu={(e) =>
-        openContextMenu(e, {
-          type: "user",
-          space: member.space,
-          member,
-          user: member.user!
-        })
-      }
-      css={{
-        cursor: "pointer",
-        ...(presence &&
-          presence.status === "offline" &&
-          !hovered && {
-            opacity: 0.5
-          })
-      }}
+    <UserProfilePopoutTrigger
+      user={member.user!}
+      member={member}
+      fullWidth
+      placement="left"
     >
-      <UserAvatar
-        user={member.user}
-        member={member}
-        badge
-        typing={
-          channelId && member.userId
-            ? app.typing.isUserTyping(channelId, member.userId)
-            : false
+      <Paper
+        maxWidth={224}
+        onMouseOver={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+        variant={hovered ? "soft" : "plain"}
+        borderRadius={8}
+        direction="row"
+        alignItems="center"
+        spacing={1.75}
+        p={1}
+        onContextMenu={(e) =>
+          openContextMenu(e, {
+            type: "user",
+            space: member.space,
+            member,
+            user: member.user!
+          })
         }
-      />
-      <Stack direction="column">
+        css={{
+          cursor: "pointer",
+          width: "100%",
+          ...(presence &&
+            presence.status === "offline" &&
+            !hovered && {
+              opacity: 0.5
+            })
+        }}
+      >
+        <UserAvatar
+          user={member.user}
+          member={member}
+          badge
+          typing={
+            channelId && member.userId
+              ? app.typing.isUserTyping(channelId, member.userId)
+              : false
+          }
+        />
+        <Stack direction="column">
         <Typography
           flex={1}
           whiteSpace="nowrap"
@@ -94,7 +102,8 @@ export const MemberListItem = observer(({ member, isOwner }: Props) => {
           )}
         </Typography>
         {presence && <SmallActivityStatus presence={presence} />}
-      </Stack>
-    </Paper>
+        </Stack>
+      </Paper>
+    </UserProfilePopoutTrigger>
   );
 });

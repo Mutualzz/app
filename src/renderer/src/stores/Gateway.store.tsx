@@ -12,6 +12,7 @@ import {
   APISpaceBan,
   APISpaceMember,
   type APIUser,
+  type APIUserProfile,
   type APIUserSettings,
   ChannelType,
   GatewayCloseCodes,
@@ -19,6 +20,8 @@ import {
   GatewayOpcodes,
   GatewayReadyPayload,
   PresenceActivity,
+  CustomStatusSchedule,
+  PresenceActivityEmoji,
   PresenceSchedule,
   PresenceStatus,
   Snowflake
@@ -125,6 +128,7 @@ export class GatewayStore {
   private memberListRanges = new Map<string, [number, number][]>();
   private memberListFetching = new Set<string>(); // Keys we are fetching
   private manualDisconnect = false;
+  private subscribedUserIds = new Set<string>();
   private resolvingChannels = new Map<
     Snowflake,
     Promise<Channel | undefined>
@@ -132,6 +136,10 @@ export class GatewayStore {
 
   constructor(private readonly app: AppStore) {
     makeAutoObservable(this, {}, { autoBind: true });
+    this.app.presence.onScheduledStatusExpire =
+      this.handleScheduledStatusExpired;
+    this.app.customStatus.onScheduledCustomStatusExpire =
+      this.handleScheduledCustomStatusExpired;
   }
 
   requestMemberListRange(spaceId: string, channelId: string, pageSize = 50) {
@@ -221,7 +229,12 @@ export class GatewayStore {
   async disconnect(code?: number, reason?: string) {
     if (!this.socket) return;
 
-    this.app.voice.reset();
+    if (this.app.voice.hasActiveVoiceTarget) {
+      await this.app.voice.leave();
+    } else {
+      this.app.voice.reset();
+    }
+
     this.readyState = GatewayStatus.CLOSING;
     this.logger.debug(`[Disconnect] ${this.url}`);
     this.manualDisconnect = true;
@@ -291,9 +304,46 @@ export class GatewayStore {
     );
   }
 
-  setCustomStatus(text: string) {
-    this.app.customStatus.set(text);
+  setCustomStatus(
+    text: string,
+    opts?: { persist?: boolean; emoji?: PresenceActivityEmoji | null }
+  ) {
+    this.app.customStatus.set(text, opts?.emoji);
 
+    const userId = this.app.account?.id;
+    if (!userId) return;
+
+    this.pushCustomStatusPresenceUpdate({ persist: Boolean(opts?.persist) });
+  }
+
+  clearCustomStatus() {
+    this.app.customStatus.clear();
+    this.pushCustomStatusPresenceUpdate();
+  }
+
+  scheduleCustomStatus(opts: {
+    text: string;
+    emoji?: PresenceActivityEmoji | null;
+    durationMs: number;
+  }) {
+    this.send({
+      op: GatewayOpcodes.CustomStatusScheduleSet,
+      d: {
+        text: opts.text,
+        emoji: opts.emoji ?? null,
+        durationMs: opts.durationMs
+      }
+    });
+  }
+
+  clearScheduledCustomStatus() {
+    this.send({
+      op: GatewayOpcodes.CustomStatusScheduleClear,
+      d: {}
+    });
+  }
+
+  private pushCustomStatusPresenceUpdate(opts?: { persist?: boolean }) {
     const userId = this.app.account?.id;
     if (!userId) return;
 
@@ -309,11 +359,30 @@ export class GatewayStore {
             customActivity,
             ...(prev?.activities?.filter((a) => a.type !== "custom") ?? [])
           ]
-        : (prev?.activities ?? [])
+        : (prev?.activities?.filter((a) => a.type !== "custom") ?? [])
     };
 
-    this.sendPresenceUpdate(draft);
+    this.lastPresenceHash = null;
+    this.sendPresenceUpdate(draft, opts);
   }
+
+  private handleScheduledCustomStatusExpired = (
+    schedule: CustomStatusSchedule
+  ) => {
+    const userId = this.app.account?.id;
+    if (!userId) return;
+
+    const revertTo = schedule.revertTo;
+    if (revertTo) this.app.customStatus.setSnapshot(revertTo);
+    else this.app.customStatus.clear();
+
+    this.lastPresenceHash = null;
+    this.clearScheduledCustomStatus();
+
+    if (!this.socket || this.readyState !== GatewayStatus.OPEN) return;
+
+    this.pushCustomStatusPresenceUpdate();
+  };
 
   scheduleStatus(opts: { status: PresenceStatus; durationMs: number }) {
     this.send({
@@ -330,6 +399,57 @@ export class GatewayStore {
       op: GatewayOpcodes.PresenceScheduleClear,
       d: {}
     });
+  }
+
+  private handleScheduledStatusExpired = (schedule: PresenceSchedule) => {
+    const userId = this.app.account?.id;
+    if (!userId) return;
+
+    const revertTo = schedule.revertTo ?? "online";
+    const prev = this.app.presence.get(userId);
+
+    this.app.presence.upsert(userId, {
+      ...(prev ?? { activities: [] }),
+      status: revertTo,
+      device: isElectron ? "desktop" : "web",
+      updatedAt: Date.now()
+    });
+
+    this.lastPresenceHash = null;
+    this.clearScheduledStatus();
+
+    if (!this.socket || this.readyState !== GatewayStatus.OPEN) return;
+
+    this.sendPresenceUpdate({
+      status: revertTo,
+      device: isElectron ? "desktop" : "web",
+      activities: prev?.activities ?? []
+    });
+  };
+
+  subscribeUser(userId: string) {
+    this.subscribedUserIds.add(userId);
+    this.send({
+      op: GatewayOpcodes.SubscribeUser,
+      d: { userId }
+    });
+  }
+
+  unsubscribeUser(userId: string) {
+    this.subscribedUserIds.delete(userId);
+    this.send({
+      op: GatewayOpcodes.UnsubscribeUser,
+      d: { userId }
+    });
+  }
+
+  private resubscribeUsers() {
+    for (const userId of this.subscribedUserIds) {
+      this.send({
+        op: GatewayOpcodes.SubscribeUser,
+        d: { userId }
+      });
+    }
   }
 
   send = async (payload: any) => {
@@ -407,6 +527,10 @@ export class GatewayStore {
       GatewayDispatchEvents.PresenceScheduleUpdate,
       this.onPresenceScheduleUpdate
     );
+    this.dispatchHandlers.set(
+      GatewayDispatchEvents.CustomStatusScheduleUpdate,
+      this.onCustomStatusScheduleUpdate
+    );
 
     // User
     this.dispatchHandlers.set(
@@ -416,6 +540,10 @@ export class GatewayStore {
     this.dispatchHandlers.set(
       GatewayDispatchEvents.UserSettingsUpdate,
       this.onUserSettingsUpdate
+    );
+    this.dispatchHandlers.set(
+      GatewayDispatchEvents.UserProfileUpdate,
+      this.onUserProfileUpdate
     );
 
     // Spaces
@@ -789,6 +917,7 @@ export class GatewayStore {
       return;
     }
 
+    this.app.voice.onGatewayDisconnected();
     this.cleanup();
 
     if (code === GatewayCloseCodes.NotAuthenticated) return;
@@ -941,6 +1070,7 @@ export class GatewayStore {
     }
 
     this.reconnectTimeout = 0;
+    this.resubscribeUsers();
     this.app.setGatewayReady(true);
     this.app.startBadgeWatch();
 
@@ -948,7 +1078,10 @@ export class GatewayStore {
 
     // if we already persisted a schedule in local storage, rearm timer for UI
     const selfUserId = this.app.account?.id;
-    if (selfUserId) this.app.presence.rearmScheduledStatusTimer();
+    if (selfUserId) {
+      this.app.presence.rearmScheduledStatusTimer();
+      this.app.customStatus.rearmScheduledCustomStatusTimer();
+    }
   };
 
   // Presence
@@ -980,6 +1113,19 @@ export class GatewayStore {
     if (String(userId) === String(selfId)) {
       this.app.presence.setScheduledStatus(schedule);
     }
+  };
+
+  private onCustomStatusScheduleUpdate = (payload: any) => {
+    const userId = payload?.userId;
+    const schedule: CustomStatusSchedule | null = payload?.schedule ?? null;
+
+    const selfId = this.app.account?.id;
+    if (!selfId || !userId) return;
+
+    if (String(userId) !== String(selfId)) return;
+
+    this.app.customStatus.setScheduledCustomStatus(schedule);
+    this.lastPresenceHash = null;
   };
 
   private startPresenceLoop() {
@@ -1228,6 +1374,7 @@ export class GatewayStore {
     }
 
     const message = channel.messages.add(payload);
+    channel.updateLastMessage(message);
     this.app.queue.handleIncomingMessage(payload);
     this.app.typing.stoppedTyping(payload.channelId, payload.authorId);
 
@@ -1304,6 +1451,10 @@ export class GatewayStore {
 
   private onUserSettingsUpdate = (payload: APIUserSettings) => {
     this.app.settings?.update(payload);
+  };
+
+  private onUserProfileUpdate = (payload: APIUserProfile) => {
+    this.app.profiles.update(payload);
   };
 
   private onInviteCreate = (payload: APIInvite) => {

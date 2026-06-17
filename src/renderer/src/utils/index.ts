@@ -181,6 +181,27 @@ export const sortThemes = (themes: Theme[]): Theme[] => {
   return [...priorityThemes, ...otherThemes];
 };
 
+export const preferredModePath = (app: AppStore) => {
+  const mode = app.settings?.preferredMode ?? "spaces";
+
+  switch (mode) {
+    case "feed":
+      return "/feed" as const;
+    case "@me":
+      return "/@me" as const;
+    default:
+      return "/spaces" as const;
+  }
+};
+
+export const navigateToPreferredMode = (
+  app: AppStore,
+  navigate: ReturnType<typeof useNavigate>,
+  replace = true
+) => {
+  navigate({ to: preferredModePath(app), replace });
+};
+
 export const switchMode = (
   app: AppStore,
   navigate?: ReturnType<typeof useNavigate>
@@ -203,12 +224,7 @@ export const switchMode = (
   }
 
   if ((!app.mode || app.mode === "@me") && app.account) {
-    const preferredMode = app.settings?.preferredMode;
-    if (navigate)
-      navigate({
-        to: preferredMode === "feed" ? "/feed" : "/spaces",
-        replace: true
-      });
+    if (navigate) navigateToPreferredMode(app, navigate, true);
   }
 };
 

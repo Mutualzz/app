@@ -1,4 +1,5 @@
 import { AnimatedPaper } from "@components/Animated/AnimatedPaper";
+import type { AvatarEditorContentProps } from "@components/Avatar/avatarEditor.types";
 import type { Area } from "react-easy-crop";
 import Cropper from "react-easy-crop";
 import { UserAvatar } from "@components/User/UserAvatar";
@@ -21,10 +22,12 @@ import { useCallback, useState } from "react";
 import { cropImage } from "@utils/cropImage";
 import { ArrowClockwiseIcon, MagnifyingGlassIcon } from "@phosphor-icons/react";
 
-export const AvatarUpload = observer(() => {
+export const AvatarUpload = observer(
+  ({ variant = "modal", onSuccess }: AvatarEditorContentProps) => {
   const { theme } = useTheme();
   const app = useAppStore();
   const { closeModal, closeAllModals } = useModal();
+  const isEmbedded = variant === "embedded";
 
   const [imageFile, setImageFile] = useState<string | null>(null);
   const [originalFile, setOriginalFile] = useState<File | null>(null);
@@ -45,6 +48,10 @@ export const AvatarUpload = observer(() => {
       setImageFile(null);
       setError(null);
       setOriginalFile(null);
+      if (isEmbedded) {
+        onSuccess?.();
+        return;
+      }
       closeAllModals();
     },
     onError: (err: HttpException) => {
@@ -105,26 +112,20 @@ export const AvatarUpload = observer(() => {
 
   if (!app.account) return <></>;
 
-  return (
-    <AnimatedPaper
-      elevation={4}
-      borderRadius={40}
-      minWidth={{ xs: "90vw", sm: 340, md: 420, lg: 500 }}
-      maxWidth={500}
-      direction="column"
-      minHeight={300}
-      initial={{ scale: 0.95 }}
-      animate={{ scale: 1 }}
-    >
+  const content = (
+    <>
       <Stack
         width="100%"
         height="100%"
+        flex={isEmbedded ? 1 : undefined}
         position="relative"
         direction="column"
-        px={{ xs: "1rem", sm: "2rem" }}
-        py={{ xs: "1.5rem", sm: "2.5rem", md: "3rem" }}
+        px={isEmbedded ? 2 : { xs: "1rem", sm: "2rem" }}
+        py={isEmbedded ? 2 : { xs: "1.5rem", sm: "2.5rem", md: "3rem" }}
         alignItems="center"
         justifyContent="center"
+        minHeight={0}
+        overflow="auto"
       >
         {imageFile ? (
           <>
@@ -220,10 +221,11 @@ export const AvatarUpload = observer(() => {
         )}
       </Stack>
       <Stack
-        pb={{ xs: "1rem", sm: "2rem" }}
-        px={{ xs: "1rem", sm: "2rem" }}
+        pb={isEmbedded ? 1.5 : { xs: "1rem", sm: "2rem" }}
+        px={isEmbedded ? 2 : { xs: "1rem", sm: "2rem" }}
         direction="row"
         justifyContent="space-between"
+        flexShrink={0}
       >
         {imageFile && croppedAreaPixels && (
           <ButtonGroup spacing={{ xs: 2, sm: 5 }}>
@@ -245,9 +247,11 @@ export const AvatarUpload = observer(() => {
           </ButtonGroup>
         )}
         <ButtonGroup color="danger" spacing={{ xs: 2, sm: 5 }}>
-          <Button disabled={saving} onClick={onClose}>
-            Cancel
-          </Button>
+          {!isEmbedded && (
+            <Button disabled={saving} onClick={onClose}>
+              Cancel
+            </Button>
+          )}
           {imageFile && (
             <Button disabled={saving} onClick={onClear}>
               Reset
@@ -255,6 +259,35 @@ export const AvatarUpload = observer(() => {
           )}
         </ButtonGroup>
       </Stack>
+    </>
+  );
+
+  if (isEmbedded) {
+    return (
+      <Stack
+        direction="column"
+        width="100%"
+        height="100%"
+        minHeight={0}
+        overflow="hidden"
+      >
+        {content}
+      </Stack>
+    );
+  }
+
+  return (
+    <AnimatedPaper
+      elevation={4}
+      borderRadius={40}
+      minWidth={{ xs: "90vw", sm: 340, md: 420, lg: 500 }}
+      maxWidth={500}
+      direction="column"
+      minHeight={300}
+      initial={{ scale: 0.95 }}
+      animate={{ scale: 1 }}
+    >
+      {content}
     </AnimatedPaper>
   );
 });

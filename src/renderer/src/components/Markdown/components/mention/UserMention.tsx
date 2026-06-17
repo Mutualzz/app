@@ -47,7 +47,7 @@ export const UserMention = observer(({ userId, attributes }: Props) => {
       }
     >
       <span style={{ position: "relative", top: 3 }}>
-        <UserAvatar size={16} user={user} member={member} />
+        <UserAvatar size={16} user={user} member={member} popout />
       </span>
       <Typography>
         @{member?.displayName || user?.displayName || "Deleted User"}

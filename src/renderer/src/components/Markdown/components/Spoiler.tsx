@@ -19,6 +19,7 @@ export const Spoiler = observer(({ children }: PropsWithChildren) => {
       variant={revealed ? "elevation" : "plain"}
       elevation={revealed ? 0 : hovered ? (prefersEmbossed ? 3 : 1) : 5}
       textColor={revealed ? "inherit" : "transparent"}
+      data-markdown-interactive=""
       css={{
         cursor: revealed ? "text" : "pointer",
         userSelect: revealed ? "text" : "none",
@@ -34,7 +35,10 @@ export const Spoiler = observer(({ children }: PropsWithChildren) => {
           pointerEvents: revealed ? "auto" : "none"
         }
       }}
-      onClick={() => setRevealed(true)}
+      onClick={(event) => {
+        event.stopPropagation();
+        setRevealed(true);
+      }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >

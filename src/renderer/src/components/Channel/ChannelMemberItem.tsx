@@ -1,16 +1,12 @@
 import { observer } from "mobx-react-lite";
-import { Paper } from "@components/Paper";
+import { UserProfilePopoutTrigger } from "@components/Profile/popout/UserProfilePopoutTrigger";
 import { useState } from "react";
 import { useAppStore } from "@hooks/useStores";
 import { useMenu } from "@contexts/ContextMenu.context";
-import { UserAvatar } from "@components/User/UserAvatar";
-import type { ColorLike } from "@mutualzz/ui-core";
-import { Stack, Typography, useTheme } from "@mutualzz/ui-web";
 import type { Space } from "@stores/objects/Space";
 import type { VoiceState } from "@stores/objects/VoiceState.ts";
-import { MicrophoneSlashIcon, VideoCameraIcon } from "@phosphor-icons/react";
-import { HeadphonesOffIcon } from "../icons/HeadphonesOffIcon";
-import { Tooltip } from "@components/Tooltip";
+import { useDraggable } from "@dnd-kit/core";
+import { VoiceChannelMemberRow } from "./VoiceChannelMemberRow";
 
 interface Props {
   space: Space;
@@ -21,15 +17,9 @@ export const ChannelMemberItem = observer(({ space, state }: Props) => {
   const app = useAppStore();
   const [hovered, setHovered] = useState(false);
   const { openContextMenu } = useMenu();
-  const { theme } = useTheme();
 
   const member = space.members.get(state.userId);
   if (!member) return null;
-
-  const videoOn =
-    app.account?.id === state.userId
-      ? !!app.voice.getLocalCameraStream()
-      : !!app.voice.getVideoStreamForUser(member.id);
 
   const isStale = !!state.disconnectedAt;
   const isOtherClient =
@@ -38,27 +28,29 @@ export const ChannelMemberItem = observer(({ space, state }: Props) => {
 
   const isSubtle = isStale || isOtherClient;
 
-  const nameColor: ColorLike = isSubtle
-    ? "#99aab5"
-    : ((member.highestRole?.color as ColorLike) ??
-      (hovered ? theme.typography.colors.primary : "#99aab5"));
+  const me = space.members.me;
+  const canDrag =
+    !isSubtle &&
+    !!me &&
+    (me.hasPermission("MoveMembers") &&
+      (space.ownerId === me.userId || me.canManageMember(member, "MoveMembers")));
 
-  const speaking = app.voice.isUserSpeaking(member.id);
+  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
+    id: `voice-member:${state.userId}`,
+    disabled: !canDrag,
+    data: {
+      type: "voice-member",
+      userId: state.userId,
+      channelId: state.channelId,
+      spaceId: space.id,
+      hovered
+    }
+  });
 
-  return (
-    <Paper
-      width="100%"
+  const content = (
+    <div
       onMouseOver={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      variant={hovered ? "soft" : "plain"}
-      borderRadius={8}
-      alignItems="center"
-      height={32}
-      px={1}
-      justifyContent="space-between"
-      css={{
-        opacity: isSubtle ? 0.55 : 1
-      }}
       onContextMenu={(e) =>
         openContextMenu(e, {
           type: "user",
@@ -68,55 +60,35 @@ export const ChannelMemberItem = observer(({ space, state }: Props) => {
         })
       }
     >
-      <Stack spacing={1.75} alignItems="center">
-        <UserAvatar
-          user={member.user}
+      <VoiceChannelMemberRow space={space} state={state} hovered={hovered} />
+    </div>
+  );
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={{
+        width: "100%",
+        visibility: isDragging ? "hidden" : "visible",
+        opacity: isSubtle ? 0.55 : 1,
+        cursor: canDrag ? (isDragging ? "grabbing" : "grab") : "pointer",
+        touchAction: canDrag ? "none" : undefined
+      }}
+      {...(canDrag ? listeners : undefined)}
+      {...(canDrag ? attributes : undefined)}
+    >
+      {canDrag ? (
+        content
+      ) : (
+        <UserProfilePopoutTrigger
+          user={member.user!}
           member={member}
-          size={24}
-          speaking={speaking}
-        />
-        <Typography
-          flex={1}
-          whiteSpace="nowrap"
-          overflow="hidden"
-          textOverflow="ellipsis"
-          level="body-sm"
-          direction="row"
-          alignItems="center"
-          display="flex"
-          spacing={2}
-          textColor={nameColor}
+          fullWidth
+          placement="left"
         >
-          {member.displayName}
-        </Typography>
-      </Stack>
-      <Stack spacing={1.75} alignItems="center">
-        {videoOn && (
-          <Tooltip content="Video">
-            <VideoCameraIcon weight="fill" />
-          </Tooltip>
-        )}
-        {state.selfMute && !state.spaceMute && (
-          <Tooltip content="Muted">
-            <MicrophoneSlashIcon weight="fill" />
-          </Tooltip>
-        )}
-        {state.spaceMute && (
-          <Tooltip content="Space Muted">
-            <MicrophoneSlashIcon weight="fill" color={theme.colors.danger} />
-          </Tooltip>
-        )}
-        {state.selfDeaf && (
-          <Tooltip content="Deafened">
-            <HeadphonesOffIcon weight="fill" />
-          </Tooltip>
-        )}
-        {state.spaceDeaf && (
-          <Tooltip content="Space Deafened">
-            <HeadphonesOffIcon weight="fill" color={theme.colors.danger} />
-          </Tooltip>
-        )}
-      </Stack>
-    </Paper>
+          {content}
+        </UserProfilePopoutTrigger>
+      )}
+    </div>
   );
 });

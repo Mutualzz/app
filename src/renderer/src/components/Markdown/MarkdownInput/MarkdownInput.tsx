@@ -72,6 +72,7 @@ const MarkdownInput = forwardRef<MarkdownInputHandle, MarkdownInputProps>(
       emojiPicker = true,
       gifPicker = true,
       stickerPicker = true,
+      mentions = true,
 
       onChange,
       onKeyDown: onKeyDownProp,
@@ -291,7 +292,7 @@ const MarkdownInput = forwardRef<MarkdownInputHandle, MarkdownInputProps>(
         }
 
         const { selection } = editor;
-        if (selection && Range.isCollapsed(selection)) {
+        if (mentions && selection && Range.isCollapsed(selection)) {
           const [start] = Range.edges(selection);
 
           let beforeIndex = start.offset - 1;
@@ -328,7 +329,7 @@ const MarkdownInput = forwardRef<MarkdownInputHandle, MarkdownInputProps>(
           }
         }
       },
-      [editor, onChange]
+      [editor, mentions, onChange]
     );
 
     return (
@@ -433,7 +434,7 @@ const MarkdownInput = forwardRef<MarkdownInputHandle, MarkdownInputProps>(
               />
             )}
 
-            {mentionSearch !== null && mentionAnchor && (
+            {mentions && mentionSearch !== null && mentionAnchor && (
               <MentionPicker
                 search={mentionSearch}
                 onSelect={(mentionType, userId) => {

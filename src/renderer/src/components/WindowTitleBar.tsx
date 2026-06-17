@@ -25,6 +25,7 @@ import { useNetworkState } from "@react-hookz/web";
 import { Button } from "@components/Button";
 import { isElectron } from "@utils/index";
 import { Tooltip } from "@components/Tooltip";
+import { useWindowTitleBar } from "@contexts/WindowTitleBar.context";
 
 interface WindowTitleBarProps {
   onHeightChange?: (height: number) => void;
@@ -39,6 +40,7 @@ const WindowTitleBar = ({ onHeightChange }: WindowTitleBarProps) => {
   const { theme, changeTheme } = useTheme();
   const { os } = useDesktopShell();
   const networkState = useNetworkState();
+  const { config: pageTitleBar } = useWindowTitleBar();
 
   const [closeDanger, setCloseDanger] = useState(false);
   const rootRef = useRef<HTMLDivElement | null>(null);
@@ -145,6 +147,7 @@ const WindowTitleBar = ({ onHeightChange }: WindowTitleBarProps) => {
         </Paper>
       )}
       <Paper
+        position="relative"
         css={{ WebkitAppRegion: "drag", userSelect: "none" }}
         justifyContent="space-between"
         alignItems="center"
@@ -158,9 +161,38 @@ const WindowTitleBar = ({ onHeightChange }: WindowTitleBarProps) => {
         elevation={app.settings?.preferEmbossed ? 1 : 0}
         boxShadow="none !important"
       >
+        {pageTitleBar && (
+          <Stack
+            position="absolute"
+            top={0}
+            left={0}
+            right={0}
+            bottom={0}
+            direction="row"
+            alignItems="center"
+            justifyContent="center"
+            px={1.5}
+            css={{
+              pointerEvents: "none",
+              zIndex: 0
+            }}
+          >
+            <Typography
+              fontWeight="bold"
+              flexShrink={0}
+              css={{
+                userSelect: "none",
+                WebkitAppRegion: "drag",
+                whiteSpace: "nowrap"
+              }}
+            >
+              {pageTitleBar.title}
+            </Typography>
+          </Stack>
+        )}
         <Stack
           alignItems="center"
-          css={{ WebkitAppRegion: "drag", userSelect: "none" }}
+          css={{ WebkitAppRegion: "drag", userSelect: "none", position: "relative", zIndex: 1 }}
           flex={1}
         >
           {app.account && (
@@ -174,34 +206,51 @@ const WindowTitleBar = ({ onHeightChange }: WindowTitleBarProps) => {
               alignItems="center"
               spacing={2.5}
             >
-              <Stack spacing={0.75} alignItems="center" mt={1.75}>
-                <Tooltip content="Go Back">
-                  <IconButton
-                    disabled={!app.navigation.canBack}
-                    onClick={() => app.navigation.back(navigate)}
-                    css={{
-                      WebkitAppRegion: "no-drag",
-                      userSelect: "auto"
-                    }}
-                    size="sm"
-                  >
-                    <ArrowLeftIcon weight="fill" />
-                  </IconButton>
-                </Tooltip>
-                <Tooltip content="Go Forward">
-                  <IconButton
-                    disabled={!app.navigation.canForward}
-                    onClick={() => app.navigation.forward(navigate)}
-                    css={{
-                      WebkitAppRegion: "no-drag",
-                      userSelect: "auto"
-                    }}
-                    size="sm"
-                  >
-                    <ArrowRightIcon weight="fill" />
-                  </IconButton>
-                </Tooltip>
-              </Stack>
+              {pageTitleBar?.onBack ? (
+                <Button
+                  size="sm"
+                  color={pageTitleBar.backLabel === "Close" ? "danger" : "neutral"}
+                  variant="soft"
+                  startDecorator={<ArrowLeftIcon weight="bold" />}
+                  onClick={pageTitleBar.onBack}
+                  css={{
+                    WebkitAppRegion: "no-drag",
+                    userSelect: "auto",
+                    flexShrink: 0
+                  }}
+                >
+                  {pageTitleBar.backLabel ?? "Back"}
+                </Button>
+              ) : (
+                <Stack spacing={0.75} alignItems="center" mt={1.75}>
+                  <Tooltip content="Go Back">
+                    <IconButton
+                      disabled={!app.navigation.canBack}
+                      onClick={() => app.navigation.back(navigate)}
+                      css={{
+                        WebkitAppRegion: "no-drag",
+                        userSelect: "auto"
+                      }}
+                      size="sm"
+                    >
+                      <ArrowLeftIcon weight="fill" />
+                    </IconButton>
+                  </Tooltip>
+                  <Tooltip content="Go Forward">
+                    <IconButton
+                      disabled={!app.navigation.canForward}
+                      onClick={() => app.navigation.forward(navigate)}
+                      css={{
+                        WebkitAppRegion: "no-drag",
+                        userSelect: "auto"
+                      }}
+                      size="sm"
+                    >
+                      <ArrowRightIcon weight="fill" />
+                    </IconButton>
+                  </Tooltip>
+                </Stack>
+              )}
               {inPreview && (
                 <Stack spacing={5} alignItems="center">
                   <Typography
@@ -237,27 +286,31 @@ const WindowTitleBar = ({ onHeightChange }: WindowTitleBarProps) => {
           width="100%"
           spacing={1.25}
           direction="row"
-          css={{ WebkitAppRegion: "drag", userSelect: "none" }}
+          css={{ WebkitAppRegion: "drag", userSelect: "none", position: "relative", zIndex: 1 }}
           alignItems="center"
           justifyContent="center"
           flex={1}
         >
-          {app.mode === "@me" && (
+          {!pageTitleBar && (
             <>
-              <UsersThreeIcon weight="fill" />
-              <Typography fontWeight="bold">Direct Messages</Typography>
-            </>
-          )}
-          {app.mode === "spaces" && (
-            <>
-              <PlanetIcon weight="fill" />
-              <Typography fontWeight="bold">Spaces</Typography>
-            </>
-          )}
-          {app.mode === "feed" && (
-            <>
-              <ScribbleIcon />
-              <Typography fontWeight="bold">Feed</Typography>
+              {app.mode === "@me" && (
+                <>
+                  <UsersThreeIcon weight="fill" />
+                  <Typography fontWeight="bold">Direct Messages</Typography>
+                </>
+              )}
+              {app.mode === "spaces" && (
+                <>
+                  <PlanetIcon weight="fill" />
+                  <Typography fontWeight="bold">Spaces</Typography>
+                </>
+              )}
+              {app.mode === "feed" && (
+                <>
+                  <ScribbleIcon />
+                  <Typography fontWeight="bold">Feed</Typography>
+                </>
+              )}
             </>
           )}
         </Stack>
@@ -265,8 +318,21 @@ const WindowTitleBar = ({ onHeightChange }: WindowTitleBarProps) => {
           flex={1}
           alignItems="center"
           justifyContent="flex-end"
-          css={{ WebkitAppRegion: "drag", userSelect: "none" }}
+          spacing={1.25}
+          direction="row"
+          css={{ WebkitAppRegion: "drag", userSelect: "none", position: "relative", zIndex: 1 }}
         >
+          {pageTitleBar?.end && (
+            <Stack
+              direction="row"
+              alignItems="center"
+              spacing={1}
+              pr={isMac ? 1 : 0}
+              css={{ WebkitAppRegion: "no-drag", userSelect: "auto" }}
+            >
+              {pageTitleBar.end}
+            </Stack>
+          )}
           {!isElectron && isAuthPage && (
             <DownloadButton
               css={{

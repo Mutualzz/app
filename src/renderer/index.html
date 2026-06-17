@@ -25,7 +25,8 @@
   img-src 'self' data: blob: https: localhost:3001 https://static.klipy.com;
   font-src 'self' data:;
   connect-src * ws: wss: data:;
-  media-src 'self' blob: mediastream: https://static.klipy.com;
+  media-src 'self' blob: mediastream: https: http://localhost:* https://static.klipy.com https://p.scdn.co;
+  frame-src 'self' https://open.spotify.com https://www.youtube.com https://www.youtube-nocookie.com https://embed.music.apple.com;
   object-src 'none';
   base-uri 'self';
   form-action 'self';"

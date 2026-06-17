@@ -17,7 +17,11 @@ import { SpaceInviteToSpaceModal } from "@components/Space/SpaceInviteToSpaceMod
 import { useModal } from "@contexts/Modal.context";
 import type { User } from "@stores/objects/User";
 import { useMenu } from "@contexts/ContextMenu.context";
-import { ChatCircleIcon, UserPlusIcon } from "@phosphor-icons/react";
+import {
+  ChatCircleIcon,
+  DesktopIcon,
+  UserPlusIcon
+} from "@phosphor-icons/react";
 import { Tooltip } from "@components/Tooltip";
 
 interface Props {
@@ -27,57 +31,212 @@ interface Props {
 
 const ResizeBar = motion.create("div");
 
-interface TileProps {
+type VoiceTileKind = "participant" | "screen";
+
+interface VoiceTileRef {
+  userId: string;
+  kind: VoiceTileKind;
+}
+
+interface ParticipantTileProps {
   userId: string;
   user?: User;
   size: number;
   selected?: boolean;
 }
 
-const Tile = observer(({ userId, user, size, selected }: TileProps) => {
-  const app = useAppStore();
+const ParticipantTile = observer(
+  ({ userId, user, size, selected }: ParticipantTileProps) => {
+    const app = useAppStore();
+    const videoRef = useRef<HTMLVideoElement>(null);
 
-  const videoRef = useRef<HTMLVideoElement>(null);
+    const isSelf = app.account?.id === userId;
+    const cameraStream = isSelf
+      ? app.voice.getLocalCameraStream()
+      : app.voice.getCameraStreamForUser(userId);
 
-  const isSelf = app.account?.id === userId;
-  const videoStream = isSelf
-    ? app.voice.getLocalCameraStream()
-    : app.voice.getVideoStreamForUser(userId);
+    const member = app.spaces.active?.members.get(userId);
+    const speaking =
+      app.voice.isUserSpeaking(userId) &&
+      !(isSelf && app.voice.effectiveSelfMute);
 
-  const member = app.spaces.active?.members.get(userId);
+    useEffect(() => {
+      const el = videoRef.current;
+      if (!el) return;
+      el.srcObject = cameraStream;
+      return () => {
+        el.srcObject = null;
+      };
+    }, [cameraStream]);
 
-  useEffect(() => {
-    const el = videoRef.current;
-    if (!el) return;
-    el.srcObject = videoStream;
-    return () => {
-      el.srcObject = null;
-    };
-  }, [videoStream]);
+    if (!cameraStream)
+      return (
+        <UserAvatar
+          member={member}
+          user={user}
+          size={size}
+          popout
+          speaking={speaking}
+        />
+      );
 
-  if (!videoStream)
-    return <UserAvatar member={member} user={user} size={size} />;
+    return (
+      <Stack
+        width="100%"
+        height="100%"
+        position="relative"
+        alignItems="center"
+        justifyContent="center"
+        css={selected ? { backgroundColor: "#000" } : undefined}
+      >
+        <video
+          ref={videoRef}
+          autoPlay
+          playsInline
+          muted
+          css={{
+            width: "100%",
+            height: "100%",
+            maxWidth: "100%",
+            maxHeight: "100%",
+            position: "relative",
+            overflow: "hidden",
+            borderRadius: selected ? 0 : 16,
+            display: "block",
+            boxSizing: "border-box",
+            objectFit: selected ? "contain" : "cover"
+          }}
+        />
+      </Stack>
+    );
+  }
+);
 
-  return (
-    <video
-      ref={videoRef}
-      autoPlay
-      playsInline
-      // muted={isSelf}
-      muted
-      css={{
-        width: "100%",
-        height: "100%",
-        position: "relative",
-        overflow: "hidden",
-        borderRadius: selected ? 0 : 16,
-        display: "block",
-        boxSizing: "border-box",
-        objectFit: "cover"
-      }}
-    />
-  );
-});
+interface ScreenShareTileProps {
+  userId: string;
+  user?: User;
+  size: number;
+  selected?: boolean;
+  onWatch?: () => void;
+}
+
+const ScreenShareTile = observer(
+  ({ userId, user, size, selected, onWatch }: ScreenShareTileProps) => {
+    const app = useAppStore();
+    const { theme } = useTheme();
+    const videoRef = useRef<HTMLVideoElement>(null);
+
+    const isSelf = app.account?.id === userId;
+    const isWatching = app.voice.isWatchingScreenShare(userId);
+    const screenStream = isSelf
+      ? app.voice.getLocalScreenStream()
+      : isWatching
+        ? app.voice.getScreenStreamForUser(userId)
+        : null;
+
+    const member = app.spaces.active?.members.get(userId);
+    const displayName =
+      member?.displayName ?? user?.displayName ?? "Deleted User";
+
+    useEffect(() => {
+      const el = videoRef.current;
+      if (!el) return;
+      el.srcObject = screenStream;
+      return () => {
+        el.srcObject = null;
+      };
+    }, [screenStream]);
+
+    if (isSelf && app.voice.screenShareEnabled && !screenStream) {
+      return (
+        <Stack
+          direction="column"
+          width="100%"
+          height="100%"
+          alignItems="center"
+          justifyContent="center"
+          spacing={2}
+          p={3}
+          css={{ backgroundColor: "#000" }}
+        >
+          <DesktopIcon
+            size={Math.round(size * 0.35)}
+            weight="fill"
+            color={theme.colors.success}
+          />
+          <Typography level="body-sm" textAlign="center" color="success">
+            Starting your screen share...
+          </Typography>
+        </Stack>
+      );
+    }
+
+    if (!screenStream) {
+      return (
+        <Stack
+          direction="column"
+          width="100%"
+          height="100%"
+          alignItems="center"
+          justifyContent="center"
+          spacing={2.5}
+          p={3}
+        >
+          <DesktopIcon size={Math.round(size * 0.35)} weight="fill" />
+          <Typography level="body-sm" textAlign="center">
+            {displayName} is sharing their screen
+          </Typography>
+          <Button
+            size="sm"
+            color="success"
+            onClick={(e) => {
+              e.stopPropagation();
+              void app.voice.watchScreenShare(userId).then(() => onWatch?.());
+            }}
+          >
+            Watch Stream
+          </Button>
+        </Stack>
+      );
+    }
+
+    return (
+      <Stack width="100%" height="100%" position="relative">
+        <video
+          ref={videoRef}
+          autoPlay
+          playsInline
+          muted
+          css={{
+            width: "100%",
+            height: "100%",
+            position: "relative",
+            overflow: "hidden",
+            borderRadius: selected ? 0 : 16,
+            display: "block",
+            boxSizing: "border-box",
+            objectFit: "contain",
+            backgroundColor: "#000"
+          }}
+        />
+        {!isSelf && (
+          <Stack position="absolute" top={8} right={8}>
+            <Button
+              size="sm"
+              color="neutral"
+              onClick={(e) => {
+                e.stopPropagation();
+                app.voice.stopWatchingScreenShare(userId);
+              }}
+            >
+              Stop Watching
+            </Button>
+          </Stack>
+        )}
+      </Stack>
+    );
+  }
+);
 
 export const VoiceChannelView = observer(
   ({ channel, showChat = false }: Props) => {
@@ -90,7 +249,9 @@ export const VoiceChannelView = observer(
 
     const { openContextMenu } = useMenu();
 
-    const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+    const [selectedTile, setSelectedTile] = useState<VoiceTileRef | null>(
+      null
+    );
 
     useEffect(() => {
       app.setVoiceChatVisible(showChat);
@@ -98,8 +259,33 @@ export const VoiceChannelView = observer(
 
     const voiceStates = Array.from(channel.voiceStates.values());
 
+    const tiles: Array<{
+      key: string;
+      userId: string;
+      kind: VoiceTileKind;
+      user?: User;
+    }> = [];
+
+    for (const state of voiceStates) {
+      tiles.push({
+        key: `${state.userId}:participant`,
+        userId: state.userId,
+        kind: "participant",
+        user: state.user
+      });
+
+      if (app.voice.isUserScreenSharing(state.userId)) {
+        tiles.push({
+          key: `${state.userId}:screen`,
+          userId: state.userId,
+          kind: "screen",
+          user: state.user
+        });
+      }
+    }
+
     const tileAspect = 16 / 9;
-    const tileCount = voiceStates.length;
+    const tileCount = tiles.length;
 
     const shrinkFactor = clamp(1 - (tileCount - 1) * 0.12, 0.35, 1);
 
@@ -113,9 +299,9 @@ export const VoiceChannelView = observer(
       avatar: Math.round(96 * shrinkFactor)
     };
 
-    const selectedState = voiceStates.find(
-      (state) => state.userId === selectedUserId
-    );
+    const selectedState = selectedTile
+      ? voiceStates.find((state) => state.userId === selectedTile.userId)
+      : undefined;
 
     if (!channel.spaceId) return null;
 
@@ -133,43 +319,62 @@ export const VoiceChannelView = observer(
           onPointerLeave={() => setHovered(false)}
           position="relative"
         >
-          {selectedState ? (
-            <Paper
+          {selectedTile && selectedState ? (
+            <Stack
+              flex={1}
               width="100%"
-              height="90%"
-              justifyContent="center"
+              height="100%"
               alignItems="center"
-              my="auto"
-              onClick={() => setSelectedUserId(null)}
-              css={{
-                cursor: "pointer"
-              }}
-              overflow="hidden"
-              variant="solid"
-              color={selectedState.member?.user?.accentColor}
-              onContextMenu={(e) => {
-                if (
-                  !selectedState?.member ||
-                  !selectedState.user ||
-                  !selectedState.space
-                )
-                  return;
-
-                openContextMenu(e, {
-                  type: "user",
-                  user: selectedState.user,
-                  space: selectedState.space,
-                  member: selectedState.member
-                });
-              }}
+              justifyContent="center"
+              minHeight={0}
             >
-              <Tile
-                userId={selectedState.userId}
-                user={selectedState.user}
-                size={256}
-                selected
-              />
-            </Paper>
+              <Paper
+                width="100%"
+                maxHeight="90%"
+                justifyContent="center"
+                alignItems="center"
+                onClick={() => setSelectedTile(null)}
+                css={{
+                  cursor: "pointer",
+                  aspectRatio: "16 / 9",
+                  maxWidth: "min(100%, calc(90vh * 16 / 9))"
+                }}
+                overflow="hidden"
+                variant="solid"
+                color={selectedState.member?.user?.accentColor}
+                onContextMenu={(e) => {
+                  if (
+                    !selectedState?.member ||
+                    !selectedState.user ||
+                    !selectedState.space
+                  )
+                    return;
+
+                  openContextMenu(e, {
+                    type: "user",
+                    user: selectedState.user,
+                    space: selectedState.space,
+                    member: selectedState.member
+                  });
+                }}
+              >
+                {selectedTile.kind === "screen" ? (
+                  <ScreenShareTile
+                    userId={selectedTile.userId}
+                    user={selectedState.user}
+                    size={256}
+                    selected
+                  />
+                ) : (
+                  <ParticipantTile
+                    userId={selectedTile.userId}
+                    user={selectedState.user}
+                    size={256}
+                    selected
+                  />
+                )}
+              </Paper>
+            </Stack>
           ) : voiceStates.length === 0 ? (
             <Stack
               flex={1}
@@ -184,6 +389,7 @@ export const VoiceChannelView = observer(
               <Typography level="h6">No one is currently in voice</Typography>
               <Button
                 padding={12}
+                color="neutral"
                 onClick={() => {
                   app.voice.join({
                     spaceId: channel.spaceId,
@@ -218,66 +424,97 @@ export const VoiceChannelView = observer(
                 display="grid"
                 margin="0 auto"
                 css={{
-                  gridAutoFlow: "column",
+                  gridAutoFlow: "row",
                   gridAutoColumns: "max-content",
-                  gridTemplateRows: "repeat(auto-fill, minmax(0, max-content))",
+                  gridTemplateColumns: "repeat(auto-fill, minmax(0, max-content))",
                   justifyItems: "center"
                 }}
               >
-                {voiceStates.map((state) => (
-                  <Paper
-                    key={state.user?.id}
-                    width={tileSize.width}
-                    height={tileSize.height}
-                    borderRadius={16}
-                    flex={`0 0 ${tileSize.width}px`}
-                    justifyContent="center"
-                    alignItems="center"
-                    position="relative"
-                    css={{
-                      cursor: "pointer"
-                    }}
-                    onClick={() =>
-                      voiceStates.find((vs) => vs.userId === app.account?.id) &&
-                      setSelectedUserId(state.member?.user?.id ?? null)
-                    }
-                    variant="solid"
-                    color={state.member?.user?.accentColor}
-                    onContextMenu={(e) => {
-                      if (!state?.member || !state.user || !state.space) return;
+                {tiles.map((tile) => {
+                  const state = voiceStates.find(
+                    (vs) => vs.userId === tile.userId
+                  );
+                  if (!state) return null;
 
-                      openContextMenu(e, {
-                        type: "user",
-                        user: state.user,
-                        space: state.space,
-                        member: state.member
-                      });
-                    }}
-                  >
-                    <Tile
-                      userId={state.userId}
-                      user={state.user}
-                      size={tileSize.avatar}
-                    />
-                    {hovered && (
-                      <Paper
-                        p={2}
-                        position="absolute"
-                        bottom={5}
-                        left={5}
-                        fontWeight="bold"
-                        elevation={app.settings?.preferEmbossed ? 2 : -2}
-                        borderRadius={8}
-                      >
-                        <Typography>
-                          {state.member
-                            ? state.member.displayName
-                            : state.user?.displayName || "Deleted User"}
-                        </Typography>
-                      </Paper>
-                    )}
-                  </Paper>
-                ))}
+                  const isScreen = tile.kind === "screen";
+
+                  return (
+                    <Paper
+                      key={tile.key}
+                      width={tileSize.width}
+                      height={tileSize.height}
+                      borderRadius={16}
+                      flex={`0 0 ${tileSize.width}px`}
+                      justifyContent="center"
+                      alignItems="center"
+                      position="relative"
+                      css={{
+                        cursor: "pointer"
+                      }}
+                      onClick={() =>
+                        voiceStates.find(
+                          (vs) => vs.userId === app.account?.id
+                        ) &&
+                        setSelectedTile({
+                          userId: tile.userId,
+                          kind: tile.kind
+                        })
+                      }
+                      variant="solid"
+                      color={state.member?.user?.accentColor}
+                      onContextMenu={(e) => {
+                        if (!state?.member || !state.user || !state.space)
+                          return;
+
+                        openContextMenu(e, {
+                          type: "user",
+                          user: state.user,
+                          space: state.space,
+                          member: state.member
+                        });
+                      }}
+                    >
+                      {isScreen ? (
+                        <ScreenShareTile
+                          userId={tile.userId}
+                          user={tile.user}
+                          size={tileSize.avatar}
+                          onWatch={() =>
+                            setSelectedTile({
+                              userId: tile.userId,
+                              kind: "screen"
+                            })
+                          }
+                        />
+                      ) : (
+                        <ParticipantTile
+                          userId={tile.userId}
+                          user={tile.user}
+                          size={tileSize.avatar}
+                        />
+                      )}
+                      {hovered && (
+                        <Paper
+                          p={2}
+                          position="absolute"
+                          bottom={5}
+                          left={5}
+                          fontWeight="bold"
+                          elevation={app.settings?.preferEmbossed ? 2 : -2}
+                          borderRadius={8}
+                        >
+                          <Typography>
+                            {isScreen
+                              ? `${state.member ? state.member.displayName : state.user?.displayName || "Deleted User"}'s Screen`
+                              : state.member
+                                ? state.member.displayName
+                                : state.user?.displayName || "Deleted User"}
+                          </Typography>
+                        </Paper>
+                      )}
+                    </Paper>
+                  );
+                })}
               </Stack>
             </Stack>
           )}
