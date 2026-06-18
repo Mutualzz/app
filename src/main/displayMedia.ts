@@ -18,7 +18,10 @@ export function setupDisplayMedia() {
           return;
         }
 
-        callback({ video: screen });
+        callback({
+          video: screen,
+          ...(request.audioRequested ? { audio: "loopback" as const } : {})
+        });
       } catch {
         callback({});
       }

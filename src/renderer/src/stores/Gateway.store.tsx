@@ -1455,6 +1455,12 @@ export class GatewayStore {
 
   private onUserProfileUpdate = (payload: APIUserProfile) => {
     this.app.profiles.update(payload);
+    void this.app.queryClient.invalidateQueries({
+      queryKey: ["profile", payload.userId]
+    });
+    void this.app.queryClient.invalidateQueries({
+      queryKey: ["profile-popout", payload.userId]
+    });
   };
 
   private onInviteCreate = (payload: APIInvite) => {

@@ -1,6 +1,11 @@
 import { Button } from "@components/Button";
+import {
+  profileMusicVolumeToGain,
+  readProfileMusicVolumePercent,
+  writeProfileMusicVolumePercent
+} from "@components/Profile/shared/profileMusicPlayback.utils";
 import type { ProfileMusicBlock } from "@mutualzz/types";
-import { Box, Stack, Typography } from "@mutualzz/ui-web";
+import { Box, Slider, Stack, Typography } from "@mutualzz/ui-web";
 import { ArrowSquareOutIcon, MusicNotesIcon, PauseIcon, PlayIcon } from "@phosphor-icons/react";
 import { useEffect, useRef, useState } from "react";
 
@@ -13,6 +18,7 @@ export const ProfileMusicBlockView = ({ block }: Props) => {
   const [playing, setPlaying] = useState(false);
   const [duration, setDuration] = useState<number | null>(null);
   const [currentTime, setCurrentTime] = useState(0);
+  const [volume, setVolume] = useState(readProfileMusicVolumePercent);
 
   const title =
     block.track?.name ?? block.title ?? block.trackUrl ?? "Music";
@@ -34,6 +40,12 @@ export const ProfileMusicBlockView = ({ block }: Props) => {
     setCurrentTime(0);
   }, [previewUrl]);
 
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    audio.volume = profileMusicVolumeToGain(volume);
+  }, [volume, previewUrl]);
+
   const formatTime = (seconds: number) => {
     if (!Number.isFinite(seconds) || seconds < 0) return "0:00";
     const total = Math.floor(seconds);
@@ -51,6 +63,7 @@ export const ProfileMusicBlockView = ({ block }: Props) => {
     const audio = audioRef.current;
     if (!audio || !previewUrl) return;
     if (audio.src !== previewUrl) audio.src = previewUrl;
+    audio.volume = profileMusicVolumeToGain(volume);
     audio.load();
     try {
       await audio.play();
@@ -233,6 +246,35 @@ export const ProfileMusicBlockView = ({ block }: Props) => {
               <Typography level="body-xs" css={{ color: "rgba(255,255,255,0.65)" }}>
                 {formatTime(duration ?? 30)}
               </Typography>
+            </Stack>
+            <Stack
+              direction="column"
+              spacing={0.35}
+              p={1}
+              css={{
+                borderRadius: 10,
+                background: "rgba(255,255,255,0.04)",
+                border: "1px solid rgba(255,255,255,0.08)"
+              }}
+            >
+              <Stack direction="row" justifyContent="space-between" alignItems="center">
+                <Typography level="body-xs" css={{ color: "rgba(255,255,255,0.65)" }}>
+                  Volume
+                </Typography>
+                <Typography level="body-xs" css={{ color: "rgba(255,255,255,0.65)" }}>
+                  {volume}%
+                </Typography>
+              </Stack>
+              <Slider
+                min={0}
+                max={100}
+                value={volume}
+                onChange={(_, value) => {
+                  const next = writeProfileMusicVolumePercent(value as number);
+                  setVolume(next);
+                }}
+                css={{ width: "100%" }}
+              />
             </Stack>
           </Stack>
         )}

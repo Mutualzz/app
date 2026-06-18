@@ -8,6 +8,10 @@ import {
   addBlockAtPoint,
   ProfileEditorCanvas
 } from "@components/Profile/editor/ProfileEditorCanvas";
+import {
+  PROFILE_BLOCK_MENU_ID,
+  ProfileBlockContextMenu
+} from "@components/Profile/editor/ProfileBlockContextMenu";
 import { ProfileLayout } from "@components/Profile/viewer/ProfileLayout";
 import {
   computeProfileEditorFitZoom,
@@ -24,8 +28,13 @@ import {
   type ProfileDraftState
 } from "@components/Profile/editor/profileEditor.utils";
 import type { CanvasRect } from "@components/Profile/viewer/profileLayout.utils";
+import {
+  alignBlockHorizontally,
+  alignBlockVertically,
+  snapBlockToGrid
+} from "@components/Profile/viewer/profileLayout.utils";
 import { useAppStore } from "@hooks/useStores";
-import type { ProfileBlockType } from "@mutualzz/types";
+import type { ProfileBlockType, APIProfileBlock } from "@mutualzz/types";
 import { Box, Stack } from "@mutualzz/ui-web";
 import {
   DndContext,
@@ -42,14 +51,17 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "react-toastify";
 import Loading from "@components/Loader/Loading";
 import { useModal } from "@contexts/Modal.context";
+import { useMenu } from "@contexts/ContextMenu.context";
 
 export const ProfileEditorPage = observer(() => {
   const app = useAppStore();
   const account = app.account;
   const navigate = useNavigate();
   const { openModal } = useModal();
+  const { openContextMenu } = useMenu();
   const viewportRef = useRef<HTMLDivElement | null>(null);
   const hasInitializedZoom = useRef(false);
+  const blockMenuTargetRef = useRef<string | null>(null);
 
   const { data: fetchedProfile, isLoading } = useQuery({
     queryKey: ["profile", account?.id, "edit"],
@@ -75,6 +87,7 @@ export const ProfileEditorPage = observer(() => {
   });
   const [zoom, setZoom] = useState(0.88);
   const [fitZoom, setFitZoom] = useState(0.88);
+  const [snapToGrid, setSnapToGrid] = useState(false);
 
   useEffect(() => {
     if (!profile) return;
@@ -176,12 +189,63 @@ export const ProfileEditorPage = observer(() => {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [draft, selectedBlockId]);
 
+  const updateBlock = useCallback(
+    (blockId: string, updater: (block: APIProfileBlock) => APIProfileBlock) => {
+      setDraft((current) => {
+        if (!current) return current;
+        return {
+          ...current,
+          blocks: current.blocks.map((block) =>
+            block.id === blockId ? updater(block) : block
+          )
+        };
+      });
+    },
+    []
+  );
+
+  const openBlockContextMenu = useCallback(
+    (event: React.MouseEvent, blockId: string) => {
+      blockMenuTargetRef.current = blockId;
+      setSelectedBlockId(blockId);
+      openContextMenu(event, { type: "custom", id: PROFILE_BLOCK_MENU_ID });
+    },
+    [openContextMenu]
+  );
+
+  const alignMenuBlock = useCallback(
+    (axis: "horizontal" | "vertical") => {
+      const blockId = blockMenuTargetRef.current;
+      if (!blockId) return;
+
+      updateBlock(blockId, (block) =>
+        axis === "horizontal"
+          ? alignBlockHorizontally(block)
+          : alignBlockVertically(block)
+      );
+    },
+    [updateBlock]
+  );
+
+  const snapMenuBlock = useCallback(() => {
+    const blockId = blockMenuTargetRef.current;
+    if (!blockId) return;
+    updateBlock(blockId, snapBlockToGrid);
+  }, [updateBlock]);
+
   const addBlock = (
     type: ProfileBlockType,
     point?: { x: number; y: number }
   ) => {
     if (!draft) return;
-    const nextBlocks = addBlockAtPoint(draft.blocks, type, canvasRect, point);
+    let nextBlocks = addBlockAtPoint(draft.blocks, type, canvasRect, point);
+    if (snapToGrid) {
+      const added = nextBlocks[nextBlocks.length - 1];
+      nextBlocks = [
+        ...nextBlocks.slice(0, -1),
+        snapBlockToGrid(added)
+      ];
+    }
     const added = nextBlocks[nextBlocks.length - 1];
     setDraft({ ...draft, blocks: nextBlocks });
     setSelectedBlockId(added.id);
@@ -295,15 +359,24 @@ export const ProfileEditorPage = observer(() => {
                 backgroundImageOverride={draft.backgroundImage}
                 bioOverride={draft.bio}
                 bannerOverride={draft.banner}
+                snapToGrid={snapToGrid}
                 onCanvasRectChange={setCanvasRect}
                 onBlocksChange={(blocks) => setDraft({ ...draft, blocks })}
                 onSelectBlock={setSelectedBlockId}
+                onBlockContextMenu={openBlockContextMenu}
               />
             </Box>
             <ProfileEditorZoomControls
               zoom={zoom}
               fitZoom={fitZoom}
               onZoomChange={setZoom}
+              snapToGrid={snapToGrid}
+              onSnapToGridChange={setSnapToGrid}
+            />
+            <ProfileBlockContextMenu
+              onAlignHorizontal={() => alignMenuBlock("horizontal")}
+              onAlignVertical={() => alignMenuBlock("vertical")}
+              onSnapToGrid={snapMenuBlock}
             />
             {draftIntroMusic && (
               <ProfileIntroMusic

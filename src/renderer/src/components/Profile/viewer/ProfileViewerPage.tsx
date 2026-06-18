@@ -61,14 +61,13 @@ export const ProfileViewerPage = observer(
       queryFn: () => app.profiles.resolve(userId!, true)
     });
 
-    const profile = useMemo(() => {
-      if (!userId) return undefined;
-      const cached = app.profiles.get(userId);
-      if (cached) return cached;
-      if (initialProfile?.userId === userId)
-        return app.profiles.add(initialProfile);
-      return undefined;
-    }, [app.profiles, userId, initialProfile]);
+    const cachedProfile = userId ? app.profiles.get(userId) : undefined;
+    const profile =
+      cachedProfile ??
+      (userId && initialProfile && initialProfile.userId === userId
+        ? app.profiles.add(initialProfile)
+        : undefined);
+    void profile?.updatedAt;
 
     const isSelf = app.account?.id === viewerUser?.id;
     const previewDraft =

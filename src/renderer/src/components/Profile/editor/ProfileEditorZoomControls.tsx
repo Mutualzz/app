@@ -5,7 +5,8 @@ import { Typography } from "@mutualzz/ui-web";
 import {
   MagnifyingGlassMinusIcon,
   MagnifyingGlassPlusIcon,
-  ArrowsInIcon
+  ArrowsInIcon,
+  GridFourIcon
 } from "@phosphor-icons/react";
 import { observer } from "mobx-react-lite";
 
@@ -37,10 +38,12 @@ interface Props {
   zoom: number;
   fitZoom: number;
   onZoomChange: (zoom: number) => void;
+  snapToGrid?: boolean;
+  onSnapToGridChange?: (snap: boolean) => void;
 }
 
 export const ProfileEditorZoomControls = observer(
-  ({ zoom, fitZoom, onZoomChange }: Props) => {
+  ({ zoom, fitZoom, onZoomChange, snapToGrid, onSnapToGridChange }: Props) => {
     const app = useAppStore();
     const embossed = app.settings?.preferEmbossed;
 
@@ -109,6 +112,18 @@ export const ProfileEditorZoomControls = observer(
         >
           <ArrowsInIcon />
         </IconButton>
+
+        {onSnapToGridChange && (
+          <IconButton
+            size="sm"
+            variant={snapToGrid ? "soft" : "plain"}
+            color={snapToGrid ? "primary" : undefined}
+            onClick={() => onSnapToGridChange(!snapToGrid)}
+            title="Snap to grid"
+          >
+            <GridFourIcon weight={snapToGrid ? "fill" : "regular"} />
+          </IconButton>
+        )}
       </Paper>
     );
   }

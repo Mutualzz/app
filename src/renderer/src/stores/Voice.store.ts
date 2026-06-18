@@ -88,7 +88,9 @@ function serializeMutedUsers(value: unknown) {
 
 function deserializeMutedUsers(value: unknown) {
   const userIds = Array.isArray(value) ? value.map(String) : [];
-  return observable.map<string, boolean>(userIds.map((userId) => [userId, true]));
+  return observable.map<string, boolean>(
+    userIds.map((userId) => [userId, true])
+  );
 }
 
 export type { VoiceInputMode };
@@ -205,10 +207,14 @@ class MediasoupSession {
     if (!this.audioContext) {
       this.audioContext = new AudioContext();
     }
-    // Always attempt resume - Electron may suspend it even after creation
-    if (this.audioContext.state === "suspended") {
-      void this.audioContext.resume();
-    }
+    this.ensureAudioContextActive();
+  }
+
+  private ensureAudioContextActive() {
+    if (!this.audioContext || this.audioContext.state !== "suspended") return;
+    void this.audioContext.resume().catch((err) => {
+      this.logger.warn("AudioContext resume failed", err);
+    });
   }
 
   getLocalCameraStream() {
@@ -402,20 +408,20 @@ class MediasoupSession {
     signal: AbortSignal,
     getStream: () => Promise<MediaStream>,
     config: ScreenShareCaptureConfig
-  ) {
-    if (!this.sendTransport) return;
+  ): Promise<boolean> {
+    if (!this.sendTransport) return false;
 
     const media = await getStream();
 
     if (signal.aborted) {
       media.getTracks().forEach((t) => t.stop());
-      return;
+      return false;
     }
 
     const [videoTrack] = media.getVideoTracks();
     if (!videoTrack) {
       media.getTracks().forEach((t) => t.stop());
-      return;
+      return false;
     }
 
     videoTrack.addEventListener("ended", () => {
@@ -437,13 +443,20 @@ class MediasoupSession {
         track: audioTrack,
         appData: { mediaKind: "screen-audio" }
       });
-    } else {
-      for (const track of media.getAudioTracks()) {
-        try {
-          track.stop();
-        } catch {}
-      }
+      return true;
     }
+
+    if (config.includeAudio) {
+      this.logger.warn(
+        "Screen share audio requested but no audio track was captured"
+      );
+    }
+    for (const track of media.getAudioTracks()) {
+      try {
+        track.stop();
+      } catch {}
+    }
+    return false;
   }
 
   setScreenShareAudioMuted(muted: boolean) {
@@ -748,28 +761,9 @@ class MediasoupSession {
   async startMic(signal: AbortSignal) {
     if (!this.sendTransport) return;
 
-    let media: MediaStream;
-    try {
-      media = await this.getUserMedia(
-        {
-          audio: this.currentInputDeviceId
-            ? {
-                echoCancellation: true,
-                noiseSuppression: true,
-                autoGainControl: true,
-                deviceId: { exact: this.currentInputDeviceId }
-              }
-            : {
-                echoCancellation: true,
-                noiseSuppression: true,
-                autoGainControl: true
-              },
-          video: false
-        },
-        signal
-      );
-    } catch {
-      // Mic permission denied - continue without mic, just muted
+    const media = await this.acquireMicMedia(signal);
+    if (!media) {
+      this.logger.warn("Mic capture failed after exhausting device fallbacks");
       this.setSelfMute(true);
       return;
     }
@@ -786,6 +780,18 @@ class MediasoupSession {
     }
 
     this.micTrack = audioTrack;
+    audioTrack.addEventListener(
+      "ended",
+      () => {
+        if (signal.aborted || this.micTrack !== audioTrack) return;
+        this.logger.warn("Mic track ended unexpectedly, restarting");
+        void this.restartMic(signal).catch((err) => {
+          this.logger.warn("restartMic after track ended failed", err);
+        });
+      },
+      { once: true }
+    );
+
     const userId = this.app.account?.id;
     if (userId) {
       const localStream = new MediaStream([audioTrack]);
@@ -800,6 +806,39 @@ class MediasoupSession {
     this.applyMicTransmission();
   }
 
+  private async acquireMicMedia(
+    signal: AbortSignal
+  ): Promise<MediaStream | null> {
+    const audioBase: MediaTrackConstraints = {
+      echoCancellation: true,
+      noiseSuppression: true,
+      autoGainControl: true
+    };
+
+    const attempts: MediaTrackConstraints[] = [];
+    if (this.currentInputDeviceId) {
+      attempts.push({
+        ...audioBase,
+        deviceId: { exact: this.currentInputDeviceId }
+      });
+      attempts.push({
+        ...audioBase,
+        deviceId: { ideal: this.currentInputDeviceId }
+      });
+    }
+    attempts.push(audioBase);
+
+    for (const audio of attempts) {
+      try {
+        return await this.getUserMedia({ audio, video: false }, signal);
+      } catch (err) {
+        if (signal.aborted) throw err;
+      }
+    }
+
+    return null;
+  }
+
   private startSpeakingDetection(stream: MediaStream, userId: string) {
     this.stopSpeakingDetectionForUser(userId);
 
@@ -810,6 +849,7 @@ class MediasoupSession {
     if (!this.audioContext) {
       this.audioContext = new AudioContextCtor();
     }
+    this.ensureAudioContextActive();
 
     const analyser = this.audioContext.createAnalyser();
     analyser.fftSize = 512;
@@ -866,6 +906,8 @@ class MediasoupSession {
         this.speakingTickTimer = null;
         return;
       }
+
+      this.ensureAudioContextActive();
 
       const now = performance.now();
 
@@ -1389,6 +1431,8 @@ export class VoiceStore {
   private pendingToken: string | null = null;
   private joinTimeoutTimer: number | null = null;
   private lastScreenShareConfig: ScreenShareCaptureConfig | null = null;
+  private deviceChangeDebounceTimer: number | null = null;
+  private channelSwitchInProgress = false;
 
   private speakingUsers = observable.map<string, boolean>();
 
@@ -1443,6 +1487,15 @@ export class VoiceStore {
       (ev) => {
         let reason =
           ev?.reason ?? (ev && ev.code ? `code ${ev.code}` : "Disconnected");
+
+        if (
+          this.channelSwitchInProgress &&
+          (reason === "superseded" ||
+            reason === "Moved to another voice channel" ||
+            reason === "teardown")
+        ) {
+          return;
+        }
 
         switch (reason) {
           case "superseded": {
@@ -1513,8 +1566,12 @@ export class VoiceStore {
     window.addEventListener("keydown", this.onPttKeyDown);
     window.addEventListener("keyup", this.onPttKeyUp);
     window.addEventListener("blur", this.onPttBlur);
+    navigator.mediaDevices?.addEventListener(
+      "devicechange",
+      this.onMediaDeviceChange
+    );
 
-    makePersistable(this, {
+    void makePersistable(this, {
       name: "VoiceStore",
       properties: [
         "currentInputDeviceId",
@@ -1542,7 +1599,35 @@ export class VoiceStore {
         }
       ],
       storage: localStorage
+    }).then(() => {
+      void this.setupTracks();
     });
+  }
+
+  private onMediaDeviceChange = () => {
+    if (this.deviceChangeDebounceTimer != null) {
+      clearTimeout(this.deviceChangeDebounceTimer);
+    }
+    this.deviceChangeDebounceTimer = window.setTimeout(() => {
+      this.deviceChangeDebounceTimer = null;
+      void this.handleMediaDeviceChange();
+    }, 300);
+  };
+
+  private async handleMediaDeviceChange() {
+    const { inputChanged } = await this.setupTracks();
+    const followsSystemDefault =
+      !this.currentInputDeviceId || this.currentInputDeviceId === "default";
+
+    if (
+      (inputChanged || followsSystemDefault) &&
+      this.connectionStatus === "connected" &&
+      this.abortController
+    ) {
+      void this.session.restartMic(this.abortController.signal).catch((err) => {
+        this.logger.warn("restartMic after device change failed", err);
+      });
+    }
   }
 
   get currentChannelId() {
@@ -1698,6 +1783,7 @@ export class VoiceStore {
     this.pendingToken = payload.voiceToken;
 
     runInAction(() => {
+      this.channelSwitchInProgress = true;
       this.currentVoiceTarget = {
         spaceId: payload.spaceId ?? null,
         channelId: payload.channelId
@@ -1950,6 +2036,7 @@ export class VoiceStore {
     if (isSame && this.connectionStatus !== "failed") return;
 
     this.session.unlockAudio();
+    await this.setupTracks();
 
     runInAction(() => {
       this.disconnectBanner = null;
@@ -2189,12 +2276,16 @@ export class VoiceStore {
     });
 
     try {
-      await this.session.startScreenShare(
+      const hasAudio = await this.session.startScreenShare(
         signal,
         () => acquireScreenCaptureStream(config, signal),
         config
       );
-      if (!config.includeAudio) {
+      runInAction(() => {
+        this.screenShareAudioEnabled = hasAudio;
+        this.screenShareSupportsAudio = hasAudio;
+      });
+      if (!hasAudio) {
         this.session.setScreenShareAudioMuted(true);
       }
     } catch (err) {
@@ -2273,7 +2364,9 @@ export class VoiceStore {
     this.session.setCameraDeviceId(deviceId);
   }
 
-  async setupTracks() {
+  async setupTracks(): Promise<{ inputChanged: boolean }> {
+    const previousInputDeviceId = this.currentInputDeviceId;
+
     try {
       let devices = (await navigator.mediaDevices.enumerateDevices()).filter(
         (d) => d.deviceId !== ""
@@ -2363,8 +2456,13 @@ export class VoiceStore {
       this.session.setCameraDeviceId(
         this.cameraEnabled ? this.currentCameraDeviceId : null
       );
+
+      return {
+        inputChanged: previousInputDeviceId !== this.currentInputDeviceId
+      };
     } catch (err) {
       this.logger.warn("setupTracks failed", err);
+      return { inputChanged: false };
     }
   }
 
@@ -2439,6 +2537,8 @@ export class VoiceStore {
     });
 
     try {
+      await this.setupTracks();
+
       this.session.setInputDeviceId(this.currentInputDeviceId);
       this.session.setOutputDeviceId(this.currentOutputDeviceId);
       this.session.setCameraDeviceId(
@@ -2477,12 +2577,16 @@ export class VoiceStore {
       if (this.screenShareEnabled && this.lastScreenShareConfig) {
         try {
           const config = this.lastScreenShareConfig;
-          await this.session.startScreenShare(
+          const hasAudio = await this.session.startScreenShare(
             signal,
             () => acquireScreenCaptureStream(config, signal),
             config
           );
-          if (!config.includeAudio) {
+          runInAction(() => {
+            this.screenShareAudioEnabled = hasAudio;
+            this.screenShareSupportsAudio = hasAudio;
+          });
+          if (!hasAudio) {
             this.session.setScreenShareAudioMuted(true);
           }
         } catch (err) {
@@ -2498,6 +2602,7 @@ export class VoiceStore {
 
       runInAction(() => {
         this.connectionStatus = "connected";
+        this.channelSwitchInProgress = false;
       });
       this.clearJoinTimeout();
       this.startKeepAlive();
@@ -2511,6 +2616,7 @@ export class VoiceStore {
       runInAction(() => {
         this.connectionStatus = "failed";
         this.connectionError = message;
+        this.channelSwitchInProgress = false;
       });
       this.clearJoinTimeout();
     }

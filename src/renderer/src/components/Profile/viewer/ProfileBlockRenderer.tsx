@@ -58,6 +58,7 @@ interface Props {
     mode: "move" | "resize",
     handle?: string
   ) => void;
+  onContextMenu?: (event: React.MouseEvent, blockId: string) => void;
 }
 
 export const ProfileBlockRenderer = observer(
@@ -73,7 +74,8 @@ export const ProfileBlockRenderer = observer(
     bannerOverride,
     readOnly,
     onSelect,
-    onPointerDown
+    onPointerDown,
+    onContextMenu
   }: Props) => {
     const rect = percentToPixels(block, canvas);
 
@@ -131,6 +133,11 @@ export const ProfileBlockRenderer = observer(
           event.stopPropagation();
           onSelect?.(block.id);
           onPointerDown?.(event, block.id, "move");
+        }}
+        onContextMenu={(event) => {
+          if (!editable || readOnly) return;
+          if (isInteractiveTarget(event.target)) return;
+          onContextMenu?.(event, block.id);
         }}
         css={{
           position: "absolute",

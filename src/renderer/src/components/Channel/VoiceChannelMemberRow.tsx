@@ -5,7 +5,7 @@ import type { ColorLike } from "@mutualzz/ui-core";
 import { Stack, Typography, useTheme } from "@mutualzz/ui-web";
 import type { Space } from "@stores/objects/Space";
 import type { VoiceState } from "@stores/objects/VoiceState.ts";
-import { MicrophoneSlashIcon, MonitorIcon, VideoCameraIcon } from "@phosphor-icons/react";
+import { MicrophoneSlashIcon, VideoCameraIcon } from "@phosphor-icons/react";
 import { HeadphonesOffIcon } from "../icons/HeadphonesOffIcon";
 import { Tooltip } from "@components/Tooltip";
 import { observer } from "mobx-react-lite";
@@ -100,11 +100,6 @@ export const VoiceChannelMemberRow = observer(
                 LIVE
               </Typography>
             </Paper>
-          )}
-          {screenOn && (
-            <Tooltip content="Screen sharing">
-              <MonitorIcon weight="fill" color={theme.colors.success} />
-            </Tooltip>
           )}
           {videoOn && (
             <Tooltip content="Video">

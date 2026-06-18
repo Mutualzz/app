@@ -6,9 +6,14 @@ import {
   getIntroMusicLabel,
   hasPreviewIntroMusic
 } from "@components/Profile/shared/profileIntroMusic.utils";
+import {
+  profileMusicVolumeToGain,
+  readProfileMusicVolumePercent,
+  writeProfileMusicVolumePercent
+} from "@components/Profile/shared/profileMusicPlayback.utils";
 import type { APIProfileIntroMusic } from "@mutualzz/types";
 import type { UserProfile } from "@stores/objects/UserProfile";
-import { Box, Stack, Typography } from "@mutualzz/ui-web";
+import { Box, Slider, Stack, Typography } from "@mutualzz/ui-web";
 import {
   ArrowSquareOutIcon,
   MusicNotesIcon,
@@ -33,6 +38,7 @@ export const ProfileIntroMusic = observer(
     const [duration, setDuration] = useState<number | null>(null);
     const [currentTime, setCurrentTime] = useState(0);
     const [isSeeking, setIsSeeking] = useState(false);
+    const [volume, setVolume] = useState(readProfileMusicVolumePercent);
 
     const label = getIntroMusicLabel(introMusic);
     const playbackUrl = getIntroMusicPlaybackUrl(profile, introMusic);
@@ -57,6 +63,19 @@ export const ProfileIntroMusic = observer(
       setIsSeeking(false);
     }, [playbackUrl]);
 
+    useEffect(() => {
+      const audio = audioRef.current;
+      if (!audio) return;
+      audio.volume = profileMusicVolumeToGain(volume);
+    }, [volume, playbackUrl]);
+
+    const commitSeek = (nextTime: number) => {
+      const audio = audioRef.current;
+      if (audio) audio.currentTime = nextTime;
+      setCurrentTime(nextTime);
+      setIsSeeking(false);
+    };
+
     const formatTime = (seconds: number) => {
       if (!Number.isFinite(seconds) || seconds < 0) return "0:00";
       const total = Math.floor(seconds);
@@ -80,6 +99,7 @@ export const ProfileIntroMusic = observer(
           audio.src = playbackUrl;
         }
 
+        audio.volume = profileMusicVolumeToGain(volume);
         audio.load();
 
         try {
@@ -259,16 +279,12 @@ export const ProfileIntroMusic = observer(
                 onMouseDown={() => setIsSeeking(true)}
                 onTouchStart={() => setIsSeeking(true)}
                 onChange={(e) => setCurrentTime(Number(e.target.value))}
-                onMouseUp={() => {
-                  const audio = audioRef.current;
-                  if (audio) audio.currentTime = currentTime;
-                  setIsSeeking(false);
-                }}
-                onTouchEnd={() => {
-                  const audio = audioRef.current;
-                  if (audio) audio.currentTime = currentTime;
-                  setIsSeeking(false);
-                }}
+                onMouseUp={(e) =>
+                  commitSeek(Number((e.target as HTMLInputElement).value))
+                }
+                onTouchEnd={(e) =>
+                  commitSeek(Number((e.target as HTMLInputElement).value))
+                }
                 css={{ width: "100%" }}
               />
               <Stack direction="row" justifyContent="space-between">
@@ -279,6 +295,38 @@ export const ProfileIntroMusic = observer(
                   {formatTime(duration ?? 0)}
                 </Typography>
               </Stack>
+            </Stack>
+          )}
+
+          {usesAudioPlayback && playbackUrl && (
+            <Stack
+              direction="column"
+              spacing={0.5}
+              p={1}
+              css={{
+                borderRadius: 10,
+                background: "rgba(255, 255, 255, 0.04)",
+                border: "1px solid rgba(255, 255, 255, 0.08)"
+              }}
+            >
+              <Stack direction="row" justifyContent="space-between" alignItems="center">
+                <Typography level="body-xs" css={{ color: "rgba(255,255,255,0.72)" }}>
+                  Volume
+                </Typography>
+                <Typography level="body-xs" css={{ color: "rgba(255,255,255,0.72)" }}>
+                  {volume}%
+                </Typography>
+              </Stack>
+              <Slider
+                min={0}
+                max={100}
+                value={volume}
+                onChange={(_, value) => {
+                  const next = writeProfileMusicVolumePercent(value as number);
+                  setVolume(next);
+                }}
+                css={{ width: "100%" }}
+              />
             </Stack>
           )}
         </Stack>

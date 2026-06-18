@@ -8,6 +8,7 @@ import type { SpaceMember } from "@stores/objects/SpaceMember";
 import { Stack, Typography, Box, useTheme } from "@mutualzz/ui-web";
 import { useNavigate } from "@tanstack/react-router";
 import { observer } from "mobx-react-lite";
+import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import Loading from "@components/Loader/Loading";
 import type { AccountStore } from "@stores/Account.store";
@@ -23,12 +24,18 @@ export const UserProfilePopout = observer(({ user, member }: Props) => {
   const navigate = useNavigate();
   const { theme } = useTheme();
 
+  useEffect(() => {
+    app.gateway.subscribeUser(user.id);
+    return () => app.gateway.unsubscribeUser(user.id);
+  }, [app.gateway, user.id]);
+
   const { data: fetchedProfile, isLoading } = useQuery({
     queryKey: ["profile-popout", user.id],
     queryFn: () => app.profiles.resolve(user.id)
   });
 
   const profile = app.profiles.get(user.id) ?? fetchedProfile;
+  void profile?.updatedAt;
 
   const presence = app.presence.get(user.id);
   const isSelf = app.account?.id === user.id;

@@ -6,11 +6,17 @@ import { useMutation } from "@tanstack/react-query";
 import { useModal } from "@contexts/Modal.context";
 import { BitField, type PermissionFlag, permissionFlags } from "@mutualzz/bitfield";
 import { type APIChannel, ChannelType } from "@mutualzz/types";
-import { JSX, useMemo, useState } from "react";
+import { Fragment, JSX, useEffect, useMemo, useRef, useState } from "react";
 import { Box, ButtonGroup, Divider, InputDefault, Stack, Typography, useTheme } from "@mutualzz/ui-web";
 import { Paper } from "@components/Paper";
 import { Button } from "@components/Button";
 import { IconButton } from "@components/IconButton";
+import { PermissionEditorControls } from "@components/Permissions/PermissionEditorControls";
+import {
+  filterPermissionGroups,
+  permissionCategoryId,
+  scrollToPermissionCategory
+} from "@components/Permissions/permissionEditor.utils";
 import { dynamicElevation, formatColor } from "@mutualzz/ui-core";
 import { CheckIcon, MinusIcon, PlusIcon, ShieldIcon, TrashIcon, XIcon } from "@phosphor-icons/react";
 import { UserAvatar } from "@components/User/UserAvatar";
@@ -671,7 +677,34 @@ export const ChannelPermissionsSettings = observer(
       };
     });
 
+    const permissionsRootRef = useRef<HTMLDivElement>(null);
+    const [permissionSearch, setPermissionSearch] = useState("");
+
     const permissionGroups = getPermissionGroups(channel.type);
+    const permissionCategories = useMemo(
+      () =>
+        permissionGroups.map((group) => ({
+          id: permissionCategoryId(group.title),
+          title: group.title
+        })),
+      [permissionGroups]
+    );
+    const visiblePermissionGroups = useMemo(
+      () => filterPermissionGroups(permissionGroups, permissionSearch),
+      [permissionGroups, permissionSearch]
+    );
+
+    const handlePermissionCategoryJump = (categoryId: string) => {
+      setPermissionSearch("");
+      setTimeout(() => {
+        scrollToPermissionCategory(permissionsRootRef.current, categoryId);
+      }, 0);
+    };
+
+    useEffect(() => {
+      setPermissionSearch("");
+    }, [selectedKey]);
+
     const existingKeys = new Set(drafts.keys());
     const selectedDraft = selectedKey ? drafts.get(selectedKey) : null;
     const selectedEntry = selectedKey
@@ -772,7 +805,12 @@ export const ChannelPermissionsSettings = observer(
               </Typography>
             </Stack>
           ) : (
-            <Stack direction="column" spacing={2.5} flex={1}>
+            <Stack
+              ref={permissionsRootRef}
+              direction="column"
+              spacing={2.5}
+              flex={1}
+            >
               <Stack direction="row" alignItems="center" spacing={1.5}>
                 {selectedEntry?.kind === "role" ? (
                   <ShieldIcon
@@ -792,36 +830,61 @@ export const ChannelPermissionsSettings = observer(
                 </Typography>
               </Stack>
 
-              {permissionGroups.map((group, gi) => (
-                <Stack key={group.title} direction="column" spacing={1}>
-                  <Typography
-                    level="body-sm"
-                    textColor="secondary"
-                    fontWeight="bold"
-                    px={2}
-                  >
-                    {group.title}
-                  </Typography>
-                  <Stack direction="column" spacing={0.25}>
-                    {group.items.map((item, ii) => (
-                      <>
-                        <PermissionRow
-                          key={item.flag}
-                          {...item}
-                          draft={selectedDraft}
-                          onChange={(next) => updateDraft(selectedKey, next)}
+              <PermissionEditorControls
+                search={permissionSearch}
+                onSearchChange={setPermissionSearch}
+                categories={permissionCategories}
+                onCategoryJump={handlePermissionCategoryJump}
+              />
+
+              {visiblePermissionGroups.length === 0 ? (
+                <Typography textColor="muted" textAlign="center" py={4}>
+                  No permissions match your search
+                </Typography>
+              ) : (
+                visiblePermissionGroups.map((group, gi) => {
+                  const categoryId = permissionCategoryId(group.title);
+
+                  return (
+                    <Stack
+                      key={categoryId}
+                      direction="column"
+                      spacing={1}
+                      data-permission-category={categoryId}
+                    >
+                      <Typography
+                        level="body-sm"
+                        textColor="secondary"
+                        fontWeight="bold"
+                        px={2}
+                      >
+                        {group.title}
+                      </Typography>
+                      <Stack direction="column" spacing={0.25}>
+                        {group.items.map((item, ii) => (
+                          <Fragment key={item.flag}>
+                            <PermissionRow
+                              {...item}
+                              draft={selectedDraft}
+                              onChange={(next) =>
+                                updateDraft(selectedKey, next)
+                              }
+                            />
+                            {ii < group.items.length - 1 && (
+                              <Divider css={{ opacity: 0.15 }} />
+                            )}
+                          </Fragment>
+                        ))}
+                      </Stack>
+                      {gi < visiblePermissionGroups.length - 1 && (
+                        <Divider
+                          css={{ opacity: 0.35, marginTop: "0.25rem" }}
                         />
-                        {ii < group.items.length - 1 && (
-                          <Divider css={{ opacity: 0.15 }} />
-                        )}
-                      </>
-                    ))}
-                  </Stack>
-                  {gi < permissionGroups.length - 1 && (
-                    <Divider css={{ opacity: 0.35, marginTop: "0.25rem" }} />
-                  )}
-                </Stack>
-              ))}
+                      )}
+                    </Stack>
+                  );
+                })
+              )}
             </Stack>
           )}
 

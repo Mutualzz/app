@@ -8,6 +8,8 @@ import {
   nextZIndex,
   percentToPixels,
   pixelsToPercent,
+  PROFILE_GRID_STEP,
+  snapRectToGrid,
   sortBlocksByZIndex,
   type CanvasRect
 } from "@components/Profile/viewer/profileLayout.utils";
@@ -44,6 +46,11 @@ interface Props {
   bioOverride?: string | null;
   bannerOverride?: string | null;
   onCanvasRectChange?: (rect: CanvasRect) => void;
+  snapToGrid?: boolean;
+  onBlockContextMenu?: (
+    event: React.MouseEvent,
+    blockId: string
+  ) => void;
 }
 
 export const ProfileEditorCanvas = observer(
@@ -58,7 +65,9 @@ export const ProfileEditorCanvas = observer(
     backgroundImageOverride,
     bioOverride,
     bannerOverride,
-    onCanvasRectChange
+    onCanvasRectChange,
+    snapToGrid = false,
+    onBlockContextMenu
   }: Props) => {
     const {
       canvasRef: measureCanvasRef,
@@ -72,6 +81,9 @@ export const ProfileEditorCanvas = observer(
     const isDraggingRef = useRef(false);
     const frameRef = useRef<number | null>(null);
     const pendingMoveRef = useRef<PointerEvent | null>(null);
+    const snapToGridRef = useRef(snapToGrid);
+
+    snapToGridRef.current = snapToGrid;
 
     displayBlocksRef.current = displayBlocks;
     if (canvasRect) {
@@ -103,7 +115,10 @@ export const ProfileEditorCanvas = observer(
     const updateBlock = (blockId: string, patch: Partial<APIProfileBlock>) => {
       const next = displayBlocksRef.current.map((block) =>
         block.id === blockId
-          ? clampBlock({ ...block, ...patch } as APIProfileBlock)
+          ? clampBlock({
+              ...block,
+              ...(snapToGridRef.current ? snapRectToGrid({ ...block, ...patch }) : patch)
+            } as APIProfileBlock)
           : block
       );
       displayBlocksRef.current = next;
@@ -268,6 +283,21 @@ export const ProfileEditorCanvas = observer(
         backgroundImageOverride={backgroundImageOverride}
         onCanvasClick={() => onSelectBlock(null)}
       >
+        {snapToGrid && canvasRect && (
+          <div
+            css={{
+              position: "absolute",
+              inset: 0,
+              pointerEvents: "none",
+              zIndex: 0,
+              backgroundImage: `
+                linear-gradient(to right, rgba(255,255,255,0.07) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255,255,255,0.07) 1px, transparent 1px)
+              `,
+              backgroundSize: `${(PROFILE_GRID_STEP / 100) * canvasRect.width}px ${(PROFILE_GRID_STEP / 100) * canvasRect.height}px`
+            }}
+          />
+        )}
         {isOver && (
           <div
             css={{
@@ -296,6 +326,11 @@ export const ProfileEditorCanvas = observer(
               onPointerDown={(event, blockId, mode, handle) =>
                 startDrag(event, blockId, mode, handle)
               }
+              onContextMenu={(event, blockId) => {
+                event.preventDefault();
+                event.stopPropagation();
+                onBlockContextMenu?.(event, blockId);
+              }}
               overlay={
                 selectedBlockId === block.id ? (
                   <ProfileBlockHandles

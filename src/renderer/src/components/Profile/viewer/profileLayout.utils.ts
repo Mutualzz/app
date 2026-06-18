@@ -13,9 +13,34 @@ export interface PixelRect {
 }
 
 export const MIN_BLOCK_PERCENT = 4;
+export const PROFILE_GRID_STEP = 4;
 
 export const roundPercent = (value: number) =>
   Math.round(Math.min(100, Math.max(0, value)) * 100) / 100;
+
+export const snapPercent = (
+  value: number,
+  step = PROFILE_GRID_STEP
+) => roundPercent(Math.round(value / step) * step);
+
+export const snapRectToGrid = (
+  rect: Pick<APIProfileBlock, "x" | "y" | "width" | "height">,
+  step = PROFILE_GRID_STEP
+) => ({
+  x: snapPercent(rect.x, step),
+  y: snapPercent(rect.y, step),
+  width: snapPercent(rect.width, step),
+  height: snapPercent(rect.height, step)
+});
+
+export const snapBlockToGrid = (block: APIProfileBlock) =>
+  clampBlock({ ...block, ...snapRectToGrid(block) });
+
+export const alignBlockHorizontally = (block: APIProfileBlock) =>
+  clampBlock({ ...block, x: roundPercent((100 - block.width) / 2) });
+
+export const alignBlockVertically = (block: APIProfileBlock) =>
+  clampBlock({ ...block, y: roundPercent((100 - block.height) / 2) });
 
 export const percentToPixels = (
   block: Pick<APIProfileBlock, "x" | "y" | "width" | "height">,
