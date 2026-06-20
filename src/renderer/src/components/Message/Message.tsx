@@ -1,6 +1,7 @@
 import { MarkdownRenderer } from "@components/Markdown/MarkdownRenderer/MarkdownRenderer";
 import { UserAvatar } from "@components/User/UserAvatar";
 import { useAppStore } from "@hooks/useStores";
+import { useMenu } from "@contexts/ContextMenu.context";
 import { Stack, Typography, useTheme } from "@mutualzz/ui-web";
 import {
   Message as MessageType,
@@ -24,6 +25,7 @@ import { MessageEmbed } from "./MessageEmbed";
 import { MessageToolbar } from "./MessageToolbar";
 import { MessageInput } from "./MessageInput";
 import { MessageSticker } from "./MessageSticker";
+import { MessageReactions } from "./MessageReactions";
 import dayjs from "dayjs";
 import { Tooltip } from "@components/Tooltip";
 import { ExpressionType } from "@mutualzz/types";
@@ -36,6 +38,7 @@ interface Props {
 export const Message = observer(({ message, header }: Props) => {
   const app = useAppStore();
   const { theme } = useTheme();
+  const { openContextMenu } = useMenu();
   const channel = app.channels.active;
   const space = message.spaceId ? app.spaces.get(message.spaceId) : null;
   const me = space?.members.me;
@@ -80,6 +83,14 @@ export const Message = observer(({ message, header }: Props) => {
     <MessageBase
       onMouseEnter={hideSwitcher}
       onMouseLeave={showSwitcher}
+      onContextMenu={(event) => {
+        if (!isSent || message.editing) return;
+
+        openContextMenu(event, {
+          type: "message",
+          message
+        });
+      }}
       header={header}
       highlight={hasProperMention ? theme.colors.warning : null}
     >
@@ -165,6 +176,8 @@ export const Message = observer(({ message, header }: Props) => {
             ))}
           </Stack>
         )}
+
+        {isSent && <MessageReactions message={message} />}
       </MessageContent>
     </MessageBase>
   );

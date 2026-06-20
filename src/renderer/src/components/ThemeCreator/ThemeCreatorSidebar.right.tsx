@@ -2,7 +2,7 @@ import { Paper } from "@components/Paper";
 import { useModal } from "@contexts/Modal.context";
 import { useAppStore } from "@hooks/useStores";
 import type { APITheme, HttpException } from "@mutualzz/types";
-import { baseDarkTheme, baseLightTheme, type MzTheme } from "@mutualzz/ui-core";
+import { baseDarkTheme, baseLightTheme } from "@mutualzz/ui-core";
 import {
   Button,
   ButtonGroup,
@@ -19,7 +19,7 @@ import {
 } from "@mutualzz/ui-web";
 import { Theme } from "@stores/objects/Theme";
 import { useMutation } from "@tanstack/react-query";
-import { adaptColors } from "@utils/adaptation";
+import { applyAdaptiveThemeValues } from "@utils/adaptation";
 import { sortThemes } from "@utils/index";
 import startCase from "lodash-es/startCase";
 import { observer } from "mobx-react-lite";
@@ -84,12 +84,8 @@ export const ThemeCreatorSidebarRight = observer(() => {
       };
       if (values.adaptive) {
         dataToPut = {
-          ...values,
-          ...(adaptColors({
-            baseColor: values.colors.background,
-            primaryColor: values.colors.primary,
-            primaryText: values.typography.colors.primary
-          }) as Partial<MzTheme>)
+          ...applyAdaptiveThemeValues(values),
+          id: Snowflake.generate()
         };
       }
 
@@ -120,14 +116,7 @@ export const ThemeCreatorSidebarRight = observer(() => {
     mutationFn: async () => {
       let dataToPatch = { ...values };
       if (values.adaptive) {
-        dataToPatch = {
-          ...values,
-          ...(adaptColors({
-            baseColor: values.colors.background,
-            primaryColor: values.colors.primary,
-            primaryText: values.typography.colors.primary
-          }) as Partial<MzTheme>)
-        };
+        dataToPatch = applyAdaptiveThemeValues(values);
       }
 
       return app.rest.patch<APITheme, APITheme>(
@@ -233,7 +222,7 @@ export const ThemeCreatorSidebarRight = observer(() => {
                   return;
                 }
 
-                startPreview(changeTheme, currentTheme);
+                startPreview(changeTheme, currentTheme, app.account?.id);
 
                 // Close modals after a tick to allow the theme and ref to update in ThemeCreatorModal
                 setTimeout(() => closeAllModals(), 0);

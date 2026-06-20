@@ -227,6 +227,7 @@ export const ProfileViewerPage = observer(
                 profile={profile}
                 backgroundColorOverride={previewDraft?.backgroundColor}
                 backgroundImageOverride={previewDraft?.backgroundImage}
+                pageFontFamilyOverride={previewDraft?.pageFontFamily}
               >
                 {isCanvasReady &&
                   canvasRect &&
@@ -242,14 +243,14 @@ export const ProfileViewerPage = observer(
                       readOnly
                     />
                   ))}
+                {(previewIntroMusic ?? profile.introMusic) && (
+                  <ProfileIntroMusic
+                    floating
+                    introMusic={previewIntroMusic ?? profile.introMusic!}
+                    profile={profile}
+                  />
+                )}
               </ProfileCanvas>
-              {(previewIntroMusic ?? profile.introMusic) && (
-                <ProfileIntroMusic
-                  floating
-                  introMusic={previewIntroMusic ?? profile.introMusic!}
-                  profile={profile}
-                />
-              )}
             </Stack>
           </Stack>
         )}

@@ -186,11 +186,11 @@ export const preferredModePath = (app: AppStore) => {
 
   switch (mode) {
     case "feed":
-      return "/feed" as const;
+      return "/feed";
     case "@me":
-      return "/@me" as const;
+      return "/@me";
     default:
-      return "/spaces" as const;
+      return "/spaces";
   }
 };
 

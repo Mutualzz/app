@@ -44,7 +44,7 @@ export const DMChannelHeader = observer(({ channel }: Props) => {
       alignItems="center"
       justifyContent="space-between"
     >
-      <Stack flex={1} direction="row" alignItems="center" spacing={2}>
+      <Stack direction="row" alignItems="center" flex={1} spacing={2} minWidth={0}>
         {isGroupDM ? (
           channel.iconUrl ? (
             <Avatar
@@ -57,12 +57,7 @@ export const DMChannelHeader = observer(({ channel }: Props) => {
         ) : (
           <UserAvatar user={channel.dmRecipient ?? null} />
         )}
-        <Typography
-          display="flex"
-          alignItems="center"
-          spacing={1}
-          fontWeight={600}
-        >
+        <Typography level="label-sm" weight="bold">
           {title}
         </Typography>
       </Stack>

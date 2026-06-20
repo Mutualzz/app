@@ -71,7 +71,7 @@ export const MessageToast = observer(
         >
           <Stack direction="row" alignItems="center">
             <Typography
-              fontWeight="bold"
+              level="label-sm"
               style={{
                 overflow: "hidden",
                 textOverflow: "ellipsis",

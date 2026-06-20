@@ -16,6 +16,7 @@ export class UserProfile {
   backgroundImage?: string | null;
   banner?: string | null;
   bio?: string | null;
+  pageFontFamily?: string | null;
   introMusic?: APIProfileIntroMusic | null;
   blocks: APIProfileBlock[];
   updatedAt: Date;
@@ -27,6 +28,7 @@ export class UserProfile {
     this.backgroundImage = profile.backgroundImage ?? null;
     this.banner = profile.banner ?? null;
     this.bio = profile.bio ?? null;
+    this.pageFontFamily = profile.pageFontFamily ?? null;
     this.introMusic = profile.introMusic ?? null;
     this.blocks = profile.blocks ?? [];
     this.updatedAt = new Date(profile.updatedAt);
@@ -40,6 +42,7 @@ export class UserProfile {
     this.backgroundImage = profile.backgroundImage ?? null;
     this.banner = profile.banner ?? null;
     this.bio = profile.bio ?? null;
+    this.pageFontFamily = profile.pageFontFamily ?? null;
     this.introMusic = profile.introMusic ?? null;
     this.blocks = profile.blocks ?? [];
     this.updatedAt = new Date(profile.updatedAt);

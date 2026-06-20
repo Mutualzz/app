@@ -9,6 +9,7 @@ export interface ProfileDraftState {
   banner: string | null;
   backgroundColor: string | null;
   backgroundImage: string | null;
+  pageFontFamily: string | null;
   introMusicUrl: string | null;
   introMusicTrackId: string | null;
   introMusicTrackSource: "itunes" | "deezer" | null;
@@ -32,6 +33,7 @@ export const createDraftFromProfile = (
     banner: profile.banner ?? null,
     backgroundColor: profile.backgroundColor ?? null,
     backgroundImage: profile.backgroundImage ?? null,
+    pageFontFamily: profile.pageFontFamily ?? null,
     introMusicTrackId: musicTrackId,
     introMusicTrackSource: musicTrackId ? (musicTrackSource ?? "itunes") : null,
     introMusicTrackSelection:
@@ -62,6 +64,7 @@ export const createEmptyDraft = (): ProfileDraftState => ({
   banner: null,
   backgroundColor: null,
   backgroundImage: null,
+  pageFontFamily: null,
   introMusicUrl: null,
   introMusicTrackId: null,
   introMusicTrackSource: null,

@@ -2,6 +2,12 @@ import type {
   APIMessage,
   APIMessageEmbed,
   APIMessageMention,
+  APIMessageReaction,
+  APIMessageReactionEmoji,
+  APIMessageReactionEvent,
+  APIMessageReactionRemoveAllEvent,
+  APIMessageReactionRemoveEmojiEvent,
+  APIMessageReactionRemoveEvent,
   Snowflake
 } from "@mutualzz/types";
 import type { AppStore } from "@stores/App.store";
@@ -10,6 +16,13 @@ import { MessageBase } from "./MessageBase";
 import type { QueuedMessage, QueuedMessageData } from "./QueuedMessage";
 import { BitField, messageFlags, MessageFlags } from "@mutualzz/bitfield";
 import { Expression } from "@stores/objects/Expression";
+import {
+  applyReactionAdd,
+  applyReactionRemove,
+  applyReactionRemoveEmoji,
+  reactionEmojiToBody,
+  reactionEmojisMatch
+} from "@utils/reactions";
 
 export type MessageLike = Message | QueuedMessage;
 export type MessageLikeData = APIMessage | QueuedMessageData;
@@ -24,6 +37,7 @@ export class Message extends MessageBase {
   flags: BitField<MessageFlags>;
   mentions: APIMessageMention[];
   expressions = observable.array<Expression>();
+  reactions: APIMessageReaction[] = [];
 
   edited: boolean;
 
@@ -49,6 +63,7 @@ export class Message extends MessageBase {
     this.expressions = observable.array<Expression>(
       this.app.expressions.addAll(data.expressions ?? [])
     );
+    this.reactions = data.reactions ?? [];
     this.flags = BitField.fromString(messageFlags, data.flags.toString());
 
     this.spaceId = data.spaceId;
@@ -59,10 +74,17 @@ export class Message extends MessageBase {
       nonce: observable,
       embeds: observable.shallow,
       expressions: observable,
+      reactions: observable.shallow,
       edited: observable,
       editing: observable,
       update: action.bound,
-      setEditing: action.bound
+      setEditing: action.bound,
+      setReactions: action.bound,
+      handleReactionAdd: action.bound,
+      handleReactionRemove: action.bound,
+      handleReactionRemoveEmoji: action.bound,
+      handleReactionRemoveAll: action.bound,
+      toggleReaction: action.bound
     });
   }
 
@@ -85,6 +107,7 @@ export class Message extends MessageBase {
         message.expressions ?? this.expressions.map((exp) => exp.toJSON()) ?? []
       )
     );
+    this.reactions = message.reactions ?? this.reactions;
 
     this.createdAt = new Date(message.createdAt);
     this.updatedAt = message.updatedAt ? new Date(message.updatedAt) : null;
@@ -94,6 +117,71 @@ export class Message extends MessageBase {
 
   setEditing(value: boolean) {
     this.editing = value;
+  }
+
+  setReactions(reactions: APIMessageReaction[]) {
+    this.reactions = reactions;
+  }
+
+  handleReactionAdd(payload: APIMessageReactionEvent) {
+    this.setReactions(
+      applyReactionAdd(this.reactions, payload, this.app.account?.id)
+    );
+  }
+
+  handleReactionRemove(payload: APIMessageReactionRemoveEvent) {
+    this.setReactions(
+      applyReactionRemove(this.reactions, payload, this.app.account?.id)
+    );
+  }
+
+  handleReactionRemoveEmoji(payload: APIMessageReactionRemoveEmojiEvent) {
+    this.setReactions(applyReactionRemoveEmoji(this.reactions, payload));
+  }
+
+  handleReactionRemoveAll(_payload: APIMessageReactionRemoveAllEvent) {
+    this.setReactions([]);
+  }
+
+  async toggleReaction(emoji: APIMessageReactionEmoji) {
+    const path = `/channels/${this.channelId}/messages/${this.id}/reactions/@me`;
+    const body = reactionEmojiToBody(emoji);
+    const existing = this.reactions.find((reaction) =>
+      reactionEmojisMatch(reaction.emoji, emoji)
+    );
+    const previous = this.reactions;
+
+    if (existing?.me) {
+      this.handleReactionRemove({
+        channelId: this.channelId,
+        messageId: this.id,
+        userId: this.app.account!.id,
+        emoji
+      });
+
+      try {
+        await this.app.rest.delete(path, {}, body);
+      } catch {
+        this.setReactions(previous);
+        throw new Error("Failed to remove reaction");
+      }
+
+      return;
+    }
+
+    this.handleReactionAdd({
+      channelId: this.channelId,
+      messageId: this.id,
+      userId: this.app.account!.id,
+      emoji
+    });
+
+    try {
+      await this.app.rest.put(path, body);
+    } catch {
+      this.setReactions(previous);
+      throw new Error("Failed to add reaction");
+    }
   }
 
   async edit(content: string) {

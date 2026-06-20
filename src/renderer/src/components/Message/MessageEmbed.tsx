@@ -188,7 +188,7 @@ export const MessageEmbed = observer(
           spacing={1.25}
           border={`1px solid ${embed.color ?? theme.colors.primary} !important`}
         >
-          <Stack direction="row" spacing={1.25} alignItems="center">
+          <Stack direction="row" alignItems="center" spacing={1.25}>
             {embed.author?.iconUrl && (
               <UserAvatar src={embed.author?.iconUrl} />
             )}

@@ -27,8 +27,8 @@ export const DMChannelList = observer(() => {
       position="relative"
       p={2.5}
     >
-      <Stack alignItems="center" justifyContent="space-between">
-        <Typography level="body-xs">Direct Messages</Typography>
+      <Stack direction="row" alignItems="center" justifyContent="space-between">
+        <Typography level="label-xs">Direct Messages</Typography>
         <Tooltip content="New Message" placement="top">
           <IconButton
             onClick={() => openModal("create-group-dm", <DMChannelCreate />)}

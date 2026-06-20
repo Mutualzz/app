@@ -7,7 +7,7 @@ import { useModal } from "@contexts/Modal.context";
 import { BitField, type PermissionFlag, permissionFlags } from "@mutualzz/bitfield";
 import { type APIChannel, ChannelType } from "@mutualzz/types";
 import { Fragment, JSX, useEffect, useMemo, useRef, useState } from "react";
-import { Box, ButtonGroup, Divider, InputDefault, Stack, Typography, useTheme } from "@mutualzz/ui-web";
+import { Box, ButtonGroup, Divider, IconSlot, InputDefault, Stack, Typography, useTheme } from "@mutualzz/ui-web";
 import { Paper } from "@components/Paper";
 import { Button } from "@components/Button";
 import { IconButton } from "@components/IconButton";
@@ -258,7 +258,7 @@ const PermissionRow = ({
       }}
     >
       <Stack direction="column" spacing={0.25} flex={1}>
-        <Typography fontWeight="bold" level="body-sm">
+        <Typography fontWeight="bold" level="label-sm">
           {label}
         </Typography>
         {description && (
@@ -798,7 +798,9 @@ export const ChannelPermissionsSettings = observer(
               direction="column"
               spacing={2}
             >
-              <ShieldIcon size={40} weight="thin" />
+              <IconSlot size={40}>
+                <ShieldIcon weight="thin" />
+              </IconSlot>
               <Typography textColor="muted" textAlign="center" level="body-sm">
                 Select a role or member on the left to edit their permissions
                 for this channel, or click <strong>+</strong> to add one.
@@ -813,11 +815,9 @@ export const ChannelPermissionsSettings = observer(
             >
               <Stack direction="row" alignItems="center" spacing={1.5}>
                 {selectedEntry?.kind === "role" ? (
-                  <ShieldIcon
-                    weight="fill"
-                    size={16}
-                    color={selectedEntry.color}
-                  />
+                  <IconSlot size={16}>
+                    <ShieldIcon weight="fill" color={selectedEntry.color} />
+                  </IconSlot>
                 ) : (
                   <UserAvatar
                     user={selectedEntry?.user}
@@ -825,7 +825,7 @@ export const ChannelPermissionsSettings = observer(
                     disableContextMenu
                   />
                 )}
-                <Typography fontFamily="monospace" fontWeight="bold">
+                <Typography level="label-sm" fontFamily="monospace" weight="bold">
                   {selectedEntry?.label}
                 </Typography>
               </Stack>

@@ -1,7 +1,5 @@
 import { Link } from "@components/Link";
 import { Box, Typography } from "@mutualzz/ui-web";
-import emojiRegexOrig from "emojibase-regex";
-import shortcodeRegexOrig from "emojibase-regex/shortcode";
 import parse, {
   domToReact,
   type HTMLReactParserOptions
@@ -26,9 +24,7 @@ import { MentionType } from "@mutualzz/types";
 import { UserMention } from "@components/Markdown/components/mention/UserMention";
 import { RoleMention } from "@components/Markdown/components/mention/RoleMention";
 import { DefaultMention } from "@components/Markdown/components/mention/DefaultMention";
-
-const shortcodeRegex = new RegExp(shortcodeRegexOrig.source, "g");
-const emojiRegex = new RegExp(emojiRegexOrig.source, "gu");
+import { isEmojiOnlyMessage } from "@utils/emojis/isEmojiOnlyMessage";
 
 // TODO: add code blocks in the future
 export const MarkdownRenderer = ({
@@ -37,17 +33,6 @@ export const MarkdownRenderer = ({
   value,
   ...props
 }: MarkdownRendererProps) => {
-  const isEmojiOnly = useMemo(() => {
-    if (!value || !enlargeEmojiOnly) return false;
-
-    const textWithoutEmojis = value
-      .replace(/<a?:[^:]+:\d+>/g, "")
-      .replace(shortcodeRegex, "")
-      .replace(emojiRegex, "");
-
-    return textWithoutEmojis.trim().length === 0 && value.trim().length > 0;
-  }, [value, enlargeEmojiOnly]);
-
   const md = useMemo(() => {
     const instance = new MarkdownItAsync("default", {
       html: false,
@@ -81,8 +66,13 @@ export const MarkdownRenderer = ({
   const [content, setContent] = useState<ReactNode>("");
 
   useEffect(() => {
+    let cancelled = false;
+    const emojiOnly = isEmojiOnlyMessage(value, enlargeEmojiOnly);
+
     const loadContent = async () => {
       const html = await md.renderAsync(value);
+      if (cancelled) return;
+
       const options: HTMLReactParserOptions = {
         replace: (domNode) => {
           if (domNode.type !== "tag") return undefined;
@@ -238,7 +228,7 @@ export const MarkdownRenderer = ({
 
               return (
                 <Emoji
-                  isEmojiOnly={isEmojiOnly}
+                  isEmojiOnly={emojiOnly}
                   url={url}
                   unicode={unicode}
                   name={name}
@@ -255,7 +245,7 @@ export const MarkdownRenderer = ({
 
               return (
                 <CustomEmoji
-                  isEmojiOnly={isEmojiOnly}
+                  isEmojiOnly={emojiOnly}
                   url={url}
                   name={name}
                   id={id}
@@ -303,13 +293,15 @@ export const MarkdownRenderer = ({
         }
       };
 
-      const content = parse(html, options);
-
-      setContent(content);
+      setContent(parse(html, options));
     };
 
-    loadContent();
-  }, [value]);
+    void loadContent();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [value, enlargeEmojiOnly, textColor]);
 
   return (
     <Box display="block" height="100%" overflowY="auto" {...props}>

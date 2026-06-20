@@ -143,7 +143,7 @@ export const ProfileMusicBlockView = ({ block }: Props) => {
       )}
 
       <Stack direction="column" spacing={1} p={1.5} height="100%" css={{ position: "relative" }}>
-        <Stack direction="row" spacing={1.25} alignItems="center">
+        <Stack direction="row" alignItems="center" spacing={1.25}>
           <Box
             width={52}
             height={52}
@@ -192,7 +192,7 @@ export const ProfileMusicBlockView = ({ block }: Props) => {
                 {artists}
               </Typography>
             )}
-            <Stack direction="row" spacing={0.75} alignItems="center">
+            <Stack direction="row" alignItems="center" spacing={0.75}>
               {previewUrl && (
                 <Typography level="body-xs" css={{ color: "rgba(255,255,255,0.62)" }}>
                   30s preview

@@ -20,6 +20,10 @@ export const emojiPlugin = (md: MarkdownItAsync) => {
         emojiRegex.lastIndex = 0;
 
         while ((match = emojiRegex.exec(content))) {
+          if (match.index > 0 && content[match.index - 1] === "<") {
+            continue;
+          }
+
           const emojiName = match[0].slice(1, -1);
           const emojiData = getEmoji(emojiName);
 

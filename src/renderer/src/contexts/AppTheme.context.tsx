@@ -1,7 +1,10 @@
 import { usePrefersDark } from "@hooks/usePrefersDark";
 import { useAppStore } from "@hooks/useStores";
+import { extractPrimaryFontFamily } from "@mutualzz/ui-core";
 import { ThemeProvider, type ThemeProviderRef } from "@mutualzz/ui-web";
 import { Theme } from "@stores/objects/Theme";
+import { ensureAppFont } from "@utils/fonts/appFontLoader";
+import { loadDefaultAppFonts } from "@utils/fonts/loadDefaultAppFonts";
 import { reaction } from "mobx";
 import { observer } from "mobx-react-lite";
 import { type PropsWithChildren, useEffect, useRef } from "react";
@@ -11,6 +14,10 @@ export const AppTheme = observer(({ children }: PropsWithChildren) => {
   const themeProviderRef = useRef<ThemeProviderRef>(null);
   const prefersDark = usePrefersDark();
   const isUpdatingFromServer = useRef(false);
+
+  useEffect(() => {
+    void loadDefaultAppFonts();
+  }, []);
 
   useEffect(() => {
     const dispose = reaction(
@@ -24,24 +31,30 @@ export const AppTheme = observer(({ children }: PropsWithChildren) => {
         if (userIconRemote !== app.themes.currentIcon)
           app.themes.setCurrentIcon(userIconRemote ?? null);
 
-        // Check if themes are loaded
         const pick = (id?: string | null) => {
           const pickedTheme = themes.find((t) => t.id === id);
           if (!pickedTheme) return undefined;
-          return Theme.toEmotion(pickedTheme);
+          return { theme: Theme.toEmotion(pickedTheme), authorId: pickedTheme.authorId };
         };
 
-        const selectedTheme =
-          pick(userThemeRemote) || pick(app.themes.currentTheme);
+        const selected = pick(userThemeRemote) || pick(app.themes.currentTheme);
 
-        if (!selectedTheme) return;
+        if (!selected) return;
 
-        if (selectedTheme.id === themeProviderRef.current?.theme.id) return;
+        if (selected.theme.id === themeProviderRef.current?.theme.id) return;
 
-        isUpdatingFromServer.current = true;
-        themeProviderRef.current?.changeTheme(selectedTheme);
-        isUpdatingFromServer.current = false;
-        app.themes.setCurrentTheme(selectedTheme.id);
+        const primaryFont = extractPrimaryFontFamily(
+          selected.theme.typography.fontFamily
+        );
+        void ensureAppFont(
+          primaryFont ?? selected.theme.typography.fontFamily,
+          selected.authorId ?? app.account?.id,
+        ).finally(() => {
+          isUpdatingFromServer.current = true;
+          themeProviderRef.current?.changeTheme(selected.theme);
+          isUpdatingFromServer.current = false;
+          app.themes.setCurrentTheme(selected.theme.id);
+        });
       },
       { fireImmediately: true }
     );

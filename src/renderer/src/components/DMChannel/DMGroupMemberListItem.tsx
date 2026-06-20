@@ -1,6 +1,6 @@
 import { Paper } from "@components/Paper";
 import { UserAvatar } from "@components/User/UserAvatar";
-import { Stack, Typography, useTheme } from "@mutualzz/ui-web";
+import { IconSlot, Stack, Typography, useTheme } from "@mutualzz/ui-web";
 import { observer } from "mobx-react-lite";
 import { useState } from "react";
 import type { ColorLike } from "@mutualzz/ui-core";
@@ -53,34 +53,29 @@ export const DMGroupMemberListItem = observer(({ user, isOwner }: Props) => {
       }}
     >
       <UserAvatar user={user} badge />
-      <Stack direction="column">
-        <Typography
-          flex={1}
-          whiteSpace="nowrap"
-          overflow="hidden"
-          textOverflow="ellipsis"
-          fontSize={16}
-          direction="row"
-          alignItems="center"
-          display="flex"
-          spacing={1.25}
-          level="body-sm"
-          textColor={nameColor}
-        >
-          {user.displayName}
+      <Stack direction="column" minWidth={0} flex={1}>
+        <Stack direction="row" alignItems="center" spacing={1.25} minWidth={0}>
+          <Typography
+            flex={1}
+            whiteSpace="nowrap"
+            overflow="hidden"
+            textOverflow="ellipsis"
+            level="label-sm"
+            textColor={nameColor}
+          >
+            {user.displayName}
+          </Typography>
           {isOwner && (
             <Tooltip content="Owner">
-              <CrownSimpleIcon
-                weight="fill"
-                color={theme.colors.warning}
-                css={{
-                  marginBottom: 4
-                }}
-                size={14}
-              />
+              <IconSlot size={14}>
+                <CrownSimpleIcon
+                  weight="fill"
+                  color={theme.colors.warning}
+                />
+              </IconSlot>
             </Tooltip>
           )}
-        </Typography>
+        </Stack>
         {presence && <SmallActivityStatus presence={presence} />}
       </Stack>
     </Paper>

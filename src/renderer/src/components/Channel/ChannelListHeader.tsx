@@ -69,6 +69,7 @@ export const ChannelListHeader = observer(({ space }: Props) => {
         width="100%"
         maxHeight="2.95rem"
         height="100%"
+        direction="row"
         alignItems="center"
         p={2}
         justifyContent="space-between"
@@ -78,13 +79,10 @@ export const ChannelListHeader = observer(({ space }: Props) => {
           cursor: "pointer"
         }}
       >
-        <Typography level="body-sm">{space.name}</Typography>
-        <Stack
-          justifyContent="flex-end"
-          direction="row"
-          spacing={1}
-          alignItems="center"
-        >
+        <Typography level="label-sm" weight="bold">
+          {space.name}
+        </Typography>
+        <Stack direction="row" alignItems="center" spacing={1} justifyContent="flex-end">
           <ButtonGroup spacing={2} variant="plain" size={12}>
             {canManage && (
               <Tooltip content="Space Settings" placement="bottom">

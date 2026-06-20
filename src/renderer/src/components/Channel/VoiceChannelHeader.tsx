@@ -1,6 +1,6 @@
 import { Paper } from "@components/Paper";
 import { useAppStore } from "@hooks/useStores";
-import { ButtonGroup, Divider, Stack, Typography } from "@mutualzz/ui-web";
+import { ButtonGroup, Divider, IconSlot, Stack, Typography } from "@mutualzz/ui-web";
 import type { Channel } from "@stores/objects/Channel";
 import { observer } from "mobx-react-lite";
 import { IconButton } from "@components/IconButton";
@@ -29,9 +29,14 @@ export const VoiceChannelHeader = observer(({ channel }: Props) => {
       alignItems="center"
       justifyContent="space-between"
     >
-      <Stack flex={1} direction="row" alignItems="center" spacing={1.25}>
-        <ChatCircleIcon weight="bold" /> {channel?.name}
-        <Stack flex="1 1 auto">
+      <Stack direction="row" alignItems="center" flex={1} spacing={1.25} minWidth={0}>
+        <IconSlot size={16}>
+          <ChatCircleIcon weight="bold" />
+        </IconSlot>
+        <Typography level="label-sm" weight="bold">
+          {channel?.name}
+        </Typography>
+        <Stack flex="1 1 auto" direction="row" alignItems="center">
           {channel.topic && (
             <>
               <Divider
@@ -40,7 +45,9 @@ export const VoiceChannelHeader = observer(({ channel }: Props) => {
                 }}
                 orientation="vertical"
               />
-              <Typography textColor="muted">{channel.topic}</Typography>
+              <Typography level="label-sm" textColor="muted">
+                {channel.topic}
+              </Typography>
             </>
           )}
         </Stack>

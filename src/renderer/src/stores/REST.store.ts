@@ -351,17 +351,20 @@ export class REST extends EventEmitter {
   public async delete<Data>(
     path: string,
     queryParams: Record<string, any> = {},
+    body?: unknown,
     headers: Record<string, string> = {}
   ): Promise<Data> {
     return new Promise((resolve, reject) => {
       const url = REST.makeAPIUrl(path, queryParams);
-      this.logger.debug(`DELETE ${url}`);
+      this.logger.debug(`DELETE ${url}; payload:`, body);
       return fetch(url, {
         method: "DELETE",
         headers: {
+          ...(body ? { "Content-Type": "application/json" } : {}),
           ...headers,
           ...this.headers
         },
+        body: body ? JSON.stringify(body) : undefined,
         mode: "cors"
       })
         .then(async (res) => {

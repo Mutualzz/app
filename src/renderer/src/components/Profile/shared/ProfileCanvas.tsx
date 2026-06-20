@@ -1,4 +1,5 @@
 import type { UserProfile } from "@stores/objects/UserProfile";
+import { useGoogleFont } from "@hooks/useGoogleFont";
 import { Box, useTheme } from "@mutualzz/ui-web";
 import { observer } from "mobx-react-lite";
 import { forwardRef, type PropsWithChildren, type Ref } from "react";
@@ -9,6 +10,7 @@ interface Props extends PropsWithChildren {
   onCanvasClick?: () => void;
   backgroundColorOverride?: string | null;
   backgroundImageOverride?: string | null;
+  pageFontFamilyOverride?: string | null;
 }
 
 export const ProfileCanvas = observer(
@@ -19,11 +21,18 @@ export const ProfileCanvas = observer(
       onCanvasClick,
       children,
       backgroundColorOverride,
-      backgroundImageOverride
+      backgroundImageOverride,
+      pageFontFamilyOverride
     }: Props,
     ref: Ref<HTMLDivElement>
   ) {
     const { theme } = useTheme();
+
+    const pageFontFamily =
+      pageFontFamilyOverride !== undefined
+        ? pageFontFamilyOverride
+        : profile.pageFontFamily;
+    const { fontFamily } = useGoogleFont(pageFontFamily, profile.userId);
 
     const backgroundColor =
       backgroundColorOverride !== undefined
@@ -56,7 +65,8 @@ export const ProfileCanvas = observer(
         onClick={interactive ? onCanvasClick : undefined}
         css={{
           background,
-          cursor: interactive ? "default" : undefined
+          cursor: interactive ? "default" : undefined,
+          fontFamily: fontFamily ?? "inherit"
         }}
       >
         {children}

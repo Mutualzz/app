@@ -8,7 +8,7 @@ import { Message, MessageLike } from "@stores/objects/Message";
 import { UserAvatar } from "@components/User/UserAvatar";
 import { MessageAuthor } from "@components/Message/MessageAuthor";
 import { MarkdownRenderer } from "@components/Markdown/MarkdownRenderer/MarkdownRenderer";
-import { Link, Stack, Typography } from "@mutualzz/ui-web";
+import { IconSlot, Link, Stack, Typography } from "@mutualzz/ui-web";
 import { MessageEmbed } from "@components/Message/MessageEmbed";
 import { EyeIcon } from "@phosphor-icons/react";
 
@@ -38,20 +38,17 @@ export const SystemMessage = observer(({ message }: Props) => {
           </Stack>
         )}
         {isEphemeral && (
-          <Typography
-            direction="row"
-            display="flex"
-            spacing={0.75}
-            alignItems="center"
-            level="body-xs"
-            textColor="secondary"
-          >
-            <EyeIcon />
-            Only you can see this •
+          <Stack direction="row" alignItems="center" spacing={0.75}>
+            <IconSlot size={14}>
+              <EyeIcon />
+            </IconSlot>
+            <Typography level="label-xs" textColor="secondary">
+              Only you can see this •
+            </Typography>
             <Link textColor="accent" onClick={() => message.dismiss()}>
               Dismiss message
             </Link>
-          </Typography>
+          </Stack>
         )}
       </MessageContent>
     </MessageBase>

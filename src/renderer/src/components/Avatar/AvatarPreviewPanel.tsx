@@ -5,10 +5,10 @@ import { Stack, Typography } from "@mutualzz/ui-web";
 import { observer } from "mobx-react-lite";
 
 const PREVIEWS = [
-  { label: "Member list", size: 32 as const },
-  { label: "Sidebar", size: 48 as const },
-  { label: "Messages", size: 40 as const },
-  { label: "Profile", size: 72 as const }
+  { label: "Member list", size: 32 },
+  { label: "Sidebar", size: 48 },
+  { label: "Messages", size: 40 },
+  { label: "Profile", size: 72 }
 ];
 
 export const AvatarPreviewPanel = observer(() => {

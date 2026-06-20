@@ -37,6 +37,43 @@ export function getSpriteCoords(hexcode: string, skinTone: SkinTone = null) {
   return { sheetX: entry.sheet_x, sheetY: entry.sheet_y };
 }
 
+export function emojiValueToUnified(value: string) {
+  const parts: string[] = [];
+
+  for (let index = 0; index < value.length; ) {
+    const codePoint = value.codePointAt(index)!;
+    parts.push(codePoint.toString(16).toUpperCase());
+    index += codePoint > 0xffff ? 2 : 1;
+  }
+
+  return parts.join("-");
+}
+
+export function getSpriteCoordsForEmojiValue(value: string): SpriteCoords | null {
+  const unified = emojiValueToUnified(value);
+
+  let coords = getSpriteCoords(unified);
+  if (coords) return coords;
+
+  if (unified.includes("-FE0F")) {
+    coords = getSpriteCoords(unified.replace(/-FE0F/g, ""));
+    if (coords) return coords;
+  }
+
+  const segments = unified.split("-");
+  const skinTone = segments.at(-1);
+
+  if (skinTone && /^1F3F[B-F]$/.test(skinTone) && segments.length > 1) {
+    coords = getSpriteCoords(
+      segments.slice(0, -1).join("-"),
+      skinTone as SkinTone
+    );
+    if (coords) return coords;
+  }
+
+  return null;
+}
+
 export function getSpriteStyle(
   sheetX: number,
   sheetY: number,

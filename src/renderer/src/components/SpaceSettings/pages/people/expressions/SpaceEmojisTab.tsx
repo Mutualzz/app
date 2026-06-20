@@ -49,7 +49,7 @@ const EmojiItem = observer(({ expression }: { expression: Expression }) => {
             height: 32
           }}
         />
-        :{expression.name}:
+        <Typography level="label-sm">:{expression.name}:</Typography>
       </Stack>
 
       <Stack flex={1} justifyContent="flex-end">

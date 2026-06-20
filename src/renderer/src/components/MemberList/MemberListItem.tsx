@@ -1,7 +1,7 @@
 import { Paper } from "@components/Paper";
 import { UserProfilePopoutTrigger } from "@components/Profile/popout/UserProfilePopoutTrigger";
 import { UserAvatar } from "@components/User/UserAvatar";
-import { Stack, Typography, useTheme } from "@mutualzz/ui-web";
+import { IconSlot, Stack, Typography, useTheme } from "@mutualzz/ui-web";
 import type { SpaceMember } from "@stores/objects/SpaceMember";
 import { observer } from "mobx-react-lite";
 import { useState } from "react";
@@ -76,32 +76,30 @@ export const MemberListItem = observer(({ member, isOwner }: Props) => {
               : false
           }
         />
-        <Stack direction="column">
-        <Typography
-          flex={1}
-          whiteSpace="nowrap"
-          overflow="hidden"
-          textOverflow="ellipsis"
-          fontSize={16}
-          direction="row"
-          alignItems="center"
-          display="flex"
-          spacing={0.75}
-          level="body-sm"
-          textColor={nameColor}
-        >
-          {member.displayName}
-          {isOwner && (
-            <Tooltip content="Owner">
-              <CrownSimpleIcon
-                weight="fill"
-                color={theme.colors.warning}
-                size={14}
-              />
-            </Tooltip>
-          )}
-        </Typography>
-        {presence && <SmallActivityStatus presence={presence} />}
+        <Stack direction="column" minWidth={0} flex={1}>
+          <Stack direction="row" alignItems="center" spacing={0.75} minWidth={0}>
+            <Typography
+              flex={1}
+              whiteSpace="nowrap"
+              overflow="hidden"
+              textOverflow="ellipsis"
+              level="label-sm"
+              textColor={nameColor}
+            >
+              {member.displayName}
+            </Typography>
+            {isOwner && (
+              <Tooltip content="Owner">
+                <IconSlot size={14}>
+                  <CrownSimpleIcon
+                    weight="fill"
+                    color={theme.colors.warning}
+                  />
+                </IconSlot>
+              </Tooltip>
+            )}
+          </Stack>
+          {presence && <SmallActivityStatus presence={presence} />}
         </Stack>
       </Paper>
     </UserProfilePopoutTrigger>

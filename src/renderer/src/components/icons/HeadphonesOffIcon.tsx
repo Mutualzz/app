@@ -1,7 +1,7 @@
 import { HeadphonesIcon, IconProps } from "@phosphor-icons/react";
 
 export const HeadphonesOffIcon = ({
-  size = "1em",
+  size = 16,
   color = "currentColor",
   weight = "fill",
   ...props
@@ -14,7 +14,9 @@ export const HeadphonesOffIcon = ({
       height: size,
       alignItems: "center",
       justifyContent: "center",
-      alignSelf: "center"
+      alignSelf: "center",
+      lineHeight: 0,
+      flexShrink: 0
     }}
     {...(props as any)}
   >

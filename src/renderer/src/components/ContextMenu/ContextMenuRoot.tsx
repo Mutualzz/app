@@ -11,6 +11,7 @@ import { AccountContextMenu } from "@components/ContextMenu/AccountContextMenu/A
 import { EmojiContextMenu } from "@components/ContextMenu/EmojiContextMenu";
 import { StickerContextMenu } from "@components/ContextMenu/StickerContextMenu";
 import { GroupDMContextMenu } from "@components/ContextMenu/GroupDMContextMenu";
+import { MessageContextMenu } from "@components/ContextMenu/MessageContextMenu";
 
 export const ContextMenuRoot = observer(() => {
   const { menu } = useMenu();
@@ -73,6 +74,13 @@ export const ContextMenuRoot = observer(() => {
       return (
         <Portal>
           <GroupDMContextMenu {...menu} />
+        </Portal>
+      );
+
+    case "message":
+      return (
+        <Portal>
+          <MessageContextMenu {...menu} />
         </Portal>
       );
 

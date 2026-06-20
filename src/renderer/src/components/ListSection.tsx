@@ -1,4 +1,4 @@
-import { Box, Stack, Typography } from "@mutualzz/ui-web";
+import { Box, IconSlot, Stack, Typography } from "@mutualzz/ui-web";
 import { type ReactNode, useState } from "react";
 import { CaretDownIcon, CaretRightIcon } from "@phosphor-icons/react";
 
@@ -13,26 +13,26 @@ export const ListSection = (props: Props) => {
 
   return (
     <Box p="24px 8px 0 8px">
-      <Typography
-        role="button"
-        display="flex"
+      <Stack
+        direction="row"
         alignItems="center"
         justifyContent="space-between"
-        fontSize={12}
-        fontWeight="bold"
+        role="button"
         onClick={toggle}
         css={{
           cursor: "pointer",
           userSelect: "none"
         }}
       >
-        {props.name}
-        {open ? (
-          <CaretDownIcon weight="bold" />
-        ) : (
-          <CaretRightIcon weight="bold" />
-        )}
-      </Typography>
+        <Typography level="label-xs">{props.name}</Typography>
+        <IconSlot size={12}>
+          {open ? (
+            <CaretDownIcon weight="bold" />
+          ) : (
+            <CaretRightIcon weight="bold" />
+          )}
+        </IconSlot>
+      </Stack>
       {open && (
         <Stack direction="column" spacing={1.25}>
           {...props.items}

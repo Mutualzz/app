@@ -3,7 +3,7 @@ import { useModal } from "@contexts/Modal.context";
 import { useDroppable, type DraggableAttributes } from "@dnd-kit/core";
 import type { SyntheticListenerMap } from "@dnd-kit/core/dist/hooks/utilities";
 import { useAppStore } from "@hooks/useStores";
-import { Avatar, type PaperProps, Stack, Typography, useTheme } from "@mutualzz/ui-web";
+import { Avatar, type PaperProps, IconSlot, Stack, Typography, useTheme } from "@mutualzz/ui-web";
 import type { Channel } from "@stores/objects/Channel";
 import type { Space } from "@stores/objects/Space";
 import { useNavigate } from "@tanstack/react-router";
@@ -18,6 +18,7 @@ import { IconButton } from "@components/IconButton";
 import { SpaceInviteToSpaceModal } from "@components/Space/SpaceInviteToSpaceModal";
 import { CaretRightIcon, GearIcon, LockIcon, PlusIcon, UserPlusIcon } from "@phosphor-icons/react";
 import { ChannelSettingsModal } from "@components/ChannelSettings/ChannelSettingsModal";
+import { HoverRevealActions } from "../HoverRevealActions";
 
 interface Props extends PaperProps {
   space: Space;
@@ -154,6 +155,7 @@ export const ChannelListItem = observer(
           borderRadius={6}
           px={isCategory ? 1 : 1.5}
           py={isCategory ? 0 : 1}
+          minHeight={isCategory ? undefined : 28}
           justifyContent="space-between"
           onMouseEnter={() => setWrapperHovered(true)}
           onMouseLeave={() => setWrapperHovered(false)}
@@ -172,11 +174,15 @@ export const ChannelListItem = observer(
             direction="row"
             alignItems="center"
             spacing={isCategory ? 1 : 1.5}
+            flex={1}
+            minWidth={0}
           >
             {!isCategory && (
               <>
                 {isDisabled ? (
-                  <LockIcon weight="fill" size={16} />
+                  <IconSlot size={16}>
+                    <LockIcon weight="fill" />
+                  </IconSlot>
                 ) : (
                   <>
                     {channel.icon && channel.iconUrl ? (
@@ -188,10 +194,12 @@ export const ChannelListItem = observer(
                         }
                       />
                     ) : (
-                      <ChannelIcon
-                        voiceActive={isActiveVoiceChannel}
-                        type={channel.type}
-                      />
+                      <IconSlot size={16}>
+                        <ChannelIcon
+                          voiceActive={isActiveVoiceChannel}
+                          type={channel.type}
+                        />
+                      </IconSlot>
                     )}
                   </>
                 )}
@@ -199,25 +207,26 @@ export const ChannelListItem = observer(
             )}
 
             <Typography
+              level={isCategory ? "label-xs" : "label-sm"}
               textColor={isCategory && wrapperHovered ? "primary" : "secondary"}
-              fontSize={isCategory ? 12 : 14}
-              fontWeight={isCategory ? 400 : isUnread || active ? 700 : 600}
+              weight={isCategory ? 400 : isUnread || active ? 700 : 600}
               letterSpacing={isCategory ? 0.5 : 0}
             >
               {channel.name}
             </Typography>
             {isCategory && (
-              <CaretRightIcon
-                size={12}
-                color={theme.typography.colors.secondary}
-                css={{
-                  ...(isCollapsed && { transform: "rotate(90deg)" })
-                }}
-              />
+              <IconSlot size={12}>
+                <CaretRightIcon
+                  color={theme.typography.colors.secondary}
+                  css={{
+                    ...(isCollapsed && { transform: "rotate(90deg)" })
+                  }}
+                />
+              </IconSlot>
             )}
           </Stack>
 
-          <Stack alignItems="center">
+          <Stack direction="row" alignItems="center">
             {isCategory && canManageChannel && (
               <IconButton
                 size={12}
@@ -254,12 +263,10 @@ export const ChannelListItem = observer(
                     }}
                   >
                     <Typography
-                      level="body-xs"
-                      fontWeight="bold"
+                      level="label-xs"
                       css={{
                         color: "#fff",
-                        fontSize: 10,
-                        lineHeight: 1
+                        fontSize: 10
                       }}
                     >
                       {mentionCount > 99 ? "99+" : mentionCount}
@@ -276,47 +283,40 @@ export const ChannelListItem = observer(
                     }}
                   />
                 )}
-                {canInvite && (wrapperHovered || active) && (
-                  <IconButton
-                    css={{
-                      borderRadius: 9999,
-                      opacity: wrapperHovered || active ? 1 : 0,
-                      pointerEvents: wrapperHovered || active ? "auto" : "none",
-                      transition: "opacity 0.15s ease"
-                    }}
-                    size={12}
-                    variant="plain"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      openModal(
-                        "invite-to-space",
-                        <SpaceInviteToSpaceModal channel={channel} />
-                      );
-                    }}
-                  >
-                    <UserPlusIcon weight="fill" />
-                  </IconButton>
-                )}
-
-                {canManageChannel && (wrapperHovered || active) && (
-                  <IconButton
-                    css={{
-                      opacity: wrapperHovered || active ? 1 : 0,
-                      pointerEvents: wrapperHovered || active ? "auto" : "none",
-                      transition: "opacity 0.15s ease"
-                    }}
-                    size={12}
-                    variant="plain"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      openModal(
-                        `channel-settings-${channel.id}`,
-                        <ChannelSettingsModal space={space} channel={channel} />
-                      );
-                    }}
-                  >
-                    <GearIcon weight="fill" />
-                  </IconButton>
+                {(canInvite || canManageChannel) && (
+                  <HoverRevealActions visible={wrapperHovered || active}>
+                    {canInvite && (
+                      <IconButton
+                        css={{ borderRadius: 9999 }}
+                        size={12}
+                        variant="plain"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openModal(
+                            "invite-to-space",
+                            <SpaceInviteToSpaceModal channel={channel} />
+                          );
+                        }}
+                      >
+                        <UserPlusIcon weight="fill" />
+                      </IconButton>
+                    )}
+                    {canManageChannel && (
+                      <IconButton
+                        size={12}
+                        variant="plain"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openModal(
+                            `channel-settings-${channel.id}`,
+                            <ChannelSettingsModal space={space} channel={channel} />
+                          );
+                        }}
+                      >
+                        <GearIcon weight="fill" />
+                      </IconButton>
+                    )}
+                  </HoverRevealActions>
                 )}
               </Stack>
             )}

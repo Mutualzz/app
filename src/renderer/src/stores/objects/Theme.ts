@@ -8,6 +8,8 @@ import type {
 import {
   baseDarkTheme,
   baseLightTheme,
+  extractPrimaryFontFamily,
+  resolveFontFamilyCss,
   type ColorLike,
   type TypographyLevel,
   type TypographyLevelObj
@@ -65,7 +67,15 @@ export class Theme implements Partial<MzTheme> {
     this.type = theme.type;
     this.style = theme.style;
     this.colors = theme.colors;
-    this.typography = theme.typography;
+    this.typography = {
+      ...theme.typography,
+      levels: {
+        ...(theme.type === "dark"
+          ? baseDarkTheme.typography.levels
+          : baseLightTheme.typography.levels),
+        ...theme.typography.levels
+      }
+    };
 
     if (theme.createdAt) this.createdAt = new Date(theme.createdAt);
     if (theme.updatedAt) this.updatedAt = new Date(theme.updatedAt);
@@ -100,9 +110,19 @@ export class Theme implements Partial<MzTheme> {
       typography: {
         ...toMergeWith.typography,
         ...themeToUse.typography,
+        fontFamily: themeToUse.typography?.fontFamily
+          ? resolveFontFamilyCss(
+              extractPrimaryFontFamily(themeToUse.typography.fontFamily) ??
+                themeToUse.typography.fontFamily,
+            )
+          : toMergeWith.typography.fontFamily,
         colors: {
           ...toMergeWith.typography.colors,
           ...themeToUse.typography?.colors
+        },
+        levels: {
+          ...toMergeWith.typography.levels,
+          ...themeToUse.typography?.levels
         }
       }
     };
@@ -132,7 +152,15 @@ export class Theme implements Partial<MzTheme> {
     this.type = theme.type;
     this.style = theme.style;
     this.colors = theme.colors;
-    this.typography = theme.typography;
+    this.typography = {
+      ...theme.typography,
+      levels: {
+        ...(theme.type === "dark"
+          ? baseDarkTheme.typography.levels
+          : baseLightTheme.typography.levels),
+        ...theme.typography.levels
+      }
+    };
 
     if (theme.createdAt) this.createdAt = new Date(theme.createdAt);
     else this.createdAt = undefined;

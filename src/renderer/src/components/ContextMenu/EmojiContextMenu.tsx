@@ -54,10 +54,10 @@ export const EmojiContextMenu = observer((props: Props) => {
         >
           <span style={getSpriteStyle(sheetX, sheetY, 32)} />
           <Stack direction="column" gap={2}>
-            <Typography level="body-sm" fontWeight="bold">
+            <Typography level="label-sm" weight="bold">
               :{emoji.shortName}:
             </Typography>
-            <Typography level="body-xs" textColor="muted">
+            <Typography level="label-xs" textColor="muted">
               {emoji.name}
             </Typography>
           </Stack>
@@ -89,10 +89,10 @@ export const EmojiContextMenu = observer((props: Props) => {
       <Stack direction="row" alignItems="center" gap={8} padding="6px 8px 4px">
         <PreviewImg src={url} alt={name} draggable={false} />
         <Stack direction="column" gap={2}>
-          <Typography level="body-sm" fontWeight="bold">
+          <Typography level="label-sm" weight="bold">
             :{name}:
           </Typography>
-          <Typography level="body-xs" textColor="muted">
+          <Typography level="label-xs" textColor="muted">
             {animated ? `<a:${name}:${id}>` : `<:${name}:${id}>`}
           </Typography>
         </Stack>

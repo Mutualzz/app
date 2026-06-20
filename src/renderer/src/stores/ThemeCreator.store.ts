@@ -1,4 +1,5 @@
 import {
+  extractPrimaryFontFamily,
   baseDarkTheme,
   baseLightTheme,
   type ThemeStyle,
@@ -8,7 +9,8 @@ import type { APITheme } from "@mutualzz/types";
 import type { Theme as MzTheme } from "@emotion/react";
 import { type IObservableArray, makeAutoObservable, observable } from "mobx";
 import { Theme } from "@stores/objects/Theme";
-import { adaptColors } from "@utils/adaptation";
+import { applyAdaptiveThemeValues } from "@utils/adaptation";
+import { ensureAppFont } from "@utils/fonts/appFontLoader";
 
 type ApiErrors = Record<string, string>;
 
@@ -170,27 +172,32 @@ export class ThemeCreatorStore {
 
   startPreview(
     changeTheme: (theme: MzTheme) => void,
-    currentThemeValues?: APITheme
+    currentThemeValues?: APITheme,
+    ownerUserId?: string | null,
   ) {
     if (this.inPreview) return;
 
     let previewThemeValues = this.values;
 
     if (this.values.adaptive)
-      previewThemeValues = Theme.serialize({
-        ...this.values,
-        ...(adaptColors({
-          baseColor: this.values.colors.background,
-          primaryColor: this.values.colors.primary,
-          primaryText: this.values.typography.colors.primary
-        }) as Partial<APITheme>)
-      });
+      previewThemeValues = Theme.serialize(
+        applyAdaptiveThemeValues(this.values)
+      );
 
     if (!this.themeBeforePreview && currentThemeValues)
       this.themeBeforePreview = Theme.serialize(currentThemeValues);
 
-    changeTheme(Theme.toEmotion(previewThemeValues));
-    this.inPreview = true;
+    const fontFamily =
+      extractPrimaryFontFamily(previewThemeValues.typography.fontFamily) ??
+      previewThemeValues.typography.fontFamily;
+
+    void ensureAppFont(
+      fontFamily,
+      ownerUserId ?? previewThemeValues.authorId,
+    ).finally(() => {
+      changeTheme(Theme.toEmotion(previewThemeValues));
+      this.inPreview = true;
+    });
   }
 
   stopPreview(changeTheme: (theme: MzTheme) => void) {

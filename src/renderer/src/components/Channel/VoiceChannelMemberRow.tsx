@@ -2,13 +2,15 @@ import { Paper } from "@components/Paper";
 import { UserAvatar } from "@components/User/UserAvatar";
 import { useAppStore } from "@hooks/useStores";
 import type { ColorLike } from "@mutualzz/ui-core";
-import { Stack, Typography, useTheme } from "@mutualzz/ui-web";
+import { IconSlot, Stack, Typography, useTheme } from "@mutualzz/ui-web";
 import type { Space } from "@stores/objects/Space";
 import type { VoiceState } from "@stores/objects/VoiceState.ts";
 import { MicrophoneSlashIcon, VideoCameraIcon } from "@phosphor-icons/react";
 import { HeadphonesOffIcon } from "../icons/HeadphonesOffIcon";
 import { Tooltip } from "@components/Tooltip";
 import { observer } from "mobx-react-lite";
+
+const STATUS_ICON_SIZE = 14;
 
 interface Props {
   space: Space;
@@ -50,6 +52,7 @@ export const VoiceChannelMemberRow = observer(
     return (
       <Paper
         width="100%"
+        direction="row"
         variant={hovered ? "soft" : "plain"}
         borderRadius={8}
         alignItems="center"
@@ -60,7 +63,7 @@ export const VoiceChannelMemberRow = observer(
           opacity: isSubtle ? 0.55 : 1
         }}
       >
-        <Stack spacing={1.75} alignItems="center">
+        <Stack direction="row" alignItems="center" spacing={1.75} flex={1} minWidth={0}>
           <UserAvatar
             user={member.user}
             member={member}
@@ -72,17 +75,13 @@ export const VoiceChannelMemberRow = observer(
             whiteSpace="nowrap"
             overflow="hidden"
             textOverflow="ellipsis"
-            level="body-sm"
-            direction="row"
-            alignItems="center"
-            display="flex"
-            spacing={2}
+            level="label-sm"
             textColor={nameColor}
           >
             {member.displayName}
           </Typography>
         </Stack>
-        <Stack spacing={1.75} alignItems="center">
+        <Stack direction="row" alignItems="center" spacing={1.75}>
           {screenOn && (
             <Paper
               variant="solid"
@@ -93,9 +92,8 @@ export const VoiceChannelMemberRow = observer(
               css={{ flexShrink: 0 }}
             >
               <Typography
-                level="body-xs"
-                fontWeight="bold"
-                css={{ lineHeight: 1, letterSpacing: "0.04em" }}
+                level="label-xs"
+                css={{ letterSpacing: "0.04em" }}
               >
                 LIVE
               </Typography>
@@ -103,27 +101,43 @@ export const VoiceChannelMemberRow = observer(
           )}
           {videoOn && (
             <Tooltip content="Video">
-              <VideoCameraIcon weight="fill" />
+              <IconSlot size={STATUS_ICON_SIZE}>
+                <VideoCameraIcon weight="fill" />
+              </IconSlot>
             </Tooltip>
           )}
           {state.selfMute && !state.spaceMute && (
             <Tooltip content="Muted">
-              <MicrophoneSlashIcon weight="fill" />
+              <IconSlot size={STATUS_ICON_SIZE}>
+                <MicrophoneSlashIcon weight="fill" />
+              </IconSlot>
             </Tooltip>
           )}
           {state.spaceMute && (
             <Tooltip content="Space Muted">
-              <MicrophoneSlashIcon weight="fill" color={theme.colors.danger} />
+              <IconSlot size={STATUS_ICON_SIZE}>
+                <MicrophoneSlashIcon
+                  weight="fill"
+                  color={theme.colors.danger}
+                />
+              </IconSlot>
             </Tooltip>
           )}
           {state.selfDeaf && (
             <Tooltip content="Deafened">
-              <HeadphonesOffIcon weight="fill" />
+              <IconSlot size={STATUS_ICON_SIZE}>
+                <HeadphonesOffIcon weight="fill" />
+              </IconSlot>
             </Tooltip>
           )}
           {state.spaceDeaf && (
             <Tooltip content="Space Deafened">
-              <HeadphonesOffIcon weight="fill" color={theme.colors.danger} />
+              <IconSlot size={STATUS_ICON_SIZE}>
+                <HeadphonesOffIcon
+                  weight="fill"
+                  color={theme.colors.danger}
+                />
+              </IconSlot>
             </Tooltip>
           )}
         </Stack>

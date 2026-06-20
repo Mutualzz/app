@@ -4,7 +4,7 @@ import { Channel } from "@stores/objects/Channel";
 import { useAppStore } from "@hooks/useStores";
 import { ChannelType } from "@mutualzz/types";
 import { Paper } from "@components/Paper";
-import { Avatar, Stack, Typography, useTheme } from "@mutualzz/ui-web";
+import { Avatar, IconSlot, Stack, Typography, useTheme } from "@mutualzz/ui-web";
 import { UserAvatar } from "@components/User/UserAvatar";
 import { DMGroupAvatar } from "@components/DMChannel/DMGroupAvatar";
 import { useMenu } from "@contexts/ContextMenu.context";
@@ -63,9 +63,12 @@ export const DMChannelItem = observer(({ channel }: Props) => {
     <Paper
       variant={active ? "soft" : "plain"}
       width="100%"
+      direction="row"
       borderRadius={10}
       px={1}
       py={0.75}
+      alignItems="center"
+      spacing={1.25}
       css={{
         cursor: "pointer",
         opacity: iBlockedThem ? 0.6 : active ? 1 : 0.94,
@@ -99,7 +102,7 @@ export const DMChannelItem = observer(({ channel }: Props) => {
         }
       }}
     >
-      <Stack direction="row" alignItems="center" spacing={1.25} width="100%">
+      <Stack direction="row" alignItems="center" spacing={1.25} flex={1} minWidth={0}>
         {channel.type === ChannelType.DM ? (
           <UserAvatar
             user={recipient}
@@ -124,7 +127,7 @@ export const DMChannelItem = observer(({ channel }: Props) => {
 
         <Stack direction="column" minWidth={0} flex={1}>
           <Typography
-            level="body-sm"
+            level="label-sm"
             weight={active ? "bold" : "medium"}
             textColor={active ? "primary" : "inherit"}
             whiteSpace="nowrap"
@@ -149,7 +152,7 @@ export const DMChannelItem = observer(({ channel }: Props) => {
         </Stack>
       </Stack>
       {!active && (
-        <Stack alignItems="center" justifyContent="center" minWidth={16}>
+        <Stack direction="row" alignItems="center" justifyContent="center" minWidth={16}>
           {mentionCount > 0 ? (
             <Stack
               alignItems="center"
@@ -163,12 +166,10 @@ export const DMChannelItem = observer(({ channel }: Props) => {
               }}
             >
               <Typography
-                level="body-xs"
-                fontWeight="bold"
+                level="label-xs"
                 css={{
                   color: "#fff",
-                  fontSize: 10,
-                  lineHeight: 1
+                  fontSize: 10
                 }}
               >
                 {mentionCount > 99 ? "99+" : mentionCount}
@@ -188,7 +189,9 @@ export const DMChannelItem = observer(({ channel }: Props) => {
       )}
       {iBlockedThem && (
         <Tooltip content="Blocked">
-          <ChatCircleSlashIcon />
+          <IconSlot size={16}>
+            <ChatCircleSlashIcon />
+          </IconSlot>
         </Tooltip>
       )}
     </Paper>

@@ -3,7 +3,7 @@ import { Paper } from "@components/Paper";
 import { useDesktopShell } from "@contexts/DesktopShell.context";
 import { useModal } from "@contexts/Modal.context";
 import { useAppStore } from "@hooks/useStores";
-import { Box, Divider, Stack, Typography, useTheme } from "@mutualzz/ui-web";
+import { Box, Divider, IconSlot, Stack, Typography, useTheme } from "@mutualzz/ui-web";
 import { observer } from "mobx-react-lite";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -283,33 +283,45 @@ const WindowTitleBar = ({ onHeightChange }: WindowTitleBarProps) => {
           )}
         </Stack>
         <Stack
+          direction="row"
+          alignItems="center"
           width="100%"
           spacing={1.25}
-          direction="row"
           css={{ WebkitAppRegion: "drag", userSelect: "none", position: "relative", zIndex: 1 }}
-          alignItems="center"
           justifyContent="center"
           flex={1}
         >
           {!pageTitleBar && (
             <>
               {app.mode === "@me" && (
-                <>
-                  <UsersThreeIcon weight="fill" />
-                  <Typography fontWeight="bold">Direct Messages</Typography>
-                </>
+                <Stack direction="row" alignItems="center" spacing={1.25}>
+                  <IconSlot size={16}>
+                    <UsersThreeIcon weight="fill" />
+                  </IconSlot>
+                  <Typography level="label-sm" weight="bold">
+                    Direct Messages
+                  </Typography>
+                </Stack>
               )}
               {app.mode === "spaces" && (
-                <>
-                  <PlanetIcon weight="fill" />
-                  <Typography fontWeight="bold">Spaces</Typography>
-                </>
+                <Stack direction="row" alignItems="center" spacing={1.25}>
+                  <IconSlot size={16}>
+                    <PlanetIcon weight="fill" />
+                  </IconSlot>
+                  <Typography level="label-sm" weight="bold">
+                    Spaces
+                  </Typography>
+                </Stack>
               )}
               {app.mode === "feed" && (
-                <>
-                  <ScribbleIcon />
-                  <Typography fontWeight="bold">Feed</Typography>
-                </>
+                <Stack direction="row" alignItems="center" spacing={1.25}>
+                  <IconSlot size={16}>
+                    <ScribbleIcon />
+                  </IconSlot>
+                  <Typography level="label-sm" weight="bold">
+                    Feed
+                  </Typography>
+                </Stack>
               )}
             </>
           )}

@@ -118,7 +118,6 @@
     "build:mac": "electron-vite build && electron-builder --mac",
     "build:unpack": "pnpm run build && electron-builder --dir",
     "build:win": "pnpm run build && electron-builder --win",
-    "dev": "electron-vite dev",
     "format": "prettier --write .",
     "lint": "eslint --cache .",
     "postinstall": "electron-builder install-app-deps",
@@ -127,5 +126,5 @@
     "typecheck:node": "tsc --noEmit -p tsconfig.node.json --composite false",
     "typecheck:web": "tsc --noEmit -p tsconfig.web.json --composite false"
   },
-  "version": "6.7.0"
+  "version": "6.8.0"
 }

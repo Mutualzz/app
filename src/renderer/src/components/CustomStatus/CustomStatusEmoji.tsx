@@ -4,7 +4,6 @@ import type { PresenceActivityEmoji } from "@mutualzz/types";
 import { getEmoji } from "@utils/emojis/emojis";
 import { TWEMOJI_URL } from "@utils/urls";
 import { observer } from "mobx-react-lite";
-import { useEffect } from "react";
 
 interface Props {
   emoji: PresenceActivityEmoji;
@@ -20,12 +19,6 @@ const EmojiImage = styled("img")<{ size: number }>(({ size }) => ({
 
 export const CustomStatusEmoji = observer(({ emoji, size = 22 }: Props) => {
   const app = useAppStore();
-
-  useEffect(() => {
-    if (emoji.id && !app.expressions.get(emoji.id)) {
-      void app.expressions.resolve(emoji.id);
-    }
-  }, [app.expressions, emoji.id]);
 
   if (emoji.id) {
     const expression = app.expressions.get(emoji.id);

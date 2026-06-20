@@ -1,6 +1,6 @@
 import { Paper } from "@components/Paper";
 import { useAppStore } from "@hooks/useStores";
-import { ButtonGroup, Divider, Stack, Typography } from "@mutualzz/ui-web";
+import { ButtonGroup, Divider, IconSlot, Stack, Typography } from "@mutualzz/ui-web";
 import type { Channel } from "@stores/objects/Channel";
 import { observer } from "mobx-react-lite";
 import { HashIcon, UsersIcon } from "@phosphor-icons/react";
@@ -29,16 +29,16 @@ export const TextChannelHeader = observer(({ channel }: Props) => {
       alignItems="center"
       justifyContent="space-between"
     >
-      <Stack flex={1} direction="row" alignItems="center" spacing={2}>
-        <Typography
-          display="flex"
-          alignItems="center"
-          spacing={1}
-          fontWeight={600}
-        >
-          <HashIcon /> {channel?.name}
-        </Typography>
-        <Stack flex="1 1 auto" alignItems="center">
+      <Stack direction="row" alignItems="center" flex={1} spacing={2} minWidth={0}>
+        <Stack direction="row" alignItems="center" spacing={1}>
+          <IconSlot size={16}>
+            <HashIcon />
+          </IconSlot>
+          <Typography level="label-sm" weight="bold">
+            {channel?.name}
+          </Typography>
+        </Stack>
+        <Stack flex="1 1 auto" direction="row" alignItems="center">
           {channel?.topic && (
             <>
               <Divider

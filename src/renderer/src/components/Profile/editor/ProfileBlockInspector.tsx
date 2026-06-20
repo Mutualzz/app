@@ -1,5 +1,6 @@
 import { Button } from "@components/Button";
 import { Paper } from "@components/Paper";
+import { GoogleFontPicker } from "@components/FontPicker/GoogleFontPicker";
 import type {
   APIProfileBlock,
   ProfileHeaderBlock,
@@ -321,6 +322,16 @@ export const ProfileBlockInspector = observer(
             setCollapsed((prev) => ({ ...prev, appearance: !prev.appearance }))
           }
         >
+          <SettingCard>
+            <GoogleFontPicker
+              label="Page font"
+              description="Visitors see this font on your profile page and profile popout."
+              fontOwnerId={app.account?.id}
+              value={draft.pageFontFamily}
+              onChange={(pageFontFamily) => onDraftChange({ pageFontFamily })}
+            />
+          </SettingCard>
+
           <SettingCard>
             <FieldLabel>Bio</FieldLabel>
             <ProfileMarkdownField

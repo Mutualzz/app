@@ -1,8 +1,10 @@
 import { InputWithLabel } from "@components/InputWithLabel";
+import { GoogleFontPicker } from "@components/FontPicker/GoogleFontPicker";
 import {
   type ColorLike,
   createColor,
   extractColors,
+  extractPrimaryFontFamily,
   isValidGradient
 } from "@mutualzz/ui-core";
 import { Stack, Typography } from "@mutualzz/ui-web";
@@ -16,6 +18,25 @@ export const ThemeCreatorColorsAdaptive = observer(() => {
 
   return (
     <Stack direction="column" p={4} spacing={5}>
+      <GoogleFontPicker
+        label="App font"
+        description="Applies across the app when this theme is active. Fonts load on demand."
+        allowClear={false}
+        fontOwnerId={app.account?.id}
+        value={
+          extractPrimaryFontFamily(values.typography.fontFamily) ??
+          values.typography.fontFamily
+        }
+        onChange={(family) =>
+          setValues({
+            ...values,
+            typography: {
+              ...values.typography,
+              fontFamily: family ?? values.typography.fontFamily
+            }
+          })
+        }
+      />
       <InputWithLabel
         type="color"
         label="Base color"

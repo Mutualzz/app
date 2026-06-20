@@ -4,7 +4,11 @@ import { Paper } from "@components/Paper";
 import { UserAvatar } from "@components/User/UserAvatar";
 import type { AccountStore } from "@stores/Account.store";
 import { useAppStore } from "@hooks/useStores";
-import { dynamicElevation, formatColor } from "@mutualzz/ui-core";
+import {
+  dynamicElevation,
+  formatColor,
+  TypographyLevel
+} from "@mutualzz/ui-core";
 import { Box, Stack, Typography, useTheme } from "@mutualzz/ui-web";
 import { hasCustomStatusContent } from "@utils/customStatus";
 import type { PresenceActivityEmoji } from "@mutualzz/types";
@@ -12,7 +16,7 @@ import { PencilIcon, TrashIcon } from "@phosphor-icons/react";
 import { observer } from "mobx-react-lite";
 import { useState } from "react";
 
-const PLACEHOLDER = "What's cookin'?";
+const PLACEHOLDER = "Set Custom Status...";
 
 const SIZES = {
   compact: {
@@ -22,7 +26,7 @@ const SIZES = {
     avatarInset: 1.25,
     bubbleTop: 10,
     bubbleEmoji: 18,
-    bubbleText: "body-sm" as const,
+    bubbleText: "body-sm" as TypographyLevel,
     bubblePx: 1.25,
     bubblePy: 0.875,
     bubbleRadius: 10,
@@ -35,7 +39,7 @@ const SIZES = {
     avatarInset: 2.5,
     bubbleTop: 24,
     bubbleEmoji: 20,
-    bubbleText: "body-md" as const,
+    bubbleText: "body-md" as TypographyLevel,
     bubblePx: 1.5,
     bubblePy: 1,
     bubbleRadius: 12,
@@ -130,7 +134,10 @@ export const CustomStatusCard = observer(
             onMouseEnter={() => interactive && setHovered(true)}
             onMouseLeave={() => interactive && setHovered(false)}
           >
-            <Box position="relative" css={{ width: "max-content", maxWidth: "100%" }}>
+            <Box
+              position="relative"
+              css={{ width: "max-content", maxWidth: "100%" }}
+            >
               <Box
                 px={dims.bubblePx}
                 py={dims.bubblePy}
@@ -146,9 +153,12 @@ export const CustomStatusCard = observer(
                     theme.colors.surface,
                     bubbleElevation
                   ),
-                  border: `1px solid ${formatColor(theme.typography.colors.muted, {
-                    alpha: 0.18
-                  })}`,
+                  border: `1px solid ${formatColor(
+                    theme.typography.colors.muted,
+                    {
+                      alpha: 0.18
+                    }
+                  )}`,
                   transition: "background 0.15s ease"
                 }}
               >
@@ -193,9 +203,12 @@ export const CustomStatusCard = observer(
                     transform: "translateY(-50%)",
                     pointerEvents: "auto",
                     background: dynamicElevation(theme.colors.surface, 5),
-                    border: `1px solid ${formatColor(theme.typography.colors.muted, {
-                      alpha: 0.22
-                    })}`,
+                    border: `1px solid ${formatColor(
+                      theme.typography.colors.muted,
+                      {
+                        alpha: 0.22
+                      }
+                    )}`,
                     boxShadow: `0 1px 6px ${formatColor(theme.colors.neutral, {
                       alpha: 30
                     })}`

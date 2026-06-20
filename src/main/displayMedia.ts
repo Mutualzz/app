@@ -2,7 +2,7 @@ import { desktopCapturer, session, systemPreferences } from "electron";
 
 export function setupDisplayMedia() {
   session.defaultSession.setDisplayMediaRequestHandler(
-    async (_request, callback) => {
+    async (request, callback) => {
       try {
         const sources = await desktopCapturer.getSources({
           types: ["screen", "window"],
@@ -20,7 +20,7 @@ export function setupDisplayMedia() {
 
         callback({
           video: screen,
-          ...(request.audioRequested ? { audio: "loopback" as const } : {})
+          ...(request.audioRequested ? { audio: "loopback" } : {})
         });
       } catch {
         callback({});
@@ -49,6 +49,6 @@ export async function listDesktopCaptureSources() {
 }
 
 export function getScreenCaptureAccessStatus() {
-  if (process.platform !== "darwin") return "granted" as const;
+  if (process.platform !== "darwin") return "granted";
   return systemPreferences.getMediaAccessStatus("screen");
 }

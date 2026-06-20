@@ -68,7 +68,7 @@ export const SpaceMemberUnban = observer(({ ban }: Props) => {
           <Typography level="body-sm" textColor="secondary">
             Banned by
           </Typography>
-          <Stack direction="row" spacing={1.25}>
+          <Stack direction="row" alignItems="center" spacing={1.25}>
             <UserAvatar
               user={ban.bannedBy}
               member={app.spaces.active?.members.get(ban.bannedById)}

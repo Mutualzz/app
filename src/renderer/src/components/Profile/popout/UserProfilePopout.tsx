@@ -10,9 +10,9 @@ import { useNavigate } from "@tanstack/react-router";
 import { observer } from "mobx-react-lite";
 import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import Loading from "@components/Loader/Loading";
 import type { AccountStore } from "@stores/Account.store";
 import { SmallActivityStatus } from "@components/SmallActivityStatus";
+import { useGoogleFont } from "@hooks/useGoogleFont";
 
 interface Props {
   user: User | AccountStore;
@@ -36,6 +36,7 @@ export const UserProfilePopout = observer(({ user, member }: Props) => {
 
   const profile = app.profiles.get(user.id) ?? fetchedProfile;
   void profile?.updatedAt;
+  const { fontFamily } = useGoogleFont(profile?.pageFontFamily, user.id);
 
   const presence = app.presence.get(user.id);
   const isSelf = app.account?.id === user.id;
@@ -66,7 +67,7 @@ export const UserProfilePopout = observer(({ user, member }: Props) => {
         css={{ background: profileBackground }}
       />
 
-      <Box position="relative" css={{ zIndex: 1 }}>
+      <Box position="relative" css={{ zIndex: 1, ...(fontFamily ? { fontFamily } : {}) }}>
         <Box position="relative" css={{ marginBottom: 36 }}>
           <Box
             height={96}
@@ -99,7 +100,7 @@ export const UserProfilePopout = observer(({ user, member }: Props) => {
 
         <Stack direction="column" spacing={1} px={2} pb={2}>
           {isLoading ? (
-            <Loading />
+            <></>
           ) : (
             <>
               <Stack direction="column" spacing={0.25}>

@@ -2,7 +2,6 @@ import { Button } from "@components/Button";
 import { ProfileBlockInspector } from "@components/Profile/editor/ProfileBlockInspector";
 import { ProfileBlockPalette } from "@components/Profile/editor/ProfileBlockPalette";
 import { getDraftIntroMusic } from "@components/Profile/shared/profileIntroMusic.utils";
-import { ProfileIntroMusic } from "@components/Profile/shared/ProfileIntroMusic";
 import { ProfileResetConfirm } from "@components/Profile/editor/ProfileResetConfirm";
 import {
   addBlockAtPoint,
@@ -143,6 +142,7 @@ export const ProfileEditorPage = observer(() => {
         banner: draft.banner,
         backgroundColor: draft.backgroundColor,
         backgroundImage: draft.backgroundImage,
+        pageFontFamily: draft.pageFontFamily,
         introMusicUrl: draft.introMusicTrackId ? null : draft.introMusicUrl,
         introMusicTrackId: draft.introMusicTrackId,
         introMusicTrackSource: draft.introMusicTrackId
@@ -357,6 +357,7 @@ export const ProfileEditorPage = observer(() => {
                 selectedBlockId={selectedBlockId}
                 backgroundColorOverride={draft.backgroundColor}
                 backgroundImageOverride={draft.backgroundImage}
+                pageFontFamilyOverride={draft.pageFontFamily}
                 bioOverride={draft.bio}
                 bannerOverride={draft.banner}
                 snapToGrid={snapToGrid}
@@ -364,6 +365,7 @@ export const ProfileEditorPage = observer(() => {
                 onBlocksChange={(blocks) => setDraft({ ...draft, blocks })}
                 onSelectBlock={setSelectedBlockId}
                 onBlockContextMenu={openBlockContextMenu}
+                introMusic={draftIntroMusic}
               />
             </Box>
             <ProfileEditorZoomControls
@@ -378,13 +380,6 @@ export const ProfileEditorPage = observer(() => {
               onAlignVertical={() => alignMenuBlock("vertical")}
               onSnapToGrid={snapMenuBlock}
             />
-            {draftIntroMusic && (
-              <ProfileIntroMusic
-                floating
-                introMusic={draftIntroMusic}
-                profile={profile}
-              />
-            )}
           </Stack>
           <ProfileBlockInspector
             profile={profile}

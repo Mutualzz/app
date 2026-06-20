@@ -1,6 +1,6 @@
 import { observer } from "mobx-react-lite";
 import type { PresencePayload } from "@mutualzz/types";
-import { Stack, Typography, useTheme } from "@mutualzz/ui-web";
+import { IconSlot, Stack, Typography, useTheme } from "@mutualzz/ui-web";
 import {
   GameControllerIcon,
   HeadphonesIcon,
@@ -16,11 +16,23 @@ interface Props {
 const PresenceIcon = ({ color, type }: { color: string; type: string }) => {
   switch (type) {
     case "playing":
-      return <GameControllerIcon size={14} weight="fill" color={color} />;
+      return (
+        <IconSlot size={14}>
+          <GameControllerIcon weight="fill" color={color} />
+        </IconSlot>
+      );
     case "listening":
-      return <HeadphonesIcon size={14} weight="fill" color={color} />;
+      return (
+        <IconSlot size={14}>
+          <HeadphonesIcon weight="fill" color={color} />
+        </IconSlot>
+      );
     default:
-      return <NotepadIcon size={14} weight="fill" color={color} />;
+      return (
+        <IconSlot size={14}>
+          <NotepadIcon weight="fill" color={color} />
+        </IconSlot>
+      );
   }
 };
 
@@ -39,15 +51,14 @@ export const SmallActivityStatus = observer(({ presence, vertical }: Props) => {
   if (activity.type === "custom") {
     return (
       <Stack
-        alignItems="center"
-        justifyContent="center"
         direction={vertical ? "column" : "row"}
+        alignItems="center"
         spacing={0.5}
         minWidth={0}
       >
         <CustomStatusDisplay activity={activity} fontSize={12} />
         {!vertical && presence.activities.length > 1 && (
-          <Typography fontSize={12} textColor="accent">
+          <Typography level="label-xs" textColor="accent">
             +{presence.activities.length - 1}
           </Typography>
         )}
@@ -57,25 +68,25 @@ export const SmallActivityStatus = observer(({ presence, vertical }: Props) => {
 
   return (
     <Stack
+      direction={vertical ? "column" : "row"}
       alignItems="center"
       justifyContent="center"
-      direction={vertical ? "column" : "row"}
       spacing={0.5}
     >
       <Stack
-        alignItems="center"
         direction={vertical ? "column" : "row"}
+        alignItems="center"
         justifyContent="center"
       >
         <PresenceIcon color={color} type={activity.type} />
-        <Typography fontSize={12} textColor={color}>
+        <Typography level="label-xs" textColor={color}>
           {presence.activities.length > 1
             ? `+${presence.activities.length - 1}`
             : ""}
         </Typography>
       </Stack>
       {!vertical && `•`}
-      <Typography textColor="accent" fontSize={12}>
+      <Typography level="label-xs" textColor="accent">
         {activity.name}
       </Typography>
     </Stack>

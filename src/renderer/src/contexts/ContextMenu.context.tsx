@@ -17,6 +17,7 @@ import type { SpaceMember } from "@stores/objects/SpaceMember";
 import type { User } from "@stores/objects/User";
 import type { Role } from "@stores/objects/Role";
 import type { AccountStore } from "@stores/Account.store";
+import type { Message } from "@stores/objects/Message";
 import { SkinTone } from "@utils/emojis/emojiSprite";
 import { PickerEmoji } from "@utils/emojis/emojiPickerData";
 
@@ -70,6 +71,11 @@ export type ContextMenuPayload =
       animated: boolean;
       [key: string]: any;
     }
+  | {
+      type: "message";
+      message: Message;
+      [key: string]: any;
+    }
   | { type: "custom"; id: string; [key: string]: any };
 
 export type MenuPosition = { x: number; y: number };
@@ -114,6 +120,8 @@ export const generateMenuIDs = {
     `context-role-${spaceId}-${roleId}`,
 
   account: (userId: string) => `context-account-${userId}`,
+  message: (channelId: string, messageId: string) =>
+    `context-message-${channelId}-${messageId}`,
   emoji: (unified: string) => `emoji-${unified}`
 };
 
@@ -139,6 +147,8 @@ function getMenuId(menu: ContextMenuPayload): string {
       return `sticker-${menu.id}`;
     case "group-dm":
       return `group-dm-${menu.channel.id}`;
+    case "message":
+      return generateMenuIDs.message(menu.message.channelId, menu.message.id);
     case "custom":
       return menu.id;
   }

@@ -217,7 +217,7 @@ export const ProfileIntroMusic = observer(
 
             <Stack direction="column" flex={1} minWidth={0} spacing={0.25}>
               <Typography
-                level="body-sm"
+                level="label-sm"
                 fontWeight={600}
                 css={{
                   color: "#fff",

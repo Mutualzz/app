@@ -1,6 +1,6 @@
 import type { Space } from "@stores/objects/Space";
 import { useEffect, useState, type ReactNode } from "react";
-import { Divider, Input, Stack, Typography, useTheme } from "@mutualzz/ui-web";
+import { Divider, IconSlot, Input, Stack, Typography, useTheme } from "@mutualzz/ui-web";
 import { Button } from "@components/Button";
 import { useMutation } from "@tanstack/react-query";
 import type { APIRole } from "@mutualzz/types";
@@ -189,9 +189,12 @@ const RoleItem = observer(
                 alignItems="center"
                 css={{ minWidth: 0, width: "100%" }}
               >
-                <ShieldIcon weight="fill" size={16} color={role.color} />
+                <IconSlot size={16}>
+                  <ShieldIcon weight="fill" color={role.color} />
+                </IconSlot>
                 <Typography
-                  fontWeight="bold"
+                  level="label-sm"
+                  weight="bold"
                   title={role.name}
                   css={{
                     overflow: "hidden",
@@ -204,9 +207,12 @@ const RoleItem = observer(
               </Stack>
             }
             members={
-              <>
-                {membersWithRole} <UserIcon />
-              </>
+              <Stack direction="row" alignItems="center" spacing={0.5}>
+                <Typography level="label-sm">{membersWithRole}</Typography>
+                <IconSlot size={14}>
+                  <UserIcon />
+                </IconSlot>
+              </Stack>
             }
             actions={
               <>
@@ -297,6 +303,7 @@ const SortableRoleItem = observer(
           ref={setActivatorNodeRef}
           {...attributes}
           {...listeners}
+          direction="row"
           alignItems="center"
           justifyContent="center"
           css={{
@@ -307,7 +314,9 @@ const SortableRoleItem = observer(
           }}
           onClick={(e) => e.stopPropagation()}
         >
-          <DotsSixVerticalIcon size={18} weight="bold" />
+          <IconSlot size={18}>
+            <DotsSixVerticalIcon weight="bold" />
+          </IconSlot>
         </Stack>
       </Tooltip>
     );
@@ -462,27 +471,26 @@ export const SpaceRolesSettings = observer(({ space }: Props) => {
             horizontalAlign="left"
             size={20}
           >
-            <Stack flex={1} direction="row" spacing={2}>
-              <UsersFourIcon weight="fill" />
+            <Stack flex={1} direction="row" alignItems="center" spacing={2}>
+              <IconSlot size={16}>
+                <UsersFourIcon weight="fill" />
+              </IconSlot>
               <Stack direction="column" alignItems="flex-start">
-                <Typography level="body-sm" fontWeight="bold">
+                <Typography level="label-sm" weight="bold">
                   Default Permissions
                 </Typography>
-                <Typography level={"body-xs"}>
+                <Typography level="label-xs">
                   @everyone - applies to all space members
                 </Typography>
               </Stack>
-              <ArrowRightIcon
-                css={{
-                  marginLeft: "auto"
-                }}
-                size={16}
-              />
+              <IconSlot size={16} css={{ marginLeft: "auto" }}>
+                <ArrowRightIcon />
+              </IconSlot>
             </Stack>
           </Button>
         </Stack>
       )}
-      <Stack alignItems="center" spacing={2} flex={1}>
+      <Stack direction="row" alignItems="center" spacing={2} flex={1}>
         <Input
           startDecorator={<MagnifyingGlassIcon />}
           placeholder="Search Roles"

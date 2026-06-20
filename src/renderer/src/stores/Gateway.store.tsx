@@ -5,6 +5,10 @@ import {
   type APIInvite,
   APIMemberRole,
   APIMessage,
+  type APIMessageReactionEvent,
+  type APIMessageReactionRemoveAllEvent,
+  type APIMessageReactionRemoveEmojiEvent,
+  type APIMessageReactionRemoveEvent,
   type APIPrivateUser,
   APIRelationship,
   APIRole,
@@ -610,6 +614,22 @@ export class GatewayStore {
     this.dispatchHandlers.set(
       GatewayDispatchEvents.MessageDeleteBulk,
       this.onMessageDeleteBulk
+    );
+    this.dispatchHandlers.set(
+      GatewayDispatchEvents.MessageReactionAdd,
+      this.onMessageReactionAdd
+    );
+    this.dispatchHandlers.set(
+      GatewayDispatchEvents.MessageReactionRemove,
+      this.onMessageReactionRemove
+    );
+    this.dispatchHandlers.set(
+      GatewayDispatchEvents.MessageReactionRemoveAll,
+      this.onMessageReactionRemoveAll
+    );
+    this.dispatchHandlers.set(
+      GatewayDispatchEvents.MessageReactionRemoveEmoji,
+      this.onMessageReactionRemoveEmoji
     );
 
     // Invites
@@ -1440,6 +1460,38 @@ export class GatewayStore {
     if (!channel) return;
 
     channel.messages.remove(payload.id);
+  };
+
+  private onMessageReactionAdd = (payload: APIMessageReactionEvent) => {
+    if (payload.userId === this.app.account?.id) return;
+
+    const channel = this.app.channels.get(payload.channelId);
+    channel?.messages.get(payload.messageId)?.handleReactionAdd(payload);
+  };
+
+  private onMessageReactionRemove = (
+    payload: APIMessageReactionRemoveEvent
+  ) => {
+    if (payload.userId === this.app.account?.id) return;
+
+    const channel = this.app.channels.get(payload.channelId);
+    channel?.messages.get(payload.messageId)?.handleReactionRemove(payload);
+  };
+
+  private onMessageReactionRemoveAll = (
+    payload: APIMessageReactionRemoveAllEvent
+  ) => {
+    const channel = this.app.channels.get(payload.channelId);
+    channel?.messages.get(payload.messageId)?.handleReactionRemoveAll(payload);
+  };
+
+  private onMessageReactionRemoveEmoji = (
+    payload: APIMessageReactionRemoveEmojiEvent
+  ) => {
+    const channel = this.app.channels.get(payload.channelId);
+    channel?.messages
+      .get(payload.messageId)
+      ?.handleReactionRemoveEmoji(payload);
   };
 
   private onUserUpdate = (payload: APIUser | APIPrivateUser) => {

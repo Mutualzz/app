@@ -1,6 +1,7 @@
 import { ProfileBlockHandles } from "@components/Profile/editor/ProfileBlockHandles";
 import { ProfileBlockRenderer } from "@components/Profile/viewer/ProfileBlockRenderer";
 import { ProfileCanvas } from "@components/Profile/shared/ProfileCanvas";
+import { ProfileIntroMusic } from "@components/Profile/shared/ProfileIntroMusic";
 import {
   clampBlock,
   clampPixelRect,
@@ -14,7 +15,7 @@ import {
   type CanvasRect
 } from "@components/Profile/viewer/profileLayout.utils";
 import { useProfileCanvasRect } from "@components/Profile/shared/useProfileCanvasRect";
-import type { APIProfileBlock, ProfileBlockType } from "@mutualzz/types";
+import type { APIProfileBlock, APIProfileIntroMusic, ProfileBlockType } from "@mutualzz/types";
 import type { AccountStore } from "@stores/Account.store";
 import type { User } from "@stores/objects/User";
 import type { UserProfile } from "@stores/objects/UserProfile";
@@ -43,6 +44,7 @@ interface Props {
   onSelectBlock: (blockId: string | null) => void;
   backgroundColorOverride?: string | null;
   backgroundImageOverride?: string | null;
+  pageFontFamilyOverride?: string | null;
   bioOverride?: string | null;
   bannerOverride?: string | null;
   onCanvasRectChange?: (rect: CanvasRect) => void;
@@ -51,6 +53,7 @@ interface Props {
     event: React.MouseEvent,
     blockId: string
   ) => void;
+  introMusic?: APIProfileIntroMusic | null;
 }
 
 export const ProfileEditorCanvas = observer(
@@ -63,11 +66,13 @@ export const ProfileEditorCanvas = observer(
     onSelectBlock,
     backgroundColorOverride,
     backgroundImageOverride,
+    pageFontFamilyOverride,
     bioOverride,
     bannerOverride,
     onCanvasRectChange,
     snapToGrid = false,
-    onBlockContextMenu
+    onBlockContextMenu,
+    introMusic
   }: Props) => {
     const {
       canvasRef: measureCanvasRef,
@@ -281,6 +286,7 @@ export const ProfileEditorCanvas = observer(
         interactive
         backgroundColorOverride={backgroundColorOverride}
         backgroundImageOverride={backgroundImageOverride}
+        pageFontFamilyOverride={pageFontFamilyOverride}
         onCanvasClick={() => onSelectBlock(null)}
       >
         {snapToGrid && canvasRect && (
@@ -342,6 +348,13 @@ export const ProfileEditorCanvas = observer(
               }
             />
           ))}
+        {introMusic && (
+          <ProfileIntroMusic
+            floating
+            introMusic={introMusic}
+            profile={profile}
+          />
+        )}
       </ProfileCanvas>
     );
   }
