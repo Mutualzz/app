@@ -5,6 +5,9 @@ export interface CanvasRect {
   height: number;
 }
 
+/** All block dimensions are expressed as % of canvas width so layout scales uniformly. */
+export const canvasUnit = (canvas: CanvasRect) => canvas.width;
+
 export interface PixelRect {
   left: number;
   top: number;
@@ -12,6 +15,120 @@ export interface PixelRect {
   height: number;
 }
 
+export interface ProfileBlockSizeLimits {
+  minWidth: number;
+  maxWidth: number;
+  minHeight: number;
+  maxHeight: number;
+  recommendedWidth: number;
+  recommendedHeight: number;
+}
+
+/** Size bounds and recommended defaults (% of canvas width) per block type. */
+export const PROFILE_BLOCK_SIZE_LIMITS: Record<
+  ProfileBlockType,
+  ProfileBlockSizeLimits
+> = {
+  header: {
+    minWidth: 60,
+    maxWidth: 100,
+    minHeight: 18,
+    maxHeight: 45,
+    recommendedWidth: 96,
+    recommendedHeight: 28
+  },
+  text: {
+    minWidth: 16,
+    maxWidth: 100,
+    minHeight: 8,
+    maxHeight: 55,
+    recommendedWidth: 36,
+    recommendedHeight: 14
+  },
+  image: {
+    minWidth: 12,
+    maxWidth: 80,
+    minHeight: 12,
+    maxHeight: 80,
+    recommendedWidth: 28,
+    recommendedHeight: 28
+  },
+  music: {
+    minWidth: 24,
+    maxWidth: 60,
+    minHeight: 16,
+    maxHeight: 36,
+    recommendedWidth: 38,
+    recommendedHeight: 24
+  },
+  links: {
+    minWidth: 18,
+    maxWidth: 72,
+    minHeight: 10,
+    maxHeight: 40,
+    recommendedWidth: 32,
+    recommendedHeight: 18
+  },
+  activity: {
+    minWidth: 20,
+    maxWidth: 64,
+    minHeight: 8,
+    maxHeight: 22,
+    recommendedWidth: 34,
+    recommendedHeight: 12
+  },
+  roles: {
+    minWidth: 18,
+    maxWidth: 72,
+    minHeight: 10,
+    maxHeight: 30,
+    recommendedWidth: 32,
+    recommendedHeight: 16
+  },
+  mutual: {
+    minWidth: 18,
+    maxWidth: 72,
+    minHeight: 10,
+    maxHeight: 30,
+    recommendedWidth: 32,
+    recommendedHeight: 16
+  },
+  divider: {
+    minWidth: 20,
+    maxWidth: 100,
+    minHeight: 2,
+    maxHeight: 8,
+    recommendedWidth: 56,
+    recommendedHeight: 4
+  },
+  quote: {
+    minWidth: 20,
+    maxWidth: 80,
+    minHeight: 10,
+    maxHeight: 40,
+    recommendedWidth: 36,
+    recommendedHeight: 16
+  }
+};
+
+export const getProfileBlockSizeLimits = (type: ProfileBlockType) =>
+  PROFILE_BLOCK_SIZE_LIMITS[type];
+
+export const applyRecommendedBlockSize = (
+  block: APIProfileBlock
+): APIProfileBlock => {
+  const limits = getProfileBlockSizeLimits(block.type);
+  return clampBlock({
+    ...block,
+    width: limits.recommendedWidth,
+    height: limits.recommendedHeight
+  });
+};
+
+export const normalizeProfileBlocks = (blocks: APIProfileBlock[]) =>
+  blocks.map((block) => clampBlock(block));
+
+/** @deprecated Use per-block limits via getProfileBlockSizeLimits */
 export const MIN_BLOCK_PERCENT = 4;
 export const PROFILE_GRID_STEP = 4;
 
@@ -45,36 +162,57 @@ export const alignBlockVertically = (block: APIProfileBlock) =>
 export const percentToPixels = (
   block: Pick<APIProfileBlock, "x" | "y" | "width" | "height">,
   canvas: CanvasRect
-): PixelRect => ({
-  left: (block.x / 100) * canvas.width,
-  top: (block.y / 100) * canvas.height,
-  width: (block.width / 100) * canvas.width,
-  height: (block.height / 100) * canvas.height
-});
+): PixelRect => {
+  const unit = canvasUnit(canvas);
+  return {
+    left: (block.x / 100) * unit,
+    top: (block.y / 100) * unit,
+    width: (block.width / 100) * unit,
+    height: (block.height / 100) * unit
+  };
+};
 
 export const pixelsToPercent = (
   rect: PixelRect,
-  canvas: CanvasRect
+  canvas: CanvasRect,
+  blockType?: ProfileBlockType
 ): Pick<APIProfileBlock, "x" | "y" | "width" | "height"> => {
-  if (canvas.width <= 0 || canvas.height <= 0) {
-    return { x: 0, y: 0, width: MIN_BLOCK_PERCENT, height: MIN_BLOCK_PERCENT };
+  const unit = canvasUnit(canvas);
+  const limits = blockType ? getProfileBlockSizeLimits(blockType) : null;
+  const minWidth = limits?.minWidth ?? MIN_BLOCK_PERCENT;
+  const maxWidth = limits?.maxWidth ?? 100;
+  const minHeight = limits?.minHeight ?? MIN_BLOCK_PERCENT;
+  const maxHeight = limits?.maxHeight ?? 100;
+
+  if (unit <= 0 || canvas.height <= 0) {
+    return {
+      x: 0,
+      y: 0,
+      width: minWidth,
+      height: minHeight
+    };
   }
 
   return {
-    x: roundPercent(clamp((rect.left / canvas.width) * 100, 0, 100)),
-    y: roundPercent(clamp((rect.top / canvas.height) * 100, 0, 100)),
+    x: roundPercent(clamp((rect.left / unit) * 100, 0, 100)),
+    y: roundPercent(clamp((rect.top / unit) * 100, 0, 100)),
     width: roundPercent(
-      clamp((rect.width / canvas.width) * 100, MIN_BLOCK_PERCENT, 100)
+      clamp((rect.width / unit) * 100, minWidth, maxWidth)
     ),
     height: roundPercent(
-      clamp((rect.height / canvas.height) * 100, MIN_BLOCK_PERCENT, 100)
+      clamp((rect.height / unit) * 100, minHeight, maxHeight)
     )
   };
 };
 
 export const clampBlock = (block: APIProfileBlock): APIProfileBlock => {
-  const width = roundPercent(clamp(block.width, MIN_BLOCK_PERCENT, 100));
-  const height = roundPercent(clamp(block.height, MIN_BLOCK_PERCENT, 100));
+  const limits = getProfileBlockSizeLimits(block.type);
+  const width = roundPercent(
+    clamp(block.width, limits.minWidth, limits.maxWidth)
+  );
+  const height = roundPercent(
+    clamp(block.height, limits.minHeight, limits.maxHeight)
+  );
   const maxX = Math.max(0, 100 - width);
   const maxY = Math.max(0, 100 - height);
   const x = roundPercent(clamp(block.x, 0, maxX));
@@ -91,19 +229,24 @@ export const clampBlock = (block: APIProfileBlock): APIProfileBlock => {
 
 export const clampPixelRect = (
   rect: PixelRect,
-  canvas: CanvasRect
+  canvas: CanvasRect,
+  blockType?: ProfileBlockType
 ): PixelRect => {
-  if (canvas.width <= 0 || canvas.height <= 0) {
+  const unit = canvasUnit(canvas);
+  if (unit <= 0 || canvas.height <= 0) {
     return rect;
   }
 
-  const minWidth = (MIN_BLOCK_PERCENT / 100) * canvas.width;
-  const minHeight = (MIN_BLOCK_PERCENT / 100) * canvas.height;
+  const limits = blockType ? getProfileBlockSizeLimits(blockType) : null;
+  const minWidth = ((limits?.minWidth ?? MIN_BLOCK_PERCENT) / 100) * unit;
+  const minHeight = ((limits?.minHeight ?? MIN_BLOCK_PERCENT) / 100) * unit;
+  const maxWidth = ((limits?.maxWidth ?? 100) / 100) * unit;
+  const maxHeight = ((limits?.maxHeight ?? 100) / 100) * unit;
 
   let { left, top, width, height } = rect;
 
-  width = Math.max(minWidth, width);
-  height = Math.max(minHeight, height);
+  width = clamp(width, minWidth, maxWidth);
+  height = clamp(height, minHeight, maxHeight);
 
   if (left < 0) {
     width += left;
@@ -121,8 +264,8 @@ export const clampPixelRect = (
     height = canvas.height - top;
   }
 
-  width = Math.max(minWidth, width);
-  height = Math.max(minHeight, height);
+  width = clamp(width, minWidth, Math.min(maxWidth, canvas.width - left));
+  height = clamp(height, minHeight, Math.min(maxHeight, canvas.height - top));
 
   if (left + width > canvas.width) {
     left = Math.max(0, canvas.width - width);
@@ -130,6 +273,9 @@ export const clampPixelRect = (
   if (top + height > canvas.height) {
     top = Math.max(0, canvas.height - height);
   }
+
+  width = clamp(width, minWidth, Math.min(maxWidth, canvas.width - left));
+  height = clamp(height, minHeight, Math.min(maxHeight, canvas.height - top));
 
   return { left, top, width, height };
 };
@@ -148,21 +294,11 @@ export const createDefaultBlock = (
   canvas: CanvasRect,
   point?: { x: number; y: number }
 ): APIProfileBlock => {
-  const defaults: Record<ProfileBlockType, { width: number; height: number }> =
-    {
-      header: { width: 96, height: 30 },
-      text: { width: 30, height: 12 },
-      image: { width: 24, height: 24 },
-      music: { width: 26, height: 18 },
-      links: { width: 28, height: 16 },
-      activity: { width: 30, height: 10 },
-      roles: { width: 28, height: 14 },
-      mutual: { width: 28, height: 14 },
-      divider: { width: 50, height: 4 },
-      quote: { width: 32, height: 14 }
-    };
-
-  const size = defaults[type];
+  const limits = getProfileBlockSizeLimits(type);
+  const size = {
+    width: limits.recommendedWidth,
+    height: limits.recommendedHeight
+  };
   const x = point
     ? clamp(
         (point.x / Math.max(canvas.width, 1)) * 100 - size.width / 2,
@@ -172,7 +308,7 @@ export const createDefaultBlock = (
     : 50 - size.width / 2;
   const y = point
     ? clamp(
-        (point.y / Math.max(canvas.height, 1)) * 100 - size.height / 2,
+        (point.y / Math.max(canvasUnit(canvas), 1)) * 100 - size.height / 2,
         0,
         100 - size.height
       )
@@ -191,13 +327,18 @@ export const createDefaultBlock = (
 
   switch (type) {
     case "text":
-      return { ...base, type: "text", content: "New text" };
+      return clampBlock({ ...base, type: "text", content: "New text" });
     case "image":
-      return { ...base, type: "image", src: "", objectFit: "cover" };
+      return clampBlock({ ...base, type: "image", src: "", objectFit: "cover" });
     case "header":
-      return { ...base, type: "header", bannerHeight: 58, bannerFocusY: 50 };
+      return clampBlock({
+        ...base,
+        type: "header",
+        bannerHeight: 58,
+        bannerFocusY: 50
+      });
     case "music":
-      return {
+      return clampBlock({
         ...base,
         type: "music",
         title: "Favorite song",
@@ -206,28 +347,33 @@ export const createDefaultBlock = (
         previewUrl: null,
         trackUrl: null,
         track: null
-      };
+      });
     case "links":
-      return {
+      return clampBlock({
         ...base,
         type: "links",
         links: [{ label: "My link", url: "https://example.com" }]
-      };
+      });
     case "activity":
-      return { ...base, type: "activity", showCustomStatus: true };
+      return clampBlock({ ...base, type: "activity", showCustomStatus: true });
     case "roles":
-      return { ...base, type: "roles", maxRoles: 6 };
+      return clampBlock({ ...base, type: "roles", maxRoles: 6 });
     case "mutual":
-      return { ...base, type: "mutual", mode: "spaces", maxItems: 6 };
+      return clampBlock({
+        ...base,
+        type: "mutual",
+        mode: "spaces",
+        maxItems: 6
+      });
     case "divider":
-      return { ...base, type: "divider", style: "line" };
+      return clampBlock({ ...base, type: "divider", style: "line" });
     case "quote":
-      return {
+      return clampBlock({
         ...base,
         type: "quote",
         content: "Write a quote…",
         variant: "default",
         attribution: null
-      };
+      });
   }
 };

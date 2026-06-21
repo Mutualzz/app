@@ -27,7 +27,7 @@ import { HeadphonesOffIcon } from "@components/icons/HeadphonesOffIcon";
 import { useNavigate } from "@tanstack/react-router";
 import { Tooltip } from "@components/Tooltip";
 
-// NOTE: Instead of using hovered, you should use the Animated motion stuff, fix it.
+// NOTE: Instead of using hovered, you should use the Animated motion stuff, fix it. (Azrael)
 export const UserBar = observer(() => {
   const app = useAppStore();
   const navigate = useNavigate();

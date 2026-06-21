@@ -142,7 +142,12 @@ export const ProfileMusicBlockView = ({ block }: Props) => {
         />
       )}
 
-      <Stack direction="column" spacing={1} p={1.5} height="100%" css={{ position: "relative" }}>
+      <Stack
+        direction="column"
+        spacing={1}
+        p={1.5}
+        css={{ position: "relative", height: "100%", overflow: "auto" }}
+      >
         <Stack direction="row" alignItems="center" spacing={1.25}>
           <Box
             width={52}
@@ -279,7 +284,7 @@ export const ProfileMusicBlockView = ({ block }: Props) => {
           </Stack>
         )}
 
-        <Stack direction="row" spacing={0.75} mt="auto" flexWrap="wrap">
+        <Stack direction="row" spacing={0.75} flexWrap="wrap">
           {previewUrl && (
             <Button
               size="sm"

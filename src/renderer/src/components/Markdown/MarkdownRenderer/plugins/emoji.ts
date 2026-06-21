@@ -6,13 +6,19 @@ import type { MarkdownItAsync } from "@components/Markdown/MarkdownItAsync";
 
 const emojiRegex = new RegExp(shortcodeRegex.source, "g");
 
+const UNICODE_EMOJI_BETWEEN_COLONS =
+  /:([\p{Extended_Pictographic}\u200d\ufe0f]+):/gu;
+
+const normalizeUnicodeEmojiColons = (content: string) =>
+  content.replace(UNICODE_EMOJI_BETWEEN_COLONS, "$1");
+
 export const emojiPlugin = (md: MarkdownItAsync) => {
   md.core.ruler.after("inline", "emoji", (state) => {
     const tokens = state.tokens;
 
     for (let i = 0; i < tokens.length; i++) {
       if (tokens[i].type === "inline") {
-        const content = tokens[i].content;
+        const content = normalizeUnicodeEmojiColons(tokens[i].content);
         const newTokens: Token[] = [];
         let lastIndex = 0;
         let match;
@@ -63,6 +69,8 @@ export const emojiPlugin = (md: MarkdownItAsync) => {
         if (newTokens.length && newTokens.some((t) => t.type === "emoji")) {
           tokens[i].children = newTokens;
           tokens[i].content = "";
+        } else if (content !== tokens[i].content) {
+          tokens[i].content = content;
         }
       }
     }

@@ -32,6 +32,7 @@ export interface MarkdownInputProps {
   onSelectSticker?: (sticker: Expression) => void;
 
   placeholder?: string | null;
+  maxLength?: number;
 
   css?: CSSObject;
 }

@@ -1,11 +1,10 @@
-import { MarkdownRenderer } from "@components/Markdown/MarkdownRenderer/MarkdownRenderer";
+import { CustomStatusEmoji } from "./CustomStatusEmoji";
 import { Stack, Typography } from "@mutualzz/ui-web";
 import { useAppStore } from "@hooks/useStores";
 import type { PresenceActivity, PresenceActivityEmoji } from "@mutualzz/types";
 import { hasStatusEmoji } from "@utils/customStatus";
 import { observer } from "mobx-react-lite";
 import { useEffect } from "react";
-import { CustomStatusEmoji } from "./CustomStatusEmoji";
 import { TypographyColor, TypographyLevel } from "@mutualzz/ui-core";
 
 interface Props {
@@ -59,7 +58,7 @@ export const CustomStatusDisplay = observer(
 
     if (!statusText && !showEmoji) return null;
 
-    const markdown = statusText ? (
+    const statusLabel = statusText ? (
       <Typography
         {...(level ? { level } : { fontSize })}
         textColor={textColor}
@@ -67,30 +66,19 @@ export const CustomStatusDisplay = observer(
           minWidth: 0,
           overflow: ellipsis ? "hidden" : undefined,
           textOverflow: ellipsis ? "ellipsis" : undefined,
-          whiteSpace: ellipsis ? "nowrap" : undefined,
-          "& > div": {
-            display: "contents"
-          },
-          "& *": {
-            margin: 0,
-            display: "inline"
-          }
+          whiteSpace: ellipsis ? "nowrap" : "pre-wrap"
         }}
       >
-        <MarkdownRenderer
-          value={statusText}
-          textColor={textColor === "muted" ? "inherit" : textColor}
-          enlargeEmojiOnly={false}
-        />
+        {statusText}
       </Typography>
     ) : null;
 
-    if (!showEmoji || !statusEmoji) return markdown;
+    if (!showEmoji || !statusEmoji) return statusLabel;
 
     return (
       <Stack direction="row" alignItems="center" spacing={0.75} minWidth={0}>
         <CustomStatusEmoji emoji={statusEmoji} size={emojiSize} />
-        {markdown}
+        {statusLabel}
       </Stack>
     );
   }

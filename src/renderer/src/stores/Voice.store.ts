@@ -284,7 +284,9 @@ class MediasoupSession {
 
     if (this.micTrack) {
       try {
-        this.micTrack.enabled = shouldTransmit;
+        // Keep the mic track enabled for VAD analysis; transmission is gated
+        // via producer pause/resume so we don't silence the analyser input.
+        this.micTrack.enabled = !this.isMuted && !this.spaceMuted;
       } catch {}
     }
 
@@ -1504,21 +1506,39 @@ export class VoiceStore {
           }
         }
 
+        const target = this.currentVoiceTarget;
+        const isSuperseded = reason === "Connected from a different device";
+        const canAutoRejoin =
+          !isSuperseded && !!target && this.app.isGatewayReady;
+
         runInAction(() => {
-          this.disconnectBanner = `Disconnected from voice: ${reason}`;
-          this.disconnectedFrom = this.currentVoiceTarget;
-          this.connectionStatus = "idle";
-          this.connectionError = reason;
-          this.currentVoiceTarget = null;
+          this.connectionError = canAutoRejoin ? null : reason;
           this.cameraEnabled = false;
           this.screenShareEnabled = false;
           this.pushToTalkActive = false;
+
+          if (canAutoRejoin) {
+            this.disconnectBanner = null;
+            return;
+          }
+
+          this.connectionStatus = "idle";
+          this.disconnectBanner = `Disconnected from voice: ${reason}`;
+          this.disconnectedFrom = target;
+          this.currentVoiceTarget = null;
         });
+
         try {
           this.abortAndTeardown();
-          this.clearLocalVoiceStateForMe();
           this.stopKeepAlive();
+          if (!canAutoRejoin) {
+            this.clearLocalVoiceStateForMe();
+          }
         } catch {}
+
+        if (canAutoRejoin && target) {
+          void this.reconnectVoice();
+        }
       },
       (userId, speaking) => {
         runInAction(() => {
@@ -1772,6 +1792,34 @@ export class VoiceStore {
 
   onGatewayDisconnected() {
     this.stopKeepAlive();
+  }
+
+  onGatewayReconnected() {
+    if (!this.currentVoiceTarget) return;
+
+    if (this.connectionStatus === "connected") {
+      this.startKeepAlive();
+      void this.sendVoiceStateUpdate();
+      return;
+    }
+
+    void this.reconnectVoice();
+  }
+
+  private async reconnectVoice() {
+    if (!this.currentVoiceTarget) return;
+
+    this.session.unlockAudio();
+
+    runInAction(() => {
+      this.connectionStatus = "connecting";
+      this.connectionError = null;
+      this.disconnectBanner = null;
+    });
+
+    this.startJoinTimeout();
+    await this.sendVoiceStateUpdate();
+    this.startKeepAlive();
   }
 
   clearDisconnectBanner() {
@@ -2038,18 +2086,20 @@ export class VoiceStore {
     this.session.unlockAudio();
     await this.setupTracks();
 
+    const preferredSelfMute = this.app.settings?.preferredSelfMute ?? false;
+    const preferredSelfDeaf = this.app.settings?.preferredSelfDeaf ?? false;
+
     runInAction(() => {
       this.disconnectBanner = null;
       this.currentVoiceTarget = target;
       this.connectionStatus = "connecting";
       this.connectionError = null;
+      this.selfMute = preferredSelfMute;
+      this.selfDeaf = preferredSelfDeaf;
     });
 
     this.session.setInputDeviceId(this.currentInputDeviceId);
     this.session.setOutputDeviceId(this.currentOutputDeviceId);
-
-    const preferredSelfMute = this.app.settings?.preferredSelfMute ?? false;
-    const preferredSelfDeaf = this.app.settings?.preferredSelfDeaf ?? false;
 
     this.session.setSelfMute(preferredSelfMute);
     this.session.setSelfDeaf(preferredSelfDeaf);
@@ -2717,18 +2767,13 @@ export class VoiceStore {
     const spaceId = this.currentVoiceTarget?.spaceId ?? null;
     const channelId = this.currentVoiceTarget?.channelId ?? null;
 
-    const preferredSelfMute = this.app.settings?.preferredSelfMute ?? false;
-    const preferredSelfDeaf = this.app.settings?.preferredSelfDeaf ?? false;
-
-    const outgoingSelfDeaf = this.spaceDeaf ? true : preferredSelfDeaf;
-
     await this.app.gateway.send({
       op: GatewayOpcodes.VoiceStateUpdate,
       d: {
         spaceId,
         channelId,
-        selfMute: preferredSelfMute,
-        selfDeaf: outgoingSelfDeaf
+        selfMute: this.spaceMute ? true : this.selfMute,
+        selfDeaf: this.spaceDeaf ? true : this.selfDeaf
       }
     });
   }

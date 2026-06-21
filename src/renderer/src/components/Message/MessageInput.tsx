@@ -1,4 +1,5 @@
 import { useAppStore } from "@hooks/useStores";
+import { reaction } from "mobx";
 import { observer } from "mobx-react-lite";
 import { KeyboardEvent, useEffect, useRef, useState } from "react";
 import { Message } from "@stores/objects/Message";
@@ -88,6 +89,19 @@ export const MessageInput = observer(
         inputRef.current?.focus();
       });
     }, [message?.editing, message?.id]);
+
+    useEffect(() => {
+      if (message) return;
+
+      return reaction(
+        () => channel?.messages.all.some((m) => m.editing) ?? false,
+        (isEditing, prevIsEditing) => {
+          if (prevIsEditing && !isEditing) {
+            requestAnimationFrame(() => inputRef.current?.focus());
+          }
+        }
+      );
+    }, [channel, message]);
 
     useEffect(() => {
       return () => clearTimeout(typingCooldownRef.current!);

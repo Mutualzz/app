@@ -1050,7 +1050,10 @@ export class GatewayStore {
 
   private onResume = () => {
     this.logger.debug("[Resume] Session");
-    this.handleIdentify();
+    this.resubscribeUsers();
+    this.app.setGatewayReady(true);
+    this.startPresenceLoop();
+    this.app.voice.onGatewayReconnected();
   };
 
   // NOTE: Dispatcher Handlers start here
@@ -1095,6 +1098,7 @@ export class GatewayStore {
     this.app.startBadgeWatch();
 
     this.startPresenceLoop();
+    this.app.voice.onGatewayReconnected();
 
     // if we already persisted a schedule in local storage, rearm timer for UI
     const selfUserId = this.app.account?.id;
@@ -1512,6 +1516,9 @@ export class GatewayStore {
     });
     void this.app.queryClient.invalidateQueries({
       queryKey: ["profile-popout", payload.userId]
+    });
+    void this.app.queryClient.invalidateQueries({
+      queryKey: ["profile", payload.userId, "edit"]
     });
   };
 

@@ -175,7 +175,6 @@ export const AccountContextMenu = observer(({ account }: Props) => {
                   active={active}
                 />
               }
-              variant={active ? "soft" : "plain"}
               color={active ? "primary" : undefined}
               css={{
                 alignItems: "center",

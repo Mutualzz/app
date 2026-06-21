@@ -27,7 +27,7 @@ import { useState } from "react";
 export const CUSTOM_STATUS_MODAL_ID = "custom-status";
 
 const MAX_CUSTOM_STATUS_LENGTH = 128;
-const STATUS_PLACEHOLDER = "Today I learned...";
+const STATUS_PLACEHOLDER = "Enter your status...";
 
 const toDurationValue = (durationMs: number | null) =>
   durationMs == null ? "forever" : String(durationMs);

@@ -80,6 +80,7 @@ const MarkdownInput = forwardRef<MarkdownInputHandle, MarkdownInputProps>(
       onSelectSticker,
       placeholder,
       value,
+      maxLength,
 
       css
     },
@@ -331,6 +332,12 @@ const MarkdownInput = forwardRef<MarkdownInputHandle, MarkdownInputProps>(
       },
       [editor, mentions, onChange]
     );
+
+    useEffect(() => {
+      if (maxLength != null && editorValue.length > maxLength) {
+        editor.delete();
+      }
+    }, [editor, editorValue, maxLength]);
 
     return (
       <MarkdownInputContext.Provider

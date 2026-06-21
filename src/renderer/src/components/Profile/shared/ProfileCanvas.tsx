@@ -33,6 +33,7 @@ export const ProfileCanvas = observer(
         ? pageFontFamilyOverride
         : profile.pageFontFamily;
     const { fontFamily } = useGoogleFont(pageFontFamily, profile.userId);
+    void profile.updatedAt;
 
     const backgroundColor =
       backgroundColorOverride !== undefined

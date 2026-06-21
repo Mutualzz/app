@@ -2,7 +2,7 @@ import { IconButton } from "@components/IconButton";
 import { Tooltip } from "@components/Tooltip";
 import { useRecentEmojis } from "@renderer/hooks/useRecentEmojis";
 import { useAppStore } from "@hooks/useStores";
-import { Stack } from "@mutualzz/ui-web";
+import { Divider, Stack } from "@mutualzz/ui-web";
 import { styled } from "@mutualzz/ui-core";
 import { Message } from "@stores/objects/Message";
 import { getSpriteStyle } from "@utils/emojis/emojiSprite";
@@ -113,7 +113,7 @@ export const MessageReactionToolbar = observer(
             </QuickEmojiButton>
           </Tooltip>
         ))}
-
+        <Divider orientation="vertical" css={{ opacity: 0.5 }} />
         <Tooltip offset={16} content="Add reaction">
           <IconButton
             ref={triggerRef}

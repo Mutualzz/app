@@ -7,7 +7,8 @@ import { ProfileLayout } from "@components/Profile/viewer/ProfileLayout";
 import { getDraftIntroMusic } from "@components/Profile/shared/profileIntroMusic.utils";
 import { hasProfileDraftContent } from "@components/Profile/editor/profileEditor.utils";
 import { sortBlocksByZIndex } from "@components/Profile/viewer/profileLayout.utils";
-import { useProfileCanvasRect } from "@components/Profile/shared/useProfileCanvasRect";
+import { ProfileCanvasBlocksLayer } from "@components/Profile/shared/ProfileCanvasBlocksLayer";
+import { ProfileCanvasViewport } from "@components/Profile/shared/ProfileCanvasViewport";
 import Loading from "@components/Loader/Loading";
 import { useAppStore } from "@hooks/useStores";
 import type { APIUser, APIUserProfile } from "@mutualzz/types";
@@ -34,7 +35,6 @@ export const ProfileViewerPage = observer(
         (state.location.state as { profilePreview?: boolean } | undefined)
           ?.profilePreview === true
     });
-    const { canvasRef, canvasRect, isCanvasReady } = useProfileCanvasRect();
     const identifier = username.trim().toLowerCase();
 
     const { isLoading: userLoading } = useQuery({
@@ -68,6 +68,7 @@ export const ProfileViewerPage = observer(
         ? app.profiles.add(initialProfile)
         : undefined);
     void profile?.updatedAt;
+    void viewerUser?.updatedAt;
 
     const isSelf = app.account?.id === viewerUser?.id;
     const previewDraft =
@@ -198,10 +199,8 @@ export const ProfileViewerPage = observer(
             flex={1}
             minHeight={0}
             width="100%"
-            p={0.75}
             position="relative"
             direction="column"
-            spacing={1}
           >
             {isPreviewing && (
               <Paper
@@ -212,6 +211,13 @@ export const ProfileViewerPage = observer(
                 direction="row"
                 alignItems="center"
                 justifyContent="space-between"
+                css={{
+                  position: "absolute",
+                  top: 6,
+                  left: 6,
+                  right: 6,
+                  zIndex: 20
+                }}
               >
                 <Typography level="body-sm" css={{ opacity: 0.85 }}>
                   Previewing unsaved changes
@@ -221,28 +227,29 @@ export const ProfileViewerPage = observer(
                 </Typography>
               </Paper>
             )}
-            <Stack flex={1} minHeight={0} width="100%" position="relative">
+            <ProfileCanvasViewport>
               <ProfileCanvas
-                ref={canvasRef}
                 profile={profile}
                 backgroundColorOverride={previewDraft?.backgroundColor}
                 backgroundImageOverride={previewDraft?.backgroundImage}
                 pageFontFamilyOverride={previewDraft?.pageFontFamily}
               >
-                {isCanvasReady &&
-                  canvasRect &&
-                  sortBlocksByZIndex(displayBlocks).map((block) => (
-                    <ProfileBlockRenderer
-                      key={block.id}
-                      block={block}
-                      canvas={canvasRect}
-                      profile={profile}
-                      user={viewerUser}
-                      bioOverride={previewDraft?.bio}
-                      bannerOverride={previewDraft?.banner}
-                      readOnly
-                    />
-                  ))}
+                <ProfileCanvasBlocksLayer>
+                  {({ canvasRect }) =>
+                    sortBlocksByZIndex(displayBlocks).map((block) => (
+                      <ProfileBlockRenderer
+                        key={block.id}
+                        block={block}
+                        canvas={canvasRect}
+                        profile={profile}
+                        user={viewerUser}
+                        bioOverride={previewDraft?.bio}
+                        bannerOverride={previewDraft?.banner}
+                        readOnly
+                      />
+                    ))
+                  }
+                </ProfileCanvasBlocksLayer>
                 {(previewIntroMusic ?? profile.introMusic) && (
                   <ProfileIntroMusic
                     floating
@@ -251,7 +258,7 @@ export const ProfileViewerPage = observer(
                   />
                 )}
               </ProfileCanvas>
-            </Stack>
+            </ProfileCanvasViewport>
           </Stack>
         )}
       </ProfileLayout>

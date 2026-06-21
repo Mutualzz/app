@@ -3,6 +3,7 @@ import type {
   APIProfileMusicSearchTrack
 } from "@mutualzz/types";
 import type { UserProfile } from "@stores/objects/UserProfile";
+import { normalizeProfileBlocks } from "@components/Profile/viewer/profileLayout.utils";
 
 export interface ProfileDraftState {
   bio: string;
@@ -53,9 +54,11 @@ export const createDraftFromProfile = (
       (profile.introMusic?.musicTrack || profile.introMusic?.spotify
         ? null
         : (profile.introMusic?.url ?? null)),
-    blocks: (profile.blocks ?? []).filter(
-      (block) => (block as { type: string }).type !== "embed"
-    ) as APIProfileBlock[]
+    blocks: normalizeProfileBlocks(
+      (profile.blocks ?? []).filter(
+        (block) => (block as { type: string }).type !== "embed"
+      ) as APIProfileBlock[]
+    )
   };
 };
 
@@ -93,7 +96,7 @@ export const EMPTY_PROFILE_SAVE_PAYLOAD = {
 };
 
 export const prepareBlocksForSave = (blocks: APIProfileBlock[]) =>
-  blocks.filter((block) => {
+  normalizeProfileBlocks(blocks).filter((block) => {
     if ((block as { type: string }).type === "embed") return false;
     if (block.type === "image" && !block.src.trim()) return false;
     if (block.type === "links" && block.links.every((l) => !l.url.trim())) {
@@ -163,10 +166,18 @@ export const isEditableInputFocused = () => {
   );
 };
 
+export const isProfileBlockDeleteKey = (event: KeyboardEvent) =>
+  (event.key === "Delete" || event.key === "Backspace") &&
+  !event.metaKey &&
+  !event.ctrlKey &&
+  !event.altKey;
+
 export const getDropPoint = (
   translatedRect: { left: number; top: number; width: number; height: number },
-  canvasRect: { left: number; top: number }
+  canvasRect: { left: number; top: number },
+  scale = 1
 ) => ({
-  x: translatedRect.left - canvasRect.left + translatedRect.width / 2,
-  y: translatedRect.top - canvasRect.top + translatedRect.height / 2
+  x:
+    (translatedRect.left - canvasRect.left + translatedRect.width / 2) / scale,
+  y: (translatedRect.top - canvasRect.top + translatedRect.height / 2) / scale
 });

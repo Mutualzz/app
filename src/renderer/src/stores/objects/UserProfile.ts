@@ -105,7 +105,7 @@ export class UserProfile {
   constructBlockImageUrl(src: string) {
     if (src.startsWith("http")) return src;
     return REST.makeCDNUrl(
-      CDNRoutes.profileBackground(this.userId, src, ImageFormat.WebP, 512),
+      CDNRoutes.profileImage(this.userId, src, ImageFormat.WebP, 512),
     );
   }
 

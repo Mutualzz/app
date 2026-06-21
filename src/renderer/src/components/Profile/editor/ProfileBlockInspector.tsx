@@ -12,6 +12,7 @@ import type { ProfileDraftState } from "@components/Profile/editor/profileEditor
 import { ProfileMarkdownField } from "@components/Profile/editor/ProfileMarkdownField";
 import { ProfileMusicPicker } from "@components/Profile/editor/ProfileMusicPicker";
 import { ProfileBlockTypeInspector } from "@components/Profile/editor/ProfileBlockTypeInspector";
+import { ProfileBlockSizeInspector } from "@components/Profile/editor/ProfileBlockSizeInspector";
 import { getApiErrorMessage } from "@components/Profile/editor/profileEditor.utils";
 import type { UserProfile } from "@stores/objects/UserProfile";
 import {
@@ -32,6 +33,8 @@ import {
   ImageIcon,
   MusicNotesIcon,
   PaintBrushBroadIcon,
+  TextAaIcon,
+  TextAlignLeftIcon,
   TrashIcon
 } from "@phosphor-icons/react";
 import { observer } from "mobx-react-lite";
@@ -164,11 +167,14 @@ export const ProfileBlockInspector = observer(
       "all"
     );
 
-    const [collapsed, setCollapsed] = useState(() => ({
-      appearance: false,
+    const [collapsed, setCollapsed] = useState({
+      font: true,
+      bio: false,
+      banner: true,
+      background: true,
       intro: true,
       selected: !selectedBlock
-    }));
+    });
 
     useEffect(() => {
       if (selectedBlock) {
@@ -217,7 +223,7 @@ export const ProfileBlockInspector = observer(
 
     const uploadAsset = async (
       file: File,
-      type: "banner" | "background" | "music"
+      type: "banner" | "background" | "image" | "music"
     ): Promise<string | null> => {
       const formData = new FormData();
       formData.append("file", file);
@@ -231,7 +237,7 @@ export const ProfileBlockInspector = observer(
 
     const handleAssetUpload = async (
       file: File,
-      type: "banner" | "background" | "music",
+      type: "banner" | "background" | "image" | "music",
       onSuccess: (hash: string) => void,
       setUploading: (value: boolean) => void,
       label: string
@@ -315,11 +321,11 @@ export const ProfileBlockInspector = observer(
         </Stack>
 
         <InspectorSection
-          icon={<PaintBrushBroadIcon size={16} weight="fill" />}
-          title="Appearance"
-          collapsed={collapsed.appearance}
+          icon={<TextAaIcon size={16} weight="fill" />}
+          title="Font"
+          collapsed={collapsed.font}
           onToggleCollapsed={() =>
-            setCollapsed((prev) => ({ ...prev, appearance: !prev.appearance }))
+            setCollapsed((prev) => ({ ...prev, font: !prev.font }))
           }
         >
           <SettingCard>
@@ -331,7 +337,18 @@ export const ProfileBlockInspector = observer(
               onChange={(pageFontFamily) => onDraftChange({ pageFontFamily })}
             />
           </SettingCard>
+        </InspectorSection>
 
+        {!collapsed.font && <Divider lineColor="muted" />}
+
+        <InspectorSection
+          icon={<TextAlignLeftIcon size={16} weight="fill" />}
+          title="Bio"
+          collapsed={collapsed.bio}
+          onToggleCollapsed={() =>
+            setCollapsed((prev) => ({ ...prev, bio: !prev.bio }))
+          }
+        >
           <SettingCard>
             <FieldLabel>Bio</FieldLabel>
             <ProfileMarkdownField
@@ -342,9 +359,20 @@ export const ProfileBlockInspector = observer(
               placeholder="Tell people about yourself"
             />
           </SettingCard>
+        </InspectorSection>
 
+        {!collapsed.bio && <Divider lineColor="muted" />}
+
+        <InspectorSection
+          icon={<ImageIcon size={16} weight="fill" />}
+          title="Banner"
+          collapsed={collapsed.banner}
+          onToggleCollapsed={() =>
+            setCollapsed((prev) => ({ ...prev, banner: !prev.banner }))
+          }
+        >
           <SettingCard>
-            <FieldLabel>Banner</FieldLabel>
+            <FieldLabel>Banner image</FieldLabel>
             {bannerPreview && (
               <img
                 src={bannerPreview}
@@ -406,10 +434,28 @@ export const ProfileBlockInspector = observer(
                 event.target.value = "";
               }}
             />
+            <FieldHint>
+              Shown in your profile header block. Crop and height can be tuned
+              when the header block is selected.
+            </FieldHint>
           </SettingCard>
+        </InspectorSection>
 
+        {!collapsed.banner && <Divider lineColor="muted" />}
+
+        <InspectorSection
+          icon={<PaintBrushBroadIcon size={16} weight="fill" />}
+          title="Background"
+          collapsed={collapsed.background}
+          onToggleCollapsed={() =>
+            setCollapsed((prev) => ({
+              ...prev,
+              background: !prev.background
+            }))
+          }
+        >
           <SettingCard>
-            <FieldLabel>Background</FieldLabel>
+            <FieldLabel>Background color</FieldLabel>
             <Stack direction="row" spacing={1.25} alignItems="center">
               <Input
                 type="color"
@@ -432,6 +478,7 @@ export const ProfileBlockInspector = observer(
                 </Button>
               )}
             </Stack>
+            <FieldLabel>Background image</FieldLabel>
             {backgroundPreview && (
               <img
                 src={backgroundPreview}
@@ -500,7 +547,7 @@ export const ProfileBlockInspector = observer(
           </SettingCard>
         </InspectorSection>
 
-        {!collapsed.appearance && <Divider lineColor="muted" />}
+        {!collapsed.background && <Divider lineColor="muted" />}
 
         <InspectorSection
           icon={<MusicNotesIcon size={16} weight="fill" />}
@@ -594,7 +641,7 @@ export const ProfileBlockInspector = observer(
         {!collapsed.intro && <Divider lineColor="muted" />}
 
         <InspectorSection
-          icon={<ImageIcon size={16} weight="fill" />}
+          icon={<CursorClickIcon size={16} weight="fill" />}
           title="Selected block"
           collapsed={collapsed.selected}
           onToggleCollapsed={() =>
@@ -737,7 +784,7 @@ export const ProfileBlockInspector = observer(
                       if (!file) return;
                       await handleAssetUpload(
                         file,
-                        "background",
+                        "image",
                         (hash) => updateSelectedBlock({ src: hash }),
                         setUploadingBlockImage,
                         "Image"
@@ -910,6 +957,13 @@ export const ProfileBlockInspector = observer(
                   </FieldHint>
                 </>
               )}
+
+              <ProfileBlockSizeInspector
+                block={selectedBlock}
+                updateSelectedBlock={updateSelectedBlock}
+              />
+
+              <Divider lineColor="muted" />
 
               <ProfileBlockTypeInspector
                 block={selectedBlock}

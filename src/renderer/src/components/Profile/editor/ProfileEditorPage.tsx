@@ -22,6 +22,7 @@ import {
   getApiErrorMessage,
   getDropPoint,
   isEditableInputFocused,
+  isProfileBlockDeleteKey,
   prepareBlocksForSave,
   validateDraftForSave,
   type ProfileDraftState
@@ -34,7 +35,7 @@ import {
 } from "@components/Profile/viewer/profileLayout.utils";
 import { useAppStore } from "@hooks/useStores";
 import type { ProfileBlockType, APIProfileBlock } from "@mutualzz/types";
-import { Box, Stack } from "@mutualzz/ui-web";
+import { Stack } from "@mutualzz/ui-web";
 import {
   DndContext,
   type DragEndEvent,
@@ -80,10 +81,8 @@ export const ProfileEditorPage = observer(() => {
     );
   });
   const [selectedBlockId, setSelectedBlockId] = useState<string | null>(null);
-  const [canvasRect, setCanvasRect] = useState<CanvasRect>({
-    width: 800,
-    height: 600
-  });
+  const viewportScaleRef = useRef(1);
+  const [canvasRect, setCanvasRect] = useState<CanvasRect>({ width: 0, height: 0 });
   const [zoom, setZoom] = useState(0.88);
   const [fitZoom, setFitZoom] = useState(0.88);
   const [snapToGrid, setSnapToGrid] = useState(false);
@@ -175,19 +174,24 @@ export const ProfileEditorPage = observer(() => {
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key !== "Delete" || !selectedBlockId || !draft) return;
+      if (!isProfileBlockDeleteKey(event) || !selectedBlockId) return;
       if (isEditableInputFocused()) return;
 
-      setDraft({
-        ...draft,
-        blocks: draft.blocks.filter((block) => block.id !== selectedBlockId)
+      event.preventDefault();
+
+      setDraft((current) => {
+        if (!current) return current;
+        return {
+          ...current,
+          blocks: current.blocks.filter((block) => block.id !== selectedBlockId)
+        };
       });
       setSelectedBlockId(null);
     };
 
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [draft, selectedBlockId]);
+  }, [selectedBlockId]);
 
   const updateBlock = useCallback(
     (blockId: string, updater: (block: APIProfileBlock) => APIProfileBlock) => {
@@ -259,7 +263,7 @@ export const ProfileEditorPage = observer(() => {
 
     const translated = event.active.rect.current.translated;
     const point = translated
-      ? getDropPoint(translated, event.over.rect)
+      ? getDropPoint(translated, event.over.rect, viewportScaleRef.current)
       : undefined;
 
     addBlock(type, point);
@@ -339,18 +343,9 @@ export const ProfileEditorPage = observer(() => {
             minWidth={0}
             minHeight={0}
             position="relative"
-            alignItems="center"
-            justifyContent="center"
             overflow="hidden"
           >
-            <Box
-              width={`${zoom * 100}%`}
-              height={`${zoom * 100}%`}
-              minWidth={0}
-              minHeight={0}
-              css={{ flexShrink: 0 }}
-            >
-              <ProfileEditorCanvas
+            <ProfileEditorCanvas
                 profile={profile}
                 user={account}
                 blocks={draft.blocks}
@@ -361,13 +356,16 @@ export const ProfileEditorPage = observer(() => {
                 bioOverride={draft.bio}
                 bannerOverride={draft.banner}
                 snapToGrid={snapToGrid}
+                zoom={zoom}
                 onCanvasRectChange={setCanvasRect}
+                onViewportScaleChange={(scale) => {
+                  viewportScaleRef.current = scale;
+                }}
                 onBlocksChange={(blocks) => setDraft({ ...draft, blocks })}
                 onSelectBlock={setSelectedBlockId}
                 onBlockContextMenu={openBlockContextMenu}
                 introMusic={draftIntroMusic}
               />
-            </Box>
             <ProfileEditorZoomControls
               zoom={zoom}
               fitZoom={fitZoom}

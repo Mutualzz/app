@@ -21,6 +21,8 @@ interface Props {
 
 export const ProfileHeaderBlockView = observer(
   ({ user, profile, block, bioOverride, bannerOverride }: Props) => {
+    void profile.updatedAt;
+
     const bannerSource =
       bannerOverride !== undefined ? bannerOverride : profile.banner;
 
@@ -34,7 +36,6 @@ export const ProfileHeaderBlockView = observer(
         <Box
           width="100%"
           flexShrink={0}
-          borderRadius={0}
           css={{
             height: `${bannerHeight}%`,
             minHeight: 64,
@@ -46,13 +47,18 @@ export const ProfileHeaderBlockView = observer(
 
         <Stack
           direction="row"
-          alignItems="center"
+          alignItems="flex-start"
           spacing={1.5}
           px={2}
           pb={1.5}
           flex={1}
-          minHeight={AVATAR_SIZE - AVATAR_OVERLAP}
-          css={{ marginTop: -AVATAR_OVERLAP }}
+          minHeight={0}
+          minWidth={0}
+          css={{
+            marginTop: -AVATAR_OVERLAP,
+            position: "relative",
+            zIndex: 1
+          }}
         >
           <Box flexShrink={0}>
             <UserAvatar user={user} size={AVATAR_SIZE} badge />
@@ -60,22 +66,26 @@ export const ProfileHeaderBlockView = observer(
 
           <Stack
             direction="column"
-            justifyContent="center"
             spacing={bio ? 0.5 : 0}
             flex={1}
             minWidth={0}
+            minHeight={0}
+            css={{ paddingTop: AVATAR_OVERLAP }}
           >
             <Typography level="title-md" css={{ lineHeight: 1.25 }}>
               {user.displayName}
             </Typography>
             {bio && (
               <Box
+                flex={1}
+                minHeight={0}
                 css={{
+                  overflowY: "auto",
                   opacity: 0.85,
                   fontSize: "var(--mz-fontSize-sm, 0.875rem)"
                 }}
               >
-                <ProfileMarkdownContent value={bio} lineClamp={4} />
+                <ProfileMarkdownContent value={bio} />
               </Box>
             )}
           </Stack>
