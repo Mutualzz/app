@@ -70,6 +70,9 @@ const ToolbarContent = observer(
 
     const isSent = message instanceof Message;
 
+    const canReact =
+      isSent && me?.hasPermission("AddReactions", message.channel);
+
     return (
       <Paper
         ref={toolbarRef}
@@ -81,7 +84,7 @@ const ToolbarContent = observer(
         transparency={25}
       >
         <Stack direction="row" alignItems="center" spacing={1.25}>
-          {isSent && (
+          {isSent && canReact && (
             <MessageReactionToolbar
               message={message}
               pickerOpen={pickerOpen}
@@ -218,7 +221,7 @@ export const MessageToolbar = observer(
               onReplyClick={(msg) => app.setReplyingTo(msg)}
             />
           }
-          offset={{ mainAxis: header ? -4 : -24, crossAxis: 0 }}
+          offset={{ mainAxis: header ? -4 : -24, crossAxis: -20 }}
           shift={{ crossAxis: false }}
           disablePortal
           disableHoverListener={pickerOpen}

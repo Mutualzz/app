@@ -8,9 +8,15 @@ import { styled } from "@mutualzz/ui-core";
 import { Message } from "@stores/objects/Message";
 import { getSpriteStyle } from "@utils/emojis/emojiSprite";
 import { getQuickReactionItems } from "@utils/quickReactionEmojis";
-import { PencilSimpleIcon, TrashIcon } from "@phosphor-icons/react";
+import {
+  ArrowBendUpLeftIcon,
+  CopyIcon,
+  PencilSimpleIcon,
+  TrashIcon
+} from "@phosphor-icons/react";
 import { useMutation } from "@tanstack/react-query";
 import { observer } from "mobx-react-lite";
+import { isElectron } from "@renderer/utils";
 
 const EMOJI_SIZE = 24;
 
@@ -54,7 +60,9 @@ export const MessageContextMenu = observer(({ message }: Props) => {
   const canEdit = message.author?.id === app.account?.id;
   const canDelete =
     message.author?.id === app.account?.id ||
-    !!me?.hasPermission("ManageMessages");
+    !!me?.hasPermission("ManageMessages", message.channel);
+
+  const canReact = me?.hasPermission("AddReactions", message.channel);
 
   const { mutate: deleteMessage } = useMutation({
     mutationKey: ["delete-message", message.id],
@@ -83,7 +91,7 @@ export const MessageContextMenu = observer(({ message }: Props) => {
       id={generateMenuIDs.message(message.channelId, message.id)}
       key={message.id}
     >
-      {quickItems.length > 0 && (
+      {quickItems.length > 0 && canReact && (
         <>
           <Stack
             direction="row"
@@ -124,6 +132,31 @@ export const MessageContextMenu = observer(({ message }: Props) => {
             />
           )}
         </>
+      )}
+
+      <ContextItem
+        endDecorator={<ArrowBendUpLeftIcon weight="fill" />}
+        onClick={() => {
+          app.setReplyingTo(message);
+          clearMenu();
+        }}
+      >
+        Reply
+      </ContextItem>
+
+      <Divider orientation="horizontal" css={{ opacity: 0.5 }} />
+
+      {message.content && (
+        <ContextItem
+          endDecorator={<CopyIcon weight="fill" />}
+          onClick={() => {
+            if (isElectron) window.api.clipboard.write(message.content!);
+            else navigator.clipboard.writeText(message.content!);
+            clearMenu();
+          }}
+        >
+          Copy Text
+        </ContextItem>
       )}
 
       {canEdit && (

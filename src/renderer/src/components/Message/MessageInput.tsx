@@ -338,15 +338,22 @@ export const MessageInput = observer(
             {replyingTo.author?.displayName ?? "Unknown"}
           </Typography>
         </Typography>
-        <Typography
-          level="body-xs"
-          fontWeight="bold"
-          textColor={app.replyMention ? "accent" : "secondary"}
-          onClick={() => app.setReplyMention(!app.replyMention)}
-          css={{ cursor: "pointer", userSelect: "none", whiteSpace: "nowrap" }}
-        >
-          {app.replyMention ? "@ ON" : "@ OFF"}
-        </Typography>
+        {replyingTo.authorId !== app.account?.id && (
+          <Typography
+            level="body-xs"
+            fontWeight="bold"
+            textColor={app.replyMention ? "accent" : "secondary"}
+            onClick={() => app.setReplyMention(!app.replyMention)}
+            css={{
+              cursor: "pointer",
+              userSelect: "none",
+              whiteSpace: "nowrap"
+            }}
+          >
+            {app.replyMention ? "@ ON" : "@ OFF"}
+          </Typography>
+        )}
+
         <IconButton
           variant="plain"
           size="sm"
