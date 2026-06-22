@@ -91,7 +91,12 @@ export const UserProfileSettings = observer(() => {
       width="100%"
       maxWidth={520}
     >
-      <Paper direction="column" borderRadius={12} elevation={embossed ? 2 : 0} boxShadow="none !important">
+      <Paper
+        direction="column"
+        borderRadius={12}
+        elevation={embossed ? 2 : 0}
+        boxShadow="none !important"
+      >
         <Paper
           variant="solid"
           color={account.accentColor}
@@ -108,8 +113,18 @@ export const UserProfileSettings = observer(() => {
           mt={-5.5}
         >
           <UserAvatar user={account} size={88} badge />
-          <Stack direction="column" spacing={0.25} pb={0.5} minWidth={0} flex={1}>
-            <Typography level="title-md" fontWeight={600} css={{ lineHeight: 1.2 }}>
+          <Stack
+            direction="column"
+            spacing={0.25}
+            pb={0.5}
+            minWidth={0}
+            flex={1}
+          >
+            <Typography
+              level="title-md"
+              fontWeight={600}
+              css={{ lineHeight: 1.2 }}
+            >
               {account.displayName}
             </Typography>
             <Typography level="body-sm" css={{ opacity: 0.75 }}>
@@ -192,8 +207,7 @@ export const UserProfileSettings = observer(() => {
       <Button
         disabled={isPending || !account.avatar}
         onClick={() => deleteAvatar()}
-        color="neutral"
-        variant="plain"
+        color="danger"
         size="sm"
         css={{ alignSelf: "flex-start" }}
       >

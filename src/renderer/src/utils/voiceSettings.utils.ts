@@ -15,10 +15,10 @@ export interface ScreenShareCaptureConfig {
 
 export const DEFAULT_SCREEN_SHARE_QUALITY: ScreenShareQuality = "1080p30";
 
-export const SCREEN_SHARE_QUALITY_OPTIONS: Array<{
+export const SCREEN_SHARE_QUALITY_OPTIONS: {
   value: ScreenShareQuality;
   label: string;
-}> = [
+}[] = [
   { value: "720p15", label: "720p 15fps" },
   { value: "720p30", label: "720p 30fps" },
   { value: "1080p30", label: "1080p 30fps" },

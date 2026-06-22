@@ -306,9 +306,8 @@ export const ProfileBlockInspector = observer(
         spacing={2.5}
         p={2}
         borderRadius={14}
-        variant="plain"
-        elevation={app.settings?.preferEmbossed ? 4 : 0}
-        boxShadow="none !important"
+        variant="elevation"
+        elevation={app.settings?.preferEmbossed ? 5 : 1}
         css={{ overflow: "auto" }}
       >
         <Stack direction="column" spacing={0.5}>

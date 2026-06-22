@@ -56,6 +56,7 @@ interface Props {
   onCanvasRectChange?: (rect: CanvasRect) => void;
   onViewportScaleChange?: (scale: number) => void;
   snapToGrid?: boolean;
+  gridStep?: number;
   zoom?: number;
   onBlockContextMenu?: (event: React.MouseEvent, blockId: string) => void;
   introMusic?: APIProfileIntroMusic | null;
@@ -77,6 +78,7 @@ const ProfileEditorCanvasInner = observer(
     onCanvasRectChange,
     onViewportScaleChange,
     snapToGrid = false,
+    gridStep = PROFILE_GRID_STEP,
     onBlockContextMenu,
     introMusic
   }: Omit<Props, "zoom">) => {
@@ -89,8 +91,10 @@ const ProfileEditorCanvasInner = observer(
     const frameRef = useRef<number | null>(null);
     const pendingMoveRef = useRef<PointerEvent | null>(null);
     const snapToGridRef = useRef(snapToGrid);
+    const gridStepRef = useRef(gridStep);
 
     snapToGridRef.current = snapToGrid;
+    gridStepRef.current = gridStep;
     displayBlocksRef.current = displayBlocks;
 
     useEffect(() => {
@@ -110,7 +114,7 @@ const ProfileEditorCanvasInner = observer(
           ? clampBlock({
               ...block,
               ...(snapToGridRef.current
-                ? snapRectToGrid({ ...block, ...patch })
+                ? snapRectToGrid({ ...block, ...patch }, gridStepRef.current)
                 : patch)
             } as APIProfileBlock)
           : block
@@ -308,7 +312,7 @@ const ProfileEditorCanvasInner = observer(
                         linear-gradient(to right, rgba(255,255,255,0.07) 1px, transparent 1px),
                         linear-gradient(to bottom, rgba(255,255,255,0.07) 1px, transparent 1px)
                       `,
-                      backgroundSize: `${(PROFILE_GRID_STEP / 100) * canvasRect.width}px ${(PROFILE_GRID_STEP / 100) * canvasRect.width}px`
+                      backgroundSize: `${(gridStep / 100) * canvasRect.width}px ${(gridStep / 100) * canvasRect.width}px`
                     }}
                   />
                 )}

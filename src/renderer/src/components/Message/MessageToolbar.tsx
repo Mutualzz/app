@@ -10,7 +10,11 @@ import { observer } from "mobx-react-lite";
 import type { PropsWithChildren, RefObject } from "react";
 import { useEffect, useRef, useState } from "react";
 import { QueuedMessage } from "@stores/objects/QueuedMessage";
-import { PencilSimpleIcon, TrashIcon } from "@phosphor-icons/react";
+import {
+  ArrowBendUpLeftIcon,
+  PencilSimpleIcon,
+  TrashIcon
+} from "@phosphor-icons/react";
 import type { Expression } from "@stores/objects/Expression";
 import type { PickerEmoji } from "@utils/emojis/emojiPickerData";
 import type { SkinTone } from "@utils/emojis/emojiSprite";
@@ -31,6 +35,7 @@ interface ToolbarContentProps extends Props {
   onPickerOpenChange: (open: boolean) => void;
   triggerRef: RefObject<HTMLButtonElement | null>;
   toolbarRef: RefObject<HTMLDivElement | null>;
+  onReplyClick: (message: Message) => void;
 }
 
 const ToolbarContent = observer(
@@ -39,7 +44,8 @@ const ToolbarContent = observer(
     pickerOpen,
     onPickerOpenChange,
     triggerRef,
-    toolbarRef
+    toolbarRef,
+    onReplyClick
   }: ToolbarContentProps) => {
     const app = useAppStore();
 
@@ -83,6 +89,17 @@ const ToolbarContent = observer(
               triggerRef={triggerRef}
             />
           )}
+          {message.author?.id !== app.account?.id && isSent && (
+            <Tooltip offset={16} content="Reply">
+              <IconButton
+                onClick={() => onReplyClick(message)}
+                variant="plain"
+                size="sm"
+              >
+                <ArrowBendUpLeftIcon weight="fill" />
+              </IconButton>
+            </Tooltip>
+          )}
           {message.author?.id === app.account?.id && isSent && (
             <Tooltip offset={16} content="Edit">
               <IconButton
@@ -115,6 +132,7 @@ const ToolbarContent = observer(
 
 export const MessageToolbar = observer(
   ({ message, header, children }: Props) => {
+    const app = useAppStore();
     const [hoverOpen, setHoverOpen] = useState(false);
     const [pickerOpen, setPickerOpen] = useState(false);
     const [activeTab, setActiveTab] = useState<"emoji" | "gifs" | "stickers">(
@@ -197,6 +215,7 @@ export const MessageToolbar = observer(
               onPickerOpenChange={setPickerOpen}
               triggerRef={triggerRef}
               toolbarRef={toolbarRef}
+              onReplyClick={(msg) => app.setReplyingTo(msg)}
             />
           }
           offset={{ mainAxis: header ? -4 : -24, crossAxis: 0 }}

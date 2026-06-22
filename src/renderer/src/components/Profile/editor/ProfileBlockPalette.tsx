@@ -102,8 +102,8 @@ export const ProfileBlockPalette = observer(({ onDoubleClickAdd }: Props) => {
       spacing={1}
       p={1.25}
       borderRadius={12}
-      variant={embossed ? "elevation" : "plain"}
-      elevation={embossed ? 2 : 0}
+      variant="elevation"
+      elevation={embossed ? 5 : 1}
       css={{
         overflowY: "auto",
         maxHeight: "100%"
@@ -115,9 +115,10 @@ export const ProfileBlockPalette = observer(({ onDoubleClickAdd }: Props) => {
         css={{
           textTransform: "uppercase",
           letterSpacing: "0.06em",
-          opacity: 0.55,
-          px: 0.5
+          opacity: 1,
+          textAlign: "center"
         }}
+        textColor="muted"
       >
         Blocks
       </Typography>

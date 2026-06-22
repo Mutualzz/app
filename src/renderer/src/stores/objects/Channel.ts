@@ -412,7 +412,13 @@ export class Channel {
 
   async sendMessage(
     data:
-      | { content: string; nonce: string; expressionIds?: string[] }
+      | {
+          content: string;
+          nonce: string;
+          expressionIds?: string[];
+          repliedToId?: string;
+          mentionReply?: boolean;
+        }
       | FormData,
     msg?: QueuedMessage
   ) {
@@ -433,7 +439,13 @@ export class Channel {
     return this.app.rest
       .post<
         APIMessage,
-        { content: string; nonce: string; expressionIds?: string[] }
+        {
+          content: string;
+          nonce: string;
+          expressionIds?: string[];
+          repliedToId?: string;
+          mentionReply?: boolean;
+        }
       >(`/channels/${this.id}/messages`, data)
       .catch((err) => {
         this.logger.error(err);

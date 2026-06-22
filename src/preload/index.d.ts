@@ -15,7 +15,7 @@ export interface MutualzzAPI {
     }>;
     listProcesses(
       filterExes: string[]
-    ): Promise<Array<{ name: string; pid: number }>>;
+    ): Promise<{ name: string; pid: number }>[];
   };
   badge: {
     set(count: number): void;
@@ -35,12 +35,12 @@ export interface MutualzzAPI {
     setAutostart(enabled: boolean): Promise<void>;
     getAutostart(): Promise<boolean>;
     listCaptureSources(): Promise<
-      Array<{
+      {
         id: string;
         name: string;
         thumbnail: string;
         appIcon: string | null;
-      }>
+      }[]
     >;
     getScreenCaptureAccess(): Promise<
       "not-determined" | "granted" | "denied" | "restricted" | "unknown"
@@ -78,11 +78,13 @@ export interface MutualzzAPI {
     onUpdaterDownloaded(callback: () => void): () => void;
     onUpdaterNotAvailable(callback: () => void): () => void;
     onUpdaterError(callback: (error: string) => void): () => void;
-    onUpdaterDownloadProgress(callback: (data: {
-      percent: number;
-      downloaded: number;
-      total: number;
-    }) => void): () => void;
+    onUpdaterDownloadProgress(
+      callback: (data: {
+        percent: number;
+        downloaded: number;
+        total: number;
+      }) => void
+    ): () => void;
   };
 }
 

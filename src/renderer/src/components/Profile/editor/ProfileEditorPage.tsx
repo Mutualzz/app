@@ -35,7 +35,7 @@ import {
 } from "@components/Profile/viewer/profileLayout.utils";
 import { useAppStore } from "@hooks/useStores";
 import type { ProfileBlockType, APIProfileBlock } from "@mutualzz/types";
-import { Stack } from "@mutualzz/ui-web";
+import { Box, Paper, Stack, Typography } from "@mutualzz/ui-web";
 import {
   DndContext,
   type DragEndEvent,
@@ -82,10 +82,15 @@ export const ProfileEditorPage = observer(() => {
   });
   const [selectedBlockId, setSelectedBlockId] = useState<string | null>(null);
   const viewportScaleRef = useRef(1);
-  const [canvasRect, setCanvasRect] = useState<CanvasRect>({ width: 0, height: 0 });
-  const [zoom, setZoom] = useState(0.88);
+  const [canvasRect, setCanvasRect] = useState<CanvasRect>({
+    width: 0,
+    height: 0
+  });
+  const [zoom, setZoom] = useState(1);
   const [fitZoom, setFitZoom] = useState(0.88);
   const [snapToGrid, setSnapToGrid] = useState(false);
+  const [gridStep, setGridStep] = useState(4);
+  const [panelsVisible, setPanelsVisible] = useState(true);
 
   useEffect(() => {
     if (!profile) return;
@@ -225,17 +230,17 @@ export const ProfileEditorPage = observer(() => {
       updateBlock(blockId, (block) =>
         axis === "horizontal"
           ? alignBlockHorizontally(block)
-          : alignBlockVertically(block)
+          : alignBlockVertically(block, canvasRect)
       );
     },
-    [updateBlock]
+    [updateBlock, canvasRect]
   );
 
   const snapMenuBlock = useCallback(() => {
     const blockId = blockMenuTargetRef.current;
     if (!blockId) return;
-    updateBlock(blockId, snapBlockToGrid);
-  }, [updateBlock]);
+    updateBlock(blockId, (block) => snapBlockToGrid(block, gridStep));
+  }, [updateBlock, gridStep]);
 
   const addBlock = (
     type: ProfileBlockType,
@@ -245,10 +250,7 @@ export const ProfileEditorPage = observer(() => {
     let nextBlocks = addBlockAtPoint(draft.blocks, type, canvasRect, point);
     if (snapToGrid) {
       const added = nextBlocks[nextBlocks.length - 1];
-      nextBlocks = [
-        ...nextBlocks.slice(0, -1),
-        snapBlockToGrid(added)
-      ];
+      nextBlocks = [...nextBlocks.slice(0, -1), snapBlockToGrid(added, gridStep)];
     }
     const added = nextBlocks[nextBlocks.length - 1];
     setDraft({ ...draft, blocks: nextBlocks });
@@ -275,20 +277,9 @@ export const ProfileEditorPage = observer(() => {
 
   const draftIntroMusic = getDraftIntroMusic(draft, profile);
 
-  const titleBarActions = (
+  const titleBarActions = panelsVisible ? (
     <Stack direction="row" spacing={1}>
-      <Button
-        color="neutral"
-        size="sm"
-        onClick={() => {
-          app.profiles.setPreviewDraft(account.id, draft);
-          navigate({
-            to: "/users/$username",
-            params: { username: account.username },
-            state: { profilePreview: true }
-          });
-        }}
-      >
+      <Button color="neutral" size="sm" onClick={() => setPanelsVisible(false)}>
         Preview
       </Button>
       <Button
@@ -314,6 +305,20 @@ export const ProfileEditorPage = observer(() => {
         Save
       </Button>
     </Stack>
+  ) : (
+    <Stack direction="row" spacing={1}>
+      <Button color="neutral" size="sm" onClick={() => setPanelsVisible(true)}>
+        Back to editing
+      </Button>
+      <Button
+        color="primary"
+        size="sm"
+        loading={saving}
+        onClick={() => saveProfile()}
+      >
+        Save
+      </Button>
+    </Stack>
   );
 
   return (
@@ -324,70 +329,122 @@ export const ProfileEditorPage = observer(() => {
       onBack={() => navigateToPreferredMode(app, navigate)}
     >
       <DndContext sensors={sensors} onDragEnd={onDragEnd}>
-        <Stack
-          direction="row"
-          spacing={1}
+        <Box
+          ref={viewportRef}
           width="100%"
           height="100%"
-          px={1}
-          py={0.5}
           minHeight={0}
           minWidth={0}
+          position="relative"
           overflow="hidden"
         >
-          <ProfileBlockPalette onDoubleClickAdd={(type) => addBlock(type)} />
-          <Stack
-            ref={viewportRef}
-            flex={1}
-            height="100%"
-            minWidth={0}
-            minHeight={0}
-            position="relative"
-            overflow="hidden"
-          >
-            <ProfileEditorCanvas
-                profile={profile}
-                user={account}
-                blocks={draft.blocks}
-                selectedBlockId={selectedBlockId}
-                backgroundColorOverride={draft.backgroundColor}
-                backgroundImageOverride={draft.backgroundImage}
-                pageFontFamilyOverride={draft.pageFontFamily}
-                bioOverride={draft.bio}
-                bannerOverride={draft.banner}
-                snapToGrid={snapToGrid}
-                zoom={zoom}
-                onCanvasRectChange={setCanvasRect}
-                onViewportScaleChange={(scale) => {
-                  viewportScaleRef.current = scale;
-                }}
-                onBlocksChange={(blocks) => setDraft({ ...draft, blocks })}
-                onSelectBlock={setSelectedBlockId}
-                onBlockContextMenu={openBlockContextMenu}
-                introMusic={draftIntroMusic}
-              />
-            <ProfileEditorZoomControls
-              zoom={zoom}
-              fitZoom={fitZoom}
-              onZoomChange={setZoom}
-              snapToGrid={snapToGrid}
-              onSnapToGridChange={setSnapToGrid}
-            />
-            <ProfileBlockContextMenu
-              onAlignHorizontal={() => alignMenuBlock("horizontal")}
-              onAlignVertical={() => alignMenuBlock("vertical")}
-              onSnapToGrid={snapMenuBlock}
-            />
-          </Stack>
-          <ProfileBlockInspector
+          <ProfileEditorCanvas
             profile={profile}
-            draft={draft}
-            selectedBlock={selectedBlock}
-            onDraftChange={(patch) => setDraft({ ...draft, ...patch })}
+            user={account}
+            blocks={draft.blocks}
+            selectedBlockId={selectedBlockId}
+            backgroundColorOverride={draft.backgroundColor}
+            backgroundImageOverride={draft.backgroundImage}
+            pageFontFamilyOverride={draft.pageFontFamily}
+            bioOverride={draft.bio}
+            bannerOverride={draft.banner}
+            snapToGrid={snapToGrid}
+            gridStep={gridStep}
+            zoom={zoom}
+            onCanvasRectChange={setCanvasRect}
+            onViewportScaleChange={(scale) => {
+              viewportScaleRef.current = scale;
+            }}
             onBlocksChange={(blocks) => setDraft({ ...draft, blocks })}
             onSelectBlock={setSelectedBlockId}
+            onBlockContextMenu={openBlockContextMenu}
+            introMusic={draftIntroMusic}
           />
-        </Stack>
+
+          {panelsVisible && (
+            <>
+              {/* Disclaimer hint */}
+              <Box
+                css={{
+                  position: "absolute",
+                  bottom: 16,
+                  left: 0,
+                  transform: "translateX(50%)",
+                  zIndex: 5,
+                  pointerEvents: "none",
+                  whiteSpace: "nowrap"
+                }}
+              >
+                <Paper
+                  variant="soft"
+                  color="warning"
+                  borderRadius={999}
+                  px={1.5}
+                  py={0.5}
+                >
+                  <Typography level="body-xs" variant="plain" color="warning">
+                    Panels may cover blocks · click Preview to see the full
+                    canvas
+                  </Typography>
+                </Paper>
+              </Box>
+
+              {/* Floating palette — left side */}
+              <Box
+                css={{
+                  position: "absolute",
+                  top: 8,
+                  left: 8,
+                  zIndex: 10,
+                  pointerEvents: "auto"
+                }}
+              >
+                <ProfileBlockPalette
+                  onDoubleClickAdd={(type) => addBlock(type)}
+                />
+              </Box>
+
+              {/* Floating inspector — right side */}
+              <Box
+                css={{
+                  position: "absolute",
+                  top: 8,
+                  right: 8,
+                  bottom: 8,
+                  zIndex: 10,
+                  pointerEvents: "auto",
+                  overflowY: "auto"
+                }}
+              >
+                <ProfileBlockInspector
+                  profile={profile}
+                  draft={draft}
+                  selectedBlock={selectedBlock}
+                  onDraftChange={(patch) => setDraft({ ...draft, ...patch })}
+                  onBlocksChange={(blocks) => setDraft({ ...draft, blocks })}
+                  onSelectBlock={setSelectedBlockId}
+                />
+              </Box>
+            </>
+          )}
+
+          <ProfileEditorZoomControls
+            panelsVisible={panelsVisible}
+            setPanelsVisible={setPanelsVisible}
+            zoom={zoom}
+            fitZoom={fitZoom}
+            onZoomChange={setZoom}
+            snapToGrid={snapToGrid}
+            onSnapToGridChange={setSnapToGrid}
+            gridStep={gridStep}
+            onGridStepChange={setGridStep}
+          />
+          <ProfileBlockContextMenu
+            onAlignHorizontal={() => alignMenuBlock("horizontal")}
+            onAlignVertical={() => alignMenuBlock("vertical")}
+            onSnapToGrid={snapMenuBlock}
+          />
+        </Box>
       </DndContext>
     </ProfileLayout>
   );

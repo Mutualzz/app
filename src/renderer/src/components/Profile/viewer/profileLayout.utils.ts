@@ -5,6 +5,13 @@ export interface CanvasRect {
   height: number;
 }
 
+/**
+ * The canonical canvas width used for block coordinate calculations.
+ * Both the editor (fill-scaled) and the viewer (capped at this width) use this
+ * as their reference so blocks appear at the same density across both surfaces.
+ */
+export const PROFILE_CANVAS_REF_WIDTH = 800;
+
 /** All block dimensions are expressed as % of canvas width so layout scales uniformly. */
 export const canvasUnit = (canvas: CanvasRect) => canvas.width;
 
@@ -30,84 +37,84 @@ export const PROFILE_BLOCK_SIZE_LIMITS: Record<
   ProfileBlockSizeLimits
 > = {
   header: {
-    minWidth: 60,
-    maxWidth: 100,
-    minHeight: 18,
-    maxHeight: 45,
-    recommendedWidth: 96,
-    recommendedHeight: 28
-  },
-  text: {
-    minWidth: 16,
+    minWidth: 25,
     maxWidth: 100,
     minHeight: 8,
-    maxHeight: 55,
-    recommendedWidth: 36,
-    recommendedHeight: 14
-  },
-  image: {
-    minWidth: 12,
-    maxWidth: 80,
-    minHeight: 12,
-    maxHeight: 80,
-    recommendedWidth: 28,
-    recommendedHeight: 28
-  },
-  music: {
-    minWidth: 24,
-    maxWidth: 60,
-    minHeight: 16,
-    maxHeight: 36,
-    recommendedWidth: 38,
-    recommendedHeight: 24
-  },
-  links: {
-    minWidth: 18,
-    maxWidth: 72,
-    minHeight: 10,
-    maxHeight: 40,
-    recommendedWidth: 32,
+    maxHeight: 45,
+    recommendedWidth: 48,
     recommendedHeight: 18
   },
-  activity: {
-    minWidth: 20,
-    maxWidth: 64,
+  text: {
+    minWidth: 10,
+    maxWidth: 100,
+    minHeight: 4,
+    maxHeight: 55,
+    recommendedWidth: 24,
+    recommendedHeight: 10
+  },
+  image: {
+    minWidth: 8,
+    maxWidth: 80,
     minHeight: 8,
-    maxHeight: 22,
-    recommendedWidth: 34,
+    maxHeight: 80,
+    recommendedWidth: 18,
+    recommendedHeight: 18
+  },
+  music: {
+    minWidth: 14,
+    maxWidth: 60,
+    minHeight: 8,
+    maxHeight: 36,
+    recommendedWidth: 26,
+    recommendedHeight: 10
+  },
+  links: {
+    minWidth: 10,
+    maxWidth: 72,
+    minHeight: 6,
+    maxHeight: 40,
+    recommendedWidth: 22,
     recommendedHeight: 12
   },
+  activity: {
+    minWidth: 12,
+    maxWidth: 64,
+    minHeight: 4,
+    maxHeight: 22,
+    recommendedWidth: 22,
+    recommendedHeight: 8
+  },
   roles: {
-    minWidth: 18,
+    minWidth: 10,
     maxWidth: 72,
-    minHeight: 10,
+    minHeight: 6,
     maxHeight: 30,
-    recommendedWidth: 32,
-    recommendedHeight: 16
+    recommendedWidth: 22,
+    recommendedHeight: 10
   },
   mutual: {
-    minWidth: 18,
+    minWidth: 10,
     maxWidth: 72,
-    minHeight: 10,
+    minHeight: 6,
     maxHeight: 30,
-    recommendedWidth: 32,
-    recommendedHeight: 16
+    recommendedWidth: 22,
+    recommendedHeight: 10
   },
   divider: {
-    minWidth: 20,
+    minWidth: 10,
     maxWidth: 100,
-    minHeight: 2,
+    minHeight: 1,
     maxHeight: 8,
-    recommendedWidth: 56,
-    recommendedHeight: 4
+    recommendedWidth: 36,
+    recommendedHeight: 2
   },
   quote: {
-    minWidth: 20,
+    minWidth: 12,
     maxWidth: 80,
-    minHeight: 10,
+    minHeight: 6,
     maxHeight: 40,
-    recommendedWidth: 36,
-    recommendedHeight: 16
+    recommendedWidth: 24,
+    recommendedHeight: 12
   }
 };
 
@@ -135,10 +142,8 @@ export const PROFILE_GRID_STEP = 4;
 export const roundPercent = (value: number) =>
   Math.round(Math.min(100, Math.max(0, value)) * 100) / 100;
 
-export const snapPercent = (
-  value: number,
-  step = PROFILE_GRID_STEP
-) => roundPercent(Math.round(value / step) * step);
+export const snapPercent = (value: number, step = PROFILE_GRID_STEP) =>
+  roundPercent(Math.round(value / step) * step);
 
 export const snapRectToGrid = (
   rect: Pick<APIProfileBlock, "x" | "y" | "width" | "height">,
@@ -150,14 +155,18 @@ export const snapRectToGrid = (
   height: snapPercent(rect.height, step)
 });
 
-export const snapBlockToGrid = (block: APIProfileBlock) =>
-  clampBlock({ ...block, ...snapRectToGrid(block) });
+export const snapBlockToGrid = (block: APIProfileBlock, step = PROFILE_GRID_STEP) =>
+  clampBlock({ ...block, ...snapRectToGrid(block, step) });
 
 export const alignBlockHorizontally = (block: APIProfileBlock) =>
   clampBlock({ ...block, x: roundPercent((100 - block.width) / 2) });
 
-export const alignBlockVertically = (block: APIProfileBlock) =>
-  clampBlock({ ...block, y: roundPercent((100 - block.height) / 2) });
+export const alignBlockVertically = (block: APIProfileBlock, canvas?: CanvasRect) => {
+  const canvasHeightUnits = canvas && canvas.width > 0
+    ? (canvas.height / canvas.width) * 100
+    : 100;
+  return clampBlock({ ...block, y: roundPercent((canvasHeightUnits - block.height) / 2) });
+};
 
 export const percentToPixels = (
   block: Pick<APIProfileBlock, "x" | "y" | "width" | "height">,
@@ -196,9 +205,7 @@ export const pixelsToPercent = (
   return {
     x: roundPercent(clamp((rect.left / unit) * 100, 0, 100)),
     y: roundPercent(clamp((rect.top / unit) * 100, 0, 100)),
-    width: roundPercent(
-      clamp((rect.width / unit) * 100, minWidth, maxWidth)
-    ),
+    width: roundPercent(clamp((rect.width / unit) * 100, minWidth, maxWidth)),
     height: roundPercent(
       clamp((rect.height / unit) * 100, minHeight, maxHeight)
     )
@@ -299,6 +306,9 @@ export const createDefaultBlock = (
     width: limits.recommendedWidth,
     height: limits.recommendedHeight
   };
+  const canvasHeightUnits = canvas.width > 0
+    ? (canvas.height / canvas.width) * 100
+    : 100;
   const x = point
     ? clamp(
         (point.x / Math.max(canvas.width, 1)) * 100 - size.width / 2,
@@ -310,11 +320,11 @@ export const createDefaultBlock = (
     ? clamp(
         (point.y / Math.max(canvasUnit(canvas), 1)) * 100 - size.height / 2,
         0,
-        100 - size.height
+        canvasHeightUnits - size.height
       )
     : type === "header"
       ? 2
-      : 50 - size.height / 2;
+      : clamp(canvasHeightUnits / 2 - size.height / 2, 0, canvasHeightUnits - size.height);
 
   const base = {
     id: crypto.randomUUID(),
@@ -329,7 +339,12 @@ export const createDefaultBlock = (
     case "text":
       return clampBlock({ ...base, type: "text", content: "New text" });
     case "image":
-      return clampBlock({ ...base, type: "image", src: "", objectFit: "cover" });
+      return clampBlock({
+        ...base,
+        type: "image",
+        src: "",
+        objectFit: "cover"
+      });
     case "header":
       return clampBlock({
         ...base,

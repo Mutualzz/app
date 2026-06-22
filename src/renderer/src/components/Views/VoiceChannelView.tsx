@@ -249,9 +249,7 @@ export const VoiceChannelView = observer(
 
     const { openContextMenu } = useMenu();
 
-    const [selectedTile, setSelectedTile] = useState<VoiceTileRef | null>(
-      null
-    );
+    const [selectedTile, setSelectedTile] = useState<VoiceTileRef | null>(null);
 
     useEffect(() => {
       app.setVoiceChatVisible(showChat);
@@ -259,12 +257,12 @@ export const VoiceChannelView = observer(
 
     const voiceStates = Array.from(channel.voiceStates.values());
 
-    const tiles: Array<{
+    const tiles: {
       key: string;
       userId: string;
       kind: VoiceTileKind;
       user?: User;
-    }> = [];
+    }[] = [];
 
     for (const state of voiceStates) {
       tiles.push({
@@ -426,7 +424,8 @@ export const VoiceChannelView = observer(
                 css={{
                   gridAutoFlow: "row",
                   gridAutoColumns: "max-content",
-                  gridTemplateColumns: "repeat(auto-fill, minmax(0, max-content))",
+                  gridTemplateColumns:
+                    "repeat(auto-fill, minmax(0, max-content))",
                   justifyItems: "center"
                 }}
               >

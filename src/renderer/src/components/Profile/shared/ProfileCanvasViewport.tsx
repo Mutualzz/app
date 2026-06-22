@@ -59,7 +59,7 @@ export function ProfileCanvasViewport({
   const mergedRef = useCallback(
     (node: HTMLDivElement | null) => {
       if (typeof canvasRef === "function") canvasRef(node);
-      else if (canvasRef) canvasRef.current = node;
+      else if (canvasRef) (canvasRef as { current: HTMLDivElement | null }).current = node;
     },
     [canvasRef]
   );

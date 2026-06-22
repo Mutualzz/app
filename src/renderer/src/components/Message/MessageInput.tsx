@@ -80,6 +80,10 @@ export const MessageInput = observer(
     }, []);
 
     useEffect(() => {
+      app.setReplyingTo(null);
+    }, [channel?.id]);
+
+    useEffect(() => {
       setContent(message?.content ?? "");
     }, [message?.id]);
 
@@ -157,6 +161,8 @@ export const MessageInput = observer(
 
         const nonce = Snowflake.generate();
         const stickerIds = stickers.map((s) => s.id);
+        const repliedToId = app.replyingTo?.id;
+        const mentionReply = app.replyMention;
         setNonce(nonce);
         const author = app.account.raw;
         const msg = app.queue.add({
@@ -171,6 +177,8 @@ export const MessageInput = observer(
           expressionIds: stickerIds,
           expressions: stickers.map((s) => s.toJSON())
         });
+
+        app.setReplyingTo(null);
 
         editor?.select({
           anchor: editor.start([]),
@@ -199,7 +207,8 @@ export const MessageInput = observer(
           {
             content: trimmed,
             nonce,
-            ...(stickerIds.length > 0 ? { expressionIds: stickerIds } : {})
+            ...(stickerIds.length > 0 ? { expressionIds: stickerIds } : {}),
+            ...(repliedToId ? { repliedToId, mentionReply } : {})
           },
           msg
         );
@@ -263,9 +272,15 @@ export const MessageInput = observer(
         return;
       }
 
-      if (e.key === "Escape" && message) {
-        onStopEdit(e);
-        return;
+      if (e.key === "Escape") {
+        if (message) {
+          onStopEdit(e);
+          return;
+        }
+        if (app.replyingTo) {
+          app.setReplyingTo(null);
+          return;
+        }
       }
 
       if (
@@ -300,16 +315,54 @@ export const MessageInput = observer(
       return `Message #${channel?.name ?? "in this channel"}`;
     })();
 
+    const replyingTo = !message && app.replyingTo;
+
     const typingIndicator = !message?.editing && channel && (
       <TypingIndicator channelId={channel.id} />
+    );
+
+    const replyBanner = replyingTo && (
+      <Paper
+        direction="row"
+        alignItems="center"
+        spacing={1}
+        px={1.5}
+        py={0.75}
+        borderTopLeftRadius={6}
+        borderTopRightRadius={6}
+        elevation={app.settings?.preferEmbossed ? 5 : 1}
+      >
+        <Typography level="body-xs" textColor="secondary" flex="1 1 auto">
+          Replying to{" "}
+          <Typography fontWeight="bold" textColor="primary">
+            {replyingTo.author?.displayName ?? "Unknown"}
+          </Typography>
+        </Typography>
+        <Typography
+          level="body-xs"
+          fontWeight="bold"
+          textColor={app.replyMention ? "accent" : "secondary"}
+          onClick={() => app.setReplyMention(!app.replyMention)}
+          css={{ cursor: "pointer", userSelect: "none", whiteSpace: "nowrap" }}
+        >
+          {app.replyMention ? "@ ON" : "@ OFF"}
+        </Typography>
+        <IconButton
+          variant="plain"
+          size="sm"
+          onClick={() => app.setReplyingTo(null)}
+        >
+          <XIcon size={14} />
+        </IconButton>
+      </Paper>
     );
 
     const inputContent = (
       <Paper
         p={2}
         elevation={app.settings?.preferEmbossed ? 5 : 1}
-        borderTopLeftRadius={areTyping ? 0 : 6}
-        borderTopRightRadius={areTyping ? 0 : 6}
+        borderTopLeftRadius={replyingTo || areTyping ? 0 : 6}
+        borderTopRightRadius={replyingTo || areTyping ? 0 : 6}
         borderBottomLeftRadius={6}
         borderBottomRightRadius={6}
         display="block"
@@ -392,6 +445,7 @@ export const MessageInput = observer(
     ) : (
       <Stack direction="column" spacing={0} ml={1.25} mr={1.75}>
         {typingIndicator}
+        {replyBanner}
         {inputContent}
       </Stack>
     );

@@ -11,7 +11,7 @@ import type {
   Snowflake
 } from "@mutualzz/types";
 import type { AppStore } from "@stores/App.store";
-import { action, makeObservable, observable } from "mobx";
+import { action, computed, makeObservable, observable } from "mobx";
 import { MessageBase } from "./MessageBase";
 import type { QueuedMessage, QueuedMessageData } from "./QueuedMessage";
 import { BitField, messageFlags, MessageFlags } from "@mutualzz/bitfield";
@@ -38,6 +38,10 @@ export class Message extends MessageBase {
   mentions: APIMessageMention[];
   expressions = observable.array<Expression>();
   reactions: APIMessageReaction[] = [];
+
+  repliedToId?: Snowflake | null;
+
+  _repliedTo?: Message | null;
 
   edited: boolean;
 
@@ -66,6 +70,10 @@ export class Message extends MessageBase {
     this.reactions = data.reactions ?? [];
     this.flags = BitField.fromString(messageFlags, data.flags.toString());
 
+    this.repliedToId = data.repliedToId ?? null;
+    if (data.repliedTo)
+      this._repliedTo = this.channel?.messages.add(data.repliedTo);
+
     this.spaceId = data.spaceId;
     if (data.space) this._space = this.app.spaces.add(data.space);
 
@@ -75,6 +83,9 @@ export class Message extends MessageBase {
       embeds: observable.shallow,
       expressions: observable,
       reactions: observable.shallow,
+      repliedTo: computed,
+      repliedToId: observable,
+      _repliedTo: observable.ref,
       edited: observable,
       editing: observable,
       update: action.bound,
@@ -86,6 +97,12 @@ export class Message extends MessageBase {
       handleReactionRemoveAll: action.bound,
       toggleReaction: action.bound
     });
+  }
+
+  get repliedTo() {
+    return (
+      this.channel?.messages.get(this.repliedToId ?? "") || this._repliedTo
+    );
   }
 
   update(message: APIMessage) {

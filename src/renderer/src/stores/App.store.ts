@@ -35,6 +35,7 @@ import { ProfileStore } from "@stores/Profile.store";
 import { usePrefersDark } from "@hooks/usePrefersDark";
 import { ReadStateStore } from "@stores/ReadState.store";
 import { TypingStore } from "@stores/Typing.store";
+import type { Message } from "@stores/objects/Message";
 
 const prefersDark = usePrefersDark();
 
@@ -81,11 +82,13 @@ export class AppStore {
   versions: {
     app: string | null;
   } = {
-    app: "6.6.0"
+    app: "6.8.0"
   };
 
   readonly tokenStorage: TokenStorage;
   composerCount = 0;
+  replyingTo: Message | null = null;
+  replyMention = true;
   private readonly logger = new Logger({
     tag: "AppStore"
   });
@@ -183,6 +186,15 @@ export class AppStore {
 
   pushComposer() {
     this.composerCount = Math.max(0, this.composerCount) + 1;
+  }
+
+  setReplyingTo(message: Message | null) {
+    this.replyingTo = message;
+    this.replyMention = true;
+  }
+
+  setReplyMention(val: boolean) {
+    this.replyMention = val;
   }
 
   setDmChannelListWidth(value: number) {

@@ -16,10 +16,7 @@ export const MessageBase = styled("div")<Props>(
   ({ header, highlight, theme }) => ({
     display: "flex",
     overflow: "hidden",
-    flexDirection: "row",
-    ...(!header && {
-      alignItems: "center"
-    }),
+    flexDirection: "column",
     ...(header && {
       marginTop: 10
     }),
@@ -34,6 +31,65 @@ export const MessageBase = styled("div")<Props>(
     })
   })
 );
+
+export const MessageRow = styled("div")<{ header?: boolean }>(({ header }) => ({
+  display: "flex",
+  flexDirection: "row",
+  ...(!header && {
+    alignItems: "center"
+  })
+}));
+
+export const ReplySection = styled("div")({
+  display: "flex",
+  flexDirection: "row",
+  alignItems: "center",
+  marginBottom: 2
+});
+
+export const ReplyConnectorArea = styled("div")({
+  width: 62,
+  flexShrink: 0,
+  alignSelf: "stretch",
+  display: "flex",
+  alignItems: "flex-end",
+  justifyContent: "flex-end",
+  paddingRight: 4
+});
+
+export const ReplyConnectorLine = styled("div")(({ theme }) => ({
+  width: 26,
+  height: 14,
+  borderLeft: `2px solid ${theme.typography.colors.muted}`,
+  borderTop: `2px solid ${theme.typography.colors.muted}`,
+  borderTopLeftRadius: 6,
+  opacity: 0.35
+}));
+
+export const ReplyContent = styled("div")({
+  display: "flex",
+  flexDirection: "row",
+  alignItems: "center",
+  gap: 6,
+  flex: 1,
+  minWidth: 0,
+  overflow: "hidden",
+  cursor: "default"
+});
+
+export const ReplyContentText = styled("div")({
+  flex: 1,
+  minWidth: 0,
+  overflow: "hidden",
+  textOverflow: "ellipsis",
+  whiteSpace: "nowrap"
+});
+
+export const ReplyAuthorName = styled("div")({
+  flexShrink: 0,
+  display: "flex",
+  alignItems: "center"
+});
 
 export const MessageInfo = styled("div")(({ theme }) => ({
   width: 62,
