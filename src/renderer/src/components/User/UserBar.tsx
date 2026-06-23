@@ -281,6 +281,7 @@ export const UserBar = observer(() => {
           width={!inFeed && showVoicePill ? "75%" : "100%"}
           px={1}
           py={0.25}
+          minWidth={0}
           borderRadius={6}
           variant={hovered ? "soft" : "plain"}
           color={formatColor(theme.colors.neutral, { alpha: 90 })}
@@ -311,16 +312,25 @@ export const UserBar = observer(() => {
           }}
         >
           <UserAvatar user={account} size={48} badge />
-          <Stack direction="column">
+          <Stack direction="column" minWidth={0}>
             <Typography
               textAlign={inFeed ? "center" : undefined}
               level="body-sm"
+              whiteSpace="nowrap"
+              overflow="hidden"
+              textOverflow="ellipsis"
             >
               {account.displayName}
             </Typography>
             {account.presence?.activities.length === 0 &&
               account.globalName && (
-                <Typography level="body-xs" textColor="muted">
+                <Typography
+                  level="body-xs"
+                  textColor="muted"
+                  whiteSpace="nowrap"
+                  overflow="hidden"
+                  textOverflow="ellipsis"
+                >
                   {account.username}
                 </Typography>
               )}

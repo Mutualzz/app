@@ -5,8 +5,16 @@ import {
   writeProfileMusicVolumePercent
 } from "@components/Profile/shared/profileMusicPlayback.utils";
 import type { ProfileMusicBlock } from "@mutualzz/types";
-import { Box, Slider, Stack, Typography } from "@mutualzz/ui-web";
-import { ArrowSquareOutIcon, MusicNotesIcon, PauseIcon, PlayIcon } from "@phosphor-icons/react";
+import { dynamicElevation } from "@mutualzz/ui-core";
+import { Box, Slider, Stack, Typography, useTheme } from "@mutualzz/ui-web";
+import {
+  ArrowSquareOutIcon,
+  MusicNotesIcon,
+  PauseIcon,
+  PlayIcon
+} from "@phosphor-icons/react";
+import { Paper } from "@renderer/components/Paper";
+import { useAppStore } from "@renderer/hooks/useStores";
 import { useEffect, useRef, useState } from "react";
 
 interface Props {
@@ -14,14 +22,15 @@ interface Props {
 }
 
 export const ProfileMusicBlockView = ({ block }: Props) => {
+  const app = useAppStore();
+  const { theme } = useTheme();
   const audioRef = useRef<HTMLAudioElement>(null);
   const [playing, setPlaying] = useState(false);
   const [duration, setDuration] = useState<number | null>(null);
   const [currentTime, setCurrentTime] = useState(0);
   const [volume, setVolume] = useState(readProfileMusicVolumePercent);
 
-  const title =
-    block.track?.name ?? block.title ?? block.trackUrl ?? "Music";
+  const title = block.track?.name ?? block.title ?? block.trackUrl ?? "Music";
   const artists = block.track?.artists ?? block.artists ?? null;
   const image = block.track?.image ?? block.image ?? null;
   const previewUrl = block.track?.previewUrl ?? block.previewUrl ?? null;
@@ -32,7 +41,7 @@ export const ProfileMusicBlockView = ({ block }: Props) => {
     () => () => {
       audioRef.current?.pause();
     },
-    [],
+    []
   );
 
   useEffect(() => {
@@ -79,17 +88,16 @@ export const ProfileMusicBlockView = ({ block }: Props) => {
   };
 
   return (
-    <Box
+    <Paper
       width="100%"
       height="100%"
-        borderRadius={12}
+      display="flex"
+      flexDirection="column"
+      borderRadius={12}
+      elevation={image ? 0 : app.settings?.preferEmbossed ? 5 : 1}
       css={{
         overflow: "hidden",
-          position: "relative",
-          background: "rgba(0,0,0,0.72)",
-          backdropFilter: "blur(12px)",
-          border: "1px solid rgba(255,255,255,0.12)",
-          boxShadow: "0 12px 34px rgba(0,0,0,0.42)",
+        position: "relative"
       }}
     >
       {image && (
@@ -125,7 +133,9 @@ export const ProfileMusicBlockView = ({ block }: Props) => {
           onLoadedMetadata={() => {
             const audio = audioRef.current;
             if (!audio) return;
-            setDuration(Number.isFinite(audio.duration) ? audio.duration : null);
+            setDuration(
+              Number.isFinite(audio.duration) ? audio.duration : null
+            );
           }}
           onTimeUpdate={() => {
             const audio = audioRef.current;
@@ -137,19 +147,20 @@ export const ProfileMusicBlockView = ({ block }: Props) => {
             width: 1,
             height: 1,
             opacity: 0,
-            pointerEvents: "none",
+            pointerEvents: "none"
           }}
         />
       )}
 
       <Stack
         direction="column"
-        spacing={1}
-        p={1.5}
+        spacing={2.5}
+        justifyContent="space-between"
+        p={1.25}
         css={{ position: "relative", height: "100%", overflow: "auto" }}
       >
         <Stack direction="row" alignItems="center" spacing={1.25}>
-          <Box
+          <Stack
             width={52}
             height={52}
             borderRadius={12}
@@ -158,7 +169,10 @@ export const ProfileMusicBlockView = ({ block }: Props) => {
               overflow: "hidden",
               background: image
                 ? `url("${image}") center / cover no-repeat`
-                : "rgba(255,255,255,0.10)",
+                : dynamicElevation(
+                    theme.colors.surface,
+                    app.settings?.preferEmbossed ? 5 : 1
+                  ),
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -166,15 +180,17 @@ export const ProfileMusicBlockView = ({ block }: Props) => {
               border: "1px solid rgba(255,255,255,0.14)"
             }}
           >
-            {!image && <MusicNotesIcon size={22} color="rgba(255,255,255,0.85)" />}
-          </Box>
+            {!image && (
+              <MusicNotesIcon size={22} color="rgba(255,255,255,0.85)" />
+            )}
+          </Stack>
 
           <Stack direction="column" spacing={0.25} minWidth={0} flex={1}>
             <Typography
               level="body-sm"
               fontWeight={700}
+              textColor="primary"
               css={{
-                color: "#fff",
                 overflow: "hidden",
                 textOverflow: "ellipsis",
                 display: "-webkit-box",
@@ -187,11 +203,11 @@ export const ProfileMusicBlockView = ({ block }: Props) => {
             {artists && (
               <Typography
                 level="body-xs"
+                textColor="accent"
                 css={{
-                  color: "rgba(255,255,255,0.72)",
                   overflow: "hidden",
                   textOverflow: "ellipsis",
-                  whiteSpace: "nowrap",
+                  whiteSpace: "nowrap"
                 }}
               >
                 {artists}
@@ -199,20 +215,20 @@ export const ProfileMusicBlockView = ({ block }: Props) => {
             )}
             <Stack direction="row" alignItems="center" spacing={0.75}>
               {previewUrl && (
-                <Typography level="body-xs" css={{ color: "rgba(255,255,255,0.62)" }}>
+                <Typography level="body-xs" textColor="muted">
                   30s preview
                 </Typography>
               )}
               {source && (
                 <Typography
                   level="body-xs"
+                  textColor="secondary"
+                  px={0.75}
+                  py={0.2}
+                  borderRadius={999}
                   css={{
-                    color: "rgba(255,255,255,0.62)",
                     border: "1px solid rgba(255,255,255,0.14)",
-                    background: "rgba(255,255,255,0.06)",
-                    px: 0.75,
-                    py: 0.2,
-                    borderRadius: 999
+                    background: "rgba(255,255,255,0.06)"
                   }}
                 >
                   {source === "itunes" ? "Apple" : "Deezer"}
@@ -237,7 +253,10 @@ export const ProfileMusicBlockView = ({ block }: Props) => {
                   height: "100%",
                   width: `${Math.min(
                     100,
-                    Math.max(0, (currentTime / Math.max(duration ?? 30, 1)) * 100)
+                    Math.max(
+                      0,
+                      (currentTime / Math.max(duration ?? 30, 1)) * 100
+                    )
                   )}%`,
                   background:
                     "linear-gradient(90deg, rgba(99,102,241,0.95) 0%, rgba(236,72,153,0.9) 100%)"
@@ -245,10 +264,16 @@ export const ProfileMusicBlockView = ({ block }: Props) => {
               />
             </Box>
             <Stack direction="row" justifyContent="space-between">
-              <Typography level="body-xs" css={{ color: "rgba(255,255,255,0.65)" }}>
+              <Typography
+                level="body-xs"
+                css={{ color: "rgba(255,255,255,0.65)" }}
+              >
                 {formatTime(currentTime)}
               </Typography>
-              <Typography level="body-xs" css={{ color: "rgba(255,255,255,0.65)" }}>
+              <Typography
+                level="body-xs"
+                css={{ color: "rgba(255,255,255,0.65)" }}
+              >
                 {formatTime(duration ?? 30)}
               </Typography>
             </Stack>
@@ -262,11 +287,21 @@ export const ProfileMusicBlockView = ({ block }: Props) => {
                 border: "1px solid rgba(255,255,255,0.08)"
               }}
             >
-              <Stack direction="row" justifyContent="space-between" alignItems="center">
-                <Typography level="body-xs" css={{ color: "rgba(255,255,255,0.65)" }}>
+              <Stack
+                direction="row"
+                justifyContent="space-between"
+                alignItems="center"
+              >
+                <Typography
+                  level="body-xs"
+                  css={{ color: "rgba(255,255,255,0.65)" }}
+                >
                   Volume
                 </Typography>
-                <Typography level="body-xs" css={{ color: "rgba(255,255,255,0.65)" }}>
+                <Typography
+                  level="body-xs"
+                  css={{ color: "rgba(255,255,255,0.65)" }}
+                >
                   {volume}%
                 </Typography>
               </Stack>
@@ -308,7 +343,6 @@ export const ProfileMusicBlockView = ({ block }: Props) => {
           )}
         </Stack>
       </Stack>
-    </Box>
+    </Paper>
   );
 };
-

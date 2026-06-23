@@ -8,6 +8,7 @@ import type { ProfileMutualBlock } from "@mutualzz/types";
 import type { Snowflake } from "@mutualzz/types";
 import { Stack, Typography } from "@mutualzz/ui-web";
 import { UsersThreeIcon } from "@phosphor-icons/react";
+import { Paper } from "@renderer/components/Paper";
 import { observer } from "mobx-react-lite";
 
 interface Props {
@@ -24,19 +25,15 @@ export const ProfileMutualBlockView = observer(({ block, userId }: Props) => {
   const isFriend = block.mode === "friends" && isProfileFriend(app, userId);
 
   return (
-    <Stack
-      direction="column"
-      spacing={1}
+    <Paper
+      flexDirection="column"
       width="100%"
+      spacing={1.25}
       height="100%"
-      p={1.5}
+      p={1.75}
       borderRadius={12}
-      css={{
-        background: "rgba(0,0,0,0.35)",
-        backdropFilter: "blur(10px)",
-        border: "1px solid rgba(255,255,255,0.1)",
-        overflow: "auto"
-      }}
+      overflow="auto"
+      elevation={app.settings?.preferEmbossed ? 5 : 1}
     >
       <Stack direction="row" spacing={1} alignItems="center">
         <UsersThreeIcon size={18} weight="fill" />
@@ -56,7 +53,12 @@ export const ProfileMutualBlockView = observer(({ block, userId }: Props) => {
       ) : (
         <Stack direction="column" spacing={0.75}>
           {mutualSpaces.map((space) => (
-            <Stack key={space.id} direction="row" spacing={1} alignItems="center">
+            <Stack
+              key={space.id}
+              direction="row"
+              spacing={1}
+              alignItems="center"
+            >
               <SpaceIcon space={space} size={24} />
               <Typography level="body-sm" css={{ minWidth: 0 }}>
                 {space.name}
@@ -65,6 +67,6 @@ export const ProfileMutualBlockView = observer(({ block, userId }: Props) => {
           ))}
         </Stack>
       )}
-    </Stack>
+    </Paper>
   );
 });

@@ -1,33 +1,51 @@
 import { ProfileMarkdownContent } from "@components/Profile/shared/ProfileMarkdownContent";
+import { Theme } from "@emotion/react";
 import type { ProfileQuoteBlock } from "@mutualzz/types";
-import { Box, Stack, Typography } from "@mutualzz/ui-web";
+import { dynamicElevation, formatColor } from "@mutualzz/ui-core";
+import { Box, Stack, Typography, useTheme } from "@mutualzz/ui-web";
 import { QuotesIcon } from "@phosphor-icons/react";
+import { useAppStore } from "@renderer/hooks/useStores";
+import { AppStore } from "@renderer/stores/App.store";
 
 interface Props {
   block: ProfileQuoteBlock;
 }
 
-const variantStyles = {
+const variantStyles = (app: AppStore, theme: Theme) => ({
   default: {
-    background: "rgba(0,0,0,0.35)",
-    border: "1px solid rgba(255,255,255,0.12)",
-    accent: "rgba(255,255,255,0.5)"
+    background: dynamicElevation(
+      theme.colors.surface,
+      app.settings?.preferEmbossed ? 5 : 1
+    ),
+    border: `1px solid ${theme.colors.neutral}`,
+    accent: theme.typography.colors.primary
   },
   accent: {
-    background: "rgba(99,102,241,0.18)",
-    border: "1px solid rgba(99,102,241,0.35)",
-    accent: "rgba(99,102,241,0.95)"
+    background: formatColor(theme.colors.primary, {
+      darken: 25,
+      format: "hexa"
+    }),
+    border: `1px solid ${theme.colors.primary}`,
+    accent: theme.typography.colors.accent
   },
   warning: {
-    background: "rgba(245,158,11,0.14)",
-    border: "1px solid rgba(245,158,11,0.35)",
-    accent: "rgba(245,158,11,0.95)"
+    background: dynamicElevation(
+      formatColor(theme.colors.warning, {
+        darken: 25,
+        format: "hexa"
+      }),
+      app.settings?.preferEmbossed ? 5 : 1
+    ),
+    border: `1px solid ${theme.colors.warning}`,
+    accent: theme.typography.colors.secondary
   }
-} as const;
+});
 
 export const ProfileQuoteBlockView = ({ block }: Props) => {
+  const app = useAppStore();
+  const { theme } = useTheme();
   const variant = block.variant ?? "default";
-  const styles = variantStyles[variant];
+  const styles = variantStyles(app, theme)[variant];
 
   return (
     <Stack

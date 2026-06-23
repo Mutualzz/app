@@ -39,7 +39,7 @@ export const CustomStatusDisplay = observer(
     fontSize = 12,
     level,
     textColor = "accent",
-    ellipsis,
+    ellipsis = true,
     emojiSize = 20
   }: Props) => {
     const app = useAppStore();
@@ -48,7 +48,7 @@ export const CustomStatusDisplay = observer(
 
     useEffect(() => {
       if (statusEmoji?.id && !app.expressions.get(statusEmoji.id)) {
-        void app.expressions.resolve(statusEmoji.id);
+        app.expressions.resolve(statusEmoji.id);
       }
     }, [app.expressions, statusEmoji?.id]);
 
@@ -76,7 +76,7 @@ export const CustomStatusDisplay = observer(
     if (!showEmoji || !statusEmoji) return statusLabel;
 
     return (
-      <Stack direction="row" alignItems="center" spacing={0.75} minWidth={0}>
+      <Stack direction="row" spacing={0.75} minWidth={0}>
         <CustomStatusEmoji emoji={statusEmoji} size={emojiSize} />
         {statusLabel}
       </Stack>

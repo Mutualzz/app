@@ -3,7 +3,7 @@ import type {
   APIProfileIntroMusic,
   APIUserProfile,
   AvatarFormat,
-  Sizes,
+  Sizes
 } from "@mutualzz/types";
 import { CDNRoutes, ImageFormat } from "@mutualzz/types";
 import { REST } from "@stores/REST.store";
@@ -52,7 +52,7 @@ export class UserProfile {
   constructBannerUrl(
     format: AvatarFormat = ImageFormat.WebP,
     size: Sizes = 512,
-    animated = false,
+    animated = false
   ) {
     return this.constructBannerUrlFrom(this.banner, format, size, animated);
   }
@@ -61,25 +61,24 @@ export class UserProfile {
     source: string | null | undefined,
     format: AvatarFormat = ImageFormat.WebP,
     size: Sizes = 512,
-    animated = false,
+    animated = false
   ) {
     if (!source) return null;
-    if (source.startsWith("http")) return source;
     return REST.makeCDNUrl(
-      CDNRoutes.profileBanner(this.userId, source, format, size, animated),
+      CDNRoutes.profileBanner(this.userId, source, format, size, animated)
     );
   }
 
   constructBackgroundUrl(
     format: AvatarFormat = ImageFormat.WebP,
     size: Sizes = 1024,
-    animated = false,
+    animated = false
   ) {
     return this.constructBackgroundUrlFrom(
       this.backgroundImage,
       format,
       size,
-      animated,
+      animated
     );
   }
 
@@ -87,25 +86,23 @@ export class UserProfile {
     source: string | null | undefined,
     format: AvatarFormat = ImageFormat.WebP,
     size: Sizes = 1024,
-    animated = false,
+    animated = false
   ) {
     if (!source) return null;
-    if (source.startsWith("http")) return source;
     return REST.makeCDNUrl(
-      CDNRoutes.profileBackground(
-        this.userId,
-        source,
-        format,
-        size,
-        animated,
-      ),
+      CDNRoutes.profileBackground(this.userId, source, format, size, animated)
     );
   }
 
-  constructBlockImageUrl(src: string) {
-    if (src.startsWith("http")) return src;
+  constructBlockImageUrl(
+    source: string | null | undefined,
+    format: AvatarFormat = ImageFormat.WebP,
+    size: Sizes = 512,
+    animated = false
+  ) {
+    if (!source) return null;
     return REST.makeCDNUrl(
-      CDNRoutes.profileImage(this.userId, src, ImageFormat.WebP, 512),
+      CDNRoutes.profileImage(this.userId, source, format, size, animated)
     );
   }
 

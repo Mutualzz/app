@@ -3,9 +3,11 @@ import { ProfileMarkdownContent } from "@components/Profile/shared/ProfileMarkdo
 import type { AccountStore } from "@stores/Account.store";
 import type { User } from "@stores/objects/User";
 import type { UserProfile } from "@stores/objects/UserProfile";
-import type { ProfileHeaderBlock } from "@mutualzz/types";
+import { ImageFormat, type ProfileHeaderBlock } from "@mutualzz/types";
 import { Box, Stack, Typography } from "@mutualzz/ui-web";
 import { observer } from "mobx-react-lite";
+import { Paper } from "@renderer/components/Paper";
+import { useAppStore } from "@renderer/hooks/useStores";
 
 const AVATAR_SIZE = 72;
 const AVATAR_OVERLAP = AVATAR_SIZE / 2;
@@ -21,18 +23,29 @@ interface Props {
 
 export const ProfileHeaderBlockView = observer(
   ({ user, profile, block, bioOverride, bannerOverride }: Props) => {
-    void profile.updatedAt;
+    const app = useAppStore();
 
     const bannerSource =
       bannerOverride !== undefined ? bannerOverride : profile.banner;
 
-    const bannerUrl = profile.constructBannerUrlFrom(bannerSource);
+    const bannerUrl = profile.constructBannerUrlFrom(
+      bannerSource,
+      ImageFormat.WebP,
+      512,
+      bannerSource?.startsWith("a_")
+    );
     const bio = bioOverride !== undefined ? bioOverride : profile.bio;
     const bannerHeight = block?.bannerHeight ?? DEFAULT_BANNER_HEIGHT;
     const bannerFocusY = block?.bannerFocusY ?? 50;
 
     return (
-      <Stack direction="column" width="100%" height="100%" overflow="hidden">
+      <Paper
+        direction="column"
+        width="100%"
+        height="100%"
+        overflow="hidden"
+        elevation={app.settings?.preferEmbossed ? 5 : 1}
+      >
         <Box
           width="100%"
           flexShrink={0}
@@ -76,21 +89,21 @@ export const ProfileHeaderBlockView = observer(
               {user.displayName}
             </Typography>
             {bio && (
-              <Box
+              <Typography
                 flex={1}
                 minHeight={0}
+                level="body-sm"
                 css={{
                   overflowY: "auto",
-                  opacity: 0.85,
-                  fontSize: "var(--mz-fontSize-sm, 0.875rem)"
+                  opacity: 0.85
                 }}
               >
                 <ProfileMarkdownContent value={bio} />
-              </Box>
+              </Typography>
             )}
           </Stack>
         </Stack>
-      </Stack>
+      </Paper>
     );
   }
 );

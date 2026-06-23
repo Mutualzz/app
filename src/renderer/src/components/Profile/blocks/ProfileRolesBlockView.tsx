@@ -1,9 +1,13 @@
-import { findMemberForUser, getMemberRoles } from "@components/Profile/shared/profileBlockData.utils";
+import {
+  findMemberForUser,
+  getMemberRoles
+} from "@components/Profile/shared/profileBlockData.utils";
 import { useAppStore } from "@hooks/useStores";
 import type { ProfileRolesBlock } from "@mutualzz/types";
 import type { Snowflake } from "@mutualzz/types";
 import { Box, Stack, Typography } from "@mutualzz/ui-web";
 import { ShieldCheckIcon } from "@phosphor-icons/react";
+import { Paper } from "@renderer/components/Paper";
 import { observer } from "mobx-react-lite";
 
 interface Props {
@@ -17,19 +21,15 @@ export const ProfileRolesBlockView = observer(({ block, userId }: Props) => {
   const roles = getMemberRoles(member, block.maxRoles ?? 6);
 
   return (
-    <Stack
+    <Paper
       direction="column"
-      spacing={1}
+      spacing={1.25}
       width="100%"
       height="100%"
-      p={1.5}
+      p={1.75}
       borderRadius={12}
-      css={{
-        background: "rgba(0,0,0,0.35)",
-        backdropFilter: "blur(10px)",
-        border: "1px solid rgba(255,255,255,0.1)",
-        overflow: "auto"
-      }}
+      overflow="auto"
+      elevation={app.settings?.preferEmbossed ? 5 : 1}
     >
       <Stack direction="row" spacing={1} alignItems="center">
         <ShieldCheckIcon size={18} weight="fill" />
@@ -63,6 +63,6 @@ export const ProfileRolesBlockView = observer(({ block, userId }: Props) => {
           ))}
         </Stack>
       )}
-    </Stack>
+    </Paper>
   );
 });

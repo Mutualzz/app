@@ -5,59 +5,41 @@ import {
   resolveProfileUrl
 } from "@components/Profile/shared/profileLink.utils";
 import type { ProfileLinksBlock } from "@mutualzz/types";
-import { Box, Stack, Typography } from "@mutualzz/ui-web";
+import { Stack, Typography } from "@mutualzz/ui-web";
 import { ArrowSquareOutIcon } from "@phosphor-icons/react";
+import { Paper } from "@renderer/components/Paper";
+import { useAppStore } from "@renderer/hooks/useStores";
 
 interface Props {
   block: ProfileLinksBlock;
 }
 
 export const ProfileLinksBlockView = ({ block }: Props) => {
-  const links = block.links.filter((link) => link.label.trim() && link.url.trim());
-
-  if (links.length === 0) {
-    return (
-      <Box
-        width="100%"
-        height="100%"
-        borderRadius={12}
-        css={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          background: "var(--mz-palette-neutral-softBg)",
-          border: "1px dashed var(--mz-palette-neutral-outlinedBorder)"
-        }}
-      >
-        <Typography level="body-sm" css={{ opacity: 0.55 }}>
-          Add links in the inspector
-        </Typography>
-      </Box>
-    );
-  }
+  const app = useAppStore();
+  const links = block.links.filter(
+    (link) => link.label.trim() && link.url.trim()
+  );
 
   return (
-    <Stack
+    <Paper
       direction="column"
       spacing={0.75}
       width="100%"
       height="100%"
       p={1.25}
       borderRadius={12}
-      css={{
-        background: "rgba(0,0,0,0.35)",
-        backdropFilter: "blur(10px)",
-        border: "1px solid rgba(255,255,255,0.1)",
-        overflow: "auto"
-      }}
+      elevation={app.settings?.preferEmbossed ? 5 : 1}
     >
+      {links.length === 0 && (
+        <Typography level="body-sm" css={{ opacity: 0.55 }}>
+          Add links in the inspector
+        </Typography>
+      )}
       {links.map((link, index) => {
         const resolved = resolveProfileUrl(link.url);
         const kind = resolved?.kind ?? "website";
         const accent = resolved?.color ?? "#6366F1";
-        const subtitle = resolved
-          ? formatProfileUrlLabel(resolved)
-          : link.url;
+        const subtitle = resolved ? formatProfileUrlLabel(resolved) : link.url;
 
         return (
           <Link
@@ -133,6 +115,6 @@ export const ProfileLinksBlockView = ({ block }: Props) => {
           </Link>
         );
       })}
-    </Stack>
+    </Paper>
   );
 };
