@@ -17,15 +17,18 @@ files:
 asarUnpack:
   - resources/**/*
   - "**/{keytar,keytar.node}/**"
+
 win:
   executableName: mutualzz
   icon: resources/icons/icon.ico
   extraFiles:
     - from: resources/updater.exe
       to: updater.exe
+
 nsis:
   oneClick: true
   perMachine: false
+  allowElevation: false
   createDesktopShortcut: always
   createStartMenuShortcut: true
   runAfterFinish: false
@@ -35,6 +38,7 @@ nsis:
   warningsAsErrors: false
   include: "resources/installer.nsh"
   installerIcon: "resources/icons/icon.ico"
+
 mac:
   hardenedRuntime: true
   gatekeeperAssess: false
@@ -53,22 +57,30 @@ mac:
     - target: dmg
       arch: universal
   x64ArchFiles: "Contents/MacOS/Mutualzz"
+
 dmg:
   artifactName: ${productName}.${ext}
+
 linux:
-  executableName: updater
+  executableName: mutualzz
+  extraFiles:
+    - from: resources/updater
+      to: updater
   target:
     - AppImage
     - deb
   maintainer: Mutualzz
   category: Social Networking
   artifactName: ${productName}.${ext}
+
 appImage:
   artifactName: ${productName}.${ext}
+
 publish:
   provider: github
   owner: mutualzz
   repo: mutualzz
   releaseType: release
+
 electronDownload:
   mirror: https://npmmirror.com/mirrors/electron/
