@@ -1,6 +1,6 @@
 import { app, BrowserWindow } from "electron";
 import { electronApp, optimizer } from "@electron-toolkit/utils";
-import { createMainWindow, setQuitting } from "./windows";
+import { createMainWindow, setQuitting, setupWindowIPC } from "./windows";
 import { setupIPC } from "./ipc";
 import { setupProtocols } from "./protocols";
 import { trayManager } from "./tray";
@@ -36,6 +36,7 @@ app.whenReady().then(() => {
   mainWindow = createMainWindow();
 
   initUpdaterHandlers();
+  setupWindowIPC();
   setupCodecIPC();
   setupIPC();
   setupProtocols(mainWindow);

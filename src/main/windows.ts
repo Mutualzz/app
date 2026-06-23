@@ -130,29 +130,27 @@ export function createMainWindow(): BrowserWindow {
     mainWindow.loadURL(process.env["ELECTRON_RENDERER_URL"]);
   else mainWindow.loadFile(join(__dirname, "../renderer/index.html"));
 
+  return mainWindow;
+}
+
+export function setupWindowIPC(): void {
   ipcMain.handle("window:minimize", () => {
-    const win = getMainWindow();
-    if (win) win.minimize();
+    getMainWindow()?.minimize();
   });
 
   ipcMain.handle("window:maximize", () => {
     const win = getMainWindow();
     if (!win) return;
-    if (win.isMaximized()) win.unmaximize();
-    else win.maximize();
+    win.isMaximized() ? win.unmaximize() : win.maximize();
   });
 
   ipcMain.handle("window:close", () => {
-    const win = getMainWindow();
-    if (win) win.hide();
+    getMainWindow()?.hide();
   });
 
   ipcMain.handle("window:is-maximized", () => {
-    const win = getMainWindow();
-    return win ? win.isMaximized() : false;
+    return getMainWindow()?.isMaximized() ?? false;
   });
-
-  return mainWindow;
 }
 
 export function getMainWindow(): BrowserWindow | null {
