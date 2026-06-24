@@ -1,29 +1,15 @@
 ; installer.nsh
 ; Custom NSIS hooks for Mutualzz
 
-!macro customHeader
-  ; Disable electron-builder's auto-generated shortcut creation.
-  ; We handle shortcuts ourselves in customInstall so they point to
-  ; updater.exe instead of mutualzz.exe.
-  !define BUILD_NO_SHORTCUTS
-!macroend
-
 !macro customInstall
   ; ── Kill running instances ────────────────────────────────────────────
   nsExec::Exec 'taskkill /F /IM updater.exe /T'
   nsExec::Exec 'taskkill /F /IM mutualzz.exe /T'
   Sleep 800
 
-  ; ── Visual C++ Redistributable ───────────────────────────────────────
-  ReadRegDword $0 HKLM "SOFTWARE\Microsoft\VisualStudio\14.0\VC\Runtimes\X64" "Installed"
-  ${If} $0 != 1
-    DetailPrint "Installing Visual C++ Redistributable..."
-    File "/oname=$TEMP\vc_redist.x64.exe" "${BUILD_RESOURCES_DIR}\vc_redist.x64.exe"
-    ExecWait '"$TEMP\vc_redist.x64.exe" /install /quiet /norestart'
-    Delete "$TEMP\vc_redist.x64.exe"
-  ${EndIf}
-
-  ; ── Shortcuts — always point to updater.exe, never mutualzz.exe ──────
+  ; ── Shortcuts — delete whatever electron-builder created and replace ──
+  ; electron-builder creates shortcuts pointing to mutualzz.exe.
+  ; We delete and recreate them pointing to updater.exe instead.
   Delete "$DESKTOP\Mutualzz.lnk"
   Delete "$SMPROGRAMS\Mutualzz\Mutualzz.lnk"
 
@@ -44,9 +30,8 @@
   WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Run" \
     "Mutualzz" "$INSTDIR\updater.exe"
 
-  ; ── Launch updater after install ─────────────────────────────────────
-  ; Don't launch here — relaunch_bootstrapper in Rust handles this.
-  ; Launching from NSIS causes a double-launch race condition.
+  ; ── Launch updater after install ──────────────────────────────────────
+  Exec "$INSTDIR\updater.exe"
 !macroend
 
 !macro customUninstall
