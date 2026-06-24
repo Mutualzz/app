@@ -48,3 +48,12 @@
   Delete "$SMPROGRAMS\Mutualzz\Mutualzz.lnk"
   DeleteRegValue HKCU "Software\Microsoft\Windows\CurrentVersion\Run" "Mutualzz"
 !macroend
+
+!macro customHeader
+  !define MUI_PAGE_CUSTOMFUNCTION_PRE mutualzzPreInstall
+  Function mutualzzPreInstall
+    nsExec::Exec 'taskkill /F /IM updater.exe /T'
+    nsExec::Exec 'taskkill /F /IM mutualzz.exe /T'
+    Sleep 800
+  FunctionEnd
+!macroend

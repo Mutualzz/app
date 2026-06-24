@@ -121,11 +121,11 @@
     "dev": "electron-vite dev",
     "format": "prettier --write .",
     "lint": "eslint --cache .",
- "postinstall": "install-electron && electron-builder install-app-deps",
+    "postinstall": "install-electron && electron-builder install-app-deps",
     "start": "electron-vite preview",
     "typecheck": "pnpm run typecheck:node && pnpm run typecheck:web",
     "typecheck:node": "tsc --noEmit -p tsconfig.node.json --composite false",
     "typecheck:web": "tsc --noEmit -p tsconfig.web.json --composite false"
   },
-  "version": "6.9.5"
+  "version": "6.9.6"
 }
