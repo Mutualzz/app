@@ -29,8 +29,8 @@ nsis:
   oneClick: true
   perMachine: false
   allowElevation: false
-  createDesktopShortcut: always
-  createStartMenuShortcut: true
+  createDesktopShortcut: false
+  createStartMenuShortcut: false
   runAfterFinish: false
   artifactName: ${productName}Setup.${ext}
   shortcutName: ${productName}
