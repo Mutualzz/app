@@ -7,30 +7,28 @@
   nsExec::Exec 'taskkill /F /IM mutualzz.exe /T'
   Sleep 800
 
-  ; ── Shortcuts — delete whatever electron-builder created and replace ──
-  ; electron-builder creates shortcuts pointing to mutualzz.exe.
-  ; We delete and recreate them pointing to updater.exe instead.
+  ; ── Shortcuts ─────────────────────────────────────────────────────────
   Delete "$DESKTOP\Mutualzz.lnk"
   Delete "$SMPROGRAMS\Mutualzz\Mutualzz.lnk"
 
   CreateShortcut "$DESKTOP\Mutualzz.lnk" \
     "$INSTDIR\updater.exe" \
     "" \
-    "$INSTDIR\resources\app.asar.unpacked\resources\icons\icon.ico" \
+    "$INSTDIR\mutualzz.exe" \
     0
 
   CreateDirectory "$SMPROGRAMS\Mutualzz"
   CreateShortcut "$SMPROGRAMS\Mutualzz\Mutualzz.lnk" \
     "$INSTDIR\updater.exe" \
     "" \
-    "$INSTDIR\resources\app.asar.unpacked\resources\icons\icon.ico" \
+    "$INSTDIR\mutualzz.exe" \
     0
 
-  ; ── Auto-start registry ───────────────────────────────────────────────
+  ; ── Auto-start ────────────────────────────────────────────────────────
   WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Run" \
     "Mutualzz" "$INSTDIR\updater.exe"
 
-  ; ── Launch updater after install ──────────────────────────────────────
+  ; ── Launch ────────────────────────────────────────────────────────────
   Exec "$INSTDIR\updater.exe"
 !macroend
 
