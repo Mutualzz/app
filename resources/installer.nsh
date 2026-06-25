@@ -29,7 +29,7 @@
     "Mutualzz" "$INSTDIR\updater.exe"
 
   ; ── Launch ────────────────────────────────────────────────────────────
-  Exec "$INSTDIR\updater.exe"
+  ExecShell "open" "$INSTDIR\updater.exe"
 !macroend
 
 !macro customUninstall
