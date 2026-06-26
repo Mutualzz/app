@@ -38,6 +38,7 @@ nsis:
   warningsAsErrors: false
   include: "resources/installer.nsh"
   installerIcon: "resources/icons/icon.ico"
+  deleteAppDataOnUninstall: false
 
 mac:
   hardenedRuntime: true
