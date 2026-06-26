@@ -35,7 +35,7 @@ import {
 } from "@components/Profile/viewer/profileLayout.utils";
 import { useAppStore } from "@hooks/useStores";
 import type { ProfileBlockType, APIProfileBlock } from "@mutualzz/types";
-import { Box, Paper, Stack, Typography } from "@mutualzz/ui-web";
+import { Box, Paper, Stack, Typography, useTheme } from "@mutualzz/ui-web";
 import {
   DndContext,
   type DragEndEvent,
@@ -55,6 +55,7 @@ import { useMenu } from "@contexts/ContextMenu.context";
 
 export const ProfileEditorPage = observer(() => {
   const app = useAppStore();
+  const { theme } = useTheme();
   const account = app.account;
   const navigate = useNavigate();
   const { openModal } = useModal();
@@ -153,7 +154,9 @@ export const ProfileEditorPage = observer(() => {
           ? draft.introMusicTrackSource
           : null,
         introMusicTitle: draft.introMusicTrackId ? null : draft.introMusicTitle,
-        introMusicAuthorName: draft.introMusicTrackId ? null : draft.introMusicAuthorName,
+        introMusicAuthorName: draft.introMusicTrackId
+          ? null
+          : draft.introMusicAuthorName,
         blocks
       });
     },
@@ -400,7 +403,7 @@ export const ProfileEditorPage = observer(() => {
                   position: "absolute",
                   top: 8,
                   left: 8,
-                  zIndex: 10000,
+                  zIndex: theme.zIndex.modal,
                   pointerEvents: "auto"
                 }}
               >
@@ -416,7 +419,7 @@ export const ProfileEditorPage = observer(() => {
                   top: 8,
                   right: 8,
                   bottom: 8,
-                  zIndex: 10000,
+                  zIndex: theme.zIndex.modal,
                   pointerEvents: "auto",
                   overflowY: "auto"
                 }}

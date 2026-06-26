@@ -2,7 +2,7 @@ import { IconButton } from "@components/IconButton";
 import { Paper } from "@components/Paper";
 import { Tooltip } from "@components/Tooltip";
 import { useAppStore } from "@hooks/useStores";
-import { Stack, Typography } from "@mutualzz/ui-web";
+import { Stack, Typography, useTheme } from "@mutualzz/ui-web";
 import {
   MagnifyingGlassMinusIcon,
   MagnifyingGlassPlusIcon,
@@ -64,6 +64,7 @@ export const ProfileEditorZoomControls = observer(
     onGridStepChange
   }: Props) => {
     const app = useAppStore();
+    const { theme } = useTheme();
     const embossed = app.settings?.preferEmbossed;
 
     return (
@@ -82,7 +83,7 @@ export const ProfileEditorZoomControls = observer(
           bottom: 12,
           left: "50%",
           transform: "translateX(-50%)",
-          zIndex: 20,
+          zIndex: theme.zIndex.modal,
           WebkitAppRegion: "no-drag"
         }}
       >

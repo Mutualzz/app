@@ -28,6 +28,7 @@ import type { UserProfile } from "@stores/objects/UserProfile";
 import { useDroppable } from "@dnd-kit/core";
 import { observer } from "mobx-react-lite";
 import { useEffect, useRef, useState } from "react";
+import { useTheme } from "@mutualzz/ui-web";
 
 type DragState = {
   blockId: string;
@@ -82,6 +83,7 @@ const ProfileEditorCanvasInner = observer(
     onBlockContextMenu,
     introMusic
   }: Omit<Props, "zoom">) => {
+    const { theme } = useTheme();
     const [displayBlocks, setDisplayBlocks] = useState(blocks);
     const dragRef = useRef<DragState | null>(null);
     const displayBlocksRef = useRef(blocks);
@@ -323,7 +325,7 @@ const ProfileEditorCanvasInner = observer(
                       inset: 0,
                       border: "2px dashed rgba(99,102,241,0.8)",
                       pointerEvents: "none",
-                      zIndex: 9999
+                      zIndex: theme.zIndex.modal
                     }}
                   />
                 )}

@@ -1015,8 +1015,7 @@ export const ProfileBlockInspector = observer(
                             <ProfileDrawBlockModal
                               block={drawBlock}
                               updateBlock={updateSelectedBlock}
-                            />,
-                            { showCloseButton: true, css: { zIndex: 99999 } }
+                            />
                           )
                         }
                       >

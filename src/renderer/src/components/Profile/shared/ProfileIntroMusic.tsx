@@ -13,7 +13,7 @@ import {
 } from "@components/Profile/shared/profileMusicPlayback.utils";
 import type { APIProfileIntroMusic } from "@mutualzz/types";
 import type { UserProfile } from "@stores/objects/UserProfile";
-import { Box, Slider, Stack, Typography } from "@mutualzz/ui-web";
+import { Box, Slider, Stack, Typography, useTheme } from "@mutualzz/ui-web";
 import {
   ArrowSquareOutIcon,
   MusicNotesIcon,
@@ -36,6 +36,7 @@ interface Props {
 export const ProfileIntroMusic = observer(
   ({ introMusic, profile, floating = false, autoPlay = false }: Props) => {
     const app = useAppStore();
+    const { theme } = useTheme();
     const audioRef = useRef<HTMLAudioElement>(null);
     const seekingRef = useRef(false);
     const pendingSeekRef = useRef<number | null>(null);
@@ -122,8 +123,9 @@ export const ProfileIntroMusic = observer(
     };
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    useEffect(() => { if (autoPlay && playable) void startPlayback(true); }, []);
-
+    useEffect(() => {
+      if (autoPlay && playable) void startPlayback(true);
+    }, []);
 
     const togglePlayback = () => {
       if (playing) {
@@ -156,7 +158,9 @@ export const ProfileIntroMusic = observer(
               const d = Number.isFinite(audio.duration) ? audio.duration : null;
               setDuration(d);
             }}
-            onSeeked={() => { seekingRef.current = false; }}
+            onSeeked={() => {
+              seekingRef.current = false;
+            }}
             onTimeUpdate={() => {
               if (seekingRef.current) return;
               const audio = audioRef.current;
@@ -277,8 +281,16 @@ export const ProfileIntroMusic = observer(
                 max={Math.max(0, duration ?? 0)}
                 step={0.25}
                 value={Math.min(currentTime, duration ?? currentTime)}
-                onChange={(_, value) => { seekingRef.current = true; pendingSeekRef.current = value as number; setCurrentTime(value as number); }}
-                onChangeCommitted={() => { const t = pendingSeekRef.current; pendingSeekRef.current = null; if (t !== null) commitSeek(t); }}
+                onChange={(_, value) => {
+                  seekingRef.current = true;
+                  pendingSeekRef.current = value as number;
+                  setCurrentTime(value as number);
+                }}
+                onChangeCommitted={() => {
+                  const t = pendingSeekRef.current;
+                  pendingSeekRef.current = null;
+                  if (t !== null) commitSeek(t);
+                }}
                 css={{ width: "100%" }}
               />
               <Stack direction="row" justifyContent="space-between">
@@ -357,7 +369,7 @@ export const ProfileIntroMusic = observer(
         bottom={12}
         left={12}
         right={12}
-        zIndex={10000}
+        zIndex={theme.zIndex.modal}
         css={{ pointerEvents: "none" }}
       >
         <Box

@@ -1,7 +1,13 @@
 import { Button } from "@components/Button";
 import type { ColorLike } from "@mutualzz/ui-core";
 import type { APIProfileBlock, ProfileDrawBlock } from "@mutualzz/types";
-import { Divider, InputColor, Stack, Typography } from "@mutualzz/ui-web";
+import {
+  Divider,
+  InputColor,
+  Slider,
+  Stack,
+  Typography
+} from "@mutualzz/ui-web";
 import { EraserIcon, PaintBrushIcon } from "@phosphor-icons/react";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -110,33 +116,20 @@ export const ProfileDrawBlockEditor = ({
           {eraserMode ? "Eraser" : "Brush"}
         </Button>
         <Stack direction="row" spacing={0.75} alignItems="center" flex={1}>
-          <Typography
-            level="body-xs"
-            css={{ opacity: 0.7, whiteSpace: "nowrap" }}
-          >
-            Size
-          </Typography>
-          <input
-            type="range"
+          <Slider
             min={1}
             max={40}
             value={size}
-            onChange={(e) => setSize(Number(e.target.value))}
-            css={{ flex: 1 }}
+            onChange={(_, value) => setSize(Number(value))}
+            valueLabelDisplay="auto"
           />
-          <Typography
-            level="body-xs"
-            css={{ opacity: 0.7, minWidth: 20, textAlign: "right" }}
-          >
-            {size}
-          </Typography>
         </Stack>
       </Stack>
 
-      <Stack direction="row" spacing={1.5} alignItems="center">
+      <Stack direction="row" justifyContent="space-around">
         {!eraserMode && (
           <>
-            <Stack direction="row" spacing={0.75} alignItems="center">
+            <Stack direction="column" spacing={0.75} alignItems="center">
               <Typography level="body-xs" css={{ opacity: 0.7 }}>
                 Brush
               </Typography>
@@ -146,16 +139,9 @@ export const ProfileDrawBlockEditor = ({
                 onChange={setBrushColor}
               />
             </Stack>
-            <Divider
-              orientation="vertical"
-              lineColor="muted"
-              css={{
-                opacity: 0.5
-              }}
-            />
           </>
         )}
-        <Stack direction="row" spacing={0.75} alignItems="center">
+        <Stack direction="column" spacing={0.75} alignItems="center">
           <Typography level="body-xs" css={{ opacity: 0.7 }}>
             Background
           </Typography>
