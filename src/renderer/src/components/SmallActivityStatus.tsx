@@ -44,14 +44,9 @@ export const SmallActivityStatus = observer(
       <Stack
         direction={vertical ? "column" : "row"}
         alignItems="center"
-        justifyContent="center"
         spacing={0.5}
       >
-        <Stack
-          direction={vertical ? "column" : "row"}
-          alignItems="center"
-          justifyContent="center"
-        >
+        <Stack direction={vertical ? "column" : "row"} alignItems="center">
           <PresenceIcon color={color} type={activity.type} />
           <Typography level="label-xs" textColor={color}>
             {presence.activities.length > 1

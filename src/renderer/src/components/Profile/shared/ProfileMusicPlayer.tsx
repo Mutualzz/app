@@ -16,6 +16,8 @@ import type { UserProfile } from "@stores/objects/UserProfile";
 import { Box, Slider, Stack, Typography, useTheme } from "@mutualzz/ui-web";
 import {
   ArrowSquareOutIcon,
+  CaretDownIcon,
+  CaretUpIcon,
   MusicNotesIcon,
   PauseIcon,
   PlayIcon
@@ -25,6 +27,7 @@ import { useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
 import { Paper } from "@renderer/components/Paper";
 import { useAppStore } from "@renderer/hooks/useStores";
+import { IconButton } from "@renderer/components/IconButton";
 
 interface Props {
   music: APIProfileMusic;
@@ -40,6 +43,7 @@ export const ProfileMusicPlayer = observer(
     const audioRef = useRef<HTMLAudioElement>(null);
     const seekingRef = useRef(false);
     const pendingSeekRef = useRef<number | null>(null);
+    const [collapsed, setCollapsed] = useState(floating);
     const [playing, setPlaying] = useState(false);
     const [embedSrc, setEmbedSrc] = useState<string | null>(null);
     const [duration, setDuration] = useState<number | null>(null);
@@ -136,14 +140,8 @@ export const ProfileMusicPlayer = observer(
       startPlayback();
     };
 
-    const bar = (
-      <Paper
-        width="100%"
-        height="100%"
-        flexDirection="column"
-        borderRadius={12}
-        elevation={app.settings?.preferEmbossed ? 5 : 1}
-      >
+    const hiddenMedia = (
+      <>
         {playbackUrl && (
           <audio
             ref={audioRef}
@@ -199,7 +197,17 @@ export const ProfileMusicPlayer = observer(
             }}
           />
         )}
+      </>
+    );
 
+    const bar = (
+      <Paper
+        width="100%"
+        height="100%"
+        flexDirection="column"
+        borderRadius={12}
+        elevation={app.settings?.preferEmbossed ? 5 : 1}
+      >
         <Stack direction="column" spacing={1} p={1.25}>
           <Stack direction="row" alignItems="center" spacing={1.25}>
             <Stack
@@ -270,6 +278,12 @@ export const ProfileMusicPlayer = observer(
                 >
                   Open
                 </Button>
+              )}
+
+              {floating && (
+                <IconButton size="sm" onClick={() => setCollapsed(true)}>
+                  <CaretDownIcon />
+                </IconButton>
               )}
             </Stack>
           </Stack>
@@ -358,7 +372,96 @@ export const ProfileMusicPlayer = observer(
     if (!floating) {
       return (
         <Box position="relative" width="100%">
+          {hiddenMedia}
           {bar}
+        </Box>
+      );
+    }
+
+    if (collapsed) {
+      return (
+        <Box
+          position="absolute"
+          bottom={12}
+          left={12}
+          zIndex={theme.zIndex.modal}
+          css={{ pointerEvents: "none" }}
+        >
+          {hiddenMedia}
+          <Box css={{ pointerEvents: "auto" }}>
+            <Paper
+              borderRadius={999}
+              elevation={app.settings?.preferEmbossed ? 5 : 1}
+              onClick={() => setCollapsed(false)}
+              css={{
+                cursor: "pointer",
+                transformOrigin: "bottom left",
+                animation: "pillIn 220ms cubic-bezier(0.34, 1.56, 0.64, 1)",
+                "@keyframes pillIn": {
+                  from: { opacity: 0, transform: "scale(0.7)" },
+                  to: { opacity: 1, transform: "scale(1)" }
+                }
+              }}
+            >
+              <Stack
+                direction="row"
+                alignItems="center"
+                spacing={1.25}
+                py={1.75}
+                px={2.5}
+              >
+                <Stack
+                  width={28}
+                  height={28}
+                  borderRadius={6}
+                  flexShrink={0}
+                  justifyContent="center"
+                  alignItems="center"
+                  overflow="hidden"
+                  css={{
+                    background: music.image
+                      ? `url("${music.image}") center / cover no-repeat`
+                      : "rgba(255, 255, 255, 0.12)"
+                  }}
+                >
+                  {!music.image && (
+                    <MusicNotesIcon size={14} color="rgba(255,255,255,0.85)" />
+                  )}
+                </Stack>
+
+                <Typography
+                  level="label-sm"
+                  fontWeight={600}
+                  textColor="primary"
+                  css={{
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                    maxWidth: 140
+                  }}
+                >
+                  {label}
+                </Typography>
+
+                <IconButton
+                  size="sm"
+                  color="primary"
+                  disabled={!playable}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    togglePlayback();
+                  }}
+                  variant="solid"
+                >
+                  {playing ? <PauseIcon /> : <PlayIcon />}
+                </IconButton>
+
+                <IconButton size="sm" onClick={() => setCollapsed(false)}>
+                  <CaretUpIcon />
+                </IconButton>
+              </Stack>
+            </Paper>
+          </Box>
         </Box>
       );
     }
@@ -368,15 +471,20 @@ export const ProfileMusicPlayer = observer(
         position="absolute"
         bottom={12}
         left={12}
-        right={12}
         zIndex={theme.zIndex.modal}
         css={{ pointerEvents: "none" }}
       >
+        {hiddenMedia}
         <Box
           css={{
             pointerEvents: "auto",
-            maxWidth: 420,
-            margin: "0 auto"
+            width: 380,
+            transformOrigin: "bottom left",
+            animation: "cardIn 220ms cubic-bezier(0.34, 1.56, 0.64, 1)",
+            "@keyframes cardIn": {
+              from: { opacity: 0, transform: "scale(0.95) translateY(8px)" },
+              to: { opacity: 1, transform: "scale(1) translateY(0)" }
+            }
           }}
         >
           {bar}
