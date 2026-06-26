@@ -1,10 +1,14 @@
-import type { CanvasRect } from "@components/Profile/viewer/profileLayout.utils";
+import {
+  PROFILE_CANVAS_REF_WIDTH,
+  type CanvasRect
+} from "@components/Profile/viewer/profileLayout.utils";
 import { Box } from "@mutualzz/ui-web";
 import {
   createContext,
   useCallback,
   useContext,
   useEffect,
+  useMemo,
   useRef,
   useState,
   type PropsWithChildren,
@@ -27,7 +31,6 @@ export function useProfileCanvasScale() {
 }
 
 interface Props extends PropsWithChildren {
-  /** Visual zoom only — layout coordinates stay in the measured canvas space. */
   zoom?: number;
   canvasRef?: Ref<HTMLDivElement>;
 }
@@ -38,7 +41,10 @@ export function ProfileCanvasViewport({
   canvasRef
 }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [canvasRect, setCanvasRect] = useState<CanvasRect | null>(null);
+  const [containerSize, setContainerSize] = useState<{
+    width: number;
+    height: number;
+  } | null>(null);
 
   useEffect(() => {
     const node = containerRef.current;
@@ -47,7 +53,11 @@ export function ProfileCanvasViewport({
     const measure = () => {
       const { width, height } = node.getBoundingClientRect();
       if (width <= 0 || height <= 0) return;
-      setCanvasRect({ width, height });
+      setContainerSize(prev =>
+        prev?.width === width && prev?.height === height
+          ? prev
+          : { width, height }
+      );
     };
 
     measure();
@@ -59,9 +69,24 @@ export function ProfileCanvasViewport({
   const mergedRef = useCallback(
     (node: HTMLDivElement | null) => {
       if (typeof canvasRef === "function") canvasRef(node);
-      else if (canvasRef) (canvasRef as { current: HTMLDivElement | null }).current = node;
+      else if (canvasRef)
+        (canvasRef as { current: HTMLDivElement | null }).current = node;
     },
     [canvasRef]
+  );
+
+  // Center the fixed-width canvas on wide viewports; clip on narrow ones.
+  const leftOffset = containerSize
+    ? Math.max(0, (containerSize.width - PROFILE_CANVAS_REF_WIDTH) / 2)
+    : 0;
+
+  // Canvas is always the reference width — no fitScale, no responsive scaling.
+  const canvasRect = useMemo<CanvasRect | null>(
+    () =>
+      containerSize
+        ? { width: PROFILE_CANVAS_REF_WIDTH, height: containerSize.height }
+        : null,
+    [containerSize?.width, containerSize?.height]
   );
 
   return (
@@ -77,10 +102,12 @@ export function ProfileCanvasViewport({
     >
       <Box
         ref={mergedRef}
-        width="100%"
-        height="100%"
-        position="relative"
         css={{
+          position: "absolute",
+          top: 0,
+          left: `${leftOffset}px`,
+          width: `${PROFILE_CANVAS_REF_WIDTH}px`,
+          height: "100%",
           transform: zoom !== 1 ? `scale(${zoom})` : undefined,
           transformOrigin: "center center"
         }}

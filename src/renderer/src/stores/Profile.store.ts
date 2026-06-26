@@ -62,6 +62,8 @@ export class ProfileStore {
     introMusicUrl?: string | null;
     introMusicTrackId?: string | null;
     introMusicTrackSource?: "itunes" | "deezer" | null;
+    introMusicTitle?: string | null;
+    introMusicAuthorName?: string | null;
   }) {
     const result = await this.app.rest.put<APIUserProfile>("/@me/profile", payload);
     if (!result) return undefined;

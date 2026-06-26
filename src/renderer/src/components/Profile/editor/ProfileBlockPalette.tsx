@@ -9,6 +9,7 @@ import {
   LinkIcon,
   MinusIcon,
   MusicNotesIcon,
+  PencilSimpleIcon,
   PulseIcon,
   QuotesIcon,
   ShieldCheckIcon,
@@ -36,7 +37,8 @@ const ITEMS: {
     label: "Mutual",
     icon: <UsersThreeIcon weight="fill" />
   },
-  { type: "divider", label: "Divider", icon: <MinusIcon weight="fill" /> }
+  { type: "divider", label: "Divider", icon: <MinusIcon weight="fill" /> },
+  { type: "draw", label: "Draw", icon: <PencilSimpleIcon weight="fill" /> }
 ];
 
 const PaletteItem = observer(

@@ -15,6 +15,8 @@ export interface ProfileDraftState {
   introMusicTrackId: string | null;
   introMusicTrackSource: "itunes" | "deezer" | null;
   introMusicTrackSelection: APIProfileMusicSearchTrack | null;
+  introMusicTitle: string | null;
+  introMusicAuthorName: string | null;
   blocks: APIProfileBlock[];
 }
 
@@ -54,6 +56,12 @@ export const createDraftFromProfile = (
       (profile.introMusic?.musicTrack || profile.introMusic?.spotify
         ? null
         : (profile.introMusic?.url ?? null)),
+    introMusicTitle: profile.introMusic?.audioHash
+      ? (profile.introMusic.title ?? null)
+      : null,
+    introMusicAuthorName: profile.introMusic?.audioHash
+      ? (profile.introMusic.authorName ?? null)
+      : null,
     blocks: normalizeProfileBlocks(
       (profile.blocks ?? []).filter(
         (block) => (block as { type: string }).type !== "embed"
@@ -72,6 +80,8 @@ export const createEmptyDraft = (): ProfileDraftState => ({
   introMusicTrackId: null,
   introMusicTrackSource: null,
   introMusicTrackSelection: null,
+  introMusicTitle: null,
+  introMusicAuthorName: null,
   blocks: []
 });
 

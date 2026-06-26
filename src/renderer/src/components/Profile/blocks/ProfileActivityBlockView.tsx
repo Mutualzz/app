@@ -34,7 +34,7 @@ export const ProfileActivityBlockView = observer(({ block, userId }: Props) => {
     >
       <Stack direction="row" spacing={1} alignItems="center">
         <PulseIcon size={18} weight="fill" />
-        <Typography level="body-sm" fontWeight={700}>
+        <Typography level="body-sm" fontWeight={700} css={{ fontSize: "var(--pcf-sm)" }}>
           Activity
         </Typography>
       </Stack>
@@ -48,18 +48,18 @@ export const ProfileActivityBlockView = observer(({ block, userId }: Props) => {
         >
           <Typography
             level="body-xs"
-            css={{ opacity: 0.75, textTransform: "capitalize" }}
+            css={{ opacity: 0.75, textTransform: "capitalize", fontSize: "var(--pcf-xs)" }}
           >
             {presence.status}
           </Typography>
           {customActivity && block.showCustomStatus && (
             <>
-              <Typography level="body-xs" css={{ opacity: 0.5 }}>
+              <Typography level="body-xs" css={{ opacity: 0.5, fontSize: "var(--pcf-xs)" }}>
                 —
               </Typography>
               <CustomStatusDisplay
                 activity={customActivity}
-                fontSize={12}
+                fontSize="var(--pcf-xs)"
                 textColor="primary"
               />
             </>
@@ -71,7 +71,7 @@ export const ProfileActivityBlockView = observer(({ block, userId }: Props) => {
                 type={activity.type}
                 color={theme.colors.success}
               />
-              <Typography level="body-xs" textColor="accent">
+              <Typography level="body-xs" textColor="accent" css={{ fontSize: "var(--pcf-xs)" }}>
                 {activity.name}
               </Typography>
             </Stack>

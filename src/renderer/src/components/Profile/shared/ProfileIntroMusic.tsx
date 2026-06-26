@@ -23,29 +23,33 @@ import {
 import { observer } from "mobx-react-lite";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
+import { Paper } from "@renderer/components/Paper";
+import { useAppStore } from "@renderer/hooks/useStores";
 
 interface Props {
   introMusic: APIProfileIntroMusic;
   profile: UserProfile;
   floating?: boolean;
+  autoPlay?: boolean;
 }
 
 export const ProfileIntroMusic = observer(
-  ({ introMusic, profile, floating = false }: Props) => {
+  ({ introMusic, profile, floating = false, autoPlay = false }: Props) => {
+    const app = useAppStore();
     const audioRef = useRef<HTMLAudioElement>(null);
+    const seekingRef = useRef(false);
+    const pendingSeekRef = useRef<number | null>(null);
     const [playing, setPlaying] = useState(false);
     const [embedSrc, setEmbedSrc] = useState<string | null>(null);
     const [duration, setDuration] = useState<number | null>(null);
     const [currentTime, setCurrentTime] = useState(0);
-    const [isSeeking, setIsSeeking] = useState(false);
     const [volume, setVolume] = useState(readProfileMusicVolumePercent);
 
     const label = getIntroMusicLabel(introMusic);
     const playbackUrl = getIntroMusicPlaybackUrl(profile, introMusic);
     const usesAudioPlayback = hasPreviewIntroMusic(introMusic);
     const playable = canPlayIntroMusic(profile, introMusic);
-    const openUrl =
-      introMusic.url.startsWith("http") ? introMusic.url : null;
+    const openUrl = introMusic.url.startsWith("http") ? introMusic.url : null;
     const isUploaded = !!introMusic.audioHash;
     const showScrubber = isUploaded && !!playbackUrl;
 
@@ -58,9 +62,9 @@ export const ProfileIntroMusic = observer(
     );
 
     useEffect(() => {
+      seekingRef.current = false;
       setDuration(null);
       setCurrentTime(0);
-      setIsSeeking(false);
     }, [playbackUrl]);
 
     useEffect(() => {
@@ -70,10 +74,8 @@ export const ProfileIntroMusic = observer(
     }, [volume, playbackUrl]);
 
     const commitSeek = (nextTime: number) => {
-      const audio = audioRef.current;
-      if (audio) audio.currentTime = nextTime;
       setCurrentTime(nextTime);
-      setIsSeeking(false);
+      if (audioRef.current) audioRef.current.currentTime = nextTime;
     };
 
     const formatTime = (seconds: number) => {
@@ -90,24 +92,24 @@ export const ProfileIntroMusic = observer(
       setPlaying(false);
     };
 
-    const startPlayback = async () => {
+    const startPlayback = async (silent = false) => {
       if (usesAudioPlayback && playbackUrl) {
         const audio = audioRef.current;
         if (!audio) return;
 
         if (audio.src !== playbackUrl) {
           audio.src = playbackUrl;
+          audio.load();
         }
 
         audio.volume = profileMusicVolumeToGain(volume);
-        audio.load();
 
         try {
           await audio.play();
           setPlaying(true);
         } catch {
           setPlaying(false);
-          toast.error("Could not play this track");
+          if (!silent) toast.error("Could not play this track");
         }
         return;
       }
@@ -119,26 +121,26 @@ export const ProfileIntroMusic = observer(
       setPlaying(true);
     };
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    useEffect(() => { if (autoPlay && playable) void startPlayback(true); }, []);
+
+
     const togglePlayback = () => {
       if (playing) {
         pausePlayback();
         return;
       }
 
-      void startPlayback();
+      startPlayback();
     };
 
     const bar = (
-      <Box
+      <Paper
+        width="100%"
+        height="100%"
+        flexDirection="column"
         borderRadius={12}
-        css={{
-          background: "rgba(0, 0, 0, 0.78)",
-          backdropFilter: "blur(12px)",
-          border: "1px solid rgba(255, 255, 255, 0.12)",
-          boxShadow: floating
-            ? "0 8px 32px rgba(0, 0, 0, 0.45)"
-            : undefined
-        }}
+        elevation={app.settings?.preferEmbossed ? 5 : 1}
       >
         {playbackUrl && (
           <audio
@@ -154,8 +156,9 @@ export const ProfileIntroMusic = observer(
               const d = Number.isFinite(audio.duration) ? audio.duration : null;
               setDuration(d);
             }}
+            onSeeked={() => { seekingRef.current = false; }}
             onTimeUpdate={() => {
-              if (isSeeking) return;
+              if (seekingRef.current) return;
               const audio = audioRef.current;
               if (!audio) return;
               setCurrentTime(audio.currentTime || 0);
@@ -195,32 +198,31 @@ export const ProfileIntroMusic = observer(
 
         <Stack direction="column" spacing={1} p={1.25}>
           <Stack direction="row" alignItems="center" spacing={1.25}>
-            <Box
+            <Stack
               width={40}
               height={40}
               borderRadius={8}
               flexShrink={0}
+              justifyContent="center"
+              alignItems="center"
+              overflow="hidden"
               css={{
-                overflow: "hidden",
                 background: introMusic.image
                   ? `url("${introMusic.image}") center / cover no-repeat`
-                  : "rgba(255, 255, 255, 0.12)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center"
+                  : "rgba(255, 255, 255, 0.12)"
               }}
             >
               {!introMusic.image && (
                 <MusicNotesIcon size={20} color="rgba(255,255,255,0.85)" />
               )}
-            </Box>
+            </Stack>
 
             <Stack direction="column" flex={1} minWidth={0} spacing={0.25}>
               <Typography
                 level="label-sm"
                 fontWeight={600}
+                textColor="primary"
                 css={{
-                  color: "#fff",
                   overflow: "hidden",
                   textOverflow: "ellipsis",
                   whiteSpace: "nowrap"
@@ -231,8 +233,8 @@ export const ProfileIntroMusic = observer(
               {introMusic.authorName && (
                 <Typography
                   level="body-xs"
+                  textColor="accent"
                   css={{
-                    color: "rgba(255,255,255,0.72)",
                     overflow: "hidden",
                     textOverflow: "ellipsis",
                     whiteSpace: "nowrap"
@@ -270,28 +272,26 @@ export const ProfileIntroMusic = observer(
 
           {showScrubber && (
             <Stack direction="column" spacing={0.5}>
-              <input
-                type="range"
+              <Slider
                 min={0}
                 max={Math.max(0, duration ?? 0)}
                 step={0.25}
                 value={Math.min(currentTime, duration ?? currentTime)}
-                onMouseDown={() => setIsSeeking(true)}
-                onTouchStart={() => setIsSeeking(true)}
-                onChange={(e) => setCurrentTime(Number(e.target.value))}
-                onMouseUp={(e) =>
-                  commitSeek(Number((e.target as HTMLInputElement).value))
-                }
-                onTouchEnd={(e) =>
-                  commitSeek(Number((e.target as HTMLInputElement).value))
-                }
+                onChange={(_, value) => { seekingRef.current = true; pendingSeekRef.current = value as number; setCurrentTime(value as number); }}
+                onChangeCommitted={() => { const t = pendingSeekRef.current; pendingSeekRef.current = null; if (t !== null) commitSeek(t); }}
                 css={{ width: "100%" }}
               />
               <Stack direction="row" justifyContent="space-between">
-                <Typography level="body-xs" css={{ color: "rgba(255,255,255,0.72)" }}>
+                <Typography
+                  level="body-xs"
+                  css={{ color: "rgba(255,255,255,0.72)" }}
+                >
                   {formatTime(currentTime)}
                 </Typography>
-                <Typography level="body-xs" css={{ color: "rgba(255,255,255,0.72)" }}>
+                <Typography
+                  level="body-xs"
+                  css={{ color: "rgba(255,255,255,0.72)" }}
+                >
                   {formatTime(duration ?? 0)}
                 </Typography>
               </Stack>
@@ -309,11 +309,21 @@ export const ProfileIntroMusic = observer(
                 border: "1px solid rgba(255, 255, 255, 0.08)"
               }}
             >
-              <Stack direction="row" justifyContent="space-between" alignItems="center">
-                <Typography level="body-xs" css={{ color: "rgba(255,255,255,0.72)" }}>
+              <Stack
+                direction="row"
+                justifyContent="space-between"
+                alignItems="center"
+              >
+                <Typography
+                  level="body-xs"
+                  css={{ color: "rgba(255,255,255,0.72)" }}
+                >
                   Volume
                 </Typography>
-                <Typography level="body-xs" css={{ color: "rgba(255,255,255,0.72)" }}>
+                <Typography
+                  level="body-xs"
+                  css={{ color: "rgba(255,255,255,0.72)" }}
+                >
                   {volume}%
                 </Typography>
               </Stack>
@@ -330,7 +340,7 @@ export const ProfileIntroMusic = observer(
             </Stack>
           )}
         </Stack>
-      </Box>
+      </Paper>
     );
 
     if (!floating) {

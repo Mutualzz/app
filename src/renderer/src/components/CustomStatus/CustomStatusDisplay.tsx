@@ -11,7 +11,7 @@ interface Props {
   activity?: PresenceActivity | null;
   text?: string | null;
   emoji?: PresenceActivityEmoji | null;
-  fontSize?: number;
+  fontSize?: number | string;
   level?: TypographyLevel;
   textColor?: TypographyColor;
   ellipsis?: boolean;

@@ -253,6 +253,7 @@ export const ProfileViewerPage = observer(
                 {(previewIntroMusic ?? profile.introMusic) && (
                   <ProfileIntroMusic
                     floating
+                    autoPlay={!isPreviewing}
                     introMusic={previewIntroMusic ?? profile.introMusic!}
                     profile={profile}
                   />

@@ -63,11 +63,11 @@ export const ProfileQuoteBlockView = ({ block }: Props) => {
       }}
     >
       <QuotesIcon size={20} weight="fill" color={styles.accent} />
-      <Box css={{ flex: 1, minHeight: 0 }}>
+      <Box css={{ flex: 1, minHeight: 0, fontSize: "var(--pcf-md)" }}>
         <ProfileMarkdownContent value={block.content} />
       </Box>
       {block.attribution && (
-        <Typography level="body-xs" css={{ opacity: 0.7, fontStyle: "italic" }}>
+        <Typography level="body-xs" css={{ opacity: 0.7, fontStyle: "italic", fontSize: "var(--pcf-xs)" }}>
           — {block.attribution}
         </Typography>
       )}

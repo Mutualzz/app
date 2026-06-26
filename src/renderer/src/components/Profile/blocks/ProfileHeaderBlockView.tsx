@@ -85,7 +85,7 @@ export const ProfileHeaderBlockView = observer(
             minHeight={0}
             css={{ paddingTop: AVATAR_OVERLAP }}
           >
-            <Typography level="title-md" css={{ lineHeight: 1.25 }}>
+            <Typography level="title-md" css={{ lineHeight: 1.25, fontSize: "var(--pcf-title)" }}>
               {user.displayName}
             </Typography>
             {bio && (
@@ -95,7 +95,8 @@ export const ProfileHeaderBlockView = observer(
                 level="body-sm"
                 css={{
                   overflowY: "auto",
-                  opacity: 0.85
+                  opacity: 0.85,
+                  fontSize: "var(--pcf-sm)"
                 }}
               >
                 <ProfileMarkdownContent value={bio} />

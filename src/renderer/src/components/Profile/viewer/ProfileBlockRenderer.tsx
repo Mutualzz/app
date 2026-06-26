@@ -8,6 +8,7 @@ import { ProfileMutualBlockView } from "@components/Profile/blocks/ProfileMutual
 import { ProfileQuoteBlockView } from "@components/Profile/blocks/ProfileQuoteBlockView";
 import { ProfileRolesBlockView } from "@components/Profile/blocks/ProfileRolesBlockView";
 import { ProfileTextBlockView } from "@components/Profile/blocks/ProfileTextBlockView";
+import { ProfileDrawBlockView } from "@components/Profile/blocks/ProfileDrawBlockView";
 import {
   percentToPixels,
   type CanvasRect
@@ -94,7 +95,7 @@ export const ProfileBlockRenderer = observer(
         case "text":
           return <ProfileTextBlockView block={block} />;
         case "music":
-          return <ProfileMusicBlockView block={block} />;
+          return <ProfileMusicBlockView block={block} profile={profile} />;
         case "image":
           return <ProfileImageBlockView block={block} profile={profile} />;
         case "links":
@@ -109,6 +110,8 @@ export const ProfileBlockRenderer = observer(
           return <ProfileDividerBlockView block={block} />;
         case "quote":
           return <ProfileQuoteBlockView block={block} />;
+        case "draw":
+          return <ProfileDrawBlockView block={block} />;
         default:
           return null;
       }

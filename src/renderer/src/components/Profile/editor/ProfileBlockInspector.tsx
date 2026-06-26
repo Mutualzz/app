@@ -3,6 +3,7 @@ import { Paper } from "@components/Paper";
 import { GoogleFontPicker } from "@components/FontPicker/GoogleFontPicker";
 import type {
   APIProfileBlock,
+  ProfileDrawBlock,
   ProfileHeaderBlock,
   ProfileImageBlock,
   ProfileMusicBlock,
@@ -11,6 +12,8 @@ import type {
 import type { ProfileDraftState } from "@components/Profile/editor/profileEditor.utils";
 import { ProfileMarkdownField } from "@components/Profile/editor/ProfileMarkdownField";
 import { ProfileMusicPicker } from "@components/Profile/editor/ProfileMusicPicker";
+import { ProfileBlockMusicPicker } from "@components/Profile/editor/ProfileBlockMusicPicker";
+import { ProfileDrawBlockModal } from "@components/Profile/editor/ProfileDrawBlockModal";
 import { ProfileBlockTypeInspector } from "@components/Profile/editor/ProfileBlockTypeInspector";
 import { ProfileBlockSizeInspector } from "@components/Profile/editor/ProfileBlockSizeInspector";
 import { getApiErrorMessage } from "@components/Profile/editor/profileEditor.utils";
@@ -18,8 +21,6 @@ import type { UserProfile } from "@stores/objects/UserProfile";
 import {
   Divider,
   Input,
-  Option,
-  Select,
   Slider,
   Stack,
   Typography
@@ -33,16 +34,18 @@ import {
   ImageIcon,
   MusicNotesIcon,
   PaintBrushBroadIcon,
+  PencilSimpleIcon,
   TextAaIcon,
   TextAlignLeftIcon,
   TrashIcon
 } from "@phosphor-icons/react";
+
+import { useModal } from "@contexts/Modal.context";
 import { observer } from "mobx-react-lite";
 import type { ReactNode } from "react";
 import { useEffect, useRef, useState } from "react";
 import { useAppStore } from "@hooks/useStores";
 import { toast } from "react-toastify";
-import { useQuery } from "@tanstack/react-query";
 
 interface Props {
   profile: UserProfile;
@@ -152,20 +155,18 @@ export const ProfileBlockInspector = observer(
     onSelectBlock
   }: Props) => {
     const app = useAppStore();
+    const { openModal } = useModal();
     const bannerInputRef = useRef<HTMLInputElement>(null);
     const backgroundInputRef = useRef<HTMLInputElement>(null);
     const musicInputRef = useRef<HTMLInputElement>(null);
     const imageInputRef = useRef<HTMLInputElement>(null);
+    const blockMusicInputRef = useRef<HTMLInputElement>(null);
     const [uploadingBanner, setUploadingBanner] = useState(false);
     const [uploadingBackground, setUploadingBackground] = useState(false);
     const [uploadingMusic, setUploadingMusic] = useState(false);
     const [uploadingBlockImage, setUploadingBlockImage] = useState(false);
+    const [uploadingBlockMusic, setUploadingBlockMusic] = useState(false);
 
-    const [musicQuery, setMusicQuery] = useState("");
-    const [musicDebouncedQuery, setMusicDebouncedQuery] = useState("");
-    const [musicSource, setMusicSource] = useState<"all" | "itunes" | "deezer">(
-      "all"
-    );
 
     const [collapsed, setCollapsed] = useState({
       font: true,
@@ -182,19 +183,6 @@ export const ProfileBlockInspector = observer(
       }
     }, [selectedBlock]);
 
-    useEffect(() => {
-      const trimmed = musicQuery.trim();
-      if (trimmed.length < 3) {
-        setMusicDebouncedQuery("");
-        return;
-      }
-      const timer = window.setTimeout(
-        () => setMusicDebouncedQuery(trimmed),
-        650
-      );
-      return () => window.clearTimeout(timer);
-    }, [musicQuery]);
-
     const bannerPreview = profile.constructBannerUrlFrom(draft.banner);
     const headerBlock = draft.blocks.find(
       (block): block is ProfileHeaderBlock => block.type === "header"
@@ -203,23 +191,6 @@ export const ProfileBlockInspector = observer(
       draft.backgroundImage
     );
 
-    const { data: musicSearch, isFetching: searchingMusic } = useQuery({
-      queryKey: [
-        "profile-music-block-search",
-        musicSource,
-        musicDebouncedQuery
-      ],
-      enabled: musicDebouncedQuery.length >= 3,
-      staleTime: 60_000,
-      queryFn: () =>
-        app.rest.get<{
-          tracks: import("@mutualzz/types").APIProfileMusicSearchTrack[];
-        }>("/@me/profile/music/search", {
-          q: musicDebouncedQuery,
-          limit: 8,
-          source: musicSource
-        })
-    });
 
     const uploadAsset = async (
       file: File,
@@ -557,49 +528,98 @@ export const ProfileBlockInspector = observer(
           }
         >
           <SettingCard>
-            <ProfileMusicPicker draft={draft} onDraftChange={onDraftChange} />
-            <Input
-              value={
-                draft.introMusicUrl &&
-                !HASH_PATTERN.test(draft.introMusicUrl) &&
-                !draft.introMusicTrackId
-                  ? draft.introMusicUrl
-                  : ""
-              }
-              onChange={(event) =>
-                onDraftChange({
-                  introMusicUrl: event.target.value || null,
-                  introMusicTrackId: null,
-                  introMusicTrackSelection: null
-                })
-              }
-              placeholder="YouTube or Apple Music link"
-            />
-            <Stack direction="row" spacing={1}>
-              <Button
-                size="sm"
-                color="neutral"
-                loading={uploadingMusic}
-                onClick={() => musicInputRef.current?.click()}
-              >
-                Upload MP3
-              </Button>
-              {(draft.introMusicUrl || draft.introMusicTrackId) && (
-                <Button
-                  size="sm"
-                  color="neutral"
-                  onClick={() =>
-                    onDraftChange({
-                      introMusicUrl: null,
-                      introMusicTrackId: null,
-                      introMusicTrackSelection: null
-                    })
+            {!draft.introMusicTrackId &&
+            draft.introMusicUrl &&
+            HASH_PATTERN.test(draft.introMusicUrl) ? (
+              <>
+                <Stack direction="row" alignItems="center" spacing={0.75}>
+                  <Typography level="body-xs" css={{ flex: 1, opacity: 0.8 }}>
+                    MP3 uploaded
+                  </Typography>
+                  <Button
+                    size="sm"
+                    color="neutral"
+                    onClick={() =>
+                      onDraftChange({
+                        introMusicUrl: null,
+                        introMusicTitle: null,
+                        introMusicAuthorName: null
+                      })
+                    }
+                  >
+                    Remove
+                  </Button>
+                </Stack>
+                <FieldLabel>Track info</FieldLabel>
+                <Input
+                  value={draft.introMusicTitle ?? ""}
+                  onChange={(event) =>
+                    onDraftChange({ introMusicTitle: event.target.value || null })
                   }
-                >
-                  Clear
-                </Button>
-              )}
-            </Stack>
+                  placeholder="Song title"
+                />
+                <Input
+                  value={draft.introMusicAuthorName ?? ""}
+                  onChange={(event) =>
+                    onDraftChange({ introMusicAuthorName: event.target.value || null })
+                  }
+                  placeholder="Artist(s)"
+                />
+              </>
+            ) : (
+              <>
+                <ProfileMusicPicker draft={draft} onDraftChange={onDraftChange} />
+                {!draft.introMusicTrackId && (
+                  <>
+                    <Input
+                      value={
+                        draft.introMusicUrl &&
+                        !HASH_PATTERN.test(draft.introMusicUrl)
+                          ? draft.introMusicUrl
+                          : ""
+                      }
+                      onChange={(event) =>
+                        onDraftChange({
+                          introMusicUrl: event.target.value || null,
+                          introMusicTrackId: null,
+                          introMusicTrackSelection: null
+                        })
+                      }
+                      placeholder="YouTube or Apple Music link"
+                    />
+                    <Stack direction="row" spacing={1}>
+                      <Button
+                        size="sm"
+                        color="neutral"
+                        loading={uploadingMusic}
+                        onClick={() => musicInputRef.current?.click()}
+                      >
+                        Upload MP3
+                      </Button>
+                      {draft.introMusicUrl && (
+                        <Button
+                          size="sm"
+                          color="neutral"
+                          onClick={() =>
+                            onDraftChange({
+                              introMusicUrl: null,
+                              introMusicTrackId: null,
+                              introMusicTrackSelection: null
+                            })
+                          }
+                        >
+                          Clear
+                        </Button>
+                      )}
+                    </Stack>
+                    <FieldHint>
+                      Upload an MP3 or paste a YouTube / Apple Music link for
+                      full song playback.
+                    </FieldHint>
+                  </>
+                )}
+              </>
+            )}
             <input
               ref={musicInputRef}
               type="file"
@@ -630,10 +650,6 @@ export const ProfileBlockInspector = observer(
                 event.target.value = "";
               }}
             />
-            <FieldHint>
-              Search for a 30s preview, upload an MP3, or paste a streaming
-              link.
-            </FieldHint>
           </SettingCard>
         </InspectorSection>
 
@@ -794,168 +810,185 @@ export const ProfileBlockInspector = observer(
                 </>
               )}
 
-              {selectedBlock.type === "music" && (
-                <>
-                  <FieldLabel>Music</FieldLabel>
-                  <Select
-                    value={musicSource}
-                    onValueChange={(value) =>
-                      setMusicSource(
-                        (value ?? "all") as "all" | "itunes" | "deezer"
-                      )
-                    }
-                    size="sm"
-                  >
-                    <Option value="all">Apple + Deezer</Option>
-                    <Option value="itunes">Apple</Option>
-                    <Option value="deezer">Deezer</Option>
-                  </Select>
-                  <Input
-                    type="text"
-                    value={musicQuery}
-                    onChange={(e) => setMusicQuery(e.target.value)}
-                    placeholder="Search songs…"
-                  />
-                  {(musicDebouncedQuery.length > 0 || searchingMusic) && (
-                    <Paper
-                      variant="plain"
-                      borderRadius={10}
-                      p={0.75}
-                      direction="column"
-                      spacing={0.5}
-                      css={{
-                        maxHeight: 220,
-                        overflow: "auto",
-                        border:
-                          "1px solid var(--mz-palette-neutral-outlinedBorder)"
-                      }}
-                    >
-                      {searchingMusic && (
-                        <Typography level="body-xs" css={{ opacity: 0.65 }}>
-                          Searching…
+              {selectedBlock.type === "music" && (() => {
+                const block = selectedBlock as ProfileMusicBlock;
+
+                if (block.audioHash) {
+                  return (
+                    <>
+                      <Stack direction="row" alignItems="center" spacing={0.75}>
+                        <Typography level="body-xs" css={{ flex: 1, opacity: 0.8 }}>
+                          MP3 uploaded
                         </Typography>
-                      )}
-                      {musicSearch?.tracks?.map((track) => (
-                        <Paper
-                          key={`${track.source}:${track.id}`}
-                          variant="plain"
-                          borderRadius={8}
-                          p={0.75}
-                          direction="row"
-                          spacing={1}
-                          alignItems="center"
-                          css={{
-                            cursor: track.previewUrl
-                              ? "pointer"
-                              : "not-allowed",
-                            opacity: track.previewUrl ? 1 : 0.45,
-                            "&:hover": track.previewUrl
-                              ? {
-                                  background: "var(--mz-palette-neutral-softBg)"
-                                }
-                              : undefined
-                          }}
-                          onClick={() => {
-                            if (!track.previewUrl) return;
-                            const next: Partial<ProfileMusicBlock> = {
-                              track,
+                        <Button
+                          size="sm"
+                          color="neutral"
+                          onClick={() =>
+                            updateSelectedBlock({
+                              audioHash: null,
                               title: null,
                               artists: null,
-                              image: null,
-                              previewUrl: null,
-                              trackUrl: null
-                            };
-                            updateSelectedBlock(
-                              next as Partial<APIProfileBlock>
-                            );
-                            setMusicQuery("");
-                            setMusicDebouncedQuery("");
-                          }}
+                              image: null
+                            } as Partial<APIProfileBlock>)
+                          }
                         >
-                          {track.image ? (
-                            <img
-                              src={track.image}
-                              alt=""
-                              width={36}
-                              height={36}
-                              css={{ borderRadius: 8, objectFit: "cover" }}
-                            />
-                          ) : (
-                            <Stack
-                              width={36}
-                              height={36}
-                              alignItems="center"
-                              justifyContent="center"
-                              css={{
-                                borderRadius: 8,
-                                background: "var(--mz-palette-neutral-softBg)"
-                              }}
-                            >
-                              <MusicNotesIcon size={16} />
-                            </Stack>
-                          )}
-                          <Stack
-                            direction="column"
-                            spacing={0.25}
-                            minWidth={0}
-                            flex={1}
+                          Remove
+                        </Button>
+                      </Stack>
+                      <FieldLabel>Track info</FieldLabel>
+                      <Input
+                        value={block.title ?? ""}
+                        onChange={(e) =>
+                          updateSelectedBlock({ title: e.target.value || null } as Partial<APIProfileBlock>)
+                        }
+                        placeholder="Song title"
+                      />
+                      <Input
+                        value={block.artists ?? ""}
+                        onChange={(e) =>
+                          updateSelectedBlock({ artists: e.target.value || null } as Partial<APIProfileBlock>)
+                        }
+                        placeholder="Artist(s)"
+                      />
+                      <Input
+                        value={block.image ?? ""}
+                        onChange={(e) =>
+                          updateSelectedBlock({ image: e.target.value || null } as Partial<APIProfileBlock>)
+                        }
+                        placeholder="Cover image URL (optional)"
+                      />
+                    </>
+                  );
+                }
+
+                if (block.youtubeUrl) {
+                  return (
+                    <Stack direction="row" alignItems="center" spacing={0.75}>
+                      <Typography
+                        level="body-xs"
+                        css={{ flex: 1, opacity: 0.8, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
+                      >
+                        YouTube linked
+                      </Typography>
+                      <Button
+                        size="sm"
+                        color="neutral"
+                        onClick={() => updateSelectedBlock({ youtubeUrl: null } as Partial<APIProfileBlock>)}
+                      >
+                        Remove
+                      </Button>
+                    </Stack>
+                  );
+                }
+
+                return (
+                  <>
+                    <ProfileBlockMusicPicker block={block} updateBlock={updateSelectedBlock} />
+                    {!block.track && (
+                      <>
+                        <Input
+                          placeholder="YouTube link"
+                          onChange={(event) => {
+                            const value = event.target.value.trim();
+                            if (value) updateSelectedBlock({ youtubeUrl: value, audioHash: null } as Partial<APIProfileBlock>);
+                          }}
+                        />
+                        <Stack direction="row" spacing={1}>
+                          <Button
+                            size="sm"
+                            color="neutral"
+                            loading={uploadingBlockMusic}
+                            onClick={() => blockMusicInputRef.current?.click()}
                           >
-                            <Typography
-                              level="body-sm"
-                              fontWeight={600}
-                              css={{
-                                overflow: "hidden",
-                                textOverflow: "ellipsis",
-                                whiteSpace: "nowrap"
-                              }}
-                            >
-                              {track.name}
-                            </Typography>
-                            <Typography
-                              level="body-xs"
-                              css={{
-                                opacity: 0.7,
-                                overflow: "hidden",
-                                textOverflow: "ellipsis",
-                                whiteSpace: "nowrap"
-                              }}
-                            >
-                              {track.artists}
-                            </Typography>
-                          </Stack>
-                          <Typography level="body-xs" css={{ opacity: 0.55 }}>
-                            {track.previewUrl ? "30s" : "—"}
-                          </Typography>
-                        </Paper>
-                      ))}
-                      {!searchingMusic && musicDebouncedQuery.length >= 3 && (
-                        <Typography level="body-xs" css={{ opacity: 0.55 }}>
-                          {musicSearch?.tracks?.length ? "" : "No tracks found"}
-                        </Typography>
-                      )}
-                    </Paper>
-                  )}
+                            Upload MP3
+                          </Button>
+                        </Stack>
+                        <input
+                          ref={blockMusicInputRef}
+                          type="file"
+                          accept="audio/mpeg,.mp3"
+                          hidden
+                          onChange={async (event) => {
+                            const file = event.target.files?.[0];
+                            if (!file) return;
+                            await handleAssetUpload(
+                              file,
+                              "music",
+                              (hash) =>
+                                updateSelectedBlock({
+                                  audioHash: hash,
+                                  youtubeUrl: null,
+                                  track: null
+                                } as Partial<APIProfileBlock>),
+                              setUploadingBlockMusic,
+                              "Music"
+                            );
+                            event.target.value = "";
+                          }}
+                        />
+                        <FieldHint>
+                          Upload an MP3 or paste a YouTube link for full song playback.
+                        </FieldHint>
+                      </>
+                    )}
+                  </>
+                );
+              })()}
 
-                  <Divider lineColor="muted" />
-
-                  <FieldLabel>Link (song/album)</FieldLabel>
-                  <Input
-                    value={(selectedBlock as ProfileMusicBlock).trackUrl ?? ""}
-                    onChange={(event) =>
-                      updateSelectedBlock({
-                        track: null,
-                        trackUrl: event.target.value || null,
-                        previewUrl: null
-                      } as Partial<APIProfileBlock>)
-                    }
-                    placeholder="Paste a link (optional)"
-                  />
-                  <FieldHint>
-                    Search adds a playable 30s preview (when available). Links
-                    are displayed as a card with an Open button.
-                  </FieldHint>
-                </>
-              )}
+              {selectedBlock.type === "draw" && (() => {
+                const drawBlock = selectedBlock as ProfileDrawBlock;
+                return (
+                  <Stack direction="column" spacing={1.25}>
+                    {drawBlock.svgData ? (
+                      <Stack
+                        css={{
+                          borderRadius: 8,
+                          overflow: "hidden",
+                          background: drawBlock.backgroundColor ?? "#1a1a2e",
+                          height: 80
+                        }}
+                      >
+                        <img
+                          src={`data:image/svg+xml;charset=utf-8,${encodeURIComponent(drawBlock.svgData)}`}
+                          alt=""
+                          css={{
+                            width: "100%",
+                            height: "100%",
+                            objectFit: "contain",
+                            display: "block"
+                          }}
+                        />
+                      </Stack>
+                    ) : (
+                      <Typography
+                        level="body-xs"
+                        textColor="muted"
+                        css={{ textAlign: "center" }}
+                      >
+                        No drawing yet
+                      </Typography>
+                    )}
+                    <Button
+                      size="sm"
+                      color="primary"
+                      startDecorator={<PencilSimpleIcon weight="fill" />}
+                      css={{ width: "100%" }}
+                      onClick={() =>
+                        openModal(
+                          "draw-editor",
+                          <ProfileDrawBlockModal
+                            block={drawBlock}
+                            updateBlock={updateSelectedBlock}
+                          />,
+                          { showCloseButton: true, css: { zIndex: 99999 } }
+                        )
+                      }
+                    >
+                      {drawBlock.svgData ? "Edit Drawing" : "Open Drawing Editor"}
+                    </Button>
+                  </Stack>
+                );
+              })()}
 
               <ProfileBlockSizeInspector
                 block={selectedBlock}

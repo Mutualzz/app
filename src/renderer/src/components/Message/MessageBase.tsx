@@ -74,7 +74,7 @@ export const ReplyContent = styled("div")({
   flex: 1,
   minWidth: 0,
   overflow: "hidden",
-  cursor: "default"
+  cursor: "pointer"
 });
 
 export const ReplyContentText = styled("div")({

@@ -5,12 +5,8 @@ export interface CanvasRect {
   height: number;
 }
 
-/**
- * The canonical canvas width used for block coordinate calculations.
- * Both the editor (fill-scaled) and the viewer (capped at this width) use this
- * as their reference so blocks appear at the same density across both surfaces.
- */
-export const PROFILE_CANVAS_REF_WIDTH = 800;
+/** The fixed canvas width. Block positions are stored as % of this value. */
+export const PROFILE_CANVAS_REF_WIDTH = 1600;
 
 /** All block dimensions are expressed as % of canvas width so layout scales uniformly. */
 export const canvasUnit = (canvas: CanvasRect) => canvas.width;
@@ -115,6 +111,14 @@ export const PROFILE_BLOCK_SIZE_LIMITS: Record<
     maxHeight: 40,
     recommendedWidth: 24,
     recommendedHeight: 12
+  },
+  draw: {
+    minWidth: 10,
+    maxWidth: 80,
+    minHeight: 10,
+    maxHeight: 80,
+    recommendedWidth: 28,
+    recommendedHeight: 28
   }
 };
 
@@ -389,6 +393,14 @@ export const createDefaultBlock = (
         content: "Write a quote…",
         variant: "default",
         attribution: null
+      });
+    case "draw":
+      return clampBlock({
+        ...base,
+        type: "draw",
+        svgData: null,
+        paths: null,
+        backgroundColor: null
       });
   }
 };

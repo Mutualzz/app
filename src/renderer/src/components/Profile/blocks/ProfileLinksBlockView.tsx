@@ -31,7 +31,7 @@ export const ProfileLinksBlockView = ({ block }: Props) => {
       elevation={app.settings?.preferEmbossed ? 5 : 1}
     >
       {links.length === 0 && (
-        <Typography level="body-sm" css={{ opacity: 0.55 }}>
+        <Typography level="body-sm" css={{ opacity: 0.55, fontSize: "var(--pcf-sm)" }}>
           Add links in the inspector
         </Typography>
       )}
@@ -89,7 +89,8 @@ export const ProfileLinksBlockView = ({ block }: Props) => {
                 css={{
                   overflow: "hidden",
                   textOverflow: "ellipsis",
-                  whiteSpace: "nowrap"
+                  whiteSpace: "nowrap",
+                  fontSize: "var(--pcf-sm)"
                 }}
               >
                 {link.label}
@@ -101,7 +102,8 @@ export const ProfileLinksBlockView = ({ block }: Props) => {
                     opacity: 0.65,
                     overflow: "hidden",
                     textOverflow: "ellipsis",
-                    whiteSpace: "nowrap"
+                    whiteSpace: "nowrap",
+                    fontSize: "var(--pcf-xs)"
                   }}
                 >
                   {subtitle}

@@ -67,7 +67,12 @@ export const ProfileCanvas = observer(
         css={{
           background,
           cursor: interactive ? "default" : undefined,
-          fontFamily: fontFamily ?? "inherit"
+          fontFamily: fontFamily ?? "inherit",
+          containerType: "inline-size",
+          "--pcf-xs": "clamp(10px, 0.75cqw, 14px)",
+          "--pcf-sm": "clamp(12px, 0.875cqw, 16px)",
+          "--pcf-md": "clamp(13px, 1.0cqw, 18px)",
+          "--pcf-title": "clamp(16px, 1.25cqw, 22px)"
         }}
       >
         {children}

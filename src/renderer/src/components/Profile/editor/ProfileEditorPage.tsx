@@ -152,6 +152,8 @@ export const ProfileEditorPage = observer(() => {
         introMusicTrackSource: draft.introMusicTrackId
           ? draft.introMusicTrackSource
           : null,
+        introMusicTitle: draft.introMusicTrackId ? null : draft.introMusicTitle,
+        introMusicAuthorName: draft.introMusicTrackId ? null : draft.introMusicAuthorName,
         blocks
       });
     },
@@ -250,7 +252,10 @@ export const ProfileEditorPage = observer(() => {
     let nextBlocks = addBlockAtPoint(draft.blocks, type, canvasRect, point);
     if (snapToGrid) {
       const added = nextBlocks[nextBlocks.length - 1];
-      nextBlocks = [...nextBlocks.slice(0, -1), snapBlockToGrid(added, gridStep)];
+      nextBlocks = [
+        ...nextBlocks.slice(0, -1),
+        snapBlockToGrid(added, gridStep)
+      ];
     }
     const added = nextBlocks[nextBlocks.length - 1];
     setDraft({ ...draft, blocks: nextBlocks });
@@ -383,7 +388,7 @@ export const ProfileEditorPage = observer(() => {
                   py={0.5}
                 >
                   <Typography level="body-xs" variant="plain" color="warning">
-                    Panels may cover blocks · click Preview to see the full
+                    Panels may overlap blocks · click Preview to see the full
                     canvas
                   </Typography>
                 </Paper>
@@ -395,7 +400,7 @@ export const ProfileEditorPage = observer(() => {
                   position: "absolute",
                   top: 8,
                   left: 8,
-                  zIndex: 10,
+                  zIndex: 10000,
                   pointerEvents: "auto"
                 }}
               >
@@ -411,7 +416,7 @@ export const ProfileEditorPage = observer(() => {
                   top: 8,
                   right: 8,
                   bottom: 8,
-                  zIndex: 10,
+                  zIndex: 10000,
                   pointerEvents: "auto",
                   overflowY: "auto"
                 }}

@@ -1,7 +1,7 @@
 import { Paper } from "@components/Paper";
 import { ProfileMarkdownContent } from "@components/Profile/shared/ProfileMarkdownContent";
 import type { ProfileTextBlock } from "@mutualzz/types";
-import { Typography } from "@mutualzz/ui-web";
+import { Box, Typography } from "@mutualzz/ui-web";
 
 export const ProfileTextBlockView = ({
   block
@@ -17,9 +17,11 @@ export const ProfileTextBlockView = ({
       css={{ overflow: "hidden" }}
     >
       {block.content ? (
-        <ProfileMarkdownContent value={block.content} />
+        <Box css={{ fontSize: "var(--pcf-md)" }}>
+          <ProfileMarkdownContent value={block.content} />
+        </Box>
       ) : (
-        <Typography level="body-md" css={{ opacity: 0.5 }}>
+        <Typography level="body-md" css={{ opacity: 0.5, fontSize: "var(--pcf-md)" }}>
           Text
         </Typography>
       )}

@@ -33,13 +33,13 @@ export const ProfileRolesBlockView = observer(({ block, userId }: Props) => {
     >
       <Stack direction="row" spacing={1} alignItems="center">
         <ShieldCheckIcon size={18} weight="fill" />
-        <Typography level="body-sm" fontWeight={700}>
+        <Typography level="body-sm" fontWeight={700} css={{ fontSize: "var(--pcf-sm)" }}>
           Roles
         </Typography>
       </Stack>
 
       {roles.length === 0 ? (
-        <Typography level="body-sm" css={{ opacity: 0.6 }}>
+        <Typography level="body-sm" css={{ opacity: 0.6, fontSize: "var(--pcf-sm)" }}>
           {member ? "No roles to show" : "Join a shared space to display roles"}
         </Typography>
       ) : (
@@ -56,7 +56,7 @@ export const ProfileRolesBlockView = observer(({ block, userId }: Props) => {
                 color: role.color ?? "inherit"
               }}
             >
-              <Typography level="body-xs" fontWeight={600}>
+              <Typography level="body-xs" fontWeight={600} css={{ fontSize: "var(--pcf-xs)" }}>
                 {role.name}
               </Typography>
             </Box>
