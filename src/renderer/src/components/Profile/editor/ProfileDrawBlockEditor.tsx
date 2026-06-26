@@ -1,13 +1,7 @@
 import { Button } from "@components/Button";
 import type { ColorLike } from "@mutualzz/ui-core";
 import type { APIProfileBlock, ProfileDrawBlock } from "@mutualzz/types";
-import {
-  Divider,
-  InputColor,
-  Slider,
-  Stack,
-  Typography
-} from "@mutualzz/ui-web";
+import { InputColor, Slider, Stack, Typography } from "@mutualzz/ui-web";
 import { EraserIcon, PaintBrushIcon } from "@phosphor-icons/react";
 import { useEffect, useRef, useState } from "react";
 import {
