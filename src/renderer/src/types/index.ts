@@ -1,6 +1,6 @@
 import type { Snowflake, VoiceState } from "@mutualzz/types";
 
-export const WINDOW_TITLEBAR_ZINDEX = 99999999;
+export const WINDOW_TITLEBAR_ZINDEX = 9999999999999;
 
 export interface VoiceServerUpdatePayload {
   roomId: string;

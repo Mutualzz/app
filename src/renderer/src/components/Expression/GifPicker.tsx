@@ -1,6 +1,11 @@
 import { type MouseEvent, useEffect, useRef, useState } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
-import { ArrowLeftIcon, MagnifyingGlassIcon, StarIcon, XIcon } from "@phosphor-icons/react";
+import {
+  ArrowLeftIcon,
+  MagnifyingGlassIcon,
+  StarIcon,
+  XIcon
+} from "@phosphor-icons/react";
 import { Stack, Typography, useTheme } from "@mutualzz/ui-web";
 import { useAppStore } from "@hooks/useStores";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
@@ -28,7 +33,7 @@ interface TagsResponse {
 }
 
 export interface GifPickerProps {
-  onSelectGif: (gif: GifResult) => void;
+  onSelectGif?: (gif: GifResult) => void;
 }
 
 const GifGrid = styled("div")({
@@ -394,7 +399,7 @@ export const GifPicker = observer(({ onSelectGif }: GifPickerProps) => {
                       <GifItem
                         key={klipyUrl}
                         gif={fav}
-                        onClick={() => onSelectGif(fav)}
+                        onClick={() => onSelectGif?.(fav)}
                         onToggleFavorite={(e) => handleToggleFavorite(e, fav)}
                         isFavorited
                       />
@@ -427,7 +432,7 @@ export const GifPicker = observer(({ onSelectGif }: GifPickerProps) => {
                     <GifItem
                       key={gif.id}
                       gif={gif}
-                      onClick={() => onSelectGif(gif)}
+                      onClick={() => onSelectGif?.(gif)}
                       onToggleFavorite={(e) => handleToggleFavorite(e, gif)}
                       isFavorited={favoriteGifs.some((f) =>
                         f.startsWith(`https://klipy.com/gifs/${gif.slug}`)

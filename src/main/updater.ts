@@ -77,12 +77,23 @@ export function initUpdaterHandlers() {
     async (_event, updatePath: string, version: string) => {
       const updaterPath = getUpdaterPath();
 
-      spawn(updaterPath, ["--apply", updatePath, "--version", version], {
-        detached: true,
-        stdio: "ignore"
-      }).unref();
+      const child = spawn(
+        updaterPath,
+        ["--apply", updatePath, "--version", version],
+        {
+          detached: true,
+          stdio: "ignore"
+        }
+      );
 
-      await new Promise((r) => setTimeout(r, 500));
+      await new Promise<void>((resolve, reject) => {
+        child.on("spawn", () => {
+          child.unref();
+          resolve();
+        });
+        child.on("error", reject);
+      });
+
       app.quit();
     }
   );

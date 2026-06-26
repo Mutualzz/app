@@ -294,9 +294,9 @@ const SidebarButton = ({
 };
 
 export interface EmojiPickerProps {
-  onSelectEmoji: (emoji: PickerEmoji, skinTone: SkinTone) => void;
-  onSelectCustomEmoji: (emoji: Expression) => void;
-  onSelectGif: (gif: {
+  onSelectEmoji?: (emoji: PickerEmoji, skinTone: SkinTone) => void;
+  onSelectCustomEmoji?: (emoji: Expression) => void;
+  onSelectGif?: (gif: {
     id: string;
     title: string;
     url: string;
@@ -305,10 +305,14 @@ export interface EmojiPickerProps {
     width: number;
     height: number;
   }) => void;
-  onSelectSticker: (sticker: Expression) => void;
-  pickerRef: RefObject<HTMLDivElement>;
+  onSelectSticker?: (sticker: Expression) => void;
+  pickerRef?: RefObject<HTMLDivElement>;
   activeTab: TopTab;
   onTabChange: (tab: TopTab) => void;
+
+  disableEmoji?: boolean;
+  disableGif?: boolean;
+  disableStickers?: boolean;
 }
 
 export const EmojiPicker = observer(
@@ -319,7 +323,11 @@ export const EmojiPicker = observer(
     onSelectSticker,
     pickerRef,
     activeTab,
-    onTabChange
+    onTabChange,
+
+    disableEmoji,
+    disableGif,
+    disableStickers
   }: EmojiPickerProps) => {
     const { theme } = useTheme();
     const app = useAppStore();
@@ -417,7 +425,7 @@ export const EmojiPicker = observer(
         const resolvedTone =
           tone === undefined ? (emoji.hasSkinTones ? skinTone : null) : tone;
         addRecentStandard(emoji.unified, resolvedTone);
-        onSelectEmoji(emoji, resolvedTone);
+        onSelectEmoji?.(emoji, resolvedTone);
       },
       [skinTone, addRecentStandard, onSelectEmoji]
     );
@@ -425,7 +433,7 @@ export const EmojiPicker = observer(
     const handleSelectCustomEmoji = useCallback(
       (emoji: Expression) => {
         addRecentCustom(emoji.id, emoji.name, emoji.url, emoji.animated);
-        onSelectCustomEmoji(emoji);
+        onSelectCustomEmoji?.(emoji);
       },
       [addRecentCustom, onSelectCustomEmoji]
     );
@@ -586,6 +594,13 @@ export const EmojiPicker = observer(
       })
     ];
 
+    const tabs = ["emoji", "gifs", "stickers"].filter((tab) => {
+      if (tab === "emoji") return !disableEmoji;
+      if (tab === "gifs") return !disableGif;
+      if (tab === "stickers") return !disableStickers;
+      return true;
+    });
+
     return (
       <Paper
         ref={pickerRef as any}
@@ -595,7 +610,7 @@ export const EmojiPicker = observer(
       >
         <PickerContainer>
           <TopTabBar direction="row">
-            {(["emoji", "gifs", "stickers"] as TopTab[]).map((tab) => (
+            {(tabs as TopTab[]).map((tab) => (
               <TopTabButton
                 key={tab}
                 active={activeTab === tab}

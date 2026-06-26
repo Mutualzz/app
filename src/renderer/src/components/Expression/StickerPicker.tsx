@@ -90,7 +90,7 @@ const EmptyPane = styled(Stack)(({ theme }) => ({
 }));
 
 export interface StickerPickerProps {
-  onSelectSticker: (sticker: Expression) => void;
+  onSelectSticker?: (sticker: Expression) => void;
 }
 
 export const StickerPicker = observer(
@@ -164,7 +164,7 @@ export const StickerPicker = observer(
     const renderSticker = (sticker: Expression) => (
       <StickerBtn
         key={sticker.id}
-        onClick={() => onSelectSticker(sticker)}
+        onClick={() => onSelectSticker?.(sticker)}
         onContextMenu={(e) => openStickerCtx(e, sticker)}
         title={sticker.name}
       >

@@ -7,8 +7,7 @@ import type { AccountStore } from "@stores/Account.store";
 import { useAppStore } from "@hooks/useStores";
 import { useMenu } from "@contexts/ContextMenu.context";
 import { useModal } from "@contexts/Modal.context";
-import { Stack, useTheme } from "@mutualzz/ui-web";
-import { formatColor } from "@mutualzz/ui-core";
+import { Divider, Stack } from "@mutualzz/ui-web";
 import { observer } from "mobx-react-lite";
 
 interface Props {
@@ -19,24 +18,12 @@ export const AccountContextMenuHeader = observer(({ account }: Props) => {
   const app = useAppStore();
   const { clearMenu } = useMenu();
   const { openModal } = useModal();
-  const { theme } = useTheme();
 
   const customText = app.customStatus.effectiveText;
   const customEmoji = app.customStatus.effectiveEmoji;
 
   return (
-    <Stack
-      direction="column"
-      px={0.5}
-      pt={0.25}
-      pb={1}
-      css={{
-        borderBottom: `1px solid ${formatColor(theme.typography.colors.muted, {
-          alpha: 0.35
-        })}`,
-        marginBottom: theme.spacing(0.5)
-      }}
-    >
+    <Stack direction="column" px={0.5} pt={0.25} pb={1} mb={0.5}>
       <CustomStatusCard
         account={account}
         text={customText}
@@ -50,6 +37,13 @@ export const AccountContextMenuHeader = observer(({ account }: Props) => {
         onClear={() => {
           app.gateway.clearScheduledCustomStatus();
           app.gateway.clearCustomStatus();
+        }}
+      />
+      <Divider
+        lineColor="muted"
+        css={{
+          opacity: 0.5,
+          marginTop: 16
         }}
       />
     </Stack>

@@ -14,7 +14,7 @@ import {
 type SettingsPatch = Omit<APIUserSettings, "updatedAt">;
 
 export class AccountSettingsStore {
-  currentTheme?: string | null;
+  currentTheme?: string | null = "baseDark";
   currentIcon?: string | null;
   preferredMode: AppMode;
   preferEmbossed: boolean = true;
@@ -43,7 +43,7 @@ export class AccountSettingsStore {
     private readonly app: AppStore,
     settings: APIUserSettings
   ) {
-    this.currentTheme = settings.currentTheme;
+    this.currentTheme = settings.currentTheme ?? "baseDark";
     this.currentIcon = settings.currentIcon;
     this.preferredMode = settings.preferredMode;
     this.spacePositions = new ObservableOrderedSet(
