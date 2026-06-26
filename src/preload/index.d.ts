@@ -15,7 +15,7 @@ export interface MutualzzAPI {
     }>;
     listProcesses(
       filterExes: string[]
-    ): Promise<{ name: string; pid: number }>[];
+    ): Promise<{ name: string; pid: number }[]>;
   };
   badge: {
     set(count: number): void;

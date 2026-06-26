@@ -1,4 +1,4 @@
-import { BrowserWindow, ipcMain } from "electron";
+import { BrowserWindow, globalShortcut, ipcMain } from "electron";
 import { join } from "path";
 import { is } from "@electron-toolkit/utils";
 import iconPng from "../../resources/icons/base/icon.png?asset";
@@ -38,6 +38,21 @@ export function createMainWindow(): BrowserWindow {
       sandbox: true,
       contextIsolation: true
     }
+  });
+
+  mainWindow.on("focus", () => {
+    globalShortcut.register("CommandOrControl+R", () => {
+      const win = getMainWindow();
+      if (win && !win.isDestroyed()) win.webContents.reload();
+    });
+  });
+
+  mainWindow.on("blur", () => {
+    globalShortcut.unregister("CommandOrControl+R");
+  });
+
+  mainWindow.on("closed", () => {
+    globalShortcut.unregister("CommandOrControl+R");
   });
 
   mainWindow.webContents.session.setPermissionCheckHandler(

@@ -18,13 +18,7 @@ import { ProfileBlockTypeInspector } from "@components/Profile/editor/ProfileBlo
 import { ProfileBlockSizeInspector } from "@components/Profile/editor/ProfileBlockSizeInspector";
 import { getApiErrorMessage } from "@components/Profile/editor/profileEditor.utils";
 import type { UserProfile } from "@stores/objects/UserProfile";
-import {
-  Divider,
-  Input,
-  Slider,
-  Stack,
-  Typography
-} from "@mutualzz/ui-web";
+import { Divider, Input, Slider, Stack, Typography } from "@mutualzz/ui-web";
 import {
   ArrowDownIcon,
   ArrowUpIcon,
@@ -167,7 +161,6 @@ export const ProfileBlockInspector = observer(
     const [uploadingBlockImage, setUploadingBlockImage] = useState(false);
     const [uploadingBlockMusic, setUploadingBlockMusic] = useState(false);
 
-
     const [collapsed, setCollapsed] = useState({
       font: true,
       bio: false,
@@ -190,7 +183,6 @@ export const ProfileBlockInspector = observer(
     const backgroundPreview = profile.constructBackgroundUrlFrom(
       draft.backgroundImage
     );
-
 
     const uploadAsset = async (
       file: File,
@@ -554,21 +546,28 @@ export const ProfileBlockInspector = observer(
                 <Input
                   value={draft.introMusicTitle ?? ""}
                   onChange={(event) =>
-                    onDraftChange({ introMusicTitle: event.target.value || null })
+                    onDraftChange({
+                      introMusicTitle: event.target.value || null
+                    })
                   }
                   placeholder="Song title"
                 />
                 <Input
                   value={draft.introMusicAuthorName ?? ""}
                   onChange={(event) =>
-                    onDraftChange({ introMusicAuthorName: event.target.value || null })
+                    onDraftChange({
+                      introMusicAuthorName: event.target.value || null
+                    })
                   }
                   placeholder="Artist(s)"
                 />
               </>
             ) : (
               <>
-                <ProfileMusicPicker draft={draft} onDraftChange={onDraftChange} />
+                <ProfileMusicPicker
+                  draft={draft}
+                  onDraftChange={onDraftChange}
+                />
                 {!draft.introMusicTrackId && (
                   <>
                     <Input
@@ -750,9 +749,11 @@ export const ProfileBlockInspector = observer(
                 <>
                   {(selectedBlock as ProfileImageBlock).src && (
                     <img
-                      src={profile.constructBlockImageUrl(
-                        (selectedBlock as ProfileImageBlock).src
-                      )}
+                      src={
+                        profile.constructBlockImageUrl(
+                          (selectedBlock as ProfileImageBlock).src
+                        ) ?? undefined
+                      }
                       alt=""
                       css={{
                         width: "100%",
@@ -810,185 +811,222 @@ export const ProfileBlockInspector = observer(
                 </>
               )}
 
-              {selectedBlock.type === "music" && (() => {
-                const block = selectedBlock as ProfileMusicBlock;
+              {selectedBlock.type === "music" &&
+                (() => {
+                  const block = selectedBlock as ProfileMusicBlock;
 
-                if (block.audioHash) {
-                  return (
-                    <>
+                  if (block.audioHash) {
+                    return (
+                      <>
+                        <Stack
+                          direction="row"
+                          alignItems="center"
+                          spacing={0.75}
+                        >
+                          <Typography
+                            level="body-xs"
+                            css={{ flex: 1, opacity: 0.8 }}
+                          >
+                            MP3 uploaded
+                          </Typography>
+                          <Button
+                            size="sm"
+                            color="neutral"
+                            onClick={() =>
+                              updateSelectedBlock({
+                                audioHash: null,
+                                title: null,
+                                artists: null,
+                                image: null
+                              } as Partial<APIProfileBlock>)
+                            }
+                          >
+                            Remove
+                          </Button>
+                        </Stack>
+                        <FieldLabel>Track info</FieldLabel>
+                        <Input
+                          value={block.title ?? ""}
+                          onChange={(e) =>
+                            updateSelectedBlock({
+                              title: e.target.value || null
+                            } as Partial<APIProfileBlock>)
+                          }
+                          placeholder="Song title"
+                        />
+                        <Input
+                          value={block.artists ?? ""}
+                          onChange={(e) =>
+                            updateSelectedBlock({
+                              artists: e.target.value || null
+                            } as Partial<APIProfileBlock>)
+                          }
+                          placeholder="Artist(s)"
+                        />
+                        <Input
+                          value={block.image ?? ""}
+                          onChange={(e) =>
+                            updateSelectedBlock({
+                              image: e.target.value || null
+                            } as Partial<APIProfileBlock>)
+                          }
+                          placeholder="Cover image URL (optional)"
+                        />
+                      </>
+                    );
+                  }
+
+                  if (block.youtubeUrl) {
+                    return (
                       <Stack direction="row" alignItems="center" spacing={0.75}>
-                        <Typography level="body-xs" css={{ flex: 1, opacity: 0.8 }}>
-                          MP3 uploaded
+                        <Typography
+                          level="body-xs"
+                          css={{
+                            flex: 1,
+                            opacity: 0.8,
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap"
+                          }}
+                        >
+                          YouTube linked
                         </Typography>
                         <Button
                           size="sm"
                           color="neutral"
                           onClick={() =>
                             updateSelectedBlock({
-                              audioHash: null,
-                              title: null,
-                              artists: null,
-                              image: null
+                              youtubeUrl: null
                             } as Partial<APIProfileBlock>)
                           }
                         >
                           Remove
                         </Button>
                       </Stack>
-                      <FieldLabel>Track info</FieldLabel>
-                      <Input
-                        value={block.title ?? ""}
-                        onChange={(e) =>
-                          updateSelectedBlock({ title: e.target.value || null } as Partial<APIProfileBlock>)
-                        }
-                        placeholder="Song title"
+                    );
+                  }
+
+                  return (
+                    <>
+                      <ProfileBlockMusicPicker
+                        block={block}
+                        updateBlock={updateSelectedBlock}
                       />
-                      <Input
-                        value={block.artists ?? ""}
-                        onChange={(e) =>
-                          updateSelectedBlock({ artists: e.target.value || null } as Partial<APIProfileBlock>)
-                        }
-                        placeholder="Artist(s)"
-                      />
-                      <Input
-                        value={block.image ?? ""}
-                        onChange={(e) =>
-                          updateSelectedBlock({ image: e.target.value || null } as Partial<APIProfileBlock>)
-                        }
-                        placeholder="Cover image URL (optional)"
-                      />
+                      {!block.track && (
+                        <>
+                          <Input
+                            placeholder="YouTube link"
+                            onChange={(event) => {
+                              const value = event.target.value.trim();
+                              if (value)
+                                updateSelectedBlock({
+                                  youtubeUrl: value,
+                                  audioHash: null
+                                } as Partial<APIProfileBlock>);
+                            }}
+                          />
+                          <Stack direction="row" spacing={1}>
+                            <Button
+                              size="sm"
+                              color="neutral"
+                              loading={uploadingBlockMusic}
+                              onClick={() =>
+                                blockMusicInputRef.current?.click()
+                              }
+                            >
+                              Upload MP3
+                            </Button>
+                          </Stack>
+                          <input
+                            ref={blockMusicInputRef}
+                            type="file"
+                            accept="audio/mpeg,.mp3"
+                            hidden
+                            onChange={async (event) => {
+                              const file = event.target.files?.[0];
+                              if (!file) return;
+                              await handleAssetUpload(
+                                file,
+                                "music",
+                                (hash) =>
+                                  updateSelectedBlock({
+                                    audioHash: hash,
+                                    youtubeUrl: null,
+                                    track: null
+                                  } as Partial<APIProfileBlock>),
+                                setUploadingBlockMusic,
+                                "Music"
+                              );
+                              event.target.value = "";
+                            }}
+                          />
+                          <FieldHint>
+                            Upload an MP3 or paste a YouTube link for full song
+                            playback.
+                          </FieldHint>
+                        </>
+                      )}
                     </>
                   );
-                }
+                })()}
 
-                if (block.youtubeUrl) {
+              {selectedBlock.type === "draw" &&
+                (() => {
+                  const drawBlock = selectedBlock as ProfileDrawBlock;
                   return (
-                    <Stack direction="row" alignItems="center" spacing={0.75}>
-                      <Typography
-                        level="body-xs"
-                        css={{ flex: 1, opacity: 0.8, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
-                      >
-                        YouTube linked
-                      </Typography>
+                    <Stack direction="column" spacing={1.25}>
+                      {drawBlock.svgData ? (
+                        <Stack
+                          css={{
+                            borderRadius: 8,
+                            overflow: "hidden",
+                            background: drawBlock.backgroundColor ?? "#1a1a2e",
+                            height: 80
+                          }}
+                        >
+                          <img
+                            src={`data:image/svg+xml;charset=utf-8,${encodeURIComponent(drawBlock.svgData)}`}
+                            alt=""
+                            css={{
+                              width: "100%",
+                              height: "100%",
+                              objectFit: "contain",
+                              display: "block"
+                            }}
+                          />
+                        </Stack>
+                      ) : (
+                        <Typography
+                          level="body-xs"
+                          textColor="muted"
+                          css={{ textAlign: "center" }}
+                        >
+                          No drawing yet
+                        </Typography>
+                      )}
                       <Button
                         size="sm"
-                        color="neutral"
-                        onClick={() => updateSelectedBlock({ youtubeUrl: null } as Partial<APIProfileBlock>)}
+                        color="primary"
+                        startDecorator={<PencilSimpleIcon weight="fill" />}
+                        css={{ width: "100%" }}
+                        onClick={() =>
+                          openModal(
+                            "draw-editor",
+                            <ProfileDrawBlockModal
+                              block={drawBlock}
+                              updateBlock={updateSelectedBlock}
+                            />,
+                            { showCloseButton: true, css: { zIndex: 99999 } }
+                          )
+                        }
                       >
-                        Remove
+                        {drawBlock.svgData
+                          ? "Edit Drawing"
+                          : "Open Drawing Editor"}
                       </Button>
                     </Stack>
                   );
-                }
-
-                return (
-                  <>
-                    <ProfileBlockMusicPicker block={block} updateBlock={updateSelectedBlock} />
-                    {!block.track && (
-                      <>
-                        <Input
-                          placeholder="YouTube link"
-                          onChange={(event) => {
-                            const value = event.target.value.trim();
-                            if (value) updateSelectedBlock({ youtubeUrl: value, audioHash: null } as Partial<APIProfileBlock>);
-                          }}
-                        />
-                        <Stack direction="row" spacing={1}>
-                          <Button
-                            size="sm"
-                            color="neutral"
-                            loading={uploadingBlockMusic}
-                            onClick={() => blockMusicInputRef.current?.click()}
-                          >
-                            Upload MP3
-                          </Button>
-                        </Stack>
-                        <input
-                          ref={blockMusicInputRef}
-                          type="file"
-                          accept="audio/mpeg,.mp3"
-                          hidden
-                          onChange={async (event) => {
-                            const file = event.target.files?.[0];
-                            if (!file) return;
-                            await handleAssetUpload(
-                              file,
-                              "music",
-                              (hash) =>
-                                updateSelectedBlock({
-                                  audioHash: hash,
-                                  youtubeUrl: null,
-                                  track: null
-                                } as Partial<APIProfileBlock>),
-                              setUploadingBlockMusic,
-                              "Music"
-                            );
-                            event.target.value = "";
-                          }}
-                        />
-                        <FieldHint>
-                          Upload an MP3 or paste a YouTube link for full song playback.
-                        </FieldHint>
-                      </>
-                    )}
-                  </>
-                );
-              })()}
-
-              {selectedBlock.type === "draw" && (() => {
-                const drawBlock = selectedBlock as ProfileDrawBlock;
-                return (
-                  <Stack direction="column" spacing={1.25}>
-                    {drawBlock.svgData ? (
-                      <Stack
-                        css={{
-                          borderRadius: 8,
-                          overflow: "hidden",
-                          background: drawBlock.backgroundColor ?? "#1a1a2e",
-                          height: 80
-                        }}
-                      >
-                        <img
-                          src={`data:image/svg+xml;charset=utf-8,${encodeURIComponent(drawBlock.svgData)}`}
-                          alt=""
-                          css={{
-                            width: "100%",
-                            height: "100%",
-                            objectFit: "contain",
-                            display: "block"
-                          }}
-                        />
-                      </Stack>
-                    ) : (
-                      <Typography
-                        level="body-xs"
-                        textColor="muted"
-                        css={{ textAlign: "center" }}
-                      >
-                        No drawing yet
-                      </Typography>
-                    )}
-                    <Button
-                      size="sm"
-                      color="primary"
-                      startDecorator={<PencilSimpleIcon weight="fill" />}
-                      css={{ width: "100%" }}
-                      onClick={() =>
-                        openModal(
-                          "draw-editor",
-                          <ProfileDrawBlockModal
-                            block={drawBlock}
-                            updateBlock={updateSelectedBlock}
-                          />,
-                          { showCloseButton: true, css: { zIndex: 99999 } }
-                        )
-                      }
-                    >
-                      {drawBlock.svgData ? "Edit Drawing" : "Open Drawing Editor"}
-                    </Button>
-                  </Stack>
-                );
-              })()}
+                })()}
 
               <ProfileBlockSizeInspector
                 block={selectedBlock}

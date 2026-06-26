@@ -43,6 +43,8 @@ export async function buildDesktopPresenceFromProcesses(): Promise<PresenceUpdat
     const gameExes = GAME_CATALOG.flatMap((g) => g.exes);
     const processes = await window.api.system.listProcesses(gameExes);
 
+    console.log(processes);
+
     const processNames = processes.map((proc) => proc.name);
     const games = matchGames(processNames);
 
