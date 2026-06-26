@@ -34,7 +34,6 @@ export function initUpdaterHandlers() {
       return new Promise<{ path: string }>((resolve, reject) => {
         const getter = url.startsWith("https") ? httpsGet : httpGet;
 
-        // Delete stale file if exists
         if (existsSync(savePath)) {
           unlinkSync(savePath);
         }
@@ -59,12 +58,14 @@ export function initUpdaterHandlers() {
           res.pipe(file);
 
           file.on("finish", () => {
-            file.close();
-            resolve({ path: savePath });
+            file.close((err) => {
+              if (err) reject(err);
+              else resolve({ path: savePath });
+            });
           });
 
           file.on("error", (err) => {
-            file.close();
+            file.destroy();
             reject(err);
           });
         }).on("error", reject);
@@ -80,10 +81,7 @@ export function initUpdaterHandlers() {
       const child = spawn(
         updaterPath,
         ["--apply", updatePath, "--version", version],
-        {
-          detached: true,
-          stdio: "ignore"
-        }
+        { detached: true, stdio: "ignore" }
       );
 
       await new Promise<void>((resolve, reject) => {
