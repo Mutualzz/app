@@ -166,7 +166,7 @@ export const ProfileBlockInspector = observer(
       bio: false,
       banner: true,
       background: true,
-      intro: true,
+      music: true,
       selected: !selectedBlock
     });
 
@@ -513,16 +513,16 @@ export const ProfileBlockInspector = observer(
 
         <InspectorSection
           icon={<MusicNotesIcon size={16} weight="fill" />}
-          title="Intro music"
-          collapsed={collapsed.intro}
+          title="Profile Music"
+          collapsed={collapsed.music}
           onToggleCollapsed={() =>
-            setCollapsed((prev) => ({ ...prev, intro: !prev.intro }))
+            setCollapsed((prev) => ({ ...prev, music: !prev.music }))
           }
         >
           <SettingCard>
-            {!draft.introMusicTrackId &&
-            draft.introMusicUrl &&
-            HASH_PATTERN.test(draft.introMusicUrl) ? (
+            {!draft.profileMusicTrackId &&
+            draft.profileMusicUrl &&
+            HASH_PATTERN.test(draft.profileMusicUrl) ? (
               <>
                 <Stack direction="row" alignItems="center" spacing={0.75}>
                   <Typography level="body-xs" css={{ flex: 1, opacity: 0.8 }}>
@@ -533,9 +533,9 @@ export const ProfileBlockInspector = observer(
                     color="neutral"
                     onClick={() =>
                       onDraftChange({
-                        introMusicUrl: null,
-                        introMusicTitle: null,
-                        introMusicAuthorName: null
+                        profileMusicUrl: null,
+                        profileMusicTitle: null,
+                        profileMusicAuthorName: null
                       })
                     }
                   >
@@ -544,19 +544,19 @@ export const ProfileBlockInspector = observer(
                 </Stack>
                 <FieldLabel>Track info</FieldLabel>
                 <Input
-                  value={draft.introMusicTitle ?? ""}
+                  value={draft.profileMusicTitle ?? ""}
                   onChange={(event) =>
                     onDraftChange({
-                      introMusicTitle: event.target.value || null
+                      profileMusicTitle: event.target.value || null
                     })
                   }
                   placeholder="Song title"
                 />
                 <Input
-                  value={draft.introMusicAuthorName ?? ""}
+                  value={draft.profileMusicAuthorName ?? ""}
                   onChange={(event) =>
                     onDraftChange({
-                      introMusicAuthorName: event.target.value || null
+                      profileMusicAuthorName: event.target.value || null
                     })
                   }
                   placeholder="Artist(s)"
@@ -568,20 +568,20 @@ export const ProfileBlockInspector = observer(
                   draft={draft}
                   onDraftChange={onDraftChange}
                 />
-                {!draft.introMusicTrackId && (
+                {!draft.profileMusicTrackId && (
                   <>
                     <Input
                       value={
-                        draft.introMusicUrl &&
-                        !HASH_PATTERN.test(draft.introMusicUrl)
-                          ? draft.introMusicUrl
+                        draft.profileMusicUrl &&
+                        !HASH_PATTERN.test(draft.profileMusicUrl)
+                          ? draft.profileMusicUrl
                           : ""
                       }
                       onChange={(event) =>
                         onDraftChange({
-                          introMusicUrl: event.target.value || null,
-                          introMusicTrackId: null,
-                          introMusicTrackSelection: null
+                          profileMusicUrl: event.target.value || null,
+                          profileMusicTrackId: null,
+                          profileMusicTrackSelection: null
                         })
                       }
                       placeholder="YouTube or Apple Music link"
@@ -595,15 +595,15 @@ export const ProfileBlockInspector = observer(
                       >
                         Upload MP3
                       </Button>
-                      {draft.introMusicUrl && (
+                      {draft.profileMusicUrl && (
                         <Button
                           size="sm"
                           color="neutral"
                           onClick={() =>
                             onDraftChange({
-                              introMusicUrl: null,
-                              introMusicTrackId: null,
-                              introMusicTrackSelection: null
+                              profileMusicUrl: null,
+                              profileMusicTrackId: null,
+                              profileMusicTrackSelection: null
                             })
                           }
                         >
@@ -639,12 +639,12 @@ export const ProfileBlockInspector = observer(
                   "music",
                   (hash) =>
                     onDraftChange({
-                      introMusicUrl: hash,
-                      introMusicTrackId: null,
-                      introMusicTrackSelection: null
+                      profileMusicUrl: hash,
+                      profileMusicTrackId: null,
+                      profileMusicTrackSelection: null
                     }),
                   setUploadingMusic,
-                  "Intro music"
+                  "Profile music"
                 );
                 event.target.value = "";
               }}
@@ -652,7 +652,7 @@ export const ProfileBlockInspector = observer(
           </SettingCard>
         </InspectorSection>
 
-        {!collapsed.intro && <Divider lineColor="muted" />}
+        {!collapsed.music && <Divider lineColor="muted" />}
 
         <InspectorSection
           icon={<CursorClickIcon size={16} weight="fill" />}

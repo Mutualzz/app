@@ -59,11 +59,11 @@ export class ProfileStore {
   }
 
   async save(payload: Omit<APIUserProfile, "userId" | "configured" | "updatedAt"> & {
-    introMusicUrl?: string | null;
-    introMusicTrackId?: string | null;
-    introMusicTrackSource?: "itunes" | "deezer" | null;
-    introMusicTitle?: string | null;
-    introMusicAuthorName?: string | null;
+    profileMusicUrl?: string | null;
+    profileMusicTrackId?: string | null;
+    profileMusicTrackSource?: "itunes" | "deezer" | null;
+    profileMusicTitle?: string | null;
+    profileMusicAuthorName?: string | null;
   }) {
     const result = await this.app.rest.put<APIUserProfile>("/@me/profile", payload);
     if (!result) return undefined;

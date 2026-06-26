@@ -43,7 +43,7 @@ export const ProfileResetConfirm = observer(({ onSuccess }: Props) => {
         Reset profile to empty?
       </Typography>
       <Typography mb={2.5} css={{ opacity: 0.85 }}>
-        This removes your bio, banner, background, intro music, and all blocks.
+        This removes your bio, banner, background, profile music, and all blocks.
         Your account avatar and username are not affected. This cannot be undone.
       </Typography>
       <Stack spacing={1.25}>

@@ -60,7 +60,7 @@ export const ProfileMusicBlockView = ({ block, profile }: Props) => {
 
   // Playback priority: uploaded audio > YouTube > 30s preview
   const audioSrc = audioHash
-    ? profile.constructIntroMusicAudioUrl(audioHash)
+    ? profile.constructProfileMusicAudioUrl(audioHash)
     : (block.track?.previewUrl ?? block.previewUrl ?? null);
   const youtubeVideoId = block.youtubeUrl ? extractYoutubeVideoId(block.youtubeUrl) : null;
 

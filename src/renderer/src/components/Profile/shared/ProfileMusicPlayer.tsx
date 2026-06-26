@@ -1,17 +1,17 @@
 import { Button } from "@components/Button";
 import {
-  canPlayIntroMusic,
+  canPlayProfileMusic,
   getHiddenEmbedPlaybackUrl,
-  getIntroMusicPlaybackUrl,
-  getIntroMusicLabel,
-  hasPreviewIntroMusic
-} from "@components/Profile/shared/profileIntroMusic.utils";
+  getProfileMusicPlaybackUrl,
+  getProfileMusicLabel,
+  hasPreviewProfileMusic
+} from "@components/Profile/shared/profileMusicPlayer.utils";
 import {
   profileMusicVolumeToGain,
   readProfileMusicVolumePercent,
   writeProfileMusicVolumePercent
 } from "@components/Profile/shared/profileMusicPlayback.utils";
-import type { APIProfileIntroMusic } from "@mutualzz/types";
+import type { APIProfileMusic } from "@mutualzz/types";
 import type { UserProfile } from "@stores/objects/UserProfile";
 import { Box, Slider, Stack, Typography, useTheme } from "@mutualzz/ui-web";
 import {
@@ -27,14 +27,14 @@ import { Paper } from "@renderer/components/Paper";
 import { useAppStore } from "@renderer/hooks/useStores";
 
 interface Props {
-  introMusic: APIProfileIntroMusic;
+  music: APIProfileMusic;
   profile: UserProfile;
   floating?: boolean;
   autoPlay?: boolean;
 }
 
-export const ProfileIntroMusic = observer(
-  ({ introMusic, profile, floating = false, autoPlay = false }: Props) => {
+export const ProfileMusicPlayer = observer(
+  ({ music, profile, floating = false, autoPlay = false }: Props) => {
     const app = useAppStore();
     const { theme } = useTheme();
     const audioRef = useRef<HTMLAudioElement>(null);
@@ -46,12 +46,12 @@ export const ProfileIntroMusic = observer(
     const [currentTime, setCurrentTime] = useState(0);
     const [volume, setVolume] = useState(readProfileMusicVolumePercent);
 
-    const label = getIntroMusicLabel(introMusic);
-    const playbackUrl = getIntroMusicPlaybackUrl(profile, introMusic);
-    const usesAudioPlayback = hasPreviewIntroMusic(introMusic);
-    const playable = canPlayIntroMusic(profile, introMusic);
-    const openUrl = introMusic.url.startsWith("http") ? introMusic.url : null;
-    const isUploaded = !!introMusic.audioHash;
+    const label = getProfileMusicLabel(music);
+    const playbackUrl = getProfileMusicPlaybackUrl(profile, music);
+    const usesAudioPlayback = hasPreviewProfileMusic(music);
+    const playable = canPlayProfileMusic(profile, music);
+    const openUrl = music.url.startsWith("http") ? music.url : null;
+    const isUploaded = !!music.audioHash;
     const showScrubber = isUploaded && !!playbackUrl;
 
     useEffect(
@@ -115,7 +115,7 @@ export const ProfileIntroMusic = observer(
         return;
       }
 
-      const nextEmbedSrc = getHiddenEmbedPlaybackUrl(introMusic);
+      const nextEmbedSrc = getHiddenEmbedPlaybackUrl(music);
       if (!nextEmbedSrc) return;
 
       setEmbedSrc(nextEmbedSrc);
@@ -184,7 +184,7 @@ export const ProfileIntroMusic = observer(
 
         {embedSrc && (
           <iframe
-            title="Profile intro music"
+            title="Profile music player"
             src={embedSrc}
             allow="autoplay; encrypted-media"
             css={{
@@ -211,12 +211,12 @@ export const ProfileIntroMusic = observer(
               alignItems="center"
               overflow="hidden"
               css={{
-                background: introMusic.image
-                  ? `url("${introMusic.image}") center / cover no-repeat`
+                background: music.image
+                  ? `url("${music.image}") center / cover no-repeat`
                   : "rgba(255, 255, 255, 0.12)"
               }}
             >
-              {!introMusic.image && (
+              {!music.image && (
                 <MusicNotesIcon size={20} color="rgba(255,255,255,0.85)" />
               )}
             </Stack>
@@ -234,7 +234,7 @@ export const ProfileIntroMusic = observer(
               >
                 {label}
               </Typography>
-              {introMusic.authorName && (
+              {music.authorName && (
                 <Typography
                   level="body-xs"
                   textColor="accent"
@@ -244,7 +244,7 @@ export const ProfileIntroMusic = observer(
                     whiteSpace: "nowrap"
                   }}
                 >
-                  {introMusic.authorName}
+                  {music.authorName}
                 </Typography>
               )}
             </Stack>

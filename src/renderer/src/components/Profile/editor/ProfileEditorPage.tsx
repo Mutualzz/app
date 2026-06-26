@@ -1,7 +1,7 @@
 import { Button } from "@components/Button";
 import { ProfileBlockInspector } from "@components/Profile/editor/ProfileBlockInspector";
 import { ProfileBlockPalette } from "@components/Profile/editor/ProfileBlockPalette";
-import { getDraftIntroMusic } from "@components/Profile/shared/profileIntroMusic.utils";
+import { getDraftProfileMusic } from "@components/Profile/shared/profileMusicPlayer.utils";
 import { ProfileResetConfirm } from "@components/Profile/editor/ProfileResetConfirm";
 import {
   addBlockAtPoint,
@@ -59,7 +59,7 @@ export const ProfileEditorPage = observer(() => {
   const account = app.account;
   const navigate = useNavigate();
   const { openModal } = useModal();
-  const { openContextMenu } = useMenu();
+  const { openContextMenu, clearMenu } = useMenu();
   const viewportRef = useRef<HTMLDivElement | null>(null);
   const hasInitializedZoom = useRef(false);
   const blockMenuTargetRef = useRef<string | null>(null);
@@ -148,15 +148,15 @@ export const ProfileEditorPage = observer(() => {
         backgroundColor: draft.backgroundColor,
         backgroundImage: draft.backgroundImage,
         pageFontFamily: draft.pageFontFamily,
-        introMusicUrl: draft.introMusicTrackId ? null : draft.introMusicUrl,
-        introMusicTrackId: draft.introMusicTrackId,
-        introMusicTrackSource: draft.introMusicTrackId
-          ? draft.introMusicTrackSource
+        profileMusicUrl: draft.profileMusicTrackId ? null : draft.profileMusicUrl,
+        profileMusicTrackId: draft.profileMusicTrackId,
+        profileMusicTrackSource: draft.profileMusicTrackId
+          ? draft.profileMusicTrackSource
           : null,
-        introMusicTitle: draft.introMusicTrackId ? null : draft.introMusicTitle,
-        introMusicAuthorName: draft.introMusicTrackId
+        profileMusicTitle: draft.profileMusicTrackId ? null : draft.profileMusicTitle,
+        profileMusicAuthorName: draft.profileMusicTrackId
           ? null
-          : draft.introMusicAuthorName,
+          : draft.profileMusicAuthorName,
         blocks
       });
     },
@@ -237,6 +237,7 @@ export const ProfileEditorPage = observer(() => {
           ? alignBlockHorizontally(block)
           : alignBlockVertically(block, canvasRect)
       );
+      clearMenu();
     },
     [updateBlock, canvasRect]
   );
@@ -245,7 +246,23 @@ export const ProfileEditorPage = observer(() => {
     const blockId = blockMenuTargetRef.current;
     if (!blockId) return;
     updateBlock(blockId, (block) => snapBlockToGrid(block, gridStep));
+    clearMenu();
   }, [updateBlock, gridStep]);
+
+  const deleteMenuBlock = useCallback(() => {
+    const blockId = blockMenuTargetRef.current;
+    if (!blockId) return;
+    setDraft((current) => {
+      if (!current) return current;
+      return {
+        ...current,
+        blocks: current.blocks.filter((block) => block.id !== blockId)
+      };
+    });
+    setSelectedBlockId((current) => (current === blockId ? null : current));
+    blockMenuTargetRef.current = null;
+    clearMenu();
+  }, []);
 
   const addBlock = (
     type: ProfileBlockType,
@@ -283,7 +300,7 @@ export const ProfileEditorPage = observer(() => {
     return <Loading />;
   }
 
-  const draftIntroMusic = getDraftIntroMusic(draft, profile);
+  const draftProfileMusic = getDraftProfileMusic(draft, profile);
 
   const titleBarActions = panelsVisible ? (
     <Stack direction="row" spacing={1}>
@@ -366,7 +383,7 @@ export const ProfileEditorPage = observer(() => {
             onBlocksChange={(blocks) => setDraft({ ...draft, blocks })}
             onSelectBlock={setSelectedBlockId}
             onBlockContextMenu={openBlockContextMenu}
-            introMusic={draftIntroMusic}
+            profileMusic={draftProfileMusic}
           />
 
           {panelsVisible && (
@@ -451,6 +468,7 @@ export const ProfileEditorPage = observer(() => {
             onAlignHorizontal={() => alignMenuBlock("horizontal")}
             onAlignVertical={() => alignMenuBlock("vertical")}
             onSnapToGrid={snapMenuBlock}
+            onDelete={deleteMenuBlock}
           />
         </Box>
       </DndContext>

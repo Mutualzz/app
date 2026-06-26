@@ -141,10 +141,10 @@ export const ProfileMusicPicker = observer(
 
     const clearMusic = () => {
       onDraftChange({
-        introMusicUrl: null,
-        introMusicTrackId: null,
-        introMusicTrackSource: null,
-        introMusicTrackSelection: null
+        profileMusicUrl: null,
+        profileMusicTrackId: null,
+        profileMusicTrackSource: null,
+        profileMusicTrackSelection: null
       });
       setQuery("");
       setDebouncedQuery("");
@@ -154,10 +154,10 @@ export const ProfileMusicPicker = observer(
       if (!track.previewUrl) return;
 
       onDraftChange({
-        introMusicUrl: null,
-        introMusicTrackId: track.id,
-        introMusicTrackSource: track.source,
-        introMusicTrackSelection: track
+        profileMusicUrl: null,
+        profileMusicTrackId: track.id,
+        profileMusicTrackSource: track.source,
+        profileMusicTrackSelection: track
       });
       setQuery("");
       setDebouncedQuery("");
@@ -167,7 +167,7 @@ export const ProfileMusicPicker = observer(
 
     return (
       <Stack direction="column" spacing={1} width="100%">
-        {draft.introMusicTrackId && draft.introMusicTrackSelection ? (
+        {draft.profileMusicTrackId && draft.profileMusicTrackSelection ? (
           <Paper
             variant="soft"
             borderRadius={10}
@@ -178,7 +178,7 @@ export const ProfileMusicPicker = observer(
           >
             <Stack direction="column" spacing={1} alignItems="center" width="100%">
               <TrackArtwork
-                image={draft.introMusicTrackSelection.image}
+                image={draft.profileMusicTrackSelection.image}
                 size={72}
               />
               <Stack
@@ -189,11 +189,11 @@ export const ProfileMusicPicker = observer(
                 css={{ textAlign: "center" }}
               >
                 <Typography level="body-sm" fontWeight={600}>
-                  {draft.introMusicTrackSelection.name}
+                  {draft.profileMusicTrackSelection.name}
                 </Typography>
-                {draft.introMusicTrackSelection.artists && (
+                {draft.profileMusicTrackSelection.artists && (
                   <Typography level="body-xs" css={{ opacity: 0.7 }}>
-                    {draft.introMusicTrackSelection.artists}
+                    {draft.profileMusicTrackSelection.artists}
                   </Typography>
                 )}
                 <Typography level="body-xs" css={{ opacity: 0.5 }}>

@@ -11,12 +11,12 @@ export interface ProfileDraftState {
   backgroundColor: string | null;
   backgroundImage: string | null;
   pageFontFamily: string | null;
-  introMusicUrl: string | null;
-  introMusicTrackId: string | null;
-  introMusicTrackSource: "itunes" | "deezer" | null;
-  introMusicTrackSelection: APIProfileMusicSearchTrack | null;
-  introMusicTitle: string | null;
-  introMusicAuthorName: string | null;
+  profileMusicUrl: string | null;
+  profileMusicTrackId: string | null;
+  profileMusicTrackSource: "itunes" | "deezer" | null;
+  profileMusicTrackSelection: APIProfileMusicSearchTrack | null;
+  profileMusicTitle: string | null;
+  profileMusicAuthorName: string | null;
   blocks: APIProfileBlock[];
 }
 
@@ -24,12 +24,12 @@ export const createDraftFromProfile = (
   profile: UserProfile
 ): ProfileDraftState => {
   const musicTrackId =
-    profile.introMusic?.musicTrack?.id ??
-    (profile.introMusic?.spotify?.type === "track"
-      ? profile.introMusic.spotify.id
+    profile.profileMusic?.musicTrack?.id ??
+    (profile.profileMusic?.spotify?.type === "track"
+      ? profile.profileMusic.spotify.id
       : null);
 
-  const musicTrackSource = profile.introMusic?.musicTrack?.source ?? null;
+  const musicTrackSource = profile.profileMusic?.musicTrack?.source ?? null;
 
   return {
     bio: profile.bio ?? "",
@@ -37,30 +37,30 @@ export const createDraftFromProfile = (
     backgroundColor: profile.backgroundColor ?? null,
     backgroundImage: profile.backgroundImage ?? null,
     pageFontFamily: profile.pageFontFamily ?? null,
-    introMusicTrackId: musicTrackId,
-    introMusicTrackSource: musicTrackId ? (musicTrackSource ?? "itunes") : null,
-    introMusicTrackSelection:
-      musicTrackId && profile.introMusic
+    profileMusicTrackId: musicTrackId,
+    profileMusicTrackSource: musicTrackId ? (musicTrackSource ?? "itunes") : null,
+    profileMusicTrackSelection:
+      musicTrackId && profile.profileMusic
         ? {
             source: musicTrackSource ?? "itunes",
             id: musicTrackId,
-            name: profile.introMusic.title ?? "Intro music",
-            artists: profile.introMusic.authorName ?? "",
-            image: profile.introMusic.image ?? null,
-            previewUrl: profile.introMusic.previewUrl ?? null,
-            trackUrl: profile.introMusic.url
+            name: profile.profileMusic.title ?? "Profile music",
+            artists: profile.profileMusic.authorName ?? "",
+            image: profile.profileMusic.image ?? null,
+            previewUrl: profile.profileMusic.previewUrl ?? null,
+            trackUrl: profile.profileMusic.url
           }
         : null,
-    introMusicUrl:
-      profile.introMusic?.audioHash ??
-      (profile.introMusic?.musicTrack || profile.introMusic?.spotify
+    profileMusicUrl:
+      profile.profileMusic?.audioHash ??
+      (profile.profileMusic?.musicTrack || profile.profileMusic?.spotify
         ? null
-        : (profile.introMusic?.url ?? null)),
-    introMusicTitle: profile.introMusic?.audioHash
-      ? (profile.introMusic.title ?? null)
+        : (profile.profileMusic?.url ?? null)),
+    profileMusicTitle: profile.profileMusic?.audioHash
+      ? (profile.profileMusic.title ?? null)
       : null,
-    introMusicAuthorName: profile.introMusic?.audioHash
-      ? (profile.introMusic.authorName ?? null)
+    profileMusicAuthorName: profile.profileMusic?.audioHash
+      ? (profile.profileMusic.authorName ?? null)
       : null,
     blocks: normalizeProfileBlocks(
       (profile.blocks ?? []).filter(
@@ -76,12 +76,12 @@ export const createEmptyDraft = (): ProfileDraftState => ({
   backgroundColor: null,
   backgroundImage: null,
   pageFontFamily: null,
-  introMusicUrl: null,
-  introMusicTrackId: null,
-  introMusicTrackSource: null,
-  introMusicTrackSelection: null,
-  introMusicTitle: null,
-  introMusicAuthorName: null,
+  profileMusicUrl: null,
+  profileMusicTrackId: null,
+  profileMusicTrackSource: null,
+  profileMusicTrackSelection: null,
+  profileMusicTitle: null,
+  profileMusicAuthorName: null,
   blocks: []
 });
 
@@ -91,17 +91,17 @@ export const hasProfileDraftContent = (draft: ProfileDraftState) =>
   !!draft.banner ||
   !!draft.backgroundColor ||
   !!draft.backgroundImage ||
-  !!draft.introMusicUrl ||
-  !!draft.introMusicTrackId;
+  !!draft.profileMusicUrl ||
+  !!draft.profileMusicTrackId;
 
 export const EMPTY_PROFILE_SAVE_PAYLOAD = {
   bio: null,
   banner: null,
   backgroundColor: null,
   backgroundImage: null,
-  introMusicUrl: null,
-  introMusicTrackId: null,
-  introMusicTrackSource: null,
+  profileMusicUrl: null,
+  profileMusicTrackId: null,
+  profileMusicTrackSource: null,
   blocks: [] as APIProfileBlock[]
 };
 

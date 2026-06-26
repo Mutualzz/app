@@ -4,9 +4,10 @@ import { useAppStore } from "@hooks/useStores";
 import {
   AlignCenterHorizontalIcon,
   AlignCenterVerticalIcon,
-  GridFourIcon
+  GridFourIcon,
+  TrashIcon
 } from "@phosphor-icons/react";
-import { Portal } from "@mutualzz/ui-web";
+import { Divider, Portal } from "@mutualzz/ui-web";
 
 export const PROFILE_BLOCK_MENU_ID = "profile-editor-block";
 
@@ -14,12 +15,14 @@ interface Props {
   onAlignHorizontal: () => void;
   onAlignVertical: () => void;
   onSnapToGrid: () => void;
+  onDelete: () => void;
 }
 
 export const ProfileBlockContextMenu = ({
   onAlignHorizontal,
   onAlignVertical,
-  onSnapToGrid
+  onSnapToGrid,
+  onDelete
 }: Props) => {
   const app = useAppStore();
 
@@ -50,6 +53,15 @@ export const ProfileBlockContextMenu = ({
           endDecorator={<GridFourIcon weight="bold" />}
         >
           Snap to grid
+        </ContextItem>
+        <Divider lineColor="muted" />
+        <ContextItem
+          size="sm"
+          color="danger"
+          onClick={onDelete}
+          endDecorator={<TrashIcon weight="bold" />}
+        >
+          Delete block
         </ContextItem>
       </ContextMenu>
     </Portal>

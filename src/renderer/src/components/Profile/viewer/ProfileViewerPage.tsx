@@ -2,9 +2,9 @@ import { Button } from "@components/Button";
 import { ProfileBlockRenderer } from "@components/Profile/viewer/ProfileBlockRenderer";
 import { ProfileCanvas } from "@components/Profile/shared/ProfileCanvas";
 import { ProfileEmptyState } from "@components/Profile/viewer/ProfileEmptyState";
-import { ProfileIntroMusic } from "@components/Profile/shared/ProfileIntroMusic";
+import { ProfileMusicPlayer } from "@components/Profile/shared/ProfileMusicPlayer";
 import { ProfileLayout } from "@components/Profile/viewer/ProfileLayout";
-import { getDraftIntroMusic } from "@components/Profile/shared/profileIntroMusic.utils";
+import { getDraftProfileMusic } from "@components/Profile/shared/profileMusicPlayer.utils";
 import { hasProfileDraftContent } from "@components/Profile/editor/profileEditor.utils";
 import { sortBlocksByZIndex } from "@components/Profile/viewer/profileLayout.utils";
 import { ProfileCanvasBlocksLayer } from "@components/Profile/shared/ProfileCanvasBlocksLayer";
@@ -93,10 +93,10 @@ export const ProfileViewerPage = observer(
       [previewDraft?.blocks, profile?.blocks, profile?.updatedAt]
     );
 
-    const previewIntroMusic = useMemo(
+    const previewProfileMusic = useMemo(
       () =>
         previewDraft && profile
-          ? getDraftIntroMusic(previewDraft, profile)
+          ? getDraftProfileMusic(previewDraft, profile)
           : null,
       [previewDraft, profile]
     );
@@ -250,11 +250,11 @@ export const ProfileViewerPage = observer(
                     ))
                   }
                 </ProfileCanvasBlocksLayer>
-                {(previewIntroMusic ?? profile.introMusic) && (
-                  <ProfileIntroMusic
+                {(previewProfileMusic ?? profile.profileMusic) && (
+                  <ProfileMusicPlayer
                     floating
                     autoPlay={!isPreviewing}
-                    introMusic={previewIntroMusic ?? profile.introMusic!}
+                    music={previewProfileMusic ?? profile.profileMusic!}
                     profile={profile}
                   />
                 )}
