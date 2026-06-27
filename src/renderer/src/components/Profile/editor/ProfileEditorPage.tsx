@@ -352,6 +352,8 @@ export const ProfileEditorPage = observer(() => {
       actions={titleBarActions}
       backLabel="Close"
       onBack={() => navigateToPreferredMode(app, navigate)}
+      music={draftProfileMusic}
+      musicProfile={profile}
     >
       <DndContext sensors={sensors} onDragEnd={onDragEnd}>
         <Box
@@ -383,7 +385,6 @@ export const ProfileEditorPage = observer(() => {
             onBlocksChange={(blocks) => setDraft({ ...draft, blocks })}
             onSelectBlock={setSelectedBlockId}
             onBlockContextMenu={openBlockContextMenu}
-            profileMusic={draftProfileMusic}
           />
 
           {panelsVisible && (

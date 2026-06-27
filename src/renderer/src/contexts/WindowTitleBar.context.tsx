@@ -12,6 +12,7 @@ export interface WindowTitleBarConfig {
   onBack?: () => void;
   backLabel?: string;
   end?: ReactNode;
+  centerExtra?: ReactNode;
   hideModeLabel?: boolean;
 }
 

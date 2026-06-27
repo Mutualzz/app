@@ -2,7 +2,6 @@ import { Button } from "@components/Button";
 import { ProfileBlockRenderer } from "@components/Profile/viewer/ProfileBlockRenderer";
 import { ProfileCanvas } from "@components/Profile/shared/ProfileCanvas";
 import { ProfileEmptyState } from "@components/Profile/viewer/ProfileEmptyState";
-import { ProfileMusicPlayer } from "@components/Profile/shared/ProfileMusicPlayer";
 import { ProfileLayout } from "@components/Profile/viewer/ProfileLayout";
 import { getDraftProfileMusic } from "@components/Profile/shared/profileMusicPlayer.utils";
 import { hasProfileDraftContent } from "@components/Profile/editor/profileEditor.utils";
@@ -191,6 +190,9 @@ export const ProfileViewerPage = observer(
             : navigateToPreferredMode(app, navigate)
         }
         backLabel={isPreviewing ? "Back" : "Close"}
+        music={previewProfileMusic ?? profile.profileMusic}
+        musicProfile={profile}
+        musicAutoPlay={!isPreviewing}
       >
         {!showCanvas ? (
           <ProfileEmptyState isSelf={isSelf} />
@@ -250,14 +252,6 @@ export const ProfileViewerPage = observer(
                     ))
                   }
                 </ProfileCanvasBlocksLayer>
-                {(previewProfileMusic ?? profile.profileMusic) && (
-                  <ProfileMusicPlayer
-                    floating
-                    autoPlay={!isPreviewing}
-                    music={previewProfileMusic ?? profile.profileMusic!}
-                    profile={profile}
-                  />
-                )}
               </ProfileCanvas>
             </ProfileCanvasViewport>
           </Stack>

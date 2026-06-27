@@ -4,7 +4,6 @@ import { ProfileCanvas } from "@components/Profile/shared/ProfileCanvas";
 import { ProfileCanvasBlocksLayer } from "@components/Profile/shared/ProfileCanvasBlocksLayer";
 import { ProfileCanvasRectReporter } from "@components/Profile/shared/ProfileCanvasBlocksLayer";
 import { ProfileCanvasViewport } from "@components/Profile/shared/ProfileCanvasViewport";
-import { ProfileMusicPlayer } from "@components/Profile/shared/ProfileMusicPlayer";
 import {
   clampBlock,
   clampPixelRect,
@@ -19,7 +18,6 @@ import {
 } from "@components/Profile/viewer/profileLayout.utils";
 import type {
   APIProfileBlock,
-  APIProfileMusic,
   ProfileBlockType
 } from "@mutualzz/types";
 import type { AccountStore } from "@stores/Account.store";
@@ -60,7 +58,6 @@ interface Props {
   gridStep?: number;
   zoom?: number;
   onBlockContextMenu?: (event: React.MouseEvent, blockId: string) => void;
-  profileMusic?: APIProfileMusic | null;
 }
 
 const ProfileEditorCanvasInner = observer(
@@ -80,8 +77,7 @@ const ProfileEditorCanvasInner = observer(
     onViewportScaleChange,
     snapToGrid = false,
     gridStep = PROFILE_GRID_STEP,
-    onBlockContextMenu,
-    profileMusic
+    onBlockContextMenu
   }: Omit<Props, "zoom">) => {
     const { theme } = useTheme();
     const [displayBlocks, setDisplayBlocks] = useState(blocks);
@@ -364,9 +360,6 @@ const ProfileEditorCanvasInner = observer(
             );
           }}
         </ProfileCanvasBlocksLayer>
-        {profileMusic && (
-          <ProfileMusicPlayer floating music={profileMusic} profile={profile} />
-        )}
       </ProfileCanvas>
     );
   }

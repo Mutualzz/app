@@ -171,6 +171,7 @@ const WindowTitleBar = ({ onHeightChange }: WindowTitleBarProps) => {
             direction="row"
             alignItems="center"
             justifyContent="center"
+            spacing={1}
             px={1.5}
             css={{
               pointerEvents: "none",
@@ -188,6 +189,17 @@ const WindowTitleBar = ({ onHeightChange }: WindowTitleBarProps) => {
             >
               {pageTitleBar.title}
             </Typography>
+            {pageTitleBar.centerExtra && (
+              <Stack
+                css={{
+                  pointerEvents: "auto",
+                  WebkitAppRegion: "no-drag",
+                  userSelect: "auto"
+                }}
+              >
+                {pageTitleBar.centerExtra}
+              </Stack>
+            )}
           </Stack>
         )}
         <Stack

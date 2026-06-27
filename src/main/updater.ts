@@ -84,12 +84,15 @@ export function initUpdaterHandlers() {
         { detached: true, stdio: "ignore" }
       );
 
-      await new Promise<void>((resolve, reject) => {
+      await new Promise<void>((resolve) => {
         child.on("spawn", () => {
           child.unref();
           resolve();
         });
-        child.on("error", reject);
+        child.on("error", (err) => {
+          console.error("[updater:apply] Failed to spawn updater:", err);
+          resolve();
+        });
       });
 
       app.quit();
