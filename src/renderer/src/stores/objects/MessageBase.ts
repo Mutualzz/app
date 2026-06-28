@@ -29,27 +29,42 @@ export class MessageBase {
     this.authorId = data.authorId;
     if (data.author) this._author = this.app.users.add(data.author);
 
-    makeObservable<this, "_author" | "_space" | "_channel">(this, {
-      id: observable,
-      content: observable,
-      createdAt: observable,
-      type: observable,
-      authorId: observable,
-      spaceId: observable,
-      channelId: observable,
+    makeObservable<this, "_author" | "_space" | "_channel" | "_repliedTo">(
+      this,
+      {
+        id: observable,
+        content: observable,
+        createdAt: observable,
+        type: observable,
+        authorId: observable,
+        spaceId: observable,
+        channelId: observable,
 
-      _author: observable.ref,
-      _space: observable.ref,
-      _channel: observable.ref,
+        _author: observable.ref,
+        _space: observable.ref,
+        _channel: observable.ref,
+        _repliedTo: observable.ref,
 
-      author: computed,
-      space: computed,
-      channel: computed,
-      member: computed
-    });
+        author: computed,
+        space: computed,
+        channel: computed,
+        repliedTo: computed,
+        member: computed
+      }
+    );
   }
 
   _author?: User | null;
+
+  repliedToId?: Snowflake | null;
+
+  _repliedTo?: MessageBase | null;
+
+  get repliedTo() {
+    return (
+      this.channel?.messages.get(this.repliedToId ?? "") || this._repliedTo
+    );
+  }
 
   get author() {
     return this.app.users.get(this.authorId) || this._author;

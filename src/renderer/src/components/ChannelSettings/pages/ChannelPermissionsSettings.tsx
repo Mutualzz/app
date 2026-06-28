@@ -4,10 +4,23 @@ import { Space } from "@stores/objects/Space";
 import { useAppStore } from "@hooks/useStores";
 import { useMutation } from "@tanstack/react-query";
 import { useModal } from "@contexts/Modal.context";
-import { BitField, type PermissionFlag, permissionFlags } from "@mutualzz/bitfield";
+import {
+  BitField,
+  type PermissionFlag,
+  permissionFlags
+} from "@mutualzz/bitfield";
 import { type APIChannel, ChannelType } from "@mutualzz/types";
-import { Fragment, JSX, useEffect, useMemo, useRef, useState } from "react";
-import { Box, ButtonGroup, Divider, IconSlot, InputDefault, Stack, Typography, useTheme } from "@mutualzz/ui-web";
+import { Fragment, JSX, useEffect, useRef, useState } from "react";
+import {
+  Box,
+  ButtonGroup,
+  Divider,
+  IconSlot,
+  InputDefault,
+  Stack,
+  Typography,
+  useTheme
+} from "@mutualzz/ui-web";
 import { Paper } from "@components/Paper";
 import { Button } from "@components/Button";
 import { IconButton } from "@components/IconButton";
@@ -18,7 +31,14 @@ import {
   scrollToPermissionCategory
 } from "@components/Permissions/permissionEditor.utils";
 import { dynamicElevation, formatColor } from "@mutualzz/ui-core";
-import { CheckIcon, MinusIcon, PlusIcon, ShieldIcon, TrashIcon, XIcon } from "@phosphor-icons/react";
+import {
+  CheckIcon,
+  MinusIcon,
+  PlusIcon,
+  ShieldIcon,
+  TrashIcon,
+  XIcon
+} from "@phosphor-icons/react";
 import { UserAvatar } from "@components/User/UserAvatar";
 import { ChannelPermissionOverwrite } from "@stores/objects/ChannelPermissionOverwrite";
 
@@ -562,14 +582,14 @@ export const ChannelPermissionsSettings = observer(
       return first ? overwriteKey(first) : null;
     });
 
-    const dirtyKeys = useMemo(() => {
+    const dirtyKeys = (() => {
       const set = new Set<string>();
       for (const [key, draft] of drafts.entries()) {
         const base = bases.get(key);
         if (!base || !draftsEqual(draft, base)) set.add(key);
       }
       return set;
-    }, [drafts, bases]);
+    })();
 
     const { mutate: saveOverwrite, isPending: saving } = useMutation({
       mutationKey: ["save-channel-overwrite", channel.id, selectedKey],
@@ -681,17 +701,13 @@ export const ChannelPermissionsSettings = observer(
     const [permissionSearch, setPermissionSearch] = useState("");
 
     const permissionGroups = getPermissionGroups(channel.type);
-    const permissionCategories = useMemo(
-      () =>
-        permissionGroups.map((group) => ({
-          id: permissionCategoryId(group.title),
-          title: group.title
-        })),
-      [permissionGroups]
-    );
-    const visiblePermissionGroups = useMemo(
-      () => filterPermissionGroups(permissionGroups, permissionSearch),
-      [permissionGroups, permissionSearch]
+    const permissionCategories = permissionGroups.map((group) => ({
+      id: permissionCategoryId(group.title),
+      title: group.title
+    }));
+    const visiblePermissionGroups = filterPermissionGroups(
+      permissionGroups,
+      permissionSearch
     );
 
     const handlePermissionCategoryJump = (categoryId: string) => {
@@ -825,7 +841,11 @@ export const ChannelPermissionsSettings = observer(
                     disableContextMenu
                   />
                 )}
-                <Typography level="label-sm" fontFamily="monospace" weight="bold">
+                <Typography
+                  level="label-sm"
+                  fontFamily="monospace"
+                  weight="bold"
+                >
                   {selectedEntry?.label}
                 </Typography>
               </Stack>

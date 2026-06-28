@@ -42,7 +42,8 @@ export const withMentions = (editor: Editor) => {
 export function insertMention(
   editor: Editor,
   mentionType: MentionType,
-  id: string
+  id: string,
+  addSpace = true
 ) {
   editor.insertNodes({
     type: "mention",
@@ -51,4 +52,6 @@ export function insertMention(
     children: [{ text: "" }]
   });
   editor.move({ unit: "offset" });
+
+  if (addSpace) editor.insertText(" ");
 }

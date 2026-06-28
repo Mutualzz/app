@@ -34,6 +34,8 @@ export class AccountSettingsStore {
   favoriteGifs = observable.array<string>([]);
   favoriteStickers = observable.array<string>([]);
 
+  idleThresholdMs: number = 5 * 60_000;
+
   updatedAt: Date;
 
   private lastSyncedHash: string;
@@ -78,6 +80,7 @@ export class AccountSettingsStore {
         "pushToTalkKey",
         "screenShareIncludeAudio",
         "screenShareQuality",
+        "idleThresholdMs",
         {
           key: "favoriteEmojis",
           serialize: (v: unknown) => (Array.isArray(v) ? [...v] : []),
@@ -254,6 +257,10 @@ export class AccountSettingsStore {
 
   setScreenShareQuality(value: ScreenShareQuality) {
     this.screenShareQuality = value;
+  }
+
+  setIdleThresholdMs(ms: number) {
+    this.idleThresholdMs = ms;
   }
 
   startSyncing() {

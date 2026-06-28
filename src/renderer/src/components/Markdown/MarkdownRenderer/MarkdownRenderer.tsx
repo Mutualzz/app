@@ -30,6 +30,7 @@ import { isEmojiOnlyMessage } from "@utils/emojis/isEmojiOnlyMessage";
 export const MarkdownRenderer = ({
   textColor = "primary",
   enlargeEmojiOnly = true,
+  level,
   value,
   ...props
 }: MarkdownRendererProps) => {
@@ -118,8 +119,9 @@ export const MarkdownRenderer = ({
               return (
                 <Typography
                   whiteSpace="pre-wrap"
-                  fontSize="inherit"
+                  fontSize={level ? undefined : "inherit"}
                   display="block"
+                  level={level}
                   textColor={textColor}
                 >
                   {children}
@@ -157,8 +159,9 @@ export const MarkdownRenderer = ({
               return (
                 <Typography
                   whiteSpace="pre-wrap"
-                  fontSize="inherit"
+                  fontSize={level ? undefined : "inherit"}
                   fontWeight="bold"
+                  level={level}
                   textColor={textColor}
                 >
                   {children}
@@ -173,8 +176,9 @@ export const MarkdownRenderer = ({
               return (
                 <Typography
                   whiteSpace="pre-wrap"
-                  fontSize="inherit"
+                  fontSize={level ? undefined : "inherit"}
                   fontStyle="italic"
+                  level={level}
                   textColor={textColor}
                 >
                   {children}
@@ -188,8 +192,9 @@ export const MarkdownRenderer = ({
               );
               return (
                 <Typography
-                  fontSize="inherit"
+                  fontSize={level ? undefined : "inherit"}
                   textDecoration="line-through"
+                  level={level}
                   textColor={textColor}
                 >
                   {children}
@@ -204,8 +209,9 @@ export const MarkdownRenderer = ({
               return (
                 <Typography
                   whiteSpace="pre-wrap"
-                  fontSize="inherit"
+                  fontSize={level ? undefined : "inherit"}
                   textDecoration="underline"
+                  level={level}
                   textColor={textColor}
                 >
                   {children}
@@ -304,7 +310,7 @@ export const MarkdownRenderer = ({
   }, [value, enlargeEmojiOnly, textColor]);
 
   return (
-    <Box display="block" height="100%" overflowY="auto" {...props}>
+    <Box display="block" height="100%" overflowY="auto" fontSize="inherit" {...props}>
       {content}
     </Box>
   );

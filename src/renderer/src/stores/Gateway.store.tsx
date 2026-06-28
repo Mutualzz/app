@@ -1360,19 +1360,37 @@ export class GatewayStore {
   private onMessageAck = (payload: {
     channelId: Snowflake;
     lastMessageId: Snowflake;
+    mentionCount: number;
   }) => {
-    this.app.readStates.updateLocal(payload.channelId, payload.lastMessageId);
+    const readState = this.app.readStates.get(payload.channelId);
+    if (readState) {
+      readState.update({
+        lastMessageId: payload.lastMessageId,
+        mentionCount: payload.mentionCount ?? 0,
+      });
+    } else {
+      this.app.readStates.updateLocal(payload.channelId, payload.lastMessageId);
+    }
   };
 
   private onMessageAckBulk = (
     payload: Array<{
       channelId: Snowflake;
       lastMessageId: Snowflake;
+      mentionCount: number;
     } | null>
   ) => {
     for (const state of payload) {
       if (!state) continue;
-      this.app.readStates.updateLocal(state.channelId, state.lastMessageId);
+      const readState = this.app.readStates.get(state.channelId);
+      if (readState) {
+        readState.update({
+          lastMessageId: state.lastMessageId,
+          mentionCount: state.mentionCount ?? 0,
+        });
+      } else {
+        this.app.readStates.updateLocal(state.channelId, state.lastMessageId);
+      }
     }
   };
 
@@ -1414,19 +1432,26 @@ export class GatewayStore {
       return m.type === "everyone" || m.type === "here";
     });
 
+    const myStatus = this.app.account
+      ? (this.app.presence.get(this.app.account.id)?.status ?? "online")
+      : "online";
+    const isDnd = myStatus === "dnd";
+
     if (isMentioned && payload.authorId !== this.app.account?.id) {
       const readState = this.app.readStates.get(payload.channelId);
       if (readState) {
         readState.incrementMentionCount();
-        toast((toastProps) => <MessageToast {...toastProps} data={message} />, {
-          closeOnClick: true,
-          style: {
-            maxWidth: "520px",
-            width: "100%",
-            height: "auto"
-          },
-          position: "top-right"
-        });
+        if (!isDnd) {
+          toast((toastProps) => <MessageToast {...toastProps} data={message} />, {
+            closeOnClick: true,
+            style: {
+              maxWidth: "520px",
+              width: "100%",
+              height: "auto"
+            },
+            position: "top-right"
+          });
+        }
       }
     }
   };

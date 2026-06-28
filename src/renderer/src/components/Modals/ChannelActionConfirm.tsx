@@ -36,6 +36,7 @@ export const ChannelActionConfirm = observer(({ channel }: Props) => {
       p={5}
       borderRadius={12}
       direction="column"
+      width="25vw"
     >
       <Typography level="h5" fontWeight="bold" marginBottom={2}>
         Delete Channel

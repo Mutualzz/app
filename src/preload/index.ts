@@ -96,6 +96,12 @@ const api = {
     apply: (updatePath: string, version: string): Promise<void> =>
       ipcRenderer.invoke("updater:apply", updatePath, version)
   },
+  idle: {
+    setThreshold: (ms: number) => ipcRenderer.send("idle:set-threshold", ms),
+    onIdleChange: (
+      callback: (state: "active" | "idle" | "locked" | "unknown") => void
+    ) => on("idle:change", callback)
+  },
   events: {
     onDeepLink: (callback: (url: string) => void) => on("deep-link", callback),
     onUpdaterChecking: (callback: () => void) =>

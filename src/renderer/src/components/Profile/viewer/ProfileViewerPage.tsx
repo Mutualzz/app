@@ -17,7 +17,7 @@ import { navigateToPreferredMode } from "@utils/index";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { observer } from "mobx-react-lite";
-import { useEffect, useMemo } from "react";
+import { useEffect } from "react";
 
 interface Props {
   username: string;
@@ -42,7 +42,7 @@ export const ProfileViewerPage = observer(
       enabled: !initialUser
     });
 
-    const viewerUser = useMemo(() => {
+    const viewerUser = (() => {
       const cached = app.users.all.find(
         (user) =>
           user.username.toLowerCase() === identifier || user.id === identifier
@@ -50,7 +50,7 @@ export const ProfileViewerPage = observer(
       if (cached) return cached;
       if (initialUser) return app.users.add(initialUser);
       return undefined;
-    }, [app.users, identifier, initialUser]);
+    })();
 
     const userId = viewerUser?.id;
 
@@ -66,8 +66,6 @@ export const ProfileViewerPage = observer(
       (userId && initialProfile && initialProfile.userId === userId
         ? app.profiles.add(initialProfile)
         : undefined);
-    void profile?.updatedAt;
-    void viewerUser?.updatedAt;
 
     const isSelf = app.account?.id === viewerUser?.id;
     const previewDraft =
@@ -87,22 +85,15 @@ export const ProfileViewerPage = observer(
       app.profiles.clearPreviewDraft();
     }, [isSelf, isPreviewMode, userId, app.profiles]);
 
-    const displayBlocks = useMemo(
-      () => previewDraft?.blocks ?? (profile ? profile.blocks : []),
-      [previewDraft?.blocks, profile?.blocks, profile?.updatedAt]
-    );
+    const displayBlocks =
+      previewDraft?.blocks ?? (profile ? profile.blocks : []);
 
-    const previewProfileMusic = useMemo(
-      () =>
-        previewDraft && profile
-          ? getDraftProfileMusic(previewDraft, profile)
-          : null,
-      [previewDraft, profile]
-    );
+    const previewProfileMusic =
+      previewDraft && profile
+        ? getDraftProfileMusic(previewDraft, profile)
+        : null;
 
-    if ((userLoading || profileLoading) && !viewerUser) {
-      return <Loading />;
-    }
+    if ((userLoading || profileLoading) && !viewerUser) return <Loading />;
 
     if (!viewerUser || !profile) {
       return (

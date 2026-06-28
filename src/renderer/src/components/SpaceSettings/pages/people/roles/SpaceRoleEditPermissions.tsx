@@ -13,7 +13,7 @@ import {
   type PermissionFlags,
   permissionFlags
 } from "@mutualzz/bitfield";
-import { type ReactNode, useMemo, useRef, useState } from "react";
+import { type ReactNode, useRef, useState } from "react";
 import { observer } from "mobx-react-lite";
 import { PermissionEditorControls } from "@components/Permissions/PermissionEditorControls";
 import {
@@ -55,8 +55,7 @@ const PERMISSION_GROUPS: PermissionGroupDef<PermissionFlag>[] = [
       {
         flag: "CreateExpressions",
         label: "Create Expressions",
-        description:
-          "Allow members to create emoji and stickers in this space."
+        description: "Allow members to create emoji and stickers in this space."
       },
       {
         flag: "ManageExpressions",
@@ -114,8 +113,7 @@ const PERMISSION_GROUPS: PermissionGroupDef<PermissionFlag>[] = [
       {
         flag: "MentionEveryone",
         label: "Mention Everyone",
-        description:
-          "Allow members to mention @everyone and @here in messages"
+        description: "Allow members to mention @everyone and @here in messages"
       },
       {
         flag: "UseExternalEmojis",
@@ -229,19 +227,12 @@ export const SpaceRoleEditPermissions = observer(
       ? BitField.fromString(permissionFlags, changes.allow.toString())
       : BitField.fromString(permissionFlags, "0");
 
-    const categories = useMemo(
-      () =>
-        PERMISSION_GROUPS.map((group) => ({
-          id: permissionCategoryId(group.title),
-          title: group.title
-        })),
-      []
-    );
+    const categories = PERMISSION_GROUPS.map((group) => ({
+      id: permissionCategoryId(group.title),
+      title: group.title
+    }));
 
-    const visibleGroups = useMemo(
-      () => filterPermissionGroups(PERMISSION_GROUPS, search),
-      [search]
-    );
+    const visibleGroups = filterPermissionGroups(PERMISSION_GROUPS, search);
 
     const togglePermission = (flag: PermissionFlag) => {
       const newPermissions = permissions.has(flag)
@@ -269,7 +260,13 @@ export const SpaceRoleEditPermissions = observer(
     };
 
     return (
-      <Stack ref={rootRef} direction="column" justifyContent="center" pb={10} spacing={3}>
+      <Stack
+        ref={rootRef}
+        direction="column"
+        justifyContent="center"
+        pb={10}
+        spacing={3}
+      >
         <Stack direction="row" alignItems="flex-start" spacing={2.5} mr={5}>
           <Stack flex={1} minWidth={0}>
             <PermissionEditorControls

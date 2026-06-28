@@ -1,7 +1,7 @@
 import { useAppStore } from "@hooks/useStores";
 import { reaction } from "mobx";
 import { observer } from "mobx-react-lite";
-import { KeyboardEvent, useEffect, useRef, useState } from "react";
+import { KeyboardEvent, useEffect, useMemo, useRef, useState } from "react";
 import { Message } from "@stores/objects/Message";
 import type { Channel } from "@stores/objects/Channel";
 import {
@@ -19,12 +19,36 @@ import { Editor } from "slate";
 import Snowflake from "@utils/Snowflake";
 import { messageFlags } from "@mutualzz/bitfield";
 import { createSystemMessage } from "@utils/index";
-import { IconButton, Stack, Typography, useTheme } from "@mutualzz/ui-web";
+import { Stack, Typography, useTheme } from "@mutualzz/ui-web";
 import { Link } from "@components/Link";
 import { Paper } from "@components/Paper";
 import { TypingIndicator } from "@components/TypingIndicator";
 import { Expression } from "@renderer/stores/objects/Expression";
-import { XIcon } from "@phosphor-icons/react";
+import { FileIcon, PlusIcon, XIcon } from "@phosphor-icons/react";
+import { IconButton } from "../IconButton";
+
+const ACCEPTED_MIME_TYPES = [
+  "image/jpeg",
+  "image/png",
+  "image/gif",
+  "image/webp",
+  "video/mp4",
+  "video/webm",
+  "audio/mpeg",
+  "audio/ogg",
+  "audio/wav",
+  "application/pdf",
+  "text/plain"
+].join(",");
+
+const MAX_FILE_SIZE = 100 * 1024 * 1024;
+const MAX_FILES = 10;
+
+function formatBytes(bytes: number) {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
 
 interface Props {
   channel: Channel | null;
@@ -41,9 +65,11 @@ export const MessageInput = observer(
     const { theme } = useTheme();
     const [content, setContent] = useState(message?.content ?? "");
     const [stickers, setStickers] = useState<Expression[]>([]);
+    const [files, setFiles] = useState<File[]>([]);
     const [nonce, setNonce] = useState("");
 
     const inputRef = useRef<MarkdownInputHandle>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
     const typingCooldownRef = useRef<ReturnType<typeof setTimeout> | null>(
       null
     );
@@ -74,9 +100,7 @@ export const MessageInput = observer(
 
     useEffect(() => {
       app.pushComposer();
-      return () => {
-        app.popComposer();
-      };
+      return () => app.popComposer();
     }, []);
 
     useEffect(() => {
@@ -95,8 +119,13 @@ export const MessageInput = observer(
     }, [message?.editing, message?.id]);
 
     useEffect(() => {
-      if (message) return;
+      if (!message && app.replyingTo) {
+        requestAnimationFrame(() => inputRef.current?.focus());
+      }
+    }, [app.replyingTo]);
 
+    useEffect(() => {
+      if (message) return;
       return reaction(
         () => channel?.messages.all.some((m) => m.editing) ?? false,
         (isEditing, prevIsEditing) => {
@@ -111,13 +140,23 @@ export const MessageInput = observer(
       return () => clearTimeout(typingCooldownRef.current!);
     }, []);
 
+    const previewUrls = useMemo(
+      () =>
+        files.map((f) =>
+          f.type.startsWith("image/") ? URL.createObjectURL(f) : null
+        ),
+      [files]
+    );
+    useEffect(
+      () => () => previewUrls.forEach((url) => url && URL.revokeObjectURL(url)),
+      [previewUrls]
+    );
+
     const triggerTyping = () => {
       if (!channel || message?.editing) return;
-
       if (!typingCooldownRef.current) {
         app.rest.post(`/channels/${channel.id}/typing`).catch(() => {});
       }
-
       clearTimeout(typingCooldownRef.current!);
       typingCooldownRef.current = setTimeout(() => {
         typingCooldownRef.current = null;
@@ -147,7 +186,13 @@ export const MessageInput = observer(
         const original = (message?.content ?? "").trim();
         const isEditing = !!message;
 
-        if (!isEditing && !trimmed && stickers.length === 0) return null;
+        if (
+          !isEditing &&
+          !trimmed &&
+          stickers.length === 0 &&
+          files.length === 0
+        )
+          return null;
 
         if (isEditing && trimmed === original) {
           onStopEditing?.();
@@ -161,10 +206,23 @@ export const MessageInput = observer(
 
         const nonce = Snowflake.generate();
         const stickerIds = stickers.map((s) => s.id);
-        const repliedToId = app.replyingTo?.id;
+        const replyingTo = app.replyingTo;
+        const repliedToId = replyingTo?.id;
         const mentionReply = app.replyMention;
+        const pendingFiles = files.slice();
+        const capturedPreviewUrls = previewUrls.slice();
+
         setNonce(nonce);
         const author = app.account.raw;
+
+        // Build pending attachment previews for the queue entry
+        const pendingAttachments = pendingFiles.map((f, i) => ({
+          name: f.name,
+          size: f.size,
+          type: f.type,
+          previewUrl: capturedPreviewUrls[i] ?? undefined
+        }));
+
         const msg = app.queue.add({
           id: nonce,
           content: trimmed,
@@ -173,23 +231,24 @@ export const MessageInput = observer(
           channelId: channel.id,
           spaceId: channel.spaceId ?? null,
           createdAt: new Date().toISOString(),
-          type: MessageType.Default,
+          type: repliedToId ? MessageType.Reply : MessageType.Default,
           expressionIds: stickerIds,
-          expressions: stickers.map((s) => s.toJSON())
+          expressions: stickers.map((s) => s.toJSON()),
+          repliedToId,
+          repliedTo: replyingTo ?? undefined,
+          pendingAttachments
         });
 
+        // Clear everything immediately so the user can keep typing
         app.setReplyingTo(null);
+        setContent("");
+        setStickers([]);
+        setFiles([]);
 
-        editor?.select({
-          anchor: editor.start([]),
-          focus: editor.end([])
-        });
+        editor?.select({ anchor: editor.start([]), focus: editor.end([]) });
         editor?.removeNodes();
         editor?.delete();
-        editor?.insertNode({
-          type: "line",
-          children: [{ text: "" }]
-        });
+        editor?.insertNode({ type: "line", children: [{ text: "" }] });
 
         if (content.length >= 2000)
           throw new HttpException(
@@ -203,7 +262,21 @@ export const MessageInput = observer(
             "You cannot message this person"
           );
 
-        const result = await channel.sendMessage(
+        if (pendingFiles.length > 0) {
+          const formData = new FormData();
+          if (trimmed) formData.append("content", trimmed);
+          formData.append("nonce", nonce);
+          if (stickerIds.length > 0)
+            stickerIds.forEach((id) => formData.append("expressionIds[]", id));
+          if (repliedToId) {
+            formData.append("repliedToId", repliedToId);
+            formData.append("mentionReply", String(mentionReply));
+          }
+          pendingFiles.forEach((f) => formData.append("attachments", f));
+          return channel.sendMessage(formData, msg);
+        }
+
+        return channel.sendMessage(
           {
             content: trimmed,
             nonce,
@@ -212,11 +285,6 @@ export const MessageInput = observer(
           },
           msg
         );
-
-        setContent("");
-        setStickers([]);
-
-        return result;
       },
       onError: async (err: HttpException) => {
         const error = err.errors?.[0]?.message || err.message;
@@ -225,8 +293,6 @@ export const MessageInput = observer(
           const queued = app.queue
             .get(channel?.id ?? "")
             .find((x) => x.id === nonce || x.content === content);
-          console.log("queued", queued);
-
           queued?.fail(error);
 
           const sysMessage = await createSystemMessage(
@@ -240,13 +306,10 @@ export const MessageInput = observer(
       },
       onSuccess: () => {
         setNonce("");
-        setStickers([]);
       }
     });
 
-    const onChange = (value: string) => {
-      setContent(value);
-    };
+    const onChange = (value: string) => setContent(value);
 
     const handleSelectSticker = (sticker: Expression) => {
       setStickers((prev) => {
@@ -257,6 +320,21 @@ export const MessageInput = observer(
     };
     const handleRemoveSticker = (stickerId: string) => {
       setStickers((prev) => prev.filter((s) => s.id !== stickerId));
+    };
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const picked = Array.from(e.target.files ?? []);
+      e.target.value = "";
+      setFiles((prev) => {
+        const combined = [...prev, ...picked].slice(0, MAX_FILES);
+        const oversized = combined.filter((f) => f.size > MAX_FILE_SIZE);
+        if (oversized.length > 0) return prev;
+        return combined;
+      });
+    };
+
+    const handleRemoveFile = (index: number) => {
+      setFiles((prev) => prev.filter((_, i) => i !== index));
     };
 
     const onStopEdit = (e?: KeyboardEvent) => {
@@ -303,7 +381,6 @@ export const MessageInput = observer(
           ? "You cannot message this person, because you have them blocked"
           : "You are not allowed to send messages in this channel.";
       }
-
       if (isDM) {
         return `Message ${
           isGroupDM
@@ -311,14 +388,121 @@ export const MessageInput = observer(
             : (channel?.dmRecipient?.displayName ?? "in this conversation")
         }`;
       }
-
       return `Message #${channel?.name ?? "in this channel"}`;
     })();
 
     const replyingTo = !message && app.replyingTo;
+    const hasUploadTray = files.length > 0 && !message?.editing;
 
     const typingIndicator = !message?.editing && channel && (
       <TypingIndicator channelId={channel.id} />
+    );
+
+    const uploadTray = hasUploadTray && (
+      <Paper
+        elevation={app.settings?.preferEmbossed ? 5 : 1}
+        px={1.25}
+        pt={2.5}
+        pb={0}
+        borderTopLeftRadius={areTyping ? 0 : 6}
+        borderTopRightRadius={areTyping ? 0 : 6}
+        borderBottomLeftRadius={0}
+        borderBottomRightRadius={0}
+        display="block"
+      >
+        <Stack
+          direction="row"
+          spacing={0.75}
+          pb={1}
+          css={{
+            overflowX: "auto",
+            borderBottom: `1px solid ${theme.colors.surface}`,
+            "&::-webkit-scrollbar": { height: 3 },
+            "&::-webkit-scrollbar-thumb": {
+              borderRadius: 2,
+              background: theme.colors.surface
+            }
+          }}
+        >
+          {files.map((file, index) => {
+            const isImage = file.type.startsWith("image/");
+            const previewUrl = previewUrls[index];
+
+            return (
+              <div key={index} css={{ position: "relative", flexShrink: 0 }}>
+                {isImage && previewUrl ? (
+                  <Paper
+                    borderRadius={8}
+                    width={64}
+                    height={64}
+                    overflow="hidden"
+                  >
+                    <img
+                      src={previewUrl}
+                      alt={file.name}
+                      css={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover"
+                      }}
+                    />
+                  </Paper>
+                ) : (
+                  <Paper
+                    direction="row"
+                    alignItems="center"
+                    spacing={0.5}
+                    p={0.75}
+                    borderRadius={8}
+                    elevation={app.settings?.preferEmbossed ? 5 : 1}
+                    maxWidth={160}
+                    minWidth={120}
+                    height="100%"
+                  >
+                    <FileIcon
+                      size={16}
+                      color={theme.colors.info}
+                      css={{ flexShrink: 0 }}
+                    />
+                    <Stack spacing={0} direction="column" flex={1} minWidth={0}>
+                      <Typography
+                        level="body-xs"
+                        fontWeight="semiBold"
+                        overflow="hidden"
+                        textOverflow="ellipsis"
+                        whiteSpace="nowrap"
+                      >
+                        {file.name}
+                      </Typography>
+                      <Typography level="body-xs" textColor="muted">
+                        {formatBytes(file.size)}
+                      </Typography>
+                    </Stack>
+                  </Paper>
+                )}
+                <IconButton
+                  variant="solid"
+                  size="sm"
+                  color="danger"
+                  onClick={() => handleRemoveFile(index)}
+                  css={{
+                    position: "absolute",
+                    top: 0,
+                    right: -2,
+                    zIndex: 1,
+                    minWidth: 16,
+                    width: 16,
+                    height: 16
+                  }}
+                  title="Remove"
+                >
+                  <XIcon size={8} />
+                </IconButton>
+              </div>
+            );
+          })}
+        </Stack>
+      </Paper>
     );
 
     const replyBanner = replyingTo && (
@@ -328,8 +512,10 @@ export const MessageInput = observer(
         spacing={1}
         px={1.5}
         py={0.75}
-        borderTopLeftRadius={6}
-        borderTopRightRadius={6}
+        borderTopLeftRadius={areTyping || hasUploadTray ? 0 : 6}
+        borderTopRightRadius={areTyping || hasUploadTray ? 0 : 6}
+        borderBottomLeftRadius={0}
+        borderBottomRightRadius={0}
         elevation={app.settings?.preferEmbossed ? 5 : 1}
       >
         <Typography level="body-xs" textColor="secondary" flex="1 1 auto">
@@ -353,7 +539,6 @@ export const MessageInput = observer(
             {app.replyMention ? "@ ON" : "@ OFF"}
           </Typography>
         )}
-
         <IconButton
           variant="plain"
           size="sm"
@@ -366,10 +551,10 @@ export const MessageInput = observer(
 
     const inputContent = (
       <Paper
-        p={2}
+        p={1.75}
         elevation={app.settings?.preferEmbossed ? 5 : 1}
-        borderTopLeftRadius={replyingTo || areTyping ? 0 : 6}
-        borderTopRightRadius={replyingTo || areTyping ? 0 : 6}
+        borderTopLeftRadius={replyingTo || areTyping || hasUploadTray ? 0 : 6}
+        borderTopRightRadius={replyingTo || areTyping || hasUploadTray ? 0 : 6}
         borderBottomLeftRadius={6}
         borderBottomRightRadius={6}
         display="block"
@@ -417,10 +602,10 @@ export const MessageInput = observer(
           onChange={onChange}
           placeholder={message?.editing ? message.content : placeholder}
           onKeyDown={onKeyDown}
-          onSendMessage={(message) =>
+          onSendMessage={(msg) =>
             sendMessage({
               editor: inputRef.current?.editor ?? null,
-              contentOverride: message
+              contentOverride: msg
             })
           }
           onSelectSticker={handleSelectSticker}
@@ -428,6 +613,28 @@ export const MessageInput = observer(
           emojiPicker={!denySendingMessages}
           gifPicker={!denySendingMessages && !message?.editing}
           stickerPicker={!denySendingMessages && !message?.editing}
+          startContent={
+            !message?.editing && !denySendingMessages ? (
+              <Stack alignItems="center" justifyContent="center" mr={2.5}>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  multiple
+                  accept={ACCEPTED_MIME_TYPES}
+                  onChange={handleFileChange}
+                  css={{ display: "none" }}
+                />
+                <IconButton
+                  variant="plain"
+                  onClick={() => fileInputRef.current?.click()}
+                  title="Attach files"
+                  shape="rounded"
+                >
+                  <PlusIcon />
+                </IconButton>
+              </Stack>
+            ) : undefined
+          }
         />
       </Paper>
     );
@@ -440,7 +647,7 @@ export const MessageInput = observer(
           <Link textColor="accent" onClick={() => onStopEdit()}>
             cancel
           </Link>{" "}
-          • enter to{"  "}
+          • enter to{" "}
           <Link
             textColor="accent"
             onClick={() => sendMessage({ editor: null })}
@@ -452,6 +659,7 @@ export const MessageInput = observer(
     ) : (
       <Stack direction="column" spacing={0} ml={1.25} mr={1.75}>
         {typingIndicator}
+        {uploadTray}
         {replyBanner}
         {inputContent}
       </Stack>

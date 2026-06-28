@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, nativeImage } from "electron";
+import { app, BrowserWindow, ipcMain, nativeImage, powerMonitor } from "electron";
 import { trayManager } from "./tray";
 import { getMainWindow } from "./windows";
 import keytar from "keytar";
@@ -290,4 +290,30 @@ export function setupIPC(): void {
     const win = getMainWindow();
     if (win) setWindowsBadge(win, count);
   });
+
+  // Idle detection
+  let idleThresholdSeconds = 5 * 60;
+  let lastIdleState: string | null = null;
+
+  ipcMain.on("idle:set-threshold", (_, ms: number) => {
+    idleThresholdSeconds = Math.max(60, Math.floor(ms / 1000));
+    // Re-evaluate immediately so the new threshold takes effect without waiting for the next tick
+    const win = getMainWindow();
+    if (!win || win.isDestroyed()) return;
+    const state = powerMonitor.getSystemIdleState(idleThresholdSeconds);
+    if (state !== lastIdleState) {
+      lastIdleState = state;
+      win.webContents.send("idle:change", state);
+    }
+  });
+
+  setInterval(() => {
+    const win = getMainWindow();
+    if (!win || win.isDestroyed()) return;
+    const state = powerMonitor.getSystemIdleState(idleThresholdSeconds);
+    if (state !== lastIdleState) {
+      lastIdleState = state;
+      win.webContents.send("idle:change", state);
+    }
+  }, 30_000);
 }

@@ -27,7 +27,9 @@ export class MessageQueue {
   }
 
   remove(id: Snowflake) {
-    const message = this.messages.find((x) => x.id === id)!;
+    const message = this.messages.find((x) => x.id === id);
+    if (!message) return;
+    message.cleanup();
     this.messages.remove(message);
   }
 

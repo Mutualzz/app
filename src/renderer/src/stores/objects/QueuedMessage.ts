@@ -14,6 +14,13 @@ export enum QueuedMessageStatus {
   Failed = "failed"
 }
 
+export type PendingAttachmentPreview = {
+  name: string;
+  size: number;
+  type: string;
+  previewUrl?: string;
+};
+
 export type QueuedMessageData = {
   id: Snowflake;
   channelId: Snowflake;
@@ -25,6 +32,9 @@ export type QueuedMessageData = {
   author?: APIUser;
   expressionIds?: Snowflake[];
   expressions?: APIExpression[];
+  repliedToId?: Snowflake;
+  repliedTo?: MessageBase;
+  pendingAttachments?: PendingAttachmentPreview[];
 };
 
 export class QueuedMessage extends MessageBase {
@@ -32,6 +42,7 @@ export class QueuedMessage extends MessageBase {
   status: QueuedMessageStatus;
   error?: string;
   expressions = observable.array<Expression>();
+  pendingAttachments: PendingAttachmentPreview[];
 
   abortCallback?: () => void;
 
@@ -41,6 +52,9 @@ export class QueuedMessage extends MessageBase {
     this.channelId = data.channelId;
     this.spaceId = data.spaceId ?? null;
     this.status = QueuedMessageStatus.Sending;
+    this.repliedToId = data.repliedToId ?? null;
+    this._repliedTo = data.repliedTo ?? null;
+    this.pendingAttachments = data.pendingAttachments ?? [];
     this.expressions = observable.array<Expression>(
       data.expressions ? app.expressions.addAll(data.expressions) : []
     );
@@ -50,11 +64,13 @@ export class QueuedMessage extends MessageBase {
       status: observable,
       error: observable,
       expressions: observable,
+      pendingAttachments: observable.shallow,
       abortCallback: observable.ref,
       updateProgress: action.bound,
       setAbortCallback: action.bound,
       abort: action.bound,
-      fail: action.bound
+      fail: action.bound,
+      cleanup: action.bound
     });
   }
 
@@ -75,6 +91,12 @@ export class QueuedMessage extends MessageBase {
   fail(error: string) {
     this.error = error;
     this.status = QueuedMessageStatus.Failed;
+  }
+
+  cleanup() {
+    this.pendingAttachments.forEach((a) => {
+      if (a.previewUrl) URL.revokeObjectURL(a.previewUrl);
+    });
   }
 
   delete() {

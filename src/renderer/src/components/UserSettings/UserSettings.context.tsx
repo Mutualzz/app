@@ -11,7 +11,8 @@ export type UserSettingsPage =
   | "profile"
   | "appearance"
   | "voice_and_video"
-  | "expressions";
+  | "expressions"
+  | "notifications";
 export type UserSettingsCategories = "user-settings" | "app-settings";
 
 interface UserSettingsContextProps {

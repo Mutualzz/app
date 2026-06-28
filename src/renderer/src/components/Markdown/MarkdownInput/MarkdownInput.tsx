@@ -81,6 +81,7 @@ const MarkdownInput = forwardRef<MarkdownInputHandle, MarkdownInputProps>(
       placeholder,
       value,
       maxLength,
+      startContent,
 
       css
     },
@@ -380,6 +381,7 @@ const MarkdownInput = forwardRef<MarkdownInputHandle, MarkdownInputProps>(
           >
             <HoverToolbar />
             <EmojiToolbar />
+            {startContent}
             <Editable
               ref={inputRef}
               autoFocus={autoFocus}

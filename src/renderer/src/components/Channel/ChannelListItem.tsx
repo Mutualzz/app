@@ -3,7 +3,14 @@ import { useModal } from "@contexts/Modal.context";
 import { useDroppable, type DraggableAttributes } from "@dnd-kit/core";
 import type { SyntheticListenerMap } from "@dnd-kit/core/dist/hooks/utilities";
 import { useAppStore } from "@hooks/useStores";
-import { Avatar, type PaperProps, IconSlot, Stack, Typography, useTheme } from "@mutualzz/ui-web";
+import {
+  Avatar,
+  type PaperProps,
+  IconSlot,
+  Stack,
+  Typography,
+  useTheme
+} from "@mutualzz/ui-web";
 import type { Channel } from "@stores/objects/Channel";
 import type { Space } from "@stores/objects/Space";
 import { useNavigate } from "@tanstack/react-router";
@@ -16,7 +23,14 @@ import { useMenu } from "@contexts/ContextMenu.context";
 import { ChannelMemberItem } from "@components/Channel/ChannelMemberItem";
 import { IconButton } from "@components/IconButton";
 import { SpaceInviteToSpaceModal } from "@components/Space/SpaceInviteToSpaceModal";
-import { CaretRightIcon, GearIcon, LockIcon, PlusIcon, UserPlusIcon } from "@phosphor-icons/react";
+import {
+  CaretRightIcon,
+  ChatCircleIcon,
+  GearIcon,
+  LockIcon,
+  PlusIcon,
+  UserPlusIcon
+} from "@phosphor-icons/react";
 import { ChannelSettingsModal } from "@components/ChannelSettings/ChannelSettingsModal";
 import { HoverRevealActions } from "../HoverRevealActions";
 
@@ -135,7 +149,6 @@ export const ChannelListItem = observer(
         borderTopLeftRadius={6}
         borderBottomLeftRadius={6}
         direction="column"
-        onClick={handleChannel}
         css={{
           cursor: isDisabled ? "not-allowed" : "pointer",
           ...(isDisabled && { opacity: 0.5 }),
@@ -175,6 +188,7 @@ export const ChannelListItem = observer(
             alignItems="center"
             spacing={isCategory ? 1 : 1.5}
             flex={1}
+            onClick={handleChannel}
             minWidth={0}
           >
             {!isCategory && (
@@ -283,8 +297,30 @@ export const ChannelListItem = observer(
                     }}
                   />
                 )}
-                {(canInvite || canManageChannel) && (
+                {(wrapperHovered || active) && (
                   <HoverRevealActions visible={wrapperHovered || active}>
+                    {channel.type === ChannelType.Voice && (
+                      <IconButton
+                        css={{ borderRadius: 9999 }}
+                        size={12}
+                        variant="plain"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate({
+                            to: "/spaces/$spaceId/$channelId",
+                            params: {
+                              spaceId: space.id,
+                              channelId: channel.id
+                            },
+                            search: {
+                              chat: true
+                            }
+                          });
+                        }}
+                      >
+                        <ChatCircleIcon weight="fill" />
+                      </IconButton>
+                    )}
                     {canInvite && (
                       <IconButton
                         css={{ borderRadius: 9999 }}
@@ -309,7 +345,10 @@ export const ChannelListItem = observer(
                           e.stopPropagation();
                           openModal(
                             `channel-settings-${channel.id}`,
-                            <ChannelSettingsModal space={space} channel={channel} />
+                            <ChannelSettingsModal
+                              space={space}
+                              channel={channel}
+                            />
                           );
                         }}
                       >

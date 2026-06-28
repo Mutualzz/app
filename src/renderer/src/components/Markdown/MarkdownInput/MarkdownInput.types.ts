@@ -7,7 +7,7 @@ import type {
   Variant
 } from "@mutualzz/ui-core";
 import type { Expression } from "@stores/objects/Expression";
-import type { KeyboardEvent } from "react";
+import type { KeyboardEvent, ReactNode } from "react";
 import type { Editor } from "slate";
 
 export interface MarkdownInputProps {
@@ -24,6 +24,8 @@ export interface MarkdownInputProps {
   mentions?: boolean;
 
   disabled?: boolean;
+
+  startContent?: ReactNode;
 
   value?: string;
   onChange?: (value: string, editor: Editor) => void;

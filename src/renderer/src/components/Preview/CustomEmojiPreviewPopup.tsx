@@ -16,6 +16,8 @@ export const CustomEmojiPreviewPopup = observer(
   ({ expression, ...props }: Props) => {
     const app = useAppStore();
 
+    console.log(expression);
+
     return (
       <Paper
         variant="elevation"
@@ -61,7 +63,7 @@ export const CustomEmojiPreviewPopup = observer(
           }}
         />
         <Stack spacing={2.5}>
-          {expression.space ? (
+          {expression.spaceId ? (
             <Stack spacing={1.25} direction="column">
               <Typography level="body-sm">
                 This emoji is from a space
@@ -69,7 +71,7 @@ export const CustomEmojiPreviewPopup = observer(
               <Stack direction="row" spacing={1.25} alignItems="center">
                 <SpaceIcon space={expression.space} />
                 <Typography fontWeight="bold" level="body-sm">
-                  {expression.space.name}
+                  {expression.space?.name ?? "Private Space"}
                 </Typography>
               </Stack>
             </Stack>
@@ -82,7 +84,7 @@ export const CustomEmojiPreviewPopup = observer(
                   member={app.spaces.active?.members.get(expression.authorId)}
                 />
                 <Typography fontWeight="bold" level="body-sm">
-                  {expression.author?.displayName}
+                  {expression.author?.displayName ?? "Unknown User"}
                 </Typography>
               </Stack>
             </Stack>

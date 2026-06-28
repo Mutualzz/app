@@ -1,3 +1,4 @@
+import { formatColor } from "@mutualzz/ui-core";
 import { MarkdownRenderer } from "@components/Markdown/MarkdownRenderer/MarkdownRenderer";
 import { UserAvatar } from "@components/User/UserAvatar";
 import { useAppStore } from "@hooks/useStores";
@@ -36,6 +37,149 @@ import { MessageReactions } from "./MessageReactions";
 import dayjs from "dayjs";
 import { Tooltip } from "@components/Tooltip";
 import { ExpressionType, MessageType } from "@mutualzz/types";
+import { MessageAttachment } from "./MessageAttachment";
+import { FileIcon } from "@phosphor-icons/react";
+import type { PendingAttachmentPreview } from "@stores/objects/QueuedMessage";
+
+function formatBytes(bytes: number) {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+const PendingAttachments = observer(
+  ({
+    attachments,
+    progress,
+  }: {
+    attachments: PendingAttachmentPreview[];
+    progress: number;
+  }) => {
+    const { theme } = useTheme();
+    return (
+      <Stack direction="row" flexWrap="wrap" spacing={1} pb={0.25}>
+        {attachments.map((attachment, i) => {
+          const isImage = attachment.type.startsWith("image/");
+          return (
+            <div key={i} css={{ position: "relative" }}>
+              {isImage && attachment.previewUrl ? (
+                <div
+                  css={{
+                    position: "relative",
+                    lineHeight: 0,
+                    borderRadius: 6,
+                    overflow: "hidden",
+                    maxWidth: 300,
+                    maxHeight: 200,
+                    background: theme.colors.surface,
+                  }}
+                >
+                  <img
+                    src={attachment.previewUrl}
+                    alt={attachment.name}
+                    css={{
+                      maxWidth: 300,
+                      maxHeight: 200,
+                      objectFit: "contain",
+                      display: "block",
+                      opacity: 0.5,
+                    }}
+                  />
+                  <div
+                    css={{
+                      position: "absolute",
+                      bottom: 0,
+                      left: 0,
+                      right: 0,
+                      height: 3,
+                      background: `${theme.colors.surface}88`,
+                    }}
+                  >
+                    <div
+                      css={{
+                        height: "100%",
+                        width: `${progress}%`,
+                        background: theme.colors.primary,
+                        transition: "width 0.15s ease",
+                        borderRadius: 2,
+                      }}
+                    />
+                  </div>
+                </div>
+              ) : (
+                <div
+                  css={{
+                    borderRadius: 8,
+                    border: `1px solid ${theme.colors.surface}`,
+                    padding: "7px 10px",
+                    minWidth: 180,
+                    maxWidth: 300,
+                    background: "transparent",
+                    overflow: "hidden",
+                    position: "relative",
+                  }}
+                >
+                  <Stack direction="row" alignItems="center" spacing={0.75}>
+                    <div
+                      css={{
+                        width: 30,
+                        height: 30,
+                        borderRadius: 6,
+                        background: `${theme.colors.info}22`,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        flexShrink: 0,
+                        color: theme.colors.info,
+                      }}
+                    >
+                      <FileIcon size={15} weight="fill" />
+                    </div>
+                    <Stack spacing={0} css={{ minWidth: 0 }}>
+                      <Typography
+                        level="body-sm"
+                        fontWeight="semiBold"
+                        css={{
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        {attachment.name}
+                      </Typography>
+                      <Typography level="body-xs" textColor="muted">
+                        {formatBytes(attachment.size)}
+                      </Typography>
+                    </Stack>
+                  </Stack>
+                  <div
+                    css={{
+                      marginTop: 6,
+                      height: 3,
+                      borderRadius: 2,
+                      background: `${theme.colors.surface}`,
+                      overflow: "hidden",
+                    }}
+                  >
+                    <div
+                      css={{
+                        height: "100%",
+                        width: `${progress}%`,
+                        background: theme.colors.primary,
+                        transition: "width 0.15s ease",
+                        borderRadius: 2,
+                      }}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </Stack>
+    );
+  }
+);
 
 interface Props {
   message: MessageLike;
@@ -74,6 +218,18 @@ export const Message = observer(
         const el = document.getElementById(`message-${messageId}`);
         if (!el) return false;
         el.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        el.animate(
+          [
+            {
+              backgroundColor: formatColor(theme.colors.info, {
+                alpha: 50,
+                format: "hexa"
+              })
+            },
+            { backgroundColor: "transparent" }
+          ],
+          { duration: 2000, easing: "ease-out" }
+        );
         return true;
       };
 
@@ -112,6 +268,9 @@ export const Message = observer(
       <MessageBase
         onMouseEnter={hideSwitcher}
         onMouseLeave={showSwitcher}
+        onDoubleClick={() => {
+          if (isSent && !message.editing) app.setReplyingTo(message);
+        }}
         onContextMenu={(event) => {
           if (!isSent || message.editing) return;
 
@@ -145,9 +304,11 @@ export const Message = observer(
                     </Typography>
                   </ReplyAuthorName>
                   <ReplyContentText>
-                    <Typography textColor="muted" level="body-xs">
-                      {repliedMessage.content}
-                    </Typography>
+                    <MarkdownRenderer
+                      textColor="muted"
+                      level="body-xs"
+                      value={repliedMessage.content ?? ""}
+                    />
                   </ReplyContentText>
                 </>
               ) : (
@@ -247,6 +408,22 @@ export const Message = observer(
                 })()
               )}
             </MessageContentText>
+
+            {isSent && message.attachments.length > 0 && (
+              <Stack direction="row" flexWrap="wrap" spacing={1} pb={0.25}>
+                {message.attachments.map((attachment) => (
+                  <MessageAttachment key={attachment.id} attachment={attachment} />
+                ))}
+              </Stack>
+            )}
+
+            {message instanceof QueuedMessage &&
+              message.pendingAttachments.length > 0 && (
+                <PendingAttachments
+                  attachments={message.pendingAttachments}
+                  progress={message.progress}
+                />
+              )}
 
             {"embeds" in message && message.embeds.length > 0 && (
               <Stack pb={0.25}>

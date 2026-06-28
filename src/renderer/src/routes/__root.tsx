@@ -15,7 +15,7 @@ import duration from "dayjs/plugin/duration";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { reaction } from "mobx";
 import { observer } from "mobx-react-lite";
-import { type PropsWithChildren, type ReactNode, useEffect, useState } from "react";
+import { type PropsWithChildren, type ReactNode, useEffect, useRef, useState } from "react";
 
 import { DesktopShell } from "@components/Desktop/DesktopShell";
 import { InjectGlobal } from "@components/InjectGlobal";
@@ -116,6 +116,36 @@ function RootComponent() {
 
     return dispose;
   }, []);
+
+  // Idle detection: auto-set status to idle after inactivity, revert when active again
+  const wasAutoIdled = useRef(false);
+  useEffect(() => {
+    if (!isElectron || !window.api) return;
+
+    // Push the stored threshold to the main process on mount
+    const storedMs = app.settings?.idleThresholdMs ?? 5 * 60_000;
+    window.api.idle.setThreshold(storedMs);
+
+    const unsubscribe = window.api.idle.onIdleChange((state) => {
+      const userId = app.account?.id;
+      if (!userId) return;
+
+      const currentStatus = app.presence.get(userId)?.status ?? "online";
+
+      if ((state === "idle" || state === "locked") && !wasAutoIdled.current) {
+        // Only auto-idle if the user hasn't manually set a non-online status
+        if (currentStatus === "online") {
+          wasAutoIdled.current = true;
+          app.gateway.setStatus("idle");
+        }
+      } else if (state === "active" && wasAutoIdled.current) {
+        wasAutoIdled.current = false;
+        app.gateway.setStatus("online");
+      }
+    });
+
+    return unsubscribe;
+  }, [app.account?.id, app.settings?.idleThresholdMs]);
 
   useEffect(() => {
     if (!isElectron || !window.api) return;

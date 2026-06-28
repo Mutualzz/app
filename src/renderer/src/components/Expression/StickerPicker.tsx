@@ -1,4 +1,4 @@
-import { type MouseEvent, useMemo, useRef, useState } from "react";
+import { type MouseEvent, useRef, useState } from "react";
 import { MagnifyingGlassIcon, XIcon } from "@phosphor-icons/react";
 import { Stack, Typography, useTheme } from "@mutualzz/ui-web";
 import styled from "@emotion/styled";
@@ -107,33 +107,25 @@ export const StickerPicker = observer(
       : null;
     const meId = app.account?.id ?? "";
 
-    const myStickers = useMemo(
-      () =>
-        app.expressions.stickers
-          .filter((s) => !s.spaceId && s.authorId === meId)
-          .filter((s) => canUseSticker(meId, s, me, channel)),
-      [app.expressions.stickers, meId, me, channel]
-    );
+    const myStickers = app.expressions.stickers
+      .filter((s) => !s.spaceId && s.authorId === meId)
+      .filter((s) => canUseSticker(meId, s, me, channel));
 
-    const spaceStickerGroups = useMemo(
-      () =>
-        app.spaces.all
-          .map((space) => ({
-            space,
-            stickers: Array.from(space.expressions.values()).filter(
-              (e) =>
-                e.type === ExpressionType.Sticker &&
-                canUseSticker(meId, e, me, channel)
-            )
-          }))
-          .filter((g) => g.stickers.length > 0),
-      [app.spaces.all, meId, me, channel]
-    );
+    const spaceStickerGroups = app.spaces.all
+      .map((space) => ({
+        space,
+        stickers: Array.from(space.expressions.values()).filter(
+          (e) =>
+            e.type === ExpressionType.Sticker &&
+            canUseSticker(meId, e, me, channel)
+        )
+      }))
+      .filter((g) => g.stickers.length > 0);
 
-    const allStickers = useMemo(
-      () => [...myStickers, ...spaceStickerGroups.flatMap((g) => g.stickers)],
-      [myStickers, spaceStickerGroups]
-    );
+    const allStickers = [
+      ...myStickers,
+      ...spaceStickerGroups.flatMap((g) => g.stickers)
+    ];
 
     const searchResults = search
       ? allStickers.filter((s) =>

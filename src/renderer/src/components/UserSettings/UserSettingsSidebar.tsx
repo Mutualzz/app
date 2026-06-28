@@ -20,6 +20,7 @@ import { UserAvatar } from "../User/UserAvatar";
 import { Button } from "@components/Button";
 import { isElectron } from "@utils/index";
 import {
+  BellIcon,
   MicrophoneIcon,
   PaletteIcon,
   PencilIcon,
@@ -61,6 +62,10 @@ const settingsPages: SettingsPages = {
       label: "voice_and_video",
       title: "Voice & Video",
       icon: <MicrophoneIcon weight="fill" />
+    },
+    {
+      label: "notifications",
+      icon: <BellIcon weight="fill" />
     }
   ]
 };

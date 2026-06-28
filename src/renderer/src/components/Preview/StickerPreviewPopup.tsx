@@ -61,7 +61,7 @@ export const StickerPreviewPopup = observer(
           }}
         />
         <Stack spacing={2.5}>
-          {expression.space ? (
+          {expression.spaceId ? (
             <Stack spacing={1.25} direction="column">
               <Typography level="body-sm">
                 This sticker is from a space
@@ -69,7 +69,7 @@ export const StickerPreviewPopup = observer(
               <Stack direction="row" spacing={1.25} alignItems="center">
                 <SpaceIcon space={expression.space} />
                 <Typography fontWeight="bold" level="body-sm">
-                  {expression.space.name}
+                  {expression.space?.name ?? "Private Space"}
                 </Typography>
               </Stack>
             </Stack>
@@ -84,7 +84,7 @@ export const StickerPreviewPopup = observer(
                   member={app.spaces.active?.members.get(expression.authorId)}
                 />
                 <Typography fontWeight="bold" level="body-sm">
-                  {expression.author?.displayName}
+                  {expression.author?.displayName ?? "Unknown User"}
                 </Typography>
               </Stack>
             </Stack>

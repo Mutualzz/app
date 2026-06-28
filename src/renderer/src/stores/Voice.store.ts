@@ -195,6 +195,7 @@ class MediasoupSession {
       producerId: string,
       kind: "audio" | "screen-audio"
     ) => void,
+    private readonly onMicFailed: () => void,
     getSpeakingThreshold: () => number,
     shouldReportSpeaking: (userId: string) => boolean
   ) {
@@ -284,8 +285,6 @@ class MediasoupSession {
 
     if (this.micTrack) {
       try {
-        // Keep the mic track enabled for VAD analysis; transmission is gated
-        // via producer pause/resume so we don't silence the analyser input.
         this.micTrack.enabled = !this.isMuted && !this.spaceMuted;
       } catch {}
     }
@@ -621,12 +620,16 @@ class MediasoupSession {
     sendTransport.on(
       "produce",
       ({ kind, rtpParameters, appData }, callback, errback) => {
-        void this.rpc(VoiceOpcodes.VoiceProduce, {
-          transportId: sendTransport.id,
-          kind,
-          rtpParameters,
-          appData
-        })
+        void this.rpcWithRetry(
+          VoiceOpcodes.VoiceProduce,
+          {
+            transportId: sendTransport.id,
+            kind,
+            rtpParameters,
+            appData
+          },
+          signal
+        )
           .then((data) => callback({ id: data.producerId }))
           .catch(errback);
       }
@@ -767,6 +770,7 @@ class MediasoupSession {
     if (!media) {
       this.logger.warn("Mic capture failed after exhausting device fallbacks");
       this.setSelfMute(true);
+      this.onMicFailed();
       return;
     }
 
@@ -778,6 +782,7 @@ class MediasoupSession {
     const [audioTrack] = media.getAudioTracks();
     if (!audioTrack) {
       this.setSelfMute(true);
+      this.onMicFailed();
       return;
     }
 
@@ -1577,6 +1582,15 @@ export class VoiceStore {
         }
         this.syncUserAudioMix(userId, kind);
       },
+      () => {
+        runInAction(() => {
+          this.selfMute = true;
+        });
+        if (this.app.account?.id) {
+          this.setUserSpeaking(this.app.account.id, false);
+        }
+        void this.sendVoiceStateUpdate();
+      },
       () => this.getSpeakingThreshold(),
       (userId) => this.shouldReportSpeakingForUser(userId)
     );
@@ -2084,7 +2098,7 @@ export class VoiceStore {
     if (isSame && this.connectionStatus !== "failed") return;
 
     this.session.unlockAudio();
-    await this.setupTracks();
+    await this.setupTracks(true);
 
     const preferredSelfMute = this.app.settings?.preferredSelfMute ?? false;
     const preferredSelfDeaf = this.app.settings?.preferredSelfDeaf ?? false;
@@ -2414,7 +2428,7 @@ export class VoiceStore {
     this.session.setCameraDeviceId(deviceId);
   }
 
-  async setupTracks(): Promise<{ inputChanged: boolean }> {
+  async setupTracks(requestPermissions = false): Promise<{ inputChanged: boolean }> {
     const previousInputDeviceId = this.currentInputDeviceId;
 
     try {
@@ -2422,7 +2436,7 @@ export class VoiceStore {
         (d) => d.deviceId !== ""
       );
 
-      if (!devices.some((d) => !!d.label)) {
+      if (requestPermissions && !devices.some((d) => !!d.label)) {
         try {
           const tmp = await navigator.mediaDevices.getUserMedia({
             audio: true,
@@ -2433,7 +2447,19 @@ export class VoiceStore {
               t.stop();
             } catch {}
           });
-        } catch {}
+        } catch {
+          // Camera unavailable or denied — still unlock audio device labels
+          try {
+            const tmp = await navigator.mediaDevices.getUserMedia({
+              audio: true
+            });
+            tmp.getTracks().forEach((t) => {
+              try {
+                t.stop();
+              } catch {}
+            });
+          } catch {}
+        }
         devices = (await navigator.mediaDevices.enumerateDevices()).filter(
           (d) => d.deviceId !== ""
         );
@@ -2587,7 +2613,7 @@ export class VoiceStore {
     });
 
     try {
-      await this.setupTracks();
+      await this.setupTracks(true);
 
       this.session.setInputDeviceId(this.currentInputDeviceId);
       this.session.setOutputDeviceId(this.currentOutputDeviceId);

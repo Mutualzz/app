@@ -15,7 +15,7 @@ import {
 import { useAppStore } from "@hooks/useStores";
 import { Paper } from "@components/Paper";
 import { Button } from "@components/Button";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { XIcon } from "@phosphor-icons/react";
 import { formatKeyCode } from "@utils/voiceSettings.utils";
 
@@ -48,14 +48,10 @@ export const AppVoiceVideoSettings = observer(() => {
     ? (voice.currentCameraDeviceId ?? "")
     : "";
 
-  const fallbackCameraId = useMemo(() => {
-    return (
-      cameras.find((d) => d.deviceId === voice.currentCameraDeviceId)
-        ?.deviceId ??
-      cameras[0]?.deviceId ??
-      null
-    );
-  }, [cameras, voice.currentCameraDeviceId]);
+  const fallbackCameraId =
+    cameras.find((d) => d.deviceId === voice.currentCameraDeviceId)?.deviceId ??
+    cameras[0]?.deviceId ??
+    null;
 
   useEffect(() => {
     app.voice.setupTracks();
@@ -204,7 +200,11 @@ export const AppVoiceVideoSettings = observer(() => {
           </Stack>
         )}
 
-        <Stack direction="row" alignItems="center" justifyContent="space-between">
+        <Stack
+          direction="row"
+          alignItems="center"
+          justifyContent="space-between"
+        >
           <Stack direction="column" spacing={0.5}>
             <Typography>Automatically determine input sensitivity</Typography>
             <Typography level="body-xs" textColor="muted">

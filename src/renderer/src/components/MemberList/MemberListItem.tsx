@@ -35,7 +35,6 @@ export const MemberListItem = observer(({ member, isOwner }: Props) => {
     <UserProfilePopoutTrigger
       user={member.user!}
       member={member}
-      fullWidth
       placement="left"
     >
       <Paper
@@ -77,7 +76,12 @@ export const MemberListItem = observer(({ member, isOwner }: Props) => {
           }
         />
         <Stack direction="column" minWidth={0} flex={1}>
-          <Stack direction="row" alignItems="center" spacing={0.75} minWidth={0}>
+          <Stack
+            direction="row"
+            alignItems="center"
+            spacing={0.75}
+            minWidth={0}
+          >
             <Typography
               flex={1}
               whiteSpace="nowrap"
@@ -91,10 +95,7 @@ export const MemberListItem = observer(({ member, isOwner }: Props) => {
             {isOwner && (
               <Tooltip content="Owner">
                 <IconSlot size={14}>
-                  <CrownSimpleIcon
-                    weight="fill"
-                    color={theme.colors.warning}
-                  />
+                  <CrownSimpleIcon weight="fill" color={theme.colors.warning} />
                 </IconSlot>
               </Tooltip>
             )}

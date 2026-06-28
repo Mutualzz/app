@@ -1,7 +1,7 @@
 import { AnimatedPaper } from "@components/Animated/AnimatedPaper";
 import { useModal } from "@contexts/Modal.context";
 import { useAppStore } from "@hooks/useStores";
-import { Button, ButtonGroup, Stack, Typography } from "@mutualzz/ui-web";
+import { Button, Stack, Typography } from "@mutualzz/ui-web";
 import type { Channel } from "@stores/objects/Channel";
 import { useMutation } from "@tanstack/react-query";
 import { observer } from "mobx-react-lite";
@@ -50,12 +50,13 @@ export const CategoryDeleteModal = observer(({ channel }: Props) => {
         </Typography>
       </Stack>
       <Stack
-        direction="row"
+        direction="column"
         justifyContent="center"
         alignItems="center"
         width="100%"
+        spacing={2.5}
       >
-        <ButtonGroup spacing={{ xs: 2, sm: 5 }}>
+        <Stack direction="row" spacing={2.5}>
           <Button
             variant="solid"
             color="danger"
@@ -72,16 +73,16 @@ export const CategoryDeleteModal = observer(({ channel }: Props) => {
           >
             Category and all channels related
           </Button>
-          <Button
-            variant="solid"
-            fullWidth
-            color="success"
-            onClick={() => closeModal()}
-            disabled={isDeleting}
-          >
-            Cancel
-          </Button>
-        </ButtonGroup>
+        </Stack>
+        <Button
+          variant="solid"
+          fullWidth
+          color="success"
+          onClick={() => closeModal()}
+          disabled={isDeleting}
+        >
+          Cancel
+        </Button>
       </Stack>
     </AnimatedPaper>
   );

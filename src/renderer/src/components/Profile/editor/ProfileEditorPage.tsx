@@ -2,6 +2,7 @@ import { Button } from "@components/Button";
 import { ProfileBlockInspector } from "@components/Profile/editor/ProfileBlockInspector";
 import { ProfileBlockPalette } from "@components/Profile/editor/ProfileBlockPalette";
 import { getDraftProfileMusic } from "@components/Profile/shared/profileMusicPlayer.utils";
+import { ProfileLeaveConfirm } from "@components/Profile/editor/ProfileLeaveConfirm";
 import { ProfileResetConfirm } from "@components/Profile/editor/ProfileResetConfirm";
 import {
   addBlockAtPoint,
@@ -47,7 +48,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { navigateToPreferredMode } from "@utils/index";
 import { observer } from "mobx-react-lite";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
 import Loading from "@components/Loader/Loading";
 import { useModal } from "@contexts/Modal.context";
@@ -125,10 +126,50 @@ export const ProfileEditorPage = observer(() => {
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } })
   );
 
-  const selectedBlock = useMemo(
-    () => draft?.blocks.find((block) => block.id === selectedBlockId) ?? null,
-    [draft?.blocks, selectedBlockId]
-  );
+  const draftRef = useRef(draft);
+  draftRef.current = draft;
+  const profileRef = useRef(profile);
+  profileRef.current = profile;
+
+  const handleBack = useCallback(() => {
+    const d = draftRef.current;
+    const p = profileRef.current;
+    const isDirty =
+      d && p
+        ? JSON.stringify(d) !== JSON.stringify(createDraftFromProfile(p))
+        : false;
+
+    if (isDirty) {
+      openModal(
+        "profile-leave",
+        <ProfileLeaveConfirm
+          onConfirm={() => navigateToPreferredMode(app, navigate)}
+        />
+      );
+    } else {
+      navigateToPreferredMode(app, navigate);
+    }
+  }, [openModal, app, navigate]);
+
+  useEffect(() => {
+    const onBeforeUnload = (e: BeforeUnloadEvent) => {
+      const d = draftRef.current;
+      const p = profileRef.current;
+      if (d && p) {
+        const isDirty =
+          JSON.stringify(d) !== JSON.stringify(createDraftFromProfile(p));
+        if (isDirty) {
+          e.preventDefault();
+          e.returnValue = "";
+        }
+      }
+    };
+    window.addEventListener("beforeunload", onBeforeUnload);
+    return () => window.removeEventListener("beforeunload", onBeforeUnload);
+  }, []);
+
+  const selectedBlock =
+    draft?.blocks.find((block) => block.id === selectedBlockId) ?? null;
 
   const { mutate: saveProfile, isPending: saving } = useMutation({
     mutationKey: ["save-profile", account?.id],
@@ -148,12 +189,16 @@ export const ProfileEditorPage = observer(() => {
         backgroundColor: draft.backgroundColor,
         backgroundImage: draft.backgroundImage,
         pageFontFamily: draft.pageFontFamily,
-        profileMusicUrl: draft.profileMusicTrackId ? null : draft.profileMusicUrl,
+        profileMusicUrl: draft.profileMusicTrackId
+          ? null
+          : draft.profileMusicUrl,
         profileMusicTrackId: draft.profileMusicTrackId,
         profileMusicTrackSource: draft.profileMusicTrackId
           ? draft.profileMusicTrackSource
           : null,
-        profileMusicTitle: draft.profileMusicTrackId ? null : draft.profileMusicTitle,
+        profileMusicTitle: draft.profileMusicTrackId
+          ? null
+          : draft.profileMusicTitle,
         profileMusicAuthorName: draft.profileMusicTrackId
           ? null
           : draft.profileMusicAuthorName,
@@ -351,7 +396,7 @@ export const ProfileEditorPage = observer(() => {
       title="Customize Profile"
       actions={titleBarActions}
       backLabel="Close"
-      onBack={() => navigateToPreferredMode(app, navigate)}
+      onBack={handleBack}
       music={draftProfileMusic}
       musicProfile={profile}
     >

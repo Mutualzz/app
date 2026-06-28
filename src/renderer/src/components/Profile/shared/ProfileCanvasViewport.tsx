@@ -53,7 +53,7 @@ export function ProfileCanvasViewport({
     const measure = () => {
       const { width, height } = node.getBoundingClientRect();
       if (width <= 0 || height <= 0) return;
-      setContainerSize(prev =>
+      setContainerSize((prev) =>
         prev?.width === width && prev?.height === height
           ? prev
           : { width, height }

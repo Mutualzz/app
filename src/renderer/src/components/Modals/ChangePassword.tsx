@@ -63,6 +63,7 @@ export const ChangePassword = observer(() => {
       direction="column"
       justifyContent="space-between"
       spacing={2.5}
+      width="30vw"
     >
       <Typography level="h5" fontWeight="bold">
         Change Password

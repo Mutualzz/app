@@ -69,6 +69,12 @@ export interface MutualzzAPI {
     download(url: string, savePath: string): Promise<{ path: string }>;
     apply(updatePath: string, version: string): Promise<void>;
   };
+  idle: {
+    setThreshold(ms: number): void;
+    onIdleChange(
+      callback: (state: "active" | "idle" | "locked" | "unknown") => void
+    ): () => void;
+  };
   events: {
     onDeepLink(callback: (url: string) => void): () => void;
     onUpdaterChecking(callback: () => void): () => void;

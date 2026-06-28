@@ -41,6 +41,7 @@ export const SpaceActionConfirm = observer(({ space, action }: Props) => {
       padding={5}
       borderRadius={12}
       direction="column"
+      width="25vw"
     >
       <Typography level="h5" fontWeight="bold" marginBottom={2}>
         {action === "delete"
@@ -51,7 +52,7 @@ export const SpaceActionConfirm = observer(({ space, action }: Props) => {
         Are you sure you want to {action} <b>{space.name}</b>? This Action
         cannot be undone.
       </Typography>
-      <ButtonGroup fullWidth size="lg" spacing={5}>
+      <ButtonGroup expand size="lg" spacing={5}>
         <Button color="neutral" onClick={() => closeModal()}>
           Cancel
         </Button>

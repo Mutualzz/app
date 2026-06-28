@@ -37,7 +37,6 @@ import {
   type CSSProperties,
   forwardRef,
   useEffect,
-  useMemo,
   useRef,
   useState
 } from "react";
@@ -197,14 +196,10 @@ export const AppAppearanceSettings = observer(() => {
 
   const icons = iconsRef.current;
 
-  const defaultIcons = useMemo(
-    () => Array.from(icons.values()).filter((ic) => !ic.theme.author),
-    [icons, _iconsVersion]
+  const defaultIcons = Array.from(icons.values()).filter(
+    (ic) => !ic.theme.author
   );
-  const userIcons = useMemo(
-    () => Array.from(icons.values()).filter((ic) => ic.theme.author),
-    [icons, _iconsVersion]
-  );
+  const userIcons = Array.from(icons.values()).filter((ic) => ic.theme.author);
 
   const handleThemeChange = (theme: MzTheme | Theme) => {
     if (theme.id === currentTheme.id) return;
