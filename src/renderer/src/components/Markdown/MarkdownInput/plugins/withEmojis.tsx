@@ -174,20 +174,15 @@ export const withEmojis = (editor: Editor) => {
       }
 
       const emojiMatch = emojiRegex.exec(text);
-      if (emojiMatch) {
+      if (
+        emojiMatch &&
+        emojiMatch.index === 0 &&
+        emojiMatch[0].length === text.length
+      ) {
         const emoji = getEmoji(emojiMatch[0]);
         if (emoji) {
-          setTimeout(() => {
-            editor.select(selection.focus);
-            insertEmoji(editor, emoji);
-            const pointAfter = editor.after(selection.focus, {
-              unit: "character"
-            });
-            if (pointAfter) {
-              editor.select(pointAfter);
-              editor.delete();
-            }
-          }, 0);
+          insertEmoji(editor, emoji);
+          return;
         }
       }
 
