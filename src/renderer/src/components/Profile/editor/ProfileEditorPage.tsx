@@ -45,7 +45,7 @@ import {
   useSensors
 } from "@dnd-kit/core";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { useNavigate } from "@tanstack/react-router";
+import { useCanGoBack, useNavigate, useRouter } from "@tanstack/react-router";
 import { navigateToPreferredMode } from "@utils/index";
 import { observer } from "mobx-react-lite";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -59,6 +59,8 @@ export const ProfileEditorPage = observer(() => {
   const { theme } = useTheme();
   const account = app.account;
   const navigate = useNavigate();
+  const router = useRouter();
+  const canGoBack = useCanGoBack();
   const { openModal } = useModal();
   const { openContextMenu, clearMenu } = useMenu();
   const viewportRef = useRef<HTMLDivElement | null>(null);
@@ -131,6 +133,11 @@ export const ProfileEditorPage = observer(() => {
   const profileRef = useRef(profile);
   profileRef.current = profile;
 
+  const leaveEditor = useCallback(() => {
+    if (canGoBack) router.history.back();
+    else navigateToPreferredMode(app, navigate);
+  }, [canGoBack, router, app, navigate]);
+
   const handleBack = useCallback(() => {
     const d = draftRef.current;
     const p = profileRef.current;
@@ -142,14 +149,12 @@ export const ProfileEditorPage = observer(() => {
     if (isDirty) {
       openModal(
         "profile-leave",
-        <ProfileLeaveConfirm
-          onConfirm={() => navigateToPreferredMode(app, navigate)}
-        />
+        <ProfileLeaveConfirm onConfirm={leaveEditor} />
       );
     } else {
-      navigateToPreferredMode(app, navigate);
+      leaveEditor();
     }
-  }, [openModal, app, navigate]);
+  }, [openModal, leaveEditor]);
 
   useEffect(() => {
     const onBeforeUnload = (e: BeforeUnloadEvent) => {

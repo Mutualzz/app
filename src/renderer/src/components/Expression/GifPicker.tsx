@@ -315,7 +315,7 @@ export const GifPicker = observer(({ onSelectGif }: GifPickerProps) => {
           />
           <SearchInput
             ref={searchRef}
-            placeholder="Search Klipy…"
+            placeholder="Search KLIPY"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             onKeyDown={(e) => {

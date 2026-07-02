@@ -127,5 +127,5 @@
     "typecheck:node": "tsc --noEmit -p tsconfig.node.json --composite false",
     "typecheck:web": "tsc --noEmit -p tsconfig.web.json --composite false"
   },
-  "version": "6.12.1"
+  "version": "6.12.2"
 }
