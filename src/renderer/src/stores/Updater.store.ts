@@ -75,7 +75,6 @@ export class UpdaterStore {
       if (!this.isNewerVersion(latest.version, currentVersion)) {
         this.logger.info("No update available");
         this.setStage("idle");
-        this.app.setAppLoading(false);
         return;
       }
 
@@ -97,7 +96,6 @@ export class UpdaterStore {
       this.logger.error("Update check failed:", err);
       this.setStage("error");
       this.setError(err?.message ?? String(err));
-      this.app.setAppLoading(false);
     }
   }
 
@@ -145,13 +143,11 @@ export class UpdaterStore {
         this.setStage("ready");
       });
 
-      this.app.setAppLoading(false);
       this.logger.info("Update ready at:", result.path);
     } catch (err: any) {
       this.logger.error("Download failed:", err);
       this.setStage("error");
       this.setError(err?.message ?? String(err));
-      this.app.setAppLoading(false);
     } finally {
       unsubscribe();
     }

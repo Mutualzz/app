@@ -337,7 +337,7 @@ export class AppStore {
   }
 
   async loadSettings() {
-    if (this.updater) await this.updater.startAutoChecker();
+    if (this.updater) void this.updater.startAutoChecker();
     if (this.settings) this.settings.startSyncing();
     await this.loadToken();
 
