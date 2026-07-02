@@ -222,7 +222,7 @@ export const SpaceRoleEditRoleList = observer(
     return (
       <Stack direction="column" spacing={1.25}>
         {canDragRoles && reorderableRoles.length > 0 && (
-          <Typography level="body-xs" color="muted" px={0.5}>
+          <Typography level="body-xs" textColor="muted" px={0.5}>
             Drag to reorder hierarchy
           </Typography>
         )}

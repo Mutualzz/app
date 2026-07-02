@@ -15,7 +15,6 @@ import {
 import {
   Box,
   type BoxProps,
-  Checkbox,
   Divider,
   Paper,
   Stack,

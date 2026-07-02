@@ -12,6 +12,7 @@ import { Link } from "@components/Link";
 import { EmailChange } from "@components/Modals/EmailChange";
 import { UsernameChange } from "@components/Modals/UsernameChange";
 import { useNavigate } from "@tanstack/react-router";
+import { ColorLike } from "@mutualzz/ui-core";
 
 export const UserAccountSettings = observer(() => {
   const app = useAppStore();
@@ -76,7 +77,7 @@ export const UserAccountSettings = observer(() => {
         <Paper
           position="relative"
           variant="solid"
-          color={account.accentColor}
+          color={account.accentColor as ColorLike}
           py={12.5}
           width="100%"
           borderRadius={8}

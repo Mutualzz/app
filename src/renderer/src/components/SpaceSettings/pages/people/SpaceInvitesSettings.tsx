@@ -219,7 +219,7 @@ export const SpaceInvitesSettings = observer(({ space }: Props) => {
 
         {invites.length === 0 && (
           <Stack justifyContent="center" alignItems="center" py="4rem">
-            <Typography textAlign="center" color="muted">
+            <Typography textAlign="center" textColor="muted">
               No invites have been created for this space yet.
             </Typography>
           </Stack>

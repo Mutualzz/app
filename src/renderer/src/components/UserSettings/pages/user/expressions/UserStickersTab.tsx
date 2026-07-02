@@ -204,7 +204,7 @@ const UserStickersTab = observer(() => {
 
       {stickers.length === 0 && (
         <Stack justifyContent="center" alignItems="center" py="4rem">
-          <Typography textAlign="center" color="muted">
+          <Typography textAlign="center" textColor="muted">
             No stickers created yet
           </Typography>
         </Stack>

@@ -46,7 +46,7 @@ export const MemberKick = observer(({ space, member }: Props) => {
         <Typography level="h5" fontWeight="bold">
           Kick {member.user?.username} from space
         </Typography>
-        <Typography level="body-sm" color="text.secondary">
+        <Typography level="body-sm" textColor="secondary">
           Are you sure you want to kick @{member.user?.username} from the space?
           They will need an invite to rejoin.
         </Typography>

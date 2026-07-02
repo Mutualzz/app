@@ -1,6 +1,13 @@
 import type { Space } from "@stores/objects/Space";
 import { useEffect, useState, type ReactNode } from "react";
-import { Divider, IconSlot, Input, Stack, Typography, useTheme } from "@mutualzz/ui-web";
+import {
+  Divider,
+  IconSlot,
+  Input,
+  Stack,
+  Typography,
+  useTheme
+} from "@mutualzz/ui-web";
 import { Button } from "@components/Button";
 import { useMutation } from "@tanstack/react-query";
 import type { APIRole } from "@mutualzz/types";
@@ -518,7 +525,7 @@ export const SpaceRolesSettings = observer(({ space }: Props) => {
               actions={<Typography>Actions</Typography>}
             />
             {canDragRoles && (
-              <Typography level="body-xs" color="muted">
+              <Typography level="body-xs" textColor="muted">
                 Roles higher in the list have more authority. Drag roles to
                 change their hierarchy.
               </Typography>
@@ -534,7 +541,7 @@ export const SpaceRolesSettings = observer(({ space }: Props) => {
 
         {visibleRoles.length === 0 && (
           <Stack justifyContent="center" alignItems="center" py="4rem">
-            <Typography textAlign="center" color="muted">
+            <Typography textAlign="center" textColor="muted">
               {isSearching
                 ? "No roles match your search."
                 : "No roles have been created for this space yet."}
