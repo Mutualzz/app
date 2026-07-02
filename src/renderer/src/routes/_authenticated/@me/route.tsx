@@ -1,7 +1,12 @@
-import { createFileRoute, Outlet, useNavigate, useParams } from "@tanstack/react-router";
+import {
+  createFileRoute,
+  Outlet,
+  useLocation,
+  useNavigate
+} from "@tanstack/react-router";
 import { useAppStore } from "@hooks/useStores";
 import { useEffect } from "react";
-import { Stack, useTheme } from "@mutualzz/ui-web";
+import { Divider, Stack, useTheme } from "@mutualzz/ui-web";
 import { UserBar } from "@components/User/UserBar";
 import { motion } from "motion/react";
 import { dynamicElevation } from "@mutualzz/ui-core";
@@ -11,7 +16,7 @@ import capitalize from "lodash-es/capitalize";
 import { observer } from "mobx-react-lite";
 import { switchMode } from "@utils/index";
 import { Paper } from "@components/Paper";
-import { PlanetIcon, ScribbleIcon } from "@phosphor-icons/react";
+import { PlanetIcon, ScribbleIcon, UsersIcon } from "@phosphor-icons/react";
 
 export const Route = createFileRoute("/_authenticated/@me")({
   component: observer(RouteComponent)
@@ -22,12 +27,8 @@ const ResizeBar = motion.create("div");
 function RouteComponent() {
   const app = useAppStore();
   const navigate = useNavigate();
+  const { href, pathname } = useLocation();
   const { theme } = useTheme();
-
-  const childParams = useParams({
-    from: "/_authenticated/@me/$channelId",
-    shouldThrow: false
-  });
 
   useEffect(() => {
     if (app.mode !== "@me") app.setMode("@me");
@@ -38,7 +39,7 @@ function RouteComponent() {
   }, []);
 
   useEffect(() => {
-    if (childParams?.channelId) return;
+    if (pathname !== "/@me") return;
     app.spaces.setActive("@me");
 
     const preferredDM =
@@ -52,7 +53,7 @@ function RouteComponent() {
       },
       replace: true
     });
-  }, [childParams?.channelId, app.channels.dms]);
+  }, [pathname, app.isGatewayReady]);
 
   return (
     <Stack width="100%" height="100%" direction="row">
@@ -80,6 +81,16 @@ function RouteComponent() {
               onClick={() => switchMode(app, navigate)}
             >
               Switch to {capitalize(app.targetMode)}
+            </Button>
+            <Divider lineColor="muted" css={{ opacity: 0.25 }} />
+            <Button
+              fullWidth
+              startDecorator={<UsersIcon weight="fill" />}
+              horizontalAlign="left"
+              variant={href.includes("friends") ? "soft" : "plain"}
+              onClick={() => navigate({ to: "/@me/friends" })}
+            >
+              Friends
             </Button>
           </Stack>
           <DMChannelList />

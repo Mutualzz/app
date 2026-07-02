@@ -76,7 +76,9 @@ export const Element = ({
           url={element.url}
           unicode={element.unicode}
           name={element.name}
-        />
+        >
+          {children}
+        </Emoji>
       );
     case "customEmoji":
       return (
@@ -88,7 +90,9 @@ export const Element = ({
           name={element.name}
           id={element.id}
           animated={element.animated}
-        />
+        >
+          {children}
+        </CustomEmoji>
       );
 
     case "mention":
@@ -97,13 +101,23 @@ export const Element = ({
 
       switch (mentionType) {
         case "user":
-          return <UserMention userId={mentionId} attributes={attributes} />;
+          return (
+            <UserMention userId={mentionId} attributes={attributes}>
+              {children}
+            </UserMention>
+          );
         case "role":
-          return <RoleMention roleId={mentionId} attributes={attributes} />;
+          return (
+            <RoleMention roleId={mentionId} attributes={attributes}>
+              {children}
+            </RoleMention>
+          );
         case "here":
         case "everyone":
           return (
-            <DefaultMention mentionId={mentionId} attributes={attributes} />
+            <DefaultMention mentionId={mentionId} attributes={attributes}>
+              {children}
+            </DefaultMention>
           );
       }
     case "line":

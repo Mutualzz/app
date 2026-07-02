@@ -16,6 +16,10 @@ function RouteComponent() {
     app.spaces.unsetActive();
     app.channels.setActive(channelId);
     app.channels.setMostRecentChannelForSpace("@me", channelId);
+
+    return () => {
+      app.channels.unsetActive();
+    };
   }, [channelId, app.isGatewayReady]);
 
   return (

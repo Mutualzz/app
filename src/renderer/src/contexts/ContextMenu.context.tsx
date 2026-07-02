@@ -20,6 +20,7 @@ import type { AccountStore } from "@stores/Account.store";
 import type { Message } from "@stores/objects/Message";
 import { SkinTone } from "@utils/emojis/emojiSprite";
 import { PickerEmoji } from "@utils/emojis/emojiPickerData";
+import { isElectron } from "@utils/index";
 
 export type ContextMenuPayload =
   | {
@@ -76,6 +77,18 @@ export type ContextMenuPayload =
       message: Message;
       [key: string]: any;
     }
+  | {
+      type: "editable";
+      isEditable: boolean;
+      selectionText: string;
+      canCut: boolean;
+      canCopy: boolean;
+      canPaste: boolean;
+      misspelledWord: string;
+      dictionarySuggestions: string[];
+      sourceElement: HTMLElement | null;
+      [key: string]: any;
+    }
   | { type: "custom"; id: string; [key: string]: any };
 
 export type MenuPosition = { x: number; y: number };
@@ -122,7 +135,8 @@ export const generateMenuIDs = {
   account: (userId: string) => `context-account-${userId}`,
   message: (channelId: string, messageId: string) =>
     `context-message-${channelId}-${messageId}`,
-  emoji: (unified: string) => `emoji-${unified}`
+  emoji: (unified: string) => `emoji-${unified}`,
+  editable: () => "context-editable"
 };
 
 function getMenuId(menu: ContextMenuPayload): string {
@@ -149,6 +163,8 @@ function getMenuId(menu: ContextMenuPayload): string {
       return `group-dm-${menu.channel.id}`;
     case "message":
       return generateMenuIDs.message(menu.message.channelId, menu.message.id);
+    case "editable":
+      return generateMenuIDs.editable();
     case "custom":
       return menu.id;
   }
@@ -203,6 +219,39 @@ export const ContextMenuProvider = observer(
       pendingShowRef.current = null;
       return () => cancelAnimationFrame(rafHandle);
     }, [menu]);
+
+    const lastPointerPosRef = useRef<MenuPosition>({ x: 0, y: 0 });
+
+    useEffect(() => {
+      const onContextMenu = (e: MouseEvent) => {
+        lastPointerPosRef.current = { x: e.clientX, y: e.clientY };
+      };
+
+      window.addEventListener("contextmenu", onContextMenu, {
+        capture: true
+      });
+      return () =>
+        window.removeEventListener("contextmenu", onContextMenu, {
+          capture: true
+        });
+    }, []);
+
+    useEffect(() => {
+      if (!isElectron) return;
+
+      return window.api.events.onContextMenuEditable((params) => {
+        const sourceElement =
+          document.activeElement instanceof HTMLElement
+            ? document.activeElement
+            : null;
+
+        openContextMenu(
+          { preventDefault() {}, stopPropagation() {} } as unknown as MouseEvent,
+          { type: "editable", ...params, sourceElement },
+          lastPointerPosRef.current
+        );
+      });
+    }, []);
 
     useEffect(() => {
       const onVisible = (event: Event) => {

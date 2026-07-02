@@ -36,7 +36,8 @@ export const AvatarDraw = observer(
     const isEmbedded = variant === "embedded";
     const canvasRef = useRef<ReactSketchCanvasRef>(null);
     const [brushColor, setBrushColor] = useState<ColorLike>("#000000");
-    const [backgroundColor, setBackgroundColor] = useState<ColorLike>("#ffffff");
+    const [backgroundColor, setBackgroundColor] =
+      useState<ColorLike>("#ffffff");
 
     const isMobile = useMediaQuery(
       theme.breakpoints.down("md").replace("@media", "")
@@ -46,7 +47,9 @@ export const AvatarDraw = observer(
     const [emptyCanvas, setEmptyCanvas] = useState(true);
 
     const [selectedAvatarValue, setSelectedAvatarValue] = useState("");
-    const [selectedAvatarId, setSelectedAvatarId] = useState<string | null>(null);
+    const [selectedAvatarId, setSelectedAvatarId] = useState<string | null>(
+      null
+    );
 
     const [size, setSize] = useState(6);
 
@@ -186,7 +189,7 @@ export const AvatarDraw = observer(
       </Stack>
     );
 
-    const brushControls = (compact = false) => (
+    const controls = (compact = false) => (
       <Stack direction="column" spacing={1.25} width="100%">
         <Button
           fullWidth
@@ -229,6 +232,17 @@ export const AvatarDraw = observer(
             />
           </Stack>
         )}
+        <Stack direction="column" spacing={0.5}>
+          <Typography level="body-sm">Background Color</Typography>
+          <InputColor
+            size={compact ? "sm" : "md"}
+            value={backgroundColor}
+            onChange={(color) => setBackgroundColor(color)}
+            allowAlpha
+            showRandom
+            disabled={isPending}
+          />
+        </Stack>
       </Stack>
     );
 
@@ -327,7 +341,7 @@ export const AvatarDraw = observer(
             >
               {savedDraftSelect}
               <Divider css={{ opacity: 0.25 }} />
-              {brushControls(true)}
+              {controls(true)}
             </Stack>
 
             <Stack
@@ -348,17 +362,6 @@ export const AvatarDraw = observer(
                 }}
               >
                 {sketchCanvas(EMBEDDED_CANVAS_PX)}
-              </Stack>
-              <Stack direction="row" spacing={1} alignItems="center">
-                <Typography level="body-xs">Background</Typography>
-                <InputColor
-                  size="sm"
-                  value={backgroundColor}
-                  onChange={(color) => setBackgroundColor(color)}
-                  allowAlpha
-                  showRandom
-                  disabled={isPending}
-                />
               </Stack>
             </Stack>
           </Stack>
@@ -455,7 +458,7 @@ export const AvatarDraw = observer(
         </Stack>
         {!isMobile && (
           <Stack direction="column" alignItems="center" justifyContent="center">
-            {brushControls()}
+            {controls()}
           </Stack>
         )}
         {isMobile && (
@@ -465,27 +468,11 @@ export const AvatarDraw = observer(
             justifyContent="center"
             width="100%"
           >
-            {brushControls(true)}
+            {controls(true)}
           </Stack>
         )}
         <Stack position="relative" spacing={2.5} direction="column">
           {sketchCanvas(canvasSize)}
-          <Stack
-            direction="column"
-            spacing={1}
-            justifyContent="center"
-            alignItems="center"
-          >
-            <Typography level="body-sm">Background Color</Typography>
-            <InputColor
-              size={isMobile ? 10 : "md"}
-              value={backgroundColor}
-              onChange={(color) => setBackgroundColor(color)}
-              allowAlpha
-              showRandom
-              disabled={isPending}
-            />
-          </Stack>
         </Stack>
         {actionButtons(isMobile ? "horizontal" : "vertical")}
       </AnimatedPaper>

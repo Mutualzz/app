@@ -18,17 +18,25 @@ export const AppNotificationsSettings = observer(() => {
         <Divider textColor="muted" css={{ opacity: 0.5 }} />
 
         {isElectron ? (
-          <Paper variant="outlined" borderRadius={10} py={2.5} px={4} spacing={2.5} direction="column">
+          <Paper
+            variant="outlined"
+            borderRadius={10}
+            py={2.5}
+            px={4}
+            spacing={2.5}
+            direction="column"
+          >
             <Stack direction="column" spacing={0.5}>
               <Typography level="body-md" fontWeight="bold">
                 Idle timeout
               </Typography>
               <Typography level="body-sm" textColor="muted">
-                Automatically mark yourself as idle after this long without keyboard or mouse input
+                Automatically mark yourself as idle after this long without
+                keyboard or mouse input
               </Typography>
             </Stack>
             <Select
-              value={String(settings.idleThresholdMs)}
+              value={settings.idleThresholdMs.toString()}
               onValueChange={(value) => {
                 if (typeof value !== "string") return;
                 const ms = Number(value);

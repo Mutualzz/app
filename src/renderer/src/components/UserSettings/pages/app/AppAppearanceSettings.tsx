@@ -19,6 +19,7 @@ import {
   Divider,
   Paper,
   Stack,
+  Switch,
   Typography,
   useTheme
 } from "@mutualzz/ui-web";
@@ -32,6 +33,7 @@ import { IconButton } from "@renderer/components/IconButton";
 import { Theme } from "@stores/objects/Theme";
 import { useMutation } from "@tanstack/react-query";
 import { getAdaptiveIcon } from "@utils/icons";
+import { isElectron } from "@utils/index";
 import { observer } from "mobx-react-lite";
 import {
   type CSSProperties,
@@ -384,8 +386,9 @@ export const AppAppearanceSettings = observer(() => {
               </IconButton>
             </Tooltip>
           </Stack>
-          <Checkbox
+          <Switch
             label="Prefer Embossed Style"
+            color="primary"
             checked={app.settings?.preferEmbossed}
             onClick={() => app.settings?.togglePreferEmbossed()}
           />
@@ -648,6 +651,34 @@ export const AppAppearanceSettings = observer(() => {
               />
             </Stack>
           )}
+        </Paper>
+      )}
+      {isElectron && (
+        <Paper
+          direction="column"
+          py={2.5}
+          px={4}
+          variant="outlined"
+          spacing={2.5}
+          borderRadius={10}
+        >
+          <Stack justifyContent="space-between" alignItems="center">
+            <Stack direction="column" spacing={0.5}>
+              <Typography fontWeight="bold" level="body-lg">
+                Spellcheck
+              </Typography>
+              <Typography level="body-sm" textColor="muted">
+                Underline misspelled words and show suggestions in the
+                right-click menu
+              </Typography>
+            </Stack>
+            <Switch
+              label="Spellcheck"
+              color="primary"
+              checked={app.settings?.spellcheckEnabled}
+              onClick={() => app.settings?.toggleSpellcheckEnabled()}
+            />
+          </Stack>
         </Paper>
       )}
     </Stack>

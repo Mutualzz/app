@@ -173,6 +173,10 @@ function RootComponent() {
     };
 
     window.api.events.onDeepLink(handleDeepLink);
+
+    void window.api.app.getStartupDeepLink().then((url) => {
+      if (url) void handleDeepLink(url);
+    });
   }, [navigate, logger]);
 
   return (

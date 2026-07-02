@@ -1,4 +1,5 @@
 import type { EmojiElement } from "@app-types/slate";
+import { ReactNode } from "react";
 import { styled } from "@mutualzz/ui-core";
 import { ContextMenu } from "@components/ContextMenu";
 import { DefaultEmojiPreviewPopup } from "@components/Preview/DefaultEmojiPreviewPopup";
@@ -9,14 +10,15 @@ import { RenderElementProps } from "slate-react";
 interface EmojiProps extends Omit<EmojiElement, "type" | "children"> {
   isEmojiOnly?: boolean;
   attributes?: RenderElementProps["attributes"];
+  children?: ReactNode;
 }
 
 const EmojiWrapper = styled("span")<{ isEmojiOnly?: boolean }>(
   ({ isEmojiOnly }) => ({
     display: "inline-block",
-    width: isEmojiOnly ? "2.25em" : "1.375em",
-    height: isEmojiOnly ? "2.25em" : "1.375em",
-    verticalAlign: "middle",
+    width: isEmojiOnly ? "2.25em" : "1.2em",
+    height: isEmojiOnly ? "2.25em" : "1.2em",
+    verticalAlign: isEmojiOnly ? "middle" : -4,
     position: "relative",
     cursor: "pointer"
   })
@@ -33,14 +35,15 @@ export const Emoji = ({
   url,
   unicode,
   name,
-  ...props
+  attributes,
+  children
 }: EmojiProps) => {
   const { openContextMenu, isOpen, clearMenu } = useMenu();
 
   return (
     <>
       <EmojiWrapper
-        {...props}
+        {...attributes}
         onClick={(event) => {
           if (isOpen) return clearMenu();
           const rect = event.currentTarget.getBoundingClientRect();
@@ -59,6 +62,7 @@ export const Emoji = ({
         }}
         isEmojiOnly={isEmojiOnly}
       >
+        {children}
         <EmojiImage
           src={url}
           alt={unicode}

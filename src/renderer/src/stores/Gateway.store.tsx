@@ -9,6 +9,8 @@ import {
   type APIMessageReactionRemoveAllEvent,
   type APIMessageReactionRemoveEmojiEvent,
   type APIMessageReactionRemoveEvent,
+  type APIPost,
+  type APIPostComment,
   type APIPrivateUser,
   APIRelationship,
   APIRole,
@@ -737,6 +739,52 @@ export class GatewayStore {
       GatewayDispatchEvents.TypingStart,
       this.onTypingStart
     );
+
+    // Posts
+    this.dispatchHandlers.set(
+      GatewayDispatchEvents.PostCreate,
+      this.onPostCreate
+    );
+    this.dispatchHandlers.set(
+      GatewayDispatchEvents.PostUpdate,
+      this.onPostUpdate
+    );
+    this.dispatchHandlers.set(
+      GatewayDispatchEvents.PostDelete,
+      this.onPostDelete
+    );
+
+    // Post Comments
+    this.dispatchHandlers.set(
+      GatewayDispatchEvents.PostCommentCreate,
+      this.onPostCommentCreate
+    );
+    this.dispatchHandlers.set(
+      GatewayDispatchEvents.PostCommentUpdate,
+      this.onPostCommentUpdate
+    );
+    this.dispatchHandlers.set(
+      GatewayDispatchEvents.PostCommentDelete,
+      this.onPostCommentDelete
+    );
+
+    // Post Engagement
+    this.dispatchHandlers.set(
+      GatewayDispatchEvents.PostLikeAdd,
+      this.onPostLikeAdd
+    );
+    this.dispatchHandlers.set(
+      GatewayDispatchEvents.PostLikeRemove,
+      this.onPostLikeRemove
+    );
+    this.dispatchHandlers.set(
+      GatewayDispatchEvents.PostShareAdd,
+      this.onPostShareAdd
+    );
+    this.dispatchHandlers.set(
+      GatewayDispatchEvents.PostShareRemove,
+      this.onPostShareRemove
+    );
   }
 
   private resolveChannel(channelId: Snowflake): Promise<Channel | undefined> {
@@ -1072,7 +1120,10 @@ export class GatewayStore {
       settings,
       expressions,
       readStates,
-      mergedPresences
+      mergedPresences,
+      profile,
+      presenceSchedule,
+      customStatusSchedule
     } = payload;
 
     this.sessionId = sessionId;
@@ -1086,11 +1137,20 @@ export class GatewayStore {
     this.app.readStates.addAll(readStates);
     this.app.expressions.addAll(expressions);
 
+    if (profile) {
+      this.app.profiles.add(profile);
+    }
+
     if (mergedPresences) {
       for (const [userId, presence] of Object.entries(mergedPresences)) {
         this.app.presence.upsert(userId, presence);
       }
     }
+
+    this.app.presence.setScheduledStatus(presenceSchedule ?? null);
+    this.app.customStatus.setScheduledCustomStatus(
+      customStatusSchedule ?? null
+    );
 
     this.reconnectTimeout = 0;
     this.resubscribeUsers();
@@ -1099,13 +1159,6 @@ export class GatewayStore {
 
     this.startPresenceLoop();
     this.app.voice.onGatewayReconnected();
-
-    // if we already persisted a schedule in local storage, rearm timer for UI
-    const selfUserId = this.app.account?.id;
-    if (selfUserId) {
-      this.app.presence.rearmScheduledStatusTimer();
-      this.app.customStatus.rearmScheduledCustomStatusTimer();
-    }
   };
 
   // Presence
@@ -1366,7 +1419,7 @@ export class GatewayStore {
     if (readState) {
       readState.update({
         lastMessageId: payload.lastMessageId,
-        mentionCount: payload.mentionCount ?? 0,
+        mentionCount: payload.mentionCount ?? 0
       });
     } else {
       this.app.readStates.updateLocal(payload.channelId, payload.lastMessageId);
@@ -1386,7 +1439,7 @@ export class GatewayStore {
       if (readState) {
         readState.update({
           lastMessageId: state.lastMessageId,
-          mentionCount: state.mentionCount ?? 0,
+          mentionCount: state.mentionCount ?? 0
         });
       } else {
         this.app.readStates.updateLocal(state.channelId, state.lastMessageId);
@@ -1442,15 +1495,18 @@ export class GatewayStore {
       if (readState) {
         readState.incrementMentionCount();
         if (!isDnd) {
-          toast((toastProps) => <MessageToast {...toastProps} data={message} />, {
-            closeOnClick: true,
-            style: {
-              maxWidth: "520px",
-              width: "100%",
-              height: "auto"
-            },
-            position: "top-right"
-          });
+          toast(
+            (toastProps) => <MessageToast {...toastProps} data={message} />,
+            {
+              closeOnClick: true,
+              style: {
+                maxWidth: "520px",
+                width: "100%",
+                height: "auto"
+              },
+              position: "top-right"
+            }
+          );
         }
       }
     }
@@ -1708,5 +1764,85 @@ export class GatewayStore {
     if (!space) return;
 
     space.removeBan(payload.userId);
+  };
+
+  private onPostCreate = (payload: APIPost) => {
+    this.app.posts.add(payload);
+  };
+
+  private onPostUpdate = (payload: APIPost) => {
+    this.app.posts.update(payload);
+  };
+
+  private onPostDelete = (payload: Pick<APIPost, "id">) => {
+    this.app.posts.remove(payload.id);
+  };
+
+  private onPostCommentCreate = (payload: APIPostComment) => {
+    const post = this.app.posts.get(payload.postId);
+    if (!post) return;
+
+    const alreadyHave = post.comments.has(payload.id);
+    post.comments.add(payload);
+    if (!alreadyHave) post.bumpCommentCount(1);
+  };
+
+  private onPostCommentUpdate = (payload: APIPostComment) => {
+    const post = this.app.posts.get(payload.postId);
+    if (!post) return;
+
+    post.comments.update(payload);
+  };
+
+  private onPostCommentDelete = (
+    payload: Pick<APIPostComment, "id" | "postId">
+  ) => {
+    const post = this.app.posts.get(payload.postId);
+    if (!post) return;
+
+    if (post.comments.has(payload.id)) post.bumpCommentCount(-1);
+    post.comments.remove(payload.id);
+  };
+
+  private onPostLikeAdd = (payload: { postId: string; userId: string }) => {
+    if (payload.userId === this.app.account?.id) return;
+
+    const post = this.app.posts.get(payload.postId);
+    if (!post) return;
+
+    post.bumpLikeCount(1);
+  };
+
+  private onPostLikeRemove = (payload: {
+    postId: string;
+    userId: string;
+  }) => {
+    if (payload.userId === this.app.account?.id) return;
+
+    const post = this.app.posts.get(payload.postId);
+    if (!post) return;
+
+    post.bumpLikeCount(-1);
+  };
+
+  private onPostShareAdd = (payload: { postId: string; userId: string }) => {
+    if (payload.userId === this.app.account?.id) return;
+
+    const post = this.app.posts.get(payload.postId);
+    if (!post) return;
+
+    post.bumpShareCount(1);
+  };
+
+  private onPostShareRemove = (payload: {
+    postId: string;
+    userId: string;
+  }) => {
+    if (payload.userId === this.app.account?.id) return;
+
+    const post = this.app.posts.get(payload.postId);
+    if (!post) return;
+
+    post.bumpShareCount(-1);
   };
 }

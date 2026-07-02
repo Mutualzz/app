@@ -1,7 +1,8 @@
 import { app, BrowserWindow } from "electron";
 import { electronApp, optimizer } from "@electron-toolkit/utils";
+import path from "path";
+import { setupIPC, setPendingDeepLink } from "./ipc";
 import { createMainWindow, setQuitting, setupWindowIPC } from "./windows";
-import { setupIPC } from "./ipc";
 import { setupProtocols } from "./protocols";
 import { trayManager } from "./tray";
 import { setupCodecIPC } from "./codec";
@@ -16,13 +17,16 @@ const gotSingleInstanceLock = app.requestSingleInstanceLock();
 
 if (!gotSingleInstanceLock) app.quit();
 
-app.on("second-instance", () => {
+app.on("second-instance", (_, argv) => {
   const win = mainWindow;
   if (!win) return;
 
   if (win.isMinimized()) win.restore();
   if (!win.isVisible()) win.show();
   win.focus();
+
+  const url = argv.find((arg) => arg.startsWith("mutualzz://"));
+  if (url) win.webContents.send("deep-link", url);
 });
 
 app.whenReady().then(() => {
@@ -35,6 +39,11 @@ app.whenReady().then(() => {
 
   mainWindow = createMainWindow();
 
+  const startupDeepLink = process.argv.find((arg) =>
+    arg.startsWith("mutualzz://")
+  );
+  if (startupDeepLink) setPendingDeepLink(startupDeepLink);
+
   initUpdaterHandlers();
   setupWindowIPC();
   setupCodecIPC();
@@ -42,7 +51,13 @@ app.whenReady().then(() => {
   setupProtocols(mainWindow);
   trayManager.initialize(mainWindow);
 
-  app.setAsDefaultProtocolClient("mutualzz");
+  if (app.isPackaged) {
+    app.setAsDefaultProtocolClient("mutualzz");
+  } else {
+    app.setAsDefaultProtocolClient("mutualzz", process.execPath, [
+      path.resolve(process.argv[1])
+    ]);
+  }
 
   app.on("activate", () => {
     if (!mainWindow || mainWindow.isDestroyed())

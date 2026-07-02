@@ -13,7 +13,7 @@ export class ReadStateStore {
   private states = observable.map<Snowflake, ReadState>(); // channelId -> ReadState
 
   constructor(private readonly app: AppStore) {
-    makeAutoObservable(this, {}, { autoBind: true });
+    makeAutoObservable(this, { get: false }, { autoBind: true });
   }
 
   addAll(states: APIReadState[]) {

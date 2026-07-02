@@ -142,7 +142,11 @@ export const CustomStatusCard = observer(
                 px={dims.bubblePx}
                 py={dims.bubblePy}
                 borderRadius={dims.bubbleRadius}
+                onClick={() => {
+                  onEdit?.();
+                }}
                 css={{
+                  cursor: interactive ? "pointer" : "default",
                   minWidth: hasStatus
                     ? undefined
                     : size === "compact"

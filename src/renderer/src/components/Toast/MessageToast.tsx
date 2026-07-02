@@ -17,7 +17,7 @@ export const MessageToast = observer(
       ""
     );
 
-    const MAX_CHARS = 400; // tweak this number if you want longer/shorter previews
+    const MAX_CHARS = 400;
     const plain = contentWithoutMentions ?? "";
     const isLong = plain.length > MAX_CHARS;
     const preview = isLong ? plain.slice(0, MAX_CHARS) + "…" : plain;

@@ -8,10 +8,16 @@ interface Props {
   presence?: PresencePayload;
   vertical?: boolean;
   hideCustomStatus?: boolean;
+  showStatus?: boolean;
 }
 
 export const SmallActivityStatus = observer(
-  ({ presence, vertical, hideCustomStatus = false }: Props) => {
+  ({
+    presence,
+    vertical,
+    hideCustomStatus = false,
+    showStatus = false
+  }: Props) => {
     const { theme } = useTheme();
     const color = theme.colors.success;
 
@@ -20,6 +26,26 @@ export const SmallActivityStatus = observer(
     const activity = Array.isArray(presence.activities)
       ? (presence.activities[0] ?? null)
       : null;
+
+    const status = (() => {
+      switch (presence.status) {
+        case "online":
+          return "Online";
+        case "idle":
+          return "Idle";
+        case "dnd":
+          return "Do Not Disturb";
+        default:
+          return null;
+      }
+    })();
+
+    if (!activity && showStatus)
+      return (
+        <Typography fontSize={12} textColor="accent">
+          {status}
+        </Typography>
+      );
 
     if (!activity) return null;
 

@@ -418,6 +418,7 @@ export class Channel {
           expressionIds?: string[];
           repliedToId?: string;
           mentionReply?: boolean;
+          sharedPostId?: string;
         }
       | FormData,
     msg?: QueuedMessage
@@ -445,6 +446,7 @@ export class Channel {
           expressionIds?: string[];
           repliedToId?: string;
           mentionReply?: boolean;
+          sharedPostId?: string;
         }
       >(`/channels/${this.id}/messages`, data)
       .catch((err) => {

@@ -1,7 +1,7 @@
 import { AnimatedLogo } from "@components/Animated/AnimatedLogo";
 import { Paper } from "@components/Paper";
 import { useAppStore } from "@hooks/useStores";
-import { ButtonGroup, Stack } from "@mutualzz/ui-web";
+import { Stack, Typography } from "@mutualzz/ui-web";
 import { useNavigate } from "@tanstack/react-router";
 import capitalize from "lodash-es/capitalize";
 import { observer } from "mobx-react-lite";
@@ -17,21 +17,25 @@ import { Tooltip } from "@components/Tooltip";
 
 const links = [
   {
-    label: "My Profile",
-    icon: <HouseIcon weight="fill" />,
-    to: "my-profile"
+    label: "Explore / Discover",
+    icon: <CompassIcon weight="fill" />,
+    to: "explore"
   },
+
   {
     label: "Friends",
-    icon: <UsersIcon weight="fill" />
+    icon: <UsersIcon weight="fill" />,
+    to: "friends"
   },
   {
     label: "Favorites",
-    icon: <StarIcon weight="fill" />
+    icon: <StarIcon weight="fill" />,
+    to: "saved"
   },
   {
-    label: "Explore / Discover",
-    icon: <CompassIcon weight="fill" />
+    label: "My Profile",
+    icon: <HouseIcon weight="fill" />,
+    to: "my-profile"
   },
   {
     label: "Customize Profile",
@@ -47,16 +51,22 @@ export const FeedSidebar = observer(() => {
   return (
     <Paper
       elevation={app.settings?.preferEmbossed ? 1 : 0}
-      width="5rem"
+      width="17.5rem"
       direction="column"
-      pt={1}
-      spacing={2.5}
+      p={2}
+      spacing={3}
       variant="plain"
-      alignItems="center"
+      alignItems="flex-start"
       boxShadow="none !important"
       height="100%"
     >
-      <Stack width="100%" alignItems="center" justifyContent="center">
+      <Stack
+        width="100%"
+        direction="row"
+        alignItems="center"
+        spacing={2}
+        pl={1}
+      >
         <Tooltip
           content={`Switch to ${capitalize(
             app.mode
@@ -67,9 +77,8 @@ export const FeedSidebar = observer(() => {
         >
           <AnimatedLogo
             css={{
-              width: 48,
-              cursor: "pointer",
-              marginBottom: 5
+              width: 40,
+              cursor: "pointer"
             }}
             initial={{ scale: 1 }}
             whileHover={{ scale: 1.1 }}
@@ -83,37 +92,60 @@ export const FeedSidebar = observer(() => {
             }}
           />
         </Tooltip>
+        <Typography level="h6" fontWeight={700}>
+          Feed
+        </Typography>
       </Stack>
 
-      <ButtonGroup
-        orientation="vertical"
-        variant="plain"
-        spacing={15}
-        size="lg"
-      >
+      <Stack direction="column" spacing={1} width="100%">
         {links.map((link) => (
-          <Tooltip content={link.label} placement="right" key={link.label}>
-            <IconButton
-              key={`feed-sidebar-link-${link.label}`}
-              onClick={() => {
-                if (!app.account) return;
-                if (link.to === "my-profile") {
-                  navigate({
-                    to: "/users/$username",
-                    params: { username: app.account.username }
-                  });
-                  return;
-                }
-                if (link.to === "customize-profile") {
-                  navigate({ to: "/profile" });
-                }
-              }}
-            >
-              {link.icon}
-            </IconButton>
-          </Tooltip>
+          <Stack
+            key={`feed-sidebar-link-${link.label}`}
+            direction="row"
+            alignItems="center"
+            spacing={2}
+            width="100%"
+            p={1.5}
+            borderRadius={8}
+            css={{
+              cursor: "pointer",
+              "&:hover": {
+                backgroundColor: "rgba(255, 255, 255, 0.06)"
+              }
+            }}
+            onClick={() => {
+              if (!app.account) return;
+              if (link.to === "my-profile") {
+                navigate({
+                  to: "/users/$username",
+                  params: { username: app.account.username }
+                });
+                return;
+              }
+              if (link.to === "customize-profile") {
+                navigate({ to: "/profile" });
+                return;
+              }
+              if (link.to === "friends") {
+                navigate({ to: "/feed/friends" });
+                return;
+              }
+              if (link.to === "saved") {
+                navigate({ to: "/feed/saved" });
+                return;
+              }
+              if (link.to === "explore") {
+                navigate({ to: "/feed" });
+              }
+            }}
+          >
+            <IconButton size="lg">{link.icon}</IconButton>
+            <Typography fontWeight={500} whiteSpace="nowrap">
+              {link.label}
+            </Typography>
+          </Stack>
         ))}
-      </ButtonGroup>
+      </Stack>
     </Paper>
   );
 });

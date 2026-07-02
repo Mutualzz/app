@@ -1,4 +1,5 @@
 import type { CustomEmojiElement } from "@app-types/slate";
+import { ReactNode } from "react";
 import { styled } from "@mutualzz/ui-core";
 import { ContextMenu } from "@components/ContextMenu";
 import { CustomEmojiPreviewPopup } from "@components/Preview/CustomEmojiPreviewPopup";
@@ -14,14 +15,15 @@ interface CustomEmojiProps extends Omit<
 > {
   isEmojiOnly?: boolean;
   attributes?: RenderElementProps["attributes"];
+  children?: ReactNode;
 }
 
 const EmojiWrapper = styled("span")<{ isEmojiOnly?: boolean }>(
   ({ isEmojiOnly }) => ({
     display: "inline-block",
-    width: isEmojiOnly ? "2.25em" : "1.375em",
-    height: isEmojiOnly ? "2.25em" : "1.375em",
-    verticalAlign: "middle",
+    width: isEmojiOnly ? "2.25em" : "1.2em",
+    height: isEmojiOnly ? "2.25em" : "1.2em",
+    verticalAlign: isEmojiOnly ? "middle" : -4,
     cursor: "pointer"
   })
 );
@@ -39,7 +41,8 @@ const CustomEmoji = observer(
     name,
     id,
     animated,
-    attributes
+    attributes,
+    children
   }: CustomEmojiProps) => {
     const app = useAppStore();
     const { clearMenu, isOpen, openContextMenu } = useMenu();
@@ -69,6 +72,7 @@ const CustomEmoji = observer(
           }}
           isEmojiOnly={isEmojiOnly}
         >
+          {children}
           <EmojiImage
             src={imageUrl}
             alt={id}

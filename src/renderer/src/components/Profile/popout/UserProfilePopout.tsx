@@ -1,4 +1,3 @@
-import { Button } from "@components/Button";
 import { Paper } from "@components/Paper";
 import { UserAvatar } from "@components/User/UserAvatar";
 import { ProfileMarkdownContent } from "@components/Profile/shared/ProfileMarkdownContent";
@@ -39,7 +38,6 @@ export const UserProfilePopout = observer(({ user, member }: Props) => {
   const { fontFamily } = useGoogleFont(profile?.pageFontFamily, user.id);
 
   const presence = app.presence.get(user.id);
-  const isSelf = app.account?.id === user.id;
   const bannerUrl = profile?.constructBannerUrl();
 
   const backgroundImageUrl = profile?.constructBackgroundUrl() ?? null;
@@ -67,7 +65,10 @@ export const UserProfilePopout = observer(({ user, member }: Props) => {
         css={{ background: profileBackground }}
       />
 
-      <Box position="relative" css={{ zIndex: 1, ...(fontFamily ? { fontFamily } : {}) }}>
+      <Box
+        position="relative"
+        css={{ zIndex: 1, ...(fontFamily ? { fontFamily } : {}) }}
+      >
         <Box position="relative" css={{ marginBottom: 36 }}>
           <Box
             height={96}
@@ -93,12 +94,24 @@ export const UserProfilePopout = observer(({ user, member }: Props) => {
               size={72}
               badge
               disableContextMenu
-              popout={false}
+              css={{
+                ":hover": {
+                  filter: "brightness(0.9)",
+                  cursor: "pointer",
+                  transition: "filter 0.2s ease-in-out"
+                }
+              }}
+              onClick={() => {
+                navigate({
+                  to: "/users/$username",
+                  params: { username: user.username }
+                });
+              }}
             />
           </Box>
         </Box>
 
-        <Stack direction="column" spacing={1} px={2} pb={2}>
+        <Stack direction="column" spacing={1.25} px={2} pb={2}>
           {isLoading ? (
             <></>
           ) : (
@@ -120,32 +133,6 @@ export const UserProfilePopout = observer(({ user, member }: Props) => {
                   css={{ opacity: 0.85 }}
                 />
               )}
-
-              <Stack direction="row" spacing={1} pt={0.5}>
-                <Button
-                  size="sm"
-                  color="primary"
-                  onClick={() => {
-                    navigate({
-                      to: "/users/$username",
-                      params: { username: user.username }
-                    });
-                  }}
-                >
-                  View Profile
-                </Button>
-                {isSelf && (
-                  <Button
-                    size="sm"
-                    color="neutral"
-                    onClick={() => {
-                      navigate({ to: "/profile" });
-                    }}
-                  >
-                    Edit Profile
-                  </Button>
-                )}
-              </Stack>
             </>
           )}
         </Stack>

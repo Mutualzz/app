@@ -14,7 +14,7 @@ export class PresenceStore {
   private scheduledTimer: number | null = null;
 
   constructor() {
-    makeAutoObservable(this, {}, { autoBind: true });
+    makeAutoObservable(this, { get: false }, { autoBind: true });
 
     makePersistable(this, {
       name: "PresenceStore",

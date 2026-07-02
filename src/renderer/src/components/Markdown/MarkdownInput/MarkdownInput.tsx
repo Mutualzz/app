@@ -260,6 +260,13 @@ const MarkdownInput = forwardRef<MarkdownInputHandle, MarkdownInputProps>(
               unit: "offset",
               reverse: true
             });
+
+            if (editor.selection && editor.void({ at: editor.selection })) {
+              editor.move({
+                unit: "offset",
+                reverse: true
+              });
+            }
           }
         }
       },
@@ -274,6 +281,13 @@ const MarkdownInput = forwardRef<MarkdownInputHandle, MarkdownInputProps>(
               unit: "offset",
               reverse: false
             });
+
+            if (editor.selection && editor.void({ at: editor.selection })) {
+              editor.move({
+                unit: "offset",
+                reverse: false
+              });
+            }
           }
         }
       }

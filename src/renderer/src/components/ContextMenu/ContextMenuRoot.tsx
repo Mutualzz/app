@@ -12,6 +12,7 @@ import { EmojiContextMenu } from "@components/ContextMenu/EmojiContextMenu";
 import { StickerContextMenu } from "@components/ContextMenu/StickerContextMenu";
 import { GroupDMContextMenu } from "@components/ContextMenu/GroupDMContextMenu";
 import { MessageContextMenu } from "@components/ContextMenu/MessageContextMenu";
+import { EditableContextMenu } from "@components/ContextMenu/EditableContextMenu";
 
 export const ContextMenuRoot = observer(() => {
   const { menu } = useMenu();
@@ -81,6 +82,13 @@ export const ContextMenuRoot = observer(() => {
       return (
         <Portal>
           <MessageContextMenu {...menu} />
+        </Portal>
+      );
+
+    case "editable":
+      return (
+        <Portal>
+          <EditableContextMenu {...menu} />
         </Portal>
       );
 

@@ -47,6 +47,16 @@ export const InjectGlobal = observer(() => {
 
         .Toastify__toast-container {
           z-index: 9999;
+          -webkit-app-region: no-drag;
+        }
+
+        .Toastify__toast {
+          -webkit-app-region: no-drag;
+        }
+
+        .Toastify__close-button {
+          -webkit-app-region: no-drag;
+          cursor: pointer;
         }
 
         .Toastify__toast {

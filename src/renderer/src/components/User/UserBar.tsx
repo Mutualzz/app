@@ -3,7 +3,7 @@ import { UserAvatar } from "@components/User/UserAvatar";
 import { UserSettingsModal } from "@components/UserSettings/UserSettingsModal";
 import { useModal } from "@contexts/Modal.context";
 import { useAppStore } from "@hooks/useStores";
-import { type PaperProps, Stack, Typography, useTheme } from "@mutualzz/ui-web";
+import { Stack, Typography, useTheme } from "@mutualzz/ui-web";
 import { observer } from "mobx-react-lite";
 import { useState } from "react";
 import { IconButton } from "@components/IconButton";
@@ -45,19 +45,6 @@ export const UserBar = observer(() => {
     Boolean(voiceChannel) ||
     voiceStatus === "connecting" ||
     voiceStatus === "failed";
-
-  const inFeed = app.mode === "feed";
-
-  const conditionalProps: Omit<PaperProps, "color"> = inFeed
-    ? {
-        width: "4.25rem",
-        height: showVoicePill ? "25rem" : "17.5rem",
-        direction: "column"
-      }
-    : {
-        minWidth: "10rem",
-        direction: "row"
-      };
 
   const account = app.account;
 
@@ -107,7 +94,7 @@ export const UserBar = observer(() => {
       width="97.5%"
       direction="column"
     >
-      {showVoicePill && !inFeed && (
+      {showVoicePill && (
         <Paper
           borderTopRightRadius={15}
           borderTopLeftRadius={15}
@@ -167,7 +154,7 @@ export const UserBar = observer(() => {
 
           <Stack direction="row" spacing={1.25} width="100%">
             <Tooltip
-              placement={inFeed ? "right" : "top"}
+              placement="top"
               content={cameraEnabled ? "Disable camera" : "Enable camera"}
             >
               <IconButton
@@ -210,7 +197,7 @@ export const UserBar = observer(() => {
             </Tooltip>
 
             <Tooltip
-              placement={inFeed ? "right" : "top"}
+              placement="top"
               content={
                 screenShareEnabled ? "Stop sharing" : "Share your screen"
               }
@@ -229,7 +216,7 @@ export const UserBar = observer(() => {
 
             {screenShareEnabled && app.voice.screenShareSupportsAudio && (
               <Tooltip
-                placement={inFeed ? "right" : "top"}
+                placement="top"
                 content={
                   app.voice.screenShareAudioEnabled
                     ? "Mute stream audio"
@@ -266,19 +253,20 @@ export const UserBar = observer(() => {
         width="100%"
         zIndex={theme.zIndex.appBar + 1}
         spacing={1.25}
-        {...(showVoicePill && !inFeed
+        {...(showVoicePill
           ? {
               borderBottomRightRadius: 15,
               borderBottomLeftRadius: 15
             }
           : { borderRadius: 15 })}
-        {...conditionalProps}
+        minWidth="10rem"
+        direction="row"
       >
         <Paper
-          direction={inFeed ? "column" : "row"}
+          direction="row"
           alignItems="center"
           spacing={2.5}
-          width={!inFeed && showVoicePill ? "75%" : "100%"}
+          width={showVoicePill ? "75%" : "100%"}
           px={1}
           py={0.25}
           minWidth={0}
@@ -298,10 +286,8 @@ export const UserBar = observer(() => {
                 account
               },
               {
-                x: inFeed ? Math.round(rect.left + 55) : Math.round(rect.left),
-                y: inFeed
-                  ? Math.round(rect.top + 10)
-                  : Math.round(Math.max(8, rect.top - 415))
+                x: Math.round(rect.left),
+                y: Math.round(Math.max(8, rect.top - 415))
               }
             );
           }}
@@ -314,7 +300,6 @@ export const UserBar = observer(() => {
           <UserAvatar user={account} size={48} badge />
           <Stack direction="column" minWidth={0}>
             <Typography
-              textAlign={inFeed ? "center" : undefined}
               level="body-sm"
               whiteSpace="nowrap"
               overflow="hidden"
@@ -322,7 +307,8 @@ export const UserBar = observer(() => {
             >
               {account.displayName}
             </Typography>
-            {account.presence?.activities.length === 0 &&
+            {hovered &&
+              account.presence?.activities.length === 0 &&
               account.globalName && (
                 <Typography
                   level="body-xs"
@@ -334,134 +320,20 @@ export const UserBar = observer(() => {
                   {account.username}
                 </Typography>
               )}
-            {account.presence && (
+
+            {!hovered && account.presence && (
               <SmallActivityStatus
-                vertical={inFeed}
+                vertical={false}
                 presence={account.presence}
+                showStatus
               />
             )}
           </Stack>
         </Paper>
 
-        {inFeed && showVoicePill && (
-          <Stack direction="column" spacing={1.25} alignItems="center">
-            <Tooltip
-              content={
-                <Stack direction="column" spacing={0.5}>
-                  <Typography level="body-sm" color={voiceTitleColor}>
-                    {voiceTitle}
-                  </Typography>
-                  {voiceSubtitle && (
-                    <Typography level="body-xs" textColor="muted">
-                      {voiceSubtitle}
-                    </Typography>
-                  )}
-                </Stack>
-              }
-              placement="right"
-            >
-              <IconButton variant="plain" color={voiceTitleColor}>
-                <HeadphonesIcon weight="fill" />
-              </IconButton>
-            </Tooltip>
-
-            <Stack direction="row" spacing={1.25} alignItems="center">
-              <Tooltip
-                placement="right"
-                content={cameraEnabled ? "Turn off camera" : "Turn on camera"}
-              >
-                <IconButton
-                  variant="plain"
-                  onClick={() => app.voice.toggleCamera()}
-                >
-                  {cameraEnabled ? (
-                    <VideoCameraIcon
-                      weight="fill"
-                      color={theme.colors.success}
-                    />
-                  ) : (
-                    <VideoCameraSlashIcon
-                      weight="fill"
-                      color={theme.colors.neutral}
-                    />
-                  )}
-                </IconButton>
-              </Tooltip>
-
-              <Tooltip
-                placement="right"
-                content={
-                  screenShareEnabled ? "Stop sharing" : "Share your screen"
-                }
-              >
-                <IconButton
-                  variant="plain"
-                  onClick={() => app.voice.toggleScreenShare()}
-                >
-                  <MonitorArrowUpIcon
-                    weight="fill"
-                    color={
-                      screenShareEnabled
-                        ? theme.colors.success
-                        : theme.colors.neutral
-                    }
-                  />
-                </IconButton>
-              </Tooltip>
-            </Stack>
-
-            {screenShareEnabled && app.voice.screenShareSupportsAudio && (
-              <Tooltip
-                placement="right"
-                content={
-                  app.voice.screenShareAudioEnabled
-                    ? "Mute stream audio"
-                    : "Unmute stream audio"
-                }
-              >
-                <IconButton
-                  variant="plain"
-                  onClick={() => app.voice.toggleScreenShareAudio()}
-                >
-                  {app.voice.screenShareAudioEnabled ? (
-                    <SpeakerHighIcon
-                      weight="fill"
-                      color={theme.colors.success}
-                    />
-                  ) : (
-                    <SpeakerSlashIcon
-                      weight="fill"
-                      color={theme.colors.neutral}
-                    />
-                  )}
-                </IconButton>
-              </Tooltip>
-            )}
-
-            {canHangup && (
-              <Tooltip content="Disconnect" placement="right">
-                <IconButton onClick={() => app.voice.leave()}>
-                  <PhoneIcon
-                    css={{
-                      transform: "rotate(135deg)"
-                    }}
-                    weight="fill"
-                  />
-                </IconButton>
-              </Tooltip>
-            )}
-          </Stack>
-        )}
-
-        <Stack
-          alignItems="center"
-          direction={inFeed ? "column" : "row"}
-          spacing={inFeed ? undefined : 0.25}
-          mr={inFeed ? undefined : 1.25}
-          flexShrink={0}
-        >
+        <Stack alignItems="center" direction="row" spacing={0.25} mr={1.25} flexShrink={0}>
           <Tooltip
-            placement={inFeed ? "right" : "top"}
+            placement="top"
             content={
               app.voice.spaceMute
                 ? "Space Muted"
@@ -492,7 +364,7 @@ export const UserBar = observer(() => {
             </IconButton>
           </Tooltip>
           <Tooltip
-            placement={inFeed ? "right" : "top"}
+            placement="top"
             content={
               app.voice.spaceDeaf
                 ? "Space Deafened"
@@ -525,7 +397,7 @@ export const UserBar = observer(() => {
             </IconButton>
           </Tooltip>
 
-          <Tooltip placement={inFeed ? "right" : "top"} content="Settings">
+          <Tooltip placement="top" content="Settings">
             <IconButton
               onClick={() => openModal("user-settings", <UserSettingsModal />)}
               variant="plain"

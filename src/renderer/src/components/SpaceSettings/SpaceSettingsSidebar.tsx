@@ -129,10 +129,14 @@ export const SpaceSettingsSidebar = observer(
                 <Stack direction="column">
                   {category === "general" ? (
                     <Typography
-                      level="body-lg"
+                      level="body-sm"
                       textColor="accent"
                       mb={2.5}
                       fontFamily="monospace"
+                      overflow="hidden"
+                      textOverflow="ellipsis"
+                      whiteSpace="nowrap"
+                      maxWidth={150}
                     >
                       {space.name}
                     </Typography>

@@ -16,8 +16,6 @@ export const CustomEmojiPreviewPopup = observer(
   ({ expression, ...props }: Props) => {
     const app = useAppStore();
 
-    console.log(expression);
-
     return (
       <Paper
         variant="elevation"

@@ -25,6 +25,7 @@ interface StatusBadgeProps {
   elevation?: number;
   inPicker?: boolean;
   showInvisible?: boolean;
+  showOffline?: boolean;
   typing?: boolean;
 }
 
@@ -36,6 +37,7 @@ interface BadgeVisualProps {
   cutColor: ColorLike;
   fillColor: string;
   drawOuterRing: boolean;
+  hollow?: boolean;
   typing?: boolean;
   overlay?: {
     xNudgePx: number;
@@ -52,6 +54,7 @@ const BadgeVisual = observer(
     cutColor,
     fillColor,
     drawOuterRing,
+    hollow,
     typing,
     overlay
   }: BadgeVisualProps) => {
@@ -139,7 +142,7 @@ const BadgeVisual = observer(
               />
             )}
 
-            {status === "invisible" && (
+            {hollow && (
               <Stack
                 width={innerDiameter}
                 height={innerDiameter}
@@ -169,9 +172,13 @@ export const StatusBadge = observer(
     elevation = 0,
     inPicker = false,
     showInvisible = false,
+    showOffline = false,
     typing = false
   }: StatusBadgeProps) => {
     const { theme } = useTheme();
+
+    const hollow =
+      status === "invisible" || (status === "offline" && showOffline);
 
     const fillColor = (() => {
       switch (status) {
@@ -182,8 +189,8 @@ export const StatusBadge = observer(
         case "dnd":
           return theme.colors.danger;
         case "invisible":
-          return "transparent";
         case "offline":
+          return hollow ? theme.colors.surface : null;
         default:
           return null;
       }
@@ -231,6 +238,7 @@ export const StatusBadge = observer(
             cutColor={effectiveCutColor}
             fillColor={fillColor}
             drawOuterRing={false}
+            hollow={hollow}
             typing={typing}
           />
         </Stack>
@@ -246,6 +254,7 @@ export const StatusBadge = observer(
         cutColor={effectiveCutColor}
         fillColor={fillColor}
         drawOuterRing={true}
+        hollow={hollow}
         typing={typing}
         overlay={{
           xNudgePx: effectiveXNudge,

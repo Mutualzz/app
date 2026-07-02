@@ -2428,7 +2428,9 @@ export class VoiceStore {
     this.session.setCameraDeviceId(deviceId);
   }
 
-  async setupTracks(requestPermissions = false): Promise<{ inputChanged: boolean }> {
+  async setupTracks(
+    requestPermissions = false
+  ): Promise<{ inputChanged: boolean }> {
     const previousInputDeviceId = this.currentInputDeviceId;
 
     try {

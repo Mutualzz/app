@@ -3,17 +3,25 @@ import { Paper } from "@components/Paper";
 import { useDesktopShell } from "@contexts/DesktopShell.context";
 import { useModal } from "@contexts/Modal.context";
 import { useAppStore } from "@hooks/useStores";
-import { Box, Divider, IconSlot, Stack, Typography, useTheme } from "@mutualzz/ui-web";
+import {
+  Box,
+  Divider,
+  IconSlot,
+  Stack,
+  Typography,
+  useTheme
+} from "@mutualzz/ui-web";
 import { observer } from "mobx-react-lite";
 import { useEffect, useRef, useState } from "react";
 import {
   ArrowLeftIcon,
   ArrowRightIcon,
+  CompassIcon,
   DownloadIcon,
   MinusIcon,
   PlanetIcon,
-  ScribbleIcon,
   SquareIcon,
+  StarIcon,
   UsersThreeIcon,
   XIcon
 } from "@phosphor-icons/react";
@@ -204,7 +212,12 @@ const WindowTitleBar = ({ onHeightChange }: WindowTitleBarProps) => {
         )}
         <Stack
           alignItems="center"
-          css={{ WebkitAppRegion: "drag", userSelect: "none", position: "relative", zIndex: 1 }}
+          css={{
+            WebkitAppRegion: "drag",
+            userSelect: "none",
+            position: "relative",
+            zIndex: 1
+          }}
           flex={1}
         >
           {app.account && (
@@ -221,7 +234,9 @@ const WindowTitleBar = ({ onHeightChange }: WindowTitleBarProps) => {
               {pageTitleBar?.onBack ? (
                 <Button
                   size="sm"
-                  color={pageTitleBar.backLabel === "Close" ? "danger" : "neutral"}
+                  color={
+                    pageTitleBar.backLabel === "Close" ? "danger" : "neutral"
+                  }
                   variant="soft"
                   startDecorator={<ArrowLeftIcon weight="bold" />}
                   onClick={pageTitleBar.onBack}
@@ -299,7 +314,12 @@ const WindowTitleBar = ({ onHeightChange }: WindowTitleBarProps) => {
           alignItems="center"
           width="100%"
           spacing={1.25}
-          css={{ WebkitAppRegion: "drag", userSelect: "none", position: "relative", zIndex: 1 }}
+          css={{
+            WebkitAppRegion: "drag",
+            userSelect: "none",
+            position: "relative",
+            zIndex: 1
+          }}
           justifyContent="center"
           flex={1}
         >
@@ -311,7 +331,9 @@ const WindowTitleBar = ({ onHeightChange }: WindowTitleBarProps) => {
                     <UsersThreeIcon weight="fill" />
                   </IconSlot>
                   <Typography level="label-sm" weight="bold">
-                    Direct Messages
+                    {location.href.includes("friends")
+                      ? "Friends"
+                      : "Direct Messages"}
                   </Typography>
                 </Stack>
               )}
@@ -328,10 +350,20 @@ const WindowTitleBar = ({ onHeightChange }: WindowTitleBarProps) => {
               {app.mode === "feed" && (
                 <Stack direction="row" alignItems="center" spacing={1.25}>
                   <IconSlot size={16}>
-                    <ScribbleIcon />
+                    {location.pathname === "/feed/friends" ? (
+                      <UsersThreeIcon weight="fill" />
+                    ) : location.pathname === "/feed/saved" ? (
+                      <StarIcon weight="fill" />
+                    ) : (
+                      <CompassIcon weight="fill" />
+                    )}
                   </IconSlot>
                   <Typography level="label-sm" weight="bold">
-                    Feed
+                    {location.pathname === "/feed/friends"
+                      ? "Friends"
+                      : location.pathname === "/feed/saved"
+                        ? "Favorites"
+                        : "Explore / Discover"}
                   </Typography>
                 </Stack>
               )}
@@ -344,7 +376,12 @@ const WindowTitleBar = ({ onHeightChange }: WindowTitleBarProps) => {
           justifyContent="flex-end"
           spacing={1.25}
           direction="row"
-          css={{ WebkitAppRegion: "drag", userSelect: "none", position: "relative", zIndex: 1 }}
+          css={{
+            WebkitAppRegion: "drag",
+            userSelect: "none",
+            position: "relative",
+            zIndex: 1
+          }}
         >
           {pageTitleBar?.end && (
             <Stack

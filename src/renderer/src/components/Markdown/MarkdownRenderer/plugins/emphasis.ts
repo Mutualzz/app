@@ -5,7 +5,6 @@ function processEmphasis(tokens: Token[]) {
   for (let i = 0; i < tokens.length; i++) {
     const token = tokens[i];
     if (token.type === "text") {
-      // Bold
       const boldRegex = /\*\*([^*]+?)\*\*/g;
       let lastIndex = 0;
       let match;
@@ -39,7 +38,6 @@ function processEmphasis(tokens: Token[]) {
       processEmphasis(token.children);
     }
   }
-  // Italic *
   for (let i = 0; i < tokens.length; i++) {
     const token = tokens[i];
     if (token.type === "text") {
@@ -76,7 +74,6 @@ function processEmphasis(tokens: Token[]) {
       processEmphasis(token.children);
     }
   }
-  // Italic _
   for (let i = 0; i < tokens.length; i++) {
     const token = tokens[i];
     if (token.type === "text") {

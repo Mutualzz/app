@@ -17,7 +17,6 @@ import type { User } from "@stores/objects/User";
 import { observer } from "mobx-react-lite";
 import { useState } from "react";
 import { useAppStore } from "@hooks/useStores";
-import { UserProfilePopoutTrigger } from "@components/Profile/popout/UserProfilePopoutTrigger";
 import { Paper } from "@components/Paper";
 import { StatusBadge } from "@components/StatusBadge";
 import { SpaceMember } from "@stores/objects/SpaceMember";
@@ -29,10 +28,10 @@ interface UserAvatarProps extends AvatarProps {
   member?: SpaceMember;
   badge?: boolean;
   showInvisible?: boolean;
+  showOffline?: boolean;
   speaking?: boolean;
   typing?: boolean;
   disableContextMenu?: boolean;
-  popout?: boolean;
 }
 
 const baseSizeMap: Record<Size, number> = {
@@ -48,12 +47,12 @@ export const UserAvatar = observer(
     css,
     badge,
     showInvisible,
+    showOffline,
     speaking,
     typing,
     shape,
     style,
     disableContextMenu,
-    popout = false,
     ...props
   }: UserAvatarProps & { css?: CSSObject }) => {
     const app = useAppStore();
@@ -106,7 +105,7 @@ export const UserAvatar = observer(
       );
     }
 
-    const status = app.presence.get(user.id)?.status;
+    const status = app.presence.get(user.id)?.status ?? "offline";
     const hasAvatar = !!user.avatar;
 
     const avatar = (
@@ -156,19 +155,12 @@ export const UserAvatar = observer(
             size={size}
             elevation={0}
             showInvisible={showInvisible}
+            showOffline={showOffline}
             typing={typing}
           />
         )}
       </Paper>
     );
-
-    if (popout) {
-      return (
-        <UserProfilePopoutTrigger user={user} member={member}>
-          {avatar}
-        </UserProfilePopoutTrigger>
-      );
-    }
 
     return avatar;
   }

@@ -37,7 +37,6 @@ export const brOnEmpty = (md: MarkdownItAsync) => {
       const children = prevInline.children || (prevInline.children = []);
 
       for (let k = 0; k < brCount; k++) {
-        // create a hardbreak token (<br>)
         const br = new state.Token("hardbreak", "br", 0);
 
         children.push(br);

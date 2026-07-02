@@ -2,14 +2,21 @@ import { observer } from "mobx-react-lite";
 import { useNavigate } from "@tanstack/react-router";
 import { Channel } from "@stores/objects/Channel";
 import { useAppStore } from "@hooks/useStores";
-import { ChannelType } from "@mutualzz/types";
+import { ChannelType, PresencePayload } from "@mutualzz/types";
 import { Paper } from "@components/Paper";
-import { Avatar, IconSlot, Stack, Typography, useTheme } from "@mutualzz/ui-web";
+import {
+  Avatar,
+  IconSlot,
+  Stack,
+  Typography,
+  useTheme
+} from "@mutualzz/ui-web";
 import { UserAvatar } from "@components/User/UserAvatar";
 import { DMGroupAvatar } from "@components/DMChannel/DMGroupAvatar";
 import { useMenu } from "@contexts/ContextMenu.context";
 import { Tooltip } from "@components/Tooltip";
 import { ChatCircleSlashIcon } from "@phosphor-icons/react";
+import { SmallActivityStatus } from "../SmallActivityStatus";
 
 interface Props {
   channel: Channel;
@@ -53,11 +60,9 @@ export const DMChannelItem = observer(({ channel }: Props) => {
     return `${names.slice(0, 2).join(", ")},  +${names.length - 2}`;
   })();
 
-  let preview: string | null = null;
-  const lastMessage = channel.lastMessage;
+  let preview: PresencePayload | string | null = null;
   if (channel.isGroupDM) preview = `${recipients.length} Members`;
-  else if (lastMessage)
-    preview = `${lastMessage.author?.displayName}: ${lastMessage.content}`;
+  else if (recipient) preview = app.presence.get(recipient.id);
 
   return (
     <Paper
@@ -102,13 +107,20 @@ export const DMChannelItem = observer(({ channel }: Props) => {
         }
       }}
     >
-      <Stack direction="row" alignItems="center" spacing={1.25} flex={1} minWidth={0}>
+      <Stack
+        direction="row"
+        alignItems="center"
+        spacing={1.25}
+        flex={1}
+        minWidth={0}
+      >
         {channel.type === ChannelType.DM ? (
           <UserAvatar
             user={recipient}
             size={AVATAR_SIZE}
             badge
             showInvisible
+            showOffline
             typing={
               recipient
                 ? app.typing.isUserTyping(channel.id, recipient.id)
@@ -137,22 +149,31 @@ export const DMChannelItem = observer(({ channel }: Props) => {
             {title}
           </Typography>
 
-          {preview && (
-            <Typography
-              level="body-xs"
-              variant="plain"
-              color="neutral"
-              whiteSpace="nowrap"
-              overflow="hidden"
-              textOverflow="ellipsis"
-            >
-              {preview}
-            </Typography>
-          )}
+          {preview &&
+            (typeof preview === "string" ? (
+              <Typography
+                level="body-xs"
+                textColor="muted"
+                css={{
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis"
+                }}
+              >
+                {preview}
+              </Typography>
+            ) : (
+              <SmallActivityStatus presence={preview} showStatus />
+            ))}
         </Stack>
       </Stack>
       {!active && (
-        <Stack direction="row" alignItems="center" justifyContent="center" minWidth={16}>
+        <Stack
+          direction="row"
+          alignItems="center"
+          justifyContent="center"
+          minWidth={16}
+        >
           {mentionCount > 0 ? (
             <Stack
               alignItems="center"

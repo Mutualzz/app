@@ -1,6 +1,7 @@
 import { Link } from "@components/Link";
 import { MessageEmbedSpoiler } from "@components/Message/MessageEmbedSpoiler";
 import { Paper } from "@components/Paper";
+import { PostEmbedPreview } from "@components/Post/PostEmbedPreview";
 import { UserAvatar } from "@components/User/UserAvatar";
 import type { APIMessageEmbed } from "@mutualzz/types";
 import { Stack, Typography, useTheme } from "@mutualzz/ui-web";
@@ -141,6 +142,9 @@ export const MessageEmbed = observer(
         </MessageEmbedSpoiler>
       );
     }
+
+    if (embed.type === "post" && embed.post)
+      return <PostEmbedPreview post={embed.post} />;
 
     if (embed.type === "gifv")
       return (

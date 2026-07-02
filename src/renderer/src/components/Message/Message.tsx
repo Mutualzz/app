@@ -40,6 +40,7 @@ import { ExpressionType, MessageType } from "@mutualzz/types";
 import { MessageAttachment } from "./MessageAttachment";
 import { FileIcon } from "@phosphor-icons/react";
 import type { PendingAttachmentPreview } from "@stores/objects/QueuedMessage";
+import { UserProfilePopoutTrigger } from "../Profile/popout/UserProfilePopoutTrigger";
 
 function formatBytes(bytes: number) {
   if (bytes < 1024) return `${bytes} B`;
@@ -50,7 +51,7 @@ function formatBytes(bytes: number) {
 const PendingAttachments = observer(
   ({
     attachments,
-    progress,
+    progress
   }: {
     attachments: PendingAttachmentPreview[];
     progress: number;
@@ -71,7 +72,7 @@ const PendingAttachments = observer(
                     overflow: "hidden",
                     maxWidth: 300,
                     maxHeight: 200,
-                    background: theme.colors.surface,
+                    background: theme.colors.surface
                   }}
                 >
                   <img
@@ -82,7 +83,7 @@ const PendingAttachments = observer(
                       maxHeight: 200,
                       objectFit: "contain",
                       display: "block",
-                      opacity: 0.5,
+                      opacity: 0.5
                     }}
                   />
                   <div
@@ -92,7 +93,7 @@ const PendingAttachments = observer(
                       left: 0,
                       right: 0,
                       height: 3,
-                      background: `${theme.colors.surface}88`,
+                      background: `${theme.colors.surface}88`
                     }}
                   >
                     <div
@@ -101,7 +102,7 @@ const PendingAttachments = observer(
                         width: `${progress}%`,
                         background: theme.colors.primary,
                         transition: "width 0.15s ease",
-                        borderRadius: 2,
+                        borderRadius: 2
                       }}
                     />
                   </div>
@@ -116,7 +117,7 @@ const PendingAttachments = observer(
                     maxWidth: 300,
                     background: "transparent",
                     overflow: "hidden",
-                    position: "relative",
+                    position: "relative"
                   }}
                 >
                   <Stack direction="row" alignItems="center" spacing={0.75}>
@@ -130,7 +131,7 @@ const PendingAttachments = observer(
                         alignItems: "center",
                         justifyContent: "center",
                         flexShrink: 0,
-                        color: theme.colors.info,
+                        color: theme.colors.info
                       }}
                     >
                       <FileIcon size={15} weight="fill" />
@@ -142,7 +143,7 @@ const PendingAttachments = observer(
                         css={{
                           overflow: "hidden",
                           textOverflow: "ellipsis",
-                          whiteSpace: "nowrap",
+                          whiteSpace: "nowrap"
                         }}
                       >
                         {attachment.name}
@@ -158,7 +159,7 @@ const PendingAttachments = observer(
                       height: 3,
                       borderRadius: 2,
                       background: `${theme.colors.surface}`,
-                      overflow: "hidden",
+                      overflow: "hidden"
                     }}
                   >
                     <div
@@ -167,7 +168,7 @@ const PendingAttachments = observer(
                         width: `${progress}%`,
                         background: theme.colors.primary,
                         transition: "width 0.15s ease",
-                        borderRadius: 2,
+                        borderRadius: 2
                       }}
                     />
                   </div>
@@ -269,7 +270,12 @@ export const Message = observer(
         onMouseEnter={hideSwitcher}
         onMouseLeave={showSwitcher}
         onDoubleClick={() => {
-          if (isSent && !message.editing) app.setReplyingTo(message);
+          if (isSent && !message.editing) {
+            if (message.authorId !== app.account?.id)
+              app.setReplyingTo(message);
+
+            if (message.authorId === app.account?.id) message.setEditing(true);
+          }
         }}
         onContextMenu={(event) => {
           if (!isSent || message.editing) return;
@@ -327,12 +333,19 @@ export const Message = observer(
         <MessageRow header={header}>
           <MessageInfo>
             {header ? (
-              <UserAvatar
-                user={message.author}
-                member={message.member}
-                size="lg"
-                popout
-              />
+              <UserProfilePopoutTrigger
+                placement="right"
+                user={message.author!}
+              >
+                <UserAvatar
+                  user={message.author}
+                  member={message.member}
+                  size="lg"
+                  css={{
+                    cursor: "pointer"
+                  }}
+                />
+              </UserProfilePopoutTrigger>
             ) : (
               <MessageDetails message={message} position="left" />
             )}
@@ -412,7 +425,10 @@ export const Message = observer(
             {isSent && message.attachments.length > 0 && (
               <Stack direction="row" flexWrap="wrap" spacing={1} pb={0.25}>
                 {message.attachments.map((attachment) => (
-                  <MessageAttachment key={attachment.id} attachment={attachment} />
+                  <MessageAttachment
+                    key={attachment.id}
+                    attachment={attachment}
+                  />
                 ))}
               </Stack>
             )}

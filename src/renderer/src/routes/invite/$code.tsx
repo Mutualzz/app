@@ -160,7 +160,36 @@ function RouteComponent() {
   const handleContinue = () => navigate({ to: "/", replace: true });
 
   if (!invite && error) return <Navigate to="/" replace />;
-  if (deepLink) return <Navigate to="/" replace />;
+
+  if (deepLink) {
+    return (
+      <Stack
+        width="100%"
+        height="100%"
+        justifyContent="center"
+        alignItems="center"
+      >
+        <Paper
+          justifyContent="center"
+          minWidth={450}
+          minHeight={300}
+          maxWidth={450}
+          maxHeight={300}
+          direction="column"
+          p={2}
+          borderRadius={10}
+          elevation={3}
+        >
+          <Stack justifyContent="center" alignItems="center" flex={1} spacing={2} direction="column">
+            {invite?.space && <SpaceIcon space={invite.space} size={48} />}
+            <Typography level="h5" fontWeight="bold">
+              {invite?.space?.name ? `Joining ${invite.space.name}...` : "Joining..."}
+            </Typography>
+          </Stack>
+        </Paper>
+      </Stack>
+    );
+  }
 
   return (
     <Stack
@@ -203,7 +232,6 @@ function RouteComponent() {
               </Stack>
             </Stack>
 
-            {/* Show fallback only when not in Electron */}
             {!isElectron && deepLinkFailed && (
               <Stack px={6} mb={1.5} textAlign="center">
                 <Typography level="body-md">
@@ -222,7 +250,6 @@ function RouteComponent() {
                 {isInSpace ? "Go to space" : "Accept in browser"}
               </Button>
 
-              {/* Hide "Open in app" inside Electron */}
               {!isElectron && (
                 <Button
                   variant="outlined"

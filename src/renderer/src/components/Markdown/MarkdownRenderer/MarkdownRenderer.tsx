@@ -53,13 +53,13 @@ export const MarkdownRenderer = ({
 
     instance.use(brOnEmpty);
     instance.use(spoilerPlugin);
-    instance.use(emojiPlugin);
-    instance.use(customEmojiPlugin);
     instance.use(mentionPlugin);
     instance.use(strikethroughPlugin);
     instance.use(emphasisPlugin);
     instance.use(underlinePlugin);
     instance.use(linkPlugin);
+    instance.use(emojiPlugin);
+    instance.use(customEmojiPlugin);
 
     return instance;
   }, []);
@@ -310,7 +310,13 @@ export const MarkdownRenderer = ({
   }, [value, enlargeEmojiOnly, textColor]);
 
   return (
-    <Box display="block" height="100%" overflowY="auto" fontSize="inherit" {...props}>
+    <Box
+      display="block"
+      height="100%"
+      overflowY="auto"
+      fontSize="inherit"
+      {...props}
+    >
       {content}
     </Box>
   );

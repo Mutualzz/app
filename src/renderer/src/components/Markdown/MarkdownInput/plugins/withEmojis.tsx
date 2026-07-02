@@ -26,6 +26,7 @@ export const withEmojis = (editor: Editor) => {
     isInline,
     isVoid,
     markableVoid,
+    isSelectable,
     insertText
   } = editor;
 
@@ -50,7 +51,9 @@ export const withEmojis = (editor: Editor) => {
   };
 
   editor.isSelectable = (element: Element) => {
-    return element.type !== "emoji" && element.type !== "customEmoji";
+    return element.type === "emoji" || element.type === "customEmoji"
+      ? false
+      : isSelectable(element);
   };
 
   editor.insertText = async (text: string) => {

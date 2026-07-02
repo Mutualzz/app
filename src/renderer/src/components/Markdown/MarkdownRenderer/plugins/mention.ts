@@ -3,15 +3,10 @@ import type { MarkdownItAsync } from "@components/Markdown/MarkdownItAsync";
 
 const mentionRegex = /<@!?(\d+)>|<@&(\d+)>|@everyone|@here/g;
 
-/**
- * Recursively process only text tokens, leaving all other token types untouched.
- * This ensures emojis, spoilers, bold, italic, etc. are preserved.
- */
 function processMentionTokens(tokens: Token[]) {
   for (let i = 0; i < tokens.length; i++) {
     const token = tokens[i];
 
-    // Only process text tokens; leave everything else alone
     if (token.type === "text") {
       const content = token.content;
       let lastIndex = 0;
@@ -20,7 +15,6 @@ function processMentionTokens(tokens: Token[]) {
       mentionRegex.lastIndex = 0;
 
       while ((match = mentionRegex.exec(content))) {
-        // Add any text before this mention
         if (match.index > lastIndex) {
           const textToken = new Token("text", "", 0);
           textToken.content = content.slice(lastIndex, match.index);
@@ -28,7 +22,6 @@ function processMentionTokens(tokens: Token[]) {
           newTokens.push(textToken);
         }
 
-        // Create mention token
         const mentionToken = new Token("mention", "", 0);
         mentionToken.content = match[0];
 
@@ -51,7 +44,6 @@ function processMentionTokens(tokens: Token[]) {
         lastIndex = match.index + match[0].length;
       }
 
-      // Add remaining text after last mention
       if (lastIndex < content.length) {
         const textToken = new Token("text", "", 0);
         textToken.content = content.slice(lastIndex);
@@ -59,7 +51,6 @@ function processMentionTokens(tokens: Token[]) {
         newTokens.push(textToken);
       }
 
-      // Only replace token if we found mentions
       if (newTokens.length > 0) {
         tokens.splice(i, 1, ...newTokens);
         i += newTokens.length - 1;

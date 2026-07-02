@@ -1,4 +1,4 @@
-import { BrowserWindow, globalShortcut, ipcMain } from "electron";
+import { app, BrowserWindow, globalShortcut, ipcMain } from "electron";
 import { join } from "path";
 import { is } from "@electron-toolkit/utils";
 import iconPng from "../../resources/icons/base/icon.png?asset";
@@ -36,9 +36,17 @@ export function createMainWindow(): BrowserWindow {
     webPreferences: {
       preload: join(__dirname, "../preload/index.js"),
       sandbox: true,
-      contextIsolation: true
+      contextIsolation: true,
+      autoplayPolicy: "no-user-gesture-required"
     }
   });
+
+  const availableSpellCheckerLanguages =
+    mainWindow.webContents.session.availableSpellCheckerLanguages;
+  const locale = app.getLocale();
+  mainWindow.webContents.session.setSpellCheckerLanguages(
+    availableSpellCheckerLanguages.includes(locale) ? [locale] : ["en-US"]
+  );
 
   mainWindow.on("focus", () => {
     globalShortcut.register("CommandOrControl+R", () => {
@@ -109,20 +117,24 @@ export function createMainWindow(): BrowserWindow {
   });
 
   mainWindow.webContents.on("context-menu", (_e, params) => {
-    const { Menu, MenuItem } = require("electron");
-    const menu = new Menu();
-
-    if (params.isEditable) {
-      menu.append(new MenuItem({ role: "cut" }));
-      menu.append(new MenuItem({ role: "copy" }));
-      menu.append(new MenuItem({ role: "paste" }));
-      menu.append(new MenuItem({ type: "separator" }));
-    } else if (params.selectionText) {
-      menu.append(new MenuItem({ role: "copy" }));
-      menu.append(new MenuItem({ type: "separator" }));
+    if (params.isEditable || params.selectionText) {
+      mainWindow?.webContents.send("context-menu:editable", {
+        x: params.x,
+        y: params.y,
+        isEditable: params.isEditable,
+        selectionText: params.selectionText,
+        canCut: params.editFlags.canCut,
+        canCopy: params.editFlags.canCopy,
+        canPaste: params.editFlags.canPaste,
+        misspelledWord: params.misspelledWord,
+        dictionarySuggestions: params.dictionarySuggestions
+      });
+      return;
     }
 
     if (is.dev) {
+      const { Menu, MenuItem } = require("electron");
+      const menu = new Menu();
       menu.append(
         new MenuItem({
           label: "Inspect Element",
@@ -130,9 +142,8 @@ export function createMainWindow(): BrowserWindow {
             mainWindow?.webContents.inspectElement(params.x, params.y)
         })
       );
+      menu.popup();
     }
-
-    if (menu.items.length > 0) menu.popup();
   });
 
   mainWindow.webContents.setWindowOpenHandler((details) => {
@@ -165,6 +176,22 @@ export function setupWindowIPC(): void {
 
   ipcMain.handle("window:is-maximized", () => {
     return getMainWindow()?.isMaximized() ?? false;
+  });
+
+  ipcMain.handle("context-menu:replace-misspelling", (_, word: string) => {
+    getMainWindow()?.webContents.replaceMisspelling(word);
+  });
+
+  ipcMain.handle("spellcheck:set-enabled", (_, enabled: boolean) => {
+    const win = getMainWindow();
+    if (!win) return;
+    win.webContents.session.spellCheckerEnabled = enabled;
+  });
+
+  ipcMain.handle("context-menu:add-to-dictionary", (_, word: string) => {
+    getMainWindow()?.webContents.session.addWordToSpellCheckerDictionary(
+      word
+    );
   });
 }
 

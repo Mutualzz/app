@@ -8,6 +8,8 @@ export class Relationship {
   userId: Snowflake;
   otherUserId: Snowflake;
   type: RelationshipType;
+  nickname: string | null;
+  note: string | null;
   createdAt: Date;
   updatedAt: Date;
   raw: APIRelationship;
@@ -20,6 +22,8 @@ export class Relationship {
     this.userId = data.userId;
     this.otherUserId = data.otherUserId;
     this.type = data.type;
+    this.nickname = data.nickname;
+    this.note = data.note;
     this.createdAt = new Date(data.createdAt);
     this.updatedAt = new Date(data.updatedAt);
 
@@ -77,6 +81,8 @@ export class Relationship {
     this.userId = data.userId;
     this.otherUserId = data.otherUserId;
     this.type = data.type;
+    this.nickname = data.nickname;
+    this.note = data.note;
     this.createdAt = new Date(data.createdAt);
     this.updatedAt = new Date(data.updatedAt);
     this.raw = data;

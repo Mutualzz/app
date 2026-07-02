@@ -8,10 +8,17 @@ import { useModal } from "@contexts/Modal.context";
 import { DMChannelCreate } from "@components/DMChannel/DMChannelCreate";
 import { PlusIcon } from "@phosphor-icons/react";
 import { Tooltip } from "@components/Tooltip";
+import { useMemo } from "react";
 
 export const DMChannelList = observer(() => {
   const app = useAppStore();
   const dms = app.channels.dms;
+
+  // Only reorder when channels are added/removed, not on every incoming
+  // message. Items update their own badges reactively via observer.
+  const dmKey = dms.map((d) => d.id).sort().join(",");
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const stableDMs = useMemo(() => dms, [dmKey]);
 
   const { openModal } = useModal();
 
@@ -49,7 +56,7 @@ export const DMChannelList = observer(() => {
           "Message" on a user's profile or by creating a new group DM!
         </Typography>
       )}
-      {dms.map((dm) => (
+      {stableDMs.map((dm) => (
         <DMChannelItem key={dm.id} channel={dm} />
       ))}
     </Paper>

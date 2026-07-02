@@ -80,7 +80,7 @@ export const ExpressionPickerTrigger = ({
   };
 
   return (
-    <Stack spacing={0.75}>
+    <Stack spacing={0.75} alignItems="center" css={{ alignSelf: "center" }}>
       {stickerPicker && (
         <IconButton
           ref={stickerTriggerRef as any}

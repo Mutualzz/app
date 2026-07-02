@@ -28,6 +28,7 @@ export const RoleActionConfirm = observer(({ role }: Props) => {
       padding={5}
       borderRadius={12}
       direction="column"
+      width={400}
     >
       <Typography level="h5" fontWeight="bold" marginBottom={2}>
         Delete Role
@@ -37,7 +38,7 @@ export const RoleActionConfirm = observer(({ role }: Props) => {
         cannot be undone.
       </Typography>
       <Stack spacing={1.25}>
-        <Button color="neutral" size="lg" onClick={() => closeModal()}>
+        <Button expand color="neutral" size="lg" onClick={() => closeModal()}>
           Cancel
         </Button>
         <Button
@@ -45,6 +46,7 @@ export const RoleActionConfirm = observer(({ role }: Props) => {
           onClick={() => deleteRole()}
           disabled={isPending}
           size="lg"
+          expand
         >
           Delete
         </Button>

@@ -554,7 +554,7 @@ export const UserContextMenu = observer(
             {!isWatchingStream ? (
               <ContextItem
                 onClick={() => {
-                  void app.voice.watchScreenShare(user.id);
+                  app.voice.watchScreenShare(user.id);
                   clearMenu();
                 }}
               >

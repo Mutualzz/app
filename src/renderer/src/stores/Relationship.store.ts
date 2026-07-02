@@ -65,6 +65,14 @@ export class RelationshipStore {
     return this.get(me, userId) || this.get(userId, me);
   }
 
+  get allNonBlocked() {
+    return this.all.filter((r) => !r.isBlocked);
+  }
+
+  get friends() {
+    return this.all.filter((r) => r.isFriend);
+  }
+
   getFriendByUserId(userId: Snowflake) {
     const rel = this.getForMe(userId);
     return rel?.isFriend ? rel : undefined;
@@ -74,18 +82,32 @@ export class RelationshipStore {
     return this.all.filter((r) => r.isIncomingRequest);
   }
 
-  getOnline() {
-    return this.all.filter((r) => {
-      const presence = this.app.presence.get(r.userId);
-      return presence?.status === "online";
-    });
+  get online() {
+    return this.all
+      .filter((r) => r.isFriend)
+      .filter((r) => {
+        const friendId = r.otherUserIdForMe;
+        if (!friendId) return false;
+        const presence = this.app.presence.get(friendId);
+        return (
+          presence?.status !== "offline" && presence?.status !== "invisible"
+        );
+      });
   }
 
-  getOutgoing() {
+  get outgoing() {
     return this.all.filter((r) => r.isOutgoingRequest);
   }
 
-  getBlocked() {
+  get incoming() {
+    return this.all.filter((r) => r.isIncomingRequest);
+  }
+
+  get pending() {
+    return [...this.incoming, ...this.outgoing];
+  }
+
+  get blocked() {
     return this.all.filter((r) => r.isBlocked);
   }
 
@@ -105,9 +127,9 @@ export class RelationshipStore {
     return this.addAll(data);
   }
 
-  async sendFriendRequest(userId: Snowflake) {
+  async sendFriendRequest(identifier: string) {
     return this.app.rest.post<APIRelationship>(`/@me/relationships`, {
-      userId
+      identifier,
     });
   }
 
@@ -119,6 +141,10 @@ export class RelationshipStore {
 
   async declineFriendRequest(userId: Snowflake) {
     return this.app.rest.patch(`/@me/relationships/${userId}/decline`);
+  }
+
+  async cancelFriendRequest(userId: Snowflake) {
+    return this.app.rest.delete(`/@me/relationships/${userId}`);
   }
 
   async removeFriend(userId: Snowflake) {

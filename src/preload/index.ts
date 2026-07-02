@@ -32,7 +32,9 @@ const api = {
     getVersion: () => ipcRenderer.invoke("app:get-version"),
     getName: () => ipcRenderer.invoke("app:get-name"),
     isPackaged: () => ipcRenderer.invoke("app:is-packaged"),
-    relaunch: () => ipcRenderer.invoke("app:relaunch")
+    relaunch: () => ipcRenderer.invoke("app:relaunch"),
+    getStartupDeepLink: (): Promise<string | null> =>
+      ipcRenderer.invoke("app:get-startup-deep-link")
   },
   system: {
     getOsInfo: () => ipcRenderer.invoke("system:get-os-info"),
@@ -78,6 +80,16 @@ const api = {
     close: () => ipcRenderer.invoke("window:close"),
     isMaximized: () => ipcRenderer.invoke("window:is-maximized")
   },
+  contextMenu: {
+    replaceMisspelling: (word: string) =>
+      ipcRenderer.invoke("context-menu:replace-misspelling", word),
+    addToDictionary: (word: string) =>
+      ipcRenderer.invoke("context-menu:add-to-dictionary", word)
+  },
+  spellcheck: {
+    setEnabled: (enabled: boolean) =>
+      ipcRenderer.invoke("spellcheck:set-enabled", enabled)
+  },
   codec: {
     etfEncode: (payload: any) =>
       ipcRenderer.invoke("codec:etf-encode", payload),
@@ -104,6 +116,19 @@ const api = {
   },
   events: {
     onDeepLink: (callback: (url: string) => void) => on("deep-link", callback),
+    onContextMenuEditable: (
+      callback: (params: {
+        x: number;
+        y: number;
+        isEditable: boolean;
+        selectionText: string;
+        canCut: boolean;
+        canCopy: boolean;
+        canPaste: boolean;
+        misspelledWord: string;
+        dictionarySuggestions: string[];
+      }) => void
+    ) => on("context-menu:editable", callback),
     onUpdaterChecking: (callback: () => void) =>
       on("updater:checking", callback),
     onUpdaterAvailable: (callback: (info: any) => void) =>

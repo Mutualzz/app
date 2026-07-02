@@ -1,6 +1,7 @@
 import type { APIUserSettings, AppMode, Snowflake } from "@mutualzz/types";
 import { ObservableOrderedSet } from "@utils/ObservableOrderedSet";
-import { makeAutoObservable, observable } from "mobx";
+import { isElectron } from "@utils/index";
+import { makeAutoObservable, observable, reaction } from "mobx";
 import type { AppStore } from "./App.store";
 import { makePersistable } from "mobx-persist-store";
 import {
@@ -18,6 +19,7 @@ export class AccountSettingsStore {
   currentIcon?: string | null;
   preferredMode: AppMode;
   preferEmbossed: boolean = true;
+  spellcheckEnabled: boolean = true;
   spacePositions: ObservableOrderedSet<string>;
 
   preferredSelfMute = false;
@@ -72,6 +74,7 @@ export class AccountSettingsStore {
         "currentIcon",
         "preferredMode",
         "preferEmbossed",
+        "spellcheckEnabled",
         "preferredSelfMute",
         "preferredSelfDeaf",
         "voiceInputMode",
@@ -121,6 +124,14 @@ export class AccountSettingsStore {
       ],
       storage: localStorage
     });
+
+    if (isElectron) {
+      reaction(
+        () => this.spellcheckEnabled,
+        (enabled) => window.api.spellcheck.setEnabled(enabled),
+        { fireImmediately: true }
+      );
+    }
   }
 
   private get isDirty(): boolean {
@@ -133,6 +144,14 @@ export class AccountSettingsStore {
 
   togglePreferEmbossed() {
     this.preferEmbossed = !this.preferEmbossed;
+  }
+
+  setSpellcheckEnabled(enabled: boolean) {
+    this.spellcheckEnabled = enabled;
+  }
+
+  toggleSpellcheckEnabled() {
+    this.spellcheckEnabled = !this.spellcheckEnabled;
   }
 
   setCurrentTheme(theme: string | null) {

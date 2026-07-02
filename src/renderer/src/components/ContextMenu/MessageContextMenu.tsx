@@ -81,7 +81,7 @@ export const MessageContextMenu = observer(({ message }: Props) => {
       );
     }
 
-    void message.toggleReaction(item.toReaction());
+    message.toggleReaction(item.toReaction());
     clearMenu();
   };
 

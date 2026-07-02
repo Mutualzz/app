@@ -104,7 +104,7 @@ export const ChannelListItem = observer(
 
       if (isVoice) {
         if (isActiveVoiceChannel) {
-          void navigate({
+          navigate({
             to: "/spaces/$spaceId/$channelId",
             params: {
               spaceId: space.id,

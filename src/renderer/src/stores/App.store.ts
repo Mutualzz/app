@@ -36,6 +36,7 @@ import { usePrefersDark } from "@hooks/usePrefersDark";
 import { ReadStateStore } from "@stores/ReadState.store";
 import { TypingStore } from "@stores/Typing.store";
 import type { Message } from "@stores/objects/Message";
+import { PostStore } from "@stores/Post.store";
 
 const prefersDark = usePrefersDark();
 
@@ -61,6 +62,7 @@ export class AppStore {
   typing = new TypingStore(this);
   users = new UserStore(this);
   profiles = new ProfileStore(this);
+  posts = new PostStore(this);
   updater: UpdaterStore | null = null;
   settings: AccountSettingsStore | null = null;
   mode: AppMode | null = null;
@@ -132,7 +134,8 @@ export class AppStore {
 
     if (this.mode === "feed") return "spaces";
     if (this.mode === "spaces") return "feed";
-    return preferredMode ?? "spaces";
+    if (preferredMode) return preferredMode;
+    return "spaces";
   }
 
   get isReady() {
@@ -315,6 +318,7 @@ export class AppStore {
     this.themes.clear();
     this.themeCreator.resetValues();
     this.users.clear();
+    this.posts.clear();
     this.mode = null;
     this.presence.clear();
     await this.queryClient.cancelQueries();

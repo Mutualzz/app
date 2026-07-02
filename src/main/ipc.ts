@@ -3,6 +3,12 @@ import { trayManager } from "./tray";
 import { getMainWindow } from "./windows";
 import keytar from "keytar";
 import { existsSync, promises as fsPromises } from "fs";
+
+let pendingStartupDeepLink: string | null = null;
+
+export function setPendingDeepLink(url: string) {
+  pendingStartupDeepLink = url;
+}
 import path from "path";
 import {
   getScreenCaptureAccessStatus,
@@ -39,6 +45,12 @@ function setWindowsBadge(win: BrowserWindow, count: number) {
 }
 
 export function setupIPC(): void {
+  ipcMain.handle("app:get-startup-deep-link", () => {
+    const url = pendingStartupDeepLink;
+    pendingStartupDeepLink = null;
+    return url;
+  });
+
   // Token Storage
   ipcMain.handle("storage:get-token", async () => {
     try {

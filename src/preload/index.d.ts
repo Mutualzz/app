@@ -4,6 +4,7 @@ export interface MutualzzAPI {
     getName(): Promise<string>;
     isPackaged(): Promise<boolean>;
     relaunch(): Promise<void>;
+    getStartupDeepLink(): Promise<string | null>;
   };
   system: {
     getOsInfo(): Promise<{
@@ -62,6 +63,13 @@ export interface MutualzzAPI {
     close(): Promise<void>;
     isMaximized(): Promise<boolean>;
   };
+  contextMenu: {
+    replaceMisspelling(word: string): Promise<void>;
+    addToDictionary(word: string): Promise<void>;
+  };
+  spellcheck: {
+    setEnabled(enabled: boolean): Promise<void>;
+  };
   updater: {
     getVersion(): Promise<string>;
     getPlatform(): Promise<string>;
@@ -77,6 +85,19 @@ export interface MutualzzAPI {
   };
   events: {
     onDeepLink(callback: (url: string) => void): () => void;
+    onContextMenuEditable(
+      callback: (params: {
+        x: number;
+        y: number;
+        isEditable: boolean;
+        selectionText: string;
+        canCut: boolean;
+        canCopy: boolean;
+        canPaste: boolean;
+        misspelledWord: string;
+        dictionarySuggestions: string[];
+      }) => void
+    ): () => void;
     onUpdaterChecking(callback: () => void): () => void;
     onUpdaterAvailable(callback: (info: any) => void): () => void;
     onUpdaterDownloading(callback: () => void): () => void;
