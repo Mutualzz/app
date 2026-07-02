@@ -4,7 +4,14 @@ import { UserAvatar } from "@components/User/UserAvatar";
 import { useModal } from "@contexts/Modal.context";
 import type { Theme } from "@emotion/react";
 import { dynamicElevation, formatColor } from "@mutualzz/ui-core";
-import { Button, Divider, IconButton, Stack, Typography, useTheme } from "@mutualzz/ui-web";
+import {
+  Button,
+  Divider,
+  IconButton,
+  Stack,
+  Typography,
+  useTheme
+} from "@mutualzz/ui-web";
 import { Invite } from "@stores/objects/Invite";
 import type { Space } from "@stores/objects/Space";
 import type { Channel } from "@stores/objects/Channel";
@@ -202,7 +209,7 @@ export const ChannelInvitesSettings = observer(({ space, channel }: Props) => {
 
         {invites.length === 0 && (
           <Stack justifyContent="center" alignItems="center" py="4rem">
-            <Typography textAlign="center" color="muted">
+            <Typography textAlign="center" textColor="muted">
               No invites have been created for #{channel.name} yet.
             </Typography>
           </Stack>

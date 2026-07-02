@@ -1,15 +1,26 @@
-import { getCustomFontCssFamily } from "@mutualzz/ui-core";
+import { getCustomFontCssFamily, type CustomFontExt } from "@mutualzz/ui-core";
 import { CDNRoutes } from "@mutualzz/types";
 import { REST } from "@stores/REST.store";
 
 const loaded = new Set<string>();
 const pending = new Map<string, Promise<void>>();
 
+const FONT_FORMATS: Record<CustomFontExt, string> = {
+  woff2: "woff2",
+  woff: "woff",
+  ttf: "truetype",
+  otf: "opentype",
+};
+
 function styleId(userId: string, hash: string) {
   return `custom-font-${userId}-${hash.slice(0, 16)}`;
 }
 
-export async function ensureCustomFont(userId: string, hash: string) {
+export async function ensureCustomFont(
+  userId: string,
+  hash: string,
+  ext: CustomFontExt = "woff2",
+) {
   const key = `${userId}:${hash}`;
   if (loaded.has(key)) return;
 
@@ -25,13 +36,13 @@ export async function ensureCustomFont(userId: string, hash: string) {
     }
 
     const cssFamily = getCustomFontCssFamily(hash);
-    const url = REST.makeCDNUrl(CDNRoutes.profileFont(userId, hash));
+    const url = REST.makeCDNUrl(CDNRoutes.profileFont(userId, hash, ext));
     const style = document.createElement("style");
     style.id = id;
     style.textContent = `
 @font-face {
   font-family: '${cssFamily}';
-  src: url('${url}') format('woff2');
+  src: url('${url}') format('${FONT_FORMATS[ext]}');
   font-display: swap;
 }
 `;

@@ -121,7 +121,6 @@ export const CustomStatusCard = observer(
               badge
               showInvisible
               disableContextMenu
-              popout={false}
             />
           </Box>
 

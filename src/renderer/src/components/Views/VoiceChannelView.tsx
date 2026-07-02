@@ -6,7 +6,7 @@ import { VoiceChannelHeader } from "@components/Channel/VoiceChannelHeader";
 import { useAppStore } from "@hooks/useStores";
 import { observer } from "mobx-react-lite";
 import { motion } from "motion/react";
-import { clamp, dynamicElevation } from "@mutualzz/ui-core";
+import { clamp, ColorLike, dynamicElevation } from "@mutualzz/ui-core";
 import { useEffect, useRef, useState } from "react";
 import { UserAvatar } from "@components/User/UserAvatar";
 import { Button } from "@components/Button";
@@ -75,7 +75,6 @@ const ParticipantTile = observer(
           member={member}
           user={user}
           size={size}
-          popout
           speaking={speaking}
         />
       );
@@ -339,7 +338,7 @@ export const VoiceChannelView = observer(
                 }}
                 overflow="hidden"
                 variant="solid"
-                color={selectedState.member?.user?.accentColor}
+                color={selectedState.member?.user?.accentColor as ColorLike}
                 onContextMenu={(e) => {
                   if (
                     !selectedState?.member ||
@@ -460,7 +459,7 @@ export const VoiceChannelView = observer(
                         })
                       }
                       variant="solid"
-                      color={state.member?.user?.accentColor}
+                      color={state.member?.user?.accentColor as ColorLike}
                       onContextMenu={(e) => {
                         if (!state?.member || !state.user || !state.space)
                           return;

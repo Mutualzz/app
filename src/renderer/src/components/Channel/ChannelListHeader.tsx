@@ -6,7 +6,7 @@ import { useMenu } from "@contexts/ContextMenu.context";
 import { useModal } from "@contexts/Modal.context";
 import type { Space } from "@stores/objects/Space";
 import { contextMenu } from "@mutualzz/contexify";
-import { Box, ButtonGroup, Portal, Stack, Typography } from "@mutualzz/ui-web";
+import { Portal, Stack, Typography } from "@mutualzz/ui-web";
 import { IconButton } from "@components/IconButton";
 import { SpaceInviteToSpaceModal } from "@components/Space/SpaceInviteToSpaceModal";
 import { SpaceContextMenu } from "@components/ContextMenu/SpaceContextMenu";

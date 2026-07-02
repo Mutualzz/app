@@ -82,7 +82,7 @@ export const GoogleFontPicker = observer(
         }
 
         setCustomLabel(
-          result.displayName ?? file.name.replace(/\.woff2$/i, "")
+          result.displayName ?? file.name.replace(/\.(woff2|woff|ttf|otf)$/i, "")
         );
         onChange(result.fontFamily);
         toast.success("Font uploaded");
@@ -260,7 +260,7 @@ export const GoogleFontPicker = observer(
           <input
             ref={uploadRef}
             type="file"
-            accept=".woff2,font/woff2"
+            accept=".ttf,.otf,.woff,.woff2,font/ttf,font/otf,font/woff,font/woff2"
             hidden
             onChange={(event) => {
               const file = event.target.files?.[0];
@@ -276,11 +276,11 @@ export const GoogleFontPicker = observer(
             startDecorator={<UploadSimpleIcon />}
             onClick={() => uploadRef.current?.click()}
           >
-            Upload custom font (.woff2)
+            Upload custom font
           </Button>
           <Typography level="body-xs" css={{ opacity: 0.55, lineHeight: 1.4 }}>
-            WOFF2 only, up to 2 MB. Loads on demand when your theme or profile
-            is viewed.
+            TTF, OTF, WOFF, or WOFF2, up to 5 MB. Loads on demand when your
+            theme or profile is viewed.
           </Typography>
         </Stack>
 

@@ -15,6 +15,7 @@ import {
   PaletteIcon,
   UploadSimpleIcon
 } from "@phosphor-icons/react";
+import { ColorLike } from "@mutualzz/ui-core";
 
 const METHOD_CARDS: {
   method: AvatarEditorMethod;
@@ -99,7 +100,7 @@ export const UserProfileSettings = observer(() => {
       >
         <Paper
           variant="solid"
-          color={account.accentColor}
+          color={account.accentColor as ColorLike}
           height={72}
           width="100%"
           borderRadius="8px 8px 0 0"
