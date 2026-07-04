@@ -96,8 +96,7 @@ export class AppStore {
   });
 
   constructor() {
-    if (isElectron && !import.meta.env.DEV)
-      this.updater = new UpdaterStore(this);
+    if (isElectron && !import.meta.env.DEV) this.updater = new UpdaterStore();
 
     makeAutoObservable(this, {}, { autoBind: true });
 

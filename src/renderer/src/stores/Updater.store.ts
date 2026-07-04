@@ -1,6 +1,5 @@
 import { Logger } from "@mutualzz/logger";
 import { makeAutoObservable, runInAction } from "mobx";
-import type { AppStore } from "@stores/App.store";
 
 type UpdaterStage =
   | "idle"
@@ -38,7 +37,7 @@ export class UpdaterStore {
   private autoCheckTimer: ReturnType<typeof setInterval> | null = null;
   private readonly logger = new Logger({ tag: "UpdaterStore" });
 
-  constructor(private readonly app: AppStore) {
+  constructor() {
     makeAutoObservable(this, {}, { autoBind: true });
   }
 
