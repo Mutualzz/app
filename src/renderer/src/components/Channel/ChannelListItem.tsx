@@ -134,7 +134,7 @@ export const ChannelListItem = observer(
     return (
       <Stack
         ref={setNodeRef}
-        ml={isCategory ? 1 : 1.5}
+        ml={isCategory ? 1 : channel.hasParent ? 2 : 1.5}
         mr={isCategory ? 1 : 2.5}
         px={isCategory ? 1 : 1.5}
         key={channel.id}

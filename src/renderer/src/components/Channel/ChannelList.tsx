@@ -80,7 +80,7 @@ const SortableChannelItem = observer(
           transition,
           opacity: isDragging ? 0.5 : 1,
           zIndex: isDragging ? 999 : undefined,
-          marginTop: channel.type === ChannelType.Category ? "1rem" : "0.5rem"
+          marginTop: channel.type === ChannelType.Category ? "1rem" : "0.375rem"
         }}
       >
         <ChannelListItem
