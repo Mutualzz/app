@@ -207,7 +207,8 @@ export const ProfileEditorPage = observer(() => {
         profileMusicAuthorName: draft.profileMusicTrackId
           ? null
           : draft.profileMusicAuthorName,
-        blocks
+        blocks,
+        mobileBlocks: profileRef.current?.mobileBlocks ?? []
       });
     },
     onSuccess: (result) => {

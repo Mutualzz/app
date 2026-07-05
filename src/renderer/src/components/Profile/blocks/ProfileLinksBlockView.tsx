@@ -29,9 +29,13 @@ export const ProfileLinksBlockView = ({ block }: Props) => {
       p={1.25}
       borderRadius={12}
       elevation={app.settings?.preferEmbossed ? 5 : 1}
+      overflow="auto"
     >
       {links.length === 0 && (
-        <Typography level="body-sm" css={{ opacity: 0.55, fontSize: "var(--pcf-sm)" }}>
+        <Typography
+          level="body-sm"
+          css={{ opacity: 0.55, fontSize: "var(--pcf-sm)" }}
+        >
           Add links in the inspector
         </Typography>
       )}

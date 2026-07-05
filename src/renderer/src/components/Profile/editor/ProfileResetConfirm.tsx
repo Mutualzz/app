@@ -21,7 +21,14 @@ export const ProfileResetConfirm = observer(({ onSuccess }: Props) => {
 
   const { mutate: resetProfile, isPending } = useMutation({
     mutationKey: ["reset-profile", app.account?.id],
-    mutationFn: () => app.profiles.save(EMPTY_PROFILE_SAVE_PAYLOAD),
+    mutationFn: () =>
+      app.profiles.save({
+        ...EMPTY_PROFILE_SAVE_PAYLOAD,
+        mobileBlocks:
+          (app.account?.id
+            ? app.profiles.get(app.account.id)?.mobileBlocks
+            : undefined) ?? []
+      }),
     onSuccess: (result) => {
       if (result) onSuccess();
       closeModal();

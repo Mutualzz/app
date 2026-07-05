@@ -106,21 +106,18 @@ export const OpenLink = observer(({ url, unsafe }: Props) => {
         </>
       )}
 
-      <Box width="100%" mb={4} px={4}>
-        <ButtonGroup fullWidth spacing={10}>
-          <Button onClick={handleProceed} variant="soft" color="success">
-            Proceed
-          </Button>
-          <Button
-            color="danger"
-            onClick={() =>
-              closeModal(unsafe ? "open-link-unsafe" : "open-link")
-            }
-          >
-            Cancel
-          </Button>
-        </ButtonGroup>
-      </Box>
+      <Stack spacing={2.5} width="100%" mb={4} px={4}>
+        <Button expand onClick={handleProceed} variant="soft" color="success">
+          Proceed
+        </Button>
+        <Button
+          expand
+          color="danger"
+          onClick={() => closeModal(unsafe ? "open-link-unsafe" : "open-link")}
+        >
+          Cancel
+        </Button>
+      </Stack>
     </AnimatedPaper>
   );
 });
