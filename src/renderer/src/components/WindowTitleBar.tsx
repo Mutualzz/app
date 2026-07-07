@@ -154,6 +154,32 @@ const WindowTitleBar = ({ onHeightChange }: WindowTitleBarProps) => {
           </Box>
         </Paper>
       )}
+      {app.voice.audioPlaybackBlocked && (
+        <Paper
+          alignItems="center"
+          justifyContent="center"
+          variant="solid"
+          color="warning"
+          spacing={2.5}
+          p={1.25}
+          css={{ WebkitAppRegion: "drag", userSelect: "none" }}
+        >
+          <Typography level="body-lg">
+            Your browser blocked voice audio playback
+          </Typography>
+          <Button
+            variant="outlined"
+            size="sm"
+            onClick={() => app.voice.retryBlockedAudio()}
+            css={{
+              WebkitAppRegion: "no-drag",
+              userSelect: "auto"
+            }}
+          >
+            Click to enable audio
+          </Button>
+        </Paper>
+      )}
       <Paper
         position="relative"
         css={{ WebkitAppRegion: "drag", userSelect: "none" }}

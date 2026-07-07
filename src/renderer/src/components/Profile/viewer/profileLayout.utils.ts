@@ -5,10 +5,8 @@ export interface CanvasRect {
   height: number;
 }
 
-/** The fixed canvas width. Block positions are stored as % of this value. */
 export const PROFILE_CANVAS_REF_WIDTH = 1600;
 
-/** All block dimensions are expressed as % of canvas width so layout scales uniformly. */
 export const canvasUnit = (canvas: CanvasRect) => canvas.width;
 
 export interface PixelRect {
@@ -27,7 +25,6 @@ export interface ProfileBlockSizeLimits {
   recommendedHeight: number;
 }
 
-/** Size bounds and recommended defaults (% of canvas width) per block type. */
 export const PROFILE_BLOCK_SIZE_LIMITS: Record<
   ProfileBlockType,
   ProfileBlockSizeLimits
@@ -139,7 +136,6 @@ export const applyRecommendedBlockSize = (
 export const normalizeProfileBlocks = (blocks: APIProfileBlock[]) =>
   blocks.map((block) => clampBlock(block));
 
-/** @deprecated Use per-block limits via getProfileBlockSizeLimits */
 export const MIN_BLOCK_PERCENT = 4;
 export const PROFILE_GRID_STEP = 4;
 
@@ -159,17 +155,24 @@ export const snapRectToGrid = (
   height: snapPercent(rect.height, step)
 });
 
-export const snapBlockToGrid = (block: APIProfileBlock, step = PROFILE_GRID_STEP) =>
-  clampBlock({ ...block, ...snapRectToGrid(block, step) });
+export const snapBlockToGrid = (
+  block: APIProfileBlock,
+  step = PROFILE_GRID_STEP
+) => clampBlock({ ...block, ...snapRectToGrid(block, step) });
 
 export const alignBlockHorizontally = (block: APIProfileBlock) =>
   clampBlock({ ...block, x: roundPercent((100 - block.width) / 2) });
 
-export const alignBlockVertically = (block: APIProfileBlock, canvas?: CanvasRect) => {
-  const canvasHeightUnits = canvas && canvas.width > 0
-    ? (canvas.height / canvas.width) * 100
-    : 100;
-  return clampBlock({ ...block, y: roundPercent((canvasHeightUnits - block.height) / 2) });
+export const alignBlockVertically = (
+  block: APIProfileBlock,
+  canvas?: CanvasRect
+) => {
+  const canvasHeightUnits =
+    canvas && canvas.width > 0 ? (canvas.height / canvas.width) * 100 : 100;
+  return clampBlock({
+    ...block,
+    y: roundPercent((canvasHeightUnits - block.height) / 2)
+  });
 };
 
 export const percentToPixels = (
@@ -310,9 +313,8 @@ export const createDefaultBlock = (
     width: limits.recommendedWidth,
     height: limits.recommendedHeight
   };
-  const canvasHeightUnits = canvas.width > 0
-    ? (canvas.height / canvas.width) * 100
-    : 100;
+  const canvasHeightUnits =
+    canvas.width > 0 ? (canvas.height / canvas.width) * 100 : 100;
   const x = point
     ? clamp(
         (point.x / Math.max(canvas.width, 1)) * 100 - size.width / 2,
@@ -328,7 +330,11 @@ export const createDefaultBlock = (
       )
     : type === "header"
       ? 2
-      : clamp(canvasHeightUnits / 2 - size.height / 2, 0, canvasHeightUnits - size.height);
+      : clamp(
+          canvasHeightUnits / 2 - size.height / 2,
+          0,
+          canvasHeightUnits - size.height
+        );
 
   const base = {
     id: crypto.randomUUID(),

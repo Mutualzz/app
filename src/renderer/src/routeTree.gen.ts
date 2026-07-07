@@ -18,12 +18,16 @@ import { Route as AuthenticatedRouteRouteImport } from "./routes/_authenticated/
 import { Route as IndexRouteImport } from "./routes/index"
 import { Route as InviteCodeRouteImport } from "./routes/invite/$code"
 import { Route as UsersUsernameRouteRouteImport } from "./routes/users/$username/route"
+import { Route as AuthenticatedStaffRouteRouteImport } from "./routes/_authenticated/staff/route"
 import { Route as AuthenticatedSpacesRouteRouteImport } from "./routes/_authenticated/spaces/route"
 import { Route as AuthenticatedProfileRouteRouteImport } from "./routes/_authenticated/profile/route"
 import { Route as AuthenticatedFeedRouteRouteImport } from "./routes/_authenticated/feed/route"
 import { Route as AuthenticatedAvatarRouteRouteImport } from "./routes/_authenticated/avatar/route"
 import { Route as AuthenticatedAtmeRouteRouteImport } from "./routes/_authenticated/@me/route"
+import { Route as AuthenticatedStaffIndexRouteImport } from "./routes/_authenticated/staff/index"
 import { Route as AuthenticatedFeedIndexRouteImport } from "./routes/_authenticated/feed/index"
+import { Route as AuthenticatedStaffReportsRouteImport } from "./routes/_authenticated/staff/reports"
+import { Route as AuthenticatedStaffActivityRouteImport } from "./routes/_authenticated/staff/activity"
 import { Route as AuthenticatedFeedScheduledRouteImport } from "./routes/_authenticated/feed/scheduled"
 import { Route as AuthenticatedFeedSavedRouteImport } from "./routes/_authenticated/feed/saved"
 import { Route as AuthenticatedFeedFriendsRouteImport } from "./routes/_authenticated/feed/friends"
@@ -31,6 +35,7 @@ import { Route as AuthenticatedAtmeFriendsRouteImport } from "./routes/_authenti
 import { Route as AuthenticatedSpacesSpaceIdRouteRouteImport } from "./routes/_authenticated/spaces/$spaceId/route"
 import { Route as AuthenticatedAtmeChannelIdRouteRouteImport } from "./routes/_authenticated/@me/$channelId/route"
 import { Route as AuthenticatedFeedPostsPostIdRouteImport } from "./routes/_authenticated/feed/posts/$postId"
+import { Route as AuthenticatedStaffUsersUserIdRouteRouteImport } from "./routes/_authenticated/staff/users/$userId/route"
 import { Route as AuthenticatedSpacesSpaceIdChannelIdRouteRouteImport } from "./routes/_authenticated/spaces/$spaceId/$channelId/route"
 
 const ResetRoute = ResetRouteImport.update({
@@ -77,6 +82,11 @@ const UsersUsernameRouteRoute = UsersUsernameRouteRouteImport.update({
   path: "/users/$username",
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedStaffRouteRoute = AuthenticatedStaffRouteRouteImport.update({
+  id: "/staff",
+  path: "/staff",
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedSpacesRouteRoute =
   AuthenticatedSpacesRouteRouteImport.update({
     id: "/spaces",
@@ -105,11 +115,28 @@ const AuthenticatedAtmeRouteRoute = AuthenticatedAtmeRouteRouteImport.update({
   path: "/@me",
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedStaffIndexRoute = AuthenticatedStaffIndexRouteImport.update({
+  id: "/",
+  path: "/",
+  getParentRoute: () => AuthenticatedStaffRouteRoute,
+} as any)
 const AuthenticatedFeedIndexRoute = AuthenticatedFeedIndexRouteImport.update({
   id: "/",
   path: "/",
   getParentRoute: () => AuthenticatedFeedRouteRoute,
 } as any)
+const AuthenticatedStaffReportsRoute =
+  AuthenticatedStaffReportsRouteImport.update({
+    id: "/reports",
+    path: "/reports",
+    getParentRoute: () => AuthenticatedStaffRouteRoute,
+  } as any)
+const AuthenticatedStaffActivityRoute =
+  AuthenticatedStaffActivityRouteImport.update({
+    id: "/activity",
+    path: "/activity",
+    getParentRoute: () => AuthenticatedStaffRouteRoute,
+  } as any)
 const AuthenticatedFeedScheduledRoute =
   AuthenticatedFeedScheduledRouteImport.update({
     id: "/scheduled",
@@ -151,6 +178,12 @@ const AuthenticatedFeedPostsPostIdRoute =
     path: "/posts/$postId",
     getParentRoute: () => AuthenticatedFeedRouteRoute,
   } as any)
+const AuthenticatedStaffUsersUserIdRouteRoute =
+  AuthenticatedStaffUsersUserIdRouteRouteImport.update({
+    id: "/users/$userId",
+    path: "/users/$userId",
+    getParentRoute: () => AuthenticatedStaffRouteRoute,
+  } as any)
 const AuthenticatedSpacesSpaceIdChannelIdRouteRoute =
   AuthenticatedSpacesSpaceIdChannelIdRouteRouteImport.update({
     id: "/$channelId",
@@ -170,6 +203,7 @@ export interface FileRoutesByFullPath {
   "/feed": typeof AuthenticatedFeedRouteRouteWithChildren
   "/profile": typeof AuthenticatedProfileRouteRoute
   "/spaces": typeof AuthenticatedSpacesRouteRouteWithChildren
+  "/staff": typeof AuthenticatedStaffRouteRouteWithChildren
   "/users/$username": typeof UsersUsernameRouteRoute
   "/invite/$code": typeof InviteCodeRoute
   "/@me/$channelId": typeof AuthenticatedAtmeChannelIdRouteRoute
@@ -178,8 +212,12 @@ export interface FileRoutesByFullPath {
   "/feed/friends": typeof AuthenticatedFeedFriendsRoute
   "/feed/saved": typeof AuthenticatedFeedSavedRoute
   "/feed/scheduled": typeof AuthenticatedFeedScheduledRoute
+  "/staff/activity": typeof AuthenticatedStaffActivityRoute
+  "/staff/reports": typeof AuthenticatedStaffReportsRoute
   "/feed/": typeof AuthenticatedFeedIndexRoute
+  "/staff/": typeof AuthenticatedStaffIndexRoute
   "/spaces/$spaceId/$channelId": typeof AuthenticatedSpacesSpaceIdChannelIdRouteRoute
+  "/staff/users/$userId": typeof AuthenticatedStaffUsersUserIdRouteRoute
   "/feed/posts/$postId": typeof AuthenticatedFeedPostsPostIdRoute
 }
 export interface FileRoutesByTo {
@@ -201,8 +239,12 @@ export interface FileRoutesByTo {
   "/feed/friends": typeof AuthenticatedFeedFriendsRoute
   "/feed/saved": typeof AuthenticatedFeedSavedRoute
   "/feed/scheduled": typeof AuthenticatedFeedScheduledRoute
+  "/staff/activity": typeof AuthenticatedStaffActivityRoute
+  "/staff/reports": typeof AuthenticatedStaffReportsRoute
   "/feed": typeof AuthenticatedFeedIndexRoute
+  "/staff": typeof AuthenticatedStaffIndexRoute
   "/spaces/$spaceId/$channelId": typeof AuthenticatedSpacesSpaceIdChannelIdRouteRoute
+  "/staff/users/$userId": typeof AuthenticatedStaffUsersUserIdRouteRoute
   "/feed/posts/$postId": typeof AuthenticatedFeedPostsPostIdRoute
 }
 export interface FileRoutesById {
@@ -219,6 +261,7 @@ export interface FileRoutesById {
   "/_authenticated/feed": typeof AuthenticatedFeedRouteRouteWithChildren
   "/_authenticated/profile": typeof AuthenticatedProfileRouteRoute
   "/_authenticated/spaces": typeof AuthenticatedSpacesRouteRouteWithChildren
+  "/_authenticated/staff": typeof AuthenticatedStaffRouteRouteWithChildren
   "/users/$username": typeof UsersUsernameRouteRoute
   "/invite/$code": typeof InviteCodeRoute
   "/_authenticated/@me/$channelId": typeof AuthenticatedAtmeChannelIdRouteRoute
@@ -227,8 +270,12 @@ export interface FileRoutesById {
   "/_authenticated/feed/friends": typeof AuthenticatedFeedFriendsRoute
   "/_authenticated/feed/saved": typeof AuthenticatedFeedSavedRoute
   "/_authenticated/feed/scheduled": typeof AuthenticatedFeedScheduledRoute
+  "/_authenticated/staff/activity": typeof AuthenticatedStaffActivityRoute
+  "/_authenticated/staff/reports": typeof AuthenticatedStaffReportsRoute
   "/_authenticated/feed/": typeof AuthenticatedFeedIndexRoute
+  "/_authenticated/staff/": typeof AuthenticatedStaffIndexRoute
   "/_authenticated/spaces/$spaceId/$channelId": typeof AuthenticatedSpacesSpaceIdChannelIdRouteRoute
+  "/_authenticated/staff/users/$userId": typeof AuthenticatedStaffUsersUserIdRouteRoute
   "/_authenticated/feed/posts/$postId": typeof AuthenticatedFeedPostsPostIdRoute
 }
 export interface FileRouteTypes {
@@ -245,6 +292,7 @@ export interface FileRouteTypes {
     | "/feed"
     | "/profile"
     | "/spaces"
+    | "/staff"
     | "/users/$username"
     | "/invite/$code"
     | "/@me/$channelId"
@@ -253,8 +301,12 @@ export interface FileRouteTypes {
     | "/feed/friends"
     | "/feed/saved"
     | "/feed/scheduled"
+    | "/staff/activity"
+    | "/staff/reports"
     | "/feed/"
+    | "/staff/"
     | "/spaces/$spaceId/$channelId"
+    | "/staff/users/$userId"
     | "/feed/posts/$postId"
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -276,8 +328,12 @@ export interface FileRouteTypes {
     | "/feed/friends"
     | "/feed/saved"
     | "/feed/scheduled"
+    | "/staff/activity"
+    | "/staff/reports"
     | "/feed"
+    | "/staff"
     | "/spaces/$spaceId/$channelId"
+    | "/staff/users/$userId"
     | "/feed/posts/$postId"
   id:
     | "__root__"
@@ -293,6 +349,7 @@ export interface FileRouteTypes {
     | "/_authenticated/feed"
     | "/_authenticated/profile"
     | "/_authenticated/spaces"
+    | "/_authenticated/staff"
     | "/users/$username"
     | "/invite/$code"
     | "/_authenticated/@me/$channelId"
@@ -301,8 +358,12 @@ export interface FileRouteTypes {
     | "/_authenticated/feed/friends"
     | "/_authenticated/feed/saved"
     | "/_authenticated/feed/scheduled"
+    | "/_authenticated/staff/activity"
+    | "/_authenticated/staff/reports"
     | "/_authenticated/feed/"
+    | "/_authenticated/staff/"
     | "/_authenticated/spaces/$spaceId/$channelId"
+    | "/_authenticated/staff/users/$userId"
     | "/_authenticated/feed/posts/$postId"
   fileRoutesById: FileRoutesById
 }
@@ -383,6 +444,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof UsersUsernameRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
+    "/_authenticated/staff": {
+      id: "/_authenticated/staff"
+      path: "/staff"
+      fullPath: "/staff"
+      preLoaderRoute: typeof AuthenticatedStaffRouteRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     "/_authenticated/spaces": {
       id: "/_authenticated/spaces"
       path: "/spaces"
@@ -418,12 +486,33 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof AuthenticatedAtmeRouteRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    "/_authenticated/staff/": {
+      id: "/_authenticated/staff/"
+      path: "/"
+      fullPath: "/staff/"
+      preLoaderRoute: typeof AuthenticatedStaffIndexRouteImport
+      parentRoute: typeof AuthenticatedStaffRouteRoute
+    }
     "/_authenticated/feed/": {
       id: "/_authenticated/feed/"
       path: "/"
       fullPath: "/feed/"
       preLoaderRoute: typeof AuthenticatedFeedIndexRouteImport
       parentRoute: typeof AuthenticatedFeedRouteRoute
+    }
+    "/_authenticated/staff/reports": {
+      id: "/_authenticated/staff/reports"
+      path: "/reports"
+      fullPath: "/staff/reports"
+      preLoaderRoute: typeof AuthenticatedStaffReportsRouteImport
+      parentRoute: typeof AuthenticatedStaffRouteRoute
+    }
+    "/_authenticated/staff/activity": {
+      id: "/_authenticated/staff/activity"
+      path: "/activity"
+      fullPath: "/staff/activity"
+      preLoaderRoute: typeof AuthenticatedStaffActivityRouteImport
+      parentRoute: typeof AuthenticatedStaffRouteRoute
     }
     "/_authenticated/feed/scheduled": {
       id: "/_authenticated/feed/scheduled"
@@ -473,6 +562,13 @@ declare module "@tanstack/react-router" {
       fullPath: "/feed/posts/$postId"
       preLoaderRoute: typeof AuthenticatedFeedPostsPostIdRouteImport
       parentRoute: typeof AuthenticatedFeedRouteRoute
+    }
+    "/_authenticated/staff/users/$userId": {
+      id: "/_authenticated/staff/users/$userId"
+      path: "/users/$userId"
+      fullPath: "/staff/users/$userId"
+      preLoaderRoute: typeof AuthenticatedStaffUsersUserIdRouteRouteImport
+      parentRoute: typeof AuthenticatedStaffRouteRoute
     }
     "/_authenticated/spaces/$spaceId/$channelId": {
       id: "/_authenticated/spaces/$spaceId/$channelId"
@@ -552,12 +648,34 @@ const AuthenticatedSpacesRouteRouteWithChildren =
     AuthenticatedSpacesRouteRouteChildren,
   )
 
+interface AuthenticatedStaffRouteRouteChildren {
+  AuthenticatedStaffActivityRoute: typeof AuthenticatedStaffActivityRoute
+  AuthenticatedStaffReportsRoute: typeof AuthenticatedStaffReportsRoute
+  AuthenticatedStaffIndexRoute: typeof AuthenticatedStaffIndexRoute
+  AuthenticatedStaffUsersUserIdRouteRoute: typeof AuthenticatedStaffUsersUserIdRouteRoute
+}
+
+const AuthenticatedStaffRouteRouteChildren: AuthenticatedStaffRouteRouteChildren =
+  {
+    AuthenticatedStaffActivityRoute: AuthenticatedStaffActivityRoute,
+    AuthenticatedStaffReportsRoute: AuthenticatedStaffReportsRoute,
+    AuthenticatedStaffIndexRoute: AuthenticatedStaffIndexRoute,
+    AuthenticatedStaffUsersUserIdRouteRoute:
+      AuthenticatedStaffUsersUserIdRouteRoute,
+  }
+
+const AuthenticatedStaffRouteRouteWithChildren =
+  AuthenticatedStaffRouteRoute._addFileChildren(
+    AuthenticatedStaffRouteRouteChildren,
+  )
+
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAtmeRouteRoute: typeof AuthenticatedAtmeRouteRouteWithChildren
   AuthenticatedAvatarRouteRoute: typeof AuthenticatedAvatarRouteRoute
   AuthenticatedFeedRouteRoute: typeof AuthenticatedFeedRouteRouteWithChildren
   AuthenticatedProfileRouteRoute: typeof AuthenticatedProfileRouteRoute
   AuthenticatedSpacesRouteRoute: typeof AuthenticatedSpacesRouteRouteWithChildren
+  AuthenticatedStaffRouteRoute: typeof AuthenticatedStaffRouteRouteWithChildren
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -566,6 +684,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedFeedRouteRoute: AuthenticatedFeedRouteRouteWithChildren,
   AuthenticatedProfileRouteRoute: AuthenticatedProfileRouteRoute,
   AuthenticatedSpacesRouteRoute: AuthenticatedSpacesRouteRouteWithChildren,
+  AuthenticatedStaffRouteRoute: AuthenticatedStaffRouteRouteWithChildren,
 }
 
 const AuthenticatedRouteRouteWithChildren =

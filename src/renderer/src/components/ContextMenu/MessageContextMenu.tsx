@@ -1,6 +1,8 @@
 import { ContextMenu } from "@components/ContextMenu";
 import { ContextItem } from "@components/ContextItem";
+import { ReportContentModal } from "@components/Modals/ReportContentModal";
 import { generateMenuIDs, useMenu } from "@contexts/ContextMenu.context";
+import { useModal } from "@contexts/Modal.context";
 import { useRecentEmojis } from "@renderer/hooks/useRecentEmojis";
 import { useAppStore } from "@hooks/useStores";
 import { Divider, Stack } from "@mutualzz/ui-web";
@@ -11,6 +13,7 @@ import { getQuickReactionItems } from "@utils/quickReactionEmojis";
 import {
   ArrowBendUpLeftIcon,
   CopyIcon,
+  FlagIcon,
   PencilSimpleIcon,
   TrashIcon
 } from "@phosphor-icons/react";
@@ -53,6 +56,7 @@ interface Props {
 export const MessageContextMenu = observer(({ message }: Props) => {
   const app = useAppStore();
   const { clearMenu } = useMenu();
+  const { openModal } = useModal();
   const { recents, addRecentStandard, addRecentCustom } = useRecentEmojis();
   const quickItems = getQuickReactionItems(app, recents, 4);
 
@@ -61,6 +65,7 @@ export const MessageContextMenu = observer(({ message }: Props) => {
   const canDelete =
     message.author?.id === app.account?.id ||
     !!me?.hasPermission("ManageMessages", message.channel);
+  const canReport = message.author?.id !== app.account?.id;
 
   const canReact = me?.hasPermission("AddReactions", message.channel);
 
@@ -181,6 +186,27 @@ export const MessageContextMenu = observer(({ message }: Props) => {
           endDecorator={<TrashIcon weight="fill" />}
         >
           Delete Message
+        </ContextItem>
+      )}
+
+      {canReport && (
+        <ContextItem
+          color="danger"
+          onClick={() => {
+            openModal(
+              `report-message-${message.id}`,
+              <ReportContentModal
+                targetType="message"
+                targetId={message.id}
+                contentLabel="this message"
+                modalId={`report-message-${message.id}`}
+              />
+            );
+            clearMenu();
+          }}
+          endDecorator={<FlagIcon weight="fill" />}
+        >
+          Report Message
         </ContextItem>
       )}
     </ContextMenu>

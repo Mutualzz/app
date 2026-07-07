@@ -2,9 +2,7 @@ import { AnimatedPaper } from "@components/Animated/AnimatedPaper";
 import { useModal } from "@contexts/Modal.context";
 import { useAppStore } from "@hooks/useStores";
 import {
-  Box,
   Button,
-  ButtonGroup,
   Link as MLink,
   type LinkProps,
   Stack,

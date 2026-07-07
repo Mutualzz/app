@@ -1,4 +1,5 @@
 import { Logger } from "@mutualzz/logger";
+import { BitField, userFlags } from "@mutualzz/bitfield";
 import {
   type APIChannel,
   APIExpression,
@@ -988,6 +989,11 @@ export class GatewayStore {
     this.app.voice.onGatewayDisconnected();
     this.cleanup();
 
+    if (code === GatewayCloseCodes.ForceLogout) {
+      void this.app.logout();
+      return;
+    }
+
     if (code === GatewayCloseCodes.NotAuthenticated) return;
 
     if (this.reconnectTimeout === 0) this.reconnectTimeout = RECONNECT_TIMEOUT;
@@ -1582,8 +1588,18 @@ export class GatewayStore {
   private onUserUpdate = (payload: APIUser | APIPrivateUser) => {
     this.app.users.update(payload as APIUser);
 
-    if (payload.id === this.app.account?.id)
+    if (payload.id === this.app.account?.id) {
+      if (
+        BitField.fromString(userFlags, payload.flags.toString()).has(
+          "Disabled"
+        )
+      ) {
+        void this.app.logout();
+        return;
+      }
+
       this.app.setUser(payload as APIPrivateUser);
+    }
   };
 
   private onUserSettingsUpdate = (payload: APIUserSettings) => {

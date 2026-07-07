@@ -255,7 +255,6 @@ export const DMChannelCreate = observer(() => {
     mutationFn: async () => {
       if (recipients.length === 1) return app.channels.openDM(recipients[0]);
 
-      // Build the options for the group DM
       let iconFile: File | null = originalFile;
 
       if (originalFile && imageFile && croppedAreaPixels) {

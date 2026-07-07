@@ -7,10 +7,10 @@ import capitalize from "lodash-es/capitalize";
 import { observer } from "mobx-react-lite";
 import { IconButton } from "@components/IconButton";
 import {
+  BookmarkSimpleIcon,
   CompassIcon,
   HouseIcon,
   PaletteIcon,
-  StarIcon,
   UsersIcon
 } from "@phosphor-icons/react";
 import { Tooltip } from "@components/Tooltip";
@@ -28,8 +28,8 @@ const links = [
     to: "friends"
   },
   {
-    label: "Favorites",
-    icon: <StarIcon weight="fill" />,
+    label: "Saves",
+    icon: <BookmarkSimpleIcon weight="fill" />,
     to: "saved"
   },
   {

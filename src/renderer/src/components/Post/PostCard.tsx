@@ -5,8 +5,12 @@ import { Tooltip } from "@components/Tooltip";
 import { PostComments } from "@components/Post/PostComments";
 import { SharePostModal } from "@components/Post/SharePostModal";
 import { MessageAttachment } from "@components/Message/MessageAttachment";
+import { MessageEmbed } from "@components/Message/MessageEmbed";
+import { MessageSticker } from "@components/Message/MessageSticker";
 import { MarkdownRenderer } from "@components/Markdown/MarkdownRenderer/MarkdownRenderer";
+import { ReportContentModal } from "@components/Modals/ReportContentModal";
 import { useModal } from "@contexts/Modal.context";
+import { ExpressionType } from "@mutualzz/types";
 import { Stack, Typography, useTheme } from "@mutualzz/ui-web";
 import type { Post } from "@stores/objects/Post";
 import { calendarStrings } from "@utils/i18n";
@@ -14,6 +18,7 @@ import dayjs from "dayjs";
 import {
   BookmarkSimpleIcon,
   ChatCircleIcon,
+  FlagIcon,
   HeartIcon,
   RepeatIcon,
   TrashIcon
@@ -21,6 +26,9 @@ import {
 import { observer } from "mobx-react-lite";
 import { useState } from "react";
 import { useAppStore } from "@renderer/hooks/useStores";
+
+const GIF_URL_PATTERN =
+  /^https?:\/\/(klipy\.com\/gifs\/|tenor\.com\/|c\.tenor\.com\/|media\.tenor\.com\/|giphy\.com\/|media\.giphy\.com\/|i\.giphy\.com\/|imgur\.com\/|i\.imgur\.com\/|redgifs\.com\/|.*\.gif(\?\S*)?$)\S*$/i;
 
 interface Props {
   post: Post;
@@ -48,6 +56,17 @@ export const PostCard = observer(({ post }: Props) => {
   const app = useAppStore();
   const { openModal } = useModal();
   const [commentsOpen, setCommentsOpen] = useState(false);
+
+  const stickerExpressions = post.expressions.filter(
+    (e) => e.type === ExpressionType.Sticker
+  );
+
+  const hasGifEmbed = post.embeds.some((e) => e.type === "gifv");
+  const isOnlyGifUrl =
+    hasGifEmbed &&
+    !!post.content &&
+    GIF_URL_PATTERN.test(post.content.trim()) &&
+    !post.content.trim().includes(" ");
 
   return (
     <Paper
@@ -96,9 +115,49 @@ export const PostCard = observer(({ post }: Props) => {
               </IconButton>
             </Tooltip>
           )}
+
+          {post.authorId !== app.account?.id && (
+            <Tooltip content="Report post">
+              <IconButton
+                size="sm"
+                color="danger"
+                onClick={() =>
+                  openModal(
+                    `report-post-${post.id}`,
+                    <ReportContentModal
+                      targetType="post"
+                      targetId={post.id}
+                      contentLabel="this post"
+                      modalId={`report-post-${post.id}`}
+                    />
+                  )
+                }
+              >
+                <FlagIcon />
+              </IconButton>
+            </Tooltip>
+          )}
         </Stack>
 
-        {post.content && <MarkdownRenderer value={post.content} />}
+        {stickerExpressions.length > 0 && (
+          <Stack direction="row" spacing={1} flexWrap="wrap">
+            {stickerExpressions.map((sticker) => (
+              <MessageSticker key={sticker.id} sticker={sticker} />
+            ))}
+          </Stack>
+        )}
+
+        {post.content && !isOnlyGifUrl && (
+          <MarkdownRenderer value={post.content} />
+        )}
+
+        {post.embeds.length > 0 && (
+          <Stack spacing={1}>
+            {post.embeds.map((embed, index) => (
+              <MessageEmbed key={index} embed={embed} />
+            ))}
+          </Stack>
+        )}
 
         {post.attachments.length > 0 && (
           <Stack direction="row" spacing={1.5} flexWrap="wrap">

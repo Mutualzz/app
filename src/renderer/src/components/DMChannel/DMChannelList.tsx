@@ -14,10 +14,10 @@ export const DMChannelList = observer(() => {
   const app = useAppStore();
   const dms = app.channels.dms;
 
-  // Only reorder when channels are added/removed, not on every incoming
-  // message. Items update their own badges reactively via observer.
-  const dmKey = dms.map((d) => d.id).sort().join(",");
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const dmKey = dms
+    .map((d) => d.id)
+    .sort()
+    .join(",");
   const stableDMs = useMemo(() => dms, [dmKey]);
 
   const { openModal } = useModal();

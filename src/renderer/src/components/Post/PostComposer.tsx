@@ -12,6 +12,8 @@ import { useNavigate } from "@tanstack/react-router";
 import { observer } from "mobx-react-lite";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Editor } from "slate";
+import { ReactEditor } from "slate-react";
+import type { Expression } from "@stores/objects/Expression";
 import {
   CalendarIcon,
   CalendarPlusIcon,
@@ -24,6 +26,8 @@ import { Tooltip } from "../Tooltip";
 interface Props {
   onPosted?: () => void;
 }
+
+const MAX_STICKERS = 3;
 
 const ACCEPTED_MIME_TYPES = [
   "image/jpeg",
@@ -57,6 +61,7 @@ export const PostComposer = observer(({ onPosted }: Props) => {
   const navigate = useNavigate();
   const [content, setContent] = useState("");
   const [files, setFiles] = useState<File[]>([]);
+  const [stickers, setStickers] = useState<Expression[]>([]);
   const [showScheduler, setShowScheduler] = useState(false);
   const [scheduledFor, setScheduledFor] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -80,11 +85,19 @@ export const PostComposer = observer(({ onPosted }: Props) => {
       content: string;
       files: File[];
       scheduledFor?: Date;
+      expressionIds?: string[];
       editor?: Editor | null;
-    }) => app.posts.createPost(opts.content, opts.files, opts.scheduledFor),
+    }) =>
+      app.posts.createPost(
+        opts.content,
+        opts.files,
+        opts.scheduledFor,
+        opts.expressionIds
+      ),
     onSuccess: (_data, variables) => {
       setContent("");
       setFiles([]);
+      setStickers([]);
       setScheduledFor("");
       setShowScheduler(false);
 
@@ -112,6 +125,29 @@ export const PostComposer = observer(({ onPosted }: Props) => {
     setFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
+  const handleSelectSticker = (sticker: Expression) => {
+    setStickers((prev) => {
+      if (prev.some((s) => s.id === sticker.id)) return prev;
+      if (prev.length >= MAX_STICKERS) return prev;
+      return [...prev, sticker];
+    });
+  };
+
+  const handleRemoveSticker = (stickerId: string) => {
+    setStickers((prev) => prev.filter((s) => s.id !== stickerId));
+  };
+
+  const handleGifUrl = (url?: string) => {
+    if (!url) return;
+    const editor = inputRef.current?.editor;
+    if (!editor) return;
+
+    ReactEditor.focus(editor);
+    editor.select(editor.end([]));
+    const needsSpace = content.length > 0 && !/\s$/.test(content);
+    editor.insertText(`${needsSpace ? " " : ""}${url}`);
+  };
+
   return (
     <Paper
       direction="column"
@@ -122,6 +158,40 @@ export const PostComposer = observer(({ onPosted }: Props) => {
       elevation={app.settings?.preferEmbossed ? 5 : 1}
       borderRadius={8}
     >
+      {stickers.length > 0 && (
+        <Stack
+          direction="row"
+          spacing={1}
+          flexWrap="wrap"
+          borderBottom={`1px solid ${theme.colors.surface}`}
+          pb={1.5}
+        >
+          {stickers.map((sticker) => (
+            <Stack
+              key={sticker.id}
+              position="relative"
+              alignItems="center"
+              justifyContent="center"
+            >
+              <img
+                src={sticker.url}
+                alt={sticker.name}
+                style={{ width: 80, height: 80, objectFit: "contain" }}
+              />
+              <IconButton
+                variant="plain"
+                size="sm"
+                onClick={() => handleRemoveSticker(sticker.id)}
+                style={{ position: "absolute", top: -4, right: -4 }}
+                title="Remove sticker"
+              >
+                <XIcon size={14} />
+              </IconButton>
+            </Stack>
+          ))}
+        </Stack>
+      )}
+
       <MarkdownInput
         ref={inputRef}
         variant="plain"
@@ -129,8 +199,10 @@ export const PostComposer = observer(({ onPosted }: Props) => {
         onChange={setContent}
         placeholder="What's on your mind?"
         mentions={false}
-        gifPicker={false}
-        stickerPicker={false}
+        gifPicker
+        stickerPicker
+        onSendMessage={handleGifUrl}
+        onSelectSticker={handleSelectSticker}
         startContent={<UserAvatar user={app.account} />}
       />
 
@@ -299,7 +371,7 @@ export const PostComposer = observer(({ onPosted }: Props) => {
 
         <Button
           disabled={
-            (!content.trim() && files.length === 0) ||
+            (!content.trim() && files.length === 0 && stickers.length === 0) ||
             isPending ||
             (!!scheduledFor && new Date(scheduledFor).getTime() <= Date.now())
           }
@@ -309,6 +381,7 @@ export const PostComposer = observer(({ onPosted }: Props) => {
               content: content.trim(),
               files,
               scheduledFor: scheduledFor ? new Date(scheduledFor) : undefined,
+              expressionIds: stickers.map((s) => s.id),
               editor: inputRef.current?.editor ?? null
             })
           }

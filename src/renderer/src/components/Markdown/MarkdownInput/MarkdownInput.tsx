@@ -82,6 +82,7 @@ const MarkdownInput = forwardRef<MarkdownInputHandle, MarkdownInputProps>(
       value,
       maxLength,
       startContent,
+      endContent,
 
       css
     },
@@ -456,6 +457,8 @@ const MarkdownInput = forwardRef<MarkdownInputHandle, MarkdownInputProps>(
                 stickerPicker={stickerPicker}
               />
             )}
+
+            {endContent}
 
             {mentions && mentionSearch !== null && mentionAnchor && (
               <MentionPicker

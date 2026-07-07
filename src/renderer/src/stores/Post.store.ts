@@ -116,12 +116,18 @@ export class PostStore {
     return this.addAll(data);
   }
 
-  async createPost(content: string, files?: File[], scheduledFor?: Date) {
+  async createPost(
+    content: string,
+    files?: File[],
+    scheduledFor?: Date,
+    expressionIds?: string[]
+  ) {
     if (files?.length) {
       const formData = new FormData();
       if (content) formData.append("content", content);
       if (scheduledFor) formData.append("scheduledFor", scheduledFor.toISOString());
       files.forEach((file) => formData.append("attachments", file));
+      expressionIds?.forEach((id) => formData.append("expressionIds[]", id));
 
       const data = await this.app.rest.postFormData<APIPost>(
         "/posts",
@@ -133,10 +139,11 @@ export class PostStore {
 
     const data = await this.app.rest.post<
       APIPost,
-      { content: string; scheduledFor?: string }
+      { content: string; scheduledFor?: string; expressionIds?: string[] }
     >("/posts", {
       content,
-      ...(scheduledFor ? { scheduledFor: scheduledFor.toISOString() } : {})
+      ...(scheduledFor ? { scheduledFor: scheduledFor.toISOString() } : {}),
+      ...(expressionIds?.length ? { expressionIds } : {})
     });
 
     return this.add(data);

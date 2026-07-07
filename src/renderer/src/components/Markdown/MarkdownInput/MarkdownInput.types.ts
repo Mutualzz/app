@@ -26,6 +26,7 @@ export interface MarkdownInputProps {
   disabled?: boolean;
 
   startContent?: ReactNode;
+  endContent?: ReactNode;
 
   value?: string;
   onChange?: (value: string, editor: Editor) => void;

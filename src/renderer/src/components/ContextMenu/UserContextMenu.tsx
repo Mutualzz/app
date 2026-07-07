@@ -18,7 +18,8 @@ import { User } from "@stores/objects/User";
 import { toast } from "react-toastify";
 import { MemberKick } from "@components/Modals/MemberKick";
 import { MemberBan } from "@components/Modals/MemberBan";
-import { ArrowLeftIcon, UserMinusIcon } from "@phosphor-icons/react";
+import { ReportContentModal } from "@components/Modals/ReportContentModal";
+import { ArrowLeftIcon, FlagIcon, UserMinusIcon } from "@phosphor-icons/react";
 import { AccountStore } from "@stores/Account.store";
 import {
   canAssignRole,
@@ -41,6 +42,7 @@ export const UserContextMenu = observer(
     const { clearMenu } = useMenu();
 
     const isSelf = app.account?.id === user.id;
+    const isViewerStaff = app.account?.isStaff ?? false;
 
     const activeChannel = app.channels.active;
     const isActiveGroupDM = activeChannel?.isGroupDM ?? false;
@@ -409,6 +411,25 @@ export const UserContextMenu = observer(
               </ContextItem>
             )}
 
+            <ContextItem
+              color="danger"
+              endDecorator={<FlagIcon weight="fill" />}
+              onClick={() => {
+                openModal(
+                  `report-user-${user.id}`,
+                  <ReportContentModal
+                    targetType="user"
+                    targetId={user.id}
+                    contentLabel="this account"
+                    modalId={`report-user-${user.id}`}
+                  />
+                );
+                clearMenu();
+              }}
+            >
+              Report User
+            </ContextItem>
+
             <Divider css={{ opacity: 0.5 }} />
           </>
         )}
@@ -746,6 +767,22 @@ export const UserContextMenu = observer(
                 Ban {member?.user?.username}
               </ContextItem>
             )}
+          </>
+        )}
+        {isViewerStaff && !isSelf && (
+          <>
+            <Divider css={{ opacity: 0.5 }} />
+            <ContextItem
+              onClick={() => {
+                clearMenu();
+                navigate({
+                  to: "/staff/users/$userId",
+                  params: { userId: user.id }
+                });
+              }}
+            >
+              Open in Staff Panel
+            </ContextItem>
           </>
         )}
       </ContextMenu>

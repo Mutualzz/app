@@ -67,7 +67,7 @@ export const ExpressionPickerTrigger = ({
     toggle();
   };
 
-  const handleSelectGif = (gif) => {
+  const handleSelectGif = (gif: { url: string; slug: any }) => {
     toggle();
     const isKlipy = gif.url.includes("klipy.com");
     const sendUrl = isKlipy ? `https://klipy.com/gifs/${gif.slug}` : gif.url;

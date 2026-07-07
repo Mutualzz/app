@@ -6,8 +6,7 @@ interface GameCatalogEntry {
   id: string;
 }
 
-// NOTE: This is a hardcoded catalog of games that we want to support presence for. In the future, we could expand this to be user-configurable or even query the Windows registry for installed games.
-// 2nd NOTE: we will eventually move them later
+// TODO: hardcoded for now, move to a user-configurable source later
 const GAME_CATALOG: GameCatalogEntry[] = [
   { exes: ["cs2.exe"], name: "Counter-Strike 2", id: "counter-strike-2" },
   { exes: ["valorant.exe"], name: "VALORANT", id: "valorant" },

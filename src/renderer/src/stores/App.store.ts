@@ -242,7 +242,13 @@ export class AppStore {
 
   setUser(user: APIPrivateUser, settings?: APIUserSettings) {
     this.account = new AccountStore(this, user);
-    if (settings) this.settings = new AccountSettingsStore(this, settings);
+    if (settings) {
+      const pending = this.settings?.getPendingOverrides();
+      this.settings?.dispose();
+      const next = new AccountSettingsStore(this, settings);
+      if (pending) next.applyLocalOverrides(pending);
+      this.settings = next;
+    }
   }
 
   setGatewayReady(ready: boolean) {
@@ -286,6 +292,12 @@ export class AppStore {
   }
 
   async logout() {
+    try {
+      await this.rest.post("auth/logout");
+    } catch (err) {
+      this.logger.warn("Failed to revoke session on logout", err);
+    }
+
     await this.tokenStorage.delete();
 
     runInAction(() => {
@@ -295,7 +307,7 @@ export class AppStore {
     this.isGatewayReady = true;
     this.account = null;
 
-    if (this.settings) this.settings.stopSyncing();
+    if (this.settings) this.settings.dispose();
     this.settings = null;
 
     this.rest.setToken(null);

@@ -5,10 +5,8 @@ interface Props {
   visible: boolean;
   children: ReactNode;
   minWidth?: number | string;
-  /** Reserve vertical space so hover never changes row height */
   minHeight?: number | string;
 }
-
 
 export const HoverRevealActions = ({
   visible,

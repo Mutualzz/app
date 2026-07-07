@@ -1,7 +1,7 @@
 import type { APIUserSettings, AppMode, Snowflake } from "@mutualzz/types";
 import { ObservableOrderedSet } from "@utils/ObservableOrderedSet";
 import { isElectron } from "@utils/index";
-import { makeAutoObservable, observable, reaction } from "mobx";
+import { comparer, makeAutoObservable, observable, reaction } from "mobx";
 import type { AppStore } from "./App.store";
 import { makePersistable } from "mobx-persist-store";
 import {
@@ -13,6 +13,8 @@ import {
 } from "@utils/voiceSettings.utils";
 
 type SettingsPatch = Omit<APIUserSettings, "updatedAt">;
+
+const SYNC_DEBOUNCE_MS = 2_000;
 
 export class AccountSettingsStore {
   currentTheme?: string | null = "baseDark";
@@ -42,6 +44,7 @@ export class AccountSettingsStore {
 
   private lastSyncedHash: string;
   private syncIntervalId?: ReturnType<typeof setInterval>;
+  private debounceTimerId?: ReturnType<typeof setTimeout>;
 
   constructor(
     private readonly app: AppStore,
@@ -132,6 +135,36 @@ export class AccountSettingsStore {
         { fireImmediately: true }
       );
     }
+
+    reaction(() => this.getSyncPayload(), this.scheduleSync, {
+      equals: comparer.structural
+    });
+
+    window.addEventListener("beforeunload", this.flush);
+    document.addEventListener("visibilitychange", this.handleVisibilityChange);
+  }
+
+  private scheduleSync() {
+    if (this.debounceTimerId) clearTimeout(this.debounceTimerId);
+    this.debounceTimerId = setTimeout(() => this.sync(), SYNC_DEBOUNCE_MS);
+  }
+
+  private handleVisibilityChange() {
+    if (document.visibilityState === "hidden") this.flush();
+  }
+
+  flush() {
+    if (this.debounceTimerId) clearTimeout(this.debounceTimerId);
+    void this.sync();
+  }
+
+  dispose() {
+    this.stopSyncing();
+    window.removeEventListener("beforeunload", this.flush);
+    document.removeEventListener(
+      "visibilitychange",
+      this.handleVisibilityChange
+    );
   }
 
   private get isDirty(): boolean {
@@ -211,6 +244,23 @@ export class AccountSettingsStore {
     this.currentIcon = icon;
   }
 
+  getPendingOverrides(): SettingsPatch | null {
+    return this.isDirty ? this.getSyncPayload() : null;
+  }
+
+  applyLocalOverrides(payload: SettingsPatch) {
+    this.spacePositions.replace(payload.spacePositions.map(String));
+    this.currentTheme = payload.currentTheme;
+    this.currentIcon = payload.currentIcon;
+    this.preferredMode = payload.preferredMode;
+    this.preferEmbossed = payload.preferEmbossed;
+    this.preferredSelfMute = payload.preferredSelfMute;
+    this.preferredSelfDeaf = payload.preferredSelfDeaf;
+    this.favoriteEmojis = observable.array(payload.favoriteEmojis ?? []);
+    this.favoriteGifs = observable.array(payload.favoriteGifs ?? []);
+    this.favoriteStickers = observable.array(payload.favoriteStickers ?? []);
+  }
+
   update(settings: Partial<APIUserSettings>) {
     if (settings.spacePositions != undefined)
       this.spacePositions.replace(settings.spacePositions.map(String));
@@ -288,11 +338,12 @@ export class AccountSettingsStore {
         this.sync();
       },
       10 * 60 * 1000
-    ); // Sync every 10 minutes, send only if there are changes
+    );
   }
 
   stopSyncing() {
     clearInterval(this.syncIntervalId);
+    if (this.debounceTimerId) clearTimeout(this.debounceTimerId);
   }
 
   addPosition(spaceId: Snowflake) {

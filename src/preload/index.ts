@@ -20,7 +20,6 @@ const electronBridge = {
   }
 };
 
-/** Helper: registers a listener and returns an unsubscribe fn */
 function on(channel: string, callback: (...args: any[]) => void) {
   const wrapped = (_event: unknown, ...args: unknown[]) => callback(...args);
   ipcRenderer.on(channel, wrapped);

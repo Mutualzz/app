@@ -169,6 +169,7 @@ class MediasoupSession {
 
   private speakingDetectors = new Map<string, SpeakingDetector>();
   private speakingTickTimer: number | null = null;
+  private blockedAudioProducers = new Set<string>();
 
   constructor(
     private readonly app: AppStore,
@@ -196,12 +197,28 @@ class MediasoupSession {
       kind: "audio" | "screen-audio"
     ) => void,
     private readonly onMicFailed: () => void,
+    private readonly onAudioBlocked: (blocked: boolean) => void,
     getSpeakingThreshold: () => number,
     shouldReportSpeaking: (userId: string) => boolean
   ) {
     this.getSpeakingThreshold = getSpeakingThreshold;
     this.shouldReportSpeaking = shouldReportSpeaking;
     makeAutoObservable(this, {}, { autoBind: true });
+
+    window.addEventListener("pointerdown", this.onWindowGesture, {
+      passive: true
+    });
+    window.addEventListener("keydown", this.onWindowGesture);
+  }
+
+  private onWindowGesture() {
+    if (
+      this.blockedAudioProducers.size === 0 &&
+      this.audioContext?.state !== "suspended"
+    )
+      return;
+    this.ensureAudioContextActive();
+    void this.retryBlockedPlayback();
   }
 
   unlockAudio() {
@@ -211,11 +228,32 @@ class MediasoupSession {
     this.ensureAudioContextActive();
   }
 
+  unlockBlockedAudio() {
+    this.unlockAudio();
+    void this.retryBlockedPlayback();
+  }
+
   private ensureAudioContextActive() {
     if (!this.audioContext || this.audioContext.state !== "suspended") return;
     void this.audioContext.resume().catch((err) => {
       this.logger.warn("AudioContext resume failed", err);
     });
+  }
+
+  private async retryBlockedPlayback() {
+    if (this.blockedAudioProducers.size === 0) return;
+
+    for (const producerId of Array.from(this.blockedAudioProducers)) {
+      const meta = this.streamMetadata.get(producerId);
+      if (!meta?.element) {
+        this.blockedAudioProducers.delete(producerId);
+        continue;
+      }
+      const played = await this.playElement(meta.element);
+      if (played) this.blockedAudioProducers.delete(producerId);
+    }
+
+    this.onAudioBlocked(this.blockedAudioProducers.size > 0);
   }
 
   getLocalCameraStream() {
@@ -234,8 +272,7 @@ class MediasoupSession {
     this.currentOutputDeviceId = id;
     if (!id) return;
     for (const [, meta] of this.streamMetadata) {
-      // Audio is routed through AudioContext - only video elements use setSinkId
-      if (meta.kind !== "audio" && meta.element)
+      if (meta.kind !== "audio" && meta.kind !== "screen-audio" && meta.element)
         void safeSetSinkId(meta.element, id, this.logger, meta.kind);
     }
   }
@@ -761,6 +798,11 @@ class MediasoupSession {
       }
     }
     this.streamMetadata.clear();
+
+    if (this.blockedAudioProducers.size > 0) {
+      this.blockedAudioProducers.clear();
+      this.onAudioBlocked(false);
+    }
   }
 
   async startMic(signal: AbortSignal) {
@@ -1017,6 +1059,13 @@ class MediasoupSession {
       this.producerUserMap.delete(producerId);
     }
 
+    if (
+      this.blockedAudioProducers.delete(producerId) &&
+      this.blockedAudioProducers.size === 0
+    ) {
+      this.onAudioBlocked(false);
+    }
+
     const meta = this.streamMetadata.get(producerId);
     if (meta) {
       if (meta.element) {
@@ -1037,20 +1086,25 @@ class MediasoupSession {
     }
   }
 
-  private async playElement(element: HTMLMediaElement) {
+  private async playElement(element: HTMLMediaElement): Promise<boolean> {
     try {
       await element.play();
+      return true;
     } catch {
       if (this.audioContext?.state === "suspended") {
-        await this.audioContext.resume();
+        try {
+          await this.audioContext.resume();
+        } catch {}
       }
       try {
         await element.play();
+        return true;
       } catch (err) {
         this.logger.debug(
           `${element instanceof HTMLVideoElement ? "Video" : "Audio"} cannot be played`,
           err
         );
+        return false;
       }
     }
   }
@@ -1184,7 +1238,13 @@ class MediasoupSession {
         }
       }
 
-      const sourceNode = audioCtx.createMediaStreamSource(stream);
+      const audio = document.createElement("audio") as HTMLAudioElement;
+      audio.autoplay = true;
+      audio.style.display = "none";
+      document.body.appendChild(audio);
+      audio.srcObject = stream;
+
+      const sourceNode = audioCtx.createMediaElementSource(audio);
       const gainNode = audioCtx.createGain();
       gainNode.gain.value = kind === "screen-audio" ? 0 : 1;
 
@@ -1197,7 +1257,7 @@ class MediasoupSession {
       this.streamMetadata.set(producerId, {
         stream,
         kind,
-        element: undefined
+        element: audio
       });
 
       if (kind === "screen-audio" || kind === "audio") {
@@ -1207,6 +1267,12 @@ class MediasoupSession {
       await this.rpc(VoiceOpcodes.VoiceResumeConsumer, {
         consumerId: consumer.id
       });
+
+      const played = await this.playElement(audio);
+      if (!played) {
+        this.blockedAudioProducers.add(producerId);
+        this.onAudioBlocked(true);
+      }
     }
   }
 
@@ -1417,6 +1483,7 @@ export class VoiceStore {
   currentOutputDeviceId: string | null = null;
   currentCameraDeviceId: string | null = null;
   disconnectBanner: string | null = null;
+  audioPlaybackBlocked = false;
   currentSessionId: string | null = null;
   private cameraProducerByUser = new Map<string, string>();
   private screenProducerByUser = new Map<string, string>();
@@ -1590,6 +1657,11 @@ export class VoiceStore {
           this.setUserSpeaking(this.app.account.id, false);
         }
         void this.sendVoiceStateUpdate();
+      },
+      (blocked) => {
+        runInAction(() => {
+          this.audioPlaybackBlocked = blocked;
+        });
       },
       () => this.getSpeakingThreshold(),
       (userId) => this.shouldReportSpeakingForUser(userId)
@@ -2122,6 +2194,10 @@ export class VoiceStore {
     this.startJoinTimeout();
     await this.sendVoiceStateUpdate();
     this.startKeepAlive();
+  }
+
+  retryBlockedAudio() {
+    this.session.unlockBlockedAudio();
   }
 
   async leave() {

@@ -2,7 +2,10 @@ import { Paper } from "@components/Paper";
 import { IconButton } from "@components/IconButton";
 import { UserAvatar } from "@components/User/UserAvatar";
 import { MessageAttachment } from "@components/Message/MessageAttachment";
+import { MessageEmbed } from "@components/Message/MessageEmbed";
+import { MessageSticker } from "@components/Message/MessageSticker";
 import { MarkdownRenderer } from "@components/Markdown/MarkdownRenderer/MarkdownRenderer";
+import { ExpressionType } from "@mutualzz/types";
 import { Button, Stack, Typography, useTheme } from "@mutualzz/ui-web";
 import type { Post } from "@stores/objects/Post";
 import { useMutation } from "@tanstack/react-query";
@@ -71,7 +74,26 @@ export const ScheduledPostCard = observer(({ post }: Props) => {
         </IconButton>
       </Stack>
 
+      {post.expressions.filter((e) => e.type === ExpressionType.Sticker)
+        .length > 0 && (
+        <Stack direction="row" spacing={1} flexWrap="wrap">
+          {post.expressions
+            .filter((e) => e.type === ExpressionType.Sticker)
+            .map((sticker) => (
+              <MessageSticker key={sticker.id} sticker={sticker} />
+            ))}
+        </Stack>
+      )}
+
       {post.content && <MarkdownRenderer value={post.content} />}
+
+      {post.embeds.length > 0 && (
+        <Stack spacing={1}>
+          {post.embeds.map((embed, index) => (
+            <MessageEmbed key={index} embed={embed} />
+          ))}
+        </Stack>
+      )}
 
       {post.attachments.length > 0 && (
         <Stack direction="row" spacing={1.5} flexWrap="wrap">

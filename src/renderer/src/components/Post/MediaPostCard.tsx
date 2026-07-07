@@ -2,7 +2,9 @@ import { IconButton } from "@components/IconButton";
 import { UserAvatar } from "@components/User/UserAvatar";
 import { PostComments } from "@components/Post/PostComments";
 import { SharePostModal } from "@components/Post/SharePostModal";
+import { MessageSticker } from "@components/Message/MessageSticker";
 import { MarkdownRenderer } from "@components/Markdown/MarkdownRenderer/MarkdownRenderer";
+import { ReportContentModal } from "@components/Modals/ReportContentModal";
 import { useModal } from "@contexts/Modal.context";
 import { useAppStore } from "@hooks/useStores";
 import {
@@ -13,13 +15,14 @@ import {
   Typography,
   useTheme
 } from "@mutualzz/ui-web";
-import type { APIAttachment } from "@mutualzz/types";
+import { type APIAttachment, ExpressionType } from "@mutualzz/types";
 import type { Post } from "@stores/objects/Post";
 import { observer } from "mobx-react-lite";
 import { useEffect, useRef, useState } from "react";
 import {
   BookmarkSimpleIcon,
   ChatCircleIcon,
+  FlagIcon,
   HeartIcon,
   RepeatIcon,
   SpeakerHighIcon,
@@ -163,6 +166,9 @@ export const MediaPostCard = observer(
 
     const media = post.attachments;
     const hasVideo = media.some((a) => a.contentType.startsWith("video/"));
+    const stickerExpressions = post.expressions.filter(
+      (e) => e.type === ExpressionType.Sticker
+    );
 
     useEffect(() => {
       if (!containerRef.current) return;
@@ -351,6 +357,33 @@ export const MediaPostCard = observer(
             </IconButton>
           )}
 
+          {post.authorId !== app.account?.id && (
+            <IconButton
+              size="sm"
+              variant="plain"
+              onClick={() =>
+                openModal(
+                  `report-post-${post.id}`,
+                  <ReportContentModal
+                    targetType="post"
+                    targetId={post.id}
+                    contentLabel="this post"
+                    modalId={`report-post-${post.id}`}
+                  />
+                )
+              }
+              css={{
+                position: "absolute",
+                top: 12,
+                left: 12,
+                color: "#fff",
+                filter: "drop-shadow(0 1px 3px rgba(0,0,0,0.6))"
+              }}
+            >
+              <FlagIcon />
+            </IconButton>
+          )}
+
           <Stack
             position="absolute"
             bottom={0}
@@ -379,6 +412,14 @@ export const MediaPostCard = observer(
                 level="body-sm"
                 textColor="#fff"
               />
+            )}
+
+            {stickerExpressions.length > 0 && (
+              <Stack direction="row" spacing={1} flexWrap="wrap">
+                {stickerExpressions.map((sticker) => (
+                  <MessageSticker key={sticker.id} sticker={sticker} size={64} />
+                ))}
+              </Stack>
             )}
 
             {post.hashtags.length > 0 && (

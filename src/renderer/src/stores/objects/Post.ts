@@ -1,6 +1,7 @@
 import type {
   APIAttachment,
   APIHashtag,
+  APIMessageEmbed,
   APIPost,
   APIPostComment,
   Snowflake
@@ -14,6 +15,7 @@ import {
   observable,
   type IObservableArray
 } from "mobx";
+import { Expression } from "@stores/objects/Expression";
 import { PostComment } from "./PostComment";
 
 export class PostCommentStore {
@@ -73,6 +75,8 @@ export class Post {
   content?: string | null;
   attachments: APIAttachment[];
   hashtags: APIHashtag[];
+  embeds: APIMessageEmbed[];
+  expressions = observable.array<Expression>();
 
   likeCount: number;
   saveCount: number;
@@ -104,7 +108,10 @@ export class Post {
     this.content = data.content;
     this.attachments = data.attachments ?? [];
     this.hashtags = data.hashtags ?? [];
-    this.app.expressions.addAll(data.expressions ?? []);
+    this.embeds = data.embeds ?? [];
+    this.expressions = observable.array<Expression>(
+      this.app.expressions.addAll(data.expressions ?? [])
+    );
 
     this.likeCount = data.likeCount ?? 0;
     this.saveCount = data.saveCount ?? 0;
@@ -125,6 +132,8 @@ export class Post {
       content: observable,
       attachments: observable.shallow,
       hashtags: observable.shallow,
+      embeds: observable.shallow,
+      expressions: observable,
       likeCount: observable,
       saveCount: observable,
       shareCount: observable,
@@ -171,7 +180,12 @@ export class Post {
     this.content = data.content;
     this.attachments = data.attachments ?? this.attachments;
     this.hashtags = data.hashtags ?? this.hashtags;
-    this.app.expressions.addAll(data.expressions ?? []);
+    this.embeds = data.embeds ?? this.embeds;
+    this.expressions = observable.array<Expression>(
+      this.app.expressions.addAll(
+        data.expressions ?? this.expressions.map((exp) => exp.toJSON())
+      )
+    );
 
     if (data.likeCount != null) this.likeCount = data.likeCount;
     if (data.saveCount != null) this.saveCount = data.saveCount;
@@ -249,11 +263,23 @@ export class Post {
     return this.comments.all;
   }
 
-  async addComment(content: string, expressionIds?: string[]) {
+  async addComment(
+    content: string,
+    expressionIds?: string[],
+    repliedToId?: string
+  ) {
     const created = await this.app.rest.post<
       APIPostComment,
-      { content: string; expressionIds?: string[] }
-    >(`/posts/${this.id}/comments`, { content, expressionIds });
+      {
+        content?: string;
+        expressionIds?: string[];
+        repliedToId?: string;
+      }
+    >(`/posts/${this.id}/comments`, {
+      ...(content ? { content } : {}),
+      expressionIds,
+      repliedToId
+    });
 
     const comment = this.comments.add(created);
     this.commentCount += 1;
