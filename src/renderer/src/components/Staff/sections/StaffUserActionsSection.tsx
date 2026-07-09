@@ -60,124 +60,124 @@ export const StaffUserActionsSection = ({
         </Typography>
       ) : (
         <Stack direction="row" spacing={1}>
-      <Button
-        color="danger"
-        variant="soft"
-        onClick={() =>
-          openModal(
-            `staff-disable-user-${user.id}`,
-            <StaffUserDisableConfirm
-              userId={user.id}
-              username={user.username}
-              disable={!isDisabled}
-              onSuccess={onUpdated}
-            />
-          )
-        }
-      >
-        {isDisabled ? "Enable Account" : "Disable Account"}
-      </Button>
-      <Button
-        color="danger"
-        variant="soft"
-        onClick={() =>
-          openModal(
-            `staff-force-logout-user-${user.id}`,
-            <StaffUserForceLogoutConfirm
-              userId={user.id}
-              username={user.username}
-              onSuccess={onForcedLogout}
-            />
-          )
-        }
-      >
-        Force Logout
-      </Button>
-      <Button
-        color="warning"
-        variant="soft"
-        onClick={() =>
-          openModal(
-            `staff-warn-user-${user.id}`,
-            <StaffUserWarnConfirm
-              userId={user.id}
-              username={user.username}
-              onSuccess={onWarned}
-            />
-          )
-        }
-      >
-        Warn User
-      </Button>
-      {isRestricted ? (
-        <Button
-          color="warning"
-          variant="soft"
-          disabled={liftingRestriction}
-          onClick={() => liftRestriction()}
-        >
-          Lift Restriction
-        </Button>
-      ) : (
-        <Button
-          color="warning"
-          variant="soft"
-          onClick={() =>
-            openModal(
-              `staff-restrict-user-${user.id}`,
-              <StaffUserRestrictConfirm
-                userId={user.id}
-                username={user.username}
-                onSuccess={onUpdated}
-              />
-            )
-          }
-        >
-          Restrict User
-        </Button>
-      )}
+          <Button
+            color="danger"
+            variant="soft"
+            onClick={() =>
+              openModal(
+                `staff-disable-user-${user.id}`,
+                <StaffUserDisableConfirm
+                  userId={user.id}
+                  username={user.username}
+                  disable={!isDisabled}
+                  onSuccess={onUpdated}
+                />
+              )
+            }
+          >
+            {isDisabled ? "Enable Account" : "Disable Account"}
+          </Button>
+          <Button
+            color="danger"
+            variant="soft"
+            onClick={() =>
+              openModal(
+                `staff-force-logout-user-${user.id}`,
+                <StaffUserForceLogoutConfirm
+                  userId={user.id}
+                  username={user.username}
+                  onSuccess={onForcedLogout}
+                />
+              )
+            }
+          >
+            Force Logout
+          </Button>
+          <Button
+            color="warning"
+            variant="soft"
+            onClick={() =>
+              openModal(
+                `staff-warn-user-${user.id}`,
+                <StaffUserWarnConfirm
+                  userId={user.id}
+                  username={user.username}
+                  onSuccess={onWarned}
+                />
+              )
+            }
+          >
+            Warn User
+          </Button>
+          {isRestricted ? (
+            <Button
+              color="warning"
+              variant="soft"
+              disabled={liftingRestriction}
+              onClick={() => liftRestriction()}
+            >
+              Lift Restriction
+            </Button>
+          ) : (
+            <Button
+              color="warning"
+              variant="soft"
+              onClick={() =>
+                openModal(
+                  `staff-restrict-user-${user.id}`,
+                  <StaffUserRestrictConfirm
+                    userId={user.id}
+                    username={user.username}
+                    onSuccess={onUpdated}
+                  />
+                )
+              }
+            >
+              Restrict User
+            </Button>
+          )}
+          {!isDeleted && (
+            <Button
+              color="danger"
+              variant="soft"
+              onClick={() =>
+                openModal(
+                  `staff-delete-user-${user.id}`,
+                  <StaffUserDeleteConfirm
+                    userId={user.id}
+                    username={user.username}
+                    isFounder={!!app.account?.isFounder}
+                    onSoftDeleted={onUpdated}
+                    onHardDeleted={onHardDeleted}
+                  />
+                )
+              }
+            >
+              Soft Delete Account
+            </Button>
+          )}
+          {app.account?.isFounder && (
+            <Button
+              color="danger"
+              variant="soft"
+              onClick={() =>
+                openModal(
+                  `staff-hard-delete-user-${user.id}`,
+                  <StaffUserDeleteConfirm
+                    userId={user.id}
+                    username={user.username}
+                    isFounder
+                    allowHardDeleteOnly
+                    onSoftDeleted={onUpdated}
+                    onHardDeleted={onHardDeleted}
+                  />
+                )
+              }
+            >
+              Hard Delete Account
+            </Button>
+          )}
         </Stack>
-      )}
-      {!isDeleted && (
-        <Button
-          color="danger"
-          variant="soft"
-          onClick={() =>
-            openModal(
-              `staff-delete-user-${user.id}`,
-              <StaffUserDeleteConfirm
-                userId={user.id}
-                username={user.username}
-                isFounder={!!app.account?.isFounder}
-                onSoftDeleted={onUpdated}
-                onHardDeleted={onHardDeleted}
-              />
-            )
-          }
-        >
-          Soft Delete Account
-        </Button>
-      )}
-      {app.account?.isFounder && (
-        <Button
-          color="danger"
-          variant="soft"
-          onClick={() =>
-            openModal(
-              `staff-hard-delete-user-${user.id}`,
-              <StaffUserDeleteConfirm
-                userId={user.id}
-                username={user.username}
-                isFounder
-                allowHardDeleteOnly
-                onSoftDeleted={onUpdated}
-                onHardDeleted={onHardDeleted}
-              />
-            )
-          }
-        >
-          Hard Delete Account
-        </Button>
       )}
     </Stack>
   );
