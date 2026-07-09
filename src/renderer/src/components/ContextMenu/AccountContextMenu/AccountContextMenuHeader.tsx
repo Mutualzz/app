@@ -28,7 +28,7 @@ export const AccountContextMenuHeader = observer(({ account }: Props) => {
         account={account}
         text={customText}
         emoji={customEmoji}
-        size="compact"
+        showName
         interactive
         onEdit={() => {
           clearMenu();

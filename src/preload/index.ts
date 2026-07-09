@@ -41,7 +41,8 @@ const api = {
       ipcRenderer.invoke("system:list-processes", filterExes)
   },
   badge: {
-    set: (count: number) => ipcRenderer.send("badge:set", count)
+    set: (count: number, color?: string) =>
+      ipcRenderer.send("badge:set", count, color)
   },
   shell: {
     openExternal: (url: string) =>

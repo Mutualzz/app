@@ -23,7 +23,7 @@ export const SystemMessage = observer(({ message }: Props) => {
   if (isEphemeral) highlight = true;
 
   return (
-    <MessageBase header highlight={highlight}>
+    <MessageBase header system highlight={highlight}>
       <MessageInfo>
         <UserAvatar user={message.author} member={message.member} size="lg" />
       </MessageInfo>

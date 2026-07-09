@@ -84,13 +84,14 @@ export class AppStore {
   versions: {
     app: string | null;
   } = {
-    app: "6.8.0"
+    app: "6.14.0"
   };
 
   readonly tokenStorage: TokenStorage;
   composerCount = 0;
   replyingTo: Message | null = null;
   replyMention = true;
+  badgeColor = "#e03131";
   private readonly logger = new Logger({
     tag: "AppStore"
   });
@@ -141,14 +142,21 @@ export class AppStore {
     return !this.isAppLoading && this.isGatewayReady;
   }
 
+  setBadgeColor(color: string) {
+    this.badgeColor = color;
+  }
+
   public startBadgeWatch() {
     reaction(
       () =>
-        [...this.channels.all].reduce((acc, ch) => {
-          return acc + (this.readStates.get(ch.id)?.mentionCount ?? 0);
-        }, 0),
-      (total) => {
-        window.api?.badge?.set(total);
+        [
+          [...this.channels.all].reduce((acc, ch) => {
+            return acc + (this.readStates.get(ch.id)?.mentionCount ?? 0);
+          }, 0),
+          this.badgeColor
+        ] as const,
+      ([total, color]) => {
+        window.api?.badge?.set(total, color);
       },
       { fireImmediately: true }
     );

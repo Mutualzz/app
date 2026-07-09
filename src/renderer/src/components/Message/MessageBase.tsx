@@ -10,13 +10,14 @@ import { Tooltip } from "@components/Tooltip";
 interface Props extends PropsWithChildren, HTMLAttributes<HTMLDivElement> {
   header?: boolean;
   highlight?: boolean | string | null;
+  system?: boolean;
 }
 
 export const MessageBase = styled("div")<Props>(
-  ({ header, highlight, theme }) => ({
+  ({ header, highlight, theme, system }) => ({
     display: "flex",
     overflow: "hidden",
-    flexDirection: "column",
+    flexDirection: system ? "row" : "column",
     ...(header && {
       marginTop: 10
     }),

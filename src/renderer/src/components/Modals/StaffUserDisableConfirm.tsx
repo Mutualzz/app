@@ -42,44 +42,45 @@ export const StaffUserDisableConfirm = observer(
     return (
       <Paper
         elevation={app.settings?.preferEmbossed ? 5 : 1}
-        p={5}
+        p={4.75}
         borderRadius={12}
         direction="column"
         width="25vw"
+        spacing={2.5}
       >
-        <Typography level="h5" fontWeight="bold" marginBottom={2}>
+        <Typography level="h5" fontWeight="bold">
           {disable ? "Disable Account" : "Enable Account"}
         </Typography>
-        <Typography mb={2.5}>
+        <Typography>
           Are you sure you want to {disable ? "disable" : "re-enable"}{" "}
           <b>@{username}</b>&apos;s account?
           {disable &&
             " They will be signed out and unable to log back in until re-enabled."}
         </Typography>
-        <Typography fontWeight="bold" mb={1}>
-          Reason (optional)
-        </Typography>
-        <Textarea
-          value={reason}
-          onChange={(e) => setReason(e.target.value)}
-          placeholder="Add context for the audit log"
-          rows={3}
-          css={{ marginBottom: "1.25rem" }}
-        />
+        <Stack direction="column" spacing={1.25}>
+          <Typography fontWeight="bold">
+            Reason {disable ? "(required)" : "(optional)"}
+          </Typography>
+          <Textarea
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
+            placeholder={
+              disable
+                ? "Explain why this account is being disabled"
+                : "Add context for the audit log"
+            }
+            rows={3}
+          />
+        </Stack>
         <Stack spacing={1.25} direction="row">
-          <Button
-            color="neutral"
-            expand
-            size="lg"
-            onClick={() => closeModal()}
-          >
+          <Button color="neutral" expand size="lg" onClick={() => closeModal()}>
             Cancel
           </Button>
           <Button
             color="danger"
             expand
             onClick={() => setDisabled()}
-            disabled={isPending}
+            disabled={isPending || (disable && !reason.trim())}
             size="lg"
           >
             {disable ? "Disable Account" : "Enable Account"}

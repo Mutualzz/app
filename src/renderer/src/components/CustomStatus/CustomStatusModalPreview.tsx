@@ -19,7 +19,6 @@ export const CustomStatusModalPreview = observer(({ text, emoji }: Props) => {
       account={account}
       text={text}
       emoji={emoji}
-      size="full"
       showName
     />
   );

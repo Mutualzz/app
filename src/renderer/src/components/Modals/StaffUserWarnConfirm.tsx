@@ -13,26 +13,30 @@ interface Props {
   onSuccess: () => void;
 }
 
-export const StaffUserForceLogoutConfirm = observer(
+export const StaffUserWarnConfirm = observer(
   ({ userId, username, onSuccess }: Props) => {
     const app = useAppStore();
     const { closeModal } = useModal();
     const [reason, setReason] = useState("");
 
-    const { mutate: forceLogout, isPending } = useMutation({
-      mutationKey: ["staff-force-logout", userId],
-      mutationFn: async () =>
-        app.rest.post(`/staff/users/${userId}/force-logout`, {
-          reason: reason.trim() || undefined
-        }),
-      onSuccess: () => {
+    const { mutate: warnUser, isPending } = useMutation({
+      mutationKey: ["staff-warn-user", userId],
+      mutationFn: () =>
+        app.rest.post<{ success: boolean; emailSent: boolean }>(
+          `/staff/users/${userId}/warn`,
+          { reason: reason.trim() }
+        ),
+      onSuccess: (data) => {
         onSuccess();
         closeModal();
+        toast.success(
+          data.emailSent
+            ? "Warning sent and emailed to the user"
+            : "Warning recorded, but the email failed to send"
+        );
       },
       onError: (err) => {
-        toast.error(
-          err instanceof Error ? err.message : "Failed to force logout user"
-        );
+        toast.error(err instanceof Error ? err.message : "Failed to warn user");
       }
     });
 
@@ -46,18 +50,18 @@ export const StaffUserForceLogoutConfirm = observer(
         spacing={2.5}
       >
         <Typography level="h5" fontWeight="bold">
-          Force Logout
+          Warn User
         </Typography>
         <Typography>
-          Are you sure you want to sign <b>@{username}</b> out of every session?
-          They will need to log back in, but the account stays enabled.
+          This sends <b>@{username}</b> a warning email and logs it to their
+          audit trail. It doesn't change their account state.
         </Typography>
         <Stack direction="column" spacing={1.25}>
-          <Typography fontWeight="bold">Reason (optional)</Typography>
+          <Typography fontWeight="bold">Reason (required)</Typography>
           <Textarea
             value={reason}
             onChange={(e) => setReason(e.target.value)}
-            placeholder="Add context for the audit log"
+            placeholder="Explain what the warning is for"
             rows={3}
           />
         </Stack>
@@ -68,11 +72,11 @@ export const StaffUserForceLogoutConfirm = observer(
           <Button
             color="danger"
             expand
-            onClick={() => forceLogout()}
-            disabled={isPending}
+            onClick={() => warnUser()}
+            disabled={isPending || !reason.trim()}
             size="lg"
           >
-            Force Logout
+            Send Warning
           </Button>
         </Stack>
       </Paper>

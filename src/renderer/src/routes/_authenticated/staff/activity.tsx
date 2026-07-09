@@ -2,8 +2,12 @@ import { Button } from "@components/Button";
 import { Paper } from "@components/Paper";
 import { useAppStore } from "@hooks/useStores";
 import type { APIStaffAction } from "@mutualzz/types";
-import { IconButton, Stack, Typography } from "@mutualzz/ui-web";
-import { ArrowLeftIcon, ClockCounterClockwiseIcon } from "@phosphor-icons/react";
+import { Stack, Typography } from "@mutualzz/ui-web";
+import {
+  ArrowLeftIcon,
+  ClockCounterClockwiseIcon
+} from "@phosphor-icons/react";
+import { IconButton } from "@renderer/components/IconButton";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import dayjs from "dayjs";
@@ -20,7 +24,10 @@ const actionVerbs: Record<string, string> = {
   "user.force_logout": "forced a logout on",
   "user.session_revoke": "revoked a session on",
   "user.profile_update": "updated the profile of",
-  "user.verify_reminder_sent": "sent a verification reminder to"
+  "user.verify_reminder_sent": "sent a verification reminder to",
+  "user.warn": "sent a warning to",
+  "user.restrict": "temporarily restricted",
+  "user.restrict_lift": "lifted a restriction on"
 };
 
 const describeGlobalAction = (entry: APIStaffAction) => {
@@ -58,7 +65,9 @@ function StaffActivityRoute() {
       queryFn: ({ pageParam }) =>
         app.rest.get<APIStaffAction[]>(
           "/staff/actions",
-          pageParam ? { before: pageParam, limit: PAGE_LIMIT } : { limit: PAGE_LIMIT }
+          pageParam
+            ? { before: pageParam, limit: PAGE_LIMIT }
+            : { limit: PAGE_LIMIT }
         ),
       initialPageParam: undefined as string | undefined,
       getNextPageParam: (lastPage) =>
@@ -89,7 +98,6 @@ function StaffActivityRoute() {
         borderLeft="0 !important"
       >
         <IconButton
-          color="neutral"
           variant="plain"
           size="sm"
           onClick={() => navigate({ to: "/staff" })}

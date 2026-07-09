@@ -146,8 +146,7 @@ export const AccountContextMenu = observer(({ account }: Props) => {
       transparency={0}
       id={generateMenuIDs.account(account.id)}
       key={account.id}
-      width="15.5rem"
-      padding={1.25}
+      width="16rem"
       spacing={0.5}
     >
       <AccountContextMenuHeader account={account} />
@@ -204,6 +203,7 @@ export const AccountContextMenu = observer(({ account }: Props) => {
             params: { username: account.username }
           });
         }}
+        size="md"
       >
         View Profile
       </ContextItem>
@@ -213,6 +213,7 @@ export const AccountContextMenu = observer(({ account }: Props) => {
           clearMenu();
           navigate({ to: "/profile" });
         }}
+        size="md"
       >
         Customize Profile
       </ContextItem>
@@ -222,6 +223,7 @@ export const AccountContextMenu = observer(({ account }: Props) => {
           clearMenu();
           navigate({ to: "/avatar", search: { method: "upload" } });
         }}
+        size="md"
       >
         Edit Avatar
       </ContextItem>

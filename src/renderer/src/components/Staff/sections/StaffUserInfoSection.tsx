@@ -151,6 +151,15 @@ export const StaffUserInfoSection = ({ user, onUpdated }: Props) => {
           label="Created"
           value={dayjs(user.createdAt).format("MMM D, YYYY h:mm A")}
         />
+        {user.restrictedUntil &&
+          new Date(user.restrictedUntil) > new Date() && (
+            <DetailRow
+              label="Restricted Until"
+              value={dayjs(user.restrictedUntil).format(
+                "MMM D, YYYY h:mm A"
+              )}
+            />
+          )}
       </Stack>
     </Stack>
   );

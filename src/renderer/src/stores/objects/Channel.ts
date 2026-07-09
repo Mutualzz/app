@@ -125,6 +125,7 @@ export class Channel {
   }
 
   _lastMessage?: Message | null;
+  lastMentionMessage: Message | null = null;
 
   get lastMessage() {
     if (this._lastMessage) return this._lastMessage;
@@ -366,6 +367,10 @@ export class Channel {
 
     this._lastMessage = message;
     this.lastMessageId = message.id;
+  }
+
+  setLastMentionMessage(message: Message) {
+    this.lastMentionMessage = message;
   }
 
   getMessages(

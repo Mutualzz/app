@@ -18,40 +18,25 @@ import { useState } from "react";
 
 const PLACEHOLDER = "Set Custom Status...";
 
-const SIZES = {
-  compact: {
-    avatar: 40,
-    banner: 52,
-    overlap: 20,
-    avatarInset: 1.25,
-    bubbleTop: 10,
-    bubbleEmoji: 18,
-    bubbleText: "body-sm" as TypographyLevel,
-    bubblePx: 1.25,
-    bubblePy: 0.875,
-    bubbleRadius: 10,
-    bubbleMinHeight: 32
-  },
-  full: {
-    avatar: 72,
-    banner: 96,
-    overlap: 36,
-    avatarInset: 2.5,
-    bubbleTop: 24,
-    bubbleEmoji: 20,
-    bubbleText: "body-md" as TypographyLevel,
-    bubblePx: 1.5,
-    bubblePy: 1,
-    bubbleRadius: 12,
-    bubbleMinHeight: 40
-  }
+const DIMS = {
+  avatar: 64,
+  banner: 84,
+  overlap: 32,
+  avatarInset: 2,
+  bubbleTop: 17,
+  bubbleGap: 4,
+  bubbleEmoji: 16,
+  bubbleText: "body-sm" as TypographyLevel,
+  bubblePx: 0.75,
+  bubblePy: 0.5,
+  bubbleRadius: 10,
+  bubbleMinHeight: 30
 };
 
 interface Props {
   account: AccountStore;
   text?: string;
   emoji?: PresenceActivityEmoji | null;
-  size?: keyof typeof SIZES;
   showName?: boolean;
   interactive?: boolean;
   onEdit?: () => void;
@@ -63,7 +48,6 @@ export const CustomStatusCard = observer(
     account,
     text = "",
     emoji = null,
-    size = "full",
     showName = false,
     interactive = false,
     onEdit,
@@ -75,19 +59,19 @@ export const CustomStatusCard = observer(
 
     const profile = app.profiles.get(account.id);
     const bannerUrl = profile?.constructBannerUrl();
-    const dims = SIZES[size];
+    const dims = DIMS;
     const previewText = text.trim();
     const hasStatus = hasCustomStatusContent(previewText, emoji);
 
     const avatarInset = theme.spacing(dims.avatarInset);
-    const bubbleLeft = `calc(${avatarInset} + ${dims.avatar * 1.15}px)`;
+    const bubbleLeft = `calc(${avatarInset} + ${dims.avatar + dims.bubbleGap}px)`;
     const bubbleElevation = interactive && hovered ? 6 : 4;
 
     return (
       <Paper
         width="100%"
         direction="column"
-        borderRadius={size === "compact" ? 8 : 10}
+        borderRadius={10}
         overflow="visible"
         elevation={0}
         variant="soft"
@@ -101,8 +85,8 @@ export const CustomStatusCard = observer(
           <Box
             height={dims.banner}
             css={{
-              borderTopLeftRadius: size === "compact" ? 8 : 10,
-              borderTopRightRadius: size === "compact" ? 8 : 10,
+              borderTopLeftRadius: 10,
+              borderTopRightRadius: 10,
               background: bannerUrl
                 ? `url("${bannerUrl}") center / cover no-repeat`
                 : account.accentColor
@@ -146,11 +130,7 @@ export const CustomStatusCard = observer(
                 }}
                 css={{
                   cursor: interactive ? "pointer" : "default",
-                  minWidth: hasStatus
-                    ? undefined
-                    : size === "compact"
-                      ? "7rem"
-                      : "9rem",
+                  minWidth: hasStatus ? undefined : "7rem",
                   minHeight: dims.bubbleMinHeight,
                   background: dynamicElevation(
                     theme.colors.surface,
@@ -272,8 +252,7 @@ export const CustomStatusCard = observer(
               {account.displayName}
             </Typography>
             <Typography
-              level="body-sm"
-              textColor="muted"
+              level="body-xs"
               css={{
                 overflow: "hidden",
                 textOverflow: "ellipsis",

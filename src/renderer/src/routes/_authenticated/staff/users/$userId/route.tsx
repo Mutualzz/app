@@ -3,6 +3,7 @@ import { StaffUserActionsSection } from "@components/Staff/sections/StaffUserAct
 import { StaffUserAuditSection } from "@components/Staff/sections/StaffUserAuditSection";
 import { StaffUserFlagsSection } from "@components/Staff/sections/StaffUserFlagsSection";
 import { StaffUserInfoSection } from "@components/Staff/sections/StaffUserInfoSection";
+import { StaffUserNotesSection } from "@components/Staff/sections/StaffUserNotesSection";
 import { StaffUserSessionsSection } from "@components/Staff/sections/StaffUserSessionsSection";
 import { StaffUserSidebar } from "@components/Staff/StaffUserSidebar";
 import {
@@ -46,6 +47,10 @@ function StaffUserRoute() {
   const handleForcedLogout = () => {
     queryClient.invalidateQueries({ queryKey: ["staff-actions", userId] });
     queryClient.invalidateQueries({ queryKey: ["staff-sessions", userId] });
+  };
+
+  const handleWarned = () => {
+    queryClient.invalidateQueries({ queryKey: ["staff-actions", userId] });
   };
 
   if (isLoading) {
@@ -137,11 +142,13 @@ function StaffUserRoute() {
               user={user}
               onUpdated={handleUpdated}
               onForcedLogout={handleForcedLogout}
+              onWarned={handleWarned}
             />
           )}
           {section === "sessions" && (
             <StaffUserSessionsSection userId={user.id} />
           )}
+          {section === "notes" && <StaffUserNotesSection userId={user.id} />}
           {section === "audit" && <StaffUserAuditSection userId={user.id} />}
         </Paper>
       </Stack>

@@ -19,7 +19,10 @@ const actionLabels: Record<string, string> = {
   "user.force_logout": "forced a logout on this account",
   "user.session_revoke": "revoked a session on this account",
   "user.profile_update": "updated this account's profile",
-  "user.verify_reminder_sent": "sent a verification reminder to this account"
+  "user.verify_reminder_sent": "sent a verification reminder to this account",
+  "user.warn": "sent this account a warning",
+  "user.restrict": "temporarily restricted this account",
+  "user.restrict_lift": "lifted a restriction on this account"
 };
 
 const describeAction = (action: string) => {

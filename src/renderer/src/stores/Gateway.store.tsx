@@ -1479,7 +1479,18 @@ export class GatewayStore {
     this.app.queue.handleIncomingMessage(payload);
     this.app.typing.stoppedTyping(payload.channelId, payload.authorId);
 
+    // Your own message (echoed back, or sent from another session) is
+    // implicitly read by you - advance your read cursor instead of
+    // leaving the channel looking unread to yourself.
+    if (payload.authorId === this.app.account?.id) {
+      this.app.readStates.updateLocal(payload.channelId, payload.id);
+      return;
+    }
+
     if (this.app.channels.activeId === payload.channelId) return;
+
+    const isDM =
+      channel.type === ChannelType.DM || channel.type === ChannelType.GroupDM;
 
     const isMentioned = payload.mentions?.some((m) => {
       if (m.type === "user") return m.id === this.app.account?.id;
@@ -1496,10 +1507,12 @@ export class GatewayStore {
       : "online";
     const isDnd = myStatus === "dnd";
 
-    if (isMentioned && payload.authorId !== this.app.account?.id) {
+    // Every DM/GroupDM message is notification-worthy, same as an explicit mention in a space
+    if (isDM || isMentioned) {
       const readState = this.app.readStates.get(payload.channelId);
       if (readState) {
         readState.incrementMentionCount();
+        if (isMentioned) channel.setLastMentionMessage(message);
         if (!isDnd) {
           toast(
             (toastProps) => <MessageToast {...toastProps} data={message} />,

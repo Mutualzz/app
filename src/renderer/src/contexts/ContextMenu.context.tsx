@@ -101,7 +101,8 @@ interface ContextMenuContextProps {
   openContextMenu: (
     e: AnyMouseEvent,
     menu: ContextMenuPayload,
-    position?: MenuPosition | null
+    position?: MenuPosition | null,
+    anchorBottom?: MenuPosition | null
   ) => void;
   clearMenu: () => void;
   isOpen: boolean;
@@ -177,6 +178,7 @@ export const ContextMenuProvider = observer(
     const pendingShowRef = useRef<{
       event: MouseEvent;
       position?: MenuPosition | null;
+      anchorBottom?: MenuPosition | null;
     } | null>(null);
 
     const setMenu = (nextMenu: ContextMenuPayload | null) =>
@@ -189,7 +191,8 @@ export const ContextMenuProvider = observer(
     const openContextMenu = (
       e: AnyMouseEvent,
       nextMenu: ContextMenuPayload,
-      position?: MenuPosition | null
+      position?: MenuPosition | null,
+      anchorBottom?: MenuPosition | null
     ) => {
       if ("stopPropagation" in e) e.stopPropagation();
       if ("preventDefault" in e) e.preventDefault();
@@ -198,7 +201,7 @@ export const ContextMenuProvider = observer(
       mouseEvent.preventDefault?.();
       mouseEvent.stopPropagation?.();
 
-      pendingShowRef.current = { event: mouseEvent, position };
+      pendingShowRef.current = { event: mouseEvent, position, anchorBottom };
       setMenu(nextMenu);
     };
 
@@ -212,7 +215,8 @@ export const ContextMenuProvider = observer(
         contextMenu.show({
           event: pending.event,
           id,
-          position: pending.position
+          position: pending.position,
+          anchorBottom: pending.anchorBottom
         });
       });
 

@@ -14,6 +14,7 @@ import { Route as RegisterRouteImport } from "./routes/register"
 import { Route as PrivacyRouteImport } from "./routes/privacy"
 import { Route as LoginRouteImport } from "./routes/login"
 import { Route as DownloadRouteImport } from "./routes/download"
+import { Route as AppealRouteImport } from "./routes/appeal"
 import { Route as AuthenticatedRouteRouteImport } from "./routes/_authenticated/route"
 import { Route as IndexRouteImport } from "./routes/index"
 import { Route as InviteCodeRouteImport } from "./routes/invite/$code"
@@ -27,6 +28,7 @@ import { Route as AuthenticatedAtmeRouteRouteImport } from "./routes/_authentica
 import { Route as AuthenticatedStaffIndexRouteImport } from "./routes/_authenticated/staff/index"
 import { Route as AuthenticatedFeedIndexRouteImport } from "./routes/_authenticated/feed/index"
 import { Route as AuthenticatedStaffReportsRouteImport } from "./routes/_authenticated/staff/reports"
+import { Route as AuthenticatedStaffAppealsRouteImport } from "./routes/_authenticated/staff/appeals"
 import { Route as AuthenticatedStaffActivityRouteImport } from "./routes/_authenticated/staff/activity"
 import { Route as AuthenticatedFeedScheduledRouteImport } from "./routes/_authenticated/feed/scheduled"
 import { Route as AuthenticatedFeedSavedRouteImport } from "./routes/_authenticated/feed/saved"
@@ -61,6 +63,11 @@ const LoginRoute = LoginRouteImport.update({
 const DownloadRoute = DownloadRouteImport.update({
   id: "/download",
   path: "/download",
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppealRoute = AppealRouteImport.update({
+  id: "/appeal",
+  path: "/appeal",
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
@@ -131,6 +138,12 @@ const AuthenticatedStaffReportsRoute =
     path: "/reports",
     getParentRoute: () => AuthenticatedStaffRouteRoute,
   } as any)
+const AuthenticatedStaffAppealsRoute =
+  AuthenticatedStaffAppealsRouteImport.update({
+    id: "/appeals",
+    path: "/appeals",
+    getParentRoute: () => AuthenticatedStaffRouteRoute,
+  } as any)
 const AuthenticatedStaffActivityRoute =
   AuthenticatedStaffActivityRouteImport.update({
     id: "/activity",
@@ -193,6 +206,7 @@ const AuthenticatedSpacesSpaceIdChannelIdRouteRoute =
 
 export interface FileRoutesByFullPath {
   "/": typeof IndexRoute
+  "/appeal": typeof AppealRoute
   "/download": typeof DownloadRoute
   "/login": typeof LoginRoute
   "/privacy": typeof PrivacyRoute
@@ -213,6 +227,7 @@ export interface FileRoutesByFullPath {
   "/feed/saved": typeof AuthenticatedFeedSavedRoute
   "/feed/scheduled": typeof AuthenticatedFeedScheduledRoute
   "/staff/activity": typeof AuthenticatedStaffActivityRoute
+  "/staff/appeals": typeof AuthenticatedStaffAppealsRoute
   "/staff/reports": typeof AuthenticatedStaffReportsRoute
   "/feed/": typeof AuthenticatedFeedIndexRoute
   "/staff/": typeof AuthenticatedStaffIndexRoute
@@ -222,6 +237,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   "/": typeof IndexRoute
+  "/appeal": typeof AppealRoute
   "/download": typeof DownloadRoute
   "/login": typeof LoginRoute
   "/privacy": typeof PrivacyRoute
@@ -240,6 +256,7 @@ export interface FileRoutesByTo {
   "/feed/saved": typeof AuthenticatedFeedSavedRoute
   "/feed/scheduled": typeof AuthenticatedFeedScheduledRoute
   "/staff/activity": typeof AuthenticatedStaffActivityRoute
+  "/staff/appeals": typeof AuthenticatedStaffAppealsRoute
   "/staff/reports": typeof AuthenticatedStaffReportsRoute
   "/feed": typeof AuthenticatedFeedIndexRoute
   "/staff": typeof AuthenticatedStaffIndexRoute
@@ -251,6 +268,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   "/": typeof IndexRoute
   "/_authenticated": typeof AuthenticatedRouteRouteWithChildren
+  "/appeal": typeof AppealRoute
   "/download": typeof DownloadRoute
   "/login": typeof LoginRoute
   "/privacy": typeof PrivacyRoute
@@ -271,6 +289,7 @@ export interface FileRoutesById {
   "/_authenticated/feed/saved": typeof AuthenticatedFeedSavedRoute
   "/_authenticated/feed/scheduled": typeof AuthenticatedFeedScheduledRoute
   "/_authenticated/staff/activity": typeof AuthenticatedStaffActivityRoute
+  "/_authenticated/staff/appeals": typeof AuthenticatedStaffAppealsRoute
   "/_authenticated/staff/reports": typeof AuthenticatedStaffReportsRoute
   "/_authenticated/feed/": typeof AuthenticatedFeedIndexRoute
   "/_authenticated/staff/": typeof AuthenticatedStaffIndexRoute
@@ -282,6 +301,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | "/"
+    | "/appeal"
     | "/download"
     | "/login"
     | "/privacy"
@@ -302,6 +322,7 @@ export interface FileRouteTypes {
     | "/feed/saved"
     | "/feed/scheduled"
     | "/staff/activity"
+    | "/staff/appeals"
     | "/staff/reports"
     | "/feed/"
     | "/staff/"
@@ -311,6 +332,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | "/"
+    | "/appeal"
     | "/download"
     | "/login"
     | "/privacy"
@@ -329,6 +351,7 @@ export interface FileRouteTypes {
     | "/feed/saved"
     | "/feed/scheduled"
     | "/staff/activity"
+    | "/staff/appeals"
     | "/staff/reports"
     | "/feed"
     | "/staff"
@@ -339,6 +362,7 @@ export interface FileRouteTypes {
     | "__root__"
     | "/"
     | "/_authenticated"
+    | "/appeal"
     | "/download"
     | "/login"
     | "/privacy"
@@ -359,6 +383,7 @@ export interface FileRouteTypes {
     | "/_authenticated/feed/saved"
     | "/_authenticated/feed/scheduled"
     | "/_authenticated/staff/activity"
+    | "/_authenticated/staff/appeals"
     | "/_authenticated/staff/reports"
     | "/_authenticated/feed/"
     | "/_authenticated/staff/"
@@ -370,6 +395,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  AppealRoute: typeof AppealRoute
   DownloadRoute: typeof DownloadRoute
   LoginRoute: typeof LoginRoute
   PrivacyRoute: typeof PrivacyRoute
@@ -414,6 +440,13 @@ declare module "@tanstack/react-router" {
       path: "/download"
       fullPath: "/download"
       preLoaderRoute: typeof DownloadRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    "/appeal": {
+      id: "/appeal"
+      path: "/appeal"
+      fullPath: "/appeal"
+      preLoaderRoute: typeof AppealRouteImport
       parentRoute: typeof rootRouteImport
     }
     "/_authenticated": {
@@ -505,6 +538,13 @@ declare module "@tanstack/react-router" {
       path: "/reports"
       fullPath: "/staff/reports"
       preLoaderRoute: typeof AuthenticatedStaffReportsRouteImport
+      parentRoute: typeof AuthenticatedStaffRouteRoute
+    }
+    "/_authenticated/staff/appeals": {
+      id: "/_authenticated/staff/appeals"
+      path: "/appeals"
+      fullPath: "/staff/appeals"
+      preLoaderRoute: typeof AuthenticatedStaffAppealsRouteImport
       parentRoute: typeof AuthenticatedStaffRouteRoute
     }
     "/_authenticated/staff/activity": {
@@ -650,6 +690,7 @@ const AuthenticatedSpacesRouteRouteWithChildren =
 
 interface AuthenticatedStaffRouteRouteChildren {
   AuthenticatedStaffActivityRoute: typeof AuthenticatedStaffActivityRoute
+  AuthenticatedStaffAppealsRoute: typeof AuthenticatedStaffAppealsRoute
   AuthenticatedStaffReportsRoute: typeof AuthenticatedStaffReportsRoute
   AuthenticatedStaffIndexRoute: typeof AuthenticatedStaffIndexRoute
   AuthenticatedStaffUsersUserIdRouteRoute: typeof AuthenticatedStaffUsersUserIdRouteRoute
@@ -658,6 +699,7 @@ interface AuthenticatedStaffRouteRouteChildren {
 const AuthenticatedStaffRouteRouteChildren: AuthenticatedStaffRouteRouteChildren =
   {
     AuthenticatedStaffActivityRoute: AuthenticatedStaffActivityRoute,
+    AuthenticatedStaffAppealsRoute: AuthenticatedStaffAppealsRoute,
     AuthenticatedStaffReportsRoute: AuthenticatedStaffReportsRoute,
     AuthenticatedStaffIndexRoute: AuthenticatedStaffIndexRoute,
     AuthenticatedStaffUsersUserIdRouteRoute:
@@ -693,6 +735,7 @@ const AuthenticatedRouteRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  AppealRoute: AppealRoute,
   DownloadRoute: DownloadRoute,
   LoginRoute: LoginRoute,
   PrivacyRoute: PrivacyRoute,

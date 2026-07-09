@@ -109,6 +109,45 @@ export class ChannelStore {
     });
   }
 
+  get unreadDMs() {
+    return this.dms.filter((ch) => this.app.readStates.get(ch.id)?.isUnread);
+  }
+
+  get hasUnreadDMs() {
+    return this.unreadDMs.length > 0;
+  }
+
+  get dmMentionCount() {
+    return this.dms.reduce(
+      (acc, ch) => acc + (this.app.readStates.get(ch.id)?.mentionCount ?? 0),
+      0
+    );
+  }
+
+  // Real @mentions in space channels, as opposed to general DM unreads
+  get mentionedChannels() {
+    return this.all
+      .filter(
+        (ch) =>
+          ch.type !== ChannelType.DM &&
+          ch.type !== ChannelType.GroupDM &&
+          (this.app.readStates.get(ch.id)?.mentionCount ?? 0) > 0 &&
+          // Drop stale mentions for channels the member's access was revoked from
+          (ch.space?.members.me?.canViewChannel(ch) ?? true)
+      )
+      .sort((a, b) => {
+        const aId = a.lastMessageId;
+        const bId = b.lastMessageId;
+        if (aId && bId) {
+          const diff = BigInt(bId) - BigInt(aId);
+          return diff > 0n ? 1 : diff < 0n ? -1 : 0;
+        }
+        if (aId) return -1;
+        if (bId) return 1;
+        return 0;
+      });
+  }
+
   get active() {
     return this.activeId ? (this.get(this.activeId) ?? null) : null;
   }

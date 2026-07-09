@@ -22,7 +22,7 @@ import { CSS } from "@dnd-kit/utilities";
 import type { CSSObject } from "@emotion/react";
 import { useAppStore } from "@hooks/useStores";
 import { formatColor } from "@mutualzz/ui-core";
-import { Portal, Stack, useTheme } from "@mutualzz/ui-web";
+import { Portal, Stack, Typography, useTheme } from "@mutualzz/ui-web";
 import type { Space } from "@stores/objects/Space";
 import { useNavigate } from "@tanstack/react-router";
 import { observer } from "mobx-react-lite";
@@ -127,6 +127,7 @@ export const SpacesSidebar = observer(() => {
   const navigate = useNavigate();
   const app = useAppStore();
   const { openModal } = useModal();
+  const { theme } = useTheme();
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -152,6 +153,10 @@ export const SpacesSidebar = observer(() => {
     }
   };
 
+  const showUnreadDMsPill = app.mode !== "@me" && app.channels.hasUnreadDMs;
+  const dmMentionCount =
+    app.mode !== "@me" ? app.channels.dmMentionCount : 0;
+
   return (
     <Paper
       width="5rem"
@@ -173,24 +178,54 @@ export const SpacesSidebar = observer(() => {
           )}`}
           placement="right"
         >
-          <AnimatedLogo
-            css={{
-              width: 48,
-              cursor: "pointer",
-              marginBottom: 5
-            }}
-            initial={{ scale: 1 }}
-            whileHover={{ scale: 1.1 }}
-            onClick={() => {
-              navigate({
-                to:
-                  app.mode === "@me"
-                    ? `/${app.settings?.preferredMode ?? "spaces"}`
-                    : "/@me",
-                replace: true
-              });
-            }}
-          />
+          <Stack justifyContent="center" position="relative">
+            <SidebarPill type={showUnreadDMsPill ? "unread" : "none"} />
+            <AnimatedLogo
+              css={{
+                width: 48,
+                cursor: "pointer",
+                marginBottom: 5
+              }}
+              initial={{ scale: 1 }}
+              whileHover={{ scale: 1.1 }}
+              onClick={() => {
+                navigate({
+                  to:
+                    app.mode === "@me"
+                      ? `/${app.settings?.preferredMode ?? "spaces"}`
+                      : "/@me",
+                  replace: true
+                });
+              }}
+            />
+            {dmMentionCount > 0 && (
+              <Stack
+                alignItems="center"
+                justifyContent="center"
+                css={{
+                  position: "absolute",
+                  top: -2,
+                  right: -2,
+                  minWidth: 16,
+                  height: 16,
+                  borderRadius: 9999,
+                  backgroundColor: theme.colors.danger,
+                  padding: "0 4px",
+                  border: `2px solid ${theme.colors.background}`
+                }}
+              >
+                <Typography
+                  level="label-xs"
+                  css={{
+                    color: "#fff",
+                    fontSize: 10
+                  }}
+                >
+                  {dmMentionCount > 99 ? "99+" : dmMentionCount}
+                </Typography>
+              </Stack>
+            )}
+          </Stack>
         </Tooltip>
       </Stack>
 

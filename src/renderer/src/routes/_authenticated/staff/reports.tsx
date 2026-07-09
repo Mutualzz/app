@@ -2,9 +2,14 @@ import { Button } from "@components/Button";
 import { Paper } from "@components/Paper";
 import { useAppStore } from "@hooks/useStores";
 import type { APIReport, ReportStatus } from "@mutualzz/types";
-import { IconButton, Option, Select, Stack, Typography } from "@mutualzz/ui-web";
+import { Option, Select, Stack, Typography } from "@mutualzz/ui-web";
 import { WarningIcon, ArrowLeftIcon } from "@phosphor-icons/react";
-import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { IconButton } from "@renderer/components/IconButton";
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQueryClient
+} from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import dayjs from "dayjs";
 import { useState } from "react";
@@ -44,7 +49,10 @@ const reasonLabels: Record<string, string> = {
   other: "Other"
 };
 
-const statusColors: Record<string, "warning" | "success" | "neutral" | "danger"> = {
+const statusColors: Record<
+  string,
+  "warning" | "success" | "neutral" | "danger"
+> = {
   pending: "warning",
   reviewed: "success",
   dismissed: "neutral",
@@ -145,7 +153,6 @@ function StaffReportsRoute() {
         borderLeft="0 !important"
       >
         <IconButton
-          color="neutral"
           variant="plain"
           size="sm"
           onClick={() => navigate({ to: "/staff" })}
@@ -330,8 +337,7 @@ function StaffReportsRoute() {
 
                 {report.status !== "pending" && report.reviewedBy && (
                   <Typography level="body-xs" textColor="muted">
-                    {report.status[0].toUpperCase() + report.status.slice(1)}{" "}
-                    by{" "}
+                    {report.status[0].toUpperCase() + report.status.slice(1)} by{" "}
                     {report.reviewedBy.globalName || report.reviewedBy.username}
                     {report.reviewedAt &&
                       ` · ${dayjs(report.reviewedAt).format("MMM D, YYYY h:mm A")}`}

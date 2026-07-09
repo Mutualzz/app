@@ -10,7 +10,6 @@ import {
   Avatar,
   ButtonGroup,
   Divider,
-  IconButton,
   Stack,
   Typography
 } from "@mutualzz/ui-web";
@@ -19,12 +18,14 @@ import {
   ClockCounterClockwiseIcon,
   DevicesIcon,
   GearIcon,
+  NotePencilIcon,
   ShieldIcon,
   UserIcon
 } from "@phosphor-icons/react";
 import { useNavigate } from "@tanstack/react-router";
 import type { JSX } from "react";
 import type { StaffSection } from "./staffSections";
+import { IconButton } from "../IconButton";
 
 interface Props {
   user: APIUser | APIPrivateUser;
@@ -40,6 +41,11 @@ const navItems: { key: StaffSection; label: string; icon: JSX.Element }[] = [
     key: "sessions",
     label: "Sessions",
     icon: <DevicesIcon weight="fill" />
+  },
+  {
+    key: "notes",
+    label: "Staff Notes",
+    icon: <NotePencilIcon weight="fill" />
   },
   {
     key: "audit",
@@ -66,7 +72,6 @@ export const StaffUserSidebar = ({ user, section, onSectionChange }: Props) => {
     >
       <Stack direction="column" height="100%" spacing={2}>
         <IconButton
-          color="neutral"
           variant="plain"
           size="sm"
           css={{ alignSelf: "flex-start" }}

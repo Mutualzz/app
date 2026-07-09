@@ -18,7 +18,11 @@ import {
 const SERVICE = "mutualzz";
 const ACCOUNT = "default";
 
-function setWindowsBadge(win: BrowserWindow, count: number) {
+function setWindowsBadge(
+  win: BrowserWindow,
+  count: number,
+  color: string = "#e03131"
+) {
   if (count === 0) {
     win.setOverlayIcon(null, "");
     return;
@@ -29,7 +33,7 @@ function setWindowsBadge(win: BrowserWindow, count: number) {
   const canvas = createCanvas(size, size);
   const ctx = canvas.getContext("2d");
 
-  ctx.fillStyle = "#e03131";
+  ctx.fillStyle = color;
   ctx.beginPath();
   ctx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2);
   ctx.fill();
@@ -296,11 +300,11 @@ export function setupIPC(): void {
     }
   });
 
-  ipcMain.on("badge:set", (_, count: number) => {
+  ipcMain.on("badge:set", (_, count: number, color?: string) => {
     app.setBadgeCount(count);
 
     const win = getMainWindow();
-    if (win) setWindowsBadge(win, count);
+    if (win) setWindowsBadge(win, count, color);
   });
 
   // Idle detection

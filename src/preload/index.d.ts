@@ -19,7 +19,7 @@ export interface MutualzzAPI {
     ): Promise<{ name: string; pid: number }[]>;
   };
   badge: {
-    set(count: number): void;
+    set(count: number, color?: string): void;
   };
   shell: {
     openExternal(url: string): Promise<void>;

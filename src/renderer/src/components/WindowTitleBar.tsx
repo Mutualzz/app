@@ -34,6 +34,7 @@ import { Button } from "@components/Button";
 import { isElectron } from "@utils/index";
 import { Tooltip } from "@components/Tooltip";
 import { useWindowTitleBar } from "@contexts/WindowTitleBar.context";
+import { NotificationCenterButton } from "@components/NotificationCenter/NotificationCenterButton";
 
 interface WindowTitleBarProps {
   onHeightChange?: (height: number) => void;
@@ -420,6 +421,22 @@ const WindowTitleBar = ({ onHeightChange }: WindowTitleBarProps) => {
               {pageTitleBar.end}
             </Stack>
           )}
+          {app.account && (
+            <Stack
+              alignItems="center"
+              css={{ WebkitAppRegion: "no-drag", userSelect: "auto" }}
+            >
+              <NotificationCenterButton />
+            </Stack>
+          )}
+          {!isMac && isElectron && (
+            <Divider
+              orientation="vertical"
+              css={{ opacity: 0.25 }}
+              lineColor="muted"
+            />
+          )}
+
           {!isElectron && isAuthPage && (
             <DownloadButton
               css={{
@@ -444,16 +461,6 @@ const WindowTitleBar = ({ onHeightChange }: WindowTitleBarProps) => {
               >
                 <DownloadIcon weight="fill" />
               </IconButton>
-              {!isMac && (
-                <Divider
-                  lineColor="neutral"
-                  orientation="vertical"
-                  css={{
-                    marginRight: 8,
-                    opacity: 0.25
-                  }}
-                />
-              )}
             </Stack>
           )}
           {!isMac && isElectron && (

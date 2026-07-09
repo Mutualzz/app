@@ -285,9 +285,10 @@ export const UserBar = observer(() => {
                 type: "account",
                 account
               },
+              null,
               {
                 x: Math.round(rect.left),
-                y: Math.round(Math.max(8, rect.top - 415))
+                y: Math.round(rect.top - 8)
               }
             );
           }}

@@ -17,6 +17,7 @@ import {
 } from "@mutualzz/ui-web";
 import {
   ClockCounterClockwiseIcon,
+  GavelIcon,
   MagnifyingGlassIcon,
   ShieldIcon,
   WarningIcon
@@ -106,28 +107,23 @@ function StaffIndexRoute() {
   const effectiveFlag = flag === ANY_FLAG ? undefined : flag;
   const isSnowflake = /^\d{5,}$/.test(trimmedQuery);
 
-  const {
-    data,
-    isFetching,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage
-  } = useInfiniteQuery({
-    queryKey: ["staff-user-search", trimmedQuery, effectiveFlag],
-    queryFn: ({ pageParam }) =>
-      app.rest.get<APIUser[]>("/staff/users", {
-        ...(trimmedQuery ? { query: trimmedQuery } : {}),
-        ...(effectiveFlag ? { flag: effectiveFlag } : {}),
-        ...(pageParam ? { after: pageParam } : {}),
-        limit: PAGE_LIMIT
-      }),
-    initialPageParam: undefined as string | undefined,
-    getNextPageParam: (lastPage) =>
-      lastPage.length === PAGE_LIMIT
-        ? lastPage[lastPage.length - 1].username
-        : undefined,
-    enabled: !!trimmedQuery || !!effectiveFlag
-  });
+  const { data, isFetching, fetchNextPage, hasNextPage, isFetchingNextPage } =
+    useInfiniteQuery({
+      queryKey: ["staff-user-search", trimmedQuery, effectiveFlag],
+      queryFn: ({ pageParam }) =>
+        app.rest.get<APIUser[]>("/staff/users", {
+          ...(trimmedQuery ? { query: trimmedQuery } : {}),
+          ...(effectiveFlag ? { flag: effectiveFlag } : {}),
+          ...(pageParam ? { after: pageParam } : {}),
+          limit: PAGE_LIMIT
+        }),
+      initialPageParam: undefined as string | undefined,
+      getNextPageParam: (lastPage) =>
+        lastPage.length === PAGE_LIMIT
+          ? lastPage[lastPage.length - 1].username
+          : undefined,
+      enabled: !!trimmedQuery || !!effectiveFlag
+    });
 
   const results = data?.pages.flat() ?? [];
 
@@ -163,7 +159,6 @@ function StaffIndexRoute() {
         <Stack direction="row" spacing={1}>
           <Button
             size="sm"
-            color="neutral"
             variant="soft"
             startDecorator={<WarningIcon />}
             onClick={() => navigate({ to: "/staff/reports" })}
@@ -172,12 +167,19 @@ function StaffIndexRoute() {
           </Button>
           <Button
             size="sm"
-            color="neutral"
             variant="soft"
             startDecorator={<ClockCounterClockwiseIcon />}
             onClick={() => navigate({ to: "/staff/activity" })}
           >
             Activity
+          </Button>
+          <Button
+            size="sm"
+            variant="soft"
+            startDecorator={<GavelIcon />}
+            onClick={() => navigate({ to: "/staff/appeals" })}
+          >
+            Appeals
           </Button>
         </Stack>
       </Paper>
