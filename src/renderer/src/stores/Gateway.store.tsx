@@ -929,10 +929,13 @@ export class GatewayStore {
   };
 
   private handleInvalidSession = (resumable: boolean) => {
-    this.cleanup();
+    this.stopHeartbeat();
+    this.socket = null;
+    this.readyState = GatewayStatus.CLOSED;
 
     this.logger.debug(`Received invalid session; Can Resume: ${resumable}`);
     if (!resumable) {
+      this.reset();
       this.handleIdentify();
       return;
     }
@@ -941,7 +944,10 @@ export class GatewayStore {
   };
 
   private handleReconnect() {
-    this.cleanup();
+    this.stopHeartbeat();
+    this.socket = null;
+    this.readyState = GatewayStatus.CLOSED;
+
     this.logger.debug(`[Gateway] -> Reconnect`);
     this.startReconnect();
   }
@@ -987,9 +993,12 @@ export class GatewayStore {
     }
 
     this.app.voice.onGatewayDisconnected();
-    this.cleanup();
+    this.stopHeartbeat();
+    this.socket = null;
+    this.readyState = GatewayStatus.CLOSED;
 
     if (code === GatewayCloseCodes.ForceLogout) {
+      this.reset();
       void this.app.logout();
       return;
     }
@@ -1058,8 +1067,9 @@ export class GatewayStore {
 
     this.socket?.close(4009);
 
-    this.cleanup();
-    this.reset();
+    this.stopHeartbeat();
+    this.socket = null;
+    this.readyState = GatewayStatus.CLOSED;
 
     this.startReconnect();
   };
@@ -1077,7 +1087,7 @@ export class GatewayStore {
     this.logger.debug("Cleaning up");
     this.stopHeartbeat();
     this.socket = null;
-    this.sessionId = null;
+    this.readyState = GatewayStatus.CLOSED;
   };
 
   private handleHeartbeatAck = () => {
