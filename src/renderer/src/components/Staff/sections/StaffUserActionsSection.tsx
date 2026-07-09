@@ -1,4 +1,5 @@
 import { Button } from "@components/Button";
+import { StaffUserDeleteConfirm } from "@components/Modals/StaffUserDeleteConfirm";
 import { StaffUserDisableConfirm } from "@components/Modals/StaffUserDisableConfirm";
 import { StaffUserForceLogoutConfirm } from "@components/Modals/StaffUserForceLogoutConfirm";
 import { StaffUserRestrictConfirm } from "@components/Modals/StaffUserRestrictConfirm";
@@ -6,7 +7,7 @@ import { StaffUserWarnConfirm } from "@components/Modals/StaffUserWarnConfirm";
 import { useModal } from "@contexts/Modal.context";
 import { BitField, userFlags } from "@mutualzz/bitfield";
 import type { APIPrivateUser } from "@mutualzz/types";
-import { Stack } from "@mutualzz/ui-web";
+import { Stack, Typography } from "@mutualzz/ui-web";
 import { useMutation } from "@tanstack/react-query";
 import { useAppStore } from "@hooks/useStores";
 import { toast } from "react-toastify";
@@ -16,18 +17,23 @@ interface Props {
   onUpdated: (user: APIPrivateUser) => void;
   onForcedLogout: () => void;
   onWarned: () => void;
+  onHardDeleted: () => void;
 }
 
 export const StaffUserActionsSection = ({
   user,
   onUpdated,
   onForcedLogout,
-  onWarned
+  onWarned,
+  onHardDeleted
 }: Props) => {
   const app = useAppStore();
   const { openModal } = useModal();
   const isDisabled = BitField.fromString(userFlags, user.flags.toString()).has(
     "Disabled"
+  );
+  const isDeleted = BitField.fromString(userFlags, user.flags.toString()).has(
+    "Deleted"
   );
   const isRestricted =
     !!user.restrictedUntil && new Date(user.restrictedUntil) > new Date();
@@ -46,7 +52,14 @@ export const StaffUserActionsSection = ({
     });
 
   return (
-    <Stack direction="row" spacing={1}>
+    <Stack direction="column" spacing={1.25}>
+      {isDeleted ? (
+        <Typography level="body-sm" textColor="muted">
+          This account is soft deleted. The user cannot log in, but their data
+          is retained.
+        </Typography>
+      ) : (
+        <Stack direction="row" spacing={1}>
       <Button
         color="danger"
         variant="soft"
@@ -121,6 +134,49 @@ export const StaffUserActionsSection = ({
           }
         >
           Restrict User
+        </Button>
+      )}
+        </Stack>
+      )}
+      {!isDeleted && (
+        <Button
+          color="danger"
+          variant="soft"
+          onClick={() =>
+            openModal(
+              `staff-delete-user-${user.id}`,
+              <StaffUserDeleteConfirm
+                userId={user.id}
+                username={user.username}
+                isFounder={!!app.account?.isFounder}
+                onSoftDeleted={onUpdated}
+                onHardDeleted={onHardDeleted}
+              />
+            )
+          }
+        >
+          Soft Delete Account
+        </Button>
+      )}
+      {app.account?.isFounder && (
+        <Button
+          color="danger"
+          variant="soft"
+          onClick={() =>
+            openModal(
+              `staff-hard-delete-user-${user.id}`,
+              <StaffUserDeleteConfirm
+                userId={user.id}
+                username={user.username}
+                isFounder
+                allowHardDeleteOnly
+                onSoftDeleted={onUpdated}
+                onHardDeleted={onHardDeleted}
+              />
+            )
+          }
+        >
+          Hard Delete Account
         </Button>
       )}
     </Stack>

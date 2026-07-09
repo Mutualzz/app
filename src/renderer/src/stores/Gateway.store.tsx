@@ -1602,11 +1602,9 @@ export class GatewayStore {
     this.app.users.update(payload as APIUser);
 
     if (payload.id === this.app.account?.id) {
-      if (
-        BitField.fromString(userFlags, payload.flags.toString()).has(
-          "Disabled"
-        )
-      ) {
+      const flags = BitField.fromString(userFlags, payload.flags.toString());
+
+      if (flags.has("Disabled") || flags.has("Deleted")) {
         void this.app.logout();
         return;
       }

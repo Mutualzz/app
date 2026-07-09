@@ -16,6 +16,8 @@ const PAGE_LIMIT = 50;
 const actionLabels: Record<string, string> = {
   "user.disable": "disabled this account",
   "user.enable": "enabled this account",
+  "user.delete": "soft deleted this account",
+  "user.hard_delete": "hard deleted this account",
   "user.force_logout": "forced a logout on this account",
   "user.session_revoke": "revoked a session on this account",
   "user.profile_update": "updated this account's profile",

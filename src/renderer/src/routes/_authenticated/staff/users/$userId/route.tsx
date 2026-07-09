@@ -13,7 +13,7 @@ import {
 import { useAppStore } from "@hooks/useStores";
 import type { APIPrivateUser } from "@mutualzz/types";
 import { Stack, Typography } from "@mutualzz/ui-web";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
@@ -24,6 +24,7 @@ export const Route = createFileRoute("/_authenticated/staff/users/$userId")({
 function StaffUserRoute() {
   const { userId } = Route.useParams();
   const app = useAppStore();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const embossed = app.settings?.preferEmbossed;
   const [section, setSection] = useState<StaffSection>("info");
@@ -51,6 +52,12 @@ function StaffUserRoute() {
 
   const handleWarned = () => {
     queryClient.invalidateQueries({ queryKey: ["staff-actions", userId] });
+  };
+
+  const handleHardDeleted = () => {
+    queryClient.removeQueries({ queryKey: userQueryKey });
+    queryClient.invalidateQueries({ queryKey: ["staff-all-actions"] });
+    navigate({ to: "/staff" });
   };
 
   if (isLoading) {
@@ -143,6 +150,7 @@ function StaffUserRoute() {
               onUpdated={handleUpdated}
               onForcedLogout={handleForcedLogout}
               onWarned={handleWarned}
+              onHardDeleted={handleHardDeleted}
             />
           )}
           {section === "sessions" && (

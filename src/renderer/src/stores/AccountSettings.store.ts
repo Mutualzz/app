@@ -27,6 +27,10 @@ export class AccountSettingsStore {
   preferredSelfMute = false;
   preferredSelfDeaf = false;
 
+  pushEnabled = true;
+  pushDirectMessages = true;
+  pushMentions = true;
+
   voiceInputMode: VoiceInputMode = "voice_activity";
   voiceInputSensitivity = DEFAULT_VOICE_INPUT_SENSITIVITY;
   voiceInputSensitivityAuto = true;
@@ -61,6 +65,9 @@ export class AccountSettingsStore {
 
     this.preferredSelfMute = settings.preferredSelfMute;
     this.preferredSelfDeaf = settings.preferredSelfDeaf;
+    this.pushEnabled = settings.pushEnabled ?? true;
+    this.pushDirectMessages = settings.pushDirectMessages ?? true;
+    this.pushMentions = settings.pushMentions ?? true;
 
     this.favoriteEmojis = observable.array(settings.favoriteEmojis ?? []);
     this.favoriteGifs = observable.array(settings.favoriteGifs ?? []);
@@ -80,6 +87,9 @@ export class AccountSettingsStore {
         "spellcheckEnabled",
         "preferredSelfMute",
         "preferredSelfDeaf",
+        "pushEnabled",
+        "pushDirectMessages",
+        "pushMentions",
         "voiceInputMode",
         "voiceInputSensitivity",
         "voiceInputSensitivityAuto",
@@ -256,6 +266,9 @@ export class AccountSettingsStore {
     this.preferEmbossed = payload.preferEmbossed;
     this.preferredSelfMute = payload.preferredSelfMute;
     this.preferredSelfDeaf = payload.preferredSelfDeaf;
+    this.pushEnabled = payload.pushEnabled ?? true;
+    this.pushDirectMessages = payload.pushDirectMessages ?? true;
+    this.pushMentions = payload.pushMentions ?? true;
     this.favoriteEmojis = observable.array(payload.favoriteEmojis ?? []);
     this.favoriteGifs = observable.array(payload.favoriteGifs ?? []);
     this.favoriteStickers = observable.array(payload.favoriteStickers ?? []);
@@ -283,6 +296,15 @@ export class AccountSettingsStore {
     if (settings.preferredSelfDeaf != undefined)
       this.preferredSelfDeaf = settings.preferredSelfDeaf;
 
+    if (settings.pushEnabled != undefined)
+      this.pushEnabled = settings.pushEnabled;
+
+    if (settings.pushDirectMessages != undefined)
+      this.pushDirectMessages = settings.pushDirectMessages;
+
+    if (settings.pushMentions != undefined)
+      this.pushMentions = settings.pushMentions;
+
     if (settings.favoriteEmojis != undefined)
       this.favoriteEmojis = observable.array(settings.favoriteEmojis);
     if (settings.favoriteGifs != undefined)
@@ -299,6 +321,18 @@ export class AccountSettingsStore {
 
   setPreferredSelfDeaf(value: boolean) {
     this.preferredSelfDeaf = value;
+  }
+
+  setPushEnabled(value: boolean) {
+    this.pushEnabled = value;
+  }
+
+  setPushDirectMessages(value: boolean) {
+    this.pushDirectMessages = value;
+  }
+
+  setPushMentions(value: boolean) {
+    this.pushMentions = value;
   }
 
   setVoiceInputMode(mode: VoiceInputMode) {
@@ -388,6 +422,9 @@ export class AccountSettingsStore {
       currentIcon: this.currentIcon,
       preferredSelfMute: this.preferredSelfMute,
       preferredSelfDeaf: this.preferredSelfDeaf,
+      pushEnabled: this.pushEnabled,
+      pushDirectMessages: this.pushDirectMessages,
+      pushMentions: this.pushMentions,
       favoriteEmojis: [...this.favoriteEmojis],
       favoriteGifs: [...this.favoriteGifs],
       favoriteStickers: [...this.favoriteStickers]

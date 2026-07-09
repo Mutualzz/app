@@ -26,7 +26,7 @@ export type ThemeCreatorLoadedType = "default" | "draft" | "custom";
 
 export type ThemeCreatorFilter = ThemeType | ThemeStyle | "adaptive";
 
-// TODO: Finish implementing the store from the old context
+// Desktop ThemeCreatorStore mirrors mobile; manage UI lives in ThemeCreatorSidebarRight.
 export class ThemeCreatorStore {
   currentCategory: ThemeCreatorCategory = "general";
   currentPage: ThemeCreatorPage = "details";
@@ -91,7 +91,7 @@ export class ThemeCreatorStore {
       ...base,
       id: "",
       name: "",
-      description: ""
+      description: "",
     });
 
     this.loadedType = "default";
@@ -119,21 +119,7 @@ export class ThemeCreatorStore {
   }
 
   resetValues() {
-    const base = this.prefersDark ? baseDarkTheme : baseLightTheme;
-
-    this.values = Theme.serialize({
-      ...base,
-      id: "",
-      name: "",
-      description: ""
-    });
-
-    if (this.userInteracted) this.userInteracted = false;
-    if (this.loadedType !== "default") this.loadedType = "default";
-
-    this.errors = {};
-    this.currentPage = "details";
-    this.currentCategory = "general";
+    this.resetToBaseTheme();
   }
 
   addFilter(filter: ThemeCreatorFilter) {
