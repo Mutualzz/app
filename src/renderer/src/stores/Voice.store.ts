@@ -1581,7 +1581,10 @@ export class VoiceStore {
         const target = this.currentVoiceTarget;
         const isSuperseded = reason === "Connected from a different device";
         const canAutoRejoin =
-          !isSuperseded && !!target && this.app.isGatewayReady;
+          !isSuperseded &&
+          this.connectionStatus === "connected" &&
+          !!target &&
+          this.app.isGatewayReady;
 
         runInAction(() => {
           this.connectionError = canAutoRejoin ? null : reason;
@@ -1904,7 +1907,13 @@ export class VoiceStore {
     });
 
     this.startJoinTimeout();
-    await this.sendVoiceStateUpdate();
+
+    if (this.pendingEndpoint?.trim() && this.pendingToken) {
+      void this.startConnection();
+    } else {
+      await this.sendVoiceStateUpdate({ refreshRtc: true });
+    }
+
     this.startKeepAlive();
   }
 
@@ -1913,6 +1922,11 @@ export class VoiceStore {
   }
 
   onVoiceServerUpdate(payload: VoiceServerUpdatePayload) {
+    if (!payload.voiceEndpoint?.trim()) {
+      this.failJoin("Voice server is not configured");
+      return;
+    }
+
     this.pendingEndpoint = payload.voiceEndpoint;
     this.pendingToken = payload.voiceToken;
 
@@ -2676,6 +2690,7 @@ export class VoiceStore {
 
     if (!endpoint || !token) {
       this.logger.warn("startConnection called with no pending credentials");
+      this.failJoin("Voice server credentials were not provided");
       return;
     }
 
@@ -2867,7 +2882,7 @@ export class VoiceStore {
     this.session.setSpaceMute(this.spaceMute);
   }
 
-  private async sendVoiceStateUpdate() {
+  private async sendVoiceStateUpdate(options?: { refreshRtc?: boolean }) {
     const spaceId = this.currentVoiceTarget?.spaceId ?? null;
     const channelId = this.currentVoiceTarget?.channelId ?? null;
 
@@ -2877,7 +2892,8 @@ export class VoiceStore {
         spaceId,
         channelId,
         selfMute: this.spaceMute ? true : this.selfMute,
-        selfDeaf: this.spaceDeaf ? true : this.selfDeaf
+        selfDeaf: this.spaceDeaf ? true : this.selfDeaf,
+        ...(options?.refreshRtc ? { refreshRtc: true } : {}),
       }
     });
   }
