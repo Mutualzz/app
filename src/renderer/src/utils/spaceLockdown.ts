@@ -9,7 +9,7 @@ const LOCKDOWN_ALLOWED_MODAL_IDS = new Set([
   "leave-space-confirm"
 ]);
 
-export function getSpaceLockdownMessage(space: Space, isOwner: boolean) {
+export function getSpaceLockdownMessage(_space: Space, isOwner: boolean) {
   return isOwner
     ? "Messaging and changes are disabled. Check your email for an appeal link if you believe this was a mistake."
     : "Messaging and changes are disabled while staff review this space.";

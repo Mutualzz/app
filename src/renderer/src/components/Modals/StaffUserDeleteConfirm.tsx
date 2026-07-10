@@ -103,7 +103,7 @@ export const StaffUserDeleteConfirm = observer(
             <Typography fontWeight="bold">Deletion type</Typography>
             <Select
               value={mode}
-              onChange={(_, value) => setMode(value as DeleteMode)}
+              onValueChange={(value) => setMode(value as DeleteMode)}
             >
               <Option value="soft">Soft delete (recommended)</Option>
               <Option value="hard">Hard delete (irreversible)</Option>

@@ -42,8 +42,8 @@ export const AppNotificationsSettings = observer(() => {
             </Stack>
             <Switch
               checked={settings.pushEnabled}
-              onChange={(value) => {
-                settings.setPushEnabled(value);
+              onChange={(e) => {
+                settings.setPushEnabled(e.target.checked);
                 sync();
               }}
             />
@@ -61,8 +61,8 @@ export const AppNotificationsSettings = observer(() => {
             <Switch
               checked={settings.pushDirectMessages}
               disabled={!settings.pushEnabled}
-              onChange={(value) => {
-                settings.setPushDirectMessages(value);
+              onChange={(e) => {
+                settings.setPushDirectMessages(e.target.checked);
                 sync();
               }}
             />
@@ -80,8 +80,8 @@ export const AppNotificationsSettings = observer(() => {
             <Switch
               checked={settings.pushMentions}
               disabled={!settings.pushEnabled}
-              onChange={(value) => {
-                settings.setPushMentions(value);
+              onChange={(e) => {
+                settings.setPushMentions(e.target.checked);
                 sync();
               }}
             />

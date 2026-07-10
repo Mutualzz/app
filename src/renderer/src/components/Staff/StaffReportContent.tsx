@@ -1,7 +1,7 @@
 import { Paper } from "@components/Paper";
 import { SpaceIcon } from "@components/Space/SpaceIcon";
 import { UserAvatar } from "@components/User/UserAvatar";
-import type { APIReportContent } from "@mutualzz/types";
+import type { APIReportContent, APIUser } from "@mutualzz/types";
 import { Stack, Typography } from "@mutualzz/ui-web";
 import dayjs from "dayjs";
 
@@ -130,7 +130,7 @@ export function StaffReportContent({ content, reportedMessageId }: Props) {
 
     return (
       <Stack direction="row" alignItems="center" spacing={1}>
-        <UserAvatar user={user} size={36} />
+        <UserAvatar user={user as APIUser} size={36} />
         <Stack direction="column" spacing={0.1}>
           <Typography level="body-sm" fontWeight={600}>
             {user.globalName || user.username}
