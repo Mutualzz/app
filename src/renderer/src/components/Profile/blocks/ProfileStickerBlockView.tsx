@@ -57,7 +57,7 @@ export const ProfileStickerBlockView = observer(
       overflow: "hidden" as const,
       display: "flex",
       alignItems: "center",
-      justifyContent: "center",
+      justifyContent: "center"
     };
 
     const placeholder = (
@@ -85,7 +85,7 @@ export const ProfileStickerBlockView = observer(
               width: "100%",
               height: "100%",
               objectFit: "contain",
-              display: "block",
+              display: "block"
             }}
           />
         </div>
@@ -103,5 +103,5 @@ export const ProfileStickerBlockView = observer(
         {placeholder}
       </Paper>
     );
-  },
+  }
 );

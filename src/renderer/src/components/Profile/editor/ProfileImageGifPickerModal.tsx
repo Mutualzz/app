@@ -35,10 +35,7 @@ export const ProfileImageGifPickerModal = ({ onSelect }: Props) => {
             Choose a GIF
           </Typography>
         </Stack>
-        <IconButton
-          size="sm"
-          onClick={() => closeModal("image-gif-picker")}
-        >
+        <IconButton size="sm" onClick={() => closeModal("image-gif-picker")}>
           <XIcon />
         </IconButton>
       </Stack>
