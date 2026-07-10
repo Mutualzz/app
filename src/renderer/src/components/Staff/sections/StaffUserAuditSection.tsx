@@ -41,6 +41,11 @@ const describeAction = (action: string) => {
   const takedownMatch = action.match(/^content\.takedown\.(.+)$/);
   if (takedownMatch) return `took down a reported ${takedownMatch[1]}`;
 
+  if (action === "report.view") return "reviewed reported content";
+  if (action === "space.delete") return "shut down a reported space";
+  if (action === "space.lockdown") return "locked down a space";
+  if (action === "space.lockdown_lift") return "lifted a space lockdown";
+
   return action;
 };
 

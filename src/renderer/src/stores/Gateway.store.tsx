@@ -562,6 +562,10 @@ export class GatewayStore {
       GatewayDispatchEvents.SpaceDelete,
       this.onSpaceDelete
     );
+    this.dispatchHandlers.set(
+      GatewayDispatchEvents.SpaceUpdate,
+      this.onSpaceUpdate
+    );
 
     // Channels
     this.dispatchHandlers.set(
@@ -1308,6 +1312,16 @@ export class GatewayStore {
       toast.warn(`You were ${payload.reason} from ${space.name}`);
   };
 
+  private onSpaceUpdate = (payload: APISpace) => {
+    const space = this.app.spaces.get(payload.id);
+    if (space) {
+      space.update(payload);
+      return;
+    }
+
+    this.app.spaces.add(payload);
+  };
+
   private onChannelCreate = (payload: APIChannel) => {
     if (!payload.spaceId) {
       this.app.channels.add(payload);
@@ -1429,12 +1443,14 @@ export class GatewayStore {
   private onMessageAck = (payload: {
     channelId: Snowflake;
     lastMessageId: Snowflake;
+    lastAckedId?: Snowflake;
     mentionCount: number;
   }) => {
     const readState = this.app.readStates.get(payload.channelId);
     if (readState) {
       readState.update({
         lastMessageId: payload.lastMessageId,
+        lastAckedId: payload.lastAckedId ?? payload.lastMessageId,
         mentionCount: payload.mentionCount ?? 0
       });
     } else {
@@ -1446,6 +1462,7 @@ export class GatewayStore {
     payload: Array<{
       channelId: Snowflake;
       lastMessageId: Snowflake;
+      lastAckedId?: Snowflake;
       mentionCount: number;
     } | null>
   ) => {
@@ -1455,6 +1472,7 @@ export class GatewayStore {
       if (readState) {
         readState.update({
           lastMessageId: state.lastMessageId,
+          lastAckedId: state.lastAckedId ?? state.lastMessageId,
           mentionCount: state.mentionCount ?? 0
         });
       } else {
@@ -1497,7 +1515,10 @@ export class GatewayStore {
       return;
     }
 
-    if (this.app.channels.activeId === payload.channelId) return;
+    if (this.app.channels.activeId === payload.channelId) {
+      this.app.readStates.updateLocal(payload.channelId, payload.id);
+      return;
+    }
 
     const isDM =
       channel.type === ChannelType.DM || channel.type === ChannelType.GroupDM;

@@ -19,8 +19,11 @@ import { Fragment, type JSX } from "react";
 import { UserAvatar } from "../User/UserAvatar";
 import { Button } from "@components/Button";
 import { isElectron } from "@utils/index";
+import { useModal } from "@contexts/Modal.context";
+import { useNavigate } from "@tanstack/react-router";
 import {
   BellIcon,
+  LifebuoyIcon,
   MicrophoneIcon,
   PaletteIcon,
   PencilIcon,
@@ -73,6 +76,8 @@ const settingsPages: SettingsPages = {
 export const UserSettingsSidebar = observer(
   ({ drawerOpen, setDrawerOpen }: UserSettingsSidebarProps) => {
     const app = useAppStore();
+    const navigate = useNavigate();
+    const { closeModal } = useModal();
 
     const { currentPage, setCurrentPage, setCurrentCategory } =
       useUserSettings();
@@ -86,6 +91,14 @@ export const UserSettingsSidebar = observer(
       if (drawerOpen && setDrawerOpen) {
         setDrawerOpen(false);
       }
+    };
+
+    const openSupport = () => {
+      closeModal();
+      if (drawerOpen && setDrawerOpen) {
+        setDrawerOpen(false);
+      }
+      navigate({ to: "/support" });
     };
 
     if (!app.account) return null;
@@ -170,6 +183,7 @@ export const UserSettingsSidebar = observer(
                           page.label
                         )
                       }
+                      horizontalAlign="left"
                       key={`user-settings-sidebar-${page.label}`}
                       variant={currentPage === page.label ? "soft" : "plain"}
                       padding={5}
@@ -191,7 +205,16 @@ export const UserSettingsSidebar = observer(
             </Fragment>
           ))}
         </Stack>
-        <Stack direction="column" pb="1rem">
+        <Stack direction="column" pb="1rem" spacing={1.25}>
+          <Button
+            color="info"
+            variant="plain"
+            startDecorator={<LifebuoyIcon weight="fill" />}
+            horizontalAlign="left"
+            onClick={openSupport}
+          >
+            Help & Support
+          </Button>
           <Button
             color="danger"
             variant="plain"

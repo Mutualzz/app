@@ -10,7 +10,12 @@ import {
 } from "react";
 import { observer } from "mobx-react-lite";
 import { contextMenu } from "@mutualzz/contexify";
+import {
+  isContextMenuBlockedByLockdown,
+  notifySpaceLockdownBlocked
+} from "@utils/spaceLockdown";
 import { ContextMenuRoot } from "@components/ContextMenu/ContextMenuRoot";
+import { useAppStore } from "@hooks/useStores";
 import type { Space } from "@stores/objects/Space";
 import type { Channel } from "@stores/objects/Channel";
 import type { SpaceMember } from "@stores/objects/SpaceMember";
@@ -173,6 +178,7 @@ function getMenuId(menu: ContextMenuPayload): string {
 
 export const ContextMenuProvider = observer(
   ({ children }: PropsWithChildren): ReactElement => {
+    const app = useAppStore();
     const [menu, setMenuState] = useState<ContextMenuPayload | null>(null);
 
     const pendingShowRef = useRef<{
@@ -194,6 +200,19 @@ export const ContextMenuProvider = observer(
       position?: MenuPosition | null,
       anchorBottom?: MenuPosition | null
     ) => {
+      if (
+        isContextMenuBlockedByLockdown(
+          nextMenu,
+          (spaceId) => app.spaces.get(spaceId),
+          app.spaces.active
+        )
+      ) {
+        if ("stopPropagation" in e) e.stopPropagation();
+        if ("preventDefault" in e) e.preventDefault();
+        notifySpaceLockdownBlocked();
+        return;
+      }
+
       if ("stopPropagation" in e) e.stopPropagation();
       if ("preventDefault" in e) e.preventDefault();
 

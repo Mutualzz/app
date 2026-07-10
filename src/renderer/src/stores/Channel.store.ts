@@ -91,7 +91,6 @@ export class ChannelStore {
       const bUnread = this.app.readStates.get(b.id)?.isUnread ? 1 : 0;
       if (aUnread !== bUnread) return bUnread - aUnread; // unread first
 
-      // Sort by lastMessageId snowflake (monotonically increasing, always present)
       const aId = a.lastMessageId;
       const bId = b.lastMessageId;
       if (aId && bId) {
@@ -124,7 +123,6 @@ export class ChannelStore {
     );
   }
 
-  // Real @mentions in space channels, as opposed to general DM unreads
   get mentionedChannels() {
     return this.all
       .filter(
@@ -132,7 +130,6 @@ export class ChannelStore {
           ch.type !== ChannelType.DM &&
           ch.type !== ChannelType.GroupDM &&
           (this.app.readStates.get(ch.id)?.mentionCount ?? 0) > 0 &&
-          // Drop stale mentions for channels the member's access was revoked from
           (ch.space?.members.me?.canViewChannel(ch) ?? true)
       )
       .sort((a, b) => {
@@ -477,7 +474,6 @@ export class ChannelStore {
       position: channel.position
     }));
 
-    // Update the channels in the backend as well
     this.app.rest.patch(`/channels/bulk`, {
       spaceId,
       channels: payload

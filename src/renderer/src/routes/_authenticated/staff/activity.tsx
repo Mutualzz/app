@@ -1,13 +1,10 @@
 import { Button } from "@components/Button";
 import { Paper } from "@components/Paper";
+import { StaffPanelHeader } from "@components/Staff/StaffPanelHeader";
 import { useAppStore } from "@hooks/useStores";
 import type { APIStaffAction } from "@mutualzz/types";
 import { Stack, Typography } from "@mutualzz/ui-web";
-import {
-  ArrowLeftIcon,
-  ClockCounterClockwiseIcon
-} from "@phosphor-icons/react";
-import { IconButton } from "@renderer/components/IconButton";
+import { ClockCounterClockwiseIcon } from "@phosphor-icons/react";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import dayjs from "dayjs";
@@ -66,6 +63,22 @@ const describeGlobalAction = (entry: APIStaffAction) => {
     return `${actorName} took down a reported ${takedownMatch[1]} from ${targetName}`;
   }
 
+  if (entry.action === "report.view") {
+    return `${actorName} reviewed reported content${entry.reason ? ` (${entry.reason})` : ""}`;
+  }
+
+  if (entry.action === "space.delete") {
+    return `${actorName} shut down a reported space`;
+  }
+
+  if (entry.action === "space.lockdown") {
+    return `${actorName} locked down a space${entry.reason ? ` (${entry.reason})` : ""}`;
+  }
+
+  if (entry.action === "space.lockdown_lift") {
+    return `${actorName} lifted a space lockdown`;
+  }
+
   return `${actorName} performed ${entry.action} on ${targetName}`;
 };
 
@@ -101,29 +114,10 @@ function StaffActivityRoute() {
       width="100%"
       direction="column"
     >
-      <Paper
-        borderTopRightRadius={{ xs: "0.75rem", sm: "1.25rem", md: "1.5rem" }}
-        px={{ xs: "0.5rem", sm: 3 }}
-        py={{ xs: "0.5rem", sm: 4 }}
-        borderLeftWidth="0px !important"
-        elevation={embossed ? 3 : 0}
-        alignItems="center"
-        spacing={1.25}
-        borderTop="0 !important"
-        borderLeft="0 !important"
-      >
-        <IconButton
-          variant="plain"
-          size="sm"
-          onClick={() => navigate({ to: "/staff" })}
-        >
-          <ArrowLeftIcon />
-        </IconButton>
-        <ClockCounterClockwiseIcon size={22} weight="fill" />
-        <Typography level={{ xs: "h6", sm: "h5" }} fontFamily="monospace">
-          Staff Activity
-        </Typography>
-      </Paper>
+      <StaffPanelHeader
+        title="Staff Activity"
+        icon={<ClockCounterClockwiseIcon size={22} weight="fill" />}
+      />
 
       <Paper
         flex={1}
@@ -170,7 +164,7 @@ function StaffActivityRoute() {
               onClick={() =>
                 navigate({
                   to: "/staff/users/$userId",
-                  params: { userId: entry.target.id }
+                  params: { userId: entry.target?.id }
                 })
               }
             >

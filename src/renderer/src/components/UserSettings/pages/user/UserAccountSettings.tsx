@@ -11,6 +11,7 @@ import { ChangePassword } from "@components/Modals/ChangePassword";
 import { Link } from "@components/Link";
 import { EmailChange } from "@components/Modals/EmailChange";
 import { UsernameChange } from "@components/Modals/UsernameChange";
+import { DeleteAccount } from "@components/Modals/DeleteAccount";
 import { useNavigate } from "@tanstack/react-router";
 import { ColorLike } from "@mutualzz/ui-core";
 
@@ -211,6 +212,22 @@ export const UserAccountSettings = observer(() => {
             onClick={() => openModal("change-password", <ChangePassword />)}
           >
             Change Password
+          </Button>
+        </Box>
+      </Stack>
+      <Stack direction="column" spacing={1.25} mt={5}>
+        <Typography fontWeight="bold" color="danger">
+          Danger Zone
+        </Typography>
+        <Typography level="body-sm">
+          Permanently deactivate your account. This cannot be undone.
+        </Typography>
+        <Box>
+          <Button
+            color="danger"
+            onClick={() => openModal("delete-account", <DeleteAccount />)}
+          >
+            Delete Account
           </Button>
         </Box>
       </Stack>

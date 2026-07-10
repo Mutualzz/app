@@ -1,10 +1,10 @@
 import { Button } from "@components/Button";
 import { Paper } from "@components/Paper";
+import { StaffPanelHeader } from "@components/Staff/StaffPanelHeader";
 import { useAppStore } from "@hooks/useStores";
 import type { APIAppeal } from "@mutualzz/types";
 import { Option, Select, Stack, Textarea, Typography } from "@mutualzz/ui-web";
-import { GavelIcon, ArrowLeftIcon } from "@phosphor-icons/react";
-import { IconButton } from "@renderer/components/IconButton";
+import { GavelIcon } from "@phosphor-icons/react";
 import {
   useInfiniteQuery,
   useMutation,
@@ -101,29 +101,10 @@ function StaffAppealsRoute() {
       width="100%"
       direction="column"
     >
-      <Paper
-        borderTopRightRadius={{ xs: "0.75rem", sm: "1.25rem", md: "1.5rem" }}
-        px={{ xs: "0.5rem", sm: 3 }}
-        py={{ xs: "0.5rem", sm: 4 }}
-        borderLeftWidth="0px !important"
-        elevation={embossed ? 3 : 0}
-        alignItems="center"
-        spacing={1.25}
-        borderTop="0 !important"
-        borderLeft="0 !important"
-      >
-        <IconButton
-          variant="plain"
-          size="sm"
-          onClick={() => navigate({ to: "/staff" })}
-        >
-          <ArrowLeftIcon />
-        </IconButton>
-        <GavelIcon size={22} weight="fill" />
-        <Typography level={{ xs: "h6", sm: "h5" }} fontFamily="monospace">
-          Appeals
-        </Typography>
-      </Paper>
+      <StaffPanelHeader
+        title="Appeals"
+        icon={<GavelIcon size={22} weight="fill" />}
+      />
 
       <Paper
         flex={1}
@@ -185,8 +166,10 @@ function StaffAppealsRoute() {
                       <b>
                         {appeal.user.globalName || appeal.user.username}
                       </b>
+                      {appeal.space ? ` · ${appeal.space.name}` : ""}
                     </Typography>
                     <Typography level="body-xs" textColor="muted">
+                      {appeal.space ? "Space lockdown appeal · " : ""}
                       {dayjs(appeal.createdAt).format("MMM D, YYYY h:mm A")}
                     </Typography>
                   </Stack>

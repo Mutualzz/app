@@ -2,7 +2,7 @@ import { makeAutoObservable, observable } from "mobx";
 import { makePersistable } from "mobx-persist-store";
 import { AppStore } from "@stores/App.store";
 import { Relationship } from "@stores/objects/Relationship";
-import { APIRelationship, Snowflake } from "@mutualzz/types";
+import { APIRelationship, APIInvite, Snowflake } from "@mutualzz/types";
 
 function relationshipKey(userId: Snowflake, otherUserId: Snowflake) {
   return BigInt(userId) < BigInt(otherUserId)
@@ -203,5 +203,17 @@ export class RelationshipStore {
 
   async unblockUser(userId: Snowflake) {
     return this.app.rest.delete(`/@me/relationships/${userId}/block`);
+  }
+
+  async getFriendInvite() {
+    return this.app.rest.get<APIInvite | null>(`/@me/invites/friend`);
+  }
+
+  async createFriendInvite() {
+    return this.app.rest.post<APIInvite>(`/@me/invites/friend`, {});
+  }
+
+  async acceptFriendInvite(code: string) {
+    return this.app.rest.put<APIRelationship>(`/invites/${code}/friend`, {});
   }
 }

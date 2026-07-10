@@ -14,6 +14,7 @@ import {
   CameraIcon,
   CheckIcon,
   PencilIcon,
+  ShieldIcon,
   UserIcon
 } from "@phosphor-icons/react";
 import { useNavigate } from "@tanstack/react-router";
@@ -227,6 +228,22 @@ export const AccountContextMenu = observer(({ account }: Props) => {
       >
         Edit Avatar
       </ContextItem>
+
+      {account.isStaff && (
+        <>
+          <Divider lineColor="muted" css={{ opacity: 0.45, marginBlock: 4 }} />
+          <ContextItem
+            startDecorator={<ShieldIcon weight="fill" />}
+            onClick={() => {
+              clearMenu();
+              navigate({ to: "/staff" });
+            }}
+            size="md"
+          >
+            Staff Panel
+          </ContextItem>
+        </>
+      )}
     </ContextMenu>
   );
 });

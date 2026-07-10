@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from "./routes/__root"
+import { Route as SupportRouteImport } from "./routes/support"
 import { Route as ResetRouteImport } from "./routes/reset"
 import { Route as RegisterRouteImport } from "./routes/register"
 import { Route as PrivacyRouteImport } from "./routes/privacy"
@@ -27,7 +28,7 @@ import { Route as AuthenticatedAvatarRouteRouteImport } from "./routes/_authenti
 import { Route as AuthenticatedAtmeRouteRouteImport } from "./routes/_authenticated/@me/route"
 import { Route as AuthenticatedStaffIndexRouteImport } from "./routes/_authenticated/staff/index"
 import { Route as AuthenticatedFeedIndexRouteImport } from "./routes/_authenticated/feed/index"
-import { Route as AuthenticatedStaffReportsRouteImport } from "./routes/_authenticated/staff/reports"
+import { Route as AuthenticatedStaffSupportRouteImport } from "./routes/_authenticated/staff/support"
 import { Route as AuthenticatedStaffAppealsRouteImport } from "./routes/_authenticated/staff/appeals"
 import { Route as AuthenticatedStaffActivityRouteImport } from "./routes/_authenticated/staff/activity"
 import { Route as AuthenticatedFeedScheduledRouteImport } from "./routes/_authenticated/feed/scheduled"
@@ -36,10 +37,19 @@ import { Route as AuthenticatedFeedFriendsRouteImport } from "./routes/_authenti
 import { Route as AuthenticatedAtmeFriendsRouteImport } from "./routes/_authenticated/@me/friends"
 import { Route as AuthenticatedSpacesSpaceIdRouteRouteImport } from "./routes/_authenticated/spaces/$spaceId/route"
 import { Route as AuthenticatedAtmeChannelIdRouteRouteImport } from "./routes/_authenticated/@me/$channelId/route"
+import { Route as AuthenticatedSupportTicketsIndexRouteImport } from "./routes/_authenticated/support/tickets/index"
+import { Route as AuthenticatedStaffReportsIndexRouteImport } from "./routes/_authenticated/staff/reports/index"
+import { Route as AuthenticatedSupportTicketsTicketIdRouteImport } from "./routes/_authenticated/support/tickets/$ticketId"
+import { Route as AuthenticatedStaffReportsReportIdRouteImport } from "./routes/_authenticated/staff/reports/$reportId"
 import { Route as AuthenticatedFeedPostsPostIdRouteImport } from "./routes/_authenticated/feed/posts/$postId"
 import { Route as AuthenticatedStaffUsersUserIdRouteRouteImport } from "./routes/_authenticated/staff/users/$userId/route"
 import { Route as AuthenticatedSpacesSpaceIdChannelIdRouteRouteImport } from "./routes/_authenticated/spaces/$spaceId/$channelId/route"
 
+const SupportRoute = SupportRouteImport.update({
+  id: "/support",
+  path: "/support",
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ResetRoute = ResetRouteImport.update({
   id: "/reset",
   path: "/reset",
@@ -132,10 +142,10 @@ const AuthenticatedFeedIndexRoute = AuthenticatedFeedIndexRouteImport.update({
   path: "/",
   getParentRoute: () => AuthenticatedFeedRouteRoute,
 } as any)
-const AuthenticatedStaffReportsRoute =
-  AuthenticatedStaffReportsRouteImport.update({
-    id: "/reports",
-    path: "/reports",
+const AuthenticatedStaffSupportRoute =
+  AuthenticatedStaffSupportRouteImport.update({
+    id: "/support",
+    path: "/support",
     getParentRoute: () => AuthenticatedStaffRouteRoute,
   } as any)
 const AuthenticatedStaffAppealsRoute =
@@ -185,6 +195,30 @@ const AuthenticatedAtmeChannelIdRouteRoute =
     path: "/$channelId",
     getParentRoute: () => AuthenticatedAtmeRouteRoute,
   } as any)
+const AuthenticatedSupportTicketsIndexRoute =
+  AuthenticatedSupportTicketsIndexRouteImport.update({
+    id: "/support/tickets/",
+    path: "/support/tickets/",
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedStaffReportsIndexRoute =
+  AuthenticatedStaffReportsIndexRouteImport.update({
+    id: "/reports/",
+    path: "/reports/",
+    getParentRoute: () => AuthenticatedStaffRouteRoute,
+  } as any)
+const AuthenticatedSupportTicketsTicketIdRoute =
+  AuthenticatedSupportTicketsTicketIdRouteImport.update({
+    id: "/support/tickets/$ticketId",
+    path: "/support/tickets/$ticketId",
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedStaffReportsReportIdRoute =
+  AuthenticatedStaffReportsReportIdRouteImport.update({
+    id: "/reports/$reportId",
+    path: "/reports/$reportId",
+    getParentRoute: () => AuthenticatedStaffRouteRoute,
+  } as any)
 const AuthenticatedFeedPostsPostIdRoute =
   AuthenticatedFeedPostsPostIdRouteImport.update({
     id: "/posts/$postId",
@@ -212,6 +246,7 @@ export interface FileRoutesByFullPath {
   "/privacy": typeof PrivacyRoute
   "/register": typeof RegisterRoute
   "/reset": typeof ResetRoute
+  "/support": typeof SupportRoute
   "/@me": typeof AuthenticatedAtmeRouteRouteWithChildren
   "/avatar": typeof AuthenticatedAvatarRouteRoute
   "/feed": typeof AuthenticatedFeedRouteRouteWithChildren
@@ -228,12 +263,16 @@ export interface FileRoutesByFullPath {
   "/feed/scheduled": typeof AuthenticatedFeedScheduledRoute
   "/staff/activity": typeof AuthenticatedStaffActivityRoute
   "/staff/appeals": typeof AuthenticatedStaffAppealsRoute
-  "/staff/reports": typeof AuthenticatedStaffReportsRoute
+  "/staff/support": typeof AuthenticatedStaffSupportRoute
   "/feed/": typeof AuthenticatedFeedIndexRoute
   "/staff/": typeof AuthenticatedStaffIndexRoute
   "/spaces/$spaceId/$channelId": typeof AuthenticatedSpacesSpaceIdChannelIdRouteRoute
   "/staff/users/$userId": typeof AuthenticatedStaffUsersUserIdRouteRoute
   "/feed/posts/$postId": typeof AuthenticatedFeedPostsPostIdRoute
+  "/staff/reports/$reportId": typeof AuthenticatedStaffReportsReportIdRoute
+  "/support/tickets/$ticketId": typeof AuthenticatedSupportTicketsTicketIdRoute
+  "/staff/reports/": typeof AuthenticatedStaffReportsIndexRoute
+  "/support/tickets/": typeof AuthenticatedSupportTicketsIndexRoute
 }
 export interface FileRoutesByTo {
   "/": typeof IndexRoute
@@ -243,6 +282,7 @@ export interface FileRoutesByTo {
   "/privacy": typeof PrivacyRoute
   "/register": typeof RegisterRoute
   "/reset": typeof ResetRoute
+  "/support": typeof SupportRoute
   "/@me": typeof AuthenticatedAtmeRouteRouteWithChildren
   "/avatar": typeof AuthenticatedAvatarRouteRoute
   "/profile": typeof AuthenticatedProfileRouteRoute
@@ -257,12 +297,16 @@ export interface FileRoutesByTo {
   "/feed/scheduled": typeof AuthenticatedFeedScheduledRoute
   "/staff/activity": typeof AuthenticatedStaffActivityRoute
   "/staff/appeals": typeof AuthenticatedStaffAppealsRoute
-  "/staff/reports": typeof AuthenticatedStaffReportsRoute
+  "/staff/support": typeof AuthenticatedStaffSupportRoute
   "/feed": typeof AuthenticatedFeedIndexRoute
   "/staff": typeof AuthenticatedStaffIndexRoute
   "/spaces/$spaceId/$channelId": typeof AuthenticatedSpacesSpaceIdChannelIdRouteRoute
   "/staff/users/$userId": typeof AuthenticatedStaffUsersUserIdRouteRoute
   "/feed/posts/$postId": typeof AuthenticatedFeedPostsPostIdRoute
+  "/staff/reports/$reportId": typeof AuthenticatedStaffReportsReportIdRoute
+  "/support/tickets/$ticketId": typeof AuthenticatedSupportTicketsTicketIdRoute
+  "/staff/reports": typeof AuthenticatedStaffReportsIndexRoute
+  "/support/tickets": typeof AuthenticatedSupportTicketsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -274,6 +318,7 @@ export interface FileRoutesById {
   "/privacy": typeof PrivacyRoute
   "/register": typeof RegisterRoute
   "/reset": typeof ResetRoute
+  "/support": typeof SupportRoute
   "/_authenticated/@me": typeof AuthenticatedAtmeRouteRouteWithChildren
   "/_authenticated/avatar": typeof AuthenticatedAvatarRouteRoute
   "/_authenticated/feed": typeof AuthenticatedFeedRouteRouteWithChildren
@@ -290,12 +335,16 @@ export interface FileRoutesById {
   "/_authenticated/feed/scheduled": typeof AuthenticatedFeedScheduledRoute
   "/_authenticated/staff/activity": typeof AuthenticatedStaffActivityRoute
   "/_authenticated/staff/appeals": typeof AuthenticatedStaffAppealsRoute
-  "/_authenticated/staff/reports": typeof AuthenticatedStaffReportsRoute
+  "/_authenticated/staff/support": typeof AuthenticatedStaffSupportRoute
   "/_authenticated/feed/": typeof AuthenticatedFeedIndexRoute
   "/_authenticated/staff/": typeof AuthenticatedStaffIndexRoute
   "/_authenticated/spaces/$spaceId/$channelId": typeof AuthenticatedSpacesSpaceIdChannelIdRouteRoute
   "/_authenticated/staff/users/$userId": typeof AuthenticatedStaffUsersUserIdRouteRoute
   "/_authenticated/feed/posts/$postId": typeof AuthenticatedFeedPostsPostIdRoute
+  "/_authenticated/staff/reports/$reportId": typeof AuthenticatedStaffReportsReportIdRoute
+  "/_authenticated/support/tickets/$ticketId": typeof AuthenticatedSupportTicketsTicketIdRoute
+  "/_authenticated/staff/reports/": typeof AuthenticatedStaffReportsIndexRoute
+  "/_authenticated/support/tickets/": typeof AuthenticatedSupportTicketsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -307,6 +356,7 @@ export interface FileRouteTypes {
     | "/privacy"
     | "/register"
     | "/reset"
+    | "/support"
     | "/@me"
     | "/avatar"
     | "/feed"
@@ -323,12 +373,16 @@ export interface FileRouteTypes {
     | "/feed/scheduled"
     | "/staff/activity"
     | "/staff/appeals"
-    | "/staff/reports"
+    | "/staff/support"
     | "/feed/"
     | "/staff/"
     | "/spaces/$spaceId/$channelId"
     | "/staff/users/$userId"
     | "/feed/posts/$postId"
+    | "/staff/reports/$reportId"
+    | "/support/tickets/$ticketId"
+    | "/staff/reports/"
+    | "/support/tickets/"
   fileRoutesByTo: FileRoutesByTo
   to:
     | "/"
@@ -338,6 +392,7 @@ export interface FileRouteTypes {
     | "/privacy"
     | "/register"
     | "/reset"
+    | "/support"
     | "/@me"
     | "/avatar"
     | "/profile"
@@ -352,12 +407,16 @@ export interface FileRouteTypes {
     | "/feed/scheduled"
     | "/staff/activity"
     | "/staff/appeals"
-    | "/staff/reports"
+    | "/staff/support"
     | "/feed"
     | "/staff"
     | "/spaces/$spaceId/$channelId"
     | "/staff/users/$userId"
     | "/feed/posts/$postId"
+    | "/staff/reports/$reportId"
+    | "/support/tickets/$ticketId"
+    | "/staff/reports"
+    | "/support/tickets"
   id:
     | "__root__"
     | "/"
@@ -368,6 +427,7 @@ export interface FileRouteTypes {
     | "/privacy"
     | "/register"
     | "/reset"
+    | "/support"
     | "/_authenticated/@me"
     | "/_authenticated/avatar"
     | "/_authenticated/feed"
@@ -384,12 +444,16 @@ export interface FileRouteTypes {
     | "/_authenticated/feed/scheduled"
     | "/_authenticated/staff/activity"
     | "/_authenticated/staff/appeals"
-    | "/_authenticated/staff/reports"
+    | "/_authenticated/staff/support"
     | "/_authenticated/feed/"
     | "/_authenticated/staff/"
     | "/_authenticated/spaces/$spaceId/$channelId"
     | "/_authenticated/staff/users/$userId"
     | "/_authenticated/feed/posts/$postId"
+    | "/_authenticated/staff/reports/$reportId"
+    | "/_authenticated/support/tickets/$ticketId"
+    | "/_authenticated/staff/reports/"
+    | "/_authenticated/support/tickets/"
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -401,12 +465,20 @@ export interface RootRouteChildren {
   PrivacyRoute: typeof PrivacyRoute
   RegisterRoute: typeof RegisterRoute
   ResetRoute: typeof ResetRoute
+  SupportRoute: typeof SupportRoute
   UsersUsernameRouteRoute: typeof UsersUsernameRouteRoute
   InviteCodeRoute: typeof InviteCodeRoute
 }
 
 declare module "@tanstack/react-router" {
   interface FileRoutesByPath {
+    "/support": {
+      id: "/support"
+      path: "/support"
+      fullPath: "/support"
+      preLoaderRoute: typeof SupportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     "/reset": {
       id: "/reset"
       path: "/reset"
@@ -533,11 +605,11 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof AuthenticatedFeedIndexRouteImport
       parentRoute: typeof AuthenticatedFeedRouteRoute
     }
-    "/_authenticated/staff/reports": {
-      id: "/_authenticated/staff/reports"
-      path: "/reports"
-      fullPath: "/staff/reports"
-      preLoaderRoute: typeof AuthenticatedStaffReportsRouteImport
+    "/_authenticated/staff/support": {
+      id: "/_authenticated/staff/support"
+      path: "/support"
+      fullPath: "/staff/support"
+      preLoaderRoute: typeof AuthenticatedStaffSupportRouteImport
       parentRoute: typeof AuthenticatedStaffRouteRoute
     }
     "/_authenticated/staff/appeals": {
@@ -595,6 +667,34 @@ declare module "@tanstack/react-router" {
       fullPath: "/@me/$channelId"
       preLoaderRoute: typeof AuthenticatedAtmeChannelIdRouteRouteImport
       parentRoute: typeof AuthenticatedAtmeRouteRoute
+    }
+    "/_authenticated/support/tickets/": {
+      id: "/_authenticated/support/tickets/"
+      path: "/support/tickets"
+      fullPath: "/support/tickets/"
+      preLoaderRoute: typeof AuthenticatedSupportTicketsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    "/_authenticated/staff/reports/": {
+      id: "/_authenticated/staff/reports/"
+      path: "/reports"
+      fullPath: "/staff/reports/"
+      preLoaderRoute: typeof AuthenticatedStaffReportsIndexRouteImport
+      parentRoute: typeof AuthenticatedStaffRouteRoute
+    }
+    "/_authenticated/support/tickets/$ticketId": {
+      id: "/_authenticated/support/tickets/$ticketId"
+      path: "/support/tickets/$ticketId"
+      fullPath: "/support/tickets/$ticketId"
+      preLoaderRoute: typeof AuthenticatedSupportTicketsTicketIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    "/_authenticated/staff/reports/$reportId": {
+      id: "/_authenticated/staff/reports/$reportId"
+      path: "/reports/$reportId"
+      fullPath: "/staff/reports/$reportId"
+      preLoaderRoute: typeof AuthenticatedStaffReportsReportIdRouteImport
+      parentRoute: typeof AuthenticatedStaffRouteRoute
     }
     "/_authenticated/feed/posts/$postId": {
       id: "/_authenticated/feed/posts/$postId"
@@ -691,19 +791,24 @@ const AuthenticatedSpacesRouteRouteWithChildren =
 interface AuthenticatedStaffRouteRouteChildren {
   AuthenticatedStaffActivityRoute: typeof AuthenticatedStaffActivityRoute
   AuthenticatedStaffAppealsRoute: typeof AuthenticatedStaffAppealsRoute
-  AuthenticatedStaffReportsRoute: typeof AuthenticatedStaffReportsRoute
+  AuthenticatedStaffSupportRoute: typeof AuthenticatedStaffSupportRoute
   AuthenticatedStaffIndexRoute: typeof AuthenticatedStaffIndexRoute
   AuthenticatedStaffUsersUserIdRouteRoute: typeof AuthenticatedStaffUsersUserIdRouteRoute
+  AuthenticatedStaffReportsReportIdRoute: typeof AuthenticatedStaffReportsReportIdRoute
+  AuthenticatedStaffReportsIndexRoute: typeof AuthenticatedStaffReportsIndexRoute
 }
 
 const AuthenticatedStaffRouteRouteChildren: AuthenticatedStaffRouteRouteChildren =
   {
     AuthenticatedStaffActivityRoute: AuthenticatedStaffActivityRoute,
     AuthenticatedStaffAppealsRoute: AuthenticatedStaffAppealsRoute,
-    AuthenticatedStaffReportsRoute: AuthenticatedStaffReportsRoute,
+    AuthenticatedStaffSupportRoute: AuthenticatedStaffSupportRoute,
     AuthenticatedStaffIndexRoute: AuthenticatedStaffIndexRoute,
     AuthenticatedStaffUsersUserIdRouteRoute:
       AuthenticatedStaffUsersUserIdRouteRoute,
+    AuthenticatedStaffReportsReportIdRoute:
+      AuthenticatedStaffReportsReportIdRoute,
+    AuthenticatedStaffReportsIndexRoute: AuthenticatedStaffReportsIndexRoute,
   }
 
 const AuthenticatedStaffRouteRouteWithChildren =
@@ -718,6 +823,8 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedProfileRouteRoute: typeof AuthenticatedProfileRouteRoute
   AuthenticatedSpacesRouteRoute: typeof AuthenticatedSpacesRouteRouteWithChildren
   AuthenticatedStaffRouteRoute: typeof AuthenticatedStaffRouteRouteWithChildren
+  AuthenticatedSupportTicketsTicketIdRoute: typeof AuthenticatedSupportTicketsTicketIdRoute
+  AuthenticatedSupportTicketsIndexRoute: typeof AuthenticatedSupportTicketsIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -727,6 +834,9 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedProfileRouteRoute: AuthenticatedProfileRouteRoute,
   AuthenticatedSpacesRouteRoute: AuthenticatedSpacesRouteRouteWithChildren,
   AuthenticatedStaffRouteRoute: AuthenticatedStaffRouteRouteWithChildren,
+  AuthenticatedSupportTicketsTicketIdRoute:
+    AuthenticatedSupportTicketsTicketIdRoute,
+  AuthenticatedSupportTicketsIndexRoute: AuthenticatedSupportTicketsIndexRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
@@ -741,6 +851,7 @@ const rootRouteChildren: RootRouteChildren = {
   PrivacyRoute: PrivacyRoute,
   RegisterRoute: RegisterRoute,
   ResetRoute: ResetRoute,
+  SupportRoute: SupportRoute,
   UsersUsernameRouteRoute: UsersUsernameRouteRoute,
   InviteCodeRoute: InviteCodeRoute,
 }

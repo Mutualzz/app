@@ -80,6 +80,7 @@ export const ChannelOverviewSettings = observer(({ space, channel }: Props) => {
               <MarkdownInput
                 value={draft.topic ?? ""}
                 gifPicker={false}
+                stickerPicker={false}
                 onChange={(value) => {
                   setDraft((prev) => ({ ...prev, topic: value }));
                 }}

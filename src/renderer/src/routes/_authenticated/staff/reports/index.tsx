@@ -1,10 +1,16 @@
 import { Button } from "@components/Button";
 import { Paper } from "@components/Paper";
+import {
+  getStaffReportLockdownLabel,
+  getStaffReportTakedownLabel,
+  staffReportReasonLabels,
+  staffReportStatusColors
+} from "@components/Staff/staffReportLabels";
+import { StaffPanelHeader } from "@components/Staff/StaffPanelHeader";
 import { useAppStore } from "@hooks/useStores";
 import type { APIReport, ReportStatus } from "@mutualzz/types";
 import { Option, Select, Stack, Typography } from "@mutualzz/ui-web";
-import { WarningIcon, ArrowLeftIcon } from "@phosphor-icons/react";
-import { IconButton } from "@renderer/components/IconButton";
+import { WarningIcon } from "@phosphor-icons/react";
 import {
   useInfiniteQuery,
   useMutation,
@@ -15,7 +21,7 @@ import dayjs from "dayjs";
 import { useState } from "react";
 import { toast } from "react-toastify";
 
-export const Route = createFileRoute("/_authenticated/staff/reports")({
+export const Route = createFileRoute("/_authenticated/staff/reports/")({
   component: StaffReportsRoute
 });
 
@@ -35,29 +41,9 @@ const targetTypeOptions: { value: string; label: string }[] = [
   { value: "message", label: "Message" },
   { value: "post", label: "Post" },
   { value: "comment", label: "Comment" },
-  { value: "user", label: "User" }
+  { value: "user", label: "User" },
+  { value: "space", label: "Space" }
 ];
-
-const reasonLabels: Record<string, string> = {
-  spam: "Spam",
-  harassment: "Harassment or Abuse",
-  hate_speech: "Hate Speech",
-  nsfw: "NSFW / Inappropriate Content",
-  self_harm: "Self-Harm or Suicide",
-  impersonation: "Impersonation",
-  misinformation: "Misinformation",
-  other: "Other"
-};
-
-const statusColors: Record<
-  string,
-  "warning" | "success" | "neutral" | "danger"
-> = {
-  pending: "warning",
-  reviewed: "success",
-  dismissed: "neutral",
-  actioned: "danger"
-};
 
 function StaffReportsRoute() {
   const app = useAppStore();
@@ -122,16 +108,36 @@ function StaffReportsRoute() {
       queryClient.invalidateQueries({ queryKey: ["staff-reports"] });
       toast.success(
         data.contentRemoved
-          ? "Content removed and report marked actioned"
-          : "Content was already removed; report marked actioned"
+          ? "Action completed and report marked actioned"
+          : "Target was already removed; report marked actioned"
       );
     },
     onError: (err) => {
       toast.error(
-        err instanceof Error ? err.message : "Failed to take down content"
+        err instanceof Error ? err.message : "Failed to complete action"
       );
     }
   });
+
+  const { mutate: lockdownSpace, isPending: lockingDown } = useMutation({
+    mutationKey: ["staff-report-lockdown"],
+    mutationFn: (reportId: string) =>
+      app.rest.post<{ report: APIReport; contentRemoved: boolean }>(
+        `/staff/reports/${reportId}/lockdown`,
+        {}
+      ),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["staff-reports"] });
+      toast.success("Space locked down and owner notified to appeal");
+    },
+    onError: (err) => {
+      toast.error(
+        err instanceof Error ? err.message : "Failed to lock down space"
+      );
+    }
+  });
+
+  const acting = takingDown || lockingDown;
 
   return (
     <Stack
@@ -141,29 +147,10 @@ function StaffReportsRoute() {
       width="100%"
       direction="column"
     >
-      <Paper
-        borderTopRightRadius={{ xs: "0.75rem", sm: "1.25rem", md: "1.5rem" }}
-        px={{ xs: "0.5rem", sm: 3 }}
-        py={{ xs: "0.5rem", sm: 4 }}
-        borderLeftWidth="0px !important"
-        elevation={embossed ? 3 : 0}
-        alignItems="center"
-        spacing={1.25}
-        borderTop="0 !important"
-        borderLeft="0 !important"
-      >
-        <IconButton
-          variant="plain"
-          size="sm"
-          onClick={() => navigate({ to: "/staff" })}
-        >
-          <ArrowLeftIcon />
-        </IconButton>
-        <WarningIcon size={22} weight="fill" />
-        <Typography level={{ xs: "h6", sm: "h5" }} fontFamily="monospace">
-          Reports
-        </Typography>
-      </Paper>
+      <StaffPanelHeader
+        title="Reports"
+        icon={<WarningIcon size={22} weight="fill" />}
+      />
 
       <Paper
         flex={1}
@@ -234,8 +221,10 @@ function StaffReportsRoute() {
                 >
                   <Stack direction="column" spacing={0.1}>
                     <Typography level="body-sm">
-                      <b>{reasonLabels[report.reason] ?? report.reason}</b> ·{" "}
-                      {report.targetType} {report.targetId}
+                      <b>
+                        {staffReportReasonLabels[report.reason] ?? report.reason}
+                      </b>{" "}
+                      · {report.targetType} {report.targetId}
                     </Typography>
                     <Typography level="body-xs" textColor="muted">
                       Reported by{" "}
@@ -247,7 +236,7 @@ function StaffReportsRoute() {
                   <Typography
                     level="body-xs"
                     fontWeight={700}
-                    color={statusColors[report.status] ?? "neutral"}
+                    color={staffReportStatusColors[report.status] ?? "neutral"}
                     css={{ textTransform: "uppercase" }}
                   >
                     {report.status}
@@ -260,41 +249,54 @@ function StaffReportsRoute() {
                   </Typography>
                 )}
 
-                {report.targetType === "user" && (
-                  <Button
-                    size="sm"
-                    color="neutral"
-                    variant="soft"
-                    css={{ alignSelf: "flex-start" }}
-                    onClick={() =>
-                      navigate({
-                        to: "/staff/users/$userId",
-                        params: { userId: report.targetId }
-                      })
-                    }
-                  >
-                    View Account
-                  </Button>
-                )}
+                <Button
+                  size="sm"
+                  color="neutral"
+                  variant="soft"
+                  css={{ alignSelf: "flex-start" }}
+                  onClick={() =>
+                    navigate({
+                      to: "/staff/reports/$reportId",
+                      params: { reportId: report.id }
+                    })
+                  }
+                >
+                  View Details
+                </Button>
 
                 {report.status === "pending" && (
                   <Stack direction="row" spacing={1} css={{ flexWrap: "wrap" }}>
+                    {report.targetType === "space" && (
+                      <Button
+                        size="sm"
+                        color="warning"
+                        variant="solid"
+                        disabled={acting || updatingStatus}
+                        onClick={() => lockdownSpace(report.id)}
+                      >
+                        {lockingDown
+                          ? "Working..."
+                          : getStaffReportLockdownLabel(report.targetType)}
+                      </Button>
+                    )}
                     {report.targetType !== "user" && (
                       <Button
                         size="sm"
                         color="danger"
                         variant="solid"
-                        disabled={takingDown || updatingStatus}
+                        disabled={acting || updatingStatus}
                         onClick={() => takedownContent(report.id)}
                       >
-                        {takingDown ? "Removing..." : "Take Down Content"}
+                        {takingDown
+                          ? "Working..."
+                          : getStaffReportTakedownLabel(report.targetType)}
                       </Button>
                     )}
                     <Button
                       size="sm"
                       color="success"
                       variant="soft"
-                      disabled={updatingStatus || takingDown}
+                      disabled={updatingStatus || acting}
                       onClick={() =>
                         updateStatus({
                           reportId: report.id,
@@ -308,7 +310,7 @@ function StaffReportsRoute() {
                       size="sm"
                       color="danger"
                       variant="soft"
-                      disabled={updatingStatus || takingDown}
+                      disabled={updatingStatus || acting}
                       onClick={() =>
                         updateStatus({
                           reportId: report.id,
@@ -322,7 +324,7 @@ function StaffReportsRoute() {
                       size="sm"
                       color="neutral"
                       variant="soft"
-                      disabled={updatingStatus || takingDown}
+                      disabled={updatingStatus || acting}
                       onClick={() =>
                         updateStatus({
                           reportId: report.id,

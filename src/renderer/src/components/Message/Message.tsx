@@ -30,6 +30,7 @@ import {
   ReplySection
 } from "./MessageBase";
 import { MessageEmbed } from "./MessageEmbed";
+import { CodedLinkPreview } from "@components/Space/CodedLinkPreview";
 import { MessageToolbar } from "./MessageToolbar";
 import { MessageInput } from "./MessageInput";
 import { MessageSticker } from "./MessageSticker";
@@ -41,6 +42,7 @@ import { MessageAttachment } from "./MessageAttachment";
 import { FileIcon } from "@phosphor-icons/react";
 import type { PendingAttachmentPreview } from "@stores/objects/QueuedMessage";
 import { UserProfilePopoutTrigger } from "../Profile/popout/UserProfilePopoutTrigger";
+import { shouldHideInviteUrlContent } from "@utils/inviteLinks";
 
 function formatBytes(bytes: number) {
   if (bytes < 1024) return `${bytes} B`;
@@ -392,7 +394,14 @@ export const Message = observer(
                     GIF_URL_PATTERN.test(message.content.trim()) &&
                     !message.content.trim().includes(" ");
 
-                  if (isOnlyGifUrl) return null;
+                  const hideInviteUrl =
+                    "codedLinks" in message &&
+                    shouldHideInviteUrlContent(
+                      message.content,
+                      message.codedLinks?.length ?? 0,
+                    );
+
+                  if (isOnlyGifUrl || hideInviteUrl) return null;
                   return (
                     <Stack alignItems="center" spacing={1.25}>
                       <MarkdownRenderer
@@ -445,6 +454,14 @@ export const Message = observer(
               <Stack pb={0.25}>
                 {message.embeds.map((embed, index) => (
                   <MessageEmbed key={index} embed={embed} />
+                ))}
+              </Stack>
+            )}
+
+            {"codedLinks" in message && message.codedLinks.length > 0 && (
+              <Stack pb={0.25} spacing={1}>
+                {message.codedLinks.map((link) => (
+                  <CodedLinkPreview key={link.code} link={link} />
                 ))}
               </Stack>
             )}

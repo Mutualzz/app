@@ -1,12 +1,16 @@
 import { AnimatedPaper } from "@components/Animated/AnimatedPaper";
 import { Link } from "@components/Link";
+import { UserAvatar } from "@components/User/UserAvatar";
+import { DMGroupAvatar } from "@components/DMChannel/DMGroupAvatar";
 import { useAppStore } from "@hooks/useStores";
 import type { APIInvite } from "@mutualzz/types";
-import { HttpException } from "@mutualzz/types";
+import { ChannelType, HttpException, InviteType } from "@mutualzz/types";
 import {
   Button,
   ButtonGroup,
+  Divider,
   Input,
+  InputDefault,
   Option,
   Select,
   Stack,
@@ -15,12 +19,14 @@ import {
 import type { Channel } from "@stores/objects/Channel";
 import { Invite } from "@stores/objects/Invite";
 import type { Space } from "@stores/objects/Space";
+import type { User } from "@stores/objects/User";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { observer } from "mobx-react-lite";
-import { useEffect, useState } from "react";
+import { type ChangeEvent, useEffect, useRef, useState } from "react";
 import { isElectron } from "@utils/index";
-import { CopyIcon } from "@phosphor-icons/react";
+import Snowflake from "@utils/Snowflake";
+import { CheckIcon, CopyIcon } from "@phosphor-icons/react";
 
 interface Props {
   channel?: Channel | null;
@@ -48,6 +54,46 @@ const maxUses = [
 
 type CreateInviteResponse = APIInvite & { editSessionId?: string };
 
+const InviteSendRow = observer(
+  ({
+    avatar,
+    name,
+    sent,
+    sending,
+    onSend
+  }: {
+    avatar: React.ReactNode;
+    name: React.ReactNode;
+    sent: boolean;
+    sending: boolean;
+    onSend: () => void;
+  }) => (
+    <Stack
+      direction="row"
+      spacing={2}
+      alignItems="center"
+      justifyContent="space-between"
+      width="100%"
+    >
+      <Stack direction="row" spacing={2} alignItems="center" minWidth={0}>
+        {avatar}
+        <Typography css={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+          {name}
+        </Typography>
+      </Stack>
+
+      <Button
+        size="sm"
+        variant={sent ? "soft" : "solid"}
+        disabled={sent || sending}
+        onClick={onSend}
+      >
+        {sent ? <CheckIcon /> : sending ? "Sending…" : "Send"}
+      </Button>
+    </Stack>
+  )
+);
+
 export const SpaceInviteToSpaceModal = observer(({ channel }: Props) => {
   const app = useAppStore();
   const [editing, setEditing] = useState(false);
@@ -56,6 +102,10 @@ export const SpaceInviteToSpaceModal = observer(({ channel }: Props) => {
   const [invite, setInvite] = useState<Invite | null>(null);
   const [copied, setCopied] = useState(false);
   const [editSessionId, setEditSessionId] = useState<string | null>(null);
+  const [search, setSearch] = useState<string | null>(null);
+  const [sentTo, setSentTo] = useState<Set<string>>(new Set());
+  const [sendingTo, setSendingTo] = useState<Set<string>>(new Set());
+  const sendingKeysRef = useRef<Set<string>>(new Set());
 
   const { data, isLoading, error } = useQuery<
     CreateInviteResponse | undefined,
@@ -138,6 +188,93 @@ export const SpaceInviteToSpaceModal = observer(({ channel }: Props) => {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const runSend = async (key: string, action: () => Promise<void>) => {
+    if (!invite?.code || sentTo.has(key) || sendingKeysRef.current.has(key))
+      return;
+
+    sendingKeysRef.current.add(key);
+    setSendingTo(new Set(sendingKeysRef.current));
+
+    try {
+      await action();
+      setSentTo((prev) => new Set(prev).add(key));
+    } finally {
+      sendingKeysRef.current.delete(key);
+      setSendingTo(new Set(sendingKeysRef.current));
+    }
+  };
+
+  const sendToChannel = (targetChannel: Channel, key: string) =>
+    runSend(key, async () => {
+      await targetChannel.sendMessage({
+        content: "",
+        nonce: Snowflake.generate(),
+        codedLinks: [{ type: InviteType.Space, code: invite!.code }]
+      });
+    });
+
+  const sendToFriend = (friend: User) => {
+    const key = `friend:${friend.id}`;
+
+    return runSend(key, async () => {
+      const dmChannel = await app.channels.openDM(friend.id);
+      await dmChannel.sendMessage({
+        content: "",
+        nonce: Snowflake.generate(),
+        codedLinks: [{ type: InviteType.Space, code: invite!.code }]
+      });
+    });
+  };
+
+  const onChangeSearch = (e: ChangeEvent<HTMLInputElement>) => {
+    setSearch(e.target.value.trim().length === 0 ? null : e.target.value);
+  };
+
+  const spaceMemberIds = new Set(
+    app.spaces.active?.members.all.map((member) => member.userId) ?? []
+  );
+
+  const matchesSearch = (user: User) =>
+    !search ||
+    user.displayName.toLowerCase().includes(search.toLowerCase()) ||
+    user.username.toLowerCase().includes(search.toLowerCase());
+
+  const dmUserIds = new Set(
+    app.channels.dms
+      .filter((ch) => ch.type === ChannelType.DM)
+      .map((ch) => ch.dmRecipient?.id)
+      .filter((id): id is string => !!id)
+  );
+
+  const filteredDms = app.channels.dms.filter((ch) => {
+    if (ch.type === ChannelType.DM) {
+      const recipient = ch.dmRecipient;
+      if (!recipient || spaceMemberIds.has(recipient.id)) return false;
+      return matchesSearch(recipient);
+    }
+
+    const recipients =
+      ch.recipients?.filter(
+        (user) => user.id !== app.account?.id && !spaceMemberIds.has(user.id)
+      ) ?? [];
+
+    if (recipients.length === 0) return false;
+    if (!search) return true;
+
+    return recipients.some((user) => matchesSearch(user));
+  });
+
+  const friendsWithoutDM = app.relationships.all
+    .filter((relationship) => relationship.isFriend)
+    .map((relationship) => relationship.otherUser)
+    .filter((user): user is User => !!user)
+    .filter((user) => !dmUserIds.has(user.id))
+    .filter((user) => !spaceMemberIds.has(user.id))
+    .filter(matchesSearch);
+
+  const hasSuggestedUsers =
+    filteredDms.length > 0 || friendsWithoutDM.length > 0;
+
   return (
     <AnimatedPaper
       elevation={app.settings?.preferEmbossed ? 5 : 1}
@@ -147,16 +284,18 @@ export const SpaceInviteToSpaceModal = observer(({ channel }: Props) => {
       direction="column"
       transparency={65}
       minHeight={300}
+      maxHeight="85vh"
       initial={{ scale: 0.95 }}
       animate={{ scale: 1 }}
       alignItems="center"
-      justifyContent={editing ? "center" : "space-between"}
+      justifyContent={editing ? "center" : "flex-start"}
       spacing={0}
       px={{ xs: "0.75rem", sm: "1.5rem" }}
       py={{
         xs: "0.5rem",
         sm: "1rem"
       }}
+      overflow="hidden"
     >
       {editing && (
         <>
@@ -228,13 +367,15 @@ export const SpaceInviteToSpaceModal = observer(({ channel }: Props) => {
         </>
       )}
       {!editing && (
-        <>
-          <Stack
-            width="100%"
-            direction="column"
-            justifyContent="center"
-            spacing={1}
-          >
+        <Stack
+          width="100%"
+          direction="column"
+          spacing={2.5}
+          flex={1}
+          minHeight={0}
+          overflow="hidden"
+        >
+          <Stack direction="column" spacing={1}>
             <Typography level="h5" fontWeight="bold">
               Invite friends to {app.spaces.active?.name || "Unknown Space"}
             </Typography>
@@ -242,6 +383,87 @@ export const SpaceInviteToSpaceModal = observer(({ channel }: Props) => {
               Recipients will land in #{channelToUse?.name || "Unknown"}
             </Typography>
           </Stack>
+
+          {!isLoading && !error && invite && (
+            <Stack direction="column" spacing={1.5} flex={1} minHeight={0}>
+              <InputDefault
+                placeholder="Search friends"
+                value={search || ""}
+                onChange={onChangeSearch}
+              />
+              <Stack
+                direction="column"
+                spacing={1.5}
+                flex={1}
+                minHeight={0}
+                overflow="auto"
+                pr={0.5}
+              >
+                {!hasSuggestedUsers && (
+                  <Typography level="body-sm" textColor="secondary">
+                    {search
+                      ? "No results."
+                      : "No friends to invite. Share the link below instead."}
+                  </Typography>
+                )}
+
+                {filteredDms.map((targetChannel) => {
+                  const isGroupDM = targetChannel.type === ChannelType.GroupDM;
+
+                  return (
+                    <InviteSendRow
+                      key={targetChannel.id}
+                      avatar={
+                        isGroupDM ? (
+                          <DMGroupAvatar
+                            users={targetChannel.dmRecipientsList}
+                            size={36}
+                          />
+                        ) : (
+                          <UserAvatar user={targetChannel.dmRecipient} size="sm" />
+                        )
+                      }
+                      name={
+                        isGroupDM
+                          ? (targetChannel.name ??
+                            targetChannel.dmRecipients
+                              .map((recipient) => recipient.displayName)
+                              .join(", "))
+                          : targetChannel.dmRecipient?.displayName
+                      }
+                      sent={sentTo.has(targetChannel.id)}
+                      sending={sendingTo.has(targetChannel.id)}
+                      onSend={() => {
+                        sendToChannel(targetChannel, targetChannel.id).catch(
+                          () => null
+                        );
+                      }}
+                    />
+                  );
+                })}
+
+                {filteredDms.length > 0 && friendsWithoutDM.length > 0 && (
+                  <Divider />
+                )}
+
+                {friendsWithoutDM.map((friend) => (
+                  <InviteSendRow
+                    key={friend.id}
+                    avatar={<UserAvatar user={friend} size="sm" />}
+                    name={friend.displayName}
+                    sent={sentTo.has(`friend:${friend.id}`)}
+                    sending={sendingTo.has(`friend:${friend.id}`)}
+                    onSend={() => {
+                      sendToFriend(friend).catch(() => null);
+                    }}
+                  />
+                ))}
+              </Stack>
+            </Stack>
+          )}
+
+          <Divider />
+
           <Stack direction="column" width="100%" spacing={1}>
             <Typography level="body-sm">Invite Link</Typography>
             <Input
@@ -300,7 +522,7 @@ export const SpaceInviteToSpaceModal = observer(({ channel }: Props) => {
               )}
             </Stack>
           </Stack>
-        </>
+        </Stack>
       )}
     </AnimatedPaper>
   );

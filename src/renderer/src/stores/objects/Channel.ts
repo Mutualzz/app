@@ -424,6 +424,7 @@ export class Channel {
           repliedToId?: string;
           mentionReply?: boolean;
           sharedPostId?: string;
+          codedLinks?: Array<{ type: 0 | 1; code: string }>;
         }
       | FormData,
     msg?: QueuedMessage
@@ -452,6 +453,7 @@ export class Channel {
           repliedToId?: string;
           mentionReply?: boolean;
           sharedPostId?: string;
+          codedLinks?: Array<{ type: 0 | 1; code: string }>;
         }
       >(`/channels/${this.id}/messages`, data)
       .catch((err) => {

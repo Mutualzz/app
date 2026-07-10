@@ -16,7 +16,8 @@ import { generateMenuIDs } from "@contexts/ContextMenu.context";
 import { SpaceActionConfirm } from "@components/Modals/SpaceActionConfirm";
 import { ContextItem } from "@components/ContextItem";
 import type { SpaceSettingsCategories } from "@components/SpaceSettings/SpaceSettings.context";
-import { ArrowRightIcon, DoorOpenIcon } from "@phosphor-icons/react";
+import { ReportContentModal } from "@components/Modals/ReportContentModal";
+import { ArrowRightIcon, DoorOpenIcon, FlagIcon } from "@phosphor-icons/react";
 
 interface Props {
   space: Space;
@@ -116,20 +117,40 @@ export const SpaceContextMenu = observer(
           </Stack>
         )}
         {!isOwner && (
-          <ContextItem
-            color="danger"
-            endDecorator={<DoorOpenIcon />}
-            onClick={() =>
-              openModal(
-                "leave-space-confirm",
-                <SpaceActionConfirm space={space} action="leave" />
-              )
-            }
-            id={`space-leave-${space.id}`}
-            textColor={undefined}
-          >
-            Leave Space
-          </ContextItem>
+          <>
+            <ContextItem
+              color="danger"
+              endDecorator={<FlagIcon weight="fill" />}
+              onClick={() =>
+                openModal(
+                  `report-space-${space.id}`,
+                  <ReportContentModal
+                    targetType="space"
+                    targetId={space.id}
+                    contentLabel="this space"
+                    modalId={`report-space-${space.id}`}
+                  />
+                )
+              }
+              id={`space-report-${space.id}`}
+            >
+              Report Space
+            </ContextItem>
+            <ContextItem
+              color="danger"
+              endDecorator={<DoorOpenIcon />}
+              onClick={() =>
+                openModal(
+                  "leave-space-confirm",
+                  <SpaceActionConfirm space={space} action="leave" />
+                )
+              }
+              id={`space-leave-${space.id}`}
+              textColor={undefined}
+            >
+              Leave Space
+            </ContextItem>
+          </>
         )}
       </ContextMenu>
     );

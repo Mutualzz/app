@@ -190,16 +190,16 @@ export const MessageList = observer(({ channel: channelProp }: Props) => {
     if (!lastMessage || "status" in lastMessage) return;
 
     const readState = app.readStates.get(channel.id);
-    if (readState?.lastMessageId === lastMessage.id) return;
+    if (readState?.isReadUpTo(lastMessage.id)) return;
 
     app.readStates.updateLocal(channel.id, lastMessage.id);
     sendAck(lastMessage.id);
-  }, [channel?.id, channel?.messages.groups, sendAck]);
+  }, [channel?.id, channel?.lastMessage?.id, channel?.messages.groups, sendAck, app.readStates]);
 
   useEffect(() => {
     if (!channel?.id) return;
     ackLatest();
-  }, [channel?.id]);
+  }, [channel?.id, channel?.messages.groups, ackLatest]);
 
   const onScroll = useCallback((e: UIEvent<HTMLDivElement>) => {
     const el = e.currentTarget;

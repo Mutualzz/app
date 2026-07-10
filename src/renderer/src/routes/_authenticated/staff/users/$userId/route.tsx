@@ -1,4 +1,5 @@
 import { Paper } from "@components/Paper";
+import { StaffPanelHeader } from "@components/Staff/StaffPanelHeader";
 import { StaffUserActionsSection } from "@components/Staff/sections/StaffUserActionsSection";
 import { StaffUserAuditSection } from "@components/Staff/sections/StaffUserAuditSection";
 import { StaffUserFlagsSection } from "@components/Staff/sections/StaffUserFlagsSection";
@@ -13,6 +14,7 @@ import {
 import { useAppStore } from "@hooks/useStores";
 import type { APIPrivateUser } from "@mutualzz/types";
 import { Stack, Typography } from "@mutualzz/ui-web";
+import { UserIcon } from "@phosphor-icons/react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
@@ -109,20 +111,10 @@ function StaffUserRoute() {
         width="100%"
         direction="column"
       >
-        <Paper
-          px={{ xs: "0.5rem", sm: 3 }}
-          py={{ xs: "0.5rem", sm: 4 }}
-          borderLeftWidth="0px !important"
-          elevation={embossed ? 3 : 0}
-          alignItems="center"
-          spacing={1.25}
-          borderTop="0 !important"
-          borderLeft="0 !important"
-        >
-          <Typography level={{ xs: "h6", sm: "h5" }} fontFamily="monospace">
-            {staffSectionTitles[section]}
-          </Typography>
-        </Paper>
+        <StaffPanelHeader
+          title={user.globalName || user.username}
+          icon={<UserIcon size={22} weight="fill" />}
+        />
 
         <Paper
           flex={1}
@@ -138,6 +130,9 @@ function StaffUserRoute() {
           borderLeft="0 !important"
           borderBottom="0 !important"
         >
+          <Typography level="body-sm" textColor="muted" fontWeight={600}>
+            {staffSectionTitles[section]}
+          </Typography>
           {section === "info" && (
             <StaffUserInfoSection user={user} onUpdated={handleUpdated} />
           )}

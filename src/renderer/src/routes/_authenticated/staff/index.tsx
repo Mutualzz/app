@@ -1,5 +1,6 @@
 import { Button } from "@components/Button";
 import { Paper } from "@components/Paper";
+import { StaffPanelHeader } from "@components/Staff/StaffPanelHeader";
 import {
   buildProfileAvatarUrl,
   getUserDisplayName
@@ -18,6 +19,7 @@ import {
 import {
   ClockCounterClockwiseIcon,
   GavelIcon,
+  LifebuoyIcon,
   MagnifyingGlassIcon,
   ShieldIcon,
   WarningIcon
@@ -138,51 +140,48 @@ function StaffIndexRoute() {
       width="100%"
       direction="column"
     >
-      <Paper
-        borderTopRightRadius={{ xs: "0.75rem", sm: "1.25rem", md: "1.5rem" }}
-        px={{ xs: "0.5rem", sm: 3 }}
-        py={{ xs: "0.5rem", sm: 4 }}
-        borderLeftWidth="0px !important"
-        elevation={embossed ? 3 : 0}
-        alignItems="center"
-        justifyContent="space-between"
-        spacing={1.25}
-        borderTop="0 !important"
-        borderLeft="0 !important"
-      >
-        <Stack direction="row" alignItems="center" spacing={1.25}>
-          <ShieldIcon size={22} weight="fill" />
-          <Typography level={{ xs: "h6", sm: "h5" }} fontFamily="monospace">
-            Staff Panel
-          </Typography>
-        </Stack>
-        <Stack direction="row" spacing={1}>
-          <Button
-            size="sm"
-            variant="soft"
-            startDecorator={<WarningIcon />}
-            onClick={() => navigate({ to: "/staff/reports" })}
-          >
-            Reports
-          </Button>
-          <Button
-            size="sm"
-            variant="soft"
-            startDecorator={<ClockCounterClockwiseIcon />}
-            onClick={() => navigate({ to: "/staff/activity" })}
-          >
-            Activity
-          </Button>
-          <Button
-            size="sm"
-            variant="soft"
-            startDecorator={<GavelIcon />}
-            onClick={() => navigate({ to: "/staff/appeals" })}
-          >
-            Appeals
-          </Button>
-        </Stack>
-      </Paper>
+      <StaffPanelHeader
+        title="Staff Panel"
+        backTo="home"
+        backLabel="Exit"
+        icon={<ShieldIcon size={22} weight="fill" />}
+        trailing={
+          <Stack direction="row" spacing={1} flexWrap="wrap">
+            <Button
+              size="sm"
+              variant="soft"
+              startDecorator={<WarningIcon />}
+              onClick={() => navigate({ to: "/staff/reports" })}
+            >
+              Reports
+            </Button>
+            <Button
+              size="sm"
+              variant="soft"
+              startDecorator={<ClockCounterClockwiseIcon />}
+              onClick={() => navigate({ to: "/staff/activity" })}
+            >
+              Activity
+            </Button>
+            <Button
+              size="sm"
+              variant="soft"
+              startDecorator={<GavelIcon />}
+              onClick={() => navigate({ to: "/staff/appeals" })}
+            >
+              Appeals
+            </Button>
+            <Button
+              size="sm"
+              variant="soft"
+              startDecorator={<LifebuoyIcon />}
+              onClick={() => navigate({ to: "/staff/support" })}
+            >
+              Support
+            </Button>
+          </Stack>
+        }
+      />
 
       <Paper
         flex={1}

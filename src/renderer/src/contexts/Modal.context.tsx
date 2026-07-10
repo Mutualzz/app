@@ -2,6 +2,10 @@ import type { CSSObject } from "@emotion/react";
 import { useAppStore } from "@hooks/useStores";
 import type { ModalProps } from "@mutualzz/ui-web";
 import { reaction } from "mobx";
+import {
+  isModalAllowedDuringSpaceLockdown,
+  notifySpaceLockdownBlocked
+} from "@utils/spaceLockdown";
 import { observer } from "mobx-react-lite";
 import {
   createContext,
@@ -69,6 +73,15 @@ export const ModalProvider = observer(({ children }: PropsWithChildren) => {
       content: ReactNode,
       props: Partial<ModalProps> & { css?: CSSObject } = {}
     ) => {
+      const activeSpace = app.spaces.active;
+      if (
+        activeSpace?.isInLockdown &&
+        !isModalAllowedDuringSpaceLockdown(id)
+      ) {
+        notifySpaceLockdownBlocked();
+        return;
+      }
+
       setModals((prev) => [
         ...prev,
         {
@@ -82,7 +95,7 @@ export const ModalProvider = observer(({ children }: PropsWithChildren) => {
         }
       ]);
     },
-    []
+    [app.spaces.active]
   );
 
   const closeModal = useCallback((id?: string) => {

@@ -36,10 +36,11 @@ export const ProfileViewerPage = observer(
     });
     const identifier = username.trim().toLowerCase();
 
-    const { isLoading: userLoading } = useQuery({
+    const { isLoading: userLoading, isError: userError } = useQuery({
       queryKey: ["user", identifier],
-      queryFn: () => app.users.resolveByIdentifier(identifier),
-      enabled: !initialUser
+      queryFn: () => app.users.resolveByIdentifier(identifier, true),
+      enabled: !initialUser,
+      retry: false,
     });
 
     const viewerUser = (() => {
@@ -54,10 +55,11 @@ export const ProfileViewerPage = observer(
 
     const userId = viewerUser?.id;
 
-    const { isLoading: profileLoading } = useQuery({
+    const { isLoading: profileLoading, isError: profileError } = useQuery({
       queryKey: ["profile", userId],
-      enabled: !!userId && !initialProfile,
-      queryFn: () => app.profiles.resolve(userId!, true)
+      enabled: !!userId && !initialProfile && !userError,
+      queryFn: () => app.profiles.resolve(userId!, true),
+      retry: false,
     });
 
     const cachedProfile = userId ? app.profiles.get(userId) : undefined;
@@ -95,7 +97,7 @@ export const ProfileViewerPage = observer(
 
     if ((userLoading || profileLoading) && !viewerUser) return <Loading />;
 
-    if (!viewerUser || !profile) {
+    if (userError || profileError || !viewerUser || !profile) {
       return (
         <ProfileLayout
           title="Profile"

@@ -2,7 +2,7 @@ import { AnimatedPaper } from "@components/Animated/AnimatedPaper";
 import { Link } from "@components/Link";
 import { useModal } from "@contexts/Modal.context";
 import { useAppStore } from "@hooks/useStores";
-import type { APIInvite, APISpaceMember } from "@mutualzz/types";
+import { type APIInvite, type APISpaceMember, InviteType } from "@mutualzz/types";
 import {
   Button,
   ButtonGroup,
@@ -90,7 +90,20 @@ export const SpaceJoin = observer(({ setCreating }: Props) => {
     onSuccess: (invite) => {
       if (!invite) return;
 
+      if (Number(invite.type) === InviteType.Friend) {
+        navigate({
+          to: "/invite/$code",
+          params: { code: invite.code },
+          replace: true
+        });
+        closeModal();
+        return;
+      }
+
       joinSpace(invite);
+    },
+    onError: (err) => {
+      toast.error(err.message);
     }
   });
 

@@ -89,7 +89,8 @@ function RouteComponent() {
             <>
               <Typography textColor="secondary">
                 Explain why you believe this decision should be reconsidered. A
-                staff member will review your appeal.
+                staff member will review your appeal. Space lockdown appeals can
+                only be submitted by the space owner using the email link.
               </Typography>
               <Textarea
                 value={message}

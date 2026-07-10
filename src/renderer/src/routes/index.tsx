@@ -16,7 +16,7 @@ function RouteComponent() {
 
   if (app.isAppLoading) return null;
 
-  if (app.joiningSpace && app.joiningInviteCode) {
+  if (app.joiningInviteCode) {
     return (
       <Navigate
         to="/invite/$code"

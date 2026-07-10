@@ -114,7 +114,10 @@ function Privacy() {
                   platform.
                 </Typography>
                 <Typography>
-                  • Protecting the security and integrity of the Service.
+                  • Protecting the security and integrity of the Service,
+                  including reviewing reported content and limited surrounding
+                  context (such as a few nearby messages in a direct message or
+                  channel) when investigating safety reports.
                 </Typography>
                 <Typography>
                   • Monitoring usage and improving performance.
@@ -175,6 +178,14 @@ function Privacy() {
                   • <b>Visibility:</b> Depending on your privacy settings, your
                   content may be public, visible to all members of a Space, or
                   visible only to your connections.
+                </Typography>
+                <Typography>
+                  • <b>Moderation:</b> If you report content, authorized Mutualzz
+                  staff may review the reported item and a small amount of
+                  nearby context to investigate the report. Staff do not browse
+                  private conversations outside of reported content. Spaces may
+                  be locked down or removed for policy violations; locked space
+                  owners can appeal by email.
                 </Typography>
                 <Typography>
                   • <b>Responsibility:</b> You are responsible for the content

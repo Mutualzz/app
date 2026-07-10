@@ -7,15 +7,58 @@ import { UserItem } from "@components/Friends/UserItem";
 import { UserAvatar } from "@components/User/UserAvatar";
 import { useAppStore } from "@hooks/useStores";
 import { Avatar, Popover, Stack, Typography, useTheme } from "@mutualzz/ui-web";
-import { ChannelType } from "@mutualzz/types";
+import { ChannelType, ReadStateType } from "@mutualzz/types";
 import type { Channel } from "@stores/objects/Channel";
 import type { AcceptedFriendNotification } from "@stores/Relationship.store";
+import type { AppStore } from "@stores/App.store";
 import { useNavigate } from "@tanstack/react-router";
-import { TrayIcon, XIcon } from "@phosphor-icons/react";
+import { CheckIcon, TrayIcon, XIcon } from "@phosphor-icons/react";
 import { observer } from "mobx-react-lite";
 import { useState } from "react";
 
 type NotificationTab = "unreads" | "requests" | "mentions";
+
+async function markChannelsAsRead(app: AppStore, channels: Channel[]) {
+  const payload = channels
+    .map((channel) => {
+      const lastMessage = channel.lastMessage;
+      if (!lastMessage || "status" in lastMessage) return null;
+
+      return {
+        channelId: channel.id,
+        lastMessageId: lastMessage.id,
+        type: ReadStateType.Messages
+      };
+    })
+    .filter((entry) => entry !== null);
+
+  if (!payload.length) return;
+
+  for (const { channelId, lastMessageId } of payload) {
+    app.readStates.updateLocal(channelId, lastMessageId);
+  }
+
+  await app.readStates.ackBulk(payload);
+}
+
+const MarkAsReadButton = ({
+  onClick,
+  disabled
+}: {
+  onClick: (e: React.MouseEvent) => void;
+  disabled?: boolean;
+}) => (
+  <IconButton
+    size={14}
+    padding={4}
+    variant="plain"
+    disabled={disabled}
+    onClick={onClick}
+    title="Mark as read"
+  >
+    <CheckIcon />
+  </IconButton>
+);
 
 const NotificationBadge = ({ count }: { count: number }) => {
   const { theme } = useTheme();
@@ -86,7 +129,8 @@ const PREVIEW_MAX_CHARS = 80;
 const UnreadDMChannelItem = observer(({ channel }: { channel: Channel }) => {
   const app = useAppStore();
   const navigate = useNavigate();
-  const mentionCount = app.readStates.get(channel.id)?.mentionCount ?? 0;
+  const readState = app.readStates.get(channel.id);
+  const mentionCount = readState?.mentionCount ?? 0;
   const message = channel.lastMessage;
 
   const recipient = channel.dmRecipient;
@@ -174,7 +218,16 @@ const UnreadDMChannelItem = observer(({ channel }: { channel: Channel }) => {
           </Typography>
         </Stack>
       </Stack>
-      <NotificationBadge count={mentionCount} />
+      <Stack direction="row" alignItems="center" spacing={1} flexShrink={0}>
+        <MarkAsReadButton
+          disabled={!readState?.isUnread}
+          onClick={(e) => {
+            e.stopPropagation();
+            void readState?.ack();
+          }}
+        />
+        <NotificationBadge count={mentionCount} />
+      </Stack>
     </Paper>
   );
 });
@@ -183,7 +236,8 @@ const MentionedChannelItem = observer(({ channel }: { channel: Channel }) => {
   const app = useAppStore();
   const navigate = useNavigate();
   const space = channel.space;
-  const mentionCount = app.readStates.get(channel.id)?.mentionCount ?? 0;
+  const readState = app.readStates.get(channel.id);
+  const mentionCount = readState?.mentionCount ?? 0;
   const message = channel.lastMentionMessage;
 
   if (!space) return null;
@@ -262,7 +316,16 @@ const MentionedChannelItem = observer(({ channel }: { channel: Channel }) => {
           )}
         </Stack>
       </Stack>
-      <NotificationBadge count={mentionCount} />
+      <Stack direction="row" alignItems="center" spacing={1} flexShrink={0}>
+        <MarkAsReadButton
+          disabled={mentionCount <= 0}
+          onClick={(e) => {
+            e.stopPropagation();
+            void readState?.ack();
+          }}
+        />
+        <NotificationBadge count={mentionCount} />
+      </Stack>
     </Paper>
   );
 });
@@ -291,12 +354,28 @@ export const NotificationCenterButton = observer(() => {
     setTab(next);
   };
 
+  const canMarkAllAsRead =
+    (activeTab === "unreads" && unreadDMs.length > 0) ||
+    (activeTab === "mentions" && mentionedChannels.length > 0);
+
+  const markAllAsRead = (e: React.MouseEvent) => {
+    e.stopPropagation();
+
+    if (activeTab === "unreads") {
+      void markChannelsAsRead(app, unreadDMs);
+      return;
+    }
+
+    if (activeTab === "mentions") {
+      void markChannelsAsRead(app, mentionedChannels);
+    }
+  };
+
   return (
     <Popover
       trigger={
         <Stack position="relative">
           <IconButton
-
             variant="plain"
             padding={4}
             css={{ WebkitAppRegion: "no-drag" }}
@@ -345,31 +424,49 @@ export const NotificationCenterButton = observer(() => {
       }}
     >
       <Stack direction="column" width="100%">
-        <Stack direction="row" alignItems="center" spacing={1} p={2.5} pb={1.5}>
-          <Button
-            size="sm"
-            variant={activeTab === "unreads" ? "soft" : "plain"}
-            onClick={selectTab("unreads")}
-          >
-            Unreads
-          </Button>
-
-          <Button
-            size="sm"
-            variant={activeTab === "mentions" ? "soft" : "plain"}
-            onClick={selectTab("mentions")}
-          >
-            Mentions
-          </Button>
-          {hasRequests && (
+        <Stack
+          direction="row"
+          alignItems="center"
+          justifyContent="space-between"
+          spacing={1}
+          p={2.5}
+          pb={1.5}
+        >
+          <Stack direction="row" alignItems="center" spacing={1} minWidth={0}>
             <Button
               size="sm"
-              variant={activeTab === "requests" ? "soft" : "plain"}
-              onClick={selectTab("requests")}
+              variant={activeTab === "unreads" ? "soft" : "plain"}
+              onClick={selectTab("unreads")}
             >
-              Requests
+              Unreads
             </Button>
-          )}
+
+            <Button
+              size="sm"
+              variant={activeTab === "mentions" ? "soft" : "plain"}
+              onClick={selectTab("mentions")}
+            >
+              Mentions
+            </Button>
+            {hasRequests && (
+              <Button
+                size="sm"
+                variant={activeTab === "requests" ? "soft" : "plain"}
+                onClick={selectTab("requests")}
+              >
+                Requests
+              </Button>
+            )}
+          </Stack>
+          <Button
+            size="sm"
+            variant="solid"
+            color="success"
+            disabled={!canMarkAllAsRead}
+            onClick={markAllAsRead}
+          >
+            Mark all as read
+          </Button>
         </Stack>
 
         <Stack

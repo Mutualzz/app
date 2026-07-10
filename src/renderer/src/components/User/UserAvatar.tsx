@@ -12,6 +12,7 @@ import {
   type AvatarProps,
   useTheme
 } from "@mutualzz/ui-web";
+import type { APIUser } from "@mutualzz/types";
 import type { AccountStore } from "@stores/Account.store";
 import type { User } from "@stores/objects/User";
 import { observer } from "mobx-react-lite";
@@ -23,8 +24,14 @@ import { SpaceMember } from "@stores/objects/SpaceMember";
 import { UserIcon } from "@phosphor-icons/react";
 import { useMenu } from "@contexts/ContextMenu.context";
 
+type UserLike = AccountStore | User | APIUser;
+
+function isStoreUser(user: UserLike): user is AccountStore | User {
+  return "constructAvatarUrl" in user && typeof user.constructAvatarUrl === "function";
+}
+
 interface UserAvatarProps extends AvatarProps {
-  user?: AccountStore | User | null;
+  user?: UserLike | null;
   member?: SpaceMember;
   badge?: boolean;
   showInvisible?: boolean;
@@ -60,6 +67,12 @@ export const UserAvatar = observer(
     const { theme } = useTheme();
     const [focused, setFocused] = useState(false);
 
+    const resolvedUser = user
+      ? isStoreUser(user)
+        ? user
+        : app.users.add(user)
+      : null;
+
     const { radius } = resolveResponsiveMerge(
       theme,
       {
@@ -71,10 +84,10 @@ export const UserAvatar = observer(
     );
 
     const version = (() => {
-      if (!user) return theme.type === "light" ? "dark" : "light";
+      if (!resolvedUser) return theme.type === "light" ? "dark" : "light";
 
-      return user.defaultAvatar.color
-        ? createColor(user.defaultAvatar.color as ColorLike).isLight()
+      return resolvedUser.defaultAvatar.color
+        ? createColor(resolvedUser.defaultAvatar.color as ColorLike).isLight()
           ? "dark"
           : "light"
         : theme.type === "light"
@@ -90,7 +103,7 @@ export const UserAvatar = observer(
       ({ size: s }) => ({ size: resolveSize(theme, s, baseSizeMap) })
     );
 
-    if (!user) {
+    if (!resolvedUser) {
       return (
         <MAvatar
           elevation={5}
@@ -105,8 +118,8 @@ export const UserAvatar = observer(
       );
     }
 
-    const status = app.presence.get(user.id)?.status ?? "offline";
-    const hasAvatar = !!user.avatar;
+    const status = app.presence.get(resolvedUser.id)?.status ?? "offline";
+    const hasAvatar = !!resolvedUser.avatar;
 
     const avatar = (
       <Paper
@@ -114,7 +127,11 @@ export const UserAvatar = observer(
         width={size}
         height={size}
         variant={
-          hasAvatar ? "plain" : user.defaultAvatar.color ? "solid" : "elevation"
+          hasAvatar
+            ? "plain"
+            : resolvedUser.defaultAvatar.color
+              ? "solid"
+              : "elevation"
         }
         borderRadius={radius}
         elevation={hasAvatar ? 0 : 5}
@@ -128,7 +145,7 @@ export const UserAvatar = observer(
           if (disableContextMenu) return;
           openContextMenu(e, {
             type: "user",
-            user,
+            user: resolvedUser,
             member
           });
         }}
@@ -139,12 +156,12 @@ export const UserAvatar = observer(
           onMouseLeave={() => setFocused(false)}
           src={
             focused
-              ? user.constructAvatarUrl(
-                  !!user.avatar?.startsWith("a_"),
+              ? resolvedUser.constructAvatarUrl(
+                  !!resolvedUser.avatar?.startsWith("a_"),
                   version,
                   size
                 )
-              : user.constructAvatarUrl(false, version, size)
+              : resolvedUser.constructAvatarUrl(false, version, size)
           }
           shape={shape}
           {...restProps}

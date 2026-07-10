@@ -1,7 +1,8 @@
 import { Paper } from "@components/Paper";
 import { SpaceIcon } from "@components/Space/SpaceIcon";
+import { UserAvatar } from "@components/User/UserAvatar";
 import { useAppStore } from "@hooks/useStores";
-import { type APIInvite } from "@mutualzz/types";
+import { type APIInvite, InviteType } from "@mutualzz/types";
 import { Button, Stack, Typography } from "@mutualzz/ui-web";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { createFileRoute, Navigate, useNavigate } from "@tanstack/react-router";
@@ -28,11 +29,20 @@ function RouteComponent() {
     isLoading,
     error
   } = useQuery({
-    queryKey: ["space-invite", code],
+    queryKey: ["invite", code],
     queryFn: () => app.rest.get<APIInvite>(`/invites/${code}`),
     retry: 2,
     enabled: !!code
   });
+
+  const isFriendInvite =
+    invite != null && Number(invite.type) === InviteType.Friend;
+  const inviteUser = invite?.user ?? invite?.inviter;
+  const inviteUserId = invite?.userId ?? invite?.inviterId;
+  const relationship = inviteUserId
+    ? app.relationships.getForMe(inviteUserId)
+    : undefined;
+  const isSelf = inviteUserId === app.account?.id;
 
   const isInSpace =
     !invite?.space?.members || !app.account?.id
@@ -41,9 +51,16 @@ function RouteComponent() {
 
   useEffect(() => {
     if (!invite) return;
+
+    if (isFriendInvite) {
+      app.setJoining(code, null);
+      setMounted(true);
+      return;
+    }
+
     app.setJoining(code, invite.space);
     setMounted(true);
-  }, [invite, code, app]);
+  }, [invite, code, app, isFriendInvite]);
 
   const handleGoToSpace = () => {
     if (!invite?.spaceId || !invite?.channelId) return;
@@ -68,6 +85,22 @@ function RouteComponent() {
       handleGoToSpace();
     }
   });
+
+  const { mutate: acceptFriendInvite, isPending: isAddingFriend } = useMutation({
+    mutationKey: ["accept-friend-invite", code],
+    mutationFn: () => app.relationships.acceptFriendInvite(code),
+    onSuccess: (relationship) => {
+      app.relationships.update(relationship);
+      app.setJoining(null, null);
+      navigate({ to: "/@me/friends", replace: true });
+    }
+  });
+
+  const friendActionLabel = relationship?.isFriend
+    ? "Friends"
+    : relationship?.isOutgoingRequest
+      ? "Pending"
+      : "Add Friend";
 
   const [deepLinkTried, setDeepLinkTried] = useState(false);
   const [deepLinkFailed, setDeepLinkFailed] = useState(false);
@@ -144,7 +177,7 @@ function RouteComponent() {
   }, [code, deepLinkTried, isElectron]);
 
   useEffect(() => {
-    if (deepLink && mounted && invite) {
+    if (deepLink && mounted && invite && !isFriendInvite) {
       if (!app.token) return;
       if (isInSpace) {
         handleGoToSpace();
@@ -152,7 +185,7 @@ function RouteComponent() {
       }
       acceptInvite();
     }
-  }, [invite, deepLink, mounted, app.token, isInSpace, acceptInvite]);
+  }, [invite, deepLink, mounted, app.token, isInSpace, acceptInvite, isFriendInvite]);
 
   if (!app.token && mounted && !deepLink)
     return <Navigate to="/login" replace />;
@@ -161,7 +194,7 @@ function RouteComponent() {
 
   if (!invite && error) return <Navigate to="/" replace />;
 
-  if (deepLink) {
+  if (deepLink && invite && !isFriendInvite) {
     return (
       <Stack
         width="100%"
@@ -217,7 +250,46 @@ function RouteComponent() {
           </Stack>
         )}
 
-        {!isLoading && invite && invite.space && (
+        {!isLoading && invite && isFriendInvite && (
+          <>
+            <Stack justifyContent="center" alignItems="center" flex={1}>
+              <Stack direction="column" spacing={2} alignItems="center">
+                {inviteUser ? (
+                  <>
+                    <UserAvatar user={inviteUser} size={64} />
+                    <Typography textAlign="center">
+                      {inviteUser.globalName ?? inviteUser.username}
+                    </Typography>
+                  </>
+                ) : (
+                  <Typography textAlign="center" fontWeight="bold">
+                    Friend invite
+                  </Typography>
+                )}
+                <Typography level="body-sm" textColor="secondary" textAlign="center">
+                  Wants to be your friend
+                </Typography>
+              </Stack>
+            </Stack>
+
+            <Stack px={10} mb={4} spacing={1.5}>
+              <Button
+                expand
+                onClick={() => acceptFriendInvite()}
+                disabled={
+                  isAddingFriend ||
+                  isSelf ||
+                  relationship?.isFriend ||
+                  relationship?.isOutgoingRequest
+                }
+              >
+                {isSelf ? "This is your invite link" : friendActionLabel}
+              </Button>
+            </Stack>
+          </>
+        )}
+
+        {!isLoading && invite && invite.space && !isFriendInvite && (
           <>
             <Stack justifyContent="center" alignItems="center" flex={1}>
               <Stack direction="column" spacing={2} alignItems="center">
