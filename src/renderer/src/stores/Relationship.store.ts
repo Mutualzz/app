@@ -132,10 +132,8 @@ export class RelationshipStore {
       .filter((r) => {
         const friendId = r.otherUserIdForMe;
         if (!friendId) return false;
-        const presence = this.app.presence.get(friendId);
-        return (
-          presence?.status !== "offline" && presence?.status !== "invisible"
-        );
+        const status = this.app.presence.get(friendId)?.status ?? "offline";
+        return status !== "offline" && status !== "invisible";
       });
   }
 

@@ -1784,13 +1784,13 @@ export class VoiceStore {
   }
 
   get effectiveSelfDeaf() {
-    return this.spaceDeaf || (this.app.settings?.preferredSelfDeaf ?? false);
+    return this.spaceDeaf || this.selfDeaf;
   }
 
   get effectiveSelfMute() {
-    if (this.spaceDeaf || this.spaceMute) return true;
-    if (this.effectiveSelfDeaf) return true;
-    return this.app.settings?.preferredSelfMute ?? false;
+    if (this.spaceMute || this.spaceDeaf) return true;
+    if (this.selfDeaf) return true;
+    return this.selfMute;
   }
 
   get pushToTalkKeyLabel() {

@@ -351,7 +351,7 @@ export const UserBar = observer(() => {
                   return;
                 }
 
-                app.voice.setMute(!app.settings?.preferredSelfMute);
+                app.voice.setMute(!app.voice.selfMute);
               }}
             >
               {app.voice.effectiveSelfMute ? (
@@ -384,7 +384,7 @@ export const UserBar = observer(() => {
                   );
                   return;
                 }
-                app.voice.setDeaf(!app.settings?.preferredSelfDeaf);
+                app.voice.setDeaf(!app.voice.selfDeaf);
               }}
             >
               {app.voice.effectiveSelfDeaf ? (
