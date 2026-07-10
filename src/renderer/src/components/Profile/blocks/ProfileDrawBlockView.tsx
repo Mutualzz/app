@@ -1,4 +1,5 @@
 import type { ProfileDrawBlock } from "@mutualzz/types";
+import { resolveProfileBlockCornerRadius } from "@mutualzz/ui-core";
 import { Stack } from "@mutualzz/ui-web";
 import { PencilSimpleIcon } from "@phosphor-icons/react";
 import { Paper } from "@renderer/components/Paper";
@@ -10,13 +11,14 @@ interface Props {
 
 export const ProfileDrawBlockView = ({ block }: Props) => {
   const app = useAppStore();
+  const cornerRadius = resolveProfileBlockCornerRadius(block, "desktop");
 
   if (!block.svgData) {
     return (
       <Paper
         width="100%"
         height="100%"
-        borderRadius={12}
+        borderRadius={cornerRadius}
         elevation={app.settings?.preferEmbossed ? 5 : 1}
         css={{ overflow: "hidden" }}
       >
@@ -39,7 +41,7 @@ export const ProfileDrawBlockView = ({ block }: Props) => {
     <Paper
       width="100%"
       height="100%"
-      borderRadius={12}
+      borderRadius={cornerRadius}
       elevation={0}
       css={{
         overflow: "hidden",

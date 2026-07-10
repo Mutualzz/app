@@ -5,7 +5,7 @@ import {
   writeProfileMusicVolumePercent
 } from "@components/Profile/shared/profileMusicPlayback.utils";
 import type { ProfileMusicBlock } from "@mutualzz/types";
-import { dynamicElevation } from "@mutualzz/ui-core";
+import { dynamicElevation, resolveProfileBlockCornerRadius } from "@mutualzz/ui-core";
 import { Box, Slider, Stack, Typography, useTheme } from "@mutualzz/ui-web";
 import {
   ArrowSquareOutIcon,
@@ -77,6 +77,7 @@ export const ProfileMusicBlockView = ({ block, profile }: Props) => {
       : audioSrc
         ? "30s preview"
         : null;
+  const cornerRadius = resolveProfileBlockCornerRadius(block, "desktop");
 
   useEffect(() => () => { audioRef.current?.pause(); }, []);
 
@@ -127,19 +128,19 @@ export const ProfileMusicBlockView = ({ block, profile }: Props) => {
       width="100%"
       height="100%"
       flexDirection="column"
-      borderRadius={12}
+      borderRadius={cornerRadius}
       elevation={image ? 0 : app.settings?.preferEmbossed ? 5 : 1}
-      css={{ overflow: "hidden", position: "relative" }}
+      css={{ overflow: "hidden", position: "relative", minWidth: 0, maxWidth: "100%" }}
     >
       {image && (
         <Box
           css={{
             position: "absolute",
-            inset: -20,
+            inset: 0,
             background: `url("${image}") center / cover no-repeat`,
             filter: "blur(18px) saturate(1.1)",
             opacity: 0.25,
-            transform: "scale(1.1)",
+            transform: "scale(1.08)",
             pointerEvents: "none"
           }}
         />
@@ -179,21 +180,30 @@ export const ProfileMusicBlockView = ({ block, profile }: Props) => {
 
       {/* YouTube hidden iframe — mounted only while playing, unmounted to pause */}
       {playbackMode === "youtube" && youtubeActive && youtubeVideoId && (
-        <iframe
-          title="YouTube music player"
-          src={`https://www.youtube.com/embed/${youtubeVideoId}?autoplay=1`}
-          allow="autoplay; encrypted-media"
+        <Box
+          aria-hidden
           css={{
-            position: "fixed",
-            left: -9999,
-            top: -9999,
-            width: 320,
-            height: 180,
+            position: "absolute",
+            width: 0,
+            height: 0,
+            overflow: "hidden",
             opacity: 0,
             pointerEvents: "none",
-            border: 0
+            left: 0,
+            top: 0
           }}
-        />
+        >
+          <iframe
+            title="YouTube music player"
+            src={`https://www.youtube.com/embed/${youtubeVideoId}?autoplay=1`}
+            allow="autoplay; encrypted-media"
+            css={{
+              width: 320,
+              height: 180,
+              border: 0
+            }}
+          />
+        </Box>
       )}
 
       <Stack
@@ -201,9 +211,16 @@ export const ProfileMusicBlockView = ({ block, profile }: Props) => {
         spacing={2.5}
         justifyContent="space-between"
         p={1.25}
-        css={{ position: "relative", height: "100%", overflow: "auto" }}
+        css={{
+          position: "relative",
+          height: "100%",
+          minWidth: 0,
+          maxWidth: "100%",
+          overflowX: "hidden",
+          overflowY: "auto"
+        }}
       >
-        <Stack direction="row" alignItems="center" spacing={1.25}>
+        <Stack direction="row" alignItems="center" spacing={1.25} minWidth={0}>
           <Stack
             width={52}
             height={52}
@@ -257,7 +274,13 @@ export const ProfileMusicBlockView = ({ block, profile }: Props) => {
                 {artists}
               </Typography>
             )}
-            <Stack direction="row" alignItems="center" spacing={0.75}>
+            <Stack
+              direction="row"
+              alignItems="center"
+              spacing={0.75}
+              minWidth={0}
+              flexWrap="wrap"
+            >
               {sourceBadge && (
                 <Typography
                   level="body-xs"
@@ -289,20 +312,30 @@ export const ProfileMusicBlockView = ({ block, profile }: Props) => {
 
         {/* Scrubber — audio modes only (no scrubber for YouTube) */}
         {playbackMode === "audio" && (
-          <Stack direction="column" spacing={0.5}>
-            <Slider
-              min={0}
-              max={Math.max(0, duration ?? (isFullSong ? 0 : 30))}
-              step={0.25}
-              value={Math.min(currentTime, duration ?? currentTime)}
-              onChange={(_, value) => { seekingRef.current = true; pendingSeekRef.current = value as number; setCurrentTime(value as number); }}
-              onChangeCommitted={() => {
-                const t = pendingSeekRef.current;
-                pendingSeekRef.current = null;
-                if (t !== null && audioRef.current) audioRef.current.currentTime = t;
+          <Stack direction="column" spacing={0.5} minWidth={0} width="100%">
+            <Box
+              css={{
+                width: "100%",
+                minWidth: 0,
+                boxSizing: "border-box",
+                px: 1.25,
+                overflow: "hidden"
               }}
-              css={{ width: "100%" }}
-            />
+            >
+              <Slider
+                min={0}
+                max={Math.max(0, duration ?? (isFullSong ? 0 : 30))}
+                step={0.25}
+                value={Math.min(currentTime, duration ?? currentTime)}
+                onChange={(_, value) => { seekingRef.current = true; pendingSeekRef.current = value as number; setCurrentTime(value as number); }}
+                onChangeCommitted={() => {
+                  const t = pendingSeekRef.current;
+                  pendingSeekRef.current = null;
+                  if (t !== null && audioRef.current) audioRef.current.currentTime = t;
+                }}
+                css={{ width: "100%" }}
+              />
+            </Box>
             <Stack direction="row" justifyContent="space-between">
               <Typography
                 level="body-xs"
@@ -349,16 +382,26 @@ export const ProfileMusicBlockView = ({ block, profile }: Props) => {
                   {volume}%
                 </Typography>
               </Stack>
-              <Slider
-                min={0}
-                max={100}
-                value={volume}
-                onChange={(_, value) => {
-                  const next = writeProfileMusicVolumePercent(value as number);
-                  setVolume(next);
+              <Box
+                css={{
+                  width: "100%",
+                  minWidth: 0,
+                  boxSizing: "border-box",
+                  px: 1.25,
+                  overflow: "hidden"
                 }}
-                css={{ width: "100%" }}
-              />
+              >
+                <Slider
+                  min={0}
+                  max={100}
+                  value={volume}
+                  onChange={(_, value) => {
+                    const next = writeProfileMusicVolumePercent(value as number);
+                    setVolume(next);
+                  }}
+                  css={{ width: "100%" }}
+                />
+              </Box>
             </Stack>
           </Stack>
         )}

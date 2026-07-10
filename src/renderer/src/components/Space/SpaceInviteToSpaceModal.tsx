@@ -77,7 +77,13 @@ const InviteSendRow = observer(
     >
       <Stack direction="row" spacing={2} alignItems="center" minWidth={0}>
         {avatar}
-        <Typography css={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+        <Typography
+          css={{
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap"
+          }}
+        >
           {name}
         </Typography>
       </Stack>
@@ -420,7 +426,10 @@ export const SpaceInviteToSpaceModal = observer(({ channel }: Props) => {
                             size={36}
                           />
                         ) : (
-                          <UserAvatar user={targetChannel.dmRecipient} size="sm" />
+                          <UserAvatar
+                            user={targetChannel.dmRecipient}
+                            size="sm"
+                          />
                         )
                       }
                       name={
@@ -500,12 +509,12 @@ export const SpaceInviteToSpaceModal = observer(({ channel }: Props) => {
                         "never"
                       )}
                     </Typography>
-                    {invite?.maxUses && invite?.maxUses > 0 ? (
+                    {invite?.maxUses && invite?.maxUses > 0 && (
                       <Typography level="body-xs" textColor="muted">
                         {" "}
                         or after <Typography>{invite?.maxUses} uses</Typography>
                       </Typography>
-                    ) : null}
+                    )}
                     .
                   </Typography>
                   <Link

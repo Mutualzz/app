@@ -1,11 +1,16 @@
+import { AppCrashFallback } from "@components/ErrorBoundary/AppCrashFallback";
+import { useAppStore } from "@hooks/useStores";
+import { Logger } from "@mutualzz/logger";
 import {
-  createHashHistory,
   createBrowserHistory,
+  createHashHistory,
   createRouter as createTanStackRouter
 } from "@tanstack/react-router";
-import { useAppStore } from "@hooks/useStores";
 import { isElectron } from "@utils/index";
+
 import { routeTree } from "./routeTree.gen";
+
+const errorLogger = new Logger({ tag: "ErrorBoundary" });
 
 export function createRouter() {
   const app = useAppStore();
@@ -16,6 +21,10 @@ export function createRouter() {
     defaultPreload: "intent",
     defaultPreloadStaleTime: 0,
     scrollRestoration: true,
-    context: { queryClient: app.queryClient }
+    context: { queryClient: app.queryClient },
+    defaultErrorComponent: AppCrashFallback,
+    defaultOnCatch: (error, errorInfo) => {
+      errorLogger.error("Uncaught render error", error, errorInfo);
+    }
   });
 }

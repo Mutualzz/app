@@ -17,6 +17,7 @@ import { reaction } from "mobx";
 import { observer } from "mobx-react-lite";
 import { type PropsWithChildren, type ReactNode, useEffect, useRef, useState } from "react";
 
+import { AppCrashFallback } from "@components/ErrorBoundary/AppCrashFallback";
 import { DesktopShell } from "@components/Desktop/DesktopShell";
 import { InjectGlobal } from "@components/InjectGlobal";
 import Loader from "@components/Loader/Loader";
@@ -43,6 +44,7 @@ dayjs.extend(duration);
 
 export const Route = createRootRoute({
   component: observer(RootComponent),
+  errorComponent: AppCrashFallback,
   head: () => ({
     meta: [...seo()],
     links: [

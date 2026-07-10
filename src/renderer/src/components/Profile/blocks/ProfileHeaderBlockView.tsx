@@ -4,6 +4,7 @@ import type { AccountStore } from "@stores/Account.store";
 import type { User } from "@stores/objects/User";
 import type { UserProfile } from "@stores/objects/UserProfile";
 import { ImageFormat, type ProfileHeaderBlock } from "@mutualzz/types";
+import { resolveProfileBlockCornerRadius } from "@mutualzz/ui-core";
 import { Box, Stack, Typography } from "@mutualzz/ui-web";
 import { observer } from "mobx-react-lite";
 import { Paper } from "@renderer/components/Paper";
@@ -12,6 +13,7 @@ import { useAppStore } from "@renderer/hooks/useStores";
 const AVATAR_SIZE = 72;
 const AVATAR_OVERLAP = AVATAR_SIZE / 2;
 const DEFAULT_BANNER_HEIGHT = 58;
+const BANNER_RENDER_SIZE = 1024;
 
 interface Props {
   user: User | AccountStore;
@@ -31,12 +33,16 @@ export const ProfileHeaderBlockView = observer(
     const bannerUrl = profile.constructBannerUrlFrom(
       bannerSource,
       ImageFormat.WebP,
-      512,
+      BANNER_RENDER_SIZE,
       bannerSource?.startsWith("a_")
     );
     const bio = bioOverride !== undefined ? bioOverride : profile.bio;
     const bannerHeight = block?.bannerHeight ?? DEFAULT_BANNER_HEIGHT;
     const bannerFocusY = block?.bannerFocusY ?? 50;
+    const cornerRadius = resolveProfileBlockCornerRadius(
+      block ?? { type: "header" },
+      "desktop",
+    );
 
     return (
       <Paper
@@ -44,6 +50,7 @@ export const ProfileHeaderBlockView = observer(
         width="100%"
         height="100%"
         overflow="hidden"
+        borderRadius={cornerRadius}
         elevation={app.settings?.preferEmbossed ? 5 : 1}
       >
         <Box
@@ -52,11 +59,26 @@ export const ProfileHeaderBlockView = observer(
           css={{
             height: `${bannerHeight}%`,
             minHeight: 64,
-            background: bannerUrl
-              ? `url("${bannerUrl}") center ${bannerFocusY}% / cover no-repeat`
-              : user.accentColor
+            overflow: "hidden",
+            backgroundColor: bannerUrl ? undefined : user.accentColor,
+            position: "relative"
           }}
-        />
+        >
+          {bannerUrl ? (
+            <img
+              src={bannerUrl}
+              alt=""
+              draggable={false}
+              css={{
+                width: "100%",
+                height: "100%",
+                objectFit: "cover",
+                objectPosition: `center ${bannerFocusY}%`,
+                display: "block"
+              }}
+            />
+          ) : null}
+        </Box>
 
         <Stack
           direction="row"

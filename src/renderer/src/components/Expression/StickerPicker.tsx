@@ -91,10 +91,12 @@ const EmptyPane = styled(Stack)(({ theme }) => ({
 
 export interface StickerPickerProps {
   onSelectSticker?: (sticker: Expression) => void;
+  /** Profile editor: show the current user's stickers without channel context. */
+  profileMode?: boolean;
 }
 
 export const StickerPicker = observer(
-  ({ onSelectSticker }: StickerPickerProps) => {
+  ({ onSelectSticker, profileMode = false }: StickerPickerProps) => {
     const app = useAppStore();
     const { theme } = useTheme();
     const { openContextMenu } = useMenu();
@@ -109,7 +111,9 @@ export const StickerPicker = observer(
 
     const myStickers = app.expressions.stickers
       .filter((s) => !s.spaceId && s.authorId === meId)
-      .filter((s) => canUseSticker(meId, s, me, channel));
+      .filter((s) =>
+        profileMode ? true : canUseSticker(meId, s, me, channel),
+      );
 
     const spaceStickerGroups = app.spaces.all
       .map((space) => ({
@@ -117,8 +121,8 @@ export const StickerPicker = observer(
         stickers: Array.from(space.expressions.values()).filter(
           (e) =>
             e.type === ExpressionType.Sticker &&
-            canUseSticker(meId, e, me, channel)
-        )
+            (profileMode || canUseSticker(meId, e, me, channel)),
+        ),
       }))
       .filter((g) => g.stickers.length > 0);
 

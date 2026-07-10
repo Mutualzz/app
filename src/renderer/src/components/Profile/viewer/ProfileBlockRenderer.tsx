@@ -9,11 +9,13 @@ import { ProfileQuoteBlockView } from "@components/Profile/blocks/ProfileQuoteBl
 import { ProfileRolesBlockView } from "@components/Profile/blocks/ProfileRolesBlockView";
 import { ProfileTextBlockView } from "@components/Profile/blocks/ProfileTextBlockView";
 import { ProfileDrawBlockView } from "@components/Profile/blocks/ProfileDrawBlockView";
+import { ProfileStickerBlockView } from "@components/Profile/blocks/ProfileStickerBlockView";
 import {
   percentToPixels,
   type CanvasRect
 } from "@components/Profile/viewer/profileLayout.utils";
 import type { APIProfileBlock } from "@mutualzz/types";
+import { resolveProfileBlockCornerRadius } from "@mutualzz/ui-core";
 import type { AccountStore } from "@stores/Account.store";
 import type { User } from "@stores/objects/User";
 import type { UserProfile } from "@stores/objects/UserProfile";
@@ -112,6 +114,8 @@ export const ProfileBlockRenderer = observer(
           return <ProfileQuoteBlockView block={block} />;
         case "draw":
           return <ProfileDrawBlockView block={block} />;
+        case "sticker":
+          return <ProfileStickerBlockView block={block} />;
         default:
           return null;
       }
@@ -121,6 +125,8 @@ export const ProfileBlockRenderer = observer(
 
     const allowPointerInteraction =
       editable && !readOnly && !INTERACTIVE_BLOCK_TYPES.has(block.type);
+
+    const cornerRadius = resolveProfileBlockCornerRadius(block, "desktop");
 
     return (
       <BlockShell
@@ -154,8 +160,10 @@ export const ProfileBlockRenderer = observer(
               ? "2px solid var(--joy-palette-primary-500, #6366f1)"
               : undefined,
           outlineOffset: !readOnly && selected ? 2 : undefined,
-          borderRadius: block.type === "divider" ? 0 : 8,
-          touchAction: allowPointerInteraction ? "none" : undefined
+          borderRadius: cornerRadius,
+          overflow: "hidden",
+          touchAction: allowPointerInteraction ? "none" : undefined,
+          minWidth: 0
         }}
       >
         {content}

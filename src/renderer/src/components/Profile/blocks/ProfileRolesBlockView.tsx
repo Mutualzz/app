@@ -5,6 +5,7 @@ import {
 import { useAppStore } from "@hooks/useStores";
 import type { ProfileRolesBlock } from "@mutualzz/types";
 import type { Snowflake } from "@mutualzz/types";
+import { resolveProfileBlockCornerRadius } from "@mutualzz/ui-core";
 import { Box, Stack, Typography } from "@mutualzz/ui-web";
 import { ShieldCheckIcon } from "@phosphor-icons/react";
 import { Paper } from "@renderer/components/Paper";
@@ -19,6 +20,7 @@ export const ProfileRolesBlockView = observer(({ block, userId }: Props) => {
   const app = useAppStore();
   const member = findMemberForUser(app, userId);
   const roles = getMemberRoles(member, block.maxRoles ?? 6);
+  const cornerRadius = resolveProfileBlockCornerRadius(block, "desktop");
 
   return (
     <Paper
@@ -27,7 +29,7 @@ export const ProfileRolesBlockView = observer(({ block, userId }: Props) => {
       width="100%"
       height="100%"
       p={1.75}
-      borderRadius={12}
+      borderRadius={cornerRadius}
       overflow="auto"
       elevation={app.settings?.preferEmbossed ? 5 : 1}
     >

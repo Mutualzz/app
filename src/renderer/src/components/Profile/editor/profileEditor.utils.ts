@@ -109,6 +109,7 @@ export const prepareBlocksForSave = (blocks: APIProfileBlock[]) =>
   normalizeProfileBlocks(blocks).filter((block) => {
     if ((block as { type: string }).type === "embed") return false;
     if (block.type === "image" && !block.src.trim()) return false;
+    if (block.type === "sticker" && !block.expressionId.trim()) return false;
     if (block.type === "links" && block.links.every((l) => !l.url.trim())) {
       return false;
     }
@@ -121,6 +122,9 @@ export const validateDraftForSave = (
   const emptyImages = draft.blocks.filter(
     (block) => block.type === "image" && !block.src.trim()
   ).length;
+  const emptyStickers = draft.blocks.filter(
+    (block) => block.type === "sticker" && !block.expressionId.trim()
+  ).length;
   const emptyLinks = draft.blocks.filter(
     (block) =>
       block.type === "links" &&
@@ -130,6 +134,12 @@ export const validateDraftForSave = (
   if (emptyImages > 0) {
     return `Remove or upload images for ${emptyImages} image block${
       emptyImages === 1 ? "" : "s"
+    } before saving`;
+  }
+
+  if (emptyStickers > 0) {
+    return `Choose stickers for ${emptyStickers} sticker block${
+      emptyStickers === 1 ? "" : "s"
     } before saving`;
   }
 

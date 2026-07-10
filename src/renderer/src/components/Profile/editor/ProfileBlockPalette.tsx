@@ -13,6 +13,7 @@ import {
   PulseIcon,
   QuotesIcon,
   ShieldCheckIcon,
+  StickerIcon,
   TextAaIcon,
   UserCircleIcon,
   UsersThreeIcon
@@ -28,6 +29,7 @@ const ITEMS: {
   { type: "text", label: "Text", icon: <TextAaIcon weight="fill" /> },
   { type: "quote", label: "Quote", icon: <QuotesIcon weight="fill" /> },
   { type: "image", label: "Image", icon: <ImageIcon weight="fill" /> },
+  { type: "sticker", label: "Sticker", icon: <StickerIcon weight="fill" /> },
   { type: "music", label: "Music", icon: <MusicNotesIcon weight="fill" /> },
   { type: "links", label: "Links", icon: <LinkIcon weight="fill" /> },
   { type: "activity", label: "Activity", icon: <PulseIcon weight="fill" /> },

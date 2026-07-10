@@ -1,5 +1,6 @@
 import type { UserProfile } from "@stores/objects/UserProfile";
 import { useGoogleFont } from "@hooks/useGoogleFont";
+import { buildProfileBackgroundCss } from "@mutualzz/ui-core";
 import { Box, useTheme } from "@mutualzz/ui-web";
 import { observer } from "mobx-react-lite";
 import { forwardRef, type PropsWithChildren, type Ref } from "react";
@@ -49,11 +50,11 @@ export const ProfileCanvas = observer(
       backgroundImageSource
     );
 
-    const resolvedColor = backgroundColor ?? theme.colors.surface;
-
-    const background = backgroundImageUrl
-      ? `url("${backgroundImageUrl}") center / cover no-repeat, ${resolvedColor}`
-      : resolvedColor;
+    const background = buildProfileBackgroundCss({
+      backgroundColor,
+      backgroundImageUrl,
+      fallback: theme.colors.surface
+    });
 
     return (
       <Box

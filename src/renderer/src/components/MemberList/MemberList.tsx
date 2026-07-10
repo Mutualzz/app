@@ -72,21 +72,20 @@ export const MemberList = observer(() => {
             flexDirection: "column"
           }}
         >
-          {list
-            ? list.map((category, i) => (
-                <ListSection
-                  key={`${category.name}-${i}`}
-                  name={category.name}
-                  items={category.items.map((m: any) => (
-                    <MemberListItem
-                      key={m.userId ?? m.user?.id ?? `${category.name}-${i}`}
-                      member={m}
-                      isOwner={(m.userId ?? m.user?.id) === space?.ownerId}
-                    />
-                  ))}
-                />
-              ))
-            : null}
+          {list &&
+            list.map((category, i) => (
+              <ListSection
+                key={`${category.name}-${i}`}
+                name={category.name}
+                items={category.items.map((m: any) => (
+                  <MemberListItem
+                    key={m.userId ?? m.user?.id ?? `${category.name}-${i}`}
+                    member={m}
+                    isOwner={(m.userId ?? m.user?.id) === space?.ownerId}
+                  />
+                ))}
+              />
+            ))}
         </InfiniteScroll>
       </div>
     </Paper>

@@ -116,6 +116,14 @@ export const PROFILE_BLOCK_SIZE_LIMITS: Record<
     maxHeight: 80,
     recommendedWidth: 28,
     recommendedHeight: 28
+  },
+  sticker: {
+    minWidth: 6,
+    maxWidth: 36,
+    minHeight: 6,
+    maxHeight: 36,
+    recommendedWidth: 12,
+    recommendedHeight: 12
   }
 };
 
@@ -407,6 +415,12 @@ export const createDefaultBlock = (
         svgData: null,
         paths: null,
         backgroundColor: null
+      });
+    case "sticker":
+      return clampBlock({
+        ...base,
+        type: "sticker",
+        expressionId: ""
       });
   }
 };

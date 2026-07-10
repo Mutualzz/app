@@ -34,7 +34,7 @@ export function PermissionEditorControls({
   };
 
   return (
-    <Stack direction="column" spacing={1.5}>
+    <Stack direction="row" spacing={10}>
       <InputDefault
         type="text"
         placeholder="Search permissions…"

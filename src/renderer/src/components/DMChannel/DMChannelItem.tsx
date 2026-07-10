@@ -196,16 +196,18 @@ export const DMChannelItem = observer(({ channel }: Props) => {
                 {mentionCount > 99 ? "99+" : mentionCount}
               </Typography>
             </Stack>
-          ) : isUnread ? (
-            <Stack
-              css={{
-                width: 8,
-                height: 8,
-                borderRadius: "50%",
-                backgroundColor: theme.typography.colors.primary
-              }}
-            />
-          ) : null}
+          ) : (
+            isUnread && (
+              <Stack
+                css={{
+                  width: 8,
+                  height: 8,
+                  borderRadius: "50%",
+                  backgroundColor: theme.typography.colors.primary
+                }}
+              />
+            )
+          )}
         </Stack>
       )}
       {iBlockedThem && (

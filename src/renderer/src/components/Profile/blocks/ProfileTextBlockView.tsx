@@ -1,6 +1,7 @@
 import { Paper } from "@components/Paper";
 import { ProfileMarkdownContent } from "@components/Profile/shared/ProfileMarkdownContent";
 import type { ProfileTextBlock } from "@mutualzz/types";
+import { resolveProfileBlockCornerRadius } from "@mutualzz/ui-core";
 import { Box, Typography } from "@mutualzz/ui-web";
 import { useAppStore } from "@renderer/hooks/useStores";
 
@@ -10,12 +11,13 @@ export const ProfileTextBlockView = ({
   block: ProfileTextBlock;
 }) => {
   const app = useAppStore();
+  const cornerRadius = resolveProfileBlockCornerRadius(block, "desktop");
 
   return (
     <Paper
       width="100%"
       height="100%"
-      borderRadius={8}
+      borderRadius={cornerRadius}
       p={1.5}
       css={{ overflow: "hidden" }}
       elevation={app.settings?.preferEmbossed ? 5 : 1}

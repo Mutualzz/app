@@ -7,28 +7,42 @@ import type {
   ProfileHeaderBlock,
   ProfileImageBlock,
   ProfileMusicBlock,
+  ProfileStickerBlock,
   ProfileTextBlock
 } from "@mutualzz/types";
+import { ImageFormat } from "@mutualzz/types";
 import type { ProfileDraftState } from "@components/Profile/editor/profileEditor.utils";
 import { ProfileMarkdownField } from "@components/Profile/editor/ProfileMarkdownField";
 import { ProfileMusicPicker } from "@components/Profile/editor/ProfileMusicPicker";
 import { ProfileBlockMusicPicker } from "@components/Profile/editor/ProfileBlockMusicPicker";
+import { ProfileStickerBlockView } from "@components/Profile/blocks/ProfileStickerBlockView";
 import { ProfileDrawBlockModal } from "@components/Profile/editor/ProfileDrawBlockModal";
+import { ProfileImageGifPickerModal } from "@components/Profile/editor/ProfileImageGifPickerModal";
+import { ProfileStickerPickerModal } from "@components/Profile/editor/ProfileStickerPickerModal";
 import { ProfileBlockTypeInspector } from "@components/Profile/editor/ProfileBlockTypeInspector";
 import { ProfileBlockSizeInspector } from "@components/Profile/editor/ProfileBlockSizeInspector";
+import { ProfileBlockCornerRadiusInspector } from "@components/Profile/editor/ProfileBlockCornerRadiusInspector";
 import { getApiErrorMessage } from "@components/Profile/editor/profileEditor.utils";
+import { InputWithLabel } from "@components/InputWithLabel";
 import type { UserProfile } from "@stores/objects/UserProfile";
-import { Divider, Input, Slider, Stack, Typography } from "@mutualzz/ui-web";
+import type { ColorLike } from "@mutualzz/ui-core";
+import {
+  isProfileImageCdnHash,
+  isProfileImageVideoUrl,
+  resolveProfileImageBlockUrl
+} from "@mutualzz/ui-core";
 import {
   ArrowDownIcon,
   ArrowUpIcon,
   CaretDownIcon,
   CaretRightIcon,
   CursorClickIcon,
+  GifIcon,
   ImageIcon,
   MusicNotesIcon,
   PaintBrushBroadIcon,
   PencilSimpleIcon,
+  StickerIcon,
   TextAaIcon,
   TextAlignLeftIcon,
   TrashIcon
@@ -40,6 +54,7 @@ import type { ReactNode } from "react";
 import { useEffect, useRef, useState } from "react";
 import { useAppStore } from "@hooks/useStores";
 import { toast } from "react-toastify";
+import { Divider, Input, Slider, Stack, Typography } from "@mutualzz/ui-web";
 
 interface Props {
   profile: UserProfile;
@@ -176,7 +191,12 @@ export const ProfileBlockInspector = observer(
       }
     }, [selectedBlock]);
 
-    const bannerPreview = profile.constructBannerUrlFrom(draft.banner);
+    const bannerPreview = profile.constructBannerUrlFrom(
+      draft.banner,
+      ImageFormat.WebP,
+      1024,
+      draft.banner?.startsWith("a_")
+    );
     const headerBlock = draft.blocks.find(
       (block): block is ProfileHeaderBlock => block.type === "header"
     );
@@ -358,6 +378,7 @@ export const ProfileBlockInspector = observer(
                 onDraftChange({ banner: event.target.value || null })
               }
               placeholder={draft.banner ? "Image uploaded" : "Paste image URL"}
+              type="text"
             />
             <Stack direction="row" spacing={1}>
               <Button
@@ -417,29 +438,28 @@ export const ProfileBlockInspector = observer(
           }
         >
           <SettingCard>
-            <FieldLabel>Background color</FieldLabel>
-            <Stack direction="row" spacing={1.25} alignItems="center">
-              <Input
-                type="color"
-                value={draft.backgroundColor ?? "#1a1a2e"}
-                onChange={(color) => {
-                  if (typeof color !== "string" || !color) return;
-                  onDraftChange({
-                    backgroundColor: color.startsWith("#") ? color : `#${color}`
-                  });
-                }}
-                css={{ flex: 1 }}
-              />
-              {draft.backgroundColor && (
-                <Button
-                  size="sm"
-                  color="neutral"
-                  onClick={() => onDraftChange({ backgroundColor: null })}
-                >
-                  Reset
-                </Button>
-              )}
-            </Stack>
+            <InputWithLabel
+              type="color"
+              label="Background color"
+              name="backgroundColor"
+              description="Use a solid color or gradient for your profile background."
+              value={(draft.backgroundColor as ColorLike) ?? "#1a1a2e"}
+              allowGradient
+              onChange={(color: ColorLike) => {
+                if (typeof color !== "string" || !color) return;
+                onDraftChange({ backgroundColor: color });
+              }}
+              fullWidth
+            />
+            {draft.backgroundColor && (
+              <Button
+                size="sm"
+                color="neutral"
+                onClick={() => onDraftChange({ backgroundColor: null })}
+              >
+                Reset background color
+              </Button>
+            )}
             <FieldLabel>Background image</FieldLabel>
             {backgroundPreview && (
               <img
@@ -745,71 +765,153 @@ export const ProfileBlockInspector = observer(
                 />
               )}
 
-              {selectedBlock.type === "image" && (
-                <>
-                  {(selectedBlock as ProfileImageBlock).src && (
-                    <img
-                      src={
-                        profile.constructBlockImageUrl(
-                          (selectedBlock as ProfileImageBlock).src
-                        ) ?? undefined
-                      }
-                      alt=""
-                      css={{
-                        width: "100%",
-                        maxHeight: 120,
-                        objectFit: "contain",
-                        borderRadius: 8,
-                        background: "var(--mz-palette-neutral-softBg)"
-                      }}
-                    />
-                  )}
-                  <Input
-                    value={
-                      (selectedBlock as ProfileImageBlock).src &&
-                      !HASH_PATTERN.test(
-                        (selectedBlock as ProfileImageBlock).src
+              {selectedBlock.type === "image" &&
+                (() => {
+                  const imageBlock = selectedBlock as ProfileImageBlock;
+                  const previewUrl = imageBlock.src
+                    ? resolveProfileImageBlockUrl(imageBlock.src, (hash, animated) =>
+                        profile.constructBlockImageUrl(hash, undefined, undefined, animated)
                       )
-                        ? (selectedBlock as ProfileImageBlock).src
-                        : ""
-                    }
-                    onChange={(event) =>
-                      updateSelectedBlock({ src: event.target.value })
-                    }
-                    placeholder={
-                      (selectedBlock as ProfileImageBlock).src
-                        ? "Image uploaded"
-                        : "Image URL"
-                    }
-                  />
-                  <Button
-                    size="sm"
-                    color="neutral"
-                    loading={uploadingBlockImage}
-                    onClick={() => imageInputRef.current?.click()}
-                  >
-                    Upload image
-                  </Button>
-                  <input
-                    ref={imageInputRef}
-                    type="file"
-                    accept="image/*"
-                    hidden
-                    onChange={async (event) => {
-                      const file = event.target.files?.[0];
-                      if (!file) return;
-                      await handleAssetUpload(
-                        file,
-                        "image",
-                        (hash) => updateSelectedBlock({ src: hash }),
-                        setUploadingBlockImage,
-                        "Image"
-                      );
-                      event.target.value = "";
-                    }}
-                  />
-                </>
-              )}
+                    : null;
+                  const previewIsVideo = previewUrl
+                    ? isProfileImageVideoUrl(previewUrl)
+                    : false;
+
+                  return (
+                    <>
+                      {previewUrl &&
+                        (previewIsVideo ? (
+                          <video
+                            src={previewUrl}
+                            autoPlay
+                            loop
+                            muted
+                            playsInline
+                            css={{
+                              width: "100%",
+                              maxHeight: 120,
+                              objectFit: "contain",
+                              borderRadius: 8,
+                              background: "var(--mz-palette-neutral-softBg)"
+                            }}
+                          />
+                        ) : (
+                          <img
+                            src={previewUrl}
+                            alt=""
+                            css={{
+                              width: "100%",
+                              maxHeight: 120,
+                              objectFit: "contain",
+                              borderRadius: 8,
+                              background: "var(--mz-palette-neutral-softBg)"
+                            }}
+                          />
+                        ))}
+                      <Input
+                        value={
+                          imageBlock.src && !isProfileImageCdnHash(imageBlock.src)
+                            ? imageBlock.src
+                            : ""
+                        }
+                        onChange={(event) =>
+                          updateSelectedBlock({ src: event.target.value })
+                        }
+                        placeholder={
+                          imageBlock.src ? "Image uploaded" : "Image URL"
+                        }
+                      />
+                      <Button
+                        size="sm"
+                        color="neutral"
+                        loading={uploadingBlockImage}
+                        onClick={() => imageInputRef.current?.click()}
+                      >
+                        Upload image
+                      </Button>
+                      <Button
+                        size="sm"
+                        color="neutral"
+                        startDecorator={<GifIcon weight="fill" />}
+                        onClick={() =>
+                          openModal(
+                            "image-gif-picker",
+                            <ProfileImageGifPickerModal
+                              onSelect={(src) => updateSelectedBlock({ src })}
+                            />
+                          )
+                        }
+                      >
+                        Choose GIF
+                      </Button>
+                      <input
+                        ref={imageInputRef}
+                        type="file"
+                        accept="image/*"
+                        hidden
+                        onChange={async (event) => {
+                          const file = event.target.files?.[0];
+                          if (!file) return;
+                          await handleAssetUpload(
+                            file,
+                            "image",
+                            (hash) => updateSelectedBlock({ src: hash }),
+                            setUploadingBlockImage,
+                            "Image"
+                          );
+                          event.target.value = "";
+                        }}
+                      />
+                    </>
+                  );
+                })()}
+
+              {selectedBlock.type === "sticker" &&
+                (() => {
+                  const stickerBlock = selectedBlock as ProfileStickerBlock;
+
+                  return (
+                    <>
+                      <div
+                        css={{
+                          width: "100%",
+                          height: 120,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          borderRadius: 8,
+                          background: stickerBlock.expressionId
+                            ? "transparent"
+                            : "var(--mz-palette-neutral-softBg)",
+                          overflow: "hidden",
+                        }}
+                      >
+                        <ProfileStickerBlockView block={stickerBlock} />
+                      </div>
+                      <Button
+                        size="sm"
+                        color="neutral"
+                        startDecorator={<StickerIcon weight="fill" />}
+                        onClick={() =>
+                          openModal(
+                            "sticker-picker",
+                            <ProfileStickerPickerModal
+                              onSelect={(sticker) =>
+                                updateSelectedBlock({
+                                  expressionId: sticker.id,
+                                })
+                              }
+                            />,
+                          )
+                        }
+                      >
+                        {stickerBlock.expressionId
+                          ? "Change sticker"
+                          : "Choose sticker"}
+                      </Button>
+                    </>
+                  );
+                })()}
 
               {selectedBlock.type === "music" &&
                 (() => {
@@ -1028,6 +1130,11 @@ export const ProfileBlockInspector = observer(
                 })()}
 
               <ProfileBlockSizeInspector
+                block={selectedBlock}
+                updateSelectedBlock={updateSelectedBlock}
+              />
+
+              <ProfileBlockCornerRadiusInspector
                 block={selectedBlock}
                 updateSelectedBlock={updateSelectedBlock}
               />

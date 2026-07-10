@@ -5,6 +5,7 @@ import {
   resolveProfileUrl
 } from "@components/Profile/shared/profileLink.utils";
 import type { ProfileLinksBlock } from "@mutualzz/types";
+import { resolveProfileBlockCornerRadius } from "@mutualzz/ui-core";
 import { Stack, Typography } from "@mutualzz/ui-web";
 import { ArrowSquareOutIcon } from "@phosphor-icons/react";
 import { Paper } from "@renderer/components/Paper";
@@ -19,6 +20,7 @@ export const ProfileLinksBlockView = ({ block }: Props) => {
   const links = block.links.filter(
     (link) => link.label.trim() && link.url.trim()
   );
+  const cornerRadius = resolveProfileBlockCornerRadius(block, "desktop");
 
   return (
     <Paper
@@ -27,7 +29,7 @@ export const ProfileLinksBlockView = ({ block }: Props) => {
       width="100%"
       height="100%"
       p={1.25}
-      borderRadius={12}
+      borderRadius={cornerRadius}
       elevation={app.settings?.preferEmbossed ? 5 : 1}
       overflow="auto"
     >

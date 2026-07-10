@@ -1,6 +1,7 @@
 import { useAppStore } from "@hooks/useStores";
 import type { ProfileActivityBlock } from "@mutualzz/types";
 import type { Snowflake } from "@mutualzz/types";
+import { resolveProfileBlockCornerRadius } from "@mutualzz/ui-core";
 import { Stack, Typography, useTheme } from "@mutualzz/ui-web";
 import { CustomStatusDisplay } from "@components/CustomStatus/CustomStatusDisplay";
 import { PulseIcon } from "@phosphor-icons/react";
@@ -21,6 +22,7 @@ export const ProfileActivityBlockView = observer(({ block, userId }: Props) => {
     (a) => a.type !== "custom"
   );
   const customActivity = presence?.activities?.find((a) => a.type === "custom");
+  const cornerRadius = resolveProfileBlockCornerRadius(block, "desktop");
 
   return (
     <Paper
@@ -29,7 +31,7 @@ export const ProfileActivityBlockView = observer(({ block, userId }: Props) => {
       width="100%"
       height="100%"
       p={1.5}
-      borderRadius={12}
+      borderRadius={cornerRadius}
       elevation={app.settings?.preferEmbossed ? 5 : 2}
     >
       <Stack direction="row" spacing={1} alignItems="center">

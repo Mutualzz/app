@@ -4,7 +4,7 @@ import { ProfileMarkdownContent } from "@components/Profile/shared/ProfileMarkdo
 import { useAppStore } from "@hooks/useStores";
 import type { User } from "@stores/objects/User";
 import type { SpaceMember } from "@stores/objects/SpaceMember";
-import { Stack, Typography, Box, useTheme } from "@mutualzz/ui-web";
+import { buildProfileBackgroundCss } from "@mutualzz/ui-core";
 import { useNavigate } from "@tanstack/react-router";
 import { observer } from "mobx-react-lite";
 import { useEffect } from "react";
@@ -12,6 +12,7 @@ import { useQuery } from "@tanstack/react-query";
 import type { AccountStore } from "@stores/Account.store";
 import { SmallActivityStatus } from "@components/SmallActivityStatus";
 import { useGoogleFont } from "@hooks/useGoogleFont";
+import { Box, Stack, Typography, useTheme } from "@mutualzz/ui-web";
 
 interface Props {
   user: User | AccountStore;
@@ -41,11 +42,11 @@ export const UserProfilePopout = observer(({ user, member }: Props) => {
   const bannerUrl = profile?.constructBannerUrl();
 
   const backgroundImageUrl = profile?.constructBackgroundUrl() ?? null;
-  const resolvedBackgroundColor =
-    profile?.backgroundColor ?? theme.colors.surface;
-  const profileBackground = backgroundImageUrl
-    ? `url("${backgroundImageUrl}") center / cover no-repeat, ${resolvedBackgroundColor}`
-    : resolvedBackgroundColor;
+  const profileBackground = buildProfileBackgroundCss({
+    backgroundColor: profile?.backgroundColor,
+    backgroundImageUrl,
+    fallback: theme.colors.surface
+  });
 
   return (
     <Paper

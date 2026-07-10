@@ -16,10 +16,7 @@ import {
   sortBlocksByZIndex,
   type CanvasRect
 } from "@components/Profile/viewer/profileLayout.utils";
-import type {
-  APIProfileBlock,
-  ProfileBlockType
-} from "@mutualzz/types";
+import type { APIProfileBlock, ProfileBlockType } from "@mutualzz/types";
 import type { AccountStore } from "@stores/Account.store";
 import type { User } from "@stores/objects/User";
 import type { UserProfile } from "@stores/objects/UserProfile";
@@ -346,13 +343,13 @@ const ProfileEditorCanvasInner = observer(
                       onBlockContextMenu?.(event, blockId);
                     }}
                     overlay={
-                      selectedBlockId === block.id ? (
+                      selectedBlockId === block.id && (
                         <ProfileBlockHandles
                           onPointerDown={(event, handle) =>
                             startDrag(event, block.id, "resize", handle)
                           }
                         />
-                      ) : null
+                      )
                     }
                   />
                 ))}

@@ -267,15 +267,19 @@ export const SpaceRoleEditPermissions = observer(
         pb={10}
         spacing={3}
       >
-        <Stack direction="row" alignItems="flex-start" spacing={2.5} mr={5}>
-          <Stack flex={1} minWidth={0}>
-            <PermissionEditorControls
-              search={search}
-              onSearchChange={setSearch}
-              categories={categories}
-              onCategoryJump={handleCategoryJump}
-            />
-          </Stack>
+        <Stack
+          direction="row"
+          alignItems="center"
+          justifyContent="space-between"
+          spacing={2.5}
+          mr={5}
+        >
+          <PermissionEditorControls
+            search={search}
+            onSearchChange={setSearch}
+            categories={categories}
+            onCategoryJump={handleCategoryJump}
+          />
           <Button
             color="danger"
             onClick={() => clearPermissions()}
