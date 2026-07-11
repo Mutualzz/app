@@ -371,7 +371,9 @@ const AddOverwritePicker = observer(
         p={4}
       >
         <Stack direction="column" spacing={0.5}>
-          <Typography level="h5">{t("channels.permissions.addOverwrite")}</Typography>
+          <Typography level="h5">
+            {t("channels.permissions.addOverwrite")}
+          </Typography>
           <Typography level="body-sm" textColor="muted">
             {t("channels.permissions.selectTargetHint")}
           </Typography>
