@@ -17,6 +17,7 @@ import { useModal } from "@contexts/Modal.context";
 import { useMutation } from "@tanstack/react-query";
 import { MagnifyingGlassIcon } from "@phosphor-icons/react";
 import { toast } from "react-toastify";
+import { useTranslation } from "react-i18next";
 
 const MAX_BULK_MEMBERS = 30;
 
@@ -25,6 +26,8 @@ interface Props {
 }
 
 export const SpaceRoleEditAddMembers = observer(({ role }: Props) => {
+  const { t } = useTranslation("space");
+  const { t: tCommon } = useTranslation("common");
   const app = useAppStore();
   const { closeModal } = useModal();
   const { theme } = useTheme();
@@ -66,12 +69,15 @@ export const SpaceRoleEditAddMembers = observer(({ role }: Props) => {
     mutationFn: () => role.addMembers(userIds),
     onSuccess: () => {
       toast.success(
-        `Added ${userIds.length} member${userIds.length === 1 ? "" : "s"} to ${role.name}`
+        t("roles.members.addSuccess", {
+          count: userIds.length,
+          roleName: role.name
+        })
       );
       closeModal();
     },
     onError: () => {
-      toast.error("Failed to add members to role");
+      toast.error(t("roles.members.addFailed"));
     }
   });
 
@@ -88,15 +94,20 @@ export const SpaceRoleEditAddMembers = observer(({ role }: Props) => {
       <Stack p={4} direction="column" spacing={2.5} flex={1} minHeight={0}>
         <Stack direction="column" spacing={1}>
           <Typography level="h4" fontWeight="bold">
-            Add Members
+            {t("actions.addMembers")}
           </Typography>
           <Typography level="body-sm" textColor="secondary">
-            Add up to {MAX_BULK_MEMBERS} members to{" "}
-            <strong>{role.name}</strong>
+            {t("roles.members.addDescription", {
+              max: MAX_BULK_MEMBERS,
+              roleName: role.name
+            })}
           </Typography>
           {userIds.length > 0 && (
             <Typography level="body-xs" textColor="secondary">
-              {userIds.length}/{MAX_BULK_MEMBERS} selected
+              {t("roles.members.selectedCount", {
+                selected: userIds.length,
+                max: MAX_BULK_MEMBERS
+              })}
             </Typography>
           )}
         </Stack>
@@ -104,7 +115,7 @@ export const SpaceRoleEditAddMembers = observer(({ role }: Props) => {
         <InputDefault
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search members"
+          placeholder={t("roles.members.searchPlaceholder")}
           startDecorator={<MagnifyingGlassIcon />}
         />
 
@@ -117,13 +128,13 @@ export const SpaceRoleEditAddMembers = observer(({ role }: Props) => {
         >
           {eligibleMembers.length === 0 && (
             <Typography level="body-sm" textColor="secondary">
-              No members available to add to this role.
+              {t("roles.members.noEligible")}
             </Typography>
           )}
 
           {eligibleMembers.length > 0 && members.length === 0 && (
             <Typography level="body-sm" textColor="secondary">
-              No members match your search.
+              {t("roles.members.emptySearch")}
             </Typography>
           )}
 
@@ -186,7 +197,7 @@ export const SpaceRoleEditAddMembers = observer(({ role }: Props) => {
           disabled={isPending}
           onClick={() => closeModal()}
         >
-          Cancel
+          {tCommon("cancel")}
         </Button>
         <Button
           size="lg"
@@ -195,7 +206,9 @@ export const SpaceRoleEditAddMembers = observer(({ role }: Props) => {
           disabled={userIds.length === 0 || isPending}
           onClick={() => addMembers()}
         >
-          Add {userIds.length > 0 ? `(${userIds.length})` : "Members"}
+          {userIds.length > 0
+            ? t("actions.addMembersCount", { count: userIds.length })
+            : tCommon("add")}
         </Button>
       </Paper>
     </Paper>

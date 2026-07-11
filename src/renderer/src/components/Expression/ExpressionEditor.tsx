@@ -22,6 +22,7 @@ import {
   MagnifyingGlassPlusIcon,
   XIcon
 } from "@phosphor-icons/react";
+import { useTranslation } from "react-i18next";
 
 // File needs to be passed
 interface Props {
@@ -34,6 +35,8 @@ interface Errors {
 }
 
 export const ExpressionEditor = observer(({ expression, file }: Props) => {
+  const { t } = useTranslation("common");
+  const { t: tSettings } = useTranslation("settings");
   const app = useAppStore();
   const { theme } = useTheme();
   const { closeModal } = useModal();
@@ -118,7 +121,7 @@ export const ExpressionEditor = observer(({ expression, file }: Props) => {
 
     if (name.trim() === "") {
       setErrors({
-        name: "Expression name cannot be empty"
+        name: tSettings("expressions.nameEmpty")
       });
       return;
     }
@@ -277,7 +280,7 @@ export const ExpressionEditor = observer(({ expression, file }: Props) => {
           alignItems="center"
           spacing={0.75}
         >
-          <Typography>Preview</Typography>
+          <Typography>{tSettings("profile.preview")}</Typography>
           <div
             css={{
               ...getPreviewStyle(64)
@@ -287,8 +290,16 @@ export const ExpressionEditor = observer(({ expression, file }: Props) => {
         <InputWithLabel
           name="name"
           type="text"
-          label={isSticker ? "Sticker Name" : "Expression Name"}
-          placeholder={isSticker ? "My Cool Sticker" : "expression_name"}
+          label={
+            isSticker
+              ? tSettings("expressions.stickerName")
+              : tSettings("expressions.expressionName")
+          }
+          placeholder={
+            isSticker
+              ? tSettings("expressions.stickerNamePlaceholder")
+              : tSettings("expressions.expressionNamePlaceholder")
+          }
           value={name}
           onChange={(e) => setName(sanitizeName(e.target.value))}
           endDecorator={
@@ -311,7 +322,7 @@ export const ExpressionEditor = observer(({ expression, file }: Props) => {
             onClick={handleUpload}
             color="primary"
           >
-            Finish
+            {t("finish")}
           </Button>
         </Stack>
       </Stack>

@@ -11,6 +11,7 @@ import { getQuickReactionItems } from "@utils/quickReactionEmojis";
 import { SmileyIcon } from "@phosphor-icons/react";
 import { observer } from "mobx-react-lite";
 import type { RefObject } from "react";
+import { useTranslation } from "react-i18next";
 
 const EMOJI_SIZE = 20;
 
@@ -65,6 +66,7 @@ interface Props {
 
 export const MessageReactionToolbar = observer(
   ({ message, pickerOpen, onPickerOpenChange, triggerRef }: Props) => {
+    const { t } = useTranslation("chat");
     const app = useAppStore();
     const { recents, addRecentStandard, addRecentCustom } = useRecentEmojis();
     const quickItems = getQuickReactionItems(app, recents, 3);
@@ -95,7 +97,7 @@ export const MessageReactionToolbar = observer(
             <QuickEmojiButton
               type="button"
               onClick={() => handleQuickReaction(item)}
-              aria-label={`React with ${item.title}`}
+              aria-label={t("actions.reactWith", { emoji: item.title })}
             >
               {item.kind === "standard" ? (
                 <SpriteEmoji
@@ -117,13 +119,13 @@ export const MessageReactionToolbar = observer(
           <Divider orientation="vertical" css={{ opacity: 0.5 }} />
         )}
 
-        <Tooltip offset={16} content="Add reaction">
+        <Tooltip offset={16} content={t("actions.addReaction")}>
           <IconButton
             ref={triggerRef}
             variant="plain"
             size="sm"
             onClick={() => onPickerOpenChange(!pickerOpen)}
-            aria-label="Add reaction"
+            aria-label={t("actions.addReaction")}
             aria-expanded={pickerOpen}
           >
             <SmileyIcon weight="fill" />

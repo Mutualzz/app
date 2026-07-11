@@ -5,6 +5,7 @@ import { Paper, Stack, Typography } from "@mutualzz/ui-web";
 import { PencilSimpleIcon, XIcon } from "@phosphor-icons/react";
 import { ProfileDrawBlockEditor } from "./ProfileDrawBlockEditor";
 import { IconButton } from "@renderer/components/IconButton";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   block: ProfileDrawBlock;
@@ -12,6 +13,7 @@ interface Props {
 }
 
 export const ProfileDrawBlockModal = ({ block, updateBlock }: Props) => {
+  const { t } = useTranslation("settings");
   const app = useAppStore();
   const { closeModal } = useModal();
 
@@ -28,7 +30,7 @@ export const ProfileDrawBlockModal = ({ block, updateBlock }: Props) => {
         <Stack direction="row" spacing={1.25} alignItems="center">
           <PencilSimpleIcon size={18} weight="fill" />
           <Typography level="title-sm" fontWeight={700}>
-            Drawing Editor
+            {t("profile.inspector.openDrawingEditor")}
           </Typography>
         </Stack>
         <IconButton size="sm" onClick={() => closeModal("draw-editor")}>

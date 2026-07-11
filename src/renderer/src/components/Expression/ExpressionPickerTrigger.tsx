@@ -10,6 +10,7 @@ import { GifIcon, SmileyIcon, StickerIcon } from "@phosphor-icons/react";
 import { useMarkdownInputContext } from "@components/Markdown/MarkdownInput/MarkdownInput.context";
 import { IconButton } from "@components/IconButton";
 import { useRef } from "react";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   emojiPicker?: boolean;
@@ -22,6 +23,7 @@ export const ExpressionPickerTrigger = ({
   gifPicker,
   stickerPicker
 }: Props) => {
+  const { t } = useTranslation("chat");
   const editor = useSlate();
   const { onSendMessage, onSelectSticker } = useMarkdownInputContext();
   const {
@@ -86,8 +88,8 @@ export const ExpressionPickerTrigger = ({
           ref={stickerTriggerRef as any}
           variant="plain"
           onClick={() => openToTab("stickers", stickerTriggerRef as any)}
-          title="Sticker picker"
-          aria-label="Open Sticker picker"
+          title={t("composer.stickerPicker")}
+          aria-label={t("composer.openStickerPicker")}
         >
           <StickerIcon weight="fill" size={24} />
         </IconButton>
@@ -97,8 +99,8 @@ export const ExpressionPickerTrigger = ({
           ref={gifTriggerRef as any}
           variant="plain"
           onClick={() => openToTab("gifs", gifTriggerRef as any)}
-          title="GIF picker"
-          aria-label="Open GIF picker"
+          title={t("composer.gifPicker")}
+          aria-label={t("composer.openGifPicker")}
         >
           <GifIcon weight="fill" size={24} />
         </IconButton>
@@ -109,8 +111,8 @@ export const ExpressionPickerTrigger = ({
           ref={triggerRef as any}
           variant="plain"
           onClick={() => openToTab("emoji")}
-          title="Emoji picker"
-          aria-label="Open emoji picker"
+          title={t("composer.emojiPicker")}
+          aria-label={t("composer.openEmojiPicker")}
           aria-expanded={isOpen}
         >
           <SmileyIcon weight="fill" size={24} />

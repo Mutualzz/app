@@ -8,6 +8,7 @@ import type { VoiceState } from "@stores/objects/VoiceState.ts";
 import { MicrophoneSlashIcon, VideoCameraIcon } from "@phosphor-icons/react";
 import { HeadphonesOffIcon } from "../icons/HeadphonesOffIcon";
 import { Tooltip } from "@components/Tooltip";
+import { useTranslation } from "react-i18next";
 import { observer } from "mobx-react-lite";
 
 const STATUS_ICON_SIZE = 14;
@@ -22,6 +23,7 @@ export const VoiceChannelMemberRow = observer(
   ({ space, state, hovered = false }: Props) => {
     const app = useAppStore();
     const { theme } = useTheme();
+    const { t } = useTranslation("chat");
 
     const member = space.members.get(state.userId);
     if (!member) return null;
@@ -95,26 +97,26 @@ export const VoiceChannelMemberRow = observer(
                 level="label-xs"
                 css={{ letterSpacing: "0.04em" }}
               >
-                LIVE
+                {t("voice.controls.live")}
               </Typography>
             </Paper>
           )}
           {videoOn && (
-            <Tooltip content="Video">
+            <Tooltip content={t("voice.controls.video")}>
               <IconSlot size={STATUS_ICON_SIZE}>
                 <VideoCameraIcon weight="fill" />
               </IconSlot>
             </Tooltip>
           )}
           {state.selfMute && !state.spaceMute && (
-            <Tooltip content="Muted">
+            <Tooltip content={t("voice.controls.muted")}>
               <IconSlot size={STATUS_ICON_SIZE}>
                 <MicrophoneSlashIcon weight="fill" />
               </IconSlot>
             </Tooltip>
           )}
           {state.spaceMute && (
-            <Tooltip content="Space Muted">
+            <Tooltip content={t("voice.controls.spaceMuted")}>
               <IconSlot size={STATUS_ICON_SIZE}>
                 <MicrophoneSlashIcon
                   weight="fill"
@@ -124,14 +126,14 @@ export const VoiceChannelMemberRow = observer(
             </Tooltip>
           )}
           {state.selfDeaf && (
-            <Tooltip content="Deafened">
+            <Tooltip content={t("voice.controls.deafened")}>
               <IconSlot size={STATUS_ICON_SIZE}>
                 <HeadphonesOffIcon weight="fill" />
               </IconSlot>
             </Tooltip>
           )}
           {state.spaceDeaf && (
-            <Tooltip content="Space Deafened">
+            <Tooltip content={t("voice.controls.spaceDeafened")}>
               <IconSlot size={STATUS_ICON_SIZE}>
                 <HeadphonesOffIcon
                   weight="fill"

@@ -26,6 +26,7 @@ import { TypingIndicator } from "@components/TypingIndicator";
 import { Expression } from "@renderer/stores/objects/Expression";
 import { FileIcon, PlusIcon, XIcon } from "@phosphor-icons/react";
 import { IconButton } from "../IconButton";
+import { useTranslation } from "react-i18next";
 
 const ACCEPTED_MIME_TYPES = [
   "image/jpeg",
@@ -63,6 +64,8 @@ export const MessageInput = observer(
   ({ channel, message, onStopEditing, onRequestEditLatest }: Props) => {
     const app = useAppStore();
     const { theme } = useTheme();
+    const { t } = useTranslation("chat");
+    const { t: tCommon } = useTranslation("common");
     const [content, setContent] = useState(message?.content ?? "");
     const [stickers, setStickers] = useState<Expression[]>([]);
     const [files, setFiles] = useState<File[]>([]);
@@ -253,13 +256,13 @@ export const MessageInput = observer(
         if (content.length >= 2000)
           throw new HttpException(
             HttpStatusCode.Forbidden,
-            "Message cannot exceed 2000 characters"
+            t("messageTooLong")
           );
 
         if (isDM && theyBlockedMe)
           throw new HttpException(
             HttpStatusCode.Forbidden,
-            "You cannot message this person"
+            t("cannotMessagePerson")
           );
 
         if (pendingFiles.length > 0) {
@@ -378,17 +381,25 @@ export const MessageInput = observer(
     const placeholder = (() => {
       if (denySendingMessages) {
         return isDM
-          ? "You cannot message this person, because you have them blocked"
-          : "You are not allowed to send messages in this channel.";
+          ? t("composer.placeholder.blocked")
+          : t("composer.placeholder.noPermission");
       }
       if (isDM) {
-        return `Message ${
-          isGroupDM
-            ? (channel?.name ?? "the group")
-            : (channel?.dmRecipient?.displayName ?? "in this conversation")
-        }`;
+        if (isGroupDM) {
+          const name = channel?.name;
+          return name
+            ? t("composer.placeholder.dm", { name })
+            : t("composer.placeholder.groupFallback");
+        }
+        const name = channel?.dmRecipient?.displayName;
+        return name
+          ? t("composer.placeholder.dm", { name })
+          : t("composer.placeholder.dmFallback");
       }
-      return `Message #${channel?.name ?? "in this channel"}`;
+      const channelName = channel?.name;
+      return channelName
+        ? t("composer.placeholder.channel", { channel: channelName })
+        : t("composer.placeholder.channelFallback");
     })();
 
     const replyingTo = !message && app.replyingTo;
@@ -494,7 +505,7 @@ export const MessageInput = observer(
                     width: 16,
                     height: 16
                   }}
-                  title="Remove"
+                  title={t("composer.removeAttachment")}
                 >
                   <XIcon size={8} />
                 </IconButton>
@@ -519,10 +530,9 @@ export const MessageInput = observer(
         elevation={app.settings?.preferEmbossed ? 5 : 1}
       >
         <Typography level="body-xs" textColor="secondary" flex="1 1 auto">
-          Replying to{" "}
-          <Typography fontWeight="bold" textColor="primary">
-            {replyingTo.author?.displayName ?? "Unknown"}
-          </Typography>
+          {t("reply.banner", {
+            name: replyingTo.author?.displayName ?? t("unknown")
+          })}
         </Typography>
         {replyingTo.authorId !== app.account?.id && (
           <Typography
@@ -536,13 +546,16 @@ export const MessageInput = observer(
               whiteSpace: "nowrap"
             }}
           >
-            {app.replyMention ? "@ ON" : "@ OFF"}
+            {app.replyMention
+              ? t("composer.mentionOn")
+              : t("composer.mentionOff")}
           </Typography>
         )}
         <IconButton
           variant="plain"
           size="sm"
           onClick={() => app.setReplyingTo(null)}
+          title={t("edit.cancelReplyA11y")}
         >
           <XIcon size={14} />
         </IconButton>
@@ -585,7 +598,7 @@ export const MessageInput = observer(
                   size="sm"
                   onClick={() => handleRemoveSticker(sticker.id)}
                   css={{ position: "absolute", top: -4, right: -4 }}
-                  title="Remove sticker"
+                  title={t("composer.removeSticker")}
                 >
                   <XIcon size={14} />
                 </IconButton>
@@ -627,7 +640,7 @@ export const MessageInput = observer(
                 <IconButton
                   variant="plain"
                   onClick={() => fileInputRef.current?.click()}
-                  title="Attach files"
+                  title={t("composer.attachFiles")}
                   shape="rounded"
                 >
                   <PlusIcon />
@@ -643,16 +656,16 @@ export const MessageInput = observer(
       <Stack direction="column" spacing={1.25}>
         {inputContent}
         <Typography level="body-xs" textColor="secondary">
-          escape to{" "}
+          {t("composer.editHintEscapeTo")}{" "}
           <Link textColor="accent" onClick={() => onStopEdit()}>
-            cancel
+            {tCommon("cancel")}
           </Link>{" "}
-          • enter to{" "}
+          • {t("composer.editHintEnterTo")}{" "}
           <Link
             textColor="accent"
             onClick={() => sendMessage({ editor: null })}
           >
-            save
+            {tCommon("save")}
           </Link>
         </Typography>
       </Stack>

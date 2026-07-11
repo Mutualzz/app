@@ -26,6 +26,7 @@ import { Editor } from "slate";
 import { ReactEditor } from "slate-react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { ChatCircleIcon, FlagIcon, TrashIcon, XIcon } from "@phosphor-icons/react";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   post: Post;
@@ -85,6 +86,7 @@ const CommentRow = ({
   onReply: (comment: PostComment) => void;
 }) => {
   const { openModal } = useModal();
+  const { t } = useTranslation("chat");
 
   return (
     <Stack direction="row" spacing={2}>
@@ -98,7 +100,7 @@ const CommentRow = ({
         >
           <Stack direction="row" spacing={1.5} alignItems="center">
             <Typography level="body-sm" fontWeight={600}>
-              {comment.author?.displayName ?? "Unknown User"}
+              {comment.author?.displayName ?? t("unknownUser")}
             </Typography>
             <Tooltip
               content={dayjs(comment.createdAt).format(
@@ -113,7 +115,7 @@ const CommentRow = ({
 
           <Stack direction="row" spacing={0.5}>
             {canDelete && (
-              <Tooltip content="Delete comment">
+              <Tooltip content={t("feed.actions.deleteComment")}>
                 <IconButton
                   size="sm"
                   color="danger"
@@ -127,7 +129,7 @@ const CommentRow = ({
             )}
 
             {canReport && (
-              <Tooltip content="Report comment">
+              <Tooltip content={t("feed.actions.reportComment")}>
                 <IconButton
                   size="sm"
                   color="danger"
@@ -137,7 +139,7 @@ const CommentRow = ({
                       <ReportContentModal
                         targetType="comment"
                         targetId={comment.id}
-                        contentLabel="this comment"
+                        contentLabel={t("feed.report.thisComment")}
                         modalId={`report-comment-${comment.id}`}
                       />
                     )
@@ -158,7 +160,7 @@ const CommentRow = ({
           style={{ width: "fit-content" }}
         >
           <Typography level="body-xs" fontWeight={600}>
-            Reply
+            {t("feed.comments.reply")}
           </Typography>
         </Link>
       </Stack>
@@ -169,6 +171,7 @@ const CommentRow = ({
 export const PostComments = observer(({ post }: Props) => {
   const app = useAppStore();
   const { theme } = useTheme();
+  const { t } = useTranslation("chat");
   const [content, setContent] = useState("");
   const [stickers, setStickers] = useState<Expression[]>([]);
   const [replyingTo, setReplyingTo] = useState<PostComment | null>(null);
@@ -284,11 +287,13 @@ export const PostComments = observer(({ post }: Props) => {
     <Stack direction="column" spacing={2.5} width="100%">
       <Divider />
 
-      {isLoading && <Typography level="body-sm">Loading comments…</Typography>}
+      {isLoading && (
+        <Typography level="body-sm">{t("feed.comments.loading")}</Typography>
+      )}
 
       {!isLoading && post.comments.count === 0 && (
         <Typography level="body-sm" textColor="secondary">
-          No comments yet.
+          {t("feed.empty.comments")}
         </Typography>
       )}
 
@@ -331,10 +336,9 @@ export const PostComments = observer(({ post }: Props) => {
             justifyContent="space-between"
           >
             <Typography level="body-xs" textColor="secondary">
-              Replying to{" "}
-              <Typography level="body-xs" fontWeight="bold" textColor="primary">
-                {replyingTo.author?.displayName ?? "Unknown"}
-              </Typography>
+              {t("reply.banner", {
+                name: replyingTo.author?.displayName ?? t("unknown")
+              })}
             </Typography>
             <IconButton
               variant="plain"
@@ -365,7 +369,7 @@ export const PostComments = observer(({ post }: Props) => {
                   size="sm"
                   onClick={() => handleRemoveSticker(sticker.id)}
                   style={{ position: "absolute", top: -4, right: -4 }}
-                  title="Remove sticker"
+                  title={t("composer.removeSticker")}
                 >
                   <XIcon size={14} />
                 </IconButton>
@@ -382,8 +386,12 @@ export const PostComments = observer(({ post }: Props) => {
           onKeyDown={onKeyDown}
           placeholder={
             replyingTo
-              ? `Reply to ${replyingTo.author?.displayName ?? "comment"}…`
-              : "Write a comment…"
+              ? t("feed.comments.replyPlaceholder", {
+                  name:
+                    replyingTo.author?.displayName ??
+                    t("feed.comments.replyFallback")
+                })
+              : t("feed.comments.placeholder")
           }
           mentions={false}
           gifPicker
@@ -391,12 +399,12 @@ export const PostComments = observer(({ post }: Props) => {
           onSendMessage={handleGifUrl}
           onSelectSticker={handleSelectSticker}
           endContent={
-            <Tooltip content="Reply">
+            <Tooltip content={t("feed.comments.sendReply")}>
               <IconButton
                 variant="plain"
                 onClick={handleSubmit}
                 disabled={!canSubmit || isPending}
-                aria-label="Send reply"
+                aria-label={t("feed.comments.sendReply")}
               >
                 <ChatCircleIcon weight="fill" />
               </IconButton>

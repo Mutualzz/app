@@ -6,10 +6,14 @@ import {
   useSpaceSettings
 } from "@components/SpaceSettings/SpaceSettings.context";
 import { useAppStore } from "@hooks/useStores";
+import {
+  spaceCategoryTitleKeys,
+  spacePageTitleKeys
+} from "@mutualzz/i18n";
 import { ButtonGroup, Divider, Stack, Typography } from "@mutualzz/ui-web";
 import type { Space } from "@stores/objects/Space";
-import startCase from "lodash-es/startCase";
 import { observer } from "mobx-react-lite";
+import { useTranslation } from "react-i18next";
 import { Fragment, type JSX } from "react";
 import { SpaceActionConfirm } from "@components/Modals/SpaceActionConfirm";
 import { useModal } from "@contexts/Modal.context";
@@ -78,6 +82,7 @@ export const settingsPages: SettingsPages = {
 
 export const SpaceSettingsSidebar = observer(
   ({ space, drawerOpen, setDrawerOpen }: SpaceSettingsProps) => {
+    const { t } = useTranslation("space");
     const app = useAppStore();
     const { openModal } = useModal();
 
@@ -142,7 +147,11 @@ export const SpaceSettingsSidebar = observer(
                     </Typography>
                   ) : (
                     <Typography level="body-xs" textColor="muted" mb={1.5}>
-                      {startCase(category)}
+                      {t(
+                        spaceCategoryTitleKeys[
+                          category as keyof typeof spaceCategoryTitleKeys
+                        ]
+                      )}
                     </Typography>
                   )}
 
@@ -171,7 +180,11 @@ export const SpaceSettingsSidebar = observer(
                             padding={5}
                             disabled={currentPage === page.label}
                           >
-                            {startCase(page.label)}
+                            {t(
+                              spacePageTitleKeys[
+                                page.label as keyof typeof spacePageTitleKeys
+                              ]
+                            )}
                           </Button>
                         )
                     )}
@@ -203,7 +216,7 @@ export const SpaceSettingsSidebar = observer(
             horizontalAlign="left"
             endDecorator={<TrashIcon weight="fill" />}
           >
-            Delete Space
+            {t("actions.deleteSpace")}
           </Button>
         )}
       </Paper>

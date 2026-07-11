@@ -16,7 +16,9 @@ import { useMutation } from "@tanstack/react-query";
 import { createFileRoute, Navigate, useNavigate } from "@tanstack/react-router";
 import { observer } from "mobx-react-lite";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Link } from "@components/Link";
+import i18n from "../i18n";
 import { useModal } from "@contexts/Modal.context";
 import { SuccessForgotSent } from "@components/Modals/SuccessForgotSent";
 
@@ -25,7 +27,7 @@ export const Route = createFileRoute("/login")({
   head: () => ({
     meta: [
       ...seo({
-        title: "Mutualzz - Login"
+        title: i18n.t("seo.loginTitle", { ns: "auth" })
       })
     ]
   })
@@ -68,6 +70,7 @@ const InputWithLabel = ({
 );
 
 function Login() {
+  const { t } = useTranslation("auth");
   const navigate = useNavigate();
   const app = useAppStore();
   const { openModal } = useModal();
@@ -170,7 +173,7 @@ function Login() {
             }}
             textAlign="center"
           >
-            Login to an account
+            {t("login.title")}
           </Typography>
           {space && (
             <Stack
@@ -180,7 +183,7 @@ function Login() {
               spacing={3}
             >
               <Typography level="body-sm" color="primary" textAlign="center">
-                You are logging in to accept an invite to join a space:{" "}
+                {t("login.inviteContext")}{" "}
               </Typography>
               <Stack alignItems="center" spacing={1}>
                 <SpaceIcon size={36} space={space} />
@@ -208,7 +211,7 @@ function Login() {
                 <Stack direction="column" spacing={0.5}>
                   <InputWithLabel
                     type="text"
-                    label="Username or Email"
+                    label={t("login.usernameOrEmail")}
                     onChange={(e) => field.handleChange(e.target.value)}
                     onBlur={field.handleBlur}
                     value={field.state.value}
@@ -227,7 +230,7 @@ function Login() {
               children={(field) => (
                 <Stack direction="column" spacing={0.5}>
                   <InputWithLabel
-                    label="Password"
+                    label={t("login.password")}
                     onChange={(e) => field.handleChange(e.target.value)}
                     onBlur={field.handleBlur}
                     value={field.state.value}
@@ -248,16 +251,14 @@ function Login() {
                         Form.getFieldValue("usernameOrEmail");
 
                       if (!usernameOrEmail) {
-                        setForgotError(
-                          "Please enter your username or email to reset your password"
-                        );
+                        setForgotError(t("forgotPassword.usernameRequired"));
                         return;
                       }
 
                       forgotPassword(usernameOrEmail);
                     }}
                   >
-                    Forgot your password?
+                    {t("login.forgotPassword")}
                   </Link>
                 </Stack>
               )}
@@ -270,7 +271,7 @@ function Login() {
                   size={{ xs: "md", sm: "lg", md: "lg" }}
                   disabled={isSubmitting || isPending}
                 >
-                  {isSubmitting ? "..." : "Login"}
+                  {isSubmitting ? t("actions.submitting") : t("actions.login")}
                 </Button>
               )}
             />
@@ -287,7 +288,7 @@ function Login() {
           fontSize={{ xs: "0.95rem", sm: "1.1rem", md: "1.2rem" }}
           textAlign="center"
         >
-          Don&apos;t have an account?{" "}
+          {t("login.noAccount")}{" "}
           <Typography
             color="info"
             textDecoration="underline"
@@ -295,7 +296,7 @@ function Login() {
             level={{ xs: "body-sm", sm: "body-md", md: "body-lg" }}
             fontSize={{ xs: "0.95rem", sm: "1.1rem", md: "1.2rem" }}
           >
-            Register
+            {t("actions.register")}
           </Typography>
         </Typography>
       </AnimatedPaper>

@@ -24,6 +24,7 @@ import {
 } from "@phosphor-icons/react";
 import { observer } from "mobx-react-lite";
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 import { Paper } from "@renderer/components/Paper";
 import { useAppStore } from "@renderer/hooks/useStores";
@@ -38,6 +39,8 @@ interface Props {
 
 export const ProfileMusicPlayer = observer(
   ({ music, profile, floating = false, autoPlay = false }: Props) => {
+    const { t } = useTranslation("common");
+    const { t: tSettings } = useTranslation("settings");
     const app = useAppStore();
     const { theme } = useTheme();
     const audioRef = useRef<HTMLAudioElement>(null);
@@ -114,7 +117,7 @@ export const ProfileMusicPlayer = observer(
           setPlaying(true);
         } catch {
           setPlaying(false);
-          if (!silent) toast.error("Could not play this track");
+          if (!silent) toast.error(tSettings("profile.music.couldNotPlay"));
         }
         return;
       }
@@ -167,7 +170,7 @@ export const ProfileMusicPlayer = observer(
             }}
             onError={() => {
               setPlaying(false);
-              toast.error("Could not load this track");
+              toast.error(tSettings("profile.music.couldNotLoad"));
             }}
             css={{
               position: "absolute",
@@ -182,7 +185,7 @@ export const ProfileMusicPlayer = observer(
 
         {embedSrc && (
           <iframe
-            title="Profile music player"
+            title={tSettings("profile.music.playerA11y")}
             src={embedSrc}
             allow="autoplay; encrypted-media"
             css={{
@@ -265,7 +268,7 @@ export const ProfileMusicPlayer = observer(
                 onClick={togglePlayback}
                 startDecorator={playing ? <PauseIcon /> : <PlayIcon />}
               >
-                {playing ? "Pause" : "Play"}
+                {playing ? t("media.pause") : t("media.play")}
               </Button>
 
               {openUrl && (
@@ -276,7 +279,7 @@ export const ProfileMusicPlayer = observer(
                   onClick={() => window.open(openUrl, "_blank", "noreferrer")}
                   startDecorator={<ArrowSquareOutIcon />}
                 >
-                  Open
+                  {t("open")}
                 </Button>
               )}
 
@@ -344,7 +347,7 @@ export const ProfileMusicPlayer = observer(
                   level="body-xs"
                   css={{ color: "rgba(255,255,255,0.72)" }}
                 >
-                  Volume
+                  {t("media.volume")}
                 </Typography>
                 <Typography
                   level="body-xs"

@@ -9,6 +9,7 @@ import { UserPlusIcon, UsersIcon } from "@phosphor-icons/react";
 import { Tooltip } from "@components/Tooltip";
 import { useModal } from "@contexts/Modal.context";
 import { GroupDMAddRecipientModal } from "@components/DMChannel/GroupDMAddRecipientModal";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   channel: Channel;
@@ -17,6 +18,7 @@ interface Props {
 export const DMChannelHeader = observer(({ channel }: Props) => {
   const app = useAppStore();
   const { openModal } = useModal();
+  const { t } = useTranslation("chat");
 
   const isGroupDM = channel.isGroupDM;
 
@@ -26,7 +28,7 @@ export const DMChannelHeader = observer(({ channel }: Props) => {
         .map((u) => u.displayName)
         .filter(Boolean)
         .join(", ")
-    : (channel.dmRecipient?.displayName ?? "Deleted User");
+    : (channel.dmRecipient?.displayName ?? t("deletedUser"));
 
   const isFull = (channel.recipientIds?.length ?? 0) >= 10;
 
@@ -65,7 +67,11 @@ export const DMChannelHeader = observer(({ channel }: Props) => {
         {isGroupDM && (
           <>
             <Tooltip
-              content={isFull ? "Group is full" : "Add to Group"}
+              content={
+                isFull
+                  ? t("header.dm.groupFull")
+                  : t("header.dm.addToGroup")
+              }
               placement="bottom"
             >
               <IconButton
@@ -82,7 +88,11 @@ export const DMChannelHeader = observer(({ channel }: Props) => {
               </IconButton>
             </Tooltip>
             <Tooltip
-              content={`${app.memberListVisible ? "Hide" : "Show"} Member List`}
+              content={
+                app.memberListVisible
+                  ? t("header.memberList.hide")
+                  : t("header.memberList.show")
+              }
               placement="bottom"
             >
               <IconButton

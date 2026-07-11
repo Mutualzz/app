@@ -3,20 +3,28 @@ import { useAppStore } from "@hooks/useStores";
 import { Stack, Typography } from "@mutualzz/ui-web";
 import { Paper } from "@components/Paper";
 import { UserAvatar } from "@components/User/UserAvatar";
+import { useTranslation } from "react-i18next";
 
 export const TypingIndicator = observer(
   ({ channelId }: { channelId: string }) => {
     const app = useAppStore();
+    const { t } = useTranslation("chat");
     const users = app.typing.getUsersTyping(channelId);
 
     if (users.length === 0) return null;
 
     const text =
       users.length === 1
-        ? `${users[0].displayName} is typing...`
+        ? t("typing.one", { name: users[0].displayName })
         : users.length === 2
-          ? `${users[0].displayName} and ${users[1].displayName} are typing...`
-          : `${users[0].displayName}, ${users[1].displayName}, and others are typing...`;
+          ? t("typing.two", {
+              name1: users[0].displayName,
+              name2: users[1].displayName
+            })
+          : t("typing.many", {
+              name1: users[0].displayName,
+              name2: users[1].displayName
+            });
 
     return (
       <Paper

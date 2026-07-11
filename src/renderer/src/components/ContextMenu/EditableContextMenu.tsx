@@ -5,6 +5,7 @@ import { useAppStore } from "@hooks/useStores";
 import { ClipboardIcon, CopyIcon, ScissorsIcon } from "@phosphor-icons/react";
 import { Checkbox, Divider } from "@mutualzz/ui-web";
 import { observer } from "mobx-react-lite";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   isEditable: boolean;
@@ -30,6 +31,7 @@ export const EditableContextMenu = observer(
   }: Props) => {
     const app = useAppStore();
     const { clearMenu } = useMenu();
+    const { t } = useTranslation("common");
 
     const hasSpellcheck = !!misspelledWord;
     const spellcheckEnabled = app.settings?.spellcheckEnabled ?? true;
@@ -89,7 +91,7 @@ export const EditableContextMenu = observer(
             ))}
             <Divider css={{ opacity: 0.5 }} />
             <ContextItem onClick={addToDictionary}>
-              Add to Dictionary
+              {t("editable.addToDictionary")}
             </ContextItem>
           </>
         )}
@@ -106,7 +108,7 @@ export const EditableContextMenu = observer(
               }
               onClick={toggleSpellcheck}
             >
-              Spellcheck
+              {t("editable.spellcheck")}
             </ContextItem>
           </>
         )}
@@ -120,7 +122,7 @@ export const EditableContextMenu = observer(
                 endDecorator={<ScissorsIcon weight="fill" />}
                 onClick={cut}
               >
-                Cut
+                {t("editable.cut")}
               </ContextItem>
             )}
             {canCopy && (
@@ -128,7 +130,7 @@ export const EditableContextMenu = observer(
                 endDecorator={<CopyIcon weight="fill" />}
                 onClick={copy}
               >
-                Copy
+                {t("editable.copy")}
               </ContextItem>
             )}
             {canPaste && (
@@ -136,7 +138,7 @@ export const EditableContextMenu = observer(
                 endDecorator={<ClipboardIcon weight="fill" />}
                 onClick={paste}
               >
-                Paste
+                {t("editable.paste")}
               </ContextItem>
             )}
           </>

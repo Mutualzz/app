@@ -5,6 +5,7 @@ import { Paper } from "@components/Paper";
 import { Button, Stack, Textarea, Typography } from "@mutualzz/ui-web";
 import { useModal } from "@contexts/Modal.context";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 
 interface Props {
@@ -17,6 +18,8 @@ export const StaffUserForceLogoutConfirm = observer(
   ({ userId, username, onSuccess }: Props) => {
     const app = useAppStore();
     const { closeModal } = useModal();
+    const { t } = useTranslation("staff");
+    const { t: tCommon } = useTranslation("common");
     const [reason, setReason] = useState("");
 
     const { mutate: forceLogout, isPending } = useMutation({
@@ -31,7 +34,9 @@ export const StaffUserForceLogoutConfirm = observer(
       },
       onError: (err) => {
         toast.error(
-          err instanceof Error ? err.message : "Failed to force logout user"
+          err instanceof Error
+            ? err.message
+            : t("user.actions.errors.forceLogout")
         );
       }
     });
@@ -46,24 +51,25 @@ export const StaffUserForceLogoutConfirm = observer(
         spacing={2.5}
       >
         <Typography level="h5" fontWeight="bold">
-          Force Logout
+          {t("user.modals.forceLogout.title")}
         </Typography>
         <Typography>
-          Are you sure you want to sign <b>@{username}</b> out of every session?
-          They will need to log back in, but the account stays enabled.
+          {t("user.modals.forceLogout.body", { username })}
         </Typography>
         <Stack direction="column" spacing={1.25}>
-          <Typography fontWeight="bold">Reason (optional)</Typography>
+          <Typography fontWeight="bold">
+            {t("user.modals.reasonOptional")}
+          </Typography>
           <Textarea
             value={reason}
             onChange={(e) => setReason(e.target.value)}
-            placeholder="Add context for the audit log"
+            placeholder={t("user.modals.placeholderAudit")}
             rows={3}
           />
         </Stack>
         <Stack spacing={1.25} direction="row">
           <Button color="neutral" expand size="lg" onClick={() => closeModal()}>
-            Cancel
+            {tCommon("cancel")}
           </Button>
           <Button
             color="danger"
@@ -72,7 +78,7 @@ export const StaffUserForceLogoutConfirm = observer(
             disabled={isPending}
             size="lg"
           >
-            Force Logout
+            {t("user.modals.forceLogout.title")}
           </Button>
         </Stack>
       </Paper>

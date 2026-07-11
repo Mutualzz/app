@@ -14,6 +14,7 @@ import {
 import { useModal } from "@contexts/Modal.context";
 import type { APIPrivateUser } from "@mutualzz/types";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 
 type DeleteMode = "soft" | "hard";
@@ -38,6 +39,8 @@ export const StaffUserDeleteConfirm = observer(
   }: Props) => {
     const app = useAppStore();
     const { closeModal } = useModal();
+    const { t } = useTranslation("staff");
+    const { t: tCommon } = useTranslation("common");
     const [mode, setMode] = useState<DeleteMode>(
       allowHardDeleteOnly ? "hard" : "soft"
     );
@@ -62,7 +65,9 @@ export const StaffUserDeleteConfirm = observer(
       },
       onError: (err) => {
         toast.error(
-          err instanceof Error ? err.message : "Failed to delete account"
+          err instanceof Error
+            ? err.message
+            : t("user.actions.errors.deleteAccount")
         );
       }
     });
@@ -81,51 +86,47 @@ export const StaffUserDeleteConfirm = observer(
         spacing={2.5}
       >
         <Typography level="h5" fontWeight="bold">
-          {isHardDelete ? "Hard Delete Account" : "Soft Delete Account"}
+          {isHardDelete
+            ? t("user.modals.delete.hardTitle")
+            : t("user.modals.delete.softTitle")}
         </Typography>
         <Typography>
-          {isHardDelete ? (
-            <>
-              This permanently removes <b>@{username}</b>&apos;s account and
-              associated data from the database. Any spaces they own will also
-              be deleted. This cannot be undone.
-            </>
-          ) : (
-            <>
-              This soft deletes <b>@{username}</b>&apos;s account. They will be
-              signed out and unable to log back in, but their data is retained
-              for moderation and audit purposes.
-            </>
-          )}
+          {isHardDelete
+            ? t("user.modals.delete.hardBody", { username })
+            : t("user.modals.delete.softBody", { username })}
         </Typography>
         {isFounder && !allowHardDeleteOnly && (
           <Stack direction="column" spacing={1}>
-            <Typography fontWeight="bold">Deletion type</Typography>
+            <Typography fontWeight="bold">
+              {t("user.modals.delete.type")}
+            </Typography>
             <Select
               value={mode}
               onValueChange={(value) => setMode(value as DeleteMode)}
             >
-              <Option value="soft">Soft delete (recommended)</Option>
-              <Option value="hard">Hard delete (irreversible)</Option>
+              <Option value="soft">{t("user.modals.delete.softOption")}</Option>
+              <Option value="hard">{t("user.modals.delete.hardOption")}</Option>
             </Select>
           </Stack>
         )}
         <Stack direction="column" spacing={1.25}>
-          <Typography fontWeight="bold">Reason (required)</Typography>
+          <Typography fontWeight="bold">
+            {t("user.modals.reasonRequired")}
+          </Typography>
           <Textarea
             value={reason}
             onChange={(e) => setReason(e.target.value)}
             placeholder={
               isHardDelete
-                ? "Explain why this account must be permanently removed"
-                : "Explain why this account is being soft deleted"
+                ? t("user.modals.delete.placeholderHard")
+                : t("user.modals.delete.placeholderSoft")
             }
             rows={3}
           />
         </Stack>
         <Stack direction="column" spacing={1.25}>
           <Typography fontWeight="bold">
-            Type <b>@{username}</b> to confirm
+            {t("user.modals.delete.confirmUsername", { username })}
           </Typography>
           <Input
             value={confirmUsername}
@@ -136,7 +137,7 @@ export const StaffUserDeleteConfirm = observer(
         </Stack>
         <Stack spacing={1.25} direction="row">
           <Button color="neutral" expand size="lg" onClick={() => closeModal()}>
-            Cancel
+            {tCommon("cancel")}
           </Button>
           <Button
             color="danger"
@@ -145,7 +146,9 @@ export const StaffUserDeleteConfirm = observer(
             disabled={isPending || !reason.trim() || !usernameMatches}
             size="lg"
           >
-            {isHardDelete ? "Hard Delete Account" : "Soft Delete Account"}
+            {isHardDelete
+              ? t("user.modals.delete.hardTitle")
+              : t("user.modals.delete.softTitle")}
           </Button>
         </Stack>
       </Paper>

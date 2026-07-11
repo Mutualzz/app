@@ -37,6 +37,7 @@ import {
   SpeakerSimpleHighIcon
 } from "@phosphor-icons/react";
 import { Tooltip } from "@components/Tooltip";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   // Usually a category channel under which to create a new channel
@@ -54,6 +55,8 @@ export const ChannelCreateModal = observer(({ space, parent }: Props) => {
   const { theme } = useTheme();
   const navigate = useNavigate();
   const { closeModal } = useModal();
+  const { t } = useTranslation("space");
+  const { t: tCommon } = useTranslation("common");
   const [name, setName] = useState("");
   const [type, setType] = useState<ChannelType>(0);
 
@@ -135,7 +138,7 @@ export const ChannelCreateModal = observer(({ space, parent }: Props) => {
 
   const handleCreate = async () => {
     if (name.trim() === "") {
-      setErrors({ name: "Channel name cannot be empty." });
+      setErrors({ name: t("channels.nameEmpty") });
       return;
     }
 
@@ -252,7 +255,7 @@ export const ChannelCreateModal = observer(({ space, parent }: Props) => {
               </Stack>
               <Divider orientation="vertical" />
               <Stack spacing={5} direction="row" alignItems="center">
-                <Tooltip content="Rotate">
+                <Tooltip content={t("channels.create.rotate")}>
                   <IconButton
                     onClick={() => setRotation((prev) => prev + 90)}
                     color={theme.typography.colors.primary}
@@ -267,7 +270,7 @@ export const ChannelCreateModal = observer(({ space, parent }: Props) => {
                   checked={roundedIcon}
                   onChange={() => setRoundedIcon(!roundedIcon)}
                   disabled={creating}
-                  label="Rounded"
+                  label={t("channels.create.rounded")}
                 />
               </Stack>
             </Stack>
@@ -292,7 +295,7 @@ export const ChannelCreateModal = observer(({ space, parent }: Props) => {
             >
               <CameraIcon weight="fill" size={16} />
               <Typography fontWeight="bold" fontSize="x-small">
-                Upload
+                {t("channels.create.upload")}
               </Typography>
             </Stack>
           </FileUploader>
@@ -300,7 +303,7 @@ export const ChannelCreateModal = observer(({ space, parent }: Props) => {
       </Stack>
       <Stack direction="column" my="auto" spacing={3}>
         <Stack direction="column" spacing={1.25}>
-          <Typography>Channel Name</Typography>
+          <Typography>{t("channels.create.name")}</Typography>
           <Input
             startDecorator={<ChannelIcon type={type} color="gray" />}
             fullWidth
@@ -311,6 +314,7 @@ export const ChannelCreateModal = observer(({ space, parent }: Props) => {
             autoFocus
             value={name}
             onChange={handleName}
+            placeholder={t("channels.create.namePlaceholder")}
           />
           {errors.name && (
             <Typography variant="plain" color="danger">
@@ -326,7 +330,7 @@ export const ChannelCreateModal = observer(({ space, parent }: Props) => {
           color="neutral"
         >
           <Typography ml={0.5} mb={1}>
-            Channel Type
+            {t("channels.create.type")}
           </Typography>
           <ButtonGroup
             variant="plain"
@@ -349,9 +353,9 @@ export const ChannelCreateModal = observer(({ space, parent }: Props) => {
                 <Stack direction="row" alignItems="center" spacing={2}>
                   <HashIcon />
                   <Stack direction="column" spacing={1}>
-                    <Typography>Text Channel</Typography>
+                    <Typography>{t("channels.create.text")}</Typography>
                     <Typography level="body-xs" textColor="secondary">
-                      A text channel for messages, images, and more.
+                      {t("channels.create.textDescription")}
                     </Typography>
                   </Stack>
                 </Stack>
@@ -368,10 +372,10 @@ export const ChannelCreateModal = observer(({ space, parent }: Props) => {
                   <SpeakerSimpleHighIcon weight="fill" />
                   <Stack direction="column" spacing={1}>
                     <Typography display="flex" spacing={1} alignItems="center">
-                      Voice Channel
+                      {t("channels.create.voice")}
                     </Typography>
                     <Typography level="body-xs" textColor="secondary">
-                      A voice channel for voice and video communication.
+                      {t("channels.create.voiceDescription")}
                     </Typography>
                   </Stack>
                 </Stack>
@@ -393,7 +397,7 @@ export const ChannelCreateModal = observer(({ space, parent }: Props) => {
           disabled={creating}
           expand
         >
-          Cancel
+          {tCommon("cancel")}
         </Button>
         {imageFile && (
           <Button
@@ -403,7 +407,7 @@ export const ChannelCreateModal = observer(({ space, parent }: Props) => {
             disabled={creating}
             expand
           >
-            Clear
+            {t("channels.create.clear")}
           </Button>
         )}
         <Button
@@ -411,7 +415,7 @@ export const ChannelCreateModal = observer(({ space, parent }: Props) => {
           onClick={() => handleCreate()}
           expand
         >
-          Create Channel
+          {t("channels.create.submit")}
         </Button>
       </Stack>
     </Paper>

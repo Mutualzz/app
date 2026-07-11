@@ -21,10 +21,13 @@ import {
 } from "@utils/voiceSettings.utils";
 import { useEffect, useState } from "react";
 import { DesktopIcon, MonitorIcon } from "@phosphor-icons/react";
+import { useTranslation } from "react-i18next";
 
 export const ScreenSharePicker = observer(() => {
   const app = useAppStore();
   const voice = app.voice;
+  const { t } = useTranslation("chat");
+  const { t: tCommon } = useTranslation("common");
   const [tab, setTab] = useState<"screen" | "window">("screen");
   const [permissionAppName, setPermissionAppName] = useState("Electron");
   const [packaged, setPackaged] = useState(true);
@@ -71,7 +74,7 @@ export const ScreenSharePicker = observer(() => {
       >
         <Stack flex={1} minWidth={0} direction="column" spacing={2.5}>
           <Typography level="h5" fontWeight="bold">
-            Share your screen
+            {t("voice.screenShare.title")}
           </Typography>
 
           {usesDesktopPicker ? (
@@ -82,14 +85,16 @@ export const ScreenSharePicker = observer(() => {
                   color="neutral"
                   onClick={() => setTab("screen")}
                 >
-                  Entire Screen ({screens.length})
+                  {t("voice.screenShare.entireScreen", { count: screens.length })}
                 </Button>
                 <Button
                   variant={tab === "window" ? "solid" : "soft"}
                   color="neutral"
                   onClick={() => setTab("window")}
                 >
-                  Application Window ({windows.length})
+                  {t("voice.screenShare.applicationWindow", {
+                    count: windows.length
+                  })}
                 </Button>
               </Stack>
 
@@ -104,20 +109,22 @@ export const ScreenSharePicker = observer(() => {
                 >
                   <MonitorIcon size={40} weight="fill" />
                   <Typography textColor="muted" textAlign="center">
-                    No {tab === "screen" ? "screens" : "windows"} available.
+                    {tab === "screen"
+                      ? t("voice.screenShare.noScreens")
+                      : t("voice.screenShare.noWindows")}
                   </Typography>
                   <Typography level="body-sm" textColor="muted" textAlign="center">
-                    Enable Screen Recording for{" "}
-                    <strong>{permissionAppName}</strong> in System Settings.
-                    {!packaged &&
-                      " In development this is usually listed as Electron."}
+                    {t("voice.screenShare.permissionHint", {
+                      appName: permissionAppName
+                    })}
+                    {!packaged && ` ${t("voice.screenShare.permissionDevHint")}`}
                   </Typography>
                   <Button
                     variant="soft"
                     color="neutral"
                     onClick={() => void openScreenCaptureSettings()}
                   >
-                    Open System Settings
+                    {t("voice.screenShare.openSystemSettings")}
                   </Button>
                 </Stack>
               ) : (
@@ -194,8 +201,7 @@ export const ScreenSharePicker = observer(() => {
             >
               <DesktopIcon size={48} weight="fill" />
               <Typography textAlign="center" textColor="muted">
-                Your browser will ask which screen or window to share when you
-                click Go Live.
+                {t("voice.screenShare.browserPickerHint")}
               </Typography>
             </Stack>
           )}
@@ -213,7 +219,7 @@ export const ScreenSharePicker = observer(() => {
         >
           <Stack direction="column" spacing={2.5}>
             <Typography level="body-sm" fontWeight="bold">
-              Stream settings
+              {t("voice.screenShare.streamSettings")}
             </Typography>
 
             {selectedSource && (
@@ -240,7 +246,7 @@ export const ScreenSharePicker = observer(() => {
 
             <Stack direction="column" spacing={1}>
               <Typography level="body-xs" textColor="muted">
-                Stream quality
+                {t("voice.screenShare.streamQuality")}
               </Typography>
               <Select
                 value={voice.screenSharePickerQuality}
@@ -252,7 +258,7 @@ export const ScreenSharePicker = observer(() => {
               >
                 {SCREEN_SHARE_QUALITY_OPTIONS.map((option) => (
                   <Option key={option.value} value={option.value}>
-                    {option.label}
+                    {t(option.labelKey)}
                   </Option>
                 ))}
               </Select>
@@ -266,10 +272,10 @@ export const ScreenSharePicker = observer(() => {
             >
               <Stack direction="column" spacing={0.5} flex={1}>
                 <Typography level="body-sm" fontWeight="bold">
-                  Share audio
+                  {t("voice.screenShare.shareAudio")}
                 </Typography>
                 <Typography level="body-xs" textColor="muted">
-                  Transmit sound from the shared screen or window
+                  {t("voice.screenShare.shareAudioDescription")}
                 </Typography>
               </Stack>
               <Switch
@@ -282,9 +288,9 @@ export const ScreenSharePicker = observer(() => {
 
             {!packaged && (
               <Typography level="body-xs" textColor="muted">
-                Dev build: grant Screen Recording to{" "}
-                <strong>{permissionAppName}</strong> (often Electron) in macOS
-                System Settings.
+                {t("voice.screenShare.devBuildHint", {
+                  appName: permissionAppName
+                })}
               </Typography>
             )}
           </Stack>
@@ -295,14 +301,14 @@ export const ScreenSharePicker = observer(() => {
               disabled={!canGoLive}
               onClick={() => voice.confirmScreenSharePicker()}
             >
-              Go Live
+              {t("voice.screenShare.goLive")}
             </Button>
             <Button
               variant="soft"
               color="neutral"
               onClick={() => voice.cancelScreenSharePicker()}
             >
-              Cancel
+              {tCommon("cancel")}
             </Button>
           </Stack>
         </Paper>

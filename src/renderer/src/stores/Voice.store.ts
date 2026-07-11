@@ -31,6 +31,7 @@ import {
   openScreenCaptureSettings,
   type ScreenCaptureSource
 } from "@utils/screenCapture.utils";
+import i18n from "@renderer/i18n";
 
 export type VoiceConnectionStatus =
   | "idle"
@@ -1560,12 +1561,16 @@ export class VoiceStore {
       },
       (ev) => {
         let reason =
-          ev?.reason ?? (ev && ev.code ? `code ${ev.code}` : "Disconnected");
+          ev?.reason ??
+          (ev && ev.code
+            ? `code ${ev.code}`
+            : i18n.t("voice.errors.disconnected", { ns: "chat" }));
 
         if (
           this.channelSwitchInProgress &&
           (reason === "superseded" ||
             reason === "Moved to another voice channel" ||
+            reason === i18n.t("voice.errors.movedChannel", { ns: "chat" }) ||
             reason === "teardown")
         ) {
           return;
@@ -1573,13 +1578,18 @@ export class VoiceStore {
 
         switch (reason) {
           case "superseded": {
-            reason = "Connected from a different device";
+            reason = i18n.t("voice.errors.differentDevice", { ns: "chat" });
+            break;
+          }
+          case "Moved to another voice channel": {
+            reason = i18n.t("voice.errors.movedChannel", { ns: "chat" });
             break;
           }
         }
 
         const target = this.currentVoiceTarget;
-        const isSuperseded = reason === "Connected from a different device";
+        const isSuperseded =
+          reason === i18n.t("voice.errors.differentDevice", { ns: "chat" });
         const canAutoRejoin =
           !isSuperseded &&
           this.connectionStatus === "connected" &&
@@ -1598,7 +1608,10 @@ export class VoiceStore {
           }
 
           this.connectionStatus = "idle";
-          this.disconnectBanner = `Disconnected from voice: ${reason}`;
+          this.disconnectBanner = i18n.t("voice.errors.disconnectedFrom", {
+            ns: "chat",
+            reason
+          });
           this.disconnectedFrom = target;
           this.currentVoiceTarget = null;
         });
@@ -1923,7 +1936,7 @@ export class VoiceStore {
 
   onVoiceServerUpdate(payload: VoiceServerUpdatePayload) {
     if (!payload.voiceEndpoint?.trim()) {
-      this.failJoin("Voice server is not configured");
+      this.failJoin(i18n.t("voice.errors.notConfigured", { ns: "chat" }));
       return;
     }
 
@@ -1971,7 +1984,9 @@ export class VoiceStore {
       state.userId === accountId &&
       this.connectionStatus === "connecting"
     ) {
-      this.failJoin("Unable to join voice channel", { notifyServer: false });
+      this.failJoin(i18n.t("voice.errors.unableToJoin", { ns: "chat" }), {
+        notifyServer: false
+      });
       return;
     }
 
@@ -2690,7 +2705,9 @@ export class VoiceStore {
 
     if (!endpoint || !token) {
       this.logger.warn("startConnection called with no pending credentials");
-      this.failJoin("Voice server credentials were not provided");
+      this.failJoin(
+        i18n.t("voice.errors.credentialsMissing", { ns: "chat" })
+      );
       return;
     }
 
@@ -2817,7 +2834,7 @@ export class VoiceStore {
     this.clearJoinTimeout();
     this.joinTimeoutTimer = window.setTimeout(() => {
       if (this.connectionStatus === "connecting") {
-        this.failJoin("Voice connection timed out");
+        this.failJoin(i18n.t("voice.errors.timedOut", { ns: "chat" }));
       }
     }, VOICE_JOIN_TIMEOUT_MS);
   }

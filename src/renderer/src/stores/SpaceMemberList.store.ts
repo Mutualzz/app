@@ -3,8 +3,8 @@ import type { PresencePayload, Snowflake } from "@mutualzz/types";
 import type { AppStore } from "@stores/App.store";
 import type { Space } from "@stores/objects/Space";
 import { SpaceMember } from "@stores/objects/SpaceMember";
-import capitalize from "lodash/capitalize";
 import { makeAutoObservable } from "mobx";
+import i18n from "@renderer/i18n";
 
 export class SpaceMemberListStore {
   id: Snowflake;
@@ -43,8 +43,8 @@ export class SpaceMemberListStore {
   }
 
   private getGroupName(group: any) {
-    if (group.id === "online") return "Online";
-    if (group.id === "offline") return "Offline";
+    if (group.id === "online") return i18n.t("online", { ns: "chat" });
+    if (group.id === "offline") return i18n.t("offline", { ns: "chat" });
     return group.name;
   }
 
@@ -226,7 +226,7 @@ export class SpaceMemberListStore {
                 : (range?.[0] ?? this.list.length);
 
             this.list.splice(at, 0, {
-              name: `${capitalize(item.group.id)}`,
+              name: `${this.getGroupName(item.group)}`,
               items: []
             });
             break;

@@ -10,6 +10,7 @@ import { useAppStore } from "@hooks/useStores";
 import { MouseEvent } from "react";
 import styled from "@emotion/styled";
 import { StarIcon } from "@phosphor-icons/react";
+import { useTranslation } from "react-i18next";
 
 const GifWrapper = styled("div")({
   position: "relative",
@@ -42,6 +43,7 @@ const EmbedFavoriteBtn = styled("button")<{ favorited?: boolean }>(
 
 export const MessageEmbed = observer(
   ({ embed }: { embed: APIMessageEmbed }) => {
+    const { t } = useTranslation("chat");
     const { theme } = useTheme();
     const app = useAppStore();
 
@@ -92,7 +94,7 @@ export const MessageEmbed = observer(
             width={560}
             height={315}
             src={embed.youtube.embedUrl}
-            title="YouTube video player"
+            title={t("a11y.youtubePlayer")}
             css={{
               borderRadius: 8,
               border: `1px solid ${embed.color ?? theme.colors.primary} !important`
@@ -170,7 +172,7 @@ export const MessageEmbed = observer(
               favorited={isFavoritedGif}
               onClick={handleToggleGifFavorite}
               title={
-                isFavoritedGif ? "Remove from favorites" : "Add to favorites"
+                isFavoritedGif ? t("favorites.remove") : t("favorites.add")
               }
             >
               <StarIcon
@@ -220,7 +222,7 @@ export const MessageEmbed = observer(
               target="_blank"
               rel="noreferrer noopener"
             >
-              <img src={embed.image} alt={embed.title || "Embed title"} />
+              <img src={embed.image} alt={embed.title || t("a11y.embedTitle")} />
             </Link>
           )}
         </Paper>

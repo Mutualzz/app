@@ -10,6 +10,7 @@ import { useAppStore } from "@renderer/hooks/useStores";
 import { createFileRoute } from "@tanstack/react-router";
 import { observer } from "mobx-react-lite";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 export const Route = createFileRoute("/_authenticated/@me/friends")({
   component: observer(RouteComponent)
@@ -19,6 +20,7 @@ type Tabs = "online" | "all" | "pending" | "add-friend";
 
 function RouteComponent() {
   const app = useAppStore();
+  const { t } = useTranslation("chat");
 
   const [tab, setTab] = useState<Tabs>("online");
 
@@ -34,7 +36,7 @@ function RouteComponent() {
       >
         <Stack alignItems="center" direction="row" spacing={1.25}>
           <PersonIcon weight="fill" size={24} />
-          <Typography level="body-lg">Friends</Typography>
+          <Typography level="body-lg">{t("friends.title")}</Typography>
         </Stack>
         <svg
           aria-hidden="true"
@@ -50,20 +52,20 @@ function RouteComponent() {
             variant={tab === "online" ? "soft" : "plain"}
             onClick={() => setTab("online")}
           >
-            Online
+            {t("friends.tabs.online")}
           </Button>
           <Button
             variant={tab === "all" ? "soft" : "plain"}
             onClick={() => setTab("all")}
           >
-            All
+            {t("friends.tabs.all")}
           </Button>
           {app.relationships.pending.length > 0 && (
             <Button
               variant={tab === "pending" ? "soft" : "plain"}
               onClick={() => setTab("pending")}
             >
-              Pending
+              {t("friends.tabs.pending")}
             </Button>
           )}
           <Button
@@ -71,7 +73,7 @@ function RouteComponent() {
             variant={tab === "add-friend" ? "soft" : "solid"}
             onClick={() => setTab("add-friend")}
           >
-            Add Friend
+            {t("friends.tabs.addFriend")}
           </Button>
         </Stack>
       </Paper>

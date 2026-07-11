@@ -8,6 +8,7 @@ import type { APIProfileBlock } from "@mutualzz/types";
 import { Slider, Stack, Typography } from "@mutualzz/ui-web";
 import { ArrowsInIcon } from "@phosphor-icons/react";
 import { observer } from "mobx-react-lite";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   block: APIProfileBlock;
@@ -28,6 +29,7 @@ const FieldHint = ({ children }: { children: React.ReactNode }) => (
 
 export const ProfileBlockSizeInspector = observer(
   ({ block, updateSelectedBlock }: Props) => {
+    const { t } = useTranslation("settings");
     const limits = getProfileBlockSizeLimits(block.type);
     const isRecommended =
       block.width === limits.recommendedWidth &&
@@ -44,15 +46,23 @@ export const ProfileBlockSizeInspector = observer(
 
     return (
       <Stack direction="column" spacing={1}>
-        <FieldLabel>Block size</FieldLabel>
+        <FieldLabel>{t("profile.inspector.size.title")}</FieldLabel>
         <FieldHint>
-          Recommended {limits.recommendedWidth}% × {limits.recommendedHeight}%
-          {" · "}
-          Allowed {limits.minWidth}–{limits.maxWidth}% wide,{" "}
-          {limits.minHeight}–{limits.maxHeight}% tall
+          {t("profile.inspector.size.recommendedHint", {
+            recommendedWidth: limits.recommendedWidth,
+            recommendedHeight: limits.recommendedHeight,
+            minWidth: limits.minWidth,
+            maxWidth: limits.maxWidth,
+            minHeight: limits.minHeight,
+            maxHeight: limits.maxHeight
+          })}
         </FieldHint>
 
-        <FieldLabel>Width ({Math.round(block.width)}%)</FieldLabel>
+        <FieldLabel>
+          {t("profile.inspector.size.width", {
+            value: Math.round(block.width)
+          })}
+        </FieldLabel>
         <Slider
           min={limits.minWidth}
           max={limits.maxWidth}
@@ -63,7 +73,11 @@ export const ProfileBlockSizeInspector = observer(
           valueLabelFormat={(value) => `${value}%`}
         />
 
-        <FieldLabel>Height ({Math.round(block.height)}%)</FieldLabel>
+        <FieldLabel>
+          {t("profile.inspector.size.height", {
+            value: Math.round(block.height)
+          })}
+        </FieldLabel>
         <Slider
           min={limits.minHeight}
           max={limits.maxHeight}
@@ -83,7 +97,7 @@ export const ProfileBlockSizeInspector = observer(
               updateSelectedBlock(applyRecommendedBlockSize(block))
             }
           >
-            Use recommended size
+            {t("profile.inspector.size.useRecommended")}
           </Button>
         )}
       </Stack>

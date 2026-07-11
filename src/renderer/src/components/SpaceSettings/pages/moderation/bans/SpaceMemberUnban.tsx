@@ -7,6 +7,7 @@ import { UserAvatar } from "@components/User/UserAvatar";
 import { Button } from "@components/Button";
 import dayjs from "dayjs";
 import { useMutation } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 import { useModal } from "@contexts/Modal.context";
 import { Tooltip } from "@components/Tooltip";
@@ -16,6 +17,8 @@ interface Props {
 }
 
 export const SpaceMemberUnban = observer(({ ban }: Props) => {
+  const { t } = useTranslation("space");
+  const { t: tSettings } = useTranslation("settings");
   const app = useAppStore();
   const { closeModal } = useModal();
 
@@ -24,7 +27,9 @@ export const SpaceMemberUnban = observer(({ ban }: Props) => {
     mutationFn: () =>
       app.rest.delete(`/spaces/${ban.spaceId}/members/${ban.userId}/unban`),
     onSuccess: () => {
-      toast.success(`Successfully unbanned ${ban.user?.displayName}`);
+      toast.success(
+        t("bans.unbanSuccess", { name: ban.user?.displayName ?? "" })
+      );
       closeModal();
     }
   });
@@ -58,15 +63,15 @@ export const SpaceMemberUnban = observer(({ ban }: Props) => {
       >
         <Stack direction="column" spacing={1.25}>
           <Typography level="body-sm" textColor="secondary">
-            Reason
+            {t("bans.reason")}
           </Typography>
           <Typography level="body-xs">
-            {ban.reason || "No reason provided"}
+            {ban.reason || t("bans.noReason")}
           </Typography>
         </Stack>
         <Stack direction="column" spacing={1.25}>
           <Typography level="body-sm" textColor="secondary">
-            Banned by
+            {t("bans.bannedBy")}
           </Typography>
           <Stack direction="row" alignItems="center" spacing={1.25}>
             <UserAvatar
@@ -85,7 +90,7 @@ export const SpaceMemberUnban = observer(({ ban }: Props) => {
         </Stack>
         <Stack direction="column" spacing={1.25}>
           <Typography level="body-sm" textColor="secondary">
-            Banned at
+            {t("bans.bannedAt")}
           </Typography>
           <Tooltip content={dayjs(ban.createdAt).toString()}>
             <Typography level="body-xs">
@@ -103,7 +108,7 @@ export const SpaceMemberUnban = observer(({ ban }: Props) => {
           color="danger"
           onClick={() => revokeBan()}
         >
-          Revoke Ban
+          {t("actions.revokeBan")}
         </Button>
         <Button
           expand
@@ -112,7 +117,7 @@ export const SpaceMemberUnban = observer(({ ban }: Props) => {
           onClick={() => closeModal()}
           color="primary"
         >
-          Done
+          {tSettings("profile.done")}
         </Button>
       </Stack>
     </Paper>

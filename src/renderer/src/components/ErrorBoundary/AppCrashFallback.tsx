@@ -2,6 +2,9 @@ import { ThemeProvider } from "@emotion/react";
 import { baseDarkTheme } from "@mutualzz/ui-core";
 import { Button, Stack, Typography } from "@mutualzz/ui-web";
 import { WarningIcon } from "@phosphor-icons/react";
+import { useEffect } from "react";
+import { useTranslation } from "react-i18next";
+import { loadDefaultAppFonts } from "@utils/fonts/loadDefaultAppFonts";
 
 function getReloadShortcut() {
   if (typeof navigator === "undefined") return "Ctrl+R";
@@ -9,7 +12,12 @@ function getReloadShortcut() {
 }
 
 export function AppCrashFallback() {
+  const { t } = useTranslation("common");
   const shortcut = getReloadShortcut();
+
+  useEffect(() => {
+    loadDefaultAppFonts();
+  }, []);
 
   return (
     <ThemeProvider theme={baseDarkTheme}>
@@ -20,9 +28,12 @@ export function AppCrashFallback() {
         height="100dvh"
         gap={2}
         padding={3}
+        direction="column"
         css={{
           backgroundColor: baseDarkTheme.colors.background,
-          boxSizing: "border-box"
+          boxSizing: "border-box",
+          fontFamily: baseDarkTheme.typography.fontFamily,
+          color: baseDarkTheme.typography.colors.primary
         }}
       >
         <WarningIcon
@@ -35,20 +46,24 @@ export function AppCrashFallback() {
           textColor="primary"
           css={{ textAlign: "center" }}
         >
-          Something went wrong
+          {t("crash.title")}
         </Typography>
         <Typography
           level="body-md"
           textColor="secondary"
           css={{ textAlign: "center", maxWidth: 420 }}
         >
-          Mutualzz ran into an unexpected error. Reload the app to try again.
+          {t("crash.bodyDesktop")}
         </Typography>
         <Button size="lg" onClick={() => window.location.reload()}>
-          Reload app
+          {t("reload")}
         </Button>
-        <Typography level="body-sm" textColor="muted" css={{ textAlign: "center" }}>
-          Or press {shortcut}
+        <Typography
+          level="body-sm"
+          textColor="muted"
+          css={{ textAlign: "center" }}
+        >
+          {t("crash.orPressShortcut", { shortcut })}
         </Typography>
       </Stack>
     </ThemeProvider>

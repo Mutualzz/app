@@ -10,12 +10,14 @@ import { Stack, Typography } from "@mutualzz/ui-web";
 import { ArrowSquareOutIcon } from "@phosphor-icons/react";
 import { Paper } from "@renderer/components/Paper";
 import { useAppStore } from "@renderer/hooks/useStores";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   block: ProfileLinksBlock;
 }
 
 export const ProfileLinksBlockView = ({ block }: Props) => {
+  const { t } = useTranslation("settings");
   const app = useAppStore();
   const links = block.links.filter(
     (link) => link.label.trim() && link.url.trim()
@@ -38,7 +40,7 @@ export const ProfileLinksBlockView = ({ block }: Props) => {
           level="body-sm"
           css={{ opacity: 0.55, fontSize: "var(--pcf-sm)" }}
         >
-          Add links in the inspector
+          {t("profile.blocks.addLinksInInspector")}
         </Typography>
       )}
       {links.map((link, index) => {

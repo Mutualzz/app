@@ -11,6 +11,7 @@ import { useAppStore } from "@hooks/useStores";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import styled from "@emotion/styled";
 import { observer } from "mobx-react-lite";
+import { useTranslation } from "react-i18next";
 import { IconButton } from "../IconButton";
 
 interface GifResult {
@@ -206,6 +207,7 @@ const GifItem = ({
   onToggleFavorite: (e: MouseEvent<HTMLButtonElement>) => void;
   isFavorited: boolean;
 }) => {
+  const { t } = useTranslation("chat");
   const isVideo = String(gif.url ?? "").includes("mp4");
 
   return (
@@ -228,7 +230,7 @@ const GifItem = ({
         className="gif-fav-btn"
         favorited={isFavorited}
         onClick={onToggleFavorite}
-        title={isFavorited ? "Remove from favorites" : "Add to favorites"}
+        title={isFavorited ? t("favorites.remove") : t("favorites.add")}
       >
         <StarIcon size={14} weight={isFavorited ? "fill" : "regular"} />
       </FavoriteBtn>
@@ -237,6 +239,7 @@ const GifItem = ({
 };
 
 export const GifPicker = observer(({ onSelectGif }: GifPickerProps) => {
+  const { t } = useTranslation("chat");
   const { theme } = useTheme();
   const app = useAppStore();
 
@@ -315,7 +318,7 @@ export const GifPicker = observer(({ onSelectGif }: GifPickerProps) => {
           />
           <SearchInput
             ref={searchRef}
-            placeholder="Search KLIPY"
+            placeholder={t("picker.searchKlipy")}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             onKeyDown={(e) => {
@@ -343,7 +346,7 @@ export const GifPicker = observer(({ onSelectGif }: GifPickerProps) => {
         {isLoading ? (
           <Stack alignItems="center" justifyContent="center" padding="40px 0">
             <Typography level="body-sm" textColor="muted">
-              Loading…
+              {t("loading")}
             </Typography>
           </Stack>
         ) : (
@@ -353,7 +356,7 @@ export const GifPicker = observer(({ onSelectGif }: GifPickerProps) => {
                 {favoriteGifs.length > 0 && (
                   <TagItem
                     tag={{
-                      name: "Favorites",
+                      name: t("picker.favorites"),
                       preview: favoriteGifs[0].split("|")[1] ?? ""
                     }}
                     onClick={() => setViewingFavorites(true)}
@@ -379,7 +382,7 @@ export const GifPicker = observer(({ onSelectGif }: GifPickerProps) => {
                   flexShrink={0}
                 >
                   <SectionLabel textColor="muted" css={{ padding: "0" }}>
-                    Favorites
+                    {t("picker.favorites")}
                   </SectionLabel>
                 </Stack>
                 <GifGrid>
@@ -421,7 +424,7 @@ export const GifPicker = observer(({ onSelectGif }: GifPickerProps) => {
                     padding="16px 0"
                   >
                     <Typography level="body-sm" textColor="muted">
-                      Loading more…
+                      {t("picker.loadingMore")}
                     </Typography>
                   </Stack>
                 }
@@ -451,7 +454,7 @@ export const GifPicker = observer(({ onSelectGif }: GifPickerProps) => {
                   padding="40px 0"
                 >
                   <Typography level="body-sm" textColor="muted">
-                    No GIFs found for "{debouncedSearch}"
+                    {t("picker.noGifsFor", { query: debouncedSearch })}
                   </Typography>
                 </Stack>
               )

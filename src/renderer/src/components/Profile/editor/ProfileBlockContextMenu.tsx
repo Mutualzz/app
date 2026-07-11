@@ -8,6 +8,7 @@ import {
   TrashIcon
 } from "@phosphor-icons/react";
 import { Divider, Portal } from "@mutualzz/ui-web";
+import { useTranslation } from "react-i18next";
 
 export const PROFILE_BLOCK_MENU_ID = "profile-editor-block";
 
@@ -24,6 +25,7 @@ export const ProfileBlockContextMenu = ({
   onSnapToGrid,
   onDelete
 }: Props) => {
+  const { t } = useTranslation("settings");
   const app = useAppStore();
 
   return (
@@ -38,21 +40,21 @@ export const ProfileBlockContextMenu = ({
           onClick={onAlignHorizontal}
           endDecorator={<AlignCenterHorizontalIcon weight="bold" />}
         >
-          Align horizontally
+          {t("profile.blocks.alignHorizontally")}
         </ContextItem>
         <ContextItem
           size="sm"
           onClick={onAlignVertical}
           endDecorator={<AlignCenterVerticalIcon weight="bold" />}
         >
-          Align vertically
+          {t("profile.blocks.alignVertically")}
         </ContextItem>
         <ContextItem
           size="sm"
           onClick={onSnapToGrid}
           endDecorator={<GridFourIcon weight="bold" />}
         >
-          Snap to grid
+          {t("profile.blocks.snapToGrid")}
         </ContextItem>
         <Divider lineColor="muted" />
         <ContextItem
@@ -61,7 +63,7 @@ export const ProfileBlockContextMenu = ({
           onClick={onDelete}
           endDecorator={<TrashIcon weight="bold" />}
         >
-          Delete block
+          {t("profile.blocks.deleteBlock")}
         </ContextItem>
       </ContextMenu>
     </Portal>

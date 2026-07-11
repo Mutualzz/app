@@ -1,5 +1,4 @@
 import { Button } from "@components/Button";
-import { Link } from "@components/Link";
 import { Paper } from "@components/Paper";
 import { SupportHeader } from "@components/Support/SupportHeader";
 import { useAppStore } from "@hooks/useStores";
@@ -13,34 +12,34 @@ import {
 } from "@phosphor-icons/react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import type { ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 
 export const Route = createFileRoute("/support")({
   component: SupportPage
 });
 
-const faqItems = [
+const SUPPORT_EMAIL = "contact@mutualzz.com";
+
+const faqKeys = ["report", "appeal", "delete", "block"] as const;
+
+const quickLinkItems = [
   {
-    question: "How do I report someone or content?",
-    answer:
-      "Open a user profile or post menu and choose Report. Reports go to our moderation team."
+    key: "report" as const,
+    icon: <ShieldWarningIcon size={18} />
   },
   {
-    question: "How do I appeal a ban?",
-    answer:
-      "If you received a ban email, use the appeal link in that message. Appeals are reviewed separately from support tickets."
+    key: "appeals" as const,
+    icon: <GavelIcon size={18} />
   },
   {
-    question: "How do I delete my account?",
-    answer: "Go to Settings → My Account → Delete Account."
-  },
-  {
-    question: "How do I block someone?",
-    answer:
-      "Open their profile and choose Block. Blocked users cannot send you direct messages, friend requests, or interact with your posts and comments. Their posts, comments, and profile are hidden from you, and your profile appears unavailable to them."
+    key: "delete" as const,
+    icon: <TrashIcon size={18} />
   }
 ];
 
 function SupportPage() {
+  const { t } = useTranslation("common");
+  const { t: tSettings } = useTranslation("settings");
   const app = useAppStore();
   const navigate = useNavigate();
   const isLoggedIn = !!app.token;
@@ -48,7 +47,7 @@ function SupportPage() {
   return (
     <Stack width="100vw" height="100dvh" direction="column" overflow="hidden">
       <SupportHeader
-        title="Help & Support"
+        title={tSettings("helpAndSupport")}
         icon={<LifebuoyIcon size={22} weight="fill" />}
         showExit={isLoggedIn}
       />
@@ -73,12 +72,11 @@ function SupportPage() {
           spacing={2}
         >
           <Stack direction="row" alignItems="center" spacing={1.25}>
-            <Typography level="h3">Help & Support</Typography>
+            <Typography level="h3">{tSettings("helpAndSupport")}</Typography>
           </Stack>
 
           <Typography level="body-lg" textColor="muted">
-            Need help with Mutualzz? Browse common answers below or contact our
-            team.
+            {t("support.pageIntro")}
           </Typography>
 
           <Stack direction="row" spacing={1} flexWrap="wrap">
@@ -88,7 +86,7 @@ function SupportPage() {
                   startDecorator={<ChatsCircleIcon />}
                   onClick={() => navigate({ to: "/support/tickets" })}
                 >
-                  My tickets
+                  {t("support.myTickets")}
                 </Button>
                 <Button
                   variant="soft"
@@ -96,68 +94,59 @@ function SupportPage() {
                     navigate({ to: "/support/tickets", search: { new: true } })
                   }
                 >
-                  Contact support
+                  {t("support.contactSupport")}
                 </Button>
               </>
             ) : (
               <Button onClick={() => navigate({ to: "/login" })}>
-                Log in to contact support
+                {t("support.loginToContact")}
               </Button>
             )}
             <Button variant="soft" onClick={() => navigate({ to: "/privacy" })}>
-              Privacy Policy
+              {t("support.privacyPolicy")}
             </Button>
           </Stack>
 
-          <Section title="Frequently asked questions">
+          <Section title={t("support.faq")}>
             <Stack direction="column" spacing={2}>
-              {faqItems.map((item) => (
+              {faqKeys.map((key) => (
                 <Paper
-                  key={item.question}
+                  key={key}
                   variant="soft"
                   borderRadius={12}
                   p={2}
                   direction="column"
                   spacing={0.75}
                 >
-                  <Typography fontWeight={600}>{item.question}</Typography>
+                  <Typography fontWeight={600}>
+                    {t(`support.faqItems.${key}.q`)}
+                  </Typography>
                   <Typography level="body-sm" textColor="muted">
-                    {item.answer}
+                    {t(`support.faqItems.${key}.a`)}
                   </Typography>
                 </Paper>
               ))}
             </Stack>
           </Section>
 
-          <Section title="Quick links">
+          <Section title={t("support.quickLinks")}>
             <Stack direction="column" spacing={1}>
-              <QuickLink
-                icon={<ShieldWarningIcon size={18} />}
-                label="Report content or a user"
-                hint="Available from profile and post menus inside the app"
-              />
-              <QuickLink
-                icon={<GavelIcon size={18} />}
-                label="Ban appeals"
-                hint="Use the appeal link from your ban email"
-              />
-              <QuickLink
-                icon={<TrashIcon size={18} />}
-                label="Delete your account"
-                hint="Settings → My Account → Delete Account"
-              />
+              {quickLinkItems.map((item) => (
+                <QuickLink
+                  key={item.key}
+                  icon={item.icon}
+                  label={t(`support.quickLinkItems.${item.key}.label`)}
+                  hint={t(`support.quickLinkItems.${item.key}.hint`)}
+                />
+              ))}
             </Stack>
           </Section>
 
-          <Section title="Contact us">
+          <Section title={t("support.contactUs")}>
             <Typography>
-              Email us at{" "}
-              <Link href="mailto:contact@mutualzz.com" textColor="accent">
-                contact@mutualzz.com
-              </Link>
               {isLoggedIn
-                ? " or open a support ticket for a tracked conversation."
-                : "."}
+                ? t("support.contactEmailLoggedIn", { email: SUPPORT_EMAIL })
+                : t("support.contactEmailGuest", { email: SUPPORT_EMAIL })}
             </Typography>
           </Section>
         </Paper>

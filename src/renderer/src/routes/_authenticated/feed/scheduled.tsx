@@ -4,6 +4,7 @@ import { Stack, Typography } from "@mutualzz/ui-web";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { observer } from "mobx-react-lite";
+import { useTranslation } from "react-i18next";
 
 export const Route = createFileRoute("/_authenticated/feed/scheduled")({
   component: observer(RouteComponent)
@@ -11,6 +12,7 @@ export const Route = createFileRoute("/_authenticated/feed/scheduled")({
 
 function RouteComponent() {
   const app = useAppStore();
+  const { t } = useTranslation("chat");
 
   const { isLoading } = useQuery({
     queryKey: ["posts", "scheduled"],
@@ -27,13 +29,13 @@ function RouteComponent() {
 
   return (
     <Stack direction="column" spacing={3} width="100%" height="100%" overflowY="auto">
-      <Typography level="h6">Scheduled Posts</Typography>
+      <Typography level="h6">{t("feed.scheduled.title")}</Typography>
 
-      {isLoading && <Typography level="body-sm">Loading…</Typography>}
+      {isLoading && <Typography level="body-sm">{t("loading")}</Typography>}
 
       {!isLoading && scheduledPosts.length === 0 && (
         <Typography level="body-sm" textColor="secondary">
-          You have no scheduled posts.
+          {t("feed.empty.scheduled")}
         </Typography>
       )}
 

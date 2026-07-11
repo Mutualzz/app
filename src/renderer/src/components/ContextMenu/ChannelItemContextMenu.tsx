@@ -13,6 +13,7 @@ import { ChannelActionConfirm } from "@components/Modals/ChannelActionConfirm";
 import { ContextItem } from "@components/ContextItem";
 import { GearIcon, PaperPlaneTiltIcon, TrashIcon } from "@phosphor-icons/react";
 import { ChannelSettingsModal } from "@components/ChannelSettings/ChannelSettingsModal";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   space: Space;
@@ -22,6 +23,7 @@ interface Props {
 export const ChannelItemContextMenu = observer(({ space, channel }: Props) => {
   const app = useAppStore();
   const { openModal } = useModal();
+  const { t } = useTranslation("chat");
 
   const canModifyChannel = space.members.me?.hasPermission(
     "ManageChannels",
@@ -46,7 +48,7 @@ export const ChannelItemContextMenu = observer(({ space, channel }: Props) => {
             onClick={() => readState.ack()}
             disabled={!readState?.isUnread}
           >
-            Mark as read
+            {t("contextMenu.markAsRead")}
           </ContextItem>
           <Divider
             css={{
@@ -66,7 +68,7 @@ export const ChannelItemContextMenu = observer(({ space, channel }: Props) => {
           }
           endDecorator={<PaperPlaneTiltIcon weight="fill" />}
         >
-          Invite to Channel
+          {t("contextMenu.inviteToChannel")}
         </ContextItem>
       )}
 
@@ -82,8 +84,9 @@ export const ChannelItemContextMenu = observer(({ space, channel }: Props) => {
             size="sm"
             endDecorator={<GearIcon weight="fill" />}
           >
-            Edit{" "}
-            {channel.type === ChannelType.Category ? "Category" : "Channel"}
+            {channel.type === ChannelType.Category
+              ? t("contextMenu.editCategory")
+              : t("contextMenu.editChannel")}
           </ContextItem>
           <ContextItem
             onClick={() =>
@@ -101,7 +104,9 @@ export const ChannelItemContextMenu = observer(({ space, channel }: Props) => {
             size="sm"
             endDecorator={<TrashIcon weight="fill" />}
           >
-            Delete {isCategory ? "Category" : "Channel"}
+            {isCategory
+              ? t("contextMenu.deleteCategory")
+              : t("contextMenu.deleteChannel")}
           </ContextItem>
         </>
       )}

@@ -18,8 +18,10 @@ import { Button } from "@components/Button";
 import { useEffect, useRef, useState } from "react";
 import { XIcon } from "@phosphor-icons/react";
 import { formatKeyCode } from "@utils/voiceSettings.utils";
+import { useTranslation } from "react-i18next";
 
 export const AppVoiceVideoSettings = observer(() => {
+  const { t } = useTranslation("settings");
   const app = useAppStore();
   const [showCamera, setShowCamera] = useState(false);
   const [testStream, setTestStream] = useState<MediaStream | null>(null);
@@ -103,7 +105,7 @@ export const AppVoiceVideoSettings = observer(() => {
   return (
     <Stack spacing={25} mt={7.5} mx={50} direction="column">
       <Stack spacing={2.5} direction="column">
-        <Typography fontSize={20}>Voice</Typography>
+        <Typography fontSize={20}>{t("voice.title")}</Typography>
         <Divider
           textColor="muted"
           css={{
@@ -112,12 +114,12 @@ export const AppVoiceVideoSettings = observer(() => {
         />
         <Stack direction="row" justifyContent="center" spacing={25}>
           <Stack direction="column" flex={1}>
-            <Typography>Microphone</Typography>
+            <Typography>{t("voice.microphone")}</Typography>
             <Select
               placeholder={
                 inputs.length === 0
-                  ? "No microphones detected"
-                  : "Select a microphone"
+                  ? t("voice.noMicrophones")
+                  : t("voice.selectMicrophone")
               }
               value={inputValue}
               disabled={inputs.length === 0}
@@ -130,18 +132,18 @@ export const AppVoiceVideoSettings = observer(() => {
             >
               {inputs.map((input) => (
                 <Option key={input.deviceId} value={input.deviceId}>
-                  {input.label || "Unknown Microphone"}
+                  {input.label || t("voice.unknownMicrophone")}
                 </Option>
               ))}
             </Select>
           </Stack>
           <Stack direction="column" flex={1}>
-            <Typography>Speaker</Typography>
+            <Typography>{t("voice.speaker")}</Typography>
             <Select
               placeholder={
                 outputs.length === 0
-                  ? "No speakers detected"
-                  : "Select a speaker"
+                  ? t("voice.noSpeakers")
+                  : t("voice.selectSpeaker")
               }
               disabled={outputs.length === 0}
               value={outputValue}
@@ -154,7 +156,7 @@ export const AppVoiceVideoSettings = observer(() => {
             >
               {outputs.map((output) => (
                 <Option key={output.deviceId} value={output.deviceId}>
-                  {output.label || "Unknown Speaker"}
+                  {output.label || t("voice.unknownSpeaker")}
                 </Option>
               ))}
             </Select>
@@ -163,7 +165,7 @@ export const AppVoiceVideoSettings = observer(() => {
 
         <Stack direction="column" spacing={2} mt={2}>
           <Typography level="body-sm" textColor="muted">
-            Input mode
+            {t("voice.inputMode")}
           </Typography>
           <RadioGroup
             value={settings.voiceInputMode}
@@ -174,15 +176,15 @@ export const AppVoiceVideoSettings = observer(() => {
               }
             }}
           >
-            <Radio value="voice_activity" label="Voice Activity" />
-            <Radio value="push_to_talk" label="Push to Talk" />
+            <Radio value="voice_activity" label={t("voice.voiceActivity")} />
+            <Radio value="push_to_talk" label={t("voice.pushToTalk")} />
           </RadioGroup>
         </Stack>
 
         {settings.voiceInputMode === "push_to_talk" && (
           <Stack direction="column" spacing={1.5}>
             <Typography level="body-sm" textColor="muted">
-              Shortcut
+              {t("voice.shortcut")}
             </Typography>
             <Button
               variant="soft"
@@ -191,11 +193,13 @@ export const AppVoiceVideoSettings = observer(() => {
               css={{ alignSelf: "flex-start" }}
             >
               {voice.recordingPushToTalkKey
-                ? "Press a key..."
-                : `Edit Keybind (${voice.pushToTalkKeyLabel})`}
+                ? t("voice.pressAKey")
+                : t("voice.editKeybind", { key: voice.pushToTalkKeyLabel })}
             </Button>
             <Typography level="body-xs" textColor="muted">
-              Current key: {formatKeyCode(settings.pushToTalkKey)}
+              {t("voice.currentKey", {
+                key: formatKeyCode(settings.pushToTalkKey)
+              })}
             </Typography>
           </Stack>
         )}
@@ -206,9 +210,9 @@ export const AppVoiceVideoSettings = observer(() => {
           justifyContent="space-between"
         >
           <Stack direction="column" spacing={0.5}>
-            <Typography>Automatically determine input sensitivity</Typography>
+            <Typography>{t("voice.autoSensitivity")}</Typography>
             <Typography level="body-xs" textColor="muted">
-              Let Mutualzz decide when your mic activates
+              {t("voice.autoSensitivityDescription")}
             </Typography>
           </Stack>
           <Switch
@@ -224,7 +228,7 @@ export const AppVoiceVideoSettings = observer(() => {
         {!settings.voiceInputSensitivityAuto && (
           <Stack direction="column" spacing={1.5}>
             <Typography level="body-sm" textColor="muted">
-              Input sensitivity
+              {t("voice.inputSensitivity")}
             </Typography>
             <Slider
               min={0}
@@ -243,7 +247,7 @@ export const AppVoiceVideoSettings = observer(() => {
       </Stack>
 
       <Stack direction="column" spacing={2.5}>
-        <Typography fontSize={20}>Camera</Typography>
+        <Typography fontSize={20}>{t("voice.camera")}</Typography>
         <Divider
           textColor="muted"
           css={{
@@ -275,14 +279,14 @@ export const AppVoiceVideoSettings = observer(() => {
                     setShowCamera(true);
                   }}
                 >
-                  Test Camera
+                  {t("voice.testCamera")}
                 </Button>
 
                 <Select
                   placeholder={
                     cameras.length === 0
-                      ? "No cameras detected"
-                      : "Select a camera"
+                      ? t("voice.noCameras")
+                      : t("voice.selectCamera")
                   }
                   disabled={cameras.length === 0}
                   value={cameraValue}
@@ -295,7 +299,7 @@ export const AppVoiceVideoSettings = observer(() => {
                 >
                   {cameras.map((camera) => (
                     <Option key={camera.deviceId} value={camera.deviceId}>
-                      {camera.label || "Unknown Camera"}
+                      {camera.label || t("voice.unknownCamera")}
                     </Option>
                   ))}
                 </Select>
@@ -315,7 +319,7 @@ export const AppVoiceVideoSettings = observer(() => {
                     objectFit: "cover"
                   }}
                 />
-                <Tooltip content="Stop testing">
+                <Tooltip content={t("voice.stopTesting")}>
                   <IconButton
                     css={{
                       position: "absolute",

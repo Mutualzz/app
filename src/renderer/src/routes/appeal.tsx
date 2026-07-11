@@ -6,6 +6,7 @@ import { Button } from "@components/Button";
 import { useMutation } from "@tanstack/react-query";
 import { useAppStore } from "@hooks/useStores";
 import { HttpException } from "@mutualzz/types";
+import { useTranslation } from "react-i18next";
 
 export const Route = createFileRoute("/appeal")({
   component: RouteComponent,
@@ -15,6 +16,7 @@ export const Route = createFileRoute("/appeal")({
 });
 
 function RouteComponent() {
+  const { t } = useTranslation("auth");
   const app = useAppStore();
   const { token } = Route.useSearch();
   const [message, setMessage] = useState("");
@@ -77,25 +79,22 @@ function RouteComponent() {
             }}
             textAlign="center"
           >
-            Submit an Appeal
+            {t("appeal.title")}
           </Typography>
 
           {isSuccess ? (
             <Typography textAlign="center" textColor="secondary">
-              Your appeal has been submitted. Our staff team will review it and
-              follow up by email.
+              {t("appeal.success")}
             </Typography>
           ) : (
             <>
               <Typography textColor="secondary">
-                Explain why you believe this decision should be reconsidered. A
-                staff member will review your appeal. Space lockdown appeals can
-                only be submitted by the space owner using the email link.
+                {t("appeal.description")}
               </Typography>
               <Textarea
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
-                placeholder="Tell us why this decision should be reconsidered"
+                placeholder={t("appeal.placeholder")}
                 rows={5}
               />
               {error && (
@@ -109,7 +108,7 @@ function RouteComponent() {
                 disabled={isPending || !message.trim()}
                 fullWidth
               >
-                Submit Appeal
+                {t("actions.submitAppeal")}
               </Button>
             </>
           )}

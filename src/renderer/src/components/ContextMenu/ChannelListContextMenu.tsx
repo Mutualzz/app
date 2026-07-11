@@ -14,6 +14,7 @@ import {
   HashIcon,
   PaperPlaneTiltIcon
 } from "@phosphor-icons/react";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   space: Space;
@@ -22,6 +23,7 @@ interface Props {
 export const ChannelListContextMenu = observer(({ space }: Props) => {
   const app = useAppStore();
   const { openModal } = useModal();
+  const { t } = useTranslation("chat");
 
   const canManageChannels = space.members.me?.hasPermission("ManageChannels");
   const canInvite = space.members.me?.hasPermission("CreateInvites");
@@ -41,7 +43,7 @@ export const ChannelListContextMenu = observer(({ space }: Props) => {
             }
             endDecorator={<HashIcon />}
           >
-            Create Channel
+            {t("contextMenu.createChannel")}
           </ContextItem>
           <ContextItem
             onClick={() =>
@@ -52,7 +54,7 @@ export const ChannelListContextMenu = observer(({ space }: Props) => {
             }
             endDecorator={<ClipboardIcon weight="fill" />}
           >
-            Create Category
+            {t("contextMenu.createCategory")}
           </ContextItem>
         </Box>
       )}
@@ -66,7 +68,7 @@ export const ChannelListContextMenu = observer(({ space }: Props) => {
           }
           endDecorator={<PaperPlaneTiltIcon weight="fill" />}
         >
-          Invite to Space
+          {t("contextMenu.inviteToSpace")}
         </ContextItem>
       )}
     </ContextMenu>

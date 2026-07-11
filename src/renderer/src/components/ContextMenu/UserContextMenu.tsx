@@ -21,6 +21,7 @@ import { MemberBan } from "@components/Modals/MemberBan";
 import { ReportContentModal } from "@components/Modals/ReportContentModal";
 import { ArrowLeftIcon, FlagIcon, UserMinusIcon } from "@phosphor-icons/react";
 import { AccountStore } from "@stores/Account.store";
+import { useTranslation } from "react-i18next";
 import {
   canAssignRole,
   getHierarchyContext
@@ -37,6 +38,9 @@ export const UserContextMenu = observer(
   ({ user, space, member, insideDMs }: Props) => {
     const app = useAppStore();
     const navigate = useNavigate();
+    const { t } = useTranslation("chat");
+    const { t: tAuth } = useTranslation("auth");
+    const { t: tSpace } = useTranslation("space");
     const me = space?.members.me;
     const { openModal } = useModal();
     const { clearMenu } = useMenu();
@@ -172,12 +176,12 @@ export const UserContextMenu = observer(
       mutationKey: ["toggle-member-role", member?.id],
       mutationFn: async (role: Role) => {
         if (!canManageRoles)
-          throw new Error("You don't have permission to manage this member");
+          throw new Error(tSpace("roles.hierarchy.cantManageMember"));
 
         if (!member) return null;
 
         if (hierarchyContext && !canAssignRole(hierarchyContext, role)) {
-          throw new Error("Role hierarchy prevents modifying this role");
+          throw new Error(tSpace("roles.hierarchy.cantAssign"));
         }
 
         if (member.roles.has(role.id)) return member.removeRole(role);
@@ -186,7 +190,9 @@ export const UserContextMenu = observer(
       },
       onError: (error) => {
         toast.error(
-          error instanceof Error ? error.message : "Failed to update role"
+          error instanceof Error
+            ? error.message
+            : tSpace("roles.hierarchy.failedUpdateRole")
         );
       }
     });
@@ -288,7 +294,7 @@ export const UserContextMenu = observer(
               onClick={() => readState.ack()}
               disabled={!readState.isUnread}
             >
-              Mark as read
+              {t("contextMenu.markAsRead")}
             </ContextItem>
             <Divider css={{ opacity: 0.5 }} />
           </>
@@ -304,7 +310,7 @@ export const UserContextMenu = observer(
                 });
               }}
             >
-              View Profile
+              {t("contextMenu.viewProfile")}
             </ContextItem>
             <ContextItem
               onClick={() => {
@@ -312,7 +318,7 @@ export const UserContextMenu = observer(
                 navigate({ to: "/profile" });
               }}
             >
-              Edit Profile
+              {t("contextMenu.editProfile")}
             </ContextItem>
           </>
         ) : (
@@ -326,20 +332,20 @@ export const UserContextMenu = observer(
                 });
               }}
             >
-              View Profile
+              {t("contextMenu.viewProfile")}
             </ContextItem>
             {!insideDMs && (
               <ContextItem
                 onClick={() => openDm()}
                 disabled={openingDm || iBlockedThem}
               >
-                Message
+                {t("contextMenu.message")}
               </ContextItem>
             )}
 
             {insideDMs && (
               <ContextItem onClick={() => closeDm()} disabled={closingDm}>
-                Close DM
+                {t("contextMenu.closeDm")}
               </ContextItem>
             )}
 
@@ -350,7 +356,7 @@ export const UserContextMenu = observer(
                 color="danger"
                 endDecorator={<UserMinusIcon weight="fill" />}
               >
-                Remove from Group
+                {t("contextMenu.removeFromGroup")}
               </ContextItem>
             )}
 
@@ -359,7 +365,7 @@ export const UserContextMenu = observer(
                 onClick={() => addFriend()}
                 disabled={addingFriend || iBlockedThem}
               >
-                Add Friend
+                {tAuth("invite.addFriend")}
               </ContextItem>
             )}
 
@@ -369,13 +375,13 @@ export const UserContextMenu = observer(
                   onClick={() => acceptFriend()}
                   disabled={acceptingFriend || iBlockedThem}
                 >
-                  Accept Friend Request
+                  {t("contextMenu.acceptFriendRequest")}
                 </ContextItem>
                 <ContextItem
                   onClick={() => declineFriend()}
                   disabled={decliningFriend || iBlockedThem}
                 >
-                  Decline Friend Request
+                  {t("contextMenu.declineFriendRequest")}
                 </ContextItem>
               </>
             )}
@@ -385,7 +391,7 @@ export const UserContextMenu = observer(
                 onClick={() => declineFriend()}
                 disabled={decliningFriend || iBlockedThem}
               >
-                Cancel Friend Request
+                {t("contextMenu.cancelFriendRequest")}
               </ContextItem>
             )}
 
@@ -394,7 +400,7 @@ export const UserContextMenu = observer(
                 onClick={() => removeFriend()}
                 disabled={removingFriend || iBlockedThem}
               >
-                Remove Friend
+                {t("contextMenu.removeFriend")}
               </ContextItem>
             )}
 
@@ -403,11 +409,11 @@ export const UserContextMenu = observer(
                 onClick={() => unblockUser()}
                 disabled={unblockingUser}
               >
-                Unblock
+                {t("contextMenu.unblock")}
               </ContextItem>
             ) : (
               <ContextItem onClick={() => blockUser()} disabled={blockingUser}>
-                Block
+                {t("contextMenu.block")}
               </ContextItem>
             )}
 
@@ -420,14 +426,14 @@ export const UserContextMenu = observer(
                   <ReportContentModal
                     targetType="user"
                     targetId={user.id}
-                    contentLabel="this account"
+                    contentLabel={t("contextMenu.reportAccount")}
                     modalId={`report-user-${user.id}`}
                   />
                 );
                 clearMenu();
               }}
             >
-              Report User
+              {t("contextMenu.reportUser")}
             </ContextItem>
 
             <Divider css={{ opacity: 0.5 }} />
@@ -439,7 +445,7 @@ export const UserContextMenu = observer(
             elevation={app.settings?.preferEmbossed ? 5 : 1}
             transparency={0}
             arrow={<ArrowLeftIcon />}
-            label="Roles"
+            label={t("contextMenu.roles")}
             style={{
               height:
                 visibleRoleCount === 0 && !canManageRoles ? "2.5rem" : "15rem",
@@ -456,14 +462,16 @@ export const UserContextMenu = observer(
                   height="100%"
                   spacing={1.25}
                 >
-                  <Typography level="body-sm">No roles to assign</Typography>
+                  <Typography level="body-sm">
+                    {t("contextMenu.noRolesToAssign")}
+                  </Typography>
                   <Button
                     color="info"
                     size="sm"
                     onClick={() => createRole()}
                     disabled={creatingRole}
                   >
-                    Create role
+                    {t("contextMenu.createRole")}
                   </Button>
                 </Stack>
               ) : (
@@ -498,7 +506,9 @@ export const UserContextMenu = observer(
                 alignItems="center"
                 height="100%"
               >
-                <Typography level="body-sm">No roles assigned</Typography>
+                <Typography level="body-sm">
+                  {t("contextMenu.noRolesAssigned")}
+                </Typography>
               </Stack>
             ) : (
               assignedRoles?.map((role) => (
@@ -529,7 +539,7 @@ export const UserContextMenu = observer(
                 flex={1}
                 alignItems="center"
               >
-                <Typography level="body-xs">Mute User</Typography>
+                <Typography level="body-xs">{t("voice.controls.muteUser")}</Typography>
                 <Checkbox
                   color="neutral"
                   checked={userVoiceMuted}
@@ -548,7 +558,7 @@ export const UserContextMenu = observer(
             >
               <Stack direction="column" spacing={1} width="100%">
                 <Stack justifyContent="space-between" alignItems="center">
-                  <Typography level="body-xs">User Volume</Typography>
+                  <Typography level="body-xs">{t("voice.controls.userVolume")}</Typography>
                   <Typography level="body-xs" textColor="muted">
                     {userVoiceVolume}%
                   </Typography>
@@ -579,7 +589,7 @@ export const UserContextMenu = observer(
                   clearMenu();
                 }}
               >
-                Watch Stream
+                {t("voice.watchStream")}
               </ContextItem>
             ) : (
               <>
@@ -589,7 +599,7 @@ export const UserContextMenu = observer(
                     clearMenu();
                   }}
                 >
-                  Stop Watching
+                  {t("voice.stopWatching")}
                 </ContextItem>
                 <ContextItem
                   variant="plain"
@@ -603,7 +613,9 @@ export const UserContextMenu = observer(
                     flex={1}
                     alignItems="center"
                   >
-                    <Typography level="body-xs">Mute Stream</Typography>
+                    <Typography level="body-xs">
+                      {t("voice.controls.muteStream")}
+                    </Typography>
                     <Checkbox
                       color="neutral"
                       checked={streamMuted}
@@ -622,7 +634,9 @@ export const UserContextMenu = observer(
                 >
                   <Stack direction="column" spacing={1} width="100%">
                     <Stack justifyContent="space-between" alignItems="center">
-                      <Typography level="body-xs">Stream Volume</Typography>
+                      <Typography level="body-xs">
+                        {t("voice.controls.streamVolume")}
+                      </Typography>
                       <Typography level="body-xs" textColor="muted">
                         {streamVolume}%
                       </Typography>
@@ -668,7 +682,7 @@ export const UserContextMenu = observer(
                 >
                   <Stack alignItems="center" spacing={1.25}>
                     <Typography color="danger" variant="plain" level="body-xs">
-                      Space Mute
+                      {t("voice.moderation.spaceMuteToggle")}
                     </Typography>
                   </Stack>
                   <Checkbox
@@ -704,7 +718,7 @@ export const UserContextMenu = observer(
                 >
                   <Stack alignItems="center" spacing={1.25}>
                     <Typography color="danger" variant="plain" level="body-xs">
-                      Space Deafen
+                      {t("voice.moderation.spaceDeafenToggle")}
                     </Typography>
                   </Stack>
                   <Checkbox
@@ -728,7 +742,7 @@ export const UserContextMenu = observer(
                 size="sm"
                 color="danger"
               >
-                Disconnect
+                {t("voice.connection.disconnect")}
               </ContextItem>
             )}
           </>
@@ -748,7 +762,9 @@ export const UserContextMenu = observer(
                   );
                 }}
               >
-                Kick {member?.user?.username}
+                {t("contextMenu.kickMember", {
+                  username: member?.user?.username
+                })}
               </ContextItem>
             )}
             {canBanMember && !isSelf && (
@@ -764,7 +780,9 @@ export const UserContextMenu = observer(
                   );
                 }}
               >
-                Ban {member?.user?.username}
+                {t("contextMenu.banMember", {
+                  username: member?.user?.username
+                })}
               </ContextItem>
             )}
           </>
@@ -781,7 +799,7 @@ export const UserContextMenu = observer(
                 });
               }}
             >
-              Open in Staff Panel
+              {t("contextMenu.openInStaffPanel")}
             </ContextItem>
           </>
         )}

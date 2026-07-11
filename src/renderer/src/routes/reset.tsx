@@ -7,6 +7,7 @@ import { Button } from "@components/Button";
 import { useMutation } from "@tanstack/react-query";
 import { useAppStore } from "@hooks/useStores";
 import { HttpException } from "@mutualzz/types";
+import { useTranslation } from "react-i18next";
 
 export const Route = createFileRoute("/reset")({
   component: RouteComponent,
@@ -16,6 +17,7 @@ export const Route = createFileRoute("/reset")({
 });
 
 function RouteComponent() {
+  const { t } = useTranslation("auth");
   const app = useAppStore();
   const navigate = useNavigate();
   const { token } = Route.useSearch();
@@ -85,7 +87,7 @@ function RouteComponent() {
             }}
             textAlign="center"
           >
-            Reset Password
+            {t("reset.title")}
           </Typography>
           <Stack direction="column" spacing={2.5}>
             <InputWithLabel
@@ -97,7 +99,7 @@ function RouteComponent() {
                   password: e.target.value
                 }))
               }
-              label="New Password"
+              label={t("reset.newPassword")}
               type="password"
               apiError={error}
             />
@@ -110,7 +112,7 @@ function RouteComponent() {
                   confirmPassword: e.target.value
                 }))
               }
-              label="Confirm New Password"
+              label={t("reset.confirmNewPassword")}
               type="password"
             />
           </Stack>
@@ -120,7 +122,7 @@ function RouteComponent() {
             disabled={changingPassword}
             fullWidth
           >
-            Change password
+            {t("actions.changePassword")}
           </Button>
         </Stack>
       </Paper>

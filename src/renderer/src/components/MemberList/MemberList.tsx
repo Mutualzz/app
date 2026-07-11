@@ -5,11 +5,13 @@ import { useAppStore } from "@hooks/useStores";
 import { Stack, Typography } from "@mutualzz/ui-web";
 import { observer } from "mobx-react-lite";
 import { useCallback, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import InfiniteScroll from "react-infinite-scroll-component";
 
 const PAGE_SIZE = 50;
 
 export const MemberList = observer(() => {
+  const { t } = useTranslation("chat");
   const app = useAppStore();
   const space = app.spaces.active;
   const channel = app.channels.active;
@@ -62,7 +64,7 @@ export const MemberList = observer(() => {
           hasMore={hasMore}
           loader={
             <Stack alignItems="center" justifyContent="center" p={2}>
-              <Typography textColor="secondary">Loading members…</Typography>
+              <Typography textColor="secondary">{t("loadingMembers")}</Typography>
             </Stack>
           }
           scrollableTarget="member-list-scroll"

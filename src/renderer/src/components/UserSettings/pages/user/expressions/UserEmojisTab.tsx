@@ -15,8 +15,10 @@ import { IconButton } from "@components/IconButton";
 import { TrashIcon } from "@phosphor-icons/react";
 import { Tooltip } from "@components/Tooltip";
 import { ExpressionEditor } from "@renderer/components/Expression/ExpressionEditor";
+import { useTranslation } from "react-i18next";
 
 const EmojiItem = observer(({ expression }: { expression: Expression }) => {
+  const { t } = useTranslation("settings");
   const { theme } = useTheme();
 
   const [hover, setHover] = useState(false);
@@ -48,7 +50,7 @@ const EmojiItem = observer(({ expression }: { expression: Expression }) => {
       <Stack flex={1} justifyContent="flex-end">
         {hover && (
           <Stack gap={1.25}>
-            <Tooltip content="Delete">
+            <Tooltip content={t("expressions.delete")}>
               <IconButton
                 onClick={() => expression.delete()}
                 size="sm"
@@ -65,6 +67,7 @@ const EmojiItem = observer(({ expression }: { expression: Expression }) => {
 });
 
 const UserEmojisTab = observer(() => {
+  const { t } = useTranslation("settings");
   const app = useAppStore();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -109,11 +112,10 @@ const UserEmojisTab = observer(() => {
       <Stack direction="row" alignItems="center" justifyContent="space-between">
         <Stack direction="column">
           <Typography color="warning" variant="plain">
-            Sadly current limit of emojis you can upload are 100, since the app
-            is in beta and storage is an issue for now
+            {t("expressions.emojiLimitDesktop")}
           </Typography>
           <Typography textColor="muted" level="body-sm" mb={1.25}>
-            {100 - emojis.length} slots available
+            {t("expressions.slotsAvailable", { count: 100 - emojis.length })}
           </Typography>
         </Stack>
         <input
@@ -134,7 +136,7 @@ const UserEmojisTab = observer(() => {
           }}
           disabled={emojis.length === 100}
         >
-          Upload Emoji
+          {t("expressions.uploadEmoji")}
         </Button>
       </Stack>
 
@@ -148,7 +150,7 @@ const UserEmojisTab = observer(() => {
           width={600}
         >
           <Typography level="body-lg" ml={2.5} my={2.5}>
-            Emojis
+            {t("expressions.emojis")}
           </Typography>
 
           <Divider
@@ -159,12 +161,12 @@ const UserEmojisTab = observer(() => {
           />
 
           <Stack mb={2.5} spacing={5} direction="row" mt={2.5} pl={2.5}>
-            <Typography>Image</Typography>
-            <Typography flex={1}>Name</Typography>
+            <Typography>{t("expressions.image")}</Typography>
+            <Typography flex={1}>{t("expressions.name")}</Typography>
           </Stack>
           <Stack direction="column">
             {staticEmojis.map((expression) => (
-              <EmojiItem expression={expression} />
+              <EmojiItem key={expression.id} expression={expression} />
             ))}
           </Stack>
         </Paper>
@@ -180,7 +182,7 @@ const UserEmojisTab = observer(() => {
           width={600}
         >
           <Typography level="body-lg" ml={2.5} my={2.5}>
-            Animated Emojis
+            {t("expressions.animatedEmojis")}
           </Typography>
 
           <Divider
@@ -191,12 +193,12 @@ const UserEmojisTab = observer(() => {
           />
 
           <Stack mb={2.5} spacing={5} direction="row" mt={2.5} pl={2.5}>
-            <Typography>Image</Typography>
-            <Typography flex={1}>Name</Typography>
+            <Typography>{t("expressions.image")}</Typography>
+            <Typography flex={1}>{t("expressions.name")}</Typography>
           </Stack>
           <Stack direction="column">
             {animatedEmojis.map((expression) => (
-              <EmojiItem expression={expression} />
+              <EmojiItem key={expression.id} expression={expression} />
             ))}
           </Stack>
         </Paper>
@@ -205,7 +207,7 @@ const UserEmojisTab = observer(() => {
       {emojis.length === 0 && (
         <Stack justifyContent="center" alignItems="center" py="4rem">
           <Typography textAlign="center" textColor="muted">
-            No emojis created yet
+            {t("expressions.noEmojis")}
           </Typography>
         </Stack>
       )}

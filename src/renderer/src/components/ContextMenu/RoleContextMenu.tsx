@@ -8,6 +8,7 @@ import { RoleActionConfirm } from "@components/Modals/RoleActionConfirm";
 import { useModal } from "@contexts/Modal.context";
 import { ContextItem } from "@components/ContextItem";
 import { TrashIcon } from "@phosphor-icons/react";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   space: Space;
@@ -17,6 +18,7 @@ interface Props {
 export const RoleContextMenu = observer(({ space, role }: Props) => {
   const app = useAppStore();
   const { openModal } = useModal();
+  const { t } = useTranslation("chat");
 
   if (role.id === space.id) return null;
 
@@ -35,7 +37,7 @@ export const RoleContextMenu = observer(({ space, role }: Props) => {
         color="danger"
         size="sm"
       >
-        Delete Role
+        {t("contextMenu.deleteRole")}
       </ContextItem>
     </ContextMenu>
   );

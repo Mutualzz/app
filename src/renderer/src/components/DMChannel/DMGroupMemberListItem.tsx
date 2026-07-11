@@ -10,6 +10,7 @@ import { SmallActivityStatus } from "@components/SmallActivityStatus";
 import { User } from "@stores/objects/User";
 import { CrownSimpleIcon } from "@phosphor-icons/react";
 import { Tooltip } from "@components/Tooltip";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   user: User;
@@ -17,6 +18,7 @@ interface Props {
 }
 
 export const DMGroupMemberListItem = observer(({ user, isOwner }: Props) => {
+  const { t } = useTranslation("chat");
   const app = useAppStore();
   const [hovered, setHovered] = useState(false);
   const { theme } = useTheme();
@@ -66,7 +68,7 @@ export const DMGroupMemberListItem = observer(({ user, isOwner }: Props) => {
             {user.displayName}
           </Typography>
           {isOwner && (
-            <Tooltip content="Owner">
+            <Tooltip content={t("owner")}>
               <IconSlot size={14}>
                 <CrownSimpleIcon
                   weight="fill"

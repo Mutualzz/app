@@ -2,9 +2,9 @@ import { Button } from "@components/Button";
 import { Paper } from "@components/Paper";
 import { StaffReportContent } from "@components/Staff/StaffReportContent";
 import {
-  getStaffReportLockdownLabel,
-  getStaffReportTakedownLabel,
-  staffReportReasonLabels,
+  getStaffReportLockdownKey,
+  getStaffReportTakedownKey,
+  staffReportReasonKeys,
   staffReportStatusColors
 } from "@components/Staff/staffReportLabels";
 import { StaffPanelHeader } from "@components/Staff/StaffPanelHeader";
@@ -15,6 +15,7 @@ import { ArrowLeftIcon, WarningIcon } from "@phosphor-icons/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import dayjs from "dayjs";
+import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 
 export const Route = createFileRoute("/_authenticated/staff/reports/$reportId")({
@@ -23,6 +24,8 @@ export const Route = createFileRoute("/_authenticated/staff/reports/$reportId")(
 
 function StaffReportDetailRoute() {
   const { reportId } = Route.useParams();
+  const { t } = useTranslation("staff");
+  const { t: tCommon } = useTranslation("common");
   const app = useAppStore();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -45,7 +48,7 @@ function StaffReportDetailRoute() {
     },
     onError: (err) => {
       toast.error(
-        err instanceof Error ? err.message : "Failed to update report"
+        err instanceof Error ? err.message : t("report.errors.update")
       );
     }
   });
@@ -60,11 +63,11 @@ function StaffReportDetailRoute() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey });
       queryClient.invalidateQueries({ queryKey: ["staff-reports"] });
-      toast.success("Action completed");
+      toast.success(t("report.toasts.actionCompleted"));
     },
     onError: (err) => {
       toast.error(
-        err instanceof Error ? err.message : "Failed to complete action"
+        err instanceof Error ? err.message : t("report.errors.action")
       );
     }
   });
@@ -79,11 +82,11 @@ function StaffReportDetailRoute() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey });
       queryClient.invalidateQueries({ queryKey: ["staff-reports"] });
-      toast.success("Space locked down and owner notified to appeal");
+      toast.success(t("report.toasts.lockdownSuccess"));
     },
     onError: (err) => {
       toast.error(
-        err instanceof Error ? err.message : "Failed to lock down space"
+        err instanceof Error ? err.message : t("report.errors.lockdown")
       );
     }
   });
@@ -99,7 +102,7 @@ function StaffReportDetailRoute() {
       direction="column"
     >
       <StaffPanelHeader
-        title="Report Details"
+        title={t("pages.reportDetails")}
         icon={<WarningIcon size={22} weight="fill" />}
       />
 
@@ -129,18 +132,18 @@ function StaffReportDetailRoute() {
             css={{ alignSelf: "flex-start" }}
             onClick={() => navigate({ to: "/staff/reports" })}
           >
-            Back to reports
+            {t("report.backToReports")}
           </Button>
 
           {isLoading && (
             <Typography level="body-sm" textColor="muted">
-              Loading report...
+              {t("report.loadingReport")}
             </Typography>
           )}
 
           {error && (
             <Typography level="body-sm" color="danger">
-              {error instanceof Error ? error.message : "Failed to load report"}
+              {error instanceof Error ? error.message : t("report.loadFailed")}
             </Typography>
           )}
 
@@ -161,15 +164,21 @@ function StaffReportDetailRoute() {
               >
                 <Stack direction="column" spacing={0.25}>
                   <Typography level="title-sm" fontWeight={700}>
-                    {staffReportReasonLabels[report.reason] ?? report.reason}
+                    {tCommon(
+                      staffReportReasonKeys[
+                        report.reason as keyof typeof staffReportReasonKeys
+                      ] ?? report.reason
+                    )}
                   </Typography>
                   <Typography level="body-xs" textColor="muted">
                     {report.targetType} · {report.targetId}
                   </Typography>
                   <Typography level="body-xs" textColor="muted">
-                    Reported by{" "}
-                    {report.reporter.globalName || report.reporter.username} ·{" "}
-                    {dayjs(report.createdAt).format("MMM D, YYYY h:mm A")}
+                    {t("report.reportedBy", {
+                      name:
+                        report.reporter.globalName || report.reporter.username
+                    })}{" "}
+                    · {dayjs(report.createdAt).format("MMM D, YYYY h:mm A")}
                   </Typography>
                 </Stack>
                 <Typography
@@ -178,7 +187,7 @@ function StaffReportDetailRoute() {
                   color={staffReportStatusColors[report.status] ?? "neutral"}
                   css={{ textTransform: "uppercase" }}
                 >
-                  {report.status}
+                  {t(`report.status.${report.status}` as "report.status.pending")}
                 </Typography>
               </Stack>
 
@@ -192,7 +201,7 @@ function StaffReportDetailRoute() {
                   spacing={0.25}
                 >
                   <Typography level="body-xs" fontWeight={600}>
-                    Reporter notes
+                    {t("report.reporterNotes")}
                   </Typography>
                   <Typography level="body-sm">{report.description}</Typography>
                 </Paper>
@@ -200,7 +209,7 @@ function StaffReportDetailRoute() {
 
               <Stack direction="column" spacing={0.75}>
                 <Typography level="body-sm" fontWeight={600}>
-                  Reported content
+                  {t("report.reportedContent")}
                 </Typography>
                 <StaffReportContent
                   content={report.content}
@@ -223,7 +232,7 @@ function StaffReportDetailRoute() {
                     })
                   }
                 >
-                  Open staff user panel
+                  {t("report.openUserPanel")}
                 </Button>
               )}
 
@@ -238,8 +247,8 @@ function StaffReportDetailRoute() {
                       onClick={() => lockdownSpace()}
                     >
                       {lockingDown
-                        ? "Working..."
-                        : getStaffReportLockdownLabel(report.targetType)}
+                        ? t("working")
+                        : t(getStaffReportLockdownKey(report.targetType)!)}
                     </Button>
                   )}
                   {report.targetType !== "user" && (
@@ -251,8 +260,8 @@ function StaffReportDetailRoute() {
                       onClick={() => takedownContent()}
                     >
                       {takingDown
-                        ? "Working..."
-                        : getStaffReportTakedownLabel(report.targetType)}
+                        ? t("working")
+                        : t(getStaffReportTakedownKey(report.targetType))}
                     </Button>
                   )}
                   <Button
@@ -262,7 +271,7 @@ function StaffReportDetailRoute() {
                     disabled={updatingStatus || acting}
                     onClick={() => updateStatus("reviewed")}
                   >
-                    Mark Reviewed
+                    {t("report.markReviewed")}
                   </Button>
                   <Button
                     size="sm"
@@ -271,7 +280,7 @@ function StaffReportDetailRoute() {
                     disabled={updatingStatus || acting}
                     onClick={() => updateStatus("actioned")}
                   >
-                    Mark Actioned
+                    {t("report.markActioned")}
                   </Button>
                   <Button
                     size="sm"
@@ -280,15 +289,21 @@ function StaffReportDetailRoute() {
                     disabled={updatingStatus || acting}
                     onClick={() => updateStatus("dismissed")}
                   >
-                    Dismiss
+                    {t("report.dismiss")}
                   </Button>
                 </Stack>
               )}
 
               {report.status !== "pending" && report.reviewedBy && (
                 <Typography level="body-xs" textColor="muted">
-                  {report.status[0].toUpperCase() + report.status.slice(1)} by{" "}
-                  {report.reviewedBy.globalName || report.reviewedBy.username}
+                  {t("report.reviewedBy", {
+                    status: t(
+                      `report.status.${report.status}` as "report.status.pending"
+                    ),
+                    name:
+                      report.reviewedBy.globalName ||
+                      report.reviewedBy.username
+                  })}
                   {report.reviewedAt &&
                     ` · ${dayjs(report.reviewedAt).format("MMM D, YYYY h:mm A")}`}
                 </Typography>

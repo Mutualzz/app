@@ -5,12 +5,14 @@ import { StickerIcon, XIcon } from "@phosphor-icons/react";
 import { StickerPicker } from "@renderer/components/Expression/StickerPicker";
 import { IconButton } from "@renderer/components/IconButton";
 import type { Expression } from "@stores/objects/Expression";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   onSelect: (sticker: Expression) => void;
 }
 
 export const ProfileStickerPickerModal = ({ onSelect }: Props) => {
+  const { t } = useTranslation("settings");
   const app = useAppStore();
   const { closeModal } = useModal();
 
@@ -32,7 +34,7 @@ export const ProfileStickerPickerModal = ({ onSelect }: Props) => {
         <Stack direction="row" spacing={1.25} alignItems="center">
           <StickerIcon size={18} weight="fill" />
           <Typography level="title-sm" fontWeight={700}>
-            Choose a sticker
+            {t("profile.inspector.chooseSticker")}
           </Typography>
         </Stack>
         <IconButton size="sm" onClick={() => closeModal("sticker-picker")}>

@@ -3,6 +3,7 @@ import { Stack, Typography } from "@mutualzz/ui-web";
 import { formatColor, styled } from "@mutualzz/ui-core";
 import { Message } from "@stores/objects/Message";
 import { observer } from "mobx-react-lite";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   message: Message;
@@ -36,6 +37,8 @@ const ReactionPill = styled("button")<{ active?: boolean }>(
 );
 
 export const MessageReactions = observer(({ message }: Props) => {
+  const { t } = useTranslation("chat");
+
   if (message.editing || message.reactions.length === 0) return null;
 
   return (
@@ -49,7 +52,7 @@ export const MessageReactions = observer(({ message }: Props) => {
           }
           active={reaction.me}
           onClick={() => void message.toggleReaction(reaction.emoji)}
-          aria-label={`Toggle reaction, count ${reaction.count}`}
+          aria-label={t("a11y.toggleReaction", { value: reaction.count })}
         >
           <MessageReactionEmoji emoji={reaction.emoji} />
           <Typography level="body-xs" textColor={reaction.me ? "primary" : "muted"}>

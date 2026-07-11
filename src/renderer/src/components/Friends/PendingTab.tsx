@@ -1,10 +1,12 @@
 import { Stack, Typography } from "@mutualzz/ui-web";
 import { observer } from "mobx-react-lite";
 import { useAppStore } from "@renderer/hooks/useStores";
+import { useTranslation } from "react-i18next";
 import { UserItem } from "./UserItem";
 
 export const PendingTab = observer(() => {
   const app = useAppStore();
+  const { t } = useTranslation("chat");
 
   const relationships = app.relationships.pending;
 
@@ -22,14 +24,15 @@ export const PendingTab = observer(() => {
           spacing={2.5}
         >
           <Typography textColor="muted" level="body-lg">
-            There are no pending friend requests. Click the "Add Friend" button
-            to send friend requests.
+            {t("friends.emptyPending")}
           </Typography>
         </Stack>
       )}
       {receiveRequests.length > 0 && (
         <>
-          <Typography>Received - {receiveRequests.length}</Typography>
+          <Typography>
+            {t("friends.receivedCount", { count: receiveRequests.length })}
+          </Typography>
           <Stack direction="column" spacing={2.5}>
             {receiveRequests.map((relationship) => (
               <UserItem key={relationship.id} relationship={relationship} />
@@ -39,7 +42,9 @@ export const PendingTab = observer(() => {
       )}
       {sendRequests.length > 0 && (
         <>
-          <Typography>Sent - {sendRequests.length}</Typography>
+          <Typography>
+            {t("friends.sentCount", { count: sendRequests.length })}
+          </Typography>
           <Stack direction="column" spacing={2.5}>
             {sendRequests.map((relationship) => (
               <UserItem key={relationship.id} relationship={relationship} />

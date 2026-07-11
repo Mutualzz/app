@@ -10,7 +10,7 @@ import {
   permissionFlags
 } from "@mutualzz/bitfield";
 import { type APIChannel, ChannelType } from "@mutualzz/types";
-import { Fragment, JSX, useEffect, useRef, useState } from "react";
+import { Fragment, JSX, ReactNode, useEffect, useRef, useState } from "react";
 import {
   Box,
   ButtonGroup,
@@ -27,10 +27,12 @@ import { IconButton } from "@components/IconButton";
 import { PermissionEditorControls } from "@components/Permissions/PermissionEditorControls";
 import {
   filterPermissionGroups,
-  permissionCategoryId,
-  scrollToPermissionCategory
+  scrollToPermissionCategory,
+  type PermissionGroupDef
 } from "@components/Permissions/permissionEditor.utils";
+import { channelPermissionGroups } from "@mutualzz/i18n";
 import { dynamicElevation, formatColor } from "@mutualzz/ui-core";
+import { useTranslation } from "react-i18next";
 import {
   CheckIcon,
   MinusIcon,
@@ -97,101 +99,14 @@ function draftsEqual(a: OverwriteDraft, b: OverwriteDraft) {
   return a.allow === b.allow && a.deny === b.deny;
 }
 
-interface PermissionDef {
-  flag: PermissionFlag;
-  label: string;
-  description?: string;
-}
-
-const ALL_PERMISSION_GROUPS: {
-  title: string;
-  channelTypes: ChannelType[];
-  items: PermissionDef[];
-}[] = [
-  {
-    title: "General Channel Permissions",
-    channelTypes: [ChannelType.Text, ChannelType.Voice, ChannelType.Category],
-    items: [
-      {
-        flag: "ViewChannel",
-        label: "View Channel",
-        description: "Allow members to view this channel"
-      },
-      {
-        flag: "ManageChannels",
-        label: "Manage Channel",
-        description: "Allow members to edit or delete this channel"
-      },
-      {
-        flag: "ManageRoles",
-        label: "Manage Permissions",
-        description:
-          "Allow members to edit this channel's permission overwrites"
-      }
-    ]
-  },
-  {
-    title: "Text Channel Permissions",
-    channelTypes: [ChannelType.Text, ChannelType.Category],
-    items: [
-      {
-        flag: "SendMessages",
-        label: "Send Messages",
-        description: "Allow members to send messages in this channel"
-      },
-      {
-        flag: "EmbedLinks",
-        label: "Embed Links",
-        description: "Allow members to embed links"
-      },
-      {
-        flag: "AttachFiles",
-        label: "Attach Files",
-        description: "Allow members to attach files"
-      },
-      {
-        flag: "MentionEveryone",
-        label: "Mention Everyone",
-        description: "Allow members to @mention @everyone and @here"
-      },
-      {
-        flag: "UseExternalEmojis",
-        label: "Use External Emojis",
-        description: "Allow members to use emojis from other spaces"
-      },
-      {
-        flag: "ManageMessages",
-        label: "Manage Messages",
-        description: "Allow members to delete others' messages"
-      },
-      {
-        flag: "ReadMessageHistory",
-        label: "Read Message History",
-        description: "Allow members to read past messages"
-      }
-    ]
-  },
-  {
-    title: "Voice Channel Permissions",
-    channelTypes: [ChannelType.Voice, ChannelType.Category],
-    items: [
-      {
-        flag: "Connect",
-        label: "Connect",
-        description: "Allow members to connect to this voice channel"
-      },
-      {
-        flag: "Speak",
-        label: "Speak",
-        description: "Allow members to speak in this voice channel"
-      }
-    ]
-  }
-];
-
-function getPermissionGroups(type: ChannelType) {
-  return ALL_PERMISSION_GROUPS.filter((g) => g.channelTypes.includes(type));
-}
+const CHANNEL_TYPE_KIND: Record<
+  ChannelType.Text | ChannelType.Voice | ChannelType.Category,
+  "text" | "voice" | "category"
+> = {
+  [ChannelType.Text]: "text",
+  [ChannelType.Voice]: "voice",
+  [ChannelType.Category]: "category"
+};
 
 const StateBtn = ({
   state,
@@ -250,7 +165,10 @@ const PermissionRow = ({
   description,
   draft,
   onChange
-}: PermissionDef & {
+}: {
+  flag: PermissionFlag;
+  label: string;
+  description?: ReactNode;
   draft: OverwriteDraft;
   onChange: (next: OverwriteDraft) => void;
 }) => {
@@ -419,6 +337,7 @@ const AddOverwritePicker = observer(
   }) => {
     const { theme } = useTheme();
     const { closeModal } = useModal();
+    const { t } = useTranslation("space");
     const [search, setSearch] = useState("");
     const q = search.toLowerCase();
 
@@ -452,14 +371,14 @@ const AddOverwritePicker = observer(
         p={4}
       >
         <Stack direction="column" spacing={0.5}>
-          <Typography level="h5">Add Permission Overwrite</Typography>
+          <Typography level="h5">{t("channels.permissions.addOverwrite")}</Typography>
           <Typography level="body-sm" textColor="muted">
-            Select a role or member to configure channel-specific permissions.
+            {t("channels.permissions.selectTargetHint")}
           </Typography>
         </Stack>
 
         <InputDefault
-          placeholder="Search roles or members…"
+          placeholder={t("channels.searchTargets")}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           autoFocus
@@ -474,7 +393,7 @@ const AddOverwritePicker = observer(
           {roles.length > 0 && (
             <>
               <Typography level="body-xs" textColor="muted" px={1}>
-                ROLES
+                {t("channels.permissions.roles")}
               </Typography>
               {roles.map((role) => (
                 <Stack
@@ -511,7 +430,7 @@ const AddOverwritePicker = observer(
                 px={1}
                 mt={roles.length ? 1 : 0}
               >
-                MEMBERS
+                {t("channels.permissions.members")}
               </Typography>
               {members.map((member) => (
                 <Stack
@@ -550,7 +469,7 @@ const AddOverwritePicker = observer(
               textAlign="center"
               py={2}
             >
-              No results
+              {t("channels.permissions.noResults")}
             </Typography>
           )}
         </Stack>
@@ -563,6 +482,8 @@ export const ChannelPermissionsSettings = observer(
   ({ space, channel }: Props) => {
     const app = useAppStore();
     const { openModal } = useModal();
+    const { t } = useTranslation("space");
+    const { t: tCommon } = useTranslation("common");
 
     const buildDrafts = (): DraftMap => {
       const map: DraftMap = new Map();
@@ -700,9 +621,29 @@ export const ChannelPermissionsSettings = observer(
     const permissionsRootRef = useRef<HTMLDivElement>(null);
     const [permissionSearch, setPermissionSearch] = useState("");
 
-    const permissionGroups = getPermissionGroups(channel.type);
+    const kind =
+      CHANNEL_TYPE_KIND[
+        channel.type as
+          | ChannelType.Text
+          | ChannelType.Voice
+          | ChannelType.Category
+      ];
+
+    const permissionGroups: PermissionGroupDef<PermissionFlag>[] =
+      channelPermissionGroups
+        .filter((group) => kind && group.channelTypes.includes(kind))
+        .map((group) => ({
+          id: group.id,
+          title: t(group.titleKey),
+          items: group.items.map((item) => ({
+            flag: item.flag as PermissionFlag,
+            label: t(item.labelKey),
+            description: t(item.descriptionKey)
+          }))
+        }));
+
     const permissionCategories = permissionGroups.map((group) => ({
-      id: permissionCategoryId(group.title),
+      id: group.id,
       title: group.title
     }));
     const visiblePermissionGroups = filterPermissionGroups(
@@ -750,7 +691,7 @@ export const ChannelPermissionsSettings = observer(
             px={0.5}
           >
             <Typography level="body-xs" textColor="muted">
-              OVERWRITES
+              {t("channels.overwrites")}
             </Typography>
             <IconButton
               size="sm"
@@ -780,7 +721,7 @@ export const ChannelPermissionsSettings = observer(
                 textAlign="center"
                 py={2}
               >
-                No overwrites yet
+                {t("channels.permissions.noOverwritesYet")}
               </Typography>
             )}
             {targetEntries.map((entry) => (
@@ -818,8 +759,7 @@ export const ChannelPermissionsSettings = observer(
                 <ShieldIcon weight="thin" />
               </IconSlot>
               <Typography textColor="muted" textAlign="center" level="body-sm">
-                Select a role or member on the left to edit their permissions
-                for this channel, or click <strong>+</strong> to add one.
+                {t("channels.permissions.selectTargetHintLeft")}
               </Typography>
             </Stack>
           ) : (
@@ -859,18 +799,16 @@ export const ChannelPermissionsSettings = observer(
 
               {visiblePermissionGroups.length === 0 ? (
                 <Typography textColor="muted" textAlign="center" py={4}>
-                  No permissions match your search
+                  {t("roles.permissions.emptySearch")}
                 </Typography>
               ) : (
                 visiblePermissionGroups.map((group, gi) => {
-                  const categoryId = permissionCategoryId(group.title);
-
                   return (
                     <Stack
-                      key={categoryId}
+                      key={group.id}
                       direction="column"
                       spacing={1}
-                      data-permission-category={categoryId}
+                      data-permission-category={group.id}
                     >
                       <Typography
                         level="body-sm"
@@ -930,7 +868,7 @@ export const ChannelPermissionsSettings = observer(
                 maxWidth="min(960px, calc(100% - 32px))"
               >
                 <Typography level="body-sm">
-                  You have unsaved changes!
+                  {t("roles.unsavedChanges")}
                 </Typography>
                 <ButtonGroup disabled={saving} spacing={10}>
                   <Button
@@ -938,14 +876,14 @@ export const ChannelPermissionsSettings = observer(
                     variant="plain"
                     onClick={resetSelected}
                   >
-                    Reset
+                    {tCommon("reset")}
                   </Button>
                   <Button
                     variant="solid"
                     color="success"
                     onClick={() => saveOverwrite()}
                   >
-                    Save Changes
+                    {tCommon("saveChanges")}
                   </Button>
                 </ButtonGroup>
               </Paper>

@@ -1,10 +1,12 @@
 import { Stack, Typography } from "@mutualzz/ui-web";
 import { observer } from "mobx-react-lite";
 import { useAppStore } from "@renderer/hooks/useStores";
+import { useTranslation } from "react-i18next";
 import { UserItem } from "./UserItem";
 
 export const OnlineTab = observer(() => {
   const app = useAppStore();
+  const { t } = useTranslation("chat");
 
   const relationships = app.relationships.online;
 
@@ -19,14 +21,15 @@ export const OnlineTab = observer(() => {
           spacing={2.5}
         >
           <Typography textColor="muted" level="body-lg">
-            None of your friends are online. Click the "Add Friend" button to
-            send friend requests.
+            {t("friends.emptyOnline")}
           </Typography>
         </Stack>
       )}
       {relationships.length > 0 && (
         <>
-          <Typography>Online - {relationships.length}</Typography>
+          <Typography>
+            {t("friends.onlineCount", { count: relationships.length })}
+          </Typography>
           <Stack direction="column" flex={1} spacing={2.5}>
             {relationships.map((relationship) => (
               <UserItem key={relationship.id} relationship={relationship} />

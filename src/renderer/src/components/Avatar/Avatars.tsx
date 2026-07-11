@@ -29,11 +29,14 @@ import { REST } from "@stores/REST.store";
 import { useMutation } from "@tanstack/react-query";
 import { observer } from "mobx-react-lite";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 type AvatarType = "default" | "previous";
 
 export const Avatars = observer(
   ({ variant = "modal", onSuccess }: AvatarEditorContentProps) => {
+  const { t } = useTranslation("settings");
+  const { t: tCommon } = useTranslation("common");
   const { theme } = useTheme();
   const app = useAppStore();
   const { closeAllModals, closeModal } = useModal();
@@ -181,7 +184,7 @@ export const Avatars = observer(
                     )}
                     onClick={() => selectAvatar(avatar, "default")}
                     variant="plain"
-                    alt="Default Avatar"
+                    alt={t("profile.avatar.presets.defaultAvatarAlt")}
                     size={128}
                   />
                 </Paper>
@@ -207,7 +210,7 @@ export const Avatars = observer(
                   });
                 }
               }}
-              label="Custom Color"
+              label={t("profile.avatar.presets.customColor")}
             />
             {customColor && (
               <InputColor
@@ -257,7 +260,7 @@ export const Avatars = observer(
                     key={`avatar-${avatar}`}
                     src={app.account?.previousAvatarUrls.get(avatar)}
                     onClick={() => selectAvatar(avatar, "previous")}
-                    alt="Previous Avatar"
+                    alt={t("profile.avatar.presets.previousAvatarAlt")}
                     size={128}
                     css={{
                       filter:
@@ -274,10 +277,10 @@ export const Avatars = observer(
             ) : (
               <Stack spacing={2.5} direction="column" alignItems="center">
                 <Typography fontWeight="bold" level="h6">
-                  No previous avatars found.
+                  {t("profile.avatar.presets.noPreviousFound")}
                 </Typography>
                 <Typography level="body-sm">
-                  Your last 9 avatars will be saved here automatically.
+                  {t("profile.avatar.presets.previousAutoSaveHint")}
                 </Typography>
               </Stack>
             )}
@@ -300,8 +303,8 @@ export const Avatars = observer(
             disabled={isPending || isDeleting}
             value={currentPage}
           >
-            <Radio label="Default" value="default" />
-            <Radio label="Previous" value="previous" />
+            <Radio label={t("profile.avatar.presets.default")} value="default" />
+            <Radio label={t("profile.avatar.presets.previous")} value="previous" />
           </RadioGroup>
         </Stack>
 
@@ -312,12 +315,12 @@ export const Avatars = observer(
               onClick={() => updateAvatar()}
               color="success"
             >
-              Save
+              {tCommon("save")}
             </Button>
           )}
           {!isEmbedded && (
             <Button color="danger" onClick={() => closeModal()}>
-              Cancel
+              {tCommon("cancel")}
             </Button>
           )}
         </ButtonGroup>

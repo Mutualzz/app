@@ -11,6 +11,7 @@ import { SpaceIcon } from "@components/Space/SpaceIcon";
 import { canUseSticker } from "@utils/index";
 import { IconButton } from "@components/IconButton";
 import { useMenu } from "@contexts/ContextMenu.context";
+import { useTranslation } from "react-i18next";
 
 const STICKER_SIZE = 72;
 
@@ -97,6 +98,7 @@ export interface StickerPickerProps {
 
 export const StickerPicker = observer(
   ({ onSelectSticker, profileMode = false }: StickerPickerProps) => {
+    const { t } = useTranslation("chat");
     const app = useAppStore();
     const { theme } = useTheme();
     const { openContextMenu } = useMenu();
@@ -183,7 +185,7 @@ export const StickerPicker = observer(
             />
             <SearchInput
               ref={searchRef}
-              placeholder="Search stickers…"
+              placeholder={t("picker.searchStickers")}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               onKeyDown={(e) => {
@@ -211,15 +213,15 @@ export const StickerPicker = observer(
           {!hasStickers && !search ? (
             <EmptyPane>
               <Typography level="body-sm" textColor="muted">
-                No stickers yet. Upload some in User or Space settings.
+                {t("picker.emptyStickers")}
               </Typography>
             </EmptyPane>
           ) : search ? (
             <>
               <SectionLabel textColor="muted">
                 {searchResults.length
-                  ? `${searchResults.length} result${searchResults.length === 1 ? "" : "s"}`
-                  : "No results"}
+                  ? t("picker.results", { count: searchResults.length })
+                  : t("picker.noResults")}
               </SectionLabel>
               <StickerGrid>
                 {searchResults.map((sticker) => renderSticker(sticker))}
@@ -229,7 +231,9 @@ export const StickerPicker = observer(
             <>
               {favoriteStickers.length > 0 && (
                 <>
-                  <SectionLabel textColor="muted">Favorites</SectionLabel>
+                  <SectionLabel textColor="muted">
+                    {t("picker.favorites")}
+                  </SectionLabel>
                   <StickerGrid>
                     {favoriteStickers.map((sticker) => renderSticker(sticker))}
                   </StickerGrid>
@@ -238,7 +242,9 @@ export const StickerPicker = observer(
 
               {myStickers.length > 0 && (
                 <>
-                  <SectionLabel textColor="muted">Your stickers</SectionLabel>
+                  <SectionLabel textColor="muted">
+                    {t("picker.yourStickers")}
+                  </SectionLabel>
                   <StickerGrid>
                     {myStickers.map((sticker) => renderSticker(sticker))}
                   </StickerGrid>

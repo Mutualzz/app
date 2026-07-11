@@ -1,9 +1,9 @@
 import { Button } from "@components/Button";
 import { Paper } from "@components/Paper";
 import {
-  getStaffReportLockdownLabel,
-  getStaffReportTakedownLabel,
-  staffReportReasonLabels,
+  getStaffReportLockdownKey,
+  getStaffReportTakedownKey,
+  staffReportReasonKeys,
   staffReportStatusColors
 } from "@components/Staff/staffReportLabels";
 import { StaffPanelHeader } from "@components/Staff/StaffPanelHeader";
@@ -19,6 +19,7 @@ import {
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import dayjs from "dayjs";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 
 export const Route = createFileRoute("/_authenticated/staff/reports/")({
@@ -28,27 +29,21 @@ export const Route = createFileRoute("/_authenticated/staff/reports/")({
 const PAGE_LIMIT = 50;
 const ANY = "any";
 
-const statusOptions: { value: string; label: string }[] = [
-  { value: ANY, label: "Any status" },
-  { value: "pending", label: "Pending" },
-  { value: "reviewed", label: "Reviewed" },
-  { value: "dismissed", label: "Dismissed" },
-  { value: "actioned", label: "Actioned" }
-];
-
-const targetTypeOptions: { value: string; label: string }[] = [
-  { value: ANY, label: "Any type" },
-  { value: "message", label: "Message" },
-  { value: "post", label: "Post" },
-  { value: "comment", label: "Comment" },
-  { value: "user", label: "User" },
-  { value: "space", label: "Space" }
-];
+const statusValues = ["pending", "reviewed", "dismissed", "actioned"] as const;
+const targetTypeValues = [
+  "message",
+  "post",
+  "comment",
+  "user",
+  "space"
+] as const;
 
 function StaffReportsRoute() {
   const app = useAppStore();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { t } = useTranslation("staff");
+  const { t: tCommon } = useTranslation("common");
   const embossed = app.settings?.preferEmbossed;
 
   const [status, setStatus] = useState<string>("pending");
@@ -92,7 +87,7 @@ function StaffReportsRoute() {
     },
     onError: (err) => {
       toast.error(
-        err instanceof Error ? err.message : "Failed to update report"
+        err instanceof Error ? err.message : t("report.errors.update")
       );
     }
   });
@@ -108,13 +103,13 @@ function StaffReportsRoute() {
       queryClient.invalidateQueries({ queryKey: ["staff-reports"] });
       toast.success(
         data.contentRemoved
-          ? "Action completed and report marked actioned"
-          : "Target was already removed; report marked actioned"
+          ? t("report.toasts.actionCompletedMarked")
+          : t("report.toasts.alreadyRemoved")
       );
     },
     onError: (err) => {
       toast.error(
-        err instanceof Error ? err.message : "Failed to complete action"
+        err instanceof Error ? err.message : t("report.errors.action")
       );
     }
   });
@@ -128,16 +123,26 @@ function StaffReportsRoute() {
       ),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["staff-reports"] });
-      toast.success("Space locked down and owner notified to appeal");
+      toast.success(t("report.toasts.lockdownSuccess"));
     },
     onError: (err) => {
       toast.error(
-        err instanceof Error ? err.message : "Failed to lock down space"
+        err instanceof Error ? err.message : t("report.errors.lockdown")
       );
     }
   });
 
   const acting = takingDown || lockingDown;
+
+  const statusLabel = (value: string) =>
+    value === ANY
+      ? t("report.anyStatus")
+      : t(`report.status.${value}` as "report.status.pending");
+
+  const targetTypeLabel = (value: string) =>
+    value === ANY
+      ? t("report.anyType")
+      : t(`report.targetTypes.${value}` as "report.targetTypes.message");
 
   return (
     <Stack
@@ -148,7 +153,7 @@ function StaffReportsRoute() {
       direction="column"
     >
       <StaffPanelHeader
-        title="Reports"
+        title={t("nav.reports")}
         icon={<WarningIcon size={22} weight="fill" />}
       />
 
@@ -172,9 +177,10 @@ function StaffReportsRoute() {
         <Stack direction="column" spacing={1.5} width="100%" maxWidth={640}>
           <Stack direction="row" spacing={1}>
             <Select value={status} onValueChange={(v) => setStatus(String(v))}>
-              {statusOptions.map((o) => (
-                <Option key={o.value} value={o.value}>
-                  {o.label}
+              <Option value={ANY}>{statusLabel(ANY)}</Option>
+              {statusValues.map((value) => (
+                <Option key={value} value={value}>
+                  {statusLabel(value)}
                 </Option>
               ))}
             </Select>
@@ -182,9 +188,10 @@ function StaffReportsRoute() {
               value={targetType}
               onValueChange={(v) => setTargetType(String(v))}
             >
-              {targetTypeOptions.map((o) => (
-                <Option key={o.value} value={o.value}>
-                  {o.label}
+              <Option value={ANY}>{targetTypeLabel(ANY)}</Option>
+              {targetTypeValues.map((value) => (
+                <Option key={value} value={value}>
+                  {targetTypeLabel(value)}
                 </Option>
               ))}
             </Select>
@@ -192,13 +199,13 @@ function StaffReportsRoute() {
 
           {isFetching && (
             <Typography level="body-sm" textColor="muted" textAlign="center">
-              Loading...
+              {t("home.loading")}
             </Typography>
           )}
 
           {!isFetching && reports.length === 0 && (
             <Typography level="body-sm" textColor="muted" textAlign="center">
-              No reports found
+              {t("report.empty")}
             </Typography>
           )}
 
@@ -222,13 +229,20 @@ function StaffReportsRoute() {
                   <Stack direction="column" spacing={0.1}>
                     <Typography level="body-sm">
                       <b>
-                        {staffReportReasonLabels[report.reason] ?? report.reason}
+                        {tCommon(
+                          staffReportReasonKeys[
+                            report.reason as keyof typeof staffReportReasonKeys
+                          ] ?? report.reason
+                        )}
                       </b>{" "}
                       · {report.targetType} {report.targetId}
                     </Typography>
                     <Typography level="body-xs" textColor="muted">
-                      Reported by{" "}
-                      {report.reporter.globalName || report.reporter.username}
+                      {t("report.reportedBy", {
+                        name:
+                          report.reporter.globalName ||
+                          report.reporter.username
+                      })}
                       {" · "}
                       {dayjs(report.createdAt).format("MMM D, YYYY h:mm A")}
                     </Typography>
@@ -239,7 +253,7 @@ function StaffReportsRoute() {
                     color={staffReportStatusColors[report.status] ?? "neutral"}
                     css={{ textTransform: "uppercase" }}
                   >
-                    {report.status}
+                    {t(`report.status.${report.status}` as "report.status.pending")}
                   </Typography>
                 </Stack>
 
@@ -261,7 +275,7 @@ function StaffReportsRoute() {
                     })
                   }
                 >
-                  View Details
+                  {t("report.viewDetails")}
                 </Button>
 
                 {report.status === "pending" && (
@@ -275,8 +289,8 @@ function StaffReportsRoute() {
                         onClick={() => lockdownSpace(report.id)}
                       >
                         {lockingDown
-                          ? "Working..."
-                          : getStaffReportLockdownLabel(report.targetType)}
+                          ? t("working")
+                          : t(getStaffReportLockdownKey(report.targetType)!)}
                       </Button>
                     )}
                     {report.targetType !== "user" && (
@@ -288,8 +302,8 @@ function StaffReportsRoute() {
                         onClick={() => takedownContent(report.id)}
                       >
                         {takingDown
-                          ? "Working..."
-                          : getStaffReportTakedownLabel(report.targetType)}
+                          ? t("working")
+                          : t(getStaffReportTakedownKey(report.targetType))}
                       </Button>
                     )}
                     <Button
@@ -304,7 +318,7 @@ function StaffReportsRoute() {
                         })
                       }
                     >
-                      Mark Reviewed
+                      {t("report.markReviewed")}
                     </Button>
                     <Button
                       size="sm"
@@ -318,7 +332,7 @@ function StaffReportsRoute() {
                         })
                       }
                     >
-                      Mark Actioned
+                      {t("report.markActioned")}
                     </Button>
                     <Button
                       size="sm"
@@ -332,15 +346,21 @@ function StaffReportsRoute() {
                         })
                       }
                     >
-                      Dismiss
+                      {t("report.dismiss")}
                     </Button>
                   </Stack>
                 )}
 
                 {report.status !== "pending" && report.reviewedBy && (
                   <Typography level="body-xs" textColor="muted">
-                    {report.status[0].toUpperCase() + report.status.slice(1)} by{" "}
-                    {report.reviewedBy.globalName || report.reviewedBy.username}
+                    {t("report.reviewedBy", {
+                      status: t(
+                        `report.status.${report.status}` as "report.status.pending"
+                      ),
+                      name:
+                        report.reviewedBy.globalName ||
+                        report.reviewedBy.username
+                    })}
                     {report.reviewedAt &&
                       ` · ${dayjs(report.reviewedAt).format("MMM D, YYYY h:mm A")}`}
                   </Typography>
@@ -357,7 +377,7 @@ function StaffReportsRoute() {
               onClick={() => fetchNextPage()}
               css={{ alignSelf: "center", marginTop: "0.5rem" }}
             >
-              {isFetchingNextPage ? "Loading..." : "Load more"}
+              {isFetchingNextPage ? t("home.loading") : t("home.loadMore")}
             </Button>
           )}
         </Stack>

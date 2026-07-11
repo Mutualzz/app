@@ -36,6 +36,7 @@ import {
   restrictToVerticalAxis,
   restrictToWindowEdges
 } from "@dnd-kit/modifiers";
+import { useTranslation } from "react-i18next";
 
 interface SortableChannelItemProps {
   channel: Channel;
@@ -172,6 +173,7 @@ const voiceMemberCollisionDetection: CollisionDetection = (args) => {
 };
 
 export const ChannelList = observer(() => {
+  const { t } = useTranslation("space");
   const app = useAppStore();
   const { openContextMenu } = useMenu();
   const [activeDragType, setActiveDragType] = useState<string | null>(null);
@@ -284,7 +286,9 @@ export const ChannelList = observer(() => {
     } catch (error) {
       if (activeData?.type === "voice-member") {
         toast.error(
-          error instanceof Error ? error.message : "Failed to move member"
+          error instanceof Error
+            ? error.message
+            : t("channels.failedMoveMember")
         );
       }
     } finally {

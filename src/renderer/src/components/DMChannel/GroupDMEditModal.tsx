@@ -13,6 +13,7 @@ import { IconButton } from "@components/IconButton";
 import { Tooltip } from "@components/Tooltip";
 import { cropImage } from "@utils/cropImage";
 import { ArrowClockwiseIcon, CameraIcon, MagnifyingGlassIcon, XIcon } from "@phosphor-icons/react";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   channel: Channel;
@@ -22,6 +23,8 @@ export const GroupDMEditModal = observer(({ channel }: Props) => {
   const app = useAppStore();
   const { theme } = useTheme();
   const { closeModal } = useModal();
+  const { t } = useTranslation("chat");
+  const { t: tCommon } = useTranslation("common");
 
   const [name, setName] = useState(channel.name ?? "");
 
@@ -117,7 +120,7 @@ export const GroupDMEditModal = observer(({ channel }: Props) => {
     >
       <Stack p={5} direction="column" spacing={2.5}>
         <Typography fontWeight="bold" level="body-lg">
-          Edit Group
+          {t("groupDm.manage.title")}
         </Typography>
 
         <Stack direction="row" spacing={2.5} alignItems="flex-start">
@@ -155,7 +158,7 @@ export const GroupDMEditModal = observer(({ channel }: Props) => {
                     }
                   }}
                 />
-                <Tooltip content="Remove">
+                <Tooltip content={t("groupDm.manage.remove")}>
                   <IconButton
                     size="sm"
                     variant="soft"
@@ -193,7 +196,7 @@ export const GroupDMEditModal = observer(({ channel }: Props) => {
                 />
               </Stack>
               <Stack direction="row" alignItems="center" spacing={1.25}>
-                <Tooltip content="Rotate 90°">
+                <Tooltip content={t("dm.rotate90")}>
                   <IconButton
                     onClick={() => setRotation((p) => p + 90)}
                     color={theme.typography.colors.primary}
@@ -208,7 +211,7 @@ export const GroupDMEditModal = observer(({ channel }: Props) => {
                   checked={roundedIcon}
                   onChange={() => setRoundedIcon((p) => !p)}
                   disabled={isPending}
-                  label="Round"
+                  label={t("groupDm.manage.round")}
                   size="sm"
                 />
               </Stack>
@@ -220,7 +223,7 @@ export const GroupDMEditModal = observer(({ channel }: Props) => {
                   src={channel.iconUrl}
                   shape={channel.flags.has("RoundedIcon") ? "circle" : "square"}
                 />
-                <Tooltip content="Remove icon">
+                <Tooltip content={t("groupDm.manage.removeIcon")}>
                   <IconButton
                     size="sm"
                     variant="soft"
@@ -247,7 +250,7 @@ export const GroupDMEditModal = observer(({ channel }: Props) => {
                   textColor="secondary"
                   css={{ cursor: "pointer" }}
                 >
-                  Change
+                  {t("groupDm.manage.changeIcon")}
                 </Typography>
               </FileUploader>
             </Stack>
@@ -270,16 +273,16 @@ export const GroupDMEditModal = observer(({ channel }: Props) => {
               >
                 <CameraIcon weight="fill" size={16} />
                 <Typography fontWeight="bold" fontSize="x-small">
-                  Icon
+                  {t("groupDm.manage.icon")}
                 </Typography>
               </Stack>
             </FileUploader>
           )}
 
           <Stack direction="column" spacing={0.75} flex={1}>
-            <Typography level="body-sm">Group Name</Typography>
+            <Typography level="body-sm">{t("groupDm.manage.groupName")}</Typography>
             <InputDefault
-              placeholder="e.g. Game Night"
+              placeholder={t("groupDm.namePlaceholder")}
               value={name}
               onChange={(e: ChangeEvent<HTMLInputElement>) =>
                 setName(e.target.value)
@@ -306,7 +309,7 @@ export const GroupDMEditModal = observer(({ channel }: Props) => {
           color="neutral"
           disabled={isPending}
         >
-          Cancel
+          {tCommon("cancel")}
         </Button>
         <Button
           expand
@@ -315,7 +318,7 @@ export const GroupDMEditModal = observer(({ channel }: Props) => {
           onClick={() => save()}
           color="primary"
         >
-          Save
+          {t("groupDm.manage.saveChanges")}
         </Button>
       </Paper>
     </Paper>

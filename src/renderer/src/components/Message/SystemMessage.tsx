@@ -11,12 +11,14 @@ import { MarkdownRenderer } from "@components/Markdown/MarkdownRenderer/Markdown
 import { IconSlot, Link, Stack, Typography } from "@mutualzz/ui-web";
 import { MessageEmbed } from "@components/Message/MessageEmbed";
 import { EyeIcon } from "@phosphor-icons/react";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   message: MessageLike;
 }
 
 export const SystemMessage = observer(({ message }: Props) => {
+  const { t } = useTranslation("chat");
   let highlight = false;
   const isEphemeral =
     message instanceof Message && message.flags.has("Ephemeral");
@@ -43,10 +45,10 @@ export const SystemMessage = observer(({ message }: Props) => {
               <EyeIcon />
             </IconSlot>
             <Typography level="label-xs" textColor="secondary">
-              Only you can see this •
+              {t("system.ephemeralOnlyYou")}
             </Typography>
             <Link textColor="accent" onClick={() => message.dismiss()}>
-              Dismiss message
+              {t("system.dismissMessage")}
             </Link>
           </Stack>
         )}

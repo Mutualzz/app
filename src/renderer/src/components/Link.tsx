@@ -11,6 +11,7 @@ import {
 import { useNavigate } from "@tanstack/react-router";
 import { isElectron, toSpotifyUri } from "@utils/index";
 import { type MouseEvent } from "react";
+import { useTranslation } from "react-i18next";
 import { observer } from "mobx-react-lite";
 
 interface Props {
@@ -19,6 +20,7 @@ interface Props {
 }
 
 export const OpenLink = observer(({ url, unsafe }: Props) => {
+  const { t } = useTranslation("common");
   const { closeModal } = useModal();
   const app = useAppStore();
 
@@ -46,12 +48,11 @@ export const OpenLink = observer(({ url, unsafe }: Props) => {
         py={4}
       >
         <Typography mt={15} textAlign="center" color="warning">
-          We do not allow opening unsafe links directly in the app for your
-          security. Please copy the link and open it in your web browser.
+          {t("externalLink.blockedInApp")}
         </Typography>
         <Stack width="80%" spacing={2}>
           <Button onClick={() => closeModal()} fullWidth>
-            Close
+            {t("externalLink.close")}
           </Button>
         </Stack>
       </AnimatedPaper>
@@ -75,15 +76,14 @@ export const OpenLink = observer(({ url, unsafe }: Props) => {
             fontWeight="bold"
             mt={7}
           >
-            This link seems to be unsafe
+            {t("externalLink.unsafeTitle")}
           </Typography>
           <Stack direction="column" alignItems="center" spacing={2}>
             <Typography mx={5} textAlign="center">
-              The link you are trying to open uses an insecure HTTP connection.
-              This could potentially expose your data to third parties.
+              {t("externalLink.unsafeHttpBody")}
             </Typography>
             <Typography fontWeight="bold">
-              Are you sure you want to proceed?
+              {t("externalLink.confirmProceed")}
             </Typography>
           </Stack>
         </>
@@ -91,11 +91,11 @@ export const OpenLink = observer(({ url, unsafe }: Props) => {
       {!unsafe && (
         <>
           <Typography level="h5" fontWeight="bold" mt={7}>
-            Open External Link
+            {t("externalLink.title")}
           </Typography>
           <Stack direction="column" alignItems="center" spacing={2}>
             <Typography mx={5} textAlign="center">
-              You are about to open an external link:
+              {t("externalLink.aboutToOpen")}
             </Typography>
             <Typography fontWeight="bold" textAlign="center">
               {url.toString()}
@@ -106,14 +106,14 @@ export const OpenLink = observer(({ url, unsafe }: Props) => {
 
       <Stack spacing={2.5} width="100%" mb={4} px={4}>
         <Button expand onClick={handleProceed} variant="soft" color="success">
-          Proceed
+          {t("externalLink.proceed")}
         </Button>
         <Button
           expand
           color="danger"
           onClick={() => closeModal(unsafe ? "open-link-unsafe" : "open-link")}
         >
-          Cancel
+          {t("cancel")}
         </Button>
       </Stack>
     </AnimatedPaper>

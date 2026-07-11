@@ -5,6 +5,7 @@ import { Button, Stack, Typography } from "@mutualzz/ui-web";
 import type { Channel } from "@stores/objects/Channel";
 import { useMutation } from "@tanstack/react-query";
 import { observer } from "mobx-react-lite";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   channel: Channel;
@@ -13,6 +14,8 @@ interface Props {
 export const CategoryDeleteModal = observer(({ channel }: Props) => {
   const app = useAppStore();
   const { closeModal } = useModal();
+  const { t } = useTranslation("space");
+  const { t: tCommon } = useTranslation("common");
 
   const { mutate: deleteCategory, isPending: isDeleting } = useMutation({
     mutationKey: ["delete-category", channel.id],
@@ -46,7 +49,7 @@ export const CategoryDeleteModal = observer(({ channel }: Props) => {
         mt={10}
       >
         <Typography level="h6">
-          Would you like to delete this category and all of its channels?
+          {t("channels.deleteCategory.title", { name: channel.name })}
         </Typography>
       </Stack>
       <Stack
@@ -63,7 +66,7 @@ export const CategoryDeleteModal = observer(({ channel }: Props) => {
             onClick={() => deleteCategory(true)}
             disabled={isDeleting}
           >
-            Just the category
+            {t("channels.deleteCategory.categoryOnly")}
           </Button>
           <Button
             variant="soft"
@@ -71,7 +74,7 @@ export const CategoryDeleteModal = observer(({ channel }: Props) => {
             onClick={() => deleteCategory(false)}
             disabled={isDeleting}
           >
-            Category and all channels related
+            {t("channels.deleteCategory.categoryAndChannels")}
           </Button>
         </Stack>
         <Button
@@ -81,7 +84,7 @@ export const CategoryDeleteModal = observer(({ channel }: Props) => {
           onClick={() => closeModal()}
           disabled={isDeleting}
         >
-          Cancel
+          {tCommon("cancel")}
         </Button>
       </Stack>
     </AnimatedPaper>

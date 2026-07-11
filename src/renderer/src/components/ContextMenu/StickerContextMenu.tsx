@@ -5,6 +5,7 @@ import { observer } from "mobx-react-lite";
 import { Stack, Typography } from "@mutualzz/ui-web";
 import styled from "@emotion/styled";
 import { StarIcon } from "@phosphor-icons/react";
+import { useTranslation } from "react-i18next";
 
 type Props = {
   id: string;
@@ -23,6 +24,7 @@ const PreviewImg = styled("img")({
 export const StickerContextMenu = observer(
   ({ id, name, url, animated }: Props) => {
     const app = useAppStore();
+    const { t } = useTranslation("chat");
     const isFavorited = app.settings?.isFavoriteSticker(id) ?? false;
 
     return (
@@ -42,7 +44,8 @@ export const StickerContextMenu = observer(
               {name}
             </Typography>
             <Typography level="body-xs" textColor="muted">
-              {animated ? "Animated sticker" : "Sticker"} · {id}
+              {animated ? t("stickers.animated") : t("stickers.sticker")} ·{" "}
+              {id}
             </Typography>
           </Stack>
         </Stack>
@@ -55,7 +58,7 @@ export const StickerContextMenu = observer(
           }
           color={isFavorited ? "warning" : undefined}
         >
-          {isFavorited ? "Remove from favorites" : "Add to favorites"}
+          {isFavorited ? t("favorites.remove") : t("favorites.add")}
         </ContextItem>
       </ContextMenu>
     );

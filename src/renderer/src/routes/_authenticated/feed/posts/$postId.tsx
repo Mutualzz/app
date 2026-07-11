@@ -5,6 +5,7 @@ import { Stack, Typography } from "@mutualzz/ui-web";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { observer } from "mobx-react-lite";
+import { useTranslation } from "react-i18next";
 
 export const Route = createFileRoute("/_authenticated/feed/posts/$postId")({
   component: observer(RouteComponent)
@@ -13,6 +14,7 @@ export const Route = createFileRoute("/_authenticated/feed/posts/$postId")({
 function RouteComponent() {
   const app = useAppStore();
   const { postId } = Route.useParams();
+  const { t } = useTranslation("chat");
 
   const { isLoading, isError } = useQuery({
     queryKey: ["post", postId],
@@ -24,11 +26,11 @@ function RouteComponent() {
 
   return (
     <Stack direction="column" spacing={3} width="100%" height="100%" overflowY="auto">
-      {isLoading && <Typography level="body-sm">Loading…</Typography>}
+      {isLoading && <Typography level="body-sm">{t("loading")}</Typography>}
 
       {isError && !post && (
         <Typography level="body-sm" textColor="secondary">
-          This post doesn't exist, or is no longer available.
+          {t("feed.empty.postUnavailable")}
         </Typography>
       )}
 

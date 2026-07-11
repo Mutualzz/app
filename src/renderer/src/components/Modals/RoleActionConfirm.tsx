@@ -1,5 +1,6 @@
 import { observer } from "mobx-react-lite";
 import { useMutation } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { Paper } from "@components/Paper";
 import { useAppStore } from "@hooks/useStores";
 import { Button, Stack, Typography } from "@mutualzz/ui-web";
@@ -11,6 +12,8 @@ interface Props {
 }
 
 export const RoleActionConfirm = observer(({ role }: Props) => {
+  const { t } = useTranslation("space");
+  const { t: tCommon } = useTranslation("common");
   const app = useAppStore();
   const { closeModal } = useModal();
 
@@ -31,15 +34,14 @@ export const RoleActionConfirm = observer(({ role }: Props) => {
       width={400}
     >
       <Typography level="h5" fontWeight="bold" marginBottom={2}>
-        Delete Role
+        {t("roles.delete.title")}
       </Typography>
       <Typography mb={2.5}>
-        Are you sure you want to delete <b>{role.name}</b> role? This Action
-        cannot be undone.
+        {t("roles.delete.confirm", { name: role.name })}
       </Typography>
       <Stack spacing={1.25}>
         <Button expand color="neutral" size="lg" onClick={() => closeModal()}>
-          Cancel
+          {tCommon("cancel")}
         </Button>
         <Button
           color="danger"
@@ -48,7 +50,7 @@ export const RoleActionConfirm = observer(({ role }: Props) => {
           size="lg"
           expand
         >
-          Delete
+          {t("actions.deleteRole")}
         </Button>
       </Stack>
     </Paper>

@@ -22,6 +22,7 @@ import type { Role } from "@stores/objects/Role";
 import type { Space } from "@stores/objects/Space";
 import { observer } from "mobx-react-lite";
 import { useState, type ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 import {
   getHierarchyContext,
   getPositionCeiling,
@@ -150,6 +151,7 @@ interface Props {
 
 export const SpaceRoleEditRoleList = observer(
   ({ space, currentRole, setCurrentRole, onRoleDeleted }: Props) => {
+    const { t } = useTranslation("space");
     const [isReordering, setIsReordering] = useState(false);
 
     const sensors = useSensors(
@@ -223,7 +225,7 @@ export const SpaceRoleEditRoleList = observer(
       <Stack direction="column" spacing={1.25}>
         {canDragRoles && reorderableRoles.length > 0 && (
           <Typography level="body-xs" textColor="muted" px={0.5}>
-            Drag to reorder hierarchy
+            {t("roles.hierarchy.dragToReorderHierarchy")}
           </Typography>
         )}
 

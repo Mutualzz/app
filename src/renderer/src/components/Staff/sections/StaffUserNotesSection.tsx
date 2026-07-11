@@ -11,6 +11,7 @@ import {
 } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 
 interface Props {
@@ -22,6 +23,7 @@ const PAGE_LIMIT = 50;
 export const StaffUserNotesSection = ({ userId }: Props) => {
   const app = useAppStore();
   const queryClient = useQueryClient();
+  const { t } = useTranslation("staff");
   const [content, setContent] = useState("");
 
   const queryKey = ["staff-notes", userId];
@@ -59,7 +61,9 @@ export const StaffUserNotesSection = ({ userId }: Props) => {
       queryClient.invalidateQueries({ queryKey });
     },
     onError: (err) => {
-      toast.error(err instanceof Error ? err.message : "Failed to add note");
+      toast.error(
+        err instanceof Error ? err.message : t("user.notes.errorAdd")
+      );
     }
   });
 
@@ -69,7 +73,7 @@ export const StaffUserNotesSection = ({ userId }: Props) => {
         <Textarea
           value={content}
           onChange={(e) => setContent(e.target.value)}
-          placeholder="Leave a note for other staff — not visible to the user"
+          placeholder={t("user.notes.placeholder")}
           rows={3}
         />
         <Button
@@ -79,13 +83,13 @@ export const StaffUserNotesSection = ({ userId }: Props) => {
           onClick={() => addNote()}
           css={{ alignSelf: "flex-start" }}
         >
-          {adding ? "Adding..." : "Add Note"}
+          {adding ? t("user.notes.adding") : t("user.notes.add")}
         </Button>
       </Stack>
 
       {!isFetching && notes.length === 0 && (
         <Typography level="body-sm" textColor="muted">
-          No staff notes yet
+          {t("user.notes.empty")}
         </Typography>
       )}
 
@@ -128,7 +132,7 @@ export const StaffUserNotesSection = ({ userId }: Props) => {
           onClick={() => fetchNextPage()}
           css={{ alignSelf: "center", marginTop: "0.5rem" }}
         >
-          {isFetchingNextPage ? "Loading..." : "Load more"}
+          {isFetchingNextPage ? t("home.loading") : t("home.loadMore")}
         </Button>
       )}
     </Stack>

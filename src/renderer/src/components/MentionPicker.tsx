@@ -6,6 +6,7 @@ import { UserAvatar } from "@components/User/UserAvatar";
 import { dynamicElevation } from "@mutualzz/ui-core";
 import { ReactEditor, useSlate } from "slate-react";
 import { MentionType } from "@mutualzz/types";
+import { useTranslation } from "react-i18next";
 
 interface Candidate {
   id: string;
@@ -22,6 +23,7 @@ interface Props {
 
 export const MentionPicker = observer(
   ({ search, onSelect, onClose }: Props) => {
+    const { t } = useTranslation("chat");
     const app = useAppStore();
     const editor = useSlate();
     const { theme } = useTheme();
@@ -175,7 +177,9 @@ export const MentionPicker = observer(
           level="body-xs"
           mb={2.5}
         >
-          {search.length === 0 ? "Members" : `Members matching "${search}"`}
+          {search.length === 0
+            ? t("mentions.members")
+            : t("mentions.membersMatching", { query: search })}
         </Typography>
         {filtered.map((c, i) => (
           <Paper
@@ -207,11 +211,11 @@ export const MentionPicker = observer(
             </Stack>
             <Typography level="body-xs" textColor="secondary">
               {c.type === "role"
-                ? "Notify users with this role who have permission to view this channel"
+                ? t("mentions.notifyRole")
                 : c.type === "everyone"
-                  ? "Notify everyone who has permission to view this channel"
+                  ? t("mentions.notifyEveryone")
                   : c.type === "here"
-                    ? "Notify everyone online who has permission to view this channel"
+                    ? t("mentions.notifyHere")
                     : `${"username" in c ? c.username : "unknown"}`}
             </Typography>
           </Paper>

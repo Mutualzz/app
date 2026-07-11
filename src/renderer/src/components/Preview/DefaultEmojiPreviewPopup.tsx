@@ -3,6 +3,7 @@ import { useAppStore } from "@hooks/useStores";
 import type { CSSObject } from "@emotion/react";
 import { Stack, Typography } from "@mutualzz/ui-web";
 import { Paper } from "@components/Paper";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   name: string;
@@ -12,6 +13,7 @@ interface Props {
 
 export const DefaultEmojiPreviewPopup = observer(
   ({ url, name, ...props }: Props) => {
+    const { t } = useTranslation("chat");
     const app = useAppStore();
 
     return (
@@ -43,7 +45,7 @@ export const DefaultEmojiPreviewPopup = observer(
               :{name}:
             </Typography>
             <Typography level="body-xs">
-              This is a default emoji. You can use it anywhere on Mutualzz
+              {t("expressionPreview.defaultEmoji")}
             </Typography>
           </Stack>
         </Stack>

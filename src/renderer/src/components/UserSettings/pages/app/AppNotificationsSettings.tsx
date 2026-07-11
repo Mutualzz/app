@@ -4,8 +4,11 @@ import { useAppStore } from "@hooks/useStores";
 import { Paper } from "@components/Paper";
 import { IDLE_THRESHOLD_OPTIONS } from "@utils/statusDurations";
 import { isElectron } from "@utils/index";
+import { useTranslation } from "react-i18next";
 
 export const AppNotificationsSettings = observer(() => {
+  const { t } = useTranslation("settings");
+  const { t: tCommon } = useTranslation("common");
   const app = useAppStore();
   const settings = app.settings;
 
@@ -18,7 +21,7 @@ export const AppNotificationsSettings = observer(() => {
   return (
     <Stack spacing={25} mt={7.5} mx={50} direction="column">
       <Stack spacing={2.5} direction="column">
-        <Typography fontSize={20}>Push notifications</Typography>
+        <Typography fontSize={20}>{t("notifications.pushTitle")}</Typography>
         <Divider textColor="muted" css={{ opacity: 0.5 }} />
 
         <Paper
@@ -30,14 +33,13 @@ export const AppNotificationsSettings = observer(() => {
           direction="column"
         >
           <Typography level="body-sm" textColor="muted">
-            Push notifications are delivered to the mobile app when you are idle
-            or offline. These settings sync across your devices.
+            {t("notifications.pushDescriptionDesktop")}
           </Typography>
 
           <Stack direction="row" alignItems="center" justifyContent="space-between">
             <Stack direction="column" spacing={0.5}>
               <Typography level="body-md" fontWeight="bold">
-                Enable push notifications
+                {t("notifications.enablePush")}
               </Typography>
             </Stack>
             <Switch
@@ -52,10 +54,10 @@ export const AppNotificationsSettings = observer(() => {
           <Stack direction="row" alignItems="center" justifyContent="space-between">
             <Stack direction="column" spacing={0.5}>
               <Typography level="body-md" fontWeight="bold">
-                Direct messages
+                {t("notifications.directMessages")}
               </Typography>
               <Typography level="body-sm" textColor="muted">
-                Includes group direct messages
+                {t("notifications.directMessagesDescription")}
               </Typography>
             </Stack>
             <Switch
@@ -71,10 +73,10 @@ export const AppNotificationsSettings = observer(() => {
           <Stack direction="row" alignItems="center" justifyContent="space-between">
             <Stack direction="column" spacing={0.5}>
               <Typography level="body-md" fontWeight="bold">
-                Mentions
+                {t("notifications.mentions")}
               </Typography>
               <Typography level="body-sm" textColor="muted">
-                Includes @user, @role, @everyone, and @here
+                {t("notifications.mentionsDescription")}
               </Typography>
             </Stack>
             <Switch
@@ -90,7 +92,7 @@ export const AppNotificationsSettings = observer(() => {
       </Stack>
 
       <Stack spacing={2.5} direction="column">
-        <Typography fontSize={20}>Presence</Typography>
+        <Typography fontSize={20}>{t("notifications.presenceTitle")}</Typography>
         <Divider textColor="muted" css={{ opacity: 0.5 }} />
 
         {isElectron ? (
@@ -104,11 +106,10 @@ export const AppNotificationsSettings = observer(() => {
           >
             <Stack direction="column" spacing={0.5}>
               <Typography level="body-md" fontWeight="bold">
-                Idle timeout
+                {t("notifications.idleTimeout")}
               </Typography>
               <Typography level="body-sm" textColor="muted">
-                Automatically mark yourself as idle after this long without
-                keyboard or mouse input
+                {t("notifications.idleTimeoutDescription")}
               </Typography>
             </Stack>
             <Select
@@ -122,19 +123,19 @@ export const AppNotificationsSettings = observer(() => {
             >
               {IDLE_THRESHOLD_OPTIONS.map((option) => (
                 <Option key={option.ms} value={String(option.ms)}>
-                  {option.label}
+                  {tCommon(option.labelKey, { count: option.count })}
                 </Option>
               ))}
             </Select>
           </Paper>
         ) : (
           <Typography level="body-sm" textColor="muted">
-            Idle detection is only available in the desktop app.
+            {t("notifications.idleDesktopOnly")}
           </Typography>
         )}
 
         <Typography level="body-sm" textColor="muted">
-          Do Not Disturb and Invisible always suppress push notifications.
+          {t("notifications.dndSuppressNote")}
         </Typography>
       </Stack>
     </Stack>

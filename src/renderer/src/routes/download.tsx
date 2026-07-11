@@ -2,6 +2,7 @@ import { LinearProgress, Stack } from "@mutualzz/ui-web";
 import { createFileRoute, Navigate, useNavigate } from "@tanstack/react-router";
 import { detectDownloadURL } from "@utils/detect";
 import { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { isElectron } from "@utils/index";
 
 export const Route = createFileRoute("/download")({
@@ -9,6 +10,7 @@ export const Route = createFileRoute("/download")({
 });
 
 function DownloadAndRedirect() {
+  const { t } = useTranslation("chat");
   const navigate = useNavigate();
   const fileUrl = detectDownloadURL();
 
@@ -43,7 +45,7 @@ function DownloadAndRedirect() {
       alignItems="center"
       spacing={5}
     >
-      Downloading...
+      {t("downloading")}
       <LinearProgress />
     </Stack>
   );

@@ -8,6 +8,7 @@ import {
 } from "@mutualzz/ui-web";
 import type { AnyFieldApi } from "@tanstack/react-form";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 interface ApiErrors {
   email?: string;
@@ -18,56 +19,20 @@ interface ApiErrors {
   dateOfBirth?: string;
 }
 
-const MONTHS = [
-  {
-    value: "01",
-    name: "January"
-  },
-  {
-    value: "02",
-    name: "February"
-  },
-  {
-    value: "03",
-    name: "March"
-  },
-  {
-    value: "04",
-    name: "April"
-  },
-  {
-    value: "05",
-    name: "May"
-  },
-  {
-    value: "06",
-    name: "June"
-  },
-  {
-    value: "07",
-    name: "July"
-  },
-  {
-    value: "08",
-    name: "August"
-  },
-  {
-    value: "09",
-    name: "September"
-  },
-  {
-    value: "10",
-    name: "October"
-  },
-  {
-    value: "11",
-    name: "November"
-  },
-  {
-    value: "12",
-    name: "December"
-  }
-];
+const MONTH_VALUES = [
+  "01",
+  "02",
+  "03",
+  "04",
+  "05",
+  "06",
+  "07",
+  "08",
+  "09",
+  "10",
+  "11",
+  "12"
+] as const;
 
 export const DOBInput = ({
   apiErrors,
@@ -79,6 +44,7 @@ export const DOBInput = ({
   label: string;
   apiErrors: ApiErrors;
 }) => {
+  const { t } = useTranslation("auth");
   const [dob, setDob] = useState({
     month: "",
     day: "",
@@ -120,20 +86,20 @@ export const DOBInput = ({
         <Select
           color="neutral"
           variant="outlined"
-          placeholder="Select month"
+          placeholder={t("dob.selectMonth")}
           onValueChange={handleMonth}
           size={{ xs: "sm", sm: "md" }}
         >
-          {MONTHS.map((month) => (
-            <Option key={month.value} value={month.value}>
-              {month.name}
+          {MONTH_VALUES.map((value) => (
+            <Option key={value} value={value}>
+              {t(`dob.months.${value}`)}
             </Option>
           ))}
         </Select>
         <Input
           type="number"
           size={{ xs: "md", sm: "lg" }}
-          placeholder="Day"
+          placeholder={t("dob.day")}
           min={1}
           max={31}
           onChange={handleDay}
@@ -143,7 +109,7 @@ export const DOBInput = ({
           fullWidth
           type="number"
           size={{ xs: "sm", sm: "md" }}
-          placeholder="Year"
+          placeholder={t("dob.year")}
           onChange={handleYear}
           min={1900}
           max={2100}

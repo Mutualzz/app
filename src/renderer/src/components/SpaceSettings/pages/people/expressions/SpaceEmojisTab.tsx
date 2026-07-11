@@ -15,6 +15,7 @@ import { IconButton } from "@components/IconButton";
 import type { Space } from "@stores/objects/Space";
 import { TrashIcon } from "@phosphor-icons/react";
 import { ExpressionEditor } from "@renderer/components/Expression/ExpressionEditor";
+import { useTranslation } from "react-i18next";
 
 const EmojiItem = observer(({ expression }: { expression: Expression }) => {
   const app = useAppStore();
@@ -72,6 +73,8 @@ interface Props {
 }
 
 const SpaceEmojisTab = observer(({ space }: Props) => {
+  const { t } = useTranslation("settings");
+  const { t: tSpace } = useTranslation("space");
   const app = useAppStore();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -115,8 +118,7 @@ const SpaceEmojisTab = observer(({ space }: Props) => {
     <Stack direction="column" spacing={2.5}>
       <Stack direction="row" alignItems="center" justifyContent="space-between">
         <Typography color="warning" variant="plain">
-          Sadly current limit of emojis you can upload are 100, since the app is
-          in beta and storage is an issue for now
+          {tSpace("expressions.emojiLimit")}
         </Typography>
         <input
           ref={fileInputRef}
@@ -135,7 +137,7 @@ const SpaceEmojisTab = observer(({ space }: Props) => {
             marginRight: 16
           }}
         >
-          Upload Emoji
+          {t("expressions.uploadEmoji")}
         </Button>
       </Stack>
 
@@ -149,7 +151,7 @@ const SpaceEmojisTab = observer(({ space }: Props) => {
           width={600}
         >
           <Typography level="body-lg" ml={2.5} my={2.5}>
-            Emojis
+            {t("expressions.emojis")}
           </Typography>
 
           <Divider
@@ -160,8 +162,8 @@ const SpaceEmojisTab = observer(({ space }: Props) => {
           />
 
           <Stack mb={2.5} spacing={5} direction="row" mt={2.5} pl={2.5}>
-            <Typography>Image</Typography>
-            <Typography flex={1}>Name</Typography>
+            <Typography>{t("expressions.image")}</Typography>
+            <Typography flex={1}>{t("expressions.name")}</Typography>
           </Stack>
           <Stack direction="column">
             {staticEmojis.map((expression) => (
@@ -181,7 +183,7 @@ const SpaceEmojisTab = observer(({ space }: Props) => {
           width={600}
         >
           <Typography level="body-lg" ml={2.5} my={2.5}>
-            Animated Emojis
+            {t("expressions.animatedEmojis")}
           </Typography>
 
           <Divider
@@ -192,8 +194,8 @@ const SpaceEmojisTab = observer(({ space }: Props) => {
           />
 
           <Stack mb={2.5} spacing={5} direction="row" mt={2.5} pl={2.5}>
-            <Typography>Image</Typography>
-            <Typography flex={1}>Name</Typography>
+            <Typography>{t("expressions.image")}</Typography>
+            <Typography flex={1}>{t("expressions.name")}</Typography>
           </Stack>
           <Stack direction="column">
             {animatedEmojis.map((expression) => (
@@ -206,7 +208,7 @@ const SpaceEmojisTab = observer(({ space }: Props) => {
       {emojis.length === 0 && (
         <Stack justifyContent="center" alignItems="center" py="4rem">
           <Typography textAlign="center" textColor="muted">
-            No emojis created yet
+            {tSpace("expressions.emptyEmojis")}
           </Typography>
         </Stack>
       )}

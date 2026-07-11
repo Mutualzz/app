@@ -5,6 +5,7 @@ import type { APIStaffSession } from "@mutualzz/types";
 import { Stack, Typography } from "@mutualzz/ui-web";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
+import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 
 interface Props {
@@ -14,6 +15,7 @@ interface Props {
 export const StaffUserSessionsSection = ({ userId }: Props) => {
   const app = useAppStore();
   const queryClient = useQueryClient();
+  const { t } = useTranslation("staff");
 
   const sessionsQueryKey = ["staff-sessions", userId];
 
@@ -33,7 +35,7 @@ export const StaffUserSessionsSection = ({ userId }: Props) => {
     },
     onError: (err) => {
       toast.error(
-        err instanceof Error ? err.message : "Failed to revoke session"
+        err instanceof Error ? err.message : t("user.sessions.errorRevoke")
       );
     }
   });
@@ -41,7 +43,7 @@ export const StaffUserSessionsSection = ({ userId }: Props) => {
   if (sessions.length === 0) {
     return (
       <Typography level="body-sm" textColor="muted">
-        No active sessions
+        {t("user.sessions.empty")}
       </Typography>
     );
   }
@@ -62,10 +64,14 @@ export const StaffUserSessionsSection = ({ userId }: Props) => {
         >
           <Stack direction="column" spacing={0.1}>
             <Typography level="body-sm">
-              Created {dayjs(session.createdAt).fromNow()}
+              {t("user.sessions.created", {
+                relative: dayjs(session.createdAt).fromNow()
+              })}
             </Typography>
             <Typography level="body-xs" textColor="muted">
-              Last used {dayjs(session.lastUsedAt).fromNow()}
+              {t("user.sessions.lastUsed", {
+                relative: dayjs(session.lastUsedAt).fromNow()
+              })}
             </Typography>
           </Stack>
           <Button
@@ -75,7 +81,7 @@ export const StaffUserSessionsSection = ({ userId }: Props) => {
             disabled={revokingSession}
             onClick={() => revokeSession(session.sessionId)}
           >
-            Revoke
+            {t("user.sessions.revoke")}
           </Button>
         </Paper>
       ))}

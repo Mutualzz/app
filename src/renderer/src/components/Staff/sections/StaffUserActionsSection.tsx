@@ -10,6 +10,7 @@ import type { APIPrivateUser } from "@mutualzz/types";
 import { Stack, Typography } from "@mutualzz/ui-web";
 import { useMutation } from "@tanstack/react-query";
 import { useAppStore } from "@hooks/useStores";
+import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 
 interface Props {
@@ -29,6 +30,7 @@ export const StaffUserActionsSection = ({
 }: Props) => {
   const app = useAppStore();
   const { openModal } = useModal();
+  const { t } = useTranslation("staff");
   const isDisabled = BitField.fromString(userFlags, user.flags.toString()).has(
     "Disabled"
   );
@@ -46,7 +48,9 @@ export const StaffUserActionsSection = ({
       onSuccess: onUpdated,
       onError: (err) => {
         toast.error(
-          err instanceof Error ? err.message : "Failed to lift restriction"
+          err instanceof Error
+            ? err.message
+            : t("user.actions.errors.liftRestriction")
         );
       }
     });
@@ -55,8 +59,7 @@ export const StaffUserActionsSection = ({
     <Stack direction="column" spacing={1.25}>
       {isDeleted ? (
         <Typography level="body-sm" textColor="muted">
-          This account is soft deleted. The user cannot log in, but their data
-          is retained.
+          {t("user.actions.softDeletedBanner")}
         </Typography>
       ) : (
         <Stack direction="row" spacing={1}>
@@ -75,7 +78,9 @@ export const StaffUserActionsSection = ({
               )
             }
           >
-            {isDisabled ? "Enable Account" : "Disable Account"}
+            {isDisabled
+              ? t("user.actions.enableAccount")
+              : t("user.actions.disableAccount")}
           </Button>
           <Button
             color="danger"
@@ -91,7 +96,7 @@ export const StaffUserActionsSection = ({
               )
             }
           >
-            Force Logout
+            {t("user.actions.forceLogout")}
           </Button>
           <Button
             color="warning"
@@ -107,7 +112,7 @@ export const StaffUserActionsSection = ({
               )
             }
           >
-            Warn User
+            {t("user.actions.warnUser")}
           </Button>
           {isRestricted ? (
             <Button
@@ -116,7 +121,7 @@ export const StaffUserActionsSection = ({
               disabled={liftingRestriction}
               onClick={() => liftRestriction()}
             >
-              Lift Restriction
+              {t("user.actions.liftRestriction")}
             </Button>
           ) : (
             <Button
@@ -133,7 +138,7 @@ export const StaffUserActionsSection = ({
                 )
               }
             >
-              Restrict User
+              {t("user.actions.restrictUser")}
             </Button>
           )}
           {!isDeleted && (
@@ -153,7 +158,7 @@ export const StaffUserActionsSection = ({
                 )
               }
             >
-              Soft Delete Account
+              {t("user.actions.softDeleteAccount")}
             </Button>
           )}
           {app.account?.isFounder && (
@@ -174,7 +179,7 @@ export const StaffUserActionsSection = ({
                 )
               }
             >
-              Hard Delete Account
+              {t("user.actions.hardDeleteAccount")}
             </Button>
           )}
         </Stack>

@@ -18,6 +18,7 @@ import {
 import { createFileRoute } from "@tanstack/react-router";
 import dayjs from "dayjs";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 
 export const Route = createFileRoute("/_authenticated/staff/support")({
@@ -27,13 +28,12 @@ export const Route = createFileRoute("/_authenticated/staff/support")({
 const PAGE_LIMIT = 50;
 const ANY = "any";
 
-const statusOptions = [
-  { value: ANY, label: "Any status" },
-  { value: "open", label: "Open" },
-  { value: "awaiting_reply", label: "Awaiting reply" },
-  { value: "resolved", label: "Resolved" },
-  { value: "closed", label: "Closed" }
-];
+const statusValues = [
+  "open",
+  "awaiting_reply",
+  "resolved",
+  "closed"
+] as const;
 
 const statusColors: Record<string, "warning" | "success" | "neutral" | "info"> =
   {
@@ -46,6 +46,7 @@ const statusColors: Record<string, "warning" | "success" | "neutral" | "info"> =
 function StaffSupportRoute() {
   const app = useAppStore();
   const queryClient = useQueryClient();
+  const { t } = useTranslation("staff");
   const embossed = app.settings?.preferEmbossed;
 
   const [status, setStatus] = useState<string>("open");
@@ -94,7 +95,9 @@ function StaffSupportRoute() {
       queryClient.invalidateQueries({ queryKey: listQueryKey });
     },
     onError: (err) => {
-      toast.error(err instanceof Error ? err.message : "Failed to send reply");
+      toast.error(
+        err instanceof Error ? err.message : t("support.errors.send")
+      );
     }
   });
 
@@ -110,7 +113,7 @@ function StaffSupportRoute() {
     },
     onError: (err) => {
       toast.error(
-        err instanceof Error ? err.message : "Failed to update ticket"
+        err instanceof Error ? err.message : t("support.errors.update")
       );
     }
   });
@@ -124,14 +127,15 @@ function StaffSupportRoute() {
       direction="column"
     >
       <StaffPanelHeader
-        title="Support"
+        title={t("nav.support")}
         icon={<LifebuoyIcon size={22} weight="fill" />}
         trailing={
           <Stack direction="row" spacing={1.25}>
             <Select value={status} onValueChange={(v) => setStatus(String(v))}>
-              {statusOptions.map((option) => (
-                <Option key={option.value} value={option.value}>
-                  {option.label}
+              <Option value={ANY}>{t("support.anyStatus")}</Option>
+              {statusValues.map((value) => (
+                <Option key={value} value={value}>
+                  {t(`support.status.${value}` as "support.status.open")}
                 </Option>
               ))}
             </Select>
@@ -153,13 +157,13 @@ function StaffSupportRoute() {
         >
           {isFetching && !isFetchingNextPage && (
             <Typography level="body-sm" textColor="muted" textAlign="center">
-              Loading...
+              {t("home.loading")}
             </Typography>
           )}
 
           {!isFetching && tickets.length === 0 && (
             <Typography level="body-sm" textColor="muted" textAlign="center">
-              No tickets found
+              {t("support.empty")}
             </Typography>
           )}
 
@@ -184,7 +188,7 @@ function StaffSupportRoute() {
                 color={statusColors[ticket.status] ?? "neutral"}
                 fontWeight={700}
               >
-                {ticket.status.replace("_", " ").toUpperCase()}
+                {t(`support.status.${ticket.status}` as "support.status.open")}
               </Typography>
             </Paper>
           ))}
@@ -196,7 +200,7 @@ function StaffSupportRoute() {
               disabled={isFetchingNextPage}
               onClick={() => fetchNextPage()}
             >
-              {isFetchingNextPage ? "Loading..." : "Load more"}
+              {isFetchingNextPage ? t("home.loading") : t("home.loadMore")}
             </Button>
           )}
         </Paper>
@@ -214,13 +218,13 @@ function StaffSupportRoute() {
         >
           {!activeId && (
             <Typography level="body-sm" textColor="muted">
-              Select a ticket
+              {t("support.selectTicket")}
             </Typography>
           )}
 
           {activeId && loadingTicket && (
             <Typography level="body-sm" textColor="muted">
-              Loading ticket...
+              {t("support.loadingTicket")}
             </Typography>
           )}
 
@@ -250,7 +254,7 @@ function StaffSupportRoute() {
                     disabled={updating}
                     onClick={() => updateStatus("resolved")}
                   >
-                    Resolve
+                    {t("support.resolve")}
                   </Button>
                   <Button
                     size="sm"
@@ -259,7 +263,7 @@ function StaffSupportRoute() {
                     disabled={updating}
                     onClick={() => updateStatus("closed")}
                   >
-                    Close
+                    {t("support.close")}
                   </Button>
                 </Stack>
               </Stack>
@@ -276,7 +280,7 @@ function StaffSupportRoute() {
                 >
                   <Typography level="body-xs" textColor="muted">
                     {message.isStaff
-                      ? "Staff"
+                      ? t("support.staff")
                       : message.author.globalName ||
                         message.author.username}{" "}
                     · {dayjs(message.createdAt).format("MMM D, h:mm A")}
@@ -293,7 +297,7 @@ function StaffSupportRoute() {
                     <Textarea
                       value={reply}
                       onChange={(e) => setReply(e.target.value)}
-                      placeholder="Reply to user"
+                      placeholder={t("support.replyPlaceholder")}
                       rows={4}
                     />
                     <Button
@@ -301,7 +305,7 @@ function StaffSupportRoute() {
                       onClick={() => sendReply()}
                       css={{ alignSelf: "flex-start" }}
                     >
-                      {sending ? "Sending..." : "Send reply"}
+                      {sending ? t("support.sending") : t("support.sendReply")}
                     </Button>
                   </Stack>
                 )}

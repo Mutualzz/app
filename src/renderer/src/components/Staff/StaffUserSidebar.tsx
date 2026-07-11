@@ -24,7 +24,8 @@ import {
 } from "@phosphor-icons/react";
 import { useNavigate } from "@tanstack/react-router";
 import type { JSX } from "react";
-import type { StaffSection } from "./staffSections";
+import { useTranslation } from "react-i18next";
+import { staffSectionTitleKeys, type StaffSection } from "./staffSections";
 import { IconButton } from "../IconButton";
 
 interface Props {
@@ -33,30 +34,19 @@ interface Props {
   onSectionChange: (section: StaffSection) => void;
 }
 
-const navItems: { key: StaffSection; label: string; icon: JSX.Element }[] = [
-  { key: "info", label: "Info", icon: <UserIcon weight="fill" /> },
-  { key: "flags", label: "Flags", icon: <ShieldIcon weight="fill" /> },
-  { key: "actions", label: "Actions", icon: <GearIcon weight="fill" /> },
-  {
-    key: "sessions",
-    label: "Sessions",
-    icon: <DevicesIcon weight="fill" />
-  },
-  {
-    key: "notes",
-    label: "Staff Notes",
-    icon: <NotePencilIcon weight="fill" />
-  },
-  {
-    key: "audit",
-    label: "Audit Log",
-    icon: <ClockCounterClockwiseIcon weight="fill" />
-  }
+const navItems: { key: StaffSection; icon: JSX.Element }[] = [
+  { key: "info", icon: <UserIcon weight="fill" /> },
+  { key: "flags", icon: <ShieldIcon weight="fill" /> },
+  { key: "actions", icon: <GearIcon weight="fill" /> },
+  { key: "sessions", icon: <DevicesIcon weight="fill" /> },
+  { key: "notes", icon: <NotePencilIcon weight="fill" /> },
+  { key: "audit", icon: <ClockCounterClockwiseIcon weight="fill" /> }
 ];
 
 export const StaffUserSidebar = ({ user, section, onSectionChange }: Props) => {
   const app = useAppStore();
   const navigate = useNavigate();
+  const { t } = useTranslation("staff");
 
   return (
     <Paper
@@ -110,7 +100,7 @@ export const StaffUserSidebar = ({ user, section, onSectionChange }: Props) => {
               padding={5}
               disabled={section === item.key}
             >
-              {item.label}
+              {t(staffSectionTitleKeys[item.key])}
             </Button>
           ))}
         </ButtonGroup>

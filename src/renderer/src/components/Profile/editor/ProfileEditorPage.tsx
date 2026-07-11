@@ -49,12 +49,15 @@ import { useCanGoBack, useNavigate, useRouter } from "@tanstack/react-router";
 import { navigateToPreferredMode } from "@utils/index";
 import { observer } from "mobx-react-lite";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 import Loading from "@components/Loader/Loading";
 import { useModal } from "@contexts/Modal.context";
 import { useMenu } from "@contexts/ContextMenu.context";
 
 export const ProfileEditorPage = observer(() => {
+  const { t } = useTranslation("settings");
+  const { t: tCommon } = useTranslation("common");
   const app = useAppStore();
   const { theme } = useTheme();
   const account = app.account;
@@ -215,10 +218,12 @@ export const ProfileEditorPage = observer(() => {
       if (result) {
         setDraft(createDraftFromProfile(result));
       }
-      toast.success("Profile saved");
+      toast.success(t("profile.editor.profileSaved"));
     },
     onError: (error) =>
-      toast.error(getApiErrorMessage(error, "Failed to save profile"))
+      toast.error(
+        getApiErrorMessage(error, t("profile.editor.failedSaveProfile"))
+      )
   });
 
   const handleProfileReset = useCallback(() => {
@@ -356,7 +361,7 @@ export const ProfileEditorPage = observer(() => {
   const titleBarActions = panelsVisible ? (
     <Stack direction="row" spacing={1}>
       <Button color="neutral" size="sm" onClick={() => setPanelsVisible(false)}>
-        Preview
+        {t("profile.preview")}
       </Button>
       <Button
         color="neutral"
@@ -367,10 +372,10 @@ export const ProfileEditorPage = observer(() => {
           setSelectedBlockId(null);
         }}
       >
-        Discard
+        {t("profile.editor.discard")}
       </Button>
       <Button color="danger" size="sm" onClick={openResetModal}>
-        Reset to empty
+        {t("profile.editor.resetToEmpty")}
       </Button>
       <Button
         color="primary"
@@ -378,13 +383,13 @@ export const ProfileEditorPage = observer(() => {
         loading={saving}
         onClick={() => saveProfile()}
       >
-        Save
+        {tCommon("save")}
       </Button>
     </Stack>
   ) : (
     <Stack direction="row" spacing={1}>
       <Button color="neutral" size="sm" onClick={() => setPanelsVisible(true)}>
-        Back to editing
+        {t("profile.editor.backToEditing")}
       </Button>
       <Button
         color="primary"
@@ -392,16 +397,16 @@ export const ProfileEditorPage = observer(() => {
         loading={saving}
         onClick={() => saveProfile()}
       >
-        Save
+        {tCommon("save")}
       </Button>
     </Stack>
   );
 
   return (
     <ProfileLayout
-      title="Customize Profile"
+      title={t("profile.customizeProfile")}
       actions={titleBarActions}
-      backLabel="Close"
+      backLabel={t("profile.close")}
       onBack={handleBack}
       music={draftProfileMusic}
       musicProfile={profile}
@@ -453,15 +458,14 @@ export const ProfileEditorPage = observer(() => {
                 }}
               >
                 <Paper
-                  variant="soft"
+                  variant="solid"
                   color="warning"
                   borderRadius={999}
-                  px={1.5}
-                  py={0.5}
+                  px={1.75}
+                  py={1.25}
                 >
-                  <Typography level="body-xs" variant="plain" color="warning">
-                    Panels may overlap blocks · click Preview to see the full
-                    canvas
+                  <Typography level="body-xs">
+                    {t("profile.editor.panelsOverlapHint")}
                   </Typography>
                 </Paper>
               </Box>

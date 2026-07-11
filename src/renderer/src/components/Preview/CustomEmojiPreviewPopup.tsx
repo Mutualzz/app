@@ -6,6 +6,7 @@ import { Divider, Stack, Typography } from "@mutualzz/ui-web";
 import { Paper } from "@components/Paper";
 import { SpaceIcon } from "@components/Space/SpaceIcon";
 import { UserAvatar } from "@components/User/UserAvatar";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   expression: Expression;
@@ -14,6 +15,7 @@ interface Props {
 
 export const CustomEmojiPreviewPopup = observer(
   ({ expression, ...props }: Props) => {
+    const { t } = useTranslation("chat");
     const app = useAppStore();
 
     return (
@@ -45,12 +47,11 @@ export const CustomEmojiPreviewPopup = observer(
               :{expression.name}:
             </Typography>
             <Typography level="body-xs">
-              This emoji is
               {expression.spaceId
-                ? " from one of the spaces you belong in"
+                ? t("expressionPreview.emojiFromSpaceBelong")
                 : expression.authorId === app.account?.id
-                  ? " from you, you can use it in any chats"
-                  : " from a user"}
+                  ? t("expressionPreview.emojiFromYou")
+                  : t("expressionPreview.emojiFromUser")}
             </Typography>
           </Stack>
         </Stack>
@@ -64,25 +65,27 @@ export const CustomEmojiPreviewPopup = observer(
           {expression.spaceId ? (
             <Stack spacing={1.25} direction="column">
               <Typography level="body-sm">
-                This emoji is from a space
+                {t("expressionPreview.emojiFromSpace")}
               </Typography>
               <Stack direction="row" spacing={1.25} alignItems="center">
                 <SpaceIcon space={expression.space} />
                 <Typography fontWeight="bold" level="body-sm">
-                  {expression.space?.name ?? "Private Space"}
+                  {expression.space?.name ?? t("privateSpace")}
                 </Typography>
               </Stack>
             </Stack>
           ) : (
             <Stack spacing={1.25} direction="column">
-              <Typography level="body-xs">This emoji is from a user</Typography>
+              <Typography level="body-xs">
+                {t("expressionPreview.emojiFromUser")}
+              </Typography>
               <Stack direction="row" spacing={1.25} alignItems="center">
                 <UserAvatar
                   user={expression.author}
                   member={app.spaces.active?.members.get(expression.authorId)}
                 />
                 <Typography fontWeight="bold" level="body-sm">
-                  {expression.author?.displayName ?? "Unknown User"}
+                  {expression.author?.displayName ?? t("unknownUser")}
                 </Typography>
               </Stack>
             </Stack>

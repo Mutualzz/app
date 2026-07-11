@@ -1,13 +1,4 @@
-export const staffReportReasonLabels: Record<string, string> = {
-  spam: "Spam",
-  harassment: "Harassment or Abuse",
-  hate_speech: "Hate Speech",
-  nsfw: "NSFW / Inappropriate Content",
-  self_harm: "Self-Harm or Suicide",
-  impersonation: "Impersonation",
-  misinformation: "Misinformation",
-  other: "Other"
-};
+import { reportReasonKeys } from "@mutualzz/i18n";
 
 export const staffReportStatusColors: Record<
   string,
@@ -19,10 +10,15 @@ export const staffReportStatusColors: Record<
   actioned: "danger"
 };
 
-export function getStaffReportTakedownLabel(targetType: string) {
-  return targetType === "space" ? "Shut Down Space" : "Take Down Content";
+/** @deprecated Prefer t(reportReasonKeys[reason], { ns: "common" }) */
+export const staffReportReasonKeys = reportReasonKeys;
+
+export function getStaffReportTakedownKey(targetType: string) {
+  return targetType === "space"
+    ? "report.actions.shutDownSpace"
+    : "report.actions.takeDownContent";
 }
 
-export function getStaffReportLockdownLabel(targetType: string) {
-  return targetType === "space" ? "Lock Down Space" : "";
+export function getStaffReportLockdownKey(targetType: string) {
+  return targetType === "space" ? "report.actions.lockDownSpace" : null;
 }

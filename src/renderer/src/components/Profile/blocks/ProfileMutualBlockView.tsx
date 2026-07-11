@@ -11,6 +11,7 @@ import { Stack, Typography } from "@mutualzz/ui-web";
 import { UsersThreeIcon } from "@phosphor-icons/react";
 import { Paper } from "@renderer/components/Paper";
 import { observer } from "mobx-react-lite";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   block: ProfileMutualBlock;
@@ -18,6 +19,7 @@ interface Props {
 }
 
 export const ProfileMutualBlockView = observer(({ block, userId }: Props) => {
+  const { t } = useTranslation("settings");
   const app = useAppStore();
   const maxItems = block.maxItems ?? 6;
 
@@ -40,17 +42,21 @@ export const ProfileMutualBlockView = observer(({ block, userId }: Props) => {
       <Stack direction="row" spacing={1} alignItems="center">
         <UsersThreeIcon size={18} weight="fill" />
         <Typography level="body-sm" fontWeight={700} css={{ fontSize: "var(--pcf-sm)" }}>
-          {block.mode === "spaces" ? "Mutual Spaces" : "Friends"}
+          {block.mode === "spaces"
+            ? t("profile.blocks.mutualSpaces")
+            : t("profile.blocks.friendsStatus")}
         </Typography>
       </Stack>
 
       {block.mode === "friends" ? (
         <Typography level="body-sm" css={{ opacity: isFriend ? 1 : 0.6, fontSize: "var(--pcf-sm)" }}>
-          {isFriend ? "You are friends" : "Not friends yet"}
+          {isFriend
+            ? t("profile.blocks.youAreFriends")
+            : t("profile.blocks.notFriendsYet")}
         </Typography>
       ) : mutualSpaces.length === 0 ? (
         <Typography level="body-sm" css={{ opacity: 0.6, fontSize: "var(--pcf-sm)" }}>
-          No mutual spaces
+          {t("profile.blocks.noMutualSpaces")}
         </Typography>
       ) : (
         <Stack direction="column" spacing={0.75}>

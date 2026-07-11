@@ -5,6 +5,7 @@ import type {
   PresencePayload
 } from "@mutualzz/types";
 import dayjs from "dayjs";
+import i18n from "../i18n";
 
 export function getCustomActivity(
   presence?: PresencePayload | null
@@ -52,18 +53,21 @@ export function formatCustomStatusClearLabel(
   durationMs: number | null,
   now = Date.now()
 ) {
-  if (durationMs == null) return "Don't clear";
+  if (durationMs == null) return i18n.t("duration.dontClear");
 
   const clearAt = dayjs(now + durationMs);
   const time = clearAt.format("h:mm A");
 
   if (clearAt.isSame(dayjs(now), "day")) {
-    return `Clear today at ${time}`;
+    return i18n.t("duration.clearTodayAt", { time });
   }
 
   if (clearAt.isSame(dayjs(now).add(1, "day"), "day")) {
-    return `Clear tomorrow at ${time}`;
+    return i18n.t("duration.clearTomorrowAt", { time });
   }
 
-  return `Clear ${clearAt.format("MMM D")} at ${time}`;
+  return i18n.t("duration.clearOnDateAt", {
+    date: clearAt.format("MMM D"),
+    time
+  });
 }

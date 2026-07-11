@@ -3,6 +3,11 @@ import { useModal } from "@contexts/Modal.context";
 import type { Theme as MzTheme } from "@emotion/react";
 import { usePrefersDark } from "@hooks/usePrefersDark";
 import { useAppStore } from "@hooks/useStores";
+import {
+  type AppLocale,
+  localeNativeNames,
+  supportedLocales
+} from "@mutualzz/i18n";
 import type { ThemeType } from "@mutualzz/types";
 import {
   baseDarkTheme,
@@ -16,7 +21,9 @@ import {
   Box,
   type BoxProps,
   Divider,
+  Option,
   Paper,
+  Select,
   Stack,
   Switch,
   Typography,
@@ -29,6 +36,7 @@ import {
   TrashIcon
 } from "@phosphor-icons/react";
 import { IconButton } from "@renderer/components/IconButton";
+import { getPreferredLocale, setPreferredLocale } from "@renderer/i18n";
 import { Theme } from "@stores/objects/Theme";
 import { useMutation } from "@tanstack/react-query";
 import { getAdaptiveIcon } from "@utils/icons";
@@ -41,6 +49,7 @@ import {
   useRef,
   useState
 } from "react";
+import { useTranslation } from "react-i18next";
 import { VirtuosoGrid } from "react-virtuoso";
 import { Tooltip } from "@components/Tooltip";
 
@@ -110,10 +119,15 @@ const VirtuosoGridList = forwardRef<HTMLDivElement, BoxProps>((props, ref) => (
 const VirtuosoGridItem = (props: BoxProps) => <Box {...props} py={1} />;
 
 export const AppAppearanceSettings = observer(() => {
+  const { t } = useTranslation("settings");
+  const { t: tCommon } = useTranslation("common");
   const app = useAppStore();
   const { openModal } = useModal();
   const { theme: currentTheme, changeTheme, type: currentType } = useTheme();
   const prefersDark = usePrefersDark();
+  const [preferredLocale, setPreferredLocaleState] = useState<
+    AppLocale | "system"
+  >(() => getPreferredLocale() ?? "system");
 
   // Use ref for icons to avoid unnecessary re-renders
   const iconsRef = useRef<Map<string, ThemeWithIcon<Theme>>>(new Map());
@@ -232,73 +246,73 @@ export const AppAppearanceSettings = observer(() => {
     ) =>
     (index: number) => {
       const theme = themes[index];
-      const description = theme.description || "No description";
+      const description = theme.description || t("appearance.noDescription");
       return (
         <Tooltip
-          key={`${theme.id}-top`}
-          title={theme.name}
+          key={theme.id}
+          title={
+            <>
+              {theme.name}
+              <br />
+              {description}
+            </>
+          }
           typographyProps={{ level: "body-sm" }}
           placement="top"
         >
-          <Tooltip
-            key={`${theme.id}-bottom`}
-            title={description}
-            placement="bottom"
+          <Box
+            position="relative"
+            onMouseEnter={() => setFocusedTheme?.(theme.id)}
+            onMouseLeave={() => setFocusedTheme?.("")}
+            onFocus={() => setFocusedTheme?.(theme.id)}
           >
-            <Box
-              position="relative"
-              onMouseEnter={() => setFocusedTheme?.(theme.id)}
-              onMouseLeave={() => setFocusedTheme?.("")}
-              onFocus={() => setFocusedTheme?.(theme.id)}
-            >
-              {onDelete &&
-                (focusedThemeId === theme.id ||
-                  currentTheme.id === theme.id) && (
-                  <IconButton
-                    onClick={() => onDelete(theme.id)}
-                    css={{
-                      position: "absolute",
-                      bottom: -3,
-                      right: -3,
-                      zIndex: 1
-                    }}
-                    color="danger"
-                    size={12}
-                    disabled={isDeleting}
-                  >
-                    <TrashIcon weight="fill" />
-                  </IconButton>
-                )}
-              <ImageBlob
-                src={colorOrGradientToDataUrl(theme.colors.background)}
-                onClick={() => handleThemeChange(theme)}
-                current={
-                  theme.id === currentTheme.id && currentType === theme.type
-                }
-                onMouseEnter={() => setFocusedTheme?.(theme.id)}
-              />
-              {theme.id === currentTheme.id && currentType === theme.type && (
-                <Stack
-                  position="absolute"
-                  top={-1}
-                  right={-2}
-                  alignItems="center"
-                  border={`2px solid ${currentTheme.colors.surface}`}
-                  justifyContent="center"
-                  fontSize="0.75rem"
-                  width="1.5rem"
-                  height="1.5rem"
-                  borderRadius="50%"
+            {onDelete &&
+              (focusedThemeId === theme.id ||
+                currentTheme.id === theme.id) && (
+                <IconButton
+                  onClick={() => onDelete(theme.id)}
                   css={{
-                    background: currentTheme.colors.primary,
-                    pointerEvents: "none"
+                    position: "absolute",
+                    bottom: -3,
+                    right: -3,
+                    zIndex: 1
                   }}
+                  color="danger"
+                  size={12}
+                  disabled={isDeleting}
                 >
-                  <CheckIcon color={currentTheme.typography.colors.primary} />
-                </Stack>
+                  <TrashIcon weight="fill" />
+                </IconButton>
               )}
-            </Box>
-          </Tooltip>
+            <ImageBlob
+              src={colorOrGradientToDataUrl(theme.colors.background)}
+              onClick={() => handleThemeChange(theme)}
+              current={
+                theme.id === currentTheme.id && currentType === theme.type
+              }
+              onMouseEnter={() => setFocusedTheme?.(theme.id)}
+            />
+            {theme.id === currentTheme.id && currentType === theme.type && (
+              <Stack
+                position="absolute"
+                top={-1}
+                right={-2}
+                alignItems="center"
+                border={`2px solid ${currentTheme.colors.surface}`}
+                justifyContent="center"
+                fontSize="0.75rem"
+                width="1.5rem"
+                height="1.5rem"
+                borderRadius="50%"
+                css={{
+                  background: currentTheme.colors.primary,
+                  pointerEvents: "none"
+                }}
+              >
+                <CheckIcon color={currentTheme.typography.colors.primary} />
+              </Stack>
+            )}
+          </Box>
         </Tooltip>
       );
     };
@@ -316,7 +330,7 @@ export const AppAppearanceSettings = observer(() => {
           key={`${icon.theme.id}-icon`}
           placement="top"
           typographyProps={{ level: "body-sm" }}
-          title={`${icon.theme.name} Icon`}
+          title={t("appearance.themeIcon", { name: icon.theme.name })}
         >
           <Box
             position="relative"
@@ -364,6 +378,39 @@ export const AppAppearanceSettings = observer(() => {
         spacing={2.5}
         borderRadius={10}
       >
+        <Stack direction="column" spacing={0.5}>
+          <Typography fontWeight="bold" level="body-lg">
+            {tCommon("language.title")}
+          </Typography>
+          <Typography level="body-sm" textColor="muted">
+            {tCommon("language.description")}
+          </Typography>
+        </Stack>
+        <Select
+          value={preferredLocale}
+          onValueChange={(value) => {
+            if (typeof value !== "string") return;
+            const next = value as AppLocale | "system";
+            setPreferredLocaleState(next);
+            setPreferredLocale(next);
+          }}
+        >
+          <Option value="system">{tCommon("language.systemDefault")}</Option>
+          {supportedLocales.map((locale) => (
+            <Option key={locale} value={locale}>
+              {localeNativeNames[locale]}
+            </Option>
+          ))}
+        </Select>
+      </Paper>
+      <Paper
+        direction="column"
+        py={2.5}
+        px={4}
+        variant="outlined"
+        spacing={2.5}
+        borderRadius={10}
+      >
         <Stack
           justifyContent="space-between"
           spacing={1.25}
@@ -371,9 +418,12 @@ export const AppAppearanceSettings = observer(() => {
         >
           <Stack spacing={1.25} alignItems="center">
             <Typography fontWeight="bold" level="body-lg">
-              Themes
+              {t("appearance.themes")}
             </Typography>
-            <Tooltip content="Create Custom Theme" placement="top">
+            <Tooltip
+              content={t("appearance.createCustomTheme")}
+              placement="top"
+            >
               <IconButton
                 variant="soft"
                 onClick={() =>
@@ -386,7 +436,7 @@ export const AppAppearanceSettings = observer(() => {
             </Tooltip>
           </Stack>
           <Switch
-            label="Prefer Embossed Style"
+            label={t("appearance.preferEmbossed")}
             color="primary"
             checked={app.settings?.preferEmbossed}
             onClick={() => app.settings?.togglePreferEmbossed()}
@@ -395,7 +445,7 @@ export const AppAppearanceSettings = observer(() => {
         <Stack direction="column">
           <Divider lineColor="muted" inset="half-start">
             <Typography fontWeight="bold" level="body-sm">
-              Default Themes
+              {t("appearance.defaultThemes")}
             </Typography>
           </Divider>
           <Stack style={gridStyles} display="grid">
@@ -407,7 +457,7 @@ export const AppAppearanceSettings = observer(() => {
               )(idx)
             )}
             <Tooltip
-              title="Sync with System"
+              title={t("appearance.syncWithSystem")}
               typographyProps={{ level: "body-sm" }}
               placement="top"
             >
@@ -453,7 +503,7 @@ export const AppAppearanceSettings = observer(() => {
           <Stack direction="column">
             <Divider lineColor="muted" inset="half-start">
               <Typography fontWeight="bold" level="body-sm">
-                Your Themes
+                {t("appearance.yourThemes")}
               </Typography>
             </Divider>
             <VirtuosoGrid
@@ -488,12 +538,12 @@ export const AppAppearanceSettings = observer(() => {
             }}
           >
             <Typography fontWeight="bold" level="body-sm">
-              Color Themes
+              {t("appearance.colorThemes")}
             </Typography>
           </Divider>
           <Stack direction="column" spacing={2.5}>
             <Typography level="body-xs" fontWeight="bold">
-              Normal
+              {t("appearance.normal")}
             </Typography>
             <VirtuosoGrid
               style={{ height: "10rem", width: "100%" }}
@@ -512,7 +562,7 @@ export const AppAppearanceSettings = observer(() => {
           </Stack>
           <Stack direction="column" spacing={2.5}>
             <Typography level="body-xs" fontWeight="bold">
-              Gradient
+              {t("appearance.gradient")}
             </Typography>
             <VirtuosoGrid
               style={{ height: "10rem", width: "100%" }}
@@ -541,12 +591,12 @@ export const AppAppearanceSettings = observer(() => {
           spacing={2.5}
         >
           <Typography level="body-lg" fontWeight="bolder">
-            Icons
+            {t("appearance.icons")}
           </Typography>
           <Stack direction="column" spacing={2.5}>
             <Divider inset="half-start" lineColor="muted">
               <Typography level="body-sm" fontWeight="bold">
-                Default Icons
+                {t("appearance.defaultIcons")}
               </Typography>
             </Divider>
             <VirtuosoGrid
@@ -570,7 +620,7 @@ export const AppAppearanceSettings = observer(() => {
                       typographyProps={{
                         level: "body-sm"
                       }}
-                      title="Adapt with current theme"
+                      title={t("appearance.adaptWithCurrentTheme")}
                       placement="top"
                     >
                       <Box
@@ -628,7 +678,7 @@ export const AppAppearanceSettings = observer(() => {
             <Stack direction="column" spacing={2.5}>
               <Divider inset="half-start" lineColor="muted">
                 <Typography level="body-sm" fontWeight="bold">
-                  Your Icons
+                  {t("appearance.yourIcons")}
                 </Typography>
               </Divider>
               <VirtuosoGrid
@@ -664,15 +714,14 @@ export const AppAppearanceSettings = observer(() => {
           <Stack justifyContent="space-between" alignItems="center">
             <Stack direction="column" spacing={0.5}>
               <Typography fontWeight="bold" level="body-lg">
-                Spellcheck
+                {t("appearance.spellcheck")}
               </Typography>
               <Typography level="body-sm" textColor="muted">
-                Underline misspelled words and show suggestions in the
-                right-click menu
+                {t("appearance.spellcheckDescription")}
               </Typography>
             </Stack>
             <Switch
-              label="Spellcheck"
+              label={t("appearance.spellcheck")}
               color="primary"
               checked={app.settings?.spellcheckEnabled}
               onClick={() => app.settings?.toggleSpellcheckEnabled()}

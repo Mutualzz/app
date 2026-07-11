@@ -8,6 +8,7 @@ import { useModal } from "@contexts/Modal.context";
 import { HttpException } from "@mutualzz/types";
 import { InputWithLabel } from "@components/InputWithLabel";
 import { toast } from "react-toastify";
+import { useTranslation } from "react-i18next";
 
 type ChangePasswordErrors = {
   currentPassword: string | undefined;
@@ -16,6 +17,8 @@ type ChangePasswordErrors = {
 };
 
 export const ChangePassword = observer(() => {
+  const { t } = useTranslation("settings");
+  const { t: tCommon } = useTranslation("common");
   const app = useAppStore();
   const { closeModal } = useModal();
 
@@ -40,7 +43,7 @@ export const ChangePassword = observer(() => {
         confirmNewPassword: values.confirmNewPassword
       }),
     onSuccess: () => {
-      toast.success("Your password was changed successfully");
+      toast.success(t("account.changePasswordSuccess"));
       closeModal();
     },
     onError: (err: HttpException) => {
@@ -66,12 +69,12 @@ export const ChangePassword = observer(() => {
       width="30vw"
     >
       <Typography level="h5" fontWeight="bold">
-        Change Password
+        {t("account.changePassword")}
       </Typography>
       <Stack direction="column" spacing={5}>
         <InputWithLabel
           name="currentPassword"
-          label="Current Password"
+          label={t("account.currentPassword")}
           type="password"
           onChange={(e) =>
             setValues((prevValues) => ({
@@ -85,7 +88,7 @@ export const ChangePassword = observer(() => {
         />
         <InputWithLabel
           name="newPassword"
-          label="New Password"
+          label={t("account.newPassword")}
           type="password"
           onChange={(e) =>
             setValues((prevValues) => ({
@@ -99,7 +102,7 @@ export const ChangePassword = observer(() => {
         />
         <InputWithLabel
           name="confirmNewPassword"
-          label="Confirm New Password"
+          label={t("account.confirmNewPassword")}
           type="password"
           onChange={(e) =>
             setValues((prevValues) => ({
@@ -121,7 +124,7 @@ export const ChangePassword = observer(() => {
           expand
           size="lg"
         >
-          Cancel
+          {tCommon("cancel")}
         </Button>
         <Button
           color="success"
@@ -130,7 +133,7 @@ export const ChangePassword = observer(() => {
           expand
           size="lg"
         >
-          Change
+          {t("account.change")}
         </Button>
       </Stack>
     </Paper>

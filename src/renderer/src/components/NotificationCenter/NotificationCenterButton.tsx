@@ -15,6 +15,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { CheckIcon, TrayIcon, XIcon } from "@phosphor-icons/react";
 import { observer } from "mobx-react-lite";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 type NotificationTab = "unreads" | "requests" | "mentions";
 
@@ -47,18 +48,21 @@ const MarkAsReadButton = ({
 }: {
   onClick: (e: React.MouseEvent) => void;
   disabled?: boolean;
-}) => (
-  <IconButton
-    size={14}
-    padding={4}
-    variant="plain"
-    disabled={disabled}
-    onClick={onClick}
-    title="Mark as read"
-  >
-    <CheckIcon />
-  </IconButton>
-);
+}) => {
+  const { t } = useTranslation("chat");
+  return (
+    <IconButton
+      size={14}
+      padding={4}
+      variant="plain"
+      disabled={disabled}
+      onClick={onClick}
+      title={t("contextMenu.markAsRead")}
+    >
+      <CheckIcon />
+    </IconButton>
+  );
+};
 
 const NotificationBadge = ({ count }: { count: number }) => {
   const { theme } = useTheme();
@@ -85,6 +89,7 @@ const NotificationBadge = ({ count }: { count: number }) => {
 
 const AcceptedNotificationRow = observer(
   ({ notification }: { notification: AcceptedFriendNotification }) => {
+    const { t } = useTranslation("common");
     const app = useAppStore();
     const user = app.users.get(notification.userId);
     if (!user) return null;
@@ -104,7 +109,7 @@ const AcceptedNotificationRow = observer(
             level="body-sm"
             css={{ overflow: "hidden", textOverflow: "ellipsis" }}
           >
-            <b>{user.displayName}</b> accepted your friend request
+            {t("notifications.acceptedFriend", { name: user.displayName })}
           </Typography>
         </Stack>
         <IconButton
@@ -127,6 +132,8 @@ const MENTION_REGEX = /<@!?(\d+)>|<@&(\d+)>|@everyone|@here/g;
 const PREVIEW_MAX_CHARS = 80;
 
 const UnreadDMChannelItem = observer(({ channel }: { channel: Channel }) => {
+  const { t } = useTranslation("common");
+  const { t: tChat } = useTranslation("chat");
   const app = useAppStore();
   const navigate = useNavigate();
   const readState = app.readStates.get(channel.id);
@@ -138,13 +145,13 @@ const UnreadDMChannelItem = observer(({ channel }: { channel: Channel }) => {
 
   const title = (() => {
     if (channel.type === ChannelType.DM)
-      return recipient?.displayName ?? "Deleted User";
+      return recipient?.displayName ?? tChat("deletedUser");
 
     if (channel.name) return channel.name;
 
     const names = recipients.map((u) => u.displayName).filter(Boolean);
 
-    if (!names.length) return "Group DM Channel";
+    if (!names.length) return t("notifications.groupDmChannel");
     if (names.length <= 2) return names.join(", ");
     return `${names.slice(0, 2).join(", ")}, +${names.length - 2}`;
   })();
@@ -214,7 +221,10 @@ const UnreadDMChannelItem = observer(({ channel }: { channel: Channel }) => {
             }}
           >
             {authorName && <b>{authorName}: </b>}
-            {preview || (message ? "Sent an attachment" : "No messages yet")}
+            {preview ||
+              (message
+                ? t("notifications.sentAttachment")
+                : t("notifications.noMessagesYet"))}
           </Typography>
         </Stack>
       </Stack>
@@ -233,6 +243,7 @@ const UnreadDMChannelItem = observer(({ channel }: { channel: Channel }) => {
 });
 
 const MentionedChannelItem = observer(({ channel }: { channel: Channel }) => {
+  const { t } = useTranslation("common");
   const app = useAppStore();
   const navigate = useNavigate();
   const space = channel.space;
@@ -299,7 +310,7 @@ const MentionedChannelItem = observer(({ channel }: { channel: Channel }) => {
               }}
             >
               {authorName && <b>{authorName}: </b>}
-              {preview || "Sent an attachment"}
+              {preview || t("notifications.sentAttachment")}
             </Typography>
           ) : (
             <Typography
@@ -311,7 +322,7 @@ const MentionedChannelItem = observer(({ channel }: { channel: Channel }) => {
                 textOverflow: "ellipsis"
               }}
             >
-              You were mentioned
+              {t("notifications.youWereMentioned")}
             </Typography>
           )}
         </Stack>
@@ -331,6 +342,8 @@ const MentionedChannelItem = observer(({ channel }: { channel: Channel }) => {
 });
 
 export const NotificationCenterButton = observer(() => {
+  const { t } = useTranslation("common");
+  const { t: tChat } = useTranslation("chat");
   const app = useAppStore();
   const { theme } = useTheme();
   const [tab, setTab] = useState<NotificationTab>("unreads");
@@ -438,7 +451,7 @@ export const NotificationCenterButton = observer(() => {
               variant={activeTab === "unreads" ? "soft" : "plain"}
               onClick={selectTab("unreads")}
             >
-              Unreads
+              {t("notifications.unreads")}
             </Button>
 
             <Button
@@ -446,7 +459,7 @@ export const NotificationCenterButton = observer(() => {
               variant={activeTab === "mentions" ? "soft" : "plain"}
               onClick={selectTab("mentions")}
             >
-              Mentions
+              {t("notifications.mentions")}
             </Button>
             {hasRequests && (
               <Button
@@ -454,7 +467,7 @@ export const NotificationCenterButton = observer(() => {
                 variant={activeTab === "requests" ? "soft" : "plain"}
                 onClick={selectTab("requests")}
               >
-                Requests
+                {t("notifications.requests")}
               </Button>
             )}
           </Stack>
@@ -465,7 +478,7 @@ export const NotificationCenterButton = observer(() => {
             disabled={!canMarkAllAsRead}
             onClick={markAllAsRead}
           >
-            Mark all as read
+            {t("notifications.markAllAsRead")}
           </Button>
         </Stack>
 
@@ -488,7 +501,7 @@ export const NotificationCenterButton = observer(() => {
                 level="body-sm"
                 css={{ textAlign: "center", padding: "24px 0" }}
               >
-                No unread messages
+                {t("notifications.noUnreads")}
               </Typography>
             ))}
 
@@ -497,7 +510,7 @@ export const NotificationCenterButton = observer(() => {
               {incoming.length > 0 && (
                 <Stack direction="column" spacing={1} mb={1}>
                   <Typography level="label-sm" textColor="muted">
-                    Received - {incoming.length}
+                    {tChat("friends.receivedCount", { count: incoming.length })}
                   </Typography>
                   {incoming.map((relationship) => (
                     <UserItem
@@ -510,7 +523,7 @@ export const NotificationCenterButton = observer(() => {
               {accepted.length > 0 && (
                 <Stack direction="column" spacing={1}>
                   <Typography level="label-sm" textColor="muted">
-                    Recently Accepted
+                    {t("notifications.recentlyAccepted")}
                   </Typography>
                   {accepted.map((notification) => (
                     <AcceptedNotificationRow
@@ -534,7 +547,7 @@ export const NotificationCenterButton = observer(() => {
                 level="body-sm"
                 css={{ textAlign: "center", padding: "24px 0" }}
               >
-                No new mentions
+                {t("notifications.noMentions")}
               </Typography>
             ))}
         </Stack>

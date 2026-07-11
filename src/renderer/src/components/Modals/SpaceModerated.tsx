@@ -2,6 +2,7 @@ import { type FC, useEffect } from "react";
 import { useModal } from "@contexts/Modal.context";
 import { Button, Paper, Typography } from "@mutualzz/ui-web";
 import { useAppStore } from "@hooks/useStores";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   type: "muted" | "deafened";
@@ -10,6 +11,7 @@ interface Props {
 export const SpaceModerated: FC<Props> = ({ type }) => {
   const app = useAppStore();
   const { closeModal } = useModal();
+  const { t } = useTranslation("chat");
 
   useEffect(() => {
     if (type !== "muted" && type !== "deafened") closeModal();
@@ -27,15 +29,18 @@ export const SpaceModerated: FC<Props> = ({ type }) => {
       spacing={2.5}
     >
       <Typography level="h5" fontWeight="bold">
-        Space {type === "muted" ? "Muted" : "Deafened"}
+        {type === "muted"
+          ? t("voice.spaceModerated.mutedTitle")
+          : t("voice.spaceModerated.deafenedTitle")}
       </Typography>
       <Typography>
-        This channel has special permissions. To{" "}
-        {type === "muted" ? "speak in it" : "listen in it"}, you'll need
-        someone, like a space moderator or admin to{" "}
-        {type === "muted" ? "unmute" : "undeafen"} you
+        {type === "muted"
+          ? t("voice.spaceModerated.mutedBody")
+          : t("voice.spaceModerated.deafenedBody")}
       </Typography>
-      <Button onClick={() => closeModal()}>Alrighty!</Button>
+      <Button onClick={() => closeModal()}>
+        {t("voice.spaceModerated.dismiss")}
+      </Button>
     </Paper>
   );
 };

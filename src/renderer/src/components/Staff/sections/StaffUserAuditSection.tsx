@@ -6,6 +6,8 @@ import { Stack, Typography } from "@mutualzz/ui-web";
 import { ClockCounterClockwiseIcon } from "@phosphor-icons/react";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import dayjs from "dayjs";
+import type { TFunction } from "i18next";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   userId: string;
@@ -13,44 +15,42 @@ interface Props {
 
 const PAGE_LIMIT = 50;
 
-const actionLabels: Record<string, string> = {
-  "user.disable": "disabled this account",
-  "user.enable": "enabled this account",
-  "user.delete": "soft deleted this account",
-  "user.hard_delete": "hard deleted this account",
-  "user.force_logout": "forced a logout on this account",
-  "user.session_revoke": "revoked a session on this account",
-  "user.profile_update": "updated this account's profile",
-  "user.verify_reminder_sent": "sent a verification reminder to this account",
-  "user.warn": "sent this account a warning",
-  "user.restrict": "temporarily restricted this account",
-  "user.restrict_lift": "lifted a restriction on this account"
+const actionLabelKeys: Record<string, string> = {
+  "user.disable": "auditActions.disabledAccount",
+  "user.enable": "auditActions.enabledAccount",
+  "user.delete": "auditActions.softDeletedAccount",
+  "user.hard_delete": "auditActions.hardDeletedAccount",
+  "user.force_logout": "auditActions.forcedLogout",
+  "user.session_revoke": "auditActions.revokedSession",
+  "user.profile_update": "auditActions.updatedProfile",
+  "user.warn": "auditActions.warnedUser",
+  "user.restrict": "auditActions.restrictedUser",
+  "user.restrict_lift": "auditActions.liftedRestriction",
+  "space.delete": "auditActions.shutDownSpace",
+  "space.lockdown": "auditActions.lockedDownSpace"
 };
 
-const describeAction = (action: string) => {
-  if (actionLabels[action]) return actionLabels[action];
+const describeAction = (action: string, t: TFunction<"staff">) => {
+  if (actionLabelKeys[action]) return t(actionLabelKeys[action]);
 
   const flagMatch = action.match(/^user\.flag\.(.+)\.(grant|revoke)$/);
   if (flagMatch) {
     const [, flag, verb] = flagMatch;
     return verb === "grant"
-      ? `granted the ${flag} flag`
-      : `revoked the ${flag} flag`;
+      ? t("auditActions.grantedFlag", { flag })
+      : t("auditActions.revokedFlag", { flag });
   }
 
   const takedownMatch = action.match(/^content\.takedown\.(.+)$/);
-  if (takedownMatch) return `took down a reported ${takedownMatch[1]}`;
-
-  if (action === "report.view") return "reviewed reported content";
-  if (action === "space.delete") return "shut down a reported space";
-  if (action === "space.lockdown") return "locked down a space";
-  if (action === "space.lockdown_lift") return "lifted a space lockdown";
+  if (takedownMatch)
+    return t("auditActions.tookDownContent", { type: takedownMatch[1] });
 
   return action;
 };
 
 export const StaffUserAuditSection = ({ userId }: Props) => {
   const app = useAppStore();
+  const { t } = useTranslation("staff");
 
   const {
     data,
@@ -77,7 +77,7 @@ export const StaffUserAuditSection = ({ userId }: Props) => {
   if (!isFetching && actions.length === 0) {
     return (
       <Typography level="body-sm" textColor="muted">
-        No staff actions yet
+        {t("user.audit.empty")}
       </Typography>
     );
   }
@@ -103,7 +103,7 @@ export const StaffUserAuditSection = ({ userId }: Props) => {
           <Stack direction="column" spacing={0.1}>
             <Typography level="body-sm">
               <b>{entry.actor.globalName || entry.actor.username}</b>{" "}
-              {describeAction(entry.action)}
+              {describeAction(entry.action, t)}
             </Typography>
             {entry.reason && (
               <Typography level="body-xs" textColor="muted">
@@ -125,7 +125,7 @@ export const StaffUserAuditSection = ({ userId }: Props) => {
           onClick={() => fetchNextPage()}
           css={{ alignSelf: "center", marginTop: "0.5rem" }}
         >
-          {isFetchingNextPage ? "Loading..." : "Load more"}
+          {isFetchingNextPage ? t("home.loading") : t("home.loadMore")}
         </Button>
       )}
     </Stack>

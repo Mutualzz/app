@@ -7,8 +7,11 @@ import { useMutation } from "@tanstack/react-query";
 import { useModal } from "@contexts/Modal.context";
 import { HttpException } from "@mutualzz/types";
 import { InputWithLabel } from "@components/InputWithLabel";
+import { useTranslation } from "react-i18next";
 
 export const DeleteAccount = observer(() => {
+  const { t } = useTranslation("settings");
+  const { t: tCommon } = useTranslation("common");
   const app = useAppStore();
   const { closeModal } = useModal();
   const account = app.account;
@@ -22,13 +25,13 @@ export const DeleteAccount = observer(() => {
     mutationFn: () =>
       app.rest.post("/@me/delete", {
         confirmUsername: confirmUsername.trim().toLowerCase(),
-        password,
+        password
       }),
     onSuccess: () => {
       closeModal();
       app.logout();
     },
-    onError: (err: HttpException) => setError(err.message),
+    onError: (err: HttpException) => setError(err.message)
   });
 
   if (!account) return null;
@@ -48,16 +51,17 @@ export const DeleteAccount = observer(() => {
       width="30vw"
     >
       <Typography level="h5" fontWeight="bold" color="danger">
-        Delete Account
+        {t("account.deleteAccount")}
       </Typography>
       <Typography level="body-sm">
-        This permanently deactivates your account. Type your username and
-        password to confirm.
+        {t("account.deleteAccountConfirm")}
       </Typography>
       <Stack direction="column" spacing={5}>
         <InputWithLabel
           name="confirmUsername"
-          label={`Type ${account.username} to confirm`}
+          label={t("account.typeUsernameToConfirm", {
+            username: account.username
+          })}
           type="text"
           onChange={(e) => setConfirmUsername(e.target.value)}
           value={confirmUsername}
@@ -66,7 +70,7 @@ export const DeleteAccount = observer(() => {
         />
         <InputWithLabel
           name="password"
-          label="Password"
+          label={t("account.password")}
           type="password"
           onChange={(e) => setPassword(e.target.value)}
           value={password}
@@ -87,7 +91,7 @@ export const DeleteAccount = observer(() => {
           expand
           size="lg"
         >
-          Cancel
+          {tCommon("cancel")}
         </Button>
         <Button
           color="danger"
@@ -96,7 +100,9 @@ export const DeleteAccount = observer(() => {
           expand
           size="lg"
         >
-          {isPending ? "Deleting..." : "Delete account"}
+          {isPending
+            ? t("account.deleting")
+            : t("account.deleteAccountAction")}
         </Button>
       </Stack>
     </Paper>

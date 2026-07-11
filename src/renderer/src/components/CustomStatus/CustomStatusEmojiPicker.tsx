@@ -9,6 +9,7 @@ import { getEmoji } from "@utils/emojis/emojis";
 import { CustomStatusEmoji } from "./CustomStatusEmoji";
 import { SmileyIcon } from "@phosphor-icons/react";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   value: PresenceActivityEmoji | null;
@@ -16,6 +17,7 @@ interface Props {
 }
 
 export const CustomStatusEmojiPicker = ({ value, onChange }: Props) => {
+  const { t } = useTranslation("common");
   const [activeTab, setActiveTab] = useState<"emoji" | "gifs" | "stickers">(
     "emoji"
   );
@@ -57,8 +59,10 @@ export const CustomStatusEmojiPicker = ({ value, onChange }: Props) => {
         <IconButton
           variant="plain"
           color={value ? "primary" : "neutral"}
-          title={value ? "Change status emoji" : "Add status emoji"}
-          aria-label="Choose status emoji"
+          title={
+            value ? t("customStatus.changeEmoji") : t("customStatus.addEmoji")
+          }
+          aria-label={t("customStatus.chooseEmoji")}
           css={{
             width: "2.25rem",
             height: "2.25rem",

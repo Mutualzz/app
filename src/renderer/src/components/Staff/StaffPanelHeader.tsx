@@ -5,6 +5,7 @@ import { Stack, Typography } from "@mutualzz/ui-web";
 import { ArrowLeftIcon } from "@phosphor-icons/react";
 import { useNavigate } from "@tanstack/react-router";
 import type { ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   title: string;
@@ -23,9 +24,11 @@ export const StaffPanelHeader = ({
 }: Props) => {
   const app = useAppStore();
   const navigate = useNavigate();
+  const { t } = useTranslation("staff");
   const embossed = app.settings?.preferEmbossed;
 
-  const label = backLabel ?? (backTo === "home" ? "Exit" : "Staff Panel");
+  const label =
+    backLabel ?? (backTo === "home" ? t("exit") : t("title"));
 
   const handleBack = () => {
     if (backTo === "home") {

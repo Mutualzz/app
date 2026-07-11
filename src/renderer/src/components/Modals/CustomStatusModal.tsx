@@ -23,16 +23,17 @@ import type { PresenceActivityEmoji } from "@mutualzz/types";
 import { CaretDownIcon, XIcon } from "@phosphor-icons/react";
 import { observer } from "mobx-react-lite";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 export const CUSTOM_STATUS_MODAL_ID = "custom-status";
 
 const MAX_CUSTOM_STATUS_LENGTH = 128;
-const STATUS_PLACEHOLDER = "Enter your status...";
 
 const toDurationValue = (durationMs: number | null) =>
   durationMs == null ? "forever" : String(durationMs);
 
 export const CustomStatusModal = observer(() => {
+  const { t } = useTranslation("common");
   const app = useAppStore();
   const { theme } = useTheme();
   const { closeModal } = useModal();
@@ -96,14 +97,14 @@ export const CustomStatusModal = observer(() => {
         pb={1.25}
       >
         <Typography level="h5" fontWeight={700}>
-          Set your status
+          {t("customStatus.title")}
         </Typography>
         <IconButton
           variant="plain"
           color="neutral"
           size="sm"
           onClick={() => closeModal(CUSTOM_STATUS_MODAL_ID)}
-          aria-label="Close"
+          aria-label={t("close")}
           css={{ opacity: 0.7 }}
         >
           <XIcon size={18} />
@@ -115,7 +116,7 @@ export const CustomStatusModal = observer(() => {
 
         <Stack direction="column" spacing={0.75}>
           <Typography level="body-sm" fontWeight={700}>
-            Status
+            {t("customStatus.label")}
           </Typography>
 
           <Stack
@@ -136,7 +137,7 @@ export const CustomStatusModal = observer(() => {
             <CustomStatusEmojiPicker value={emoji} onChange={setEmoji} />
             <Input
               variant="plain"
-              placeholder={STATUS_PLACEHOLDER}
+              placeholder={t("customStatus.placeholder")}
               fullWidth
               color="neutral"
               autoComplete="off"
@@ -183,7 +184,7 @@ export const CustomStatusModal = observer(() => {
         >
           {STATUS_DURATION_OPTIONS.map((option) => (
             <Option
-              key={option.label}
+              key={`${option.labelKey}:${option.count ?? "forever"}`}
               value={toDurationValue(option.durationMs)}
             >
               {formatCustomStatusClearLabel(option.durationMs)}
@@ -197,7 +198,7 @@ export const CustomStatusModal = observer(() => {
           size="md"
           css={{ minWidth: "6rem", flexShrink: 0 }}
         >
-          Save
+          {t("save")}
         </Button>
       </Stack>
     </Paper>

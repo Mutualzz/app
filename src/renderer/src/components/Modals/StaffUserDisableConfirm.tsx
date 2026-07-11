@@ -6,6 +6,7 @@ import { Button, Stack, Textarea, Typography } from "@mutualzz/ui-web";
 import { useModal } from "@contexts/Modal.context";
 import type { APIPrivateUser } from "@mutualzz/types";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 
 interface Props {
@@ -19,6 +20,8 @@ export const StaffUserDisableConfirm = observer(
   ({ userId, username, disable, onSuccess }: Props) => {
     const app = useAppStore();
     const { closeModal } = useModal();
+    const { t } = useTranslation("staff");
+    const { t: tCommon } = useTranslation("common");
     const [reason, setReason] = useState("");
 
     const { mutate: setDisabled, isPending } = useMutation({
@@ -34,7 +37,9 @@ export const StaffUserDisableConfirm = observer(
       },
       onError: (err) => {
         toast.error(
-          err instanceof Error ? err.message : "Failed to update user"
+          err instanceof Error
+            ? err.message
+            : t("user.actions.errors.updateUser")
         );
       }
     });
@@ -49,32 +54,35 @@ export const StaffUserDisableConfirm = observer(
         spacing={2.5}
       >
         <Typography level="h5" fontWeight="bold">
-          {disable ? "Disable Account" : "Enable Account"}
+          {disable
+            ? t("user.modals.disable.title")
+            : t("user.modals.disable.enableTitle")}
         </Typography>
         <Typography>
-          Are you sure you want to {disable ? "disable" : "re-enable"}{" "}
-          <b>@{username}</b>&apos;s account?
-          {disable &&
-            " They will be signed out and unable to log back in until re-enabled."}
+          {disable
+            ? t("user.modals.disable.bodyDisable", { username })
+            : t("user.modals.disable.bodyEnable", { username })}
         </Typography>
         <Stack direction="column" spacing={1.25}>
           <Typography fontWeight="bold">
-            Reason {disable ? "(required)" : "(optional)"}
+            {disable
+              ? t("user.modals.reasonRequired")
+              : t("user.modals.reasonOptional")}
           </Typography>
           <Textarea
             value={reason}
             onChange={(e) => setReason(e.target.value)}
             placeholder={
               disable
-                ? "Explain why this account is being disabled"
-                : "Add context for the audit log"
+                ? t("user.modals.disable.placeholder")
+                : t("user.modals.placeholderAudit")
             }
             rows={3}
           />
         </Stack>
         <Stack spacing={1.25} direction="row">
           <Button color="neutral" expand size="lg" onClick={() => closeModal()}>
-            Cancel
+            {tCommon("cancel")}
           </Button>
           <Button
             color="danger"
@@ -83,7 +91,9 @@ export const StaffUserDisableConfirm = observer(
             disabled={isPending || (disable && !reason.trim())}
             size="lg"
           >
-            {disable ? "Disable Account" : "Enable Account"}
+            {disable
+              ? t("user.modals.disable.title")
+              : t("user.modals.disable.enableTitle")}
           </Button>
         </Stack>
       </Paper>

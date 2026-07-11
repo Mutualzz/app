@@ -14,6 +14,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { observer } from "mobx-react-lite";
 import { type ChangeEvent, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 
 interface Props {
@@ -27,6 +28,7 @@ const regex = import.meta.env.DEV
   : /^(?:(?:https?:\/\/)?(?:www\.)?mutualzz\.com\/invite\/)?([A-Za-z0-9_-]{8,})$/;
 
 export const SpaceJoin = observer(({ setCreating }: Props) => {
+  const { t } = useTranslation("auth");
   const app = useAppStore();
   const navigate = useNavigate();
   const [inviteLink, setInviteLink] = useState("");
@@ -79,7 +81,7 @@ export const SpaceJoin = observer(({ setCreating }: Props) => {
     mutationFn: async () => {
       const match = inviteLink.match(regex);
       if (!match) {
-        setError("Invalid invite link format.");
+        setError(t("onboarding.joinSpace.inviteLinkInvalid"));
         return null;
       }
 
@@ -109,7 +111,7 @@ export const SpaceJoin = observer(({ setCreating }: Props) => {
 
   const handleJoin = () => {
     if (inviteLink.trim() === "") {
-      setError("Invite link cannot be empty.");
+      setError(t("onboarding.joinSpace.inviteLinkEmpty"));
       return;
     }
 
@@ -143,10 +145,10 @@ export const SpaceJoin = observer(({ setCreating }: Props) => {
         mb={10}
       >
         <Typography level="h5" fontWeight="bold">
-          Join a space
+          {t("onboarding.joinSpace.title")}
         </Typography>
         <Typography level="body-sm">
-          Enter an invite below to join an existing space
+          {t("onboarding.joinSpace.description")}
         </Typography>
       </Stack>
 
@@ -156,7 +158,7 @@ export const SpaceJoin = observer(({ setCreating }: Props) => {
         width="100%"
       >
         <Typography fontWeight={500} level={{ xs: "body-sm", sm: "body-md" }}>
-          Invite Link{" "}
+          {t("onboarding.joinSpace.inviteLink")}{" "}
           <Typography variant="plain" color="danger">
             *
           </Typography>
@@ -169,8 +171,9 @@ export const SpaceJoin = observer(({ setCreating }: Props) => {
         )}
       </Stack>
       <Stack direction="column" mt={5}>
-        <Typography>Invites should look like:</Typography>
-        <Typography textColor="muted">fJ2XlEuD</Typography> or{" "}
+        <Typography>{t("onboarding.joinSpace.examplesIntro")}</Typography>
+        <Typography textColor="muted">fJ2XlEuD</Typography>{" "}
+        {t("onboarding.joinSpace.or")}{" "}
         <Typography textColor="muted">{exampleLink}</Typography>
       </Stack>
       <Stack
@@ -192,12 +195,12 @@ export const SpaceJoin = observer(({ setCreating }: Props) => {
             variant="solid"
             color="success"
           >
-            Join Space
+            {t("onboarding.joinSpace.joinSpace")}
           </Button>
         </ButtonGroup>
       </Stack>
       <Stack mt={2.5} alignItems="center" spacing={2}>
-        <Typography>You prefer to create your own space?</Typography>
+        <Typography>{t("onboarding.joinSpace.preferCreate")}</Typography>
         <Link
           variant="plain"
           color="success"
@@ -205,7 +208,7 @@ export const SpaceJoin = observer(({ setCreating }: Props) => {
           underline="always"
           disabled={isGettingInvite || isJoining}
         >
-          Back to creating
+          {t("onboarding.joinSpace.backToCreating")}
         </Link>
       </Stack>
     </AnimatedPaper>

@@ -9,18 +9,20 @@ import {
 } from "@mutualzz/ui-core";
 import { Stack, Typography } from "@mutualzz/ui-web";
 import { observer } from "mobx-react-lite";
+import { useTranslation } from "react-i18next";
 import { useAppStore } from "@hooks/useStores";
 import { InfoIcon } from "@phosphor-icons/react";
 
 export const ThemeCreatorColorsAdaptive = observer(() => {
+  const { t } = useTranslation("settings");
   const app = useAppStore();
   const { values, setValues } = app.themeCreator;
 
   return (
     <Stack direction="column" p={4} spacing={5}>
       <GoogleFontPicker
-        label="App font"
-        description="Applies across the app when this theme is active. Fonts load on demand."
+        label={t("themeCreator.colors.appFont")}
+        description={t("themeCreator.colors.appFontDescription")}
         allowClear={false}
         fontOwnerId={app.account?.id}
         value={
@@ -39,9 +41,9 @@ export const ThemeCreatorColorsAdaptive = observer(() => {
       />
       <InputWithLabel
         type="color"
-        label="Base color"
+        label={t("themeCreator.colors.baseColor")}
         name="baseColor"
-        description="The base color of the app"
+        description={t("themeCreator.colors.baseColorDescription")}
         required
         value={values.colors.background}
         allowGradient
@@ -75,11 +77,11 @@ export const ThemeCreatorColorsAdaptive = observer(() => {
       />
       <InputWithLabel
         type="color"
-        label="Primary Color"
+        label={t("themeCreator.colors.primary")}
         name="primaryColor"
         description={
           <>
-            Usually used to indicate the primary action or important elements{" "}
+            {t("themeCreator.colors.primaryDescription")}{" "}
             <Typography
               level="body-sm"
               display="inline-flex"
@@ -89,7 +91,7 @@ export const ThemeCreatorColorsAdaptive = observer(() => {
               alignItems="center"
             >
               <InfoIcon weight="fill" />
-              Auto-generated icons derive from this color
+              {t("themeCreator.colors.primaryIconsHint")}
             </Typography>
           </>
         }
@@ -108,11 +110,11 @@ export const ThemeCreatorColorsAdaptive = observer(() => {
       />
       <InputWithLabel
         type="color"
-        label="Base Text Color"
+        label={t("themeCreator.colors.baseText")}
         name="typographyBaseColor"
         description={
           <Stack direction="column" justifyContent="center">
-            The base color for texts{" "}
+            {t("themeCreator.colors.primaryTextDescription")}{" "}
             <Typography
               level="body-sm"
               display="inline-flex"
@@ -121,8 +123,7 @@ export const ThemeCreatorColorsAdaptive = observer(() => {
               spacing={1}
             >
               <InfoIcon weight="fill" />
-              Usually white-ish is used on dark backgrounds, black-ish on light
-              backgrounds
+              {t("themeCreator.colors.primaryTextHint")}
             </Typography>
           </Stack>
         }

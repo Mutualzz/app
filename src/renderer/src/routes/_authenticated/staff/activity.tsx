@@ -8,6 +8,8 @@ import { ClockCounterClockwiseIcon } from "@phosphor-icons/react";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import dayjs from "dayjs";
+import type { TFunction } from "i18next";
+import { useTranslation } from "react-i18next";
 
 export const Route = createFileRoute("/_authenticated/staff/activity")({
   component: StaffActivityRoute
@@ -15,76 +17,79 @@ export const Route = createFileRoute("/_authenticated/staff/activity")({
 
 const PAGE_LIMIT = 50;
 
-const actionVerbs: Record<string, string> = {
-  "user.disable": "disabled",
-  "user.enable": "enabled",
-  "user.delete": "soft deleted",
-  "user.hard_delete": "hard deleted",
-  "user.force_logout": "forced a logout on",
-  "user.session_revoke": "revoked a session on",
-  "user.profile_update": "updated the profile of",
-  "user.verify_reminder_sent": "sent a verification reminder to",
-  "user.warn": "sent a warning to",
-  "user.restrict": "temporarily restricted",
-  "user.restrict_lift": "lifted a restriction on"
+const globalActionKeys: Record<string, string> = {
+  "user.disable": "auditActions.global.disabled",
+  "user.enable": "auditActions.global.enabled",
+  "user.delete": "auditActions.global.softDeleted",
+  "user.hard_delete": "auditActions.global.hardDeleted",
+  "user.force_logout": "auditActions.global.forcedLogout",
+  "user.session_revoke": "auditActions.global.revokedSession",
+  "user.profile_update": "auditActions.global.updatedProfile",
+  "user.warn": "auditActions.global.warned",
+  "user.restrict": "auditActions.global.restricted",
+  "user.restrict_lift": "auditActions.global.liftedRestriction",
+  "space.delete": "auditActions.global.shutDownSpace",
+  "space.lockdown": "auditActions.global.lockedDownSpace"
 };
 
-const formatStaffActionTarget = (entry: APIStaffAction) => {
+const formatStaffActionTarget = (
+  entry: APIStaffAction,
+  t: TFunction<"staff">
+) => {
   if (entry.target) {
     return entry.target.globalName || entry.target.username;
   }
 
   if (entry.action === "user.hard_delete" && entry.reason) {
     const match = entry.reason.match(/^@([^\s(]+)/);
-    if (match) return `@${match[1]} (removed)`;
+    if (match) return t("activity.removedUserNamed", { name: match[1] });
   }
 
-  return "a removed user";
+  return t("activity.removedUser");
 };
 
-const describeGlobalAction = (entry: APIStaffAction) => {
-  const actorName = entry.actor.globalName || entry.actor.username;
-  const targetName = formatStaffActionTarget(entry);
+const describeGlobalAction = (
+  entry: APIStaffAction,
+  t: TFunction<"staff">
+) => {
+  const actor = entry.actor.globalName || entry.actor.username;
+  const target = formatStaffActionTarget(entry, t);
 
-  if (actionVerbs[entry.action]) {
-    return `${actorName} ${actionVerbs[entry.action]} ${targetName}`;
+  if (globalActionKeys[entry.action]) {
+    return t(globalActionKeys[entry.action], { actor, target });
   }
 
   const flagMatch = entry.action.match(/^user\.flag\.(.+)\.(grant|revoke)$/);
   if (flagMatch) {
     const [, flag, verb] = flagMatch;
     return verb === "grant"
-      ? `${actorName} granted the ${flag} flag to ${targetName}`
-      : `${actorName} revoked the ${flag} flag from ${targetName}`;
+      ? t("auditActions.global.grantedFlag", { actor, flag, target })
+      : t("auditActions.global.revokedFlag", { actor, flag, target });
   }
 
   const takedownMatch = entry.action.match(/^content\.takedown\.(.+)$/);
   if (takedownMatch) {
-    return `${actorName} took down a reported ${takedownMatch[1]} from ${targetName}`;
-  }
-
-  if (entry.action === "report.view") {
-    return `${actorName} reviewed reported content${entry.reason ? ` (${entry.reason})` : ""}`;
+    return t("auditActions.global.tookDownContent", {
+      actor,
+      type: takedownMatch[1]
+    });
   }
 
   if (entry.action === "space.delete") {
-    return `${actorName} shut down a reported space`;
+    return t("auditActions.global.shutDownSpace", { actor });
   }
 
   if (entry.action === "space.lockdown") {
-    return `${actorName} locked down a space${entry.reason ? ` (${entry.reason})` : ""}`;
+    return t("auditActions.global.lockedDownSpace", { actor });
   }
 
-  if (entry.action === "space.lockdown_lift") {
-    return `${actorName} lifted a space lockdown`;
-  }
-
-  return `${actorName} performed ${entry.action} on ${targetName}`;
+  return `${actor} ${entry.action} ${target}`;
 };
 
 function StaffActivityRoute() {
   const app = useAppStore();
   const navigate = useNavigate();
+  const { t } = useTranslation("staff");
   const embossed = app.settings?.preferEmbossed;
 
   const { data, isFetching, fetchNextPage, hasNextPage, isFetchingNextPage } =
@@ -115,7 +120,7 @@ function StaffActivityRoute() {
       direction="column"
     >
       <StaffPanelHeader
-        title="Staff Activity"
+        title={t("pages.activity")}
         icon={<ClockCounterClockwiseIcon size={22} weight="fill" />}
       />
 
@@ -139,13 +144,13 @@ function StaffActivityRoute() {
         <Stack direction="column" spacing={0.75} width="100%" maxWidth={640}>
           {isFetching && !isFetchingNextPage && (
             <Typography level="body-sm" textColor="muted" textAlign="center">
-              Loading...
+              {t("home.loading")}
             </Typography>
           )}
 
           {!isFetching && actions.length === 0 && (
             <Typography level="body-sm" textColor="muted" textAlign="center">
-              No staff actions yet
+              {t("activity.empty")}
             </Typography>
           )}
 
@@ -174,7 +179,7 @@ function StaffActivityRoute() {
               />
               <Stack direction="column" spacing={0.1}>
                 <Typography level="body-sm">
-                  {describeGlobalAction(entry)}
+                  {describeGlobalAction(entry, t)}
                 </Typography>
                 {entry.reason && (
                   <Typography level="body-xs" textColor="muted">
@@ -196,7 +201,7 @@ function StaffActivityRoute() {
               onClick={() => fetchNextPage()}
               css={{ alignSelf: "center", marginTop: "0.5rem" }}
             >
-              {isFetchingNextPage ? "Loading..." : "Load more"}
+              {isFetchingNextPage ? t("home.loading") : t("home.loadMore")}
             </Button>
           )}
         </Stack>

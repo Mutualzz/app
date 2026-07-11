@@ -26,6 +26,7 @@ import {
 import { observer } from "mobx-react-lite";
 import { useState } from "react";
 import { useAppStore } from "@renderer/hooks/useStores";
+import { useTranslation } from "react-i18next";
 
 const GIF_URL_PATTERN =
   /^https?:\/\/(klipy\.com\/gifs\/|tenor\.com\/|c\.tenor\.com\/|media\.tenor\.com\/|giphy\.com\/|media\.giphy\.com\/|i\.giphy\.com\/|imgur\.com\/|i\.imgur\.com\/|redgifs\.com\/|.*\.gif(\?\S*)?$)\S*$/i;
@@ -55,6 +56,7 @@ export const PostCard = observer(({ post }: Props) => {
   const { theme } = useTheme();
   const app = useAppStore();
   const { openModal } = useModal();
+  const { t } = useTranslation("chat");
   const [commentsOpen, setCommentsOpen] = useState(false);
 
   const stickerExpressions = post.expressions.filter(
@@ -88,7 +90,7 @@ export const PostCard = observer(({ post }: Props) => {
             <UserAvatar user={post.author} size="md" badge />
             <Stack direction="column" spacing={0}>
               <Typography fontWeight={600}>
-                {post.author?.displayName ?? "Unknown User"}
+                {post.author?.displayName ?? t("unknownUser")}
               </Typography>
               <Tooltip
                 content={dayjs(post.createdAt).format(
@@ -103,7 +105,7 @@ export const PostCard = observer(({ post }: Props) => {
           </Stack>
 
           {post.authorId === app.account?.id && (
-            <Tooltip content="Delete post">
+            <Tooltip content={t("feed.actions.deletePost")}>
               <IconButton
                 size="sm"
                 color="danger"
@@ -117,7 +119,7 @@ export const PostCard = observer(({ post }: Props) => {
           )}
 
           {post.authorId !== app.account?.id && (
-            <Tooltip content="Report post">
+            <Tooltip content={t("feed.actions.reportPost")}>
               <IconButton
                 size="sm"
                 color="danger"
@@ -127,7 +129,7 @@ export const PostCard = observer(({ post }: Props) => {
                     <ReportContentModal
                       targetType="post"
                       targetId={post.id}
-                      contentLabel="this post"
+                      contentLabel={t("feed.report.thisPost")}
                       modalId={`report-post-${post.id}`}
                     />
                   )

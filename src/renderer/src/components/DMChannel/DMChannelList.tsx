@@ -9,8 +9,10 @@ import { DMChannelCreate } from "@components/DMChannel/DMChannelCreate";
 import { PlusIcon } from "@phosphor-icons/react";
 import { Tooltip } from "@components/Tooltip";
 import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 
 export const DMChannelList = observer(() => {
+  const { t } = useTranslation("chat");
   const app = useAppStore();
   const dms = app.channels.dms;
 
@@ -35,8 +37,8 @@ export const DMChannelList = observer(() => {
       p={2.5}
     >
       <Stack direction="row" alignItems="center" justifyContent="space-between">
-        <Typography level="label-xs">Direct Messages</Typography>
-        <Tooltip content="New Message" placement="top">
+        <Typography level="label-xs">{t("dm.title")}</Typography>
+        <Tooltip content={t("dm.newMessage")} placement="top">
           <IconButton
             onClick={() => openModal("create-group-dm", <DMChannelCreate />)}
             size={12}
@@ -52,8 +54,7 @@ export const DMChannelList = observer(() => {
           textAlign="center"
           mt={2}
         >
-          You have no direct messages yet. Start a conversation by clicking
-          "Message" on a user's profile or by creating a new group DM!
+          {t("dm.empty")}
         </Typography>
       )}
       {stableDMs.map((dm) => (

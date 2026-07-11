@@ -7,10 +7,11 @@ import { Paper } from "@components/Paper";
 import { useAppStore } from "@hooks/useStores";
 import { Stack, Typography } from "@mutualzz/ui-web";
 import { Button } from "@components/Button";
-import startCase from "lodash-es/startCase";
+import { channelPageTitleKeys } from "@mutualzz/i18n";
 import { ChannelType } from "@mutualzz/types";
 import { PermissionFlag } from "@mutualzz/bitfield";
 import { Space } from "@stores/objects/Space";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   space: Space;
@@ -45,6 +46,7 @@ const settingsPages: SettingsPages = [
 
 export const ChannelSettingsSidebar = observer(({ space, channel }: Props) => {
   const app = useAppStore();
+  const { t } = useTranslation("space");
   const { currentPage, setCurrentPage } = useChannelSettings();
 
   const shouldShowPage = (page: Page) => {
@@ -90,7 +92,11 @@ export const ChannelSettingsSidebar = observer(({ space, channel }: Props) => {
                   padding={5}
                   disabled={currentPage === page.label}
                 >
-                  {startCase(page.label)}
+                  {t(
+                    channelPageTitleKeys[
+                      page.label as keyof typeof channelPageTitleKeys
+                    ]
+                  )}
                 </Button>
               )
             )

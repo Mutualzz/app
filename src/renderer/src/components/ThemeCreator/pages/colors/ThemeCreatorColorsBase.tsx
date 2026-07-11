@@ -8,10 +8,12 @@ import {
 } from "@mutualzz/ui-core";
 import { Stack, Typography } from "@mutualzz/ui-web";
 import { observer } from "mobx-react-lite";
+import { useTranslation } from "react-i18next";
 import { useAppStore } from "@hooks/useStores";
 import { InfoIcon, WarningIcon } from "@phosphor-icons/react";
 
 export const ThemeCreatorColorsBase = observer(() => {
+  const { t } = useTranslation("settings");
   const app = useAppStore();
   const { values, setValues } = app.themeCreator;
 
@@ -19,9 +21,9 @@ export const ThemeCreatorColorsBase = observer(() => {
     <Stack direction="column" p={4} spacing={5}>
       <InputWithLabel
         type="color"
-        label="Background color"
+        label={t("themeCreator.colors.background")}
         name="backgroundColor"
-        description="The background color of the app"
+        description={t("themeCreator.colors.backgroundDescription")}
         required
         value={values.colors.background}
         allowGradient
@@ -54,11 +56,11 @@ export const ThemeCreatorColorsBase = observer(() => {
       />
       <InputWithLabel
         type="color"
-        label="Surface Color"
+        label={t("themeCreator.colors.surface")}
         name="surfaceColor"
         description={
           <>
-            This color gets applied to cards, sheets, and menus
+            {t("themeCreator.colors.surfaceDescription")}
             <Typography
               level="body-sm"
               display="flex"
@@ -68,7 +70,7 @@ export const ThemeCreatorColorsBase = observer(() => {
               alignItems="center"
             >
               <InfoIcon weight="fill" />
-              it automatically adapts to certain UI elements
+              {t("themeCreator.colors.surfaceInfo")}
             </Typography>
             <Typography
               level="body-sm"
@@ -79,8 +81,7 @@ export const ThemeCreatorColorsBase = observer(() => {
               alignItems="center"
             >
               <WarningIcon weight="fill" />
-              If you prefer using embossed style, I recommend modifying this
-              color
+              {t("themeCreator.colors.surfaceEmbossedHint")}
             </Typography>
           </>
         }
@@ -97,9 +98,9 @@ export const ThemeCreatorColorsBase = observer(() => {
       />
       <InputWithLabel
         type="color"
-        label="Black Color"
+        label={t("themeCreator.colors.black")}
         name="blackColor"
-        description="The color to use for text and icons on a light background"
+        description={t("themeCreator.colors.blackDescription")}
         value={values.colors.common.black}
         // apiError={errors.whiteColor}
         onChange={(color: ColorLike) =>
@@ -118,9 +119,9 @@ export const ThemeCreatorColorsBase = observer(() => {
       />
       <InputWithLabel
         type="color"
-        label="White Color"
+        label={t("themeCreator.colors.white")}
         name="whiteColor"
-        description="The color to use for text and icons on a dark background"
+        description={t("themeCreator.colors.whiteDescription")}
         value={values.colors.common.white}
         // apiError={errors.whiteColor}
         fullWidth

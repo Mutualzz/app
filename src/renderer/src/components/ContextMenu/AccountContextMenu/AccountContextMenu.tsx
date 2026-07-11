@@ -20,43 +20,20 @@ import {
 import { useNavigate } from "@tanstack/react-router";
 import { STATUS_DURATION_OPTIONS } from "@utils/statusDurations";
 import { AccountContextMenuHeader } from "@components/ContextMenu/AccountContextMenu/AccountContextMenuHeader";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   account: AccountStore;
 }
 
-const STATUS_OPTIONS: {
-  status: PresenceStatus;
-  label: string;
-  description?: string;
-  showInvisible?: boolean;
-}[] = [
-  { status: "online", label: "Online" },
-  {
-    status: "idle",
-    label: "Idle",
-    description: "Away from keyboard"
-  },
-  {
-    status: "dnd",
-    label: "Do Not Disturb",
-    description: "You won't receive notifications"
-  },
-  {
-    status: "invisible",
-    label: "Invisible",
-    description: "Appear offline",
-    showInvisible: true
-  }
-];
-
 const TimeContextMenu = observer(
   ({ app, status }: { app: AppStore; status: PresenceStatus }) => {
     const { clearMenu } = useMenu();
+    const { t } = useTranslation("common");
 
-    return STATUS_DURATION_OPTIONS.map(({ label, durationMs }) => (
+    return STATUS_DURATION_OPTIONS.map(({ labelKey, count, durationMs }) => (
       <ContextItem
-        key={`${status}:${label}`}
+        key={`${status}:${labelKey}:${count ?? "forever"}`}
         onClick={() => {
           clearMenu();
 
@@ -72,7 +49,7 @@ const TimeContextMenu = observer(
           });
         }}
       >
-        {label}
+        {count == null ? t(labelKey) : t(labelKey, { count })}
       </ContextItem>
     ));
   }
@@ -134,12 +111,40 @@ const StatusMenuLabel = ({
 
 export const AccountContextMenu = observer(({ account }: Props) => {
   const app = useAppStore();
+  const { t } = useTranslation("common");
+  const { t: tChat } = useTranslation("chat");
+  const { t: tSettings } = useTranslation("settings");
   const navigate = useNavigate();
   const { clearMenu } = useMenu();
 
   const presence = app.presence.get(account.id);
   const elevation = app.settings?.preferEmbossed ? 5 : 1;
   const currentStatus = presence?.status;
+
+  const STATUS_OPTIONS: {
+    status: PresenceStatus;
+    label: string;
+    description?: string;
+    showInvisible?: boolean;
+  }[] = [
+    { status: "online", label: t("status.online") },
+    {
+      status: "idle",
+      label: t("status.idle"),
+      description: t("status.idleDescription")
+    },
+    {
+      status: "dnd",
+      label: t("status.dnd"),
+      description: t("status.dndDescription")
+    },
+    {
+      status: "invisible",
+      label: t("status.invisible"),
+      description: t("status.invisibleDescription"),
+      showInvisible: true
+    }
+  ];
 
   return (
     <ContextMenu
@@ -206,7 +211,7 @@ export const AccountContextMenu = observer(({ account }: Props) => {
         }}
         size="md"
       >
-        View Profile
+        {tChat("contextMenu.viewProfile")}
       </ContextItem>
       <ContextItem
         startDecorator={<PencilIcon weight="fill" />}
@@ -216,7 +221,7 @@ export const AccountContextMenu = observer(({ account }: Props) => {
         }}
         size="md"
       >
-        Customize Profile
+        {tSettings("profile.customizeProfile")}
       </ContextItem>
       <ContextItem
         startDecorator={<CameraIcon weight="fill" />}
@@ -226,7 +231,7 @@ export const AccountContextMenu = observer(({ account }: Props) => {
         }}
         size="md"
       >
-        Edit Avatar
+        {tSettings("account.editAvatar")}
       </ContextItem>
 
       {account.isStaff && (
@@ -240,7 +245,7 @@ export const AccountContextMenu = observer(({ account }: Props) => {
             }}
             size="md"
           >
-            Staff Panel
+            {tSettings("staffPanel")}
           </ContextItem>
         </>
       )}

@@ -7,8 +7,11 @@ import { useState } from "react";
 import { useModal } from "@contexts/Modal.context";
 import { HttpException } from "@mutualzz/types";
 import { useMutation } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 
 export const UsernameChange = observer(() => {
+  const { t } = useTranslation("settings");
+  const { t: tCommon } = useTranslation("common");
   const app = useAppStore();
   const [newUsername, setNewUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -44,11 +47,11 @@ export const UsernameChange = observer(() => {
       spacing={2.5}
     >
       <Typography level="h5" fontWeight="bold">
-        Changing username
+        {t("account.changingUsername")}
       </Typography>
       <InputWithLabel
         name="username"
-        label="New username"
+        label={t("account.newUsername")}
         value={newUsername}
         onChange={(e) => setNewUsername(e.target.value)}
         apiError={errors.username}
@@ -57,7 +60,7 @@ export const UsernameChange = observer(() => {
       />
       <InputWithLabel
         name="password"
-        label="Current password"
+        label={t("account.currentPasswordShort")}
         value={password}
         onChange={(e) => setPassword(e.target.value)}
         apiError={errors.password}
@@ -72,7 +75,7 @@ export const UsernameChange = observer(() => {
           size="lg"
           expand
         >
-          Cancel
+          {tCommon("cancel")}
         </Button>
         <Button
           color="success"
@@ -81,7 +84,7 @@ export const UsernameChange = observer(() => {
           size="lg"
           expand
         >
-          Change
+          {t("account.change")}
         </Button>
       </Stack>
     </Paper>

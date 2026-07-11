@@ -24,6 +24,7 @@ import {
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import dayjs from "dayjs";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 import { z } from "zod";
 
@@ -44,13 +45,13 @@ export const Route = createFileRoute("/_authenticated/support/tickets/")({
 
 const PAGE_LIMIT = 50;
 
-const categoryOptions: { value: SupportTicketCategory; label: string }[] = [
-  { value: "account", label: "Account & login" },
-  { value: "bug", label: "Bug or crash" },
-  { value: "donations", label: "Donations" },
-  { value: "feature", label: "Feature request" },
-  { value: "other", label: "Other" }
-];
+const categoryKeys = [
+  "account",
+  "bug",
+  "donations",
+  "feature",
+  "other"
+] as const satisfies readonly SupportTicketCategory[];
 
 const statusColors: Record<string, "warning" | "success" | "neutral" | "info"> =
   {
@@ -61,6 +62,8 @@ const statusColors: Record<string, "warning" | "success" | "neutral" | "info"> =
   };
 
 function SupportTicketsRoute() {
+  const { t } = useTranslation("common");
+  const { t: tSettings } = useTranslation("settings");
   const app = useAppStore();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -109,17 +112,19 @@ function SupportTicketsRoute() {
       });
     },
     onError: (err) => {
-      toast.error(err instanceof Error ? err.message : "Failed to create ticket");
+      toast.error(
+        err instanceof Error ? err.message : t("support.createFailed")
+      );
     }
   });
 
   return (
     <Stack flex={1} height="100%" overflow="hidden" width="100%" direction="column">
       <SupportHeader
-        title="Support tickets"
+        title={t("support.myTickets")}
         icon={<LifebuoyIcon size={22} weight="fill" />}
         onBack={() => navigate({ to: "/support" })}
-        backLabel="Help"
+        backLabel={tSettings("helpAndSupport")}
       />
 
       <Paper
@@ -147,27 +152,27 @@ function SupportTicketsRoute() {
               boxShadow="none !important"
             >
               <Typography level="title-sm" fontWeight={600}>
-                Contact support
+                {t("support.contactSupport")}
               </Typography>
               <Select
                 value={category}
                 onValueChange={(v) => setCategory(v as SupportTicketCategory)}
               >
-                {categoryOptions.map((option) => (
-                  <Option key={option.value} value={option.value}>
-                    {option.label}
+                {categoryKeys.map((value) => (
+                  <Option key={value} value={value}>
+                    {t(`support.categories.${value}`)}
                   </Option>
                 ))}
               </Select>
               <Input
                 value={subject}
                 onChange={(e) => setSubject(e.target.value)}
-                placeholder="Subject"
+                placeholder={t("support.subjectPlaceholder")}
               />
               <Textarea
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
-                placeholder="Describe your issue"
+                placeholder={t("support.describeIssue")}
                 rows={5}
               />
               <Button
@@ -175,7 +180,7 @@ function SupportTicketsRoute() {
                 onClick={() => createTicket()}
                 css={{ alignSelf: "flex-start" }}
               >
-                {creating ? "Submitting..." : "Submit ticket"}
+                {creating ? t("report.submitting") : t("support.submitTicket")}
               </Button>
             </Paper>
           )}
@@ -188,19 +193,19 @@ function SupportTicketsRoute() {
                 navigate({ to: "/support/tickets", search: { new: true } })
               }
             >
-              New ticket
+              {t("support.newTicket")}
             </Button>
           )}
 
           {isFetching && !isFetchingNextPage && (
             <Typography level="body-sm" textColor="muted" textAlign="center">
-              Loading tickets...
+              {t("support.loadingTickets")}
             </Typography>
           )}
 
           {!isFetching && tickets.length === 0 && !showNew && (
             <Typography level="body-sm" textColor="muted" textAlign="center">
-              No tickets yet
+              {t("support.noTickets")}
             </Typography>
           )}
 
@@ -236,8 +241,11 @@ function SupportTicketsRoute() {
                 </Typography>
               </Stack>
               <Typography level="body-sm" textColor="muted">
-                {ticket.category} · updated{" "}
-                {dayjs(ticket.lastMessageAt).format("MMM D, h:mm A")}
+                {t(`support.categories.${ticket.category as SupportTicketCategory}`)}{" "}
+                ·{" "}
+                {t("support.updatedAt", {
+                  date: dayjs(ticket.lastMessageAt).format("MMM D, h:mm A")
+                })}
               </Typography>
             </Paper>
           ))}
@@ -250,7 +258,9 @@ function SupportTicketsRoute() {
               onClick={() => fetchNextPage()}
               css={{ alignSelf: "center" }}
             >
-              {isFetchingNextPage ? "Loading..." : "Load more"}
+              {isFetchingNextPage
+                ? t("support.loading")
+                : t("support.loadMore")}
             </Button>
           )}
         </Stack>

@@ -24,6 +24,7 @@ import {
 } from "@utils/reactions";
 import { Tooltip } from "../Tooltip";
 import { MessageReactionToolbar } from "./MessageReactionToolbar";
+import { useTranslation } from "react-i18next";
 
 interface Props extends PropsWithChildren {
   message: Message | QueuedMessage;
@@ -48,6 +49,7 @@ const ToolbarContent = observer(
     onReplyClick
   }: ToolbarContentProps) => {
     const app = useAppStore();
+    const { t } = useTranslation("chat");
 
     const { mutate: deleteMessage } = useMutation({
       mutationKey: ["delete-message", message.id],
@@ -93,7 +95,7 @@ const ToolbarContent = observer(
             />
           )}
           {message.author?.id !== app.account?.id && isSent && (
-            <Tooltip offset={16} content="Reply">
+            <Tooltip offset={16} content={t("actions.reply")}>
               <IconButton
                 onClick={() => onReplyClick(message)}
                 variant="plain"
@@ -104,7 +106,7 @@ const ToolbarContent = observer(
             </Tooltip>
           )}
           {message.author?.id === app.account?.id && isSent && (
-            <Tooltip offset={16} content="Edit">
+            <Tooltip offset={16} content={t("actions.edit")}>
               <IconButton
                 onClick={() => message.setEditing(true)}
                 variant="plain"
@@ -116,7 +118,7 @@ const ToolbarContent = observer(
           )}
           {(message.author?.id === app.account?.id ||
             me?.hasPermission("ManageMessages")) && (
-            <Tooltip offset={16} content="Delete">
+            <Tooltip offset={16} content={t("actions.delete")}>
               <IconButton
                 color="danger"
                 variant="plain"
@@ -222,8 +224,7 @@ export const MessageToolbar = observer(
             />
           }
           offset={{ mainAxis: header ? -4 : -24, crossAxis: -20 }}
-          shift={{ crossAxis: false }}
-          disablePortal
+          shift={{ padding: 8 }}
           disableHoverListener={pickerOpen}
           open={hoverOpen || pickerOpen}
           onHover={setHoverOpen}

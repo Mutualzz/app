@@ -43,6 +43,7 @@ import { FileIcon } from "@phosphor-icons/react";
 import type { PendingAttachmentPreview } from "@stores/objects/QueuedMessage";
 import { UserProfilePopoutTrigger } from "../Profile/popout/UserProfilePopoutTrigger";
 import { shouldHideInviteUrlContent } from "@utils/inviteLinks";
+import { useTranslation } from "react-i18next";
 
 function formatBytes(bytes: number) {
   if (bytes < 1024) return `${bytes} B`;
@@ -194,6 +195,7 @@ export const Message = observer(
   ({ message, repliedMessage, header }: Props) => {
     const app = useAppStore();
     const { theme } = useTheme();
+    const { t } = useTranslation("chat");
     const { openContextMenu } = useMenu();
     const channel = app.channels.active;
     const space = message.spaceId ? app.spaces.get(message.spaceId) : null;
@@ -308,7 +310,7 @@ export const Message = observer(
                   />
                   <ReplyAuthorName>
                     <Typography textColor="muted" level="body-xs">
-                      {repliedMessage.author?.displayName ?? "Unknown"}
+                      {repliedMessage.author?.displayName ?? t("unknown")}
                     </Typography>
                   </ReplyAuthorName>
                   <ReplyContentText>
@@ -325,7 +327,7 @@ export const Message = observer(
                   level="body-xs"
                   fontStyle="italic"
                 >
-                  Could not find the replied message
+                  {t("reply.replyPreviewMissing")}
                 </Typography>
               )}
             </ReplyContent>
@@ -421,7 +423,7 @@ export const Message = observer(
                             ml={0.25}
                             level="body-xs"
                           >
-                            (edited)
+                            {t("message.edited")}
                           </Typography>
                         </Tooltip>
                       )}

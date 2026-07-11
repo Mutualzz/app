@@ -7,8 +7,11 @@ import { useAppStore } from "@hooks/useStores";
 import { useMutation } from "@tanstack/react-query";
 import { HttpException } from "@mutualzz/types";
 import { Paper } from "@components/Paper";
+import { useTranslation } from "react-i18next";
 
 export const EmailChange = observer(() => {
+  const { t } = useTranslation("settings");
+  const { t: tCommon } = useTranslation("common");
   const app = useAppStore();
 
   const [code, setCode] = useState("");
@@ -50,12 +53,12 @@ export const EmailChange = observer(() => {
       spacing={2.5}
     >
       <Typography level="h5" fontWeight="bold">
-        Confirm your current email address
+        {t("account.confirmCurrentEmail")}
       </Typography>
       {needsCode && (
         <InputWithLabel
           name="code"
-          label="Code"
+          label={t("account.code")}
           value={code}
           onChange={(e) => setCode(e.target.value)}
           apiError={errors.code}
@@ -65,7 +68,7 @@ export const EmailChange = observer(() => {
       )}
       <InputWithLabel
         name="email"
-        label="New Email Address"
+        label={t("account.newEmail")}
         value={newEmail}
         onChange={(e) => setNewEmail(e.target.value)}
         apiError={errors.email}
@@ -81,7 +84,7 @@ export const EmailChange = observer(() => {
           size="lg"
           expand
         >
-          Cancel
+          {tCommon("cancel")}
         </Button>
         <Button
           color="success"
@@ -90,7 +93,7 @@ export const EmailChange = observer(() => {
           size="lg"
           expand
         >
-          Confirm
+          {t("account.confirm")}
         </Button>
       </Stack>
     </Paper>

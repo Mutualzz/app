@@ -3,11 +3,9 @@ import { useAppStore } from "@hooks/useStores";
 import type { Space } from "@stores/objects/Space";
 import { LockSimpleIcon } from "@phosphor-icons/react";
 import { Stack, Typography, useTheme } from "@mutualzz/ui-web";
-import {
-  getSpaceLockdownMessage,
-  notifySpaceLockdownBlocked
-} from "@utils/spaceLockdown";
+import { notifySpaceLockdownBlocked } from "@utils/spaceLockdown";
 import { observer } from "mobx-react-lite";
+import { useTranslation } from "react-i18next";
 import type { SyntheticEvent } from "react";
 
 interface Props {
@@ -18,6 +16,7 @@ interface Props {
 
 export const SpaceLockdownOverlay = observer(
   ({ space, showMessage = true, reserveBottom }: Props) => {
+    const { t } = useTranslation("space");
     const app = useAppStore();
     const { theme } = useTheme();
 
@@ -70,10 +69,12 @@ export const SpaceLockdownOverlay = observer(
           >
             <LockSimpleIcon size={28} weight="fill" />
             <Typography level="title-sm" fontWeight={700}>
-              This space is in lockdown
+              {t("lockdown.title")}
             </Typography>
             <Typography level="body-sm">
-              {getSpaceLockdownMessage(space, isOwner)}
+              {t(
+                isOwner ? "lockdown.ownerMessage" : "lockdown.memberMessage"
+              )}
             </Typography>
           </Paper>
         )}

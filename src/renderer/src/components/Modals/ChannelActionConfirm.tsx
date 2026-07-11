@@ -6,6 +6,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { Paper } from "@components/Paper";
 import { Button, Stack, Typography } from "@mutualzz/ui-web";
 import { useModal } from "@contexts/Modal.context";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   channel: Channel;
@@ -15,6 +16,8 @@ export const ChannelActionConfirm = observer(({ channel }: Props) => {
   const app = useAppStore();
   const navigate = useNavigate();
   const { closeModal } = useModal();
+  const { t } = useTranslation("space");
+  const { t: tCommon } = useTranslation("common");
 
   const { mutate: deleteChannel, isPending: isDeleting } = useMutation({
     mutationKey: ["delete-channel", channel.id],
@@ -39,15 +42,14 @@ export const ChannelActionConfirm = observer(({ channel }: Props) => {
       width="25vw"
     >
       <Typography level="h5" fontWeight="bold" marginBottom={2}>
-        Delete Channel
+        {t("channels.delete.title")}
       </Typography>
       <Typography mb={2.5}>
-        Are you sure you want to Delete <b>{channel.name}</b>? This Action
-        cannot be undone.
+        {t("channels.delete.body", { name: channel.name })}
       </Typography>
       <Stack spacing={1.25} direction="row">
         <Button color="neutral" expand size="lg" onClick={() => closeModal()}>
-          Cancel
+          {tCommon("cancel")}
         </Button>
         <Button
           color="danger"
@@ -56,7 +58,7 @@ export const ChannelActionConfirm = observer(({ channel }: Props) => {
           disabled={isDeleting}
           size="lg"
         >
-          Delete Channel
+          {t("channels.delete.confirm")}
         </Button>
       </Stack>
     </Paper>

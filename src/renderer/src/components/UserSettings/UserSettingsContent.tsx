@@ -5,10 +5,11 @@ import {
   useUserSettings
 } from "@components/UserSettings/UserSettings.context";
 import { useAppStore } from "@hooks/useStores";
+import { settingsPageTitleKeys } from "@mutualzz/i18n";
 import { IconButton, Stack, Typography } from "@mutualzz/ui-web";
-import startCase from "lodash-es/startCase";
 import { observer } from "mobx-react-lite";
 import { useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { AppAppearanceSettings } from "./pages/app/AppAppearanceSettings";
 import { UserAccountSettings } from "./pages/user/UserAccountSettings";
 import { UserProfileSettings } from "./pages/user/UserProfileSettings";
@@ -23,6 +24,7 @@ interface UserSettingsContentProps {
 
 export const UserSettingsContent = observer(
   ({ redirectTo }: UserSettingsContentProps) => {
+    const { t } = useTranslation("settings");
     const app = useAppStore();
     const { currentPage, setCurrentPage } = useUserSettings();
     const { closeModal } = useModal();
@@ -37,6 +39,15 @@ export const UserSettingsContent = observer(
 
       setCurrentPage(redirectTo);
     }, [redirectTo, setCurrentPage]);
+
+    const title =
+      currentPage === "voice_and_video"
+        ? t("pages.voiceAndVideoWip")
+        : t(
+            settingsPageTitleKeys[
+              currentPage as keyof typeof settingsPageTitleKeys
+            ] ?? "title"
+          );
 
     return (
       <Stack
@@ -61,9 +72,7 @@ export const UserSettingsContent = observer(
           borderLeft="0 !important"
         >
           <Typography level={{ xs: "h6", sm: "h5" }} fontFamily="monospace">
-            {currentPage === "voice_and_video"
-              ? "Voice & Video (Still WIP)"
-              : startCase(currentPage)}
+            {title}
           </Typography>
           <IconButton
             color="neutral"

@@ -21,6 +21,7 @@ import {
   SpeakerSlashIcon
 } from "@phosphor-icons/react";
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Link } from "../Link";
 import { useAppStore } from "@renderer/hooks/useStores";
 
@@ -53,13 +54,14 @@ interface VolumeButtonProps {
 }
 
 const VolumeButton = ({ volume, color, onChange }: VolumeButtonProps) => {
+  const { t } = useTranslation("common");
   return (
     <Popover
       placement="top"
       closeOnClickOutside
       p={1}
       trigger={
-        <IconButton variant="plain" size="sm" title="Volume">
+        <IconButton variant="plain" size="sm" title={t("media.volume")}>
           {volume === 0 ? (
             <SpeakerSlashIcon size={14} weight="fill" />
           ) : (
@@ -89,46 +91,50 @@ const VolumeButton = ({ volume, color, onChange }: VolumeButtonProps) => {
   );
 };
 
-const ImageViewer = ({ attachment }: { attachment: APIAttachment }) => (
-  <Stack direction="column" alignItems="center" spacing={1.5}>
-    <img
-      src={attachment.url}
-      alt={attachment.filename}
-      css={{
-        maxWidth: "90vw",
-        maxHeight: "80vh",
-        objectFit: "contain",
-        borderRadius: 8,
-        boxShadow: "0 8px 48px rgba(0,0,0,0.7)",
-        display: "block"
-      }}
-    />
-    <Stack direction="row" alignItems="center" spacing={1}>
-      <Typography level="body-sm" textColor="muted">
-        {attachment.filename}
-      </Typography>
-      <Typography level="body-sm" textColor="muted">
-        ·
-      </Typography>
-      <Typography level="body-sm" textColor="muted">
-        {formatBytes(attachment.size)}
-      </Typography>
-      <Link
-        href={attachment.url}
-        download={attachment.filename}
-        target="_blank"
-        rel="noopener noreferrer"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <IconButton variant="plain" size="sm" title="Download">
-          <DownloadSimpleIcon size={15} />
-        </IconButton>
-      </Link>
+const ImageViewer = ({ attachment }: { attachment: APIAttachment }) => {
+  const { t } = useTranslation("common");
+  return (
+    <Stack direction="column" alignItems="center" spacing={1.5}>
+      <img
+        src={attachment.url}
+        alt={attachment.filename}
+        css={{
+          maxWidth: "90vw",
+          maxHeight: "80vh",
+          objectFit: "contain",
+          borderRadius: 8,
+          boxShadow: "0 8px 48px rgba(0,0,0,0.7)",
+          display: "block"
+        }}
+      />
+      <Stack direction="row" alignItems="center" spacing={1}>
+        <Typography level="body-sm" textColor="muted">
+          {attachment.filename}
+        </Typography>
+        <Typography level="body-sm" textColor="muted">
+          ·
+        </Typography>
+        <Typography level="body-sm" textColor="muted">
+          {formatBytes(attachment.size)}
+        </Typography>
+        <Link
+          href={attachment.url}
+          download={attachment.filename}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <IconButton variant="plain" size="sm" title={t("media.download")}>
+            <DownloadSimpleIcon size={15} />
+          </IconButton>
+        </Link>
+      </Stack>
     </Stack>
-  </Stack>
-);
+  );
+};
 
 const AudioPlayer = ({ attachment }: { attachment: APIAttachment }) => {
+  const { t } = useTranslation("common");
   const { theme } = useTheme();
   const app = useAppStore();
   const audioRef = useRef<HTMLAudioElement>(null);
@@ -250,7 +256,7 @@ const AudioPlayer = ({ attachment }: { attachment: APIAttachment }) => {
             target="_blank"
             rel="noopener noreferrer"
           >
-            <IconButton variant="plain" size="sm" title="Download">
+            <IconButton variant="plain" size="sm" title={t("media.download")}>
               <DownloadSimpleIcon size={13} />
             </IconButton>
           </Link>
@@ -266,7 +272,7 @@ const AudioPlayer = ({ attachment }: { attachment: APIAttachment }) => {
           variant="plain"
           size="sm"
           onClick={togglePlay}
-          title={playing ? "Pause" : "Play"}
+          title={playing ? t("media.pause") : t("media.play")}
         >
           {playing ? (
             <PauseIcon size={16} weight="fill" />
@@ -301,6 +307,7 @@ const AudioPlayer = ({ attachment }: { attachment: APIAttachment }) => {
 };
 
 const VideoPlayer = ({ attachment }: { attachment: APIAttachment }) => {
+  const { t } = useTranslation("common");
   const { theme } = useTheme();
   const videoRef = useRef<HTMLVideoElement>(null);
   const seekingRef = useRef(false);
@@ -415,9 +422,9 @@ const VideoPlayer = ({ attachment }: { attachment: APIAttachment }) => {
             variant="plain"
             size="sm"
             onClick={togglePlay}
-            title={playing ? "Pause" : "Play"}
+            title={playing ? t("media.pause") : t("media.play")}
           >
-            {playing ? (
+              {playing ? (
               <PauseIcon size={14} weight="fill" />
             ) : (
               <PlayIcon size={14} weight="fill" />
@@ -440,7 +447,7 @@ const VideoPlayer = ({ attachment }: { attachment: APIAttachment }) => {
             target="_blank"
             rel="noopener noreferrer"
           >
-            <IconButton variant="plain" size="sm" title="Download">
+            <IconButton variant="plain" size="sm" title={t("media.download")}>
               <DownloadSimpleIcon size={13} />
             </IconButton>
           </Link>
@@ -455,6 +462,7 @@ interface Props {
 }
 
 export const MessageAttachment = ({ attachment }: Props) => {
+  const { t } = useTranslation("common");
   const { theme } = useTheme();
   const app = useAppStore();
   const { openModal } = useModal();
@@ -537,7 +545,7 @@ export const MessageAttachment = ({ attachment }: Props) => {
           </Typography>
         </Stack>
         <Stack direction="column">
-          <IconButton variant="plain" size="sm" title="Download">
+          <IconButton variant="plain" size="sm" title={t("media.download")}>
             <DownloadSimpleIcon size={16} />
           </IconButton>
           <Typography level="body-xs" textColor="muted">

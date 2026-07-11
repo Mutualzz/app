@@ -11,6 +11,7 @@ import Snowflake from "@utils/Snowflake";
 import { observer } from "mobx-react-lite";
 import { useRef, useState } from "react";
 import { CheckIcon } from "@phosphor-icons/react";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   post: Post;
@@ -29,34 +30,45 @@ const ShareRow = observer(
     sent: boolean;
     sending: boolean;
     onSend: () => void;
-  }) => (
-    <Stack
-      direction="row"
-      spacing={2}
-      alignItems="center"
-      justifyContent="space-between"
-      width="100%"
-    >
-      <Stack direction="row" spacing={2} alignItems="center">
-        {avatar}
-        <Typography>{name}</Typography>
-      </Stack>
+  }) => {
+    const { t } = useTranslation("chat");
 
-      <Button
-        size="sm"
-        variant={sent ? "soft" : "solid"}
-        disabled={sent || sending}
-        onClick={onSend}
+    return (
+      <Stack
+        direction="row"
+        spacing={2}
+        alignItems="center"
+        justifyContent="space-between"
+        width="100%"
       >
-        {sent ? <CheckIcon /> : sending ? "Sending…" : "Send"}
-      </Button>
-    </Stack>
-  )
+        <Stack direction="row" spacing={2} alignItems="center">
+          {avatar}
+          <Typography>{name}</Typography>
+        </Stack>
+
+        <Button
+          size="sm"
+          variant={sent ? "soft" : "solid"}
+          disabled={sent || sending}
+          onClick={onSend}
+        >
+          {sent ? (
+            <CheckIcon />
+          ) : sending ? (
+            t("feed.share.sending")
+          ) : (
+            t("feed.share.send")
+          )}
+        </Button>
+      </Stack>
+    );
+  }
 );
 
 export const SharePostModal = observer(({ post }: Props) => {
   const app = useAppStore();
   const { closeModal } = useModal();
+  const { t } = useTranslation("chat");
   const [sentTo, setSentTo] = useState<Set<string>>(new Set());
   const [sendingTo, setSendingTo] = useState<Set<string>>(new Set());
   const sendingKeysRef = useRef<Set<string>>(new Set());
@@ -123,12 +135,12 @@ export const SharePostModal = observer(({ post }: Props) => {
       width="24rem"
       elevation={app.settings?.preferEmbossed ? 5 : 1}
     >
-      <Typography level="h6">Share post</Typography>
+      <Typography level="h6">{t("feed.share.title")}</Typography>
 
       <Stack direction="column" spacing={2.5} maxHeight="20rem" overflowY="auto">
         {hasNothingToShow && (
           <Typography level="body-sm" textColor="secondary">
-            You don't have any conversations or friends to share with yet.
+            {t("feed.empty.shareTargets")}
           </Typography>
         )}
 
@@ -179,7 +191,7 @@ export const SharePostModal = observer(({ post }: Props) => {
       </Stack>
 
       <Button variant="soft" fullWidth onClick={() => closeModal()}>
-        Done
+        {t("feed.share.done")}
       </Button>
     </Paper>
   );

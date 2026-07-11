@@ -26,6 +26,7 @@ import {
 import { HeadphonesOffIcon } from "@components/icons/HeadphonesOffIcon";
 import { useNavigate } from "@tanstack/react-router";
 import { Tooltip } from "@components/Tooltip";
+import { useTranslation } from "react-i18next";
 
 // NOTE: Instead of using hovered, you should use the Animated motion stuff, fix it. (Azrael)
 export const UserBar = observer(() => {
@@ -35,6 +36,7 @@ export const UserBar = observer(() => {
   const { openModal } = useModal();
   const { openContextMenu } = useMenu();
   const [hovered, setHovered] = useState(false);
+  const { t } = useTranslation("chat");
 
   const voiceChannel = app.voice.channel;
 
@@ -52,20 +54,20 @@ export const UserBar = observer(() => {
   let voiceTitleColor: Color;
   switch (voiceStatus) {
     case "connecting":
-      voiceTitle = "RTC Connecting";
+      voiceTitle = t("voice.connection.rtcConnecting");
       voiceTitleColor = "warning";
       break;
     case "connected":
-      voiceTitle = "Voice Connected";
+      voiceTitle = t("voice.connection.voiceConnected");
       voiceTitleColor = "success";
       break;
     case "failed":
-      voiceTitle = "Connection Failed";
+      voiceTitle = t("voice.connection.failed");
       voiceTitleColor = "danger";
       break;
     case "idle":
     default:
-      voiceTitle = "Voice";
+      voiceTitle = t("voice.title");
       voiceTitleColor = "neutral";
   }
 
@@ -74,7 +76,7 @@ export const UserBar = observer(() => {
     voiceSubtitle =
       `${voiceChannel.name} / ${voiceChannel.space?.name ?? ""}`.trim();
   } else if (voiceStatus === "failed") {
-    voiceSubtitle = voiceError ?? "Unable to connect";
+    voiceSubtitle = voiceError ?? t("voice.connection.unableToConnect");
   }
 
   const canHangup =
@@ -137,7 +139,7 @@ export const UserBar = observer(() => {
               )}
             </Stack>
 
-            <Tooltip content="Disconnect" placement="top">
+            <Tooltip content={t("voice.connection.disconnect")} placement="top">
               <IconButton
                 disabled={!canHangup}
                 onClick={() => app.voice.leave()}
@@ -155,7 +157,11 @@ export const UserBar = observer(() => {
           <Stack direction="row" spacing={1.25} width="100%">
             <Tooltip
               placement="top"
-              content={cameraEnabled ? "Disable camera" : "Enable camera"}
+              content={
+                cameraEnabled
+                  ? t("voice.controls.disableCamera")
+                  : t("voice.controls.enableCamera")
+              }
             >
               <IconButton
                 variant="soft"
@@ -199,7 +205,9 @@ export const UserBar = observer(() => {
             <Tooltip
               placement="top"
               content={
-                screenShareEnabled ? "Stop sharing" : "Share your screen"
+                screenShareEnabled
+                  ? t("voice.controls.stopSharing")
+                  : t("voice.controls.shareScreen")
               }
             >
               <IconButton
@@ -219,8 +227,8 @@ export const UserBar = observer(() => {
                 placement="top"
                 content={
                   app.voice.screenShareAudioEnabled
-                    ? "Mute stream audio"
-                    : "Unmute stream audio"
+                    ? t("voice.controls.muteStreamAudio")
+                    : t("voice.controls.unmuteStreamAudio")
                 }
               >
                 <IconButton
@@ -332,15 +340,21 @@ export const UserBar = observer(() => {
           </Stack>
         </Paper>
 
-        <Stack alignItems="center" direction="row" spacing={0.25} mr={1.25} flexShrink={0}>
+        <Stack
+          alignItems="center"
+          direction="row"
+          spacing={0.25}
+          mr={1.25}
+          flexShrink={0}
+        >
           <Tooltip
             placement="top"
             content={
               app.voice.spaceMute
-                ? "Space Muted"
+                ? t("voice.controls.spaceMuted")
                 : app.voice.effectiveSelfMute
-                  ? "Muted"
-                  : "Mute"
+                  ? t("voice.controls.muted")
+                  : t("voice.controls.mute")
             }
           >
             <IconButton
@@ -368,10 +382,10 @@ export const UserBar = observer(() => {
             placement="top"
             content={
               app.voice.spaceDeaf
-                ? "Space Deafened"
+                ? t("voice.controls.spaceDeafened")
                 : app.voice.effectiveSelfDeaf
-                  ? "Deafened"
-                  : "Deafen"
+                  ? t("voice.controls.deafened")
+                  : t("voice.controls.deafen")
             }
           >
             <IconButton
@@ -398,7 +412,7 @@ export const UserBar = observer(() => {
             </IconButton>
           </Tooltip>
 
-          <Tooltip placement="top" content="Settings">
+          <Tooltip placement="top" content={t("voice.controls.settings")}>
             <IconButton
               onClick={() => openModal("user-settings", <UserSettingsModal />)}
               variant="plain"

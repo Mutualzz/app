@@ -7,6 +7,7 @@ import { HashIcon, UsersIcon } from "@phosphor-icons/react";
 import { IconButton } from "../IconButton";
 import { Tooltip } from "@components/Tooltip";
 import { MarkdownRenderer } from "@components/Markdown/MarkdownRenderer/MarkdownRenderer";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   channel?: Channel | null;
@@ -14,6 +15,7 @@ interface Props {
 
 export const TextChannelHeader = observer(({ channel }: Props) => {
   const app = useAppStore();
+  const { t } = useTranslation("chat");
 
   return (
     <Paper
@@ -54,7 +56,11 @@ export const TextChannelHeader = observer(({ channel }: Props) => {
       </Stack>
       <ButtonGroup variant="plain" spacing={10}>
         <Tooltip
-          content={`${app.memberListVisible ? "Hide" : "Show"} Member List`}
+          content={
+            app.memberListVisible
+              ? t("header.memberList.hide")
+              : t("header.memberList.show")
+          }
           placement="bottom"
         >
           <IconButton

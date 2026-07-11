@@ -11,6 +11,7 @@ import { InputWithLabel } from "@components/InputWithLabel";
 import { APIChannel, ChannelType } from "@mutualzz/types";
 import { normalizeJSON } from "@utils/JSON";
 import { MarkdownInput } from "@components/Markdown/MarkdownInput/MarkdownInput";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   space: Space;
@@ -28,6 +29,8 @@ const pickEditable = (channel: Channel): ChannelEditable => {
 };
 
 export const ChannelOverviewSettings = observer(({ space, channel }: Props) => {
+  const { t: tCommon } = useTranslation("common");
+  const { t } = useTranslation("space");
   const app = useAppStore();
 
   const { draft, dirty, reset, setDraft, diff, commitBase } =
@@ -57,7 +60,11 @@ export const ChannelOverviewSettings = observer(({ space, channel }: Props) => {
       <Stack direction="column" spacing={5} flex={1}>
         <InputWithLabel
           name="name"
-          label={`${channel.type === ChannelType.Category ? "Category" : "Channel"} Name`}
+          label={
+            channel.type === ChannelType.Category
+              ? t("channels.createCategory.name")
+              : t("channels.create.name")
+          }
           required
           type="text"
           value={draft.name ?? ""}
@@ -75,7 +82,7 @@ export const ChannelOverviewSettings = observer(({ space, channel }: Props) => {
                 fontWeight={500}
                 level={{ xs: "body-sm", sm: "body-md" }}
               >
-                Channel Topic
+                {t("channels.topic")}
               </Typography>
               <MarkdownInput
                 value={draft.topic ?? ""}
@@ -86,7 +93,7 @@ export const ChannelOverviewSettings = observer(({ space, channel }: Props) => {
                 }}
               />
               <Typography level="body-xs" textColor="muted">
-                Shown to members at the top of the channel.
+                {t("channels.topicHint")}
               </Typography>
             </Stack>
           </>
@@ -114,17 +121,17 @@ export const ChannelOverviewSettings = observer(({ space, channel }: Props) => {
             width="100%"
             maxWidth="min(960px, calc(100% - 32px))"
           >
-            <Typography level="body-sm">You have unsaved changes!</Typography>
+            <Typography level="body-sm">{t("roles.unsavedChanges")}</Typography>
             <ButtonGroup disabled={updatingChannel || !dirty} spacing={10}>
               <Button color="danger" variant="plain" onClick={reset}>
-                Reset
+                {tCommon("reset")}
               </Button>
               <Button
                 variant="solid"
                 color="success"
                 onClick={() => updateChannel()}
               >
-                Save Changes
+                {tCommon("saveChanges")}
               </Button>
             </ButtonGroup>
           </Paper>

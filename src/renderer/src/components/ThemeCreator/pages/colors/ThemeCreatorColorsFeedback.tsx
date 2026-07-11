@@ -2,10 +2,12 @@ import { InputWithLabel } from "@components/InputWithLabel";
 import type { ColorLike } from "@mutualzz/ui-core";
 import { Stack, Typography } from "@mutualzz/ui-web";
 import { observer } from "mobx-react-lite";
+import { useTranslation } from "react-i18next";
 import { useAppStore } from "@hooks/useStores";
 import { InfoIcon } from "@phosphor-icons/react";
 
 export const ThemeCreatorColorsFeedback = observer(() => {
+  const { t } = useTranslation("settings");
   const app = useAppStore();
   const { values, setValues } = app.themeCreator;
 
@@ -13,11 +15,11 @@ export const ThemeCreatorColorsFeedback = observer(() => {
     <Stack direction="column" p={4} spacing={5}>
       <InputWithLabel
         type="color"
-        label="Primary Color"
+        label={t("themeCreator.colors.primary")}
         name="primaryColor"
         description={
           <>
-            Usually used to indicate the primary action or important elements
+            {t("themeCreator.colors.primaryDescription")}
             <Typography
               level="body-sm"
               display="flex"
@@ -27,7 +29,7 @@ export const ThemeCreatorColorsFeedback = observer(() => {
               alignItems="center"
             >
               <InfoIcon weight="fill" />
-              Auto-generated icons derive from this color
+              {t("themeCreator.colors.primaryIconsHint")}
             </Typography>
           </>
         }
@@ -47,8 +49,8 @@ export const ThemeCreatorColorsFeedback = observer(() => {
       <InputWithLabel
         type="color"
         name="neutralColor"
-        label="Neutral Color"
-        description="Usually used to indicate a neutral or inactive state"
+        label={t("themeCreator.colors.neutral")}
+        description={t("themeCreator.colors.neutralDescription")}
         required
         value={values.colors.neutral}
         onChange={(color: ColorLike) =>
@@ -65,8 +67,8 @@ export const ThemeCreatorColorsFeedback = observer(() => {
       <InputWithLabel
         type="color"
         name="successColor"
-        label="Success Color"
-        description="Usually used to indicate a successful or positive action"
+        label={t("themeCreator.colors.success")}
+        description={t("themeCreator.colors.successDescription")}
         required
         value={values.colors.success}
         onChange={(color: ColorLike) =>
@@ -83,8 +85,8 @@ export const ThemeCreatorColorsFeedback = observer(() => {
       <InputWithLabel
         type="color"
         name="dangerColor"
-        label="Danger Color"
-        description="Usually used to indicate errors and failure within the app"
+        label={t("themeCreator.colors.danger")}
+        description={t("themeCreator.colors.dangerDescription")}
         value={values.colors.danger}
         onChange={(color: ColorLike) =>
           setValues({
@@ -100,8 +102,8 @@ export const ThemeCreatorColorsFeedback = observer(() => {
       <InputWithLabel
         type="color"
         name="warningColor"
-        label="Warning Color"
-        description="Usually used to indicate caution and requires user attention"
+        label={t("themeCreator.colors.warning")}
+        description={t("themeCreator.colors.warningDescription")}
         value={values.colors.warning}
         onChange={(color: ColorLike) =>
           setValues({
@@ -117,8 +119,8 @@ export const ThemeCreatorColorsFeedback = observer(() => {
       <InputWithLabel
         type="color"
         name="infoColor"
-        label="Info Color"
-        description="Usually used to indicate additional information"
+        label={t("themeCreator.colors.info")}
+        description={t("themeCreator.colors.infoDescription")}
         value={values.colors.info}
         onChange={(color: ColorLike) =>
           setValues({

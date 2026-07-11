@@ -6,6 +6,10 @@ import {
 } from "@components/UserSettings/UserSettings.context";
 import { useAppStore } from "@hooks/useStores";
 import {
+  settingsCategoryTitleKeys,
+  settingsPageTitleKeys
+} from "@mutualzz/i18n";
+import {
   Box,
   ButtonGroup,
   Divider,
@@ -13,9 +17,9 @@ import {
   Stack,
   Typography
 } from "@mutualzz/ui-web";
-import startCase from "lodash-es/startCase";
 import { observer } from "mobx-react-lite";
 import { Fragment, type JSX } from "react";
+import { useTranslation } from "react-i18next";
 import { UserAvatar } from "../User/UserAvatar";
 import { Button } from "@components/Button";
 import { isElectron } from "@utils/index";
@@ -39,7 +43,7 @@ interface UserSettingsSidebarProps {
 
 interface Pages {
   label: UserSettingsPage;
-  title?: string;
+  titleKey?: string;
   icon: JSX.Element;
 }
 
@@ -63,7 +67,7 @@ const settingsPages: SettingsPages = {
     },
     {
       label: "voice_and_video",
-      title: "Voice & Video",
+      titleKey: "pages.voiceAndVideo",
       icon: <MicrophoneIcon weight="fill" />
     },
     {
@@ -75,6 +79,7 @@ const settingsPages: SettingsPages = {
 
 export const UserSettingsSidebar = observer(
   ({ drawerOpen, setDrawerOpen }: UserSettingsSidebarProps) => {
+    const { t } = useTranslation("settings");
     const app = useAppStore();
     const navigate = useNavigate();
     const { closeModal } = useModal();
@@ -104,6 +109,15 @@ export const UserSettingsSidebar = observer(
     if (!app.account) return null;
 
     const categories = Object.entries(settingsPages);
+
+    const pageLabel = (page: Pages) => {
+      if (page.titleKey) return t(page.titleKey);
+      const key =
+        settingsPageTitleKeys[
+          page.label as keyof typeof settingsPageTitleKeys
+        ];
+      return key ? t(key) : page.label;
+    };
 
     return (
       <Paper
@@ -153,7 +167,7 @@ export const UserSettingsSidebar = observer(
                     direction="row"
                     spacing={1}
                   >
-                    Avatar &amp; profile
+                    {t("pages.avatarAndProfile")}
                     <PencilIcon css={{ marginBottom: 5 }} />
                   </Typography>
                 </Stack>
@@ -165,7 +179,11 @@ export const UserSettingsSidebar = observer(
             <Fragment key={`settings-sidebar-category-fragment-${category}`}>
               <Stack direction="column">
                 <Typography level="body-sm" textColor="muted" mb={1.25}>
-                  {startCase(category)}
+                  {t(
+                    settingsCategoryTitleKeys[
+                      category as keyof typeof settingsCategoryTitleKeys
+                    ]
+                  )}
                 </Typography>
                 <ButtonGroup
                   color="info"
@@ -189,7 +207,7 @@ export const UserSettingsSidebar = observer(
                       padding={5}
                       disabled={currentPage === page.label}
                     >
-                      {page.title ?? startCase(page.label)}
+                      {pageLabel(page)}
                     </Button>
                   ))}
                 </ButtonGroup>
@@ -213,7 +231,7 @@ export const UserSettingsSidebar = observer(
             horizontalAlign="left"
             onClick={openSupport}
           >
-            Help & Support
+            {t("helpAndSupport")}
           </Button>
           <Button
             color="danger"
@@ -222,7 +240,7 @@ export const UserSettingsSidebar = observer(
             horizontalAlign="left"
             onClick={() => app.logout()}
           >
-            Log out
+            {t("logOut")}
           </Button>
         </Stack>
 
@@ -233,7 +251,7 @@ export const UserSettingsSidebar = observer(
             </Typography>
             {import.meta.env.DEV && (
               <Typography variant="plain" level="body-xs" color="danger">
-                DEVELOPMENT BUILD
+                {t("developmentBuild")}
               </Typography>
             )}
           </Stack>
@@ -253,7 +271,7 @@ export const UserSettingsSidebar = observer(
               variant="plain"
               color="info"
             >
-              Privacy Policy
+              {t("privacyPolicy")}
             </Link>
           </Stack>
         </Box>

@@ -8,6 +8,7 @@ import { useMutation } from "@tanstack/react-query";
 import { observer } from "mobx-react-lite";
 import { useState } from "react";
 import { FolderSimpleIcon } from "@phosphor-icons/react";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   space: Space;
@@ -16,6 +17,8 @@ interface Props {
 export const CategoryCreateModal = observer(({ space }: Props) => {
   const app = useAppStore();
   const { closeModal } = useModal();
+  const { t } = useTranslation("space");
+  const { t: tCommon } = useTranslation("common");
   const [name, setName] = useState("");
   const [errors, setErrors] = useState<{ name?: string }>({});
 
@@ -55,7 +58,7 @@ export const CategoryCreateModal = observer(({ space }: Props) => {
     >
       <Stack direction="column" my="auto" spacing={1.25}>
         <Stack direction="column" spacing={1.25}>
-          <Typography>Category Name</Typography>
+          <Typography>{t("channels.createCategory.name")}</Typography>
           <Input
             startDecorator={<FolderSimpleIcon weight="fill" />}
             fullWidth
@@ -66,6 +69,7 @@ export const CategoryCreateModal = observer(({ space }: Props) => {
             autoFocus
             value={name}
             onChange={(e) => setName(e.target.value)}
+            placeholder={t("channels.createCategory.namePlaceholder")}
           />
           {errors.name && <Typography color="danger">{errors.name}</Typography>}
         </Stack>
@@ -77,14 +81,14 @@ export const CategoryCreateModal = observer(({ space }: Props) => {
           disabled={isCreating}
           expand
         >
-          Cancel
+          {tCommon("cancel")}
         </Button>
         <Button
           disabled={isCreating || name.length === 0}
           onClick={() => createCategory()}
           expand
         >
-          Create Category
+          {t("channels.createCategory.submit")}
         </Button>
       </Stack>
     </Paper>

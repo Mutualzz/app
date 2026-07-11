@@ -17,6 +17,7 @@ import type {
 } from "@mutualzz/types";
 import { PlusIcon, TrashIcon } from "@phosphor-icons/react";
 import { observer } from "mobx-react-lite";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   block: APIProfileBlock;
@@ -37,6 +38,8 @@ const FieldHint = ({ children }: { children: React.ReactNode }) => (
 
 export const ProfileBlockTypeInspector = observer(
   ({ block, updateSelectedBlock }: Props) => {
+    const { t } = useTranslation("settings");
+
     switch (block.type) {
       case "links": {
         const linksBlock = block as ProfileLinksBlock;
@@ -46,7 +49,7 @@ export const ProfileBlockTypeInspector = observer(
 
         return (
           <Stack direction="column" spacing={1}>
-            <FieldLabel>Links</FieldLabel>
+            <FieldLabel>{t("profile.blocks.links")}</FieldLabel>
             {links.map((link, index) => {
               const resolved = resolveProfileUrl(link.url);
 
@@ -59,7 +62,7 @@ export const ProfileBlockTypeInspector = observer(
                     next[index] = { ...next[index], label: event.target.value };
                     updateSelectedBlock({ links: next });
                   }}
-                  placeholder="Label"
+                  placeholder={t("profile.inspector.linkLabel")}
                 />
                 <Stack direction="row" spacing={0.75}>
                   <Input
@@ -80,7 +83,7 @@ export const ProfileBlockTypeInspector = observer(
                       };
                       updateSelectedBlock({ links: next });
                     }}
-                    placeholder="https://"
+                    placeholder={t("profile.editor.urlPlaceholder")}
                     css={{ flex: 1 }}
                   />
                   <Button
@@ -98,7 +101,9 @@ export const ProfileBlockTypeInspector = observer(
                 </Stack>
                 {resolved && (
                   <Typography level="body-xs" css={{ opacity: 0.6 }}>
-                    Detected: {formatProfileUrlLabel(resolved)}
+                    {t("profile.inspector.detected", {
+                      label: formatProfileUrlLabel(resolved),
+                    })}
                   </Typography>
                 )}
               </Stack>
@@ -111,11 +116,17 @@ export const ProfileBlockTypeInspector = observer(
                 startDecorator={<PlusIcon />}
                 onClick={() =>
                   updateSelectedBlock({
-                    links: [...links, { label: "New link", url: "https://example.com" }]
+                    links: [
+                      ...links,
+                      {
+                        label: t("profile.blocks.newLink"),
+                        url: "https://example.com"
+                      }
+                    ]
                   })
                 }
               >
-                Add link
+                {t("profile.blocks.addLink")}
               </Button>
             )}
           </Stack>
@@ -125,11 +136,8 @@ export const ProfileBlockTypeInspector = observer(
       case "activity":
         return (
           <Stack direction="column" spacing={1}>
-            <FieldLabel>Activity</FieldLabel>
-            <FieldHint>
-              Shows live presence and current activity from the user&apos;s
-              status. No configuration needed — updates automatically.
-            </FieldHint>
+            <FieldLabel>{t("profile.blocks.activity")}</FieldLabel>
+            <FieldHint>{t("profile.inspector.activityHint")}</FieldHint>
             <Select
               value={
                 (block as ProfileActivityBlock).showCustomStatus === false
@@ -143,8 +151,8 @@ export const ProfileBlockTypeInspector = observer(
               }
               size="sm"
             >
-              <Option value="show">Show custom status</Option>
-              <Option value="hide">Hide custom status</Option>
+              <Option value="show">{t("profile.blocks.showCustomStatus")}</Option>
+              <Option value="hide">{t("profile.blocks.hideCustomStatus")}</Option>
             </Select>
           </Stack>
         );
@@ -152,7 +160,7 @@ export const ProfileBlockTypeInspector = observer(
       case "roles":
         return (
           <Stack direction="column" spacing={1}>
-            <FieldLabel>Max roles</FieldLabel>
+            <FieldLabel>{t("profile.inspector.maxRoles")}</FieldLabel>
             <Slider
               min={1}
               max={12}
@@ -162,17 +170,14 @@ export const ProfileBlockTypeInspector = observer(
               }
               valueLabelDisplay="auto"
             />
-            <FieldHint>
-              Displays roles from a shared space. Viewers see roles from spaces
-              they share with this user.
-            </FieldHint>
+            <FieldHint>{t("profile.inspector.rolesHint")}</FieldHint>
           </Stack>
         );
 
       case "mutual":
         return (
           <Stack direction="column" spacing={1}>
-            <FieldLabel>Mutual card type</FieldLabel>
+            <FieldLabel>{t("profile.inspector.mutualCardType")}</FieldLabel>
             <Select
               value={(block as ProfileMutualBlock).mode}
               onValueChange={(value) =>
@@ -182,10 +187,10 @@ export const ProfileBlockTypeInspector = observer(
               }
               size="sm"
             >
-              <Option value="spaces">Mutual spaces</Option>
-              <Option value="friends">Friends status</Option>
+              <Option value="spaces">{t("profile.blocks.mutualSpaces")}</Option>
+              <Option value="friends">{t("profile.blocks.friendsStatus")}</Option>
             </Select>
-            <FieldLabel>Max items</FieldLabel>
+            <FieldLabel>{t("profile.inspector.maxItems")}</FieldLabel>
             <Slider
               min={1}
               max={12}
@@ -201,7 +206,7 @@ export const ProfileBlockTypeInspector = observer(
       case "divider":
         return (
           <Stack direction="column" spacing={1}>
-            <FieldLabel>Divider style</FieldLabel>
+            <FieldLabel>{t("profile.inspector.dividerStyle")}</FieldLabel>
             <Select
               value={(block as ProfileDividerBlock).style ?? "line"}
               onValueChange={(value) =>
@@ -211,9 +216,9 @@ export const ProfileBlockTypeInspector = observer(
               }
               size="sm"
             >
-              <Option value="line">Line</Option>
-              <Option value="dotted">Dotted</Option>
-              <Option value="space">Spacer</Option>
+              <Option value="line">{t("profile.blocks.dividerLine")}</Option>
+              <Option value="dotted">{t("profile.blocks.dividerDotted")}</Option>
+              <Option value="space">{t("profile.blocks.dividerSpacer")}</Option>
             </Select>
           </Stack>
         );
@@ -221,15 +226,15 @@ export const ProfileBlockTypeInspector = observer(
       case "quote":
         return (
           <Stack direction="column" spacing={1}>
-            <FieldLabel>Quote</FieldLabel>
+            <FieldLabel>{t("profile.blocks.quote")}</FieldLabel>
             <ProfileMarkdownField
               value={(block as ProfileQuoteBlock).content}
               maxLength={1000}
               minHeight={100}
               onChange={(content) => updateSelectedBlock({ content })}
-              placeholder="Write a quote…"
+              placeholder={t("profile.widgets.defaults.quoteContent")}
             />
-            <FieldLabel>Style</FieldLabel>
+            <FieldLabel>{t("profile.inspector.style")}</FieldLabel>
             <Select
               value={(block as ProfileQuoteBlock).variant ?? "default"}
               onValueChange={(value) =>
@@ -239,11 +244,11 @@ export const ProfileBlockTypeInspector = observer(
               }
               size="sm"
             >
-              <Option value="default">Default</Option>
-              <Option value="accent">Accent</Option>
-              <Option value="warning">Warning</Option>
+              <Option value="default">{t("profile.blocks.quoteDefault")}</Option>
+              <Option value="accent">{t("profile.blocks.quoteAccent")}</Option>
+              <Option value="warning">{t("profile.blocks.quoteWarning")}</Option>
             </Select>
-            <FieldLabel>Attribution</FieldLabel>
+            <FieldLabel>{t("profile.inspector.attribution")}</FieldLabel>
             <Input
               value={(block as ProfileQuoteBlock).attribution ?? ""}
               onChange={(event) =>
@@ -251,7 +256,7 @@ export const ProfileBlockTypeInspector = observer(
                   attribution: event.target.value || null
                 })
               }
-              placeholder="Optional — who said it"
+              placeholder={t("profile.inspector.attributionPlaceholder")}
             />
           </Stack>
         );

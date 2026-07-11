@@ -45,13 +45,15 @@ import {
   StickerIcon,
   TextAaIcon,
   TextAlignLeftIcon,
-  TrashIcon
+  TrashIcon,
+  UploadIcon
 } from "@phosphor-icons/react";
 
 import { useModal } from "@contexts/Modal.context";
 import { observer } from "mobx-react-lite";
 import type { ReactNode } from "react";
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useAppStore } from "@hooks/useStores";
 import { toast } from "react-toastify";
 import { Divider, Input, Slider, Stack, Typography } from "@mutualzz/ui-web";
@@ -163,6 +165,7 @@ export const ProfileBlockInspector = observer(
     onBlocksChange,
     onSelectBlock
   }: Props) => {
+    const { t } = useTranslation("settings");
     const app = useAppStore();
     const { openModal } = useModal();
     const bannerInputRef = useRef<HTMLInputElement>(null);
@@ -223,8 +226,9 @@ export const ProfileBlockInspector = observer(
       type: "banner" | "background" | "image" | "music",
       onSuccess: (hash: string) => void,
       setUploading: (value: boolean) => void,
-      label: string
+      assetLabelKey: "banner" | "background" | "image" | "music" | "profileMusic"
     ) => {
+      const label = t(`profile.inspector.assetLabels.${assetLabelKey}`);
       setUploading(true);
       try {
         const hash = await uploadAsset(file, type);
@@ -232,10 +236,13 @@ export const ProfileBlockInspector = observer(
           throw new Error(`No hash returned for ${label}`);
         }
         onSuccess(hash);
-        toast.success(`${label} uploaded`);
+        toast.success(t("profile.inspector.assetUploaded", { label }));
       } catch (error) {
         toast.error(
-          getApiErrorMessage(error, `Failed to upload ${label.toLowerCase()}`)
+          getApiErrorMessage(
+            error,
+            t("profile.inspector.failedUploadAsset", { label })
+          )
         );
       } finally {
         setUploading(false);
@@ -295,16 +302,16 @@ export const ProfileBlockInspector = observer(
       >
         <Stack direction="column" spacing={0.5}>
           <Typography level="title-md" fontWeight={700}>
-            Customize
+            {t("profile.inspector.title")}
           </Typography>
           <Typography level="body-xs" css={{ opacity: 0.6 }}>
-            Page settings and selected block
+            {t("profile.inspector.subtitle")}
           </Typography>
         </Stack>
 
         <InspectorSection
           icon={<TextAaIcon size={16} weight="fill" />}
-          title="Font"
+          title={t("profile.inspector.font")}
           collapsed={collapsed.font}
           onToggleCollapsed={() =>
             setCollapsed((prev) => ({ ...prev, font: !prev.font }))
@@ -312,8 +319,8 @@ export const ProfileBlockInspector = observer(
         >
           <SettingCard>
             <GoogleFontPicker
-              label="Page font"
-              description="Visitors see this font on your profile page and profile popout."
+              label={t("profile.editor.pageFont")}
+              description={t("profile.inspector.pageFontDescription")}
               fontOwnerId={app.account?.id}
               value={draft.pageFontFamily}
               onChange={(pageFontFamily) => onDraftChange({ pageFontFamily })}
@@ -325,20 +332,20 @@ export const ProfileBlockInspector = observer(
 
         <InspectorSection
           icon={<TextAlignLeftIcon size={16} weight="fill" />}
-          title="Bio"
+          title={t("profile.editor.bio")}
           collapsed={collapsed.bio}
           onToggleCollapsed={() =>
             setCollapsed((prev) => ({ ...prev, bio: !prev.bio }))
           }
         >
           <SettingCard>
-            <FieldLabel>Bio</FieldLabel>
+            <FieldLabel>{t("profile.editor.bio")}</FieldLabel>
             <ProfileMarkdownField
               value={draft.bio}
               maxLength={512}
               minHeight={88}
               onChange={(bio) => onDraftChange({ bio })}
-              placeholder="Tell people about yourself"
+              placeholder={t("profile.editor.bioPlaceholder")}
             />
           </SettingCard>
         </InspectorSection>
@@ -347,14 +354,14 @@ export const ProfileBlockInspector = observer(
 
         <InspectorSection
           icon={<ImageIcon size={16} weight="fill" />}
-          title="Banner"
+          title={t("profile.editor.banner")}
           collapsed={collapsed.banner}
           onToggleCollapsed={() =>
             setCollapsed((prev) => ({ ...prev, banner: !prev.banner }))
           }
         >
           <SettingCard>
-            <FieldLabel>Banner image</FieldLabel>
+            <FieldLabel>{t("profile.inspector.bannerImage")}</FieldLabel>
             {bannerPreview && (
               <img
                 src={bannerPreview}
@@ -377,7 +384,11 @@ export const ProfileBlockInspector = observer(
               onChange={(event) =>
                 onDraftChange({ banner: event.target.value || null })
               }
-              placeholder={draft.banner ? "Image uploaded" : "Paste image URL"}
+              placeholder={
+                draft.banner
+                  ? t("profile.inspector.imageUploaded")
+                  : t("profile.inspector.pasteImageUrl")
+              }
               type="text"
             />
             <Stack direction="row" spacing={1}>
@@ -387,7 +398,7 @@ export const ProfileBlockInspector = observer(
                 loading={uploadingBanner}
                 onClick={() => bannerInputRef.current?.click()}
               >
-                Upload
+                {t("expressions.upload")}
               </Button>
               {draft.banner && (
                 <Button
@@ -395,7 +406,7 @@ export const ProfileBlockInspector = observer(
                   color="neutral"
                   onClick={() => onDraftChange({ banner: null })}
                 >
-                  Remove
+                  {t("profile.remove")}
                 </Button>
               )}
             </Stack>
@@ -412,15 +423,12 @@ export const ProfileBlockInspector = observer(
                   "banner",
                   (hash) => onDraftChange({ banner: hash }),
                   setUploadingBanner,
-                  "Banner"
+                  "banner"
                 );
                 event.target.value = "";
               }}
             />
-            <FieldHint>
-              Shown in your profile header block. Crop and height can be tuned
-              when the header block is selected.
-            </FieldHint>
+            <FieldHint>{t("profile.inspector.bannerHint")}</FieldHint>
           </SettingCard>
         </InspectorSection>
 
@@ -428,7 +436,7 @@ export const ProfileBlockInspector = observer(
 
         <InspectorSection
           icon={<PaintBrushBroadIcon size={16} weight="fill" />}
-          title="Background"
+          title={t("profile.editor.background")}
           collapsed={collapsed.background}
           onToggleCollapsed={() =>
             setCollapsed((prev) => ({
@@ -440,9 +448,9 @@ export const ProfileBlockInspector = observer(
           <SettingCard>
             <InputWithLabel
               type="color"
-              label="Background color"
+              label={t("profile.inspector.backgroundColor")}
               name="backgroundColor"
-              description="Use a solid color or gradient for your profile background."
+              description={t("profile.inspector.backgroundColorDescription")}
               value={(draft.backgroundColor as ColorLike) ?? "#1a1a2e"}
               allowGradient
               onChange={(color: ColorLike) => {
@@ -457,10 +465,10 @@ export const ProfileBlockInspector = observer(
                 color="neutral"
                 onClick={() => onDraftChange({ backgroundColor: null })}
               >
-                Reset background color
+                {t("profile.inspector.resetBackgroundColor")}
               </Button>
             )}
-            <FieldLabel>Background image</FieldLabel>
+            <FieldLabel>{t("profile.inspector.backgroundImage")}</FieldLabel>
             {backgroundPreview && (
               <img
                 src={backgroundPreview}
@@ -485,8 +493,8 @@ export const ProfileBlockInspector = observer(
               }
               placeholder={
                 draft.backgroundImage
-                  ? "Image uploaded"
-                  : "Background image URL"
+                  ? t("profile.inspector.imageUploaded")
+                  : t("profile.inspector.backgroundImageUrl")
               }
             />
             <Stack direction="row" spacing={1}>
@@ -496,7 +504,7 @@ export const ProfileBlockInspector = observer(
                 loading={uploadingBackground}
                 onClick={() => backgroundInputRef.current?.click()}
               >
-                Upload image
+                {t("profile.inspector.uploadImage")}
               </Button>
               {draft.backgroundImage && (
                 <Button
@@ -504,7 +512,7 @@ export const ProfileBlockInspector = observer(
                   color="neutral"
                   onClick={() => onDraftChange({ backgroundImage: null })}
                 >
-                  Remove
+                  {t("profile.remove")}
                 </Button>
               )}
             </Stack>
@@ -521,7 +529,7 @@ export const ProfileBlockInspector = observer(
                   "background",
                   (hash) => onDraftChange({ backgroundImage: hash }),
                   setUploadingBackground,
-                  "Background"
+                  "background"
                 );
                 event.target.value = "";
               }}
@@ -533,7 +541,7 @@ export const ProfileBlockInspector = observer(
 
         <InspectorSection
           icon={<MusicNotesIcon size={16} weight="fill" />}
-          title="Profile Music"
+          title={t("profile.inspector.profileMusic")}
           collapsed={collapsed.music}
           onToggleCollapsed={() =>
             setCollapsed((prev) => ({ ...prev, music: !prev.music }))
@@ -546,7 +554,7 @@ export const ProfileBlockInspector = observer(
               <>
                 <Stack direction="row" alignItems="center" spacing={0.75}>
                   <Typography level="body-xs" css={{ flex: 1, opacity: 0.8 }}>
-                    MP3 uploaded
+                    {t("profile.inspector.mp3Uploaded")}
                   </Typography>
                   <Button
                     size="sm"
@@ -559,10 +567,10 @@ export const ProfileBlockInspector = observer(
                       })
                     }
                   >
-                    Remove
+                    {t("profile.remove")}
                   </Button>
                 </Stack>
-                <FieldLabel>Track info</FieldLabel>
+                <FieldLabel>{t("profile.inspector.trackInfo")}</FieldLabel>
                 <Input
                   value={draft.profileMusicTitle ?? ""}
                   onChange={(event) =>
@@ -570,7 +578,7 @@ export const ProfileBlockInspector = observer(
                       profileMusicTitle: event.target.value || null
                     })
                   }
-                  placeholder="Song title"
+                  placeholder={t("profile.inspector.songTitle")}
                 />
                 <Input
                   value={draft.profileMusicAuthorName ?? ""}
@@ -579,7 +587,7 @@ export const ProfileBlockInspector = observer(
                       profileMusicAuthorName: event.target.value || null
                     })
                   }
-                  placeholder="Artist(s)"
+                  placeholder={t("profile.inspector.artists")}
                 />
               </>
             ) : (
@@ -604,7 +612,7 @@ export const ProfileBlockInspector = observer(
                           profileMusicTrackSelection: null
                         })
                       }
-                      placeholder="YouTube or Apple Music link"
+                      placeholder={t("profile.inspector.youtubeOrAppleMusicLink")}
                     />
                     <Stack direction="row" spacing={1}>
                       <Button
@@ -613,7 +621,7 @@ export const ProfileBlockInspector = observer(
                         loading={uploadingMusic}
                         onClick={() => musicInputRef.current?.click()}
                       >
-                        Upload MP3
+                        {t("profile.inspector.uploadMp3")}
                       </Button>
                       {draft.profileMusicUrl && (
                         <Button
@@ -627,14 +635,11 @@ export const ProfileBlockInspector = observer(
                             })
                           }
                         >
-                          Clear
+                          {t("profile.inspector.clear")}
                         </Button>
                       )}
                     </Stack>
-                    <FieldHint>
-                      Upload an MP3 or paste a YouTube / Apple Music link for
-                      full song playback.
-                    </FieldHint>
+                    <FieldHint>{t("profile.inspector.profileMusicHint")}</FieldHint>
                   </>
                 )}
               </>
@@ -648,9 +653,7 @@ export const ProfileBlockInspector = observer(
                 const file = event.target.files?.[0];
                 if (!file) return;
                 if (/\.wav$/i.test(file.name)) {
-                  toast.error(
-                    "WAV files are not supported. Please upload an MP3."
-                  );
+                  toast.error(t("profile.inspector.wavNotSupported"));
                   event.target.value = "";
                   return;
                 }
@@ -664,7 +667,7 @@ export const ProfileBlockInspector = observer(
                       profileMusicTrackSelection: null
                     }),
                   setUploadingMusic,
-                  "Profile music"
+                  "profileMusic"
                 );
                 event.target.value = "";
               }}
@@ -676,7 +679,7 @@ export const ProfileBlockInspector = observer(
 
         <InspectorSection
           icon={<CursorClickIcon size={16} weight="fill" />}
-          title="Selected block"
+          title={t("profile.inspector.selectedBlock")}
           collapsed={collapsed.selected}
           onToggleCollapsed={() =>
             setCollapsed((prev) => ({ ...prev, selected: !prev.selected }))
@@ -694,7 +697,7 @@ export const ProfileBlockInspector = observer(
             >
               <CursorClickIcon size={28} css={{ opacity: 0.35 }} />
               <Typography level="body-sm" css={{ opacity: 0.7 }}>
-                Click a block on the canvas to edit it
+                {t("profile.inspector.clickBlockToEdit")}
               </Typography>
             </Paper>
           ) : (
@@ -713,13 +716,13 @@ export const ProfileBlockInspector = observer(
                     opacity: 0.65
                   }}
                 >
-                  {selectedBlock.type}
+                  {t(`profile.blocks.${selectedBlock.type}`)}
                 </Typography>
               </Stack>
 
               {selectedBlock.type === "header" && (
                 <>
-                  <FieldLabel>Banner height</FieldLabel>
+                  <FieldLabel>{t("profile.inspector.bannerHeight")}</FieldLabel>
                   <Slider
                     min={35}
                     max={75}
@@ -733,7 +736,7 @@ export const ProfileBlockInspector = observer(
                     }
                     valueLabelDisplay="auto"
                   />
-                  <FieldLabel>Banner crop position</FieldLabel>
+                  <FieldLabel>{t("profile.inspector.bannerCropPosition")}</FieldLabel>
                   <Slider
                     min={0}
                     max={100}
@@ -747,11 +750,7 @@ export const ProfileBlockInspector = observer(
                     }
                     valueLabelDisplay="auto"
                   />
-                  <FieldHint>
-                    Drag the block edges on the canvas to change overall header
-                    size. Use the sliders to tune banner height and vertical
-                    crop.
-                  </FieldHint>
+                  <FieldHint>{t("profile.inspector.headerSizeHint")}</FieldHint>
                 </>
               )}
 
@@ -761,7 +760,7 @@ export const ProfileBlockInspector = observer(
                   maxLength={2000}
                   minHeight={120}
                   onChange={(content) => updateSelectedBlock({ content })}
-                  placeholder="Write something…"
+                  placeholder={t("profile.inspector.writeSomething")}
                 />
               )}
 
@@ -769,8 +768,15 @@ export const ProfileBlockInspector = observer(
                 (() => {
                   const imageBlock = selectedBlock as ProfileImageBlock;
                   const previewUrl = imageBlock.src
-                    ? resolveProfileImageBlockUrl(imageBlock.src, (hash, animated) =>
-                        profile.constructBlockImageUrl(hash, undefined, undefined, animated)
+                    ? resolveProfileImageBlockUrl(
+                        imageBlock.src,
+                        (hash, animated) =>
+                          profile.constructBlockImageUrl(
+                            hash,
+                            undefined,
+                            undefined,
+                            animated
+                          )
                       )
                     : null;
                   const previewIsVideo = previewUrl
@@ -810,7 +816,8 @@ export const ProfileBlockInspector = observer(
                         ))}
                       <Input
                         value={
-                          imageBlock.src && !isProfileImageCdnHash(imageBlock.src)
+                          imageBlock.src &&
+                          !isProfileImageCdnHash(imageBlock.src)
                             ? imageBlock.src
                             : ""
                         }
@@ -818,32 +825,37 @@ export const ProfileBlockInspector = observer(
                           updateSelectedBlock({ src: event.target.value })
                         }
                         placeholder={
-                          imageBlock.src ? "Image uploaded" : "Image URL"
+                          imageBlock.src
+                            ? t("profile.inspector.imageUploaded")
+                            : t("profile.inspector.imageUrl")
                         }
                       />
-                      <Button
-                        size="sm"
-                        color="neutral"
-                        loading={uploadingBlockImage}
-                        onClick={() => imageInputRef.current?.click()}
-                      >
-                        Upload image
-                      </Button>
-                      <Button
-                        size="sm"
-                        color="neutral"
-                        startDecorator={<GifIcon weight="fill" />}
-                        onClick={() =>
-                          openModal(
-                            "image-gif-picker",
-                            <ProfileImageGifPickerModal
-                              onSelect={(src) => updateSelectedBlock({ src })}
-                            />
-                          )
-                        }
-                      >
-                        Choose GIF
-                      </Button>
+                      <Stack flex={1} direction="row" spacing={1.25}>
+                        <Button
+                          size="sm"
+                          color="neutral"
+                          loading={uploadingBlockImage}
+                          onClick={() => imageInputRef.current?.click()}
+                          startDecorator={<UploadIcon weight="fill" />}
+                        >
+                          {t("profile.inspector.uploadImage")}
+                        </Button>
+                        <Button
+                          size="sm"
+                          color="neutral"
+                          startDecorator={<GifIcon weight="fill" />}
+                          onClick={() =>
+                            openModal(
+                              "image-gif-picker",
+                              <ProfileImageGifPickerModal
+                                onSelect={(src) => updateSelectedBlock({ src })}
+                              />
+                            )
+                          }
+                        >
+                          {t("profile.inspector.chooseGif")}
+                        </Button>
+                      </Stack>
                       <input
                         ref={imageInputRef}
                         type="file"
@@ -857,7 +869,7 @@ export const ProfileBlockInspector = observer(
                             "image",
                             (hash) => updateSelectedBlock({ src: hash }),
                             setUploadingBlockImage,
-                            "Image"
+                            "image"
                           );
                           event.target.value = "";
                         }}
@@ -883,7 +895,7 @@ export const ProfileBlockInspector = observer(
                           background: stickerBlock.expressionId
                             ? "transparent"
                             : "var(--mz-palette-neutral-softBg)",
-                          overflow: "hidden",
+                          overflow: "hidden"
                         }}
                       >
                         <ProfileStickerBlockView block={stickerBlock} />
@@ -898,16 +910,16 @@ export const ProfileBlockInspector = observer(
                             <ProfileStickerPickerModal
                               onSelect={(sticker) =>
                                 updateSelectedBlock({
-                                  expressionId: sticker.id,
+                                  expressionId: sticker.id
                                 })
                               }
-                            />,
+                            />
                           )
                         }
                       >
                         {stickerBlock.expressionId
-                          ? "Change sticker"
-                          : "Choose sticker"}
+                          ? t("profile.inspector.changeSticker")
+                          : t("profile.inspector.chooseSticker")}
                       </Button>
                     </>
                   );
@@ -929,7 +941,7 @@ export const ProfileBlockInspector = observer(
                             level="body-xs"
                             css={{ flex: 1, opacity: 0.8 }}
                           >
-                            MP3 uploaded
+                            {t("profile.inspector.mp3Uploaded")}
                           </Typography>
                           <Button
                             size="sm"
@@ -943,10 +955,10 @@ export const ProfileBlockInspector = observer(
                               } as Partial<APIProfileBlock>)
                             }
                           >
-                            Remove
+                            {t("profile.remove")}
                           </Button>
                         </Stack>
-                        <FieldLabel>Track info</FieldLabel>
+                        <FieldLabel>{t("profile.inspector.trackInfo")}</FieldLabel>
                         <Input
                           value={block.title ?? ""}
                           onChange={(e) =>
@@ -954,7 +966,7 @@ export const ProfileBlockInspector = observer(
                               title: e.target.value || null
                             } as Partial<APIProfileBlock>)
                           }
-                          placeholder="Song title"
+                          placeholder={t("profile.inspector.songTitle")}
                         />
                         <Input
                           value={block.artists ?? ""}
@@ -963,7 +975,7 @@ export const ProfileBlockInspector = observer(
                               artists: e.target.value || null
                             } as Partial<APIProfileBlock>)
                           }
-                          placeholder="Artist(s)"
+                          placeholder={t("profile.inspector.artists")}
                         />
                         <Input
                           value={block.image ?? ""}
@@ -972,7 +984,7 @@ export const ProfileBlockInspector = observer(
                               image: e.target.value || null
                             } as Partial<APIProfileBlock>)
                           }
-                          placeholder="Cover image URL (optional)"
+                          placeholder={t("profile.inspector.coverImageUrlOptional")}
                         />
                       </>
                     );
@@ -991,7 +1003,7 @@ export const ProfileBlockInspector = observer(
                             whiteSpace: "nowrap"
                           }}
                         >
-                          YouTube linked
+                          {t("profile.inspector.youtubeLinked")}
                         </Typography>
                         <Button
                           size="sm"
@@ -1002,7 +1014,7 @@ export const ProfileBlockInspector = observer(
                             } as Partial<APIProfileBlock>)
                           }
                         >
-                          Remove
+                          {t("profile.remove")}
                         </Button>
                       </Stack>
                     );
@@ -1017,7 +1029,7 @@ export const ProfileBlockInspector = observer(
                       {!block.track && (
                         <>
                           <Input
-                            placeholder="YouTube link"
+                            placeholder={t("profile.inspector.youtubeLink")}
                             onChange={(event) => {
                               const value = event.target.value.trim();
                               if (value)
@@ -1036,7 +1048,7 @@ export const ProfileBlockInspector = observer(
                                 blockMusicInputRef.current?.click()
                               }
                             >
-                              Upload MP3
+                              {t("profile.inspector.uploadMp3")}
                             </Button>
                           </Stack>
                           <input
@@ -1057,15 +1069,12 @@ export const ProfileBlockInspector = observer(
                                     track: null
                                   } as Partial<APIProfileBlock>),
                                 setUploadingBlockMusic,
-                                "Music"
+                                "music"
                               );
                               event.target.value = "";
                             }}
                           />
-                          <FieldHint>
-                            Upload an MP3 or paste a YouTube link for full song
-                            playback.
-                          </FieldHint>
+                          <FieldHint>{t("profile.inspector.blockMusicHint")}</FieldHint>
                         </>
                       )}
                     </>
@@ -1103,7 +1112,7 @@ export const ProfileBlockInspector = observer(
                           textColor="muted"
                           css={{ textAlign: "center" }}
                         >
-                          No drawing yet
+                          {t("profile.inspector.noDrawingYet")}
                         </Typography>
                       )}
                       <Button
@@ -1122,8 +1131,8 @@ export const ProfileBlockInspector = observer(
                         }
                       >
                         {drawBlock.svgData
-                          ? "Edit Drawing"
-                          : "Open Drawing Editor"}
+                          ? t("profile.inspector.editDrawing")
+                          : t("profile.inspector.openDrawingEditor")}
                       </Button>
                     </Stack>
                   );
@@ -1153,7 +1162,7 @@ export const ProfileBlockInspector = observer(
                   startDecorator={<ArrowUpIcon />}
                   onClick={() => layerBlock("up")}
                 >
-                  Forward
+                  {t("profile.inspector.forward")}
                 </Button>
                 <Button
                   size="sm"
@@ -1161,7 +1170,7 @@ export const ProfileBlockInspector = observer(
                   startDecorator={<ArrowDownIcon />}
                   onClick={() => layerBlock("down")}
                 >
-                  Back
+                  {t("profile.inspector.back")}
                 </Button>
                 <Button
                   size="sm"
@@ -1169,7 +1178,7 @@ export const ProfileBlockInspector = observer(
                   startDecorator={<TrashIcon />}
                   onClick={deleteSelected}
                 >
-                  Delete
+                  {t("profile.inspector.delete")}
                 </Button>
               </Stack>
             </SettingCard>

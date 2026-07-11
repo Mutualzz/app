@@ -5,6 +5,7 @@ import { Paper } from "@components/Paper";
 import { Button, Stack, Textarea, Typography } from "@mutualzz/ui-web";
 import { useModal } from "@contexts/Modal.context";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 
 interface Props {
@@ -17,6 +18,8 @@ export const StaffUserWarnConfirm = observer(
   ({ userId, username, onSuccess }: Props) => {
     const app = useAppStore();
     const { closeModal } = useModal();
+    const { t } = useTranslation("staff");
+    const { t: tCommon } = useTranslation("common");
     const [reason, setReason] = useState("");
 
     const { mutate: warnUser, isPending } = useMutation({
@@ -31,12 +34,14 @@ export const StaffUserWarnConfirm = observer(
         closeModal();
         toast.success(
           data.emailSent
-            ? "Warning sent and emailed to the user"
-            : "Warning recorded, but the email failed to send"
+            ? t("user.modals.warn.toastSent")
+            : t("user.modals.warn.toastEmailFailed")
         );
       },
       onError: (err) => {
-        toast.error(err instanceof Error ? err.message : "Failed to warn user");
+        toast.error(
+          err instanceof Error ? err.message : t("user.actions.errors.warnUser")
+        );
       }
     });
 
@@ -50,24 +55,23 @@ export const StaffUserWarnConfirm = observer(
         spacing={2.5}
       >
         <Typography level="h5" fontWeight="bold">
-          Warn User
+          {t("user.modals.warn.title")}
         </Typography>
-        <Typography>
-          This sends <b>@{username}</b> a warning email and logs it to their
-          audit trail. It doesn't change their account state.
-        </Typography>
+        <Typography>{t("user.modals.warn.body", { username })}</Typography>
         <Stack direction="column" spacing={1.25}>
-          <Typography fontWeight="bold">Reason (required)</Typography>
+          <Typography fontWeight="bold">
+            {t("user.modals.reasonRequired")}
+          </Typography>
           <Textarea
             value={reason}
             onChange={(e) => setReason(e.target.value)}
-            placeholder="Explain what the warning is for"
+            placeholder={t("user.modals.warn.placeholder")}
             rows={3}
           />
         </Stack>
         <Stack spacing={1.25} direction="row">
           <Button color="neutral" expand size="lg" onClick={() => closeModal()}>
-            Cancel
+            {tCommon("cancel")}
           </Button>
           <Button
             color="danger"
@@ -76,7 +80,7 @@ export const StaffUserWarnConfirm = observer(
             disabled={isPending || !reason.trim()}
             size="lg"
           >
-            Send Warning
+            {t("user.modals.warn.submit")}
           </Button>
         </Stack>
       </Paper>

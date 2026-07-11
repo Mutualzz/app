@@ -16,6 +16,7 @@ import {
   XIcon
 } from "@phosphor-icons/react";
 import { useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 import { observer } from "mobx-react-lite";
 
@@ -36,10 +37,13 @@ export const GoogleFontPicker = observer(
     value,
     onChange,
     allowClear = true,
-    label = "Font",
+    label,
     description,
     fontOwnerId
   }: Props) => {
+    const { t } = useTranslation("common");
+    const { t: tSettings } = useTranslation("settings");
+    const resolvedLabel = label ?? tSettings("fonts.label");
     const app = useAppStore();
     const uploadRef = useRef<HTMLInputElement>(null);
     const [query, setQuery] = useState("");
@@ -63,7 +67,7 @@ export const GoogleFontPicker = observer(
 
     const uploadFont = async (file: File) => {
       if (!ownerId) {
-        toast.error("Sign in to upload a custom font");
+        toast.error(tSettings("fonts.signInToUpload"));
         return;
       }
 
@@ -85,10 +89,12 @@ export const GoogleFontPicker = observer(
           result.displayName ?? file.name.replace(/\.(woff2|woff|ttf|otf)$/i, "")
         );
         onChange(result.fontFamily);
-        toast.success("Font uploaded");
+        toast.success(tSettings("fonts.uploadedSuccess"));
       } catch (error) {
         toast.error(
-          error instanceof Error ? error.message : "Failed to upload font"
+          error instanceof Error
+            ? error.message
+            : tSettings("fonts.uploadFailed")
         );
       } finally {
         setUploading(false);
@@ -98,7 +104,9 @@ export const GoogleFontPicker = observer(
 
     const previewLabel = (() => {
       if (isCustomFontRef(resolvedValue)) {
-        return customLabel ? `Uploaded · ${customLabel}` : "Uploaded font";
+        return customLabel
+          ? tSettings("fonts.uploadedNamed", { name: customLabel })
+          : tSettings("fonts.uploaded");
       }
       if (selectedFont) {
         return `${providerLabel(selectedFont.provider)} · ${selectedFont.category}`;
@@ -110,7 +118,7 @@ export const GoogleFontPicker = observer(
       <Stack direction="column" spacing={1.25}>
         <Stack direction="column" spacing={0.35}>
           <Typography level="body-xs" fontWeight={600} css={{ opacity: 0.85 }}>
-            {label}
+            {resolvedLabel}
           </Typography>
           {description && (
             <Typography
@@ -125,7 +133,7 @@ export const GoogleFontPicker = observer(
         <Input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search fonts or type a Google Font name…"
+          placeholder={tSettings("fonts.searchPlaceholder")}
           startDecorator={<MagnifyingGlassIcon />}
           endDecorator={
             query ? (
@@ -165,7 +173,9 @@ export const GoogleFontPicker = observer(
               }}
             >
               <Typography level="body-sm" fontWeight={600}>
-                Default ({DEFAULT_FONT_FAMILY})
+                {tSettings("fonts.defaultOption", {
+                  family: DEFAULT_FONT_FAMILY
+                })}
               </Typography>
             </Box>
           )}
@@ -188,10 +198,10 @@ export const GoogleFontPicker = observer(
               }}
             >
               <Typography level="body-sm" fontWeight={600}>
-                Use &ldquo;{trimmedQuery}&rdquo;
+                {tSettings("fonts.useQuoted", { name: trimmedQuery })}
               </Typography>
               <Typography level="body-xs" css={{ opacity: 0.55 }}>
-                Load from Google / Bunny Fonts
+                {tSettings("fonts.loadFromProvider")}
               </Typography>
             </Box>
           )}
@@ -202,8 +212,8 @@ export const GoogleFontPicker = observer(
               css={{ opacity: 0.65, px: 0.75, py: 0.5 }}
             >
               {trimmedQuery
-                ? `No catalog fonts match "${trimmedQuery}"`
-                : "No fonts to show"}
+                ? tSettings("fonts.noMatch", { query: trimmedQuery })
+                : tSettings("fonts.noFonts")}
             </Typography>
           ) : (
             filteredFonts.map((font) => {
@@ -276,11 +286,10 @@ export const GoogleFontPicker = observer(
             startDecorator={<UploadSimpleIcon />}
             onClick={() => uploadRef.current?.click()}
           >
-            Upload custom font
+            {t("uploadCustomFont")}
           </Button>
           <Typography level="body-xs" css={{ opacity: 0.55, lineHeight: 1.4 }}>
-            TTF, OTF, WOFF, or WOFF2, up to 5 MB. Loads on demand when your
-            theme or profile is viewed.
+            {tSettings("fonts.uploadHint")}
           </Typography>
         </Stack>
 
@@ -295,7 +304,7 @@ export const GoogleFontPicker = observer(
           }}
         >
           <Typography level="body-xs" css={{ opacity: 0.6 }}>
-            Preview
+            {tSettings("fonts.preview")}
           </Typography>
           <Typography
             level="title-md"
@@ -303,7 +312,7 @@ export const GoogleFontPicker = observer(
               fontFamily: fontFamily ?? resolveFontFamilyCss(resolvedValue)
             }}
           >
-            The quick brown fox jumps over the lazy dog
+            {tSettings("fonts.pangram")}
           </Typography>
           <Typography
             level="body-sm"
@@ -327,7 +336,7 @@ export const GoogleFontPicker = observer(
             }}
             onClick={() => onChange(null)}
           >
-            Reset to default
+            {tSettings("fonts.resetToDefault")}
           </Typography>
         )}
       </Stack>

@@ -35,6 +35,7 @@ import {
 } from "@renderer/utils/emojis/emojiSprite";
 import { useRecentEmojis } from "@renderer/hooks/useRecentEmojis";
 import { ExpressionType } from "@mutualzz/types";
+import { pickerCategoryKeys } from "@mutualzz/i18n";
 import { useMenu } from "@contexts/ContextMenu.context";
 import {
   AirplaneIcon,
@@ -53,6 +54,7 @@ import {
   XIcon
 } from "@phosphor-icons/react";
 import { observable } from "mobx";
+import { useTranslation } from "react-i18next";
 import { Tooltip } from "@components/Tooltip";
 import { StickerPicker } from "./StickerPicker";
 import { canUseCustomEmoji } from "@utils/index";
@@ -61,6 +63,17 @@ const PICKER_WIDTH = 500;
 const PICKER_HEIGHT = 500;
 const SIDEBAR_WIDTH = 44;
 const EMOJI_SIZE = 28;
+
+const categoryLabel = (
+  id: string,
+  t: (key: string) => string,
+  fallback: string
+) => {
+  const key =
+    pickerCategoryKeys[id as keyof typeof pickerCategoryKeys] ??
+    pickerCategoryKeys[fallback as keyof typeof pickerCategoryKeys];
+  return key ? t(key) : fallback;
+};
 
 const CLAP_COORDS: Record<string, { sheetX: number; sheetY: number }> = {
   default: { sheetX: 13, sheetY: 11 },
@@ -329,6 +342,7 @@ export const EmojiPicker = observer(
     disableGif,
     disableStickers
   }: EmojiPickerProps) => {
+    const { t } = useTranslation("chat");
     const { theme } = useTheme();
     const app = useAppStore();
     const { recents, addRecentStandard, addRecentCustom } = useRecentEmojis();
@@ -553,7 +567,7 @@ export const EmojiPicker = observer(
         ? [
             {
               id: "favorites",
-              label: "Favorites",
+              label: t("picker.favorites"),
               renderIcon: () => <StarIcon size={16} />
             }
           ]
@@ -562,7 +576,7 @@ export const EmojiPicker = observer(
         ? [
             {
               id: "recent",
-              label: "Recently used",
+              label: t("picker.recentlyUsed"),
               renderIcon: () => <ClockIcon size={16} />
             }
           ]
@@ -571,7 +585,7 @@ export const EmojiPicker = observer(
         ? [
             {
               id: "my-emojis",
-              label: "Your emojis",
+              label: t("picker.yourEmojis"),
               renderIcon: () => <UserIcon size={16} />
             }
           ]
@@ -588,7 +602,7 @@ export const EmojiPicker = observer(
         const Icon = STANDARD_CATEGORY_ICONS[c.id] ?? HashIcon;
         return {
           id: c.id,
-          label: c.name,
+          label: categoryLabel(c.id, t, c.name),
           renderIcon: () => <Icon size={22} />
         };
       })
@@ -617,10 +631,10 @@ export const EmojiPicker = observer(
                 onClick={() => onTabChange(tab)}
               >
                 {tab === "emoji"
-                  ? "Emoji"
+                  ? t("picker.tabs.emoji")
                   : tab === "gifs"
-                    ? "GIFs"
-                    : "Stickers"}
+                    ? t("picker.tabs.gifs")
+                    : t("picker.tabs.stickers")}
               </TopTabButton>
             ))}
           </TopTabBar>
@@ -645,7 +659,7 @@ export const EmojiPicker = observer(
                   />
                   <SearchInput
                     ref={searchRef}
-                    placeholder="Search emojis…"
+                    placeholder={t("picker.searchEmojis")}
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     onKeyDown={handleSearchKey}
@@ -672,12 +686,12 @@ export const EmojiPicker = observer(
                   <SkinToneBtn
                     active={false}
                     onClick={() => setShowSkinTones((v) => !v)}
-                    title="Skin tone"
+                    title={t("picker.skinTone")}
                   >
                     <SpriteEmoji
                       sheetX={clapCoords.sheetX}
                       sheetY={clapCoords.sheetY}
-                      title="Skin tone"
+                      title={t("picker.skinTone")}
                     />
                   </SkinToneBtn>
                   {showSkinTones && (
@@ -692,7 +706,7 @@ export const EmojiPicker = observer(
                         <SpriteEmoji
                           sheetX={CLAP_COORDS.default.sheetX}
                           sheetY={CLAP_COORDS.default.sheetY}
-                          title="Default"
+                          title={t("picker.skinToneDefault")}
                         />
                       </SkinToneBtn>
                       {SKIN_TONE_MODIFIERS.map((tone) => (
@@ -749,13 +763,15 @@ export const EmojiPicker = observer(
                     <>
                       <SectionLabel textColor="muted">
                         {totalSearchResults
-                          ? `${totalSearchResults} result${totalSearchResults === 1 ? "" : "s"}`
-                          : "No results"}
+                          ? t("picker.results", { count: totalSearchResults })
+                          : t("picker.noResults")}
                       </SectionLabel>
 
                       {customSearchResults.length > 0 && (
                         <>
-                          <SectionLabel textColor="muted">Custom</SectionLabel>
+                          <SectionLabel textColor="muted">
+                            {t("picker.custom")}
+                          </SectionLabel>
                           <EmojiGrid>
                             {customSearchResults.map((emoji) => (
                               <EmojiBtn
@@ -779,7 +795,7 @@ export const EmojiPicker = observer(
                         <>
                           {customSearchResults.length > 0 && (
                             <SectionLabel textColor="muted">
-                              Standard
+                              {t("picker.standard")}
                             </SectionLabel>
                           )}
                           <EmojiGrid>
@@ -818,7 +834,7 @@ export const EmojiPicker = observer(
                       {favoriteEmojiItems.length > 0 && (
                         <div data-category="favorites">
                           <SectionLabel textColor="muted">
-                            Favorites
+                            {t("picker.favorites")}
                           </SectionLabel>
                           <EmojiGrid>
                             {favoriteEmojiItems.map((item) =>
@@ -867,7 +883,7 @@ export const EmojiPicker = observer(
                       {recentItems.length > 0 && (
                         <div data-category="recent">
                           <SectionLabel textColor="muted">
-                            Recently used
+                            {t("picker.recentlyUsed")}
                           </SectionLabel>
                           <EmojiGrid>
                             {recentItems.map((item, i) =>
@@ -924,7 +940,7 @@ export const EmojiPicker = observer(
                       {myEmojis.length > 0 && (
                         <div data-category="my-emojis">
                           <SectionLabel textColor="muted">
-                            Your emojis
+                            {t("picker.yourEmojis")}
                           </SectionLabel>
                           <EmojiGrid>
                             {myEmojis.map((emoji) => (
@@ -989,7 +1005,7 @@ export const EmojiPicker = observer(
                       {PICKER_CATEGORIES.map((category) => (
                         <div key={category.id} data-category={category.id}>
                           <SectionLabel textColor="muted">
-                            {category.name}
+                            {categoryLabel(category.id, t, category.name)}
                           </SectionLabel>
                           <EmojiGrid>
                             {category.emojis.map((emoji) => {

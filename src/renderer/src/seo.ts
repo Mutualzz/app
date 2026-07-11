@@ -1,3 +1,5 @@
+import i18n from "@renderer/i18n";
+
 interface SEO {
   title?: string;
   description?: string;
@@ -6,14 +8,10 @@ interface SEO {
   url?: string;
 }
 
-const defaultTitle = "Mutualzz (Early Access)";
-const defaultDescription =
-  "Connect with other people who share your interests. Currently under heavy development";
-
 export const seo = (params?: SEO) => {
   const {
-    title = defaultTitle,
-    description = defaultDescription,
+    title = i18n.t("seo.defaultTitle", { ns: "common" }),
+    description = i18n.t("seo.defaultDescription", { ns: "common" }),
     image,
     keywords,
     url

@@ -5,12 +5,14 @@ import { Paper, Stack, Typography } from "@mutualzz/ui-web";
 import { GifIcon, XIcon } from "@phosphor-icons/react";
 import { GifPicker } from "@renderer/components/Expression/GifPicker";
 import { IconButton } from "@renderer/components/IconButton";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   onSelect: (src: string) => void;
 }
 
 export const ProfileImageGifPickerModal = ({ onSelect }: Props) => {
+  const { t } = useTranslation("settings");
   const app = useAppStore();
   const { closeModal } = useModal();
 
@@ -32,7 +34,7 @@ export const ProfileImageGifPickerModal = ({ onSelect }: Props) => {
         <Stack direction="row" spacing={1.25} alignItems="center">
           <GifIcon size={18} weight="fill" />
           <Typography level="title-sm" fontWeight={700}>
-            Choose a GIF
+            {t("profile.inspector.chooseGif")}
           </Typography>
         </Stack>
         <IconButton size="sm" onClick={() => closeModal("image-gif-picker")}>

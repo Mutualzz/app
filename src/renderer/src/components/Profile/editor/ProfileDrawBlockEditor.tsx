@@ -4,6 +4,7 @@ import type { APIProfileBlock, ProfileDrawBlock } from "@mutualzz/types";
 import { InputColor, Slider, Stack, Typography } from "@mutualzz/ui-web";
 import { EraserIcon, PaintBrushIcon } from "@phosphor-icons/react";
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   ReactSketchCanvas,
   type ReactSketchCanvasRef
@@ -34,6 +35,8 @@ export const ProfileDrawBlockEditor = ({
   updateBlock,
   onApply
 }: Props) => {
+  const { t } = useTranslation("common");
+  const { t: tSettings } = useTranslation("settings");
   const canvasRef = useRef<ReactSketchCanvasRef>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [canvasSize, setCanvasSize] = useState(DEFAULT_CANVAS_SIZE);
@@ -107,7 +110,9 @@ export const ProfileDrawBlockEditor = ({
           }
           onClick={toggleEraser}
         >
-          {eraserMode ? "Eraser" : "Brush"}
+          {eraserMode
+            ? tSettings("profile.draw.eraser")
+            : tSettings("profile.draw.brush")}
         </Button>
         <Stack direction="row" spacing={0.75} alignItems="center" flex={1}>
           <Slider
@@ -125,7 +130,7 @@ export const ProfileDrawBlockEditor = ({
           <>
             <Stack direction="column" spacing={0.75} alignItems="center">
               <Typography level="body-xs" css={{ opacity: 0.7 }}>
-                Brush
+                {tSettings("profile.draw.brush")}
               </Typography>
               <InputColor
                 size="sm"
@@ -137,7 +142,7 @@ export const ProfileDrawBlockEditor = ({
         )}
         <Stack direction="column" spacing={0.75} alignItems="center">
           <Typography level="body-xs" css={{ opacity: 0.7 }}>
-            Background
+            {tSettings("profile.draw.background")}
           </Typography>
           <InputColor
             size="sm"
@@ -185,7 +190,7 @@ export const ProfileDrawBlockEditor = ({
           disabled={isEmpty}
           onClick={() => canvasRef.current?.undo()}
         >
-          Undo
+          {t("undo")}
         </Button>
         <Button
           size="sm"
@@ -193,7 +198,7 @@ export const ProfileDrawBlockEditor = ({
           disabled={isEmpty}
           onClick={() => canvasRef.current?.redo()}
         >
-          Redo
+          {t("redo")}
         </Button>
         <Button
           size="sm"
@@ -204,7 +209,7 @@ export const ProfileDrawBlockEditor = ({
             setIsEmpty(true);
           }}
         >
-          Clear
+          {t("clear")}
         </Button>
         <Button
           size="sm"
@@ -212,7 +217,7 @@ export const ProfileDrawBlockEditor = ({
           onClick={apply}
           css={{ marginLeft: "auto" }}
         >
-          Apply
+          {t("apply")}
         </Button>
       </Stack>
     </Stack>

@@ -8,6 +8,7 @@ import { useModal } from "@contexts/Modal.context";
 import { Space } from "@stores/objects/Space";
 import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 
 interface Props {
@@ -18,17 +19,20 @@ interface Props {
 export const MemberKick = observer(({ space, member }: Props) => {
   const app = useAppStore();
   const { closeModal } = useModal();
+  const { t } = useTranslation("space");
+  const { t: tCommon } = useTranslation("common");
 
   const [reason, setReason] = useState<string | null>(null);
+  const name = member.user?.username ?? "";
 
   const { mutate: kickMember, isPending: kickingMember } = useMutation({
     mutationKey: ["member-kick", member.id],
     mutationFn: () =>
       app.rest.post(`/spaces/${space.id}/members/${member.id}/kick`, {
-        reason: reason ?? "No reason provided"
+        reason: reason ?? t("bans.noReason")
       }),
     onSuccess: () => {
-      toast.success(`Kicked ${member.user?.username} from space`);
+      toast.success(t("moderation.kickSuccess", { name }));
       closeModal();
     }
   });
@@ -44,18 +48,17 @@ export const MemberKick = observer(({ space, member }: Props) => {
     >
       <Stack direction="column" spacing={5}>
         <Typography level="h5" fontWeight="bold">
-          Kick {member.user?.username} from space
+          {t("moderation.kickFromSpaceTitle", { name })}
         </Typography>
         <Typography level="body-sm" textColor="secondary">
-          Are you sure you want to kick @{member.user?.username} from the space?
-          They will need an invite to rejoin.
+          {t("moderation.kickBody", { name })}
         </Typography>
 
         <InputWithLabel
           onChange={(e) => setReason(e.target.value)}
           value={reason || ""}
           name="reason"
-          label="Reason for Kick"
+          label={t("moderation.reasonForKick")}
           type="text"
         />
       </Stack>
@@ -66,7 +69,7 @@ export const MemberKick = observer(({ space, member }: Props) => {
           disabled={kickingMember}
           onClick={() => closeModal()}
         >
-          Cancel
+          {tCommon("cancel")}
         </Button>
         <Button
           color="danger"
@@ -74,7 +77,7 @@ export const MemberKick = observer(({ space, member }: Props) => {
           onClick={() => kickMember()}
           disabled={kickingMember}
         >
-          Kick
+          {t("actions.kick")}
         </Button>
       </Stack>
     </Paper>

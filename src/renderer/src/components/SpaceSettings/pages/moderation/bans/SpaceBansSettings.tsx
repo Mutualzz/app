@@ -1,6 +1,7 @@
 import { observer } from "mobx-react-lite";
 import { Space } from "@stores/objects/Space";
 import { Stack, Typography } from "@mutualzz/ui-web";
+import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { Paper } from "@components/Paper";
 import { SpaceBan } from "@stores/objects/SpaceBan";
@@ -57,6 +58,7 @@ const BanItem = observer(({ ban }: BanItemProps) => {
 });
 
 export const SpaceBansSettings = observer(({ space }: Props) => {
+  const { t } = useTranslation("space");
   const [search, setSearch] = useState<string | null>(null);
 
   const data = space.banList;
@@ -78,15 +80,13 @@ export const SpaceBansSettings = observer(({ space }: Props) => {
   return (
     <Paper mt={2.5} p={2} spacing={2.5} direction="column">
       <Stack direction="column" spacing={1.25}>
-        <Typography level="h5">Space Ban List</Typography>
+        <Typography level="h5">{t("bans.title")}</Typography>
         <Typography textColor="muted" mb={2.5}>
-          View and manage the list of banned users in this space. As of right
-          now the ban is account based, we will be introducing IP bans in the
-          future.
+          {t("bans.description")}
         </Typography>
       </Stack>
       <InputWithLabel
-        placeholder="Search Bans by User ID or Username or Display Name"
+        placeholder={t("bans.searchPlaceholder")}
         name="search"
         onChange={(e) => setSearch(e.target.value)}
         value={search || ""}
@@ -95,7 +95,7 @@ export const SpaceBansSettings = observer(({ space }: Props) => {
       {bans.length === 0 && (
         <Stack justifyContent="center" alignItems="center" py="4rem">
           <Typography textAlign="center" textColor="muted">
-            No one has been banned yet
+            {t("bans.empty")}
           </Typography>
         </Stack>
       )}

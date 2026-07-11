@@ -11,32 +11,22 @@ import {
 } from "@mutualzz/ui-web";
 import { SpaceMember } from "@stores/objects/SpaceMember";
 import { Space } from "@stores/objects/Space";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { InputWithLabel } from "@components/InputWithLabel";
 import { useMutation } from "@tanstack/react-query";
 import { useModal } from "@contexts/Modal.context";
 import { HttpException } from "@mutualzz/types";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   space: Space;
   member: SpaceMember;
 }
 
-const suspicious = "Suspicious or spam account";
-const compromised = "Compromised or hacked account";
-const breakingRules = "Breaking space rules";
-const other = "Other";
-
-const deleteMessageOptions = [
-  { label: "Don't delete messages", value: 0 },
-  { label: "Last hour", value: 3600 },
-  { label: "Last 24 hours", value: 86400 },
-  { label: "Last 7 days", value: 604800 },
-  { label: "Delete all messages", value: -1 }
-];
-
 export const MemberBan = observer(({ space, member }: Props) => {
   const app = useAppStore();
+  const { t } = useTranslation("space");
+  const { t: tCommon } = useTranslation("common");
   const [reason, setReason] = useState<string | null>(null);
   const [deleteMessageTimeframe, setDeleteMessageTimeframe] =
     useState<number>(3600);
@@ -48,6 +38,27 @@ export const MemberBan = observer(({ space, member }: Props) => {
   });
 
   const { closeModal } = useModal();
+
+  const banReasons = useMemo(
+    () => ({
+      suspicious: t("moderation.banReasons.suspicious"),
+      compromised: t("moderation.banReasons.compromised"),
+      breakingRules: t("moderation.banReasons.breakingRules"),
+      other: t("moderation.banReasons.other")
+    }),
+    [t]
+  );
+
+  const deleteMessageOptions = useMemo(
+    () => [
+      { label: t("moderation.deleteMessages.dontDeleteMessages"), value: 0 },
+      { label: t("moderation.deleteMessages.lastHour"), value: 3600 },
+      { label: t("moderation.deleteMessages.last24Hours"), value: 86400 },
+      { label: t("moderation.deleteMessages.last7Days"), value: 604800 },
+      { label: t("moderation.deleteMessages.deleteAllMessages"), value: -1 }
+    ],
+    [t]
+  );
 
   const { mutate: banMember, isPending: isBanning } = useMutation({
     mutationKey: ["ban_member", space.id, member.id],
@@ -66,6 +77,8 @@ export const MemberBan = observer(({ space, member }: Props) => {
     }
   });
 
+  const name = member.user?.displayName ?? member.user?.username ?? "";
+
   return (
     <Paper
       elevation={app.settings?.preferEmbossed ? 5 : 1}
@@ -77,48 +90,48 @@ export const MemberBan = observer(({ space, member }: Props) => {
     >
       <Stack direction="column" spacing={5}>
         <Typography level="h6" textColor="secondary" fontWeight="bold">
-          Ban @{member.user?.displayName}?
+          {t("moderation.banTitle", { name })}
         </Typography>
-        <Typography fontWeight="bold">Reason for ban *</Typography>
+        <Typography fontWeight="bold">{t("moderation.reasonForBan")}</Typography>
         <Stack direction="column" justifyContent="center" spacing={2.5}>
           <Radio
             color="neutral"
-            value={suspicious}
-            label={suspicious}
-            checked={reason === suspicious}
+            value={banReasons.suspicious}
+            label={banReasons.suspicious}
+            checked={reason === banReasons.suspicious}
             onChange={() => {
-              setReason(suspicious);
+              setReason(banReasons.suspicious);
               setOtherSelected(false);
             }}
             size={18}
           />
           <Radio
             color="neutral"
-            value={compromised}
-            label={compromised}
-            checked={reason === compromised}
+            value={banReasons.compromised}
+            label={banReasons.compromised}
+            checked={reason === banReasons.compromised}
             onChange={() => {
-              setReason(compromised);
+              setReason(banReasons.compromised);
               setOtherSelected(false);
             }}
             size={18}
           />
           <Radio
             color="neutral"
-            value={breakingRules}
-            label={breakingRules}
-            checked={reason === breakingRules}
+            value={banReasons.breakingRules}
+            label={banReasons.breakingRules}
+            checked={reason === banReasons.breakingRules}
             onChange={() => {
-              setReason(breakingRules);
+              setReason(banReasons.breakingRules);
               setOtherSelected(false);
             }}
             size={18}
           />
           <Radio
             color="neutral"
-            value={other}
-            label={other}
-            checked={reason === other}
+            value={banReasons.other}
+            label={banReasons.other}
+            checked={otherSelected}
             onChange={() => {
               setReason("");
               setOtherSelected(true);
@@ -140,7 +153,7 @@ export const MemberBan = observer(({ space, member }: Props) => {
           )}
         </Stack>
         <Stack direction="column" spacing={2.5}>
-          <Typography>Delete recent messages</Typography>
+          <Typography>{t("moderation.deleteRecentMessages")}</Typography>
           <Select
             value={deleteMessageTimeframe}
             onValueChange={(v) => setDeleteMessageTimeframe(Number(v))}
@@ -159,7 +172,7 @@ export const MemberBan = observer(({ space, member }: Props) => {
             disabled={isBanning}
             onClick={() => closeModal()}
           >
-            Cancel
+            {tCommon("cancel")}
           </Button>
           <Button
             color="danger"
@@ -167,7 +180,7 @@ export const MemberBan = observer(({ space, member }: Props) => {
             onClick={() => banMember()}
             disabled={isBanning}
           >
-            Ban
+            {t("actions.ban")}
           </Button>
         </Stack>
       </Stack>

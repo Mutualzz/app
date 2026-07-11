@@ -13,9 +13,11 @@ import {
 import { toast } from "react-toastify";
 import { isElectron } from "@utils/index";
 import { CopyIcon } from "@phosphor-icons/react";
+import { useTranslation } from "react-i18next";
 
 export const AddFriendTab = observer(() => {
   const app = useAppStore();
+  const { t } = useTranslation("chat");
   const [identifier, setIdentifier] = useState("");
   const [copied, setCopied] = useState(false);
 
@@ -31,10 +33,10 @@ export const AddFriendTab = observer(() => {
     matchingRelationship?.type === RelationshipType.OutgoingRequest;
 
   const buttonLabel = isFriend
-    ? "Already friends"
+    ? t("friends.alreadyFriends")
     : alreadySent
-      ? "Already sent request"
-      : "Send Request";
+      ? t("friends.alreadySent")
+      : t("friends.sendRequest");
 
   const isDisabled = !trimmed || isBlocked || isFriend || alreadySent;
 
@@ -44,10 +46,10 @@ export const AddFriendTab = observer(() => {
       const status = err instanceof HttpException ? err.status : null;
       const message =
         status === HttpStatusCode.NotFound
-          ? "Unknown username, please make sure the username is correct"
+          ? t("friends.unknownUsername")
           : err instanceof Error
             ? err.message
-            : "Unknown username, please make sure the username is correct";
+            : t("friends.unknownUsername");
       toast.error(message);
     }
   });
@@ -103,15 +105,15 @@ export const AddFriendTab = observer(() => {
       }}
     >
       <Stack direction="column" spacing={1.25}>
-        <Typography level="body-lg">Add Friend</Typography>
+        <Typography level="body-lg">{t("friends.addTitle")}</Typography>
         <Typography textColor="secondary">
-          You can add friends with their Mutualzz username.
+          {t("friends.addDescription")}
         </Typography>
         <Input
           type="text"
           value={identifier}
           onChange={(e) => setIdentifier(e.target.value)}
-          placeholder="Enter username"
+          placeholder={t("friends.usernamePlaceholder")}
           css={{
             padding: 6
           }}
@@ -130,14 +132,15 @@ export const AddFriendTab = observer(() => {
       <Divider />
 
       <Stack direction="column" spacing={1.25}>
-        <Typography level="body-lg">Your Friend Link</Typography>
+        <Typography level="body-lg">{t("friends.friendLinkTitle")}</Typography>
         <Typography textColor="secondary">
-          Share this link to let people send you a friend request. They will see
-          an Add Friend button in chat.
+          {t("friends.friendLinkDescription")}
         </Typography>
 
         {!friendInvite && (isLoadingFriendInvite || isCreatingFriendInvite) && (
-          <Typography textColor="secondary">Creating your friend link...</Typography>
+          <Typography textColor="secondary">
+            {t("friends.creatingLink")}
+          </Typography>
         )}
 
         {friendInvite && (
@@ -156,7 +159,7 @@ export const AddFriendTab = observer(() => {
                 disabled={copied}
                 size="sm"
               >
-                {copied ? "Copied" : "Copy"}
+                {copied ? t("friends.copied") : t("friends.copy")}
               </Button>
             }
           />

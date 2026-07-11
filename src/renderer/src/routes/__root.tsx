@@ -1,4 +1,5 @@
 import "../styles/fonts";
+import "../i18n";
 
 import createCache from "@emotion/cache";
 import { CacheProvider } from "@emotion/react";
@@ -15,7 +16,13 @@ import duration from "dayjs/plugin/duration";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { reaction } from "mobx";
 import { observer } from "mobx-react-lite";
-import { type PropsWithChildren, type ReactNode, useEffect, useRef, useState } from "react";
+import {
+  type PropsWithChildren,
+  type ReactNode,
+  useEffect,
+  useRef,
+  useState
+} from "react";
 
 import { AppCrashFallback } from "@components/ErrorBoundary/AppCrashFallback";
 import { DesktopShell } from "@components/Desktop/DesktopShell";
@@ -68,7 +75,7 @@ function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
           height: "100dvh",
           margin: 0,
           padding: 0,
-          width: "100vw",
+          width: "100%",
           overflow: "hidden"
         }}
       >
@@ -202,8 +209,8 @@ function RootComponent() {
                       <Loader>
                         <Stack
                           direction="column"
-                          height="100vh"
-                          width="100vw"
+                          height="100%"
+                          width="100%"
                           flex={1}
                           minHeight={0}
                           css={{

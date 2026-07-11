@@ -10,12 +10,13 @@ import { useEffect, useRef } from "react";
 import { IconButton, Stack, Typography } from "@mutualzz/ui-web";
 import { Paper } from "@components/Paper";
 import { useModal } from "@contexts/Modal.context";
-import startCase from "lodash-es/startCase";
+import { channelPageTitleKeys } from "@mutualzz/i18n";
 import { XIcon } from "@phosphor-icons/react";
 import { ChannelOverviewSettings } from "@components/ChannelSettings/pages/ChannelOverviewSettings";
 import { ChannelPermissionsSettings } from "@components/ChannelSettings/pages/ChannelPermissionsSettings";
 import { ChannelInvitesSettings } from "@components/ChannelSettings/pages/ChannelInvitesSettings";
 import { ChannelType } from "@mutualzz/types";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   space: Space;
@@ -26,6 +27,7 @@ interface Props {
 export const ChannelSettingsContent = observer(
   ({ space, channel, redirectTo }: Props) => {
     const app = useAppStore();
+    const { t } = useTranslation("space");
     const { closeAllModals } = useModal();
     const { currentPage, setCurrentPage } = useChannelSettings();
 
@@ -58,7 +60,11 @@ export const ChannelSettingsContent = observer(
           justifyContent="space-between"
         >
           <Typography level="h5" fontFamily="monospace">
-            {startCase(currentPage)}
+            {t(
+              channelPageTitleKeys[
+                currentPage as keyof typeof channelPageTitleKeys
+              ]
+            )}
           </Typography>
           <IconButton
             color="neutral"

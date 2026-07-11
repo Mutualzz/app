@@ -3,6 +3,7 @@ import {
   parseCustomFontHash,
   resolveFontFamilyCss,
 } from "@mutualzz/ui-core";
+import i18n from "@renderer/i18n";
 import { ensureAppFont } from "@utils/fonts/appFontLoader";
 import { useEffect, useState } from "react";
 
@@ -40,5 +41,5 @@ export function useGoogleFont(
 
 export function getCustomFontLabel(family: string | null | undefined) {
   if (!family || !isCustomFontRef(family)) return null;
-  return "Custom font";
+  return i18n.t("fonts.customFont", { ns: "settings" });
 }

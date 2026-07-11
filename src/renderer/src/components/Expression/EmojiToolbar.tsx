@@ -17,6 +17,7 @@ import { TWEMOJI_URL } from "@utils/urls";
 import { Paper } from "@components/Paper";
 import { UserAvatar } from "@components/User/UserAvatar";
 import { SpaceIcon } from "@components/Space/SpaceIcon";
+import { useTranslation } from "react-i18next";
 
 interface StandardSuggestion {
   kind: "standard";
@@ -74,6 +75,7 @@ function buildDeduplicatedLabels(
 export const EmojiToolbar = () => {
   const editor = useSlate();
   const { enableEmojis } = useContext(MarkdownInputContext);
+  const { t } = useTranslation("chat");
   const app = useAppStore();
   const { theme } = useTheme();
 
@@ -300,7 +302,7 @@ export const EmojiToolbar = () => {
     >
       <Stack ml={2} alignItems="center" my={2} spacing={1.25}>
         <Typography level="body-sm" letterSpacing="0.06em" fontWeight={200}>
-          Emoji matching
+          {t("expressionPreview.emojiMatching")}
         </Typography>
         <Typography level="body-sm" letterSpacing="0.06em" fontWeight={200}>
           :{query}:

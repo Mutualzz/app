@@ -21,8 +21,8 @@ import { Theme } from "@stores/objects/Theme";
 import { useMutation } from "@tanstack/react-query";
 import { applyAdaptiveThemeValues } from "@utils/adaptation";
 import { sortThemes } from "@utils/index";
-import startCase from "lodash-es/startCase";
 import { observer } from "mobx-react-lite";
+import { useTranslation } from "react-i18next";
 import Snowflake from "@utils/Snowflake";
 import { usePrefersDark } from "@hooks/usePrefersDark";
 import type {
@@ -39,6 +39,7 @@ const availableFilters = [
 ] as const;
 
 export const ThemeCreatorSidebarRight = observer(() => {
+  const { t } = useTranslation("settings");
   const app = useAppStore();
   const prefersDark = usePrefersDark();
   const { theme: currentTheme, changeTheme } = useTheme();
@@ -212,7 +213,7 @@ export const ThemeCreatorSidebarRight = observer(() => {
               onClick={() => resetThemeCreator()}
               disabled={!userInteracted || inPreview}
             >
-              Reset
+              {t("themeCreator.actions.reset")}
             </Button>
             <Button
               expand
@@ -231,7 +232,9 @@ export const ThemeCreatorSidebarRight = observer(() => {
                 loadedType === "default" || ownedByUser || !userInteracted
               }
             >
-              {inPreview ? "Stop Preview" : "Preview"}
+              {inPreview
+                ? t("themeCreator.preview.stopShort")
+                : t("themeCreator.preview.preview")}
             </Button>
           </ButtonGroup>
         </Stack>
@@ -242,7 +245,9 @@ export const ThemeCreatorSidebarRight = observer(() => {
           lineColor="muted"
         />
         <Stack direction="column" spacing={2.5}>
-          <Typography textAlign="center">Load Themes</Typography>
+          <Typography textAlign="center">
+            {t("themeCreator.manage.loadThemes")}
+          </Typography>
           <RadioGroup
             value={loadedType}
             onChange={(_, value) =>
@@ -252,16 +257,22 @@ export const ThemeCreatorSidebarRight = observer(() => {
             orientation="horizontal"
             size="sm"
           >
-            <Radio value="default" label="Default" />
-            <Radio value="draft" label="Draft" />
-            <Radio value="custom" label="Custom" />
+            <Radio
+              value="default"
+              label={t("themeCreator.loadedTypes.default")}
+            />
+            <Radio value="draft" label={t("themeCreator.loadedTypes.draft")} />
+            <Radio
+              value="custom"
+              label={t("themeCreator.loadedTypes.custom")}
+            />
           </RadioGroup>
         </Stack>
         <Stack direction="column" spacing={2.5}>
           <Select
             onValueChange={handleChange}
             color="primary"
-            placeholder="Pick a theme"
+            placeholder={t("themeCreator.manage.pickTheme")}
             disabled={themes.length === 0}
             value={values.id}
           >
@@ -276,12 +287,12 @@ export const ThemeCreatorSidebarRight = observer(() => {
               color="danger"
               onClick={() => app.drafts.deleteThemeDraft(values)}
             >
-              Delete Draft
+              {t("themeCreator.actions.deleteDraft")}
             </Button>
           )}
           {loadedType === "custom" && values.id && values.id.trim() !== "" && (
             <Button color="danger" onClick={() => deleteTheme()}>
-              Delete Theme
+              {t("themeCreator.actions.deleteTheme")}
             </Button>
           )}
         </Stack>
@@ -292,18 +303,20 @@ export const ThemeCreatorSidebarRight = observer(() => {
           lineColor="muted"
         />
         <Stack direction="column">
-          <Typography textAlign="center">Filters</Typography>
+          <Typography textAlign="center">
+            {t("themeCreator.manage.filters")}
+          </Typography>
           <CheckboxGroup>
             <Checkbox
               key="theme-creator-filter-all"
-              label="All"
+              label={t("themeCreator.manage.all")}
               checked={filters.length === 0}
               onChange={() => resetFilters()}
             />
             {availableFilters.map((filter) => (
               <Checkbox
                 key={`theme-creator-filter-${filter}`}
-                label={startCase(filter)}
+                label={t(`themeCreator.filters.${filter}`)}
                 checked={filters.includes(filter)}
                 onChange={() => toggleFilter(filter)}
               />
@@ -328,14 +341,16 @@ export const ThemeCreatorSidebarRight = observer(() => {
             }
           >
             {app.drafts.existsThemeDraft(values)
-              ? "Update Draft"
-              : "Save Draft"}
+              ? t("themeCreator.actions.updateDraft")
+              : t("themeCreator.actions.saveDraft")}
           </Button>
           <Button
             color="success"
             onClick={() => (ownedByUser ? patchTheme() : putTheme())}
           >
-            {ownedByUser ? "Update" : "Publish"}
+            {ownedByUser
+              ? t("themeCreator.actions.update")
+              : t("themeCreator.actions.publish")}
           </Button>
         </ButtonGroup>
       </Stack>

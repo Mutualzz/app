@@ -1,6 +1,7 @@
 import { observer } from "mobx-react-lite";
 import type { Space } from "@stores/objects/Space";
 import { useMutation } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "@tanstack/react-router";
 import { Paper } from "@components/Paper";
 import { useAppStore } from "@hooks/useStores";
@@ -13,6 +14,8 @@ interface Props {
 }
 
 export const SpaceActionConfirm = observer(({ space, action }: Props) => {
+  const { t } = useTranslation("space");
+  const { t: tCommon } = useTranslation("common");
   const app = useAppStore();
   const navigate = useNavigate();
   const { closeModal, closeAllModals } = useModal();
@@ -45,23 +48,26 @@ export const SpaceActionConfirm = observer(({ space, action }: Props) => {
     >
       <Typography level="h5" fontWeight="bold" marginBottom={2}>
         {action === "delete"
-          ? `Delete '${space.name}'`
-          : `Leave '${space.name}'?`}
+          ? t("confirm.deleteSpaceTitle", { name: space.name })
+          : t("confirm.leaveSpaceTitle", { name: space.name })}
       </Typography>
       <Typography mb={2.5}>
-        Are you sure you want to {action} <b>{space.name}</b>? This Action
-        cannot be undone.
+        {action === "delete"
+          ? t("confirm.deleteSpaceBody", { name: space.name })
+          : t("confirm.leaveSpaceBody", { name: space.name })}
       </Typography>
       <ButtonGroup expand size="lg" spacing={5}>
         <Button color="neutral" onClick={() => closeModal()}>
-          Cancel
+          {tCommon("cancel")}
         </Button>
         <Button
           color="danger"
           onClick={() => (action === "delete" ? deleteSpace() : leaveSpace())}
           disabled={isPending || isLeaving}
         >
-          {action === "delete" ? "Delete" : "Leave"} Space
+          {action === "delete"
+            ? t("actions.deleteSpace")
+            : t("actions.leaveSpace")}
         </Button>
       </ButtonGroup>
     </Paper>

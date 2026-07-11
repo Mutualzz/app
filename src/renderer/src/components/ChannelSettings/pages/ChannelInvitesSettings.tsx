@@ -23,6 +23,7 @@ import { useQuery } from "@tanstack/react-query";
 import { ClipboardIcon, TrashIcon } from "@phosphor-icons/react";
 import { useAppStore } from "@hooks/useStores";
 import { Tooltip } from "@components/Tooltip";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   space: Space;
@@ -40,9 +41,9 @@ function pad(num: number) {
   return num.toString().padStart(2, "0");
 }
 
-const formatCountdown = (expiresAt: Date, now: Date) => {
+const formatCountdown = (expiresAt: Date, now: Date, expiredLabel: string) => {
   const diff = dayjs(expiresAt).diff(dayjs(now));
-  if (diff <= 0) return "Expired";
+  if (diff <= 0) return expiredLabel;
   const dur = dayjs.duration(diff);
   const days = pad(dur.days());
   const hours = pad(dur.hours());
@@ -52,6 +53,7 @@ const formatCountdown = (expiresAt: Date, now: Date) => {
 };
 
 const InviteItem = observer(({ theme, invite, last, now }: InviteItemProps) => {
+  const { t } = useTranslation("space");
   const app = useAppStore();
   const [hover, setHover] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -95,7 +97,11 @@ const InviteItem = observer(({ theme, invite, last, now }: InviteItemProps) => {
         </Stack>
         <Stack direction="row" flex={1}>
           <Typography fontFamily="monospace">{invite.code}</Typography>
-          <Tooltip content={copied ? "Copied to clipboard" : "Copy Invite URL"}>
+          <Tooltip
+            content={
+              copied ? t("invites.copiedToClipboard") : t("invites.copyInviteUrl")
+            }
+          >
             <IconButton
               variant="plain"
               size="sm"
@@ -118,7 +124,7 @@ const InviteItem = observer(({ theme, invite, last, now }: InviteItemProps) => {
           <Typography fontFamily="monospace">
             {invite.expiresAt ? (
               <time dateTime={invite.expiresAt.toISOString()}>
-                {formatCountdown(invite.expiresAt, now)}
+                {formatCountdown(invite.expiresAt, now, t("invites.expired"))}
               </time>
             ) : (
               "∞"
@@ -148,6 +154,7 @@ const InviteItem = observer(({ theme, invite, last, now }: InviteItemProps) => {
 });
 
 export const ChannelInvitesSettings = observer(({ space, channel }: Props) => {
+  const { t } = useTranslation("space");
   const { theme } = useTheme();
   const { openModal } = useModal();
 
@@ -170,7 +177,7 @@ export const ChannelInvitesSettings = observer(({ space, channel }: Props) => {
   return (
     <Stack direction="column" spacing={4} mt={1}>
       <Stack alignItems="center" justifyContent="space-between">
-        <Typography fontFamily="monospace">Active Invite Links</Typography>
+        <Typography fontFamily="monospace">{t("invites.activeLinks")}</Typography>
         <Button
           onClick={() =>
             openModal(
@@ -179,7 +186,7 @@ export const ChannelInvitesSettings = observer(({ space, channel }: Props) => {
             )
           }
         >
-          Create invite link
+          {t("channels.createInviteLink")}
         </Button>
       </Stack>
 
@@ -193,10 +200,10 @@ export const ChannelInvitesSettings = observer(({ space, channel }: Props) => {
               spacing={2}
               px="1rem"
             >
-              <Typography flex={1}>Inviter</Typography>
-              <Typography flex={1}>Invite Code</Typography>
-              <Typography flex={1}>Uses</Typography>
-              <Typography flex={1}>Expires</Typography>
+              <Typography flex={1}>{t("invites.columns.inviter")}</Typography>
+              <Typography flex={1}>{t("invites.columns.inviteCode")}</Typography>
+              <Typography flex={1}>{t("invites.columns.uses")}</Typography>
+              <Typography flex={1}>{t("invites.columns.expires")}</Typography>
             </Stack>
             <Divider
               lineColor="muted"
@@ -210,7 +217,7 @@ export const ChannelInvitesSettings = observer(({ space, channel }: Props) => {
         {invites.length === 0 && (
           <Stack justifyContent="center" alignItems="center" py="4rem">
             <Typography textAlign="center" textColor="muted">
-              No invites have been created for #{channel.name} yet.
+              {t("invites.empty")}
             </Typography>
           </Stack>
         )}

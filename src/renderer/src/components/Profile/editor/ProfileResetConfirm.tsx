@@ -9,6 +9,7 @@ import { useAppStore } from "@hooks/useStores";
 import { Stack, Typography } from "@mutualzz/ui-web";
 import { useMutation } from "@tanstack/react-query";
 import { observer } from "mobx-react-lite";
+import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 
 interface Props {
@@ -16,6 +17,8 @@ interface Props {
 }
 
 export const ProfileResetConfirm = observer(({ onSuccess }: Props) => {
+  const { t } = useTranslation("settings");
+  const { t: tCommon } = useTranslation("common");
   const app = useAppStore();
   const { closeModal } = useModal();
 
@@ -32,10 +35,12 @@ export const ProfileResetConfirm = observer(({ onSuccess }: Props) => {
     onSuccess: (result) => {
       if (result) onSuccess();
       closeModal();
-      toast.success("Profile reset to empty");
+      toast.success(t("profile.editor.resetSuccess"));
     },
     onError: (error) =>
-      toast.error(getApiErrorMessage(error, "Failed to reset profile"))
+      toast.error(
+        getApiErrorMessage(error, t("profile.editor.failedResetProfile"))
+      )
   });
 
   return (
@@ -47,15 +52,14 @@ export const ProfileResetConfirm = observer(({ onSuccess }: Props) => {
       maxWidth={420}
     >
       <Typography level="h5" fontWeight="bold" marginBottom={2}>
-        Reset profile to empty?
+        {t("profile.editor.resetTitle")}
       </Typography>
       <Typography mb={2.5} css={{ opacity: 0.85 }}>
-        This removes your bio, banner, background, profile music, and all blocks.
-        Your account avatar and username are not affected. This cannot be undone.
+        {t("profile.editor.resetDescription")}
       </Typography>
       <Stack spacing={1.25}>
         <Button color="neutral" size="lg" onClick={() => closeModal()}>
-          Cancel
+          {tCommon("cancel")}
         </Button>
         <Button
           color="danger"
@@ -63,7 +67,7 @@ export const ProfileResetConfirm = observer(({ onSuccess }: Props) => {
           loading={isPending}
           onClick={() => resetProfile()}
         >
-          Reset to empty
+          {t("profile.editor.resetToEmpty")}
         </Button>
       </Stack>
     </Paper>

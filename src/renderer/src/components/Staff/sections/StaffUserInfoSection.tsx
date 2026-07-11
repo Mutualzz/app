@@ -7,6 +7,7 @@ import { Stack, Typography } from "@mutualzz/ui-web";
 import { useMutation } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 
 interface Props {
@@ -32,6 +33,7 @@ function DetailRow({ label, value }: { label: string; value: string }) {
 
 export const StaffUserInfoSection = ({ user, onUpdated }: Props) => {
   const app = useAppStore();
+  const { t } = useTranslation("staff");
 
   const isVerified = BitField.fromString(userFlags, user.flags.toString()).has(
     "Verified"
@@ -83,7 +85,7 @@ export const StaffUserInfoSection = ({ user, onUpdated }: Props) => {
       mutationKey: ["staff-verify-reminder", user.id],
       mutationFn: () =>
         app.rest.post(`/staff/users/${user.id}/verify-reminder`),
-      onSuccess: () => toast.success("Verification reminder sent"),
+      onSuccess: () => toast.success(t("user.info.verifyReminderSent")),
       onError: (err: HttpException) => toast.error(err.message)
     });
 
@@ -91,16 +93,16 @@ export const StaffUserInfoSection = ({ user, onUpdated }: Props) => {
     <Stack direction="column" spacing={2} maxWidth={480}>
       <Stack direction="column" spacing={1.25}>
         <InputWithLabel
-          label="Username"
+          label={t("user.info.username")}
           name="username"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
           apiError={errors.username}
         />
         <InputWithLabel
-          label="Display Name"
+          label={t("user.info.displayName")}
           name="globalName"
-          placeholder="No display name set"
+          placeholder={t("user.info.noDisplayName")}
           value={globalName}
           onChange={(e) => setGlobalName(e.target.value)}
           apiError={errors.globalName}
@@ -115,21 +117,21 @@ export const StaffUserInfoSection = ({ user, onUpdated }: Props) => {
           onClick={() => saveProfile()}
           css={{ alignSelf: "flex-start" }}
         >
-          Save Changes
+          {t("user.info.saveChanges")}
         </Button>
       </Stack>
 
       <Stack direction="column" spacing={0.75}>
         <Typography level="title-sm" fontWeight={600}>
-          Account Details
+          {t("user.info.accountDetails")}
         </Typography>
-        <DetailRow label="Email" value={user.email} />
+        <DetailRow label={t("user.info.email")} value={user.email} />
         <Stack direction="row" justifyContent="space-between" alignItems="center">
           <Typography level="body-sm" textColor="muted">
-            Email Verified
+            {t("user.info.emailVerified")}
           </Typography>
           {isVerified ? (
-            <Typography level="body-sm">Yes</Typography>
+            <Typography level="body-sm">{t("user.info.yes")}</Typography>
           ) : (
             <Button
               size="sm"
@@ -138,23 +140,23 @@ export const StaffUserInfoSection = ({ user, onUpdated }: Props) => {
               disabled={sendingReminder}
               onClick={() => sendVerifyReminder()}
             >
-              Send Reminder
+              {t("user.info.sendReminder")}
             </Button>
           )}
         </Stack>
-        <DetailRow label="User ID" value={user.id} />
+        <DetailRow label={t("user.info.userId")} value={user.id} />
         <DetailRow
-          label="Date of Birth"
+          label={t("user.info.dateOfBirth")}
           value={dayjs(user.dateOfBirth).format("MMM D, YYYY")}
         />
         <DetailRow
-          label="Created"
+          label={t("user.info.created")}
           value={dayjs(user.createdAt).format("MMM D, YYYY h:mm A")}
         />
         {user.restrictedUntil &&
           new Date(user.restrictedUntil) > new Date() && (
             <DetailRow
-              label="Restricted Until"
+              label={t("user.info.restrictedUntil")}
               value={dayjs(user.restrictedUntil).format(
                 "MMM D, YYYY h:mm A"
               )}

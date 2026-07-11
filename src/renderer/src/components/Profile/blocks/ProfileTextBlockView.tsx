@@ -4,12 +4,14 @@ import type { ProfileTextBlock } from "@mutualzz/types";
 import { resolveProfileBlockCornerRadius } from "@mutualzz/ui-core";
 import { Box, Typography } from "@mutualzz/ui-web";
 import { useAppStore } from "@renderer/hooks/useStores";
+import { useTranslation } from "react-i18next";
 
 export const ProfileTextBlockView = ({
   block
 }: {
   block: ProfileTextBlock;
 }) => {
+  const { t } = useTranslation("settings");
   const app = useAppStore();
   const cornerRadius = resolveProfileBlockCornerRadius(block, "desktop");
 
@@ -31,7 +33,7 @@ export const ProfileTextBlockView = ({
           level="body-md"
           css={{ opacity: 0.5, fontSize: "var(--pcf-md)" }}
         >
-          Text
+          {t("profile.blocks.text")}
         </Typography>
       )}
     </Paper>

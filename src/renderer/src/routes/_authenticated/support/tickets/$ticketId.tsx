@@ -8,6 +8,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import dayjs from "dayjs";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 
 export const Route = createFileRoute(
@@ -17,6 +18,8 @@ export const Route = createFileRoute(
 });
 
 function SupportTicketDetailRoute() {
+  const { t } = useTranslation("common");
+  const { t: tSettings } = useTranslation("settings");
   const { ticketId } = Route.useParams();
   const app = useAppStore();
   const navigate = useNavigate();
@@ -44,7 +47,9 @@ function SupportTicketDetailRoute() {
       queryClient.invalidateQueries({ queryKey: ["support-tickets"] });
     },
     onError: (err) => {
-      toast.error(err instanceof Error ? err.message : "Failed to send reply");
+      toast.error(
+        err instanceof Error ? err.message : t("support.sendReplyFailed")
+      );
     }
   });
 
@@ -54,9 +59,9 @@ function SupportTicketDetailRoute() {
   return (
     <Stack flex={1} height="100%" overflow="hidden" width="100%" direction="column">
       <SupportHeader
-        title={ticket?.subject ?? "Support ticket"}
+        title={ticket?.subject ?? t("support.myTickets")}
         onBack={() => navigate({ to: "/support/tickets" })}
-        backLabel="Tickets"
+        backLabel={t("support.myTickets")}
       />
 
       <Paper
@@ -81,7 +86,7 @@ function SupportTicketDetailRoute() {
         <Stack direction="column" spacing={1} width="100%" maxWidth={640}>
           {isLoading && (
             <Typography level="body-sm" textColor="muted">
-              Loading...
+              {t("support.loading")}
             </Typography>
           )}
 
@@ -99,7 +104,7 @@ function SupportTicketDetailRoute() {
             >
               <Typography level="body-xs" textColor="muted">
                 {message.isStaff
-                  ? "Support"
+                  ? t("support.staffLabel")
                   : message.author.globalName || message.author.username}{" "}
                 · {dayjs(message.createdAt).format("MMM D, h:mm A")}
               </Typography>
@@ -114,7 +119,7 @@ function SupportTicketDetailRoute() {
               <Textarea
                 value={reply}
                 onChange={(e) => setReply(e.target.value)}
-                placeholder="Write a reply"
+                placeholder={t("support.writeReply")}
                 rows={4}
               />
               <Button
@@ -122,14 +127,16 @@ function SupportTicketDetailRoute() {
                 onClick={() => sendReply()}
                 css={{ alignSelf: "flex-start" }}
               >
-                {sending ? "Sending..." : "Send reply"}
+                {sending
+                  ? tSettings("account.sending")
+                  : t("support.sendReply")}
               </Button>
             </Stack>
           )}
 
           {isClosed && (
             <Typography level="body-sm" textColor="muted">
-              This ticket is closed. Open a new ticket if you still need help.
+              {t("support.ticketClosedHint")}
             </Typography>
           )}
         </Stack>

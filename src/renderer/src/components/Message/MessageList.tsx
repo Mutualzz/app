@@ -14,6 +14,7 @@ import { ChannelType } from "@mutualzz/types";
 import { UserAvatar } from "@components/User/UserAvatar";
 import { DMGroupAvatar } from "@components/DMChannel/DMGroupAvatar";
 import { HashIcon } from "@phosphor-icons/react";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   channel?: Channel | null;
@@ -30,7 +31,10 @@ const SpaceEndMessage = ({
 }: {
   channel: Channel | null;
   canReadHistory: boolean;
-}) => (
+}) => {
+  const { t } = useTranslation("chat");
+
+  return (
   <Stack direction="column" spacing={1} margin="16px 16px 0 16px">
     <Paper
       width={64}
@@ -47,20 +51,21 @@ const SpaceEndMessage = ({
     </Paper>
 
     <Typography level="h1" fontWeight={700} margin="8px 0">
-      Welcome to #{channel?.name}!
+      {t("empty.channel.welcome", { channel: channel?.name })}
     </Typography>
 
     {canReadHistory ? (
       <Typography textColor="secondary">
-        This is the start of the #{channel?.name} channel.
+        {t("empty.channel.start", { channel: channel?.name })}
       </Typography>
     ) : (
       <Typography textColor="secondary">
-        You don't have permissions to read message history
+        {t("empty.channel.noHistory")}
       </Typography>
     )}
   </Stack>
-);
+  );
+};
 
 const DMEndMessage = ({
   channel,
@@ -68,7 +73,13 @@ const DMEndMessage = ({
 }: {
   channel: Channel;
   isGroupDM: boolean;
-}) => (
+}) => {
+  const { t } = useTranslation("chat");
+  const conversation =
+    channel?.name ||
+    channel?.dmRecipients?.map((r) => r.displayName).join(", ");
+
+  return (
   <Stack direction="column" spacing={1} margin="16px 16px 0 16px">
     {isGroupDM ? (
       channel.iconUrl ? (
@@ -86,18 +97,18 @@ const DMEndMessage = ({
 
     <Typography level="h1" fontWeight={700} margin="8px 0">
       {isGroupDM
-        ? channel?.name ||
-          channel?.dmRecipients?.map((r) => r.displayName).join(", ")
-        : `Send your first message to ${channel?.dmRecipient?.displayName}`}
+        ? conversation
+        : t("empty.dm.firstMessage", {
+            name: channel?.dmRecipient?.displayName
+          })}
     </Typography>
 
     <Typography textColor="secondary">
-      Welcome to the beginning of the{" "}
-      {channel?.name ||
-        channel?.dmRecipients?.map((r) => r.displayName).join(", ")}
+      {t("empty.dm.beginning", { conversation })}
     </Typography>
   </Stack>
-);
+  );
+};
 
 export const MessageList = observer(({ channel: channelProp }: Props) => {
   const app = useAppStore();
@@ -254,6 +265,7 @@ export const MessageList = observer(({ channel: channelProp }: Props) => {
     >
       <Stack
         overflowY="auto"
+        overflowX="hidden"
         direction="column-reverse"
         flex="1 1 auto"
         ref={ref}

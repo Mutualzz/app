@@ -49,6 +49,7 @@ import { normalizeJSON } from "@utils/JSON";
 import { isElectron } from "@utils/index";
 import { toast } from "react-toastify";
 import { MessageToast } from "@renderer/components/Toast/MessageToast"; // We have to create our own GatewayStatus "enum" to avoid issues with SSR
+import i18n from "@renderer/i18n";
 import { Channel } from "./objects/Channel";
 
 // We have to create our own GatewayStatus "enum" to avoid issues with SSR
@@ -1309,7 +1310,11 @@ export class GatewayStore {
     this.app.channels.setPreferredActive();
 
     if (payload.reason === "banned" || payload.reason === "kicked")
-      toast.warn(`You were ${payload.reason} from ${space.name}`);
+      toast.warn(
+        payload.reason === "banned"
+          ? i18n.t("moderation.youWereBanned", { ns: "space", name: space.name })
+          : i18n.t("moderation.youWereKicked", { ns: "space", name: space.name })
+      );
   };
 
   private onSpaceUpdate = (payload: APISpace) => {

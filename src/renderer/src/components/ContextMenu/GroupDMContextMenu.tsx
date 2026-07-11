@@ -9,6 +9,7 @@ import { NotePencilIcon, SignOutIcon, TrashIcon } from "@phosphor-icons/react";
 import { useMutation } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { GroupDMEditModal } from "@components/DMChannel/GroupDMEditModal";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   channel: Channel;
@@ -18,6 +19,7 @@ export const GroupDMContextMenu = observer(({ channel }: Props) => {
   const app = useAppStore();
   const navigate = useNavigate();
   const { openModal } = useModal();
+  const { t } = useTranslation("chat");
 
   const readState = app.readStates.get(channel.id);
   const isOwner = !!channel.ownerId && channel.ownerId === app.account?.id;
@@ -54,7 +56,7 @@ export const GroupDMContextMenu = observer(({ channel }: Props) => {
             onClick={() => readState.ack()}
             disabled={!readState.isUnread}
           >
-            Mark as read
+            {t("contextMenu.markAsRead")}
           </ContextItem>
           <Divider css={{ opacity: 0.5 }} />
         </>
@@ -70,7 +72,7 @@ export const GroupDMContextMenu = observer(({ channel }: Props) => {
           }
           endDecorator={<NotePencilIcon weight="fill" />}
         >
-          Edit Group
+          {t("contextMenu.editGroup")}
         </ContextItem>
       )}
 
@@ -79,7 +81,7 @@ export const GroupDMContextMenu = observer(({ channel }: Props) => {
         disabled={isPending}
         endDecorator={<SignOutIcon weight="fill" />}
       >
-        Leave Group
+        {t("contextMenu.leaveGroup")}
       </ContextItem>
 
       {isOwner && (
@@ -89,7 +91,7 @@ export const GroupDMContextMenu = observer(({ channel }: Props) => {
           color="danger"
           endDecorator={<TrashIcon weight="fill" />}
         >
-          Delete Group
+          {t("contextMenu.deleteGroup")}
         </ContextItem>
       )}
     </ContextMenu>

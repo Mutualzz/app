@@ -23,6 +23,7 @@ import {
   UserPlusIcon
 } from "@phosphor-icons/react";
 import { Tooltip } from "@components/Tooltip";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   channel: Channel;
@@ -123,6 +124,7 @@ const ScreenShareTile = observer(
   ({ userId, user, size, selected, onWatch }: ScreenShareTileProps) => {
     const app = useAppStore();
     const { theme } = useTheme();
+    const { t } = useTranslation("chat");
     const videoRef = useRef<HTMLVideoElement>(null);
 
     const isSelf = app.account?.id === userId;
@@ -135,7 +137,7 @@ const ScreenShareTile = observer(
 
     const member = app.spaces.active?.members.get(userId);
     const displayName =
-      member?.displayName ?? user?.displayName ?? "Deleted User";
+      member?.displayName ?? user?.displayName ?? t("deletedUser");
 
     useEffect(() => {
       const el = videoRef.current;
@@ -164,7 +166,7 @@ const ScreenShareTile = observer(
             color={theme.colors.success}
           />
           <Typography level="body-sm" textAlign="center" color="success">
-            Starting your screen share...
+            {t("voice.startingScreenShare")}
           </Typography>
         </Stack>
       );
@@ -183,7 +185,7 @@ const ScreenShareTile = observer(
         >
           <DesktopIcon size={Math.round(size * 0.35)} weight="fill" />
           <Typography level="body-sm" textAlign="center">
-            {displayName} is sharing their screen
+            {t("voice.sharingScreen", { name: displayName })}
           </Typography>
           <Button
             size="sm"
@@ -193,7 +195,7 @@ const ScreenShareTile = observer(
               void app.voice.watchScreenShare(userId).then(() => onWatch?.());
             }}
           >
-            Watch Stream
+            {t("voice.watchStream")}
           </Button>
         </Stack>
       );
@@ -228,7 +230,7 @@ const ScreenShareTile = observer(
                 app.voice.stopWatchingScreenShare(userId);
               }}
             >
-              Stop Watching
+              {t("voice.stopWatching")}
             </Button>
           </Stack>
         )}
@@ -245,6 +247,7 @@ export const VoiceChannelView = observer(
     const hostRef = useRef<HTMLDivElement>(null);
     const [hovered, setHovered] = useState(false);
     const { openModal } = useModal();
+    const { t } = useTranslation("chat");
 
     const { openContextMenu } = useMenu();
 
@@ -383,7 +386,7 @@ export const VoiceChannelView = observer(
               <Typography fontWeight="bold" level="h2">
                 {channel.name}
               </Typography>
-              <Typography level="h6">No one is currently in voice</Typography>
+              <Typography level="h6">{t("voice.noOneInVoice")}</Typography>
               <Button
                 padding={12}
                 color="neutral"
@@ -394,7 +397,7 @@ export const VoiceChannelView = observer(
                   });
                 }}
               >
-                Join Voice
+                {t("voice.joinVoice")}
               </Button>
             </Stack>
           ) : (
@@ -503,10 +506,15 @@ export const VoiceChannelView = observer(
                         >
                           <Typography>
                             {isScreen
-                              ? `${state.member ? state.member.displayName : state.user?.displayName || "Deleted User"}'s Screen`
+                              ? t("voice.screenLabel", {
+                                  name:
+                                    state.member?.displayName ??
+                                    state.user?.displayName ??
+                                    t("deletedUser")
+                                })
                               : state.member
                                 ? state.member.displayName
-                                : state.user?.displayName || "Deleted User"}
+                                : state.user?.displayName ?? t("deletedUser")}
                           </Typography>
                         </Paper>
                       )}
@@ -531,7 +539,7 @@ export const VoiceChannelView = observer(
                   <ChannelIcon type={channel.type} /> {channel.name}
                 </Typography>
                 {!showChat && (
-                  <Tooltip placement="left" content="Open Chat">
+                  <Tooltip placement="left" content={t("voice.openChat")}>
                     <IconButton
                       onClick={(e) => {
                         e.stopPropagation();
@@ -561,7 +569,7 @@ export const VoiceChannelView = observer(
                 justifyContent="space-between"
                 zIndex={1}
               >
-                <Tooltip content="Invite">
+                <Tooltip content={t("voice.invite")}>
                   <IconButton
                     onClick={(e) => {
                       e.stopPropagation();

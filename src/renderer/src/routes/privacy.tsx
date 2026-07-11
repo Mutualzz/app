@@ -10,6 +10,8 @@ export const Route = createFileRoute("/privacy")({
 
 function Privacy() {
   return (
+    // Legal copy is English-only for now; product UI is localized separately.
+    // i18next-instrument-ignore
     <Stack
       width="100vw"
       minHeight="90vh"

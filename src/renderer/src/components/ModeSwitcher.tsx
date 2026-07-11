@@ -7,10 +7,13 @@ import { AnimatePresence } from "motion/react";
 import { AnimatedIconButton } from "./Animated/AnimatedIconButton";
 import { PlanetIcon, ScribbleIcon } from "@phosphor-icons/react";
 import { Tooltip } from "@components/Tooltip";
+import { useTranslation } from "react-i18next";
 
 const EDITOR_ROUTES = new Set(["/profile", "/avatar"]);
 
 export const ModeSwitcher = observer(() => {
+  const { t } = useTranslation("chat");
+  const { t: tSpace } = useTranslation("space");
   const app = useAppStore();
   const navigate = useNavigate();
   const { theme } = useTheme();
@@ -19,7 +22,9 @@ export const ModeSwitcher = observer(() => {
   const targetMode = app.targetMode;
   const hideForEditor = EDITOR_ROUTES.has(pathname);
 
-  const title = `Switch to ${targetMode === "feed" ? "Feed" : "Spaces"}`;
+  const title = t("feed.sidebar.switchMode", {
+    mode: targetMode === "feed" ? t("feed.title") : tSpace("sidebar.spaces")
+  });
 
   const handleClick = () => {
     switchMode(app, navigate);

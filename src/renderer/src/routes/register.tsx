@@ -20,13 +20,15 @@ import { useMutation } from "@tanstack/react-query";
 import { createFileRoute, Navigate, useNavigate } from "@tanstack/react-router";
 import { observer } from "mobx-react-lite";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
+import i18n from "../i18n";
 
 export const Route = createFileRoute("/register")({
   component: observer(Register),
   head: () => ({
     meta: [
       ...seo({
-        title: "Mutualzz - Register"
+        title: i18n.t("seo.registerTitle", { ns: "auth" })
       })
     ]
   })
@@ -81,6 +83,7 @@ const InputWithLabel = ({
 );
 
 function Register() {
+  const { t } = useTranslation("auth");
   const navigate = useNavigate();
   const app = useAppStore();
   const [passwordVisible, setPasswordVisible] = useState(false);
@@ -160,7 +163,7 @@ function Register() {
           fontSize={{ xs: "1.25rem", sm: "1.5rem", md: "2rem" }}
           textAlign="center"
         >
-          Create an account
+          {t("register.title")}
         </Typography>
         <form
           css={{
@@ -181,7 +184,7 @@ function Register() {
                   apiErrors={apiErrors}
                   field={field}
                   name="email"
-                  label="Email"
+                  label={t("register.email")}
                   onChange={(e) => field.handleChange(e.target.value)}
                   onBlur={field.handleBlur}
                   value={field.state.value}
@@ -198,7 +201,7 @@ function Register() {
                   apiErrors={apiErrors}
                   field={field}
                   name="username"
-                  label="Username"
+                  label={t("register.username")}
                   onChange={(e) => field.handleChange(e.target.value)}
                   onBlur={field.handleBlur}
                   value={field.state.value}
@@ -214,7 +217,7 @@ function Register() {
                   apiErrors={apiErrors}
                   field={field}
                   name="globalName"
-                  label="Display Name"
+                  label={t("register.displayName")}
                   onChange={(e) =>
                     field.handleChange(
                       e.target.value.length > 0 ? e.target.value : undefined
@@ -232,7 +235,7 @@ function Register() {
                   apiErrors={apiErrors}
                   field={field}
                   name="password"
-                  label="Password"
+                  label={t("register.password")}
                   onChange={(e) => field.handleChange(e.target.value)}
                   onBlur={field.handleBlur}
                   value={field.state.value}
@@ -250,7 +253,7 @@ function Register() {
                   apiErrors={apiErrors}
                   field={field}
                   name="confirmPassword"
-                  label="Confirm Password"
+                  label={t("register.confirmPassword")}
                   onChange={(e) => field.handleChange(e.target.value)}
                   onBlur={field.handleBlur}
                   value={field.state.value}
@@ -268,7 +271,7 @@ function Register() {
                   apiErrors={apiErrors}
                   field={field}
                   name="dateOfBirth"
-                  label="Date Of Birth"
+                  label={t("register.dateOfBirth")}
                   value={field.state.value}
                   type="date"
                   required
@@ -283,7 +286,7 @@ function Register() {
                   disabled={isSubmitting || isPending}
                   size={{ xs: "md", sm: "lg" }}
                 >
-                  {isSubmitting ? "..." : "Create Account"}
+                  {isSubmitting ? t("actions.submitting") : t("actions.createAccount")}
                 </Button>
               )}
             />
@@ -300,14 +303,14 @@ function Register() {
           fontSize={{ xs: "0.95rem", sm: "1.1rem" }}
           textAlign="center"
         >
-          Already have an account?{" "}
+          {t("register.hasAccount")}{" "}
           <Typography
             color="info"
             textDecoration="underline"
             variant="plain"
             level={{ xs: "body-sm", sm: "body-md" }}
           >
-            Login
+            {t("actions.login")}
           </Typography>
         </Typography>
       </AnimatedPaper>

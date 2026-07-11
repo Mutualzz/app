@@ -24,8 +24,10 @@ import {
   TextStrikethroughIcon,
   TextUnderlineIcon
 } from "@phosphor-icons/react";
+import { useTranslation } from "react-i18next";
 
 export const HoverToolbar = () => {
+  const { t } = useTranslation("common");
   const { theme } = useTheme();
   const app = useAppStore();
   const { activeFormats, enableHoverToolbar } =
@@ -105,14 +107,14 @@ export const HoverToolbar = () => {
         <ButtonGroup spacing={1} variant="plain">
           <Button
             shape="rounded"
-            title="Bold"
+            title={t("markdown.bold")}
             color={activeFormats.includes("**") ? "success" : undefined}
             onClick={(e) => textFormat(e, "**")}
           >
             <TextBIcon weight="bold" />
           </Button>
           <Button
-            title="Italic"
+            title={t("markdown.italic")}
             shape="rounded"
             color={activeFormats.includes("*") ? "success" : undefined}
             onClick={(e) => textFormat(e, "*")}
@@ -120,7 +122,7 @@ export const HoverToolbar = () => {
             <TextItalicIcon weight="bold" />
           </Button>
           <Button
-            title="Underline"
+            title={t("markdown.underline")}
             shape="rounded"
             color={activeFormats.includes("__") ? "success" : undefined}
             onClick={(e) => textFormat(e, "__")}
@@ -128,7 +130,7 @@ export const HoverToolbar = () => {
             <TextUnderlineIcon weight="bold" />
           </Button>
           <Button
-            title="Strikethrough"
+            title={t("markdown.strikethrough")}
             shape="rounded"
             color={activeFormats.includes("~~") ? "success" : undefined}
             onClick={(e) => textFormat(e, "~~")}
@@ -146,7 +148,7 @@ export const HoverToolbar = () => {
         />
         <ButtonGroup spacing={1} variant="plain">
           <Button
-            title="Blockquote"
+            title={t("markdown.blockquote")}
             color={isBlockActive(editor, "blockquote") ? "success" : undefined}
             shape="rounded"
             onClick={() => toggleBlockquote(editor)}
@@ -154,7 +156,7 @@ export const HoverToolbar = () => {
             <QuotesIcon weight="bold" />
           </Button>
           <Button
-            title="Code"
+            title={t("markdown.code")}
             color={activeFormats.includes("`") ? "success" : undefined}
             shape="rounded"
             onClick={(e) => textFormat(e, "`")}
@@ -162,7 +164,7 @@ export const HoverToolbar = () => {
             <CodeIcon weight="bold" />
           </Button>
           <Button
-            title="Spoiler"
+            title={t("markdown.spoiler")}
             color={activeFormats.includes("||") ? "success" : undefined}
             shape="rounded"
             onClick={(e) => textFormat(e, "||")}

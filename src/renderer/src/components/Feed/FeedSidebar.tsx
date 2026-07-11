@@ -3,7 +3,6 @@ import { Paper } from "@components/Paper";
 import { useAppStore } from "@hooks/useStores";
 import { Stack, Typography } from "@mutualzz/ui-web";
 import { useNavigate } from "@tanstack/react-router";
-import capitalize from "lodash-es/capitalize";
 import { observer } from "mobx-react-lite";
 import { IconButton } from "@components/IconButton";
 import {
@@ -14,39 +13,48 @@ import {
   UsersIcon
 } from "@phosphor-icons/react";
 import { Tooltip } from "@components/Tooltip";
+import { useTranslation } from "react-i18next";
 
 const links = [
   {
-    label: "Explore / Discover",
+    labelKey: "feed.sidebar.explore",
     icon: <CompassIcon weight="fill" />,
     to: "explore"
   },
 
   {
-    label: "Friends",
+    labelKey: "feed.sidebar.friends",
     icon: <UsersIcon weight="fill" />,
     to: "friends"
   },
   {
-    label: "Saves",
+    labelKey: "feed.sidebar.saves",
     icon: <BookmarkSimpleIcon weight="fill" />,
     to: "saved"
   },
   {
-    label: "My Profile",
+    labelKey: "feed.sidebar.myProfile",
     icon: <HouseIcon weight="fill" />,
     to: "my-profile"
   },
   {
-    label: "Customize Profile",
+    labelKey: "feed.sidebar.customizeProfile",
     icon: <PaletteIcon weight="fill" />,
     to: "customize-profile"
   }
-];
+] as const;
 
 export const FeedSidebar = observer(() => {
   const app = useAppStore();
   const navigate = useNavigate();
+  const { t } = useTranslation("chat");
+  const { t: tSpace } = useTranslation("space");
+
+  const switchMode = app.mode
+    ? tSpace("sidebar.directMessages")
+    : app.settings?.preferredMode === "feed"
+      ? t("feed.title")
+      : tSpace("sidebar.spaces");
 
   return (
     <Paper
@@ -68,11 +76,7 @@ export const FeedSidebar = observer(() => {
         pl={1}
       >
         <Tooltip
-          content={`Switch to ${capitalize(
-            app.mode
-              ? "Direct Messages"
-              : (app.settings?.preferredMode ?? "Spaces")
-          )}`}
+          content={t("feed.sidebar.switchMode", { mode: switchMode })}
           placement="right"
         >
           <AnimatedLogo
@@ -93,14 +97,14 @@ export const FeedSidebar = observer(() => {
           />
         </Tooltip>
         <Typography level="h6" fontWeight={700}>
-          Feed
+          {t("feed.title")}
         </Typography>
       </Stack>
 
       <Stack direction="column" spacing={1} width="100%">
         {links.map((link) => (
           <Stack
-            key={`feed-sidebar-link-${link.label}`}
+            key={`feed-sidebar-link-${link.to}`}
             direction="row"
             alignItems="center"
             spacing={2}
@@ -141,7 +145,7 @@ export const FeedSidebar = observer(() => {
           >
             <IconButton size="lg">{link.icon}</IconButton>
             <Typography fontWeight={500} whiteSpace="nowrap">
-              {link.label}
+              {t(link.labelKey)}
             </Typography>
           </Stack>
         ))}

@@ -1,3 +1,5 @@
+import { staffSectionTitleKeys } from "@mutualzz/i18n";
+
 export type StaffSection =
   | "info"
   | "flags"
@@ -6,11 +8,4 @@ export type StaffSection =
   | "notes"
   | "audit";
 
-export const staffSectionTitles: Record<StaffSection, string> = {
-  info: "Info",
-  flags: "Flags",
-  actions: "Actions",
-  sessions: "Active Sessions",
-  notes: "Staff Notes",
-  audit: "Audit Log"
-};
+export { staffSectionTitleKeys, staffSectionTitleKeys as staffSectionTitles };

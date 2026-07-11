@@ -3,12 +3,14 @@ import { Paper } from "@components/Paper";
 import { Stack, Typography } from "@mutualzz/ui-web";
 import { useNavigate } from "@tanstack/react-router";
 import { observer } from "mobx-react-lite";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   isSelf?: boolean;
 }
 
 export const ProfileEmptyState = observer(({ isSelf }: Props) => {
+  const { t } = useTranslation("settings");
   const navigate = useNavigate();
 
   return (
@@ -30,17 +32,17 @@ export const ProfileEmptyState = observer(({ isSelf }: Props) => {
       >
         <Typography level="title-md" textAlign="center">
           {isSelf
-            ? "You haven't set up your profile yet"
-            : "User hasn't setup their profile yet"}
+            ? t("profile.viewer.emptySelfTitle")
+            : t("profile.viewer.emptyOtherTitle")}
         </Typography>
         <Typography level="body-sm" textAlign="center" css={{ opacity: 0.75 }}>
           {isSelf
-            ? "Customize your profile with blocks, a banner, bio, and more."
-            : "Check back later to see their customized profile page."}
+            ? t("profile.viewer.emptySelfDescription")
+            : t("profile.viewer.emptyOtherDescription")}
         </Typography>
         {isSelf && (
           <Button color="primary" onClick={() => navigate({ to: "/profile" })}>
-            Customize Profile
+            {t("profile.customizeProfile")}
           </Button>
         )}
       </Paper>

@@ -3,6 +3,7 @@ import { useAppStore } from "@renderer/hooks/useStores";
 import { Relationship } from "@renderer/stores/objects/Relationship";
 import { useNavigate } from "@tanstack/react-router";
 import { observer } from "mobx-react-lite";
+import { useTranslation } from "react-i18next";
 import { Paper } from "../Paper";
 import { dynamicElevation } from "@mutualzz/ui-core";
 import { UserAvatar } from "../User/UserAvatar";
@@ -15,6 +16,7 @@ export const UserItem = observer(
   ({ relationship }: { relationship: Relationship }) => {
     const { theme } = useTheme();
     const app = useAppStore();
+    const { t } = useTranslation("chat");
     const user = relationship.otherUser;
     const navigate = useNavigate();
     if (!user) return null;
@@ -57,7 +59,7 @@ export const UserItem = observer(
         </Stack>
         <Stack direction="row" alignItems="center" spacing={2.5}>
           {relationship.isFriend && (
-            <Tooltip content="Message">
+            <Tooltip content={t("contextMenu.message")}>
               <IconButton
                 color="neutral"
                 padding={8}
@@ -76,7 +78,7 @@ export const UserItem = observer(
             </Tooltip>
           )}
           {relationship.isOutgoingRequest && (
-            <Tooltip content="Cancel Friend Request">
+            <Tooltip content={t("contextMenu.cancelFriendRequest")}>
               <IconButton
                 color="neutral"
                 padding={8}
@@ -92,7 +94,7 @@ export const UserItem = observer(
           )}
           {relationship.isIncomingRequest && (
             <>
-              <Tooltip content="Accept Friend Request">
+              <Tooltip content={t("contextMenu.acceptFriendRequest")}>
                 <IconButton
                   color="neutral"
                   padding={8}
@@ -105,7 +107,7 @@ export const UserItem = observer(
                   <CheckIcon />
                 </IconButton>
               </Tooltip>
-              <Tooltip content="Decline Friend Request">
+              <Tooltip content={t("contextMenu.declineFriendRequest")}>
                 <IconButton
                   color="neutral"
                   padding={8}

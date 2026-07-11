@@ -16,39 +16,41 @@ import {
   UploadSimpleIcon
 } from "@phosphor-icons/react";
 import { ColorLike } from "@mutualzz/ui-core";
-
-const METHOD_CARDS: {
-  method: AvatarEditorMethod;
-  title: string;
-  description: string;
-  icon: React.ReactNode;
-}[] = [
-  {
-    method: "upload",
-    title: "Upload",
-    description: "Use a photo or GIF from your device.",
-    icon: <UploadSimpleIcon weight="fill" size={22} />
-  },
-  {
-    method: "draw",
-    title: "Draw",
-    description: "Sketch a custom avatar on the canvas.",
-    icon: <PaintBrushIcon weight="fill" size={22} />
-  },
-  {
-    method: "avatars",
-    title: "Avatars",
-    description: "Pick a default style or restore a previous one.",
-    icon: <ImagesIcon weight="fill" size={22} />
-  }
-];
+import { useTranslation } from "react-i18next";
 
 export const UserProfileSettings = observer(() => {
+  const { t } = useTranslation("settings");
   const app = useAppStore();
   const account = app.account;
   const navigate = useNavigate();
   const { openModal, closeModal } = useModal();
   const embossed = app.settings?.preferEmbossed;
+
+  const methodCards: {
+    method: AvatarEditorMethod;
+    title: string;
+    description: string;
+    icon: React.ReactNode;
+  }[] = [
+    {
+      method: "upload",
+      title: t("profile.methodUpload"),
+      description: t("profile.methodUploadDescriptionDesktop"),
+      icon: <UploadSimpleIcon weight="fill" size={22} />
+    },
+    {
+      method: "draw",
+      title: t("profile.methodDraw"),
+      description: t("profile.methodDrawDescription"),
+      icon: <PaintBrushIcon weight="fill" size={22} />
+    },
+    {
+      method: "avatars",
+      title: t("profile.methodAvatars"),
+      description: t("profile.methodAvatarsDescription"),
+      icon: <ImagesIcon weight="fill" size={22} />
+    }
+  ];
 
   const { mutate: deleteAvatar, isPending } = useMutation({
     mutationKey: ["delete-avatar"],
@@ -146,20 +148,19 @@ export const UserProfileSettings = observer(() => {
       >
         <Stack direction="column" spacing={0.5}>
           <Typography level="title-sm" fontWeight={600}>
-            Avatar studio
+            {t("profile.avatarStudio")}
           </Typography>
           <Typography level="body-sm" css={{ opacity: 0.75 }}>
-            Open the full editor for upload, drawing, and previews — or jump in
-            quickly below.
+            {t("profile.avatarStudioDescriptionDesktop")}
           </Typography>
         </Stack>
         <Button color="primary" onClick={() => openAvatarStudio()}>
-          Open Avatar Studio
+          {t("profile.openAvatarStudio")}
         </Button>
       </Paper>
 
       <Stack direction="column" spacing={1}>
-        {METHOD_CARDS.map((card) => (
+        {methodCards.map((card) => (
           <Paper
             key={card.method}
             variant="soft"
@@ -199,7 +200,7 @@ export const UserProfileSettings = observer(() => {
                 openQuickModal(card.method);
               }}
             >
-              Quick edit
+              {t("profile.quickEdit")}
             </Button>
           </Paper>
         ))}
@@ -212,7 +213,7 @@ export const UserProfileSettings = observer(() => {
         size="sm"
         css={{ alignSelf: "flex-start" }}
       >
-        Remove current avatar
+        {t("profile.removeCurrentAvatar")}
       </Button>
 
       <Divider css={{ opacity: 0.35 }} />
@@ -228,11 +229,10 @@ export const UserProfileSettings = observer(() => {
       >
         <Stack direction="column" spacing={0.5}>
           <Typography level="title-sm" fontWeight={600}>
-            Profile page
+            {t("profile.profilePage")}
           </Typography>
           <Typography level="body-sm" css={{ opacity: 0.75 }}>
-            Customize your MySpace-style page with blocks, banner, bio, and
-            profile music.
+            {t("profile.profilePageDescription")}
           </Typography>
         </Stack>
         <Button
@@ -240,7 +240,7 @@ export const UserProfileSettings = observer(() => {
           startDecorator={<PaletteIcon weight="fill" />}
           onClick={openProfileEditor}
         >
-          Customize Profile
+          {t("profile.customizeProfile")}
         </Button>
       </Paper>
     </Stack>

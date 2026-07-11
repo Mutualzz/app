@@ -22,6 +22,7 @@ import {
   XIcon
 } from "@phosphor-icons/react";
 import { Tooltip } from "../Tooltip";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   onPosted?: () => void;
@@ -58,6 +59,7 @@ function toDatetimeLocalValue(date: Date) {
 export const PostComposer = observer(({ onPosted }: Props) => {
   const app = useAppStore();
   const { theme } = useTheme();
+  const { t } = useTranslation("chat");
   const navigate = useNavigate();
   const [content, setContent] = useState("");
   const [files, setFiles] = useState<File[]>([]);
@@ -183,7 +185,7 @@ export const PostComposer = observer(({ onPosted }: Props) => {
                 size="sm"
                 onClick={() => handleRemoveSticker(sticker.id)}
                 style={{ position: "absolute", top: -4, right: -4 }}
-                title="Remove sticker"
+                title={t("composer.removeSticker")}
               >
                 <XIcon size={14} />
               </IconButton>
@@ -197,7 +199,7 @@ export const PostComposer = observer(({ onPosted }: Props) => {
         variant="plain"
         value={content}
         onChange={setContent}
-        placeholder="What's on your mind?"
+        placeholder={t("feed.composer.placeholder")}
         mentions={false}
         gifPicker
         stickerPicker
@@ -288,7 +290,7 @@ export const PostComposer = observer(({ onPosted }: Props) => {
                     width: 16,
                     height: 16
                   }}
-                  title="Remove"
+                  title={t("composer.removeAttachment")}
                 >
                   <XIcon size={8} />
                 </IconButton>
@@ -318,7 +320,7 @@ export const PostComposer = observer(({ onPosted }: Props) => {
             <IconButton
               size="sm"
               onClick={() => setScheduledFor("")}
-              title="Clear scheduled time"
+              title={t("feed.composer.clearScheduledTime")}
             >
               <XIcon size={12} />
             </IconButton>
@@ -344,7 +346,7 @@ export const PostComposer = observer(({ onPosted }: Props) => {
               e.target.value = "";
             }}
           />
-          <Tooltip content="Add media" placement="bottom">
+          <Tooltip content={t("feed.composer.addMedia")} placement="bottom">
             <IconButton
               disabled={files.length >= MAX_FILES}
               onClick={() => fileInputRef.current?.click()}
@@ -353,16 +355,16 @@ export const PostComposer = observer(({ onPosted }: Props) => {
             </IconButton>
           </Tooltip>
 
-          <Tooltip content="Schedule post" placement="bottom">
+          <Tooltip content={t("feed.composer.schedulePost")} placement="bottom">
             <IconButton
               onClick={() => setShowScheduler((prev) => !prev)}
-              title="Schedule post"
+              title={t("feed.composer.schedulePost")}
             >
               <CalendarPlusIcon weight={showScheduler ? "fill" : "regular"} />
             </IconButton>
           </Tooltip>
 
-          <Tooltip content="View scheduled posts" placement="bottom">
+          <Tooltip content={t("feed.composer.viewScheduled")} placement="bottom">
             <IconButton onClick={() => navigate({ to: "/feed/scheduled" })}>
               <CalendarIcon />
             </IconButton>
@@ -386,7 +388,7 @@ export const PostComposer = observer(({ onPosted }: Props) => {
             })
           }
         >
-          {scheduledFor ? "Schedule" : "Post"}
+          {scheduledFor ? t("feed.composer.schedule") : t("feed.composer.post")}
         </Button>
       </Stack>
     </Paper>

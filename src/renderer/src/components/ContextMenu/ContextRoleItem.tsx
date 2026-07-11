@@ -3,7 +3,10 @@ import { ContextItem } from "@components/ContextItem";
 import { Checkbox, Stack, Typography } from "@mutualzz/ui-web";
 import styled from "@emotion/styled";
 import { Role } from "@stores/objects/Role";
-import { RoleHierarchyLock, ROLE_HIERARCHY_ASSIGN_TOOLTIP } from "@components/SpaceSettings/pages/people/roles/RoleHierarchyLock";
+import {
+  RoleHierarchyLock,
+  getRoleHierarchyAssignTooltip
+} from "@components/SpaceSettings/pages/people/roles/RoleHierarchyLock";
 
 const RoleColorBlob = styled("span")<{ color: string }>(({ color }) => ({
   width: 12,
@@ -53,7 +56,7 @@ export const ContextRoleItem = observer(
           {locked ? (
             <RoleHierarchyLock
               size={14}
-              tooltip={ROLE_HIERARCHY_ASSIGN_TOOLTIP}
+              tooltip={getRoleHierarchyAssignTooltip()}
             />
           ) : canManage ? (
             <Checkbox

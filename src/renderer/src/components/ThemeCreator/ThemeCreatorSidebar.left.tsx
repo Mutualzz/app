@@ -7,8 +7,8 @@ import {
   Stack,
   Typography
 } from "@mutualzz/ui-web";
-import startCase from "lodash-es/startCase";
 import { observer } from "mobx-react-lite";
+import { useTranslation } from "react-i18next";
 import { Fragment, type JSX } from "react";
 import type {
   ThemeCreatorCategory,
@@ -38,6 +38,7 @@ type ThemeCreatorPages = Record<ThemeCreatorCategory, Pages[]>;
 // TODO: and also work on new adaptive theme generation algorithm
 export const ThemeCreatorSidebarLeft = observer(
   ({ drawerOpen, setDrawerOpen }: ThemeCreatorSidebarProps) => {
+    const { t } = useTranslation("settings");
     const app = useAppStore();
 
     const {
@@ -104,7 +105,7 @@ export const ThemeCreatorSidebarLeft = observer(
       >
         <Stack alignItems="center" direction="column">
           <Checkbox
-            label="Automatically Adapt Colors"
+            label={t("themeCreator.sidebar.adaptColorsAutomatically")}
             checked={values.adaptive}
             size="sm"
             onChange={(e) => {
@@ -120,7 +121,7 @@ export const ThemeCreatorSidebarLeft = observer(
             <Fragment key={`theme-creator-sidebar-category-${category}`}>
               <Stack direction="column">
                 <Typography level="body-sm" textColor="muted" mb={1.25}>
-                  {startCase(category)}
+                  {t(`themeCreator.categories.${category}`)}
                 </Typography>
                 <ButtonGroup
                   orientation="vertical"
@@ -142,7 +143,7 @@ export const ThemeCreatorSidebarLeft = observer(
                       padding={5}
                       disabled={currentPage === page.label}
                     >
-                      {startCase(page.label)}
+                      {t(`themeCreator.pages.${page.label}`)}
                     </Button>
                   ))}
                 </ButtonGroup>

@@ -8,6 +8,7 @@ import { useAppStore } from "@renderer/hooks/useStores";
 import { Expression } from "@stores/objects/Expression";
 import { observer } from "mobx-react-lite";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 const STICKER_RENDER_SIZE = 256 satisfies Sizes;
 
@@ -23,6 +24,7 @@ function getStickerRenderUrl(sticker: Expression) {
 
 export const ProfileStickerBlockView = observer(
   ({ block }: { block: ProfileStickerBlock }) => {
+    const { t } = useTranslation("settings");
     const app = useAppStore();
     const [sticker, setSticker] = useState<Expression | null>(null);
     const cornerRadius = resolveProfileBlockCornerRadius(block, "desktop");
@@ -69,7 +71,9 @@ export const ProfileStickerBlockView = observer(
       >
         <StickerIcon size={28} weight="fill" />
         <Typography level="body-xs">
-          {expressionId ? "Sticker unavailable" : "Choose a sticker"}
+          {expressionId
+            ? t("profile.blocks.stickerUnavailable")
+            : t("profile.inspector.chooseSticker")}
         </Typography>
       </Stack>
     );

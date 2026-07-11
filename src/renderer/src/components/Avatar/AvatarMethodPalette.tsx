@@ -8,29 +8,36 @@ import {
   UploadSimpleIcon
 } from "@phosphor-icons/react";
 import { observer } from "mobx-react-lite";
+import { useTranslation } from "react-i18next";
 
 const ITEMS: {
   method: AvatarEditorMethod;
-  label: string;
-  description: string;
+  labelKey:
+    | "profile.methodUpload"
+    | "profile.methodDraw"
+    | "profile.methodAvatars";
+  descriptionKey:
+    | "profile.methodUploadShort"
+    | "profile.methodDrawShort"
+    | "profile.methodAvatarsShort";
   icon: React.ReactNode;
 }[] = [
   {
     method: "upload",
-    label: "Upload",
-    description: "Photo or GIF",
+    labelKey: "profile.methodUpload",
+    descriptionKey: "profile.methodUploadShort",
     icon: <UploadSimpleIcon weight="fill" />
   },
   {
     method: "draw",
-    label: "Draw",
-    description: "Sketch your own",
+    labelKey: "profile.methodDraw",
+    descriptionKey: "profile.methodDrawShort",
     icon: <PaintBrushIcon weight="fill" />
   },
   {
     method: "avatars",
-    label: "Avatars",
-    description: "Defaults & history",
+    labelKey: "profile.methodAvatars",
+    descriptionKey: "profile.methodAvatarsShort",
     icon: <ImagesIcon weight="fill" />
   }
 ];
@@ -41,6 +48,7 @@ interface Props {
 }
 
 export const AvatarMethodPalette = observer(({ method, onMethodChange }: Props) => {
+  const { t } = useTranslation("settings");
   const app = useAppStore();
   const embossed = app.settings?.preferEmbossed;
 
@@ -59,7 +67,7 @@ export const AvatarMethodPalette = observer(({ method, onMethodChange }: Props) 
       boxShadow="none !important"
     >
       <Typography level="body-sm" fontWeight={600} px={0.5}>
-        Methods
+        {t("profile.methods")}
       </Typography>
       <Stack direction="column" spacing={1}>
         {ITEMS.map((item) => {
@@ -83,11 +91,11 @@ export const AvatarMethodPalette = observer(({ method, onMethodChange }: Props) 
               <Stack direction="row" spacing={1} alignItems="center">
                 {item.icon}
                 <Typography level="body-sm" fontWeight={selected ? 600 : 500}>
-                  {item.label}
+                  {t(item.labelKey)}
                 </Typography>
               </Stack>
               <Typography level="body-xs" css={{ opacity: 0.7 }}>
-                {item.description}
+                {t(item.descriptionKey)}
               </Typography>
             </Paper>
           );

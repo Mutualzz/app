@@ -10,6 +10,7 @@ import { Box, Stack, Typography } from "@mutualzz/ui-web";
 import { ShieldCheckIcon } from "@phosphor-icons/react";
 import { Paper } from "@renderer/components/Paper";
 import { observer } from "mobx-react-lite";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   block: ProfileRolesBlock;
@@ -17,6 +18,7 @@ interface Props {
 }
 
 export const ProfileRolesBlockView = observer(({ block, userId }: Props) => {
+  const { t } = useTranslation("settings");
   const app = useAppStore();
   const member = findMemberForUser(app, userId);
   const roles = getMemberRoles(member, block.maxRoles ?? 6);
@@ -36,13 +38,15 @@ export const ProfileRolesBlockView = observer(({ block, userId }: Props) => {
       <Stack direction="row" spacing={1} alignItems="center">
         <ShieldCheckIcon size={18} weight="fill" />
         <Typography level="body-sm" fontWeight={700} css={{ fontSize: "var(--pcf-sm)" }}>
-          Roles
+          {t("profile.blocks.roles")}
         </Typography>
       </Stack>
 
       {roles.length === 0 ? (
         <Typography level="body-sm" css={{ opacity: 0.6, fontSize: "var(--pcf-sm)" }}>
-          {member ? "No roles to show" : "Join a shared space to display roles"}
+          {member
+            ? t("profile.blocks.noRolesToShow")
+            : t("profile.blocks.rolesNeedSharedSpace")}
         </Typography>
       ) : (
         <Stack direction="row" spacing={0.75} flexWrap="wrap">

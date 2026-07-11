@@ -15,8 +15,7 @@ import type { PresenceActivityEmoji } from "@mutualzz/types";
 import { PencilIcon, TrashIcon } from "@phosphor-icons/react";
 import { observer } from "mobx-react-lite";
 import { useState } from "react";
-
-const PLACEHOLDER = "Set Custom Status...";
+import { useTranslation } from "react-i18next";
 
 const DIMS = {
   avatar: 64,
@@ -53,6 +52,7 @@ export const CustomStatusCard = observer(
     onEdit,
     onClear
   }: Props) => {
+    const { t } = useTranslation("common");
     const app = useAppStore();
     const { theme } = useTheme();
     const [hovered, setHovered] = useState(false);
@@ -165,7 +165,7 @@ export const CustomStatusCard = observer(
                       minWidth: 0
                     }}
                   >
-                    {PLACEHOLDER}
+                    {t("customStatus.setPlaceholder")}
                   </Typography>
                 )}
               </Box>
@@ -200,7 +200,7 @@ export const CustomStatusCard = observer(
                   <IconButton
                     variant="plain"
                     size="sm"
-                    aria-label="Edit custom status"
+                    aria-label={t("customStatus.editA11y")}
                     onMouseDown={(event) => event.stopPropagation()}
                     onClick={(event) => {
                       event.stopPropagation();
@@ -215,7 +215,7 @@ export const CustomStatusCard = observer(
                       variant="plain"
                       size="sm"
                       color={theme.colors.danger}
-                      aria-label="Clear custom status"
+                      aria-label={t("customStatus.clearA11y")}
                       onMouseDown={(event) => event.stopPropagation()}
                       onClick={(event) => {
                         event.stopPropagation();

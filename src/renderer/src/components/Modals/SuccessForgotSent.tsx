@@ -2,8 +2,10 @@ import { useAppStore } from "@hooks/useStores";
 import { Paper } from "@components/Paper";
 import { Button, Typography } from "@mutualzz/ui-web";
 import { useModal } from "@contexts/Modal.context";
+import { useTranslation } from "react-i18next";
 
 export const SuccessForgotSent = () => {
+  const { t } = useTranslation("auth");
   const app = useAppStore();
   const { closeModal } = useModal();
 
@@ -16,14 +18,11 @@ export const SuccessForgotSent = () => {
       justifyContent="space-between"
     >
       <Typography level="h5" fontWeight="bold">
-        Password Reset Sent
+        {t("forgotPassword.title")}
       </Typography>
-      <Typography>
-        If an account with the provided username or email exists, a password
-        reset link has been sent to it.
-      </Typography>
+      <Typography>{t("forgotPassword.message")}</Typography>
       <Button color="neutral" onClick={() => closeModal()}>
-        Close
+        {t("actions.close")}
       </Button>
     </Paper>
   );

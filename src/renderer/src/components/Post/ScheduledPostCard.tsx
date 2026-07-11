@@ -13,6 +13,7 @@ import dayjs from "dayjs";
 import { observer } from "mobx-react-lite";
 import { useState } from "react";
 import { TrashIcon, XIcon } from "@phosphor-icons/react";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   post: Post;
@@ -28,6 +29,7 @@ function toDatetimeLocalValue(date: Date) {
 
 export const ScheduledPostCard = observer(({ post }: Props) => {
   const { theme } = useTheme();
+  const { t } = useTranslation("chat");
   const [rescheduling, setRescheduling] = useState(false);
   const [nextDate, setNextDate] = useState(() =>
     post.scheduledFor ? toDatetimeLocalValue(post.scheduledFor) : ""
@@ -53,13 +55,16 @@ export const ScheduledPostCard = observer(({ post }: Props) => {
           <UserAvatar user={post.author} size="md" />
           <Stack direction="column" spacing={0}>
             <Typography fontWeight={600}>
-              {post.author?.displayName ?? "Unknown User"}
+              {post.author?.displayName ?? t("unknownUser")}
             </Typography>
             <Typography level="body-sm" textColor="secondary">
-              Scheduled for{" "}
               {post.scheduledFor
-                ? dayjs(post.scheduledFor).format("dddd, MMMM D, YYYY h:mm A")
-                : "unknown"}
+                ? t("feed.scheduled.scheduledFor", {
+                    datetime: dayjs(post.scheduledFor).format(
+                      "dddd, MMMM D, YYYY h:mm A"
+                    )
+                  })
+                : t("feed.scheduled.scheduledForUnknown")}
             </Typography>
           </Stack>
         </Stack>
@@ -150,7 +155,7 @@ export const ScheduledPostCard = observer(({ post }: Props) => {
             }
             onClick={() => reschedule(new Date(nextDate))}
           >
-            Save time
+            {t("feed.scheduled.saveTime")}
           </Button>
         ) : (
           <Button
@@ -158,7 +163,7 @@ export const ScheduledPostCard = observer(({ post }: Props) => {
             variant="soft"
             onClick={() => setRescheduling(true)}
           >
-            Reschedule
+            {t("feed.scheduled.reschedule")}
           </Button>
         )}
         <Button
@@ -166,7 +171,7 @@ export const ScheduledPostCard = observer(({ post }: Props) => {
           disabled={isPublishing}
           onClick={() => publishNow()}
         >
-          Publish now
+          {t("feed.scheduled.publishNow")}
         </Button>
       </Stack>
     </Paper>

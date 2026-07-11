@@ -16,6 +16,7 @@ import {
   ProhibitIcon
 } from "@phosphor-icons/react";
 import { observer } from "mobx-react-lite";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   post: NonNullable<APIMessageEmbed["post"]>;
@@ -120,6 +121,7 @@ export const PostEmbedPreview = observer(({ post: postData }: Props) => {
   const app = useAppStore();
   const { theme } = useTheme();
   const navigate = useNavigate();
+  const { t } = useTranslation("chat");
 
   const { isLoading, isError } = useQuery({
     queryKey: ["post-embed", postData.id],
@@ -141,7 +143,7 @@ export const PostEmbedPreview = observer(({ post: postData }: Props) => {
       >
         <ProhibitIcon />
         <Typography level="body-sm" textColor="secondary">
-          This post doesn't exist, or is no longer available.
+          {t("feed.empty.postUnavailable")}
         </Typography>
       </Paper>
     );
@@ -156,7 +158,7 @@ export const PostEmbedPreview = observer(({ post: postData }: Props) => {
         border={`1px solid ${theme.colors.surface} !important`}
       >
         <Typography level="body-sm" textColor="secondary">
-          Loading post…
+          {t("feed.embed.loadingPost")}
         </Typography>
       </Paper>
     );
@@ -185,7 +187,7 @@ export const PostEmbedPreview = observer(({ post: postData }: Props) => {
           <UserAvatar user={post.author} size="sm" />
           <Stack direction="column" spacing={0}>
             <Typography level="body-sm" fontWeight={600}>
-              {post.author?.displayName ?? "Unknown User"}
+              {post.author?.displayName ?? t("unknownUser")}
             </Typography>
             <Typography level="body-sm" textColor="secondary">
               {dayjs(post.createdAt).calendar(undefined, calendarStrings)}
@@ -195,7 +197,7 @@ export const PostEmbedPreview = observer(({ post: postData }: Props) => {
 
         <IconButton
           size="sm"
-          title="Open post"
+          title={t("feed.actions.openPost")}
           onClick={() =>
             navigate({
               to: "/feed/posts/$postId",
@@ -239,9 +241,7 @@ export const PostEmbedPreview = observer(({ post: postData }: Props) => {
 
       {post.content && post.attachments.length > 0 && (
         <Typography level="body-xs" textColor="secondary">
-          {post.attachments.length === 1
-            ? "1 attachment"
-            : `${post.attachments.length} attachments`}
+          {t("feed.embed.attachments", { count: post.attachments.length })}
         </Typography>
       )}
 

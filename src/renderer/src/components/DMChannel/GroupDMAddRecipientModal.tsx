@@ -9,12 +9,16 @@ import { useModal } from "@contexts/Modal.context";
 import { useMutation } from "@tanstack/react-query";
 import type { Channel } from "@stores/objects/Channel";
 import type { Snowflake } from "@mutualzz/types";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   channel: Channel;
 }
 
 export const GroupDMAddRecipientModal = observer(({ channel }: Props) => {
+  const { t } = useTranslation("chat");
+  const { t: tCommon } = useTranslation("common");
+  const { t: tSpace } = useTranslation("space");
   const app = useAppStore();
   const { closeModal } = useModal();
 
@@ -32,7 +36,10 @@ export const GroupDMAddRecipientModal = observer(({ channel }: Props) => {
   });
 
   const existingIds = new Set(channel.recipientIds ?? []);
-  const isFull = (channel.recipientIds?.length ?? 0) >= 10;
+  const currentCount = channel.recipientIds?.length ?? 0;
+  const maxCount = 10;
+  const isFull = currentCount >= maxCount;
+  const spotsRemaining = maxCount - currentCount;
 
   const suggestions = app
     .getSuggestedGroupDMRecipients()
@@ -60,17 +67,18 @@ export const GroupDMAddRecipientModal = observer(({ channel }: Props) => {
       <Stack p={5} direction="column" spacing={2.5}>
         <Stack direction="column" spacing={0.5}>
           <Typography fontWeight="bold" level="body-lg">
-            Add to Group
+            {t("header.dm.addToGroup")}
           </Typography>
           {isFull ? (
             <Typography level="body-sm" color="danger" variant="plain">
-              This group is full (10/10).
+              {t("groupDm.groupFullCount", {
+                current: currentCount,
+                max: maxCount
+              })}
             </Typography>
           ) : (
             <Typography level="body-sm" textColor="secondary">
-              {10 - (channel.recipientIds?.length ?? 0)} spot
-              {10 - (channel.recipientIds?.length ?? 0) === 1 ? "" : "s"}{" "}
-              remaining
+              {t("groupDm.spotsRemaining", { count: spotsRemaining })}
             </Typography>
           )}
         </Stack>
@@ -78,7 +86,7 @@ export const GroupDMAddRecipientModal = observer(({ channel }: Props) => {
         {!isFull && (
           <Stack direction="column" spacing={2.5}>
             <InputDefault
-              placeholder="Search friends"
+              placeholder={tSpace("invites.modal.searchFriends")}
               value={search || ""}
               onChange={onChangeSearch}
             />
@@ -90,7 +98,9 @@ export const GroupDMAddRecipientModal = observer(({ channel }: Props) => {
             >
               {suggestions.length === 0 && (
                 <Typography level="body-sm" textColor="secondary">
-                  {search ? "No results." : "No friends to add."}
+                  {search
+                    ? tSpace("invites.modal.noResults")
+                    : t("groupDm.noFriendsToAdd")}
                 </Typography>
               )}
               {suggestions.map((user) => (
@@ -152,7 +162,7 @@ export const GroupDMAddRecipientModal = observer(({ channel }: Props) => {
           color="neutral"
           disabled={isPending}
         >
-          Cancel
+          {tCommon("cancel")}
         </Button>
         <Button
           expand
@@ -161,7 +171,7 @@ export const GroupDMAddRecipientModal = observer(({ channel }: Props) => {
           onClick={() => addRecipient()}
           color="primary"
         >
-          Add to Group
+          {t("header.dm.addToGroup")}
         </Button>
       </Paper>
     </Paper>

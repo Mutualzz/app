@@ -1,16 +1,13 @@
 import type { ReactNode } from "react";
 
 export interface PermissionGroupDef<TFlag extends string = string> {
+  id: string;
   title: string;
   items: {
     flag: TFlag;
     label: string;
     description?: ReactNode;
   }[];
-}
-
-export function permissionCategoryId(title: string): string {
-  return title.toLowerCase().replace(/[^a-z0-9]+/g, "-");
 }
 
 export function filterPermissionGroups<T extends PermissionGroupDef>(

@@ -27,6 +27,7 @@ import {
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 export const Route = createFileRoute("/_authenticated/staff/")({
   component: StaffIndexRoute
@@ -90,6 +91,7 @@ const UserRow = ({ avatarSrc, primary, secondary, onClick }: UserRowProps) => {
 function StaffIndexRoute() {
   const app = useAppStore();
   const navigate = useNavigate();
+  const { t } = useTranslation("staff");
   const embossed = app.settings?.preferEmbossed;
 
   const [query, setQuery] = useState("");
@@ -141,9 +143,9 @@ function StaffIndexRoute() {
       direction="column"
     >
       <StaffPanelHeader
-        title="Staff Panel"
+        title={t("title")}
         backTo="home"
-        backLabel="Exit"
+        backLabel={t("exit")}
         icon={<ShieldIcon size={22} weight="fill" />}
         trailing={
           <Stack direction="row" spacing={1} flexWrap="wrap">
@@ -153,7 +155,7 @@ function StaffIndexRoute() {
               startDecorator={<WarningIcon />}
               onClick={() => navigate({ to: "/staff/reports" })}
             >
-              Reports
+              {t("nav.reports")}
             </Button>
             <Button
               size="sm"
@@ -161,7 +163,7 @@ function StaffIndexRoute() {
               startDecorator={<ClockCounterClockwiseIcon />}
               onClick={() => navigate({ to: "/staff/activity" })}
             >
-              Activity
+              {t("nav.activity")}
             </Button>
             <Button
               size="sm"
@@ -169,7 +171,7 @@ function StaffIndexRoute() {
               startDecorator={<GavelIcon />}
               onClick={() => navigate({ to: "/staff/appeals" })}
             >
-              Appeals
+              {t("nav.appeals")}
             </Button>
             <Button
               size="sm"
@@ -177,7 +179,7 @@ function StaffIndexRoute() {
               startDecorator={<LifebuoyIcon />}
               onClick={() => navigate({ to: "/staff/support" })}
             >
-              Support
+              {t("nav.support")}
             </Button>
           </Stack>
         }
@@ -212,25 +214,24 @@ function StaffIndexRoute() {
           >
             <Stack direction="column" spacing={0.5}>
               <Typography level="title-sm" fontWeight={600}>
-                Find a user
+                {t("home.findUser")}
               </Typography>
               <Typography level="body-sm" css={{ opacity: 0.75 }}>
-                Search by username, or filter by flag, to view an account and
-                its available staff actions.
+                {t("home.findUserDescription")}
               </Typography>
             </Stack>
             <Input
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search by username, or paste a user ID"
+              placeholder={t("home.searchPlaceholder")}
               startDecorator={<MagnifyingGlassIcon />}
               onKeyDown={(e) => {
                 if (e.key === "Enter" && isSnowflake) goToUser(trimmedQuery);
               }}
             />
             <Select value={flag} onValueChange={(v) => setFlag(String(v))}>
-              <Option value={ANY_FLAG}>Any flag</Option>
+              <Option value={ANY_FLAG}>{t("home.anyFlag")}</Option>
               {flagOptions.map((f) => (
                 <Option key={f} value={f}>
                   {f}
@@ -241,7 +242,7 @@ function StaffIndexRoute() {
 
           {isFetching && !isFetchingNextPage && (
             <Typography level="body-sm" textColor="muted" textAlign="center">
-              Searching...
+              {t("home.searching")}
             </Typography>
           )}
 
@@ -250,7 +251,7 @@ function StaffIndexRoute() {
             results.length === 0 &&
             !isSnowflake && (
               <Typography level="body-sm" textColor="muted" textAlign="center">
-                No users found
+                {t("home.noUsers")}
               </Typography>
             )}
 
@@ -258,8 +259,8 @@ function StaffIndexRoute() {
             <Stack direction="column" spacing={0.5}>
               {isSnowflake && (
                 <UserRow
-                  primary={`Go to user ID ${trimmedQuery}`}
-                  secondary="Exact ID lookup"
+                  primary={t("home.goToUserId", { id: trimmedQuery })}
+                  secondary={t("home.exactIdLookup")}
                   onClick={() => goToUser(trimmedQuery)}
                 />
               )}
@@ -280,7 +281,7 @@ function StaffIndexRoute() {
                   onClick={() => fetchNextPage()}
                   css={{ alignSelf: "center", marginTop: "0.5rem" }}
                 >
-                  {isFetchingNextPage ? "Loading..." : "Load more"}
+                  {isFetchingNextPage ? t("home.loading") : t("home.loadMore")}
                 </Button>
               )}
             </Stack>

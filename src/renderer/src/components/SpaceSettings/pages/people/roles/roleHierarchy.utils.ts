@@ -2,6 +2,7 @@ import type { Space } from "@stores/objects/Space";
 import type { Role } from "@stores/objects/Role";
 import type { SpaceMember } from "@stores/objects/SpaceMember";
 import { arrayMove } from "@dnd-kit/sortable";
+import i18n from "@renderer/i18n";
 import { toast } from "react-toastify";
 
 export interface HierarchyContext {
@@ -95,13 +96,13 @@ export async function reorderRolesFromDrag(
     !hierarchyContext.actorIsAdmin &&
     movedPosition >= hierarchyContext.actorTopPos
   ) {
-    toast.error("Cannot move role above or equal to your highest role");
+    toast.error(i18n.t("roles.hierarchy.cantReorder", { ns: "space" }));
     return;
   }
 
   try {
     await space.roles.reorderRoles(newOrder, positionCeiling);
   } catch {
-    toast.error("Failed to reorder roles");
+    toast.error(i18n.t("roles.hierarchy.failedReorder", { ns: "space" }));
   }
 }

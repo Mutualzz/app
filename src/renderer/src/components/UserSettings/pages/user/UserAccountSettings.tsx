@@ -14,8 +14,10 @@ import { UsernameChange } from "@components/Modals/UsernameChange";
 import { DeleteAccount } from "@components/Modals/DeleteAccount";
 import { useNavigate } from "@tanstack/react-router";
 import { ColorLike } from "@mutualzz/ui-core";
+import { useTranslation } from "react-i18next";
 
 export const UserAccountSettings = observer(() => {
+  const { t } = useTranslation("settings");
   const app = useAppStore();
   const { setCurrentPage } = useUserSettings();
   const { openModal, closeModal } = useModal();
@@ -93,7 +95,7 @@ export const UserAccountSettings = observer(() => {
               {account.displayName}
             </Typography>
             <Button color="primary" onClick={openAvatarStudio}>
-              Edit Avatar
+              {t("account.editAvatar")}
             </Button>
           </Stack>
           <Paper
@@ -110,14 +112,14 @@ export const UserAccountSettings = observer(() => {
               justifyContent="space-between"
             >
               <Stack direction="column">
-                <Typography fontWeight="bold">Display Name</Typography>
+                <Typography fontWeight="bold">{t("account.displayName")}</Typography>
                 <Typography level="body-sm">
-                  {account.globalName ?? "Not set"}
+                  {account.globalName ?? t("account.notSet")}
                 </Typography>
               </Stack>
               <Box>
                 <Button color="neutral" onClick={switchToProfile}>
-                  Edit
+                  {t("account.edit")}
                 </Button>
               </Box>
             </Stack>
@@ -127,7 +129,7 @@ export const UserAccountSettings = observer(() => {
               justifyContent="space-between"
             >
               <Stack direction="column">
-                <Typography fontWeight="bold">Username</Typography>
+                <Typography fontWeight="bold">{t("account.username")}</Typography>
                 <Typography level="body-sm">{account.username}</Typography>
               </Stack>
               <Box>
@@ -137,7 +139,7 @@ export const UserAccountSettings = observer(() => {
                     openModal("change-username", <UsernameChange />)
                   }
                 >
-                  Edit
+                  {t("account.edit")}
                 </Button>
               </Box>
             </Stack>
@@ -148,10 +150,10 @@ export const UserAccountSettings = observer(() => {
             >
               <Stack direction="column" justifyContent="center" spacing={1.25}>
                 <Stack spacing={1.25}>
-                  <Typography fontWeight="bold">Email</Typography>
+                  <Typography fontWeight="bold">{t("account.email")}</Typography>
                   {!account.flags.has("Verified") && (
                     <Typography level="body-sm" variant="plain" color="danger">
-                      (Unverified)
+                      {t("account.unverified")}
                     </Typography>
                   )}
                 </Stack>
@@ -168,7 +170,7 @@ export const UserAccountSettings = observer(() => {
                       color="info"
                       variant="plain"
                     >
-                      {hideEmail ? "Show" : "Hide"}
+                      {hideEmail ? t("account.show") : t("account.hide")}
                     </Link>
                   )}
                   {!account.flags.has("Verified") && (
@@ -184,7 +186,7 @@ export const UserAccountSettings = observer(() => {
                       }}
                       underline="none"
                     >
-                      Verify
+                      {t("account.verify")}
                     </Link>
                   )}
                 </Stack>
@@ -197,7 +199,7 @@ export const UserAccountSettings = observer(() => {
                   }}
                   disabled={confirmingEmail}
                 >
-                  Edit
+                  {t("account.edit")}
                 </Button>
               </Box>
             </Stack>
@@ -205,29 +207,29 @@ export const UserAccountSettings = observer(() => {
         </Stack>
       </Paper>
       <Stack direction="column" spacing={1.25}>
-        <Typography fontWeight="bold">Password</Typography>
+        <Typography fontWeight="bold">{t("account.password")}</Typography>
         <Box>
           <Button
             color="primary"
             onClick={() => openModal("change-password", <ChangePassword />)}
           >
-            Change Password
+            {t("account.changePassword")}
           </Button>
         </Box>
       </Stack>
       <Stack direction="column" spacing={1.25} mt={5}>
         <Typography fontWeight="bold" color="danger">
-          Danger Zone
+          {t("account.dangerZone")}
         </Typography>
         <Typography level="body-sm">
-          Permanently deactivate your account. This cannot be undone.
+          {t("account.dangerZoneDescription")}
         </Typography>
         <Box>
           <Button
             color="danger"
             onClick={() => openModal("delete-account", <DeleteAccount />)}
           >
-            Delete Account
+            {t("account.deleteAccount")}
           </Button>
         </Box>
       </Stack>

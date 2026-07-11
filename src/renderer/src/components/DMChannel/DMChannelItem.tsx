@@ -17,6 +17,7 @@ import { useMenu } from "@contexts/ContextMenu.context";
 import { Tooltip } from "@components/Tooltip";
 import { ChatCircleSlashIcon } from "@phosphor-icons/react";
 import { SmallActivityStatus } from "../SmallActivityStatus";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   channel: Channel;
@@ -25,6 +26,8 @@ interface Props {
 const AVATAR_SIZE = 40;
 
 export const DMChannelItem = observer(({ channel }: Props) => {
+  const { t } = useTranslation("chat");
+  const { t: tCommon } = useTranslation("common");
   const app = useAppStore();
   const { theme } = useTheme();
 
@@ -49,19 +52,20 @@ export const DMChannelItem = observer(({ channel }: Props) => {
 
   const title = (() => {
     if (channel.type === ChannelType.DM)
-      return recipient?.displayName ?? "Deleted User";
+      return recipient?.displayName ?? t("deletedUser");
 
     if (channel.name) return channel.name;
 
     const names = recipients.map((u) => u.displayName).filter(Boolean);
 
-    if (!names.length) return "Group DM Channel";
+    if (!names.length) return tCommon("notifications.groupDmChannel");
     if (names.length <= 2) return names.join(", ");
     return `${names.slice(0, 2).join(", ")},  +${names.length - 2}`;
   })();
 
   let preview: PresencePayload | string | null = null;
-  if (channel.isGroupDM) preview = `${recipients.length} Members`;
+  if (channel.isGroupDM)
+    preview = `${recipients.length} ${t("groupDm.manage.members")}`;
   else if (recipient) preview = app.presence.get(recipient.id);
 
   return (
@@ -211,7 +215,7 @@ export const DMChannelItem = observer(({ channel }: Props) => {
         </Stack>
       )}
       {iBlockedThem && (
-        <Tooltip content="Blocked">
+        <Tooltip content={t("blocked")}>
           <IconSlot size={16}>
             <ChatCircleSlashIcon />
           </IconSlot>

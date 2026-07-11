@@ -13,6 +13,7 @@ import {
 import { useModal } from "@contexts/Modal.context";
 import type { APIPrivateUser } from "@mutualzz/types";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 
 interface Props {
@@ -22,18 +23,20 @@ interface Props {
 }
 
 const durationOptions = [
-  { value: 1, label: "1 hour" },
-  { value: 6, label: "6 hours" },
-  { value: 24, label: "1 day" },
-  { value: 72, label: "3 days" },
-  { value: 168, label: "7 days" },
-  { value: 720, label: "30 days" }
-];
+  { value: 1, labelKey: "user.modals.restrict.durations.1h" },
+  { value: 6, labelKey: "user.modals.restrict.durations.6h" },
+  { value: 24, labelKey: "user.modals.restrict.durations.1d" },
+  { value: 72, labelKey: "user.modals.restrict.durations.3d" },
+  { value: 168, labelKey: "user.modals.restrict.durations.7d" },
+  { value: 720, labelKey: "user.modals.restrict.durations.30d" }
+] as const;
 
 export const StaffUserRestrictConfirm = observer(
-  ({ userId, username, onSuccess }: Props) => {
+  ({ userId, username: _username, onSuccess }: Props) => {
     const app = useAppStore();
     const { closeModal } = useModal();
+    const { t } = useTranslation("staff");
+    const { t: tCommon } = useTranslation("common");
     const [hours, setHours] = useState(24);
     const [reason, setReason] = useState("");
 
@@ -50,7 +53,9 @@ export const StaffUserRestrictConfirm = observer(
       },
       onError: (err) => {
         toast.error(
-          err instanceof Error ? err.message : "Failed to restrict user"
+          err instanceof Error
+            ? err.message
+            : t("user.actions.errors.restrictUser")
         );
       }
     });
@@ -65,37 +70,35 @@ export const StaffUserRestrictConfirm = observer(
         spacing={2.5}
       >
         <Typography level="h5" fontWeight="bold">
-          Restrict User
+          {t("user.modals.restrict.title")}
         </Typography>
-        <Typography>
-          <b>@{username}</b> won&apos;t be able to send messages, create
-          posts, or comment until the restriction expires or is lifted early.
-        </Typography>
+        <Typography>{t("user.modals.restrict.body")}</Typography>
         <Stack direction="column" spacing={1.25}>
-          <Typography fontWeight="bold">Duration</Typography>
-          <Select
-            value={hours}
-            onValueChange={(v) => setHours(Number(v))}
-          >
+          <Typography fontWeight="bold">
+            {t("user.modals.restrict.duration")}
+          </Typography>
+          <Select value={hours} onValueChange={(v) => setHours(Number(v))}>
             {durationOptions.map((o) => (
               <Option key={o.value} value={o.value}>
-                {o.label}
+                {t(o.labelKey)}
               </Option>
             ))}
           </Select>
         </Stack>
         <Stack direction="column" spacing={1.25}>
-          <Typography fontWeight="bold">Reason (required)</Typography>
+          <Typography fontWeight="bold">
+            {t("user.modals.reasonRequired")}
+          </Typography>
           <Textarea
             value={reason}
             onChange={(e) => setReason(e.target.value)}
-            placeholder="Explain what this restriction is for"
+            placeholder={t("user.modals.restrict.placeholder")}
             rows={3}
           />
         </Stack>
         <Stack spacing={1.25} direction="row">
           <Button color="neutral" expand size="lg" onClick={() => closeModal()}>
-            Cancel
+            {tCommon("cancel")}
           </Button>
           <Button
             color="danger"
@@ -104,7 +107,7 @@ export const StaffUserRestrictConfirm = observer(
             disabled={isPending || !reason.trim()}
             size="lg"
           >
-            Restrict
+            {t("user.modals.restrict.submit")}
           </Button>
         </Stack>
       </Paper>

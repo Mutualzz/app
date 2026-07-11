@@ -7,12 +7,14 @@ import { UserAvatar } from "@renderer/components/User/UserAvatar";
 import { IconButton } from "@components/IconButton";
 import { useModal } from "@contexts/Modal.context";
 import { SpaceRoleEditAddMembers } from "@components/SpaceSettings/pages/people/roles/SpaceRoleEditAddMembers";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   role: Role;
 }
 
 export const SpaceRoleEditManageMembers = observer(({ role }: Props) => {
+  const { t } = useTranslation("space");
   const { openModal } = useModal();
 
   const [search, setSearch] = useState("");
@@ -34,7 +36,7 @@ export const SpaceRoleEditManageMembers = observer(({ role }: Props) => {
       >
         <InputDefault
           type="text"
-          placeholder="Search Members"
+          placeholder={t("roles.members.searchPlaceholder")}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           startDecorator={<MagnifyingGlassIcon />}
@@ -48,15 +50,15 @@ export const SpaceRoleEditManageMembers = observer(({ role }: Props) => {
             )
           }
         >
-          Add Members
+          {t("actions.addMembers")}
         </Button>
       </Stack>
       <Stack direction="column" spacing={2.5} maxHeight="50vh" height="100%">
         {(!members || members.length === 0) && !search && (
-          <Typography>No members have been assigned this role</Typography>
+          <Typography>{t("roles.members.emptyAssigned")}</Typography>
         )}
         {(!members || members.length === 0) && search && (
-          <Typography>No members match the search query</Typography>
+          <Typography>{t("roles.members.emptySearch")}</Typography>
         )}
         {members &&
           members.map((member) => (

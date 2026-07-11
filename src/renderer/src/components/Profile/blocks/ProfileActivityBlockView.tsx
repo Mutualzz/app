@@ -1,4 +1,5 @@
 import { useAppStore } from "@hooks/useStores";
+import { presenceStatusKeys } from "@mutualzz/i18n";
 import type { ProfileActivityBlock } from "@mutualzz/types";
 import type { Snowflake } from "@mutualzz/types";
 import { resolveProfileBlockCornerRadius } from "@mutualzz/ui-core";
@@ -8,6 +9,7 @@ import { PulseIcon } from "@phosphor-icons/react";
 import { observer } from "mobx-react-lite";
 import { PresenceIcon } from "@renderer/components/Presence/PresenceIcon";
 import { Paper } from "@renderer/components/Paper";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   block: ProfileActivityBlock;
@@ -15,9 +17,15 @@ interface Props {
 }
 
 export const ProfileActivityBlockView = observer(({ block, userId }: Props) => {
+  const { t } = useTranslation("settings");
+  const { t: tCommon } = useTranslation("common");
   const app = useAppStore();
   const { theme } = useTheme();
   const presence = app.presence.get(userId);
+  const statusKey = presence?.status
+    ? presenceStatusKeys[presence.status as keyof typeof presenceStatusKeys]
+    : null;
+  const statusLabel = statusKey ? tCommon(statusKey) : null;
   const otherActivities = presence?.activities?.filter(
     (a) => a.type !== "custom"
   );
@@ -37,11 +45,11 @@ export const ProfileActivityBlockView = observer(({ block, userId }: Props) => {
       <Stack direction="row" spacing={1} alignItems="center">
         <PulseIcon size={18} weight="fill" />
         <Typography level="body-sm" fontWeight={700} css={{ fontSize: "var(--pcf-sm)" }}>
-          Activity
+          {t("profile.blocks.activity")}
         </Typography>
       </Stack>
 
-      {presence?.status && (
+      {statusLabel && (
         <Stack
           direction="row"
           spacing={0.75}
@@ -50,9 +58,9 @@ export const ProfileActivityBlockView = observer(({ block, userId }: Props) => {
         >
           <Typography
             level="body-xs"
-            css={{ opacity: 0.75, textTransform: "capitalize", fontSize: "var(--pcf-xs)" }}
+            css={{ opacity: 0.75, fontSize: "var(--pcf-xs)" }}
           >
-            {presence.status}
+            {statusLabel}
           </Typography>
           {customActivity && block.showCustomStatus && (
             <>

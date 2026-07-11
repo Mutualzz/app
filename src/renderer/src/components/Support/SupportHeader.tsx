@@ -6,6 +6,7 @@ import { ArrowLeftIcon, XIcon } from "@phosphor-icons/react";
 import { useNavigate } from "@tanstack/react-router";
 import { navigateToPreferredMode } from "@utils/index";
 import type { ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   title: string;
@@ -19,12 +20,14 @@ export function SupportHeader({
   title,
   icon,
   onBack,
-  backLabel = "Back",
+  backLabel,
   showExit = true
 }: Props) {
+  const { t } = useTranslation("common");
   const app = useAppStore();
   const navigate = useNavigate();
   const embossed = app.settings?.preferEmbossed;
+  const resolvedBackLabel = backLabel ?? t("back");
 
   const handleExit = () => {
     if (app.token) {
@@ -59,7 +62,7 @@ export function SupportHeader({
             onClick={onBack}
             css={{ flexShrink: 0 }}
           >
-            {backLabel}
+            {resolvedBackLabel}
           </Button>
         )}
         {icon}
@@ -84,7 +87,7 @@ export function SupportHeader({
           onClick={handleExit}
           css={{ flexShrink: 0 }}
         >
-          Close
+          {t("close")}
         </Button>
       )}
     </Paper>

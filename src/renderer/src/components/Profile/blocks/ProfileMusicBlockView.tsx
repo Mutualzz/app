@@ -17,6 +17,7 @@ import { Paper } from "@renderer/components/Paper";
 import { useAppStore } from "@renderer/hooks/useStores";
 import type { UserProfile } from "@stores/objects/UserProfile";
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 function extractYoutubeVideoId(url: string): string | null {
   try {
@@ -33,6 +34,8 @@ interface Props {
 }
 
 export const ProfileMusicBlockView = ({ block, profile }: Props) => {
+  const { t } = useTranslation("common");
+  const { t: tSettings } = useTranslation("settings");
   const app = useAppStore();
   const { theme } = useTheme();
   const audioRef = useRef<HTMLAudioElement>(null);
@@ -46,9 +49,10 @@ export const ProfileMusicBlockView = ({ block, profile }: Props) => {
 
   // When audioHash is set, custom metadata takes priority over track search result
   const audioHash = block.audioHash ?? null;
+  const musicFallback = tSettings("profile.blocks.music");
   const title = audioHash
-    ? (block.title ?? "Music")
-    : (block.track?.name ?? block.title ?? block.trackUrl ?? "Music");
+    ? (block.title ?? musicFallback)
+    : (block.track?.name ?? block.title ?? block.trackUrl ?? musicFallback);
   const artists = audioHash
     ? (block.artists ?? null)
     : (block.track?.artists ?? block.artists ?? null);
@@ -71,11 +75,11 @@ export const ProfileMusicBlockView = ({ block, profile }: Props) => {
   const isPlaying = playbackMode === "youtube" ? youtubeActive : playing;
 
   const sourceBadge = isFullSong
-    ? "Full song"
+    ? tSettings("profile.music.fullSong")
     : youtubeVideoId
-      ? "YouTube"
+      ? tSettings("profile.music.youtube")
       : audioSrc
-        ? "30s preview"
+        ? tSettings("profile.music.preview30s")
         : null;
   const cornerRadius = resolveProfileBlockCornerRadius(block, "desktop");
 
@@ -194,7 +198,7 @@ export const ProfileMusicBlockView = ({ block, profile }: Props) => {
           }}
         >
           <iframe
-            title="YouTube music player"
+            title={tSettings("profile.music.youtubePlayer")}
             src={`https://www.youtube.com/embed/${youtubeVideoId}?autoplay=1`}
             allow="autoplay; encrypted-media"
             css={{
@@ -303,7 +307,9 @@ export const ProfileMusicBlockView = ({ block, profile }: Props) => {
                     fontSize: "var(--pcf-xs)"
                   }}
                 >
-                  {source === "itunes" ? "Apple" : "Deezer"}
+                  {source === "itunes"
+                    ? tSettings("profile.blocks.musicSourceApple")
+                    : tSettings("profile.blocks.musicSourceDeezer")}
                 </Typography>
               )}
             </Stack>
@@ -329,9 +335,9 @@ export const ProfileMusicBlockView = ({ block, profile }: Props) => {
                 value={Math.min(currentTime, duration ?? currentTime)}
                 onChange={(_, value) => { seekingRef.current = true; pendingSeekRef.current = value as number; setCurrentTime(value as number); }}
                 onChangeCommitted={() => {
-                  const t = pendingSeekRef.current;
+                  const seek = pendingSeekRef.current;
                   pendingSeekRef.current = null;
-                  if (t !== null && audioRef.current) audioRef.current.currentTime = t;
+                  if (seek !== null && audioRef.current) audioRef.current.currentTime = seek;
                 }}
                 css={{ width: "100%" }}
               />
@@ -373,7 +379,7 @@ export const ProfileMusicBlockView = ({ block, profile }: Props) => {
                   level="body-xs"
                   css={{ color: "rgba(255,255,255,0.65)", fontSize: "var(--pcf-xs)" }}
                 >
-                  Volume
+                  {t("media.volume")}
                 </Typography>
                 <Typography
                   level="body-xs"
@@ -414,7 +420,7 @@ export const ProfileMusicBlockView = ({ block, profile }: Props) => {
               onClick={toggle}
               startDecorator={isPlaying ? <PauseIcon /> : <PlayIcon />}
             >
-              {isPlaying ? "Pause" : "Play"}
+              {isPlaying ? t("media.pause") : t("media.play")}
             </Button>
           )}
           {openUrl && (
@@ -425,7 +431,7 @@ export const ProfileMusicBlockView = ({ block, profile }: Props) => {
               onClick={() => window.open(openUrl, "_blank", "noreferrer")}
               startDecorator={<ArrowSquareOutIcon />}
             >
-              Open
+              {t("open")}
             </Button>
           )}
         </Stack>

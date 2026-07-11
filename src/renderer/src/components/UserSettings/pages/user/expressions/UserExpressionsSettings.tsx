@@ -1,8 +1,8 @@
 import { observer } from "mobx-react-lite";
 import { type PropsWithChildren, useState } from "react";
 import { Stack } from "@mutualzz/ui-web";
-import startCase from "lodash-es/startCase";
 import styled from "@emotion/styled";
+import { useTranslation } from "react-i18next";
 import UserEmojisTab from "./UserEmojisTab";
 import UserStickersTab from "./UserStickersTab";
 
@@ -31,14 +31,19 @@ const Tab = styled("div")<TabProps>(({ theme, selected }) => ({
 }));
 
 export const UserExpressionsSettings = observer(() => {
+  const { t } = useTranslation("settings");
   const [currentTab, setCurrentTab] = useState<Tab>("emojis");
 
   return (
     <Stack direction="column" width="100%" height="100%">
       <Stack direction="row" gap={5} mb={2}>
         {tabs.map((tab) => (
-          <Tab onClick={() => setCurrentTab(tab)} selected={currentTab === tab}>
-            {startCase(tab)}
+          <Tab
+            key={tab}
+            onClick={() => setCurrentTab(tab)}
+            selected={currentTab === tab}
+          >
+            {t(`expressions.${tab}`)}
           </Tab>
         ))}
       </Stack>

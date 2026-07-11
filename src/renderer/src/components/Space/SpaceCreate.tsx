@@ -18,6 +18,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { observer } from "mobx-react-lite";
 import { type ChangeEvent, useCallback, useState } from "react";
+import { useTranslation } from "react-i18next";
 import Cropper, { type Area, type Point } from "react-easy-crop";
 import {
   ArrowClockwiseIcon,
@@ -35,6 +36,8 @@ interface Props {
 }
 
 export const SpaceCreate = observer(({ setCreating }: Props) => {
+  const { t } = useTranslation("auth");
+  const { t: tSpace } = useTranslation("space");
   const app = useAppStore();
   const navigate = useNavigate();
   const { theme } = useTheme();
@@ -42,7 +45,11 @@ export const SpaceCreate = observer(({ setCreating }: Props) => {
   const { closeModal } = useModal();
 
   const userDisplay = app.account?.displayName;
-  const [name, setName] = useState(userDisplay ? `${userDisplay}'s space` : "");
+  const [name, setName] = useState(
+    userDisplay
+      ? t("onboarding.createSpace.defaultSpaceName", { displayName: userDisplay })
+      : ""
+  );
 
   const [imageFile, setImageFile] = useState<string | null>(null);
   const [originalFile, setOriginalFile] = useState<File | null>(null);
@@ -75,7 +82,9 @@ export const SpaceCreate = observer(({ setCreating }: Props) => {
       closeModal();
     },
     onError: (err: HttpException) => {
-      setError(err.errors?.[0].message ?? err.message ?? "An error occurred");
+      setError(
+        err.errors?.[0].message ?? err.message ?? tSpace("profile.genericError")
+      );
     }
   });
 
@@ -114,7 +123,7 @@ export const SpaceCreate = observer(({ setCreating }: Props) => {
 
   const handleCreate = async () => {
     if (name.trim() === "") {
-      setError("Name is required");
+      setError(t("onboarding.createSpace.nameRequired"));
       return;
     }
     const shouldCrop =
@@ -144,7 +153,7 @@ export const SpaceCreate = observer(({ setCreating }: Props) => {
       onKeyDown={(e) => e.key === "Enter" && handleCreate()}
     >
       <Typography level="h5" fontWeight="bold" mb={10}>
-        Create a space
+        {t("onboarding.createSpace.title")}
       </Typography>
       <Stack
         width="100%"
@@ -241,7 +250,7 @@ export const SpaceCreate = observer(({ setCreating }: Props) => {
             >
               <CameraIcon weight="fill" size={16} />
               <Typography fontWeight="bold" fontSize="x-small">
-                Upload
+                {t("onboarding.createSpace.upload")}
               </Typography>
             </Stack>
           </FileUploader>
@@ -253,7 +262,7 @@ export const SpaceCreate = observer(({ setCreating }: Props) => {
         width="100%"
       >
         <Typography fontWeight={500} level={{ xs: "body-sm", sm: "body-md" }}>
-          Name{" "}
+          {t("onboarding.createSpace.name")}{" "}
           <Typography variant="plain" color="danger">
             *
           </Typography>
@@ -282,7 +291,7 @@ export const SpaceCreate = observer(({ setCreating }: Props) => {
         <ButtonGroup fullWidth spacing={{ xs: 2, sm: 5 }}>
           {imageFile && (
             <Button disabled={creating} onClick={onClear}>
-              Clear
+              {t("onboarding.createSpace.clear")}
             </Button>
           )}
           <Button
@@ -291,12 +300,12 @@ export const SpaceCreate = observer(({ setCreating }: Props) => {
             variant="solid"
             color="success"
           >
-            Create Space
+            {t("onboarding.createSpace.createSpace")}
           </Button>
         </ButtonGroup>
       </Stack>
       <Stack mt={2.5} alignItems="center" spacing={2}>
-        <Typography>Already have an invite?</Typography>
+        <Typography>{t("onboarding.createSpace.alreadyHaveInvite")}</Typography>
         <Link
           variant="plain"
           color="success"
@@ -304,7 +313,7 @@ export const SpaceCreate = observer(({ setCreating }: Props) => {
           underline="always"
           onClick={() => setCreating(false)}
         >
-          Back to join
+          {t("onboarding.createSpace.backToJoin")}
         </Link>
       </Stack>
     </AnimatedPaper>

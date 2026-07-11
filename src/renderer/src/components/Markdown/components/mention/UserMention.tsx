@@ -7,6 +7,7 @@ import { UserAvatar } from "@components/User/UserAvatar";
 import { RenderElementProps } from "slate-react";
 import { useMenu } from "@contexts/ContextMenu.context";
 import { UserProfilePopoutTrigger } from "@renderer/components/Profile/popout/UserProfilePopoutTrigger";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   userId: Snowflake;
@@ -16,6 +17,7 @@ interface Props {
 
 export const UserMention = observer(
   ({ userId, attributes, children }: Props) => {
+    const { t } = useTranslation("chat");
     const app = useAppStore();
     const { theme } = useTheme();
     const { openContextMenu } = useMenu();
@@ -66,7 +68,7 @@ export const UserMention = observer(
               ":hover": { textDecoration: "underline" }
             }}
           >
-            @{member?.displayName || user?.displayName || "Deleted User"}
+            @{member?.displayName || user?.displayName || t("deletedUser")}
           </Typography>
         </Stack>
       </UserProfilePopoutTrigger>

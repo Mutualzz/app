@@ -9,6 +9,7 @@ import {
 import { Button, Slider, Stack, Typography } from "@mutualzz/ui-web";
 import { ArrowsCounterClockwiseIcon } from "@phosphor-icons/react";
 import { observer } from "mobx-react-lite";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   block: APIProfileBlock;
@@ -29,15 +30,20 @@ const FieldHint = ({ children }: { children: React.ReactNode }) => (
 
 export const ProfileBlockCornerRadiusInspector = observer(
   ({ block, updateSelectedBlock }: Props) => {
+    const { t } = useTranslation("settings");
     const radius = resolveProfileBlockCornerRadius(block, "desktop");
     const isCustom = isCustomProfileBlockCornerRadius(block);
 
     return (
       <Stack direction="column" spacing={1}>
-        <FieldLabel>Corner radius ({radius}px)</FieldLabel>
+        <FieldLabel>
+          {t("profile.inspector.cornerRadius.title", { value: radius })}
+        </FieldLabel>
         <FieldHint>
-          Round block corners from {PROFILE_BLOCK_CORNER_RADIUS_MIN}px to{" "}
-          {PROFILE_BLOCK_CORNER_RADIUS_MAX}px.
+          {t("profile.inspector.cornerRadius.hint", {
+            min: PROFILE_BLOCK_CORNER_RADIUS_MIN,
+            max: PROFILE_BLOCK_CORNER_RADIUS_MAX
+          })}
         </FieldHint>
         <Slider
           min={PROFILE_BLOCK_CORNER_RADIUS_MIN}
@@ -63,7 +69,7 @@ export const ProfileBlockCornerRadiusInspector = observer(
               } as Partial<APIProfileBlock>)
             }
           >
-            Reset to default
+            {t("profile.inspector.cornerRadius.resetToDefault")}
           </Button>
         )}
       </Stack>

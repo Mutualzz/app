@@ -13,6 +13,7 @@ import {
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import dayjs from "dayjs";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 
 export const Route = createFileRoute("/_authenticated/staff/appeals")({
@@ -22,12 +23,7 @@ export const Route = createFileRoute("/_authenticated/staff/appeals")({
 const PAGE_LIMIT = 50;
 const ANY = "any";
 
-const statusOptions: { value: string; label: string }[] = [
-  { value: ANY, label: "Any status" },
-  { value: "pending", label: "Pending" },
-  { value: "accepted", label: "Accepted" },
-  { value: "rejected", label: "Rejected" }
-];
+const statusValues = ["pending", "accepted", "rejected"] as const;
 
 const statusColors: Record<string, "warning" | "success" | "danger"> = {
   pending: "warning",
@@ -39,6 +35,7 @@ function StaffAppealsRoute() {
   const app = useAppStore();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { t } = useTranslation("staff");
   const embossed = app.settings?.preferEmbossed;
 
   const [status, setStatus] = useState<string>("pending");
@@ -88,7 +85,7 @@ function StaffAppealsRoute() {
     },
     onError: (err) => {
       toast.error(
-        err instanceof Error ? err.message : "Failed to update appeal"
+        err instanceof Error ? err.message : t("appeals.errorUpdate")
       );
     }
   });
@@ -102,7 +99,7 @@ function StaffAppealsRoute() {
       direction="column"
     >
       <StaffPanelHeader
-        title="Appeals"
+        title={t("nav.appeals")}
         icon={<GavelIcon size={22} weight="fill" />}
       />
 
@@ -125,22 +122,23 @@ function StaffAppealsRoute() {
       >
         <Stack direction="column" spacing={1.5} width="100%" maxWidth={640}>
           <Select value={status} onValueChange={(v) => setStatus(String(v))}>
-            {statusOptions.map((o) => (
-              <Option key={o.value} value={o.value}>
-                {o.label}
+            <Option value={ANY}>{t("appeals.anyStatus")}</Option>
+            {statusValues.map((value) => (
+              <Option key={value} value={value}>
+                {t(`appeals.status.${value}` as "appeals.status.pending")}
               </Option>
             ))}
           </Select>
 
           {isFetching && (
             <Typography level="body-sm" textColor="muted" textAlign="center">
-              Loading...
+              {t("home.loading")}
             </Typography>
           )}
 
           {!isFetching && appeals.length === 0 && (
             <Typography level="body-sm" textColor="muted" textAlign="center">
-              No appeals found
+              {t("appeals.empty")}
             </Typography>
           )}
 
@@ -169,7 +167,9 @@ function StaffAppealsRoute() {
                       {appeal.space ? ` · ${appeal.space.name}` : ""}
                     </Typography>
                     <Typography level="body-xs" textColor="muted">
-                      {appeal.space ? "Space lockdown appeal · " : ""}
+                      {appeal.space
+                        ? `${t("appeals.spaceLockdownAppeal")} · `
+                        : ""}
                       {dayjs(appeal.createdAt).format("MMM D, YYYY h:mm A")}
                     </Typography>
                   </Stack>
@@ -179,7 +179,9 @@ function StaffAppealsRoute() {
                     color={statusColors[appeal.status] ?? "neutral"}
                     css={{ textTransform: "uppercase" }}
                   >
-                    {appeal.status}
+                    {t(
+                      `appeals.status.${appeal.status}` as "appeals.status.pending"
+                    )}
                   </Typography>
                 </Stack>
 
@@ -199,7 +201,7 @@ function StaffAppealsRoute() {
                     })
                   }
                 >
-                  View Account
+                  {t("appeals.viewAccount")}
                 </Button>
 
                 {appeal.status === "pending" && (
@@ -212,7 +214,7 @@ function StaffAppealsRoute() {
                           [appeal.id]: e.target.value
                         }))
                       }
-                      placeholder="Response to the user (optional)"
+                      placeholder={t("appeals.responsePlaceholder")}
                       rows={2}
                     />
                     <Stack direction="row" spacing={1}>
@@ -229,7 +231,7 @@ function StaffAppealsRoute() {
                           })
                         }
                       >
-                        Accept
+                        {t("appeals.accept")}
                       </Button>
                       <Button
                         size="sm"
@@ -244,7 +246,7 @@ function StaffAppealsRoute() {
                           })
                         }
                       >
-                        Reject
+                        {t("appeals.reject")}
                       </Button>
                     </Stack>
                   </>
@@ -254,15 +256,20 @@ function StaffAppealsRoute() {
                   <Stack direction="column" spacing={0.25}>
                     {appeal.staffResponse && (
                       <Typography level="body-sm">
-                        {appeal.staffResponse}
+                        {t("appeals.staffResponse", {
+                          text: appeal.staffResponse
+                        })}
                       </Typography>
                     )}
                     <Typography level="body-xs" textColor="muted">
-                      {appeal.status[0].toUpperCase() +
-                        appeal.status.slice(1)}{" "}
-                      by{" "}
-                      {appeal.reviewedBy.globalName ||
-                        appeal.reviewedBy.username}
+                      {t("appeals.decidedBy", {
+                        status: t(
+                          `appeals.status.${appeal.status}` as "appeals.status.pending"
+                        ),
+                        name:
+                          appeal.reviewedBy.globalName ||
+                          appeal.reviewedBy.username
+                      })}
                       {appeal.reviewedAt &&
                         ` · ${dayjs(appeal.reviewedAt).format(
                           "MMM D, YYYY h:mm A"
@@ -282,7 +289,7 @@ function StaffAppealsRoute() {
               onClick={() => fetchNextPage()}
               css={{ alignSelf: "center", marginTop: "0.5rem" }}
             >
-              {isFetchingNextPage ? "Loading..." : "Load more"}
+              {isFetchingNextPage ? t("home.loading") : t("home.loadMore")}
             </Button>
           )}
         </Stack>

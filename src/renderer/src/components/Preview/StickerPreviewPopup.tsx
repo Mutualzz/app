@@ -6,6 +6,7 @@ import { Divider, Stack, Typography } from "@mutualzz/ui-web";
 import { Paper } from "@components/Paper";
 import { SpaceIcon } from "@components/Space/SpaceIcon";
 import { UserAvatar } from "@components/User/UserAvatar";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   expression: Expression;
@@ -14,6 +15,7 @@ interface Props {
 
 export const StickerPreviewPopup = observer(
   ({ expression, ...props }: Props) => {
+    const { t } = useTranslation("chat");
     const app = useAppStore();
 
     return (
@@ -45,12 +47,11 @@ export const StickerPreviewPopup = observer(
               {expression.name}
             </Typography>
             <Typography level="body-xs">
-              {expression.animated ? "Animated sticker" : "Sticker"}
               {expression.spaceId
-                ? " from one of the spaces you belong in"
+                ? t("expressionPreview.stickerFromSpaceBelong")
                 : expression.authorId === app.account?.id
-                  ? " from you"
-                  : " from a user"}
+                  ? t("expressionPreview.stickerFromYou")
+                  : t("expressionPreview.stickerFromUser")}
             </Typography>
           </Stack>
         </Stack>
@@ -64,19 +65,19 @@ export const StickerPreviewPopup = observer(
           {expression.spaceId ? (
             <Stack spacing={1.25} direction="column">
               <Typography level="body-sm">
-                This sticker is from a space
+                {t("expressionPreview.stickerFromSpace")}
               </Typography>
               <Stack direction="row" spacing={1.25} alignItems="center">
                 <SpaceIcon space={expression.space} />
                 <Typography fontWeight="bold" level="body-sm">
-                  {expression.space?.name ?? "Private Space"}
+                  {expression.space?.name ?? t("privateSpace")}
                 </Typography>
               </Stack>
             </Stack>
           ) : (
             <Stack spacing={1.25} direction="column">
               <Typography level="body-xs">
-                This sticker is from a user
+                {t("expressionPreview.stickerFromUser")}
               </Typography>
               <Stack direction="row" spacing={1.25} alignItems="center">
                 <UserAvatar
@@ -84,7 +85,7 @@ export const StickerPreviewPopup = observer(
                   member={app.spaces.active?.members.get(expression.authorId)}
                 />
                 <Typography fontWeight="bold" level="body-sm">
-                  {expression.author?.displayName ?? "Unknown User"}
+                  {expression.author?.displayName ?? t("unknownUser")}
                 </Typography>
               </Stack>
             </Stack>

@@ -12,10 +12,12 @@ import { Stack } from "@mutualzz/ui-web";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useMutation } from "@tanstack/react-query";
 import { observer } from "mobx-react-lite";
+import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 import { navigateToPreferredMode } from "@utils/index";
 
 export const AvatarEditorPage = observer(() => {
+  const { t } = useTranslation("settings");
   const app = useAppStore();
   const account = app.account;
   const navigate = useNavigate();
@@ -31,8 +33,8 @@ export const AvatarEditorPage = observer(() => {
   const { mutate: removeAvatar, isPending: removing } = useMutation({
     mutationKey: ["delete-avatar", account?.id],
     mutationFn: () => app.rest.patch("@me", { avatar: null }),
-    onSuccess: () => toast.success("Avatar removed"),
-    onError: () => toast.error("Failed to remove avatar")
+    onSuccess: () => toast.success(t("profile.avatarRemoved")),
+    onError: () => toast.error(t("profile.failedRemoveAvatar"))
   });
 
   if (!account) return null;
@@ -44,7 +46,7 @@ export const AvatarEditorPage = observer(() => {
         size="sm"
         onClick={() => navigateToPreferredMode(app, navigate, false)}
       >
-        Done
+        {t("profile.done")}
       </Button>
       <Button
         color="danger"
@@ -53,16 +55,16 @@ export const AvatarEditorPage = observer(() => {
         disabled={!account.avatar}
         onClick={() => removeAvatar()}
       >
-        Remove
+        {t("profile.remove")}
       </Button>
     </Stack>
   );
 
   return (
     <ProfileLayout
-      title="Edit Avatar"
+      title={t("account.editAvatar")}
       actions={titleBarActions}
-      backLabel="Close"
+      backLabel={t("profile.close")}
       onBack={() => navigateToPreferredMode(app, navigate)}
     >
       <Stack

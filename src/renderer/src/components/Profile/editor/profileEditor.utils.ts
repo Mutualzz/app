@@ -4,6 +4,7 @@ import type {
 } from "@mutualzz/types";
 import type { UserProfile } from "@stores/objects/UserProfile";
 import { normalizeProfileBlocks } from "@components/Profile/viewer/profileLayout.utils";
+import i18n from "../../../i18n";
 
 export interface ProfileDraftState {
   bio: string;
@@ -44,7 +45,7 @@ export const createDraftFromProfile = (
         ? {
             source: musicTrackSource ?? "itunes",
             id: musicTrackId,
-            name: profile.profileMusic.title ?? "Profile music",
+            name: profile.profileMusic.title ?? i18n.t("profile.inspector.profileMusic", { ns: "settings" }),
             artists: profile.profileMusic.authorName ?? "",
             image: profile.profileMusic.image ?? null,
             previewUrl: profile.profileMusic.previewUrl ?? null,
@@ -132,25 +133,28 @@ export const validateDraftForSave = (
   ).length;
 
   if (emptyImages > 0) {
-    return `Remove or upload images for ${emptyImages} image block${
-      emptyImages === 1 ? "" : "s"
-    } before saving`;
+    return i18n.t("profile.inspector.validation.emptyImages", {
+      count: emptyImages,
+      ns: "settings"
+    });
   }
 
   if (emptyStickers > 0) {
-    return `Choose stickers for ${emptyStickers} sticker block${
-      emptyStickers === 1 ? "" : "s"
-    } before saving`;
+    return i18n.t("profile.inspector.validation.emptyStickers", {
+      count: emptyStickers,
+      ns: "settings"
+    });
   }
 
   if (emptyLinks > 0) {
-    return `Add at least one link to ${emptyLinks} links block${
-      emptyLinks === 1 ? "" : "s"
-    } before saving`;
+    return i18n.t("profile.inspector.validation.emptyLinks", {
+      count: emptyLinks,
+      ns: "settings"
+    });
   }
 
   if (draft.bio.length > 512) {
-    return "Bio must be at most 512 characters";
+    return i18n.t("profile.inspector.validation.bioTooLong", { ns: "settings" });
   }
 
   return null;

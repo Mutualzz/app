@@ -1,6 +1,7 @@
 import type { APIProfileMusic } from "@mutualzz/types";
 import type { ProfileDraftState } from "@components/Profile/editor/profileEditor.utils";
 import type { UserProfile } from "@stores/objects/UserProfile";
+import i18n from "@renderer/i18n";
 
 const AUDIO_HASH_PATTERN = /^[a-f0-9_]+$/i;
 
@@ -9,11 +10,12 @@ export const isProfileMusicAudioHash = (value: string) =>
 
 export const getProfileMusicLabel = (music: APIProfileMusic) => {
   if (music.title) return music.title;
-  if (music.audioHash) return "Uploaded track";
+  if (music.audioHash)
+    return i18n.t("profile.music.uploadedTrack", { ns: "settings" });
   try {
     return new URL(music.url).hostname.replace(/^www\./, "");
   } catch {
-    return "Profile music";
+    return i18n.t("profile.music.fallbackTitle", { ns: "settings" });
   }
 };
 
@@ -87,13 +89,17 @@ export const getDraftProfileMusic = (
   if (!draft.profileMusicUrl && !draft.profileMusicTrackId) return null;
 
   const ref = draft.profileMusicUrl;
+  const fallbackTitle = i18n.t("profile.music.fallbackTitle", {
+    ns: "settings"
+  });
+
   if (ref && isProfileMusicAudioHash(ref)) {
     return {
       url: ref,
       audioHash: ref,
       title: profile.profileMusic?.audioHash === ref
-        ? profile.profileMusic.title ?? "Profile music"
-        : "Profile music"
+        ? profile.profileMusic.title ?? fallbackTitle
+        : fallbackTitle
     };
   }
 
@@ -110,7 +116,7 @@ export const getDraftProfileMusic = (
   }
 
   if (ref) {
-    return { url: ref, title: "Profile music" };
+    return { url: ref, title: fallbackTitle };
   }
 
   return null;

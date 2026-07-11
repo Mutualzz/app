@@ -15,6 +15,7 @@ import type { Expression } from "@stores/objects/Expression";
 import type { SpaceMember } from "@stores/objects/SpaceMember";
 import type { Channel } from "@stores/objects/Channel";
 import Snowflake from "@utils/Snowflake";
+import i18n from "../i18n";
 
 export function mergeAppendAnything(
   ...objects: Record<string, string | string[]>[]
@@ -109,16 +110,16 @@ export const generateHash = async (buffer: ArrayBuffer, animated: boolean) => {
 export const formatPresenceStatus = (status: PresenceStatus) => {
   switch (status) {
     case "online":
-      return "Online";
+      return i18n.t("status.online");
     case "idle":
-      return "Idle";
+      return i18n.t("status.idle");
     case "dnd":
-      return "Do Not Disturb";
+      return i18n.t("status.dnd");
     case "invisible":
-      return "Invisible";
+      return i18n.t("status.invisible");
     case "offline":
     default:
-      return "Offline";
+      return i18n.t("status.offline");
   }
 };
 

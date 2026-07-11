@@ -2,8 +2,8 @@ import { Paper } from "@components/Paper";
 import { useModal } from "@contexts/Modal.context";
 import { useAppStore } from "@hooks/useStores";
 import { IconButton, Stack, Typography } from "@mutualzz/ui-web";
-import startCase from "lodash-es/startCase";
 import { observer } from "mobx-react-lite";
+import { useTranslation } from "react-i18next";
 import { ThemeCreatorSidebarRight } from "./ThemeCreatorSidebar.right";
 import { ThemeCreatorColorsAdaptive } from "./pages/colors/ThemeCreatorColorsAdaptive";
 import { ThemeCreatorColorsBase } from "./pages/colors/ThemeCreatorColorsBase";
@@ -13,6 +13,7 @@ import { ThemeCreatorDetails } from "./pages/general/ThemeCreatorDetails";
 import { XIcon } from "@phosphor-icons/react";
 
 export const ThemeCreatorContent = observer(() => {
+  const { t } = useTranslation("settings");
   const app = useAppStore();
   const { currentCategory, currentPage, values } = app.themeCreator;
   const { closeModal } = useModal();
@@ -46,19 +47,27 @@ export const ThemeCreatorContent = observer(() => {
             fontFamily="monospace"
             textAlign="center"
           >
-            {currentCategory === "general" ? "Theme " : ""}
-            {startCase(currentPage)}
             {currentCategory === "general"
-              ? ""
-              : ` ${startCase(currentCategory)}`}
+              ? t("themeCreator.headers.pageGeneral", {
+                  page: t(`themeCreator.pages.${currentPage}`)
+                })
+              : t("themeCreator.headers.pageColors", {
+                  page: t(`themeCreator.pages.${currentPage}`),
+                  category: t(`themeCreator.categories.${currentCategory}`)
+                })}
           </Typography>
           <Typography
             level={{ xs: "h6", sm: "body-lg" }}
             fontFamily="monospace"
             textAlign="center"
           >
-            {startCase(values.type)} {startCase(values.style)}
-            {values.adaptive ? " Adaptive " : ""} Theme
+            {t("themeCreator.headers.themeSummary", {
+              type: t(`themeCreator.themeTypes.${values.type}`),
+              style: t(`themeCreator.themeStyles.${values.style}`),
+              adaptive: values.adaptive
+                ? t("themeCreator.headers.adaptiveSuffix")
+                : ""
+            })}
           </Typography>
         </Stack>
         <IconButton

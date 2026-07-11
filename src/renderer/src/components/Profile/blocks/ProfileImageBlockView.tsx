@@ -2,25 +2,20 @@ import { ImageFormat, type ProfileImageBlock } from "@mutualzz/types";
 import {
   isProfileImageVideoUrl,
   resolveProfileBlockCornerRadius,
-  resolveProfileImageBlockUrl,
+  resolveProfileImageBlockUrl
 } from "@mutualzz/ui-core";
 import type { UserProfile } from "@stores/objects/UserProfile";
 
 export const ProfileImageBlockView = ({
   block,
-  profile,
+  profile
 }: {
   block: ProfileImageBlock;
   profile: UserProfile;
 }) => {
   const displayUrl = block.src
     ? resolveProfileImageBlockUrl(block.src, (hash, animated) =>
-        profile.constructBlockImageUrl(
-          hash,
-          ImageFormat.WebP,
-          512,
-          animated,
-        ),
+        profile.constructBlockImageUrl(hash, ImageFormat.WebP, 512, animated)
       )
     : null;
   const isVideo = displayUrl ? isProfileImageVideoUrl(displayUrl) : false;
@@ -37,7 +32,7 @@ export const ProfileImageBlockView = ({
         background: "rgba(0,0,0,0.15)",
         display: "flex",
         alignItems: "center",
-        justifyContent: "center",
+        justifyContent: "center"
       }}
     >
       {displayUrl &&
@@ -51,18 +46,17 @@ export const ProfileImageBlockView = ({
             css={{
               width: "100%",
               height: "100%",
-              objectFit,
+              objectFit
             }}
           />
         ) : (
           <img
             src={displayUrl}
-            alt=""
             draggable={false}
             css={{
               width: "100%",
               height: "100%",
-              objectFit,
+              objectFit
             }}
           />
         ))}

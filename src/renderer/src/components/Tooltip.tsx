@@ -14,24 +14,20 @@ interface Props extends TooltipProps {
 
 export const Tooltip = observer(
   ({ content, title, paperProps, typographyProps, ...props }: Props) => {
+    const label = content ?? title;
+
     return (
       <MzTooltip
         {...props}
         content={
-          <TooltipWrapper
-            paperProps={paperProps}
-            typographyProps={typographyProps}
-          >
-            {content}
-          </TooltipWrapper>
-        }
-        title={
-          <TooltipWrapper
-            paperProps={paperProps}
-            typographyProps={typographyProps}
-          >
-            {title}
-          </TooltipWrapper>
+          label != null ? (
+            <TooltipWrapper
+              paperProps={paperProps}
+              typographyProps={typographyProps}
+            >
+              {label}
+            </TooltipWrapper>
+          ) : undefined
         }
       />
     );

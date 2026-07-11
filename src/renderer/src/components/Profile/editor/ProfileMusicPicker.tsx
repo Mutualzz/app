@@ -12,6 +12,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { observer } from "mobx-react-lite";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 const SEARCH_DEBOUNCE_MS = 650;
 const MIN_SEARCH_LENGTH = 3;
@@ -104,6 +105,8 @@ const TrackMeta = ({
 
 export const ProfileMusicPicker = observer(
   ({ draft, onDraftChange }: Props) => {
+    const { t } = useTranslation("common");
+    const { t: tSettings } = useTranslation("settings");
     const app = useAppStore();
     const [query, setQuery] = useState("");
     const [debouncedQuery, setDebouncedQuery] = useState("");
@@ -197,12 +200,12 @@ export const ProfileMusicPicker = observer(
                   </Typography>
                 )}
                 <Typography level="body-xs" css={{ opacity: 0.5 }}>
-                  30-second preview
+                  {tSettings("profile.music.preview30s")}
                 </Typography>
               </Stack>
             </Stack>
             <Button size="sm" color="neutral" fullWidth onClick={clearMusic}>
-              Remove
+              {t("remove")}
             </Button>
           </Paper>
         ) : (
@@ -213,16 +216,16 @@ export const ProfileMusicPicker = observer(
                 setSource((value ?? "all") as "itunes" | "deezer" | "all")
               }
               size="sm"
-              placeholder="Source"
+              placeholder={tSettings("profile.music.source")}
             >
-              <Option value="all">Apple + Deezer</Option>
-              <Option value="itunes">Apple</Option>
-              <Option value="deezer">Deezer</Option>
+              <Option value="all">{tSettings("profile.blocks.musicSourceAll")}</Option>
+              <Option value="itunes">{tSettings("profile.blocks.musicSourceApple")}</Option>
+              <Option value="deezer">{tSettings("profile.blocks.musicSourceDeezer")}</Option>
             </Select>
             <Input
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              placeholder="Search songs…"
+              placeholder={tSettings("profile.music.searchSongs")}
               startDecorator={<MagnifyingGlassIcon />}
               endDecorator={
                 query ? (
@@ -239,7 +242,9 @@ export const ProfileMusicPicker = observer(
             {trimmedQuery.length > 0 &&
               trimmedQuery.length < MIN_SEARCH_LENGTH && (
                 <Typography level="body-xs" css={{ opacity: 0.55 }}>
-                  Type at least {MIN_SEARCH_LENGTH} characters to search
+                  {tSettings("profile.music.typeAtLeast", {
+                    min: MIN_SEARCH_LENGTH
+                  })}
                 </Typography>
               )}
             {showResults && (
@@ -262,8 +267,8 @@ export const ProfileMusicPicker = observer(
                     css={{ opacity: 0.65, px: 0.25, py: 0.25 }}
                   >
                     {isDebouncing
-                      ? "Waiting for you to finish typing…"
-                      : "Searching…"}
+                      ? tSettings("profile.music.waitingToType")
+                      : tSettings("profile.music.searching")}
                   </Typography>
                 )}
                 {!isDebouncing &&
@@ -298,7 +303,9 @@ export const ProfileMusicPicker = observer(
                           name={track.name}
                           artists={track.artists}
                           previewLabel={
-                            track.previewUrl ? "30s preview" : "No preview"
+                            track.previewUrl
+                              ? tSettings("profile.music.preview30s")
+                              : tSettings("profile.music.noPreview")
                           }
                         />
                       </Stack>
@@ -309,7 +316,7 @@ export const ProfileMusicPicker = observer(
                     level="body-xs"
                     css={{ opacity: 0.65, px: 0.25, py: 0.25 }}
                   >
-                    No tracks found
+                    {tSettings("profile.music.noTracksFound")}
                   </Typography>
                 )}
               </Paper>

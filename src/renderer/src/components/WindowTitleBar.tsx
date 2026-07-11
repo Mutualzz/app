@@ -12,6 +12,7 @@ import {
   useTheme
 } from "@mutualzz/ui-web";
 import { observer } from "mobx-react-lite";
+import { useTranslation } from "react-i18next";
 import { useEffect, useRef, useState } from "react";
 import {
   ArrowLeftIcon,
@@ -41,6 +42,10 @@ interface WindowTitleBarProps {
 }
 
 const WindowTitleBar = ({ onHeightChange }: WindowTitleBarProps) => {
+  const { t } = useTranslation("settings");
+  const { t: tCommon } = useTranslation("common");
+  const { t: tSpace } = useTranslation("space");
+  const { t: tChat } = useTranslation("chat");
   const app = useAppStore();
   const navigate = useNavigate();
   const { location } = useRouterState();
@@ -113,7 +118,9 @@ const WindowTitleBar = ({ onHeightChange }: WindowTitleBarProps) => {
           color="danger"
           css={{ WebkitAppRegion: "drag", userSelect: "none" }}
         >
-          <Typography level="body-lg">You are currently offline</Typography>
+          <Typography level="body-lg">
+            {tCommon("connection.offlineBanner")}
+          </Typography>
         </Paper>
       )}
       {app.voice.disconnectBanner && (
@@ -137,7 +144,7 @@ const WindowTitleBar = ({ onHeightChange }: WindowTitleBarProps) => {
                 userSelect: "auto"
               }}
             >
-              Reconnect
+              {tCommon("connection.reconnect")}
             </Button>
           )}
           <Box position="absolute" top={2} right={4}>
@@ -166,7 +173,7 @@ const WindowTitleBar = ({ onHeightChange }: WindowTitleBarProps) => {
           css={{ WebkitAppRegion: "drag", userSelect: "none" }}
         >
           <Typography level="body-lg">
-            Your browser blocked voice audio playback
+            {tCommon("connection.audioBlocked")}
           </Typography>
           <Button
             variant="outlined"
@@ -177,7 +184,7 @@ const WindowTitleBar = ({ onHeightChange }: WindowTitleBarProps) => {
               userSelect: "auto"
             }}
           >
-            Click to enable audio
+            {tCommon("connection.enableAudio")}
           </Button>
         </Paper>
       )}
@@ -262,7 +269,9 @@ const WindowTitleBar = ({ onHeightChange }: WindowTitleBarProps) => {
                 <Button
                   size="sm"
                   color={
-                    pageTitleBar.backLabel === "Close" ? "danger" : "neutral"
+                    pageTitleBar.backLabel === tCommon("close")
+                      ? "danger"
+                      : "neutral"
                   }
                   variant="soft"
                   startDecorator={<ArrowLeftIcon weight="bold" />}
@@ -273,11 +282,11 @@ const WindowTitleBar = ({ onHeightChange }: WindowTitleBarProps) => {
                     flexShrink: 0
                   }}
                 >
-                  {pageTitleBar.backLabel ?? "Back"}
+                  {pageTitleBar.backLabel ?? tCommon("back")}
                 </Button>
               ) : (
                 <Stack spacing={0.75} alignItems="center" mt={1.75}>
-                  <Tooltip content="Go Back">
+                  <Tooltip content={tCommon("nav.goBack")}>
                     <IconButton
                       disabled={!app.navigation.canBack}
                       onClick={() => app.navigation.back(navigate)}
@@ -290,7 +299,7 @@ const WindowTitleBar = ({ onHeightChange }: WindowTitleBarProps) => {
                       <ArrowLeftIcon weight="fill" />
                     </IconButton>
                   </Tooltip>
-                  <Tooltip content="Go Forward">
+                  <Tooltip content={tCommon("nav.goForward")}>
                     <IconButton
                       disabled={!app.navigation.canForward}
                       onClick={() => app.navigation.forward(navigate)}
@@ -314,8 +323,11 @@ const WindowTitleBar = ({ onHeightChange }: WindowTitleBarProps) => {
                     fontWeight="bold"
                     ml={2}
                   >
-                    Currently previewing a theme
-                    {values.name ? `: ${values.name}` : ""}
+                    {values.name
+                      ? t("themeCreator.preview.bannerNamed", {
+                          name: values.name
+                        })
+                      : t("themeCreator.preview.banner")}
                   </Typography>
                   <Button
                     onClick={() => {
@@ -329,7 +341,7 @@ const WindowTitleBar = ({ onHeightChange }: WindowTitleBarProps) => {
                       userSelect: "auto"
                     }}
                   >
-                    Stop preview
+                    {t("themeCreator.preview.stop")}
                   </Button>
                 </Stack>
               )}
@@ -359,8 +371,8 @@ const WindowTitleBar = ({ onHeightChange }: WindowTitleBarProps) => {
                   </IconSlot>
                   <Typography level="label-sm" weight="bold">
                     {location.href.includes("friends")
-                      ? "Friends"
-                      : "Direct Messages"}
+                      ? tSpace("sidebar.friends")
+                      : tSpace("sidebar.directMessages")}
                   </Typography>
                 </Stack>
               )}
@@ -370,7 +382,7 @@ const WindowTitleBar = ({ onHeightChange }: WindowTitleBarProps) => {
                     <PlanetIcon weight="fill" />
                   </IconSlot>
                   <Typography level="label-sm" weight="bold">
-                    Spaces
+                    {tSpace("sidebar.spaces")}
                   </Typography>
                 </Stack>
               )}
@@ -387,10 +399,10 @@ const WindowTitleBar = ({ onHeightChange }: WindowTitleBarProps) => {
                   </IconSlot>
                   <Typography level="label-sm" weight="bold">
                     {location.pathname === "/feed/friends"
-                      ? "Friends"
+                      ? tChat("feed.sidebar.friends")
                       : location.pathname === "/feed/saved"
-                        ? "Favorites"
-                        : "Explore / Discover"}
+                        ? tChat("feed.sidebar.saves")
+                        : tChat("feed.sidebar.explore")}
                   </Typography>
                 </Stack>
               )}
@@ -505,7 +517,11 @@ const WindowTitleBar = ({ onHeightChange }: WindowTitleBarProps) => {
                 onMouseLeave={() => setCloseDanger(false)}
                 variant={closeDanger ? "solid" : "plain"}
                 onClick={handleClose}
-                title={isUpdating ? "Updating… please wait" : "Close"}
+                title={
+                  isUpdating
+                    ? tCommon("updater.pleaseWait")
+                    : tCommon("close")
+                }
               >
                 <XIcon />
               </IconButton>

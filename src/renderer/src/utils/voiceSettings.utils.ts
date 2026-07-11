@@ -17,13 +17,13 @@ export const DEFAULT_SCREEN_SHARE_QUALITY: ScreenShareQuality = "1080p30";
 
 export const SCREEN_SHARE_QUALITY_OPTIONS: {
   value: ScreenShareQuality;
-  label: string;
+  labelKey: string;
 }[] = [
-  { value: "720p15", label: "720p 15fps" },
-  { value: "720p30", label: "720p 30fps" },
-  { value: "1080p30", label: "1080p 30fps" },
-  { value: "1080p60", label: "1080p 60fps" },
-  { value: "source", label: "Source" }
+  { value: "720p15", labelKey: "voice.screenShare.quality.720p15" },
+  { value: "720p30", labelKey: "voice.screenShare.quality.720p30" },
+  { value: "1080p30", labelKey: "voice.screenShare.quality.1080p30" },
+  { value: "1080p60", labelKey: "voice.screenShare.quality.1080p60" },
+  { value: "source", labelKey: "voice.screenShare.quality.source" }
 ];
 
 export const DEFAULT_VOICE_INPUT_SENSITIVITY = 35;

@@ -20,6 +20,7 @@ import {
 import { useMutation } from "@tanstack/react-query";
 import { observer } from "mobx-react-lite";
 import { isElectron } from "@renderer/utils";
+import { useTranslation } from "react-i18next";
 
 const EMOJI_SIZE = 24;
 
@@ -55,6 +56,7 @@ interface Props {
 
 export const MessageContextMenu = observer(({ message }: Props) => {
   const app = useAppStore();
+  const { t } = useTranslation("chat");
   const { clearMenu } = useMenu();
   const { openModal } = useModal();
   const { recents, addRecentStandard, addRecentCustom } = useRecentEmojis();
@@ -111,7 +113,7 @@ export const MessageContextMenu = observer(({ message }: Props) => {
                 key={item.key}
                 type="button"
                 onClick={() => handleQuickReaction(item)}
-                aria-label={`React with ${item.title}`}
+                aria-label={t("actions.reactWith", { emoji: item.title })}
                 title={`:${item.title}:`}
               >
                 {item.kind === "standard" ? (
@@ -146,7 +148,7 @@ export const MessageContextMenu = observer(({ message }: Props) => {
           clearMenu();
         }}
       >
-        Reply
+        {t("actions.reply")}
       </ContextItem>
 
       <Divider orientation="horizontal" css={{ opacity: 0.5 }} />
@@ -160,7 +162,7 @@ export const MessageContextMenu = observer(({ message }: Props) => {
             clearMenu();
           }}
         >
-          Copy Text
+          {t("actions.copyText")}
         </ContextItem>
       )}
 
@@ -172,7 +174,7 @@ export const MessageContextMenu = observer(({ message }: Props) => {
           }}
           endDecorator={<PencilSimpleIcon weight="fill" />}
         >
-          Edit Message
+          {t("actions.editMessage")}
         </ContextItem>
       )}
 
@@ -185,7 +187,7 @@ export const MessageContextMenu = observer(({ message }: Props) => {
           }}
           endDecorator={<TrashIcon weight="fill" />}
         >
-          Delete Message
+          {t("actions.deleteMessage")}
         </ContextItem>
       )}
 
@@ -198,7 +200,7 @@ export const MessageContextMenu = observer(({ message }: Props) => {
               <ReportContentModal
                 targetType="message"
                 targetId={message.id}
-                contentLabel="this message"
+                contentLabel={t("report.thisMessage")}
                 modalId={`report-message-${message.id}`}
               />
             );
@@ -206,7 +208,7 @@ export const MessageContextMenu = observer(({ message }: Props) => {
           }}
           endDecorator={<FlagIcon weight="fill" />}
         >
-          Report Message
+          {t("actions.reportMessage")}
         </ContextItem>
       )}
     </ContextMenu>

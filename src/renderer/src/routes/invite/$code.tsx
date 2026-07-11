@@ -8,6 +8,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { createFileRoute, Navigate, useNavigate } from "@tanstack/react-router";
 import { observer } from "mobx-react-lite";
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { isElectron } from "@utils/index";
 
 export const Route = createFileRoute("/invite/$code")({
@@ -18,6 +19,7 @@ export const Route = createFileRoute("/invite/$code")({
 });
 
 function RouteComponent() {
+  const { t } = useTranslation("auth");
   const app = useAppStore();
   const { code } = Route.useParams();
   const navigate = useNavigate();
@@ -97,10 +99,10 @@ function RouteComponent() {
   });
 
   const friendActionLabel = relationship?.isFriend
-    ? "Friends"
+    ? t("invite.friends")
     : relationship?.isOutgoingRequest
-      ? "Pending"
-      : "Add Friend";
+      ? t("invite.pending")
+      : t("invite.addFriend");
 
   const [deepLinkTried, setDeepLinkTried] = useState(false);
   const [deepLinkFailed, setDeepLinkFailed] = useState(false);
@@ -216,7 +218,9 @@ function RouteComponent() {
           <Stack justifyContent="center" alignItems="center" flex={1} spacing={2} direction="column">
             {invite?.space && <SpaceIcon space={invite.space} size={48} />}
             <Typography level="h5" fontWeight="bold">
-              {invite?.space?.name ? `Joining ${invite.space.name}...` : "Joining..."}
+              {invite?.space?.name
+                ? t("invite.joiningSpace", { spaceName: invite.space.name })
+                : t("invite.joining")}
             </Typography>
           </Stack>
         </Paper>
@@ -245,7 +249,7 @@ function RouteComponent() {
         {isLoading && (
           <Stack justifyContent="center" alignItems="center" flex={1}>
             <Typography level="h5" fontWeight="bold">
-              Loading invite...
+              {t("invite.loading")}
             </Typography>
           </Stack>
         )}
@@ -263,11 +267,11 @@ function RouteComponent() {
                   </>
                 ) : (
                   <Typography textAlign="center" fontWeight="bold">
-                    Friend invite
+                    {t("invite.friendInvite")}
                   </Typography>
                 )}
                 <Typography level="body-sm" textColor="secondary" textAlign="center">
-                  Wants to be your friend
+                  {t("invite.wantsToBeFriend")}
                 </Typography>
               </Stack>
             </Stack>
@@ -283,7 +287,7 @@ function RouteComponent() {
                   relationship?.isOutgoingRequest
                 }
               >
-                {isSelf ? "This is your invite link" : friendActionLabel}
+                {isSelf ? t("invite.thisIsYourInviteLink") : friendActionLabel}
               </Button>
             </Stack>
           </>
@@ -295,8 +299,10 @@ function RouteComponent() {
               <Stack direction="column" spacing={2} alignItems="center">
                 <SpaceIcon space={invite.space} size={48} />
                 <Typography>
-                  {(invite.inviter?.globalName ?? invite.inviter?.username) +
-                    " invited you to join"}
+                  {t("invite.invitedYouToJoin", {
+                    name:
+                      invite.inviter?.globalName ?? invite.inviter?.username ?? ""
+                  })}
                 </Typography>
                 <Typography level="h2" fontWeight="bold">
                   {invite.space.name}
@@ -307,8 +313,7 @@ function RouteComponent() {
             {!isElectron && deepLinkFailed && (
               <Stack px={6} mb={1.5} textAlign="center">
                 <Typography level="body-md">
-                  It looks like the Mutualzz app did not respond. You can accept
-                  the invite here in your browser.
+                  {t("invite.deepLinkFailed")}
                 </Typography>
               </Stack>
             )}
@@ -319,7 +324,7 @@ function RouteComponent() {
                 onClick={isInSpace ? handleGoToSpace : () => acceptInvite()}
                 disabled={isJoining}
               >
-                {isInSpace ? "Go to space" : "Accept in browser"}
+                {isInSpace ? t("invite.goToSpace") : t("invite.acceptInBrowser")}
               </Button>
 
               {!isElectron && (
@@ -331,7 +336,7 @@ function RouteComponent() {
                     setDeepLinkFailed(false);
                   }}
                 >
-                  Open in app
+                  {t("invite.openInApp")}
                 </Button>
               )}
             </Stack>
@@ -349,16 +354,13 @@ function RouteComponent() {
               textAlign="center"
             >
               <Typography level="h5" fontWeight="bold">
-                Invite Invalid
+                {t("invite.invalidTitle")}
               </Typography>
-              <Typography>
-                This invite may be expired, or you might not have permission to
-                join it.
-              </Typography>
+              <Typography>{t("invite.invalidDescription")}</Typography>
             </Stack>
             <Stack mx={7.5} mb={2.5}>
               <Button color="success" fullWidth onClick={handleContinue}>
-                Continue to Mutualzz
+                {t("actions.continueToMutualzz")}
               </Button>
             </Stack>
           </>

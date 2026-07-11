@@ -11,6 +11,7 @@ import {
   SidebarIcon
 } from "@phosphor-icons/react";
 import { observer } from "mobx-react-lite";
+import { useTranslation } from "react-i18next";
 
 export const PROFILE_EDITOR_MIN_ZOOM = 0.72;
 export const PROFILE_EDITOR_MAX_ZOOM = 1;
@@ -63,6 +64,7 @@ export const ProfileEditorZoomControls = observer(
     gridStep = 4,
     onGridStepChange
   }: Props) => {
+    const { t } = useTranslation("settings");
     const app = useAppStore();
     const { theme } = useTheme();
     const embossed = app.settings?.preferEmbossed;
@@ -87,18 +89,28 @@ export const ProfileEditorZoomControls = observer(
           WebkitAppRegion: "no-drag"
         }}
       >
-        <Tooltip content="Hide panels">
+        <Tooltip
+          content={
+            panelsVisible
+              ? t("profile.inspector.zoom.hidePanels")
+              : t("profile.inspector.zoom.showPanels")
+          }
+        >
           <IconButton
             size="sm"
             variant="plain"
             onClick={() => setPanelsVisible(!panelsVisible)}
-            title={panelsVisible ? "Hide panels" : "Show panels"}
+            title={
+              panelsVisible
+                ? t("profile.inspector.zoom.hidePanels")
+                : t("profile.inspector.zoom.showPanels")
+            }
           >
             <SidebarIcon weight={panelsVisible ? "fill" : "regular"} />
           </IconButton>
         </Tooltip>
 
-        <Tooltip content="Zoom out">
+        <Tooltip content={t("profile.inspector.zoom.zoomOut")}>
           <IconButton
             size="sm"
             variant="plain"
@@ -108,7 +120,7 @@ export const ProfileEditorZoomControls = observer(
                 clampProfileEditorZoom(zoom - PROFILE_EDITOR_ZOOM_STEP)
               )
             }
-            title="Zoom out"
+            title={t("profile.inspector.zoom.zoomOut")}
           >
             <MagnifyingGlassMinusIcon />
           </IconButton>
@@ -122,7 +134,7 @@ export const ProfileEditorZoomControls = observer(
           {Math.round(zoom * 100)}%
         </Typography>
 
-        <Tooltip content="Zoom in">
+        <Tooltip content={t("profile.inspector.zoom.zoomIn")}>
           <IconButton
             size="sm"
             variant="plain"
@@ -132,19 +144,19 @@ export const ProfileEditorZoomControls = observer(
                 clampProfileEditorZoom(zoom + PROFILE_EDITOR_ZOOM_STEP)
               )
             }
-            title="Zoom in"
+            title={t("profile.inspector.zoom.zoomIn")}
           >
             <MagnifyingGlassPlusIcon />
           </IconButton>
         </Tooltip>
 
-        <Tooltip content="Fit to editor">
+        <Tooltip content={t("profile.inspector.zoom.fitToEditor")}>
           <IconButton
             size="sm"
             variant="plain"
             disabled={Math.abs(zoom - fitZoom) < 0.01}
             onClick={() => onZoomChange(fitZoom)}
-            title="Fit to editor"
+            title={t("profile.inspector.zoom.fitToEditor")}
           >
             <ArrowsInIcon />
           </IconButton>
@@ -152,13 +164,13 @@ export const ProfileEditorZoomControls = observer(
 
         {onSnapToGridChange && (
           <>
-            <Tooltip content="Snap to grid">
+            <Tooltip content={t("profile.blocks.snapToGrid")}>
               <IconButton
                 size="sm"
                 variant={snapToGrid ? "soft" : "plain"}
                 color={snapToGrid ? "primary" : undefined}
                 onClick={() => onSnapToGridChange(!snapToGrid)}
-                title="Snap to grid"
+                title={t("profile.blocks.snapToGrid")}
               >
                 <GridFourIcon weight={snapToGrid ? "fill" : "regular"} />
               </IconButton>
@@ -167,7 +179,10 @@ export const ProfileEditorZoomControls = observer(
             {snapToGrid && onGridStepChange && (
               <Stack direction="row" spacing={0.25}>
                 {PROFILE_GRID_STEP_OPTIONS.map((step) => (
-                  <Tooltip key={step} content={`${step}% grid`}>
+                  <Tooltip
+                    key={step}
+                    content={t("profile.inspector.zoom.gridStep", { step })}
+                  >
                     <Typography
                       level="body-xs"
                       fontFamily="monospace"

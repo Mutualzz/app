@@ -5,10 +5,11 @@ import {
   useSpaceSettings
 } from "@components/SpaceSettings/SpaceSettings.context";
 import { useAppStore } from "@hooks/useStores";
+import { spacePageTitleKeys } from "@mutualzz/i18n";
 import { IconButton, Stack, Typography } from "@mutualzz/ui-web";
 import type { Space } from "@stores/objects/Space";
-import startCase from "lodash-es/startCase";
 import { observer } from "mobx-react-lite";
+import { useTranslation } from "react-i18next";
 import { useEffect, useRef } from "react";
 import { SpaceInvitesSettings } from "@components/SpaceSettings/pages/people/SpaceInvitesSettings";
 import { SpaceRolesSettings } from "@components/SpaceSettings/pages/people/roles/SpaceRolesSettings";
@@ -24,6 +25,7 @@ interface SpaceSettingsContentProps {
 
 export const SpaceSettingsContent = observer(
   ({ space, redirectTo }: SpaceSettingsContentProps) => {
+    const { t } = useTranslation("space");
     const app = useAppStore();
     const { closeAllModals } = useModal();
     const { currentPage, setCurrentPage } = useSpaceSettings();
@@ -61,7 +63,11 @@ export const SpaceSettingsContent = observer(
           borderLeft="0 !important"
         >
           <Typography level={{ xs: "h6", sm: "h5" }} fontFamily="monospace">
-            {startCase(currentPage)}
+            {t(
+              spacePageTitleKeys[
+                currentPage as keyof typeof spacePageTitleKeys
+              ]
+            )}
           </Typography>
           <IconButton
             color="neutral"

@@ -4,6 +4,7 @@ import { UserAvatar } from "@components/User/UserAvatar";
 import type { APIReportContent, APIUser } from "@mutualzz/types";
 import { Stack, Typography } from "@mutualzz/ui-web";
 import dayjs from "dayjs";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   content: APIReportContent;
@@ -11,6 +12,8 @@ interface Props {
 }
 
 export function StaffReportContent({ content, reportedMessageId }: Props) {
+  const { t } = useTranslation("staff");
+
   if (content.type === "unavailable") {
     return (
       <Typography level="body-sm" textColor="muted">
@@ -25,13 +28,17 @@ export function StaffReportContent({ content, reportedMessageId }: Props) {
     return (
       <Stack direction="column" spacing={0.75}>
         <Typography level="body-xs" textColor="muted">
-          {isDirectMessage ? "Direct message context" : "Message context"}
-          {isDirectMessage && " — limited surrounding messages for moderation"}
+          {isDirectMessage
+            ? t("report.content.dmContext")
+            : t("report.content.messageContext")}
+          {isDirectMessage && ` — ${t("report.content.dmContextHint")}`}
         </Typography>
         {context.map((message) => {
           const isReported = message.id === reportedMessageId;
           const authorName =
-            message.author?.globalName || message.author?.username || "Unknown";
+            message.author?.globalName ||
+            message.author?.username ||
+            t("report.content.unknown");
 
           return (
             <Paper
@@ -65,12 +72,12 @@ export function StaffReportContent({ content, reportedMessageId }: Props) {
                     fontWeight={700}
                     css={{ marginLeft: "auto" }}
                   >
-                    REPORTED
+                    {t("report.content.reported")}
                   </Typography>
                 )}
               </Stack>
               <Typography level="body-sm" css={{ whiteSpace: "pre-wrap" }}>
-                {message.content?.trim() || "(no text content)"}
+                {message.content?.trim() || t("report.content.noText")}
               </Typography>
             </Paper>
           );
@@ -82,7 +89,9 @@ export function StaffReportContent({ content, reportedMessageId }: Props) {
   if (content.type === "post") {
     const { post } = content.data;
     const authorName =
-      post.author?.globalName || post.author?.username || "Unknown";
+      post.author?.globalName ||
+      post.author?.username ||
+      t("report.content.unknown");
 
     return (
       <Stack direction="column" spacing={0.75}>
@@ -96,7 +105,7 @@ export function StaffReportContent({ content, reportedMessageId }: Props) {
           </Typography>
         </Stack>
         <Typography level="body-sm" css={{ whiteSpace: "pre-wrap" }}>
-          {post.content?.trim() || "(no text content)"}
+          {post.content?.trim() || t("report.content.noText")}
         </Typography>
       </Stack>
     );
@@ -105,7 +114,9 @@ export function StaffReportContent({ content, reportedMessageId }: Props) {
   if (content.type === "comment") {
     const { comment } = content.data;
     const authorName =
-      comment.author?.globalName || comment.author?.username || "Unknown";
+      comment.author?.globalName ||
+      comment.author?.username ||
+      t("report.content.unknown");
 
     return (
       <Stack direction="column" spacing={0.75}>
@@ -119,7 +130,7 @@ export function StaffReportContent({ content, reportedMessageId }: Props) {
           </Typography>
         </Stack>
         <Typography level="body-sm" css={{ whiteSpace: "pre-wrap" }}>
-          {comment.content?.trim() || "(no text content)"}
+          {comment.content?.trim() || t("report.content.noText")}
         </Typography>
       </Stack>
     );
@@ -146,7 +157,9 @@ export function StaffReportContent({ content, reportedMessageId }: Props) {
   if (content.type === "space") {
     const { space } = content.data;
     const ownerName =
-      space.owner?.globalName || space.owner?.username || "Unknown";
+      space.owner?.globalName ||
+      space.owner?.username ||
+      t("report.content.unknown");
 
     return (
       <Stack direction="column" spacing={1}>
@@ -157,7 +170,10 @@ export function StaffReportContent({ content, reportedMessageId }: Props) {
               {space.name}
             </Typography>
             <Typography level="body-xs" textColor="muted">
-              {space.memberCount} members · owned by {ownerName}
+              {t("report.content.membersOwnedBy", {
+                count: space.memberCount,
+                owner: ownerName
+              })}
             </Typography>
           </Stack>
         </Stack>

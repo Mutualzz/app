@@ -27,12 +27,12 @@ import type { Space } from "@stores/objects/Space";
 import { useNavigate } from "@tanstack/react-router";
 import { observer } from "mobx-react-lite";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { SpaceContextMenu } from "@components/ContextMenu/SpaceContextMenu";
 import { useMenu } from "@contexts/ContextMenu.context";
 import { IconButton } from "@components/IconButton";
 import { PlusCircleIcon } from "@phosphor-icons/react";
 import { Tooltip } from "@components/Tooltip";
-import capitalize from "lodash-es/capitalize";
 
 const SortableSpace = observer(
   ({
@@ -124,6 +124,7 @@ const SortableSpace = observer(
 );
 
 export const SpacesSidebar = observer(() => {
+  const { t } = useTranslation("space");
   const navigate = useNavigate();
   const app = useAppStore();
   const { openModal } = useModal();
@@ -171,11 +172,11 @@ export const SpacesSidebar = observer(() => {
     >
       <Stack width="100%" alignItems="center" justifyContent="center">
         <Tooltip
-          content={`Switch to ${capitalize(
+          content={
             app.mode === "@me"
-              ? (app.settings?.preferredMode ?? "Spaces")
-              : "Direct Messages"
-          )}`}
+              ? t("sidebar.switchToSpaces")
+              : t("sidebar.switchToDirectMessages")
+          }
           placement="right"
         >
           <Stack justifyContent="center" position="relative">
@@ -259,7 +260,7 @@ export const SpacesSidebar = observer(() => {
         </SortableContext>
       </DndContext>
       <Stack>
-        <Tooltip content="Create a space" placement="right">
+        <Tooltip content={t("sidebar.createSpace")} placement="right">
           <IconButton
             size={36}
             css={{

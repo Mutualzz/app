@@ -7,9 +7,11 @@ import { useNavigate } from "@tanstack/react-router";
 import { ChannelType } from "@mutualzz/types";
 import { MarkdownRenderer } from "@components/Markdown/MarkdownRenderer/MarkdownRenderer";
 import { Link } from "@components/Link";
+import { useTranslation } from "react-i18next";
 
 export const MessageToast = observer(
   ({ data: message, closeToast }: ToastContentProps<Message>) => {
+    const { t } = useTranslation("chat");
     const navigate = useNavigate();
 
     const contentWithoutMentions = message.content?.replace(
@@ -90,7 +92,7 @@ export const MessageToast = observer(
                 level="body-sm"
                 style={{ marginTop: 6 }}
               >
-                You were only mentioned in this message
+                {t("toast.onlyMentioned")}
               </Typography>
               <Stack direction="row" spacing={0.5} style={{ marginTop: 8 }}>
                 <Link
@@ -98,7 +100,7 @@ export const MessageToast = observer(
                   onClick={navigateToChannel}
                   underline="always"
                 >
-                  Open channel
+                  {t("toast.openChannel")}
                 </Link>
               </Stack>
             </>
@@ -119,7 +121,7 @@ export const MessageToast = observer(
                   onClick={navigateToChannel}
                   underline="always"
                 >
-                  Open channel
+                  {t("toast.openChannel")}
                 </Link>
               </Stack>
             </>
@@ -132,7 +134,7 @@ export const MessageToast = observer(
                   onClick={navigateToChannel}
                   underline="always"
                 >
-                  Open channel
+                  {t("toast.openChannel")}
                 </Link>
               </Stack>
             </Stack>

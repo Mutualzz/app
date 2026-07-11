@@ -13,6 +13,7 @@ import { useMutation } from "@tanstack/react-query";
 import type { APIRole } from "@mutualzz/types";
 import { useAppStore } from "@hooks/useStores";
 import { observer } from "mobx-react-lite";
+import { useTranslation } from "react-i18next";
 import type { Role } from "@stores/objects/Role";
 import { SpaceRoleEdit } from "./SpaceRoleEdit";
 import type { Theme } from "@emotion/react";
@@ -157,6 +158,7 @@ const RoleItem = observer(
     reserveDragColumn = false,
     locked = false
   }: RoleItemProps) => {
+    const { t: tSettings } = useTranslation("settings");
     const { openModal } = useModal();
     const { openContextMenu } = useMenu();
 
@@ -223,7 +225,7 @@ const RoleItem = observer(
             }
             actions={
               <>
-                <Tooltip content="Edit" placement="top">
+                <Tooltip content={tSettings("account.edit")} placement="top">
                   <IconButton
                     variant="soft"
                     onClick={onClick}
@@ -233,7 +235,7 @@ const RoleItem = observer(
                     <PencilIcon weight="fill" />
                   </IconButton>
                 </Tooltip>
-                <Tooltip content="Delete" placement="top">
+                <Tooltip content={tSettings("expressions.delete")} placement="top">
                   <IconButton
                     onClick={(e) => {
                       e.stopPropagation();
@@ -291,6 +293,7 @@ const SortableRoleItem = observer(
     reserveDragColumn = false,
     locked = false
   }: SortableRoleItemProps) => {
+    const { t } = useTranslation("space");
     const {
       attributes,
       listeners,
@@ -305,7 +308,7 @@ const SortableRoleItem = observer(
     });
 
     const dragHandle = (
-      <Tooltip content="Drag to reorder" placement="top">
+      <Tooltip content={t("roles.hierarchy.dragToReorder")} placement="top">
         <Stack
           ref={setActivatorNodeRef}
           {...attributes}
@@ -355,6 +358,7 @@ const SortableRoleItem = observer(
 );
 
 export const SpaceRolesSettings = observer(({ space }: Props) => {
+  const { t } = useTranslation("space");
   const app = useAppStore();
   const { theme } = useTheme();
   const [search, setSearch] = useState("");
@@ -484,10 +488,10 @@ export const SpaceRolesSettings = observer(({ space }: Props) => {
               </IconSlot>
               <Stack direction="column" alignItems="flex-start">
                 <Typography level="label-sm" weight="bold">
-                  Default Permissions
+                  {t("roles.defaultPermissions")}
                 </Typography>
                 <Typography level="label-xs">
-                  @everyone - applies to all space members
+                  {t("roles.everyoneSubtitle")}
                 </Typography>
               </Stack>
               <IconSlot size={16} css={{ marginLeft: "auto" }}>
@@ -500,7 +504,7 @@ export const SpaceRolesSettings = observer(({ space }: Props) => {
       <Stack direction="row" alignItems="center" spacing={2} flex={1}>
         <Input
           startDecorator={<MagnifyingGlassIcon />}
-          placeholder="Search Roles"
+          placeholder={t("roles.searchPlaceholder")}
           fullWidth
           type="text"
           value={search}
@@ -511,7 +515,7 @@ export const SpaceRolesSettings = observer(({ space }: Props) => {
           disabled={creatingRole}
           onClick={() => createRole()}
         >
-          Create Role
+          {t("actions.createRole")}
         </Button>
       </Stack>
       <Stack direction="column">
@@ -520,14 +524,17 @@ export const SpaceRolesSettings = observer(({ space }: Props) => {
             <RoleListColumns
               isHeader
               reserveDragColumn={canDragRoles}
-              name={<Typography>Roles - {visibleRoles.length}</Typography>}
-              members={<Typography>Members</Typography>}
-              actions={<Typography>Actions</Typography>}
+              name={
+                <Typography>
+                  {t("roles.listTitle", { count: visibleRoles.length })}
+                </Typography>
+              }
+              members={<Typography>{t("roles.membersColumn")}</Typography>}
+              actions={<Typography>{t("roles.actionsColumn")}</Typography>}
             />
             {canDragRoles && (
               <Typography level="body-xs" textColor="muted">
-                Roles higher in the list have more authority. Drag roles to
-                change their hierarchy.
+                {t("roles.hierarchyHint")}
               </Typography>
             )}
             <Divider
@@ -543,8 +550,8 @@ export const SpaceRolesSettings = observer(({ space }: Props) => {
           <Stack justifyContent="center" alignItems="center" py="4rem">
             <Typography textAlign="center" textColor="muted">
               {isSearching
-                ? "No roles match your search."
-                : "No roles have been created for this space yet."}
+                ? t("roles.emptySearch")
+                : t("roles.empty")}
             </Typography>
           </Stack>
         )}

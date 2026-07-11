@@ -20,6 +20,7 @@ import { useMediaQuery } from "@react-hookz/web";
 import { useMutation } from "@tanstack/react-query";
 import { observer } from "mobx-react-lite";
 import { useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   ReactSketchCanvas,
   type ReactSketchCanvasRef
@@ -30,6 +31,8 @@ const EMBEDDED_CANVAS_PX = 360;
 // NOTE: Eventually fork ReactSketchCanvas to fit our usage case
 export const AvatarDraw = observer(
   ({ variant = "modal", onSuccess }: AvatarEditorContentProps) => {
+    const { t } = useTranslation("settings");
+    const { t: tCommon } = useTranslation("common");
     const { theme } = useTheme();
     const app = useAppStore();
     const { closeModal, closeAllModals } = useModal();
@@ -139,11 +142,17 @@ export const AvatarDraw = observer(
     const savedDraftSelect = (
       <Stack direction="column" spacing={1} width="100%">
         <Typography level="body-xs" fontWeight={600}>
-          Saved drafts
+          {t("profile.avatar.draw.savedDrafts")}
         </Typography>
         <Select
           disabled={app.drafts.avatars.size === 0 || isPending}
-          placeholder={`${app.drafts.avatars.size > 0 ? app.drafts.avatars.size : "No saved"} drafts`}
+          placeholder={
+            app.drafts.avatars.size > 0
+              ? t("profile.avatar.draw.draftsPlaceholder", {
+                  count: app.drafts.avatars.size
+                })
+              : t("profile.avatar.draw.noSavedDrafts")
+          }
           onValueChange={(value) => selectAvatar(value.toString())}
           value={selectedAvatarValue}
           size="sm"
@@ -183,7 +192,7 @@ export const AvatarDraw = observer(
               canvasRef.current?.clearCanvas();
             }}
           >
-            Delete draft
+            {t("profile.avatar.draw.deleteDraft")}
           </Button>
         )}
       </Stack>
@@ -205,11 +214,15 @@ export const AvatarDraw = observer(
           disabled={isPending}
           size={compact ? "sm" : "md"}
         >
-          {eraserMode ? "Eraser" : "Brush"}
+          {eraserMode
+            ? t("profile.avatar.draw.eraser")
+            : t("profile.avatar.draw.brush")}
         </Button>
         <Stack direction="column" spacing={0.5}>
           <Typography level="body-xs">
-            {eraserMode ? "Eraser" : "Brush"} size
+            {eraserMode
+              ? t("profile.avatar.draw.eraserSize")
+              : t("profile.avatar.draw.brushSize")}
           </Typography>
           <InputNumber
             disabled={isPending}
@@ -221,7 +234,9 @@ export const AvatarDraw = observer(
         </Stack>
         {!eraserMode && (
           <Stack direction="column" spacing={0.5}>
-            <Typography level="body-xs">Brush color</Typography>
+            <Typography level="body-xs">
+              {t("profile.avatar.draw.brushColor")}
+            </Typography>
             <InputColor
               disabled={isPending}
               size={compact ? "sm" : "md"}
@@ -233,7 +248,9 @@ export const AvatarDraw = observer(
           </Stack>
         )}
         <Stack direction="column" spacing={0.5}>
-          <Typography level="body-sm">Background Color</Typography>
+          <Typography level="body-sm">
+            {t("profile.avatar.draw.backgroundColor")}
+          </Typography>
           <InputColor
             size={compact ? "sm" : "md"}
             value={backgroundColor}
@@ -257,7 +274,7 @@ export const AvatarDraw = observer(
           color="danger"
           disabled={emptyCanvas || isPending}
         >
-          Clear
+          {t("profile.avatar.draw.clear")}
         </Button>
         <ButtonGroup
           disabled={emptyCanvas || isPending}
@@ -265,26 +282,30 @@ export const AvatarDraw = observer(
           orientation={orientation}
           size={isMobile ? "sm" : "md"}
         >
-          <Button onClick={() => canvasRef.current?.undo()}>Undo</Button>
-          <Button onClick={() => canvasRef.current?.redo()}>Redo</Button>
+          <Button onClick={() => canvasRef.current?.undo()}>
+            {t("profile.avatar.draw.undo")}
+          </Button>
+          <Button onClick={() => canvasRef.current?.redo()}>
+            {t("profile.avatar.draw.redo")}
+          </Button>
         </ButtonGroup>
         <Button
           disabled={emptyCanvas || isPending}
           color="success"
           onClick={() => save()}
         >
-          Save
+          {tCommon("save")}
         </Button>
         <Button
           disabled={emptyCanvas || isPending}
           color="success"
           onClick={() => saveDraft()}
         >
-          Save draft
+          {t("profile.avatar.draw.saveDraft")}
         </Button>
         {!isEmbedded && (
           <Button color="danger" onClick={onClose}>
-            Cancel
+            {tCommon("cancel")}
           </Button>
         )}
       </ButtonGroup>
@@ -410,10 +431,16 @@ export const AvatarDraw = observer(
           left={isMobile ? undefined : 5}
           top={isMobile ? undefined : 5}
         >
-          <Typography>Saved Avatars</Typography>
+          <Typography>{t("profile.avatar.draw.savedAvatars")}</Typography>
           <Select
             disabled={app.drafts.avatars.size === 0 || isPending}
-            placeholder={`${app.drafts.avatars.size > 0 ? app.drafts.avatars.size : "No Saved"} Avatars`}
+            placeholder={
+              app.drafts.avatars.size > 0
+                ? t("profile.avatar.draw.avatarsPlaceholder", {
+                    count: app.drafts.avatars.size
+                  })
+                : t("profile.avatar.draw.noSavedAvatars")
+            }
             onValueChange={(value) => selectAvatar(value.toString())}
             value={selectedAvatarValue}
             size={isMobile ? "sm" : "md"}
@@ -452,7 +479,7 @@ export const AvatarDraw = observer(
               }}
               size={isMobile ? "sm" : "md"}
             >
-              Delete Selected Avatar
+              {t("profile.avatar.draw.deleteSelectedAvatar")}
             </Button>
           )}
         </Stack>

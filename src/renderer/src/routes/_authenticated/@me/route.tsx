@@ -12,11 +12,11 @@ import { motion } from "motion/react";
 import { dynamicElevation } from "@mutualzz/ui-core";
 import { DMChannelList } from "@components/DMChannel/DMChannelList";
 import { Button } from "@components/Button";
-import capitalize from "lodash-es/capitalize";
 import { observer } from "mobx-react-lite";
 import { switchMode } from "@utils/index";
 import { Paper } from "@components/Paper";
 import { PlanetIcon, ScribbleIcon, UsersIcon } from "@phosphor-icons/react";
+import { useTranslation } from "react-i18next";
 
 export const Route = createFileRoute("/_authenticated/@me")({
   component: observer(RouteComponent)
@@ -25,6 +25,8 @@ export const Route = createFileRoute("/_authenticated/@me")({
 const ResizeBar = motion.create("div");
 
 function RouteComponent() {
+  const { t: tSpace } = useTranslation("space");
+  const { t: tChat } = useTranslation("chat");
   const app = useAppStore();
   const navigate = useNavigate();
   const { href, pathname } = useLocation();
@@ -80,7 +82,9 @@ function RouteComponent() {
               variant="plain"
               onClick={() => switchMode(app, navigate)}
             >
-              Switch to {capitalize(app.targetMode)}
+              {app.targetMode === "feed"
+                ? tSpace("sidebar.switchToFeed")
+                : tSpace("sidebar.switchToSpaces")}
             </Button>
             <Divider lineColor="muted" css={{ opacity: 0.25 }} />
             <Button
@@ -90,7 +94,7 @@ function RouteComponent() {
               variant={href.includes("friends") ? "soft" : "plain"}
               onClick={() => navigate({ to: "/@me/friends" })}
             >
-              Friends
+              {tChat("friends.title")}
             </Button>
           </Stack>
           <DMChannelList />

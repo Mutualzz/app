@@ -1,7 +1,9 @@
 import { Button, type ButtonProps } from "@mutualzz/ui-web";
 import { detectDownloadURL } from "@utils/detect";
+import { useTranslation } from "react-i18next";
 
 export const DownloadButton = (props: ButtonProps) => {
+  const { t } = useTranslation("common");
   const fileUrl = detectDownloadURL();
 
   const handleClick = (e: React.MouseEvent) => {
@@ -13,7 +15,7 @@ export const DownloadButton = (props: ButtonProps) => {
 
   return (
     <Button {...props} onClick={handleClick}>
-      Download Mutualzz
+      {t("download")}
     </Button>
   );
 };

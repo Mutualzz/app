@@ -7,8 +7,11 @@ import { useMutation } from "@tanstack/react-query";
 import { useModal } from "@contexts/Modal.context";
 import { HttpException } from "@mutualzz/types";
 import { InputWithLabel } from "@components/InputWithLabel";
+import { useTranslation } from "react-i18next";
 
 export const EmailVerifyCode = observer(() => {
+  const { t } = useTranslation("settings");
+  const { t: tCommon } = useTranslation("common");
   const app = useAppStore();
   const { closeModal } = useModal();
 
@@ -40,11 +43,11 @@ export const EmailVerifyCode = observer(() => {
       spacing={2.5}
     >
       <Typography level="h5" fontWeight="bold">
-        Email Verification
+        {t("account.emailVerification")}
       </Typography>
       <InputWithLabel
         name="code"
-        label="Code"
+        label={t("account.code")}
         value={code}
         onChange={(e) => setCode(e.target.value)}
         apiError={error}
@@ -59,7 +62,7 @@ export const EmailVerifyCode = observer(() => {
           size="lg"
           expand
         >
-          Cancel
+          {tCommon("cancel")}
         </Button>
         <Button
           color="success"
@@ -68,7 +71,7 @@ export const EmailVerifyCode = observer(() => {
           size="lg"
           expand
         >
-          Verify
+          {t("account.verify")}
         </Button>
       </Stack>
     </Paper>

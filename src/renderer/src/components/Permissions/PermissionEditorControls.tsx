@@ -1,6 +1,7 @@
 import { InputDefault, Option, Select, Stack } from "@mutualzz/ui-web";
 import { MagnifyingGlassIcon } from "@phosphor-icons/react";
 import { type KeyboardEvent, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 interface Category {
   id: string;
@@ -20,6 +21,7 @@ export function PermissionEditorControls({
   categories,
   onCategoryJump
 }: Props) {
+  const { t } = useTranslation("space");
   const [jumpValue, setJumpValue] = useState("");
 
   const handleSearchKey = (e: KeyboardEvent<HTMLInputElement>) => {
@@ -37,7 +39,7 @@ export function PermissionEditorControls({
     <Stack direction="row" spacing={10}>
       <InputDefault
         type="text"
-        placeholder="Search permissions…"
+        placeholder={t("roles.permissions.searchPlaceholder")}
         value={search}
         onChange={(e) => onSearchChange(e.target.value)}
         onKeyDown={handleSearchKey}
@@ -47,7 +49,7 @@ export function PermissionEditorControls({
 
       {categories.length > 1 && (
         <Select
-          placeholder="Jump to category…"
+          placeholder={t("roles.permissions.jumpToCategory")}
           value={jumpValue}
           onValueChange={handleCategoryJump}
           size="sm"

@@ -30,6 +30,7 @@ import {
 } from "@phosphor-icons/react";
 import type { OpenGroupDMOptions } from "@stores/Channel.store";
 import { User } from "@stores/objects/User";
+import { useTranslation } from "react-i18next";
 
 interface GroupDMChannelInfoProps {
   recipientNames: string[];
@@ -70,6 +71,7 @@ const GroupDMChannelInfo = observer(
     disabled
   }: GroupDMChannelInfoProps) => {
     const { theme } = useTheme();
+    const { t } = useTranslation("chat");
 
     return (
       <Stack direction="row" spacing={2.5} alignItems="flex-start">
@@ -108,7 +110,7 @@ const GroupDMChannelInfo = observer(
                 }}
               />
               {/* Clear icon button */}
-              <Tooltip content="Remove icon">
+              <Tooltip content={t("groupDm.manage.removeIcon")}>
                 <IconButton
                   size="sm"
                   variant="soft"
@@ -146,7 +148,7 @@ const GroupDMChannelInfo = observer(
               />
             </Stack>
             <Stack direction="row" alignItems="center" spacing={1.25}>
-              <Tooltip content="Rotate 90°">
+              <Tooltip content={t("dm.rotate90")}>
                 <IconButton
                   onClick={onRotate}
                   color={theme.typography.colors.primary}
@@ -161,7 +163,7 @@ const GroupDMChannelInfo = observer(
                 checked={roundedIcon}
                 onChange={onRoundedChange}
                 disabled={disabled}
-                label="Round"
+                label={t("groupDm.manage.round")}
                 size="sm"
               />
             </Stack>
@@ -185,14 +187,14 @@ const GroupDMChannelInfo = observer(
             >
               <CameraIcon weight="fill" size={16} />
               <Typography fontWeight="bold" fontSize="x-small">
-                Icon
+                {t("groupDm.manage.icon")}
               </Typography>
             </Stack>
           </FileUploader>
         )}
 
         <Stack direction="column" spacing={0.75} flex={1}>
-          <Typography level="body-sm">Group Name</Typography>
+          <Typography level="body-sm">{t("groupDm.manage.groupName")}</Typography>
           <InputDefault
             placeholder={recipientNames.join(", ")}
             value={name}
@@ -208,6 +210,8 @@ const GroupDMChannelInfo = observer(
 );
 
 export const DMChannelCreate = observer(() => {
+  const { t: tCommon } = useTranslation("common");
+  const { t } = useTranslation("chat");
   const app = useAppStore();
   const [search, setSearch] = useState<string | null>(null);
   const [recipients, setRecipients] = useState<Snowflake[]>([]);
@@ -326,9 +330,11 @@ export const DMChannelCreate = observer(() => {
       <Stack p={5} direction="column" spacing={2.5}>
         <Stack direction="column" spacing={2.5}>
           <Typography fontWeight="bold" level="body-lg">
-            New Message
+            {t("dm.createTitle")}
           </Typography>
-          <Typography>You can add 9 more friends.</Typography>
+          <Typography>
+            {t("dm.addFriendsHint", { count: 9 - recipients.length })}
+          </Typography>
         </Stack>
         <Stack direction="column" spacing={2.5}>
           <InputDefault value={search || ""} onChange={onChangeSearch} />
@@ -411,7 +417,7 @@ export const DMChannelCreate = observer(() => {
             color="neutral"
             disabled={isCreating}
           >
-            Cancel
+            {tCommon("cancel")}
           </Button>
           <Button
             expand
@@ -422,7 +428,9 @@ export const DMChannelCreate = observer(() => {
             onClick={() => createMessage()}
             color="primary"
           >
-            {recipients.length > 1 ? "Create Group Message" : "Create Message"}
+            {recipients.length > 1
+              ? t("dm.createGroupMessage")
+              : t("dm.createMessage")}
           </Button>
         </Stack>
       </Paper>

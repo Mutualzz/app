@@ -1,6 +1,7 @@
 import { observer } from "mobx-react-lite";
 import { Role } from "@stores/objects/Role";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Box, ButtonGroup, Divider, Stack, Typography } from "@mutualzz/ui-web";
 import { Paper } from "@components/Paper";
 import { Button } from "@components/Button";
@@ -35,6 +36,8 @@ type RoleEditable = Pick<
 
 export const SpaceRoleEdit = observer(
   ({ space, currentRole, setCurrentRole, membersWithRole }: Props) => {
+    const { t } = useTranslation("space");
+    const { t: tSettings } = useTranslation("settings");
     const app = useAppStore();
     const { openModal } = useModal();
 
@@ -119,7 +122,7 @@ export const SpaceRoleEdit = observer(
               onClick={() => setCurrentRole(null)}
               size="sm"
             >
-              Back
+              {tSettings("profile.avatar.draw.back")}
             </Button>
             <IconButton
               onClick={() => createRole()}
@@ -155,7 +158,7 @@ export const SpaceRoleEdit = observer(
               alignItems="center"
             >
               <Typography fontFamily="monospace">
-                Edit Role - {currentRole.name}
+                {t("roles.editTitle", { name: currentRole.name })}
               </Typography>
               <IconButton
                 onClick={() =>
@@ -179,7 +182,7 @@ export const SpaceRoleEdit = observer(
                   selected={tab === "display"}
                   disabled={tab === "display" || currentRole.id === space.id}
                 >
-                  Display
+                  {t("roles.tabs.display")}
                 </Button>
                 <Button
                   color="info"
@@ -187,7 +190,7 @@ export const SpaceRoleEdit = observer(
                   disabled={tab === "permissions"}
                   onClick={() => setTab("permissions")}
                 >
-                  Permissions
+                  {t("roles.tabs.permissions")}
                 </Button>
                 <Button
                   color="info"
@@ -197,7 +200,7 @@ export const SpaceRoleEdit = observer(
                   onClick={() => setTab("manage-members")}
                   selected={tab === "manage-members"}
                 >
-                  Manage Members
+                  {t("roles.tabs.manageMembers")}
                   {currentRole.id === space.id ? "" : ` (${membersWithRole})`}
                 </Button>
               </ButtonGroup>
@@ -258,19 +261,19 @@ export const SpaceRoleEdit = observer(
                 maxWidth="min(960px, calc(100% - 32px))"
               >
                 <Typography level="body-sm">
-                  You have unsaved changes!
+                  {t("roles.unsavedChanges")}
                 </Typography>
 
                 <ButtonGroup disabled={updatingRole || !dirty} spacing={10}>
                   <Button color="danger" variant="plain" onClick={reset}>
-                    Reset
+                    {tSettings("profile.avatar.upload.reset")}
                   </Button>
                   <Button
                     variant="solid"
                     color="success"
                     onClick={() => updateRole()}
                   >
-                    Save Changes
+                    {tSettings("profile.saveChanges")}
                   </Button>
                 </ButtonGroup>
               </Paper>

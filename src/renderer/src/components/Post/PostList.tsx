@@ -7,6 +7,7 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { observer } from "mobx-react-lite";
 import { useCallback } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   variant: "friends" | "for-you" | "saved";
@@ -17,6 +18,7 @@ const LIMIT = 25;
 
 export const PostList = observer(({ variant, showComposer }: Props) => {
   const app = useAppStore();
+  const { t } = useTranslation("chat");
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, refetch } =
     useInfiniteQuery({
@@ -97,7 +99,9 @@ export const PostList = observer(({ variant, showComposer }: Props) => {
 
       {!isFetchingNextPage && posts.length === 0 && (
         <Stack alignItems="center" justifyContent="center" p={6}>
-          {variant === "saved" ? "No saved posts yet." : "No posts yet."}
+          {variant === "saved"
+            ? t("feed.empty.saved")
+            : t("feed.empty.posts")}
         </Stack>
       )}
     </Stack>

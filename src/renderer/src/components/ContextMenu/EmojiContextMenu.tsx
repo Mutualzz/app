@@ -8,6 +8,7 @@ import { observer } from "mobx-react-lite";
 import { Stack, Typography } from "@mutualzz/ui-web";
 import styled from "@emotion/styled";
 import { StarIcon } from "@phosphor-icons/react";
+import { useTranslation } from "react-i18next";
 
 type StandardProps = {
   kind: "standard";
@@ -34,6 +35,7 @@ const PreviewImg = styled("img")({
 
 export const EmojiContextMenu = observer((props: Props) => {
   const app = useAppStore();
+  const { t } = useTranslation("chat");
 
   if (props.kind === "standard") {
     const { emoji, skinTone } = props;
@@ -71,7 +73,7 @@ export const EmojiContextMenu = observer((props: Props) => {
           }
           color={isFavorited ? "warning" : undefined}
         >
-          {isFavorited ? "Remove from favorites" : "Add to favorites"}
+          {isFavorited ? t("favorites.remove") : t("favorites.add")}
         </ContextItem>
       </ContextMenu>
     );
@@ -106,7 +108,7 @@ export const EmojiContextMenu = observer((props: Props) => {
         }
         color={isFavorited ? "warning" : undefined}
       >
-        {isFavorited ? "Remove from favorites" : "Add to favorites"}
+        {isFavorited ? t("favorites.remove") : t("favorites.add")}
       </ContextItem>
     </ContextMenu>
   );

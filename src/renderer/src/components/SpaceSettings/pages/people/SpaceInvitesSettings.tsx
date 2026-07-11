@@ -18,6 +18,7 @@ import type { Space } from "@stores/objects/Space";
 import dayjs from "dayjs";
 import { observer } from "mobx-react-lite";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { isElectron } from "@utils/index";
 import { useQuery } from "@tanstack/react-query";
 import { ClipboardIcon, TrashIcon } from "@phosphor-icons/react";
@@ -39,9 +40,9 @@ function pad(num: number) {
   return num.toString().padStart(2, "0");
 }
 
-const formatCountdown = (expiresAt: Date, now: Date) => {
+const formatCountdown = (expiresAt: Date, now: Date, expiredLabel: string) => {
   const diff = dayjs(expiresAt).diff(dayjs(now));
-  if (diff <= 0) return "Expired";
+  if (diff <= 0) return expiredLabel;
   const dur = dayjs.duration(diff);
   const days = pad(dur.days());
   const hours = pad(dur.hours());
@@ -51,6 +52,7 @@ const formatCountdown = (expiresAt: Date, now: Date) => {
 };
 
 const InviteItem = observer(({ theme, invite, last, now }: InviteItemProps) => {
+  const { t } = useTranslation("space");
   const app = useAppStore();
   const [hover, setHover] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -99,7 +101,11 @@ const InviteItem = observer(({ theme, invite, last, now }: InviteItemProps) => {
         </Stack>
         <Stack direction="row" flex={1}>
           <Typography fontFamily="monospace">{invite.code}</Typography>
-          <Tooltip content={copied ? "Copied to clipboard" : "Copy Invite URL"}>
+          <Tooltip
+            content={
+              copied ? t("invites.copiedToClipboard") : t("invites.copyInviteUrl")
+            }
+          >
             <IconButton
               variant="plain"
               size="sm"
@@ -122,7 +128,7 @@ const InviteItem = observer(({ theme, invite, last, now }: InviteItemProps) => {
           <Typography fontFamily="monospace">
             {invite.expiresAt ? (
               <time dateTime={invite.expiresAt.toISOString()}>
-                {formatCountdown(invite.expiresAt, now)}
+                {formatCountdown(invite.expiresAt, now, t("invites.expired"))}
               </time>
             ) : (
               "∞"
@@ -152,6 +158,7 @@ const InviteItem = observer(({ theme, invite, last, now }: InviteItemProps) => {
 });
 
 export const SpaceInvitesSettings = observer(({ space }: Props) => {
+  const { t } = useTranslation("space");
   const { theme } = useTheme();
   const { openModal } = useModal();
 
@@ -171,7 +178,7 @@ export const SpaceInvitesSettings = observer(({ space }: Props) => {
   return (
     <Stack direction="column" spacing={4} mt={1}>
       <Stack alignItems="center" justifyContent="space-between">
-        <Typography fontFamily="monospace">Active Invite Links</Typography>
+        <Typography fontFamily="monospace">{t("invites.activeLinks")}</Typography>
         <ButtonGroup spacing={10}>
           <Button
             onClick={() => space.deleteAll()}
@@ -179,7 +186,7 @@ export const SpaceInvitesSettings = observer(({ space }: Props) => {
             variant="soft"
             disabled={space.invites.size === 0}
           >
-            Delete all invites
+            {t("actions.deleteAllInvites")}
           </Button>
           <Button
             onClick={() =>
@@ -189,7 +196,7 @@ export const SpaceInvitesSettings = observer(({ space }: Props) => {
               )
             }
           >
-            Create invite link
+            {t("actions.createInviteLink")}
           </Button>
         </ButtonGroup>
       </Stack>
@@ -203,10 +210,10 @@ export const SpaceInvitesSettings = observer(({ space }: Props) => {
               spacing={2}
               px="1rem"
             >
-              <Typography flex={1}>Inviter</Typography>
-              <Typography flex={1}>Invite Code</Typography>
-              <Typography flex={1}>Uses</Typography>
-              <Typography flex={1}>Expires</Typography>
+              <Typography flex={1}>{t("invites.columns.inviter")}</Typography>
+              <Typography flex={1}>{t("invites.columns.inviteCode")}</Typography>
+              <Typography flex={1}>{t("invites.columns.uses")}</Typography>
+              <Typography flex={1}>{t("invites.columns.expires")}</Typography>
             </Stack>
             <Divider
               lineColor="muted"
@@ -220,7 +227,7 @@ export const SpaceInvitesSettings = observer(({ space }: Props) => {
         {invites.length === 0 && (
           <Stack justifyContent="center" alignItems="center" py="4rem">
             <Typography textAlign="center" textColor="muted">
-              No invites have been created for this space yet.
+              {t("invites.empty")}
             </Typography>
           </Stack>
         )}

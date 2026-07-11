@@ -18,6 +18,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { observer } from "mobx-react-lite";
 import { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   username: string;
@@ -27,6 +28,8 @@ interface Props {
 
 export const ProfileViewerPage = observer(
   ({ username, initialUser, initialProfile }: Props) => {
+    const { t } = useTranslation("settings");
+    const { t: tCommon } = useTranslation("common");
     const app = useAppStore();
     const navigate = useNavigate();
     const isPreviewMode = useRouterState({
@@ -100,8 +103,8 @@ export const ProfileViewerPage = observer(
     if (userError || profileError || !viewerUser || !profile) {
       return (
         <ProfileLayout
-          title="Profile"
-          backLabel="Close"
+          title={t("profile.viewer.title")}
+          backLabel={tCommon("close")}
           onBack={() => navigateToPreferredMode(app, navigate)}
         >
           <Stack
@@ -111,7 +114,7 @@ export const ProfileViewerPage = observer(
             justifyContent="center"
             p={4}
           >
-            <Typography level="title-md">User not found</Typography>
+            <Typography level="title-md">{t("profile.viewer.userNotFound")}</Typography>
           </Stack>
         </ProfileLayout>
       );
@@ -120,7 +123,7 @@ export const ProfileViewerPage = observer(
     if (isPreviewMode && isSelf && !previewDraft) {
       return (
         <ProfileLayout
-          title="Preview"
+          title={t("profile.preview")}
           onBack={() => navigate({ to: "/profile" })}
         >
           <Stack
@@ -130,15 +133,15 @@ export const ProfileViewerPage = observer(
             justifyContent="center"
             p={4}
           >
-            <Typography level="title-md">Preview expired</Typography>
+            <Typography level="title-md">{t("profile.viewer.previewExpired")}</Typography>
             <Typography level="body-sm" css={{ opacity: 0.75 }}>
-              Return to the editor and preview again.
+              {t("profile.viewer.previewExpiredHint")}
             </Typography>
             <Button
               color="primary"
               onClick={() => navigate({ to: "/profile" })}
             >
-              Back to editor
+              {t("profile.editor.backToEditing")}
             </Button>
           </Stack>
         </ProfileLayout>
@@ -151,7 +154,7 @@ export const ProfileViewerPage = observer(
         size="sm"
         onClick={() => navigate({ to: "/profile" })}
       >
-        Keep editing
+        {t("profile.editor.keepEditing")}
       </Button>
     ) : isSelf ? (
       <Button
@@ -159,15 +162,17 @@ export const ProfileViewerPage = observer(
         size="sm"
         onClick={() => navigate({ to: "/profile" })}
       >
-        Customize Profile
+        {t("profile.customizeProfile")}
       </Button>
     ) : undefined;
 
     const pageTitle = isPreviewing
-      ? "Preview"
+      ? t("profile.preview")
       : isSelf
-        ? "Your Profile"
-        : `${getUserDisplayName(viewerUser.raw)}'s Profile`;
+        ? t("profile.viewer.yourProfile")
+        : t("profile.viewer.userProfile", {
+            name: getUserDisplayName(viewerUser.raw)
+          });
 
     const showCanvas =
       profile.configured ||
@@ -182,7 +187,7 @@ export const ProfileViewerPage = observer(
             ? navigate({ to: "/profile" })
             : navigateToPreferredMode(app, navigate)
         }
-        backLabel={isPreviewing ? "Back" : "Close"}
+        backLabel={isPreviewing ? tCommon("back") : tCommon("close")}
         music={previewProfileMusic ?? profile.profileMusic}
         musicProfile={profile}
         musicAutoPlay={!isPreviewing}
@@ -215,10 +220,10 @@ export const ProfileViewerPage = observer(
                 }}
               >
                 <Typography level="body-sm" css={{ opacity: 0.85 }}>
-                  Previewing unsaved changes
+                  {t("profile.viewer.previewingUnsaved")}
                 </Typography>
                 <Typography level="body-xs" css={{ opacity: 0.65 }}>
-                  Nothing is published until you save
+                  {t("profile.viewer.nothingPublishedUntilSave")}
                 </Typography>
               </Paper>
             )}

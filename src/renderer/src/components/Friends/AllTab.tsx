@@ -2,9 +2,11 @@ import { Stack, Typography } from "@mutualzz/ui-web";
 import { observer } from "mobx-react-lite";
 import { UserItem } from "./UserItem";
 import { useAppStore } from "@renderer/hooks/useStores";
+import { useTranslation } from "react-i18next";
 
 export const AllTab = observer(() => {
   const app = useAppStore();
+  const { t } = useTranslation("chat");
   const relationships = app.relationships.friends;
 
   return (
@@ -18,14 +20,15 @@ export const AllTab = observer(() => {
           spacing={2.5}
         >
           <Typography textColor="muted" level="body-lg">
-            You do not have any friends. Click the "Add Friend" button to send
-            friend requests.
+            {t("friends.emptyAll")}
           </Typography>
         </Stack>
       )}
       {relationships.length > 0 && (
         <>
-          <Typography>All - {relationships.length}</Typography>
+          <Typography>
+            {t("friends.allCount", { count: relationships.length })}
+          </Typography>
           <Stack direction="column" flex={1} spacing={2.5}>
             {relationships.map((relationship) => (
               <UserItem key={relationship.id} relationship={relationship} />

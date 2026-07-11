@@ -19,28 +19,24 @@ import {
   UsersThreeIcon
 } from "@phosphor-icons/react";
 import { observer } from "mobx-react-lite";
+import { useTranslation } from "react-i18next";
 
 const ITEMS: {
   type: ProfileBlockType;
-  label: string;
   icon: React.ReactNode;
 }[] = [
-  { type: "header", label: "Header", icon: <UserCircleIcon weight="fill" /> },
-  { type: "text", label: "Text", icon: <TextAaIcon weight="fill" /> },
-  { type: "quote", label: "Quote", icon: <QuotesIcon weight="fill" /> },
-  { type: "image", label: "Image", icon: <ImageIcon weight="fill" /> },
-  { type: "sticker", label: "Sticker", icon: <StickerIcon weight="fill" /> },
-  { type: "music", label: "Music", icon: <MusicNotesIcon weight="fill" /> },
-  { type: "links", label: "Links", icon: <LinkIcon weight="fill" /> },
-  { type: "activity", label: "Activity", icon: <PulseIcon weight="fill" /> },
-  { type: "roles", label: "Roles", icon: <ShieldCheckIcon weight="fill" /> },
-  {
-    type: "mutual",
-    label: "Mutual",
-    icon: <UsersThreeIcon weight="fill" />
-  },
-  { type: "divider", label: "Divider", icon: <MinusIcon weight="fill" /> },
-  { type: "draw", label: "Draw", icon: <PencilSimpleIcon weight="fill" /> }
+  { type: "header", icon: <UserCircleIcon weight="fill" /> },
+  { type: "text", icon: <TextAaIcon weight="fill" /> },
+  { type: "quote", icon: <QuotesIcon weight="fill" /> },
+  { type: "image", icon: <ImageIcon weight="fill" /> },
+  { type: "sticker", icon: <StickerIcon weight="fill" /> },
+  { type: "music", icon: <MusicNotesIcon weight="fill" /> },
+  { type: "links", icon: <LinkIcon weight="fill" /> },
+  { type: "activity", icon: <PulseIcon weight="fill" /> },
+  { type: "roles", icon: <ShieldCheckIcon weight="fill" /> },
+  { type: "mutual", icon: <UsersThreeIcon weight="fill" /> },
+  { type: "divider", icon: <MinusIcon weight="fill" /> },
+  { type: "draw", icon: <PencilSimpleIcon weight="fill" /> }
 ];
 
 const PaletteItem = observer(
@@ -55,13 +51,17 @@ const PaletteItem = observer(
     icon: React.ReactNode;
     onDoubleClick: (type: ProfileBlockType) => void;
   }) => {
+    const { t } = useTranslation("settings");
     const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
       id: `palette-${type}`,
       data: { type, source: "palette" }
     });
 
     return (
-      <Tooltip content={`Drag ${label} onto canvas`} placement="right">
+      <Tooltip
+        content={t("profile.blocks.dragHint", { label })}
+        placement="right"
+      >
         <Paper
           ref={setNodeRef}
           {...listeners}
@@ -95,6 +95,7 @@ interface Props {
 }
 
 export const ProfileBlockPalette = observer(({ onDoubleClickAdd }: Props) => {
+  const { t } = useTranslation("settings");
   const app = useAppStore();
   const embossed = app.settings?.preferEmbossed;
 
@@ -124,14 +125,14 @@ export const ProfileBlockPalette = observer(({ onDoubleClickAdd }: Props) => {
         }}
         textColor="muted"
       >
-        Blocks
+        {t("profile.blocks.paletteTitle")}
       </Typography>
       <Stack direction="column" spacing={1}>
         {ITEMS.map((item) => (
           <PaletteItem
             key={item.type}
             type={item.type}
-            label={item.label}
+            label={t(`profile.blocks.${item.type}`)}
             icon={item.icon}
             onDoubleClick={onDoubleClickAdd}
           />

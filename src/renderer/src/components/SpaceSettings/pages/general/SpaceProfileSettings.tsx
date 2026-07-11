@@ -17,6 +17,7 @@ import type { Space } from "@stores/objects/Space";
 import { useMutation } from "@tanstack/react-query";
 import { observer } from "mobx-react-lite";
 import { type ChangeEvent, useCallback, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 import Cropper, { type Area, type Point } from "react-easy-crop";
 import {
@@ -31,6 +32,9 @@ interface Props {
 }
 
 export const SpaceProfileSettings = observer(({ space }: Props) => {
+  const { t } = useTranslation("space");
+  const { t: tCommon } = useTranslation("common");
+  const { t: tSettings } = useTranslation("settings");
   const app = useAppStore();
   const { theme } = useTheme();
 
@@ -86,10 +90,11 @@ export const SpaceProfileSettings = observer(({ space }: Props) => {
       setRotation(0);
       setRemoveIcon(false);
       setError(null);
-      toast.success("Space updated successfully.");
+      toast.success(t("profile.updatedSuccess"));
     },
     onError: (err: HttpException) => {
-      const msg = err.errors?.[0].message ?? err.message ?? "An error occurred";
+      const msg =
+        err.errors?.[0].message ?? err.message ?? t("profile.genericError");
       setError(msg);
       toast.error(msg);
     }
@@ -128,7 +133,7 @@ export const SpaceProfileSettings = observer(({ space }: Props) => {
   return (
     <Stack direction="column" spacing={4} mt={1}>
       <Stack direction="column" spacing={2}>
-        <Typography fontFamily="monospace">Space Icon</Typography>
+        <Typography fontFamily="monospace">{t("profile.spaceIcon")}</Typography>
 
         <Stack direction="row" alignItems="flex-start" spacing={3}>
           <Stack direction="column" alignItems="center" spacing={1.5}>
@@ -201,7 +206,7 @@ export const SpaceProfileSettings = observer(({ space }: Props) => {
                   onClick={onClearImage}
                   disabled={saving}
                 >
-                  Cancel
+                  {tCommon("cancel")}
                 </Button>
               </>
             ) : (
@@ -232,7 +237,7 @@ export const SpaceProfileSettings = observer(({ space }: Props) => {
                   >
                     <CameraIcon weight="fill" size={18} />
                     <Typography fontSize="xx-small" fontWeight="bold">
-                      Change
+                      {tSettings("account.change")}
                     </Typography>
                   </Stack>
                 </Stack>
@@ -249,7 +254,7 @@ export const SpaceProfileSettings = observer(({ space }: Props) => {
               onClick={() => setRemoveIcon(true)}
               disabled={saving}
             >
-              Remove Icon
+              {t("channels.removeIcon")}
             </Button>
           )}
 
@@ -260,7 +265,7 @@ export const SpaceProfileSettings = observer(({ space }: Props) => {
               onClick={() => setRemoveIcon(false)}
               disabled={saving}
             >
-              Restore Icon
+              {t("channels.restoreIcon")}
             </Button>
           )}
         </Stack>
@@ -268,7 +273,7 @@ export const SpaceProfileSettings = observer(({ space }: Props) => {
 
       <Stack direction="column" spacing={0.75}>
         <Typography fontWeight={500}>
-          Name{" "}
+          {t("profile.name")}{" "}
           <Typography variant="plain" color="danger">
             *
           </Typography>
@@ -284,12 +289,12 @@ export const SpaceProfileSettings = observer(({ space }: Props) => {
       </Stack>
 
       <Stack direction="column" spacing={0.75}>
-        <Typography fontWeight={500}>Description</Typography>
+        <Typography fontWeight={500}>{t("profile.description")}</Typography>
         <MarkdownInput
           value={description}
           onChange={(val) => setDescription(val)}
           disabled={saving}
-          placeholder="Write something about your space..."
+          placeholder={t("profile.descriptionPlaceholder")}
           emoticons={false}
           emojiPicker={false}
           gifPicker={false}
@@ -324,7 +329,7 @@ export const SpaceProfileSettings = observer(({ space }: Props) => {
                 setError(null);
               }}
             >
-              Reset
+              {tSettings("profile.avatar.upload.reset")}
             </Button>
           )}
           <Button
@@ -333,7 +338,9 @@ export const SpaceProfileSettings = observer(({ space }: Props) => {
             disabled={!hasChanges || saving || name.trim() === "" || !!error}
             onClick={() => saveProfile()}
           >
-            {saving ? "Saving..." : "Save Changes"}
+            {saving
+              ? tSettings("profile.saving")
+              : tSettings("profile.saveChanges")}
           </Button>
         </ButtonGroup>
       </Stack>

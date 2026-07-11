@@ -7,6 +7,7 @@ import {
 import type { APIPrivateUser } from "@mutualzz/types";
 import { Checkbox, Stack, Typography } from "@mutualzz/ui-web";
 import { useMutation } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 
 interface Props {
@@ -16,6 +17,7 @@ interface Props {
 
 export const StaffUserFlagsSection = ({ user, onUpdated }: Props) => {
   const app = useAppStore();
+  const { t } = useTranslation("staff");
   const flags = BitField.fromString(userFlags, user.flags.toString());
 
   const { mutate: setFlag, isPending: settingFlag } = useMutation({
@@ -26,7 +28,9 @@ export const StaffUserFlagsSection = ({ user, onUpdated }: Props) => {
       }),
     onSuccess: onUpdated,
     onError: (err) => {
-      toast.error(err instanceof Error ? err.message : "Failed to update flag");
+      toast.error(
+        err instanceof Error ? err.message : t("user.actions.errors.updateUser")
+      );
     }
   });
 
@@ -34,17 +38,19 @@ export const StaffUserFlagsSection = ({ user, onUpdated }: Props) => {
     <Stack direction="column" spacing={2} maxWidth={480}>
       <Stack direction="column" spacing={0.75}>
         <Typography level="title-sm" fontWeight={600}>
-          Current Flags
+          {t("user.flags.current")}
         </Typography>
         <Typography level="body-sm" css={{ opacity: 0.75 }}>
-          {flags.toArray().length ? flags.toArray().join(", ") : "No flags set"}
+          {flags.toArray().length
+            ? flags.toArray().join(", ")
+            : t("user.flags.none")}
         </Typography>
       </Stack>
 
       {app.account?.isFounder && (
         <Stack direction="column" spacing={0.75}>
           <Typography level="title-sm" fontWeight={600}>
-            Manage Flags
+            {t("user.flags.manage")}
           </Typography>
           <Stack direction="column" spacing={0.75}>
             {staffToggleableUserFlags.map((f) => (

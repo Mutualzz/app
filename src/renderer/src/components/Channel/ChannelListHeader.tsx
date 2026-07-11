@@ -13,6 +13,7 @@ import { SpaceContextMenu } from "@components/ContextMenu/SpaceContextMenu";
 import { SpaceSettingsModal } from "@components/SpaceSettings/SpaceSettingsModal";
 import { CaretDownIcon, GearIcon, UserPlusIcon } from "@phosphor-icons/react";
 import { Tooltip } from "@components/Tooltip";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   space: Space;
@@ -21,6 +22,8 @@ interface Props {
 export const ChannelListHeader = observer(({ space }: Props) => {
   const app = useAppStore();
   const { openContextMenu } = useMenu();
+  const { t } = useTranslation("space");
+  const { t: tChat } = useTranslation("chat");
 
   const [menuOpen, setMenuOpen] = useState(false);
   const { openModal } = useModal();
@@ -100,7 +103,7 @@ export const ChannelListHeader = observer(({ space }: Props) => {
           flexWrap="nowrap"
         >
           {canManage && (
-            <Tooltip content="Space Settings" placement="bottom">
+            <Tooltip content={t("chrome.spaceSettings")} placement="bottom">
               <IconButton
                 onClick={(e) => {
                   e.stopPropagation();
@@ -110,6 +113,7 @@ export const ChannelListHeader = observer(({ space }: Props) => {
                   );
                 }}
                 size={12}
+                aria-label={t("chrome.spaceSettings")}
               >
                 <GearIcon weight="fill" />
               </IconButton>
@@ -117,7 +121,10 @@ export const ChannelListHeader = observer(({ space }: Props) => {
           )}
 
           {canInvite && (
-            <Tooltip content="Invite to Space" placement="bottom">
+            <Tooltip
+              content={tChat("contextMenu.inviteToSpace")}
+              placement="bottom"
+            >
               <IconButton
                 onClick={(e) => {
                   e.stopPropagation();
@@ -127,13 +134,14 @@ export const ChannelListHeader = observer(({ space }: Props) => {
                   );
                 }}
                 size={12}
+                aria-label={t("chrome.createInviteA11y")}
               >
                 <UserPlusIcon weight="fill" />
               </IconButton>
             </Tooltip>
           )}
 
-          <IconButton size={12}>
+          <IconButton size={12} aria-label={t("chrome.spaceMenuA11y")}>
             <CaretDownIcon
               weight="bold"
               css={{

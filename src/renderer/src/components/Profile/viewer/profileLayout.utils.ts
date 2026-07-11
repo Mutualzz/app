@@ -1,4 +1,5 @@
 import type { APIProfileBlock, ProfileBlockType } from "@mutualzz/types";
+import i18n from "@renderer/i18n";
 
 export interface CanvasRect {
   width: number;
@@ -355,7 +356,11 @@ export const createDefaultBlock = (
 
   switch (type) {
     case "text":
-      return clampBlock({ ...base, type: "text", content: "New text" });
+      return clampBlock({
+        ...base,
+        type: "text",
+        content: i18n.t("profile.widgets.defaults.text", { ns: "settings" })
+      });
     case "image":
       return clampBlock({
         ...base,
@@ -374,7 +379,7 @@ export const createDefaultBlock = (
       return clampBlock({
         ...base,
         type: "music",
-        title: "Favorite song",
+        title: i18n.t("profile.widgets.defaults.musicTitle", { ns: "settings" }),
         artists: null,
         image: null,
         previewUrl: null,
@@ -385,7 +390,14 @@ export const createDefaultBlock = (
       return clampBlock({
         ...base,
         type: "links",
-        links: [{ label: "My link", url: "https://example.com" }]
+        links: [
+          {
+            label: i18n.t("profile.widgets.defaults.linkLabel", {
+              ns: "settings"
+            }),
+            url: "https://example.com"
+          }
+        ]
       });
     case "activity":
       return clampBlock({ ...base, type: "activity", showCustomStatus: true });
@@ -404,7 +416,9 @@ export const createDefaultBlock = (
       return clampBlock({
         ...base,
         type: "quote",
-        content: "Write a quote…",
+        content: i18n.t("profile.widgets.defaults.quoteContent", {
+          ns: "settings"
+        }),
         variant: "default",
         attribution: null
       });

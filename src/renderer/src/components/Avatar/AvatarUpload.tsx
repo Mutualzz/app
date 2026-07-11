@@ -19,11 +19,14 @@ import {
 import { useMutation } from "@tanstack/react-query";
 import { observer } from "mobx-react-lite";
 import { useCallback, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { cropImage } from "@utils/cropImage";
 import { ArrowClockwiseIcon, MagnifyingGlassIcon } from "@phosphor-icons/react";
 
 export const AvatarUpload = observer(
   ({ variant = "modal", onSuccess }: AvatarEditorContentProps) => {
+  const { t } = useTranslation("settings");
+  const { t: tCommon } = useTranslation("common");
   const { theme } = useTheme();
   const app = useAppStore();
   const { closeModal, closeAllModals } = useModal();
@@ -55,7 +58,7 @@ export const AvatarUpload = observer(
       closeAllModals();
     },
     onError: (err: HttpException) => {
-      setError(err.message ?? "An error occurred");
+      setError(err.message ?? t("profile.avatar.upload.genericError"));
     }
   });
 
@@ -215,7 +218,9 @@ export const AvatarUpload = observer(
               }}
             >
               <UserAvatar user={app.account} size={256} />
-              <Typography level="body-xs">(Click or Drag and drop)</Typography>
+              <Typography level="body-xs">
+                {t("profile.avatar.upload.clickOrDrag")}
+              </Typography>
             </Stack>
           </FileUploader>
         )}
@@ -234,7 +239,7 @@ export const AvatarUpload = observer(
               color="success"
               loading={saving}
             >
-              Save
+              {tCommon("save")}
             </Button>
             <Button
               onClick={() => handleSave(true)}
@@ -242,19 +247,19 @@ export const AvatarUpload = observer(
               color="neutral"
               variant="outlined"
             >
-              Skip
+              {t("profile.avatar.upload.skip")}
             </Button>
           </ButtonGroup>
         )}
         <ButtonGroup color="danger" spacing={{ xs: 2, sm: 5 }}>
           {!isEmbedded && (
             <Button disabled={saving} onClick={onClose}>
-              Cancel
+              {tCommon("cancel")}
             </Button>
           )}
           {imageFile && (
             <Button disabled={saving} onClick={onClear}>
-              Reset
+              {t("profile.avatar.upload.reset")}
             </Button>
           )}
         </ButtonGroup>

@@ -24,6 +24,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { observer } from "mobx-react-lite";
 import { type ChangeEvent, useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { isElectron } from "@utils/index";
 import Snowflake from "@utils/Snowflake";
 import { CheckIcon, CopyIcon } from "@phosphor-icons/react";
@@ -32,25 +33,25 @@ interface Props {
   channel?: Channel | null;
 }
 
-const expirations = [
-  { label: "30 minutes", value: 1800 },
-  { label: "1 hour", value: 3600 },
-  { label: "6 hours", value: 21600 },
-  { label: "12 hours", value: 43200 },
-  { label: "1 day", value: 86400 },
-  { label: "7 days", value: 604800 },
-  { label: "Never", value: null }
-];
+const expirationOptions = [
+  { key: "invites.expiry.30minutes", value: 1800 },
+  { key: "invites.expiry.1hour", value: 3600 },
+  { key: "invites.expiry.6hours", value: 21600 },
+  { key: "invites.expiry.12hours", value: 43200 },
+  { key: "invites.expiry.1day", value: 86400 },
+  { key: "invites.expiry.7days", value: 604800 },
+  { key: "invites.expiry.never", value: null }
+] as const;
 
-const maxUses = [
-  { label: "No limit", value: 0 },
-  { label: "1 use", value: 1 },
-  { label: "5 uses", value: 5 },
-  { label: "10 uses", value: 10 },
-  { label: "25 uses", value: 25 },
-  { label: "50 uses", value: 50 },
-  { label: "100 uses", value: 100 }
-];
+const maxUseOptions = [
+  { key: "invites.maxUses.noLimit", value: 0 },
+  { key: "invites.maxUses.1use", value: 1 },
+  { key: "invites.maxUses.5uses", value: 5 },
+  { key: "invites.maxUses.10uses", value: 10 },
+  { key: "invites.maxUses.25uses", value: 25 },
+  { key: "invites.maxUses.50uses", value: 50 },
+  { key: "invites.maxUses.100uses", value: 100 }
+] as const;
 
 type CreateInviteResponse = APIInvite & { editSessionId?: string };
 
@@ -67,7 +68,10 @@ const InviteSendRow = observer(
     sent: boolean;
     sending: boolean;
     onSend: () => void;
-  }) => (
+  }) => {
+    const { t: tChat } = useTranslation("chat");
+
+    return (
     <Stack
       direction="row"
       spacing={2}
@@ -94,17 +98,25 @@ const InviteSendRow = observer(
         disabled={sent || sending}
         onClick={onSend}
       >
-        {sent ? <CheckIcon /> : sending ? "Sending…" : "Send"}
+        {sent ? <CheckIcon /> : sending ? tChat("feed.share.sending") : tChat("feed.share.send")}
       </Button>
     </Stack>
-  )
+    );
+  }
 );
 
 export const SpaceInviteToSpaceModal = observer(({ channel }: Props) => {
+  const { t } = useTranslation("space");
+  const { t: tCommon } = useTranslation("common");
+  const { t: tChat } = useTranslation("chat");
   const app = useAppStore();
   const [editing, setEditing] = useState(false);
-  const [expiresAfter, setExpiresAfter] = useState(expirations[5].value);
-  const [maxUsesAfter, setMaxUsesAfter] = useState(maxUses[0].value);
+  const [expiresAfter, setExpiresAfter] = useState<number | null>(
+    expirationOptions[5].value
+  );
+  const [maxUsesAfter, setMaxUsesAfter] = useState<number>(
+    maxUseOptions[0].value
+  );
   const [invite, setInvite] = useState<Invite | null>(null);
   const [copied, setCopied] = useState(false);
   const [editSessionId, setEditSessionId] = useState<string | null>(null);
@@ -314,12 +326,12 @@ export const SpaceInviteToSpaceModal = observer(({ channel }: Props) => {
             mb={4}
           >
             <Typography level="h5" fontWeight="bold">
-              Editing the current invite link
+              {t("invites.modal.editTitle")}
             </Typography>
           </Stack>
           <Stack width="100%" direction="column" spacing={5} py={2}>
             <Stack direction="column" spacing={1}>
-              <Typography level="body-sm">Expire After</Typography>
+              <Typography level="body-sm">{t("invites.modal.expireAfter")}</Typography>
               <Select
                 color="neutral"
                 value={expiresAfter as number}
@@ -327,23 +339,23 @@ export const SpaceInviteToSpaceModal = observer(({ channel }: Props) => {
                   setExpiresAfter(val as unknown as number | null)
                 }
               >
-                {expirations.map((opt) => (
+                {expirationOptions.map((opt) => (
                   <Option key={opt.value} value={opt.value}>
-                    {opt.label}
+                    {t(opt.key)}
                   </Option>
                 ))}
               </Select>
             </Stack>
             <Stack direction="column" spacing={1}>
-              <Typography level="body-sm">Max Uses</Typography>
+              <Typography level="body-sm">{t("invites.modal.maxUses")}</Typography>
               <Select
                 onValueChange={(val) => setMaxUsesAfter(val as number)}
                 color="neutral"
                 value={maxUsesAfter}
               >
-                {maxUses.map((opt) => (
+                {maxUseOptions.map((opt) => (
                   <Option key={opt.value} value={opt.value}>
-                    {opt.label}
+                    {t(opt.key)}
                   </Option>
                 ))}
               </Select>
@@ -358,14 +370,14 @@ export const SpaceInviteToSpaceModal = observer(({ channel }: Props) => {
                   variant="soft"
                   color="neutral"
                 >
-                  Cancel
+                  {tCommon("cancel")}
                 </Button>
                 <Button
                   onClick={() => updateInvite(app.spaces.active!)}
                   variant="solid"
                   color="success"
                 >
-                  Save
+                  {tCommon("save")}
                 </Button>
               </ButtonGroup>
             </Stack>
@@ -383,17 +395,21 @@ export const SpaceInviteToSpaceModal = observer(({ channel }: Props) => {
         >
           <Stack direction="column" spacing={1}>
             <Typography level="h5" fontWeight="bold">
-              Invite friends to {app.spaces.active?.name || "Unknown Space"}
+              {t("invites.modal.title", {
+                spaceName: app.spaces.active?.name || tChat("unknownSpace")
+              })}
             </Typography>
             <Typography level="body-sm">
-              Recipients will land in #{channelToUse?.name || "Unknown"}
+              {t("invites.modal.landingChannel", {
+                channelName: channelToUse?.name || tChat("unknown")
+              })}
             </Typography>
           </Stack>
 
           {!isLoading && !error && invite && (
             <Stack direction="column" spacing={1.5} flex={1} minHeight={0}>
               <InputDefault
-                placeholder="Search friends"
+                placeholder={t("invites.modal.searchFriends")}
                 value={search || ""}
                 onChange={onChangeSearch}
               />
@@ -408,8 +424,8 @@ export const SpaceInviteToSpaceModal = observer(({ channel }: Props) => {
                 {!hasSuggestedUsers && (
                   <Typography level="body-sm" textColor="secondary">
                     {search
-                      ? "No results."
-                      : "No friends to invite. Share the link below instead."}
+                      ? t("invites.modal.noResults")
+                      : t("invites.modal.noFriends")}
                   </Typography>
                 )}
 
@@ -474,7 +490,7 @@ export const SpaceInviteToSpaceModal = observer(({ channel }: Props) => {
           <Divider />
 
           <Stack direction="column" width="100%" spacing={1}>
-            <Typography level="body-sm">Invite Link</Typography>
+            <Typography level="body-sm">{t("invites.modal.inviteLink")}</Typography>
             <Input
               type="text"
               readOnly
@@ -491,7 +507,7 @@ export const SpaceInviteToSpaceModal = observer(({ channel }: Props) => {
                   disabled={isLoading || !!error || !invite || copied}
                   size="sm"
                 >
-                  {copied ? "Copied" : "Copy"}
+                  {copied ? t("invites.copiedToClipboard") : t("invites.copyInviteUrl")}
                 </Button>
               }
             />
@@ -499,20 +515,21 @@ export const SpaceInviteToSpaceModal = observer(({ channel }: Props) => {
               {!isLoading && !error && (
                 <>
                   <Typography level="body-xs" textColor="muted">
-                    This link will expire{" "}
+                    {t("invites.modal.expiresPrefix")}
                     <Typography>
                       {invite?.expiresAt ? (
                         <time dateTime={invite.expiresAt.toISOString()}>
                           {dayjs(invite.expiresAt).fromNow()}
                         </time>
                       ) : (
-                        "never"
+                        t("invites.modal.expiresNever")
                       )}
                     </Typography>
                     {invite?.maxUses && invite?.maxUses > 0 && (
                       <Typography level="body-xs" textColor="muted">
-                        {" "}
-                        or after <Typography>{invite?.maxUses} uses</Typography>
+                        {t("invites.modal.expiresAfterUses", {
+                          count: invite.maxUses
+                        })}
                       </Typography>
                     )}
                     .
@@ -525,7 +542,7 @@ export const SpaceInviteToSpaceModal = observer(({ channel }: Props) => {
                     color="info"
                     underline="always"
                   >
-                    Edit invite link
+                    {t("actions.editInviteLink")}
                   </Link>
                 </>
               )}

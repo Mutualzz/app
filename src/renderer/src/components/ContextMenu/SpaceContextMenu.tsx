@@ -11,13 +11,17 @@ import {
   type Page,
   settingsPages
 } from "@components/SpaceSettings/SpaceSettingsSidebar";
-import startCase from "lodash-es/startCase";
 import { generateMenuIDs } from "@contexts/ContextMenu.context";
 import { SpaceActionConfirm } from "@components/Modals/SpaceActionConfirm";
 import { ContextItem } from "@components/ContextItem";
 import type { SpaceSettingsCategories } from "@components/SpaceSettings/SpaceSettings.context";
 import { ReportContentModal } from "@components/Modals/ReportContentModal";
+import {
+  spaceCategoryTitleKeys,
+  spacePageTitleKeys
+} from "@mutualzz/i18n";
 import { ArrowRightIcon, DoorOpenIcon, FlagIcon } from "@phosphor-icons/react";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   space: Space;
@@ -29,6 +33,8 @@ export const SpaceContextMenu = observer(
   ({ space, fromSidebar, setMenuOpen }: Props) => {
     const app = useAppStore();
     const { openModal } = useModal();
+    const { t } = useTranslation("chat");
+    const { t: tSpace } = useTranslation("space");
 
     const spaceSettings = Object.entries(settingsPages);
 
@@ -64,7 +70,7 @@ export const SpaceContextMenu = observer(
               onClick={() => space.markAsRead()}
               disabled={!hasUnread}
             >
-              Mark as read
+              {t("contextMenu.markAsRead")}
             </ContextItem>
             <Divider css={{ opacity: 0.5 }} />
           </>
@@ -75,7 +81,11 @@ export const SpaceContextMenu = observer(
               <Box key={`context-menu-settings-category-${category}`}>
                 {shouldShowCategory(category as SpaceSettingsCategories) && (
                   <ContextSubmenu
-                    label={startCase(category)}
+                    label={tSpace(
+                      spaceCategoryTitleKeys[
+                        category as keyof typeof spaceCategoryTitleKeys
+                      ]
+                    )}
                     arrow={<ArrowRightIcon weight="fill" />}
                     elevation={app.settings?.preferEmbossed ? 5 : 1}
                     transparency={0}
@@ -106,7 +116,11 @@ export const SpaceContextMenu = observer(
                             }
                             endDecorator={page.icon}
                           >
-                            {startCase(page.label)}
+                            {tSpace(
+                              spacePageTitleKeys[
+                                page.label as keyof typeof spacePageTitleKeys
+                              ]
+                            )}
                           </ContextItem>
                         )
                     )}
@@ -127,14 +141,14 @@ export const SpaceContextMenu = observer(
                   <ReportContentModal
                     targetType="space"
                     targetId={space.id}
-                    contentLabel="this space"
+                    contentLabel={t("contextMenu.reportSpaceLabel")}
                     modalId={`report-space-${space.id}`}
                   />
                 )
               }
               id={`space-report-${space.id}`}
             >
-              Report Space
+              {t("contextMenu.reportSpace")}
             </ContextItem>
             <ContextItem
               color="danger"
@@ -148,7 +162,7 @@ export const SpaceContextMenu = observer(
               id={`space-leave-${space.id}`}
               textColor={undefined}
             >
-              Leave Space
+              {t("contextMenu.leaveSpace")}
             </ContextItem>
           </>
         )}

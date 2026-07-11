@@ -6,6 +6,7 @@ import { Stack, Typography } from "@mutualzz/ui-web";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { observer } from "mobx-react-lite";
 import { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 
 export const Route = createFileRoute(
   "/_authenticated/spaces/$spaceId/$channelId"
@@ -17,6 +18,7 @@ export const Route = createFileRoute(
 });
 
 function RouteComponent() {
+  const { t } = useTranslation("chat");
   const app = useAppStore();
   const { spaceId, channelId } = Route.useParams();
   const { chat } = Route.useSearch();
@@ -56,7 +58,7 @@ function RouteComponent() {
     return (
       <Paper direction="column" flex="1 1 auto" overflow="hidden">
         <Stack alignItems="center" justifyContent="center" flex="1">
-          <Typography level="h5">Loading channel...</Typography>
+          <Typography level="h5">{t("loadingChannel")}</Typography>
         </Stack>
       </Paper>
     );

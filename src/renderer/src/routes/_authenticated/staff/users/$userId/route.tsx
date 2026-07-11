@@ -8,7 +8,7 @@ import { StaffUserNotesSection } from "@components/Staff/sections/StaffUserNotes
 import { StaffUserSessionsSection } from "@components/Staff/sections/StaffUserSessionsSection";
 import { StaffUserSidebar } from "@components/Staff/StaffUserSidebar";
 import {
-  staffSectionTitles,
+  staffSectionTitleKeys,
   type StaffSection
 } from "@components/Staff/staffSections";
 import { useAppStore } from "@hooks/useStores";
@@ -18,6 +18,7 @@ import { UserIcon } from "@phosphor-icons/react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 export const Route = createFileRoute("/_authenticated/staff/users/$userId")({
   component: StaffUserRoute
@@ -28,6 +29,9 @@ function StaffUserRoute() {
   const app = useAppStore();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { t } = useTranslation("staff");
+  const { t: tChat } = useTranslation("chat");
+  const { t: tSettings } = useTranslation("settings");
   const embossed = app.settings?.preferEmbossed;
   const [section, setSection] = useState<StaffSection>("info");
 
@@ -71,7 +75,7 @@ function StaffUserRoute() {
         justifyContent="center"
         alignItems="center"
       >
-        <Typography textColor="secondary">Loading...</Typography>
+        <Typography textColor="secondary">{tChat("loading")}</Typography>
       </Stack>
     );
   }
@@ -85,7 +89,9 @@ function StaffUserRoute() {
         justifyContent="center"
         alignItems="center"
       >
-        <Typography textColor="secondary">User not found</Typography>
+        <Typography textColor="secondary">
+          {tSettings("profile.viewer.userNotFound")}
+        </Typography>
       </Stack>
     );
   }
@@ -131,7 +137,7 @@ function StaffUserRoute() {
           borderBottom="0 !important"
         >
           <Typography level="body-sm" textColor="muted" fontWeight={600}>
-            {staffSectionTitles[section]}
+            {t(staffSectionTitleKeys[section])}
           </Typography>
           {section === "info" && (
             <StaffUserInfoSection user={user} onUpdated={handleUpdated} />
