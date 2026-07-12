@@ -260,7 +260,7 @@ export const UserSettingsSidebar = observer(
               </Typography>
             )}
           </Stack>
-          <Stack fontFamily="monospace">
+          <Stack fontFamily="monospace" direction="column" spacing={0.5}>
             <Link
               href={!isElectron ? "https://mutualzz.com/privacy" : undefined}
               target={!isElectron ? "_blank" : undefined}
@@ -277,6 +277,23 @@ export const UserSettingsSidebar = observer(
               color="info"
             >
               {t("privacyPolicy")}
+            </Link>
+            <Link
+              href={!isElectron ? "https://mutualzz.com/tos" : undefined}
+              target={!isElectron ? "_blank" : undefined}
+              level="body-xs"
+              onClick={async (e) => {
+                if (isElectron) {
+                  e.preventDefault();
+                  await window.api.shell.openExternal(
+                    "https://mutualzz.com/tos"
+                  );
+                }
+              }}
+              variant="plain"
+              color="info"
+            >
+              {t("termsOfService")}
             </Link>
           </Stack>
         </Box>

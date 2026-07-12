@@ -35,14 +35,19 @@ function Privacy() {
             Privacy Policy for Mutualzz
           </Typography>
           <Typography level="body-lg" mb={5}>
-            Effective Date: August 25, 2025
+            Effective Date: July 11, 2026
           </Typography>
           <Typography mb={7}>
             Mutualzz (“we,” “our,” or “us”) values your privacy and is committed
             to protecting your personal information. This Privacy Policy
             explains how we collect, use, and safeguard your data when you use
-            our services, including our website, mobile apps, and related
-            services (collectively, the “Service”).
+            our website, desktop and mobile apps, voice features, Minecraft
+            bridge tools, and related services (collectively, the “Service”).
+            Use of Mutualzz is also governed by our{" "}
+            <Link href="/tos" textColor="accent" underline="hover">
+              Terms of Service
+            </Link>
+            .
           </Typography>
 
           <Section
@@ -61,19 +66,29 @@ function Privacy() {
                   <Stack direction="column" pl={4} spacing={0.75}>
                     <Typography>
                       • <b>Account Information:</b> Username, email address,
-                      password, and profile details (such as bio, avatar,
-                      themes, and customization).
+                      password, date of birth, display name, and profile details
+                      (such as bio, avatar, themes, and customization).
                     </Typography>
                     <Typography>
                       • <b>Content You Share:</b> Feed activity (posts, videos,
-                      images, comments - similar to TikTok/Instagram). Spaces
-                      activity (discussions, group messages, shared media, and
-                      voice chats - similar to Discord servers). Statuses and
-                      reactions you use across profiles, the Feed, and Spaces.
+                      images, comments). Spaces activity (discussions, group
+                      messages, shared media, and voice participation). Direct
+                      messages, statuses, and reactions.
                     </Typography>
                     <Typography>
-                      • <b>Preferences:</b> Custom themes, color settings, and
-                      accessibility options.
+                      • <b>Support & Safety:</b> Messages you send to support,
+                      appeals, and reports you submit about content or users.
+                    </Typography>
+                    <Typography>
+                      • <b>Linked Services:</b> If you connect Minecraft (for
+                      example via account linking codes) or Discord bridges, we
+                      process identifiers and configuration needed to keep those
+                      connections working, such as linked usernames, server IDs,
+                      channel bindings, and relay settings.
+                    </Typography>
+                    <Typography>
+                      • <b>Preferences:</b> Custom themes, color settings,
+                      notification preferences, and accessibility options.
                     </Typography>
                   </Stack>
                   <Typography fontWeight="bold" mt={3}>
@@ -86,9 +101,17 @@ function Privacy() {
                       the Service.
                     </Typography>
                     <Typography>
-                      • <b>Cookies & Tracking:</b> Cookies, local storage, and
-                      similar technologies for authentication, security, and
-                      improving your experience.
+                      • <b>Voice & Real-Time Media:</b> When you join voice (or
+                      related features such as screen sharing), audio/video is
+                      transmitted to other participants for the session.
+                      Technical connection metadata (such as join/leave events
+                      and quality diagnostics) may be processed to operate the
+                      feature.
+                    </Typography>
+                    <Typography>
+                      • <b>Cookies & Local Storage:</b> Cookies, local storage,
+                      and similar technologies for authentication, security,
+                      preferences, and improving your experience.
                     </Typography>
                     <Typography>
                       • <b>Diagnostic Data:</b> Crash logs, performance
@@ -111,9 +134,11 @@ function Privacy() {
                   • Personalizing your experience (custom themes, profiles).
                 </Typography>
                 <Typography>
-                  • Enabling you to share and interact through the Feed,
-                  participate in Spaces, and use statuses/reactions across the
-                  platform.
+                  • Enabling Feed, Spaces, messaging, voice, and optional
+                  bridges/integrations.
+                </Typography>
+                <Typography>
+                  • Verifying age eligibility and securing accounts.
                 </Typography>
                 <Typography>
                   • Protecting the security and integrity of the Service,
@@ -125,7 +150,8 @@ function Privacy() {
                   • Monitoring usage and improving performance.
                 </Typography>
                 <Typography>
-                  • Communicating with you about updates, features, and support.
+                  • Communicating with you about updates, features, security,
+                  and support.
                 </Typography>
                 <Typography>• Complying with legal obligations.</Typography>
               </Stack>
@@ -148,16 +174,34 @@ function Privacy() {
                   <Typography>
                     – In Spaces, your discussions, group contributions, media,
                     and voice activity can be seen/heard by members of that
-                    Space.
+                    Space (or channel participants).
+                  </Typography>
+                  <Typography>
+                    – Direct messages are visible to participants in that
+                    conversation.
                   </Typography>
                   <Typography>
                     – Statuses and reactions you post are visible across
-                    profiles, the Feed, and Spaces.
+                    profiles, the Feed, and Spaces according to feature design
+                    and your settings.
                   </Typography>
                 </Stack>
                 <Typography>
+                  • <b>Through Bridges:</b> If you or a server admin enable
+                  Minecraft or Discord bridging, messages and related metadata
+                  may be relayed to those platforms and become subject to their
+                  visibility rules and policies.
+                </Typography>
+                <Typography>
                   • <b>With Service Providers:</b> Third-party vendors who help
-                  us with hosting, analytics, customer support, or security.
+                  us with hosting, content delivery, analytics, customer
+                  support, push notifications, or security.
+                </Typography>
+                <Typography>
+                  • <b>Third-Party Features You Choose:</b> Embeds and widgets
+                  (such as music or GIF providers) may send requests to those
+                  services when you use them. Their privacy policies apply to
+                  data they receive.
                 </Typography>
                 <Typography>
                   • <b>For Legal Reasons:</b> If required by law, regulation,
@@ -177,17 +221,18 @@ function Privacy() {
             content={
               <Stack direction="column" pl={6} spacing={1.5}>
                 <Typography>
-                  • <b>Visibility:</b> Depending on your privacy settings, your
-                  content may be public, visible to all members of a Space, or
-                  visible only to your connections.
+                  • <b>Visibility:</b> Depending on your privacy settings and
+                  the feature you use, your content may be public, visible to
+                  all members of a Space, visible to conversation participants,
+                  or visible only to your connections.
                 </Typography>
                 <Typography>
                   • <b>Moderation:</b> If you report content, authorized Mutualzz
                   staff may review the reported item and a small amount of
                   nearby context to investigate the report. Staff do not browse
                   private conversations outside of reported content. Spaces may
-                  be locked down or removed for policy violations; locked space
-                  owners can appeal by email.
+                  be locked down or removed for policy violations; locked Space
+                  owners can appeal by email where that process is available.
                 </Typography>
                 <Typography>
                   • <b>Responsibility:</b> You are responsible for the content
@@ -196,13 +241,16 @@ function Privacy() {
                 </Typography>
                 <Typography>
                   • <b>Removal:</b> We reserve the right to remove content that
-                  violates our community guidelines, terms of service, or
-                  applicable law.
+                  violates our{" "}
+                  <Link href="/tos" textColor="accent" underline="hover">
+                    Terms of Service
+                  </Link>
+                  , community guidelines, or applicable law.
                 </Typography>
                 <Typography>
                   • <b>Persistence:</b> Even if you delete content, copies may
-                  remain visible to others if it was shared, saved, or otherwise
-                  distributed before deletion.
+                  remain visible to others if it was shared, saved, relayed
+                  through a bridge, or otherwise distributed before deletion.
                 </Typography>
               </Stack>
             }
@@ -213,20 +261,31 @@ function Privacy() {
             content={
               <Stack direction="column" pl={6} spacing={1.5}>
                 <Typography>
-                  • Account Settings: You can edit, update, or delete your
+                  • Account Settings: You can edit, update, or delete certain
                   information through your profile settings.
                 </Typography>
                 <Typography>
                   • Privacy Controls: Adjust what information is visible in your
-                  profile, in the Feed, and within Spaces.
+                  profile, in the Feed, and within Spaces where those controls
+                  are available.
+                </Typography>
+                <Typography>
+                  • Bridges: You (or a server admin) can disconnect Minecraft or
+                  Discord links and channel bindings you control.
                 </Typography>
                 <Typography>
                   • Cookies: Manage or disable cookies in your browser/app
-                  settings.
+                  settings (note that some features may not work without them).
                 </Typography>
                 <Typography>
                   • Account Deletion: You may request deletion of your account
-                  and associated data at any time.
+                  and associated data at any time through the Service or by
+                  contacting us.
+                </Typography>
+                <Typography>
+                  • Depending on where you live, you may have rights to access,
+                  correct, delete, or export personal data, or to object to or
+                  restrict certain processing. Contact us to make a request.
                 </Typography>
               </Stack>
             }
@@ -237,8 +296,10 @@ function Privacy() {
             content={
               <Typography>
                 We retain your information as long as necessary to provide the
-                Service, comply with obligations, and resolve disputes. When
-                data is no longer needed, we securely delete it.
+                Service, comply with obligations, resolve disputes, and enforce
+                our agreements. When data is no longer needed, we delete or
+                de-identify it. Backup copies may persist for a limited period
+                after deletion.
               </Typography>
             }
           />
@@ -248,8 +309,9 @@ function Privacy() {
             content={
               <Typography>
                 We use industry-standard safeguards to protect your data,
-                including encryption, access controls, and regular monitoring.
-                However, no method of storage or transmission is 100% secure.
+                including encryption in transit where appropriate, access
+                controls, and monitoring. However, no method of storage or
+                transmission is 100% secure.
               </Typography>
             }
           />
@@ -259,9 +321,10 @@ function Privacy() {
             content={
               <Typography>
                 Mutualzz is not intended for users under 13 (or the minimum
-                legal age in your jurisdiction). We do not knowingly collect
-                data from children. If we learn we have done so, we will delete
-                it.
+                legal age in your jurisdiction, if higher). We do not knowingly
+                collect data from children below that age. If we learn we have
+                done so, we will delete it. Date of birth is collected to help
+                enforce age eligibility.
               </Typography>
             }
           />
@@ -271,8 +334,10 @@ function Privacy() {
             content={
               <Typography>
                 Your information may be transferred and processed outside your
-                country of residence. By using Mutualzz, you consent to such
-                transfers in compliance with applicable laws.
+                country of residence, including in countries that may have
+                different data-protection laws than your own. By using Mutualzz,
+                you acknowledge such transfers as described in this Policy and
+                as permitted by applicable law.
               </Typography>
             }
           />
@@ -283,7 +348,8 @@ function Privacy() {
               <Typography>
                 We may update this Privacy Policy from time to time. If we make
                 significant changes, we will notify you through the Service or
-                other means.
+                other means. The “Effective Date” above shows when this Policy
+                last changed.
               </Typography>
             }
           />
@@ -314,6 +380,11 @@ function Privacy() {
                   underline="hover"
                 >
                   mutualzz.com
+                </Link>
+                <br />
+                Terms of Service:{" "}
+                <Link href="/tos" textColor="accent" underline="hover">
+                  mutualzz.com/tos
                 </Link>
               </Typography>
             }

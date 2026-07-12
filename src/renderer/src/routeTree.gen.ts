@@ -13,6 +13,7 @@ import { Route as SupportRouteImport } from "./routes/support"
 import { Route as ResetRouteImport } from "./routes/reset"
 import { Route as RegisterRouteImport } from "./routes/register"
 import { Route as PrivacyRouteImport } from "./routes/privacy"
+import { Route as TosRouteImport } from "./routes/tos"
 import { Route as LoginRouteImport } from "./routes/login"
 import { Route as DownloadRouteImport } from "./routes/download"
 import { Route as AppealRouteImport } from "./routes/appeal"
@@ -65,6 +66,11 @@ const RegisterRoute = RegisterRouteImport.update({
 const PrivacyRoute = PrivacyRouteImport.update({
   id: "/privacy",
   path: "/privacy",
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TosRoute = TosRouteImport.update({
+  id: "/tos",
+  path: "/tos",
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -258,6 +264,7 @@ export interface FileRoutesByFullPath {
   "/download": typeof DownloadRoute
   "/login": typeof LoginRoute
   "/privacy": typeof PrivacyRoute
+  "/tos": typeof TosRoute
   "/register": typeof RegisterRoute
   "/reset": typeof ResetRoute
   "/support": typeof SupportRoute
@@ -296,6 +303,7 @@ export interface FileRoutesByTo {
   "/download": typeof DownloadRoute
   "/login": typeof LoginRoute
   "/privacy": typeof PrivacyRoute
+  "/tos": typeof TosRoute
   "/register": typeof RegisterRoute
   "/reset": typeof ResetRoute
   "/support": typeof SupportRoute
@@ -334,6 +342,7 @@ export interface FileRoutesById {
   "/download": typeof DownloadRoute
   "/login": typeof LoginRoute
   "/privacy": typeof PrivacyRoute
+  "/tos": typeof TosRoute
   "/register": typeof RegisterRoute
   "/reset": typeof ResetRoute
   "/support": typeof SupportRoute
@@ -374,6 +383,7 @@ export interface FileRouteTypes {
     | "/download"
     | "/login"
     | "/privacy"
+    | "/tos"
     | "/register"
     | "/reset"
     | "/support"
@@ -412,6 +422,7 @@ export interface FileRouteTypes {
     | "/download"
     | "/login"
     | "/privacy"
+    | "/tos"
     | "/register"
     | "/reset"
     | "/support"
@@ -449,6 +460,7 @@ export interface FileRouteTypes {
     | "/download"
     | "/login"
     | "/privacy"
+    | "/tos"
     | "/register"
     | "/reset"
     | "/support"
@@ -489,6 +501,7 @@ export interface RootRouteChildren {
   DownloadRoute: typeof DownloadRoute
   LoginRoute: typeof LoginRoute
   PrivacyRoute: typeof PrivacyRoute
+  TosRoute: typeof TosRoute
   RegisterRoute: typeof RegisterRoute
   ResetRoute: typeof ResetRoute
   SupportRoute: typeof SupportRoute
@@ -524,6 +537,13 @@ declare module "@tanstack/react-router" {
       path: "/privacy"
       fullPath: "/privacy"
       preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    "/tos": {
+      id: "/tos"
+      path: "/tos"
+      fullPath: "/tos"
+      preLoaderRoute: typeof TosRouteImport
       parentRoute: typeof rootRouteImport
     }
     "/login": {
@@ -894,6 +914,7 @@ const rootRouteChildren: RootRouteChildren = {
   DownloadRoute: DownloadRoute,
   LoginRoute: LoginRoute,
   PrivacyRoute: PrivacyRoute,
+  TosRoute: TosRoute,
   RegisterRoute: RegisterRoute,
   ResetRoute: ResetRoute,
   SupportRoute: SupportRoute,

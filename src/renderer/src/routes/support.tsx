@@ -105,6 +105,9 @@ function SupportPage() {
             <Button variant="soft" onClick={() => navigate({ to: "/privacy" })}>
               {t("support.privacyPolicy")}
             </Button>
+            <Button variant="soft" onClick={() => navigate({ to: "/tos" })}>
+              {t("support.termsOfService")}
+            </Button>
           </Stack>
 
           <Section title={t("support.faq")}>
