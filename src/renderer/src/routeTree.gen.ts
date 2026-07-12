@@ -9,11 +9,11 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from "./routes/__root"
+import { Route as TosRouteImport } from "./routes/tos"
 import { Route as SupportRouteImport } from "./routes/support"
 import { Route as ResetRouteImport } from "./routes/reset"
 import { Route as RegisterRouteImport } from "./routes/register"
 import { Route as PrivacyRouteImport } from "./routes/privacy"
-import { Route as TosRouteImport } from "./routes/tos"
 import { Route as LoginRouteImport } from "./routes/login"
 import { Route as DownloadRouteImport } from "./routes/download"
 import { Route as AppealRouteImport } from "./routes/appeal"
@@ -48,6 +48,11 @@ import { Route as AuthenticatedAtmeBridgesBridgeIdRouteImport } from "./routes/_
 import { Route as AuthenticatedStaffUsersUserIdRouteRouteImport } from "./routes/_authenticated/staff/users/$userId/route"
 import { Route as AuthenticatedSpacesSpaceIdChannelIdRouteRouteImport } from "./routes/_authenticated/spaces/$spaceId/$channelId/route"
 
+const TosRoute = TosRouteImport.update({
+  id: "/tos",
+  path: "/tos",
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SupportRoute = SupportRouteImport.update({
   id: "/support",
   path: "/support",
@@ -66,11 +71,6 @@ const RegisterRoute = RegisterRouteImport.update({
 const PrivacyRoute = PrivacyRouteImport.update({
   id: "/privacy",
   path: "/privacy",
-  getParentRoute: () => rootRouteImport,
-} as any)
-const TosRoute = TosRouteImport.update({
-  id: "/tos",
-  path: "/tos",
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -264,10 +264,10 @@ export interface FileRoutesByFullPath {
   "/download": typeof DownloadRoute
   "/login": typeof LoginRoute
   "/privacy": typeof PrivacyRoute
-  "/tos": typeof TosRoute
   "/register": typeof RegisterRoute
   "/reset": typeof ResetRoute
   "/support": typeof SupportRoute
+  "/tos": typeof TosRoute
   "/@me": typeof AuthenticatedAtmeRouteRouteWithChildren
   "/avatar": typeof AuthenticatedAvatarRouteRoute
   "/feed": typeof AuthenticatedFeedRouteRouteWithChildren
@@ -303,10 +303,10 @@ export interface FileRoutesByTo {
   "/download": typeof DownloadRoute
   "/login": typeof LoginRoute
   "/privacy": typeof PrivacyRoute
-  "/tos": typeof TosRoute
   "/register": typeof RegisterRoute
   "/reset": typeof ResetRoute
   "/support": typeof SupportRoute
+  "/tos": typeof TosRoute
   "/@me": typeof AuthenticatedAtmeRouteRouteWithChildren
   "/avatar": typeof AuthenticatedAvatarRouteRoute
   "/profile": typeof AuthenticatedProfileRouteRoute
@@ -342,10 +342,10 @@ export interface FileRoutesById {
   "/download": typeof DownloadRoute
   "/login": typeof LoginRoute
   "/privacy": typeof PrivacyRoute
-  "/tos": typeof TosRoute
   "/register": typeof RegisterRoute
   "/reset": typeof ResetRoute
   "/support": typeof SupportRoute
+  "/tos": typeof TosRoute
   "/_authenticated/@me": typeof AuthenticatedAtmeRouteRouteWithChildren
   "/_authenticated/avatar": typeof AuthenticatedAvatarRouteRoute
   "/_authenticated/feed": typeof AuthenticatedFeedRouteRouteWithChildren
@@ -383,10 +383,10 @@ export interface FileRouteTypes {
     | "/download"
     | "/login"
     | "/privacy"
-    | "/tos"
     | "/register"
     | "/reset"
     | "/support"
+    | "/tos"
     | "/@me"
     | "/avatar"
     | "/feed"
@@ -422,10 +422,10 @@ export interface FileRouteTypes {
     | "/download"
     | "/login"
     | "/privacy"
-    | "/tos"
     | "/register"
     | "/reset"
     | "/support"
+    | "/tos"
     | "/@me"
     | "/avatar"
     | "/profile"
@@ -460,10 +460,10 @@ export interface FileRouteTypes {
     | "/download"
     | "/login"
     | "/privacy"
-    | "/tos"
     | "/register"
     | "/reset"
     | "/support"
+    | "/tos"
     | "/_authenticated/@me"
     | "/_authenticated/avatar"
     | "/_authenticated/feed"
@@ -501,16 +501,23 @@ export interface RootRouteChildren {
   DownloadRoute: typeof DownloadRoute
   LoginRoute: typeof LoginRoute
   PrivacyRoute: typeof PrivacyRoute
-  TosRoute: typeof TosRoute
   RegisterRoute: typeof RegisterRoute
   ResetRoute: typeof ResetRoute
   SupportRoute: typeof SupportRoute
+  TosRoute: typeof TosRoute
   UsersUsernameRouteRoute: typeof UsersUsernameRouteRoute
   InviteCodeRoute: typeof InviteCodeRoute
 }
 
 declare module "@tanstack/react-router" {
   interface FileRoutesByPath {
+    "/tos": {
+      id: "/tos"
+      path: "/tos"
+      fullPath: "/tos"
+      preLoaderRoute: typeof TosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     "/support": {
       id: "/support"
       path: "/support"
@@ -537,13 +544,6 @@ declare module "@tanstack/react-router" {
       path: "/privacy"
       fullPath: "/privacy"
       preLoaderRoute: typeof PrivacyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    "/tos": {
-      id: "/tos"
-      path: "/tos"
-      fullPath: "/tos"
-      preLoaderRoute: typeof TosRouteImport
       parentRoute: typeof rootRouteImport
     }
     "/login": {
@@ -914,10 +914,10 @@ const rootRouteChildren: RootRouteChildren = {
   DownloadRoute: DownloadRoute,
   LoginRoute: LoginRoute,
   PrivacyRoute: PrivacyRoute,
-  TosRoute: TosRoute,
   RegisterRoute: RegisterRoute,
   ResetRoute: ResetRoute,
   SupportRoute: SupportRoute,
+  TosRoute: TosRoute,
   UsersUsernameRouteRoute: UsersUsernameRouteRoute,
   InviteCodeRoute: InviteCodeRoute,
 }
