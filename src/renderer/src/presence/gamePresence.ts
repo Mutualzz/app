@@ -11,7 +11,8 @@ const GAME_CATALOG: GameCatalogEntry[] = [
   { exes: ["cs2.exe"], name: "Counter-Strike 2", id: "counter-strike-2" },
   { exes: ["valorant.exe"], name: "VALORANT", id: "valorant" },
   {
-    exes: ["minecraft.exe", "minecraftlauncher.exe"],
+    // Launcher alone is not "playing" — only the game process.
+    exes: ["minecraft.exe"],
     name: "Minecraft",
     id: "minecraft"
   },

@@ -48,12 +48,27 @@ type QueuedSend = {
 
 const MAX_PER_BRIDGE = 200;
 const MAX_QUEUE_ATTEMPTS = 3;
+const EMPTY_ENTRIES: BridgeFeedEntry[] = [];
+const EMPTY_PLAYERS: BridgeOnlinePlayer[] = [];
 
 const sortEntries = (entries: BridgeFeedEntry[]) =>
   [...entries].sort((a, b) => {
     const at = a.at.localeCompare(b.at);
     return at !== 0 ? at : a.id.localeCompare(b.id);
   });
+
+const isSameOrAfter = (a: BridgeFeedEntry, b: BridgeFeedEntry) => {
+  const cmp = a.at.localeCompare(b.at);
+  return cmp > 0 || (cmp === 0 && a.id.localeCompare(b.id) >= 0);
+};
+
+const playersFingerprint = (players: BridgeOnlinePlayer[]) =>
+  players
+    .map(
+      (p) =>
+        `${p.uuid}:${p.name}:${p.serverId}:${p.linkedUser?.id ?? ""}`,
+    )
+    .join("|");
 
 export class BridgeChatStore {
   entriesByBridge = observable.map<string, BridgeFeedEntry[]>();
@@ -67,11 +82,11 @@ export class BridgeChatStore {
   }
 
   entriesFor(bridgeId: string): BridgeFeedEntry[] {
-    return this.entriesByBridge.get(bridgeId) ?? [];
+    return this.entriesByBridge.get(bridgeId) ?? EMPTY_ENTRIES;
   }
 
   playersFor(bridgeId: string): BridgeOnlinePlayer[] {
-    return this.playersByBridge.get(bridgeId) ?? [];
+    return this.playersByBridge.get(bridgeId) ?? EMPTY_PLAYERS;
   }
 
   unreadFor(bridgeId: string): BridgeUnreadState | undefined {
@@ -92,7 +107,14 @@ export class BridgeChatStore {
   add = action((entry: BridgeFeedEntry) => {
     const current = this.entriesByBridge.get(entry.bridgeId) ?? [];
     if (current.some((e) => e.id === entry.id)) return;
-    const next = sortEntries([...current, entry]).slice(-MAX_PER_BRIDGE);
+
+    const last = current.at(-1);
+    // Live gateway events are almost always newest — avoid O(n log n) sort.
+    const next =
+      !last || isSameOrAfter(entry, last)
+        ? [...current, entry].slice(-MAX_PER_BRIDGE)
+        : sortEntries([...current, entry]).slice(-MAX_PER_BRIDGE);
+
     this.entriesByBridge.set(entry.bridgeId, next);
 
     if (entry.kind === "join" && entry.uuid) {
@@ -143,17 +165,35 @@ export class BridgeChatStore {
   });
 
   setPlayers = action((bridgeId: string, players: BridgeOnlinePlayer[]) => {
+    const prev = this.playersByBridge.get(bridgeId);
+    if (
+      prev &&
+      prev.length === players.length &&
+      playersFingerprint(prev) === playersFingerprint(players)
+    ) {
+      return;
+    }
     this.playersByBridge.set(bridgeId, players);
   });
 
   upsertPlayer = action((bridgeId: string, player: BridgeOnlinePlayer) => {
     const current = this.playersByBridge.get(bridgeId) ?? [];
+    const existing = current.find((p) => p.uuid === player.uuid);
+    if (
+      existing &&
+      existing.name === player.name &&
+      existing.serverId === player.serverId &&
+      (existing.linkedUser?.id ?? null) === (player.linkedUser?.id ?? null)
+    ) {
+      return;
+    }
     const without = current.filter((p) => p.uuid !== player.uuid);
     this.playersByBridge.set(bridgeId, [...without, player]);
   });
 
   removePlayer = action((bridgeId: string, uuid: string) => {
     const current = this.playersByBridge.get(bridgeId) ?? [];
+    if (!current.some((p) => p.uuid === uuid)) return;
     this.playersByBridge.set(
       bridgeId,
       current.filter((p) => p.uuid !== uuid),
@@ -161,6 +201,15 @@ export class BridgeChatStore {
   });
 
   setUnread = action((bridgeId: string, state: BridgeUnreadState) => {
+    const prev = this.unreadByBridge.get(bridgeId);
+    if (
+      prev &&
+      prev.lastMessageId === state.lastMessageId &&
+      prev.lastAckedId === state.lastAckedId &&
+      prev.unread === state.unread
+    ) {
+      return;
+    }
     this.unreadByBridge.set(bridgeId, state);
   });
 
@@ -174,7 +223,7 @@ export class BridgeChatStore {
       }[],
     ) => {
       for (const bridge of bridges) {
-        this.unreadByBridge.set(bridge.id, {
+        this.setUnread(bridge.id, {
           lastMessageId: bridge.lastMessageId ?? null,
           lastAckedId: bridge.lastAckedId ?? null,
           unread: Boolean(bridge.unread),
@@ -185,6 +234,7 @@ export class BridgeChatStore {
 
   markAcked = action((bridgeId: string, lastAckedId: string) => {
     const prev = this.unreadByBridge.get(bridgeId);
+    if (prev?.lastAckedId === lastAckedId && prev.unread === false) return;
     this.unreadByBridge.set(bridgeId, {
       lastMessageId: prev?.lastMessageId ?? lastAckedId,
       lastAckedId,
@@ -195,10 +245,18 @@ export class BridgeChatStore {
   touchLastMessage = action((bridgeId: string, messageId: string) => {
     const prev = this.unreadByBridge.get(bridgeId);
     const lastAckedId = prev?.lastAckedId ?? null;
+    const unread = Boolean(messageId && messageId !== lastAckedId);
+    if (
+      prev?.lastMessageId === messageId &&
+      prev.lastAckedId === lastAckedId &&
+      prev.unread === unread
+    ) {
+      return;
+    }
     this.unreadByBridge.set(bridgeId, {
       lastMessageId: messageId,
       lastAckedId,
-      unread: Boolean(messageId && messageId !== lastAckedId),
+      unread,
     });
   });
 
@@ -241,7 +299,10 @@ export class BridgeChatStore {
       if (!without.some((e) => e.id === entry.id)) {
         without.push({ ...entry, pending: false, failed: false });
       }
-      this.entriesByBridge.set(bridgeId, sortEntries(without).slice(-MAX_PER_BRIDGE));
+      this.entriesByBridge.set(
+        bridgeId,
+        sortEntries(without).slice(-MAX_PER_BRIDGE),
+      );
       this.touchLastMessage(bridgeId, entry.id);
     },
   );

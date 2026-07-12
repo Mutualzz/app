@@ -61,7 +61,7 @@ interface SpeakingDetector {
 
 const SPEAKING_ON_DELAY_MS = 50;
 const SPEAKING_OFF_DELAY_MS = 250;
-const SPEAKING_TICK_MS = 20;
+const SPEAKING_TICK_MS = 75;
 const VOICE_JOIN_TIMEOUT_MS = 30_000;
 
 type UserMix = { muted: boolean; volume: number };

@@ -113,11 +113,15 @@ export function setupIPC(): void {
 
   ipcMain.handle("system:list-processes", async (_, filterExes: string[]) => {
     try {
-      const { execSync } = await import("child_process");
+      const { exec } = await import("child_process");
+      const { promisify } = await import("util");
+      const execAsync = promisify(exec);
 
       if (process.platform === "win32") {
-        const output = execSync("tasklist /nh /fo csv", {
-          encoding: "utf-8"
+        const { stdout: output } = await execAsync("tasklist /nh /fo csv", {
+          encoding: "utf-8",
+          windowsHide: true,
+          maxBuffer: 10 * 1024 * 1024
         });
         const lines = output.split("\n").filter((l) => l.trim());
 
@@ -137,7 +141,10 @@ export function setupIPC(): void {
       }
 
       // macOS/Linux
-      const output = execSync("ps aux", { encoding: "utf-8" });
+      const { stdout: output } = await execAsync("ps aux", {
+        encoding: "utf-8",
+        maxBuffer: 10 * 1024 * 1024
+      });
       const lines = output.split("\n").slice(1);
 
       const processes = lines.map((line) => {

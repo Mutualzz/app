@@ -5,7 +5,7 @@ import { useAppStore } from "@hooks/useStores";
 import { Button, Popover, Stack, Typography } from "@mutualzz/ui-web";
 import { isElectron } from "@utils/index";
 import { observer } from "mobx-react-lite";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import type { BridgeOnlinePlayer } from "@stores/BridgeChat.store";
 
@@ -106,8 +106,10 @@ export const BridgeMemberList = observer(({ bridgeId }: Props) => {
   const { t } = useTranslation("settings");
   const app = useAppStore();
   const [copied, setCopied] = useState<"name" | "uuid" | null>(null);
-  const players = [...app.bridgeChat.playersFor(bridgeId)].sort((a, b) =>
-    a.name.localeCompare(b.name),
+  const rawPlayers = app.bridgeChat.playersFor(bridgeId);
+  const players = useMemo(
+    () => [...rawPlayers].sort((a, b) => a.name.localeCompare(b.name)),
+    [rawPlayers],
   );
 
   const handleCopied = (kind: "name" | "uuid") => {

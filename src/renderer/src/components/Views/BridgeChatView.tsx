@@ -4,8 +4,9 @@ import type { BridgeFeedEntry } from "@stores/BridgeChat.store";
 import { Input, Stack, Typography } from "@mutualzz/ui-web";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { observer } from "mobx-react-lite";
-import { Fragment, useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { Virtuoso, type VirtuosoHandle } from "react-virtuoso";
 import { BridgeChatHeader } from "./BridgeChatHeader";
 import { BridgeDateSeparator } from "./BridgeDateSeparator";
 import { BridgeMemberList } from "./BridgeMemberList";
@@ -35,20 +36,58 @@ interface Props {
   bridgeId: string;
 }
 
+type FeedRow =
+  | { type: "date"; key: string; date: Date }
+  | { type: "message"; key: string; entry: BridgeFeedEntry; header: boolean };
+
+function buildFeedRows(entries: BridgeFeedEntry[]): FeedRow[] {
+  const rows: FeedRow[] = [];
+  for (let i = 0; i < entries.length; i++) {
+    const entry = entries[i];
+    const prev = entries[i - 1];
+    const prevDay = prev ? new Date(prev.at) : null;
+    const day = new Date(entry.at);
+    const showDate =
+      Number.isFinite(day.getTime()) &&
+      (!prevDay ||
+        !Number.isFinite(prevDay.getTime()) ||
+        prevDay.toDateString() !== day.toDateString());
+
+    if (showDate) {
+      rows.push({
+        type: "date",
+        key: `date:${day.toDateString()}:${entry.id}`,
+        date: day,
+      });
+    }
+    rows.push({
+      type: "message",
+      key: entry.id,
+      entry,
+      header: shouldStartBridgeGroup(prev, entry),
+    });
+  }
+  return rows;
+}
+
 export const BridgeChatView = observer(({ bridgeId }: Props) => {
   const { t } = useTranslation("settings");
   const app = useAppStore();
   const queryClient = useQueryClient();
   const [message, setMessage] = useState("");
-  const feedRef = useRef<HTMLDivElement | null>(null);
+  const virtuosoRef = useRef<VirtuosoHandle | null>(null);
   const sendingRef = useRef(false);
   const loadingOlderRef = useRef(false);
   const stickToBottomRef = useRef(true);
+  const ackTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastAckedRef = useRef<string | null>(null);
 
   const bridgesQuery = useQuery({
     queryKey: ["me", "bridges", bridgeId],
     queryFn: () => app.rest.get<BridgeDetail>(`/@me/bridges/${bridgeId}`),
-    refetchInterval: 15_000,
+    // Gateway covers live chat/players; slow poll only for hubConnected.
+    staleTime: 30_000,
+    refetchInterval: 60_000,
   });
 
   const historyQuery = useQuery({
@@ -63,6 +102,7 @@ export const BridgeChatView = observer(({ bridgeId }: Props) => {
   const hubConnected = bridge?.hubConnected === true;
   const entries = app.bridgeChat.entriesFor(bridgeId);
   const players = app.bridgeChat.playersFor(bridgeId);
+  const rows = useMemo(() => buildFeedRows(entries), [entries]);
 
   useEffect(() => {
     app.pushComposer();
@@ -88,26 +128,46 @@ export const BridgeChatView = observer(({ bridgeId }: Props) => {
     });
   }, [bridge, bridgeId, app.bridgeChat]);
 
-  // Ack when viewing
+  // Debounced ack — patch local cache only (never invalidate all bridge queries).
   useEffect(() => {
     const last = entries.filter((e) => !e.pending && !e.failed).at(-1);
     if (!last) return;
     const state = app.bridgeChat.unreadFor(bridgeId);
-    if (state?.lastAckedId === last.id) return;
-    app.bridgeChat.markAcked(bridgeId, last.id);
-    void app.rest
-      .post(`/@me/bridges/${bridgeId}/ack`, { lastAckedId: last.id })
-      .then(() => {
-        queryClient.invalidateQueries({ queryKey: ["me", "bridges"] });
-      })
-      .catch(() => undefined);
-  }, [bridgeId, entries.length, app, queryClient]);
+    if (state?.lastAckedId === last.id || lastAckedRef.current === last.id) {
+      return;
+    }
 
-  useEffect(() => {
-    const el = feedRef.current;
-    if (!el || !stickToBottomRef.current) return;
-    el.scrollTop = el.scrollHeight;
-  }, [entries.length]);
+    if (ackTimerRef.current) clearTimeout(ackTimerRef.current);
+    ackTimerRef.current = setTimeout(() => {
+      lastAckedRef.current = last.id;
+      app.bridgeChat.markAcked(bridgeId, last.id);
+
+      const patchUnread = <T extends { lastAckedId?: string | null; unread?: boolean }>(
+        old: T | undefined,
+      ): T | undefined => {
+        if (!old) return old;
+        return { ...old, lastAckedId: last.id, unread: false };
+      };
+
+      queryClient.setQueryData<BridgeDetail>(
+        ["me", "bridges", bridgeId],
+        (old) => patchUnread(old),
+      );
+      queryClient.setQueryData<
+        { id: string; lastAckedId?: string | null; unread?: boolean }[]
+      >(["me", "bridges"], (old) =>
+        old?.map((b) => (b.id === bridgeId ? { ...b, lastAckedId: last.id, unread: false } : b)),
+      );
+
+      void app.rest
+        .post(`/@me/bridges/${bridgeId}/ack`, { lastAckedId: last.id })
+        .catch(() => undefined);
+    }, 750);
+
+    return () => {
+      if (ackTimerRef.current) clearTimeout(ackTimerRef.current);
+    };
+  }, [bridgeId, entries.length, app, queryClient]);
 
   const sendMutation = useMutation({
     mutationFn: (content: string) =>
@@ -144,17 +204,11 @@ export const BridgeChatView = observer(({ bridgeId }: Props) => {
     const oldest = entries[0];
     if (!oldest) return;
     loadingOlderRef.current = true;
-    const el = feedRef.current;
-    const prevHeight = el?.scrollHeight ?? 0;
     try {
       const older = await app.rest.get<BridgeFeedEntry[]>(
         `/@me/bridges/${bridgeId}/messages?limit=50&before=${encodeURIComponent(oldest.id)}`,
       );
       app.bridgeChat.prepend(bridgeId, older);
-      requestAnimationFrame(() => {
-        if (!el) return;
-        el.scrollTop = el.scrollHeight - prevHeight;
-      });
     } catch {
       // ignore
     } finally {
@@ -234,66 +288,43 @@ export const BridgeChatView = observer(({ bridgeId }: Props) => {
               </Typography>
             </Paper>
           )}
-          <div
-            ref={feedRef}
-            onScroll={(e) => {
-              const el = e.currentTarget;
-              stickToBottomRef.current =
-                el.scrollHeight - el.scrollTop - el.clientHeight < 80;
-              if (el.scrollTop < 40) void loadOlder();
-            }}
-            css={{
-              flex: 1,
-              minWidth: 0,
-              overflowY: "auto",
-              overflowX: "hidden",
-              display: "flex",
-              flexDirection: "column",
-              padding: "8px 8px 8px",
-            }}
-          >
-            {entries.length === 0 ? (
-              <Stack p={2.5} direction="column" spacing={1}>
-                <Typography level="title-md" fontWeight="bold">
-                  {t("minecraftBridge.liveWelcomeTitle", {
-                    name: bridge?.name ?? "",
-                  })}
-                </Typography>
-                <Typography level="body-sm" textColor="muted">
-                  {!hubConnected
-                    ? t("minecraftBridge.hubWaitingBanner")
-                    : t("minecraftBridge.liveEmpty")}
-                </Typography>
-              </Stack>
-            ) : (
-              <>
-                <div
-                  aria-hidden
-                  css={{ flex: "1 1 auto", minHeight: 0, pointerEvents: "none" }}
-                />
-                {entries.map((entry, i) => {
-                  const prev = entries[i - 1];
-                  const prevDay = prev ? new Date(prev.at) : null;
-                  const day = new Date(entry.at);
-                  const showDate =
-                    Number.isFinite(day.getTime()) &&
-                    (!prevDay ||
-                      !Number.isFinite(prevDay.getTime()) ||
-                      prevDay.toDateString() !== day.toDateString());
-
-                  return (
-                    <Fragment key={entry.id}>
-                      {showDate && <BridgeDateSeparator date={day} />}
-                      <BridgeMessage
-                        entry={entry}
-                        header={shouldStartBridgeGroup(prev, entry)}
-                      />
-                    </Fragment>
-                  );
+          {entries.length === 0 ? (
+            <Stack p={2.5} direction="column" spacing={1} flex={1}>
+              <Typography level="title-md" fontWeight="bold">
+                {t("minecraftBridge.liveWelcomeTitle", {
+                  name: bridge?.name ?? "",
                 })}
-              </>
-            )}
-          </div>
+              </Typography>
+              <Typography level="body-sm" textColor="muted">
+                {!hubConnected
+                  ? t("minecraftBridge.hubWaitingBanner")
+                  : t("minecraftBridge.liveEmpty")}
+              </Typography>
+            </Stack>
+          ) : (
+            <Virtuoso
+              ref={virtuosoRef}
+              style={{ flex: 1, minWidth: 0 }}
+              data={rows}
+              computeItemKey={(_, row) => row.key}
+              alignToBottom
+              followOutput={() => (stickToBottomRef.current ? "smooth" : false)}
+              atBottomStateChange={(atBottom) => {
+                stickToBottomRef.current = atBottom;
+              }}
+              startReached={() => {
+                void loadOlder();
+              }}
+              increaseViewportBy={{ top: 400, bottom: 200 }}
+              itemContent={(_, row) =>
+                row.type === "date" ? (
+                  <BridgeDateSeparator date={row.date} />
+                ) : (
+                  <BridgeMessage entry={row.entry} header={row.header} />
+                )
+              }
+            />
+          )}
 
           <Stack px={1.25} pb={1.25} flexShrink={0} minWidth={0}>
             <Paper
@@ -325,7 +356,12 @@ export const BridgeChatView = observer(({ bridgeId }: Props) => {
                   }
                 }}
                 disabled={sendMutation.isPending}
-                css={{ flex: 1, minWidth: 0, border: "none", background: "transparent" }}
+                css={{
+                  flex: 1,
+                  minWidth: 0,
+                  border: "none",
+                  background: "transparent",
+                }}
               />
             </Paper>
           </Stack>

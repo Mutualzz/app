@@ -30,6 +30,23 @@ export const Route = createFileRoute("/_authenticated/@me")({
 
 const ResizeBar = motion.create("div");
 
+/** Isolated so unread flips don't re-render the whole @me shell. */
+const BridgeUnreadDot = observer(() => {
+  const app = useAppStore();
+  if (!app.bridgeChat.hasAnyUnread) return null;
+  return (
+    <Stack
+      css={{
+        width: 8,
+        height: 8,
+        borderRadius: 999,
+        backgroundColor: "var(--mui-palette-primary-main, #5865f2)",
+        flexShrink: 0
+      }}
+    />
+  );
+});
+
 function RouteComponent() {
   const { t: tSpace } = useTranslation("space");
   const { t: tChat } = useTranslation("chat");
@@ -136,18 +153,7 @@ function RouteComponent() {
                 justifyContent="space-between"
               >
                 <span>{tSettings("minecraftBridge.sidebarTitle")}</span>
-                {app.bridgeChat.hasAnyUnread && !bridgesMode && (
-                  <Stack
-                    css={{
-                      width: 8,
-                      height: 8,
-                      borderRadius: 999,
-                      backgroundColor:
-                        "var(--mui-palette-primary-main, #5865f2)",
-                      flexShrink: 0
-                    }}
-                  />
-                )}
+                {!bridgesMode && <BridgeUnreadDot />}
               </Stack>
             </Button>
           </Stack>

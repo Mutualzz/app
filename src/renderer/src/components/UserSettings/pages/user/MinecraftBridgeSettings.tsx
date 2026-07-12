@@ -171,7 +171,8 @@ export const MinecraftBridgeSettings = observer(() => {
   const bridgesQuery = useQuery({
     queryKey: ["me", "bridges"],
     queryFn: () => app.rest.get<BridgeSummary[]>("/@me/bridges"),
-    refetchInterval: currentTab === "link" ? 5_000 : false,
+    // Link status also arrives via MinecraftLinkUpdate gateway event.
+    refetchInterval: currentTab === "link" ? 15_000 : false,
   });
 
   const detailQuery = useQuery({

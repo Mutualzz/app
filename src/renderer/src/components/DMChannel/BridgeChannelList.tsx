@@ -28,7 +28,9 @@ export const BridgeChannelList = observer(() => {
   const bridgesQuery = useQuery({
     queryKey: ["me", "bridges"],
     queryFn: () => app.rest.get<BridgeSummary[]>("/@me/bridges"),
-    refetchInterval: 15_000,
+    // Online count / unread come from gateway; slow poll for hubConnected.
+    staleTime: 30_000,
+    refetchInterval: 60_000,
   });
 
   const bridges = bridgesQuery.data ?? [];

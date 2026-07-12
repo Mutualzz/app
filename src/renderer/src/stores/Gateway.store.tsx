@@ -1854,6 +1854,25 @@ export class GatewayStore {
     this.app.queryClient.setQueryData(["me", "bridges", "link"], payload);
   };
 
+  private markBridgeHubConnected = (bridgeId: string, connected: boolean) => {
+    this.app.queryClient.setQueryData(
+      ["me", "bridges", bridgeId],
+      (old: { hubConnected?: boolean } | undefined) =>
+        old ? { ...old, hubConnected: connected } : old
+    );
+    this.app.queryClient.setQueryData(
+      ["me", "bridges"],
+      (
+        old:
+          | { id: string; hubConnected?: boolean; onlineCount?: number }[]
+          | undefined
+      ) =>
+        old?.map((b) =>
+          b.id === bridgeId ? { ...b, hubConnected: connected } : b
+        )
+    );
+  };
+
   private onBridgeChat = (payload: {
     id: string;
     bridgeId: string;
@@ -1866,6 +1885,7 @@ export class GatewayStore {
     avatarUrl?: string;
     at: string;
   }) => {
+    this.markBridgeHubConnected(payload.bridgeId, true);
     this.app.bridgeChat.add({ ...payload, kind: "chat" });
   };
 
@@ -1879,6 +1899,7 @@ export class GatewayStore {
     userId?: string;
     at: string;
   }) => {
+    this.markBridgeHubConnected(payload.bridgeId, true);
     this.app.bridgeChat.add({ ...payload, kind: "join" });
   };
 
@@ -1892,6 +1913,7 @@ export class GatewayStore {
     userId?: string;
     at: string;
   }) => {
+    this.markBridgeHubConnected(payload.bridgeId, true);
     this.app.bridgeChat.add({ ...payload, kind: "leave" });
   };
 
@@ -1906,6 +1928,7 @@ export class GatewayStore {
     channelName?: string;
     at: string;
   }) => {
+    this.markBridgeHubConnected(payload.bridgeId, true);
     this.app.bridgeChat.add({
       ...payload,
       kind: "voice_join",
@@ -1924,6 +1947,7 @@ export class GatewayStore {
     channelName?: string;
     at: string;
   }) => {
+    this.markBridgeHubConnected(payload.bridgeId, true);
     this.app.bridgeChat.add({
       ...payload,
       kind: "voice_leave",
@@ -1936,6 +1960,19 @@ export class GatewayStore {
     players: { uuid: string; name: string; serverId: string }[];
   }) => {
     this.app.bridgeChat.setPlayers(payload.bridgeId, payload.players);
+    this.app.queryClient.setQueryData(
+      ["me", "bridges"],
+      (
+        old:
+          | { id: string; hubConnected?: boolean; onlineCount?: number }[]
+          | undefined
+      ) =>
+        old?.map((b) =>
+          b.id === payload.bridgeId
+            ? { ...b, onlineCount: payload.players.length }
+            : b
+        )
+    );
   };
 
   private onSpaceBanAdd = (payload: APISpaceBan) => {
