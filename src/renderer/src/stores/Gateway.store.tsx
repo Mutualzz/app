@@ -730,6 +730,36 @@ export class GatewayStore {
       this.onRelationshipDelete
     );
 
+    // Minecraft bridge
+    this.dispatchHandlers.set(
+      GatewayDispatchEvents.MinecraftLinkUpdate,
+      this.onMinecraftLinkUpdate
+    );
+    this.dispatchHandlers.set(
+      GatewayDispatchEvents.BridgeChat,
+      this.onBridgeChat
+    );
+    this.dispatchHandlers.set(
+      GatewayDispatchEvents.BridgeJoin,
+      this.onBridgeJoin
+    );
+    this.dispatchHandlers.set(
+      GatewayDispatchEvents.BridgeLeave,
+      this.onBridgeLeave
+    );
+    this.dispatchHandlers.set(
+      GatewayDispatchEvents.BridgeVoiceJoin,
+      this.onBridgeVoiceJoin
+    );
+    this.dispatchHandlers.set(
+      GatewayDispatchEvents.BridgeVoiceLeave,
+      this.onBridgeVoiceLeave
+    );
+    this.dispatchHandlers.set(
+      GatewayDispatchEvents.BridgePresence,
+      this.onBridgePresence
+    );
+
     // Space Bans
     this.dispatchHandlers.set(
       GatewayDispatchEvents.SpaceBanAdd,
@@ -1811,6 +1841,101 @@ export class GatewayStore {
     payload: Pick<APIRelationship, "userId" | "otherUserId">
   ) => {
     this.app.relationships.remove(payload.userId, payload.otherUserId);
+  };
+
+  private onMinecraftLinkUpdate = (
+    payload: {
+      minecraftUuid: string;
+      minecraftName: string;
+      discordId: string | null;
+      createdAt: string | Date;
+    } | null
+  ) => {
+    this.app.queryClient.setQueryData(["me", "bridges", "link"], payload);
+  };
+
+  private onBridgeChat = (payload: {
+    id: string;
+    bridgeId: string;
+    serverId: string;
+    source: "minecraft" | "discord" | "app";
+    name: string;
+    content: string;
+    uuid?: string;
+    userId?: string;
+    avatarUrl?: string;
+    at: string;
+  }) => {
+    this.app.bridgeChat.add({ ...payload, kind: "chat" });
+  };
+
+  private onBridgeJoin = (payload: {
+    id: string;
+    bridgeId: string;
+    serverId: string;
+    source: "minecraft" | "discord" | "app";
+    name: string;
+    uuid?: string;
+    userId?: string;
+    at: string;
+  }) => {
+    this.app.bridgeChat.add({ ...payload, kind: "join" });
+  };
+
+  private onBridgeLeave = (payload: {
+    id: string;
+    bridgeId: string;
+    serverId: string;
+    source: "minecraft" | "discord" | "app";
+    name: string;
+    uuid?: string;
+    userId?: string;
+    at: string;
+  }) => {
+    this.app.bridgeChat.add({ ...payload, kind: "leave" });
+  };
+
+  private onBridgeVoiceJoin = (payload: {
+    id: string;
+    bridgeId: string;
+    serverId: string;
+    source: "minecraft" | "discord" | "app";
+    name: string;
+    uuid?: string;
+    userId?: string;
+    channelName?: string;
+    at: string;
+  }) => {
+    this.app.bridgeChat.add({
+      ...payload,
+      kind: "voice_join",
+      content: payload.channelName
+    });
+  };
+
+  private onBridgeVoiceLeave = (payload: {
+    id: string;
+    bridgeId: string;
+    serverId: string;
+    source: "minecraft" | "discord" | "app";
+    name: string;
+    uuid?: string;
+    userId?: string;
+    channelName?: string;
+    at: string;
+  }) => {
+    this.app.bridgeChat.add({
+      ...payload,
+      kind: "voice_leave",
+      content: payload.channelName
+    });
+  };
+
+  private onBridgePresence = (payload: {
+    bridgeId: string;
+    players: { uuid: string; name: string; serverId: string }[];
+  }) => {
+    this.app.bridgeChat.setPlayers(payload.bridgeId, payload.players);
   };
 
   private onSpaceBanAdd = (payload: APISpaceBan) => {

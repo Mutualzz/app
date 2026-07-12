@@ -5,9 +5,17 @@ import type { MessageGroup as MessageGroupType } from "@stores/Message.store";
 import type { Channel } from "@stores/objects/Channel";
 import { useInfiniteQuery, useMutation } from "@tanstack/react-query";
 import { observer } from "mobx-react-lite";
-import { createContext, UIEvent, useCallback, useEffect, useRef } from "react";
+import {
+  createContext,
+  Fragment,
+  UIEvent,
+  useCallback,
+  useEffect,
+  useRef
+} from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import useResizeObserver from "use-resize-observer";
+import { MessageDateSeparator } from "@components/Message/MessageDateSeparator";
 import { MessageGroup } from "@components/Message/MessageGroup";
 import { useAppStore } from "@hooks/useStores";
 import { ChannelType } from "@mutualzz/types";
@@ -245,13 +253,24 @@ export const MessageList = observer(({ channel: channelProp }: Props) => {
   }, [messageGroups, hasNextPage, fetchNextPage]);
 
   const renderGroup = useCallback(
-    (group: MessageGroupType) => (
-      <MessageGroup
-        key={`messageGroup-${group.messages[group.messages.length - 1].id}`}
-        group={group}
-      />
-    ),
-    []
+    (group: MessageGroupType, index: number) => {
+      const olderGroup = messageGroups?.[index + 1];
+      const showDateSeparator =
+        !olderGroup ||
+        group.createdAt.toDateString() !== olderGroup.createdAt.toDateString();
+
+      return (
+        <Fragment
+          key={`messageGroup-${group.messages[group.messages.length - 1].id}`}
+        >
+          <MessageGroup group={group} />
+          {showDateSeparator && (
+            <MessageDateSeparator date={group.createdAt} />
+          )}
+        </Fragment>
+      );
+    },
+    [messageGroups]
   );
 
   const loader = isFetchingNextPage ? <></> : null;

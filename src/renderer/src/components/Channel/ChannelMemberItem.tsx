@@ -19,7 +19,8 @@ export const ChannelMemberItem = observer(({ space, state }: Props) => {
   const { openContextMenu } = useMenu();
 
   const member = space.members.get(state.userId);
-  if (!member) return null;
+  const user = member?.user ?? state.user ?? app.users.get(state.userId);
+  if (!member && !user) return null;
 
   const isStale = !!state.disconnectedAt;
   const isOtherClient =
@@ -31,6 +32,7 @@ export const ChannelMemberItem = observer(({ space, state }: Props) => {
   const me = space.members.me;
   const canDrag =
     !isSubtle &&
+    !!member &&
     !!me &&
     me.hasPermission("MoveMembers") &&
     (space.ownerId === me.userId || me.canManageMember(member, "MoveMembers"));
@@ -47,36 +49,43 @@ export const ChannelMemberItem = observer(({ space, state }: Props) => {
     }
   });
 
+  const row = (
+    <div
+      ref={setNodeRef}
+      style={{
+        width: "100%",
+        visibility: isDragging ? "hidden" : "visible",
+        opacity: isSubtle ? 0.55 : 1,
+        cursor: canDrag ? (isDragging ? "grabbing" : "grab") : "pointer",
+        touchAction: canDrag ? "none" : undefined
+      }}
+      {...(canDrag ? listeners : undefined)}
+      {...(canDrag ? attributes : undefined)}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      onContextMenu={(e) => {
+        if (!member || !user) return;
+        openContextMenu(e, {
+          type: "user",
+          space: member.space,
+          member,
+          user
+        });
+      }}
+    >
+      <VoiceChannelMemberRow space={space} state={state} hovered={hovered} />
+    </div>
+  );
+
+  if (!user) return row;
+
   return (
     <UserProfilePopoutTrigger
-      user={member.user!}
+      user={user}
       member={member}
       placement="right"
     >
-      <div
-        ref={setNodeRef}
-        style={{
-          width: "100%",
-          visibility: isDragging ? "hidden" : "visible",
-          opacity: isSubtle ? 0.55 : 1,
-          cursor: canDrag ? (isDragging ? "grabbing" : "grab") : "pointer",
-          touchAction: canDrag ? "none" : undefined
-        }}
-        {...(canDrag ? listeners : undefined)}
-        {...(canDrag ? attributes : undefined)}
-        onMouseEnter={() => setHovered(true)}
-        onMouseLeave={() => setHovered(false)}
-        onContextMenu={(e) =>
-          openContextMenu(e, {
-            type: "user",
-            space: member.space,
-            member,
-            user: member.user!
-          })
-        }
-      >
-        <VoiceChannelMemberRow space={space} state={state} hovered={hovered} />
-      </div>
+      {row}
     </UserProfilePopoutTrigger>
   );
 });

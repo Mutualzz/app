@@ -37,6 +37,7 @@ import { ReadStateStore } from "@stores/ReadState.store";
 import { TypingStore } from "@stores/Typing.store";
 import type { Message } from "@stores/objects/Message";
 import { PostStore } from "@stores/Post.store";
+import { BridgeChatStore } from "@stores/BridgeChat.store";
 
 const prefersDark = usePrefersDark();
 
@@ -63,6 +64,7 @@ export class AppStore {
   users = new UserStore(this);
   profiles = new ProfileStore(this);
   posts = new PostStore(this);
+  bridgeChat = new BridgeChatStore();
   updater: UpdaterStore | null = null;
   settings: AccountSettingsStore | null = null;
   mode: AppMode | null = null;

@@ -11,11 +11,17 @@ import { UserBar } from "@components/User/UserBar";
 import { motion } from "motion/react";
 import { dynamicElevation } from "@mutualzz/ui-core";
 import { DMChannelList } from "@components/DMChannel/DMChannelList";
+import { BridgeChannelList } from "@components/DMChannel/BridgeChannelList";
 import { Button } from "@components/Button";
 import { observer } from "mobx-react-lite";
 import { switchMode } from "@utils/index";
 import { Paper } from "@components/Paper";
-import { PlanetIcon, ScribbleIcon, UsersIcon } from "@phosphor-icons/react";
+import {
+  CubeIcon,
+  PlanetIcon,
+  ScribbleIcon,
+  UsersIcon
+} from "@phosphor-icons/react";
 import { useTranslation } from "react-i18next";
 
 export const Route = createFileRoute("/_authenticated/@me")({
@@ -27,10 +33,14 @@ const ResizeBar = motion.create("div");
 function RouteComponent() {
   const { t: tSpace } = useTranslation("space");
   const { t: tChat } = useTranslation("chat");
+  const { t: tSettings } = useTranslation("settings");
   const app = useAppStore();
   const navigate = useNavigate();
-  const { href, pathname } = useLocation();
+  const { pathname } = useLocation();
   const { theme } = useTheme();
+
+  const bridgesMode = pathname.startsWith("/@me/bridges");
+  const friendsMode = pathname.includes("/friends");
 
   useEffect(() => {
     if (app.mode !== "@me") app.setMode("@me");
@@ -91,13 +101,57 @@ function RouteComponent() {
               fullWidth
               startDecorator={<UsersIcon weight="fill" />}
               horizontalAlign="left"
-              variant={href.includes("friends") ? "soft" : "plain"}
+              variant={friendsMode ? "soft" : "plain"}
               onClick={() => navigate({ to: "/@me/friends" })}
             >
               {tChat("friends.title")}
             </Button>
+            <Button
+              fullWidth
+              startDecorator={<CubeIcon weight="fill" />}
+              horizontalAlign="left"
+              variant={bridgesMode ? "soft" : "plain"}
+              onClick={() => {
+                if (bridgesMode) {
+                  const preferredDM =
+                    app.channels.getMostRecentChannelForSpace("@me") ??
+                    app.channels.dms[0];
+                  if (preferredDM) {
+                    navigate({
+                      to: "/@me/$channelId",
+                      params: { channelId: preferredDM.id }
+                    });
+                    return;
+                  }
+                  navigate({ to: "/@me" });
+                  return;
+                }
+                navigate({ to: "/@me/bridges" });
+              }}
+            >
+              <Stack
+                direction="row"
+                width="100%"
+                alignItems="center"
+                justifyContent="space-between"
+              >
+                <span>{tSettings("minecraftBridge.sidebarTitle")}</span>
+                {app.bridgeChat.hasAnyUnread && !bridgesMode && (
+                  <Stack
+                    css={{
+                      width: 8,
+                      height: 8,
+                      borderRadius: 999,
+                      backgroundColor:
+                        "var(--mui-palette-primary-main, #5865f2)",
+                      flexShrink: 0
+                    }}
+                  />
+                )}
+              </Stack>
+            </Button>
           </Stack>
-          <DMChannelList />
+          {bridgesMode ? <BridgeChannelList /> : <DMChannelList />}
         </Stack>
         <UserBar />
         <ResizeBar

@@ -3,6 +3,7 @@ import { Paper, Stack, Typography, useTheme } from "@mutualzz/ui-web";
 import { MessageList } from "@components/Message/MessageList";
 import { MessageInput } from "@components/Message/MessageInput";
 import { VoiceChannelHeader } from "@components/Channel/VoiceChannelHeader";
+import { VoiceMinecraftBadge } from "@components/Channel/VoiceChannelMemberRow";
 import { useAppStore } from "@hooks/useStores";
 import { observer } from "mobx-react-lite";
 import { motion } from "motion/react";
@@ -303,10 +304,34 @@ export const VoiceChannelView = observer(
       ? voiceStates.find((state) => state.userId === selectedTile.userId)
       : undefined;
 
+    const selfVoiceState = app.account?.id
+      ? voiceStates.find((state) => state.userId === app.account?.id)
+      : undefined;
+    const selfOnMinecraft = selfVoiceState?.client === "minecraft";
+
     if (!channel.spaceId) return null;
 
     return (
       <Stack flex={1}>
+        {selfOnMinecraft && (
+          <Paper
+            px={2}
+            py={1}
+            mx={2}
+            mt={1}
+            borderRadius={8}
+            variant="soft"
+            color="neutral"
+            direction="row"
+            alignItems="center"
+            spacing={1}
+          >
+            <VoiceMinecraftBadge />
+            <Typography level="label-sm" textColor="muted">
+              {t("voice.controls.audioInMinecraft")}
+            </Typography>
+          </Paper>
+        )}
         <Stack
           flex={1}
           direction="row"
@@ -493,6 +518,16 @@ export const VoiceChannelView = observer(
                           user={tile.user}
                           size={tileSize.avatar}
                         />
+                      )}
+                      {state.client === "minecraft" && !isScreen && (
+                        <Stack
+                          position="absolute"
+                          top={8}
+                          right={8}
+                          zIndex={1}
+                        >
+                          <VoiceMinecraftBadge />
+                        </Stack>
                       )}
                       {hovered && (
                         <Paper

@@ -5,7 +5,7 @@ import type { ColorLike } from "@mutualzz/ui-core";
 import { IconSlot, Stack, Typography, useTheme } from "@mutualzz/ui-web";
 import type { Space } from "@stores/objects/Space";
 import type { VoiceState } from "@stores/objects/VoiceState.ts";
-import { MicrophoneSlashIcon, VideoCameraIcon } from "@phosphor-icons/react";
+import { MicrophoneSlashIcon, VideoCameraIcon, CubeIcon } from "@phosphor-icons/react";
 import { HeadphonesOffIcon } from "../icons/HeadphonesOffIcon";
 import { Tooltip } from "@components/Tooltip";
 import { useTranslation } from "react-i18next";
@@ -19,6 +19,17 @@ interface Props {
   hovered?: boolean;
 }
 
+export const VoiceMinecraftBadge = observer(() => {
+  const { t } = useTranslation("chat");
+  return (
+    <Tooltip content={t("voice.controls.connectedViaMinecraft")}>
+      <IconSlot size={STATUS_ICON_SIZE}>
+        <CubeIcon weight="fill" />
+      </IconSlot>
+    </Tooltip>
+  );
+});
+
 export const VoiceChannelMemberRow = observer(
   ({ space, state, hovered = false }: Props) => {
     const app = useAppStore();
@@ -26,14 +37,17 @@ export const VoiceChannelMemberRow = observer(
     const { t } = useTranslation("chat");
 
     const member = space.members.get(state.userId);
-    if (!member) return null;
+    const user = member?.user ?? state.user ?? app.users.get(state.userId);
+    if (!member && !user) return null;
+
+    const displayId = member?.id ?? state.userId;
 
     const videoOn =
       app.account?.id === state.userId
         ? !!app.voice.getLocalCameraStream()
-        : !!app.voice.getCameraStreamForUser(member.id);
+        : !!app.voice.getCameraStreamForUser(displayId);
 
-    const screenOn = app.voice.isUserScreenSharing(member.id);
+    const screenOn = app.voice.isUserScreenSharing(displayId);
 
     const isStale = !!state.disconnectedAt;
     const isOtherClient =
@@ -44,12 +58,15 @@ export const VoiceChannelMemberRow = observer(
 
     const nameColor: ColorLike = isSubtle
       ? "#99aab5"
-      : ((member.highestRole?.color as ColorLike) ??
+      : ((member?.highestRole?.color as ColorLike) ??
         (hovered ? theme.typography.colors.primary : "#99aab5"));
 
     const speaking =
-      app.voice.isUserSpeaking(member.id) &&
+      app.voice.isUserSpeaking(displayId) &&
       !(state.userId === app.account?.id && app.voice.effectiveSelfMute);
+
+    const displayName =
+      member?.displayName ?? user?.displayName ?? t("deletedUser");
 
     return (
       <Paper
@@ -65,9 +82,15 @@ export const VoiceChannelMemberRow = observer(
           opacity: isSubtle ? 0.55 : 1
         }}
       >
-        <Stack direction="row" alignItems="center" spacing={1.75} flex={1} minWidth={0}>
+        <Stack
+          direction="row"
+          alignItems="center"
+          spacing={1.75}
+          flex={1}
+          minWidth={0}
+        >
           <UserAvatar
-            user={member.user}
+            user={user}
             member={member}
             size={24}
             speaking={speaking}
@@ -80,10 +103,11 @@ export const VoiceChannelMemberRow = observer(
             level="label-sm"
             textColor={nameColor}
           >
-            {member.displayName}
+            {displayName}
           </Typography>
         </Stack>
         <Stack direction="row" alignItems="center" spacing={1.75}>
+          {state.client === "minecraft" && <VoiceMinecraftBadge />}
           {screenOn && (
             <Paper
               variant="solid"

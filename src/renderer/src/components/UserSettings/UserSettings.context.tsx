@@ -12,7 +12,8 @@ export type UserSettingsPage =
   | "appearance"
   | "voice_and_video"
   | "expressions"
-  | "notifications";
+  | "notifications"
+  | "minecraft-bridge";
 export type UserSettingsCategories = "user-settings" | "app-settings";
 
 interface UserSettingsContextProps {

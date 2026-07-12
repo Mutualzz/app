@@ -50,6 +50,8 @@ export class MessageStore {
           lastMessage.author?.id === message.author?.id &&
           lastMessage.type === message.type &&
           message.type === MessageType.Default &&
+          lastMessage.createdAt.toDateString() ===
+            message.createdAt.toDateString() &&
           lastMessage.createdAt.getTime() - message.createdAt.getTime() <=
             10 * 60 * 1000
         ) {

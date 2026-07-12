@@ -39,9 +39,11 @@ import { Route as AuthenticatedSpacesSpaceIdRouteRouteImport } from "./routes/_a
 import { Route as AuthenticatedAtmeChannelIdRouteRouteImport } from "./routes/_authenticated/@me/$channelId/route"
 import { Route as AuthenticatedSupportTicketsIndexRouteImport } from "./routes/_authenticated/support/tickets/index"
 import { Route as AuthenticatedStaffReportsIndexRouteImport } from "./routes/_authenticated/staff/reports/index"
+import { Route as AuthenticatedAtmeBridgesIndexRouteImport } from "./routes/_authenticated/@me/bridges/index"
 import { Route as AuthenticatedSupportTicketsTicketIdRouteImport } from "./routes/_authenticated/support/tickets/$ticketId"
 import { Route as AuthenticatedStaffReportsReportIdRouteImport } from "./routes/_authenticated/staff/reports/$reportId"
 import { Route as AuthenticatedFeedPostsPostIdRouteImport } from "./routes/_authenticated/feed/posts/$postId"
+import { Route as AuthenticatedAtmeBridgesBridgeIdRouteImport } from "./routes/_authenticated/@me/bridges/$bridgeId"
 import { Route as AuthenticatedStaffUsersUserIdRouteRouteImport } from "./routes/_authenticated/staff/users/$userId/route"
 import { Route as AuthenticatedSpacesSpaceIdChannelIdRouteRouteImport } from "./routes/_authenticated/spaces/$spaceId/$channelId/route"
 
@@ -207,6 +209,12 @@ const AuthenticatedStaffReportsIndexRoute =
     path: "/reports/",
     getParentRoute: () => AuthenticatedStaffRouteRoute,
   } as any)
+const AuthenticatedAtmeBridgesIndexRoute =
+  AuthenticatedAtmeBridgesIndexRouteImport.update({
+    id: "/bridges/",
+    path: "/bridges/",
+    getParentRoute: () => AuthenticatedAtmeRouteRoute,
+  } as any)
 const AuthenticatedSupportTicketsTicketIdRoute =
   AuthenticatedSupportTicketsTicketIdRouteImport.update({
     id: "/support/tickets/$ticketId",
@@ -224,6 +232,12 @@ const AuthenticatedFeedPostsPostIdRoute =
     id: "/posts/$postId",
     path: "/posts/$postId",
     getParentRoute: () => AuthenticatedFeedRouteRoute,
+  } as any)
+const AuthenticatedAtmeBridgesBridgeIdRoute =
+  AuthenticatedAtmeBridgesBridgeIdRouteImport.update({
+    id: "/bridges/$bridgeId",
+    path: "/bridges/$bridgeId",
+    getParentRoute: () => AuthenticatedAtmeRouteRoute,
   } as any)
 const AuthenticatedStaffUsersUserIdRouteRoute =
   AuthenticatedStaffUsersUserIdRouteRouteImport.update({
@@ -268,9 +282,11 @@ export interface FileRoutesByFullPath {
   "/staff/": typeof AuthenticatedStaffIndexRoute
   "/spaces/$spaceId/$channelId": typeof AuthenticatedSpacesSpaceIdChannelIdRouteRoute
   "/staff/users/$userId": typeof AuthenticatedStaffUsersUserIdRouteRoute
+  "/@me/bridges/$bridgeId": typeof AuthenticatedAtmeBridgesBridgeIdRoute
   "/feed/posts/$postId": typeof AuthenticatedFeedPostsPostIdRoute
   "/staff/reports/$reportId": typeof AuthenticatedStaffReportsReportIdRoute
   "/support/tickets/$ticketId": typeof AuthenticatedSupportTicketsTicketIdRoute
+  "/@me/bridges/": typeof AuthenticatedAtmeBridgesIndexRoute
   "/staff/reports/": typeof AuthenticatedStaffReportsIndexRoute
   "/support/tickets/": typeof AuthenticatedSupportTicketsIndexRoute
 }
@@ -302,9 +318,11 @@ export interface FileRoutesByTo {
   "/staff": typeof AuthenticatedStaffIndexRoute
   "/spaces/$spaceId/$channelId": typeof AuthenticatedSpacesSpaceIdChannelIdRouteRoute
   "/staff/users/$userId": typeof AuthenticatedStaffUsersUserIdRouteRoute
+  "/@me/bridges/$bridgeId": typeof AuthenticatedAtmeBridgesBridgeIdRoute
   "/feed/posts/$postId": typeof AuthenticatedFeedPostsPostIdRoute
   "/staff/reports/$reportId": typeof AuthenticatedStaffReportsReportIdRoute
   "/support/tickets/$ticketId": typeof AuthenticatedSupportTicketsTicketIdRoute
+  "/@me/bridges": typeof AuthenticatedAtmeBridgesIndexRoute
   "/staff/reports": typeof AuthenticatedStaffReportsIndexRoute
   "/support/tickets": typeof AuthenticatedSupportTicketsIndexRoute
 }
@@ -340,9 +358,11 @@ export interface FileRoutesById {
   "/_authenticated/staff/": typeof AuthenticatedStaffIndexRoute
   "/_authenticated/spaces/$spaceId/$channelId": typeof AuthenticatedSpacesSpaceIdChannelIdRouteRoute
   "/_authenticated/staff/users/$userId": typeof AuthenticatedStaffUsersUserIdRouteRoute
+  "/_authenticated/@me/bridges/$bridgeId": typeof AuthenticatedAtmeBridgesBridgeIdRoute
   "/_authenticated/feed/posts/$postId": typeof AuthenticatedFeedPostsPostIdRoute
   "/_authenticated/staff/reports/$reportId": typeof AuthenticatedStaffReportsReportIdRoute
   "/_authenticated/support/tickets/$ticketId": typeof AuthenticatedSupportTicketsTicketIdRoute
+  "/_authenticated/@me/bridges/": typeof AuthenticatedAtmeBridgesIndexRoute
   "/_authenticated/staff/reports/": typeof AuthenticatedStaffReportsIndexRoute
   "/_authenticated/support/tickets/": typeof AuthenticatedSupportTicketsIndexRoute
 }
@@ -378,9 +398,11 @@ export interface FileRouteTypes {
     | "/staff/"
     | "/spaces/$spaceId/$channelId"
     | "/staff/users/$userId"
+    | "/@me/bridges/$bridgeId"
     | "/feed/posts/$postId"
     | "/staff/reports/$reportId"
     | "/support/tickets/$ticketId"
+    | "/@me/bridges/"
     | "/staff/reports/"
     | "/support/tickets/"
   fileRoutesByTo: FileRoutesByTo
@@ -412,9 +434,11 @@ export interface FileRouteTypes {
     | "/staff"
     | "/spaces/$spaceId/$channelId"
     | "/staff/users/$userId"
+    | "/@me/bridges/$bridgeId"
     | "/feed/posts/$postId"
     | "/staff/reports/$reportId"
     | "/support/tickets/$ticketId"
+    | "/@me/bridges"
     | "/staff/reports"
     | "/support/tickets"
   id:
@@ -449,9 +473,11 @@ export interface FileRouteTypes {
     | "/_authenticated/staff/"
     | "/_authenticated/spaces/$spaceId/$channelId"
     | "/_authenticated/staff/users/$userId"
+    | "/_authenticated/@me/bridges/$bridgeId"
     | "/_authenticated/feed/posts/$postId"
     | "/_authenticated/staff/reports/$reportId"
     | "/_authenticated/support/tickets/$ticketId"
+    | "/_authenticated/@me/bridges/"
     | "/_authenticated/staff/reports/"
     | "/_authenticated/support/tickets/"
   fileRoutesById: FileRoutesById
@@ -682,6 +708,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof AuthenticatedStaffReportsIndexRouteImport
       parentRoute: typeof AuthenticatedStaffRouteRoute
     }
+    "/_authenticated/@me/bridges/": {
+      id: "/_authenticated/@me/bridges/"
+      path: "/bridges"
+      fullPath: "/@me/bridges/"
+      preLoaderRoute: typeof AuthenticatedAtmeBridgesIndexRouteImport
+      parentRoute: typeof AuthenticatedAtmeRouteRoute
+    }
     "/_authenticated/support/tickets/$ticketId": {
       id: "/_authenticated/support/tickets/$ticketId"
       path: "/support/tickets/$ticketId"
@@ -703,6 +736,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof AuthenticatedFeedPostsPostIdRouteImport
       parentRoute: typeof AuthenticatedFeedRouteRoute
     }
+    "/_authenticated/@me/bridges/$bridgeId": {
+      id: "/_authenticated/@me/bridges/$bridgeId"
+      path: "/bridges/$bridgeId"
+      fullPath: "/@me/bridges/$bridgeId"
+      preLoaderRoute: typeof AuthenticatedAtmeBridgesBridgeIdRouteImport
+      parentRoute: typeof AuthenticatedAtmeRouteRoute
+    }
     "/_authenticated/staff/users/$userId": {
       id: "/_authenticated/staff/users/$userId"
       path: "/users/$userId"
@@ -723,12 +763,17 @@ declare module "@tanstack/react-router" {
 interface AuthenticatedAtmeRouteRouteChildren {
   AuthenticatedAtmeChannelIdRouteRoute: typeof AuthenticatedAtmeChannelIdRouteRoute
   AuthenticatedAtmeFriendsRoute: typeof AuthenticatedAtmeFriendsRoute
+  AuthenticatedAtmeBridgesBridgeIdRoute: typeof AuthenticatedAtmeBridgesBridgeIdRoute
+  AuthenticatedAtmeBridgesIndexRoute: typeof AuthenticatedAtmeBridgesIndexRoute
 }
 
 const AuthenticatedAtmeRouteRouteChildren: AuthenticatedAtmeRouteRouteChildren =
   {
     AuthenticatedAtmeChannelIdRouteRoute: AuthenticatedAtmeChannelIdRouteRoute,
     AuthenticatedAtmeFriendsRoute: AuthenticatedAtmeFriendsRoute,
+    AuthenticatedAtmeBridgesBridgeIdRoute:
+      AuthenticatedAtmeBridgesBridgeIdRoute,
+    AuthenticatedAtmeBridgesIndexRoute: AuthenticatedAtmeBridgesIndexRoute,
   }
 
 const AuthenticatedAtmeRouteRouteWithChildren =

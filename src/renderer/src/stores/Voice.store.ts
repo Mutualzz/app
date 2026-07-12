@@ -32,6 +32,7 @@ import {
   type ScreenCaptureSource
 } from "@utils/screenCapture.utils";
 import i18n from "@renderer/i18n";
+import { isElectron } from "@utils/index";
 
 export type VoiceConnectionStatus =
   | "idle"
@@ -304,14 +305,11 @@ class MediasoupSession {
 
   private applyMicTransmission() {
     const selfId = this.app.account?.id;
-    const selfSpeaking = selfId
-      ? (this.speakingDetectors.get(selfId)?.speaking ?? false)
-      : false;
 
+    // Voice-activity: always send when unmuted (Opus DTX covers silence). VAD is
+    // UI-only. Gating RTP on VAD + zeroRtpOnPause broke web↔Electron hearability.
     const inputOpen =
-      this.inputMode === "voice_activity"
-        ? selfSpeaking
-        : this.pushToTalkPressed;
+      this.inputMode === "voice_activity" ? true : this.pushToTalkPressed;
 
     const shouldTransmit = !this.isMuted && !this.spaceMuted && inputOpen;
 
@@ -323,7 +321,7 @@ class MediasoupSession {
 
     if (this.micTrack) {
       try {
-        this.micTrack.enabled = !this.isMuted && !this.spaceMuted;
+        this.micTrack.enabled = shouldTransmit;
       } catch {}
     }
 
@@ -844,7 +842,10 @@ class MediasoupSession {
 
     const userId = this.app.account?.id;
     if (userId) {
-      const localStream = new MediaStream([audioTrack]);
+      // Clone for VAD — sharing the same track with Web Audio + RTCPeerConnection
+      // can silence the PeerConnection uplink on Electron/Chromium.
+      const vadTrack = audioTrack.clone();
+      const localStream = new MediaStream([vadTrack]);
       this.startSpeakingDetection(localStream, userId);
     }
     this.micProducer = await this.sendTransport.produce({
@@ -929,6 +930,17 @@ class MediasoupSession {
 
     try {
       detector.analyser.disconnect();
+    } catch {}
+
+    // Stop cloned VAD tracks (not the PeerConnection mic track).
+    try {
+      const stream = (detector.sourceNode as MediaStreamAudioSourceNode)
+        .mediaStream;
+      if (stream) {
+        for (const track of stream.getAudioTracks()) {
+          track.stop();
+        }
+      }
     } catch {}
 
     if (detector.speaking) {
@@ -1569,6 +1581,7 @@ export class VoiceStore {
         if (
           this.channelSwitchInProgress &&
           (reason === "superseded" ||
+            reason === "Superseded by Minecraft voice" ||
             reason === "Moved to another voice channel" ||
             reason === i18n.t("voice.errors.movedChannel", { ns: "chat" }) ||
             reason === "teardown")
@@ -1577,7 +1590,8 @@ export class VoiceStore {
         }
 
         switch (reason) {
-          case "superseded": {
+          case "superseded":
+          case "Superseded by Minecraft voice": {
             reason = i18n.t("voice.errors.differentDevice", { ns: "chat" });
             break;
           }
@@ -1588,8 +1602,14 @@ export class VoiceStore {
         }
 
         const target = this.currentVoiceTarget;
+        const reasonLower = String(reason).toLowerCase();
         const isSuperseded =
-          reason === i18n.t("voice.errors.differentDevice", { ns: "chat" });
+          reason === i18n.t("voice.errors.differentDevice", { ns: "chat" }) ||
+          reasonLower.includes("superseded") ||
+          reasonLower.includes("minecraft") ||
+          ev?.code === 4000;
+        // Never auto-rejoin when another client (esp. Minecraft) took the slot —
+        // that fight steals the MC mediasoup peer and breaks /mzvoice.
         const canAutoRejoin =
           !isSuperseded &&
           this.connectionStatus === "connected" &&
@@ -1899,6 +1919,18 @@ export class VoiceStore {
   onGatewayReconnected() {
     if (!this.currentVoiceTarget) return;
 
+    // If Redis says we're on Minecraft voice, don't steal that session back.
+    const selfId = this.app.account?.id;
+    const selfState = selfId ? this.app.voiceStates.get(selfId) : null;
+    if (selfState?.client === "minecraft" && selfState.channelId) {
+      runInAction(() => {
+        this.connectionStatus = "idle";
+        this.currentVoiceTarget = null;
+      });
+      this.stopKeepAlive();
+      return;
+    }
+
     if (this.connectionStatus === "connected") {
       this.startKeepAlive();
       void this.sendVoiceStateUpdate();
@@ -1977,6 +2009,34 @@ export class VoiceStore {
 
     const channelId = state.channelId === "null" ? null : state.channelId;
     const accountId = this.app.account?.id;
+
+    // Minecraft owns this user's SFU slot — drop any app RTC so we don't steal it back.
+    if (
+      accountId &&
+      state.userId === accountId &&
+      state.client === "minecraft" &&
+      channelId
+    ) {
+      if (
+        this.currentVoiceTarget ||
+        this.connectionStatus === "connected" ||
+        this.connectionStatus === "connecting"
+      ) {
+        try {
+          this.abortAndTeardown();
+          this.stopKeepAlive();
+        } catch {
+          // ignore
+        }
+        runInAction(() => {
+          this.connectionStatus = "idle";
+          this.connectionError = null;
+          this.currentVoiceTarget = null;
+          this.cameraEnabled = false;
+          this.screenShareEnabled = false;
+        });
+      }
+    }
 
     if (
       !channelId &&
@@ -2910,6 +2970,7 @@ export class VoiceStore {
         channelId,
         selfMute: this.spaceMute ? true : this.selfMute,
         selfDeaf: this.spaceDeaf ? true : this.selfDeaf,
+        client: isElectron ? "desktop" : "web",
         ...(options?.refreshRtc ? { refreshRtc: true } : {}),
       }
     });
