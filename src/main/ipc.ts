@@ -14,6 +14,17 @@ import {
   getScreenCaptureAccessStatus,
   listDesktopCaptureSources
 } from "./displayMedia";
+import {
+  getCachedProcesses,
+  listProcessesCached,
+  refreshProcessCache,
+  startProcessCache
+} from "./processCache";
+import {
+  getRpcActivities,
+  setRpcUpdatedListener,
+  startRpc
+} from "./rpc";
 
 const SERVICE = "mutualzz";
 const ACCOUNT = "default";
@@ -49,6 +60,14 @@ function setWindowsBadge(
 }
 
 export function setupIPC(): void {
+  startProcessCache();
+  setRpcUpdatedListener(() => {
+    for (const win of BrowserWindow.getAllWindows()) {
+      if (!win.isDestroyed()) win.webContents.send("presence:rpc-updated");
+    }
+  });
+  void startRpc();
+
   ipcMain.handle("app:get-startup-deep-link", () => {
     const url = pendingStartupDeepLink;
     pendingStartupDeepLink = null;
@@ -111,59 +130,30 @@ export function setupIPC(): void {
     };
   });
 
-  ipcMain.handle("system:list-processes", async (_, filterExes: string[]) => {
+  ipcMain.handle("system:list-processes", async (_, filterExes?: string[]) => {
     try {
-      const { exec } = await import("child_process");
-      const { promisify } = await import("util");
-      const execAsync = promisify(exec);
-
-      if (process.platform === "win32") {
-        const { stdout: output } = await execAsync("tasklist /nh /fo csv", {
-          encoding: "utf-8",
-          windowsHide: true,
-          maxBuffer: 10 * 1024 * 1024
-        });
-        const lines = output.split("\n").filter((l) => l.trim());
-
-        const processes = lines.map((line) => {
-          const parts = line.split('","');
-          return {
-            name: parts[0]?.replace(/"/g, "").trim() || "",
-            pid: parseInt(parts[1]?.replace(/"/g, "") || "0")
-          };
-        });
-
-        return processes.filter((p) =>
-          filterExes.some((exe) =>
-            p.name.toLowerCase().includes(exe.toLowerCase())
-          )
-        );
-      }
-
-      // macOS/Linux
-      const { stdout: output } = await execAsync("ps aux", {
-        encoding: "utf-8",
-        maxBuffer: 10 * 1024 * 1024
-      });
-      const lines = output.split("\n").slice(1);
-
-      const processes = lines.map((line) => {
-        const parts = line.split(/\s+/);
-        return {
-          pid: parseInt(parts[1]),
-          name: parts[10] || ""
-        };
-      });
-
-      return processes.filter((p) =>
-        filterExes.some((exe) =>
-          p.name.toLowerCase().includes(exe.toLowerCase())
-        )
-      );
+      return await listProcessesCached(filterExes);
     } catch (err) {
       console.error("Failed to list processes:", err);
       return [];
     }
+  });
+
+  ipcMain.handle("system:get-cached-processes", (_, filterExes?: string[]) => {
+    return getCachedProcesses(filterExes);
+  });
+
+  ipcMain.handle("system:refresh-processes", async () => {
+    try {
+      return await refreshProcessCache();
+    } catch (err) {
+      console.error("Failed to refresh processes:", err);
+      return getCachedProcesses();
+    }
+  });
+
+  ipcMain.handle("presence:get-rpc-activities", () => {
+    return getRpcActivities();
   });
 
   // Shell/External

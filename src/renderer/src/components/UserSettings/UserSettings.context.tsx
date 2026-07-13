@@ -13,6 +13,8 @@ export type UserSettingsPage =
   | "voice_and_video"
   | "expressions"
   | "notifications"
+  | "registered-games"
+  | "connections"
   | "minecraft-bridge";
 export type UserSettingsCategories = "user-settings" | "app-settings";
 

@@ -123,7 +123,6 @@ export const DMChannelItem = observer(({ channel }: Props) => {
             user={recipient}
             size={AVATAR_SIZE}
             badge
-            showInvisible
             showOffline
             typing={
               recipient

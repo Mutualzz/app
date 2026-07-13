@@ -1,4 +1,5 @@
 import { ProfileActivityBlockView } from "@components/Profile/blocks/ProfileActivityBlockView";
+import { ProfileConnectionsBlockView } from "@components/Profile/blocks/ProfileConnectionsBlockView";
 import { ProfileDividerBlockView } from "@components/Profile/blocks/ProfileDividerBlockView";
 import { ProfileHeaderBlockView } from "@components/Profile/blocks/ProfileHeaderBlockView";
 import { ProfileImageBlockView } from "@components/Profile/blocks/ProfileImageBlockView";
@@ -30,6 +31,7 @@ const INTERACTIVE_BLOCK_TYPES = new Set([
   "header",
   "music",
   "links",
+  "connections",
   "quote"
 ]);
 
@@ -106,6 +108,10 @@ export const ProfileBlockRenderer = observer(
           return <ProfileActivityBlockView block={block} userId={user.id} />;
         case "roles":
           return <ProfileRolesBlockView block={block} userId={user.id} />;
+        case "connections":
+          return (
+            <ProfileConnectionsBlockView block={block} userId={user.id} />
+          );
         case "mutual":
           return <ProfileMutualBlockView block={block} userId={user.id} />;
         case "divider":

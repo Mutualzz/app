@@ -1,34 +1,23 @@
 import type { PresenceActivity, PresenceStatus } from "@mutualzz/types";
+import {
+  findMatchingProcess,
+  getCatalogExeFilter,
+  matchGamesFromProcesses
+} from "./gameCatalog";
+import { isGameShared, touchGamePlayed } from "./gamePreferences";
 
-interface GameCatalogEntry {
-  exes: string[];
-  name: string;
-  id: string;
-}
-
-// TODO: hardcoded for now, move to a user-configurable source later
-const GAME_CATALOG: GameCatalogEntry[] = [
-  { exes: ["cs2.exe"], name: "Counter-Strike 2", id: "counter-strike-2" },
-  { exes: ["valorant.exe"], name: "VALORANT", id: "valorant" },
-  {
-    // Launcher alone is not "playing" — only the game process.
-    exes: ["minecraft.exe"],
-    name: "Minecraft",
-    id: "minecraft"
-  },
-  {
-    exes: ["warframe.x64.exe", "warframe.exe"],
-    name: "Warframe",
-    id: "warframe"
-  }
-];
-
-function matchGames(processNames: string[]): GameCatalogEntry[] {
-  const lowerSet = new Set(processNames.map((p) => p.toLowerCase()));
-  return GAME_CATALOG.filter((entry) =>
-    entry.exes.some((exe) => lowerSet.has(exe))
-  );
-}
+export type { GameCatalogEntry, CustomGameCatalogEntry } from "./gameCatalog";
+export {
+  getGameCatalog,
+  getOfficialGameCatalog,
+  addCustomGame,
+  removeCustomGame,
+  renameCustomGame,
+  listCustomGames,
+  ensureRemoteGameCatalog,
+  BUILTIN_GAME_CATALOG,
+  FALLBACK_GAME_CATALOG
+} from "./gameCatalog";
 
 export interface PresenceUpdateDraft {
   status: PresenceStatus;
@@ -40,21 +29,38 @@ export async function buildDesktopPresenceFromProcesses(): Promise<PresenceUpdat
   if (!window.api) return { status: "online", device: "web", activities: [] };
 
   try {
-    const gameExes = GAME_CATALOG.flatMap((g) => g.exes);
-    const processes = await window.api.system.listProcesses(gameExes);
-
-    const processNames = processes.map((proc) => proc.name);
-    const games = matchGames(processNames);
-
-    if (!games.length)
+    const gameExes = getCatalogExeFilter();
+    if (!gameExes.length) {
       return { status: "online", device: "desktop", activities: [] };
+    }
+
+    const processes = await window.api.system.listProcesses(gameExes);
+    const matched = matchGamesFromProcesses(processes);
+    if (matched.length) {
+      touchGamePlayed(
+        matched.map((game) => {
+          const proc = findMatchingProcess(game, processes);
+          return {
+            id: game.id,
+            exePath: proc?.path ?? null
+          };
+        })
+      );
+    }
+
+    const games = matched.filter((game) => isGameShared(game.id));
+
+    if (!games.length) {
+      return { status: "online", device: "desktop", activities: [] };
+    }
 
     return {
       status: "online",
       device: "desktop",
       activities: games.map((game) => ({
-        type: "playing",
-        name: game.name
+        type: "playing" as const,
+        name: game.name,
+        applicationId: game.id
       }))
     };
   } catch {

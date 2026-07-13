@@ -8,6 +8,8 @@ import { trayManager } from "./tray";
 import { setupCodecIPC } from "./codec";
 import { initUpdaterHandlers } from "./updater";
 import { setupDisplayMedia } from "./displayMedia";
+import { stopProcessCache } from "./processCache";
+import { stopRpc } from "./rpc";
 
 app.setName("Mutualzz");
 
@@ -76,5 +78,7 @@ app.on("window-all-closed", () => {
 
 app.on("before-quit", () => {
   setQuitting(true);
+  stopProcessCache();
+  stopRpc();
   trayManager.destroy();
 });

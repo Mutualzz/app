@@ -86,6 +86,14 @@ export const PROFILE_BLOCK_SIZE_LIMITS: Record<
     recommendedWidth: 22,
     recommendedHeight: 10
   },
+  connections: {
+    minWidth: 12,
+    maxWidth: 72,
+    minHeight: 6,
+    maxHeight: 28,
+    recommendedWidth: 24,
+    recommendedHeight: 10
+  },
   mutual: {
     minWidth: 10,
     maxWidth: 72,
@@ -403,6 +411,8 @@ export const createDefaultBlock = (
       return clampBlock({ ...base, type: "activity", showCustomStatus: true });
     case "roles":
       return clampBlock({ ...base, type: "roles", maxRoles: 6 });
+    case "connections":
+      return clampBlock({ ...base, type: "connections" });
     case "mutual":
       return clampBlock({
         ...base,

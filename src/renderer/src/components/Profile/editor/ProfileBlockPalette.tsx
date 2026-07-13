@@ -7,6 +7,7 @@ import { useDraggable } from "@dnd-kit/core";
 import {
   ImageIcon,
   LinkIcon,
+  LinkSimpleIcon,
   MinusIcon,
   MusicNotesIcon,
   PencilSimpleIcon,
@@ -32,6 +33,7 @@ const ITEMS: {
   { type: "sticker", icon: <StickerIcon weight="fill" /> },
   { type: "music", icon: <MusicNotesIcon weight="fill" /> },
   { type: "links", icon: <LinkIcon weight="fill" /> },
+  { type: "connections", icon: <LinkSimpleIcon weight="fill" /> },
   { type: "activity", icon: <PulseIcon weight="fill" /> },
   { type: "roles", icon: <ShieldCheckIcon weight="fill" /> },
   { type: "mutual", icon: <UsersThreeIcon weight="fill" /> },

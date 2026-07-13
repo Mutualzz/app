@@ -15,8 +15,43 @@ export interface MutualzzAPI {
       family?: string;
     }>;
     listProcesses(
-      filterExes: string[]
-    ): Promise<{ name: string; pid: number }[]>;
+      filterExes?: string[]
+    ): Promise<{
+      name: string;
+      pid: number;
+      title?: string;
+      commandLine?: string;
+      path?: string;
+    }[]>;
+    getCachedProcesses(
+      filterExes?: string[]
+    ): Promise<{
+      name: string;
+      pid: number;
+      title?: string;
+      commandLine?: string;
+      path?: string;
+    }[]>;
+    refreshProcesses(): Promise<{
+      name: string;
+      pid: number;
+      title?: string;
+      commandLine?: string;
+      path?: string;
+    }[]>;
+  };
+  presence: {
+    getRpcActivities(): Promise<
+      {
+        type: "playing" | "listening";
+        name: string;
+        applicationId?: string;
+        details?: string;
+        state?: string;
+        timestamps?: { start?: number; end?: number };
+      }[]
+    >;
+    onRpcUpdated(callback: () => void): () => void;
   };
   badge: {
     set(count: number, color?: string): void;

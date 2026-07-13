@@ -37,8 +37,15 @@ const api = {
   },
   system: {
     getOsInfo: () => ipcRenderer.invoke("system:get-os-info"),
-    listProcesses: (filterExes: string[]) =>
-      ipcRenderer.invoke("system:list-processes", filterExes)
+    listProcesses: (filterExes?: string[]) =>
+      ipcRenderer.invoke("system:list-processes", filterExes ?? []),
+    getCachedProcesses: (filterExes?: string[]) =>
+      ipcRenderer.invoke("system:get-cached-processes", filterExes ?? []),
+    refreshProcesses: () => ipcRenderer.invoke("system:refresh-processes")
+  },
+  presence: {
+    getRpcActivities: () => ipcRenderer.invoke("presence:get-rpc-activities"),
+    onRpcUpdated: (callback: () => void) => on("presence:rpc-updated", callback)
   },
   badge: {
     set: (count: number, color?: string) =>

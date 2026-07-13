@@ -76,7 +76,7 @@ export const CustomStatusDisplay = observer(
     if (!showEmoji || !statusEmoji) return statusLabel;
 
     return (
-      <Stack direction="row" spacing={0.75} minWidth={0}>
+      <Stack direction="row" spacing={0.75} alignItems="center" minWidth={0}>
         <CustomStatusEmoji emoji={statusEmoji} size={emojiSize} />
         {statusLabel}
       </Stack>

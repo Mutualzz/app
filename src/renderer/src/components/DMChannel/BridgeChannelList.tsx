@@ -17,6 +17,7 @@ interface BridgeSummary {
   lastMessageId?: string | null;
   lastAckedId?: string | null;
   status?: number;
+  role?: "owner" | "member";
 }
 
 export const BridgeChannelList = observer(() => {
@@ -115,6 +116,9 @@ export const BridgeChannelList = observer(() => {
                   }}
                 >
                   {bridge.name}
+                  {bridge.role === "member"
+                    ? ` · ${t("minecraftBridge.roleMember")}`
+                    : ""}
                 </Typography>
                 <Typography level="body-xs" textColor="muted">
                   {statusLabel}

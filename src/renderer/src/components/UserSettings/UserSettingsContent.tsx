@@ -15,6 +15,8 @@ import { UserAccountSettings } from "./pages/user/UserAccountSettings";
 import { UserProfileSettings } from "./pages/user/UserProfileSettings";
 import { AppVoiceVideoSettings } from "@components/UserSettings/pages/app/AppVoiceVideoSettings";
 import { AppNotificationsSettings } from "@components/UserSettings/pages/app/AppNotificationsSettings";
+import { AppRegisteredGamesSettings } from "@components/UserSettings/pages/app/AppRegisteredGamesSettings";
+import { AppConnectionsSettings } from "@components/UserSettings/pages/app/AppConnectionsSettings";
 import { UserExpressionsSettings } from "@components/UserSettings/pages/user/expressions/UserExpressionsSettings";
 import { MinecraftBridgeSettings } from "@components/UserSettings/pages/user/MinecraftBridgeSettings";
 import { XIcon } from "@phosphor-icons/react";
@@ -108,6 +110,8 @@ export const UserSettingsContent = observer(
           {currentPage === "voice_and_video" && <AppVoiceVideoSettings />}
           {currentPage === "expressions" && <UserExpressionsSettings />}
           {currentPage === "notifications" && <AppNotificationsSettings />}
+          {currentPage === "registered-games" && <AppRegisteredGamesSettings />}
+          {currentPage === "connections" && <AppConnectionsSettings />}
           {currentPage === "minecraft-bridge" && <MinecraftBridgeSettings />}
         </Paper>
       </Stack>

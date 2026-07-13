@@ -77,7 +77,7 @@ export const MemberListItem = observer(({ member, isOwner }: Props) => {
               : false
           }
         />
-        <Stack direction="column" minWidth={0} flex={1}>
+        <Stack direction="column" minWidth={0} flex={1} spacing={0.35}>
           <Stack
             direction="row"
             alignItems="center"

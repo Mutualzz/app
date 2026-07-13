@@ -28,7 +28,9 @@ import { useNavigate } from "@tanstack/react-router";
 import {
   BellIcon,
   CubeIcon,
+  GameControllerIcon,
   LifebuoyIcon,
+  LinkSimpleIcon,
   MicrophoneIcon,
   PaletteIcon,
   PencilIcon,
@@ -61,6 +63,10 @@ const settingsPages: SettingsPages = {
       icon: <SmileyIcon weight="fill" />
     },
     {
+      label: "connections",
+      icon: <LinkSimpleIcon weight="fill" />
+    },
+    {
       label: "minecraft-bridge",
       icon: <CubeIcon weight="fill" />
     }
@@ -78,7 +84,15 @@ const settingsPages: SettingsPages = {
     {
       label: "notifications",
       icon: <BellIcon weight="fill" />
-    }
+    },
+    ...(isElectron
+      ? [
+          {
+            label: "registered-games" as const,
+            icon: <GameControllerIcon weight="fill" />
+          }
+        ]
+      : [])
   ]
 };
 
@@ -118,9 +132,7 @@ export const UserSettingsSidebar = observer(
     const pageLabel = (page: Pages) => {
       if (page.titleKey) return t(page.titleKey);
       const key =
-        settingsPageTitleKeys[
-          page.label as keyof typeof settingsPageTitleKeys
-        ];
+        settingsPageTitleKeys[page.label as keyof typeof settingsPageTitleKeys];
       return key ? t(key) : page.label;
     };
 
@@ -228,7 +240,7 @@ export const UserSettingsSidebar = observer(
             </Fragment>
           ))}
         </Stack>
-        <Stack direction="column" pb="1rem" spacing={1.25}>
+        <Stack direction="column" mb="1rem">
           <Button
             color="info"
             variant="plain"
@@ -260,7 +272,12 @@ export const UserSettingsSidebar = observer(
               </Typography>
             )}
           </Stack>
-          <Stack fontFamily="monospace" direction="column" spacing={0.5}>
+          <Stack
+            fontFamily="monospace"
+            direction="column"
+            alignItems="flex-start"
+            spacing={0.5}
+          >
             <Link
               href={!isElectron ? "https://mutualzz.com/privacy" : undefined}
               target={!isElectron ? "_blank" : undefined}

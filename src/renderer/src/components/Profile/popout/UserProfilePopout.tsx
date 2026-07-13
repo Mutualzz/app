@@ -10,9 +10,13 @@ import { observer } from "mobx-react-lite";
 import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import type { AccountStore } from "@stores/Account.store";
+import { UserPresenceCard } from "@components/Profile/popout/UserPresenceCard";
 import { SmallActivityStatus } from "@components/SmallActivityStatus";
 import { useGoogleFont } from "@hooks/useGoogleFont";
 import { Box, Stack, Typography, useTheme } from "@mutualzz/ui-web";
+import { ProfileConnectionsChips } from "@components/Profile/shared/ProfileConnectionsChips";
+import { RecentActivitiesSection } from "@components/Profile/shared/RecentActivitiesSection";
+import { getNonCustomActivities } from "@utils/customStatus";
 
 interface Props {
   user: User | AccountStore;
@@ -40,6 +44,39 @@ export const UserProfilePopout = observer(({ user, member }: Props) => {
 
   const presence = app.presence.get(user.id);
   const bannerUrl = profile?.constructBannerUrl();
+
+  const { data: spotifyConnection } = useQuery({
+    queryKey: ["user-spotify", user.id],
+    queryFn: async () => {
+      try {
+        return await app.rest.get<{
+          displayName: string | null;
+          externalUrl: string | null;
+        }>(`/users/${user.id}/spotify`);
+      } catch {
+        return null;
+      }
+    },
+    staleTime: 60_000
+  });
+
+  const { data: userConnections } = useQuery({
+    queryKey: ["user-connections-public", user.id],
+    queryFn: async () => {
+      try {
+        return await app.rest.get<{
+          connections: Array<{
+            provider: string;
+            displayName: string | null;
+            externalUrl: string | null;
+          }>;
+        }>(`/users/${user.id}/connections`);
+      } catch {
+        return { connections: [] };
+      }
+    },
+    staleTime: 60_000
+  });
 
   const backgroundImageUrl = profile?.constructBackgroundUrl() ?? null;
   const profileBackground = buildProfileBackgroundCss({
@@ -124,7 +161,9 @@ export const UserProfilePopout = observer(({ user, member }: Props) => {
                 <Typography level="body-sm" css={{ opacity: 0.7 }}>
                   @{user.username}
                 </Typography>
-                {presence && <SmallActivityStatus presence={presence} />}
+                {presence && (
+                  <SmallActivityStatus presence={presence} customOnly />
+                )}
               </Stack>
 
               {profile?.bio && (
@@ -134,6 +173,37 @@ export const UserProfilePopout = observer(({ user, member }: Props) => {
                   css={{ opacity: 0.85 }}
                 />
               )}
+
+              {presence && <UserPresenceCard presence={presence} />}
+
+              <RecentActivitiesSection
+                userId={user.id}
+                liveActivities={
+                  presence &&
+                  (presence.status === "online" ||
+                    presence.status === "idle" ||
+                    presence.status === "dnd")
+                    ? getNonCustomActivities(presence)
+                    : []
+                }
+                iconSize={28}
+                compact
+              />
+
+              <ProfileConnectionsChips
+                connections={[
+                  ...(spotifyConnection?.externalUrl
+                    ? [
+                        {
+                          provider: "spotify",
+                          displayName: spotifyConnection.displayName,
+                          externalUrl: spotifyConnection.externalUrl
+                        }
+                      ]
+                    : []),
+                  ...(userConnections?.connections ?? [])
+                ]}
+              />
             </>
           )}
         </Stack>

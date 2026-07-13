@@ -43,6 +43,11 @@ export default defineConfig({
   main: {},
   preload: {},
   renderer: {
+    server: {
+      host: true,
+      port: 5173,
+      strictPort: true
+    },
     assetsInclude: ["**/*.ogg", "**/*.mp3"],
     plugins: [
       svgr(),

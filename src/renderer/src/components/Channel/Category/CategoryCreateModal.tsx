@@ -28,6 +28,7 @@ export const CategoryCreateModal = observer(({ space }: Props) => {
       const formData = new FormData();
       formData.append("name", name);
       formData.append("type", ChannelType.Category.toString());
+      formData.append("spaceId", space.id);
 
       return app.rest.postFormData("channels", formData);
     },

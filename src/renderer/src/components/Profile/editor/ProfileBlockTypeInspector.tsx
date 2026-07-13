@@ -174,6 +174,14 @@ export const ProfileBlockTypeInspector = observer(
           </Stack>
         );
 
+      case "connections":
+        return (
+          <Stack direction="column" spacing={1}>
+            <FieldLabel>{t("profile.blocks.connections")}</FieldLabel>
+            <FieldHint>{t("profile.inspector.connectionsHint")}</FieldHint>
+          </Stack>
+        );
+
       case "mutual":
         return (
           <Stack direction="column" spacing={1}>

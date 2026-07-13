@@ -11,10 +11,11 @@ interface Props {
   name: string;
   onlineCount: number;
   hubConnected: boolean;
+  role?: "owner" | "member";
 }
 
 export const BridgeChatHeader = observer(
-  ({ name, onlineCount, hubConnected }: Props) => {
+  ({ name, onlineCount, hubConnected, role }: Props) => {
     const app = useAppStore();
     const { t } = useTranslation("settings");
 
@@ -23,6 +24,13 @@ export const BridgeChatHeader = observer(
       : onlineCount === 0
         ? t("minecraftBridge.onlineNone")
         : t("minecraftBridge.onlineCount", { count: onlineCount });
+
+    const roleLabel =
+      role === "member"
+        ? t("minecraftBridge.roleMember")
+        : role === "owner"
+          ? t("minecraftBridge.roleOwner")
+          : null;
 
     return (
       <Paper
@@ -64,6 +72,15 @@ export const BridgeChatHeader = observer(
             >
               {name}
             </Typography>
+            {roleLabel && (
+              <Typography
+                level="body-xs"
+                textColor="muted"
+                css={{ flexShrink: 0 }}
+              >
+                · {roleLabel}
+              </Typography>
+            )}
             <Typography
               level="body-xs"
               textColor="muted"

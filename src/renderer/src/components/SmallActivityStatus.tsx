@@ -4,13 +4,23 @@ import { presenceStatusKeys } from "@mutualzz/i18n";
 import { Stack, Typography, useTheme } from "@mutualzz/ui-web";
 import { CustomStatusDisplay } from "@components/CustomStatus/CustomStatusDisplay";
 import { useTranslation } from "react-i18next";
-import { PresenceIcon } from "./Presence/PresenceIcon";
+import { ActivityIcon } from "./Presence/ActivityIcon";
+import {
+  activityTypeLabelKey,
+  formatActivityPrimary,
+  formatActivitySecondary
+} from "@utils/activityDisplay";
+import {
+  getCustomActivity,
+  getNonCustomActivities
+} from "@utils/customStatus";
 
 interface Props {
   presence?: PresencePayload;
   vertical?: boolean;
   hideCustomStatus?: boolean;
   showStatus?: boolean;
+  customOnly?: boolean;
 }
 
 export const SmallActivityStatus = observer(
@@ -18,7 +28,8 @@ export const SmallActivityStatus = observer(
     presence,
     vertical,
     hideCustomStatus = false,
-    showStatus = false
+    showStatus = false,
+    customOnly = false
   }: Props) => {
     const { theme } = useTheme();
     const { t } = useTranslation("common");
@@ -26,9 +37,9 @@ export const SmallActivityStatus = observer(
 
     if (!presence) return null;
 
-    const activity = Array.isArray(presence.activities)
-      ? (presence.activities[0] ?? null)
-      : null;
+    const customActivity = getCustomActivity(presence);
+    const otherActivities = getNonCustomActivities(presence);
+    const activity = otherActivities[0] ?? null;
 
     const statusKey =
       presence.status === "online" ||
@@ -38,50 +49,92 @@ export const SmallActivityStatus = observer(
         : null;
     const status = statusKey ? t(statusKey) : null;
 
-    if (!activity && showStatus)
+    if (customOnly) {
+      if (!customActivity || hideCustomStatus) return null;
       return (
-        <Typography fontSize={12} textColor="accent">
-          {status}
-        </Typography>
+        <CustomStatusDisplay activity={customActivity} fontSize={12} />
       );
+    }
 
-    if (!activity) return null;
-
-    if (activity.type === "custom" && !hideCustomStatus) {
+    if (customActivity && !hideCustomStatus) {
+      const extraCount = otherActivities.length;
       return (
         <Stack
           direction={vertical ? "column" : "row"}
-          spacing={0.5}
+          alignItems="center"
+          spacing={0.75}
           minWidth={0}
+          width="100%"
         >
-          <CustomStatusDisplay activity={activity} fontSize={12} />
-          {!vertical && presence.activities.length > 1 && (
-            <Typography level="label-xs" textColor="accent">
-              +{presence.activities.length - 1}
+          <Stack minWidth={0} flex={1}>
+            <CustomStatusDisplay activity={customActivity} fontSize={12} />
+          </Stack>
+          {!vertical && extraCount > 0 && (
+            <Typography
+              level="label-xs"
+              textColor="accent"
+              css={{ lineHeight: 1, flexShrink: 0, opacity: 0.85 }}
+            >
+              +{extraCount}
             </Typography>
           )}
         </Stack>
       );
     }
 
+    if (!activity && !customActivity && showStatus)
+      return (
+        <Typography fontSize={12} textColor="accent">
+          {status}
+        </Typography>
+      );
+
+    if (!activity && !customActivity) return null;
+
+    const typeKey = activityTypeLabelKey(activity.type);
+    const typeLabel = typeKey ? t(typeKey) : null;
+    const title = formatActivityPrimary(activity);
+    const secondary = formatActivitySecondary(activity);
+    const line = typeLabel
+      ? secondary
+        ? `${typeLabel} ${title} · ${secondary}`
+        : `${typeLabel} ${title}`
+      : secondary
+        ? `${title} · ${secondary}`
+        : title;
+    const extraCount = Math.max(0, otherActivities.length - 1);
+
     return (
       <Stack
         direction={vertical ? "column" : "row"}
         alignItems="center"
-        spacing={0.5}
+        spacing={0.75}
+        minWidth={0}
+        width="100%"
       >
-        <Stack direction={vertical ? "column" : "row"} alignItems="center">
-          <PresenceIcon color={color} type={activity.type} />
-          <Typography level="label-xs" textColor={color}>
-            {presence.activities.length > 1
-              ? `+${presence.activities.length - 1}`
-              : ""}
-          </Typography>
-        </Stack>
-        {!vertical && `•`}
-        <Typography level="label-xs" textColor="accent">
-          {activity.name}
+        <ActivityIcon activity={activity} size={16} color={color} />
+        <Typography
+          level="label-xs"
+          textColor={color}
+          css={{
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+            minWidth: 0,
+            flex: 1
+          }}
+        >
+          {line}
         </Typography>
+        {extraCount > 0 && (
+          <Typography
+            level="label-xs"
+            textColor={color}
+            css={{ lineHeight: 1, flexShrink: 0, opacity: 0.85 }}
+          >
+            +{extraCount}
+          </Typography>
+        )}
       </Stack>
     );
   }

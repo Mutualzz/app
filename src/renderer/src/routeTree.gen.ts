@@ -19,7 +19,9 @@ import { Route as DownloadRouteImport } from "./routes/download"
 import { Route as AppealRouteImport } from "./routes/appeal"
 import { Route as AuthenticatedRouteRouteImport } from "./routes/_authenticated/route"
 import { Route as IndexRouteImport } from "./routes/index"
+import { Route as SpotifyCallbackRouteImport } from "./routes/spotify/callback"
 import { Route as InviteCodeRouteImport } from "./routes/invite/$code"
+import { Route as ConnectionsCallbackRouteImport } from "./routes/connections/callback"
 import { Route as UsersUsernameRouteRouteImport } from "./routes/users/$username/route"
 import { Route as AuthenticatedStaffRouteRouteImport } from "./routes/_authenticated/staff/route"
 import { Route as AuthenticatedSpacesRouteRouteImport } from "./routes/_authenticated/spaces/route"
@@ -97,9 +99,19 @@ const IndexRoute = IndexRouteImport.update({
   path: "/",
   getParentRoute: () => rootRouteImport,
 } as any)
+const SpotifyCallbackRoute = SpotifyCallbackRouteImport.update({
+  id: "/spotify/callback",
+  path: "/spotify/callback",
+  getParentRoute: () => rootRouteImport,
+} as any)
 const InviteCodeRoute = InviteCodeRouteImport.update({
   id: "/invite/$code",
   path: "/invite/$code",
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConnectionsCallbackRoute = ConnectionsCallbackRouteImport.update({
+  id: "/connections/callback",
+  path: "/connections/callback",
   getParentRoute: () => rootRouteImport,
 } as any)
 const UsersUsernameRouteRoute = UsersUsernameRouteRouteImport.update({
@@ -275,7 +287,9 @@ export interface FileRoutesByFullPath {
   "/spaces": typeof AuthenticatedSpacesRouteRouteWithChildren
   "/staff": typeof AuthenticatedStaffRouteRouteWithChildren
   "/users/$username": typeof UsersUsernameRouteRoute
+  "/connections/callback": typeof ConnectionsCallbackRoute
   "/invite/$code": typeof InviteCodeRoute
+  "/spotify/callback": typeof SpotifyCallbackRoute
   "/@me/$channelId": typeof AuthenticatedAtmeChannelIdRouteRoute
   "/spaces/$spaceId": typeof AuthenticatedSpacesSpaceIdRouteRouteWithChildren
   "/@me/friends": typeof AuthenticatedAtmeFriendsRoute
@@ -312,7 +326,9 @@ export interface FileRoutesByTo {
   "/profile": typeof AuthenticatedProfileRouteRoute
   "/spaces": typeof AuthenticatedSpacesRouteRouteWithChildren
   "/users/$username": typeof UsersUsernameRouteRoute
+  "/connections/callback": typeof ConnectionsCallbackRoute
   "/invite/$code": typeof InviteCodeRoute
+  "/spotify/callback": typeof SpotifyCallbackRoute
   "/@me/$channelId": typeof AuthenticatedAtmeChannelIdRouteRoute
   "/spaces/$spaceId": typeof AuthenticatedSpacesSpaceIdRouteRouteWithChildren
   "/@me/friends": typeof AuthenticatedAtmeFriendsRoute
@@ -353,7 +369,9 @@ export interface FileRoutesById {
   "/_authenticated/spaces": typeof AuthenticatedSpacesRouteRouteWithChildren
   "/_authenticated/staff": typeof AuthenticatedStaffRouteRouteWithChildren
   "/users/$username": typeof UsersUsernameRouteRoute
+  "/connections/callback": typeof ConnectionsCallbackRoute
   "/invite/$code": typeof InviteCodeRoute
+  "/spotify/callback": typeof SpotifyCallbackRoute
   "/_authenticated/@me/$channelId": typeof AuthenticatedAtmeChannelIdRouteRoute
   "/_authenticated/spaces/$spaceId": typeof AuthenticatedSpacesSpaceIdRouteRouteWithChildren
   "/_authenticated/@me/friends": typeof AuthenticatedAtmeFriendsRoute
@@ -394,7 +412,9 @@ export interface FileRouteTypes {
     | "/spaces"
     | "/staff"
     | "/users/$username"
+    | "/connections/callback"
     | "/invite/$code"
+    | "/spotify/callback"
     | "/@me/$channelId"
     | "/spaces/$spaceId"
     | "/@me/friends"
@@ -431,7 +451,9 @@ export interface FileRouteTypes {
     | "/profile"
     | "/spaces"
     | "/users/$username"
+    | "/connections/callback"
     | "/invite/$code"
+    | "/spotify/callback"
     | "/@me/$channelId"
     | "/spaces/$spaceId"
     | "/@me/friends"
@@ -471,7 +493,9 @@ export interface FileRouteTypes {
     | "/_authenticated/spaces"
     | "/_authenticated/staff"
     | "/users/$username"
+    | "/connections/callback"
     | "/invite/$code"
+    | "/spotify/callback"
     | "/_authenticated/@me/$channelId"
     | "/_authenticated/spaces/$spaceId"
     | "/_authenticated/@me/friends"
@@ -506,7 +530,9 @@ export interface RootRouteChildren {
   SupportRoute: typeof SupportRoute
   TosRoute: typeof TosRoute
   UsersUsernameRouteRoute: typeof UsersUsernameRouteRoute
+  ConnectionsCallbackRoute: typeof ConnectionsCallbackRoute
   InviteCodeRoute: typeof InviteCodeRoute
+  SpotifyCallbackRoute: typeof SpotifyCallbackRoute
 }
 
 declare module "@tanstack/react-router" {
@@ -581,11 +607,25 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    "/spotify/callback": {
+      id: "/spotify/callback"
+      path: "/spotify/callback"
+      fullPath: "/spotify/callback"
+      preLoaderRoute: typeof SpotifyCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     "/invite/$code": {
       id: "/invite/$code"
       path: "/invite/$code"
       fullPath: "/invite/$code"
       preLoaderRoute: typeof InviteCodeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    "/connections/callback": {
+      id: "/connections/callback"
+      path: "/connections/callback"
+      fullPath: "/connections/callback"
+      preLoaderRoute: typeof ConnectionsCallbackRouteImport
       parentRoute: typeof rootRouteImport
     }
     "/users/$username": {
@@ -919,7 +959,9 @@ const rootRouteChildren: RootRouteChildren = {
   SupportRoute: SupportRoute,
   TosRoute: TosRoute,
   UsersUsernameRouteRoute: UsersUsernameRouteRoute,
+  ConnectionsCallbackRoute: ConnectionsCallbackRoute,
   InviteCodeRoute: InviteCodeRoute,
+  SpotifyCallbackRoute: SpotifyCallbackRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

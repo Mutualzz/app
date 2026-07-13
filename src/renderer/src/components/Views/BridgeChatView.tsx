@@ -15,6 +15,7 @@ import { BridgeMessage, shouldStartBridgeGroup } from "./BridgeMessage";
 interface BridgeDetail {
   id: string;
   name: string;
+  role?: "owner" | "member";
   hubConnected?: boolean;
   lastMessageId?: string | null;
   lastAckedId?: string | null;
@@ -264,6 +265,7 @@ export const BridgeChatView = observer(({ bridgeId }: Props) => {
         name={bridge?.name ?? t("minecraftBridge.liveTitle")}
         onlineCount={players.length}
         hubConnected={hubConnected}
+        role={bridge?.role}
       />
       <Stack direction="row" flex="1 1 auto" overflow="hidden" minWidth={0}>
         <Stack

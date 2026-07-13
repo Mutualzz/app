@@ -103,7 +103,7 @@ export const AppVoiceVideoSettings = observer(() => {
   if (!settings) return null;
 
   return (
-    <Stack spacing={25} mt={7.5} mx={50} direction="column">
+    <Stack spacing={7.5} pt={2.5} pb={5} direction="column">
       <Stack spacing={2.5} direction="column">
         <Typography fontSize={20}>{t("voice.title")}</Typography>
         <Divider
@@ -112,7 +112,7 @@ export const AppVoiceVideoSettings = observer(() => {
             opacity: 0.5
           }}
         />
-        <Stack direction="row" justifyContent="center" spacing={25}>
+        <Stack direction="row" justifyContent="center" spacing={7.5}>
           <Stack direction="column" flex={1}>
             <Typography>{t("voice.microphone")}</Typography>
             <Select

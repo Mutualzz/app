@@ -7,28 +7,30 @@ import {
 
 export const PresenceIcon = ({
   color,
-  type
+  type,
+  size = 14
 }: {
   color: string;
   type: string;
+  size?: number;
 }) => {
   switch (type) {
     case "playing":
       return (
-        <IconSlot size={14}>
-          <GameControllerIcon weight="fill" color={color} />
+        <IconSlot size={size}>
+          <GameControllerIcon weight="fill" color={color} size={size} />
         </IconSlot>
       );
     case "listening":
       return (
-        <IconSlot size={14}>
-          <HeadphonesIcon weight="fill" color={color} />
+        <IconSlot size={size}>
+          <HeadphonesIcon weight="fill" color={color} size={size} />
         </IconSlot>
       );
     default:
       return (
-        <IconSlot size={14}>
-          <NotepadIcon weight="fill" color={color} />
+        <IconSlot size={size}>
+          <NotepadIcon weight="fill" color={color} size={size} />
         </IconSlot>
       );
   }

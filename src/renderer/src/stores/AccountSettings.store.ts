@@ -30,6 +30,8 @@ export class AccountSettingsStore {
   pushEnabled = true;
   pushDirectMessages = true;
   pushMentions = true;
+  shareActivity = true;
+  shareRecentActivity = true;
 
   voiceInputMode: VoiceInputMode = "voice_activity";
   voiceInputSensitivity = DEFAULT_VOICE_INPUT_SENSITIVITY;
@@ -68,6 +70,8 @@ export class AccountSettingsStore {
     this.pushEnabled = settings.pushEnabled ?? true;
     this.pushDirectMessages = settings.pushDirectMessages ?? true;
     this.pushMentions = settings.pushMentions ?? true;
+    this.shareActivity = settings.shareActivity ?? true;
+    this.shareRecentActivity = settings.shareRecentActivity ?? true;
 
     this.favoriteEmojis = observable.array(settings.favoriteEmojis ?? []);
     this.favoriteGifs = observable.array(settings.favoriteGifs ?? []);
@@ -90,6 +94,8 @@ export class AccountSettingsStore {
         "pushEnabled",
         "pushDirectMessages",
         "pushMentions",
+        "shareActivity",
+        "shareRecentActivity",
         "voiceInputMode",
         "voiceInputSensitivity",
         "voiceInputSensitivityAuto",
@@ -269,6 +275,8 @@ export class AccountSettingsStore {
     this.pushEnabled = payload.pushEnabled ?? true;
     this.pushDirectMessages = payload.pushDirectMessages ?? true;
     this.pushMentions = payload.pushMentions ?? true;
+    this.shareActivity = payload.shareActivity ?? true;
+    this.shareRecentActivity = payload.shareRecentActivity ?? true;
     this.favoriteEmojis = observable.array(payload.favoriteEmojis ?? []);
     this.favoriteGifs = observable.array(payload.favoriteGifs ?? []);
     this.favoriteStickers = observable.array(payload.favoriteStickers ?? []);
@@ -305,6 +313,16 @@ export class AccountSettingsStore {
     if (settings.pushMentions != undefined)
       this.pushMentions = settings.pushMentions;
 
+    if (settings.shareActivity != undefined) {
+      const changed = this.shareActivity !== settings.shareActivity;
+      this.shareActivity = settings.shareActivity;
+      if (changed) this.app.gateway?.refreshPresenceActivities?.();
+    }
+
+    if (settings.shareRecentActivity != undefined) {
+      this.shareRecentActivity = settings.shareRecentActivity;
+    }
+
     if (settings.favoriteEmojis != undefined)
       this.favoriteEmojis = observable.array(settings.favoriteEmojis);
     if (settings.favoriteGifs != undefined)
@@ -333,6 +351,15 @@ export class AccountSettingsStore {
 
   setPushMentions(value: boolean) {
     this.pushMentions = value;
+  }
+
+  setShareActivity(value: boolean) {
+    this.shareActivity = value;
+    this.app.gateway?.refreshPresenceActivities?.();
+  }
+
+  setShareRecentActivity(value: boolean) {
+    this.shareRecentActivity = value;
   }
 
   setVoiceInputMode(mode: VoiceInputMode) {
@@ -435,6 +462,8 @@ export class AccountSettingsStore {
       pushEnabled: this.pushEnabled,
       pushDirectMessages: this.pushDirectMessages,
       pushMentions: this.pushMentions,
+      shareActivity: this.shareActivity,
+      shareRecentActivity: this.shareRecentActivity,
       favoriteEmojis: [...this.favoriteEmojis],
       favoriteGifs: [...this.favoriteGifs],
       favoriteStickers: [...this.favoriteStickers]

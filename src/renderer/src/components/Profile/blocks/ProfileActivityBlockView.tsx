@@ -1,14 +1,14 @@
-import { useAppStore } from "@hooks/useStores";
-import { presenceStatusKeys } from "@mutualzz/i18n";
-import type { ProfileActivityBlock } from "@mutualzz/types";
-import type { Snowflake } from "@mutualzz/types";
-import { resolveProfileBlockCornerRadius } from "@mutualzz/ui-core";
-import { Stack, Typography, useTheme } from "@mutualzz/ui-web";
 import { CustomStatusDisplay } from "@components/CustomStatus/CustomStatusDisplay";
-import { PulseIcon } from "@phosphor-icons/react";
-import { observer } from "mobx-react-lite";
-import { PresenceIcon } from "@renderer/components/Presence/PresenceIcon";
+import { PresenceActivitiesList } from "@components/Presence/PresenceActivitiesList";
+import { RecentActivitiesSection } from "@components/Profile/shared/RecentActivitiesSection";
 import { Paper } from "@renderer/components/Paper";
+import { useAppStore } from "@hooks/useStores";
+import type { ProfileActivityBlock, Snowflake } from "@mutualzz/types";
+import { resolveProfileBlockCornerRadius } from "@mutualzz/ui-core";
+import { Stack, Typography } from "@mutualzz/ui-web";
+import { PulseIcon } from "@phosphor-icons/react";
+import { getCustomActivity, getNonCustomActivities } from "@utils/customStatus";
+import { observer } from "mobx-react-lite";
 import { useTranslation } from "react-i18next";
 
 interface Props {
@@ -18,19 +18,22 @@ interface Props {
 
 export const ProfileActivityBlockView = observer(({ block, userId }: Props) => {
   const { t } = useTranslation("settings");
-  const { t: tCommon } = useTranslation("common");
   const app = useAppStore();
-  const { theme } = useTheme();
   const presence = app.presence.get(userId);
-  const statusKey = presence?.status
-    ? presenceStatusKeys[presence.status as keyof typeof presenceStatusKeys]
-    : null;
-  const statusLabel = statusKey ? tCommon(statusKey) : null;
-  const otherActivities = presence?.activities?.filter(
-    (a) => a.type !== "custom"
-  );
-  const customActivity = presence?.activities?.find((a) => a.type === "custom");
   const cornerRadius = resolveProfileBlockCornerRadius(block, "desktop");
+
+  const isActive =
+    presence?.status === "online" ||
+    presence?.status === "idle" ||
+    presence?.status === "dnd";
+
+  const customActivity = presence ? getCustomActivity(presence) : null;
+  const otherActivities = presence ? getNonCustomActivities(presence) : [];
+
+  const showCustom =
+    Boolean(customActivity) && block.showCustomStatus !== false;
+  const showActivities = otherActivities.length > 0;
+  const hasLiveContent = isActive && (showCustom || showActivities);
 
   return (
     <Paper
@@ -44,50 +47,52 @@ export const ProfileActivityBlockView = observer(({ block, userId }: Props) => {
     >
       <Stack direction="row" spacing={1} alignItems="center">
         <PulseIcon size={18} weight="fill" />
-        <Typography level="body-sm" fontWeight={700} css={{ fontSize: "var(--pcf-sm)" }}>
+        <Typography
+          level="body-sm"
+          fontWeight={700}
+          css={{ fontSize: "var(--pcf-sm)" }}
+        >
           {t("profile.blocks.activity")}
         </Typography>
       </Stack>
 
-      {statusLabel && (
-        <Stack
-          direction="row"
-          spacing={0.75}
-          alignItems="center"
-          flexWrap="wrap"
-        >
-          <Typography
-            level="body-xs"
-            css={{ opacity: 0.75, fontSize: "var(--pcf-xs)" }}
-          >
-            {statusLabel}
-          </Typography>
-          {customActivity && block.showCustomStatus && (
-            <>
-              <Typography level="body-xs" css={{ opacity: 0.5, fontSize: "var(--pcf-xs)" }}>
-                —
-              </Typography>
+      <Stack
+        direction="column"
+        spacing={0.75}
+        minWidth={0}
+        flex={1}
+        minHeight={0}
+        css={{ overflow: "hidden" }}
+      >
+        {hasLiveContent && (
+          <>
+            {showCustom && customActivity && (
               <CustomStatusDisplay
                 activity={customActivity}
                 fontSize="var(--pcf-xs)"
                 textColor="primary"
               />
-            </>
-          )}
-          {otherActivities?.map((activity) => (
-            <Stack direction="row" spacing={0.5} alignItems="center">
-              <PresenceIcon
-                key={activity.name}
-                type={activity.type}
-                color={theme.colors.success}
-              />
-              <Typography level="body-xs" textColor="accent" css={{ fontSize: "var(--pcf-xs)" }}>
-                {activity.name}
-              </Typography>
-            </Stack>
-          ))}
-        </Stack>
-      )}
+            )}
+            {showActivities && (
+              <Stack flex={1} minHeight={0} css={{ overflow: "hidden" }}>
+                <PresenceActivitiesList
+                  activities={otherActivities}
+                  iconSize={40}
+                  fetchFallback
+                  scrollWhenExpanded
+                />
+              </Stack>
+            )}
+          </>
+        )}
+
+        <RecentActivitiesSection
+          userId={userId}
+          liveActivities={isActive ? otherActivities : []}
+          iconSize={36}
+          showEmpty={!hasLiveContent}
+        />
+      </Stack>
     </Paper>
   );
 });

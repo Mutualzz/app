@@ -1,5 +1,5 @@
 import "../styles/fonts";
-import "../i18n";
+import i18n from "../i18n";
 
 import createCache from "@emotion/cache";
 import { CacheProvider } from "@emotion/react";
@@ -43,7 +43,7 @@ import { ScreenSharePicker } from "@components/Voice/ScreenSharePicker";
 import { seo } from "@seo";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { HotkeysProvider } from "@tanstack/react-hotkeys";
-import { ToastContainer } from "react-toastify";
+import { ToastContainer, toast } from "react-toastify";
 
 dayjs.extend(relativeTime);
 dayjs.extend(calendar, calendarStrings);
@@ -126,7 +126,6 @@ function RootComponent() {
     return dispose;
   }, []);
 
-  // Idle detection: auto-set status to idle after inactivity, revert when active again
   const wasAutoIdled = useRef(false);
   useEffect(() => {
     if (!isElectron || !window.api) return;
@@ -142,7 +141,6 @@ function RootComponent() {
       const currentStatus = app.presence.get(userId)?.status ?? "online";
 
       if ((state === "idle" || state === "locked") && !wasAutoIdled.current) {
-        // Only auto-idle if the user hasn't manually set a non-online status
         if (currentStatus === "online") {
           wasAutoIdled.current = true;
           app.gateway.setStatus("idle");
@@ -159,7 +157,11 @@ function RootComponent() {
   useEffect(() => {
     if (!isElectron || !window.api) return;
 
+    const handled = new Set<string>();
+
     const handleDeepLink = async (urlStr: string) => {
+      if (handled.has(urlStr)) return;
+      handled.add(urlStr);
       logger.debug("Deep link received:", urlStr);
 
       try {
@@ -175,18 +177,39 @@ function RootComponent() {
               deepLink: true
             }
           });
+        } else if (url.hostname === "spotify") {
+          const { invalidateSpotifyConnectionCache } = await import(
+            "@renderer/presence/spotifyPresence"
+          );
+          invalidateSpotifyConnectionCache();
+          await app.queryClient.invalidateQueries({
+            queryKey: ["spotify-connection"]
+          });
+          app.gateway.refreshPresenceActivities();
+          toast.success(i18n.t("settings:connections.spotifyConnectedToast"), {
+            toastId: "spotify-connected"
+          });
+        } else if (url.hostname === "connections") {
+          await app.queryClient.invalidateQueries({
+            queryKey: ["user-connections"]
+          });
+          toast.success(i18n.t("settings:connections.accountConnectedToast"), {
+            toastId: "connections-connected"
+          });
         }
       } catch (err) {
         logger.error("Failed to handle deep link", err);
       }
     };
 
-    window.api.events.onDeepLink(handleDeepLink);
+    const unsubscribe = window.api.events.onDeepLink(handleDeepLink);
 
     void window.api.app.getStartupDeepLink().then((url) => {
       if (url) void handleDeepLink(url);
     });
-  }, [navigate, logger]);
+
+    return unsubscribe;
+  }, [navigate, logger, app]);
 
   return (
     <QueryClientProvider client={app.queryClient}>

@@ -34,6 +34,7 @@
     "@mutualzz/eslint-config": "workspace:*",
     "@mutualzz/i18n": "workspace:*",
     "@mutualzz/logger": "workspace:*",
+    "@mutualzz/rpc": "workspace:*",
     "@mutualzz/types": "workspace:*",
     "@mutualzz/ui-core": "workspace:*",
     "@mutualzz/ui-web": "workspace:*",
@@ -130,5 +131,5 @@
     "typecheck:node": "tsc --noEmit -p tsconfig.node.json --composite false",
     "typecheck:web": "tsc --noEmit -p tsconfig.web.json --composite false"
   },
-  "version": "6.18.1"
+  "version": "6.19.0"
 }

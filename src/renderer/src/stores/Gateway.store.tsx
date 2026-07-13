@@ -43,8 +43,11 @@ import { makeAutoObservable } from "mobx";
 import type { AppStore } from "./App.store";
 import {
   buildDesktopPresenceFromProcesses,
+  ensureRemoteGameCatalog,
   type PresenceUpdateDraft
 } from "../presence/gamePresence";
+import { normalizeRpcActivities } from "../presence/rpcActivities";
+import { loadSpotifyActivity } from "../presence/spotifyPresence";
 import { normalizeJSON } from "@utils/JSON";
 import { isElectron } from "@utils/index";
 import { toast } from "react-toastify";
@@ -67,32 +70,58 @@ const RECONNECT_TIMEOUT = 5000;
 
 function mergeActivities(opts: {
   processActivities: PresenceActivity[];
+  rpcActivities: PresenceActivity[];
+  spotifyActivity: PresenceActivity | null;
   customActivity: PresenceActivity | null;
   previousActivities: PresenceActivity[];
 }): PresenceActivity[] {
-  const previousByName = new Map(
-    opts.previousActivities
-      .filter((a) => a.type === "playing" && a.name)
-      .map((a) => [a.name.toLowerCase(), a])
+  const previousByKey = new Map<string, PresenceActivity>();
+  for (const activity of opts.previousActivities) {
+    if (activity.type === "custom") continue;
+    const key = activity.applicationId
+      ? `id:${activity.applicationId.toLowerCase()}`
+      : `name:${(activity.name ?? "").toLowerCase()}`;
+    previousByKey.set(key, activity);
+  }
+
+  const games = new Map<string, PresenceActivity>();
+
+  const upsert = (act: PresenceActivity) => {
+    const key = act.applicationId
+      ? `id:${act.applicationId.toLowerCase()}`
+      : `name:${(act.name ?? "").toLowerCase()}`;
+    const prev = previousByKey.get(key) ?? games.get(key);
+    games.set(key, {
+      ...act,
+      applicationId: act.applicationId ?? prev?.applicationId,
+      url: act.url ?? prev?.url,
+      assets: act.assets ?? prev?.assets,
+      timestamps: act.timestamps ?? prev?.timestamps ?? { start: Date.now() }
+    });
+  };
+
+  for (const act of opts.processActivities) upsert(act);
+  for (const act of opts.rpcActivities) upsert(act);
+  if (opts.spotifyActivity) upsert(opts.spotifyActivity);
+
+  const sortedGames = [...games.values()].sort(
+    (a, b) => (b.timestamps?.start ?? 0) - (a.timestamps?.start ?? 0)
   );
 
-  const sortedGames = opts.processActivities
-    .map((act) => {
-      const prev = previousByName.get(act.name.toLowerCase());
-
-      return {
-        ...act,
-        timestamps: prev?.timestamps ?? { start: Date.now() }
-      };
-    })
-    .sort((a, b) => (b.timestamps?.start ?? 0) - (a.timestamps?.start ?? 0));
-
   const out: PresenceActivity[] = [];
-
   if (opts.customActivity) out.push(opts.customActivity);
   out.push(...sortedGames);
-
   return out.slice(0, 5);
+}
+
+async function loadRpcActivities(): Promise<PresenceActivity[]> {
+  if (!window.api?.presence?.getRpcActivities) return [];
+  try {
+    const raw = await window.api.presence.getRpcActivities();
+    return normalizeRpcActivities(raw ?? []);
+  } catch {
+    return [];
+  }
 }
 
 function stableStringify(value: unknown) {
@@ -129,6 +158,7 @@ export class GatewayStore {
     (...args: any[]) => any
   >();
   private presenceLoopInterval: number | null = null;
+  private rpcUpdatedUnsub: (() => void) | null = null;
   private lastPresenceHash: string | null = null;
   private lazyRequestChannels = new Map<string, string[]>(); // spaceId -> channelIds
 
@@ -306,7 +336,9 @@ export class GatewayStore {
       {
         status,
         device: isElectron ? "desktop" : "web",
-        activities: prev?.activities ?? []
+        activities: isElectron
+          ? (prev?.activities ?? [])
+          : (prev?.activities?.filter((a) => a.type === "custom") ?? [])
       },
       { persist: Boolean(opts?.persist) }
     );
@@ -355,19 +387,31 @@ export class GatewayStore {
     const userId = this.app.account?.id;
     if (!userId) return;
 
+    if (!isElectron) {
+      this.refreshPresenceActivities();
+      return;
+    }
+
     const customActivity = this.app.customStatus.activity;
     const status = this.getEffectiveStatus();
     const prev = this.app.presence.get(userId);
+    const shareActivity = this.app.settings?.shareActivity !== false;
+
+    const activities = customActivity
+      ? [
+          customActivity,
+          ...(shareActivity
+            ? (prev?.activities?.filter((a) => a.type !== "custom") ?? [])
+            : [])
+        ]
+      : shareActivity
+        ? (prev?.activities?.filter((a) => a.type !== "custom") ?? [])
+        : [];
 
     const draft: PresenceUpdateDraft = {
       status,
-      device: isElectron ? "desktop" : "web",
-      activities: customActivity
-        ? [
-            customActivity,
-            ...(prev?.activities?.filter((a) => a.type !== "custom") ?? [])
-          ]
-        : (prev?.activities?.filter((a) => a.type !== "custom") ?? [])
+      device: "desktop",
+      activities
     };
 
     this.lastPresenceHash = null;
@@ -409,6 +453,62 @@ export class GatewayStore {
     });
   }
 
+  refreshPresenceActivities() {
+    this.lastPresenceHash = null;
+    if (!this.socket || this.readyState !== GatewayStatus.OPEN) return;
+    if (!this.app.account?.id) return;
+
+    void (async () => {
+      const shareActivity = this.app.settings?.shareActivity !== false;
+      const previousActivities =
+        this.app.presence.get(this.app.account!.id)?.activities ?? [];
+
+      if (isElectron) {
+        const [baseDraft, rpcActivities, spotifyActivity] = await Promise.all([
+          buildDesktopPresenceFromProcesses(),
+          loadRpcActivities(),
+          shareActivity
+            ? loadSpotifyActivity(this.app.rest)
+            : Promise.resolve(null)
+        ]);
+        const draft: PresenceUpdateDraft = {
+          ...baseDraft,
+          device: "desktop",
+          activities: mergeActivities({
+            processActivities: shareActivity
+              ? (baseDraft.activities ?? [])
+              : [],
+            rpcActivities: shareActivity ? rpcActivities : [],
+            spotifyActivity: shareActivity ? spotifyActivity : null,
+            customActivity: this.app.customStatus.activity,
+            previousActivities: shareActivity ? previousActivities : []
+          }),
+          status: this.getEffectiveStatus()
+        };
+        this.lastPresenceHash = stableStringify(draft);
+        this.sendPresenceUpdate(draft);
+        return;
+      }
+
+      const spotifyActivity = shareActivity
+        ? await loadSpotifyActivity(this.app.rest)
+        : null;
+      const draft: PresenceUpdateDraft = {
+        status: this.getEffectiveStatus(),
+        device: "web",
+        activities: mergeActivities({
+          processActivities: [],
+          rpcActivities: [],
+          spotifyActivity,
+          customActivity: this.app.customStatus.activity,
+          previousActivities: shareActivity ? previousActivities : []
+        })
+      };
+      this.lastPresenceHash = stableStringify(draft);
+      this.sendPresenceUpdate(draft);
+    })();
+  }
+
   private handleScheduledStatusExpired = (schedule: PresenceSchedule) => {
     const userId = this.app.account?.id;
     if (!userId) return;
@@ -431,7 +531,9 @@ export class GatewayStore {
     this.sendPresenceUpdate({
       status: revertTo,
       device: isElectron ? "desktop" : "web",
-      activities: prev?.activities ?? []
+      activities: isElectron
+        ? (prev?.activities ?? [])
+        : (prev?.activities?.filter((a) => a.type === "custom") ?? [])
     });
   };
 
@@ -758,6 +860,14 @@ export class GatewayStore {
     this.dispatchHandlers.set(
       GatewayDispatchEvents.BridgePresence,
       this.onBridgePresence
+    );
+    this.dispatchHandlers.set(
+      GatewayDispatchEvents.BridgeMemberAdd,
+      this.onBridgeMemberAdd
+    );
+    this.dispatchHandlers.set(
+      GatewayDispatchEvents.BridgeMemberRemove,
+      this.onBridgeMemberRemove
     );
 
     // Space Bans
@@ -1208,14 +1318,61 @@ export class GatewayStore {
     this.app.setGatewayReady(true);
     this.app.startBadgeWatch();
 
+    if (isElectron) {
+      void ensureRemoteGameCatalog(() =>
+        this.app.rest.get("/games/catalog")
+      ).then(() => {
+        this.refreshPresenceActivities();
+      });
+    } else {
+      this.refreshPresenceActivities();
+    }
+
     this.startPresenceLoop();
     this.app.voice.onGatewayReconnected();
   };
 
   // Presence
+  private trackableActivityFingerprint(
+    presence?: { activities?: PresenceActivity[] } | null
+  ) {
+    return (presence?.activities ?? [])
+      .filter((a) => a.type === "playing" || a.type === "listening")
+      .map((a) => `${a.type}|${a.applicationId ?? ""}|${a.name}`)
+      .sort()
+      .join("\0");
+  }
+
+  private scheduleRecentActivitiesRefresh(userId: string) {
+    window.setTimeout(() => {
+      void this.app.queryClient.invalidateQueries({
+        queryKey: ["user-recent-activities", String(userId)]
+      });
+    }, 800);
+  }
+
   private onPresenceUpdate = (payload: any) => {
     if (payload?.userId && payload?.presence) {
+      const prevFingerprint = this.trackableActivityFingerprint(
+        this.app.presence.get(payload.userId)
+      );
       this.app.presence.upsert(payload.userId, payload.presence);
+
+      const selfId = this.app.account?.id;
+      if (selfId && String(payload.userId) === String(selfId)) {
+        const custom =
+          payload.presence.activities?.find(
+            (a: PresenceActivity) => a.type === "custom"
+          ) ?? null;
+        this.app.customStatus.syncFromPresenceActivity(custom);
+      }
+
+      const nextFingerprint = this.trackableActivityFingerprint(
+        payload.presence
+      );
+      if (prevFingerprint !== nextFingerprint) {
+        this.scheduleRecentActivitiesRefresh(payload.userId);
+      }
       return;
     }
 
@@ -1223,7 +1380,16 @@ export class GatewayStore {
     if (Array.isArray(list)) {
       for (const item of list) {
         if (!item?.userId || !item?.presence) continue;
+        const prevFingerprint = this.trackableActivityFingerprint(
+          this.app.presence.get(item.userId)
+        );
         this.app.presence.upsert(item.userId, item.presence);
+        const nextFingerprint = this.trackableActivityFingerprint(
+          item.presence
+        );
+        if (prevFingerprint !== nextFingerprint) {
+          this.scheduleRecentActivitiesRefresh(item.userId);
+        }
       }
       return;
     }
@@ -1254,29 +1420,43 @@ export class GatewayStore {
 
     this.app.customStatus.setScheduledCustomStatus(schedule);
     this.lastPresenceHash = null;
+
+    if (!schedule) this.pushCustomStatusPresenceUpdate();
   };
 
   private startPresenceLoop() {
     if (this.presenceLoopInterval) return;
 
-    const intervalMs = 15_000;
+    const intervalMs = isElectron ? 5_000 : 15_000;
 
     const tick = async () => {
       if (!this.socket || this.readyState !== GatewayStatus.OPEN) return;
       if (!this.app.account?.id) return;
 
+      const shareActivity = this.app.settings?.shareActivity !== false;
+      const previousActivities =
+        this.app.presence.get(this.app.account.id)?.activities ?? [];
+
       if (isElectron) {
-        const baseDraft = await buildDesktopPresenceFromProcesses();
-        const previousActivities =
-          this.app.presence.get(this.app.account.id)?.activities ?? [];
+        const [baseDraft, rpcActivities, spotifyActivity] = await Promise.all([
+          buildDesktopPresenceFromProcesses(),
+          loadRpcActivities(),
+          shareActivity
+            ? loadSpotifyActivity(this.app.rest)
+            : Promise.resolve(null)
+        ]);
 
         const mergedDraft: PresenceUpdateDraft = {
           ...baseDraft,
           device: "desktop",
           activities: mergeActivities({
-            processActivities: baseDraft.activities ?? [],
+            processActivities: shareActivity
+              ? (baseDraft.activities ?? [])
+              : [],
+            rpcActivities: shareActivity ? rpcActivities : [],
+            spotifyActivity: shareActivity ? spotifyActivity : null,
             customActivity: this.app.customStatus.activity,
-            previousActivities
+            previousActivities: shareActivity ? previousActivities : []
           }),
           status: this.getEffectiveStatus()
         };
@@ -1289,12 +1469,20 @@ export class GatewayStore {
         return;
       }
 
+      const spotifyActivity = shareActivity
+        ? await loadSpotifyActivity(this.app.rest)
+        : null;
+
       const webDraft: PresenceUpdateDraft = {
         status: this.getEffectiveStatus(),
         device: "web",
-        activities: this.app.customStatus.activity
-          ? [this.app.customStatus.activity]
-          : []
+        activities: mergeActivities({
+          processActivities: [],
+          rpcActivities: [],
+          spotifyActivity,
+          customActivity: this.app.customStatus.activity,
+          previousActivities: shareActivity ? previousActivities : []
+        })
       };
 
       const draftHash = stableStringify(webDraft);
@@ -1306,12 +1494,22 @@ export class GatewayStore {
 
     tick();
     this.presenceLoopInterval = window.setInterval(tick, intervalMs);
+
+    if (isElectron && window.api?.presence?.onRpcUpdated && !this.rpcUpdatedUnsub) {
+      this.rpcUpdatedUnsub = window.api.presence.onRpcUpdated(() => {
+        this.refreshPresenceActivities();
+      });
+    }
   }
 
   private stopPresenceLoop() {
     if (this.presenceLoopInterval) {
       window.clearInterval(this.presenceLoopInterval);
       this.presenceLoopInterval = null;
+    }
+    if (this.rpcUpdatedUnsub) {
+      this.rpcUpdatedUnsub();
+      this.rpcUpdatedUnsub = null;
     }
     this.lastPresenceHash = null;
   }
@@ -1342,8 +1540,14 @@ export class GatewayStore {
     if (payload.reason === "banned" || payload.reason === "kicked")
       toast.warn(
         payload.reason === "banned"
-          ? i18n.t("moderation.youWereBanned", { ns: "space", name: space.name })
-          : i18n.t("moderation.youWereKicked", { ns: "space", name: space.name })
+          ? i18n.t("moderation.youWereBanned", {
+              ns: "space",
+              name: space.name
+            })
+          : i18n.t("moderation.youWereKicked", {
+              ns: "space",
+              name: space.name
+            })
       );
   };
 
@@ -1854,6 +2058,38 @@ export class GatewayStore {
     this.app.queryClient.setQueryData(["me", "bridges", "link"], payload);
   };
 
+  private onBridgeMemberAdd = (payload: {
+    bridgeId: string;
+    name?: string;
+    role?: "owner" | "member";
+  }) => {
+    void this.app.queryClient.invalidateQueries({
+      queryKey: ["me", "bridges"]
+    });
+    if (payload.name) {
+      toast.info(
+        i18n.t("minecraftBridge.joinedToast", {
+          ns: "settings",
+          name: payload.name
+        })
+      );
+    }
+  };
+
+  private onBridgeMemberRemove = (payload: { bridgeId: string }) => {
+    this.app.queryClient.setQueryData<Array<{ id: string }>>(
+      ["me", "bridges"],
+      (prev) => (prev ?? []).filter((b) => b.id !== payload.bridgeId)
+    );
+    this.app.queryClient.removeQueries({
+      queryKey: ["me", "bridges", payload.bridgeId]
+    });
+    this.app.bridgeChat.clear(payload.bridgeId);
+    void this.app.queryClient.invalidateQueries({
+      queryKey: ["me", "bridges"]
+    });
+  };
+
   private markBridgeHubConnected = (bridgeId: string, connected: boolean) => {
     this.app.queryClient.setQueryData(
       ["me", "bridges", bridgeId],
@@ -2038,10 +2274,7 @@ export class GatewayStore {
     post.bumpLikeCount(1);
   };
 
-  private onPostLikeRemove = (payload: {
-    postId: string;
-    userId: string;
-  }) => {
+  private onPostLikeRemove = (payload: { postId: string; userId: string }) => {
     if (payload.userId === this.app.account?.id) return;
 
     const post = this.app.posts.get(payload.postId);
@@ -2059,10 +2292,7 @@ export class GatewayStore {
     post.bumpShareCount(1);
   };
 
-  private onPostShareRemove = (payload: {
-    postId: string;
-    userId: string;
-  }) => {
+  private onPostShareRemove = (payload: { postId: string; userId: string }) => {
     if (payload.userId === this.app.account?.id) return;
 
     const post = this.app.posts.get(payload.postId);
