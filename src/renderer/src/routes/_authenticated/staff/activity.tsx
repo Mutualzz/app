@@ -29,7 +29,9 @@ const globalActionKeys: Record<string, string> = {
   "user.restrict": "auditActions.global.restricted",
   "user.restrict_lift": "auditActions.global.liftedRestriction",
   "space.delete": "auditActions.global.shutDownSpace",
-  "space.lockdown": "auditActions.global.lockedDownSpace"
+  "space.lockdown": "auditActions.global.lockedDownSpace",
+  "changelog.publish": "auditActions.global.publishedChangelog",
+  "changelog.delete": "auditActions.global.deletedChangelog"
 };
 
 const formatStaffActionTarget = (

@@ -1,4 +1,4 @@
-import { AnimatedLogo } from "@components/Animated/AnimatedLogo";
+import { BrandLoader } from "@components/BrandLoader";
 import { Stack } from "@mutualzz/ui-web";
 
 const Loading = () => {
@@ -11,22 +11,7 @@ const Loading = () => {
       height="100%"
       minHeight="100vh"
     >
-      <AnimatedLogo
-        css={{
-          width: 72,
-          height: "auto",
-          display: "block"
-        }}
-        animate={{ scale: [0.95, 1, 0.95] }}
-        transition={{
-          scale: {
-            duration: 2.5,
-            repeat: Infinity,
-            repeatType: "loop",
-            ease: "easeInOut"
-          }
-        }}
-      />
+      <BrandLoader size={108} />
     </Stack>
   );
 };

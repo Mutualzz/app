@@ -47,6 +47,7 @@ export const MarkdownRenderer = ({
     });
 
     instance.disable("emphasis");
+    instance.disable("strikethrough");
     instance.disable("table");
     instance.disable("hr");
     instance.disable("escape");
@@ -185,13 +186,15 @@ export const MarkdownRenderer = ({
                 </Typography>
               );
             }
-            case "del": {
+            case "del":
+            case "s": {
               const children = domToReact(
                 (domNode.children ?? []) as any,
                 options
               );
               return (
                 <Typography
+                  whiteSpace="pre-wrap"
                   fontSize={level ? undefined : "inherit"}
                   textDecoration="line-through"
                   level={level}
@@ -293,8 +296,64 @@ export const MarkdownRenderer = ({
                 </Link>
               );
             }
+            case "ul": {
+              const children = domToReact(
+                (domNode.children ?? []) as any,
+                options
+              );
+              return (
+                <ul
+                  style={{
+                    margin: "0.5em 0",
+                    paddingLeft: "1.5em",
+                    listStyleType: "disc",
+                    listStylePosition: "outside"
+                  }}
+                >
+                  {children}
+                </ul>
+              );
+            }
+            case "ol": {
+              const children = domToReact(
+                (domNode.children ?? []) as any,
+                options
+              );
+              return (
+                <ol
+                  style={{
+                    margin: "0.5em 0",
+                    paddingLeft: "1.5em",
+                    listStyleType: "decimal",
+                    listStylePosition: "outside"
+                  }}
+                >
+                  {children}
+                </ol>
+              );
+            }
+            case "li": {
+              const children = domToReact(
+                (domNode.children ?? []) as any,
+                options
+              );
+              return (
+                <li style={{ marginBottom: "0.35em" }}>
+                  <Typography
+                    whiteSpace="pre-wrap"
+                    fontSize={level ? undefined : "inherit"}
+                    level={level}
+                    textColor={textColor}
+                  >
+                    {children}
+                  </Typography>
+                </li>
+              );
+            }
+            case "br":
+              return <br />;
             default:
-              return <></>;
+              return undefined;
           }
         }
       };

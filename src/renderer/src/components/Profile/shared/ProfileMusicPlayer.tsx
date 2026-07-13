@@ -2,9 +2,9 @@ import { Button } from "@components/Button";
 import {
   canPlayProfileMusic,
   getHiddenEmbedPlaybackUrl,
-  getProfileMusicPlaybackUrl,
   getProfileMusicLabel,
-  hasPreviewProfileMusic
+  hasPreviewProfileMusic,
+  resolveProfileMusicPlaybackUrl
 } from "@components/Profile/shared/profileMusicPlayer.utils";
 import {
   profileMusicVolumeToGain,
@@ -54,7 +54,11 @@ export const ProfileMusicPlayer = observer(
     const [volume, setVolume] = useState(readProfileMusicVolumePercent);
 
     const label = getProfileMusicLabel(music);
-    const playbackUrl = getProfileMusicPlaybackUrl(profile, music);
+    const [playbackUrl, setPlaybackUrl] = useState<string | null>(
+      music.audioHash
+        ? profile.constructProfileMusicAudioUrl(music.audioHash)
+        : (music.previewUrl ?? null)
+    );
     const usesAudioPlayback = hasPreviewProfileMusic(music);
     const playable = canPlayProfileMusic(profile, music);
     const openUrl = music.url.startsWith("http") ? music.url : null;
@@ -73,7 +77,12 @@ export const ProfileMusicPlayer = observer(
       seekingRef.current = false;
       setDuration(null);
       setCurrentTime(0);
-    }, [playbackUrl]);
+      setPlaybackUrl(
+        music.audioHash
+          ? profile.constructProfileMusicAudioUrl(music.audioHash)
+          : (music.previewUrl ?? null)
+      );
+    }, [music.audioHash, music.previewUrl, music.musicTrack?.id, music.musicTrack?.source, profile]);
 
     useEffect(() => {
       const audio = audioRef.current;
@@ -101,32 +110,43 @@ export const ProfileMusicPlayer = observer(
     };
 
     const startPlayback = async (silent = false) => {
-      if (usesAudioPlayback && playbackUrl) {
-        const audio = audioRef.current;
-        if (!audio) return;
+      if (usesAudioPlayback) {
+        const nextUrl = await resolveProfileMusicPlaybackUrl(
+          app,
+          profile,
+          music
+        );
+        if (nextUrl) {
+          setPlaybackUrl(nextUrl);
+          const audio = audioRef.current;
+          if (!audio) return;
 
-        if (audio.src !== playbackUrl) {
-          audio.src = playbackUrl;
-          audio.load();
+          if (audio.getAttribute("src") !== nextUrl) {
+            audio.src = nextUrl;
+            audio.load();
+          }
+
+          audio.volume = profileMusicVolumeToGain(volume);
+
+          try {
+            await audio.play();
+            setPlaying(true);
+            return;
+          } catch {
+            setPlaying(false);
+          }
         }
-
-        audio.volume = profileMusicVolumeToGain(volume);
-
-        try {
-          await audio.play();
-          setPlaying(true);
-        } catch {
-          setPlaying(false);
-          if (!silent) toast.error(tSettings("profile.music.couldNotPlay"));
-        }
-        return;
       }
 
       const nextEmbedSrc = getHiddenEmbedPlaybackUrl(music);
-      if (!nextEmbedSrc) return;
+      if (nextEmbedSrc) {
+        setEmbedSrc(nextEmbedSrc);
+        setPlaying(true);
+        return;
+      }
 
-      setEmbedSrc(nextEmbedSrc);
-      setPlaying(true);
+      if (!silent) toast.error(tSettings("profile.music.couldNotPlay"));
+      setPlaying(false);
     };
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -145,10 +165,10 @@ export const ProfileMusicPlayer = observer(
 
     const hiddenMedia = (
       <>
-        {playbackUrl && (
+        {usesAudioPlayback && (
           <audio
             ref={audioRef}
-            src={playbackUrl}
+            src={playbackUrl ?? undefined}
             preload="metadata"
             onPlay={() => setPlaying(true)}
             onPause={() => setPlaying(false)}
@@ -170,7 +190,6 @@ export const ProfileMusicPlayer = observer(
             }}
             onError={() => {
               setPlaying(false);
-              toast.error(tSettings("profile.music.couldNotLoad"));
             }}
             css={{
               position: "absolute",

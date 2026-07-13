@@ -108,8 +108,13 @@ export interface MutualzzAPI {
   updater: {
     getVersion(): Promise<string>;
     getPlatform(): Promise<string>;
-    getSavePath(version: string): Promise<string>;
-    download(url: string, savePath: string): Promise<{ path: string }>;
+    getLinuxPackage(): Promise<"appimage" | "debian" | "rpm" | "pacman">;
+    getSavePath(version: string, url: string): Promise<string>;
+    download(
+      url: string,
+      savePath: string,
+      sha256: string
+    ): Promise<{ path: string }>;
     apply(updatePath: string, version: string): Promise<void>;
   };
   idle: {
@@ -145,6 +150,7 @@ export interface MutualzzAPI {
         percent: number;
         downloaded: number;
         total: number;
+        bytesPerSecond?: number;
       }) => void
     ): () => void;
   };

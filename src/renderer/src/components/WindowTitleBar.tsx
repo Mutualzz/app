@@ -462,13 +462,24 @@ const WindowTitleBar = ({ onHeightChange }: WindowTitleBarProps) => {
           {isElectron && app.updater?.hasUpdate && (
             <Stack px={isMac ? 3.75 : 0} alignItems="center" spacing={2}>
               <IconButton
-                onClick={() => app.updater?.installUpdate()}
+                onClick={() => {
+                  if (app.updater?.stage === "ready") {
+                    void app.updater.installUpdate();
+                  }
+                }}
                 size={16}
                 variant="plain"
                 color="success"
                 padding={4}
+                title={
+                  app.updater.progressLabel ||
+                  (app.updater.stage === "ready" ? "Install update" : undefined)
+                }
                 css={{
-                  WebkitAppRegion: "no-drag"
+                  WebkitAppRegion: "no-drag",
+                  opacity: app.updater.stage === "ready" ? 1 : 0.75,
+                  pointerEvents:
+                    app.updater.stage === "ready" ? "auto" : "none"
                 }}
               >
                 <DownloadIcon weight="fill" />

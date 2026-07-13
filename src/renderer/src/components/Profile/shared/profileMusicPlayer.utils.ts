@@ -2,6 +2,7 @@ import type { APIProfileMusic } from "@mutualzz/types";
 import type { ProfileDraftState } from "@components/Profile/editor/profileEditor.utils";
 import type { UserProfile } from "@stores/objects/UserProfile";
 import i18n from "@renderer/i18n";
+import type { AppStore } from "@stores/App.store";
 
 const AUDIO_HASH_PATTERN = /^[a-f0-9_]+$/i;
 
@@ -23,12 +24,12 @@ export const isUploadedProfileMusic = (music: APIProfileMusic) =>
   !!music.audioHash;
 
 export const hasPreviewProfileMusic = (music: APIProfileMusic) =>
-  !!music.previewUrl || !!music.audioHash;
+  !!music.previewUrl || !!music.audioHash || !!music.musicTrack;
 
 export const getHiddenEmbedPlaybackUrl = (
   music: APIProfileMusic
 ): string | null => {
-  if (music.previewUrl || music.audioHash) return null;
+  if (music.audioHash) return null;
 
   if (music.youtube) {
     const base = music.youtube.embedUrl;
@@ -60,11 +61,48 @@ export const getProfileMusicPlaybackUrl = (
   return null;
 };
 
+export const resolveFreshTrackPreviewUrl = async (
+  app: AppStore,
+  source: "itunes" | "deezer",
+  id: string
+) => {
+  const data = await app.rest.get<{ previewUrl: string }>(
+    "/@me/profile/music/preview",
+    { source, id }
+  );
+  return data.previewUrl;
+};
+
+export const resolveProfileMusicPlaybackUrl = async (
+  app: AppStore,
+  profile: UserProfile,
+  music: APIProfileMusic
+) => {
+  if (music.audioHash) {
+    return profile.constructProfileMusicAudioUrl(music.audioHash);
+  }
+
+  if (music.musicTrack) {
+    try {
+      return await resolveFreshTrackPreviewUrl(
+        app,
+        music.musicTrack.source,
+        music.musicTrack.id
+      );
+    } catch {
+      return music.previewUrl ?? null;
+    }
+  }
+
+  return music.previewUrl ?? null;
+};
+
 export const canPlayProfileMusic = (
   profile: UserProfile,
   music: APIProfileMusic
 ) =>
   !!getProfileMusicPlaybackUrl(profile, music) ||
+  !!music.musicTrack ||
   !!getHiddenEmbedPlaybackUrl(music);
 
 export const getDraftProfileMusic = (

@@ -1,6 +1,6 @@
 const STORAGE_KEY = "mutualzz.profile-music-volume";
 
-export const DEFAULT_PROFILE_MUSIC_VOLUME = 10;
+export const DEFAULT_PROFILE_MUSIC_VOLUME = 45;
 
 export function readProfileMusicVolumePercent(): number {
   try {

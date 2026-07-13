@@ -34,7 +34,7 @@ export const StaffUserActionsSection = ({
   const flags = BitField.fromString(userFlags, user.flags.toString());
   const isDisabled = flags.has("Disabled");
   const isDeleted = flags.has("Deleted");
-  const isTargetFounder = flags.has("Founder");
+  const isProtectedTarget = flags.has("Founder") && !app.account?.isFounder;
   const isRestricted =
     !!user.restrictedUntil && new Date(user.restrictedUntil) > new Date();
 
@@ -53,7 +53,7 @@ export const StaffUserActionsSection = ({
       }
     });
 
-  if (isTargetFounder) {
+  if (isProtectedTarget) {
     return (
       <Typography level="body-sm" textColor="muted">
         {t("user.actions.founderProtectedBanner")}

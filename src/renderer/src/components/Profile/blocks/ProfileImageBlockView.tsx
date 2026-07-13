@@ -1,6 +1,7 @@
 import { ImageFormat, type ProfileImageBlock } from "@mutualzz/types";
 import {
   isProfileImageVideoUrl,
+  resolveProfileBackgroundFill,
   resolveProfileBlockCornerRadius,
   resolveProfileImageBlockUrl
 } from "@mutualzz/ui-core";
@@ -21,6 +22,7 @@ export const ProfileImageBlockView = ({
   const isVideo = displayUrl ? isProfileImageVideoUrl(displayUrl) : false;
   const objectFit = block.objectFit ?? "cover";
   const cornerRadius = resolveProfileBlockCornerRadius(block, "desktop");
+  const customBackground = block.backgroundColor?.trim() || null;
 
   return (
     <div
@@ -29,7 +31,9 @@ export const ProfileImageBlockView = ({
         height: "100%",
         borderRadius: cornerRadius,
         overflow: "hidden",
-        background: "rgba(0,0,0,0.15)",
+        background: customBackground
+          ? resolveProfileBackgroundFill(customBackground, "transparent")
+          : "rgba(0,0,0,0.15)",
         display: "flex",
         alignItems: "center",
         justifyContent: "center"

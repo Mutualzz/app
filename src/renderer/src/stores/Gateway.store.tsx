@@ -67,6 +67,8 @@ export const GatewayStatus = {
 export type GatewayStatus = (typeof GatewayStatus)[keyof typeof GatewayStatus];
 
 const RECONNECT_TIMEOUT = 5000;
+const RESUME_STORAGE_KEY = "mutualzz:gateway:resume";
+const RESUME_MAX_AGE_MS = 110_000;
 
 function mergeActivities(opts: {
   processActivities: PresenceActivity[];
@@ -171,6 +173,11 @@ export class GatewayStore {
     Snowflake,
     Promise<Channel | undefined>
   >();
+  private visibilityHandler: (() => void) | null = null;
+  private focusHandler: (() => void) | null = null;
+  private foregroundProbeTimer: ReturnType<typeof setTimeout> | null = null;
+  private foregroundProbeResolve: ((acked: boolean) => void) | null = null;
+  private backgroundPresenceStatus: PresenceStatus | null = null;
 
   constructor(private readonly app: AppStore) {
     makeAutoObservable(this, {}, { autoBind: true });
@@ -178,6 +185,196 @@ export class GatewayStore {
       this.handleScheduledStatusExpired;
     this.app.customStatus.onScheduledCustomStatusExpire =
       this.handleScheduledCustomStatusExpired;
+    this.restoreResumeState();
+    this.bindLifecycleHandlers();
+  }
+
+  private restoreResumeState() {
+    try {
+      const raw = localStorage.getItem(RESUME_STORAGE_KEY);
+      if (!raw) return;
+      const parsed = JSON.parse(raw) as {
+        sessionId?: string;
+        sequence?: number;
+        savedAt?: number;
+      };
+      if (
+        !parsed.sessionId ||
+        typeof parsed.sequence !== "number" ||
+        typeof parsed.savedAt !== "number"
+      ) {
+        localStorage.removeItem(RESUME_STORAGE_KEY);
+        return;
+      }
+      if (Date.now() - parsed.savedAt > RESUME_MAX_AGE_MS) {
+        localStorage.removeItem(RESUME_STORAGE_KEY);
+        return;
+      }
+      this.sessionId = parsed.sessionId;
+      this.sequence = parsed.sequence;
+    } catch {
+      localStorage.removeItem(RESUME_STORAGE_KEY);
+    }
+  }
+
+  private persistResumeState() {
+    if (!this.sessionId) {
+      localStorage.removeItem(RESUME_STORAGE_KEY);
+      return;
+    }
+    try {
+      localStorage.setItem(
+        RESUME_STORAGE_KEY,
+        JSON.stringify({
+          sessionId: this.sessionId,
+          sequence: this.sequence,
+          savedAt: Date.now(),
+        })
+      );
+    } catch {}
+  }
+
+  private clearResumeState() {
+    localStorage.removeItem(RESUME_STORAGE_KEY);
+  }
+
+  private bindLifecycleHandlers() {
+    if (typeof document === "undefined") return;
+
+    this.visibilityHandler = () => {
+      if (document.visibilityState === "hidden") {
+        this.persistResumeState();
+        const userId = this.app.account?.id;
+        if (
+          userId &&
+          this.readyState === GatewayStatus.OPEN &&
+          !this.backgroundPresenceStatus
+        ) {
+          const current = this.app.presence.get(userId)?.status ?? "online";
+          if (
+            current !== "idle" &&
+            current !== "offline" &&
+            current !== "invisible" &&
+            current !== "dnd"
+          ) {
+            this.backgroundPresenceStatus = current;
+            this.setStatus("idle");
+          }
+        }
+        return;
+      }
+
+      if (document.visibilityState === "visible") {
+        if (this.backgroundPresenceStatus) {
+          this.setStatus(this.backgroundPresenceStatus);
+          this.backgroundPresenceStatus = null;
+        }
+        void this.handleForeground();
+      }
+    };
+
+    this.focusHandler = () => {
+      void this.handleForeground();
+    };
+
+    document.addEventListener("visibilitychange", this.visibilityHandler);
+    window.addEventListener("focus", this.focusHandler);
+  }
+
+  private clearForegroundProbe() {
+    if (this.foregroundProbeTimer) {
+      clearTimeout(this.foregroundProbeTimer);
+      this.foregroundProbeTimer = null;
+    }
+    this.foregroundProbeResolve = null;
+  }
+
+  private teardownSocket() {
+    this.stopHeartbeat();
+    this.clearForegroundProbe();
+
+    if (!this.socket) {
+      this.readyState = GatewayStatus.CLOSED;
+      return;
+    }
+
+    const socket = this.socket;
+    socket.onopen = null;
+    socket.onmessage = null;
+    socket.onerror = null;
+    socket.onclose = null;
+
+    try {
+      if (
+        socket.readyState === WebSocket.OPEN ||
+        socket.readyState === WebSocket.CONNECTING
+      ) {
+        socket.close(4000, "reconnect");
+      }
+    } catch {}
+
+    this.socket = null;
+    this.readyState = GatewayStatus.CLOSED;
+  }
+
+  private forceReconnect() {
+    if (!this.app.token) return;
+
+    this.logger.debug("[Foreground] Forcing gateway reconnect");
+    this.markGatewayUnavailable();
+    this.reconnecting = false;
+    this.teardownSocket();
+    void this.connect(this.url);
+  }
+
+  private probeConnection(timeoutMs: number) {
+    return new Promise<boolean>((resolve) => {
+      if (
+        !this.socket ||
+        this.socket.readyState !== WebSocket.OPEN ||
+        this.readyState !== GatewayStatus.OPEN
+      ) {
+        resolve(false);
+        return;
+      }
+
+      this.clearForegroundProbe();
+      this.foregroundProbeResolve = resolve;
+      this.heartbeatAck = false;
+      this.sendHeartbeat();
+
+      this.foregroundProbeTimer = setTimeout(() => {
+        this.foregroundProbeTimer = null;
+        const done = this.foregroundProbeResolve;
+        this.foregroundProbeResolve = null;
+        done?.(this.heartbeatAck);
+      }, timeoutMs);
+    });
+  }
+
+  private async handleForeground() {
+    if (!this.app.token) return;
+
+    const socketOpen =
+      !!this.socket &&
+      this.socket.readyState === WebSocket.OPEN &&
+      this.readyState === GatewayStatus.OPEN;
+
+    if (!socketOpen) {
+      this.forceReconnect();
+      return;
+    }
+
+    const probeTimeout = Math.min(this.heartbeatInterval ?? 30_000, 10_000);
+    const acked = await this.probeConnection(probeTimeout);
+
+    if (!acked) {
+      this.forceReconnect();
+      return;
+    }
+
+    this.heartbeatAck = true;
+    this.startHeartbeat();
   }
 
   requestMemberListRange(spaceId: string, channelId: string, pageSize = 50) {
@@ -276,6 +473,7 @@ export class GatewayStore {
     this.readyState = GatewayStatus.CLOSING;
     this.logger.debug(`[Disconnect] ${this.url}`);
     this.manualDisconnect = true;
+    this.clearResumeState();
     this.socket.close(code, reason);
   }
 
@@ -613,7 +811,9 @@ export class GatewayStore {
     const scheduled = this.app.presence.scheduledStatus;
     if (scheduled && scheduled.until > Date.now()) return scheduled.status;
 
-    return this.app.presence.get(userId)?.status ?? "online";
+    const status = this.app.presence.get(userId)?.status ?? "online";
+    if (status === "offline") return "online";
+    return status;
   }
 
   private setupListeners() {
@@ -955,10 +1155,18 @@ export class GatewayStore {
     this.readyState = GatewayStatus.OPEN;
     this.reconnectTimeout = 0;
 
-    if (this.sessionId) {
+    if (this.sessionId && this.app.account) {
       this.logger.info("[Gateway] Resuming session");
       this.handleResume();
     } else {
+      if (this.sessionId && !this.app.account) {
+        this.logger.info(
+          "[Gateway] Resume state without local data; identifying"
+        );
+        this.sessionId = null;
+        this.sequence = 0;
+        this.clearResumeState();
+      }
       this.logger.info("[Gateway] Identifying");
       this.handleIdentify();
     }
@@ -1073,10 +1281,15 @@ export class GatewayStore {
     this.handleClose(event.code);
   };
 
+  private markGatewayUnavailable() {
+    this.app.setGatewayReady(false);
+  }
+
   private handleInvalidSession = (resumable: boolean) => {
     this.stopHeartbeat();
     this.socket = null;
     this.readyState = GatewayStatus.CLOSED;
+    this.markGatewayUnavailable();
 
     this.logger.debug(`Received invalid session; Can Resume: ${resumable}`);
     if (!resumable) {
@@ -1092,6 +1305,7 @@ export class GatewayStore {
     this.stopHeartbeat();
     this.socket = null;
     this.readyState = GatewayStatus.CLOSED;
+    this.markGatewayUnavailable();
 
     this.logger.debug(`[Gateway] -> Reconnect`);
     this.startReconnect();
@@ -1134,6 +1348,7 @@ export class GatewayStore {
       this.manualDisconnect = false;
       this.cleanup();
       this.reset();
+      this.markGatewayUnavailable();
       return;
     }
 
@@ -1141,6 +1356,7 @@ export class GatewayStore {
     this.stopHeartbeat();
     this.socket = null;
     this.readyState = GatewayStatus.CLOSED;
+    this.markGatewayUnavailable();
 
     if (code === GatewayCloseCodes.ForceLogout) {
       this.reset();
@@ -1166,6 +1382,7 @@ export class GatewayStore {
     this.sessionId = null;
     this.sequence = 0;
     this.readyState = GatewayStatus.CLOSED;
+    this.clearResumeState();
   };
 
   private startHeartbeat = () => {
@@ -1210,6 +1427,7 @@ export class GatewayStore {
       `[Heartbeat ACK Timeout] should reconnect in ${(RECONNECT_TIMEOUT / 1000).toFixed(2)} seconds`
     );
 
+    this.markGatewayUnavailable();
     this.socket?.close(4009);
 
     this.stopHeartbeat();
@@ -1238,12 +1456,18 @@ export class GatewayStore {
   private handleHeartbeatAck = () => {
     this.logger.debug("Received heartbeat ack");
     this.heartbeatAck = true;
+    const probe = this.foregroundProbeResolve;
+    if (probe) {
+      this.clearForegroundProbe();
+      probe(true);
+    }
   };
 
   private handleDispatch = (data: any) => {
     const { d, t, s } = data;
     this.logger.debug(`[Gateway] -> ${t}`);
     this.sequence = s;
+    this.persistResumeState();
 
     const handler = this.dispatchHandlers.get(t);
     if (!handler) {
@@ -1251,7 +1475,6 @@ export class GatewayStore {
       return;
     }
 
-    // To avoid issues with ETF mutability and etc., we do an inexpensive clone of the data for now
     const parsedData = normalizeJSON(d);
 
     handler(parsedData);
@@ -1259,6 +1482,18 @@ export class GatewayStore {
 
   private onResume = () => {
     this.logger.debug("[Resume] Session");
+
+    if (!this.app.account) {
+      this.logger.warn(
+        "[Resume] No local session data; falling back to Identify"
+      );
+      this.sessionId = null;
+      this.sequence = 0;
+      this.clearResumeState();
+      this.handleIdentify();
+      return;
+    }
+
     this.resubscribeUsers();
     this.app.setGatewayReady(true);
     this.startPresenceLoop();
@@ -1288,6 +1523,7 @@ export class GatewayStore {
     } = payload;
 
     this.sessionId = sessionId;
+    this.persistResumeState();
 
     this.app.setUser(user, settings);
     this.app.users.add(user);

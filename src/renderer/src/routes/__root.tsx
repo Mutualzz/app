@@ -39,6 +39,7 @@ import { AppHotkeys } from "@components/AppHotkeys";
 import { ContextMenuProvider } from "@contexts/ContextMenu.context";
 import { WindowTitleBarProvider } from "@contexts/WindowTitleBar.context";
 import { ModalRoot } from "@components/Modals/ModalRoot";
+import { ChangelogPrompt } from "@components/Changelog/ChangelogPrompt";
 import { ScreenSharePicker } from "@components/Voice/ScreenSharePicker";
 import { seo } from "@seo";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -225,6 +226,7 @@ function RootComponent() {
                     <ContextMenuProvider>
                       <ToastContainer position="top-center" />
                       <ModalRoot />
+                      <ChangelogPrompt />
                       <ScreenSharePicker />
                       <NavigationTracker />
                       <AppHotkeys />

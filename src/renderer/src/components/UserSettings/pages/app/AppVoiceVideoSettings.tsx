@@ -236,7 +236,11 @@ export const AppVoiceVideoSettings = observer(() => {
             {t("voice.inputMode")}
           </Typography>
           <RadioGroup
-            value={settings.voiceInputMode}
+            value={
+              voice.hasActiveVoiceTarget
+                ? voice.effectiveVoiceInputMode
+                : settings.voiceInputMode
+            }
             color="neutral"
             onChange={(_, value) => {
               if (value === "voice_activity" || value === "push_to_talk") {
@@ -244,12 +248,25 @@ export const AppVoiceVideoSettings = observer(() => {
               }
             }}
           >
-            <Radio value="voice_activity" label={t("voice.voiceActivity")} />
+            <Radio
+              value="voice_activity"
+              label={t("voice.voiceActivity")}
+              disabled={
+                voice.hasActiveVoiceTarget && !voice.canUseVadInCurrentChannel
+              }
+            />
             <Radio value="push_to_talk" label={t("voice.pushToTalk")} />
           </RadioGroup>
+          {voice.hasActiveVoiceTarget && !voice.canUseVadInCurrentChannel && (
+            <Typography level="body-xs" textColor="muted">
+              {t("voice.vadPermissionRequired")}
+            </Typography>
+          )}
         </Stack>
 
-        {settings.voiceInputMode === "push_to_talk" && (
+        {(voice.hasActiveVoiceTarget
+          ? voice.effectiveVoiceInputMode
+          : settings.voiceInputMode) === "push_to_talk" && (
           <Stack direction="column" spacing={1.5}>
             <Typography level="body-sm" textColor="muted">
               {t("voice.shortcut")}

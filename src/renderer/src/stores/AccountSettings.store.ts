@@ -90,18 +90,7 @@ export class AccountSettingsStore {
     makePersistable(this, {
       name: "AccountSettingsStore",
       properties: [
-        "currentTheme",
-        "currentIcon",
-        "preferredMode",
-        "preferEmbossed",
         "spellcheckEnabled",
-        "preferredSelfMute",
-        "preferredSelfDeaf",
-        "pushEnabled",
-        "pushDirectMessages",
-        "pushMentions",
-        "shareActivity",
-        "shareRecentActivity",
         "voiceInputMode",
         "voiceInputSensitivity",
         "voiceInputSensitivityAuto",
@@ -111,44 +100,7 @@ export class AccountSettingsStore {
         "pushToTalkKey",
         "screenShareIncludeAudio",
         "screenShareQuality",
-        "idleThresholdMs",
-        {
-          key: "favoriteEmojis",
-          serialize: (v: unknown) => (Array.isArray(v) ? [...v] : []),
-          deserialize: (v: unknown) =>
-            observable.array(Array.isArray(v) ? v : [])
-        },
-        {
-          key: "favoriteGifs",
-          serialize: (v: unknown) => (Array.isArray(v) ? [...v] : []),
-          deserialize: (v: unknown) =>
-            observable.array(Array.isArray(v) ? v : [])
-        },
-        {
-          key: "favoriteStickers",
-          serialize: (v: unknown) => (Array.isArray(v) ? [...v] : []),
-          deserialize: (v: unknown) =>
-            observable.array(Array.isArray(v) ? v : [])
-        },
-        {
-          key: "spacePositions",
-          serialize: (v: unknown) => {
-            if (v instanceof ObservableOrderedSet) return v.toArray();
-            if (Array.isArray(v)) return v.map(String);
-            if (v && typeof v === "object" && "toArray" in (v as any))
-              return (v as any).toArray().map(String);
-            return [];
-          },
-          deserialize: (v: unknown) =>
-            new ObservableOrderedSet<string>(
-              Array.isArray(v) ? v.map(String) : []
-            )
-        },
-        {
-          key: "updatedAt",
-          serialize: (d: unknown) => (d instanceof Date ? d.toISOString() : d),
-          deserialize: (v: unknown) => new Date(v as any)
-        }
+        "idleThresholdMs"
       ],
       storage: localStorage
     });
@@ -214,6 +166,7 @@ export class AccountSettingsStore {
 
   setCurrentTheme(theme: string | null) {
     this.currentTheme = theme;
+    this.flush();
   }
 
   toggleFavoriteEmoji(unified: string, skinTone: string | null = null) {
@@ -267,6 +220,7 @@ export class AccountSettingsStore {
 
   setCurrentIcon(icon?: string | null) {
     this.currentIcon = icon;
+    this.flush();
   }
 
   getPendingOverrides(): SettingsPatch | null {

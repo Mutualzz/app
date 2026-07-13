@@ -53,6 +53,8 @@ const categoryKeys = [
   "other"
 ] as const satisfies readonly SupportTicketCategory[];
 
+const PENDING_TICKET_STATUSES = new Set(["open", "awaiting_reply"]);
+
 const statusColors: Record<string, "warning" | "success" | "neutral" | "info"> =
   {
     open: "warning",
@@ -92,6 +94,12 @@ function SupportTicketsRoute() {
     });
 
   const tickets = data?.pages.flat() ?? [];
+  const hasPendingTicket = tickets.some((ticket) =>
+    PENDING_TICKET_STATUSES.has(ticket.status)
+  );
+  const canCreateTicket = !hasPendingTicket;
+  const showCreateForm =
+    canCreateTicket && (showNew || tickets.length === 0);
 
   const { mutate: createTicket, isPending: creating } = useMutation({
     mutationKey: ["support-create-ticket"],
@@ -141,7 +149,13 @@ function SupportTicketsRoute() {
         alignItems="center"
       >
         <Stack direction="column" spacing={1.5} width="100%" maxWidth={640}>
-          {(showNew || tickets.length === 0) && (
+          {hasPendingTicket && (
+            <Typography level="body-sm" textColor="muted">
+              {t("support.pendingTicketExists")}
+            </Typography>
+          )}
+
+          {showCreateForm && (
             <Paper
               variant="soft"
               borderRadius={12}
@@ -185,7 +199,7 @@ function SupportTicketsRoute() {
             </Paper>
           )}
 
-          {!showNew && tickets.length > 0 && (
+          {!showNew && tickets.length > 0 && canCreateTicket && (
             <Button
               variant="soft"
               css={{ alignSelf: "flex-start" }}

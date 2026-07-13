@@ -21,6 +21,7 @@ import {
   GavelIcon,
   LifebuoyIcon,
   MagnifyingGlassIcon,
+  NewspaperIcon,
   ShieldIcon,
   WarningIcon
 } from "@phosphor-icons/react";
@@ -181,6 +182,16 @@ function StaffIndexRoute() {
             >
               {t("nav.support")}
             </Button>
+            {app.account?.isDeveloper ? (
+              <Button
+                size="sm"
+                variant="soft"
+                startDecorator={<NewspaperIcon />}
+                onClick={() => navigate({ to: "/staff/changelogs" })}
+              >
+                {t("nav.changelogs")}
+              </Button>
+            ) : null}
           </Stack>
         }
       />

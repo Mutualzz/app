@@ -1,9 +1,11 @@
 import { Button } from "@components/Button";
+import { ProfileBlockBackgroundFill } from "@components/Profile/shared/ProfileBlockBackgroundFill";
 import {
   profileMusicVolumeToGain,
   readProfileMusicVolumePercent,
   writeProfileMusicVolumePercent
 } from "@components/Profile/shared/profileMusicPlayback.utils";
+import { resolveFreshTrackPreviewUrl } from "@components/Profile/shared/profileMusicPlayer.utils";
 import type { ProfileMusicBlock } from "@mutualzz/types";
 import { dynamicElevation, resolveProfileBlockCornerRadius } from "@mutualzz/ui-core";
 import { Box, Slider, Stack, Typography, useTheme } from "@mutualzz/ui-web";
@@ -18,6 +20,7 @@ import { useAppStore } from "@renderer/hooks/useStores";
 import type { UserProfile } from "@stores/objects/UserProfile";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { toast } from "react-toastify";
 
 function extractYoutubeVideoId(url: string): string | null {
   try {
@@ -63,22 +66,27 @@ export const ProfileMusicBlockView = ({ block, profile }: Props) => {
   const source = audioHash ? null : (block.track?.source ?? null);
 
   // Playback priority: uploaded audio > YouTube > 30s preview
-  const audioSrc = audioHash
+  const initialAudioSrc = audioHash
     ? profile.constructProfileMusicAudioUrl(audioHash)
     : (block.track?.previewUrl ?? block.previewUrl ?? null);
   const youtubeVideoId = block.youtubeUrl ? extractYoutubeVideoId(block.youtubeUrl) : null;
+  const [audioSrc, setAudioSrc] = useState<string | null>(initialAudioSrc);
 
   const playbackMode: "audio" | "youtube" | null =
-    audioSrc ? "audio" : youtubeVideoId ? "youtube" : null;
+    audioSrc || block.track
+      ? "audio"
+      : youtubeVideoId
+        ? "youtube"
+        : null;
 
   const isFullSong = !!audioHash;
   const isPlaying = playbackMode === "youtube" ? youtubeActive : playing;
 
   const sourceBadge = isFullSong
     ? tSettings("profile.music.fullSong")
-    : youtubeVideoId
+    : youtubeVideoId && !audioSrc && !block.track
       ? tSettings("profile.music.youtube")
-      : audioSrc
+      : audioSrc || block.track
         ? tSettings("profile.music.preview30s")
         : null;
   const cornerRadius = resolveProfileBlockCornerRadius(block, "desktop");
@@ -91,7 +99,8 @@ export const ProfileMusicBlockView = ({ block, profile }: Props) => {
     setCurrentTime(0);
     setPlaying(false);
     setYoutubeActive(false);
-  }, [audioSrc, youtubeVideoId]);
+    setAudioSrc(initialAudioSrc);
+  }, [initialAudioSrc, youtubeVideoId, block.track?.id, block.track?.source]);
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -107,7 +116,7 @@ export const ProfileMusicBlockView = ({ block, profile }: Props) => {
     return `${m}:${s.toString().padStart(2, "0")}`;
   };
 
-  const toggle = () => {
+  const toggle = async () => {
     if (playbackMode === "youtube") {
       setYoutubeActive((prev) => !prev);
       return;
@@ -115,15 +124,47 @@ export const ProfileMusicBlockView = ({ block, profile }: Props) => {
     if (playing) {
       audioRef.current?.pause();
       setPlaying(false);
-    } else {
-      const audio = audioRef.current;
-      if (!audio || !audioSrc) return;
-      if (audio.src !== audioSrc) {
-        audio.src = audioSrc;
-        audio.load();
+      return;
+    }
+
+    let nextSrc = audioSrc;
+    if (!audioHash && block.track) {
+      try {
+        nextSrc = await resolveFreshTrackPreviewUrl(
+          app,
+          block.track.source,
+          block.track.id
+        );
+        setAudioSrc(nextSrc);
+      } catch {
+        nextSrc = audioSrc;
       }
-      audio.volume = profileMusicVolumeToGain(volume);
-      audio.play().then(() => setPlaying(true)).catch(() => setPlaying(false));
+    }
+
+    const audio = audioRef.current;
+    if (!audio || !nextSrc) {
+      if (youtubeVideoId) {
+        setYoutubeActive(true);
+        return;
+      }
+      toast.error(tSettings("profile.music.couldNotPlay"));
+      return;
+    }
+    if (audio.getAttribute("src") !== nextSrc) {
+      audio.src = nextSrc;
+      audio.load();
+    }
+    audio.volume = profileMusicVolumeToGain(volume);
+    try {
+      await audio.play();
+      setPlaying(true);
+    } catch {
+      setPlaying(false);
+      if (youtubeVideoId) {
+        setYoutubeActive(true);
+        return;
+      }
+      toast.error(tSettings("profile.music.couldNotPlay"));
     }
   };
 
@@ -136,6 +177,7 @@ export const ProfileMusicBlockView = ({ block, profile }: Props) => {
       elevation={image ? 0 : app.settings?.preferEmbossed ? 5 : 1}
       css={{ overflow: "hidden", position: "relative", minWidth: 0, maxWidth: "100%" }}
     >
+      <ProfileBlockBackgroundFill backgroundColor={block.backgroundColor} />
       {image && (
         <Box
           css={{
@@ -159,7 +201,7 @@ export const ProfileMusicBlockView = ({ block, profile }: Props) => {
         }}
       />
 
-      {playbackMode === "audio" && audioSrc && (
+      {playbackMode === "audio" && (
         <audio
           ref={audioRef}
           preload="metadata"

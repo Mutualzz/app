@@ -47,31 +47,26 @@ export const StaffUserFlagsSection = ({ user, onUpdated }: Props) => {
         </Typography>
       </Stack>
 
-      {app.account?.isFounder &&
-        (flags.has("Founder") ? (
-          <Typography level="body-sm" textColor="muted">
-            {t("user.actions.founderProtectedBanner")}
+      {app.account?.isFounder && (
+        <Stack direction="column" spacing={0.75}>
+          <Typography level="title-sm" fontWeight={600}>
+            {t("user.flags.manage")}
           </Typography>
-        ) : (
           <Stack direction="column" spacing={0.75}>
-            <Typography level="title-sm" fontWeight={600}>
-              {t("user.flags.manage")}
-            </Typography>
-            <Stack direction="column" spacing={0.75}>
-              {staffToggleableUserFlags.map((f) => (
-                <Checkbox
-                  key={f}
-                  label={f}
-                  checked={flags.has(f)}
-                  disabled={settingFlag}
-                  onChange={(e) =>
-                    setFlag({ flag: f, enabled: e.target.checked })
-                  }
-                />
-              ))}
-            </Stack>
+            {staffToggleableUserFlags.map((f) => (
+              <Checkbox
+                key={f}
+                label={f}
+                checked={flags.has(f)}
+                disabled={settingFlag}
+                onChange={(e) =>
+                  setFlag({ flag: f, enabled: e.target.checked })
+                }
+              />
+            ))}
           </Stack>
-        ))}
+        </Stack>
+      )}
     </Stack>
   );
 };

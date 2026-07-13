@@ -32,6 +32,7 @@ import { Route as AuthenticatedAtmeRouteRouteImport } from "./routes/_authentica
 import { Route as AuthenticatedStaffIndexRouteImport } from "./routes/_authenticated/staff/index"
 import { Route as AuthenticatedFeedIndexRouteImport } from "./routes/_authenticated/feed/index"
 import { Route as AuthenticatedStaffSupportRouteImport } from "./routes/_authenticated/staff/support"
+import { Route as AuthenticatedStaffChangelogsRouteImport } from "./routes/_authenticated/staff/changelogs"
 import { Route as AuthenticatedStaffAppealsRouteImport } from "./routes/_authenticated/staff/appeals"
 import { Route as AuthenticatedStaffActivityRouteImport } from "./routes/_authenticated/staff/activity"
 import { Route as AuthenticatedFeedScheduledRouteImport } from "./routes/_authenticated/feed/scheduled"
@@ -168,6 +169,12 @@ const AuthenticatedStaffSupportRoute =
     path: "/support",
     getParentRoute: () => AuthenticatedStaffRouteRoute,
   } as any)
+const AuthenticatedStaffChangelogsRoute =
+  AuthenticatedStaffChangelogsRouteImport.update({
+    id: "/changelogs",
+    path: "/changelogs",
+    getParentRoute: () => AuthenticatedStaffRouteRoute,
+  } as any)
 const AuthenticatedStaffAppealsRoute =
   AuthenticatedStaffAppealsRouteImport.update({
     id: "/appeals",
@@ -298,6 +305,7 @@ export interface FileRoutesByFullPath {
   "/feed/scheduled": typeof AuthenticatedFeedScheduledRoute
   "/staff/activity": typeof AuthenticatedStaffActivityRoute
   "/staff/appeals": typeof AuthenticatedStaffAppealsRoute
+  "/staff/changelogs": typeof AuthenticatedStaffChangelogsRoute
   "/staff/support": typeof AuthenticatedStaffSupportRoute
   "/feed/": typeof AuthenticatedFeedIndexRoute
   "/staff/": typeof AuthenticatedStaffIndexRoute
@@ -337,6 +345,7 @@ export interface FileRoutesByTo {
   "/feed/scheduled": typeof AuthenticatedFeedScheduledRoute
   "/staff/activity": typeof AuthenticatedStaffActivityRoute
   "/staff/appeals": typeof AuthenticatedStaffAppealsRoute
+  "/staff/changelogs": typeof AuthenticatedStaffChangelogsRoute
   "/staff/support": typeof AuthenticatedStaffSupportRoute
   "/feed": typeof AuthenticatedFeedIndexRoute
   "/staff": typeof AuthenticatedStaffIndexRoute
@@ -380,6 +389,7 @@ export interface FileRoutesById {
   "/_authenticated/feed/scheduled": typeof AuthenticatedFeedScheduledRoute
   "/_authenticated/staff/activity": typeof AuthenticatedStaffActivityRoute
   "/_authenticated/staff/appeals": typeof AuthenticatedStaffAppealsRoute
+  "/_authenticated/staff/changelogs": typeof AuthenticatedStaffChangelogsRoute
   "/_authenticated/staff/support": typeof AuthenticatedStaffSupportRoute
   "/_authenticated/feed/": typeof AuthenticatedFeedIndexRoute
   "/_authenticated/staff/": typeof AuthenticatedStaffIndexRoute
@@ -423,6 +433,7 @@ export interface FileRouteTypes {
     | "/feed/scheduled"
     | "/staff/activity"
     | "/staff/appeals"
+    | "/staff/changelogs"
     | "/staff/support"
     | "/feed/"
     | "/staff/"
@@ -462,6 +473,7 @@ export interface FileRouteTypes {
     | "/feed/scheduled"
     | "/staff/activity"
     | "/staff/appeals"
+    | "/staff/changelogs"
     | "/staff/support"
     | "/feed"
     | "/staff"
@@ -504,6 +516,7 @@ export interface FileRouteTypes {
     | "/_authenticated/feed/scheduled"
     | "/_authenticated/staff/activity"
     | "/_authenticated/staff/appeals"
+    | "/_authenticated/staff/changelogs"
     | "/_authenticated/staff/support"
     | "/_authenticated/feed/"
     | "/_authenticated/staff/"
@@ -696,6 +709,13 @@ declare module "@tanstack/react-router" {
       path: "/support"
       fullPath: "/staff/support"
       preLoaderRoute: typeof AuthenticatedStaffSupportRouteImport
+      parentRoute: typeof AuthenticatedStaffRouteRoute
+    }
+    "/_authenticated/staff/changelogs": {
+      id: "/_authenticated/staff/changelogs"
+      path: "/changelogs"
+      fullPath: "/staff/changelogs"
+      preLoaderRoute: typeof AuthenticatedStaffChangelogsRouteImport
       parentRoute: typeof AuthenticatedStaffRouteRoute
     }
     "/_authenticated/staff/appeals": {
@@ -896,6 +916,7 @@ const AuthenticatedSpacesRouteRouteWithChildren =
 interface AuthenticatedStaffRouteRouteChildren {
   AuthenticatedStaffActivityRoute: typeof AuthenticatedStaffActivityRoute
   AuthenticatedStaffAppealsRoute: typeof AuthenticatedStaffAppealsRoute
+  AuthenticatedStaffChangelogsRoute: typeof AuthenticatedStaffChangelogsRoute
   AuthenticatedStaffSupportRoute: typeof AuthenticatedStaffSupportRoute
   AuthenticatedStaffIndexRoute: typeof AuthenticatedStaffIndexRoute
   AuthenticatedStaffUsersUserIdRouteRoute: typeof AuthenticatedStaffUsersUserIdRouteRoute
@@ -907,6 +928,7 @@ const AuthenticatedStaffRouteRouteChildren: AuthenticatedStaffRouteRouteChildren
   {
     AuthenticatedStaffActivityRoute: AuthenticatedStaffActivityRoute,
     AuthenticatedStaffAppealsRoute: AuthenticatedStaffAppealsRoute,
+    AuthenticatedStaffChangelogsRoute: AuthenticatedStaffChangelogsRoute,
     AuthenticatedStaffSupportRoute: AuthenticatedStaffSupportRoute,
     AuthenticatedStaffIndexRoute: AuthenticatedStaffIndexRoute,
     AuthenticatedStaffUsersUserIdRouteRoute:

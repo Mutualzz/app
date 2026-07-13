@@ -1,7 +1,6 @@
 import type { Theme as MzTheme } from "@emotion/react";
 import type { APITheme, Snowflake, ThemeType } from "@mutualzz/types";
 import { makeAutoObservable, observable, type ObservableMap } from "mobx";
-import { makePersistable } from "mobx-persist-store";
 import type { AppStore } from "./App.store";
 import { Theme } from "./objects/Theme";
 import { baseDarkTheme } from "@mutualzz/ui-core";
@@ -12,9 +11,7 @@ export class ThemeStore {
 
   currentType: ThemeType | null = null;
 
-  // NOTE: If the currentTheme is null, it means using the system preference
   currentTheme: string | null = null;
-  // NOTE: If the currentIcon is null, it means its adaptive to the theme
   currentIcon: string | null = null;
 
   constructor(private readonly app: AppStore) {
@@ -22,12 +19,6 @@ export class ThemeStore {
       baseThemes.map((t) => [t.id, new Theme(this.app, t)])
     );
     makeAutoObservable(this, {}, { autoBind: true });
-
-    makePersistable(this, {
-      name: "ThemeStore",
-      properties: ["currentTheme", "currentIcon"],
-      storage: localStorage
-    });
   }
 
   get all() {

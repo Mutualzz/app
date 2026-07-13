@@ -108,10 +108,17 @@ const api = {
       ipcRenderer.invoke("updater:get-version"),
     getPlatform: (): Promise<string> =>
       ipcRenderer.invoke("updater:get-platform"),
-    getSavePath: (version: string): Promise<string> =>
-      ipcRenderer.invoke("updater:get-save-path", version),
-    download: (url: string, savePath: string): Promise<{ path: string }> =>
-      ipcRenderer.invoke("updater:download", url, savePath),
+    getLinuxPackage: (): Promise<
+      "appimage" | "debian" | "rpm" | "pacman"
+    > => ipcRenderer.invoke("updater:get-linux-package"),
+    getSavePath: (version: string, url: string): Promise<string> =>
+      ipcRenderer.invoke("updater:get-save-path", version, url),
+    download: (
+      url: string,
+      savePath: string,
+      sha256: string
+    ): Promise<{ path: string }> =>
+      ipcRenderer.invoke("updater:download", url, savePath, sha256),
     apply: (updatePath: string, version: string): Promise<void> =>
       ipcRenderer.invoke("updater:apply", updatePath, version)
   },
@@ -155,6 +162,7 @@ const api = {
         percent: number;
         downloaded: number;
         total: number;
+        bytesPerSecond?: number;
       }) => void
     ) => on("updater:download-progress", callback)
   }

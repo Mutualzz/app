@@ -1,7 +1,11 @@
 import { Paper } from "@components/Paper";
+import { ProfileBlockBackgroundFill } from "@components/Profile/shared/ProfileBlockBackgroundFill";
 import type { ProfileStickerBlock } from "@mutualzz/types";
 import { ImageFormat, type Sizes } from "@mutualzz/types";
-import { resolveProfileBlockCornerRadius } from "@mutualzz/ui-core";
+import {
+  resolveProfileBackgroundFill,
+  resolveProfileBlockCornerRadius,
+} from "@mutualzz/ui-core";
 import { Stack, Typography } from "@mutualzz/ui-web";
 import { StickerIcon } from "@phosphor-icons/react";
 import { useAppStore } from "@renderer/hooks/useStores";
@@ -29,6 +33,7 @@ export const ProfileStickerBlockView = observer(
     const [sticker, setSticker] = useState<Expression | null>(null);
     const cornerRadius = resolveProfileBlockCornerRadius(block, "desktop");
     const expressionId = block.expressionId?.trim() ?? "";
+    const customBackground = block.backgroundColor?.trim() || null;
 
     useEffect(() => {
       if (!expressionId) {
@@ -59,7 +64,16 @@ export const ProfileStickerBlockView = observer(
       overflow: "hidden" as const,
       display: "flex",
       alignItems: "center",
-      justifyContent: "center"
+      justifyContent: "center",
+      position: "relative" as const,
+      ...(customBackground
+        ? {
+            background: resolveProfileBackgroundFill(
+              customBackground,
+              "transparent",
+            ),
+          }
+        : {}),
     };
 
     const placeholder = (
@@ -67,7 +81,7 @@ export const ProfileStickerBlockView = observer(
         alignItems="center"
         justifyContent="center"
         spacing={0.75}
-        css={{ opacity: 0.45, padding: 12, textAlign: "center" }}
+        css={{ opacity: 0.45, padding: 12, textAlign: "center", position: "relative" }}
       >
         <StickerIcon size={28} weight="fill" />
         <Typography level="body-xs">
@@ -89,7 +103,8 @@ export const ProfileStickerBlockView = observer(
               width: "100%",
               height: "100%",
               objectFit: "contain",
-              display: "block"
+              display: "block",
+              position: "relative",
             }}
           />
         </div>
@@ -104,6 +119,7 @@ export const ProfileStickerBlockView = observer(
         elevation={app.settings?.preferEmbossed ? 5 : 1}
         css={shellStyle}
       >
+        <ProfileBlockBackgroundFill backgroundColor={block.backgroundColor} />
         {placeholder}
       </Paper>
     );

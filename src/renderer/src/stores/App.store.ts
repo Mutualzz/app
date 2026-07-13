@@ -86,7 +86,7 @@ export class AppStore {
   versions: {
     app: string | null;
   } = {
-    app: "6.14.0"
+    app: __APP_VERSION__
   };
 
   readonly tokenStorage: TokenStorage;
@@ -297,7 +297,9 @@ export class AppStore {
     } catch (err) {
       this.logger.error("Failed to load token", err);
     } finally {
-      this.setGatewayReady(true);
+      if (!this.token) {
+        this.setGatewayReady(true);
+      }
     }
   }
 
@@ -361,6 +363,10 @@ export class AppStore {
     if (this.updater) void this.updater.startAutoChecker();
     if (this.settings) this.settings.startSyncing();
     await this.loadToken();
+
+    this.versions = {
+      app: __APP_VERSION__
+    };
 
     if (window.api) {
       try {

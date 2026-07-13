@@ -18,7 +18,12 @@ interface LatestJson {
   version: string;
   win?: { x64?: PlatformAsset };
   osx?: { universal?: PlatformAsset };
-  linux?: { debian?: PlatformAsset; appimage?: PlatformAsset };
+  linux?: {
+    debian?: PlatformAsset;
+    appimage?: PlatformAsset;
+    rpm?: PlatformAsset;
+    pacman?: PlatformAsset;
+  };
 }
 
 const LATEST_JSON_URL =
@@ -29,6 +34,7 @@ export class UpdaterStore {
   stage: UpdaterStage = "idle";
   downloadedBytes = 0;
   totalBytes = 0;
+  bytesPerSecond = 0;
   error: string | null = null;
   hasUpdate = false;
   updateVersion: string | null = null;
@@ -44,6 +50,30 @@ export class UpdaterStore {
   get progress() {
     if (!this.totalBytes) return 0;
     return this.downloadedBytes / this.totalBytes;
+  }
+
+  get progressLabel() {
+    const mb = (n: number) => (n / 1_048_576).toFixed(1);
+    if (this.stage === "downloading") {
+      if (this.totalBytes > 0) {
+        const pct = Math.round(this.progress * 100);
+        const eta =
+          this.bytesPerSecond > 0
+            ? formatEta(
+                (this.totalBytes - this.downloadedBytes) / this.bytesPerSecond
+              )
+            : "";
+        return `${pct}% · ${mb(this.downloadedBytes)}/${mb(this.totalBytes)} MB${eta ? ` · ${eta}` : ""}`;
+      }
+      return `${mb(this.downloadedBytes)} MB`;
+    }
+    if (this.stage === "ready" && this.updateVersion) {
+      return `Update ${this.updateVersion} ready`;
+    }
+    if (this.stage === "installing") {
+      return "Installing update…";
+    }
+    return "";
   }
 
   async startAutoChecker() {
@@ -124,18 +154,22 @@ export class UpdaterStore {
   private async downloadUpdate(asset: PlatformAsset, version: string) {
     this.logger.info("Downloading update from:", asset.url);
 
-    const savePath = await window.api.updater.getSavePath(version);
+    const savePath = await window.api.updater.getSavePath(version, asset.url);
 
-    // Listen for download progress
     const unsubscribe = window.api.events.onUpdaterDownloadProgress((data) => {
       runInAction(() => {
         this.downloadedBytes = data.downloaded;
         this.totalBytes = data.total;
+        this.bytesPerSecond = data.bytesPerSecond ?? 0;
       });
     });
 
     try {
-      const result = await window.api.updater.download(asset.url, savePath);
+      const result = await window.api.updater.download(
+        asset.url,
+        savePath,
+        asset.sha256
+      );
 
       runInAction(() => {
         this.updateFilePath = result.path;
@@ -159,20 +193,42 @@ export class UpdaterStore {
 
     if (platform === "darwin") return latest.osx?.universal ?? null;
     if (platform === "win32") return latest.win?.x64 ?? null;
-    if (platform === "linux")
-      return latest.linux?.debian ?? latest.linux?.appimage ?? null;
+    if (platform === "linux") {
+      const flavor = await window.api.updater.getLinuxPackage();
+      return (
+        latest.linux?.[flavor] ??
+        latest.linux?.appimage ??
+        latest.linux?.debian ??
+        null
+      );
+    }
 
     return null;
   }
 
   private isNewerVersion(remote: string, current: string): boolean {
-    const parse = (v: string) => v.split(".").map(Number);
-    const [rMaj, rMin, rPat] = parse(remote);
-    const [cMaj, cMin, cPat] = parse(current);
+    const normalize = (v: string) => v.trim().replace(/^v/i, "");
+    const parse = (v: string) => {
+      const [core, ...preParts] = normalize(v).split("-");
+      const nums = core.split(".").map((part) => {
+        const n = parseInt(part, 10);
+        return Number.isFinite(n) ? n : 0;
+      });
+      while (nums.length < 3) nums.push(0);
+      return { nums: nums.slice(0, 3), pre: preParts.join("-") };
+    };
 
-    if (rMaj !== cMaj) return rMaj > cMaj;
-    if (rMin !== cMin) return rMin > cMin;
-    return rPat > cPat;
+    const r = parse(remote);
+    const c = parse(current);
+
+    for (let i = 0; i < 3; i++) {
+      if (r.nums[i] !== c.nums[i]) return r.nums[i] > c.nums[i];
+    }
+
+    if (r.pre && !c.pre) return false;
+    if (!r.pre && c.pre) return true;
+    if (r.pre && c.pre) return r.pre > c.pre;
+    return false;
   }
 
   private setStage(stage: UpdaterStage) {
@@ -182,4 +238,11 @@ export class UpdaterStore {
   private setError(error: string | null) {
     this.error = error;
   }
+}
+
+function formatEta(secs: number) {
+  const s = Math.max(0, Math.round(secs));
+  if (s < 60) return `${s}s left`;
+  if (s < 3600) return `${Math.floor(s / 60)}m ${s % 60}s left`;
+  return `${Math.floor(s / 3600)}h ${Math.floor((s % 3600) / 60)}m left`;
 }

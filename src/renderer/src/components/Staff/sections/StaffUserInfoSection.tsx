@@ -37,7 +37,7 @@ export const StaffUserInfoSection = ({ user, onUpdated }: Props) => {
 
   const flags = BitField.fromString(userFlags, user.flags.toString());
   const isVerified = flags.has("Verified");
-  const isTargetFounder = flags.has("Founder");
+  const isProtectedTarget = flags.has("Founder") && !app.account?.isFounder;
 
   const [username, setUsername] = useState(user.username);
   const [globalName, setGlobalName] = useState(user.globalName ?? "");
@@ -91,7 +91,7 @@ export const StaffUserInfoSection = ({ user, onUpdated }: Props) => {
 
   return (
     <Stack direction="column" spacing={2} maxWidth={480}>
-      {isTargetFounder ? (
+      {isProtectedTarget ? (
         <Typography level="body-sm" textColor="muted">
           {t("user.actions.founderProtectedBanner")}
         </Typography>

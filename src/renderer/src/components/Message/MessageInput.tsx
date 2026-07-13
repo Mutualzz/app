@@ -101,6 +101,12 @@ export const MessageInput = observer(
           app.spaces.get(channel?.spaceId ?? "") ?? app.spaces.active
         )?.members.me?.canSendMessages(channel);
 
+    const canAttachFiles = isDM
+      ? !denySendingMessages
+      : !!((
+          app.spaces.get(channel?.spaceId ?? "") ?? app.spaces.active
+        )?.members.me?.canAttachFiles(channel) ?? false);
+
     useEffect(() => {
       app.pushComposer();
       return () => app.popComposer();
@@ -212,8 +218,8 @@ export const MessageInput = observer(
         const replyingTo = app.replyingTo;
         const repliedToId = replyingTo?.id;
         const mentionReply = app.replyMention;
-        const pendingFiles = files.slice();
-        const capturedPreviewUrls = previewUrls.slice();
+        const pendingFiles = canAttachFiles ? files.slice() : [];
+        const capturedPreviewUrls = canAttachFiles ? previewUrls.slice() : [];
 
         setNonce(nonce);
         const author = app.account.raw;
@@ -627,7 +633,7 @@ export const MessageInput = observer(
           gifPicker={!denySendingMessages && !message?.editing}
           stickerPicker={!denySendingMessages && !message?.editing}
           startContent={
-            !message?.editing && !denySendingMessages ? (
+            !message?.editing && !denySendingMessages && canAttachFiles ? (
               <Stack alignItems="center" justifyContent="center" mr={2.5}>
                 <input
                   ref={fileInputRef}

@@ -1,11 +1,46 @@
 const path = require("path");
 const fs = require("fs");
 
+function writeVersionFiles(resourcesDir, packager) {
+  fs.mkdirSync(resourcesDir, { recursive: true });
+
+  const appVersion = packager.appInfo.version;
+  fs.writeFileSync(path.join(resourcesDir, "app-version.txt"), appVersion);
+
+  let electronVersion = "";
+  try {
+    electronVersion = require(
+      path.join(packager.projectDir, "node_modules", "electron", "package.json")
+    ).version;
+  } catch {
+    try {
+      electronVersion = require("electron/package.json").version;
+    } catch {
+      electronVersion = "";
+    }
+  }
+
+  if (electronVersion) {
+    fs.writeFileSync(
+      path.join(resourcesDir, "electron-runtime-version.txt"),
+      electronVersion
+    );
+  }
+}
+
 exports.default = async ({ appOutDir, packager }) => {
   const platform = packager.platform.name;
+  const productName = packager.appInfo.productName;
 
   if (platform === "mac") {
-    const productName = packager.appInfo.productName;
+    const resourcesDir = path.join(
+      appOutDir,
+      `${productName}.app`,
+      "Contents",
+      "Resources"
+    );
+    writeVersionFiles(resourcesDir, packager);
+
     const macosDir = path.join(
       appOutDir,
       `${productName}.app`,
@@ -13,10 +48,10 @@ exports.default = async ({ appOutDir, packager }) => {
       "MacOS"
     );
 
-    const electronBin = path.join(macosDir, productName); // Mutualzz (Electron)
-    const renamedBin = path.join(macosDir, `${productName}App`); // MutualzzApp
+    const electronBin = path.join(macosDir, productName);
+    const renamedBin = path.join(macosDir, `${productName}App`);
     const updaterSrc = path.join(packager.projectDir, "resources", "updater");
-    const updaterDest = path.join(macosDir, productName); // Mutualzz (updater)
+    const updaterDest = path.join(macosDir, productName);
 
     if (fs.existsSync(renamedBin) && fs.existsSync(updaterDest)) {
       console.log("[afterPack] macOS: already wired, skipping");
@@ -44,15 +79,12 @@ exports.default = async ({ appOutDir, packager }) => {
     return;
   }
 
-  // ─── Linux ────────────────────────────────────────────────────────────────
-  // The AppImage/deb entry point is always the executableName binary (mutualzz).
-  // We rename it to mutualzz-bin and replace it with a tiny shell script that
-  // execs the Rust bootstrapper (updater), which then execs mutualzz-bin after
-  // the update check. This mirrors exactly what macOS does above.
   if (platform === "linux") {
-    const electronBin = path.join(appOutDir, "mutualzz");        // entry point (Electron)
-    const renamedBin  = path.join(appOutDir, "mutualzz-bin");    // Electron renamed
-    const updaterBin  = path.join(appOutDir, "updater");         // Rust bootstrapper
+    writeVersionFiles(path.join(appOutDir, "resources"), packager);
+
+    const electronBin = path.join(appOutDir, "mutualzz");
+    const renamedBin = path.join(appOutDir, "mutualzz-bin");
+    const updaterBin = path.join(appOutDir, "updater");
 
     if (!fs.existsSync(electronBin)) {
       throw new Error(`[afterPack] Linux: Electron binary not found: ${electronBin}`);
@@ -79,5 +111,9 @@ exports.default = async ({ appOutDir, packager }) => {
 
     console.log("[afterPack] Linux: entry point wiring complete");
     return;
+  }
+
+  if (platform === "windows") {
+    writeVersionFiles(path.join(appOutDir, "resources"), packager);
   }
 };

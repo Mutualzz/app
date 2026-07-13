@@ -2,6 +2,7 @@ import {
   getMutualSpaces,
   isProfileFriend
 } from "@components/Profile/shared/profileBlockData.utils";
+import { ProfileBlockBackgroundFill } from "@components/Profile/shared/ProfileBlockBackgroundFill";
 import { SpaceIcon } from "@components/Space/SpaceIcon";
 import { useAppStore } from "@hooks/useStores";
 import type { ProfileMutualBlock } from "@mutualzz/types";
@@ -38,8 +39,10 @@ export const ProfileMutualBlockView = observer(({ block, userId }: Props) => {
       borderRadius={cornerRadius}
       overflow="auto"
       elevation={app.settings?.preferEmbossed ? 5 : 1}
+      css={{ position: "relative" }}
     >
-      <Stack direction="row" spacing={1} alignItems="center">
+      <ProfileBlockBackgroundFill backgroundColor={block.backgroundColor} />
+      <Stack direction="row" spacing={1} alignItems="center" css={{ position: "relative" }}>
         <UsersThreeIcon size={18} weight="fill" />
         <Typography level="body-sm" fontWeight={700} css={{ fontSize: "var(--pcf-sm)" }}>
           {block.mode === "spaces"

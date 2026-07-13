@@ -1,7 +1,12 @@
 import { ProfileMarkdownContent } from "@components/Profile/shared/ProfileMarkdownContent";
 import { Theme } from "@emotion/react";
 import type { ProfileQuoteBlock } from "@mutualzz/types";
-import { dynamicElevation, formatColor, resolveProfileBlockCornerRadius } from "@mutualzz/ui-core";
+import {
+  dynamicElevation,
+  formatColor,
+  resolveProfileBackgroundFill,
+  resolveProfileBlockCornerRadius,
+} from "@mutualzz/ui-core";
 import { Box, Stack, Typography, useTheme } from "@mutualzz/ui-web";
 import { QuotesIcon } from "@phosphor-icons/react";
 import { useAppStore } from "@renderer/hooks/useStores";
@@ -47,6 +52,7 @@ export const ProfileQuoteBlockView = ({ block }: Props) => {
   const variant = block.variant ?? "default";
   const styles = variantStyles(app, theme)[variant];
   const cornerRadius = resolveProfileBlockCornerRadius(block, "desktop");
+  const customBackground = block.backgroundColor?.trim() || null;
 
   return (
     <Stack
@@ -57,10 +63,12 @@ export const ProfileQuoteBlockView = ({ block }: Props) => {
       p={1.5}
       borderRadius={cornerRadius}
       css={{
-        background: styles.background,
+        background: customBackground
+          ? resolveProfileBackgroundFill(customBackground, "transparent")
+          : styles.background,
         backdropFilter: "blur(10px)",
         border: styles.border,
-        overflow: "auto"
+        overflow: "auto",
       }}
     >
       <QuotesIcon size={20} weight="fill" color={styles.accent} />

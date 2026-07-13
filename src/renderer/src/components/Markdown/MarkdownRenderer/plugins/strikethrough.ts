@@ -2,28 +2,38 @@ import Token from "markdown-it/lib/token.mjs";
 import type { MarkdownItAsync } from "@components/Markdown/MarkdownItAsync";
 
 function processStrikethrough(tokens: Token[]) {
+  const regex = /~~([^~]+?)~~/g;
   for (let i = 0; i < tokens.length; i++) {
     const token = tokens[i];
     if (token.type === "text" && token.content.includes("~~")) {
-      const parts = token.content.split(/(~~)/);
+      let lastIndex = 0;
+      let match;
+      const content = token.content;
       const newTokens: Token[] = [];
-      let strikeOpen = false;
-      for (const part of parts) {
-        if (part === "~~") strikeOpen = !strikeOpen;
-        else if (strikeOpen && part) {
-          const strikeToken = new Token("strikethrough", "", 0);
-          strikeToken.content = part;
-          strikeToken.level = token.level;
-          newTokens.push(strikeToken);
-        } else if (part) {
+      regex.lastIndex = 0;
+      while ((match = regex.exec(content))) {
+        if (match.index > lastIndex) {
           const textToken = new Token("text", "", 0);
-          textToken.content = part;
+          textToken.content = content.slice(lastIndex, match.index);
           textToken.level = token.level;
           newTokens.push(textToken);
         }
+        const strikeToken = new Token("strikethrough", "", 0);
+        strikeToken.content = match[1];
+        strikeToken.level = token.level;
+        newTokens.push(strikeToken);
+        lastIndex = match.index + match[0].length;
       }
-      tokens.splice(i, 1, ...newTokens);
-      i += newTokens.length - 1;
+      if (lastIndex < content.length) {
+        const textToken = new Token("text", "", 0);
+        textToken.content = content.slice(lastIndex);
+        textToken.level = token.level;
+        newTokens.push(textToken);
+      }
+      if (newTokens.length > 0) {
+        tokens.splice(i, 1, ...newTokens);
+        i += newTokens.length - 1;
+      }
     } else if (token.children) {
       processStrikethrough(token.children);
     }

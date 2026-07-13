@@ -70,11 +70,22 @@ linux:
   target:
     - AppImage
     - deb
+    - rpm
+    - pacman
   maintainer: Mutualzz
   category: Social Networking
   artifactName: ${productName}.${ext}
 
 appImage:
+  artifactName: ${productName}.${ext}
+
+deb:
+  artifactName: ${productName}.${ext}
+
+rpm:
+  artifactName: ${productName}.${ext}
+
+pacman:
   artifactName: ${productName}.${ext}
 
 publish:

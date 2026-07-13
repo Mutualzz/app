@@ -158,10 +158,11 @@ function StaffUserRoute() {
           {section === "sessions" && (
             <StaffUserSessionsSection
               userId={user.id}
-              protectedTarget={BitField.fromString(
-                userFlags,
-                user.flags.toString()
-              ).has("Founder")}
+              protectedTarget={
+                BitField.fromString(userFlags, user.flags.toString()).has(
+                  "Founder"
+                ) && !app.account?.isFounder
+              }
             />
           )}
           {section === "notes" && <StaffUserNotesSection userId={user.id} />}

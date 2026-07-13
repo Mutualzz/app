@@ -21,6 +21,7 @@ import { ProfileImageGifPickerModal } from "@components/Profile/editor/ProfileIm
 import { ProfileStickerPickerModal } from "@components/Profile/editor/ProfileStickerPickerModal";
 import { ProfileBlockTypeInspector } from "@components/Profile/editor/ProfileBlockTypeInspector";
 import { ProfileBlockSizeInspector } from "@components/Profile/editor/ProfileBlockSizeInspector";
+import { ProfileBlockBackgroundColorInspector } from "@components/Profile/editor/ProfileBlockBackgroundColorInspector";
 import { ProfileBlockCornerRadiusInspector } from "@components/Profile/editor/ProfileBlockCornerRadiusInspector";
 import { getApiErrorMessage } from "@components/Profile/editor/profileEditor.utils";
 import { InputWithLabel } from "@components/InputWithLabel";
@@ -1139,6 +1140,11 @@ export const ProfileBlockInspector = observer(
                 })()}
 
               <ProfileBlockSizeInspector
+                block={selectedBlock}
+                updateSelectedBlock={updateSelectedBlock}
+              />
+
+              <ProfileBlockBackgroundColorInspector
                 block={selectedBlock}
                 updateSelectedBlock={updateSelectedBlock}
               />

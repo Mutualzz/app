@@ -1,4 +1,5 @@
 import { ProfileConnectionsChips } from "@components/Profile/shared/ProfileConnectionsChips";
+import { ProfileBlockBackgroundFill } from "@components/Profile/shared/ProfileBlockBackgroundFill";
 import { Paper } from "@components/Paper";
 import { useAppStore } from "@hooks/useStores";
 import type { ProfileConnectionsBlock, Snowflake } from "@mutualzz/types";
@@ -80,8 +81,10 @@ export const ProfileConnectionsBlockView = observer(
         borderRadius={cornerRadius}
         overflow="auto"
         elevation={app.settings?.preferEmbossed ? 5 : 1}
+        css={{ position: "relative" }}
       >
-        <Stack direction="row" spacing={1} alignItems="center">
+        <ProfileBlockBackgroundFill backgroundColor={block.backgroundColor} />
+        <Stack direction="row" spacing={1} alignItems="center" css={{ position: "relative" }}>
           <LinkSimpleIcon size={18} weight="fill" />
           <Typography
             level="body-sm"

@@ -52,9 +52,9 @@ export default defineConfig({
     plugins: [
       svgr(),
       replace({
-        __GIT_REVISION__: getGitRevision(),
-        __GIT_BRANCH__: getGitBranch(),
-        __APP_VERSION__: getVersion(),
+        __GIT_REVISION__: JSON.stringify(getGitRevision()),
+        __GIT_BRANCH__: JSON.stringify(getGitBranch()),
+        __APP_VERSION__: JSON.stringify(getVersion()),
         preventAssignment: true
       }),
       tanstackRouter({

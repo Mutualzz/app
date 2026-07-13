@@ -4,7 +4,10 @@ import type { AccountStore } from "@stores/Account.store";
 import type { User } from "@stores/objects/User";
 import type { UserProfile } from "@stores/objects/UserProfile";
 import { ImageFormat, type ProfileHeaderBlock } from "@mutualzz/types";
-import { resolveProfileBlockCornerRadius } from "@mutualzz/ui-core";
+import {
+  resolveProfileBackgroundFill,
+  resolveProfileBlockCornerRadius,
+} from "@mutualzz/ui-core";
 import { Box, Stack, Typography } from "@mutualzz/ui-web";
 import { observer } from "mobx-react-lite";
 import { Paper } from "@renderer/components/Paper";
@@ -39,6 +42,7 @@ export const ProfileHeaderBlockView = observer(
     const bio = bioOverride !== undefined ? bioOverride : profile.bio;
     const bannerHeight = block?.bannerHeight ?? DEFAULT_BANNER_HEIGHT;
     const bannerFocusY = block?.bannerFocusY ?? 50;
+    const headerBackground = block?.backgroundColor?.trim() || null;
     const cornerRadius = resolveProfileBlockCornerRadius(
       block ?? { type: "header" },
       "desktop",
@@ -52,7 +56,21 @@ export const ProfileHeaderBlockView = observer(
         overflow="hidden"
         borderRadius={cornerRadius}
         elevation={app.settings?.preferEmbossed ? 5 : 1}
+        css={{ position: "relative" }}
       >
+        {headerBackground ? (
+          <Box
+            css={{
+              position: "absolute",
+              inset: 0,
+              background: resolveProfileBackgroundFill(
+                headerBackground,
+                "transparent",
+              ),
+              pointerEvents: "none",
+            }}
+          />
+        ) : null}
         <Box
           width="100%"
           flexShrink={0}
@@ -61,7 +79,8 @@ export const ProfileHeaderBlockView = observer(
             minHeight: 64,
             overflow: "hidden",
             backgroundColor: bannerUrl ? undefined : user.accentColor,
-            position: "relative"
+            position: "relative",
+            zIndex: 0,
           }}
         >
           {bannerUrl ? (

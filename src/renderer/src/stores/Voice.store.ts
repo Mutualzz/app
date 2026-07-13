@@ -285,6 +285,7 @@ class MediasoupSession {
 
   setOutputDeviceId(id: string | null) {
     this.currentOutputDeviceId = id;
+    void this.applyOutputSink();
     if (!id) return;
     for (const [, meta] of this.streamMetadata) {
       if (meta.kind !== "audio" && meta.kind !== "screen-audio" && meta.element)
@@ -355,6 +356,11 @@ class MediasoupSession {
   setSelfDeaf(deafened: boolean) {
     this.isDeafened = deafened;
     this.applyMasterOutputRouting();
+    if (!deafened) {
+      for (const [, gainNode] of this.audioGainNodes) {
+        this.connectAudioGain(gainNode);
+      }
+    }
     for (const [, meta] of this.streamMetadata) {
       if (
         meta.kind !== "audio" &&
@@ -383,6 +389,7 @@ class MediasoupSession {
   private ensureAudioGraph() {
     if (!this.audioContext) {
       this.audioContext = new AudioContext({ sampleRate: 48000 });
+      void this.applyOutputSink();
     }
     this.ensureAudioContextActive();
     if (!this.masterOutputGain) {
@@ -393,6 +400,18 @@ class MediasoupSession {
       this.applyMasterOutputRouting();
     }
     return this.audioContext;
+  }
+
+  private async applyOutputSink() {
+    const ctx = this.audioContext as
+      | (AudioContext & { setSinkId?: (id: string) => Promise<void> })
+      | null;
+    if (!ctx?.setSinkId || !this.currentOutputDeviceId) return;
+    try {
+      await ctx.setSinkId(this.currentOutputDeviceId);
+    } catch (err) {
+      this.logger.warn("AudioContext setSinkId failed", err);
+    }
   }
 
   private applyMasterOutputRouting() {
@@ -428,6 +447,9 @@ class MediasoupSession {
   private connectAudioGain(gainNode: GainNode) {
     this.ensureAudioGraph();
     if (!this.masterOutputGain || this.isDeafened) return;
+    try {
+      gainNode.disconnect();
+    } catch {}
     try {
       gainNode.connect(this.masterOutputGain);
     } catch {}
@@ -622,10 +644,16 @@ class MediasoupSession {
   }
 
   private disposeMicPipeline() {
+    const producerId = this.micProducer?.id ?? null;
     try {
       this.micProducer?.close();
     } catch {}
     this.micProducer = null;
+    if (producerId && this.socket) {
+      void this.rpc(VoiceOpcodes.VoiceCloseProducer, { producerId }).catch(
+        () => {}
+      );
+    }
     if (this.rnnoiseDispose) {
       try {
         this.rnnoiseDispose();
@@ -675,7 +703,6 @@ class MediasoupSession {
     this.consumeAbortSignal = signal;
 
     const url = new URL(endpoint);
-    url.searchParams.set("token", token);
 
     const socket = await this.openSocket(url.toString(), signal);
     if (signal.aborted) {
@@ -684,6 +711,9 @@ class MediasoupSession {
     }
 
     this.socket = socket;
+    await this.rpc(VoiceOpcodes.VoiceAuthenticate, { token });
+    if (signal.aborted) return;
+
     const { rtpCapabilities } = await this.rpc(
       VoiceOpcodes.VoiceGetRTPCapabilities,
       {}
@@ -875,6 +905,12 @@ class MediasoupSession {
     if (this.blockedAudioProducers.size > 0) {
       this.blockedAudioProducers.clear();
       this.onAudioBlocked(false);
+    }
+
+    this.masterOutputGain = null;
+    if (this.audioContext) {
+      void this.audioContext.close().catch(() => {});
+      this.audioContext = null;
     }
   }
 
@@ -1149,6 +1185,23 @@ class MediasoupSession {
     if (this.speakingTickTimer != null) {
       clearTimeout(this.speakingTickTimer);
       this.speakingTickTimer = null;
+    }
+  }
+
+  private cleanupProducersForUser(userId: string) {
+    const producerIds = Array.from(this.producerUserMap.entries())
+      .filter(([, uid]) => uid === userId)
+      .map(([producerId]) => producerId);
+
+    for (const producerId of producerIds) {
+      this.cleanupProducer(producerId);
+      this.onVideoClosed(producerId);
+    }
+
+    for (const [producerId, pending] of this.pendingProducerIds) {
+      if (pending.userId === userId) {
+        this.pendingProducerIds.delete(producerId);
+      }
     }
   }
 
@@ -1487,6 +1540,17 @@ class MediasoupSession {
       return;
     }
 
+    if (op === VoiceDispatchEvents.VoicePeerLeft) {
+      const userId = data?.userId;
+      if (!userId) return;
+      this.cleanupProducersForUser(String(userId));
+      return;
+    }
+
+    if (op === VoiceDispatchEvents.VoicePeerJoined) {
+      return;
+    }
+
     if (op === VoiceDispatchEvents.VoiceNewProducer) {
       const { producerId, userId, mediaKind } = data ?? {};
       if (!producerId || !userId) return;
@@ -1707,14 +1771,23 @@ export class VoiceStore {
           return;
         }
 
+        if (reason === "Moved to another voice channel") {
+          runInAction(() => {
+            this.channelSwitchInProgress = true;
+            this.connectionStatus = "connecting";
+            this.connectionError = null;
+          });
+          try {
+            this.abortAndTeardown();
+            this.stopKeepAlive();
+          } catch {}
+          return;
+        }
+
         switch (reason) {
           case "superseded":
           case "Superseded by Minecraft voice": {
             reason = i18n.t("voice.errors.differentDevice", { ns: "chat" });
-            break;
-          }
-          case "Moved to another voice channel": {
-            reason = i18n.t("voice.errors.movedChannel", { ns: "chat" });
             break;
           }
         }
@@ -1915,6 +1988,18 @@ export class VoiceStore {
     return !!this.currentVoiceTarget;
   }
 
+  get canUseVadInCurrentChannel() {
+    const channel = this.channel;
+    if (!channel?.spaceId) return true;
+    const space = this.app.spaces.get(channel.spaceId);
+    return space?.members.me?.canUseVad(channel) ?? true;
+  }
+
+  get effectiveVoiceInputMode(): VoiceInputMode {
+    if (!this.canUseVadInCurrentChannel) return "push_to_talk";
+    return this.app.settings?.voiceInputMode ?? "voice_activity";
+  }
+
   get isInSpaceVoice() {
     return !!this.currentSpaceId;
   }
@@ -1964,7 +2049,7 @@ export class VoiceStore {
     const accountId = this.app.account?.id;
     if (userId !== accountId) return true;
     if (this.effectiveSelfMute) return false;
-    if (this.app.settings?.voiceInputMode === "push_to_talk") {
+    if (this.effectiveVoiceInputMode === "push_to_talk") {
       return this.pushToTalkActive;
     }
     return true;
@@ -1973,7 +2058,7 @@ export class VoiceStore {
   applyVoiceSettings() {
     const settings = this.app.settings;
     if (!settings) return;
-    this.session.setInputMode(settings.voiceInputMode);
+    this.session.setInputMode(this.effectiveVoiceInputMode);
     this.session.setSpaceMute(this.spaceMute);
     this.session.setMicrophoneVolume(settings.microphoneVolume);
     this.session.setSpeakerVolume(settings.speakerVolume);
@@ -2053,7 +2138,7 @@ export class VoiceStore {
       return;
     }
 
-    if (this.app.settings?.voiceInputMode !== "push_to_talk") return;
+    if (this.effectiveVoiceInputMode !== "push_to_talk") return;
     if (!this.hasActiveVoiceTarget) return;
     if (isEditableTarget(event.target)) return;
     if (event.code !== this.app.settings.pushToTalkKey) return;
@@ -2067,7 +2152,7 @@ export class VoiceStore {
   };
 
   private onPttKeyUp = (event: KeyboardEvent) => {
-    if (this.app.settings?.voiceInputMode !== "push_to_talk") return;
+    if (this.effectiveVoiceInputMode !== "push_to_talk") return;
     if (event.code !== this.app.settings?.pushToTalkKey) return;
 
     runInAction(() => {
@@ -2484,6 +2569,7 @@ export class VoiceStore {
       this.currentSessionId = null;
       this.connectionStatus = "idle";
       this.connectionError = null;
+      this.channelSwitchInProgress = false;
       this.cameraEnabled = false;
       this.screenShareEnabled = false;
       this.pushToTalkActive = false;
@@ -2512,6 +2598,7 @@ export class VoiceStore {
       this.connectionError = null;
       this.disconnectBanner = null;
       this.currentSessionId = null;
+      this.channelSwitchInProgress = false;
       this.cameraEnabled = false;
       this.screenShareEnabled = false;
       this.pushToTalkActive = false;
@@ -2529,7 +2616,7 @@ export class VoiceStore {
   }
 
   setMute(value: boolean) {
-    if (this.spaceDeaf) return;
+    if (this.spaceMute || this.spaceDeaf) return;
 
     if (this.selfDeaf && !value) {
       runInAction(() => {
@@ -2977,7 +3064,7 @@ export class VoiceStore {
 
       await this.session.connect(endpoint, token, signal);
 
-      if (signal.aborted) return; // superseded by leave/channel-switch
+      if (signal.aborted) return;
 
       try {
         await this.session.startMic(signal);
@@ -2987,7 +3074,6 @@ export class VoiceStore {
 
       if (signal.aborted) return;
 
-      // Start camera if enabled
       if (this.cameraEnabled) {
         try {
           await this.session.startCamera(signal);
@@ -3059,6 +3145,7 @@ export class VoiceStore {
       this.connectionError = message;
       this.currentVoiceTarget = null;
       this.currentSessionId = null;
+      this.channelSwitchInProgress = false;
       this.cameraEnabled = false;
       this.screenShareEnabled = false;
     });
