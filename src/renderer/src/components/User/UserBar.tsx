@@ -2,6 +2,7 @@ import { Paper } from "@components/Paper";
 import { UserAvatar } from "@components/User/UserAvatar";
 import { UserSettingsModal } from "@components/UserSettings/UserSettingsModal";
 import { useModal } from "@contexts/Modal.context";
+import { useElapsedClock } from "@hooks/useElapsedClock";
 import { useAppStore } from "@hooks/useStores";
 import { Stack, Typography, useTheme } from "@mutualzz/ui-web";
 import { observer } from "mobx-react-lite";
@@ -27,8 +28,9 @@ import { HeadphonesOffIcon } from "@components/icons/HeadphonesOffIcon";
 import { useNavigate } from "@tanstack/react-router";
 import { Tooltip } from "@components/Tooltip";
 import { useTranslation } from "react-i18next";
+import { NoiseSuppressionPopover } from "@components/User/NoiseSuppressionPopover";
+import { getChannelOccupiedAt } from "@utils/voiceElapsed";
 
-// NOTE: Instead of using hovered, you should use the Animated motion stuff, fix it. (Azrael)
 export const UserBar = observer(() => {
   const app = useAppStore();
   const navigate = useNavigate();
@@ -49,6 +51,17 @@ export const UserBar = observer(() => {
     voiceStatus === "failed";
 
   const account = app.account;
+  const selfVoiceState = account ? app.voiceStates.get(account.id) : undefined;
+  const selfElapsed = useElapsedClock(
+    selfVoiceState?.channelId && !selfVoiceState.disconnectedAt
+      ? selfVoiceState.joinedAt
+      : null
+  );
+  const channelElapsed = useElapsedClock(
+    voiceChannel
+      ? getChannelOccupiedAt(Array.from(voiceChannel.voiceStates.values()))
+      : null
+  );
 
   let voiceTitle: string;
   let voiceTitleColor: Color;
@@ -112,7 +125,7 @@ export const UserBar = observer(() => {
             alignItems="center"
             justifyContent="space-between"
           >
-            <Stack spacing={1.25} direction="column">
+            <Stack spacing={1.25} direction="column" minWidth={0} flex={1}>
               <Typography
                 variant="plain"
                 color={voiceTitleColor}
@@ -137,21 +150,36 @@ export const UserBar = observer(() => {
                   {voiceSubtitle}
                 </Typography>
               )}
+              {channelElapsed && (
+                <Typography
+                  level="label-xs"
+                  textColor="muted"
+                  css={{ fontVariantNumeric: "tabular-nums" }}
+                  aria-label={t("voice.channelOccupied", {
+                    time: channelElapsed
+                  })}
+                >
+                  {channelElapsed}
+                </Typography>
+              )}
             </Stack>
 
-            <Tooltip content={t("voice.connection.disconnect")} placement="top">
-              <IconButton
-                disabled={!canHangup}
-                onClick={() => app.voice.leave()}
-              >
-                <PhoneIcon
-                  weight="fill"
-                  css={{
-                    transform: "rotate(135deg)"
-                  }}
-                />
-              </IconButton>
-            </Tooltip>
+            <Stack direction="row" spacing={0.5} alignItems="center">
+              {voiceStatus === "connected" && <NoiseSuppressionPopover />}
+              <Tooltip content={t("voice.connection.disconnect")} placement="top">
+                <IconButton
+                  disabled={!canHangup}
+                  onClick={() => app.voice.leave()}
+                >
+                  <PhoneIcon
+                    weight="fill"
+                    css={{
+                      transform: "rotate(135deg)"
+                    }}
+                  />
+                </IconButton>
+              </Tooltip>
+            </Stack>
           </Stack>
 
           <Stack direction="row" spacing={1.25} width="100%">
@@ -307,15 +335,30 @@ export const UserBar = observer(() => {
           }}
         >
           <UserAvatar user={account} size={48} badge />
-          <Stack direction="column" minWidth={0}>
-            <Typography
-              level="body-sm"
-              whiteSpace="nowrap"
-              overflow="hidden"
-              textOverflow="ellipsis"
-            >
-              {account.displayName}
-            </Typography>
+          <Stack direction="column" minWidth={0} flex={1}>
+            <Stack direction="row" alignItems="center" spacing={1} minWidth={0}>
+              <Typography
+                level="body-sm"
+                whiteSpace="nowrap"
+                overflow="hidden"
+                textOverflow="ellipsis"
+                minWidth={0}
+              >
+                {account.displayName}
+              </Typography>
+              {selfElapsed && (
+                <Typography
+                  level="label-xs"
+                  textColor="muted"
+                  css={{ flexShrink: 0, fontVariantNumeric: "tabular-nums" }}
+                  aria-label={t("voice.elapsedInChannel", {
+                    time: selfElapsed
+                  })}
+                >
+                  {selfElapsed}
+                </Typography>
+              )}
+            </Stack>
             {hovered &&
               account.presence?.activities.length === 0 &&
               account.globalName && (

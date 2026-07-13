@@ -28,6 +28,16 @@ export const SCREEN_SHARE_QUALITY_OPTIONS: {
 
 export const DEFAULT_VOICE_INPUT_SENSITIVITY = 35;
 export const DEFAULT_PUSH_TO_TALK_KEY = "Space";
+export const DEFAULT_MICROPHONE_VOLUME = 100;
+export const DEFAULT_SPEAKER_VOLUME = 100;
+
+export function clampVoiceVolume(value: number) {
+  return Math.min(200, Math.max(0, Math.round(value)));
+}
+
+export function voiceVolumeToGain(volume: number) {
+  return clampVoiceVolume(volume) / 100;
+}
 
 export function formatKeyCode(code: string) {
   if (code === "Space") return "Space";

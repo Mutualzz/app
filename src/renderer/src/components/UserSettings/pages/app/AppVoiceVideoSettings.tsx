@@ -19,6 +19,7 @@ import { useEffect, useRef, useState } from "react";
 import { XIcon } from "@phosphor-icons/react";
 import { formatKeyCode } from "@utils/voiceSettings.utils";
 import { useTranslation } from "react-i18next";
+import { VoiceMicTest } from "./VoiceMicTest";
 
 export const AppVoiceVideoSettings = observer(() => {
   const { t } = useTranslation("settings");
@@ -162,6 +163,73 @@ export const AppVoiceVideoSettings = observer(() => {
             </Select>
           </Stack>
         </Stack>
+
+        <Stack direction="row" spacing={3} mt={2} width="100%">
+          <Stack direction="column" spacing={1.5} flex={1}>
+            <Typography level="body-sm" textColor="muted">
+              {t("voice.microphoneVolume")}
+            </Typography>
+            <Slider
+              min={0}
+              max={200}
+              color="neutral"
+              value={settings.microphoneVolume}
+              onChange={(_, value) =>
+                settings.setMicrophoneVolume(
+                  typeof value === "number" ? value : value[0]
+                )
+              }
+              valueLabelDisplay="auto"
+              valueLabelFormat={(v) => `${v}%`}
+            />
+          </Stack>
+          <Stack direction="column" spacing={1.5} flex={1}>
+            <Typography level="body-sm" textColor="muted">
+              {t("voice.speakerVolume")}
+            </Typography>
+            <Slider
+              min={0}
+              max={200}
+              color="neutral"
+              value={settings.speakerVolume}
+              onChange={(_, value) =>
+                settings.setSpeakerVolume(
+                  typeof value === "number" ? value : value[0]
+                )
+              }
+              valueLabelDisplay="auto"
+              valueLabelFormat={(v) => `${v}%`}
+            />
+          </Stack>
+        </Stack>
+
+        <Stack
+          direction="row"
+          alignItems="center"
+          justifyContent="space-between"
+          mt={2}
+        >
+          <Stack direction="column" spacing={0.5}>
+            <Typography>{t("voice.noiseSuppression")}</Typography>
+            <Typography level="body-xs" textColor="muted">
+              {t("voice.noiseSuppressionDescription")}
+            </Typography>
+          </Stack>
+          <Switch
+            checked={settings.noiseSuppression}
+            disabled={voice.noiseSuppressionPending}
+            onChange={() =>
+              settings.setNoiseSuppression(!settings.noiseSuppression)
+            }
+          />
+        </Stack>
+        {voice.noiseSuppressionPending && (
+          <Typography level="body-xs" textColor="muted">
+            {t("voice.noiseSuppressionApplying")}
+          </Typography>
+        )}
+
+        <VoiceMicTest />
 
         <Stack direction="column" spacing={2} mt={2}>
           <Typography level="body-sm" textColor="muted">

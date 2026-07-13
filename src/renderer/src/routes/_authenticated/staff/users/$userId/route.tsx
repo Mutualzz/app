@@ -12,6 +12,7 @@ import {
   type StaffSection
 } from "@components/Staff/staffSections";
 import { useAppStore } from "@hooks/useStores";
+import { BitField, userFlags } from "@mutualzz/bitfield";
 import type { APIPrivateUser } from "@mutualzz/types";
 import { Stack, Typography } from "@mutualzz/ui-web";
 import { UserIcon } from "@phosphor-icons/react";
@@ -155,7 +156,13 @@ function StaffUserRoute() {
             />
           )}
           {section === "sessions" && (
-            <StaffUserSessionsSection userId={user.id} />
+            <StaffUserSessionsSection
+              userId={user.id}
+              protectedTarget={BitField.fromString(
+                userFlags,
+                user.flags.toString()
+              ).has("Founder")}
+            />
           )}
           {section === "notes" && <StaffUserNotesSection userId={user.id} />}
           {section === "audit" && <StaffUserAuditSection userId={user.id} />}

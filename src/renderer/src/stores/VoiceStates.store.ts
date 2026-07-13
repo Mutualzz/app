@@ -28,6 +28,9 @@ export class VoiceStatesStore {
       existing.spaceDeaf = state.spaceDeaf;
       existing.sessionId = state.sessionId;
       existing.updatedAt = state.updatedAt;
+      if (typeof state.joinedAt === "number") {
+        existing.joinedAt = state.joinedAt;
+      }
       // Keep prior client when an update omits it (e.g. partial leave stubs).
       if (state.client != null || state.channelId == null) {
         existing.client = state.client;
@@ -79,7 +82,9 @@ export class VoiceStatesStore {
   }
 
   getAllByChannel(channelId?: Snowflake | null) {
-    return this.all.filter((state) => state.channelId === (channelId ?? null));
+    return this.all
+      .filter((state) => state.channelId === (channelId ?? null))
+      .sort((a, b) => (a.joinedAt ?? 0) - (b.joinedAt ?? 0));
   }
 
   getBySpace(userId: Snowflake, spaceId: Snowflake) {

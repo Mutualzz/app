@@ -1,5 +1,6 @@
 import { Paper } from "@components/Paper";
 import { UserAvatar } from "@components/User/UserAvatar";
+import { Tooltip } from "@components/Tooltip";
 import { useAppStore } from "@hooks/useStores";
 import type { ColorLike } from "@mutualzz/ui-core";
 import { IconSlot, Stack, Typography, useTheme } from "@mutualzz/ui-web";
@@ -7,7 +8,6 @@ import type { Space } from "@stores/objects/Space";
 import type { VoiceState } from "@stores/objects/VoiceState.ts";
 import { MicrophoneSlashIcon, VideoCameraIcon, CubeIcon } from "@phosphor-icons/react";
 import { HeadphonesOffIcon } from "../icons/HeadphonesOffIcon";
-import { Tooltip } from "@components/Tooltip";
 import { useTranslation } from "react-i18next";
 import { observer } from "mobx-react-lite";
 

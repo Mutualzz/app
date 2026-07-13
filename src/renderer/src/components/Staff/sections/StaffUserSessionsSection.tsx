@@ -10,9 +10,13 @@ import { toast } from "react-toastify";
 
 interface Props {
   userId: string;
+  protectedTarget?: boolean;
 }
 
-export const StaffUserSessionsSection = ({ userId }: Props) => {
+export const StaffUserSessionsSection = ({
+  userId,
+  protectedTarget = false
+}: Props) => {
   const app = useAppStore();
   const queryClient = useQueryClient();
   const { t } = useTranslation("staff");
@@ -50,6 +54,11 @@ export const StaffUserSessionsSection = ({ userId }: Props) => {
 
   return (
     <Stack direction="column" spacing={0.75} maxWidth={480}>
+      {protectedTarget && (
+        <Typography level="body-sm" textColor="muted">
+          {t("user.actions.founderProtectedBanner")}
+        </Typography>
+      )}
       {sessions.map((session) => (
         <Paper
           key={session.sessionId}
@@ -74,15 +83,17 @@ export const StaffUserSessionsSection = ({ userId }: Props) => {
               })}
             </Typography>
           </Stack>
-          <Button
-            size="sm"
-            color="danger"
-            variant="soft"
-            disabled={revokingSession}
-            onClick={() => revokeSession(session.sessionId)}
-          >
-            {t("user.sessions.revoke")}
-          </Button>
+          {!protectedTarget && (
+            <Button
+              size="sm"
+              color="danger"
+              variant="soft"
+              disabled={revokingSession}
+              onClick={() => revokeSession(session.sessionId)}
+            >
+              {t("user.sessions.revoke")}
+            </Button>
+          )}
         </Paper>
       ))}
     </Stack>

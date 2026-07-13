@@ -8,6 +8,9 @@ import {
   DEFAULT_PUSH_TO_TALK_KEY,
   DEFAULT_SCREEN_SHARE_QUALITY,
   DEFAULT_VOICE_INPUT_SENSITIVITY,
+  DEFAULT_MICROPHONE_VOLUME,
+  DEFAULT_SPEAKER_VOLUME,
+  clampVoiceVolume,
   type ScreenShareQuality,
   type VoiceInputMode
 } from "@utils/voiceSettings.utils";
@@ -36,6 +39,9 @@ export class AccountSettingsStore {
   voiceInputMode: VoiceInputMode = "voice_activity";
   voiceInputSensitivity = DEFAULT_VOICE_INPUT_SENSITIVITY;
   voiceInputSensitivityAuto = true;
+  noiseSuppression = true;
+  microphoneVolume = DEFAULT_MICROPHONE_VOLUME;
+  speakerVolume = DEFAULT_SPEAKER_VOLUME;
   pushToTalkKey = DEFAULT_PUSH_TO_TALK_KEY;
   screenShareIncludeAudio = false;
   screenShareQuality: ScreenShareQuality = DEFAULT_SCREEN_SHARE_QUALITY;
@@ -99,6 +105,9 @@ export class AccountSettingsStore {
         "voiceInputMode",
         "voiceInputSensitivity",
         "voiceInputSensitivityAuto",
+        "noiseSuppression",
+        "microphoneVolume",
+        "speakerVolume",
         "pushToTalkKey",
         "screenShareIncludeAudio",
         "screenShareQuality",
@@ -374,6 +383,22 @@ export class AccountSettingsStore {
 
   setVoiceInputSensitivityAuto(value: boolean) {
     this.voiceInputSensitivityAuto = value;
+    this.app.voice?.applyVoiceSettings();
+  }
+
+  setNoiseSuppression(value: boolean) {
+    if (this.noiseSuppression === value) return;
+    this.noiseSuppression = value;
+    void this.app.voice?.setNoiseSuppression(value);
+  }
+
+  setMicrophoneVolume(value: number) {
+    this.microphoneVolume = clampVoiceVolume(value);
+    this.app.voice?.applyVoiceSettings();
+  }
+
+  setSpeakerVolume(value: number) {
+    this.speakerVolume = clampVoiceVolume(value);
     this.app.voice?.applyVoiceSettings();
   }
 

@@ -31,12 +31,10 @@ export const StaffUserActionsSection = ({
   const app = useAppStore();
   const { openModal } = useModal();
   const { t } = useTranslation("staff");
-  const isDisabled = BitField.fromString(userFlags, user.flags.toString()).has(
-    "Disabled"
-  );
-  const isDeleted = BitField.fromString(userFlags, user.flags.toString()).has(
-    "Deleted"
-  );
+  const flags = BitField.fromString(userFlags, user.flags.toString());
+  const isDisabled = flags.has("Disabled");
+  const isDeleted = flags.has("Deleted");
+  const isTargetFounder = flags.has("Founder");
   const isRestricted =
     !!user.restrictedUntil && new Date(user.restrictedUntil) > new Date();
 
@@ -54,6 +52,14 @@ export const StaffUserActionsSection = ({
         );
       }
     });
+
+  if (isTargetFounder) {
+    return (
+      <Typography level="body-sm" textColor="muted">
+        {t("user.actions.founderProtectedBanner")}
+      </Typography>
+    );
+  }
 
   return (
     <Stack direction="column" spacing={1.25}>

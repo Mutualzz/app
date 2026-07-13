@@ -23,6 +23,8 @@ import { useMenu } from "@contexts/ContextMenu.context";
 import { ChannelMemberItem } from "@components/Channel/ChannelMemberItem";
 import { IconButton } from "@components/IconButton";
 import { SpaceInviteToSpaceModal } from "@components/Space/SpaceInviteToSpaceModal";
+import { useElapsedClock } from "@hooks/useElapsedClock";
+import { getChannelOccupiedAt } from "@utils/voiceElapsed";
 import {
   CaretRightIcon,
   ChatCircleIcon,
@@ -33,6 +35,7 @@ import {
 } from "@phosphor-icons/react";
 import { ChannelSettingsModal } from "@components/ChannelSettings/ChannelSettingsModal";
 import { HoverRevealActions } from "../HoverRevealActions";
+import { useTranslation } from "react-i18next";
 
 interface Props extends PaperProps {
   space: Space;
@@ -61,6 +64,7 @@ export const ChannelListItem = observer(
     const { openModal } = useModal();
     const app = useAppStore();
     const navigate = useNavigate();
+    const { t } = useTranslation("chat");
     const [wrapperHovered, setWrapperHovered] = useState(false);
 
     const isCategory = channel.type === ChannelType.Category;
@@ -130,6 +134,8 @@ export const ChannelListItem = observer(
     };
 
     const voiceStates = Array.from(channel.voiceStates.values());
+    const channelOccupiedAt = getChannelOccupiedAt(voiceStates);
+    const channelElapsed = useElapsedClock(channelOccupiedAt);
 
     return (
       <Stack
@@ -225,6 +231,10 @@ export const ChannelListItem = observer(
               textColor={isCategory && wrapperHovered ? "primary" : "secondary"}
               weight={isCategory ? 400 : isUnread || active ? 700 : 600}
               letterSpacing={isCategory ? 0.5 : 0}
+              css={{ minWidth: 0 }}
+              whiteSpace="nowrap"
+              overflow="hidden"
+              textOverflow="ellipsis"
             >
               {channel.name}
             </Typography>
@@ -240,7 +250,7 @@ export const ChannelListItem = observer(
             )}
           </Stack>
 
-          <Stack direction="row" alignItems="center">
+          <Stack direction="row" alignItems="center" spacing={1}>
             {isCategory && canManageChannel && (
               <IconButton
                 size={12}
@@ -261,10 +271,31 @@ export const ChannelListItem = observer(
                 direction="row"
                 alignItems="center"
                 spacing={0.5}
-                minWidth="2.5rem"
                 justifyContent="flex-end"
+                css={{
+                  minWidth:
+                    (!wrapperHovered &&
+                      (channelElapsed ||
+                        mentionCount > 0 ||
+                        (isUnread && !active))) ||
+                    wrapperHovered
+                      ? undefined
+                      : "2.5rem"
+                }}
               >
-                {mentionCount > 0 && (
+                {!wrapperHovered && channelElapsed && (
+                  <Typography
+                    level="label-xs"
+                    textColor="muted"
+                    css={{ flexShrink: 0, fontVariantNumeric: "tabular-nums" }}
+                    aria-label={t("voice.channelOccupied", {
+                      time: channelElapsed
+                    })}
+                  >
+                    {channelElapsed}
+                  </Typography>
+                )}
+                {!wrapperHovered && mentionCount > 0 && (
                   <Stack
                     alignItems="center"
                     justifyContent="center"
@@ -287,7 +318,7 @@ export const ChannelListItem = observer(
                     </Typography>
                   </Stack>
                 )}
-                {isUnread && mentionCount === 0 && !active && (
+                {!wrapperHovered && isUnread && mentionCount === 0 && !active && (
                   <Stack
                     css={{
                       width: 8,
@@ -297,8 +328,8 @@ export const ChannelListItem = observer(
                     }}
                   />
                 )}
-                {(wrapperHovered || active) && (
-                  <HoverRevealActions visible={wrapperHovered || active}>
+                {wrapperHovered && (
+                  <HoverRevealActions visible={wrapperHovered}>
                     {channel.type === ChannelType.Voice && (
                       <IconButton
                         css={{ borderRadius: 9999 }}

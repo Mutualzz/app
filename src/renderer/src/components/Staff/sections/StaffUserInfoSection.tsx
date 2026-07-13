@@ -35,9 +35,9 @@ export const StaffUserInfoSection = ({ user, onUpdated }: Props) => {
   const app = useAppStore();
   const { t } = useTranslation("staff");
 
-  const isVerified = BitField.fromString(userFlags, user.flags.toString()).has(
-    "Verified"
-  );
+  const flags = BitField.fromString(userFlags, user.flags.toString());
+  const isVerified = flags.has("Verified");
+  const isTargetFounder = flags.has("Founder");
 
   const [username, setUsername] = useState(user.username);
   const [globalName, setGlobalName] = useState(user.globalName ?? "");
@@ -91,35 +91,41 @@ export const StaffUserInfoSection = ({ user, onUpdated }: Props) => {
 
   return (
     <Stack direction="column" spacing={2} maxWidth={480}>
-      <Stack direction="column" spacing={1.25}>
-        <InputWithLabel
-          label={t("user.info.username")}
-          name="username"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          apiError={errors.username}
-        />
-        <InputWithLabel
-          label={t("user.info.displayName")}
-          name="globalName"
-          placeholder={t("user.info.noDisplayName")}
-          value={globalName}
-          onChange={(e) => setGlobalName(e.target.value)}
-          apiError={errors.globalName}
-        />
-        <Button
-          color="primary"
-          disabled={
-            isPending ||
-            !trimmedUsername ||
-            (!usernameChanged && !globalNameChanged)
-          }
-          onClick={() => saveProfile()}
-          css={{ alignSelf: "flex-start" }}
-        >
-          {t("user.info.saveChanges")}
-        </Button>
-      </Stack>
+      {isTargetFounder ? (
+        <Typography level="body-sm" textColor="muted">
+          {t("user.actions.founderProtectedBanner")}
+        </Typography>
+      ) : (
+        <Stack direction="column" spacing={1.25}>
+          <InputWithLabel
+            label={t("user.info.username")}
+            name="username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            apiError={errors.username}
+          />
+          <InputWithLabel
+            label={t("user.info.displayName")}
+            name="globalName"
+            placeholder={t("user.info.noDisplayName")}
+            value={globalName}
+            onChange={(e) => setGlobalName(e.target.value)}
+            apiError={errors.globalName}
+          />
+          <Button
+            color="primary"
+            disabled={
+              isPending ||
+              !trimmedUsername ||
+              (!usernameChanged && !globalNameChanged)
+            }
+            onClick={() => saveProfile()}
+            css={{ alignSelf: "flex-start" }}
+          >
+            {t("user.info.saveChanges")}
+          </Button>
+        </Stack>
+      )}
 
       <Stack direction="column" spacing={0.75}>
         <Typography level="title-sm" fontWeight={600}>

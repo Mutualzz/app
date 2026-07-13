@@ -21,6 +21,7 @@ import {
   isEditableTarget,
   sensitivityToThreshold,
   clampUserVolume,
+  voiceVolumeToGain,
   type ScreenShareCaptureConfig,
   type ScreenShareQuality,
   type VoiceInputMode
@@ -31,6 +32,10 @@ import {
   openScreenCaptureSettings,
   type ScreenCaptureSource
 } from "@utils/screenCapture.utils";
+import {
+  createMicAudioContext,
+  createMicProcessedTrack
+} from "@utils/rnnoiseFilter";
 import i18n from "@renderer/i18n";
 import { isElectron } from "@utils/index";
 
@@ -125,6 +130,11 @@ class MediasoupSession {
   private receiverTransport: mediasoupClient.types.Transport | null = null;
 
   private micTrack: MediaStreamTrack | null = null;
+  private rawMicTrack: MediaStreamTrack | null = null;
+  private rnnoiseDispose: (() => void) | null = null;
+  private micGainNode: GainNode | null = null;
+  private micProcessContext: AudioContext | null = null;
+  private masterOutputGain: GainNode | null = null;
   private cameraTrack: MediaStreamTrack | null = null;
   private screenTrack: MediaStreamTrack | null = null;
   private screenAudioTrack: MediaStreamTrack | null = null;
@@ -200,6 +210,9 @@ class MediasoupSession {
     ) => void,
     private readonly onMicFailed: () => void,
     private readonly onAudioBlocked: (blocked: boolean) => void,
+    private readonly getNoiseSuppression: () => boolean,
+    private readonly getMicrophoneVolume: () => number,
+    private readonly getSpeakerVolume: () => number,
     getSpeakingThreshold: () => number,
     shouldReportSpeaking: (userId: string) => boolean
   ) {
@@ -341,17 +354,7 @@ class MediasoupSession {
 
   setSelfDeaf(deafened: boolean) {
     this.isDeafened = deafened;
-    if (this.audioContext) {
-      for (const [, gainNode] of this.audioGainNodes) {
-        try {
-          if (deafened) {
-            gainNode.disconnect();
-          } else {
-            gainNode.connect(this.audioContext.destination);
-          }
-        } catch {}
-      }
-    }
+    this.applyMasterOutputRouting();
     for (const [, meta] of this.streamMetadata) {
       if (
         meta.kind !== "audio" &&
@@ -362,6 +365,45 @@ class MediasoupSession {
           meta.element.muted = deafened;
         } catch {}
       }
+    }
+  }
+
+  setMicrophoneVolume(volume: number) {
+    if (this.micGainNode) {
+      this.micGainNode.gain.value = voiceVolumeToGain(volume);
+    }
+  }
+
+  setSpeakerVolume(volume: number) {
+    if (this.masterOutputGain) {
+      this.masterOutputGain.gain.value = voiceVolumeToGain(volume);
+    }
+  }
+
+  private ensureAudioGraph() {
+    if (!this.audioContext) {
+      this.audioContext = new AudioContext({ sampleRate: 48000 });
+    }
+    this.ensureAudioContextActive();
+    if (!this.masterOutputGain) {
+      this.masterOutputGain = this.audioContext.createGain();
+      this.masterOutputGain.gain.value = voiceVolumeToGain(
+        this.getSpeakerVolume()
+      );
+      this.applyMasterOutputRouting();
+    }
+    return this.audioContext;
+  }
+
+  private applyMasterOutputRouting() {
+    if (!this.audioContext || !this.masterOutputGain) return;
+    try {
+      this.masterOutputGain.disconnect();
+    } catch {}
+    if (!this.isDeafened) {
+      try {
+        this.masterOutputGain.connect(this.audioContext.destination);
+      } catch {}
     }
   }
 
@@ -384,9 +426,10 @@ class MediasoupSession {
   }
 
   private connectAudioGain(gainNode: GainNode) {
-    if (!this.audioContext || this.isDeafened) return;
+    this.ensureAudioGraph();
+    if (!this.masterOutputGain || this.isDeafened) return;
     try {
-      gainNode.connect(this.audioContext.destination);
+      gainNode.connect(this.masterOutputGain);
     } catch {}
   }
 
@@ -573,18 +616,58 @@ class MediasoupSession {
   }
 
   async restartMic(signal: AbortSignal) {
+    this.disposeMicPipeline();
+    if (!this.sendTransport) return;
+    await this.startMic(signal);
+  }
+
+  private disposeMicPipeline() {
     try {
       this.micProducer?.close();
     } catch {}
     this.micProducer = null;
+    if (this.rnnoiseDispose) {
+      try {
+        this.rnnoiseDispose();
+      } catch {}
+      this.rnnoiseDispose = null;
+    }
+    this.micGainNode = null;
     if (this.micTrack) {
       try {
         this.micTrack.stop();
       } catch {}
       this.micTrack = null;
     }
-    if (!this.sendTransport) return;
-    await this.startMic(signal);
+    if (this.rawMicTrack) {
+      try {
+        this.rawMicTrack.stop();
+      } catch {}
+      this.rawMicTrack = null;
+    }
+    if (this.micProcessContext) {
+      void this.micProcessContext.close().catch(() => {});
+      this.micProcessContext = null;
+    }
+  }
+
+  private ensureMicProcessContext() {
+    if (
+      !this.micProcessContext ||
+      this.micProcessContext.state === "closed" ||
+      this.micProcessContext.sampleRate !== 48000
+    ) {
+      if (this.micProcessContext && this.micProcessContext.state !== "closed") {
+        void this.micProcessContext.close().catch(() => {});
+      }
+      this.micProcessContext = createMicAudioContext();
+    }
+    if (this.micProcessContext.state === "suspended") {
+      void this.micProcessContext.resume().catch((err) => {
+        this.logger.warn("Mic AudioContext resume failed", err);
+      });
+    }
+    return this.micProcessContext;
   }
 
   async connect(endpoint: string, token: string, signal: AbortSignal) {
@@ -712,16 +795,7 @@ class MediasoupSession {
     }
 
     // Stop local tracks
-    try {
-      this.micProducer?.close();
-    } catch {}
-    this.micProducer = null;
-    if (this.micTrack) {
-      try {
-        this.micTrack.stop();
-      } catch {}
-      this.micTrack = null;
-    }
+    this.disposeMicPipeline();
 
     try {
       this.cameraProducer?.close();
@@ -807,7 +881,8 @@ class MediasoupSession {
   async startMic(signal: AbortSignal) {
     if (!this.sendTransport) return;
 
-    const media = await this.acquireMicMedia(signal);
+    const wantRnnoise = this.getNoiseSuppression();
+    const media = await this.acquireMicMedia(signal, wantRnnoise);
     if (!media) {
       this.logger.warn("Mic capture failed after exhausting device fallbacks");
       this.setSelfMute(true);
@@ -827,11 +902,49 @@ class MediasoupSession {
       return;
     }
 
-    this.micTrack = audioTrack;
-    audioTrack.addEventListener(
+    this.rawMicTrack = audioTrack;
+    const audioContext = this.ensureMicProcessContext();
+
+    let processHandle: Awaited<ReturnType<typeof createMicProcessedTrack>>;
+    try {
+      processHandle = await createMicProcessedTrack(audioContext, audioTrack, {
+        useRnnoise: wantRnnoise,
+        gain: voiceVolumeToGain(this.getMicrophoneVolume())
+      });
+    } catch (err) {
+      this.logger.warn("Mic processing graph failed", err);
+      media.getTracks().forEach((t) => t.stop());
+      this.rawMicTrack = null;
+      this.setSelfMute(true);
+      this.onMicFailed();
+      return;
+    }
+
+    if (signal.aborted) {
+      processHandle.dispose();
+      media.getTracks().forEach((t) => t.stop());
+      this.rawMicTrack = null;
+      return;
+    }
+
+    if (wantRnnoise && !processHandle.usedRnnoise) {
+      try {
+        await audioTrack.applyConstraints({
+          noiseSuppression: true,
+          autoGainControl: true
+        });
+      } catch {}
+    }
+
+    this.micGainNode = processHandle.micGainNode;
+    this.rnnoiseDispose = processHandle.dispose;
+    const produceTrack = processHandle.processedTrack;
+
+    this.micTrack = produceTrack;
+    produceTrack.addEventListener(
       "ended",
       () => {
-        if (signal.aborted || this.micTrack !== audioTrack) return;
+        if (signal.aborted || this.micTrack !== produceTrack) return;
         this.logger.warn("Mic track ended unexpectedly, restarting");
         void this.restartMic(signal).catch((err) => {
           this.logger.warn("restartMic after track ended failed", err);
@@ -842,28 +955,31 @@ class MediasoupSession {
 
     const userId = this.app.account?.id;
     if (userId) {
-      // Clone for VAD — sharing the same track with Web Audio + RTCPeerConnection
-      // can silence the PeerConnection uplink on Electron/Chromium.
-      const vadTrack = audioTrack.clone();
+      const vadTrack = produceTrack.clone();
       const localStream = new MediaStream([vadTrack]);
       this.startSpeakingDetection(localStream, userId);
     }
     this.micProducer = await this.sendTransport.produce({
-      track: audioTrack,
+      track: produceTrack,
       appData: { mediaKind: "audio" },
-      codecOptions: { opusStereo: true, opusDtx: true }
+      codecOptions: {
+        opusStereo: false,
+        opusDtx: !processHandle.usedRnnoise
+      }
     });
 
     this.applyMicTransmission();
   }
 
   private async acquireMicMedia(
-    signal: AbortSignal
+    signal: AbortSignal,
+    useRnnoise: boolean
   ): Promise<MediaStream | null> {
     const audioBase: MediaTrackConstraints = {
       echoCancellation: true,
-      noiseSuppression: true,
-      autoGainControl: true
+      noiseSuppression: !useRnnoise,
+      autoGainControl: true,
+      channelCount: 1
     };
 
     const attempts: MediaTrackConstraints[] = [];
@@ -1497,6 +1613,8 @@ export class VoiceStore {
   currentCameraDeviceId: string | null = null;
   disconnectBanner: string | null = null;
   audioPlaybackBlocked = false;
+  noiseSuppressionPending = false;
+  private micTestIsolation: { mute: boolean; deaf: boolean } | null = null;
   currentSessionId: string | null = null;
   private cameraProducerByUser = new Map<string, string>();
   private screenProducerByUser = new Map<string, string>();
@@ -1699,6 +1817,9 @@ export class VoiceStore {
           this.audioPlaybackBlocked = blocked;
         });
       },
+      () => this.app.settings?.noiseSuppression !== false,
+      () => this.app.settings?.microphoneVolume ?? 100,
+      () => this.app.settings?.speakerVolume ?? 100,
       () => this.getSpeakingThreshold(),
       (userId) => this.shouldReportSpeakingForUser(userId)
     );
@@ -1854,6 +1975,66 @@ export class VoiceStore {
     if (!settings) return;
     this.session.setInputMode(settings.voiceInputMode);
     this.session.setSpaceMute(this.spaceMute);
+    this.session.setMicrophoneVolume(settings.microphoneVolume);
+    this.session.setSpeakerVolume(settings.speakerVolume);
+  }
+
+  beginMicTestIsolation() {
+    if (this.connectionStatus !== "connected") return;
+    if (this.micTestIsolation) return;
+    this.micTestIsolation = {
+      mute: this.selfMute,
+      deaf: this.selfDeaf
+    };
+    runInAction(() => {
+      this.selfMute = true;
+      this.selfDeaf = true;
+    });
+    this.session.setSelfMute(true);
+    this.session.setSelfDeaf(true);
+    if (this.app.account?.id) {
+      this.setUserSpeaking(this.app.account.id, false);
+    }
+    void this.sendVoiceStateUpdate();
+  }
+
+  endMicTestIsolation() {
+    if (!this.micTestIsolation) return;
+    const { mute, deaf } = this.micTestIsolation;
+    this.micTestIsolation = null;
+    runInAction(() => {
+      this.selfDeaf = deaf;
+      this.selfMute = mute;
+    });
+    this.session.setSelfDeaf(deaf);
+    this.session.setSelfMute(mute);
+    void this.sendVoiceStateUpdate();
+  }
+
+  async setNoiseSuppression(enabled: boolean) {
+    const settings = this.app.settings;
+    if (settings && settings.noiseSuppression !== enabled) {
+      settings.noiseSuppression = enabled;
+    }
+    if (
+      this.connectionStatus !== "connected" ||
+      !this.abortController ||
+      this.noiseSuppressionPending
+    ) {
+      return;
+    }
+    runInAction(() => {
+      this.noiseSuppressionPending = true;
+    });
+    try {
+      await this.session.restartMic(this.abortController.signal);
+    } catch (err) {
+      this.logger.warn("restartMic after noise suppression toggle failed", err);
+    } finally {
+      runInAction(() => {
+        this.noiseSuppressionPending = false;
+      });
+    }
   }
 
   startRecordingPushToTalkKey() {
@@ -2907,6 +3088,7 @@ export class VoiceStore {
   }
 
   private abortAndTeardown() {
+    this.endMicTestIsolation();
     if (this.abortController) {
       this.abortController.abort();
       this.abortController = null;

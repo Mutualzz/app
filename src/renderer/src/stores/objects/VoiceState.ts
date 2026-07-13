@@ -12,12 +12,13 @@ export class VoiceState {
   spaceDeaf: boolean;
   sessionId: string;
   updatedAt: number;
+  joinedAt: number;
   client?: MzVoiceState["client"];
   disconnectedAt?: number | null;
 
   constructor(
     private readonly app: AppStore,
-    state: MzVoiceState
+    state: MzVoiceState & { disconnectedAt?: number | null }
   ) {
     this.userId = state.userId;
     this.spaceId = state.spaceId ?? null;
@@ -28,7 +29,9 @@ export class VoiceState {
     this.spaceDeaf = state.spaceDeaf;
     this.sessionId = state.sessionId;
     this.updatedAt = state.updatedAt;
+    this.joinedAt = state.joinedAt ?? state.updatedAt ?? Date.now();
     this.client = state.client;
+    this.disconnectedAt = state.disconnectedAt ?? null;
 
     makeAutoObservable(this, {}, { autoBind: true });
   }
