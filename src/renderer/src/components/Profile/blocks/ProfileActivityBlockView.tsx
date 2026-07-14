@@ -1,6 +1,9 @@
 import { CustomStatusDisplay } from "@components/CustomStatus/CustomStatusDisplay";
 import { PresenceActivitiesList } from "@components/Presence/PresenceActivitiesList";
-import { ProfileBlockBackgroundFill } from "@components/Profile/shared/ProfileBlockBackgroundFill";
+import {
+  ProfileBlockBackgroundFill,
+  profileBlockSurfaceCss
+} from "@components/Profile/shared/ProfileBlockBackgroundFill";
 import { RecentActivitiesSection } from "@components/Profile/shared/RecentActivitiesSection";
 import { Paper } from "@renderer/components/Paper";
 import { useAppStore } from "@hooks/useStores";
@@ -45,10 +48,10 @@ export const ProfileActivityBlockView = observer(({ block, userId }: Props) => {
       p={1.5}
       borderRadius={cornerRadius}
       elevation={app.settings?.preferEmbossed ? 5 : 2}
-      css={{ position: "relative" }}
+      css={profileBlockSurfaceCss}
     >
       <ProfileBlockBackgroundFill backgroundColor={block.backgroundColor} />
-      <Stack direction="row" spacing={1} alignItems="center" css={{ position: "relative" }}>
+      <Stack direction="row" spacing={1} alignItems="center">
         <PulseIcon size={18} weight="fill" />
         <Typography
           level="body-sm"

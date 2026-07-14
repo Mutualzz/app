@@ -2,7 +2,10 @@ import {
   getMutualSpaces,
   isProfileFriend
 } from "@components/Profile/shared/profileBlockData.utils";
-import { ProfileBlockBackgroundFill } from "@components/Profile/shared/ProfileBlockBackgroundFill";
+import {
+  ProfileBlockBackgroundFill,
+  profileBlockSurfaceCss
+} from "@components/Profile/shared/ProfileBlockBackgroundFill";
 import { SpaceIcon } from "@components/Space/SpaceIcon";
 import { useAppStore } from "@hooks/useStores";
 import type { ProfileMutualBlock } from "@mutualzz/types";
@@ -39,12 +42,16 @@ export const ProfileMutualBlockView = observer(({ block, userId }: Props) => {
       borderRadius={cornerRadius}
       overflow="auto"
       elevation={app.settings?.preferEmbossed ? 5 : 1}
-      css={{ position: "relative" }}
+      css={profileBlockSurfaceCss}
     >
       <ProfileBlockBackgroundFill backgroundColor={block.backgroundColor} />
-      <Stack direction="row" spacing={1} alignItems="center" css={{ position: "relative" }}>
+      <Stack direction="row" spacing={1} alignItems="center">
         <UsersThreeIcon size={18} weight="fill" />
-        <Typography level="body-sm" fontWeight={700} css={{ fontSize: "var(--pcf-sm)" }}>
+        <Typography
+          level="body-sm"
+          fontWeight={700}
+          css={{ fontSize: "var(--pcf-sm)" }}
+        >
           {block.mode === "spaces"
             ? t("profile.blocks.mutualSpaces")
             : t("profile.blocks.friendsStatus")}
@@ -52,13 +59,19 @@ export const ProfileMutualBlockView = observer(({ block, userId }: Props) => {
       </Stack>
 
       {block.mode === "friends" ? (
-        <Typography level="body-sm" css={{ opacity: isFriend ? 1 : 0.6, fontSize: "var(--pcf-sm)" }}>
+        <Typography
+          level="body-sm"
+          css={{ opacity: isFriend ? 1 : 0.6, fontSize: "var(--pcf-sm)" }}
+        >
           {isFriend
             ? t("profile.blocks.youAreFriends")
             : t("profile.blocks.notFriendsYet")}
         </Typography>
       ) : mutualSpaces.length === 0 ? (
-        <Typography level="body-sm" css={{ opacity: 0.6, fontSize: "var(--pcf-sm)" }}>
+        <Typography
+          level="body-sm"
+          css={{ opacity: 0.6, fontSize: "var(--pcf-sm)" }}
+        >
           {t("profile.blocks.noMutualSpaces")}
         </Typography>
       ) : (
@@ -71,7 +84,10 @@ export const ProfileMutualBlockView = observer(({ block, userId }: Props) => {
               alignItems="center"
             >
               <SpaceIcon space={space} size={24} />
-              <Typography level="body-sm" css={{ minWidth: 0, fontSize: "var(--pcf-sm)" }}>
+              <Typography
+                level="body-sm"
+                css={{ minWidth: 0, fontSize: "var(--pcf-sm)" }}
+              >
                 {space.name}
               </Typography>
             </Stack>

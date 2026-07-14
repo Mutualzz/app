@@ -1,5 +1,8 @@
 import { Link } from "@components/Link";
-import { ProfileBlockBackgroundFill } from "@components/Profile/shared/ProfileBlockBackgroundFill";
+import {
+  ProfileBlockBackgroundFill,
+  profileBlockSurfaceCss
+} from "@components/Profile/shared/ProfileBlockBackgroundFill";
 import { ProfileLinkKindIcon } from "@components/Profile/shared/ProfileLinkKindIcon";
 import {
   formatProfileUrlLabel,
@@ -35,13 +38,13 @@ export const ProfileLinksBlockView = ({ block }: Props) => {
       borderRadius={cornerRadius}
       elevation={app.settings?.preferEmbossed ? 5 : 1}
       overflow="auto"
-      css={{ position: "relative" }}
+      css={profileBlockSurfaceCss}
     >
       <ProfileBlockBackgroundFill backgroundColor={block.backgroundColor} />
       {links.length === 0 && (
         <Typography
           level="body-sm"
-          css={{ opacity: 0.55, fontSize: "var(--pcf-sm)", position: "relative" }}
+          css={{ opacity: 0.55, fontSize: "var(--pcf-sm)" }}
         >
           {t("profile.blocks.addLinksInInspector")}
         </Typography>

@@ -12,6 +12,8 @@ type UpdaterStage =
 interface PlatformAsset {
   url: string;
   sha256: string;
+  updaterSha256?: string;
+  updaterVersion?: string;
 }
 
 interface LatestJson {
@@ -100,8 +102,23 @@ export class UpdaterStore {
 
       const latest: LatestJson = await res.json();
       const currentVersion = await window.api.updater.getVersion();
+      const asset = await this.getAssetForPlatform(latest);
 
       if (!this.isNewerVersion(latest.version, currentVersion)) {
+        if (asset && (await this.isUpdaterStale(asset))) {
+          this.logger.info(
+            "App version current but updater binary outdated — forcing full package"
+          );
+          runInAction(() => {
+            this.hasUpdate = true;
+            this.updateVersion = latest.version;
+            this.setStage("downloading");
+          });
+          await this.downloadUpdate(asset, latest.version);
+          await this.installUpdate();
+          return;
+        }
+
         this.logger.info("No update available");
         this.setStage("idle");
         return;
@@ -115,7 +132,6 @@ export class UpdaterStore {
         this.setStage("downloading");
       });
 
-      const asset = await this.getAssetForPlatform(latest);
       if (!asset) {
         throw new Error("No asset for current platform");
       }
@@ -149,6 +165,13 @@ export class UpdaterStore {
       this.setStage("error");
       this.setError(err?.message ?? String(err));
     }
+  }
+
+  private async isUpdaterStale(asset: PlatformAsset): Promise<boolean> {
+    if (!asset.updaterSha256) return false;
+    const local = await window.api.updater.getBinarySha256();
+    if (!local) return true;
+    return local.toLowerCase() !== asset.updaterSha256.toLowerCase();
   }
 
   private async downloadUpdate(asset: PlatformAsset, version: string) {

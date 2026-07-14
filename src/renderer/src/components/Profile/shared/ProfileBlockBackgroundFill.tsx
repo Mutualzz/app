@@ -1,8 +1,14 @@
 import { resolveProfileBackgroundFill } from "@mutualzz/ui-core";
 import { Box } from "@mutualzz/ui-web";
+import type { CSSObject } from "@emotion/react";
+
+export const profileBlockSurfaceCss: CSSObject = {
+  position: "relative",
+  isolation: "isolate"
+};
 
 export function ProfileBlockBackgroundFill({
-  backgroundColor,
+  backgroundColor
 }: {
   backgroundColor?: string | null;
 }) {
@@ -15,9 +21,9 @@ export function ProfileBlockBackgroundFill({
       css={{
         position: "absolute",
         inset: 0,
-        zIndex: 0,
+        zIndex: -1,
         background: resolveProfileBackgroundFill(fill, "transparent"),
-        pointerEvents: "none",
+        pointerEvents: "none"
       }}
     />
   );

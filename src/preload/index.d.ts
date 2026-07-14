@@ -109,6 +109,7 @@ export interface MutualzzAPI {
     getVersion(): Promise<string>;
     getPlatform(): Promise<string>;
     getLinuxPackage(): Promise<"appimage" | "debian" | "rpm" | "pacman">;
+    getBinarySha256(): Promise<string | null>;
     getSavePath(version: string, url: string): Promise<string>;
     download(
       url: string,

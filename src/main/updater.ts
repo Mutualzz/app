@@ -1,5 +1,5 @@
 import { app, ipcMain } from "electron";
-import { createHash, Hash } from "crypto";
+import { createHash, type Hash } from "crypto";
 import { join, resolve, sep } from "path";
 import { spawn } from "child_process";
 import {
@@ -30,6 +30,12 @@ export function initUpdaterHandlers() {
 
   ipcMain.handle("updater:get-linux-package", () => {
     return detectLinuxPackage();
+  });
+
+  ipcMain.handle("updater:get-binary-sha256", async () => {
+    const updaterPath = getUpdaterPath();
+    if (!existsSync(updaterPath)) return null;
+    return hashFileSha256(updaterPath);
   });
 
   ipcMain.handle(
@@ -315,6 +321,19 @@ function hashFile(path: string, hasher: Hash): Promise<number> {
       total += buf.length;
     });
     stream.on("end", () => resolve(total));
+    stream.on("error", reject);
+  });
+}
+
+function hashFileSha256(path: string): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const hasher = createHash("sha256");
+    const stream = createReadStream(path);
+    stream.on("data", (chunk) => {
+      const buf = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
+      hasher.update(buf);
+    });
+    stream.on("end", () => resolve(hasher.digest("hex")));
     stream.on("error", reject);
   });
 }

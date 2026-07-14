@@ -2,7 +2,10 @@ import {
   findMemberForUser,
   getMemberRoles
 } from "@components/Profile/shared/profileBlockData.utils";
-import { ProfileBlockBackgroundFill } from "@components/Profile/shared/ProfileBlockBackgroundFill";
+import {
+  ProfileBlockBackgroundFill,
+  profileBlockSurfaceCss
+} from "@components/Profile/shared/ProfileBlockBackgroundFill";
 import { useAppStore } from "@hooks/useStores";
 import type { ProfileRolesBlock } from "@mutualzz/types";
 import type { Snowflake } from "@mutualzz/types";
@@ -35,18 +38,25 @@ export const ProfileRolesBlockView = observer(({ block, userId }: Props) => {
       borderRadius={cornerRadius}
       overflow="auto"
       elevation={app.settings?.preferEmbossed ? 5 : 1}
-      css={{ position: "relative" }}
+      css={profileBlockSurfaceCss}
     >
       <ProfileBlockBackgroundFill backgroundColor={block.backgroundColor} />
-      <Stack direction="row" spacing={1} alignItems="center" css={{ position: "relative" }}>
+      <Stack direction="row" spacing={1} alignItems="center">
         <ShieldCheckIcon size={18} weight="fill" />
-        <Typography level="body-sm" fontWeight={700} css={{ fontSize: "var(--pcf-sm)" }}>
+        <Typography
+          level="body-sm"
+          fontWeight={700}
+          css={{ fontSize: "var(--pcf-sm)" }}
+        >
           {t("profile.blocks.roles")}
         </Typography>
       </Stack>
 
       {roles.length === 0 ? (
-        <Typography level="body-sm" css={{ opacity: 0.6, fontSize: "var(--pcf-sm)" }}>
+        <Typography
+          level="body-sm"
+          css={{ opacity: 0.6, fontSize: "var(--pcf-sm)" }}
+        >
           {member
             ? t("profile.blocks.noRolesToShow")
             : t("profile.blocks.rolesNeedSharedSpace")}
@@ -65,7 +75,11 @@ export const ProfileRolesBlockView = observer(({ block, userId }: Props) => {
                 color: role.color ?? "inherit"
               }}
             >
-              <Typography level="body-xs" fontWeight={600} css={{ fontSize: "var(--pcf-xs)" }}>
+              <Typography
+                level="body-xs"
+                fontWeight={600}
+                css={{ fontSize: "var(--pcf-xs)" }}
+              >
                 {role.name}
               </Typography>
             </Box>

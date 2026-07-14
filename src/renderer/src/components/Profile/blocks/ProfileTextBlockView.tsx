@@ -1,5 +1,8 @@
 import { Paper } from "@components/Paper";
-import { ProfileBlockBackgroundFill } from "@components/Profile/shared/ProfileBlockBackgroundFill";
+import {
+  ProfileBlockBackgroundFill,
+  profileBlockSurfaceCss
+} from "@components/Profile/shared/ProfileBlockBackgroundFill";
 import { ProfileMarkdownContent } from "@components/Profile/shared/ProfileMarkdownContent";
 import type { ProfileTextBlock } from "@mutualzz/types";
 import { resolveProfileBlockCornerRadius } from "@mutualzz/ui-core";
@@ -22,18 +25,18 @@ export const ProfileTextBlockView = ({
       height="100%"
       borderRadius={cornerRadius}
       p={1.5}
-      css={{ overflow: "hidden", position: "relative" }}
+      css={{ ...profileBlockSurfaceCss, overflow: "hidden" }}
       elevation={app.settings?.preferEmbossed ? 5 : 1}
     >
       <ProfileBlockBackgroundFill backgroundColor={block.backgroundColor} />
       {block.content ? (
-        <Box css={{ fontSize: "var(--pcf-md)", position: "relative" }}>
+        <Box css={{ fontSize: "var(--pcf-md)" }}>
           <ProfileMarkdownContent value={block.content} />
         </Box>
       ) : (
         <Typography
           level="body-md"
-          css={{ opacity: 0.5, fontSize: "var(--pcf-md)", position: "relative" }}
+          css={{ opacity: 0.5, fontSize: "var(--pcf-md)" }}
         >
           {t("profile.blocks.text")}
         </Typography>

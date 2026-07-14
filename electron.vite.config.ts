@@ -1,7 +1,6 @@
 import { defineConfig } from "electron-vite";
 import react from "@vitejs/plugin-react";
 import { readFileSync } from "node:fs";
-import replace from "@rollup/plugin-replace";
 import svgr from "vite-plugin-svgr";
 import tanstackRouter from "@tanstack/router-plugin/vite";
 
@@ -49,14 +48,13 @@ export default defineConfig({
       strictPort: true
     },
     assetsInclude: ["**/*.ogg", "**/*.mp3"],
+    define: {
+      __GIT_REVISION__: JSON.stringify(getGitRevision()),
+      __GIT_BRANCH__: JSON.stringify(getGitBranch()),
+      __APP_VERSION__: JSON.stringify(getVersion())
+    },
     plugins: [
       svgr(),
-      replace({
-        __GIT_REVISION__: JSON.stringify(getGitRevision()),
-        __GIT_BRANCH__: JSON.stringify(getGitBranch()),
-        __APP_VERSION__: JSON.stringify(getVersion()),
-        preventAssignment: true
-      }),
       tanstackRouter({
         target: "react",
         autoCodeSplitting: false,

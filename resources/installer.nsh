@@ -30,6 +30,9 @@
 	IfFileExists "$INSTDIR\resources\electron-runtime-version.txt" 0 skip_electron_version
 	nsExec::ExecToLog 'cmd /c copy /Y "$INSTDIR\resources\electron-runtime-version.txt" "$LOCALAPPDATA\Mutualzz\electron-version.txt"'
 	skip_electron_version:
+	IfFileExists "$INSTDIR\resources\updater-runtime-version.txt" 0 skip_updater_version
+	nsExec::ExecToLog 'cmd /c copy /Y "$INSTDIR\resources\updater-runtime-version.txt" "$LOCALAPPDATA\Mutualzz\updater-version.txt"'
+	skip_updater_version:
 	ExecShell "open" "$INSTDIR\updater.exe"
 !macroend
 

@@ -1,5 +1,6 @@
 import { UserAvatar } from "@components/User/UserAvatar";
 import { ProfileMarkdownContent } from "@components/Profile/shared/ProfileMarkdownContent";
+import { profileBlockSurfaceCss } from "@components/Profile/shared/ProfileBlockBackgroundFill";
 import type { AccountStore } from "@stores/Account.store";
 import type { User } from "@stores/objects/User";
 import type { UserProfile } from "@stores/objects/UserProfile";
@@ -56,13 +57,16 @@ export const ProfileHeaderBlockView = observer(
         overflow="hidden"
         borderRadius={cornerRadius}
         elevation={app.settings?.preferEmbossed ? 5 : 1}
-        css={{ position: "relative" }}
+        css={{
+          ...profileBlockSurfaceCss,
+        }}
       >
         {headerBackground ? (
           <Box
             css={{
               position: "absolute",
               inset: 0,
+              zIndex: -1,
               background: resolveProfileBackgroundFill(
                 headerBackground,
                 "transparent",

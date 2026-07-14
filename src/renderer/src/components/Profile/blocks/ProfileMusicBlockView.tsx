@@ -1,5 +1,8 @@
 import { Button } from "@components/Button";
-import { ProfileBlockBackgroundFill } from "@components/Profile/shared/ProfileBlockBackgroundFill";
+import {
+  ProfileBlockBackgroundFill,
+  profileBlockSurfaceCss
+} from "@components/Profile/shared/ProfileBlockBackgroundFill";
 import {
   profileMusicVolumeToGain,
   readProfileMusicVolumePercent,
@@ -175,7 +178,12 @@ export const ProfileMusicBlockView = ({ block, profile }: Props) => {
       flexDirection="column"
       borderRadius={cornerRadius}
       elevation={image ? 0 : app.settings?.preferEmbossed ? 5 : 1}
-      css={{ overflow: "hidden", position: "relative", minWidth: 0, maxWidth: "100%" }}
+      css={{
+        ...profileBlockSurfaceCss,
+        overflow: "hidden",
+        minWidth: 0,
+        maxWidth: "100%"
+      }}
     >
       <ProfileBlockBackgroundFill backgroundColor={block.backgroundColor} />
       {image && (

@@ -9,6 +9,7 @@ import { QueryClient } from "@tanstack/react-query";
 import { isElectron } from "@utils/index";
 import { makeAutoObservable, reaction, runInAction } from "mobx";
 import { makePersistable } from "mobx-persist-store";
+import { version as packageVersion } from "../../../../package.json";
 import { AccountStore } from "./Account.store";
 import { AccountSettingsStore } from "./AccountSettings.store";
 import { ChannelStore } from "./Channel.store";
@@ -86,7 +87,7 @@ export class AppStore {
   versions: {
     app: string | null;
   } = {
-    app: __APP_VERSION__
+    app: packageVersion
   };
 
   readonly tokenStorage: TokenStorage;
@@ -375,7 +376,7 @@ export class AppStore {
     await this.loadToken();
 
     this.versions = {
-      app: __APP_VERSION__
+      app: packageVersion
     };
 
     if (window.api) {

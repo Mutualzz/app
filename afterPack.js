@@ -26,6 +26,18 @@ function writeVersionFiles(resourcesDir, packager) {
       electronVersion
     );
   }
+
+  const updaterVersionPath = path.join(
+    packager.projectDir,
+    "resources",
+    "updater-version.txt"
+  );
+  if (fs.existsSync(updaterVersionPath)) {
+    fs.copyFileSync(
+      updaterVersionPath,
+      path.join(resourcesDir, "updater-runtime-version.txt")
+    );
+  }
 }
 
 exports.default = async ({ appOutDir, packager }) => {
