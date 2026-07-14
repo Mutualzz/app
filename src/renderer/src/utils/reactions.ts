@@ -66,6 +66,8 @@ export const applyReactionAdd = (
   );
 
   if (existing) {
+    if (payload.userId === meId && existing.me) return reactions;
+
     return reactions.map((reaction) =>
       reactionEmojisMatch(reaction.emoji, payload.emoji)
         ? {
@@ -98,6 +100,8 @@ export const applyReactionRemove = (
   if (index === -1) return reactions;
 
   const existing = reactions[index];
+  if (payload.userId === meId && !existing.me) return reactions;
+
   if (existing.count <= 1) {
     return reactions.filter((_, reactionIndex) => reactionIndex !== index);
   }

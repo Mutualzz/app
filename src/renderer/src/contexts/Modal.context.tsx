@@ -4,7 +4,8 @@ import type { ModalProps } from "@mutualzz/ui-web";
 import { reaction } from "mobx";
 import {
   isModalAllowedDuringSpaceLockdown,
-  notifySpaceLockdownBlocked
+  notifySpaceLockdownBlocked,
+  shouldCloseModalDuringSpaceLockdown
 } from "@utils/spaceLockdown";
 import { observer } from "mobx-react-lite";
 import {
@@ -67,6 +68,20 @@ export const ModalProvider = observer(({ children }: PropsWithChildren) => {
     return dispose;
   }, [app.token]);
 
+  useEffect(() => {
+    const dispose = reaction(
+      () => Boolean(app.spaces.active?.isInLockdown),
+      (inLockdown) => {
+        if (!inLockdown) return;
+        setModals((prev) =>
+          prev.filter((modal) => !shouldCloseModalDuringSpaceLockdown(modal.id))
+        );
+      }
+    );
+
+    return dispose;
+  }, [app.spaces]);
+
   const openModal = useCallback(
     (
       id: string,
@@ -101,7 +116,7 @@ export const ModalProvider = observer(({ children }: PropsWithChildren) => {
   const closeModal = useCallback((id?: string) => {
     setModals(
       (prev) =>
-        id ? prev.filter((modal) => modal.id !== id) : prev.slice(0, -1) // close topmost if no id
+        id ? prev.filter((modal) => modal.id !== id) : prev.slice(0, -1)
     );
   }, []);
 

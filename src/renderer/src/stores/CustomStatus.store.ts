@@ -20,10 +20,12 @@ export class CustomStatusStore {
   constructor() {
     makeAutoObservable(this, {}, { autoBind: true });
 
-    makePersistable(this, {
+    void makePersistable(this, {
       name: "CustomStatusStore",
       properties: ["text", "emoji", "enabled", "scheduledCustomStatus"],
       storage: localStorage
+    }).then(() => {
+      this.rearmScheduledCustomStatusTimer();
     });
   }
 

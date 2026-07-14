@@ -39,7 +39,7 @@ export const MarkdownRenderer = ({
       html: false,
       linkify: false,
       typographer: true,
-      breaks: false
+      breaks: true
     });
 
     instance.linkify.set({
@@ -51,6 +51,10 @@ export const MarkdownRenderer = ({
     instance.disable("table");
     instance.disable("hr");
     instance.disable("escape");
+
+    instance.renderer.rules.hardbreak = () => "<br>";
+    instance.renderer.rules.softbreak = () =>
+      instance.options.breaks ? "<br>" : "\n";
 
     instance.use(brOnEmpty);
     instance.use(spoilerPlugin);
@@ -276,6 +280,8 @@ export const MarkdownRenderer = ({
                 case "here":
                 case "everyone":
                   return <DefaultMention mentionId={id} />;
+                default:
+                  return null;
               }
             }
             case "a": {
@@ -366,7 +372,7 @@ export const MarkdownRenderer = ({
     return () => {
       cancelled = true;
     };
-  }, [value, enlargeEmojiOnly, textColor]);
+  }, [value, enlargeEmojiOnly, textColor, level]);
 
   return (
     <Box

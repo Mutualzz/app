@@ -68,6 +68,7 @@ export const GroupDMEditModal = observer(({ channel }: Props) => {
       return app.channels.updateGroupDM(channel.id, formData);
     },
     onSuccess: (updated) => {
+      if (imageFile) URL.revokeObjectURL(imageFile);
       if (updated) app.channels.update(updated);
       closeModal();
     }
@@ -76,6 +77,7 @@ export const GroupDMEditModal = observer(({ channel }: Props) => {
   const onUpload = (file: File | File[]) => {
     const fileToUse = Array.isArray(file) ? file[0] : file;
     const url = URL.createObjectURL(fileToUse);
+    if (imageFile) URL.revokeObjectURL(imageFile);
     setImageFile(url);
     setOriginalFile(fileToUse);
     setClearIcon(false);
@@ -304,7 +306,10 @@ export const GroupDMEditModal = observer(({ channel }: Props) => {
       >
         <Button
           size="lg"
-          onClick={() => closeModal()}
+          onClick={() => {
+            onClearNewIcon();
+            closeModal();
+          }}
           expand
           color="neutral"
           disabled={isPending}

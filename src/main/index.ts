@@ -19,6 +19,8 @@ const gotSingleInstanceLock = app.requestSingleInstanceLock();
 
 if (!gotSingleInstanceLock) app.quit();
 
+setupProtocols();
+
 app.on("second-instance", (_, argv) => {
   const win = mainWindow;
   if (!win) return;
@@ -50,7 +52,6 @@ app.whenReady().then(() => {
   setupWindowIPC();
   setupCodecIPC();
   setupIPC();
-  setupProtocols(mainWindow);
   trayManager.initialize(mainWindow);
 
   if (app.isPackaged) {
@@ -62,9 +63,10 @@ app.whenReady().then(() => {
   }
 
   app.on("activate", () => {
-    if (!mainWindow || mainWindow.isDestroyed())
+    if (!mainWindow || mainWindow.isDestroyed()) {
       mainWindow = createMainWindow();
-    else {
+      trayManager.initialize(mainWindow);
+    } else {
       if (mainWindow.isMinimized()) mainWindow.restore();
       mainWindow.show();
       mainWindow.focus();

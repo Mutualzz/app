@@ -19,6 +19,7 @@ import { Editor } from "slate";
 import Snowflake from "@utils/Snowflake";
 import { messageFlags } from "@mutualzz/bitfield";
 import { createSystemMessage } from "@utils/index";
+import { formatRestError } from "@utils/restError";
 import { Stack, Typography, useTheme } from "@mutualzz/ui-web";
 import { Link } from "@components/Link";
 import { Paper } from "@components/Paper";
@@ -209,8 +210,9 @@ export const MessageInput = observer(
         }
 
         if (message) {
+          const updated = await message.edit(trimmed);
           onStopEditing?.();
-          return message.edit(trimmed);
+          return updated;
         }
 
         const nonce = Snowflake.generate();
@@ -219,17 +221,18 @@ export const MessageInput = observer(
         const repliedToId = replyingTo?.id;
         const mentionReply = app.replyMention;
         const pendingFiles = canAttachFiles ? files.slice() : [];
-        const capturedPreviewUrls = canAttachFiles ? previewUrls.slice() : [];
+        const contentSnapshot = trimmed;
 
         setNonce(nonce);
         const author = app.account.raw;
 
-        // Build pending attachment previews for the queue entry
-        const pendingAttachments = pendingFiles.map((f, i) => ({
+        const pendingAttachments = pendingFiles.map((f) => ({
           name: f.name,
           size: f.size,
           type: f.type,
-          previewUrl: capturedPreviewUrls[i] ?? undefined
+          previewUrl: f.type.startsWith("image/")
+            ? URL.createObjectURL(f)
+            : undefined
         }));
 
         const msg = app.queue.add({
@@ -248,7 +251,6 @@ export const MessageInput = observer(
           pendingAttachments
         });
 
-        // Clear everything immediately so the user can keep typing
         app.setReplyingTo(null);
         setContent("");
         setStickers([]);
@@ -259,59 +261,71 @@ export const MessageInput = observer(
         editor?.delete();
         editor?.insertNode({ type: "line", children: [{ text: "" }] });
 
-        if (content.length >= 2000)
-          throw new HttpException(
-            HttpStatusCode.Forbidden,
-            t("messageTooLong")
-          );
-
-        if (isDM && theyBlockedMe)
-          throw new HttpException(
-            HttpStatusCode.Forbidden,
-            t("cannotMessagePerson")
-          );
-
-        if (pendingFiles.length > 0) {
-          const formData = new FormData();
-          if (trimmed) formData.append("content", trimmed);
-          formData.append("nonce", nonce);
-          if (stickerIds.length > 0)
-            stickerIds.forEach((id) => formData.append("expressionIds[]", id));
-          if (repliedToId) {
-            formData.append("repliedToId", repliedToId);
-            formData.append("mentionReply", String(mentionReply));
-          }
-          pendingFiles.forEach((f) => formData.append("attachments", f));
-          return channel.sendMessage(formData, msg);
-        }
-
-        return channel.sendMessage(
-          {
-            content: trimmed,
-            nonce,
-            ...(stickerIds.length > 0 ? { expressionIds: stickerIds } : {}),
-            ...(repliedToId ? { repliedToId, mentionReply } : {})
-          },
-          msg
-        );
-      },
-      onError: async (err: HttpException) => {
-        const error = err.errors?.[0]?.message || err.message;
-
-        if (!message) {
-          const queued = app.queue
-            .get(channel?.id ?? "")
-            .find((x) => x.id === nonce || x.content === content);
-          queued?.fail(error);
-
+        const failQueued = async (err: unknown) => {
+          const error = formatRestError(err, t("unknownError"));
+          msg.fail(error);
           const sysMessage = await createSystemMessage(
             app,
-            channel?.id ?? "",
+            channel.id,
             error,
             messageFlags.Ephemeral
           );
-          if (sysMessage) channel?.messages.add(sysMessage);
+          if (sysMessage) channel.messages.add(sysMessage);
+        };
+
+        try {
+          if (contentSnapshot.length >= 2000)
+            throw new HttpException(
+              HttpStatusCode.Forbidden,
+              t("messageTooLong")
+            );
+
+          if (isDM && theyBlockedMe)
+            throw new HttpException(
+              HttpStatusCode.Forbidden,
+              t("cannotMessagePerson")
+            );
+
+          if (pendingFiles.length > 0) {
+            const formData = new FormData();
+            if (contentSnapshot) formData.append("content", contentSnapshot);
+            formData.append("nonce", nonce);
+            if (stickerIds.length > 0)
+              stickerIds.forEach((id) =>
+                formData.append("expressionIds[]", id)
+              );
+            if (repliedToId) {
+              formData.append("repliedToId", repliedToId);
+              formData.append("mentionReply", String(mentionReply));
+            }
+            pendingFiles.forEach((f) => formData.append("attachments", f));
+            return await channel.sendMessage(formData, msg);
+          }
+
+          return await channel.sendMessage(
+            {
+              content: contentSnapshot,
+              nonce,
+              ...(stickerIds.length > 0 ? { expressionIds: stickerIds } : {}),
+              ...(repliedToId ? { repliedToId, mentionReply } : {})
+            },
+            msg
+          );
+        } catch (err) {
+          await failQueued(err);
+          throw err;
         }
+      },
+      onError: async (err: unknown) => {
+        if (!message) return;
+        const error = formatRestError(err, t("unknownError"));
+        const sysMessage = await createSystemMessage(
+          app,
+          channel?.id ?? "",
+          error,
+          messageFlags.Ephemeral
+        );
+        if (sysMessage) channel?.messages.add(sysMessage);
       },
       onSuccess: () => {
         setNonce("");

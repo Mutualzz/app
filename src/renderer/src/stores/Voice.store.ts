@@ -325,7 +325,8 @@ class MediasoupSession {
     const inputOpen =
       this.inputMode === "voice_activity" ? true : this.pushToTalkPressed;
 
-    const shouldTransmit = !this.isMuted && !this.spaceMuted && inputOpen;
+    const shouldTransmit =
+      !this.isMuted && !this.spaceMuted && !this.isDeafened && inputOpen;
 
     if (this.micProducer) {
       try {
@@ -355,6 +356,7 @@ class MediasoupSession {
 
   setSelfDeaf(deafened: boolean) {
     this.isDeafened = deafened;
+    this.applyMicTransmission();
     this.applyMasterOutputRouting();
     if (!deafened) {
       for (const [, gainNode] of this.audioGainNodes) {
@@ -511,54 +513,67 @@ class MediasoupSession {
     getStream: () => Promise<MediaStream>,
     config: ScreenShareCaptureConfig
   ): Promise<boolean> {
-    if (!this.sendTransport) return false;
+    if (!this.sendTransport) throw new Error("NO_SEND_TRANSPORT");
 
     const media = await getStream();
 
     if (signal.aborted) {
       media.getTracks().forEach((t) => t.stop());
-      return false;
+      throw new DOMException("Aborted", "AbortError");
     }
 
     const [videoTrack] = media.getVideoTracks();
     if (!videoTrack) {
       media.getTracks().forEach((t) => t.stop());
-      return false;
+      throw new Error("NO_VIDEO_TRACK");
     }
 
-    videoTrack.addEventListener("ended", () => {
-      void this.stopScreenShare();
-    });
-
-    this.screenTrack = videoTrack;
-    const codecOptions = getScreenShareCodecOptions(config.quality);
-    this.screenProducer = await this.sendTransport.produce({
-      track: videoTrack,
-      appData: { mediaKind: "screen" },
-      codecOptions
-    });
-
-    const [audioTrack] = media.getAudioTracks();
-    if (config.includeAudio && audioTrack) {
-      this.screenAudioTrack = audioTrack;
-      this.screenAudioProducer = await this.sendTransport.produce({
-        track: audioTrack,
-        appData: { mediaKind: "screen-audio" }
+    try {
+      videoTrack.addEventListener("ended", () => {
+        void this.stopScreenShare();
       });
-      return true;
-    }
 
-    if (config.includeAudio) {
-      this.logger.warn(
-        "Screen share audio requested but no audio track was captured"
-      );
+      this.screenTrack = videoTrack;
+      const codecOptions = getScreenShareCodecOptions(config.quality);
+      this.screenProducer = await this.sendTransport.produce({
+        track: videoTrack,
+        appData: { mediaKind: "screen" },
+        codecOptions
+      });
+
+      const [audioTrack] = media.getAudioTracks();
+      if (config.includeAudio && audioTrack) {
+        this.screenAudioTrack = audioTrack;
+        this.screenAudioProducer = await this.sendTransport.produce({
+          track: audioTrack,
+          appData: { mediaKind: "screen-audio" }
+        });
+        return true;
+      }
+
+      if (config.includeAudio) {
+        this.logger.warn(
+          "Screen share audio requested but no audio track was captured"
+        );
+      }
+      for (const track of media.getAudioTracks()) {
+        try {
+          track.stop();
+        } catch {}
+      }
+      return false;
+    } catch (err) {
+      media.getTracks().forEach((t) => {
+        try {
+          t.stop();
+        } catch {}
+      });
+      this.screenTrack = null;
+      this.screenProducer = null;
+      this.screenAudioTrack = null;
+      this.screenAudioProducer = null;
+      throw err;
     }
-    for (const track of media.getAudioTracks()) {
-      try {
-        track.stop();
-      } catch {}
-    }
-    return false;
   }
 
   setScreenShareAudioMuted(muted: boolean) {
@@ -641,6 +656,12 @@ class MediasoupSession {
     this.disposeMicPipeline();
     if (!this.sendTransport) return;
     await this.startMic(signal);
+  }
+
+  async restartCamera(signal: AbortSignal) {
+    await this.stopCamera();
+    if (!this.sendTransport || signal.aborted) return;
+    await this.startCamera(signal);
   }
 
   private disposeMicPipeline() {
@@ -1232,8 +1253,11 @@ class MediasoupSession {
 
     const userId = this.producerUserMap.get(producerId);
     if (userId) {
-      const hasOtherAudio = Array.from(this.producerUserMap.entries()).some(
-        ([id, uid]) => id !== producerId && uid === userId
+      const hasOtherAudio = Array.from(this.streamMetadata.entries()).some(
+        ([id, meta]) =>
+          id !== producerId &&
+          this.producerUserMap.get(id) === userId &&
+          (meta.kind === "audio" || meta.kind === "screen-audio")
       );
       if (!hasOtherAudio) {
         this.stopSpeakingDetectionForUser(userId);
@@ -1696,6 +1720,7 @@ export class VoiceStore {
   private readonly logger = new Logger({ tag: "VoiceStore" });
   private keepAliveTimer: number | null = null;
   private abortController: AbortController | null = null;
+  private connectionGeneration = 0;
   private pendingEndpoint: string | null = null;
   private pendingToken: string | null = null;
   private joinTimeoutTimer: number | null = null;
@@ -1830,6 +1855,13 @@ export class VoiceStore {
         try {
           this.abortAndTeardown();
           this.stopKeepAlive();
+          this.speakingUsers.clear();
+          this.availableScreenShares.clear();
+          this.availableScreenAudioShares.clear();
+          this.watchedScreenShares.clear();
+          this.cameraProducerByUser.clear();
+          this.screenProducerByUser.clear();
+          this.screenAudioProducerByUser.clear();
           if (!canAutoRejoin) {
             this.clearLocalVoiceStateForMe();
           }
@@ -2524,26 +2556,44 @@ export class VoiceStore {
       this.currentVoiceTarget?.channelId === target.channelId;
     if (isSame && this.connectionStatus !== "failed") return;
 
+    if (this.currentVoiceTarget && !isSame) {
+      this.clearJoinTimeout();
+      this.abortAndTeardown();
+      this.stopKeepAlive();
+      this.speakingUsers.clear();
+      this.availableScreenShares.clear();
+      this.availableScreenAudioShares.clear();
+      this.watchedScreenShares.clear();
+      runInAction(() => {
+        this.cameraEnabled = false;
+        this.screenShareEnabled = false;
+        this.screenShareAudioEnabled = false;
+        this.pushToTalkActive = false;
+      });
+    }
+
     this.session.unlockAudio();
     await this.setupTracks(true);
 
     const preferredSelfMute = this.app.settings?.preferredSelfMute ?? false;
     const preferredSelfDeaf = this.app.settings?.preferredSelfDeaf ?? false;
+    const selfDeaf = preferredSelfDeaf;
+    const selfMute = preferredSelfMute || preferredSelfDeaf;
 
     runInAction(() => {
       this.disconnectBanner = null;
       this.currentVoiceTarget = target;
       this.connectionStatus = "connecting";
       this.connectionError = null;
-      this.selfMute = preferredSelfMute;
-      this.selfDeaf = preferredSelfDeaf;
+      this.selfMute = selfMute;
+      this.selfDeaf = selfDeaf;
     });
 
     this.session.setInputDeviceId(this.currentInputDeviceId);
     this.session.setOutputDeviceId(this.currentOutputDeviceId);
 
-    this.session.setSelfMute(preferredSelfMute);
-    this.session.setSelfDeaf(preferredSelfDeaf);
+    this.session.setSelfMute(selfMute);
+    this.session.setSelfDeaf(selfDeaf);
     this.applyVoiceSettings();
 
     this.startJoinTimeout();
@@ -2787,9 +2837,11 @@ export class VoiceStore {
       }
     } catch (err) {
       this.logger.warn("startScreenShare failed", err);
+      void this.session.stopScreenShare().catch(() => {});
       runInAction(() => {
         this.screenShareEnabled = false;
         this.screenShareAudioEnabled = false;
+        this.screenShareSupportsAudio = false;
       });
       const message = err instanceof Error ? err.message : String(err);
       if (message === "SCREEN_CAPTURE_DENIED") {
@@ -2854,11 +2906,26 @@ export class VoiceStore {
   }
 
   setCameraDeviceId(deviceId: string) {
+    const changed = this.currentCameraDeviceId !== deviceId;
     runInAction(() => {
       this.currentCameraDeviceId = deviceId;
-      if (!this.cameraEnabled) this.cameraEnabled = true;
     });
     this.session.setCameraDeviceId(deviceId);
+    if (
+      changed &&
+      this.cameraEnabled &&
+      this.connectionStatus === "connected" &&
+      this.abortController
+    ) {
+      void this.session
+        .restartCamera(this.abortController.signal)
+        .catch((err) => {
+          this.logger.warn("restartCamera failed", err);
+          runInAction(() => {
+            this.cameraEnabled = false;
+          });
+        });
+    }
   }
 
   async setupTracks(
@@ -3040,6 +3107,7 @@ export class VoiceStore {
     }
 
     this.abortAndTeardown();
+    const generation = this.connectionGeneration;
 
     const controller = new AbortController();
     this.abortController = controller;
@@ -3052,6 +3120,7 @@ export class VoiceStore {
 
     try {
       await this.setupTracks(true);
+      if (generation !== this.connectionGeneration || signal.aborted) return;
 
       this.session.setInputDeviceId(this.currentInputDeviceId);
       this.session.setOutputDeviceId(this.currentOutputDeviceId);
@@ -3064,7 +3133,7 @@ export class VoiceStore {
 
       await this.session.connect(endpoint, token, signal);
 
-      if (signal.aborted) return;
+      if (generation !== this.connectionGeneration || signal.aborted) return;
 
       try {
         await this.session.startMic(signal);
@@ -3072,7 +3141,7 @@ export class VoiceStore {
         this.logger.warn("startMic after connect failed", err);
       }
 
-      if (signal.aborted) return;
+      if (generation !== this.connectionGeneration || signal.aborted) return;
 
       if (this.cameraEnabled) {
         try {
@@ -3085,7 +3154,7 @@ export class VoiceStore {
         }
       }
 
-      if (signal.aborted) return;
+      if (generation !== this.connectionGeneration || signal.aborted) return;
 
       if (this.screenShareEnabled && this.lastScreenShareConfig) {
         try {
@@ -3111,7 +3180,7 @@ export class VoiceStore {
         }
       }
 
-      if (signal.aborted) return;
+      if (generation !== this.connectionGeneration || signal.aborted) return;
 
       runInAction(() => {
         this.connectionStatus = "connected";
@@ -3121,7 +3190,7 @@ export class VoiceStore {
       this.startKeepAlive();
       this.logger.debug("Voice connected");
     } catch (err) {
-      if (signal.aborted) return; // not an error. we were told to stop
+      if (generation !== this.connectionGeneration || signal.aborted) return;
 
       const message = err instanceof Error ? err.message : String(err);
       this.logger.warn("Voice connection failed", { message });
@@ -3175,6 +3244,7 @@ export class VoiceStore {
   }
 
   private abortAndTeardown() {
+    this.connectionGeneration++;
     this.endMicTestIsolation();
     if (this.abortController) {
       this.abortController.abort();

@@ -22,13 +22,7 @@ export const MemberList = observer(() => {
 
   const scrollRef = useRef<HTMLDivElement | null>(null);
 
-  const loadedCount = list
-    ? list.reduce((acc, g) => acc + (g.items?.length ?? 0), 0)
-    : 0;
-  const memberCount =
-    typeof store?.memberCount === "number" ? store.memberCount : 0;
-
-  const hasMore = !store ? true : loadedCount < memberCount;
+  const hasMore = !store ? true : store.hasMore;
 
   const handleLoadMore = useCallback(() => {
     if (!space || !channel) return;

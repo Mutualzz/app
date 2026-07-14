@@ -97,6 +97,12 @@ function RootComponent() {
   useEffect(() => {
     app.loadSettings();
 
+    const onUnauthorized = () => {
+      if (!app.token) return;
+      void app.logout();
+    };
+    app.rest.on("unauthorized", onUnauthorized);
+
     const dispose = reaction(
       () => app.token,
       (value) => {
@@ -124,7 +130,10 @@ function RootComponent() {
 
     logger.debug("Loading complete");
 
-    return dispose;
+    return () => {
+      app.rest.off("unauthorized", onUnauthorized);
+      dispose();
+    };
   }, []);
 
   const wasAutoIdled = useRef(false);

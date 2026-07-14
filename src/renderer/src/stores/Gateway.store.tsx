@@ -155,6 +155,7 @@ export class GatewayStore {
   private identifyStartTime?: number;
   private reconnectTimeout = 0;
   private reconnecting = false;
+  private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
   private readonly dispatchHandlers = new Map<
     string,
     (...args: any[]) => any
@@ -169,6 +170,7 @@ export class GatewayStore {
   private memberListFetching = new Set<string>(); // Keys we are fetching
   private manualDisconnect = false;
   private subscribedUserIds = new Set<string>();
+  private subscribedUserRefCounts = new Map<string, number>();
   private resolvingChannels = new Map<
     Snowflake,
     Promise<Channel | undefined>
@@ -317,12 +319,20 @@ export class GatewayStore {
     this.readyState = GatewayStatus.CLOSED;
   }
 
+  private clearReconnect = () => {
+    if (this.reconnectTimer) {
+      clearTimeout(this.reconnectTimer);
+      this.reconnectTimer = null;
+    }
+    this.reconnecting = false;
+  };
+
   private forceReconnect() {
     if (!this.app.token) return;
 
     this.logger.debug("[Foreground] Forcing gateway reconnect");
     this.markGatewayUnavailable();
-    this.reconnecting = false;
+    this.clearReconnect();
     this.teardownSocket();
     void this.connect(this.url);
   }
@@ -462,6 +472,9 @@ export class GatewayStore {
   }
 
   async disconnect(code?: number, reason?: string) {
+    this.clearReconnect();
+    this.clearForegroundProbe();
+
     if (!this.socket) return;
 
     if (this.app.voice.hasActiveVoiceTarget) {
@@ -481,7 +494,8 @@ export class GatewayStore {
     if (this.reconnecting) return;
 
     this.reconnecting = true;
-    setTimeout(() => {
+    this.reconnectTimer = setTimeout(() => {
+      this.reconnectTimer = null;
       this.reconnecting = false;
       this.logger.debug(`[Reconnect] ${this.url}`);
       this.connect(this.url);
@@ -492,10 +506,14 @@ export class GatewayStore {
     const prev = this.lazyRequestChannels.get(spaceId) ?? [];
     if (prev.includes(channelId)) return;
 
+    const key = `${spaceId}:${channelId}`;
+    const initialRange: [number, number] = [0, 99];
+    this.memberListRanges.set(key, [initialRange]);
+
     const payload = {
       spaceId,
       channels: {
-        [channelId]: [[0, 99]]
+        [channelId]: [initialRange]
       }
     };
 
@@ -506,6 +524,24 @@ export class GatewayStore {
       d: payload
     });
   };
+
+  private resubscribeLazyChannels() {
+    for (const [spaceId, channelIds] of this.lazyRequestChannels) {
+      for (const channelId of channelIds) {
+        const key = `${spaceId}:${channelId}`;
+        const ranges = this.memberListRanges.get(key) ?? [[0, 99]];
+        this.send({
+          op: GatewayOpcodes.LazyRequest,
+          d: {
+            spaceId,
+            channels: {
+              [channelId]: ranges
+            }
+          }
+        });
+      }
+    }
+  }
 
   sendPresenceUpdate(
     presence: PresenceUpdateDraft,
@@ -736,7 +772,12 @@ export class GatewayStore {
   };
 
   subscribeUser(userId: string) {
+    const next = (this.subscribedUserRefCounts.get(userId) ?? 0) + 1;
+    this.subscribedUserRefCounts.set(userId, next);
     this.subscribedUserIds.add(userId);
+    if (next > 1) return;
+    if (this.readyState !== GatewayStatus.OPEN) return;
+
     this.send({
       op: GatewayOpcodes.SubscribeUser,
       d: { userId }
@@ -744,11 +785,19 @@ export class GatewayStore {
   }
 
   unsubscribeUser(userId: string) {
-    this.subscribedUserIds.delete(userId);
-    this.send({
-      op: GatewayOpcodes.UnsubscribeUser,
-      d: { userId }
-    });
+    const current = this.subscribedUserRefCounts.get(userId) ?? 0;
+    if (current <= 1) {
+      this.subscribedUserRefCounts.delete(userId);
+      this.subscribedUserIds.delete(userId);
+      if (this.readyState !== GatewayStatus.OPEN) return;
+      this.send({
+        op: GatewayOpcodes.UnsubscribeUser,
+        d: { userId }
+      });
+      return;
+    }
+
+    this.subscribedUserRefCounts.set(userId, current - 1);
   }
 
   private resubscribeUsers() {
@@ -1154,6 +1203,7 @@ export class GatewayStore {
     );
     this.readyState = GatewayStatus.OPEN;
     this.reconnectTimeout = 0;
+    this.clearReconnect();
 
     if (this.sessionId && this.app.account) {
       this.logger.info("[Gateway] Resuming session");
@@ -1287,8 +1337,6 @@ export class GatewayStore {
 
   private handleInvalidSession = (resumable: boolean) => {
     this.stopHeartbeat();
-    this.socket = null;
-    this.readyState = GatewayStatus.CLOSED;
     this.markGatewayUnavailable();
 
     this.logger.debug(`Received invalid session; Can Resume: ${resumable}`);
@@ -1302,12 +1350,9 @@ export class GatewayStore {
   };
 
   private handleReconnect() {
-    this.stopHeartbeat();
-    this.socket = null;
-    this.readyState = GatewayStatus.CLOSED;
     this.markGatewayUnavailable();
-
     this.logger.debug(`[Gateway] -> Reconnect`);
+    this.teardownSocket();
     this.startReconnect();
   }
 
@@ -1382,6 +1427,11 @@ export class GatewayStore {
     this.sessionId = null;
     this.sequence = 0;
     this.readyState = GatewayStatus.CLOSED;
+    this.lazyRequestChannels.clear();
+    this.memberListRanges.clear();
+    this.memberListFetching.clear();
+    this.subscribedUserIds.clear();
+    this.subscribedUserRefCounts.clear();
     this.clearResumeState();
   };
 
@@ -1428,12 +1478,7 @@ export class GatewayStore {
     );
 
     this.markGatewayUnavailable();
-    this.socket?.close(4009);
-
-    this.stopHeartbeat();
-    this.socket = null;
-    this.readyState = GatewayStatus.CLOSED;
-
+    this.teardownSocket();
     this.startReconnect();
   };
 
@@ -1495,6 +1540,7 @@ export class GatewayStore {
     }
 
     this.resubscribeUsers();
+    this.resubscribeLazyChannels();
     this.app.setGatewayReady(true);
     this.startPresenceLoop();
     this.app.voice.onGatewayReconnected();
@@ -1548,8 +1594,11 @@ export class GatewayStore {
     this.app.customStatus.setScheduledCustomStatus(
       customStatusSchedule ?? null
     );
+    this.app.presence.rearmScheduledStatusTimer();
+    this.app.customStatus.rearmScheduledCustomStatusTimer();
 
     this.reconnectTimeout = 0;
+    this.clearReconnect();
     this.resubscribeUsers();
     this.app.setGatewayReady(true);
     this.app.startBadgeWatch();
@@ -1986,12 +2035,12 @@ export class GatewayStore {
     // implicitly read by you - advance your read cursor instead of
     // leaving the channel looking unread to yourself.
     if (payload.authorId === this.app.account?.id) {
-      this.app.readStates.updateLocal(payload.channelId, payload.id);
+      void this.app.readStates.ack(payload.channelId, payload.id);
       return;
     }
 
     if (this.app.channels.activeId === payload.channelId) {
-      this.app.readStates.updateLocal(payload.channelId, payload.id);
+      void this.app.readStates.ack(payload.channelId, payload.id);
       return;
     }
 

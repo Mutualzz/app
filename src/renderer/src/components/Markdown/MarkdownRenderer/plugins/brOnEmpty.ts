@@ -32,11 +32,9 @@ export const brOnEmpty = (md: MarkdownItAsync) => {
 
       if (emptyLines <= 0) continue;
 
-      const brCount = emptyLines > 0 ? emptyLines + 1 : 0;
-
       const children = prevInline.children || (prevInline.children = []);
 
-      for (let k = 0; k < brCount; k++) {
+      for (let k = 0; k < emptyLines; k++) {
         const br = new state.Token("hardbreak", "br", 0);
 
         children.push(br);

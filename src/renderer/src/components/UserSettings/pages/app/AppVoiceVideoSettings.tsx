@@ -27,6 +27,7 @@ export const AppVoiceVideoSettings = observer(() => {
   const [showCamera, setShowCamera] = useState(false);
   const [testStream, setTestStream] = useState<MediaStream | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const testStreamRef = useRef<MediaStream | null>(null);
 
   const voice = app.voice;
   const settings = app.settings;
@@ -56,20 +57,33 @@ export const AppVoiceVideoSettings = observer(() => {
     cameras[0]?.deviceId ??
     null;
 
+  const stopTestStream = () => {
+    const stream = testStreamRef.current;
+    if (!stream) return;
+    for (const track of stream.getTracks()) {
+      track.stop();
+    }
+    testStreamRef.current = null;
+    setTestStream(null);
+    if (videoRef.current) {
+      videoRef.current.srcObject = null;
+    }
+  };
+
   useEffect(() => {
     app.voice.setupTracks();
-
     return () => {
-      if (testStream) {
-        for (const track of testStream.getTracks()) {
-          track.stop();
-        }
-      }
+      stopTestStream();
     };
   }, []);
 
   useEffect(() => {
-    if (!showCamera) return;
+    if (!showCamera) {
+      stopTestStream();
+      return;
+    }
+
+    let cancelled = false;
 
     const startTest = async () => {
       try {
@@ -78,6 +92,15 @@ export const AppVoiceVideoSettings = observer(() => {
           audio: false
         });
 
+        if (cancelled) {
+          for (const track of stream.getTracks()) {
+            track.stop();
+          }
+          return;
+        }
+
+        stopTestStream();
+        testStreamRef.current = stream;
         setTestStream(stream);
 
         if (videoRef.current) {
@@ -92,12 +115,8 @@ export const AppVoiceVideoSettings = observer(() => {
     void startTest();
 
     return () => {
-      if (testStream) {
-        for (const track of testStream.getTracks()) {
-          track.stop();
-        }
-        setTestStream(null);
-      }
+      cancelled = true;
+      stopTestStream();
     };
   }, [showCamera, fallbackCameraId]);
 

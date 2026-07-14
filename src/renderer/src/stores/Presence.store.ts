@@ -16,15 +16,22 @@ export class PresenceStore {
   constructor() {
     makeAutoObservable(this, { get: false }, { autoBind: true });
 
-    makePersistable(this, {
+    void makePersistable(this, {
       name: "PresenceStore",
       properties: ["scheduledStatus"],
       storage: localStorage
+    }).then(() => {
+      this.rearmScheduledStatusTimer();
     });
   }
 
   clear() {
     this.presences.clear();
+    this.scheduledStatus = null;
+    if (this.scheduledTimer) {
+      window.clearTimeout(this.scheduledTimer);
+      this.scheduledTimer = null;
+    }
   }
 
   upsert(userId: Snowflake, presence: PresencePayload) {

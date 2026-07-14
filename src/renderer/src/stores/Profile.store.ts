@@ -101,4 +101,10 @@ export class ProfileStore {
     this.previewUserId = null;
     this.previewDraft = null;
   }
+
+  clear() {
+    this.profiles.clear();
+    this.pending.clear();
+    this.clearPreviewDraft();
+  }
 }

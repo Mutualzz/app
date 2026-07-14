@@ -94,6 +94,7 @@ export class AppStore {
   replyingTo: Message | null = null;
   replyMention = true;
   badgeColor = "#e03131";
+  private badgeWatchDispose: (() => void) | null = null;
   private readonly logger = new Logger({
     tag: "AppStore"
   });
@@ -149,7 +150,8 @@ export class AppStore {
   }
 
   public startBadgeWatch() {
-    reaction(
+    this.stopBadgeWatch();
+    this.badgeWatchDispose = reaction(
       () =>
         [
           [...this.channels.all].reduce((acc, ch) => {
@@ -162,6 +164,11 @@ export class AppStore {
       },
       { fireImmediately: true }
     );
+  }
+
+  public stopBadgeWatch() {
+    this.badgeWatchDispose?.();
+    this.badgeWatchDispose = null;
   }
 
   getSuggestedGroupDMRecipients() {
@@ -310,6 +317,7 @@ export class AppStore {
       this.logger.warn("Failed to revoke session on logout", err);
     }
 
+    this.stopBadgeWatch();
     await this.tokenStorage.delete();
 
     runInAction(() => {
@@ -330,6 +338,9 @@ export class AppStore {
     await this.gateway.disconnect();
 
     this.customStatus.clear();
+    this.presence.clear();
+    this.profiles.clear();
+    this.bridgeChat.clearAll();
 
     this.channels.clear();
     this.expressions.clear();
@@ -343,7 +354,6 @@ export class AppStore {
     this.users.clear();
     this.posts.clear();
     this.mode = null;
-    this.presence.clear();
     await this.queryClient.cancelQueries();
     this.queryClient.clear();
     this.queryClient.removeQueries();

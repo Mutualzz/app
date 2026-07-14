@@ -130,6 +130,12 @@ export class Message extends MessageBase {
   }
 
   setEditing(value: boolean) {
+    if (value) {
+      const channel = this.app.channels.get(this.channelId);
+      channel?.messages.all.forEach((m) => {
+        if (m.id !== this.id && m.editing) m.setEditing(false);
+      });
+    }
     this.editing = value;
   }
 

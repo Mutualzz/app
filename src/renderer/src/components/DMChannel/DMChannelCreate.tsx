@@ -235,6 +235,7 @@ export const DMChannelCreate = observer(() => {
   const onUpload = (file: File | File[]) => {
     const fileToUse = Array.isArray(file) ? file[0] : file;
     const url = URL.createObjectURL(fileToUse);
+    if (imageFile) URL.revokeObjectURL(imageFile);
     setImageFile(url);
     setOriginalFile(fileToUse);
   };
@@ -280,6 +281,7 @@ export const DMChannelCreate = observer(() => {
       return app.channels.openGroupDM(options);
     },
     onSuccess: (channel) => {
+      if (imageFile) URL.revokeObjectURL(imageFile);
       if (channel) navigate({ to: `/@me/${channel.id}`, replace: true });
       closeModal();
     }
@@ -412,7 +414,10 @@ export const DMChannelCreate = observer(() => {
         <Stack direction="row" spacing={2.5}>
           <Button
             size="lg"
-            onClick={() => closeModal()}
+            onClick={() => {
+              onClearIcon();
+              closeModal();
+            }}
             expand
             color="neutral"
             disabled={isCreating}

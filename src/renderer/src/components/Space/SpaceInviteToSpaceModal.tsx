@@ -169,7 +169,8 @@ export const SpaceInviteToSpaceModal = observer(({ channel }: Props) => {
       await app.rest.post(
         `/spaces/${spaceId}/invites/${invite.code}/keepalive`,
         null,
-        { headers: { "x-invite-edit-session": editSessionId } }
+        undefined,
+        { "x-invite-edit-session": editSessionId }
       );
     }
   });

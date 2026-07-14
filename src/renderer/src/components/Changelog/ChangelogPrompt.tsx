@@ -46,7 +46,8 @@ export const ChangelogPrompt = observer(() => {
             }}
           />,
           {
-            disableEscapeKeyDown: true
+            disableEscapeKeyDown: true,
+            disableBackdropClick: true
           }
         );
       } catch {

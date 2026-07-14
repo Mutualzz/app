@@ -321,5 +321,15 @@ export class BridgeChatStore {
     this.entriesByBridge.delete(bridgeId);
     this.playersByBridge.delete(bridgeId);
     this.hasMoreByBridge.delete(bridgeId);
+    this.unreadByBridge.delete(bridgeId);
+    this.sendQueue = this.sendQueue.filter((item) => item.bridgeId !== bridgeId);
+  });
+
+  clearAll = action(() => {
+    this.entriesByBridge.clear();
+    this.playersByBridge.clear();
+    this.hasMoreByBridge.clear();
+    this.unreadByBridge.clear();
+    this.sendQueue = [];
   });
 }

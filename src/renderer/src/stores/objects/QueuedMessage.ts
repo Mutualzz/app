@@ -75,6 +75,10 @@ export class QueuedMessage extends MessageBase {
   }
 
   updateProgress(e: ProgressEvent) {
+    if (!e.lengthComputable || e.total <= 0) {
+      this.progress = 0;
+      return;
+    }
     this.progress = Math.round((e.loaded / e.total) * 100);
   }
 

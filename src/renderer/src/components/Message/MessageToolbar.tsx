@@ -117,7 +117,7 @@ const ToolbarContent = observer(
             </Tooltip>
           )}
           {(message.author?.id === app.account?.id ||
-            me?.hasPermission("ManageMessages")) && (
+            me?.hasPermission("ManageMessages", message.channel)) && (
             <Tooltip offset={16} content={t("actions.delete")}>
               <IconButton
                 color="danger"

@@ -108,6 +108,7 @@ export const ChannelCreateModal = observer(({ space, parent }: Props) => {
   const onUpload = async (file: File | File[]) => {
     const fileToUse = Array.isArray(file) ? file[0] : file;
     const url = URL.createObjectURL(fileToUse);
+    if (imageFile) URL.revokeObjectURL(imageFile);
     setImageFile(url);
     setOriginalFile(fileToUse);
     setErrors({});

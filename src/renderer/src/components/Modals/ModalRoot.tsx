@@ -22,7 +22,10 @@ export const ModalRoot = observer(() => {
             open={true}
             disableEnforceFocus={!isTop}
             disableAutoFocus={!isTop}
-            disableEscapeKeyDown={!isTop}
+            disableEscapeKeyDown={
+              !isTop || Boolean(modal.props?.disableEscapeKeyDown)
+            }
+            disableBackdropClick={Boolean(modal.props?.disableBackdropClick)}
             onClose={isTop ? () => closeModal(modal.id) : undefined}
             hideBackdrop={!isTop}
             keepMounted

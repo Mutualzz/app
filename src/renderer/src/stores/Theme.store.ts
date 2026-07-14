@@ -46,9 +46,15 @@ export class ThemeStore {
   }
 
   reset() {
+    const idsToRemove: string[] = [];
     this.themes.forEach((theme) => {
-      if (theme.author) this.themes.delete(theme.id);
+      if (theme.authorId || theme.author) idsToRemove.push(theme.id);
     });
+    for (const id of idsToRemove) {
+      this.themes.delete(id);
+      if (this.currentTheme === id) this.currentTheme = null;
+      if (this.currentIcon === id) this.currentIcon = null;
+    }
   }
 
   add(theme: APITheme | MzTheme) {

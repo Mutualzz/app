@@ -120,6 +120,8 @@ export class ThemeCreatorStore {
 
   resetValues() {
     this.resetToBaseTheme();
+    this.themeBeforePreview = null;
+    this.inPreview = false;
   }
 
   addFilter(filter: ThemeCreatorFilter) {

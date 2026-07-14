@@ -6,11 +6,18 @@ import { SpaceMember } from "@stores/objects/SpaceMember";
 import { makeAutoObservable } from "mobx";
 import i18n from "@renderer/i18n";
 
+type SyncGroupData = {
+  id: string;
+  title: string;
+  data: { member: SpaceMember; index: number }[];
+};
+
 export class SpaceMemberListStore {
   id: Snowflake;
   memberCount: number;
   list: { name: string; items: SpaceMember[] }[] = [];
   groups: any[] = [];
+  hasMore = true;
   private readonly logger = new Logger({
     tag: "SpaceMemberListStore"
   });
@@ -38,7 +45,7 @@ export class SpaceMemberListStore {
 
     this.id = id;
     this.groups = groups;
-    this.memberCount = memberCount;
+    this.memberCount = Math.max(this.memberCount ?? 0, memberCount ?? 0);
     this.computeListData(ops);
   }
 
@@ -55,84 +62,124 @@ export class SpaceMemberListStore {
     this.app.presence.upsert(userId, presence);
   }
 
+  private parseSyncItems(items: any[]): SyncGroupData[] {
+    let listData: SyncGroupData[] = [];
+
+    for (const entry of items ?? []) {
+      if ("group" in entry) {
+        listData.push({
+          id: entry.group.id,
+          title: this.getGroupName(entry.group),
+          data: []
+        });
+        continue;
+      }
+
+      if (listData.length === 0) {
+        this.logger.warn("SYNC: member without group header", entry);
+        continue;
+      }
+
+      const m = entry.member;
+      const memberKey = m?.userId ? m.userId : null;
+      if (!memberKey) continue;
+
+      this.upsertPresence(memberKey, m?.presence);
+
+      const { presence: _presence, ...memberWithoutPresence } = m;
+
+      let member = this.space.members.get(memberKey);
+      if (member) member.update?.(memberWithoutPresence);
+      else member = this.space.members.add(memberWithoutPresence);
+
+      listData[listData.length - 1].data.push({
+        member,
+        index: entry.index
+      });
+    }
+
+    listData = listData.filter((x) => x.data.length > 0);
+
+    listData = listData.map((x) => ({
+      ...x,
+      id: x.id,
+      title: `${x.title} - ${x.data.length}`
+    }));
+
+    listData = listData.filter(
+      (x) =>
+        !(x.id.toLowerCase().startsWith("offline") && x.data.length >= 100)
+    );
+
+    return listData;
+  }
+
+  private applySyncListData(listData: SyncGroupData[], merge: boolean) {
+    const mapped = listData.map((x) => ({
+      id: x.id,
+      name: x.title,
+      items: x.data
+        .slice()
+        .sort((a, b) => {
+          const ua = a.member.displayName ?? "";
+          const ub = b.member.displayName ?? "";
+          return ua.localeCompare(ub, undefined, {
+            sensitivity: "base"
+          });
+        })
+        .map((y) => y.member)
+    }));
+
+    if (!merge || this.list.length === 0) {
+      this.list = mapped.map(({ name, items }) => ({ name, items }));
+      return;
+    }
+
+    for (const group of mapped) {
+      const baseName = group.name.split(" - ")[0] ?? group.name;
+      const target = this.list.find((g) => {
+        const existingBase = g.name.split(" - ")[0] ?? g.name;
+        return existingBase === baseName;
+      });
+
+      if (target) {
+        const seen = new Set(target.items.map((m) => m.userId));
+        for (const member of group.items) {
+          if (seen.has(member.userId)) continue;
+          target.items.push(member);
+          seen.add(member.userId);
+        }
+        target.name = `${baseName} - ${target.items.length}`;
+      } else {
+        this.list.push({ name: group.name, items: group.items });
+      }
+    }
+  }
+
   private computeListData(ops: any) {
     for (const i of ops) {
       const { op, items, range, item, index } = i;
 
       switch (op) {
         case "SYNC": {
-          let listData: {
-            id: string;
-            title: string;
-            data: { member: SpaceMember; index: number }[];
-          }[] = [];
+          const syncRange = range as [number, number] | undefined;
+          const merge = Boolean(syncRange && syncRange[0] > 0);
+          const listData = this.parseSyncItems(items);
+          this.applySyncListData(listData, merge);
 
-          for (const entry of items ?? []) {
-            if ("group" in entry) {
-              listData.push({
-                id: entry.group.id,
-                title: this.getGroupName(entry.group),
-                data: []
-              });
-              continue;
-            }
-
-            if (listData.length === 0) {
-              this.logger.warn("SYNC: member without group header", entry);
-              continue;
-            }
-
-            const m = entry.member;
-            const memberKey = m?.userId ? m.userId : null;
-            if (!memberKey) continue;
-
-            this.upsertPresence(memberKey, m?.presence);
-
-            const { presence: _presence, ...memberWithoutPresence } = m;
-
-            let member = this.space.members.get(memberKey);
-            if (member) member.update?.(memberWithoutPresence);
-            else member = this.space.members.add(memberWithoutPresence);
-
-            listData[listData.length - 1].data.push({
-              member,
-              index: entry.index
-            });
+          if (syncRange) {
+            const expected = syncRange[1] - syncRange[0] + 1;
+            const memberItems = (items ?? []).filter(
+              (entry: any) => !("group" in entry)
+            ).length;
+            this.hasMore = memberItems >= expected;
           }
-
-          listData = listData.filter((x) => x.data.length > 0);
-
-          listData = listData.map((x) => ({
-            ...x,
-            id: x.id,
-            title: `${x.title} - ${x.data.length}`
-          }));
-
-          // hide offline group if it has more than 100 members
-          listData = listData.filter(
-            (x) =>
-              !(
-                x.id.toLowerCase().startsWith("offline") && x.data.length >= 100
-              )
-          );
-
-          this.list = listData.map((x) => ({
-            name: x.title,
-            items: x.data
-              .slice()
-              .sort((a, b) => {
-                const ua = a.member.displayName ?? "";
-                const ub = b.member.displayName ?? "";
-                return ua.localeCompare(ub, undefined, {
-                  sensitivity: "base"
-                });
-              })
-              .map((y) => y.member)
-          }));
 
           this.logger.debug("SYNC built list", {
             groups: this.list.length,
-            total: this.list.reduce((n, g) => n + g.items.length, 0)
+            total: this.list.reduce((n, g) => n + g.items.length, 0),
+            merge,
+            hasMore: this.hasMore
           });
 
           break;
@@ -252,17 +299,18 @@ export class SpaceMemberListStore {
             memberObj?.update?.(memberWithoutPresence);
 
             if (!memberObj) {
-              memberObj = new SpaceMember(this.app, memberWithoutPresence);
+              memberObj = this.space.members.add(memberWithoutPresence);
             }
           }
 
           if (!memberObj) {
-            memberObj = new SpaceMember(
-              this.app,
-
-              item.member
-            );
+            if (item.member) {
+              const { presence: _p, ...raw } = item.member;
+              memberObj = this.space.members.add(raw);
+            }
           }
+
+          if (!memberObj) break;
 
           this.list[groupIndex].items.splice(memberIndex, 0, memberObj);
           break;
