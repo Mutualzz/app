@@ -29,7 +29,6 @@ import { useNavigate } from "@tanstack/react-router";
 import { Tooltip } from "@components/Tooltip";
 import { useTranslation } from "react-i18next";
 import { NoiseSuppressionPopover } from "@components/User/NoiseSuppressionPopover";
-import { getChannelOccupiedAt } from "@utils/voiceElapsed";
 
 export const UserBar = observer(() => {
   const app = useAppStore();
@@ -55,11 +54,6 @@ export const UserBar = observer(() => {
   const selfElapsed = useElapsedClock(
     selfVoiceState?.channelId && !selfVoiceState.disconnectedAt
       ? selfVoiceState.joinedAt
-      : null
-  );
-  const channelElapsed = useElapsedClock(
-    voiceChannel
-      ? getChannelOccupiedAt(Array.from(voiceChannel.voiceStates.values()))
       : null
   );
 
@@ -150,23 +144,26 @@ export const UserBar = observer(() => {
                   {voiceSubtitle}
                 </Typography>
               )}
-              {channelElapsed && (
+              {selfElapsed && (
                 <Typography
                   level="label-xs"
                   textColor="muted"
-                  css={{ fontVariantNumeric: "tabular-nums" }}
-                  aria-label={t("voice.channelOccupied", {
-                    time: channelElapsed
+                  css={{ flexShrink: 0, fontVariantNumeric: "tabular-nums" }}
+                  aria-label={t("voice.elapsedInChannel", {
+                    time: selfElapsed
                   })}
                 >
-                  {channelElapsed}
+                  {selfElapsed}
                 </Typography>
               )}
             </Stack>
 
             <Stack direction="row" spacing={0.5} alignItems="center">
               {voiceStatus === "connected" && <NoiseSuppressionPopover />}
-              <Tooltip content={t("voice.connection.disconnect")} placement="top">
+              <Tooltip
+                content={t("voice.connection.disconnect")}
+                placement="top"
+              >
                 <IconButton
                   disabled={!canHangup}
                   onClick={() => app.voice.leave()}
@@ -346,18 +343,6 @@ export const UserBar = observer(() => {
               >
                 {account.displayName}
               </Typography>
-              {selfElapsed && (
-                <Typography
-                  level="label-xs"
-                  textColor="muted"
-                  css={{ flexShrink: 0, fontVariantNumeric: "tabular-nums" }}
-                  aria-label={t("voice.elapsedInChannel", {
-                    time: selfElapsed
-                  })}
-                >
-                  {selfElapsed}
-                </Typography>
-              )}
             </Stack>
             {hovered &&
               account.presence?.activities.length === 0 &&
