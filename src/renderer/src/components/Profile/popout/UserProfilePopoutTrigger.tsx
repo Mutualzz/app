@@ -39,7 +39,8 @@ export const UserProfilePopoutTrigger = observer(
           padding: 0,
           background: "transparent",
           boxShadow: "none",
-          overflow: "visible"
+          overflow: "visible",
+          whiteSpace: "normal"
         }}
       >
         <UserProfilePopout user={user} member={member} />

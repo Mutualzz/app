@@ -8,19 +8,12 @@ import { useModal } from "@contexts/Modal.context";
 import { DMChannelCreate } from "@components/DMChannel/DMChannelCreate";
 import { PlusIcon } from "@phosphor-icons/react";
 import { Tooltip } from "@components/Tooltip";
-import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
 export const DMChannelList = observer(() => {
   const { t } = useTranslation("chat");
   const app = useAppStore();
   const dms = app.channels.dms;
-
-  const dmKey = dms
-    .map((d) => d.id)
-    .sort()
-    .join(",");
-  const stableDMs = useMemo(() => dms, [dmKey]);
 
   const { openModal } = useModal();
 
@@ -57,7 +50,7 @@ export const DMChannelList = observer(() => {
           {t("dm.empty")}
         </Typography>
       )}
-      {stableDMs.map((dm) => (
+      {dms.map((dm) => (
         <DMChannelItem key={dm.id} channel={dm} />
       ))}
     </Paper>

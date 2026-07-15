@@ -1,9 +1,10 @@
 import { ActivityIcon } from "@components/Presence/ActivityIcon";
+import { Paper } from "@components/Paper";
 import { useAppStore } from "@hooks/useStores";
 import type { PresenceActivity, PresenceActivityAssets } from "@mutualzz/types";
 import { Box, Stack, Typography, useTheme } from "@mutualzz/ui-web";
+import { CaretDownIcon, CaretUpIcon } from "@phosphor-icons/react";
 import {
-  activityTypeLabelKey,
   formatActivityDuration,
   formatActivityPrimary,
   formatActivitySecondary
@@ -11,7 +12,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 dayjs.extend(relativeTime);
@@ -48,6 +49,18 @@ function activityIdentity(activity: {
   return `${activity.type}|${activity.applicationId ?? ""}|${activity.name}`;
 }
 
+function dedupeRecent(rows: RecentActivityDto[]) {
+  const seen = new Set<string>();
+  const out: RecentActivityDto[] = [];
+  for (const row of rows) {
+    const key = activityIdentity(row);
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(row);
+  }
+  return out;
+}
+
 interface Props {
   userId: string;
   liveActivities?: PresenceActivity[];
@@ -67,6 +80,8 @@ export const RecentActivitiesSection = ({
   const { t: tCommon } = useTranslation("common");
   const { theme } = useTheme();
   const app = useAppStore();
+  const [expanded, setExpanded] = useState(false);
+  const accent = theme.colors.success;
 
   const { data, isPending } = useQuery({
     queryKey: ["user-recent-activities", userId],
@@ -89,31 +104,45 @@ export const RecentActivitiesSection = ({
 
   const recent = useMemo(
     () =>
-      (data?.activities ?? []).filter(
-        (row) => !liveKeys.has(activityIdentity(row))
+      dedupeRecent(
+        (data?.activities ?? []).filter(
+          (row) => !liveKeys.has(activityIdentity(row))
+        )
       ),
     [data?.activities, liveKeys]
   );
 
-  const header = (
-    <Typography
-      level="body-xs"
-      css={{
-        opacity: 0.65,
-        fontSize: "0.65rem",
-        textTransform: "uppercase",
-        letterSpacing: "0.04em",
-        fontWeight: 700
-      }}
-    >
-      {t("profile.blocks.recentActivity")}
-    </Typography>
+  const activitiesSignature = useMemo(
+    () => recent.map(activityIdentity).join("|"),
+    [recent]
   );
 
+  useEffect(() => {
+    setExpanded(false);
+  }, [activitiesSignature]);
+
+  const canCollapse = recent.length > 1;
+  const visible = canCollapse && !expanded ? recent.slice(0, 1) : recent;
+  const hiddenCount = recent.length - 1;
+
+  const cardCss = {
+    backgroundColor: `${theme.colors.surface}cc`,
+    border: `1px solid ${theme.colors.neutral}22`
+  } as const;
+
   if (isPending) {
+    if (compact) return null;
+
     return (
-      <Stack direction="column" spacing={0.75} minWidth={0}>
-        {!compact && header}
+      <Paper
+        direction="column"
+        spacing={1}
+        p={1.25}
+        borderRadius={8}
+        elevation={1}
+        css={cardCss}
+        minWidth={0}
+      >
         {[0, 1].map((i) => (
           <Stack
             key={i}
@@ -155,28 +184,61 @@ export const RecentActivitiesSection = ({
             </Stack>
           </Stack>
         ))}
-      </Stack>
+      </Paper>
     );
   }
 
   if (recent.length === 0) {
     if (!showEmpty) return null;
     return (
-      <Stack direction="column" spacing={0.5} minWidth={0}>
-        {!compact && header}
+      <Paper
+        direction="column"
+        spacing={0.5}
+        p={1.25}
+        borderRadius={8}
+        elevation={1}
+        css={cardCss}
+        minWidth={0}
+      >
         <Typography level="body-xs" css={{ opacity: 0.55 }}>
           {t("profile.blocks.noRecentActivity")}
         </Typography>
-      </Stack>
+      </Paper>
     );
   }
 
   return (
-    <Stack direction="column" spacing={0.75} minWidth={0}>
-      {header}
-      {recent.map((row) => {
+    <Paper
+      direction="column"
+      spacing={1}
+      p={1.25}
+      borderRadius={8}
+      elevation={1}
+      css={{
+        ...cardCss,
+        ...(canCollapse && !expanded ? { cursor: "pointer" } : undefined),
+        ...(canCollapse && {
+          "&:hover": {
+            borderColor: `${theme.colors.neutral}44`
+          }
+        })
+      }}
+      minWidth={0}
+      onClick={
+        canCollapse && !expanded
+          ? (e) => {
+              e.stopPropagation();
+              setExpanded(true);
+            }
+          : undefined
+      }
+    >
+      {visible.map((row) => {
         const activity = toPresenceActivity(row);
-        const typeKey = activityTypeLabelKey(activity.type);
+        const typeKey =
+          row.type === "listening"
+            ? "activity.listened"
+            : "activity.played";
         const secondary = formatActivitySecondary(activity);
         const duration = formatActivityDuration(row.startedAt, row.endedAt);
         const durationKey =
@@ -194,12 +256,12 @@ export const RecentActivitiesSection = ({
             <ActivityIcon
               activity={activity}
               size={iconSize}
-              color={theme.typography.colors.primary}
+              color={accent}
               fetchFallback
               borderRadius={8}
             />
             <Stack direction="column" spacing={0.15} minWidth={0} flex={1}>
-              {typeKey && (
+              {!compact && (
                 <Typography
                   level="body-xs"
                   css={{
@@ -223,9 +285,11 @@ export const RecentActivitiesSection = ({
                   whiteSpace: "nowrap"
                 }}
               >
-                {formatActivityPrimary(activity)}
+                {compact
+                  ? `${tCommon(typeKey)} ${formatActivityPrimary(activity)}`
+                  : formatActivityPrimary(activity)}
               </Typography>
-              {secondary && (
+              {secondary && !compact && (
                 <Typography
                   level="body-xs"
                   css={{
@@ -240,7 +304,11 @@ export const RecentActivitiesSection = ({
               )}
               <Typography
                 level="body-xs"
-                css={{ opacity: 0.55, fontSize: "0.65rem" }}
+                css={{
+                  opacity: 0.55,
+                  fontSize: "0.65rem",
+                  fontVariantNumeric: "tabular-nums"
+                }}
               >
                 {duration
                   ? t(durationKey, {
@@ -255,6 +323,42 @@ export const RecentActivitiesSection = ({
           </Stack>
         );
       })}
-    </Stack>
+
+      {canCollapse && (
+        <Stack
+          direction="row"
+          alignItems="center"
+          justifyContent="center"
+          spacing={0.35}
+          flexShrink={0}
+          onClick={
+            expanded
+              ? (e) => {
+                  e.stopPropagation();
+                  setExpanded(false);
+                }
+              : undefined
+          }
+          css={{
+            opacity: 0.65,
+            ...(expanded ? { cursor: "pointer" } : undefined)
+          }}
+        >
+          {!expanded ? (
+            <>
+              <Typography level="body-xs">+{hiddenCount}</Typography>
+              <CaretDownIcon size={12} weight="bold" />
+            </>
+          ) : (
+            <>
+              <Typography level="body-xs">
+                {tCommon("activity.showLess")}
+              </Typography>
+              <CaretUpIcon size={12} weight="bold" />
+            </>
+          )}
+        </Stack>
+      )}
+    </Paper>
   );
 };

@@ -258,6 +258,9 @@ export class AccountSettingsStore {
     if (settings.preferredMode != undefined)
       this.preferredMode = settings.preferredMode;
 
+    if (settings.preferEmbossed != undefined)
+      this.preferEmbossed = settings.preferEmbossed;
+
     if (settings.updatedAt != undefined)
       this.updatedAt = new Date(settings.updatedAt);
 

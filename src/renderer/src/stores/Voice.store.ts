@@ -2173,7 +2173,7 @@ export class VoiceStore {
     if (this.effectiveVoiceInputMode !== "push_to_talk") return;
     if (!this.hasActiveVoiceTarget) return;
     if (isEditableTarget(event.target)) return;
-    if (event.code !== this.app.settings.pushToTalkKey) return;
+    if (event.code !== this.app.settings?.pushToTalkKey) return;
     if (event.repeat) return;
 
     event.preventDefault();
@@ -3100,9 +3100,7 @@ export class VoiceStore {
 
     if (!endpoint || !token) {
       this.logger.warn("startConnection called with no pending credentials");
-      this.failJoin(
-        i18n.t("voice.errors.credentialsMissing", { ns: "chat" })
-      );
+      this.failJoin(i18n.t("voice.errors.credentialsMissing", { ns: "chat" }));
       return;
     }
 
@@ -3310,7 +3308,7 @@ export class VoiceStore {
         selfMute: this.spaceMute ? true : this.selfMute,
         selfDeaf: this.spaceDeaf ? true : this.selfDeaf,
         client: isElectron ? "desktop" : "web",
-        ...(options?.refreshRtc ? { refreshRtc: true } : {}),
+        ...(options?.refreshRtc ? { refreshRtc: true } : {})
       }
     });
   }
