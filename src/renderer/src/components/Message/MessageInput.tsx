@@ -70,7 +70,6 @@ export const MessageInput = observer(
     const [content, setContent] = useState(message?.content ?? "");
     const [stickers, setStickers] = useState<Expression[]>([]);
     const [files, setFiles] = useState<File[]>([]);
-    const [nonce, setNonce] = useState("");
 
     const inputRef = useRef<MarkdownInputHandle>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -223,7 +222,6 @@ export const MessageInput = observer(
         const pendingFiles = canAttachFiles ? files.slice() : [];
         const contentSnapshot = trimmed;
 
-        setNonce(nonce);
         const author = app.account.raw;
 
         const pendingAttachments = pendingFiles.map((f) => ({
@@ -327,9 +325,6 @@ export const MessageInput = observer(
         );
         if (sysMessage) channel?.messages.add(sysMessage);
       },
-      onSuccess: () => {
-        setNonce("");
-      }
     });
 
     const onChange = (value: string) => setContent(value);

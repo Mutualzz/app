@@ -25,7 +25,6 @@ export const AppVoiceVideoSettings = observer(() => {
   const { t } = useTranslation("settings");
   const app = useAppStore();
   const [showCamera, setShowCamera] = useState(false);
-  const [testStream, setTestStream] = useState<MediaStream | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const testStreamRef = useRef<MediaStream | null>(null);
 
@@ -64,7 +63,6 @@ export const AppVoiceVideoSettings = observer(() => {
       track.stop();
     }
     testStreamRef.current = null;
-    setTestStream(null);
     if (videoRef.current) {
       videoRef.current.srcObject = null;
     }
@@ -101,7 +99,6 @@ export const AppVoiceVideoSettings = observer(() => {
 
         stopTestStream();
         testStreamRef.current = stream;
-        setTestStream(stream);
 
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
