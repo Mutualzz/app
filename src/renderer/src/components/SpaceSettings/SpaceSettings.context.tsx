@@ -11,8 +11,13 @@ export type SpaceSettingsPage =
   | "profile"
   | "roles"
   | "expressions"
-  | "bans";
-export type SpaceSettingsCategories = "people" | "general" | "moderation";
+  | "bans"
+  | "minecraft-bridge";
+export type SpaceSettingsCategories =
+  | "people"
+  | "general"
+  | "integrations"
+  | "moderation";
 
 interface SpaceSettingsContextProps {
   currentPage: SpaceSettingsPage;

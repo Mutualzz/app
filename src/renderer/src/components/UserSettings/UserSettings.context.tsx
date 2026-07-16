@@ -14,8 +14,7 @@ export type UserSettingsPage =
   | "expressions"
   | "notifications"
   | "registered-games"
-  | "connections"
-  | "minecraft-bridge";
+  | "connections";
 export type UserSettingsCategories = "user-settings" | "app-settings";
 
 interface UserSettingsContextProps {

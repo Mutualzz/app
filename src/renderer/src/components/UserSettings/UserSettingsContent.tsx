@@ -18,7 +18,6 @@ import { AppNotificationsSettings } from "@components/UserSettings/pages/app/App
 import { AppRegisteredGamesSettings } from "@components/UserSettings/pages/app/AppRegisteredGamesSettings";
 import { AppConnectionsSettings } from "@components/UserSettings/pages/app/AppConnectionsSettings";
 import { UserExpressionsSettings } from "@components/UserSettings/pages/user/expressions/UserExpressionsSettings";
-import { MinecraftBridgeSettings } from "@components/UserSettings/pages/user/MinecraftBridgeSettings";
 import { XIcon } from "@phosphor-icons/react";
 
 interface UserSettingsContentProps {
@@ -112,7 +111,6 @@ export const UserSettingsContent = observer(
           {currentPage === "notifications" && <AppNotificationsSettings />}
           {currentPage === "registered-games" && <AppRegisteredGamesSettings />}
           {currentPage === "connections" && <AppConnectionsSettings />}
-          {currentPage === "minecraft-bridge" && <MinecraftBridgeSettings />}
         </Paper>
       </Stack>
     );

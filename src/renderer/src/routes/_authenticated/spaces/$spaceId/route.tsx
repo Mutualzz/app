@@ -1,6 +1,12 @@
 import { useAppStore } from "@hooks/useStores";
 import { Stack } from "@mutualzz/ui-web";
-import { createFileRoute, Outlet, useNavigate, useParams } from "@tanstack/react-router";
+import {
+  createFileRoute,
+  Outlet,
+  useNavigate,
+  useParams,
+  useRouterState,
+} from "@tanstack/react-router";
 import { observer } from "mobx-react-lite";
 import { useEffect } from "react";
 
@@ -12,6 +18,8 @@ function RouteComponent() {
   const app = useAppStore();
   const navigate = useNavigate();
   const { spaceId } = Route.useParams();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const onBridgeRoute = pathname.includes("/bridges/");
 
   const childParams = useParams({
     from: "/_authenticated/spaces/$spaceId/$channelId",
@@ -24,6 +32,7 @@ function RouteComponent() {
 
   useEffect(() => {
     if (childParams?.channelId) return;
+    if (onBridgeRoute) return;
     if (!app.isGatewayReady) return;
 
     const space = app.spaces.get(spaceId);
@@ -49,7 +58,7 @@ function RouteComponent() {
       params: { spaceId, channelId: preferred.id },
       replace: true
     });
-  }, [childParams?.channelId, spaceId, app.isGatewayReady]);
+  }, [childParams?.channelId, onBridgeRoute, spaceId, app.isGatewayReady]);
 
   return (
     <Stack direction="row" width="100%" height="100%">

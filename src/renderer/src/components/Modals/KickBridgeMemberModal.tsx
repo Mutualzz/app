@@ -7,13 +7,13 @@ import { observer } from "mobx-react-lite";
 import { useTranslation } from "react-i18next";
 
 interface Props {
-  bridgeId: string;
+  spaceId: string;
   userId: string;
   displayName: string;
 }
 
 export const KickBridgeMemberModal = observer(
-  ({ bridgeId, userId, displayName }: Props) => {
+  ({ spaceId, userId, displayName }: Props) => {
     const { t } = useTranslation("settings");
     const { t: tCommon } = useTranslation("common");
     const app = useAppStore();
@@ -21,12 +21,12 @@ export const KickBridgeMemberModal = observer(
     const queryClient = useQueryClient();
 
     const { mutate: kick, isPending } = useMutation({
-      mutationKey: ["kick-bridge-member", bridgeId, userId],
+      mutationKey: ["kick-bridge-member", spaceId, userId],
       mutationFn: () =>
-        app.rest.delete(`/@me/bridges/${bridgeId}/members/${userId}`),
+        app.rest.delete(`/spaces/${spaceId}/bridge/members/${userId}`),
       onSuccess: () => {
         void queryClient.invalidateQueries({
-          queryKey: ["me", "bridges", bridgeId, "members"],
+          queryKey: ["space", spaceId, "bridge"],
         });
         closeModal();
       },

@@ -6,10 +6,7 @@ import {
   useSpaceSettings
 } from "@components/SpaceSettings/SpaceSettings.context";
 import { useAppStore } from "@hooks/useStores";
-import {
-  spaceCategoryTitleKeys,
-  spacePageTitleKeys
-} from "@mutualzz/i18n";
+import { spaceCategoryTitleKeys, spacePageTitleKeys } from "@mutualzz/i18n";
 import { ButtonGroup, Divider, Stack, Typography } from "@mutualzz/ui-web";
 import type { Space } from "@stores/objects/Space";
 import { observer } from "mobx-react-lite";
@@ -19,6 +16,7 @@ import { SpaceActionConfirm } from "@components/Modals/SpaceActionConfirm";
 import { useModal } from "@contexts/Modal.context";
 import type { PermissionFlag } from "@mutualzz/bitfield";
 import {
+  CubeIcon,
   GavelIcon,
   PaintBrushIcon,
   PaperPlaneTiltIcon,
@@ -46,6 +44,13 @@ export const settingsPages: SettingsPages = {
     {
       label: "profile",
       icon: <PaintBrushIcon weight="fill" />,
+      permissions: ["ManageSpace"]
+    }
+  ],
+  integrations: [
+    {
+      label: "minecraft-bridge",
+      icon: <CubeIcon weight="fill" />,
       permissions: ["ManageSpace"]
     }
   ],

@@ -4,9 +4,12 @@ import { makePersistable } from "mobx-persist-store";
 import type { AppStore } from "./App.store";
 import { Space } from "./objects/Space";
 
+export type SpaceSidebarTab = "channels" | "bridges";
+
 export class SpaceStore {
   activeId: Snowflake | null = null;
   mostRecentSpaceId?: string | null;
+  sidebarTabBySpace: Record<string, SpaceSidebarTab> = {};
   private readonly spaces: ObservableMap<string, Space>;
 
   constructor(private readonly app: AppStore) {
@@ -15,9 +18,17 @@ export class SpaceStore {
 
     makePersistable(this, {
       name: "SpaceStore",
-      properties: ["mostRecentSpaceId"],
+      properties: ["mostRecentSpaceId", "sidebarTabBySpace"],
       storage: localStorage
     });
+  }
+
+  getSidebarTab(spaceId: string): SpaceSidebarTab {
+    return this.sidebarTabBySpace[spaceId] ?? "channels";
+  }
+
+  setSidebarTab(spaceId: string, tab: SpaceSidebarTab) {
+    this.sidebarTabBySpace = { ...this.sidebarTabBySpace, [spaceId]: tab };
   }
 
   get mostRecentSpace(): Space | undefined {

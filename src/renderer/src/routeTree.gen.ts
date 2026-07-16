@@ -50,6 +50,7 @@ import { Route as AuthenticatedFeedPostsPostIdRouteImport } from "./routes/_auth
 import { Route as AuthenticatedAtmeBridgesBridgeIdRouteImport } from "./routes/_authenticated/@me/bridges/$bridgeId"
 import { Route as AuthenticatedStaffUsersUserIdRouteRouteImport } from "./routes/_authenticated/staff/users/$userId/route"
 import { Route as AuthenticatedSpacesSpaceIdChannelIdRouteRouteImport } from "./routes/_authenticated/spaces/$spaceId/$channelId/route"
+import { Route as AuthenticatedSpacesSpaceIdBridgesBridgeIdRouteImport } from "./routes/_authenticated/spaces/$spaceId/bridges/$bridgeId"
 
 const TosRoute = TosRouteImport.update({
   id: "/tos",
@@ -276,6 +277,12 @@ const AuthenticatedSpacesSpaceIdChannelIdRouteRoute =
     path: "/$channelId",
     getParentRoute: () => AuthenticatedSpacesSpaceIdRouteRoute,
   } as any)
+const AuthenticatedSpacesSpaceIdBridgesBridgeIdRoute =
+  AuthenticatedSpacesSpaceIdBridgesBridgeIdRouteImport.update({
+    id: "/bridges/$bridgeId",
+    path: "/bridges/$bridgeId",
+    getParentRoute: () => AuthenticatedSpacesSpaceIdRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   "/": typeof IndexRoute
@@ -318,6 +325,7 @@ export interface FileRoutesByFullPath {
   "/@me/bridges/": typeof AuthenticatedAtmeBridgesIndexRoute
   "/staff/reports/": typeof AuthenticatedStaffReportsIndexRoute
   "/support/tickets/": typeof AuthenticatedSupportTicketsIndexRoute
+  "/spaces/$spaceId/bridges/$bridgeId": typeof AuthenticatedSpacesSpaceIdBridgesBridgeIdRoute
 }
 export interface FileRoutesByTo {
   "/": typeof IndexRoute
@@ -358,6 +366,7 @@ export interface FileRoutesByTo {
   "/@me/bridges": typeof AuthenticatedAtmeBridgesIndexRoute
   "/staff/reports": typeof AuthenticatedStaffReportsIndexRoute
   "/support/tickets": typeof AuthenticatedSupportTicketsIndexRoute
+  "/spaces/$spaceId/bridges/$bridgeId": typeof AuthenticatedSpacesSpaceIdBridgesBridgeIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -402,6 +411,7 @@ export interface FileRoutesById {
   "/_authenticated/@me/bridges/": typeof AuthenticatedAtmeBridgesIndexRoute
   "/_authenticated/staff/reports/": typeof AuthenticatedStaffReportsIndexRoute
   "/_authenticated/support/tickets/": typeof AuthenticatedSupportTicketsIndexRoute
+  "/_authenticated/spaces/$spaceId/bridges/$bridgeId": typeof AuthenticatedSpacesSpaceIdBridgesBridgeIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -446,6 +456,7 @@ export interface FileRouteTypes {
     | "/@me/bridges/"
     | "/staff/reports/"
     | "/support/tickets/"
+    | "/spaces/$spaceId/bridges/$bridgeId"
   fileRoutesByTo: FileRoutesByTo
   to:
     | "/"
@@ -486,6 +497,7 @@ export interface FileRouteTypes {
     | "/@me/bridges"
     | "/staff/reports"
     | "/support/tickets"
+    | "/spaces/$spaceId/bridges/$bridgeId"
   id:
     | "__root__"
     | "/"
@@ -529,6 +541,7 @@ export interface FileRouteTypes {
     | "/_authenticated/@me/bridges/"
     | "/_authenticated/staff/reports/"
     | "/_authenticated/support/tickets/"
+    | "/_authenticated/spaces/$spaceId/bridges/$bridgeId"
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -837,6 +850,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof AuthenticatedSpacesSpaceIdChannelIdRouteRouteImport
       parentRoute: typeof AuthenticatedSpacesSpaceIdRouteRoute
     }
+    "/_authenticated/spaces/$spaceId/bridges/$bridgeId": {
+      id: "/_authenticated/spaces/$spaceId/bridges/$bridgeId"
+      path: "/bridges/$bridgeId"
+      fullPath: "/spaces/$spaceId/bridges/$bridgeId"
+      preLoaderRoute: typeof AuthenticatedSpacesSpaceIdBridgesBridgeIdRouteImport
+      parentRoute: typeof AuthenticatedSpacesSpaceIdRouteRoute
+    }
   }
 }
 
@@ -885,12 +905,15 @@ const AuthenticatedFeedRouteRouteWithChildren =
 
 interface AuthenticatedSpacesSpaceIdRouteRouteChildren {
   AuthenticatedSpacesSpaceIdChannelIdRouteRoute: typeof AuthenticatedSpacesSpaceIdChannelIdRouteRoute
+  AuthenticatedSpacesSpaceIdBridgesBridgeIdRoute: typeof AuthenticatedSpacesSpaceIdBridgesBridgeIdRoute
 }
 
 const AuthenticatedSpacesSpaceIdRouteRouteChildren: AuthenticatedSpacesSpaceIdRouteRouteChildren =
   {
     AuthenticatedSpacesSpaceIdChannelIdRouteRoute:
       AuthenticatedSpacesSpaceIdChannelIdRouteRoute,
+    AuthenticatedSpacesSpaceIdBridgesBridgeIdRoute:
+      AuthenticatedSpacesSpaceIdBridgesBridgeIdRoute,
   }
 
 const AuthenticatedSpacesSpaceIdRouteRouteWithChildren =

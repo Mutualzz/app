@@ -23,10 +23,11 @@ export interface CreatedBridgeResult {
 }
 
 interface Props {
+  spaceId: string;
   onCreated?: (bridge: CreatedBridgeResult) => void;
 }
 
-export const CreateBridgeModal = observer(({ onCreated }: Props) => {
+export const CreateBridgeModal = observer(({ spaceId, onCreated }: Props) => {
   const { t } = useTranslation("settings");
   const { t: tCommon } = useTranslation("common");
   const app = useAppStore();
@@ -42,12 +43,12 @@ export const CreateBridgeModal = observer(({ onCreated }: Props) => {
   const { mutate: createBridge, isPending } = useMutation({
     mutationKey: ["create-bridge"],
     mutationFn: () =>
-      app.rest.post<CreatedBridgeResult>("/@me/bridges", {
+      app.rest.post<CreatedBridgeResult>(`/spaces/${spaceId}/bridge`, {
         name: name.trim() || t("minecraftBridge.namePlaceholder"),
         serverId: sanitizeServerId(serverId),
       }),
     onSuccess: (created) => {
-      void queryClient.invalidateQueries({ queryKey: ["me", "bridges"] });
+      void queryClient.invalidateQueries({ queryKey: ["space", spaceId, "bridge"] });
       onCreated?.(created);
       closeModal();
     },

@@ -27,7 +27,6 @@ import { useModal } from "@contexts/Modal.context";
 import { useNavigate } from "@tanstack/react-router";
 import {
   BellIcon,
-  CubeIcon,
   GameControllerIcon,
   LifebuoyIcon,
   LinkSimpleIcon,
@@ -65,10 +64,6 @@ const settingsPages: SettingsPages = {
     {
       label: "connections",
       icon: <LinkSimpleIcon weight="fill" />
-    },
-    {
-      label: "minecraft-bridge",
-      icon: <CubeIcon weight="fill" />
     }
   ],
   "app-settings": [

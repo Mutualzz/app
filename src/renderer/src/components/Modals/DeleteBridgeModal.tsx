@@ -7,13 +7,14 @@ import { observer } from "mobx-react-lite";
 import { useTranslation } from "react-i18next";
 
 interface Props {
+  spaceId: string;
   bridgeId: string;
   bridgeName: string;
   onDeleted?: () => void;
 }
 
 export const DeleteBridgeModal = observer(
-  ({ bridgeId, bridgeName, onDeleted }: Props) => {
+  ({ spaceId, bridgeId, bridgeName, onDeleted }: Props) => {
     const { t } = useTranslation("settings");
     const { t: tCommon } = useTranslation("common");
     const app = useAppStore();
@@ -21,15 +22,12 @@ export const DeleteBridgeModal = observer(
     const queryClient = useQueryClient();
 
     const { mutate: deleteBridge, isPending } = useMutation({
-      mutationKey: ["delete-bridge", bridgeId],
-      mutationFn: () => app.rest.delete(`/@me/bridges/${bridgeId}`),
+      mutationKey: ["delete-bridge", spaceId],
+      mutationFn: () => app.rest.delete(`/spaces/${spaceId}/bridge`),
       onSuccess: () => {
-        queryClient.setQueryData<Array<{ id: string }>>(
-          ["me", "bridges"],
-          (prev) => (prev ?? []).filter((b) => b.id !== bridgeId),
-        );
-        queryClient.removeQueries({ queryKey: ["me", "bridges", bridgeId] });
-        void queryClient.invalidateQueries({ queryKey: ["me", "bridges"] });
+        void queryClient.invalidateQueries({
+          queryKey: ["space", spaceId, "bridge"],
+        });
         onDeleted?.();
         closeModal();
       },

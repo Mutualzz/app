@@ -60,7 +60,8 @@ interface BridgeSummary {
   id: string;
   name: string;
   status: number;
-  role?: "owner" | "member";
+  role?: "admin" | "member";
+  spaceId?: string;
   createdAt: string;
   hubConnected?: boolean;
   onlineCount?: number;
@@ -68,7 +69,7 @@ interface BridgeSummary {
 
 interface BridgeMemberRow {
   userId: string;
-  role: "owner" | "member";
+  role: "admin" | "member";
   username: string;
   globalName: string | null;
   avatar: string | null;
@@ -140,8 +141,22 @@ const formatLastSeen = (iso?: string | null) => {
   }
 };
 
-const ChecklistItem = ({ done, label }: { done: boolean; label: string }) => (
-  <Stack direction="row" spacing={1} alignItems="center">
+const ChecklistItem = ({
+  done,
+  label,
+  onPress,
+}: {
+  done: boolean;
+  label: string;
+  onPress?: () => void;
+}) => (
+  <Stack
+    direction="row"
+    spacing={1}
+    alignItems="center"
+    css={onPress && !done ? { cursor: "pointer" } : undefined}
+    onClick={done ? undefined : onPress}
+  >
     {done ? (
       <CheckCircleIcon weight="fill" size={18} />
     ) : (
@@ -157,11 +172,12 @@ const ChecklistItem = ({ done, label }: { done: boolean; label: string }) => (
   </Stack>
 );
 
-export const MinecraftBridgeSettings = observer(() => {
+export const SpaceMinecraftBridgeSettings = observer(({ spaceId }: { spaceId: string }) => {
   const { t } = useTranslation("settings");
   const app = useAppStore();
   const { openModal } = useModal();
   const queryClient = useQueryClient();
+  const spaceBridgePath = `/spaces/${spaceId}/bridge`;
 
   const [currentTab, setCurrentTab] = useState<BridgeTab>("bridges");
   const [selectedBridgeId, setSelectedBridgeId] = useState<string | null>(null);
@@ -189,28 +205,33 @@ export const MinecraftBridgeSettings = observer(() => {
   };
 
   const bridgesQuery = useQuery({
-    queryKey: ["me", "bridges"],
-    queryFn: () => app.rest.get<BridgeSummary[]>("/@me/bridges"),
-    // Link status also arrives via MinecraftLinkUpdate gateway event.
+    queryKey: ["space", spaceId, "bridge", "list"],
+    queryFn: async () => {
+      try {
+        const detail = await app.rest.get<BridgeDetail>(spaceBridgePath);
+        return [detail as BridgeSummary];
+      } catch {
+        return [] as BridgeSummary[];
+      }
+    },
     refetchInterval: currentTab === "link" ? 15_000 : false,
   });
 
   const detailQuery = useQuery({
-    queryKey: ["me", "bridges", selectedBridgeId],
-    enabled: !!selectedBridgeId,
-    queryFn: () =>
-      app.rest.get<BridgeDetail>(`/@me/bridges/${selectedBridgeId}`),
+    queryKey: ["space", spaceId, "bridge"],
+    enabled: (bridgesQuery.data?.length ?? 0) > 0,
+    queryFn: () => app.rest.get<BridgeDetail>(spaceBridgePath),
   });
 
   const membersQuery = useQuery({
-    queryKey: ["me", "bridges", selectedBridgeId, "members"],
+    queryKey: ["space", spaceId, "bridge", "members"],
     enabled:
       !!selectedBridgeId &&
       (bridgesQuery.data?.find((b) => b.id === selectedBridgeId)?.role ??
-        "owner") !== "member",
+        "admin") !== "member",
     queryFn: () =>
       app.rest.get<{ members: BridgeMemberRow[] }>(
-        `/@me/bridges/${selectedBridgeId}/members`,
+        `${spaceBridgePath}/members`,
       ),
     refetchInterval: 15_000,
   });
@@ -252,7 +273,7 @@ export const MinecraftBridgeSettings = observer(() => {
       return;
     openModal(
       "create-bridge",
-      <CreateBridgeModal onCreated={handleBridgeCreated} />
+      <CreateBridgeModal spaceId={spaceId} onCreated={handleBridgeCreated} />
     );
   };
 
@@ -260,7 +281,7 @@ export const MinecraftBridgeSettings = observer(() => {
     mutationFn: () => {
       if (!selectedBridgeId) throw new Error("No bridge selected");
       return app.rest.post<{ token: string; pluginConfig: PluginConfig }>(
-        `/@me/bridges/${selectedBridgeId}/token`,
+        `${spaceBridgePath}/token`,
         { serverId: bindServerId.trim() || undefined }
       );
     },
@@ -268,7 +289,7 @@ export const MinecraftBridgeSettings = observer(() => {
       setError(null);
       setFreshConfig(result.pluginConfig);
       void queryClient.invalidateQueries({
-        queryKey: ["me", "bridges", selectedBridgeId]
+        queryKey: ["space", spaceId, "bridge"]
       });
     },
     onError: (err: Error) => setError(err.message)
@@ -277,13 +298,13 @@ export const MinecraftBridgeSettings = observer(() => {
   const renameMutation = useMutation({
     mutationFn: (name: string) => {
       if (!selectedBridgeId) throw new Error("No bridge selected");
-      return app.rest.patch(`/@me/bridges/${selectedBridgeId}`, { name });
+      return app.rest.patch(spaceBridgePath, { name });
     },
     onSuccess: () => {
       setError(null);
-      void queryClient.invalidateQueries({ queryKey: ["me", "bridges"] });
+      void queryClient.invalidateQueries({ queryKey: ["space", spaceId, "bridge"] });
       void queryClient.invalidateQueries({
-        queryKey: ["me", "bridges", selectedBridgeId],
+        queryKey: ["space", spaceId, "bridge"],
       });
     },
     onError: (err: Error) => setError(err.message),
@@ -292,13 +313,13 @@ export const MinecraftBridgeSettings = observer(() => {
   const archiveMutation = useMutation({
     mutationFn: (status: 0 | 1) => {
       if (!selectedBridgeId) throw new Error("No bridge selected");
-      return app.rest.patch(`/@me/bridges/${selectedBridgeId}`, { status });
+      return app.rest.patch(spaceBridgePath, { status });
     },
     onSuccess: () => {
       setError(null);
-      void queryClient.invalidateQueries({ queryKey: ["me", "bridges"] });
+      void queryClient.invalidateQueries({ queryKey: ["space", spaceId, "bridge"] });
       void queryClient.invalidateQueries({
-        queryKey: ["me", "bridges", selectedBridgeId],
+        queryKey: ["space", spaceId, "bridge"],
       });
     },
     onError: (err: Error) => setError(err.message),
@@ -307,7 +328,7 @@ export const MinecraftBridgeSettings = observer(() => {
   const bindMutation = useMutation({
     mutationFn: () => {
       if (!selectedBridgeId) throw new Error("No bridge selected");
-      return app.rest.put(`/@me/bridges/${selectedBridgeId}/discord`, {
+      return app.rest.put(`${spaceBridgePath}/discord`, {
         serverId: bindServerId.trim(),
         guildId: guildId.trim(),
         channelId: channelId.trim()
@@ -316,7 +337,7 @@ export const MinecraftBridgeSettings = observer(() => {
     onSuccess: () => {
       setError(null);
       void queryClient.invalidateQueries({
-        queryKey: ["me", "bridges", selectedBridgeId],
+        queryKey: ["space", spaceId, "bridge"],
       });
     },
     onError: (err: Error) => setError(err.message)
@@ -325,7 +346,7 @@ export const MinecraftBridgeSettings = observer(() => {
   const bindVoiceMutation = useMutation({
     mutationFn: () => {
       if (!selectedBridgeId) throw new Error("No bridge selected");
-      return app.rest.put(`/@me/bridges/${selectedBridgeId}/voice`, {
+      return app.rest.put(`${spaceBridgePath}/voice`, {
         serverId: bindServerId.trim(),
         name: voiceRoomName.trim() || "default",
         spaceId: voiceSpaceId.trim(),
@@ -335,7 +356,7 @@ export const MinecraftBridgeSettings = observer(() => {
     onSuccess: () => {
       setError(null);
       void queryClient.invalidateQueries({
-        queryKey: ["me", "bridges", selectedBridgeId],
+        queryKey: ["space", spaceId, "bridge"],
       });
     },
     onError: (err: Error) => setError(err.message),
@@ -345,7 +366,7 @@ export const MinecraftBridgeSettings = observer(() => {
     mutationFn: (bindingId: string) => {
       if (!selectedBridgeId) throw new Error("No bridge selected");
       return app.rest.delete(
-        `/@me/bridges/${selectedBridgeId}/discord/${bindingId}`,
+        `${spaceBridgePath}/discord/${bindingId}`,
       );
     },
     onSuccess: () => {
@@ -353,7 +374,7 @@ export const MinecraftBridgeSettings = observer(() => {
       setGuildId("");
       setChannelId("");
       void queryClient.invalidateQueries({
-        queryKey: ["me", "bridges", selectedBridgeId],
+        queryKey: ["space", spaceId, "bridge"],
       });
     },
     onError: (err: Error) => setError(err.message),
@@ -370,7 +391,7 @@ export const MinecraftBridgeSettings = observer(() => {
     mutationFn: (bindingId: string) => {
       if (!selectedBridgeId) throw new Error("No bridge selected");
       return app.rest.delete(
-        `/@me/bridges/${selectedBridgeId}/voice/${bindingId}`,
+        `${spaceBridgePath}/voice/${bindingId}`,
       );
     },
     onSuccess: () => {
@@ -378,7 +399,7 @@ export const MinecraftBridgeSettings = observer(() => {
       setVoiceSpaceId("");
       setVoiceChannelId("");
       void queryClient.invalidateQueries({
-        queryKey: ["me", "bridges", selectedBridgeId],
+        queryKey: ["space", spaceId, "bridge"],
       });
     },
     onError: (err: Error) => setError(err.message),
@@ -417,7 +438,7 @@ export const MinecraftBridgeSettings = observer(() => {
       void queryClient.invalidateQueries({
         queryKey: ["me", "bridges", "link"]
       });
-      void queryClient.invalidateQueries({ queryKey: ["me", "bridges"] });
+      void queryClient.invalidateQueries({ queryKey: ["space", spaceId, "bridge"] });
       if ((data.joinedCount ?? 0) > 0) {
         toast.success(
           t("minecraftBridge.joinedBridges", { count: data.joinedCount }),
@@ -436,7 +457,7 @@ export const MinecraftBridgeSettings = observer(() => {
       : undefined;
   const link = linkQuery.data;
   const isOwner =
-    (detail?.role ?? selectedBridge?.role ?? "owner") !== "member";
+    (detail?.role ?? selectedBridge?.role ?? "admin") !== "member";
 
   useEffect(() => {
     if (bridges.length === 0) {
@@ -489,14 +510,14 @@ export const MinecraftBridgeSettings = observer(() => {
     }) => {
       if (!selectedBridgeId) throw new Error("No bridge selected");
       return app.rest.patch(
-        `/@me/bridges/${selectedBridgeId}/servers/${encodeURIComponent(serverId)}`,
+        `${spaceBridgePath}/servers/${encodeURIComponent(serverId)}`,
         { displayName },
       );
     },
     onSuccess: () => {
       setError(null);
       void queryClient.invalidateQueries({
-        queryKey: ["me", "bridges", selectedBridgeId],
+        queryKey: ["space", spaceId, "bridge"],
       });
     },
     onError: (err: Error) => setError(err.message),
@@ -595,22 +616,27 @@ export const MinecraftBridgeSettings = observer(() => {
         <ChecklistItem
           done={hasBridge}
           label={t("minecraftBridge.checklist.bridge")}
+          onPress={() => setCurrentTab("bridges")}
         />
         <ChecklistItem
           done={hasPluginConfig}
           label={t("minecraftBridge.checklist.plugin")}
+          onPress={() => setCurrentTab("bridges")}
         />
         <ChecklistItem
           done={hasDiscord}
           label={t("minecraftBridge.checklist.discord")}
+          onPress={() => setCurrentTab("discord")}
         />
         <ChecklistItem
           done={hasVoice}
           label={t("minecraftBridge.checklist.voice")}
+          onPress={() => setCurrentTab("voice")}
         />
         <ChecklistItem
           done={hasLink}
           label={t("minecraftBridge.checklist.link")}
+          onPress={() => setCurrentTab("link")}
         />
       </Paper>
 
@@ -709,7 +735,7 @@ export const MinecraftBridgeSettings = observer(() => {
           {hasBridge && (
             <Stack spacing={2} direction="column">
               <Typography fontSize={18} fontWeight="bold">
-                {t("minecraftBridge.yourBridges")}
+                {t("minecraftBridge.spaceBridge")}
               </Typography>
               <Divider textColor="muted" css={{ opacity: 0.5 }} />
               <Paper
@@ -795,6 +821,7 @@ export const MinecraftBridgeSettings = observer(() => {
                           openModal(
                             "delete-bridge",
                             <DeleteBridgeModal
+                              spaceId={spaceId}
                               bridgeId={bridge.id}
                               bridgeName={bridge.name}
                               onDeleted={() =>
@@ -1006,7 +1033,7 @@ export const MinecraftBridgeSettings = observer(() => {
                               <Typography level="body-sm">
                                 {displayName}
                                 {" · "}
-                                {member.role === "owner"
+                                {member.role === "admin"
                                   ? t("minecraftBridge.roleOwner")
                                   : t("minecraftBridge.roleMember")}
                               </Typography>
@@ -1028,7 +1055,7 @@ export const MinecraftBridgeSettings = observer(() => {
                                   openModal(
                                     "kick-bridge-member",
                                     <KickBridgeMemberModal
-                                      bridgeId={selectedBridge!.id}
+                                      spaceId={spaceId}
                                       userId={member.userId}
                                       displayName={displayName}
                                     />,
@@ -1051,7 +1078,7 @@ export const MinecraftBridgeSettings = observer(() => {
 
                 {detail && !isOwner && (
                   <Typography level="body-sm" textColor="muted">
-                    {t("minecraftBridge.ownerOnlySettings")}
+                    {t("minecraftBridge.adminOnlySettings")}
                   </Typography>
                 )}
               </Paper>
@@ -1090,7 +1117,7 @@ export const MinecraftBridgeSettings = observer(() => {
               direction="column"
             >
               <Typography level="body-sm" textColor="muted">
-                {t("minecraftBridge.ownerOnlySettings")}
+                {t("minecraftBridge.adminOnlySettings")}
               </Typography>
             </Paper>
           ) : (
@@ -1348,7 +1375,7 @@ export const MinecraftBridgeSettings = observer(() => {
               direction="column"
             >
               <Typography level="body-sm" textColor="muted">
-                {t("minecraftBridge.ownerOnlySettings")}
+                {t("minecraftBridge.adminOnlySettings")}
               </Typography>
             </Paper>
           ) : (
