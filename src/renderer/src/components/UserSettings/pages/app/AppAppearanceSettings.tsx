@@ -207,7 +207,9 @@ export const AppAppearanceSettings = observer(() => {
     (theme) => theme.style === "gradient"
   );
 
-  const userThemes = app.themes.all.filter((theme) => theme.author);
+  const userThemes = app.themes.all.filter(
+    (theme) => theme.author && !theme.spaceId
+  );
 
   const icons = iconsRef.current;
 
@@ -267,8 +269,7 @@ export const AppAppearanceSettings = observer(() => {
             onFocus={() => setFocusedTheme?.(theme.id)}
           >
             {onDelete &&
-              (focusedThemeId === theme.id ||
-                currentTheme.id === theme.id) && (
+              (focusedThemeId === theme.id || currentTheme.id === theme.id) && (
                 <IconButton
                   onClick={() => onDelete(theme.id)}
                   css={{
@@ -278,6 +279,7 @@ export const AppAppearanceSettings = observer(() => {
                     zIndex: 1
                   }}
                   color="danger"
+                  variant="solid"
                   size={12}
                   disabled={isDeleting}
                 >
@@ -426,9 +428,10 @@ export const AppAppearanceSettings = observer(() => {
             >
               <IconButton
                 variant="soft"
-                onClick={() =>
-                  openModal("theme-creator", <ThemeCreatorModal />)
-                }
+                onClick={() => {
+                  app.themeCreator.setSpaceId(null);
+                  openModal("theme-creator", <ThemeCreatorModal />);
+                }}
                 size="sm"
               >
                 <PaletteIcon weight="fill" />

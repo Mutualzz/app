@@ -419,6 +419,8 @@ export const MessageInput = observer(
 
     const replyingTo = !message && app.replyingTo;
     const hasUploadTray = files.length > 0 && !message?.editing;
+    const hasWallpaper = Boolean(theme.backgroundImageUrl);
+    const composerElevation = app.settings?.preferEmbossed ? 5 : 1;
 
     const typingIndicator = !message?.editing && channel && (
       <TypingIndicator channelId={channel.id} />
@@ -426,7 +428,8 @@ export const MessageInput = observer(
 
     const uploadTray = hasUploadTray && (
       <Paper
-        elevation={app.settings?.preferEmbossed ? 5 : 1}
+        surfaceRole={hasWallpaper ? "card" : undefined}
+        elevation={hasWallpaper ? 0 : composerElevation}
         px={1.25}
         pt={2.5}
         pb={0}
@@ -533,6 +536,7 @@ export const MessageInput = observer(
 
     const replyBanner = replyingTo && (
       <Paper
+        surfaceRole={hasWallpaper ? "card" : undefined}
         direction="row"
         alignItems="center"
         spacing={1}
@@ -542,7 +546,7 @@ export const MessageInput = observer(
         borderTopRightRadius={areTyping || hasUploadTray ? 0 : 6}
         borderBottomLeftRadius={0}
         borderBottomRightRadius={0}
-        elevation={app.settings?.preferEmbossed ? 5 : 1}
+        elevation={hasWallpaper ? 0 : composerElevation}
       >
         <Typography level="body-xs" textColor="secondary" flex="1 1 auto">
           {t("reply.banner", {
@@ -579,14 +583,15 @@ export const MessageInput = observer(
 
     const inputContent = (
       <Paper
+        surfaceRole={hasWallpaper ? "composer" : undefined}
         p={1.75}
-        elevation={app.settings?.preferEmbossed ? 5 : 1}
+        elevation={hasWallpaper ? 0 : composerElevation}
         borderTopLeftRadius={replyingTo || areTyping || hasUploadTray ? 0 : 6}
         borderTopRightRadius={replyingTo || areTyping || hasUploadTray ? 0 : 6}
         borderBottomLeftRadius={6}
         borderBottomRightRadius={6}
         display="block"
-        mb={message?.editing ? 0 : 3.5}
+        mb={0}
       >
         {stickers.length > 0 && (
           <Stack
@@ -685,7 +690,14 @@ export const MessageInput = observer(
         </Typography>
       </Stack>
     ) : (
-      <Stack direction="column" spacing={0} ml={1.25} mr={1.75}>
+      <Stack
+        direction="column"
+        spacing={0}
+        ml={hasWallpaper ? 0 : 1.25}
+        mr={hasWallpaper ? 0 : 1.75}
+        mb={hasWallpaper ? 0 : 3.5}
+        css={{ flexShrink: 0 }}
+      >
         {typingIndicator}
         {uploadTray}
         {replyBanner}

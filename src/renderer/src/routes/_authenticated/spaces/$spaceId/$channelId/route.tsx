@@ -56,7 +56,13 @@ function RouteComponent() {
 
   if (!activeChannel) {
     return (
-      <Paper direction="column" flex="1 1 auto" overflow="hidden">
+      <Paper
+        surfaceRole="content"
+        elevation={0}
+        direction="column"
+        flex="1 1 auto"
+        overflow="hidden"
+      >
         <Stack alignItems="center" justifyContent="center" flex="1">
           <Typography level="h5">{t("loadingChannel")}</Typography>
         </Stack>
@@ -65,21 +71,23 @@ function RouteComponent() {
   }
 
   return (
-    <Paper
-      elevation={app.settings?.preferEmbossed ? 3 : 0}
-      direction="column"
-      flex="1 1 auto"
-      overflow="hidden"
-      borderLeft="0 !important"
-      borderRight="0 !important"
-      borderBottom="0 !important"
-    >
+    <>
       {activeChannel.isTextChannel && (
         <TextChannelView channel={activeChannel} />
       )}
       {activeChannel.isVoiceChannel && (
-        <VoiceChannelView channel={activeChannel} showChat={openChat} />
+        <Paper
+          surfaceRole="content"
+          elevation={0}
+          direction="column"
+          flex="1 1 auto"
+          overflow="hidden"
+          height="100%"
+          borderRadius={0}
+        >
+          <VoiceChannelView channel={activeChannel} showChat={openChat} />
+        </Paper>
       )}
-    </Paper>
+    </>
   );
 }

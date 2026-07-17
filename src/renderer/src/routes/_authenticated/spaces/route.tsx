@@ -3,6 +3,7 @@ import { SpaceLockdownGuard } from "@components/Space/SpaceLockdownGuard";
 import { SpaceLockdownOverlay } from "@components/Space/SpaceLockdownOverlay";
 import { SpacesSidebar } from "@components/Space/SpacesSidebar";
 import { UserBar } from "@components/User/UserBar";
+import { SpaceThemeProvider } from "@contexts/SpaceTheme.context";
 import { useAppStore } from "@hooks/useStores";
 import { Stack, useTheme } from "@mutualzz/ui-web";
 import {
@@ -71,78 +72,82 @@ function RouteComponent() {
       >
         <Stack height="100%" direction="row">
           <SpacesSidebar />
-          <Stack
-            position="relative"
-            flex={1}
-            minWidth={0}
-            height="100%"
-            direction="row"
-          >
-            <ChannelList />
-            <ResizeBar
-              onPointerDown={(e) => {
-                if (isSpaceLockedDown) return;
+          <SpaceThemeProvider>
+            <Stack
+              position="relative"
+              flex={1}
+              minWidth={0}
+              height="100%"
+              direction="row"
+            >
+              <ChannelList />
+              <ResizeBar
+                onPointerDown={(e) => {
+                  if (isSpaceLockedDown) return;
 
-                const startX = e.clientX;
-                const startWidth = app.channelListWidth;
+                  const startX = e.clientX;
+                  const startWidth = app.channelListWidth;
 
-                (e.currentTarget as HTMLDivElement).setPointerCapture(
-                  e.pointerId
-                );
-
-                const onMove = (moveEvent: PointerEvent) => {
-                  app.setChannelListWidth(
-                    startWidth + (moveEvent.clientX - startX)
+                  (e.currentTarget as HTMLDivElement).setPointerCapture(
+                    e.pointerId
                   );
-                };
 
-                const onUp = () => {
-                  window.removeEventListener("pointermove", onMove);
-                  window.removeEventListener("pointerup", onUp);
-                };
+                  const onMove = (moveEvent: PointerEvent) => {
+                    app.setChannelListWidth(
+                      startWidth + (moveEvent.clientX - startX)
+                    );
+                  };
 
-                window.addEventListener("pointermove", onMove);
-                window.addEventListener("pointerup", onUp);
-              }}
-              style={{
-                width: 2,
-                marginLeft: -1,
-                marginRight: -1,
-                cursor: isSpaceLockedDown ? "not-allowed" : "col-resize",
-                flexShrink: 0,
-                touchAction: "none",
-                userSelect: "none",
-                backgroundColor: app.settings?.preferEmbossed
-                  ? dynamicElevation(theme.colors.surface, 4)
-                  : "transparent"
-              }}
-              whileHover={
-                isSpaceLockedDown
-                  ? undefined
-                  : {
-                      backgroundColor: app.settings?.preferEmbossed
-                        ? dynamicElevation(theme.colors.surface, 6)
-                        : dynamicElevation(theme.colors.surface, 2)
-                    }
-              }
-            />
-            {activeSpace && (
-              <SpaceLockdownOverlay
-                space={activeSpace}
-                showMessage={false}
-                reserveBottom="4.5rem"
+                  const onUp = () => {
+                    window.removeEventListener("pointermove", onMove);
+                    window.removeEventListener("pointerup", onUp);
+                  };
+
+                  window.addEventListener("pointermove", onMove);
+                  window.addEventListener("pointerup", onUp);
+                }}
+                style={{
+                  width: 2,
+                  marginLeft: -1,
+                  marginRight: -1,
+                  cursor: isSpaceLockedDown ? "not-allowed" : "col-resize",
+                  flexShrink: 0,
+                  touchAction: "none",
+                  userSelect: "none",
+                  backgroundColor: app.settings?.preferEmbossed
+                    ? dynamicElevation(theme.colors.surface, 4)
+                    : "transparent"
+                }}
+                whileHover={
+                  isSpaceLockedDown
+                    ? undefined
+                    : {
+                        backgroundColor: app.settings?.preferEmbossed
+                          ? dynamicElevation(theme.colors.surface, 6)
+                          : dynamicElevation(theme.colors.surface, 2)
+                      }
+                }
               />
-            )}
-          </Stack>
+              {activeSpace && (
+                <SpaceLockdownOverlay
+                  space={activeSpace}
+                  showMessage={false}
+                  reserveBottom="4.5rem"
+                />
+              )}
+            </Stack>
+          </SpaceThemeProvider>
         </Stack>
 
         <UserBar />
       </Stack>
 
-      <Stack height="100%" width="100%" position="relative">
-        <Outlet />
-        {activeSpace && <SpaceLockdownOverlay space={activeSpace} />}
-      </Stack>
+      <SpaceThemeProvider>
+        <Stack height="100%" width="100%" position="relative">
+          <Outlet />
+          {activeSpace && <SpaceLockdownOverlay space={activeSpace} />}
+        </Stack>
+      </SpaceThemeProvider>
       <SpaceLockdownGuard />
     </Stack>
   );

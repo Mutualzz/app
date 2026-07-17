@@ -1,6 +1,7 @@
 import { Paper } from "@components/Paper";
 import { useAppStore } from "@hooks/useStores";
-import { ButtonGroup, Divider, IconSlot, Stack, Typography } from "@mutualzz/ui-web";
+import { ButtonGroup, Divider, IconSlot, Stack, Typography, useTheme } from "@mutualzz/ui-web";
+import { resolveWallpaperDivider } from "@mutualzz/ui-core";
 import type { Channel } from "@stores/objects/Channel";
 import { observer } from "mobx-react-lite";
 import { HashIcon, UsersIcon } from "@phosphor-icons/react";
@@ -15,11 +16,13 @@ interface Props {
 
 export const TextChannelHeader = observer(({ channel }: Props) => {
   const app = useAppStore();
+  const { theme } = useTheme();
   const { t } = useTranslation("chat");
 
   return (
     <Paper
-      elevation={app.settings?.preferEmbossed ? 5 : 0}
+      variant="plain"
+      elevation={0}
       p={2.5}
       height="100%"
       borderLeft="0 !important"
@@ -30,6 +33,14 @@ export const TextChannelHeader = observer(({ channel }: Props) => {
       boxShadow="0 !important"
       alignItems="center"
       justifyContent="space-between"
+      css={{
+        background: "transparent",
+        ...(theme.backgroundImageUrl
+          ? {
+              borderBottom: `1px solid ${resolveWallpaperDivider(theme)}`
+            }
+          : null)
+      }}
     >
       <Stack direction="row" alignItems="center" flex={1} spacing={2} minWidth={0}>
         <Stack direction="row" alignItems="center" spacing={1}>

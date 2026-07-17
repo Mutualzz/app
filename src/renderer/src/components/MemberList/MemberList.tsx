@@ -35,7 +35,8 @@ export const MemberList = observer(() => {
 
   return (
     <Paper
-      elevation={app.settings?.preferEmbossed ? 5 : 0}
+      surfaceRole="chrome"
+      elevation={0}
       direction="column"
       flex="0 0 240px"
       overflowX="hidden"

@@ -6,7 +6,8 @@ import { useMenu } from "@contexts/ContextMenu.context";
 import { useModal } from "@contexts/Modal.context";
 import type { Space } from "@stores/objects/Space";
 import { contextMenu } from "@mutualzz/contexify";
-import { Portal, Stack, Typography } from "@mutualzz/ui-web";
+import { Portal, Stack, Typography, useTheme } from "@mutualzz/ui-web";
+import { resolveWallpaperDivider } from "@mutualzz/ui-core";
 import { IconButton } from "@components/IconButton";
 import { SpaceInviteToSpaceModal } from "@components/Space/SpaceInviteToSpaceModal";
 import { SpaceContextMenu } from "@components/ContextMenu/SpaceContextMenu";
@@ -21,6 +22,7 @@ interface Props {
 
 export const ChannelListHeader = observer(({ space }: Props) => {
   const app = useAppStore();
+  const { theme } = useTheme();
   const { openContextMenu } = useMenu();
   const { t } = useTranslation("space");
   const { t: tChat } = useTranslation("chat");
@@ -65,7 +67,8 @@ export const ChannelListHeader = observer(({ space }: Props) => {
   return (
     <>
       <Paper
-        elevation={app.settings?.preferEmbossed ? 5 : 0}
+        variant="plain"
+        elevation={0}
         borderLeft="0 !important"
         borderRight="0 !important"
         borderTop="0 !important"
@@ -79,7 +82,13 @@ export const ChannelListHeader = observer(({ space }: Props) => {
         onContextMenu={showSpaceMenu}
         onClick={handleClick}
         css={{
-          cursor: "pointer"
+          cursor: "pointer",
+          background: "transparent",
+          ...(theme.backgroundImageUrl
+            ? {
+                borderBottom: `1px solid ${resolveWallpaperDivider(theme)}`
+              }
+            : null)
         }}
         minWidth={0}
       >

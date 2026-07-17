@@ -66,40 +66,100 @@ export const ThemeCreatorSidebarRight = observer(() => {
 
   const themes = app.themeCreator.filter(
     loadedType === "custom"
-      ? app.themes.all.filter((theme) => theme.authorId)
+      ? app.themes.all.filter((theme) =>
+          app.themeCreator.spaceId
+            ? theme.spaceId === app.themeCreator.spaceId
+            : !!theme.authorId && !theme.spaceId
+        )
       : loadedType === "draft"
         ? Array.from(app.drafts.themes.values()).map(
             (draft) => new Theme(app, draft)
           )
-        : app.themes.all.filter((theme) => !theme.author)
+        : app.themes.all.filter((theme) => !theme.author && !theme.spaceId)
   );
 
-  const ownedByUser = !!values.id && app.account?.id === values.authorId;
+  const ownedByUser =
+    !!values.id &&
+    (app.account?.id === values.authorId ||
+      (!!app.themeCreator.spaceId &&
+        values.spaceId === app.themeCreator.spaceId));
+
+  const syncBackground = async (themeId: string) => {
+    const spaceId = app.themeCreator.spaceId;
+    const base = spaceId
+      ? `/spaces/${spaceId}/themes/${themeId}/background`
+      : `@me/themes/${themeId}/background`;
+
+    if (app.themeCreator.pendingBackgroundFile) {
+      const formData = new FormData();
+      formData.append(
+        "backgroundImage",
+        app.themeCreator.pendingBackgroundFile
+      );
+      const updated = await app.rest.putFormData<APITheme>(base, formData);
+      app.themes.add(updated);
+      app.themeCreator.clearPendingBackground();
+      return updated;
+    }
+
+    if (app.themeCreator.clearBackgroundImage) {
+      const updated = await app.rest.delete<APITheme>(base);
+      app.themes.add(updated);
+      app.themeCreator.clearPendingBackground();
+      return updated;
+    }
+
+    return null;
+  };
 
   const { mutate: putTheme } = useMutation({
-    mutationKey: ["put-theme", values.name],
+    mutationKey: ["put-theme", values.name, app.themeCreator.spaceId],
     mutationFn: async () => {
-      let dataToPut = {
-        ...values,
+      const base = values.adaptive
+        ? applyAdaptiveThemeValues(values)
+        : values;
+      const dataToPut = {
+        ...Theme.serialize(base),
         id: Snowflake.generate()
       };
-      if (values.adaptive) {
-        dataToPut = {
-          ...applyAdaptiveThemeValues(values),
-          id: Snowflake.generate()
-        };
+
+      const spaceId = app.themeCreator.spaceId;
+      let created: APITheme;
+      if (spaceId) {
+        created = await app.rest.post<APITheme, APITheme>(
+          `/spaces/${spaceId}/themes`,
+          dataToPut
+        );
+      } else {
+        created = await app.rest.post<APITheme, APITheme>(
+          "@me/themes",
+          dataToPut
+        );
       }
 
-      return app.rest.post<APITheme, APITheme>("@me/themes", dataToPut);
+      const withBackground = await syncBackground(created.id);
+      return withBackground ?? created;
     },
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       const newTheme = app.themes.add(data);
-      changeTheme(Theme.toEmotion(newTheme));
-      app.settings?.setCurrentTheme(newTheme.id);
-      app.themes.setCurrentTheme(newTheme.id);
       setErrors({});
 
-      // Always set loaded type to custom when publishing a new theme
+      const spaceId = app.themeCreator.spaceId;
+      if (spaceId) {
+        const space = app.spaces.get(spaceId);
+        const formData = new FormData();
+        formData.append("themeId", newTheme.id);
+        await app.rest.patchFormData(`/spaces/${spaceId}`, formData);
+        if (space) {
+          space.themeId = newTheme.id;
+          space.theme = Theme.serialize(newTheme);
+        }
+      } else {
+        changeTheme(Theme.toEmotion(newTheme));
+        app.settings?.setCurrentTheme(newTheme.id);
+        app.themes.setCurrentTheme(newTheme.id);
+      }
+
       setLoadedType("custom");
       loadValues(data);
     },
@@ -113,26 +173,44 @@ export const ThemeCreatorSidebarRight = observer(() => {
   });
 
   const { mutate: patchTheme } = useMutation({
-    mutationKey: ["patch-theme", values.id],
+    mutationKey: ["patch-theme", values.id, app.themeCreator.spaceId],
     mutationFn: async () => {
-      let dataToPatch = { ...values };
-      if (values.adaptive) {
-        dataToPatch = applyAdaptiveThemeValues(values);
+      const dataToPatch = Theme.serialize(
+        values.adaptive ? applyAdaptiveThemeValues(values) : values
+      );
+
+      const spaceId = app.themeCreator.spaceId;
+      let updated: APITheme;
+      if (spaceId) {
+        updated = await app.rest.patch<APITheme, APITheme>(
+          `/spaces/${spaceId}/themes/${values.id}`,
+          dataToPatch
+        );
+      } else {
+        updated = await app.rest.patch<APITheme, APITheme>(
+          `@me/themes/${values.id}`,
+          dataToPatch
+        );
       }
 
-      return app.rest.patch<APITheme, APITheme>(
-        `@me/themes/${values.id}`,
-        dataToPatch
-      );
+      const withBackground = await syncBackground(updated.id);
+      return withBackground ?? updated;
     },
     onSuccess: (data) => {
       app.themes.update(data);
 
-      // If the current theme is the one updated, change it
-      if (app.settings?.currentTheme === data.id)
+      const spaceId = app.themeCreator.spaceId;
+      if (spaceId) {
+        const space = app.spaces.get(spaceId);
+        if (space?.themeId === data.id) {
+          space.theme = data;
+        }
+      } else if (app.settings?.currentTheme === data.id) {
         changeTheme(Theme.toEmotion(data));
+      }
 
       setErrors({});
+      loadValues(data);
     },
     onError: (error: HttpException) => {
       const next: Record<string, string> = {};
@@ -144,19 +222,37 @@ export const ThemeCreatorSidebarRight = observer(() => {
   });
 
   const { mutate: deleteTheme } = useMutation({
-    mutationKey: ["theme-delete"],
+    mutationKey: ["theme-delete", app.themeCreator.spaceId],
     mutationFn: async () => {
-      if (!values.id) return;
+      if (!values.id) throw new Error("Theme ID is required");
 
-      return app.rest.delete<any>(`@me/themes/${values.id}`);
+      const spaceId = app.themeCreator.spaceId;
+      if (spaceId) {
+        return app.rest.delete<{ id: string }>(
+          `/spaces/${spaceId}/themes/${values.id}`
+        );
+      }
+
+      return app.rest.delete<{ id: string }>(`@me/themes/${values.id}`);
     },
     onSuccess: ({ id: themeId }: { id: string }) => {
       const deletingCurrent = currentTheme.id === themeId;
+      const spaceId = app.themeCreator.spaceId;
 
       app.themes.remove(themeId);
 
+      if (spaceId) {
+        const space = app.spaces.get(spaceId);
+        if (space?.themeId === themeId) {
+          space.themeId = null;
+          space.theme = null;
+        }
+        app.themeCreator.resetToBaseTheme();
+        return;
+      }
+
       const remainingCustomThemes = app.themes.all.filter(
-        (theme) => theme.authorId
+        (theme) => theme.authorId && !theme.spaceId
       );
 
       if (remainingCustomThemes.length === 0) {
@@ -169,6 +265,8 @@ export const ThemeCreatorSidebarRight = observer(() => {
         app.themes.setCurrentTheme(fallback.id);
         changeTheme(Theme.toEmotion(fallback));
       }
+
+      app.themeCreator.resetToBaseTheme();
     }
   });
 

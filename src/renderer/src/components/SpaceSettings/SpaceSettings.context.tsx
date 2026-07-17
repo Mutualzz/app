@@ -9,6 +9,7 @@ import {
 export type SpaceSettingsPage =
   | "invites"
   | "profile"
+  | "theme"
   | "roles"
   | "expressions"
   | "bans"

@@ -179,6 +179,9 @@ export const ChannelListItem = observer(
           onMouseEnter={() => setWrapperHovered(true)}
           onMouseLeave={() => setWrapperHovered(false)}
           variant={active ? "soft" : "plain"}
+          surfaceRole={
+            active && theme.backgroundImageUrl ? "card" : undefined
+          }
           color={
             active ? theme.typography.colors.primary : (props.color as any)
           }

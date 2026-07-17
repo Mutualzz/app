@@ -520,12 +520,7 @@ export const VoiceChannelView = observer(
                         />
                       )}
                       {state.client === "minecraft" && !isScreen && (
-                        <Stack
-                          position="absolute"
-                          top={8}
-                          right={8}
-                          zIndex={1}
-                        >
+                        <Stack position="absolute" top={8} right={8} zIndex={1}>
                           <VoiceMinecraftBadge />
                         </Stack>
                       )}
@@ -549,7 +544,7 @@ export const VoiceChannelView = observer(
                                 })
                               : state.member
                                 ? state.member.displayName
-                                : state.user?.displayName ?? t("deletedUser")}
+                                : (state.user?.displayName ?? t("deletedUser"))}
                           </Typography>
                         </Paper>
                       )}

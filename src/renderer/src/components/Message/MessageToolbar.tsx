@@ -3,7 +3,7 @@ import { IconButton } from "@components/IconButton";
 import { Paper } from "@components/Paper";
 import { useAppStore } from "@hooks/useStores";
 import { useRecentEmojis } from "@renderer/hooks/useRecentEmojis";
-import { Portal, Stack, Tooltip as MzTooltip } from "@mutualzz/ui-web";
+import { Portal, Stack, Tooltip as MzTooltip, useTheme } from "@mutualzz/ui-web";
 import { Message } from "@stores/objects/Message";
 import { useMutation } from "@tanstack/react-query";
 import { observer } from "mobx-react-lite";
@@ -49,6 +49,7 @@ const ToolbarContent = observer(
     onReplyClick
   }: ToolbarContentProps) => {
     const app = useAppStore();
+    const { theme } = useTheme();
     const { t } = useTranslation("chat");
 
     const { mutate: deleteMessage } = useMutation({
@@ -82,6 +83,7 @@ const ToolbarContent = observer(
         onMouseLeave={showSwitcher}
         p={2}
         borderRadius={10}
+        surfaceRole={theme.backgroundImageUrl ? "popout" : undefined}
         elevation={app.settings?.preferEmbossed ? 5 : 2}
         transparency={25}
       >

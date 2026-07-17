@@ -48,7 +48,8 @@ export class ThemeStore {
   reset() {
     const idsToRemove: string[] = [];
     this.themes.forEach((theme) => {
-      if (theme.authorId || theme.author) idsToRemove.push(theme.id);
+      if (theme.authorId || theme.author || theme.spaceId)
+        idsToRemove.push(theme.id);
     });
     for (const id of idsToRemove) {
       this.themes.delete(id);

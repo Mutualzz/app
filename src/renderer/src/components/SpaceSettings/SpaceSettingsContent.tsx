@@ -16,6 +16,7 @@ import { SpaceRolesSettings } from "@components/SpaceSettings/pages/people/roles
 import { SpaceExpressionsSettings } from "@components/SpaceSettings/pages/people/expressions/SpaceExpressionsSettings";
 import { SpaceBansSettings } from "@components/SpaceSettings/pages/moderation/bans/SpaceBansSettings";
 import { SpaceProfileSettings } from "@components/SpaceSettings/pages/general/SpaceProfileSettings";
+import { SpaceThemeSettings } from "@components/SpaceSettings/pages/general/SpaceThemeSettings";
 import { SpaceMinecraftBridgeSettings } from "@components/SpaceSettings/pages/general/SpaceMinecraftBridgeSettings";
 import { XIcon } from "@phosphor-icons/react";
 
@@ -97,6 +98,7 @@ export const SpaceSettingsContent = observer(
           py={{ xs: "0.5rem", sm: currentPage === "roles" ? 0 : 1 }}
         >
           {currentPage === "profile" && <SpaceProfileSettings space={space} />}
+          {currentPage === "theme" && <SpaceThemeSettings space={space} />}
           {currentPage === "minecraft-bridge" && (
             <SpaceMinecraftBridgeSettings spaceId={space.id} />
           )}

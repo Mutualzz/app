@@ -19,6 +19,7 @@ import {
   CubeIcon,
   GavelIcon,
   PaintBrushIcon,
+  PaletteIcon,
   PaperPlaneTiltIcon,
   SmileyIcon,
   TrashIcon,
@@ -44,6 +45,11 @@ export const settingsPages: SettingsPages = {
     {
       label: "profile",
       icon: <PaintBrushIcon weight="fill" />,
+      permissions: ["ManageSpace"]
+    },
+    {
+      label: "theme",
+      icon: <PaletteIcon weight="fill" />,
       permissions: ["ManageSpace"]
     }
   ],

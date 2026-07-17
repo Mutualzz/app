@@ -6,16 +6,32 @@ import {
   extractColors,
   isValidGradient
 } from "@mutualzz/ui-core";
-import { Stack, Typography } from "@mutualzz/ui-web";
+import { Button, Stack, Typography } from "@mutualzz/ui-web";
 import { observer } from "mobx-react-lite";
 import { useTranslation } from "react-i18next";
 import { useAppStore } from "@hooks/useStores";
 import { InfoIcon, WarningIcon } from "@phosphor-icons/react";
+import { Theme } from "@stores/objects/Theme";
+import { useRef } from "react";
 
 export const ThemeCreatorColorsBase = observer(() => {
   const { t } = useTranslation("settings");
   const app = useAppStore();
-  const { values, setValues } = app.themeCreator;
+  const {
+    values,
+    setValues,
+    pendingBackgroundPreviewUrl,
+    setPendingBackgroundFile,
+    markClearBackgroundImage,
+    clearBackgroundImage
+  } = app.themeCreator;
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const existingUrl =
+    !clearBackgroundImage && !pendingBackgroundPreviewUrl
+      ? Theme.resolveBackgroundImageUrl(values)
+      : null;
+  const previewUrl = pendingBackgroundPreviewUrl || existingUrl;
 
   return (
     <Stack direction="column" p={4} spacing={5}>
@@ -54,6 +70,57 @@ export const ThemeCreatorColorsBase = observer(() => {
         }}
         fullWidth
       />
+      <Stack direction="column" spacing={2}>
+        <Typography fontWeight="bold" level="body-md">
+          {t("themeCreator.colors.backgroundImage")}
+        </Typography>
+        <Typography level="body-sm" textColor="muted">
+          {t("themeCreator.colors.backgroundImageDescription")}
+        </Typography>
+        {previewUrl && (
+          <img
+            src={previewUrl}
+            alt=""
+            css={{
+              width: "100%",
+              maxHeight: 160,
+              objectFit: "cover",
+              borderRadius: 8
+            }}
+          />
+        )}
+        <Stack direction="row" spacing={2}>
+          <Button
+            size="sm"
+            variant="soft"
+            onClick={() => fileInputRef.current?.click()}
+          >
+            {t("themeCreator.colors.chooseBackgroundImage")}
+          </Button>
+          {(previewUrl || values.backgroundImage) && (
+            <Button
+              size="sm"
+              variant="plain"
+              color="danger"
+              onClick={() => markClearBackgroundImage()}
+            >
+              {t("themeCreator.colors.removeBackgroundImage")}
+            </Button>
+          )}
+        </Stack>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/png,image/jpeg,image/webp,image/gif"
+          hidden
+          onChange={(e) => {
+            const file = e.target.files?.[0] ?? null;
+            setPendingBackgroundFile(file);
+            if (file) setValues({ wallpaper: null });
+            e.target.value = "";
+          }}
+        />
+      </Stack>
       <InputWithLabel
         type="color"
         label={t("themeCreator.colors.surface")}
@@ -87,7 +154,6 @@ export const ThemeCreatorColorsBase = observer(() => {
         }
         value={values.colors.surface}
         allowGradient
-        // apiError={errors.surfaceColor}
         onChange={(color: ColorLike) =>
           setValues({
             ...values,
@@ -102,7 +168,6 @@ export const ThemeCreatorColorsBase = observer(() => {
         name="blackColor"
         description={t("themeCreator.colors.blackDescription")}
         value={values.colors.common.black}
-        // apiError={errors.whiteColor}
         onChange={(color: ColorLike) =>
           setValues({
             ...values,
@@ -123,7 +188,6 @@ export const ThemeCreatorColorsBase = observer(() => {
         name="whiteColor"
         description={t("themeCreator.colors.whiteDescription")}
         value={values.colors.common.white}
-        // apiError={errors.whiteColor}
         fullWidth
         onChange={(color: ColorLike) =>
           setValues({

@@ -361,12 +361,13 @@ export const ChannelList = observer(() => {
   return (
     <>
       <Paper
+        surfaceRole="chrome"
         borderRight={inChannel ? "0 !important" : undefined}
         borderBottom="0 !important"
         borderTopLeftRadius="0.75rem"
         direction="column"
         width="100%"
-        elevation={app.settings?.preferEmbossed ? 4 : 0}
+        elevation={0}
       >
         <ChannelListHeader space={space} />
         <Stack direction="column" px={1.5} pt={1.25} pb={0.5}>

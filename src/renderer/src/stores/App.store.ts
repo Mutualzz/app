@@ -352,6 +352,7 @@ export class AppStore {
     this.queue.clear();
     this.themes.clear();
     this.themeCreator.resetValues();
+    this.themeCreator.setSpaceId(null);
     this.users.clear();
     this.posts.clear();
     this.mode = null;
