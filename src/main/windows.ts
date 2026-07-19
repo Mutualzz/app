@@ -156,6 +156,21 @@ export function createMainWindow(): BrowserWindow {
     mainWindow.loadURL(process.env["ELECTRON_RENDERER_URL"]);
   else mainWindow.loadFile(join(__dirname, "../renderer/index.html"));
 
+  let rendererCrashReloads = 0;
+  mainWindow.webContents.on("render-process-gone", (_event, details) => {
+    console.error("Renderer process gone", details);
+    if (details.reason === "clean-exit") return;
+    if (rendererCrashReloads >= 2) return;
+    rendererCrashReloads += 1;
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.webContents.reload();
+    }
+  });
+
+  mainWindow.webContents.on("unresponsive", () => {
+    console.error("Renderer became unresponsive");
+  });
+
   return mainWindow;
 }
 

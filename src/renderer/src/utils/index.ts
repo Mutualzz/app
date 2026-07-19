@@ -62,7 +62,8 @@ export const canUseCustomEmoji = (
   meId: Snowflake,
   emoji: Expression,
   currentMember?: SpaceMember | null,
-  channel?: Channel | null
+  channel?: Channel | null,
+  joinedSpaceIds?: readonly Snowflake[] | null
 ) => {
   if (emoji.type !== ExpressionType.Emoji) return false;
 
@@ -71,7 +72,8 @@ export const canUseCustomEmoji = (
   const inSpace = !!channel?.spaceId && !!currentMember;
 
   if (!inSpace) {
-    return !emoji.spaceId && meId === emoji.authorId;
+    if (!emoji.spaceId) return meId === emoji.authorId;
+    return !!joinedSpaceIds?.includes(emoji.spaceId);
   }
 
   if (emoji.spaceId === currentMember.spaceId) return true;

@@ -28,6 +28,7 @@ import { AppCrashFallback } from "@components/ErrorBoundary/AppCrashFallback";
 import { DesktopShell } from "@components/Desktop/DesktopShell";
 import { InjectGlobal } from "@components/InjectGlobal";
 import Loader from "@components/Loader/Loader";
+import { invalidateSpotifyConnectionCache } from "@renderer/presence/spotifyPresence";
 import { ModeSwitcher } from "@components/ModeSwitcher";
 import WindowTitleBar from "@components/WindowTitleBar";
 import { AppTheme } from "@contexts/AppTheme.context";
@@ -38,6 +39,7 @@ import { NavigationTracker } from "@components/NavigationTracker";
 import { AppHotkeys } from "@components/AppHotkeys";
 import { ContextMenuProvider } from "@contexts/ContextMenu.context";
 import { WindowTitleBarProvider } from "@contexts/WindowTitleBar.context";
+import { IncomingCallWatcher } from "@components/Call/IncomingCallWatcher";
 import { ModalRoot } from "@components/Modals/ModalRoot";
 import { ChangelogPrompt } from "@components/Changelog/ChangelogPrompt";
 import { ScreenSharePicker } from "@components/Voice/ScreenSharePicker";
@@ -110,7 +112,10 @@ function RootComponent() {
           app.rest.setToken(value);
           if (app.gateway.readyState === GatewayStatus.CLOSED) {
             app.setGatewayReady(false);
-            app.gateway.connect();
+            void app.gateway.connect().catch((error) => {
+              logger.error("Gateway connect failed", error);
+              app.gateway.startReconnect();
+            });
           } else {
             logger.debug("Gateway connect called but socket is not closed");
           }
@@ -188,9 +193,6 @@ function RootComponent() {
             }
           });
         } else if (url.hostname === "spotify") {
-          const { invalidateSpotifyConnectionCache } = await import(
-            "@renderer/presence/spotifyPresence"
-          );
           invalidateSpotifyConnectionCache();
           await app.queryClient.invalidateQueries({
             queryKey: ["spotify-connection"]
@@ -235,6 +237,7 @@ function RootComponent() {
                     <ContextMenuProvider>
                       <ToastContainer position="top-center" />
                       <ModalRoot />
+                      <IncomingCallWatcher />
                       <ChangelogPrompt />
                       <ScreenSharePicker />
                       <NavigationTracker />

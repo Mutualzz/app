@@ -82,9 +82,16 @@ export const withEmojis = (editor: Editor) => {
         const me = channel?.spaceId
           ? app.spaces.get(channel.spaceId)?.members.me
           : null;
+        const joinedSpaceIds = app.spaces.all.map((space) => space.id);
         if (
           customEmoji &&
-          canUseCustomEmoji(app.account?.id ?? "", customEmoji, me, channel)
+          canUseCustomEmoji(
+            app.account?.id ?? "",
+            customEmoji,
+            me,
+            channel,
+            joinedSpaceIds
+          )
         ) {
           const distance = shortcode.length - text.length;
           if (distance <= caretOffset) {
@@ -113,12 +120,19 @@ export const withEmojis = (editor: Editor) => {
         const me = channel?.spaceId
           ? app.spaces.get(channel.spaceId)?.members.me
           : null;
+        const joinedSpaceIds = app.spaces.all.map((space) => space.id);
 
         const matchedCustomEmoji = app.expressions.all.find(
           (exp) =>
             exp.type === ExpressionType.Emoji &&
             exp.name.toLowerCase() === rawName.toLowerCase() &&
-            canUseCustomEmoji(app.account?.id || "", exp, me, channel)
+            canUseCustomEmoji(
+              app.account?.id || "",
+              exp,
+              me,
+              channel,
+              joinedSpaceIds
+            )
         );
 
         if (matchedCustomEmoji) {
@@ -307,10 +321,17 @@ export const withEmojis = (editor: Editor) => {
         const me = channel?.spaceId
           ? app.spaces.get(channel.spaceId)?.members.me
           : null;
+        const joinedSpaceIds = app.spaces.all.map((space) => space.id);
 
         if (
           customEmoji &&
-          canUseCustomEmoji(app.account?.id || "", customEmoji, me, channel)
+          canUseCustomEmoji(
+            app.account?.id || "",
+            customEmoji,
+            me,
+            channel,
+            joinedSpaceIds
+          )
         )
           parts.push({ type: "customEmoji", emoji: customEmoji });
         else parts.push({ type: "text", text: m.text });

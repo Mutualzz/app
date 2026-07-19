@@ -54,6 +54,7 @@ interface Props {
   editable?: boolean;
   overlay?: ReactNode;
   bioOverride?: string | null;
+  pronounsOverride?: string | null;
   bannerOverride?: string | null;
   readOnly?: boolean;
   onSelect?: (blockId: string) => void;
@@ -76,6 +77,7 @@ export const ProfileBlockRenderer = observer(
     editable,
     overlay,
     bioOverride,
+    pronounsOverride,
     bannerOverride,
     readOnly,
     onSelect,
@@ -93,6 +95,7 @@ export const ProfileBlockRenderer = observer(
               profile={profile}
               block={block}
               bioOverride={bioOverride}
+              pronounsOverride={pronounsOverride}
               bannerOverride={bannerOverride}
             />
           );

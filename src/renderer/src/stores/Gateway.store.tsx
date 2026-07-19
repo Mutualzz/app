@@ -31,7 +31,9 @@ import {
   PresenceActivityEmoji,
   PresenceSchedule,
   PresenceStatus,
-  Snowflake
+  Snowflake,
+  APICall,
+  type VoiceState as APIVoiceState
 } from "@mutualzz/types";
 import { type Codec, createCodec, type Encoding } from "@utils/codec";
 import {
@@ -67,8 +69,10 @@ export const GatewayStatus = {
 export type GatewayStatus = (typeof GatewayStatus)[keyof typeof GatewayStatus];
 
 const RECONNECT_TIMEOUT = 5000;
+const RECONNECT_MAX_TIMEOUT = 30_000;
 const RESUME_STORAGE_KEY = "mutualzz:gateway:resume";
 const RESUME_MAX_AGE_MS = 110_000;
+const FOREGROUND_DEBOUNCE_MS = 1000;
 
 function mergeActivities(opts: {
   processActivities: PresenceActivity[];
@@ -179,7 +183,11 @@ export class GatewayStore {
   private focusHandler: (() => void) | null = null;
   private foregroundProbeTimer: ReturnType<typeof setTimeout> | null = null;
   private foregroundProbeResolve: ((acked: boolean) => void) | null = null;
+  private foregroundHandling = false;
+  private lastForegroundAt = 0;
+  private connectionGeneration = 0;
   private backgroundPresenceStatus: PresenceStatus | null = null;
+  private sendChain: Promise<void> = Promise.resolve();
 
   constructor(private readonly app: AppStore) {
     makeAutoObservable(this, {}, { autoBind: true });
@@ -230,7 +238,7 @@ export class GatewayStore {
         JSON.stringify({
           sessionId: this.sessionId,
           sequence: this.sequence,
-          savedAt: Date.now(),
+          savedAt: Date.now()
         })
       );
     } catch {}
@@ -288,7 +296,9 @@ export class GatewayStore {
       clearTimeout(this.foregroundProbeTimer);
       this.foregroundProbeTimer = null;
     }
+    const done = this.foregroundProbeResolve;
     this.foregroundProbeResolve = null;
+    done?.(false);
   }
 
   private teardownSocket() {
@@ -333,8 +343,13 @@ export class GatewayStore {
     this.logger.debug("[Foreground] Forcing gateway reconnect");
     this.markGatewayUnavailable();
     this.clearReconnect();
+    this.reconnectTimeout = RECONNECT_TIMEOUT;
     this.teardownSocket();
-    void this.connect(this.url);
+    void this.connect(this.url).catch((error) => {
+      this.logger.error("Foreground reconnect failed", error);
+      this.readyState = GatewayStatus.CLOSED;
+      this.startReconnect();
+    });
   }
 
   private probeConnection(timeoutMs: number) {
@@ -364,27 +379,38 @@ export class GatewayStore {
 
   private async handleForeground() {
     if (!this.app.token) return;
+    if (this.foregroundHandling) return;
 
-    const socketOpen =
-      !!this.socket &&
-      this.socket.readyState === WebSocket.OPEN &&
-      this.readyState === GatewayStatus.OPEN;
+    const now = Date.now();
+    if (now - this.lastForegroundAt < FOREGROUND_DEBOUNCE_MS) return;
+    this.lastForegroundAt = now;
 
-    if (!socketOpen) {
-      this.forceReconnect();
-      return;
+    this.foregroundHandling = true;
+    try {
+      const socketOpen =
+        !!this.socket &&
+        this.socket.readyState === WebSocket.OPEN &&
+        this.readyState === GatewayStatus.OPEN;
+
+      if (!socketOpen) {
+        this.forceReconnect();
+        return;
+      }
+
+      this.stopHeartbeat();
+      const probeTimeout = Math.min(this.heartbeatInterval ?? 30_000, 10_000);
+      const acked = await this.probeConnection(probeTimeout);
+
+      if (!acked) {
+        this.forceReconnect();
+        return;
+      }
+
+      this.heartbeatAck = true;
+      this.startHeartbeat();
+    } finally {
+      this.foregroundHandling = false;
     }
-
-    const probeTimeout = Math.min(this.heartbeatInterval ?? 30_000, 10_000);
-    const acked = await this.probeConnection(probeTimeout);
-
-    if (!acked) {
-      this.forceReconnect();
-      return;
-    }
-
-    this.heartbeatAck = true;
-    this.startHeartbeat();
   }
 
   requestMemberListRange(spaceId: string, channelId: string, pageSize = 50) {
@@ -456,17 +482,25 @@ export class GatewayStore {
       this.url = newUrl.href;
     }
 
+    const connectionId = ++this.connectionGeneration;
     this.logger.debug(`[Connect] Gateway URL ${this.url}`);
     this.connectionStartTime = Date.now();
-
     this.manualDisconnect = false;
+    this.readyState = GatewayStatus.CONNECTING;
+
+    const [codec, compressor] = await Promise.all([
+      createCodec(),
+      createCompressor(this.compress)
+    ]);
+
+    if (connectionId !== this.connectionGeneration) return;
+
+    this.codec = codec;
+    this.compressor = compressor;
+    this.teardownSocket();
     this.socket = new WebSocket(this.url);
     this.socket.binaryType = "arraybuffer";
     this.readyState = GatewayStatus.CONNECTING;
-
-    this.codec = await createCodec();
-    this.compressor = await createCompressor(this.compress);
-
     this.setupListeners();
     this.setupDispatchHandlers();
   }
@@ -494,12 +528,21 @@ export class GatewayStore {
     if (this.reconnecting) return;
 
     this.reconnecting = true;
+    const delay = this.reconnectTimeout || RECONNECT_TIMEOUT;
     this.reconnectTimer = setTimeout(() => {
       this.reconnectTimer = null;
       this.reconnecting = false;
       this.logger.debug(`[Reconnect] ${this.url}`);
-      this.connect(this.url);
-    }, this.reconnectTimeout);
+      void this.connect(this.url).catch((error) => {
+        this.logger.error("Reconnect failed", error);
+        this.readyState = GatewayStatus.CLOSED;
+        this.reconnectTimeout = Math.min(
+          RECONNECT_MAX_TIMEOUT,
+          (this.reconnectTimeout || RECONNECT_TIMEOUT) * 2
+        );
+        this.startReconnect();
+      });
+    }, delay);
   }
 
   onChannelOpen = (spaceId: string, channelId: string) => {
@@ -809,7 +852,16 @@ export class GatewayStore {
     }
   }
 
-  send = async (payload: any) => {
+  send = (payload: any) => {
+    this.sendChain = this.sendChain
+      .then(() => this.sendImmediate(payload))
+      .catch((error) => {
+        this.logger.error("Failed to send message", error);
+      });
+    return this.sendChain;
+  };
+
+  private sendImmediate = async (payload: any) => {
     if (!this.socket) {
       this.logger.error("Socket is not open");
       return;
@@ -1055,6 +1107,19 @@ export class GatewayStore {
     this.dispatchHandlers.set(
       GatewayDispatchEvents.VoiceStateUpdate,
       this.app.voice.onVoiceStateUpdate
+    );
+
+    this.dispatchHandlers.set(
+      GatewayDispatchEvents.CallCreate,
+      this.onCallCreate
+    );
+    this.dispatchHandlers.set(
+      GatewayDispatchEvents.CallUpdate,
+      this.onCallUpdate
+    );
+    this.dispatchHandlers.set(
+      GatewayDispatchEvents.CallDelete,
+      this.onCallDelete
     );
 
     // Expression
@@ -1315,9 +1380,25 @@ export class GatewayStore {
       case GatewayOpcodes.HeartbeatAck:
         this.handleHeartbeatAck();
         break;
+      case GatewayOpcodes.System:
+        this.handleSystem(payload.d);
+        break;
       default:
         this.logger.debug("Received unknown opcode");
         break;
+    }
+  };
+
+  private handleSystem = (data: { message?: string } | null) => {
+    const message = data?.message?.trim();
+    if (!message) return;
+
+    const voice = this.app.voice;
+    if (
+      voice.connectionStatus === "connecting" ||
+      voice.connectionStatus === "failed"
+    ) {
+      voice.failJoinFromSystem(message);
     }
   };
 
@@ -1340,9 +1421,10 @@ export class GatewayStore {
     this.markGatewayUnavailable();
 
     this.logger.debug(`Received invalid session; Can Resume: ${resumable}`);
+    this.reconnectTimeout = 0;
     if (!resumable) {
       this.reset();
-      this.handleIdentify();
+      this.clearResumeState();
       return;
     }
 
@@ -1357,10 +1439,16 @@ export class GatewayStore {
   }
 
   private handleResume() {
-    if (!this.app.token || !this.sessionId) {
-      this.logger.error("Cannot resume, token or sessionId is not set");
+    if (!this.app.token) {
+      this.logger.error("Cannot resume, token is not set");
       this.reset();
       this.app.logout();
+      return;
+    }
+
+    if (!this.sessionId) {
+      this.logger.warn("Cannot resume without sessionId; identifying");
+      this.handleIdentify();
       return;
     }
 
@@ -1381,7 +1469,6 @@ export class GatewayStore {
 
   private handleHello(data: any) {
     this.heartbeatInterval = data.heartbeatInterval;
-    this.reconnectTimeout = this.heartbeatInterval!;
     this.logger.info(
       `[Hello] heartbeat interval: ${data.heartbeatInterval} (took ${Date.now() - this.connectionStartTime!}ms)`
     );
@@ -1411,8 +1498,12 @@ export class GatewayStore {
 
     if (code === GatewayCloseCodes.NotAuthenticated) return;
 
-    if (this.reconnectTimeout === 0) this.reconnectTimeout = RECONNECT_TIMEOUT;
-    else this.reconnectTimeout += RECONNECT_TIMEOUT;
+    if (this.reconnectTimeout <= 0) this.reconnectTimeout = RECONNECT_TIMEOUT;
+    else
+      this.reconnectTimeout = Math.min(
+        RECONNECT_MAX_TIMEOUT,
+        this.reconnectTimeout * 2
+      );
 
     this.logger.debug(
       `Websocket closed with code ${code}; Will reconnect in ${(
@@ -1436,10 +1527,8 @@ export class GatewayStore {
   };
 
   private startHeartbeat = () => {
-    if (this.heartbeat) {
-      clearInterval(this.heartbeat);
-      this.heartbeat = null;
-    }
+    this.stopHeartbeat();
+    this.heartbeatAck = true;
 
     const heartbeatFn = () => {
       if (this.heartbeatAck) {
@@ -1477,6 +1566,7 @@ export class GatewayStore {
       `[Heartbeat ACK Timeout] should reconnect in ${(RECONNECT_TIMEOUT / 1000).toFixed(2)} seconds`
     );
 
+    this.reconnectTimeout = RECONNECT_TIMEOUT;
     this.markGatewayUnavailable();
     this.teardownSocket();
     this.startReconnect();
@@ -1511,8 +1601,10 @@ export class GatewayStore {
   private handleDispatch = (data: any) => {
     const { d, t, s } = data;
     this.logger.debug(`[Gateway] -> ${t}`);
-    this.sequence = s;
-    this.persistResumeState();
+    if (typeof s === "number") {
+      this.sequence = s;
+      this.persistResumeState();
+    }
 
     const handler = this.dispatchHandlers.get(t);
     if (!handler) {
@@ -1525,7 +1617,10 @@ export class GatewayStore {
     handler(parsedData);
   };
 
-  private onResume = () => {
+  private onResume = (payload?: {
+    calls?: APICall[];
+    voiceStates?: APIVoiceState[];
+  }) => {
     this.logger.debug("[Resume] Session");
 
     if (!this.app.account) {
@@ -1537,6 +1632,14 @@ export class GatewayStore {
       this.clearResumeState();
       this.handleIdentify();
       return;
+    }
+
+    if (payload?.calls) {
+      this.app.calls.hydrate(payload.calls);
+    }
+
+    if (Array.isArray(payload?.voiceStates)) {
+      this.app.voiceStates.replace(payload.voiceStates);
     }
 
     this.resubscribeUsers();
@@ -1565,7 +1668,11 @@ export class GatewayStore {
       mergedPresences,
       profile,
       presenceSchedule,
-      customStatusSchedule
+      customStatusSchedule,
+      calls,
+      voiceStates,
+      users,
+      minecraftLink
     } = payload;
 
     this.sessionId = sessionId;
@@ -1573,12 +1680,21 @@ export class GatewayStore {
 
     this.app.setUser(user, settings);
     this.app.users.add(user);
+    if (users?.length) this.app.users.addAll(users);
     this.app.themes.addAll(themes);
     this.app.spaces.addAll(spaces);
     this.app.channels.addAll(channels);
     this.app.relationships.addAll(relationships);
     this.app.readStates.addAll(readStates);
     this.app.expressions.addAll(expressions);
+    this.app.calls.hydrate(calls);
+    if (Array.isArray(voiceStates)) {
+      this.app.voiceStates.replace(voiceStates);
+    }
+    this.app.queryClient.setQueryData(
+      ["me", "bridges", "link"],
+      minecraftLink ?? null
+    );
 
     if (profile) {
       this.app.profiles.add(profile);
@@ -1615,6 +1731,22 @@ export class GatewayStore {
 
     this.startPresenceLoop();
     this.app.voice.onGatewayReconnected();
+  };
+
+  private onCallCreate = (payload: APICall) => {
+    this.app.calls.onCallCreate(payload);
+    const channelId = String(payload.channelId);
+    if (!this.app.channels.get(channelId)) {
+      void this.resolveChannel(channelId);
+    }
+  };
+
+  private onCallUpdate = (payload: APICall) => {
+    this.app.calls.onCallUpdate(payload);
+  };
+
+  private onCallDelete = (payload: APICall & { reason?: string }) => {
+    this.app.calls.onCallDelete(payload);
   };
 
   // Presence
@@ -1780,7 +1912,11 @@ export class GatewayStore {
     tick();
     this.presenceLoopInterval = window.setInterval(tick, intervalMs);
 
-    if (isElectron && window.api?.presence?.onRpcUpdated && !this.rpcUpdatedUnsub) {
+    if (
+      isElectron &&
+      window.api?.presence?.onRpcUpdated &&
+      !this.rpcUpdatedUnsub
+    ) {
       this.rpcUpdatedUnsub = window.api.presence.onRpcUpdated(() => {
         this.refreshPresenceActivities();
       });
@@ -1817,6 +1953,10 @@ export class GatewayStore {
     const space = this.app.spaces.get(payload.id);
     if (!space) return;
 
+    if (this.app.voice.currentSpaceId === space.id) {
+      void this.app.voice.leave();
+    }
+
     this.app.spaces.remove(space.id);
     this.lazyRequestChannels.delete(space.id);
     this.app.spaces.setPreferredActive();
@@ -1846,8 +1986,27 @@ export class GatewayStore {
     this.app.spaces.add(payload);
   };
 
+  private isCallShapedPayload(payload: unknown): boolean {
+    return (
+      !!payload &&
+      typeof payload === "object" &&
+      ("initiatorId" in payload ||
+        "ringing" in payload ||
+        "accepted" in payload ||
+        "soloTimeoutMs" in payload)
+    );
+  }
+
   private onChannelCreate = (payload: APIChannel) => {
+    if (this.isCallShapedPayload(payload)) return;
+
     if (!payload.spaceId) {
+      if (
+        payload.type !== ChannelType.DM &&
+        payload.type !== ChannelType.GroupDM
+      ) {
+        return;
+      }
       this.app.channels.add(payload);
       return;
     }
@@ -1862,10 +2021,10 @@ export class GatewayStore {
   };
 
   private onChannelUpdate = (payload: APIChannel) => {
+    if (this.isCallShapedPayload(payload)) return;
+
     const isDM =
-      payload.type === ChannelType.DM ||
-      payload.type === ChannelType.GroupDM ||
-      payload.spaceId == null;
+      payload.type === ChannelType.DM || payload.type === ChannelType.GroupDM;
 
     if (isDM) {
       const existing = this.app.channels.get(payload.id);
@@ -1875,7 +2034,17 @@ export class GatewayStore {
       return;
     }
 
-    if (!payload.spaceId) return;
+    if (payload.spaceId == null) {
+      const existing = this.app.channels.get(payload.id);
+      if (
+        existing &&
+        (existing.type === ChannelType.DM ||
+          existing.type === ChannelType.GroupDM)
+      ) {
+        existing.update(payload);
+      }
+      return;
+    }
 
     const space = this.app.spaces.get(payload.spaceId);
     if (!space) return;
@@ -1885,10 +2054,11 @@ export class GatewayStore {
 
   private onChannelUpdateBulk = (payload: APIChannel[]) => {
     for (const channel of payload) {
+      if (this.isCallShapedPayload(channel)) continue;
+
       const isDM =
         channel.type === ChannelType.DM ||
-        channel.type === ChannelType.GroupDM ||
-        channel.spaceId == null;
+        channel.type === ChannelType.GroupDM;
 
       if (isDM) {
         const existing = this.app.channels.get(channel.id);
@@ -1897,7 +2067,17 @@ export class GatewayStore {
         continue;
       }
 
-      if (!channel.spaceId) continue;
+      if (channel.spaceId == null) {
+        const existing = this.app.channels.get(channel.id);
+        if (
+          existing &&
+          (existing.type === ChannelType.DM ||
+            existing.type === ChannelType.GroupDM)
+        ) {
+          existing.update(channel);
+        }
+        continue;
+      }
 
       const space = this.app.spaces.get(channel.spaceId);
       if (!space) continue;
@@ -1906,8 +2086,23 @@ export class GatewayStore {
   };
 
   private onChannelDelete = (payload: Pick<APIChannel, "id" | "spaceId">) => {
+    if (this.isCallShapedPayload(payload)) {
+      return;
+    }
+
+    if (this.app.voice.currentChannelId === payload.id) {
+      void this.app.voice.leave();
+    }
+
     if (!payload.spaceId) {
-      this.app.channels.remove(payload.id);
+      const existing = this.app.channels.get(payload.id);
+      if (
+        existing &&
+        (existing.type === ChannelType.DM ||
+          existing.type === ChannelType.GroupDM)
+      ) {
+        this.app.channels.remove(payload.id);
+      }
       return;
     }
 
@@ -1954,6 +2149,12 @@ export class GatewayStore {
   private onChannelDeleteBulk = (
     payload: Pick<APIChannel, "id" | "spaceId">[]
   ) => {
+    if (
+      payload.some((channel) => channel.id === this.app.voice.currentChannelId)
+    ) {
+      void this.app.voice.leave();
+    }
+
     for (const channel of payload) {
       if (!channel.spaceId) continue;
       const space = this.app.spaces.get(channel.spaceId);
@@ -2069,6 +2270,7 @@ export class GatewayStore {
         readState.incrementMentionCount();
         if (isMentioned) channel.setLastMentionMessage(message);
         if (!isDnd) {
+          this.app.sounds.play("message");
           toast(
             (toastProps) => <MessageToast {...toastProps} data={message} />,
             {

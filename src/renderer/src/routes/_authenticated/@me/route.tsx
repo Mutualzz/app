@@ -30,9 +30,9 @@ export const Route = createFileRoute("/_authenticated/@me")({
 
 const ResizeBar = motion.create("div");
 
-/** Isolated so unread flips don't re-render the whole @me shell. */
 const BridgeUnreadDot = observer(() => {
   const app = useAppStore();
+  const { theme } = useTheme();
   if (!app.bridgeChat.hasAnyUnread) return null;
   return (
     <Stack
@@ -40,7 +40,7 @@ const BridgeUnreadDot = observer(() => {
         width: 8,
         height: 8,
         borderRadius: 999,
-        backgroundColor: "var(--mui-palette-primary-main, #5865f2)",
+        backgroundColor: theme.colors.primary,
         flexShrink: 0
       }}
     />

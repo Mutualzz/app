@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "@tanstack/react-router";
 import { useAppStore } from "@hooks/useStores";
 import { Paper } from "@components/Paper";
 import { Button } from "@components/Button";
-import { Stack, Typography } from "@mutualzz/ui-web";
+import { Stack, Typography, useTheme } from "@mutualzz/ui-web";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { CubeIcon } from "@phosphor-icons/react";
@@ -32,6 +32,7 @@ export const BridgeChannelList = observer(
   ({ spaceId }: BridgeChannelListProps) => {
     const { t } = useTranslation("settings");
     const app = useAppStore();
+    const { theme } = useTheme();
     const navigate = useNavigate();
     const { openModal } = useModal();
     const params = useParams({ strict: false }) as { bridgeId?: string };
@@ -40,7 +41,7 @@ export const BridgeChannelList = observer(
       queryKey: ["me", "bridges"],
       queryFn: () => app.rest.get<BridgeSummary[]>("/@me/bridges"),
       staleTime: 30_000,
-      refetchInterval: 60_000,
+      refetchInterval: 60_000
     });
 
     const bridges = useMemo(() => {
@@ -78,13 +79,13 @@ export const BridgeChannelList = observer(
         const targetSpaceId = spaceId ?? bridge.spaceId!;
         navigate({
           to: "/spaces/$spaceId/bridges/$bridgeId",
-          params: { spaceId: targetSpaceId, bridgeId: bridge.id },
+          params: { spaceId: targetSpaceId, bridgeId: bridge.id }
         });
         return;
       }
       navigate({
         to: "/@me/bridges/$bridgeId",
-        params: { bridgeId: bridge.id },
+        params: { bridgeId: bridge.id }
       });
     };
 
@@ -92,7 +93,7 @@ export const BridgeChannelList = observer(
       if (!space) return;
       openModal(
         `space-settings-${space.id}`,
-        <SpaceSettingsModal space={space} redirectTo="minecraft-bridge" />,
+        <SpaceSettingsModal space={space} redirectTo="minecraft-bridge" />
       );
     };
 
@@ -132,7 +133,7 @@ export const BridgeChannelList = observer(
               css={{
                 overflow: "hidden",
                 textOverflow: "ellipsis",
-                whiteSpace: "nowrap",
+                whiteSpace: "nowrap"
               }}
             >
               {bridge.name}
@@ -150,8 +151,8 @@ export const BridgeChannelList = observer(
                 width: 8,
                 height: 8,
                 borderRadius: 999,
-                backgroundColor: "var(--mui-palette-primary-main, #5865f2)",
-                flexShrink: 0,
+                backgroundColor: theme.colors.primary,
+                flexShrink: 0
               }}
             />
           )}
@@ -160,8 +161,7 @@ export const BridgeChannelList = observer(
     };
 
     return (
-      <Paper
-        elevation={app.settings?.preferEmbossed ? 4 : 0}
+      <Stack
         direction="column"
         width="100%"
         spacing={1.25}
@@ -199,7 +199,11 @@ export const BridgeChannelList = observer(
           </Stack>
         ) : grouped ? (
           grouped.map(([groupSpaceId, groupBridges]) => (
-            <Stack key={groupSpaceId || "unknown"} direction="column" spacing={1}>
+            <Stack
+              key={groupSpaceId || "unknown"}
+              direction="column"
+              spacing={1}
+            >
               <Typography level="label-xs" textColor="muted">
                 {app.spaces.get(groupSpaceId)?.name ??
                   t("minecraftBridge.unknownSpace")}
@@ -210,7 +214,7 @@ export const BridgeChannelList = observer(
         ) : (
           bridges.map(renderBridgeRow)
         )}
-      </Paper>
+      </Stack>
     );
-  },
+  }
 );

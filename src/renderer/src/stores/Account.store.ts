@@ -22,6 +22,7 @@ export class AccountStore {
   previousAvatars: string[] = [];
   avatar?: string | null = null;
   globalName?: string | null = null;
+  pronouns?: string | null = null;
   email?: string | null = null;
   accentColor: string;
   createdAt: Date;
@@ -45,6 +46,7 @@ export class AccountStore {
     this.accentColor = user.accentColor;
     this.previousAvatars = user.previousAvatars ?? [];
     this.globalName = user.globalName ?? null;
+    this.pronouns = user.pronouns ?? null;
     this.email = user.email ?? null;
     this.createdAt = new Date(user.createdAt);
     this.updatedAt = new Date(user.updatedAt);

@@ -14,7 +14,7 @@ interface Props {
 }
 
 export const DeleteBridgeModal = observer(
-  ({ spaceId, bridgeId, bridgeName, onDeleted }: Props) => {
+  ({ spaceId, bridgeName, onDeleted }: Props) => {
     const { t } = useTranslation("settings");
     const { t: tCommon } = useTranslation("common");
     const app = useAppStore();

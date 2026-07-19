@@ -1,4 +1,12 @@
-import { app, BrowserWindow, ipcMain, nativeImage, powerMonitor } from "electron";
+import {
+  app,
+  BrowserWindow,
+  clipboard,
+  ipcMain,
+  nativeImage,
+  powerMonitor,
+  shell,
+} from "electron";
 import { trayManager } from "./tray";
 import { getMainWindow } from "./windows";
 import keytar from "keytar";
@@ -159,7 +167,6 @@ export function setupIPC(): void {
   // Shell/External
   ipcMain.handle("shell:open-external", async (_, url: string) => {
     try {
-      const { shell } = await import("electron");
       await shell.openExternal(url);
     } catch (err) {
       console.error("Failed to open external URL:", err);
@@ -170,7 +177,6 @@ export function setupIPC(): void {
   // Clipboard
   ipcMain.handle("clipboard:write", async (_, text: string) => {
     try {
-      const { clipboard } = await import("electron");
       clipboard.writeText(text);
     } catch (err) {
       console.error("Failed to write to clipboard:", err);
@@ -180,7 +186,6 @@ export function setupIPC(): void {
 
   ipcMain.handle("clipboard:read", async () => {
     try {
-      const { clipboard } = await import("electron");
       return clipboard.readText();
     } catch (err) {
       console.error("Failed to read from clipboard:", err);
@@ -229,7 +234,6 @@ export function setupIPC(): void {
 
   ipcMain.handle("desktop:open-screen-capture-settings", async () => {
     try {
-      const { shell } = await import("electron");
       if (process.platform === "darwin") {
         await shell.openExternal(
           "x-apple.systempreferences:com.apple.preference.security?Privacy_ScreenCapture"

@@ -28,6 +28,8 @@ import { CustomStatusStore } from "@stores/CustomStatus.store";
 import { VoiceStore } from "@stores/Voice.store";
 import { VoiceStatesStore } from "@stores/VoiceStates.store";
 import { ExpressionsStore } from "@stores/Expressions.store";
+import { CallStore } from "@stores/Call.store";
+import { SoundStore } from "@stores/Sound.store";
 import { webTokenStorage } from "@storages/webTokenStorage";
 import type { TokenStorage } from "@renderer/types";
 import { electronTokenStorage } from "@storages/electronTokenStorage";
@@ -44,6 +46,7 @@ const prefersDark = usePrefersDark();
 
 export class AppStore {
   isGatewayReady = false;
+  hasBootstrapped = false;
   isAppLoading = true;
   hideSwitcher = false;
   token: string | null = null;
@@ -80,9 +83,12 @@ export class AppStore {
   channelListWidth = 320;
   dmChannelListWidth = 320;
   voiceChatWidth = 500;
+  dmCallViewHeight = 320;
 
   voice = new VoiceStore(this);
   voiceStates = new VoiceStatesStore(this);
+  calls = new CallStore(this);
+  sounds = new SoundStore(this);
 
   versions: {
     app: string | null;
@@ -121,7 +127,8 @@ export class AppStore {
         "memberListVisible",
         "dontShowLinkWarning",
         "channelListWidth",
-        "voiceChatWidth"
+        "voiceChatWidth",
+        "dmCallViewHeight"
       ],
       storage: localStorage
     });
@@ -143,7 +150,9 @@ export class AppStore {
   }
 
   get isReady() {
-    return !this.isAppLoading && this.isGatewayReady;
+    if (this.isAppLoading) return false;
+    if (!this.token) return true;
+    return this.hasBootstrapped || this.isGatewayReady;
   }
 
   setBadgeColor(color: string) {
@@ -229,6 +238,10 @@ export class AppStore {
     this.voiceChatWidth = Math.min(1000, Math.max(380, width));
   }
 
+  setDmCallViewHeight(height: number) {
+    this.dmCallViewHeight = Math.min(560, Math.max(240, height));
+  }
+
   setChannelListWidth(width: number) {
     this.channelListWidth = Math.min(480, Math.max(320, width));
   }
@@ -271,6 +284,7 @@ export class AppStore {
 
   setGatewayReady(ready: boolean) {
     this.isGatewayReady = ready;
+    if (ready && this.token) this.hasBootstrapped = true;
   }
 
   setAppLoading(loading: boolean) {
@@ -323,13 +337,15 @@ export class AppStore {
 
     runInAction(() => {
       this.token = null;
-    });
-    this.isAppLoading = false;
-    this.isGatewayReady = true;
-    this.account = null;
+      this.isAppLoading = false;
+      this.isGatewayReady = true;
+      this.hasBootstrapped = false;
+      this.account = null;
+      this.mode = null;
 
-    if (this.settings) this.settings.dispose();
-    this.settings = null;
+      if (this.settings) this.settings.dispose();
+      this.settings = null;
+    });
 
     this.rest.setToken(null);
     this.themes.reset();
@@ -338,31 +354,36 @@ export class AppStore {
     this.voice.reset();
     await this.gateway.disconnect();
 
-    this.customStatus.clear();
-    this.presence.clear();
-    this.profiles.clear();
-    this.bridgeChat.clearAll();
+    runInAction(() => {
+      this.customStatus.clear();
+      this.presence.clear();
+      this.profiles.clear();
+      this.bridgeChat.clearAll();
 
-    this.channels.clear();
-    this.expressions.clear();
-    this.drafts.clear();
-    this.navigation.clear();
-    this.spaces.clear();
-    this.relationships.clear();
-    this.queue.clear();
-    this.themes.clear();
-    this.themeCreator.resetValues();
-    this.themeCreator.setSpaceId(null);
-    this.users.clear();
-    this.posts.clear();
-    this.mode = null;
+      this.channels.clear();
+      this.expressions.clear();
+      this.drafts.clear();
+      this.navigation.clear();
+      this.spaces.clear();
+      this.relationships.clear();
+      this.queue.clear();
+      this.themes.clear();
+      this.themeCreator.resetValues();
+      this.themeCreator.setSpaceId(null);
+      this.users.clear();
+      this.posts.clear();
+      this.spaces.unsetActive();
+      this.spaces.setMostRecentSpace(null);
+      this.channels.unsetActive?.();
+
+      this.isAppLoading = false;
+      this.isGatewayReady = true;
+    });
+
     await this.queryClient.cancelQueries();
     this.queryClient.clear();
     this.queryClient.removeQueries();
     this.queryClient.getMutationCache().clear();
-    this.spaces.unsetActive();
-    this.spaces.setMostRecentSpace(null);
-    this.channels.unsetActive?.();
 
     localStorage.removeItem("AppStore");
     localStorage.removeItem("AppStoreTransient");

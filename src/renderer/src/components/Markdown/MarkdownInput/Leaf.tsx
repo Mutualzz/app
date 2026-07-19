@@ -1,12 +1,22 @@
 import { Paper } from "@components/Paper";
 import { Typography, useTheme } from "@mutualzz/ui-web";
+import type { ColorLike } from "@mutualzz/ui-core";
 import type { RenderLeafProps } from "slate-react";
 
 export const Leaf = ({ attributes, children, leaf }: RenderLeafProps) => {
   const { theme } = useTheme();
 
-  const { bold, italic, underline, strikethrough, code, spoiler, isMarker } =
-    leaf;
+  const {
+    bold,
+    italic,
+    underline,
+    strikethrough,
+    code,
+    spoiler,
+    color,
+    isMarker
+  } = leaf;
+  const colorProps = color ? { textColor: color as ColorLike } : {};
 
   if (isMarker) {
     return (
@@ -44,6 +54,7 @@ export const Leaf = ({ attributes, children, leaf }: RenderLeafProps) => {
           fontFamily="monospace"
           fontSize="inherit"
           whiteSpace="pre-wrap"
+          {...colorProps}
         >
           {children}
         </Typography>
@@ -94,6 +105,7 @@ export const Leaf = ({ attributes, children, leaf }: RenderLeafProps) => {
       fontFamily="inherit"
       fontSize="inherit"
       whiteSpace="pre-wrap"
+      {...colorProps}
     >
       {children}
     </Typography>

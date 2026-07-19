@@ -49,12 +49,14 @@ export const AppTheme = observer(({ children }: PropsWithChildren) => {
         void ensureAppFont(
           primaryFont ?? selected.theme.typography.fontFamily,
           selected.authorId ?? app.account?.id,
-        ).finally(() => {
-          isUpdatingFromServer.current = true;
-          themeProviderRef.current?.changeTheme(selected.theme);
-          isUpdatingFromServer.current = false;
-          app.themes.setCurrentTheme(selected.theme.id);
-        });
+        )
+          .catch(() => undefined)
+          .finally(() => {
+            isUpdatingFromServer.current = true;
+            themeProviderRef.current?.changeTheme(selected.theme);
+            isUpdatingFromServer.current = false;
+            app.themes.setCurrentTheme(selected.theme.id);
+          });
       },
       { fireImmediately: true }
     );

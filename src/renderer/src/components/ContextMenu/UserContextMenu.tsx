@@ -585,7 +585,10 @@ export const UserContextMenu = observer(
             {!isWatchingStream ? (
               <ContextItem
                 onClick={() => {
-                  app.voice.watchScreenShare(user.id);
+                  void app.voice.watchScreenShare(user.id).catch((err) => {
+                    console.error("watchScreenShare failed", err);
+                    toast.error(t("voice.errors.watchStreamFailed"));
+                  });
                   clearMenu();
                 }}
               >

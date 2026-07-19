@@ -82,8 +82,14 @@ export class VoiceStatesStore {
   }
 
   getAllByChannel(channelId?: Snowflake | null) {
+    const target = channelId == null ? null : String(channelId);
     return this.all
-      .filter((state) => state.channelId === (channelId ?? null))
+      .filter(
+        (state) =>
+          state.channelId != null &&
+          String(state.channelId) === target &&
+          !state.disconnectedAt,
+      )
       .sort((a, b) => (a.joinedAt ?? 0) - (b.joinedAt ?? 0));
   }
 

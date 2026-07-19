@@ -14,6 +14,7 @@ import {
   QueuedMessageStatus
 } from "@stores/objects/QueuedMessage";
 import { observer } from "mobx-react-lite";
+import { isSystemMessageType, isSystemUser } from "@utils/systemUser";
 import { MessageAuthor } from "./MessageAuthor";
 import {
   MessageBase,
@@ -310,7 +311,10 @@ export const Message = observer(
                   />
                   <ReplyAuthorName>
                     <Typography textColor="muted" level="body-xs">
-                      {repliedMessage.author?.displayName ?? t("unknown")}
+                      {isSystemUser(repliedMessage.author) &&
+                      !isSystemMessageType(repliedMessage.type)
+                        ? t("unknown")
+                        : (repliedMessage.author?.displayName ?? t("unknown"))}
                     </Typography>
                   </ReplyAuthorName>
                   <ReplyContentText>
@@ -356,8 +360,17 @@ export const Message = observer(
           </MessageInfo>
           <MessageContent>
             {header && (
-              <Stack flexShrink={0}>
+              <Stack
+                direction="row"
+                alignItems="center"
+                spacing={0.75}
+                flexShrink={0}
+                minWidth={0}
+              >
                 <MessageAuthor message={message} space={space} />
+                <Typography level="body-sm" textColor="muted">
+                  ·
+                </Typography>
                 <MessageDetails message={message} position="top" />
               </Stack>
             )}
