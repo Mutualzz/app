@@ -8,7 +8,8 @@ const LOCKDOWN_TOAST_ID = "space-lockdown";
 const LOCKDOWN_ALLOWED_MODAL_IDS = new Set([
   "space-invite",
   "leave-space-confirm",
-  "whats-new"
+  "whats-new",
+  "incoming-call"
 ]);
 
 export function getSpaceLockdownMessage(_space: Space, isOwner: boolean) {

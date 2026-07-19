@@ -169,7 +169,7 @@ export class MarkdownItAsync extends MarkdownIt {
     return super.render(src, env);
   }
 
-  async renderAsync(src: string, env?: any): Promise<string> {
+  async renderAsync(src: string, env: any = {}): Promise<string> {
     this.options.highlight = wrapHighlight(
       this.options.highlight,
       this.placeholderMap

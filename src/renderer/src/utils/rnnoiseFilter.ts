@@ -38,6 +38,17 @@ async function loadRnnoiseAssets() {
   return assetsPromise;
 }
 
+export function warmRnnoiseAssets(): Promise<void> {
+  try {
+    return loadRnnoiseAssets().then(
+      () => undefined,
+      () => undefined
+    );
+  } catch {
+    return Promise.resolve();
+  }
+}
+
 async function ensureRnnoiseRegistered(audioContext: AudioContext) {
   const assets = await loadRnnoiseAssets();
   await RNNoiseNode.register(audioContext, assets);

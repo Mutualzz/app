@@ -96,7 +96,7 @@ export const UserSettingsSidebar = observer(
     const { t } = useTranslation("settings");
     const app = useAppStore();
     const navigate = useNavigate();
-    const { closeModal } = useModal();
+    const { closeModal, closeAllModals } = useModal();
 
     const { currentPage, setCurrentPage, setCurrentCategory } =
       useUserSettings();
@@ -118,6 +118,13 @@ export const UserSettingsSidebar = observer(
         setDrawerOpen(false);
       }
       navigate({ to: "/support" });
+    };
+
+    const handleLogout = () => {
+      closeAllModals();
+      void app.logout().then(() => {
+        void navigate({ to: "/login", replace: true });
+      });
     };
 
     if (!app.account) return null;
@@ -250,7 +257,7 @@ export const UserSettingsSidebar = observer(
             variant="plain"
             startDecorator={<SignOutIcon weight="fill" />}
             horizontalAlign="left"
-            onClick={() => app.logout()}
+            onClick={handleLogout}
           >
             {t("logOut")}
           </Button>

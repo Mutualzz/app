@@ -1,15 +1,28 @@
-import { observer } from "mobx-react-lite";
-import { Stack } from "@mutualzz/ui-web";
+import { Paper } from "@components/Paper";
 import { DMChannelHeader } from "@components/DMChannel/DMChannelHeader";
-import { useAppStore } from "@hooks/useStores";
+import { DMCallView } from "@components/DMChannel/DMCallView";
 import { DMGroupMemberList } from "@components/DMChannel/DMGroupMemberList";
-import { ChannelType } from "@mutualzz/types";
 import { MessageList } from "@components/Message/MessageList";
 import { MessageInput } from "@components/Message/MessageInput";
+import { useAppStore } from "@hooks/useStores";
+import { ChannelType } from "@mutualzz/types";
+import { Stack, useTheme } from "@mutualzz/ui-web";
+import { observer } from "mobx-react-lite";
+import { useEffect, useState } from "react";
 
 export const DMChannelView = observer(() => {
   const app = useAppStore();
+  const { theme } = useTheme();
   const channel = app.channels.active;
+  const hasWallpaper = Boolean(theme.backgroundImageUrl);
+  const [callExpanded, setCallExpanded] = useState(true);
+  const callActive = !!channel && app.calls.isActive(channel.id);
+  const ringingForMe = !!channel && app.calls.isRingingForMe(channel.id);
+  const outgoing = !!channel && app.calls.isOutgoing(channel.id);
+
+  useEffect(() => {
+    if (callActive || ringingForMe || outgoing) setCallExpanded(true);
+  }, [callActive, ringingForMe, outgoing, channel?.id]);
 
   if (!channel) return null;
 
@@ -28,20 +41,56 @@ export const DMChannelView = observer(() => {
 
   return (
     <Stack direction="column" width="100%" height="100%">
-      <DMChannelHeader channel={channel} />
-      <Stack direction="row" flex="1 1 auto" overflow="hidden">
-        <Stack
+      <Paper
+        elevation={app.settings?.preferEmbossed ? 5 : 0}
+        p={0}
+        direction="column"
+        borderLeft="0 !important"
+        borderRight="0 !important"
+        borderTop="0 !important"
+        boxShadow="0 !important"
+        overflow="hidden"
+        css={{ flexShrink: 0 }}
+      >
+        <DMChannelHeader
+          channel={channel}
+          callExpanded={callExpanded}
+          onToggleCallExpanded={
+            callActive ? () => setCallExpanded((v) => !v) : undefined
+          }
+        />
+        {callActive && callExpanded && <DMCallView channel={channel} />}
+      </Paper>
+      <Stack direction="row" flex="1 1 auto" overflow="hidden" minHeight={0}>
+        <Paper
+          surfaceRole={hasWallpaper ? "content" : undefined}
+          elevation={0}
           direction="column"
           flex="1 1 auto"
           position="relative"
           overflow="hidden"
+          minHeight={0}
+          minWidth={0}
+          borderLeft="0 !important"
+          borderRight="0 !important"
+          borderBottom="0 !important"
+          borderRadius={0}
+          css={
+            hasWallpaper
+              ? {
+                  paddingLeft: 12,
+                  paddingRight: 14,
+                  paddingBottom: 14
+                }
+              : undefined
+          }
         >
           <MessageList channel={channel} />
           <MessageInput
             channel={channel}
             onRequestEditLatest={handleRequestEditLatest}
           />
-        </Stack>
+        </Paper>
         {app.memberListVisible && channel.type === ChannelType.GroupDM && (
           <DMGroupMemberList />
         )}

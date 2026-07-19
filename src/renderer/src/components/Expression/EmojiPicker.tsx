@@ -359,9 +359,16 @@ export const EmojiPicker = observer(
     const me = channel?.spaceId
       ? app.spaces.get(channel.spaceId)?.members.me
       : null;
+    const joinedSpaceIds = app.spaces.all.map((space) => space.id);
 
     const canUseEmoji = (emoji: Expression) =>
-      canUseCustomEmoji(app.account?.id ?? "", emoji, me, channel);
+      canUseCustomEmoji(
+        app.account?.id ?? "",
+        emoji,
+        me,
+        channel,
+        joinedSpaceIds
+      );
 
     const myEmojis = app.expressions.emojis
       .filter((e) => !e.spaceId)

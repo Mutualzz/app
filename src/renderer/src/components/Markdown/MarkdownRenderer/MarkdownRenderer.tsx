@@ -12,6 +12,7 @@ import { Spoiler } from "../components/Spoiler";
 import type { MarkdownRendererProps } from "./MarkdownRenderer.types";
 import { emphasisPlugin } from "./plugins/emphasis";
 import { spoilerPlugin } from "./plugins/spoiler";
+import { colorPlugin } from "./plugins/color";
 import { strikethroughPlugin } from "./plugins/strikethrough";
 import { underlinePlugin } from "./plugins/underline";
 import { brOnEmpty } from "./plugins/brOnEmpty";
@@ -58,6 +59,7 @@ export const MarkdownRenderer = ({
 
     instance.use(brOnEmpty);
     instance.use(spoilerPlugin);
+    instance.use(colorPlugin);
     instance.use(mentionPlugin);
     instance.use(strikethroughPlugin);
     instance.use(emphasisPlugin);
@@ -231,6 +233,27 @@ export const MarkdownRenderer = ({
                 options
               );
               return <Spoiler>{children}</Spoiler>;
+            }
+            case "span": {
+              const hex = domNode.attribs?.["data-markdown-color"];
+              if (!hex) return undefined;
+
+              const children = domToReact(
+                (domNode.children ?? []) as any,
+                options
+              );
+
+              return (
+                <Typography
+                  whiteSpace="pre-wrap"
+                  fontSize={level ? undefined : "inherit"}
+                  level={level}
+                  textColor={hex as any}
+                  css={{ color: hex }}
+                >
+                  {children}
+                </Typography>
+              );
             }
             case "emoji": {
               const {

@@ -1,6 +1,7 @@
 import { Paper } from "@components/Paper";
 import { UserAvatar } from "@components/User/UserAvatar";
 import { ProfileMarkdownContent } from "@components/Profile/shared/ProfileMarkdownContent";
+import { ProfileScrim } from "@components/Profile/shared/ProfileScrim";
 import {
   MarkdownInput,
   type MarkdownInputHandle
@@ -217,21 +218,42 @@ export const UserProfilePopout = observer(({ user, member }: Props) => {
         </Box>
 
         <Stack direction="column" spacing={1.25} px={2} pb={2}>
-          <Stack direction="column" spacing={0.25}>
-            <Typography level="title-md">{displayName}</Typography>
-            <Typography level="body-sm" css={{ opacity: 0.7 }}>
-              @{user.username}
-            </Typography>
-            {presence && <SmallActivityStatus presence={presence} customOnly />}
-          </Stack>
-
-          {profile?.bio && (
-            <ProfileMarkdownContent
-              value={profile.bio}
-              lineClamp={3}
-              css={{ opacity: 0.85 }}
-            />
-          )}
+          <ProfileScrim>
+            <Stack direction="column" spacing={0.25}>
+              <Stack
+                direction="row"
+                alignItems="center"
+                spacing={0.75}
+                minWidth={0}
+                flexWrap="wrap"
+              >
+                <Typography level="title-md">{displayName}</Typography>
+                {(user.pronouns ?? profile?.pronouns) ? (
+                  <>
+                    <Typography level="body-sm" textColor="muted">
+                      ·
+                    </Typography>
+                    <Typography level="body-sm" textColor="muted">
+                      {user.pronouns ?? profile?.pronouns}
+                    </Typography>
+                  </>
+                ) : null}
+              </Stack>
+              <Typography level="body-sm" css={{ opacity: 0.7 }}>
+                @{user.username}
+              </Typography>
+              {presence && (
+                <SmallActivityStatus presence={presence} customOnly />
+              )}
+            </Stack>
+            {profile?.bio && (
+              <ProfileMarkdownContent
+                value={profile.bio}
+                lineClamp={3}
+                css={{ marginTop: 8 }}
+              />
+            )}
+          </ProfileScrim>
 
           {presence && <UserPresenceCard presence={presence} />}
 

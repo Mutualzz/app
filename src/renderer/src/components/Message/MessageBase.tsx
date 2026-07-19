@@ -130,8 +130,7 @@ export const DetailsBase = styled("div")(({ theme }) => ({
   flexShrink: 0,
   fontSize: 12,
   display: "inline-flex",
-  color: theme.typography.colors.secondary,
-  paddingLeft: 4,
+  color: theme.typography.colors.muted,
   alignSelf: "center",
 
   ".edited": {

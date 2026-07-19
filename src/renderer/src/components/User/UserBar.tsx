@@ -80,14 +80,21 @@ export const UserBar = observer(() => {
 
   let voiceSubtitle: string | undefined;
   if (voiceChannel) {
-    voiceSubtitle =
-      `${voiceChannel.name} / ${voiceChannel.space?.name ?? ""}`.trim();
+    if (voiceChannel.spaceId) {
+      voiceSubtitle =
+        `${voiceChannel.name} / ${voiceChannel.space?.name ?? ""}`.trim();
+    } else {
+      voiceSubtitle =
+        voiceChannel.name ||
+        voiceChannel.dmRecipient?.displayName ||
+        t("call.inCall");
+    }
   } else if (voiceStatus === "failed") {
     voiceSubtitle = voiceError ?? t("voice.connection.unableToConnect");
   }
 
   const canHangup =
-    Boolean(app.voice.currentSpaceId) && Boolean(app.voice.currentChannelId);
+    Boolean(app.voice.currentChannelId) || voiceStatus === "failed";
 
   const cameraEnabled = app.voice.cameraEnabled;
   const screenShareEnabled = app.voice.screenShareEnabled;
@@ -119,7 +126,70 @@ export const UserBar = observer(() => {
             alignItems="center"
             justifyContent="space-between"
           >
-            <Stack spacing={1.25} direction="column" minWidth={0} flex={1}>
+            <Stack
+              spacing={1.25}
+              direction="column"
+              minWidth={0}
+              flex={1}
+              role={voiceChannel ? "button" : undefined}
+              tabIndex={voiceChannel ? 0 : undefined}
+              onClick={() => {
+                if (!voiceChannel) return;
+                if (voiceChannel.spaceId) {
+                  navigate({
+                    to: "/spaces/$spaceId/$channelId",
+                    params: {
+                      spaceId: voiceChannel.spaceId,
+                      channelId: voiceChannel.id
+                    }
+                  });
+                  return;
+                }
+                navigate({
+                  to: "/@me/$channelId",
+                  params: {
+                    channelId: voiceChannel.id
+                  }
+                });
+              }}
+              onKeyDown={(e) => {
+                if (!voiceChannel) return;
+                if (e.key !== "Enter" && e.key !== " ") return;
+                e.preventDefault();
+                if (voiceChannel.spaceId) {
+                  navigate({
+                    to: "/spaces/$spaceId/$channelId",
+                    params: {
+                      spaceId: voiceChannel.spaceId,
+                      channelId: voiceChannel.id
+                    }
+                  });
+                  return;
+                }
+                navigate({
+                  to: "/@me/$channelId",
+                  params: {
+                    channelId: voiceChannel.id
+                  }
+                });
+              }}
+              css={
+                voiceChannel
+                  ? {
+                      cursor: "pointer",
+                      borderRadius: 8,
+                      "&:hover": {
+                        opacity: 0.85
+                      }
+                    }
+                  : undefined
+              }
+              aria-label={
+                voiceSubtitle
+                  ? `${voiceTitle}, ${voiceSubtitle}`
+                  : voiceTitle
+              }
+            >
               <Typography
                 variant="plain"
                 color={voiceTitleColor}
@@ -166,7 +236,9 @@ export const UserBar = observer(() => {
               >
                 <IconButton
                   disabled={!canHangup}
-                  onClick={() => app.voice.leave()}
+                  onClick={() => {
+                    void app.voice.hangupCurrentDmCall();
+                  }}
                 >
                   <PhoneIcon
                     weight="fill"

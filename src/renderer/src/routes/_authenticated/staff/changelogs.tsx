@@ -1,7 +1,12 @@
 import { Button } from "@components/Button";
 import { MarkdownRenderer } from "@components/Markdown/MarkdownRenderer/MarkdownRenderer";
+import {
+  WhatsNewModal,
+  WHATS_NEW_MODAL_ID
+} from "@components/Modals/WhatsNewModal";
 import { Paper } from "@components/Paper";
 import { StaffPanelHeader } from "@components/Staff/StaffPanelHeader";
+import { useModal } from "@contexts/Modal.context";
 import { useAppStore } from "@hooks/useStores";
 import type { APIChangelog } from "@mutualzz/types";
 import { Input, Stack, Textarea, Typography } from "@mutualzz/ui-web";
@@ -24,9 +29,37 @@ export const Route = createFileRoute("/_authenticated/staff/changelogs")({
 
 const PAGE_LIMIT = 25;
 
+const PREVIEW_CHANGELOG_ID = "changelog-preview";
+
+function buildPreviewChangelog(partial: {
+  title?: string;
+  body?: string;
+  imageUrl?: string | null;
+  desktopVersion?: string | null;
+  mobileVersion?: string | null;
+  publishedAt?: Date;
+}): APIChangelog {
+  const now = new Date();
+  return {
+    id: PREVIEW_CHANGELOG_ID,
+    title: partial.title?.trim() || "What’s new in this release",
+    body:
+      partial.body?.trim() ||
+      "## Highlights\n- Something shiny\n- Something fixed\n\nThanks for updating!",
+    imageUrl: partial.imageUrl?.trim() || null,
+    authorId: "0",
+    desktopVersion: partial.desktopVersion?.trim() || "6.25.0",
+    mobileVersion: partial.mobileVersion?.trim() || null,
+    publishedAt: partial.publishedAt ?? now,
+    createdAt: now,
+    updatedAt: now
+  };
+}
+
 function StaffChangelogsRoute() {
   const app = useAppStore();
   const queryClient = useQueryClient();
+  const { openModal } = useModal();
   const { t } = useTranslation("staff");
   const embossed = app.settings?.preferEmbossed;
   const isDeveloper = !!app.account?.isDeveloper;
@@ -36,6 +69,13 @@ function StaffChangelogsRoute() {
   const [imageUrl, setImageUrl] = useState("");
   const [desktopVersion, setDesktopVersion] = useState("");
   const [mobileVersion, setMobileVersion] = useState("");
+
+  const previewChangelog = (changelog: APIChangelog) => {
+    openModal(
+      WHATS_NEW_MODAL_ID,
+      <WhatsNewModal changelog={changelog} onAck={() => {}} />
+    );
+  };
 
   const { data, isFetching, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useInfiniteQuery({
@@ -179,22 +219,41 @@ function StaffChangelogsRoute() {
               />
             </Stack>
           </Stack>
-          <Button
-            variant="solid"
-            color="primary"
-            disabled={!canPublish}
-            onClick={() => {
-              if (!desktopVersion.trim() && !mobileVersion.trim()) {
-                toast.error(t("changelogs.errors.versionRequired"));
-                return;
+          <Stack direction="row" spacing={1}>
+            <Button
+              variant="soft"
+              color="neutral"
+              onClick={() =>
+                previewChangelog(
+                  buildPreviewChangelog({
+                    title,
+                    body,
+                    imageUrl,
+                    desktopVersion,
+                    mobileVersion
+                  })
+                )
               }
-              publishMutation.mutate();
-            }}
-          >
-            {publishMutation.isPending
-              ? t("changelogs.publishing")
-              : t("changelogs.publish")}
-          </Button>
+            >
+              {t("changelogs.preview")}
+            </Button>
+            <Button
+              variant="solid"
+              color="primary"
+              disabled={!canPublish}
+              onClick={() => {
+                if (!desktopVersion.trim() && !mobileVersion.trim()) {
+                  toast.error(t("changelogs.errors.versionRequired"));
+                  return;
+                }
+                publishMutation.mutate();
+              }}
+            >
+              {publishMutation.isPending
+                ? t("changelogs.publishing")
+                : t("changelogs.publish")}
+            </Button>
+          </Stack>
         </Stack>
 
         <Stack direction="column" spacing={1} maxWidth={720} width="100%" mt={1}>
@@ -229,16 +288,26 @@ function StaffChangelogsRoute() {
                       : ""}
                   </Typography>
                 </Stack>
-                <Button
-                  size="sm"
-                  variant="soft"
-                  color="danger"
-                  startDecorator={<TrashIcon />}
-                  disabled={deleteMutation.isPending}
-                  onClick={() => deleteMutation.mutate(entry.id)}
-                >
-                  {t("changelogs.delete")}
-                </Button>
+                <Stack direction="row" spacing={0.75} flexShrink={0}>
+                  <Button
+                    size="sm"
+                    variant="soft"
+                    color="neutral"
+                    onClick={() => previewChangelog(entry)}
+                  >
+                    {t("changelogs.preview")}
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="soft"
+                    color="danger"
+                    startDecorator={<TrashIcon />}
+                    disabled={deleteMutation.isPending}
+                    onClick={() => deleteMutation.mutate(entry.id)}
+                  >
+                    {t("changelogs.delete")}
+                  </Button>
+                </Stack>
               </Stack>
               <MarkdownRenderer value={entry.body} />
             </Paper>

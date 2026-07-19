@@ -61,7 +61,8 @@ export interface Text {
   underline?: boolean;
   strikethrough?: boolean;
   spoiler?: boolean;
-  isMarker?: boolean; // Used to mark ranges for markers like **bold** or *italic*
+  color?: string;
+  isMarker?: boolean;
   text: string;
 }
 

@@ -10,7 +10,8 @@ import { MessageAuthor } from "@components/Message/MessageAuthor";
 import { MarkdownRenderer } from "@components/Markdown/MarkdownRenderer/MarkdownRenderer";
 import { IconSlot, Link, Stack, Typography } from "@mutualzz/ui-web";
 import { MessageEmbed } from "@components/Message/MessageEmbed";
-import { EyeIcon } from "@phosphor-icons/react";
+import { EyeIcon, PhoneSlashIcon } from "@phosphor-icons/react";
+import { isCallNoticeMessage } from "@utils/callNoticeMessage";
 import { useTranslation } from "react-i18next";
 
 interface Props {
@@ -23,6 +24,23 @@ export const SystemMessage = observer(({ message }: Props) => {
   const isEphemeral =
     message instanceof Message && message.flags.has("Ephemeral");
   if (isEphemeral) highlight = true;
+
+  if (isCallNoticeMessage(message)) {
+    return (
+      <MessageBase header system>
+        <MessageInfo>
+          <IconSlot size={20}>
+            <PhoneSlashIcon weight="fill" />
+          </IconSlot>
+        </MessageInfo>
+        <MessageContent>
+          <Typography level="body-sm" textColor="secondary">
+            {message.content}
+          </Typography>
+        </MessageContent>
+      </MessageBase>
+    );
+  }
 
   return (
     <MessageBase header system highlight={highlight}>

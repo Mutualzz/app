@@ -193,6 +193,7 @@ export const ProfileEditorPage = observer(() => {
 
       return app.profiles.save({
         bio: draft.bio.trim() || null,
+        pronouns: draft.pronouns.trim() || null,
         banner: draft.banner,
         backgroundColor: draft.backgroundColor,
         backgroundImage: draft.backgroundImage,
@@ -430,6 +431,7 @@ export const ProfileEditorPage = observer(() => {
             backgroundImageOverride={draft.backgroundImage}
             pageFontFamilyOverride={draft.pageFontFamily}
             bioOverride={draft.bio}
+            pronounsOverride={draft.pronouns}
             bannerOverride={draft.banner}
             snapToGrid={snapToGrid}
             gridStep={gridStep}

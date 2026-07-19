@@ -37,6 +37,7 @@ import { Leaf } from "./Leaf";
 import { MarkdownInputContext } from "./MarkdownInput.context";
 import {
   parseMarkdownToRanges,
+  parseColorRanges,
   parseSpoilerRanges,
   resolveMarkdownStyles
 } from "./MarkdownInput.helpers";
@@ -150,7 +151,12 @@ const MarkdownInput = forwardRef<MarkdownInputHandle, MarkdownInputProps>(
     );
 
     const decorate = useCallback(([node, path]: [Node, number[]]): Range[] => {
-      if (Text.isText(node)) return parseMarkdownToRanges(node.text, path);
+      if (Text.isText(node)) {
+        return [
+          ...parseMarkdownToRanges(node.text, path),
+          ...parseColorRanges(node.text, path)
+        ];
+      }
 
       return parseSpoilerRanges([node, path]);
     }, []);

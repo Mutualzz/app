@@ -1,3 +1,4 @@
+import { CallCameraVideo } from "@components/Voice/CallCameraVideo";
 import type { Channel } from "@stores/objects/Channel";
 import { Paper, Stack, Typography, useTheme } from "@mutualzz/ui-web";
 import { MessageList } from "@components/Message/MessageList";
@@ -25,6 +26,7 @@ import {
 } from "@phosphor-icons/react";
 import { Tooltip } from "@components/Tooltip";
 import { useTranslation } from "react-i18next";
+import { toast } from "react-toastify";
 
 interface Props {
   channel: Channel;
@@ -50,7 +52,6 @@ interface ParticipantTileProps {
 const ParticipantTile = observer(
   ({ userId, user, size, selected }: ParticipantTileProps) => {
     const app = useAppStore();
-    const videoRef = useRef<HTMLVideoElement>(null);
 
     const isSelf = app.account?.id === userId;
     const cameraStream = isSelf
@@ -61,15 +62,6 @@ const ParticipantTile = observer(
     const speaking =
       app.voice.isUserSpeaking(userId) &&
       !(isSelf && app.voice.effectiveSelfMute);
-
-    useEffect(() => {
-      const el = videoRef.current;
-      if (!el) return;
-      el.srcObject = cameraStream;
-      return () => {
-        el.srcObject = null;
-      };
-    }, [cameraStream]);
 
     if (!cameraStream)
       return (
@@ -90,22 +82,18 @@ const ParticipantTile = observer(
         justifyContent="center"
         css={selected ? { backgroundColor: "#000" } : undefined}
       >
-        <video
-          ref={videoRef}
-          autoPlay
-          playsInline
-          muted
-          css={{
-            width: "100%",
-            height: "100%",
+        <CallCameraVideo
+          userId={userId}
+          stream={cameraStream}
+          isSelf={isSelf}
+          objectFit={selected ? "contain" : "cover"}
+          style={{
             maxWidth: "100%",
             maxHeight: "100%",
             position: "relative",
             overflow: "hidden",
             borderRadius: selected ? 0 : 16,
-            display: "block",
-            boxSizing: "border-box",
-            objectFit: selected ? "contain" : "cover"
+            boxSizing: "border-box"
           }}
         />
       </Stack>
@@ -143,9 +131,13 @@ const ScreenShareTile = observer(
     useEffect(() => {
       const el = videoRef.current;
       if (!el) return;
-      el.srcObject = screenStream;
+      if (el.srcObject !== screenStream) {
+        el.srcObject = screenStream;
+      }
       return () => {
-        el.srcObject = null;
+        if (videoRef.current?.srcObject === screenStream) {
+          videoRef.current.srcObject = null;
+        }
       };
     }, [screenStream]);
 
@@ -193,7 +185,13 @@ const ScreenShareTile = observer(
             color="success"
             onClick={(e) => {
               e.stopPropagation();
-              void app.voice.watchScreenShare(userId).then(() => onWatch?.());
+              void app.voice
+                .watchScreenShare(userId)
+                .then(() => onWatch?.())
+                .catch((err) => {
+                  console.error("watchScreenShare failed", err);
+                  toast.error(t("voice.errors.watchStreamFailed"));
+                });
             }}
           >
             {t("voice.watchStream")}

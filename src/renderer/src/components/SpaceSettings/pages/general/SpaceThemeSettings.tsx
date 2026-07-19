@@ -12,15 +12,12 @@ import {
   isValidGradient,
   styled
 } from "@mutualzz/ui-core";
+import { Box, Divider, Stack, Typography, useTheme } from "@mutualzz/ui-web";
 import {
-  Box,
-  Button,
-  Divider,
-  Stack,
-  Typography,
-  useTheme
-} from "@mutualzz/ui-web";
-import { CheckIcon, PaletteIcon } from "@phosphor-icons/react";
+  ArrowClockwiseIcon,
+  CheckIcon,
+  PaletteIcon
+} from "@phosphor-icons/react";
 import { IconButton } from "@renderer/components/IconButton";
 import { Theme } from "@stores/objects/Theme";
 import type { Space } from "@stores/objects/Space";
@@ -89,8 +86,7 @@ export const SpaceThemeSettings = observer(
 
     const { data: spaceThemes = [], refetch } = useQuery({
       queryKey: ["space-themes", space.id],
-      queryFn: () =>
-        app.rest.get<APITheme[]>(`/spaces/${space.id}/themes`),
+      queryFn: () => app.rest.get<APITheme[]>(`/spaces/${space.id}/themes`),
       enabled: !!space.id
     });
 
@@ -102,9 +98,10 @@ export const SpaceThemeSettings = observer(
       mutationFn: async (themeId: string | null) => {
         const formData = new FormData();
         formData.append("themeId", themeId ?? "");
-        return app.rest.patchFormData<
-          APISpace & { theme?: APITheme | null }
-        >(`/spaces/${space.id}`, formData);
+        return app.rest.patchFormData<APISpace & { theme?: APITheme | null }>(
+          `/spaces/${space.id}`,
+          formData
+        );
       },
       onSuccess: (data) => {
         space.themeId = data.themeId ?? null;
@@ -188,16 +185,18 @@ export const SpaceThemeSettings = observer(
           justifyContent="space-between"
           alignItems="center"
         >
-          <Typography level="body-md">{t("theme.description")}</Typography>
-          <Stack direction="row" spacing={1} alignItems="center">
-            <Button
-              size="sm"
-              variant="soft"
-              disabled={isPending || !activeId}
-              onClick={() => setThemeId(null)}
-            >
-              {t("theme.clear")}
-            </Button>
+          <Typography level="body-sm">{t("theme.description")}</Typography>
+          <Stack direction="row" spacing={2.5} alignItems="center">
+            <Tooltip content={t("theme.clear")} placement="top">
+              <IconButton
+                size="sm"
+                variant="soft"
+                disabled={isPending || !activeId}
+                onClick={() => setThemeId(null)}
+              >
+                <ArrowClockwiseIcon weight="fill" />
+              </IconButton>
+            </Tooltip>
             <Tooltip content={t("theme.createCustom")} placement="top">
               <IconButton
                 variant="soft"

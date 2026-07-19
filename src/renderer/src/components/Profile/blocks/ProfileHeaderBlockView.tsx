@@ -1,6 +1,7 @@
 import { UserAvatar } from "@components/User/UserAvatar";
 import { ProfileMarkdownContent } from "@components/Profile/shared/ProfileMarkdownContent";
 import { profileBlockSurfaceCss } from "@components/Profile/shared/ProfileBlockBackgroundFill";
+import { ProfileScrim } from "@components/Profile/shared/ProfileScrim";
 import type { AccountStore } from "@stores/Account.store";
 import type { User } from "@stores/objects/User";
 import type { UserProfile } from "@stores/objects/UserProfile";
@@ -24,11 +25,19 @@ interface Props {
   profile: UserProfile;
   block?: ProfileHeaderBlock;
   bioOverride?: string | null;
+  pronounsOverride?: string | null;
   bannerOverride?: string | null;
 }
 
 export const ProfileHeaderBlockView = observer(
-  ({ user, profile, block, bioOverride, bannerOverride }: Props) => {
+  ({
+    user,
+    profile,
+    block,
+    bioOverride,
+    pronounsOverride,
+    bannerOverride
+  }: Props) => {
     const app = useAppStore();
 
     const bannerSource =
@@ -41,6 +50,10 @@ export const ProfileHeaderBlockView = observer(
       bannerSource?.startsWith("a_")
     );
     const bio = bioOverride !== undefined ? bioOverride : profile.bio;
+    const pronouns =
+      pronounsOverride !== undefined
+        ? pronounsOverride
+        : (user.pronouns ?? profile.pronouns);
     const bannerHeight = block?.bannerHeight ?? DEFAULT_BANNER_HEIGHT;
     const bannerFocusY = block?.bannerFocusY ?? 50;
     const headerBackground = block?.backgroundColor?.trim() || null;
@@ -130,23 +143,54 @@ export const ProfileHeaderBlockView = observer(
             minHeight={0}
             css={{ paddingTop: AVATAR_OVERLAP }}
           >
-            <Typography level="title-md" css={{ lineHeight: 1.25, fontSize: "var(--pcf-title)" }}>
-              {user.displayName}
-            </Typography>
-            {bio && (
-              <Typography
-                flex={1}
-                minHeight={0}
-                level="body-sm"
-                css={{
-                  overflowY: "auto",
-                  opacity: 0.85,
-                  fontSize: "var(--pcf-sm)"
-                }}
+            <ProfileScrim>
+              <Stack
+                direction="row"
+                alignItems="center"
+                spacing={0.75}
+                minWidth={0}
+                flexWrap="wrap"
               >
-                <ProfileMarkdownContent value={bio} />
-              </Typography>
-            )}
+                <Typography
+                  level="title-md"
+                  css={{ lineHeight: 1.25, fontSize: "var(--pcf-title)" }}
+                >
+                  {user.displayName}
+                </Typography>
+                {pronouns ? (
+                  <>
+                    <Typography
+                      level="body-sm"
+                      textColor="muted"
+                      css={{ fontSize: "var(--pcf-sm)", lineHeight: 1.25 }}
+                    >
+                      ·
+                    </Typography>
+                    <Typography
+                      level="body-sm"
+                      textColor="muted"
+                      css={{ fontSize: "var(--pcf-sm)", lineHeight: 1.25 }}
+                    >
+                      {pronouns}
+                    </Typography>
+                  </>
+                ) : null}
+              </Stack>
+              {bio && (
+                <Typography
+                  flex={1}
+                  minHeight={0}
+                  level="body-sm"
+                  css={{
+                    overflowY: "auto",
+                    fontSize: "var(--pcf-sm)",
+                    marginTop: 4
+                  }}
+                >
+                  <ProfileMarkdownContent value={bio} />
+                </Typography>
+              )}
+            </ProfileScrim>
           </Stack>
         </Stack>
       </Paper>

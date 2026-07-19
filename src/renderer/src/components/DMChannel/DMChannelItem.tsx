@@ -64,9 +64,20 @@ export const DMChannelItem = observer(({ channel }: Props) => {
   })();
 
   let preview: PresencePayload | string | null = null;
-  if (channel.isGroupDM)
-    preview = `${recipients.length} ${t("groupDm.manage.members")}`;
-  else if (recipient) preview = app.presence.get(recipient.id);
+  try {
+    if (app.calls.isRingingForMe(channel.id)) preview = t("call.incoming");
+    else if (app.calls.isOutgoing(channel.id)) preview = t("call.calling");
+    else if (app.calls.isActive(channel.id)) {
+      const inThisCall =
+        app.voice.currentChannelId === channel.id &&
+        app.voice.connectionStatus !== "idle";
+      preview = inThisCall ? t("call.inCall") : t("call.active");
+    } else if (channel.isGroupDM)
+      preview = `${recipients.length} ${t("groupDm.manage.members")}`;
+    else if (recipient) preview = app.presence.get(recipient.id);
+  } catch {
+    if (recipient) preview = app.presence.get(recipient.id);
+  }
 
   return (
     <Paper

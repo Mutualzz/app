@@ -9,6 +9,7 @@ import {
   resolveTypographyColor,
   type TypographyColor
 } from "@mutualzz/ui-core";
+import { resolveMarkdownTextColor } from "@mutualzz/validators";
 import { Node, type Range, Text } from "slate";
 
 const tokenDefs = [
@@ -77,7 +78,56 @@ export const parseMarkdownToRanges = (
   return ranges;
 };
 
-type DecoratedRange = Range & { spoiler?: boolean; isMarker?: boolean };
+type DecoratedRange = Range & {
+  spoiler?: boolean;
+  isMarker?: boolean;
+  color?: string;
+};
+
+const COLOR_RANGE_RE = /\[color=([^\]]+)\]([\s\S]*?)\[\/color\]/gi;
+const COLOR_CLOSE = "[/color]";
+
+export const parseColorRanges = (
+  text: string,
+  path: number[]
+): DecoratedRange[] => {
+  const ranges: DecoratedRange[] = [];
+  let match: RegExpExecArray | null;
+
+  COLOR_RANGE_RE.lastIndex = 0;
+  while ((match = COLOR_RANGE_RE.exec(text))) {
+    const resolved = resolveMarkdownTextColor(match[1]);
+    if (!resolved) continue;
+
+    const start = match.index;
+    const openLen = match[0].length - match[2].length - COLOR_CLOSE.length;
+    const contentStart = start + openLen;
+    const contentEnd = contentStart + match[2].length;
+    const end = contentEnd + COLOR_CLOSE.length;
+
+    ranges.push({
+      isMarker: true,
+      anchor: { path, offset: start },
+      focus: { path, offset: contentStart }
+    });
+
+    if (contentEnd > contentStart) {
+      ranges.push({
+        color: resolved,
+        anchor: { path, offset: contentStart },
+        focus: { path, offset: contentEnd }
+      });
+    }
+
+    ranges.push({
+      isMarker: true,
+      anchor: { path, offset: contentEnd },
+      focus: { path, offset: end }
+    });
+  }
+
+  return ranges;
+};
 
 export const parseSpoilerRanges = ([node, path]: [
   Node,

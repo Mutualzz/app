@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useAppStore } from "@hooks/useStores";
 import { Paper } from "@components/Paper";
-import { Stack, Typography } from "@mutualzz/ui-web";
+import { Stack, Typography, useTheme } from "@mutualzz/ui-web";
 import { CubeIcon } from "@phosphor-icons/react";
 import { useQuery } from "@tanstack/react-query";
 import { observer } from "mobx-react-lite";
@@ -19,17 +19,18 @@ interface BridgeSummary {
 }
 
 export const Route = createFileRoute("/_authenticated/@me/bridges/")({
-  component: observer(RouteComponent),
+  component: observer(RouteComponent)
 });
 
 function RouteComponent() {
   const { t } = useTranslation("settings");
   const app = useAppStore();
+  const { theme } = useTheme();
   const navigate = useNavigate();
 
   const bridgesQuery = useQuery({
     queryKey: ["me", "bridges"],
-    queryFn: () => app.rest.get<BridgeSummary[]>("/@me/bridges"),
+    queryFn: () => app.rest.get<BridgeSummary[]>("/@me/bridges")
   });
 
   const bridges = bridgesQuery.data ?? [];
@@ -69,7 +70,12 @@ function RouteComponent() {
         p={4}
       >
         <CubeIcon size={40} />
-        <Stack direction="column" spacing={1} alignItems="center" maxWidth={360}>
+        <Stack
+          direction="column"
+          spacing={1}
+          alignItems="center"
+          maxWidth={360}
+        >
           <Typography level="title-md" fontWeight="bold" textAlign="center">
             {t("minecraftBridge.sidebarEmptyTitle")}
           </Typography>
@@ -123,14 +129,14 @@ function RouteComponent() {
                       to: "/spaces/$spaceId/bridges/$bridgeId",
                       params: {
                         spaceId: bridge.spaceId,
-                        bridgeId: bridge.id,
-                      },
+                        bridgeId: bridge.id
+                      }
                     });
                     return;
                   }
                   navigate({
                     to: "/@me/bridges/$bridgeId",
-                    params: { bridgeId: bridge.id },
+                    params: { bridgeId: bridge.id }
                   });
                 }}
               >
@@ -149,9 +155,8 @@ function RouteComponent() {
                       width: 8,
                       height: 8,
                       borderRadius: 999,
-                      backgroundColor:
-                        "var(--mui-palette-primary-main, #5865f2)",
-                      flexShrink: 0,
+                      backgroundColor: theme.colors.primary,
+                      flexShrink: 0
                     }}
                   />
                 )}

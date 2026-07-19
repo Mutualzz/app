@@ -8,6 +8,7 @@ import i18n from "../../../i18n";
 
 export interface ProfileDraftState {
   bio: string;
+  pronouns: string;
   banner: string | null;
   backgroundColor: string | null;
   backgroundImage: string | null;
@@ -34,6 +35,7 @@ export const createDraftFromProfile = (
 
   return {
     bio: profile.bio ?? "",
+    pronouns: profile.pronouns ?? "",
     banner: profile.banner ?? null,
     backgroundColor: profile.backgroundColor ?? null,
     backgroundImage: profile.backgroundImage ?? null,
@@ -73,6 +75,7 @@ export const createDraftFromProfile = (
 
 export const createEmptyDraft = (): ProfileDraftState => ({
   bio: "",
+  pronouns: "",
   banner: null,
   backgroundColor: null,
   backgroundImage: null,
@@ -89,6 +92,7 @@ export const createEmptyDraft = (): ProfileDraftState => ({
 export const hasProfileDraftContent = (draft: ProfileDraftState) =>
   draft.blocks.length > 0 ||
   !!draft.bio.trim() ||
+  !!draft.pronouns.trim() ||
   !!draft.banner ||
   !!draft.backgroundColor ||
   !!draft.backgroundImage ||
@@ -97,6 +101,7 @@ export const hasProfileDraftContent = (draft: ProfileDraftState) =>
 
 export const EMPTY_PROFILE_SAVE_PAYLOAD = {
   bio: null,
+  pronouns: null,
   banner: null,
   backgroundColor: null,
   backgroundImage: null,
@@ -155,6 +160,12 @@ export const validateDraftForSave = (
 
   if (draft.bio.length > 512) {
     return i18n.t("profile.inspector.validation.bioTooLong", { ns: "settings" });
+  }
+
+  if (draft.pronouns.length > 32) {
+    return i18n.t("profile.inspector.validation.pronounsTooLong", {
+      ns: "settings"
+    });
   }
 
   return null;

@@ -48,6 +48,7 @@ interface Props {
   backgroundImageOverride?: string | null;
   pageFontFamilyOverride?: string | null;
   bioOverride?: string | null;
+  pronounsOverride?: string | null;
   bannerOverride?: string | null;
   onCanvasRectChange?: (rect: CanvasRect) => void;
   onViewportScaleChange?: (scale: number) => void;
@@ -69,6 +70,7 @@ const ProfileEditorCanvasInner = observer(
     backgroundImageOverride,
     pageFontFamilyOverride,
     bioOverride,
+    pronounsOverride,
     bannerOverride,
     onCanvasRectChange,
     onViewportScaleChange,
@@ -332,6 +334,7 @@ const ProfileEditorCanvasInner = observer(
                     editable
                     selected={selectedBlockId === block.id}
                     bioOverride={bioOverride}
+                    pronounsOverride={pronounsOverride}
                     bannerOverride={bannerOverride}
                     onSelect={(blockId) => onSelectBlock(blockId)}
                     onPointerDown={(event, blockId, mode, handle) =>

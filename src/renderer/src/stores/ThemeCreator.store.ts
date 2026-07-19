@@ -254,11 +254,11 @@ export class ThemeCreatorStore {
       extractPrimaryFontFamily(this.values.typography.fontFamily) ??
       this.values.typography.fontFamily;
 
-    void ensureAppFont(fontFamily, ownerUserId ?? this.values.authorId).finally(
-      () => {
+    void ensureAppFont(fontFamily, ownerUserId ?? this.values.authorId)
+      .catch(() => undefined)
+      .finally(() => {
         this.applyPreview();
-      }
-    );
+      });
   }
 
   stopPreview(changeTheme: (theme: MzTheme) => void) {

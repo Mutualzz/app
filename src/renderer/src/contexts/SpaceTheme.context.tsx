@@ -35,7 +35,6 @@ export const SpaceThemeProvider = observer(
       ? themeCreator.buildPreviewEmotion()
       : Theme.toEmotion(source!);
     const backgroundImageUrl = emotionTheme.backgroundImageUrl;
-    const fallback = emotionTheme.colors.background;
 
     return (
       <ThemeContext.Provider
@@ -55,7 +54,7 @@ export const SpaceThemeProvider = observer(
             position="relative"
             overflow="hidden"
             css={{
-              background: backgroundImageUrl ? undefined : fallback
+              background: backgroundImageUrl ? undefined : "transparent"
             }}
           >
             {backgroundImageUrl && (

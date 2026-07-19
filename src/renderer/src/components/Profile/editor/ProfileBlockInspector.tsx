@@ -340,6 +340,15 @@ export const ProfileBlockInspector = observer(
           }
         >
           <SettingCard>
+            <FieldLabel>{t("profile.editor.pronouns")}</FieldLabel>
+            <Input
+              value={draft.pronouns}
+              maxLength={32}
+              onChange={(e) =>
+                onDraftChange({ pronouns: e.target.value.slice(0, 32) })
+              }
+              placeholder={t("profile.editor.pronounsPlaceholder")}
+            />
             <FieldLabel>{t("profile.editor.bio")}</FieldLabel>
             <ProfileMarkdownField
               value={draft.bio}

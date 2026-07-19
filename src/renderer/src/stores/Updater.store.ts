@@ -112,6 +112,10 @@ export class UpdaterStore {
           runInAction(() => {
             this.hasUpdate = true;
             this.updateVersion = latest.version;
+            this.updateFilePath = null;
+            this.downloadedBytes = 0;
+            this.totalBytes = 0;
+            this.bytesPerSecond = 0;
             this.setStage("downloading");
           });
           await this.downloadUpdate(asset, latest.version);
@@ -120,6 +124,7 @@ export class UpdaterStore {
         }
 
         this.logger.info("No update available");
+        this.clearPendingUpdate();
         this.setStage("idle");
         return;
       }
@@ -129,6 +134,10 @@ export class UpdaterStore {
       runInAction(() => {
         this.hasUpdate = true;
         this.updateVersion = latest.version;
+        this.updateFilePath = null;
+        this.downloadedBytes = 0;
+        this.totalBytes = 0;
+        this.bytesPerSecond = 0;
         this.setStage("downloading");
       });
 
@@ -139,6 +148,7 @@ export class UpdaterStore {
       await this.downloadUpdate(asset, latest.version);
     } catch (err: any) {
       this.logger.error("Update check failed:", err);
+      this.clearPendingUpdate();
       this.setStage("error");
       this.setError(err?.message ?? String(err));
     }
@@ -157,6 +167,7 @@ export class UpdaterStore {
     }
 
     this.setStage("installing");
+    this.hasUpdate = false;
 
     try {
       await window.api.updater.apply(this.updateFilePath, this.updateVersion);
@@ -204,6 +215,7 @@ export class UpdaterStore {
       this.logger.error("Download failed:", err);
       this.setStage("error");
       this.setError(err?.message ?? String(err));
+      throw err;
     } finally {
       unsubscribe();
     }
@@ -260,6 +272,15 @@ export class UpdaterStore {
 
   private setError(error: string | null) {
     this.error = error;
+  }
+
+  private clearPendingUpdate() {
+    this.hasUpdate = false;
+    this.updateVersion = null;
+    this.updateFilePath = null;
+    this.downloadedBytes = 0;
+    this.totalBytes = 0;
+    this.bytesPerSecond = 0;
   }
 }
 

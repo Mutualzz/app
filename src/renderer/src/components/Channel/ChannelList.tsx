@@ -21,7 +21,7 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import { useAppStore } from "@hooks/useStores";
 import { ChannelType } from "@mutualzz/types";
-import { ButtonGroup, Portal, Stack } from "@mutualzz/ui-web";
+import { ButtonGroup, Portal, Stack, useTheme } from "@mutualzz/ui-web";
 import type { Channel } from "@stores/objects/Channel";
 import type { Space } from "@stores/objects/Space";
 import { runInAction } from "mobx";
@@ -181,6 +181,7 @@ const voiceMemberCollisionDetection: CollisionDetection = (args) => {
 export const ChannelList = observer(() => {
   const { t } = useTranslation("space");
   const app = useAppStore();
+  const { theme } = useTheme();
   const navigate = useNavigate();
   const { openContextMenu } = useMenu();
   const [activeDragType, setActiveDragType] = useState<string | null>(null);
@@ -214,7 +215,7 @@ export const ChannelList = observer(() => {
       >("/@me/bridges"),
     staleTime: 30_000,
     refetchInterval: 60_000,
-    enabled: Boolean(space?.id),
+    enabled: Boolean(space?.id)
   });
 
   useEffect(() => {
@@ -228,15 +229,13 @@ export const ChannelList = observer(() => {
     if (tab === "channels" && onBridgeRoute) {
       const mostRecent = app.channels.getMostRecentChannelForSpace(space.id);
       const preferred =
-        (mostRecent?.canRedirect &&
-        space.members.me?.canViewChannel(mostRecent)
+        (mostRecent?.canRedirect && space.members.me?.canViewChannel(mostRecent)
           ? mostRecent
-          : null) ??
-        app.channels.getFirstNavigableChannel(space.id);
+          : null) ?? app.channels.getFirstNavigableChannel(space.id);
       if (preferred) {
         navigate({
           to: "/spaces/$spaceId/$channelId",
-          params: { spaceId: space.id, channelId: preferred.id },
+          params: { spaceId: space.id, channelId: preferred.id }
         });
       }
     }
@@ -302,7 +301,10 @@ export const ChannelList = observer(() => {
         let newOrder: Channel[];
 
         if (movingChannel.type === ChannelType.Category) {
-          const group = getAllCategoryChildren(visibleChannels, movingChannel.id);
+          const group = getAllCategoryChildren(
+            visibleChannels,
+            movingChannel.id
+          );
 
           newOrder = flatChannels.filter((c) => !group.includes(c));
 
@@ -376,7 +378,6 @@ export const ChannelList = observer(() => {
             orientation="horizontal"
             variant="plain"
             spacing={4}
-            css={{ width: "100%" }}
           >
             <Button
               expand
@@ -400,8 +401,7 @@ export const ChannelList = observer(() => {
                       width: 8,
                       height: 8,
                       borderRadius: 999,
-                      backgroundColor:
-                        "var(--mui-palette-primary-main, #5865f2)",
+                      backgroundColor: theme.colors.primary
                     }}
                   />
                 ) : undefined
