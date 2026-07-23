@@ -1,6 +1,7 @@
 import type { APIRole } from "@mutualzz/types";
-import { Box, Divider, Stack, Switch, Typography } from "@mutualzz/ui-web";
 import { InputWithLabel } from "@components/InputWithLabel";
+import { SettingsToggleRow } from "@components/UserSettings/SettingsField";
+import { Divider, Stack } from "@mutualzz/ui-web";
 import { useTranslation } from "react-i18next";
 
 interface Props {
@@ -45,54 +46,28 @@ export const SpaceRoleEditDisplay = ({ changes, setChanges }: Props) => {
         }}
       />
       <Divider css={{ opacity: 0.5 }} />
-      <Stack
-        direction="row"
-        justifyContent="space-between"
-        alignItems="center"
-        spacing={2}
-      >
-        <Typography textColor="secondary">
-          {t("roles.display.hoist")}
-        </Typography>
-        <Box mr={2}>
-          <Switch
-            checked={changes.hoist}
-            onChange={() => {
-              setChanges((prev) => ({
-                ...prev,
-                hoist: !prev.hoist
-              }));
-            }}
-          />
-        </Box>
-      </Stack>
+      <SettingsToggleRow
+        title={t("roles.display.hoist")}
+        checked={!!changes.hoist}
+        onChange={(hoist) =>
+          setChanges((prev) => ({
+            ...prev,
+            hoist
+          }))
+        }
+      />
       <Divider css={{ opacity: 0.5 }} />
-      <Stack
-        direction="row"
-        justifyContent="space-between"
-        alignItems="center"
-        spacing={2}
-      >
-        <Stack direction="column" spacing={1.25}>
-          <Typography textColor="secondary">
-            {t("roles.display.mentionable")}
-          </Typography>
-          <Typography level="body-sm">
-            {t("roles.display.mentionableHint")}
-          </Typography>
-        </Stack>
-        <Box mr={2}>
-          <Switch
-            checked={changes.mentionable}
-            onChange={() => {
-              setChanges((prev) => ({
-                ...prev,
-                mentionable: !prev.mentionable
-              }));
-            }}
-          />
-        </Box>
-      </Stack>
+      <SettingsToggleRow
+        title={t("roles.display.mentionable")}
+        description={t("roles.display.mentionableHint")}
+        checked={!!changes.mentionable}
+        onChange={(mentionable) =>
+          setChanges((prev) => ({
+            ...prev,
+            mentionable
+          }))
+        }
+      />
     </Stack>
   );
 };

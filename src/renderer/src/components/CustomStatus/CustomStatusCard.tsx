@@ -10,7 +10,7 @@ import {
   TypographyLevel
 } from "@mutualzz/ui-core";
 import { Box, Stack, Typography, useTheme } from "@mutualzz/ui-web";
-import { hasCustomStatusContent } from "@utils/customStatus";
+import { hasCustomStatusContent } from "@mutualzz/client";
 import type { PresenceActivityEmoji } from "@mutualzz/types";
 import { PencilIcon, TrashIcon } from "@phosphor-icons/react";
 import { observer } from "mobx-react-lite";

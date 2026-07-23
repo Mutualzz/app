@@ -1,18 +1,15 @@
 import { observer } from "mobx-react-lite";
-import {
-  Divider,
-  Option,
-  Select,
-  Stack,
-  Switch,
-  Typography
-} from "@mutualzz/ui-web";
+import { Stack, Typography } from "@mutualzz/ui-web";
 import { useAppStore } from "@hooks/useStores";
-import { Paper } from "@components/Paper";
-import { Button } from "@components/Button";
 import { IconButton } from "@components/IconButton";
 import { ClearActivityHistoryConfirm } from "@components/Modals/ClearActivityHistoryConfirm";
-import { IDLE_THRESHOLD_OPTIONS } from "@utils/statusDurations";
+import {
+  SettingsActionRow,
+  SettingsSection,
+  SettingsSelectField,
+  SettingsToggleRow
+} from "@components/UserSettings/SettingsField";
+import { IDLE_THRESHOLD_OPTIONS } from "@mutualzz/client";
 import { isElectron } from "@utils/index";
 import { useTranslation } from "react-i18next";
 import { useQueryClient } from "@tanstack/react-query";
@@ -50,303 +47,154 @@ export const AppNotificationsSettings = observer(() => {
 
   return (
     <Stack spacing={7.5} pt={2.5} pb={5} direction="column">
-      <Stack spacing={2.5} direction="column">
-        <Typography fontSize={20}>{t("notifications.pushTitle")}</Typography>
-        <Divider textColor="muted" css={{ opacity: 0.5 }} />
+      <SettingsSection
+        title={t("notifications.pushTitle")}
+        description={t("notifications.pushDescriptionDesktop")}
+      >
+        <SettingsToggleRow
+          title={t("notifications.enablePush")}
+          checked={settings.pushEnabled}
+          onChange={(checked) => {
+            settings.setPushEnabled(checked);
+            sync();
+          }}
+        />
 
-        <Paper
-          variant="outlined"
-          borderRadius={10}
-          py={2.5}
-          px={4}
-          spacing={2.5}
-          direction="column"
-        >
-          <Typography level="body-sm" textColor="muted">
-            {t("notifications.pushDescriptionDesktop")}
-          </Typography>
+        <SettingsToggleRow
+          title={t("notifications.directMessages")}
+          description={t("notifications.directMessagesDescription")}
+          checked={settings.pushDirectMessages}
+          disabled={!settings.pushEnabled}
+          onChange={(checked) => {
+            settings.setPushDirectMessages(checked);
+            sync();
+          }}
+        />
 
-          <Stack
-            direction="row"
-            alignItems="center"
-            justifyContent="space-between"
-          >
-            <Stack direction="column" spacing={0.5}>
-              <Typography level="body-md" fontWeight="bold">
-                {t("notifications.enablePush")}
-              </Typography>
-            </Stack>
-            <Switch
-              checked={settings.pushEnabled}
-              onChange={(e) => {
-                settings.setPushEnabled(e.target.checked);
-                sync();
-              }}
-            />
-          </Stack>
+        <SettingsToggleRow
+          title={t("notifications.mentions")}
+          description={t("notifications.mentionsDescription")}
+          checked={settings.pushMentions}
+          disabled={!settings.pushEnabled}
+          onChange={(checked) => {
+            settings.setPushMentions(checked);
+            sync();
+          }}
+        />
+      </SettingsSection>
 
-          <Stack
-            direction="row"
-            alignItems="center"
-            justifyContent="space-between"
-          >
-            <Stack direction="column" spacing={0.5}>
-              <Typography level="body-md" fontWeight="bold">
-                {t("notifications.directMessages")}
-              </Typography>
-              <Typography level="body-sm" textColor="muted">
-                {t("notifications.directMessagesDescription")}
-              </Typography>
-            </Stack>
-            <Switch
-              checked={settings.pushDirectMessages}
-              disabled={!settings.pushEnabled}
-              onChange={(e) => {
-                settings.setPushDirectMessages(e.target.checked);
-                sync();
-              }}
-            />
-          </Stack>
+      <SettingsSection
+        title={t("notifications.soundsTitle")}
+        description={t("notifications.soundsDescription")}
+      >
+        <SettingsToggleRow
+          title={t("notifications.soundsEnable")}
+          checked={app.sounds.enabled}
+          onChange={(checked) => app.sounds.setEnabled(checked)}
+        />
 
-          <Stack
-            direction="row"
-            alignItems="center"
-            justifyContent="space-between"
-          >
-            <Stack direction="column" spacing={0.5}>
-              <Typography level="body-md" fontWeight="bold">
-                {t("notifications.mentions")}
-              </Typography>
-              <Typography level="body-sm" textColor="muted">
-                {t("notifications.mentionsDescription")}
-              </Typography>
-            </Stack>
-            <Switch
-              checked={settings.pushMentions}
-              disabled={!settings.pushEnabled}
-              onChange={(e) => {
-                settings.setPushMentions(e.target.checked);
-                sync();
-              }}
-            />
-          </Stack>
-        </Paper>
-      </Stack>
-
-      <Stack spacing={2.5} direction="column">
-        <Typography fontSize={20}>{t("notifications.soundsTitle")}</Typography>
-        <Divider textColor="muted" css={{ opacity: 0.5 }} />
-
-        <Paper
-          variant="outlined"
-          borderRadius={10}
-          py={2.5}
-          px={4}
-          spacing={2.5}
-          direction="column"
-        >
-          <Typography level="body-sm" textColor="muted">
-            {t("notifications.soundsDescription")}
-          </Typography>
-
-          <Stack
-            direction="row"
-            alignItems="center"
-            justifyContent="space-between"
-          >
-            <Stack direction="column" spacing={0.5}>
-              <Typography level="body-md" fontWeight="bold">
-                {t("notifications.soundsEnable")}
-              </Typography>
-            </Stack>
-            <Switch
-              checked={app.sounds.enabled}
-              onChange={(e) => {
-                app.sounds.setEnabled(e.target.checked);
-              }}
-            />
-          </Stack>
-
-          {(
-            [
-              "message",
-              "call_incoming",
-              "call_outgoing",
-              "call_connect",
-              "call_disconnect",
-              "call_decline",
-              "user_join",
-              "user_leave",
-              "mute",
-              "deafen",
-              "ptt",
-              "stream"
-            ] as SoundToggleId[]
-          ).map((id) => (
-            <Stack
-              key={id}
-              direction="row"
-              alignItems="center"
-              justifyContent="space-between"
-              spacing={2}
-            >
-              <Stack direction="column" spacing={0.5} minWidth={0} flex={1}>
-                <Typography level="body-md" fontWeight="bold">
-                  {t(`notifications.sounds.${id}`)}
-                </Typography>
-              </Stack>
-              <Stack direction="row" alignItems="center" spacing={1}>
-                <IconButton
-                  size="sm"
-                  variant="plain"
-                  aria-label={t("notifications.soundsPreview")}
-                  onClick={() => app.sounds.preview(id)}
-                >
-                  <SpeakerHighIcon size={18} weight="fill" />
-                </IconButton>
-                <Switch
-                  checked={app.sounds.isToggleEnabled(id)}
-                  disabled={!app.sounds.enabled}
-                  onChange={(e) => {
-                    app.sounds.setToggle(id, e.target.checked);
-                  }}
-                />
-              </Stack>
-            </Stack>
-          ))}
-        </Paper>
+        {(
+          [
+            "message",
+            "call_incoming",
+            "call_outgoing",
+            "call_connect",
+            "call_disconnect",
+            "call_decline",
+            "user_join",
+            "user_leave",
+            "mute",
+            "deafen",
+            "ptt",
+            "stream"
+          ] as SoundToggleId[]
+        ).map((id) => (
+          <SettingsToggleRow
+            key={id}
+            title={t(`notifications.sounds.${id}`)}
+            checked={app.sounds.isToggleEnabled(id)}
+            disabled={!app.sounds.enabled}
+            onChange={(checked) => app.sounds.setToggle(id, checked)}
+            beforeSwitch={
+              <IconButton
+                size="sm"
+                variant="plain"
+                aria-label={t("notifications.soundsPreview")}
+                onClick={() => app.sounds.preview(id)}
+              >
+                <SpeakerHighIcon size={18} weight="fill" />
+              </IconButton>
+            }
+          />
+        ))}
 
         <Typography level="body-sm" textColor="muted">
           {t("notifications.soundsDndNote")}
         </Typography>
-      </Stack>
+      </SettingsSection>
 
-      <Stack spacing={2.5} direction="column">
-        <Typography fontSize={20}>
-          {t("notifications.presenceTitle")}
-        </Typography>
-        <Divider textColor="muted" css={{ opacity: 0.5 }} />
+      <SettingsSection title={t("notifications.presenceTitle")}>
+        <SettingsToggleRow
+          title={t("notifications.shareActivity")}
+          description={t("notifications.shareActivityDescription")}
+          checked={settings.shareActivity}
+          onChange={(checked) => {
+            settings.setShareActivity(checked);
+            sync();
+          }}
+        />
 
-        <Paper
-          variant="outlined"
-          borderRadius={10}
-          py={2.5}
-          px={4}
-          spacing={2.5}
-          direction="column"
-        >
-          <Stack
-            direction="row"
-            alignItems="center"
-            justifyContent="space-between"
-          >
-            <Stack direction="column" spacing={0.5}>
-              <Typography level="body-md" fontWeight="bold">
-                {t("notifications.shareActivity")}
-              </Typography>
-              <Typography level="body-sm" textColor="muted">
-                {t("notifications.shareActivityDescription")}
-              </Typography>
-            </Stack>
-            <Switch
-              checked={settings.shareActivity}
-              onChange={(e) => {
-                settings.setShareActivity(e.target.checked);
-                sync();
-              }}
-            />
-          </Stack>
+        <SettingsToggleRow
+          title={t("notifications.shareRecentActivity")}
+          description={t("notifications.shareRecentActivityDescription")}
+          checked={settings.shareRecentActivity}
+          onChange={(checked) => {
+            settings.setShareRecentActivity(checked);
+            sync();
+            void queryClient.invalidateQueries({
+              queryKey: ["user-recent-activities"]
+            });
+          }}
+        />
 
-          <Stack
-            direction="row"
-            alignItems="center"
-            justifyContent="space-between"
-          >
-            <Stack direction="column" spacing={0.5}>
-              <Typography level="body-md" fontWeight="bold">
-                {t("notifications.shareRecentActivity")}
-              </Typography>
-              <Typography level="body-sm" textColor="muted">
-                {t("notifications.shareRecentActivityDescription")}
-              </Typography>
-            </Stack>
-            <Switch
-              checked={settings.shareRecentActivity}
-              onChange={(e) => {
-                settings.setShareRecentActivity(e.target.checked);
-                sync();
-                void queryClient.invalidateQueries({
-                  queryKey: ["user-recent-activities"]
-                });
-              }}
-            />
-          </Stack>
+        <SettingsActionRow
+          title={t("notifications.clearRecentActivity")}
+          description={t("notifications.clearRecentActivityDescription")}
+          actionLabel={t("notifications.clearRecentActivityAction")}
+          actionColor="danger"
+          onClick={() =>
+            openModal(
+              "clear-activity-history",
+              <ClearActivityHistoryConfirm onConfirm={clearHistory} />
+            )
+          }
+        />
 
-          <Stack
-            direction="row"
-            alignItems="center"
-            justifyContent="space-between"
-          >
-            <Stack direction="column" spacing={0.5}>
-              <Typography level="body-md" fontWeight="bold">
-                {t("notifications.clearRecentActivity")}
-              </Typography>
-              <Typography level="body-sm" textColor="muted">
-                {t("notifications.clearRecentActivityDescription")}
-              </Typography>
-            </Stack>
-            <Button
-              variant="outlined"
-              color="danger"
-              size="sm"
-              onClick={() =>
-                openModal(
-                  "clear-activity-history",
-                  <ClearActivityHistoryConfirm onConfirm={clearHistory} />
-                )
-              }
-            >
-              {t("notifications.clearRecentActivityAction")}
-            </Button>
-          </Stack>
-
-          {isElectron ? (
-            <>
-              <Stack direction="column" spacing={0.5}>
-                <Typography level="body-md" fontWeight="bold">
-                  {t("notifications.idleTimeout")}
-                </Typography>
-                <Typography level="body-sm" textColor="muted">
-                  {t("notifications.idleTimeoutDescription")}
-                </Typography>
-              </Stack>
-              <Select
-                value={settings.idleThresholdMs.toString()}
-                onValueChange={(value) => {
-                  if (typeof value !== "string") return;
-                  const ms = Number(value);
-                  settings.setIdleThresholdMs(ms);
-                  window.api.idle.setThreshold(ms);
-                }}
-              >
-                {IDLE_THRESHOLD_OPTIONS.map((option) => (
-                  <Option key={option.ms} value={String(option.ms)}>
-                    {tCommon(option.labelKey, { count: option.count })}
-                  </Option>
-                ))}
-              </Select>
-            </>
-          ) : (
-            <Typography level="body-sm" textColor="muted">
-              {t("notifications.idleDesktopOnly")}
-            </Typography>
-          )}
-        </Paper>
+        {isElectron ? (
+          <SettingsSelectField
+            title={t("notifications.idleTimeout")}
+            description={t("notifications.idleTimeoutDescription")}
+            value={settings.idleThresholdMs.toString()}
+            onChange={(value) => {
+              const ms = Number(value);
+              settings.setIdleThresholdMs(ms);
+              window.api.idle.setThreshold(ms);
+            }}
+            options={IDLE_THRESHOLD_OPTIONS.map((option) => ({
+              value: String(option.ms),
+              label: tCommon(option.labelKey, { count: option.count })
+            }))}
+          />
+        ) : (
+          <Typography level="body-sm" textColor="muted">
+            {t("notifications.idleDesktopOnly")}
+          </Typography>
+        )}
 
         <Typography level="body-sm" textColor="muted">
           {t("notifications.dndSuppressNote")}
         </Typography>
-      </Stack>
+      </SettingsSection>
     </Stack>
   );
 });

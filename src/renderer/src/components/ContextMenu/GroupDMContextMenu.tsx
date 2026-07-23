@@ -9,6 +9,7 @@ import { NotePencilIcon, SignOutIcon, TrashIcon } from "@phosphor-icons/react";
 import { useMutation } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { GroupDMEditModal } from "@components/DMChannel/GroupDMEditModal";
+import { ChannelNotificationSettingsMenu } from "@components/Channel/ChannelNotificationSettingsMenu";
 import { useTranslation } from "react-i18next";
 
 interface Props {
@@ -58,6 +59,7 @@ export const GroupDMContextMenu = observer(({ channel }: Props) => {
           >
             {t("contextMenu.markAsRead")}
           </ContextItem>
+          <ChannelNotificationSettingsMenu channel={channel} />
           <Divider css={{ opacity: 0.5 }} />
         </>
       )}

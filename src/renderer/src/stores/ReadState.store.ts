@@ -1,7 +1,8 @@
-import { APIReadState, ReadStateType, Snowflake } from "@mutualzz/types";
-import { ReadState } from "@stores/objects/ReadState";
+import { type APIReadState, ReadStateType, type Snowflake } from "@mutualzz/types";
+import type { PatchChannelNotificationSettings } from "@mutualzz/validators";
 import { makeAutoObservable, observable } from "mobx";
-import { AppStore } from "@stores/App.store";
+import { ReadState } from "@stores/objects/ReadState";
+import type { AppStore } from "@stores/App.store";
 
 interface AckPayload {
   channelId: Snowflake;
@@ -10,7 +11,7 @@ interface AckPayload {
 }
 
 export class ReadStateStore {
-  private states = observable.map<Snowflake, ReadState>(); // channelId -> ReadState
+  private states = observable.map<Snowflake, ReadState>();
 
   constructor(private readonly app: AppStore) {
     makeAutoObservable(this, { get: false }, { autoBind: true });
@@ -34,7 +35,7 @@ export class ReadStateStore {
       existing.update({
         lastMessageId,
         lastAckedId: lastMessageId,
-        mentionCount: 0
+        mentionCount: 0,
       });
     } else {
       this.states.set(
@@ -48,8 +49,10 @@ export class ReadStateStore {
           badgeCount: 0,
           lastPinTimestamp: null,
           flags: 0n,
-          type: 0
-        })
+          type: ReadStateType.Messages,
+          notificationLevel: null,
+          mutedUntil: null,
+        }),
       );
     }
   }
@@ -58,13 +61,37 @@ export class ReadStateStore {
     this.updateLocal(channelId, lastMessageId);
 
     return this.app.rest.post(
-      `/channels/${channelId}/messages/${lastMessageId}/ack`
+      `/channels/${channelId}/messages/${lastMessageId}/ack`,
     );
   }
 
   ackBulk(payload: AckPayload[]) {
     return this.app.rest.post("/channels/ack-bulk", {
-      readStates: payload
+      readStates: payload,
     });
+  }
+
+  setMuted(channelId: Snowflake, muted: boolean) {
+    return this.patchNotificationSettings(channelId, { muted });
+  }
+
+  patchNotificationSettings(
+    channelId: Snowflake,
+    body: PatchChannelNotificationSettings,
+  ) {
+    return this.app.rest
+      .patch<APIReadState, PatchChannelNotificationSettings>(
+        `/channels/${channelId}/read-state`,
+        body,
+      )
+      .then((state) => {
+        const current = this.states.get(channelId);
+        if (current) current.mergeFromServer(state);
+        else this.states.set(channelId, new ReadState(this.app, state));
+      });
+  }
+
+  clear() {
+    this.states.clear();
   }
 }

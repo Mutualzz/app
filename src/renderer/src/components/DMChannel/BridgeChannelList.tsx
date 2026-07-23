@@ -75,17 +75,12 @@ export const BridgeChannelList = observer(
     const canManageBridge = !!space?.members.me?.hasPermission("ManageSpace");
 
     const openBridge = (bridge: BridgeSummary) => {
-      if (spaceId || bridge.spaceId) {
-        const targetSpaceId = spaceId ?? bridge.spaceId!;
-        navigate({
-          to: "/spaces/$spaceId/bridges/$bridgeId",
-          params: { spaceId: targetSpaceId, bridgeId: bridge.id }
-        });
-        return;
-      }
+      const targetSpaceId = spaceId ?? bridge.spaceId;
+      if (!targetSpaceId) return;
+
       navigate({
-        to: "/@me/bridges/$bridgeId",
-        params: { bridgeId: bridge.id }
+        to: "/spaces/$spaceId/bridges/$bridgeId",
+        params: { spaceId: targetSpaceId, bridgeId: bridge.id }
       });
     };
 

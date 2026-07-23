@@ -27,12 +27,17 @@ import { useModal } from "@contexts/Modal.context";
 import { useNavigate } from "@tanstack/react-router";
 import {
   BellIcon,
+  ChatTextIcon,
+  DesktopIcon,
+  DevicesIcon,
   GameControllerIcon,
+  KeyboardIcon,
   LifebuoyIcon,
   LinkSimpleIcon,
   MicrophoneIcon,
   PaletteIcon,
   PencilIcon,
+  ShieldIcon,
   SignOutIcon,
   SmileyIcon,
   UserGearIcon
@@ -58,6 +63,10 @@ const settingsPages: SettingsPages = {
       icon: <UserGearIcon weight="fill" />
     },
     {
+      label: "sessions",
+      icon: <DevicesIcon weight="fill" />
+    },
+    {
       label: "expressions",
       icon: <SmileyIcon weight="fill" />
     },
@@ -72,16 +81,32 @@ const settingsPages: SettingsPages = {
       icon: <PaletteIcon weight="fill" />
     },
     {
-      label: "voice_and_video",
-      titleKey: "pages.voiceAndVideo",
-      icon: <MicrophoneIcon weight="fill" />
+      label: "messages",
+      icon: <ChatTextIcon weight="fill" />
     },
     {
       label: "notifications",
       icon: <BellIcon weight="fill" />
     },
+    {
+      label: "privacy",
+      icon: <ShieldIcon weight="fill" />
+    },
+    {
+      label: "voice_and_video",
+      titleKey: "pages.voiceAndVideo",
+      icon: <MicrophoneIcon weight="fill" />
+    },
     ...(isElectron
       ? [
+          {
+            label: "keybinds" as const,
+            icon: <KeyboardIcon weight="fill" />
+          },
+          {
+            label: "desktop" as const,
+            icon: <DesktopIcon weight="fill" />
+          },
           {
             label: "registered-games" as const,
             icon: <GameControllerIcon weight="fill" />

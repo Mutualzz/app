@@ -11,6 +11,7 @@ import {
   Typography,
   useTheme
 } from "@mutualzz/ui-web";
+import type { Theme } from "@emotion/react";
 import {
   DownloadSimpleIcon,
   FileIcon,
@@ -23,6 +24,7 @@ import {
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "../Link";
+import { MessageEmbedSpoiler } from "@components/Message/MessageEmbedSpoiler";
 import { useAppStore } from "@renderer/hooks/useStores";
 
 function formatBytes(bytes: number) {
@@ -40,7 +42,7 @@ function formatTime(seconds: number) {
 
 const getTypeColor = (
   contentType: string,
-  theme: ReturnType<typeof useTheme>["theme"]
+  theme: Theme
 ) => {
   if (contentType.startsWith("audio/")) return theme.colors.warning;
   if (contentType.includes("pdf")) return theme.colors.danger;
@@ -472,30 +474,37 @@ export const MessageAttachment = ({ attachment }: Props) => {
 
   if (isImage)
     return (
-      <Box
-        inline
-        onClick={() =>
-          openModal("image-viewer", <ImageViewer attachment={attachment} />, {
-            showCloseButton: true
-          })
-        }
-        css={{ cursor: "zoom-in", lineHeight: 0 }}
-      >
-        <img
-          src={attachment.url}
-          alt={attachment.filename?.trim() || "Image attachment"}
-          css={{
-            maxWidth: 400,
-            maxHeight: 300,
-            borderRadius: 6,
-            display: "block",
-            objectFit: "contain"
-          }}
-        />
-      </Box>
+      <MessageEmbedSpoiler spoiler={attachment.spoiler} borderRadius={6}>
+        <Box
+          inline
+          onClick={() =>
+            openModal("image-viewer", <ImageViewer attachment={attachment} />, {
+              showCloseButton: true
+            })
+          }
+          css={{ cursor: "zoom-in", lineHeight: 0 }}
+        >
+          <img
+            src={attachment.url}
+            alt={attachment.filename?.trim() || "Image attachment"}
+            css={{
+              maxWidth: 400,
+              maxHeight: 300,
+              borderRadius: 6,
+              display: "block",
+              objectFit: "contain"
+            }}
+          />
+        </Box>
+      </MessageEmbedSpoiler>
     );
 
-  if (isVideo) return <VideoPlayer attachment={attachment} />;
+  if (isVideo)
+    return (
+      <MessageEmbedSpoiler spoiler={attachment.spoiler} borderRadius={8}>
+        <VideoPlayer attachment={attachment} />
+      </MessageEmbedSpoiler>
+    );
   if (isAudio) return <AudioPlayer attachment={attachment} />;
 
   const color = getTypeColor(attachment.contentType, theme);

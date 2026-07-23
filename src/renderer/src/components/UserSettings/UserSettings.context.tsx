@@ -8,13 +8,22 @@ import {
 
 export type UserSettingsPage =
   | "my-account"
+  | "sessions"
   | "profile"
   | "appearance"
+  | "messages"
   | "voice_and_video"
   | "expressions"
   | "notifications"
   | "registered-games"
-  | "connections";
+  | "connections"
+  | "privacy"
+  | "desktop"
+  | "keybinds"
+  | "text_and_chat"
+  | "accessibility"
+  | "layout"
+  | "composer";
 export type UserSettingsCategories = "user-settings" | "app-settings";
 
 interface UserSettingsContextProps {

@@ -7,7 +7,7 @@ import { Button, Divider, Paper, Stack, Typography } from "@mutualzz/ui-web";
 import type { Post } from "@stores/objects/Post";
 import type { Channel } from "@stores/objects/Channel";
 import type { User } from "@stores/objects/User";
-import Snowflake from "@utils/Snowflake";
+import { Snowflake } from "@mutualzz/client";
 import { observer } from "mobx-react-lite";
 import { useRef, useState } from "react";
 import { CheckIcon } from "@phosphor-icons/react";

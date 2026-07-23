@@ -15,7 +15,7 @@ import { useAppStore } from "@hooks/useStores";
 import { Avatar, Stack, Typography, useTheme } from "@mutualzz/ui-web";
 import { CubeIcon } from "@phosphor-icons/react";
 import type { BridgeFeedEntry } from "@stores/BridgeChat.store";
-import { calendarStrings } from "@utils/i18n";
+import { calendarStrings } from "@mutualzz/client";
 import dayjs from "dayjs";
 import { observer } from "mobx-react-lite";
 import { useTranslation } from "react-i18next";

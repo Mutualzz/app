@@ -31,6 +31,7 @@ export interface MarkdownInputProps {
   value?: string;
   onChange?: (value: string, editor: Editor) => void;
   onKeyDown?: (event: KeyboardEvent, editor: Editor) => void;
+  onPasteFiles?: (files: File[]) => void;
   onSendMessage?: (message?: string) => void;
   onSelectSticker?: (sticker: Expression) => void;
 

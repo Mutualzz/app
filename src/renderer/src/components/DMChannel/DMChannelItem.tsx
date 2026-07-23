@@ -15,7 +15,7 @@ import { UserAvatar } from "@components/User/UserAvatar";
 import { DMGroupAvatar } from "@components/DMChannel/DMGroupAvatar";
 import { useMenu } from "@contexts/ContextMenu.context";
 import { Tooltip } from "@components/Tooltip";
-import { ChatCircleSlashIcon } from "@phosphor-icons/react";
+import { ChatCircleSlashIcon, BellSlashIcon } from "@phosphor-icons/react";
 import { SmallActivityStatus } from "../SmallActivityStatus";
 import { useTranslation } from "react-i18next";
 
@@ -41,7 +41,8 @@ export const DMChannelItem = observer(({ channel }: Props) => {
 
   const readState = app.readStates.get(channel.id);
   const isUnread = readState?.isUnread ?? false;
-  const mentionCount = readState?.mentionCount ?? 0;
+  const mentionCount = readState?.displayMentionCount ?? 0;
+  const isNotificationMuted = readState?.isNotificationMuted ?? false;
 
   const relationship =
     channel.type === ChannelType.DM && recipient
@@ -177,7 +178,11 @@ export const DMChannelItem = observer(({ channel }: Props) => {
                 {preview}
               </Typography>
             ) : (
-              <SmallActivityStatus presence={preview} showStatus />
+              <SmallActivityStatus
+                userId={recipient?.id}
+                presence={preview}
+                showStatus
+              />
             ))}
         </Stack>
       </Stack>
@@ -188,7 +193,11 @@ export const DMChannelItem = observer(({ channel }: Props) => {
           justifyContent="center"
           minWidth={16}
         >
-          {mentionCount > 0 ? (
+          {isNotificationMuted ? (
+            <IconSlot size={14}>
+              <BellSlashIcon weight="fill" />
+            </IconSlot>
+          ) : mentionCount > 0 ? (
             <Stack
               alignItems="center"
               justifyContent="center"

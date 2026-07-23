@@ -167,6 +167,10 @@ export function setupIPC(): void {
   // Shell/External
   ipcMain.handle("shell:open-external", async (_, url: string) => {
     try {
+      const parsed = new URL(url);
+      if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+        throw new Error("Only http: and https: URLs are allowed");
+      }
       await shell.openExternal(url);
     } catch (err) {
       console.error("Failed to open external URL:", err);

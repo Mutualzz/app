@@ -3,13 +3,14 @@ import { useAppStore } from "@hooks/useStores";
 import { useGoogleFont } from "@hooks/useGoogleFont";
 import {
   DEFAULT_FONT_FAMILY,
+  formatColor,
   getFontByFamily,
   isCustomFontRef,
   resolveFontFamilyCss,
   searchFonts
 } from "@mutualzz/ui-core";
 import { isValidWebFontFamilyName } from "@mutualzz/validators";
-import { Box, Button, Input, Stack, Typography } from "@mutualzz/ui-web";
+import { Box, Button, Input, Stack, Typography, useTheme } from "@mutualzz/ui-web";
 import {
   MagnifyingGlassIcon,
   UploadSimpleIcon,
@@ -43,7 +44,20 @@ export const GoogleFontPicker = observer(
   }: Props) => {
     const { t } = useTranslation("common");
     const { t: tSettings } = useTranslation("settings");
+    const { theme } = useTheme();
     const resolvedLabel = label ?? tSettings("fonts.label");
+    const outlinedBorder = formatColor(theme.colors.neutral, {
+      alpha: 30,
+      format: "hexa"
+    });
+    const neutralSoftBg = formatColor(theme.colors.neutral, {
+      alpha: 10,
+      format: "hexa"
+    });
+    const primarySoftBg = formatColor(theme.colors.primary, {
+      alpha: 10,
+      format: "hexa"
+    });
     const app = useAppStore();
     const uploadRef = useRef<HTMLInputElement>(null);
     const [query, setQuery] = useState("");
@@ -152,7 +166,7 @@ export const GoogleFontPicker = observer(
           css={{
             maxHeight: 240,
             overflow: "auto",
-            border: "1px solid var(--mz-palette-neutral-outlinedBorder)"
+            border: `1px solid ${outlinedBorder}`
           }}
         >
           {allowClear && !query.trim() && (
@@ -165,10 +179,10 @@ export const GoogleFontPicker = observer(
                 cursor: "pointer",
                 background:
                   resolvedValue === DEFAULT_FONT_FAMILY
-                    ? "var(--mz-palette-primary-softBg)"
+                    ? primarySoftBg
                     : undefined,
                 "&:hover": {
-                  background: "var(--mz-palette-neutral-softBg)"
+                  background: neutralSoftBg
                 }
               }}
             >
@@ -190,10 +204,10 @@ export const GoogleFontPicker = observer(
                 cursor: "pointer",
                 background:
                   resolvedValue.toLowerCase() === trimmedQuery.toLowerCase()
-                    ? "var(--mz-palette-primary-softBg)"
+                    ? primarySoftBg
                     : undefined,
                 "&:hover": {
-                  background: "var(--mz-palette-neutral-softBg)"
+                  background: neutralSoftBg
                 }
               }}
             >
@@ -229,12 +243,12 @@ export const GoogleFontPicker = observer(
                   css={{
                     cursor: "pointer",
                     background: selected
-                      ? "var(--mz-palette-primary-softBg)"
+                      ? primarySoftBg
                       : undefined,
                     "&:hover": {
                       background: selected
-                        ? "var(--mz-palette-primary-softBg)"
-                        : "var(--mz-palette-neutral-softBg)"
+                        ? primarySoftBg
+                        : neutralSoftBg
                     }
                   }}
                 >
@@ -299,8 +313,8 @@ export const GoogleFontPicker = observer(
           p={1.25}
           css={{
             borderRadius: 10,
-            border: "1px solid var(--mz-palette-neutral-outlinedBorder)",
-            background: "var(--mz-palette-neutral-softBg)"
+            border: `1px solid ${outlinedBorder}`,
+            background: neutralSoftBg
           }}
         >
           <Typography level="body-xs" css={{ opacity: 0.6 }}>

@@ -4,8 +4,8 @@ import { Paper } from "@components/Paper";
 import { useModal } from "@contexts/Modal.context";
 import { useAppStore } from "@hooks/useStores";
 import { dynamicElevation } from "@mutualzz/ui-core";
+import { IconButton } from "@components/IconButton";
 import {
-  IconButton,
   Stack,
   Typography,
   useTheme

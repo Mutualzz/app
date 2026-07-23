@@ -148,7 +148,13 @@ export function createMainWindow(): BrowserWindow {
 
   mainWindow.webContents.setWindowOpenHandler((details) => {
     const { shell } = require("electron");
-    shell.openExternal(details.url);
+    try {
+      const parsed = new URL(details.url);
+      if (parsed.protocol === "http:" || parsed.protocol === "https:") {
+        shell.openExternal(details.url);
+      }
+    } catch {
+    }
     return { action: "deny" };
   });
 

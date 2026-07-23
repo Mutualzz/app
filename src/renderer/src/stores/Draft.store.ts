@@ -2,7 +2,7 @@ import { Logger } from "@mutualzz/logger";
 import type { APITheme } from "@mutualzz/types";
 import { makeAutoObservable, observable } from "mobx";
 import { makePersistable } from "mobx-persist-store";
-import Snowflake from "@utils/Snowflake";
+import { Snowflake } from "@mutualzz/client";
 import type { CanvasPath } from "react-sketch-canvas";
 
 interface AvatarDraft {

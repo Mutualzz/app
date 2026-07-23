@@ -2,6 +2,7 @@ import { IconButton } from "@components/IconButton";
 import { Paper } from "@components/Paper";
 import { Tooltip } from "@components/Tooltip";
 import { useAppStore } from "@hooks/useStores";
+import { formatColor } from "@mutualzz/ui-core";
 import { Stack, Typography, useTheme } from "@mutualzz/ui-web";
 import {
   MagnifyingGlassMinusIcon,
@@ -67,6 +68,14 @@ export const ProfileEditorZoomControls = observer(
     const { t } = useTranslation("settings");
     const app = useAppStore();
     const { theme } = useTheme();
+    const primarySoftBg = formatColor(theme.colors.primary, {
+      alpha: 10,
+      format: "hexa"
+    });
+    const neutralSoftBg = formatColor(theme.colors.neutral, {
+      alpha: 10,
+      format: "hexa"
+    });
     const embossed = app.settings?.preferEmbossed;
 
     return (
@@ -198,15 +207,15 @@ export const ProfileEditorZoomControls = observer(
                         opacity: gridStep === step ? 1 : 0.45,
                         background:
                           gridStep === step
-                            ? "var(--mz-palette-primary-softBg)"
+                            ? primarySoftBg
                             : "transparent",
                         color:
                           gridStep === step
-                            ? "var(--mz-palette-primary-plainColor)"
+                            ? theme.colors.primary
                             : undefined,
                         "&:hover": {
                           opacity: 1,
-                          background: "var(--mz-palette-neutral-softBg)"
+                          background: neutralSoftBg
                         }
                       }}
                     >

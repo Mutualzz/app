@@ -113,6 +113,8 @@ const api = {
     > => ipcRenderer.invoke("updater:get-linux-package"),
     getBinarySha256: (): Promise<string | null> =>
       ipcRenderer.invoke("updater:get-binary-sha256"),
+    getUpdaterVersion: (): Promise<string | null> =>
+      ipcRenderer.invoke("updater:get-updater-version"),
     getSavePath: (version: string, url: string): Promise<string> =>
       ipcRenderer.invoke("updater:get-save-path", version, url),
     download: (

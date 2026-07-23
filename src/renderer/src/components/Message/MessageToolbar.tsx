@@ -3,7 +3,12 @@ import { IconButton } from "@components/IconButton";
 import { Paper } from "@components/Paper";
 import { useAppStore } from "@hooks/useStores";
 import { useRecentEmojis } from "@renderer/hooks/useRecentEmojis";
-import { Portal, Stack, Tooltip as MzTooltip, useTheme } from "@mutualzz/ui-web";
+import {
+  Portal,
+  Stack,
+  Tooltip as MzTooltip,
+  useTheme
+} from "@mutualzz/ui-web";
 import { Message } from "@stores/objects/Message";
 import { useMutation } from "@tanstack/react-query";
 import { observer } from "mobx-react-lite";
@@ -21,7 +26,7 @@ import type { SkinTone } from "@utils/emojis/emojiSprite";
 import {
   expressionToReactionEmoji,
   pickerEmojiToReactionEmoji
-} from "@utils/reactions";
+} from "@mutualzz/client";
 import { Tooltip } from "../Tooltip";
 import { MessageReactionToolbar } from "./MessageReactionToolbar";
 import { useTranslation } from "react-i18next";
@@ -74,7 +79,10 @@ const ToolbarContent = observer(
     const isSent = message instanceof Message;
 
     const canReact =
-      isSent && me?.hasPermission("AddReactions", message.channel);
+      isSent &&
+      (!message.space
+        ? true
+        : !!me?.hasPermission("AddReactions", message.channel));
 
     return (
       <Paper

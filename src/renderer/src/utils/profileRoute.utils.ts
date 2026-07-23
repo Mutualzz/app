@@ -2,26 +2,74 @@ import type { APIUser, APIUserProfile } from "@mutualzz/types";
 import { CDNRoutes, ImageFormat } from "@mutualzz/types";
 import { REST } from "@stores/REST.store";
 
+async function fetchWithAuth(path: string) {
+  const headers: Record<string, string> = {
+    accept: "application/json",
+  };
+
+  if (typeof localStorage !== "undefined") {
+    const token = localStorage.getItem("token");
+    if (token) headers.Authorization = `Bearer ${token}`;
+  }
+
+  return fetch(REST.makeAPIUrl(path), { headers });
+}
+
+async function fetchOwnUserIfMatch(normalized: string) {
+  const response = await fetchWithAuth("@me");
+  if (!response.ok) return null;
+
+  const user = (await response.json()) as APIUser;
+  if (
+    user.username.toLowerCase() === normalized ||
+    String(user.id) === normalized
+  ) {
+    return user;
+  }
+
+  return null;
+}
+
 export const fetchUserByIdentifier = async (identifier: string) => {
   const normalized = identifier.trim().toLowerCase();
-  const response = await fetch(REST.makeAPIUrl(`users/${encodeURIComponent(normalized)}`));
-  if (response.status === 404) return null;
-  if (!response.ok) {
-    throw new Error("Failed to load user");
+  const response = await fetchWithAuth(
+    `users/${encodeURIComponent(normalized)}`,
+  );
+
+  if (response.ok) {
+    return (await response.json()) as APIUser;
   }
-  return (await response.json()) as APIUser;
+
+  if (response.status === 404) {
+    return fetchOwnUserIfMatch(normalized);
+  }
+
+  throw new Error("Failed to load user");
 };
 
 export const fetchUserProfileByIdentifier = async (identifier: string) => {
   const normalized = identifier.trim().toLowerCase();
-  const response = await fetch(
-    REST.makeAPIUrl(`users/${encodeURIComponent(normalized)}/profile`),
+  const response = await fetchWithAuth(
+    `users/${encodeURIComponent(normalized)}/profile`,
   );
-  if (response.status === 404) return null;
-  if (!response.ok) {
-    throw new Error("Failed to load profile");
+
+  if (response.ok) {
+    return (await response.json()) as APIUserProfile;
   }
-  return (await response.json()) as APIUserProfile;
+
+  if (response.status === 404) {
+    const me = await fetchOwnUserIfMatch(normalized);
+    if (!me) return null;
+
+    const ownResponse = await fetchWithAuth("@me/profile");
+    if (ownResponse.ok) {
+      return (await ownResponse.json()) as APIUserProfile;
+    }
+
+    return null;
+  }
+
+  throw new Error("Failed to load profile");
 };
 
 export const getUserDisplayName = (user: APIUser) =>
@@ -69,7 +117,7 @@ export const buildProfileSeo = (user: APIUser, profile: APIUserProfile) => {
       displayName,
       "Mutualzz profile",
       "user profile",
-      "social profile"
-    ]
+      "social profile",
+    ],
   };
 };

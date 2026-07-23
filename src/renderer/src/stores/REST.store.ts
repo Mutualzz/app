@@ -1,7 +1,7 @@
 import { Logger } from "@mutualzz/logger";
 import { HttpException, HttpStatusCode } from "@mutualzz/types";
 import { detectBrowser } from "@utils/detect";
-import { formatRestError, parseXhrJson } from "@utils/restError";
+import { formatRestError, parseXhrJson } from "@mutualzz/client";
 import EventEmitter from "events";
 
 const isElectron = !!window.api;

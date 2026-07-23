@@ -343,7 +343,9 @@ export class ChannelStore {
           badgeCount: 0,
           lastPinTimestamp: null,
           flags: 0n,
-          type: ReadStateType.Messages
+          type: ReadStateType.Messages,
+          notificationLevel: null,
+          mutedUntil: null,
         }
       ]);
     }
@@ -390,6 +392,10 @@ export class ChannelStore {
 
   getCollapsedCategories(spaceId: Snowflake): Set<Snowflake> {
     return this.collapsedCategories.get(spaceId) ?? new Set<Snowflake>();
+  }
+
+  resetCollapsedCategories() {
+    this.collapsedCategories.clear();
   }
 
   getSpaceVisibleChannels(

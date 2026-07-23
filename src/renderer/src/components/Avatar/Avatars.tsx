@@ -16,7 +16,6 @@ import {
   Button,
   ButtonGroup,
   Checkbox,
-  IconButton,
   InputColor,
   Radio,
   RadioGroup,
@@ -24,6 +23,7 @@ import {
   Typography,
   useTheme
 } from "@mutualzz/ui-web";
+import { IconButton } from "@components/IconButton";
 import { TrashIcon } from "@phosphor-icons/react";
 import { REST } from "@stores/REST.store";
 import { useMutation } from "@tanstack/react-query";

@@ -185,9 +185,7 @@ export const UserBar = observer(() => {
                   : undefined
               }
               aria-label={
-                voiceSubtitle
-                  ? `${voiceTitle}, ${voiceSubtitle}`
-                  : voiceTitle
+                voiceSubtitle ? `${voiceTitle}, ${voiceSubtitle}` : voiceTitle
               }
             >
               <Typography
@@ -416,19 +414,17 @@ export const UserBar = observer(() => {
                 {account.displayName}
               </Typography>
             </Stack>
-            {hovered &&
-              account.presence?.activities.length === 0 &&
-              account.globalName && (
-                <Typography
-                  level="body-xs"
-                  textColor="muted"
-                  whiteSpace="nowrap"
-                  overflow="hidden"
-                  textOverflow="ellipsis"
-                >
-                  {account.username}
-                </Typography>
-              )}
+            {hovered && (
+              <Typography
+                level="body-xs"
+                textColor="muted"
+                whiteSpace="nowrap"
+                overflow="hidden"
+                textOverflow="ellipsis"
+              >
+                {account.username}
+              </Typography>
+            )}
 
             {!hovered && account.presence && (
               <SmallActivityStatus

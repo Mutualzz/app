@@ -1,6 +1,6 @@
 import { Avatar } from "@mutualzz/ui-web";
 import { CubeIcon } from "@phosphor-icons/react";
-import { minecraftAvatarUrl } from "@utils/minecraft";
+import { minecraftAvatarUrl } from "@mutualzz/client";
 import { observer } from "mobx-react-lite";
 import { useState } from "react";
 

@@ -1,11 +1,12 @@
 import { formatColor, styled } from "@mutualzz/ui-core";
 import { Stack } from "@mutualzz/ui-web";
 import { Message, type MessageLike } from "@stores/objects/Message";
-import { calendarStrings } from "@utils/i18n";
+import { calendarStrings } from "@mutualzz/client";
 import dayjs from "dayjs";
 import { observer } from "mobx-react-lite";
 import type { HTMLAttributes, PropsWithChildren } from "react";
 import { Tooltip } from "@components/Tooltip";
+import { useAppStore } from "@hooks/useStores";
 
 interface Props extends PropsWithChildren, HTMLAttributes<HTMLDivElement> {
   header?: boolean;
@@ -19,10 +20,10 @@ export const MessageBase = styled("div")<Props>(
     overflow: "hidden",
     flexDirection: system ? "row" : "column",
     ...(header && {
-      marginTop: 10
+      marginTop: "var(--message-density-header-margin-top, 0.625rem)"
     }),
-    paddingTop: "0.2rem",
-    paddingBottom: "0.2rem",
+    paddingTop: "var(--message-density-padding-y, 0.2rem)",
+    paddingBottom: "var(--message-density-padding-y, 0.2rem)",
     ...(highlight && {
       borderLeft: `2px solid ${typeof highlight === "string" ? highlight : theme.colors.info}`,
       background: `linear-gradient(135deg, ${formatColor(
@@ -37,8 +38,8 @@ export const MessageRow = styled("div")<{ header?: boolean }>(({ header }) => ({
   display: "flex",
   flexDirection: "row",
   ...(!header && {
-    alignItems: "center"
-  })
+    alignItems: "center",
+  }),
 }));
 
 export const ReplySection = styled("div")({
@@ -92,20 +93,22 @@ export const ReplyAuthorName = styled("div")({
   alignItems: "center"
 });
 
-export const MessageInfo = styled("div")(({ theme }) => ({
-  width: 62,
-  display: "flex",
-  flexShrink: 0,
-  paddingTop: 2,
-  flexDirection: "row",
-  justifyContent: "center",
+export const MessageInfo = styled("div")<{ $showTime?: boolean }>(
+  ({ theme, $showTime }) => ({
+    width: 62,
+    display: "flex",
+    flexShrink: 0,
+    paddingTop: 2,
+    flexDirection: "row",
+    justifyContent: "center",
 
-  "time, .edited": {
-    opacity: 0,
-    fontSize: 12,
-    color: theme.typography.colors.muted
-  }
-}));
+    "time, .edited": {
+      opacity: $showTime ? 1 : 0,
+      fontSize: 12,
+      color: theme.typography.colors.muted,
+    },
+  }),
+);
 
 export const MessageContent = styled("div")({
   position: "relative",
@@ -115,7 +118,7 @@ export const MessageContent = styled("div")({
   justifyContent: "center",
   paddingRight: 48,
   wordWrap: "break-word",
-  flex: 1
+  flex: 1,
 });
 
 export const MessageContentText = styled("div")<{
@@ -147,21 +150,31 @@ export const MessageDetails = observer(
     message: MessageLike;
     position: "left" | "top";
   }) => {
+    const app = useAppStore();
+    const timestampFormat =
+      app.settings?.extendedSettings.timestampFormat ?? "relative";
+    const fullTimestamp = dayjs(message.createdAt).format(
+      "dddd, MMMM D, YYYY h:mm A"
+    );
+    const absoluteTime = dayjs(message.createdAt).format("h:mm A");
+    const relativeTime = dayjs(message.createdAt).calendar(
+      undefined,
+      calendarStrings
+    );
+    const headerTime =
+      timestampFormat === "absolute" ? absoluteTime : relativeTime;
+    const compactTime = absoluteTime;
+
     if (position === "left") {
       if (message instanceof Message && message.edited) {
         return (
           <Stack direction="column">
-            <Tooltip
-              placement="top"
-              content={dayjs(message.createdAt).format(
-                "dddd, MMMM D, YYYY h:mm A"
-              )}
-            >
+            <Tooltip placement="top" content={fullTimestamp}>
               <time
                 className="copyTime"
                 dateTime={message.createdAt.toISOString()}
               >
-                {dayjs(message.createdAt).format("h:mm A")}
+                {compactTime}
               </time>
             </Tooltip>
           </Stack>
@@ -169,25 +182,17 @@ export const MessageDetails = observer(
       }
 
       return (
-        <Tooltip
-          placement="left"
-          content={dayjs(message.createdAt).format("dddd, MMMM D, YYYY h:mm A")}
-        >
-          <time dateTime={message.createdAt.toISOString()}>
-            {dayjs(message.createdAt).format("h:mm A")}
-          </time>
+        <Tooltip placement="left" content={fullTimestamp}>
+          <time dateTime={message.createdAt.toISOString()}>{compactTime}</time>
         </Tooltip>
       );
     }
 
     return (
       <DetailsBase>
-        <Tooltip
-          placement="top"
-          content={dayjs(message.createdAt).format("dddd, MMMM D, YYYY h:mm A")}
-        >
+        <Tooltip placement="top" content={fullTimestamp}>
           <time className="copyTime" dateTime={message.createdAt.toISOString()}>
-            {dayjs(message.createdAt).calendar(undefined, calendarStrings)}
+            {headerTime}
           </time>
         </Tooltip>
       </DetailsBase>

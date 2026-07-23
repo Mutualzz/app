@@ -8,11 +8,11 @@ import { useElapsedClock } from "@hooks/useElapsedClock";
 import { dynamicElevation, formatColor } from "@mutualzz/ui-core";
 import {
   Button,
-  IconButton,
   Stack,
   Typography,
   useTheme
 } from "@mutualzz/ui-web";
+import { IconButton } from "@components/IconButton";
 import type { Channel } from "@stores/objects/Channel";
 import {
   DesktopIcon,
@@ -760,7 +760,7 @@ export const DMCallView = observer(({ channel }: Props) => {
                 <Tooltip content={t("voice.controls.mute")}>
                   <IconButton
                     variant="soft"
-                    color={selfMute ? "danger" : "neutral"}
+                    color={selfMute ? "danger" : undefined}
                     onClick={() => app.voice.setMute(!app.voice.selfMute)}
                     css={circleBtn}
                   >
@@ -780,7 +780,7 @@ export const DMCallView = observer(({ channel }: Props) => {
                 >
                   <IconButton
                     variant="soft"
-                    color={cameraEnabled ? "neutral" : "danger"}
+                    color={cameraEnabled ? undefined : "danger"}
                     onClick={() => app.voice.toggleCamera()}
                     css={circleBtn}
                   >
@@ -801,7 +801,7 @@ export const DMCallView = observer(({ channel }: Props) => {
                   <IconButton
                     variant="soft"
                     onClick={() => app.voice.toggleScreenShare()}
-                    color={screenShareEnabled ? "success" : "neutral"}
+                    color={screenShareEnabled ? "success" : undefined}
                     css={circleBtn}
                   >
                     <MonitorArrowUpIcon weight="fill" size={20} />

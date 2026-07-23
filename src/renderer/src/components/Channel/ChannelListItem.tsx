@@ -24,14 +24,15 @@ import { ChannelMemberItem } from "@components/Channel/ChannelMemberItem";
 import { IconButton } from "@components/IconButton";
 import { SpaceInviteToSpaceModal } from "@components/Space/SpaceInviteToSpaceModal";
 import { useElapsedClock } from "@hooks/useElapsedClock";
-import { getChannelOccupiedAt } from "@utils/voiceElapsed";
+import { getChannelOccupiedAt } from "@mutualzz/client";
 import {
   CaretRightIcon,
   ChatCircleIcon,
   GearIcon,
   LockIcon,
   PlusIcon,
-  UserPlusIcon
+  UserPlusIcon,
+  BellSlashIcon,
 } from "@phosphor-icons/react";
 import { ChannelSettingsModal } from "@components/ChannelSettings/ChannelSettingsModal";
 import { HoverRevealActions } from "../HoverRevealActions";
@@ -72,7 +73,8 @@ export const ChannelListItem = observer(
 
     const readState = app.readStates.get(channel.id);
     const isUnread = readState?.isUnread ?? false;
-    const mentionCount = readState?.mentionCount ?? 0;
+    const mentionCount = readState?.displayMentionCount ?? 0;
+    const isNotificationMuted = readState?.isNotificationMuted ?? false;
 
     const canMoveMembers = space.members.me?.hasPermission("MoveMembers");
 
@@ -297,6 +299,11 @@ export const ChannelListItem = observer(
                   >
                     {channelElapsed}
                   </Typography>
+                )}
+                {!wrapperHovered && isNotificationMuted && (
+                  <IconSlot size={14}>
+                    <BellSlashIcon weight="fill" />
+                  </IconSlot>
                 )}
                 {!wrapperHovered && mentionCount > 0 && (
                   <Stack

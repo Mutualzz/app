@@ -14,7 +14,7 @@ import {
   QueuedMessageStatus
 } from "@stores/objects/QueuedMessage";
 import { observer } from "mobx-react-lite";
-import { isSystemMessageType, isSystemUser } from "@utils/systemUser";
+import { isSystemMessageType, isSystemUser } from "@mutualzz/client";
 import { MessageAuthor } from "./MessageAuthor";
 import {
   MessageBase,
@@ -43,7 +43,7 @@ import { MessageAttachment } from "./MessageAttachment";
 import { FileIcon } from "@phosphor-icons/react";
 import type { PendingAttachmentPreview } from "@stores/objects/QueuedMessage";
 import { UserProfilePopoutTrigger } from "../Profile/popout/UserProfilePopoutTrigger";
-import { shouldHideInviteUrlContent } from "@utils/inviteLinks";
+import { shouldHideInviteUrlContent } from "@mutualzz/client";
 import { useTranslation } from "react-i18next";
 
 function formatBytes(bytes: number) {
@@ -51,6 +51,9 @@ function formatBytes(bytes: number) {
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
+
+const GIF_URL_PATTERN =
+  /^https?:\/\/(klipy\.com\/gifs\/|tenor\.com\/|c\.tenor\.com\/|media\.tenor\.com\/|giphy\.com\/|media\.giphy\.com\/|i\.giphy\.com\/|imgur\.com\/|i\.imgur\.com\/|redgifs\.com\/|.*\.gif(\?\S*)?$)\S*$/i;
 
 const PendingAttachments = observer(
   ({
@@ -190,10 +193,18 @@ interface Props {
   message: MessageLike;
   repliedMessage?: MessageObject;
   header?: boolean;
+  showAvatar?: boolean;
+  compact?: boolean;
 }
 
 export const Message = observer(
-  ({ message, repliedMessage, header }: Props) => {
+  ({
+    message,
+    repliedMessage,
+    header,
+    showAvatar = !!header,
+    compact = false,
+  }: Props) => {
     const app = useAppStore();
     const { theme } = useTheme();
     const { t } = useTranslation("chat");
@@ -201,6 +212,7 @@ export const Message = observer(
     const channel = app.channels.active;
     const space = message.spaceId ? app.spaces.get(message.spaceId) : null;
     const me = space?.members.me;
+    const showLinkEmbeds = app.settings?.extendedSettings.showLinkEmbeds ?? true;
 
     const isSent = message instanceof MessageObject;
 
@@ -292,6 +304,10 @@ export const Message = observer(
         }}
         header={header}
         highlight={hasProperMention ? theme.colors.warning : null}
+        css={{
+          fontSize: "calc(1em * var(--chat-font-scale, 1))",
+          "&:hover time, &:hover .edited": { opacity: 1 },
+        }}
       >
         {header && message.type === MessageType.Reply && (
           <ReplySection
@@ -304,11 +320,13 @@ export const Message = observer(
             <ReplyContent>
               {repliedMessage ? (
                 <>
-                  <UserAvatar
-                    user={repliedMessage.author}
-                    member={repliedMessage.member}
-                    size="sm"
-                  />
+                  {!compact && (
+                    <UserAvatar
+                      user={repliedMessage.author}
+                      member={repliedMessage.member}
+                      size="sm"
+                    />
+                  )}
                   <ReplyAuthorName>
                     <Typography textColor="muted" level="body-xs">
                       {isSystemUser(repliedMessage.author) &&
@@ -338,28 +356,30 @@ export const Message = observer(
           </ReplySection>
         )}
 
-        <MessageRow header={header}>
+        <MessageRow header={header && !compact}>
           <MessageInfo>
-            {header ? (
-              <UserProfilePopoutTrigger
-                placement="right"
-                user={message.author!}
-              >
-                <UserAvatar
-                  user={message.author}
-                  member={message.member}
-                  size="lg"
-                  css={{
-                    cursor: "pointer"
-                  }}
-                />
-              </UserProfilePopoutTrigger>
-            ) : (
+            {compact || !showAvatar ? (
               <MessageDetails message={message} position="left" />
+            ) : (
+              header && (
+                <UserProfilePopoutTrigger
+                  placement="right"
+                  user={message.author!}
+                >
+                  <UserAvatar
+                    user={message.author}
+                    member={message.member}
+                    size="lg"
+                    css={{
+                      cursor: "pointer",
+                    }}
+                  />
+                </UserProfilePopoutTrigger>
+              )
             )}
           </MessageInfo>
           <MessageContent>
-            {header && (
+            {header && !compact && (
               <Stack
                 direction="row"
                 alignItems="center"
@@ -381,6 +401,12 @@ export const Message = observer(
                 message.status === QueuedMessageStatus.Sending
               }
             >
+              {compact && header && (
+                <Stack flexShrink={0} direction="row" alignItems="baseline" pb={0.25}>
+                  <MessageAuthor message={message} space={space} />
+                </Stack>
+              )}
+
               {stickerExpressions.length > 0 && (
                 <Stack direction="row" spacing={1} flexWrap="wrap" mb={1}>
                   {stickerExpressions.map((sticker) => (
@@ -388,6 +414,7 @@ export const Message = observer(
                   ))}
                 </Stack>
               )}
+
               {isSent && message.editing ? (
                 <MessageInput
                   channel={channel}
@@ -397,9 +424,6 @@ export const Message = observer(
               ) : (
                 message.content &&
                 (() => {
-                  const GIF_URL_PATTERN =
-                    /^https?:\/\/(klipy\.com\/gifs\/|tenor\.com\/|c\.tenor\.com\/|media\.tenor\.com\/|giphy\.com\/|media\.giphy\.com\/|i\.giphy\.com\/|imgur\.com\/|i\.imgur\.com\/|redgifs\.com\/|.*\.gif(\?\S*)?$)\S*$/i;
-
                   const hasGifEmbed =
                     "embeds" in message &&
                     message.embeds?.some((e) => e.type === "gifv");
@@ -418,7 +442,10 @@ export const Message = observer(
 
                   if (isOnlyGifUrl || hideInviteUrl) return null;
                   return (
-                    <Stack alignItems="center" spacing={1.25}>
+                    <Stack
+                      alignItems={compact ? "flex-start" : "center"}
+                      spacing={1.25}
+                    >
                       <MarkdownRenderer
                         textColor={isFailed ? theme.colors.danger : "primary"}
                         value={message.content}
@@ -427,7 +454,7 @@ export const Message = observer(
                         <Tooltip
                           placement="right"
                           content={dayjs(message.updatedAt).format(
-                            "dddd, MMMM D, YYYY h:mm A"
+                            "dddd, MMMM D, YYYY h:mm A",
                           )}
                           offset={8}
                         >
@@ -465,7 +492,9 @@ export const Message = observer(
                 />
               )}
 
-            {"embeds" in message && message.embeds.length > 0 && (
+            {"embeds" in message &&
+              showLinkEmbeds &&
+              message.embeds.length > 0 && (
               <Stack pb={0.25}>
                 {message.embeds.map((embed, index) => (
                   <MessageEmbed key={index} embed={embed} />

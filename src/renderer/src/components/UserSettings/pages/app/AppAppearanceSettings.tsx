@@ -21,11 +21,8 @@ import {
   Box,
   type BoxProps,
   Divider,
-  Option,
   Paper,
-  Select,
   Stack,
-  Switch,
   Typography,
   useTheme
 } from "@mutualzz/ui-web";
@@ -52,6 +49,12 @@ import {
 import { useTranslation } from "react-i18next";
 import { VirtuosoGrid } from "react-virtuoso";
 import { Tooltip } from "@components/Tooltip";
+import { AppAppearanceExtrasSettings } from "@components/UserSettings/pages/app/AppAppearanceExtrasSettings";
+import {
+  SettingsSection,
+  SettingsSelectField,
+  SettingsToggleRow
+} from "@components/UserSettings/SettingsField";
 
 const ImageBlob = styled("img")<{
   current: boolean;
@@ -129,9 +132,8 @@ export const AppAppearanceSettings = observer(() => {
     AppLocale | "system"
   >(() => getPreferredLocale() ?? "system");
 
-  // Use ref for icons to avoid unnecessary re-renders
   const iconsRef = useRef<Map<string, ThemeWithIcon<Theme>>>(new Map());
-  const [_iconsVersion, setIconsVersion] = useState(0); // Used to trigger re-renders when icons are loaded
+  const [_iconsVersion, setIconsVersion] = useState(0);
   const [adaptiveIcon, setAdaptiveIcon] =
     useState<ThemeWithIcon<MzTheme> | null>(null);
 
@@ -177,7 +179,6 @@ export const AppAppearanceSettings = observer(() => {
     onSuccess: ({ id: themeId }: { id: string }) => {
       const deletingCurrent = currentTheme.id === themeId;
 
-      // Remove theme from store first
       app.themes.remove(themeId);
 
       if (deletingCurrent) {
@@ -372,39 +373,25 @@ export const AppAppearanceSettings = observer(() => {
 
   return (
     <Stack direction="column" pt={2.5} pb={5} spacing={7.5}>
-      <Paper
-        direction="column"
-        py={2.5}
-        px={4}
-        variant="outlined"
-        spacing={2.5}
-        borderRadius={10}
-      >
-        <Stack direction="column" spacing={0.5}>
-          <Typography fontWeight="bold" level="body-lg">
-            {tCommon("language.title")}
-          </Typography>
-          <Typography level="body-sm" textColor="muted">
-            {tCommon("language.description")}
-          </Typography>
-        </Stack>
-        <Select
+      <SettingsSection title={tCommon("language.title")}>
+        <SettingsSelectField
+          title={tCommon("language.title")}
+          description={tCommon("language.description")}
           value={preferredLocale}
-          onValueChange={(value) => {
-            if (typeof value !== "string") return;
+          onChange={(value) => {
             const next = value as AppLocale | "system";
             setPreferredLocaleState(next);
             setPreferredLocale(next);
           }}
-        >
-          <Option value="system">{tCommon("language.systemDefault")}</Option>
-          {supportedLocales.map((locale) => (
-            <Option key={locale} value={locale}>
-              {localeNativeNames[locale]}
-            </Option>
-          ))}
-        </Select>
-      </Paper>
+          options={[
+            { value: "system", label: tCommon("language.systemDefault") },
+            ...supportedLocales.map((locale) => ({
+              value: locale,
+              label: localeNativeNames[locale]
+            }))
+          ]}
+        />
+      </SettingsSection>
       <Paper
         direction="column"
         py={2.5}
@@ -413,38 +400,31 @@ export const AppAppearanceSettings = observer(() => {
         spacing={2.5}
         borderRadius={10}
       >
-        <Stack
-          justifyContent="space-between"
-          spacing={1.25}
-          alignItems="center"
-        >
-          <Stack spacing={1.25} alignItems="center">
-            <Typography fontWeight="bold" level="body-lg">
-              {t("appearance.themes")}
-            </Typography>
-            <Tooltip
-              content={t("appearance.createCustomTheme")}
-              placement="top"
+        <Stack spacing={1.25} alignItems="center">
+          <Typography fontWeight="bold" level="body-lg">
+            {t("appearance.themes")}
+          </Typography>
+          <Tooltip
+            content={t("appearance.createCustomTheme")}
+            placement="top"
+          >
+            <IconButton
+              variant="soft"
+              onClick={() => {
+                app.themeCreator.setSpaceId(null);
+                openModal("theme-creator", <ThemeCreatorModal />);
+              }}
+              size="sm"
             >
-              <IconButton
-                variant="soft"
-                onClick={() => {
-                  app.themeCreator.setSpaceId(null);
-                  openModal("theme-creator", <ThemeCreatorModal />);
-                }}
-                size="sm"
-              >
-                <PaletteIcon weight="fill" />
-              </IconButton>
-            </Tooltip>
-          </Stack>
-          <Switch
-            label={t("appearance.preferEmbossed")}
-            color="primary"
-            checked={app.settings?.preferEmbossed}
-            onClick={() => app.settings?.togglePreferEmbossed()}
-          />
+              <PaletteIcon weight="fill" />
+            </IconButton>
+          </Tooltip>
         </Stack>
+        <SettingsToggleRow
+          title={t("appearance.preferEmbossed")}
+          checked={!!app.settings?.preferEmbossed}
+          onChange={() => app.settings?.togglePreferEmbossed()}
+        />
         <Stack direction="column">
           <Divider lineColor="muted" inset="half-start">
             <Typography fontWeight="bold" level="body-sm">
@@ -705,33 +685,46 @@ export const AppAppearanceSettings = observer(() => {
           )}
         </Paper>
       )}
-      {isElectron && (
-        <Paper
-          direction="column"
-          py={2.5}
-          px={4}
-          variant="outlined"
-          spacing={2.5}
-          borderRadius={10}
-        >
-          <Stack justifyContent="space-between" alignItems="center">
-            <Stack direction="column" spacing={0.5}>
-              <Typography fontWeight="bold" level="body-lg">
-                {t("appearance.spellcheck")}
-              </Typography>
-              <Typography level="body-sm" textColor="muted">
-                {t("appearance.spellcheckDescription")}
-              </Typography>
-            </Stack>
-            <Switch
-              label={t("appearance.spellcheck")}
-              color="primary"
-              checked={app.settings?.spellcheckEnabled}
-              onClick={() => app.settings?.toggleSpellcheckEnabled()}
-            />
-          </Stack>
-        </Paper>
-      )}
+      <SettingsSection title={t("appearance.startupMode")}>
+        <SettingsSelectField
+          title={t("appearance.startupMode")}
+          description={t("appearance.startupModeDescription")}
+          value={app.settings?.preferredMode === "feed" ? "feed" : "spaces"}
+          onChange={(value) => {
+            if (value === "spaces" || value === "feed") {
+              app.settings?.setPreferredMode(value);
+              app.settings?.flush();
+            }
+          }}
+          options={[
+            { value: "spaces", label: t("appearance.startupModeSpaces") },
+            { value: "feed", label: t("appearance.startupModeFeed") }
+          ]}
+        />
+      </SettingsSection>
+      <SettingsSection title={t("appearance.convertEmoticons")}>
+        <SettingsToggleRow
+          title={t("appearance.convertEmoticons")}
+          description={t("appearance.convertEmoticonsDescription")}
+          checked={!!app.settings?.extendedSettings.convertEmoticons}
+          onChange={(checked) => {
+            if (!app.settings) return;
+            app.settings.patchExtendedSettings({ convertEmoticons: checked });
+            app.settings.flush();
+          }}
+        />
+      </SettingsSection>
+      {isElectron ? (
+        <SettingsSection title={t("appearance.spellcheck")}>
+          <SettingsToggleRow
+            title={t("appearance.spellcheck")}
+            description={t("appearance.spellcheckDescription")}
+            checked={!!app.settings?.spellcheckEnabled}
+            onChange={() => app.settings?.toggleSpellcheckEnabled()}
+          />
+        </SettingsSection>
+      ) : null}
+      <AppAppearanceExtrasSettings />
     </Stack>
   );
 });

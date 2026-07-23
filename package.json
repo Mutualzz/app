@@ -30,6 +30,7 @@
     "@juggle/resize-observer": "^3.4.0",
     "@mateie/react-drag-drop-files": "^3.1.1",
     "@mutualzz/bitfield": "workspace:*",
+    "@mutualzz/client": "workspace:*",
     "@mutualzz/color-picker": "workspace:*",
     "@mutualzz/contexify": "workspace:*",
     "@mutualzz/eslint-config": "workspace:*",
@@ -37,6 +38,7 @@
     "@mutualzz/logger": "workspace:*",
     "@mutualzz/rpc": "workspace:*",
     "@mutualzz/types": "workspace:*",
+    "@mutualzz/themes": "workspace:*",
     "@mutualzz/ui-core": "workspace:*",
     "@mutualzz/ui-web": "workspace:*",
     "@mutualzz/validators": "workspace:*",
@@ -132,5 +134,5 @@
     "typecheck:node": "tsc --noEmit -p tsconfig.node.json --composite false",
     "typecheck:web": "tsc --noEmit -p tsconfig.web.json --composite false"
   },
-  "version": "6.25.0"
+  "version": "6.26.0"
 }

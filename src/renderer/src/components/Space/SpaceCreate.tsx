@@ -7,13 +7,13 @@ import type { APISpace, HttpException } from "@mutualzz/types";
 import {
   Button,
   ButtonGroup,
-  IconButton,
   Input,
   Slider,
   Stack,
   Typography,
   useTheme
 } from "@mutualzz/ui-web";
+import { IconButton } from "@components/IconButton";
 import { useMutation } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { observer } from "mobx-react-lite";
@@ -221,7 +221,6 @@ export const SpaceCreate = observer(({ setCreating }: Props) => {
               />
               <IconButton
                 onClick={() => setRotation((prev) => prev + 90)}
-                color={theme.typography.colors.primary}
                 variant="plain"
                 size="sm"
                 disabled={creating}

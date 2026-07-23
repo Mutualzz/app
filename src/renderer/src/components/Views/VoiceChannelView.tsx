@@ -2,7 +2,11 @@ import { CallCameraVideo } from "@components/Voice/CallCameraVideo";
 import type { Channel } from "@stores/objects/Channel";
 import { Paper, Stack, Typography, useTheme } from "@mutualzz/ui-web";
 import { MessageList } from "@components/Message/MessageList";
-import { MessageInput } from "@components/Message/MessageInput";
+import {
+  MessageInput,
+  type MessageInputHandle
+} from "@components/Message/MessageInput";
+import { ChannelFileDropZone } from "@components/Channel/ChannelFileDropZone";
 import { VoiceChannelHeader } from "@components/Channel/VoiceChannelHeader";
 import { VoiceMinecraftBadge } from "@components/Channel/VoiceChannelMemberRow";
 import { useAppStore } from "@hooks/useStores";
@@ -244,6 +248,7 @@ export const VoiceChannelView = observer(
     const navigate = useNavigate();
     const { theme } = useTheme();
     const hostRef = useRef<HTMLDivElement>(null);
+    const messageInputRef = useRef<MessageInputHandle>(null);
     const [hovered, setHovered] = useState(false);
     const { openModal } = useModal();
     const { t } = useTranslation("chat");
@@ -554,7 +559,6 @@ export const VoiceChannelView = observer(
           )}
           {hovered && (
             <>
-              {/** Top Stack **/}
               <Stack
                 position="absolute"
                 top={2}
@@ -588,7 +592,6 @@ export const VoiceChannelView = observer(
                   </Tooltip>
                 )}
               </Stack>
-              {/** Bottom Stack */}
               <Stack
                 position="absolute"
                 bottom={2}
@@ -673,16 +676,17 @@ export const VoiceChannelView = observer(
               }}
             >
               <VoiceChannelHeader channel={channel} />
-              <Stack
-                direction="column"
-                position="relative"
-                overflow="hidden"
-                minWidth={0}
-                flex={1}
+              <ChannelFileDropZone
+                channel={channel}
+                onDropFiles={(files) => messageInputRef.current?.addFiles(files)}
               >
                 <MessageList channel={channel} />
-                <MessageInput channel={channel} />
-              </Stack>
+                <MessageInput
+                  key={channel.id}
+                  ref={messageInputRef}
+                  channel={channel}
+                />
+              </ChannelFileDropZone>
             </Paper>
           </>
         )}

@@ -6,16 +6,19 @@ import mergeWith from "lodash-es/mergeWith";
 import { isValidElement, type ReactNode } from "react";
 import MurmurHash from "imurmurhash";
 import {
-  APIMessage,
   ExpressionType,
-  MessageType,
   PresenceStatus
 } from "@mutualzz/types";
 import type { Expression } from "@stores/objects/Expression";
 import type { SpaceMember } from "@stores/objects/SpaceMember";
 import type { Channel } from "@stores/objects/Channel";
-import Snowflake from "@utils/Snowflake";
+import { Snowflake } from "@mutualzz/client";
 import i18n from "../i18n";
+import {
+  createSystemMessage as createSystemMessageBase,
+  preferredChannelForSpace,
+  resolveModeRouteTarget,
+} from "@mutualzz/client";
 
 export function mergeAppendAnything(
   ...objects: Record<string, string | string[]>[]
@@ -32,31 +35,12 @@ export function mergeAppendAnything(
   });
 }
 
-export const createSystemMessage = async (
+export const createSystemMessage = (
   app: AppStore,
   channelId: string,
   content: string,
   flags?: bigint
-): Promise<APIMessage | null> => {
-  const systemUser = await app.users.resolveSystem();
-  if (!systemUser) return null;
-
-  return {
-    author: systemUser.toJSON(),
-    authorId: systemUser.id,
-    channelId,
-    embeds: [],
-    content,
-    edited: false,
-    id: Snowflake.generate(),
-    nonce: null,
-    spaceId: null,
-    type: MessageType.System,
-    flags: flags || 0n,
-    createdAt: new Date(),
-    updatedAt: new Date()
-  };
-};
+) => createSystemMessageBase(app.users as Parameters<typeof createSystemMessageBase>[0], channelId, content, flags);
 
 export const canUseCustomEmoji = (
   meId: Snowflake,
@@ -157,10 +141,16 @@ export const getIconType = (theme: MzTheme): string => {
   return `/${filename}`;
 };
 
-/**
- * Returns a boolean indicating if we are running in a electron context
- */
 export const isElectron = !!window.api;
+
+export const openExternalLink = async (url: string) => {
+  if (window.api?.shell?.openExternal) {
+    await window.api.shell.openExternal(url);
+    return;
+  }
+
+  window.open(url, "_blank", "noopener,noreferrer");
+};
 
 export const canvasToArrayBuffer = (canvas: HTMLCanvasElement) =>
   new Promise<ArrayBuffer>((resolve, reject) =>
@@ -202,32 +192,108 @@ export const navigateToPreferredMode = (
   navigate: ReturnType<typeof useNavigate>,
   replace = true
 ) => {
-  navigate({ to: preferredModePath(app), replace });
+  navigateToMode(app, navigate, app.settings?.preferredMode ?? "spaces", replace);
+};
+
+type NavigateFn = ReturnType<typeof useNavigate>;
+
+export const navigateToMode = (
+  app: AppStore,
+  navigate: NavigateFn,
+  mode: "spaces" | "feed" | "@me" | "dms",
+  replace = true
+) => {
+  const target = resolveModeRouteTarget(
+    app as Parameters<typeof resolveModeRouteTarget>[0],
+    mode,
+  );
+
+  if (target.type === "feed") {
+    navigate({ to: "/feed", replace });
+    return;
+  }
+
+  if (target.type === "dms") {
+    if (target.channelId) {
+      navigate({
+        to: "/@me/$channelId",
+        params: { channelId: target.channelId },
+        replace
+      });
+      return;
+    }
+    navigate({ to: "/@me", replace });
+    return;
+  }
+
+  if (target.type === "spaces-list") {
+    navigate({ to: "/spaces", replace });
+    return;
+  }
+
+  if (target.channelId) {
+    navigate({
+      to: "/spaces/$spaceId/$channelId",
+      params: { spaceId: target.spaceId, channelId: target.channelId },
+      replace
+    });
+    return;
+  }
+
+  navigate({
+    to: "/spaces/$spaceId",
+    params: { spaceId: target.spaceId },
+    replace
+  });
+};
+
+export const navigateToSpace = (
+  app: AppStore,
+  navigate: NavigateFn,
+  spaceId: string,
+  replace = false
+) => {
+  app.spaces.setMostRecentSpace(spaceId);
+
+  const channel = preferredChannelForSpace(
+    app as Parameters<typeof preferredChannelForSpace>[0],
+    spaceId,
+  );
+  if (channel) {
+    navigate({
+      to: "/spaces/$spaceId/$channelId",
+      params: { spaceId, channelId: channel.id },
+      replace
+    });
+    return;
+  }
+
+  app.spaces.setActive(spaceId);
+  navigate({
+    to: "/spaces/$spaceId",
+    params: { spaceId },
+    replace
+  });
 };
 
 export const switchMode = (
   app: AppStore,
   navigate?: ReturnType<typeof useNavigate>
 ) => {
+  if (!navigate) return;
+
   if (app.mode === "feed") {
-    if (navigate) {
-      navigate({
-        to: "/spaces",
-        replace: true
-      });
-    }
+    navigateToMode(app, navigate, "spaces");
+    return;
   }
 
   if (app.mode === "spaces") {
-    if (navigate)
-      navigate({
-        to: "/feed",
-        replace: true
-      });
+    navigateToMode(app, navigate, "feed");
+    return;
   }
 
   if ((!app.mode || app.mode === "@me") && app.account) {
-    if (navigate) navigateToPreferredMode(app, navigate, true);
+    navigateToPreferredMode(app, navigate, true);
   }
 };
 

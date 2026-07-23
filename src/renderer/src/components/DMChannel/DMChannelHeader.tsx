@@ -1,11 +1,11 @@
 import {
   Avatar,
   ButtonGroup,
-  IconButton,
   Stack,
   Typography,
   useTheme,
 } from "@mutualzz/ui-web";
+import { IconButton } from "@components/IconButton";
 import { formatColor } from "@mutualzz/ui-core";
 import { useAppStore } from "@hooks/useStores";
 import { observer } from "mobx-react-lite";
@@ -120,7 +120,7 @@ export const DMChannelHeader = observer(
         </Stack>
         <ButtonGroup variant="plain" spacing={10}>
           {callActive && onToggleCallExpanded && (
-            <IconButton color="neutral" onClick={onToggleCallExpanded}>
+            <IconButton onClick={onToggleCallExpanded}>
               {callExpanded ? <CaretUpIcon /> : <CaretDownIcon />}
             </IconButton>
           )}
@@ -130,12 +130,12 @@ export const DMChannelHeader = observer(
                 ? t("call.inCall")
                 : callActive
                   ? t("call.join")
-                  : t("call.startHint")
+                  : t("call.start")
             }
             placement="bottom"
           >
             <IconButton
-              color={callActive || inThisCall ? "success" : "neutral"}
+              color={callActive || inThisCall ? "success" : undefined}
               disabled={inThisCall}
               onClick={(e) => {
                 if (inThisCall) return;
@@ -169,7 +169,6 @@ export const DMChannelHeader = observer(
                 placement="bottom"
               >
                 <IconButton
-                  color="neutral"
                   disabled={isFull}
                   onClick={() =>
                     openModal(
@@ -190,7 +189,7 @@ export const DMChannelHeader = observer(
                 placement="bottom"
               >
                 <IconButton
-                  color={app.memberListVisible ? "success" : "neutral"}
+                  color={app.memberListVisible ? "success" : undefined}
                   onClick={() => app.toggleMemberList()}
                 >
                   <UsersIcon weight="fill" />

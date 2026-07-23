@@ -331,7 +331,6 @@ export const GifPicker = observer(({ onSelectGif }: GifPickerProps) => {
           {search && (
             <IconButton
               variant="plain"
-              color="neutral"
               size={12}
               padding="2px"
               onClick={() => setSearch("")}

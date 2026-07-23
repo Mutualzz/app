@@ -2,6 +2,7 @@ import { Button } from "@components/Button";
 import { ProfileBlockRenderer } from "@components/Profile/viewer/ProfileBlockRenderer";
 import { ProfileCanvas } from "@components/Profile/shared/ProfileCanvas";
 import { ProfileEmptyState } from "@components/Profile/viewer/ProfileEmptyState";
+import { ProfileNotFoundState } from "@components/Profile/viewer/ProfileNotFoundState";
 import { ProfileLayout } from "@components/Profile/viewer/ProfileLayout";
 import { getDraftProfileMusic } from "@components/Profile/shared/profileMusicPlayer.utils";
 import { hasProfileDraftContent } from "@components/Profile/editor/profileEditor.utils";
@@ -39,12 +40,8 @@ export const ProfileViewerPage = observer(
     });
     const identifier = username.trim().toLowerCase();
 
-    const { isLoading: userLoading, isError: userError } = useQuery({
-      queryKey: ["user", identifier],
-      queryFn: () => app.users.resolveByIdentifier(identifier, true),
-      enabled: !initialUser,
-      retry: false,
-    });
+    const accountMatches =
+      app.account?.username.toLowerCase() === identifier;
 
     const viewerUser = (() => {
       const cached = app.users.all.find(
@@ -53,16 +50,33 @@ export const ProfileViewerPage = observer(
       );
       if (cached) return cached;
       if (initialUser) return app.users.add(initialUser);
+      if (accountMatches && app.account) {
+        const existing = app.users.get(app.account.id);
+        if (existing) return existing;
+        return app.users.add(app.account.raw as APIUser);
+      }
       return undefined;
     })();
 
     const userId = viewerUser?.id;
 
+    const isSelf =
+      app.account?.id != null &&
+      userId != null &&
+      String(app.account.id) === String(userId);
+
+    const { isLoading: userLoading, isError: userError } = useQuery({
+      queryKey: ["user", identifier, app.account?.id],
+      queryFn: () => app.users.resolveByIdentifier(identifier, true),
+      enabled: !viewerUser,
+      retry: false
+    });
+
     const { isLoading: profileLoading, isError: profileError } = useQuery({
-      queryKey: ["profile", userId],
-      enabled: !!userId && !initialProfile && !userError,
+      queryKey: ["profile", userId, app.account?.id],
+      enabled: !!userId && !userError && (!initialProfile || isSelf),
       queryFn: () => app.profiles.resolve(userId!, true),
-      retry: false,
+      retry: false
     });
 
     const cachedProfile = userId ? app.profiles.get(userId) : undefined;
@@ -72,7 +86,6 @@ export const ProfileViewerPage = observer(
         ? app.profiles.add(initialProfile)
         : undefined);
 
-    const isSelf = app.account?.id === viewerUser?.id;
     const previewDraft =
       isSelf && isPreviewMode && userId
         ? app.profiles.getPreviewDraft(userId)
@@ -100,24 +113,57 @@ export const ProfileViewerPage = observer(
 
     if ((userLoading || profileLoading) && !viewerUser) return <Loading />;
 
-    if (userError || profileError || !viewerUser || !profile) {
+    if (userError || !viewerUser) {
       return (
         <ProfileLayout
           title={t("profile.viewer.title")}
           backLabel={tCommon("close")}
           onBack={() => navigateToPreferredMode(app, navigate)}
         >
-          <Stack
-            width="100%"
-            height="100%"
-            alignItems="center"
-            justifyContent="center"
-            p={4}
-          >
-            <Typography level="title-md">{t("profile.viewer.userNotFound")}</Typography>
-          </Stack>
+          <ProfileNotFoundState
+            onBack={() => navigateToPreferredMode(app, navigate)}
+          />
         </ProfileLayout>
       );
+    }
+
+    if ((profileError || !profile) && !isSelf) {
+      return (
+        <ProfileLayout
+          title={t("profile.viewer.title")}
+          backLabel={tCommon("close")}
+          onBack={() => navigateToPreferredMode(app, navigate)}
+        >
+          <ProfileNotFoundState
+            onBack={() => navigateToPreferredMode(app, navigate)}
+          />
+        </ProfileLayout>
+      );
+    }
+
+    if (!profile) {
+      if (profileLoading) return <Loading />;
+      if (isSelf) {
+        return (
+          <ProfileLayout
+            title={t("profile.viewer.yourProfile")}
+            backLabel={tCommon("close")}
+            onBack={() => navigateToPreferredMode(app, navigate)}
+            actions={
+              <Button
+                color="primary"
+                size="sm"
+                onClick={() => navigate({ to: "/profile" })}
+              >
+                {t("profile.customizeProfile")}
+              </Button>
+            }
+          >
+            <ProfileEmptyState isSelf />
+          </ProfileLayout>
+        );
+      }
+      return <Loading />;
     }
 
     if (isPreviewMode && isSelf && !previewDraft) {

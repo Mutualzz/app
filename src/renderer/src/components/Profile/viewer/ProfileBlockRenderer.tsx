@@ -17,6 +17,7 @@ import {
 } from "@components/Profile/viewer/profileLayout.utils";
 import type { APIProfileBlock } from "@mutualzz/types";
 import { resolveProfileBlockCornerRadius } from "@mutualzz/ui-core";
+import { useTheme } from "@mutualzz/ui-web";
 import type { AccountStore } from "@stores/Account.store";
 import type { User } from "@stores/objects/User";
 import type { UserProfile } from "@stores/objects/UserProfile";
@@ -84,6 +85,7 @@ export const ProfileBlockRenderer = observer(
     onPointerDown,
     onContextMenu
   }: Props) => {
+    const { theme } = useTheme();
     const rect = percentToPixels(block, canvas);
 
     const content = (() => {
@@ -166,7 +168,7 @@ export const ProfileBlockRenderer = observer(
           zIndex: block.zIndex,
           outline:
             !readOnly && selected
-              ? "2px solid var(--joy-palette-primary-500, #6366f1)"
+              ? `2px solid ${theme.colors.primary}`
               : undefined,
           outlineOffset: !readOnly && selected ? 2 : undefined,
           borderRadius: cornerRadius,

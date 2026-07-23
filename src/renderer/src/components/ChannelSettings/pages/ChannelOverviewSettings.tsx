@@ -9,7 +9,7 @@ import { Paper } from "@components/Paper";
 import { Button } from "@components/Button";
 import { InputWithLabel } from "@components/InputWithLabel";
 import { APIChannel, ChannelType } from "@mutualzz/types";
-import { normalizeJSON } from "@utils/JSON";
+import { normalizeJSON } from "@mutualzz/client";
 import { MarkdownInput } from "@components/Markdown/MarkdownInput/MarkdownInput";
 import { useTranslation } from "react-i18next";
 

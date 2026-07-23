@@ -58,7 +58,7 @@ export const CustomStatusEmojiPicker = ({ value, onChange }: Props) => {
       trigger={
         <IconButton
           variant="plain"
-          color={value ? "primary" : "neutral"}
+          color={value ? "primary" : undefined}
           title={
             value ? t("customStatus.changeEmoji") : t("customStatus.addEmoji")
           }

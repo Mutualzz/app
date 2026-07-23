@@ -101,7 +101,7 @@ export const BridgeChatHeader = observer(
             placement="bottom"
           >
             <IconButton
-              color={app.memberListVisible ? "success" : "neutral"}
+              color={app.memberListVisible ? "success" : undefined}
               onClick={() => app.toggleMemberList()}
             >
               <UsersIcon size={20} weight="fill" />

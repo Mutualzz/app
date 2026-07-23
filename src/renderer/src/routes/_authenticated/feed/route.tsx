@@ -1,4 +1,8 @@
 import { FeedSidebar } from "@components/Feed/FeedSidebar";
+import {
+  SIDEBAR_RAIL_USERBAR_WIDTH,
+  SIDEBAR_RAIL_WIDTH
+} from "@components/Navigation/SidebarRail";
 import { Paper } from "@components/Paper";
 import { UserBar } from "@components/User/UserBar";
 import { useAppStore } from "@hooks/useStores";
@@ -23,15 +27,14 @@ function RouteComponent() {
   }, []);
 
   return (
-    <Stack width="100%" height="100%" direction="row">
+    <Stack width="100%" height="100%" direction="row" position="relative">
       <Stack
-        position="relative"
-        maxWidth="17.5rem"
-        width="100%"
-        direction="column"
+        width={SIDEBAR_RAIL_WIDTH}
+        minWidth={SIDEBAR_RAIL_WIDTH}
+        height="100%"
+        flexShrink={0}
       >
         <FeedSidebar />
-        <UserBar />
       </Stack>
       <Paper
         borderRight="0 !important"
@@ -43,6 +46,14 @@ function RouteComponent() {
       >
         <Outlet />
       </Paper>
+      <Stack
+        position="absolute"
+        bottom={0}
+        left={0}
+        width={SIDEBAR_RAIL_USERBAR_WIDTH}
+      >
+        <UserBar />
+      </Stack>
     </Stack>
   );
 }

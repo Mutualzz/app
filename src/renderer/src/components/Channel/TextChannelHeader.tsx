@@ -1,6 +1,13 @@
 import { Paper } from "@components/Paper";
 import { useAppStore } from "@hooks/useStores";
-import { ButtonGroup, Divider, IconSlot, Stack, Typography, useTheme } from "@mutualzz/ui-web";
+import {
+  ButtonGroup,
+  Divider,
+  IconSlot,
+  Stack,
+  Typography,
+  useTheme
+} from "@mutualzz/ui-web";
 import { resolveWallpaperDivider } from "@mutualzz/ui-core";
 import type { Channel } from "@stores/objects/Channel";
 import { observer } from "mobx-react-lite";
@@ -42,7 +49,13 @@ export const TextChannelHeader = observer(({ channel }: Props) => {
           : null)
       }}
     >
-      <Stack direction="row" alignItems="center" flex={1} spacing={2} minWidth={0}>
+      <Stack
+        direction="row"
+        alignItems="center"
+        flex={1}
+        spacing={2}
+        minWidth={0}
+      >
         <Stack direction="row" alignItems="center" spacing={1}>
           <IconSlot size={16}>
             <HashIcon />
@@ -75,7 +88,7 @@ export const TextChannelHeader = observer(({ channel }: Props) => {
           placement="bottom"
         >
           <IconButton
-            color={app.memberListVisible ? undefined : "neutral"}
+            color={app.memberListVisible ? "success" : undefined}
             onClick={() => app.toggleMemberList()}
           >
             <UsersIcon weight="fill" />

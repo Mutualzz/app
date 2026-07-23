@@ -11,7 +11,7 @@ import type { ProfileActivityBlock, Snowflake } from "@mutualzz/types";
 import { resolveProfileBlockCornerRadius } from "@mutualzz/ui-core";
 import { Stack, Typography } from "@mutualzz/ui-web";
 import { PulseIcon } from "@phosphor-icons/react";
-import { getCustomActivity, getNonCustomActivities } from "@utils/customStatus";
+import { getCustomActivity, getNonCustomActivities } from "@mutualzz/client";
 import { observer } from "mobx-react-lite";
 import { useTranslation } from "react-i18next";
 

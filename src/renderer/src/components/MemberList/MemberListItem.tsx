@@ -102,7 +102,9 @@ export const MemberListItem = observer(({ member, isOwner }: Props) => {
               </Tooltip>
             )}
           </Stack>
-          {presence && <SmallActivityStatus presence={presence} />}
+          {presence && (
+            <SmallActivityStatus userId={member.userId} presence={presence} />
+          )}
         </Stack>
       </Paper>
     </UserProfilePopoutTrigger>

@@ -89,6 +89,13 @@ export class UpdaterStore {
     }, CHECK_INTERVAL);
   }
 
+  stopAutoChecker() {
+    if (this.autoCheckTimer) {
+      clearInterval(this.autoCheckTimer);
+      this.autoCheckTimer = null;
+    }
+  }
+
   async checkForUpdates() {
     this.setStage("checking");
     this.setError(null);

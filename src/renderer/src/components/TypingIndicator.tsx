@@ -9,6 +9,11 @@ export const TypingIndicator = observer(
   ({ channelId }: { channelId: string }) => {
     const app = useAppStore();
     const { t } = useTranslation("chat");
+
+    if (app.settings?.extendedSettings.showTypingIndicators === false) {
+      return null;
+    }
+
     const users = app.typing.getUsersTyping(channelId);
 
     if (users.length === 0) return null;
@@ -46,7 +51,9 @@ export const TypingIndicator = observer(
             />
           ))}
         </Stack>
-        <Typography textColor="secondary">{text}</Typography>
+        <Typography textColor="secondary" css={{ fontSize: "calc(1em * var(--chat-font-scale, 1))" }}>
+          {text}
+        </Typography>
       </Paper>
     );
   }

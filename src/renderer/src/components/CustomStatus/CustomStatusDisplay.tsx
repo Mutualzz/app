@@ -2,7 +2,7 @@ import { CustomStatusEmoji } from "./CustomStatusEmoji";
 import { Stack, Typography } from "@mutualzz/ui-web";
 import { useAppStore } from "@hooks/useStores";
 import type { PresenceActivity, PresenceActivityEmoji } from "@mutualzz/types";
-import { hasStatusEmoji } from "@utils/customStatus";
+import { hasStatusEmoji } from "@mutualzz/client";
 import { observer } from "mobx-react-lite";
 import { useEffect } from "react";
 import { TypographyColor, TypographyLevel } from "@mutualzz/ui-core";

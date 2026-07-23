@@ -40,7 +40,17 @@ import { ReadStateStore } from "@stores/ReadState.store";
 import { TypingStore } from "@stores/Typing.store";
 import type { Message } from "@stores/objects/Message";
 import { PostStore } from "@stores/Post.store";
+import { SpaceNotificationSettingsStore } from "@stores/SpaceNotificationSettings.store";
 import { BridgeChatStore } from "@stores/BridgeChat.store";
+import {
+  DEFAULT_KEYBOARD_SHORTCUTS,
+  mergeKeyboardShortcuts,
+  normalizeKeyboardShortcut,
+  type KeyboardShortcutId,
+} from "@utils/keyboardShortcuts";
+import { applyChatFontScale } from "@utils/chatFontScale";
+import { applyMessageLayout } from "@utils/messageLayout";
+import { applyUiDensity } from "@mutualzz/ui-core";
 
 const prefersDark = usePrefersDark();
 
@@ -73,6 +83,7 @@ export class AppStore {
   settings: AccountSettingsStore | null = null;
   mode: AppMode | null = null;
   readStates = new ReadStateStore(this);
+  spaceNotifications = new SpaceNotificationSettingsStore(this);
   joiningSpace?: APISpacePartial | null = null;
   joiningInviteCode?: string | null = null;
   queryClient: QueryClient;
@@ -101,6 +112,7 @@ export class AppStore {
   replyingTo: Message | null = null;
   replyMention = true;
   badgeColor = "#e03131";
+  keyboardShortcuts = mergeKeyboardShortcuts();
   private badgeWatchDispose: (() => void) | null = null;
   private readonly logger = new Logger({
     tag: "AppStore"
@@ -127,13 +139,35 @@ export class AppStore {
         "memberListVisible",
         "dontShowLinkWarning",
         "channelListWidth",
+        "dmChannelListWidth",
+        "badgeColor",
         "voiceChatWidth",
-        "dmCallViewHeight"
+        "dmCallViewHeight",
+        "keyboardShortcuts",
       ],
       storage: localStorage
     });
 
     this.tokenStorage = isElectron ? electronTokenStorage : webTokenStorage;
+
+    reaction(
+      () => this.settings?.extendedSettings.chatFontScale ?? 1,
+      (scale) => applyChatFontScale(scale),
+      { fireImmediately: true },
+    );
+
+    reaction(
+      () => ({
+        messageDisplay:
+          this.settings?.extendedSettings.messageDisplay ?? "default",
+        uiDensity: this.settings?.extendedSettings.uiDensity ?? "default",
+      }),
+      ({ messageDisplay, uiDensity }) => {
+        applyMessageLayout(messageDisplay, uiDensity);
+        applyUiDensity(uiDensity);
+      },
+      { fireImmediately: true },
+    );
   }
 
   get composerVisible() {
@@ -159,13 +193,31 @@ export class AppStore {
     this.badgeColor = color;
   }
 
+  setKeyboardShortcut(id: KeyboardShortcutId, hotkey: string) {
+    this.keyboardShortcuts = {
+      ...this.keyboardShortcuts,
+      [id]: hotkey.trim() ? normalizeKeyboardShortcut(hotkey) : "",
+    };
+  }
+
+  resetKeyboardShortcut(id: KeyboardShortcutId) {
+    this.keyboardShortcuts = {
+      ...this.keyboardShortcuts,
+      [id]: DEFAULT_KEYBOARD_SHORTCUTS[id],
+    };
+  }
+
+  resetKeyboardShortcuts() {
+    this.keyboardShortcuts = mergeKeyboardShortcuts();
+  }
+
   public startBadgeWatch() {
     this.stopBadgeWatch();
     this.badgeWatchDispose = reaction(
       () =>
         [
           [...this.channels.all].reduce((acc, ch) => {
-            return acc + (this.readStates.get(ch.id)?.mentionCount ?? 0);
+            return acc + (this.readStates.get(ch.id)?.displayMentionCount ?? 0);
           }, 0),
           this.badgeColor
         ] as const,
@@ -219,7 +271,10 @@ export class AppStore {
 
   setReplyingTo(message: Message | null) {
     this.replyingTo = message;
-    this.replyMention = true;
+    if (message) {
+      this.replyMention =
+        this.settings?.extendedSettings.replyWithMention ?? true;
+    }
   }
 
   setReplyMention(val: boolean) {
@@ -259,6 +314,22 @@ export class AppStore {
     this.memberListVisible = !this.memberListVisible;
   }
 
+  setMemberListVisible(visible: boolean) {
+    this.memberListVisible = visible;
+  }
+
+  resetChannelListWidth() {
+    this.channelListWidth = 320;
+  }
+
+  resetDmChannelListWidth() {
+    this.dmChannelListWidth = 320;
+  }
+
+  resetCollapsedCategories() {
+    this.channels.resetCollapsedCategories();
+  }
+
   setMode(mode: AppMode) {
     this.mode = mode;
   }
@@ -274,11 +345,16 @@ export class AppStore {
   setUser(user: APIPrivateUser, settings?: APIUserSettings) {
     this.account = new AccountStore(this, user);
     if (settings) {
+      const isInitialSettings = !this.settings;
       const pending = this.settings?.getPendingOverrides();
       this.settings?.dispose();
       const next = new AccountSettingsStore(this, settings);
       if (pending) next.applyLocalOverrides(pending);
       this.settings = next;
+      this.replyMention = next.extendedSettings.replyWithMention;
+      if (isInitialSettings) {
+        this.memberListVisible = next.extendedSettings.defaultMemberListVisible;
+      }
     }
   }
 
@@ -342,10 +418,17 @@ export class AppStore {
       this.hasBootstrapped = false;
       this.account = null;
       this.mode = null;
+      this.keyboardShortcuts = mergeKeyboardShortcuts();
+      this.badgeColor = "#e03131";
+      this.memberListVisible = true;
 
       if (this.settings) this.settings.dispose();
       this.settings = null;
     });
+
+    applyChatFontScale(1);
+    applyMessageLayout("default", "default");
+    applyUiDensity("default");
 
     this.rest.setToken(null);
     this.themes.reset();
@@ -365,6 +448,7 @@ export class AppStore {
       this.drafts.clear();
       this.navigation.clear();
       this.spaces.clear();
+      this.spaceNotifications.clear();
       this.relationships.clear();
       this.queue.clear();
       this.themes.clear();
@@ -393,7 +477,12 @@ export class AppStore {
   }
 
   async loadSettings() {
-    if (this.updater) void this.updater.startAutoChecker();
+    if (
+      this.updater &&
+      this.settings?.extendedSettings.autoCheckUpdates !== false
+    ) {
+      void this.updater.startAutoChecker();
+    }
     if (this.settings) this.settings.startSyncing();
     await this.loadToken();
 

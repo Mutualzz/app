@@ -52,6 +52,7 @@ import {
 } from "@components/Markdown/MarkdownInput/plugins/withMentions";
 import { MentionPicker } from "@components/MentionPicker";
 import { ExpressionPickerTrigger } from "@components/Expression/ExpressionPickerTrigger";
+import { useAppStore } from "@hooks/useStores";
 
 export interface MarkdownInputHandle {
   focus: (opts?: { at?: "start" | "end" | "selectAll" }) => void;
@@ -68,7 +69,7 @@ const MarkdownInput = forwardRef<MarkdownInputHandle, MarkdownInputProps>(
       disabled = false,
 
       autoFocus = false,
-      emoticons = true,
+      emoticons: emoticonsProp,
       hoverToolbar = true,
       emojiPicker = true,
       gifPicker = true,
@@ -77,6 +78,7 @@ const MarkdownInput = forwardRef<MarkdownInputHandle, MarkdownInputProps>(
 
       onChange,
       onKeyDown: onKeyDownProp,
+      onPasteFiles,
       onSendMessage,
       onSelectSticker,
       placeholder,
@@ -89,6 +91,10 @@ const MarkdownInput = forwardRef<MarkdownInputHandle, MarkdownInputProps>(
     },
     ref
   ) => {
+    const app = useAppStore();
+    const emoticons =
+      emoticonsProp ?? app.settings?.extended.convertEmoticons ?? true;
+
     const { theme } = useTheme();
     const inputRef = useRef<HTMLInputElement | null>(null);
 
@@ -307,6 +313,38 @@ const MarkdownInput = forwardRef<MarkdownInputHandle, MarkdownInputProps>(
       [editor, onKeyDownProp]
     );
 
+    const onPaste = useCallback(
+      (e: React.ClipboardEvent) => {
+        if (!onPasteFiles) return;
+
+        const items = Array.from(e.clipboardData.items ?? []);
+        const files = [
+          ...Array.from(e.clipboardData.files ?? []),
+          ...items
+            .filter((item) => item.kind === "file")
+            .map((item) => item.getAsFile())
+            .filter((file): file is File => file != null)
+        ];
+
+        const unique = files.filter(
+          (file, index, all) =>
+            all.findIndex(
+              (other) =>
+                other.name === file.name &&
+                other.size === file.size &&
+                other.type === file.type &&
+                other.lastModified === file.lastModified
+            ) === index
+        );
+
+        if (unique.length === 0) return;
+
+        e.preventDefault();
+        onPasteFiles(unique);
+      },
+      [onPasteFiles]
+    );
+
     const handleChange = useCallback(
       (newValue: Descendant[]) => {
         if (onChange) {
@@ -410,6 +448,7 @@ const MarkdownInput = forwardRef<MarkdownInputHandle, MarkdownInputProps>(
               renderElement={renderElement}
               renderLeaf={renderLeaf}
               onKeyDown={onKeyDown}
+              onPaste={onPaste}
               placeholder={placeholder ?? ""}
               renderPlaceholder={({
                 children,

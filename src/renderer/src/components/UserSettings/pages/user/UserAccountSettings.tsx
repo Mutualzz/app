@@ -1,3 +1,4 @@
+import { maskEmail } from "@mutualzz/client";
 import { Box, Button, Paper, Stack, Typography } from "@mutualzz/ui-web";
 import { observer } from "mobx-react-lite";
 import { useAppStore } from "@hooks/useStores";
@@ -12,6 +13,7 @@ import { Link } from "@components/Link";
 import { EmailChange } from "@components/Modals/EmailChange";
 import { UsernameChange } from "@components/Modals/UsernameChange";
 import { DeleteAccount } from "@components/Modals/DeleteAccount";
+import { SettingsActionRow } from "@components/UserSettings/SettingsField";
 import { useNavigate } from "@tanstack/react-router";
 import { ColorLike } from "@mutualzz/ui-core";
 import { useTranslation } from "react-i18next";
@@ -60,19 +62,7 @@ export const UserAccountSettings = observer(() => {
 
   if (!account) return null;
 
-  const maskedEmail = (() => {
-    const email = account.email ?? "";
-    const atIndex = email.indexOf("@");
-
-    if (atIndex === -1) return "****";
-
-    const domain = email.slice(atIndex + 1);
-    const localPartLength = atIndex;
-
-    if (!domain) return "****";
-
-    return `${"*".repeat(localPartLength)}@${domain}`;
-  })();
+  const maskedEmail = maskEmail(account.email ?? "");
 
   return (
     <Stack mx={20} direction="column" flex={1}>
@@ -106,117 +96,76 @@ export const UserAccountSettings = observer(() => {
             m={7.5}
             direction="column"
           >
-            <Stack
-              width="100%"
-              alignItems="center"
-              justifyContent="space-between"
-            >
-              <Stack direction="column">
-                <Typography fontWeight="bold">{t("account.displayName")}</Typography>
-                <Typography level="body-sm">
-                  {account.globalName ?? t("account.notSet")}
-                </Typography>
-              </Stack>
-              <Box>
-                <Button color="neutral" onClick={switchToProfile}>
-                  {t("account.edit")}
-                </Button>
-              </Box>
-            </Stack>
-            <Stack
-              width="100%"
-              alignItems="center"
-              justifyContent="space-between"
-            >
-              <Stack direction="column">
-                <Typography fontWeight="bold">{t("account.username")}</Typography>
-                <Typography level="body-sm">{account.username}</Typography>
-              </Stack>
-              <Box>
-                <Button
-                  color="neutral"
-                  onClick={() =>
-                    openModal("change-username", <UsernameChange />)
-                  }
-                >
-                  {t("account.edit")}
-                </Button>
-              </Box>
-            </Stack>
-            <Stack
-              width="100%"
-              alignItems="center"
-              justifyContent="space-between"
-            >
-              <Stack direction="column" justifyContent="center" spacing={1.25}>
-                <Stack spacing={1.25}>
-                  <Typography fontWeight="bold">{t("account.email")}</Typography>
+            <SettingsActionRow
+              title={t("account.displayName")}
+              description={account.globalName ?? t("account.notSet")}
+              actionLabel={t("account.edit")}
+              onClick={switchToProfile}
+            />
+            <SettingsActionRow
+              title={t("account.username")}
+              description={account.username}
+              actionLabel={t("account.edit")}
+              onClick={() =>
+                openModal("change-username", <UsernameChange />)
+              }
+            />
+            <SettingsActionRow
+              title={t("account.email")}
+              description={
+                <Stack direction="column" spacing={1.25}>
                   {!account.flags.has("Verified") && (
                     <Typography level="body-sm" variant="plain" color="danger">
                       {t("account.unverified")}
                     </Typography>
                   )}
+                  <Stack direction="row" spacing={1.25} alignItems="center">
+                    <Typography level="body-sm">
+                      {hideEmail && account.flags.has("Verified")
+                        ? maskedEmail
+                        : account.email}
+                    </Typography>
+                    {account.flags.has("Verified") && (
+                      <Link
+                        level="body-xs"
+                        onClick={toggleEmail}
+                        color="info"
+                        variant="plain"
+                      >
+                        {hideEmail ? t("account.show") : t("account.hide")}
+                      </Link>
+                    )}
+                    {!account.flags.has("Verified") && (
+                      <Link
+                        level="body-xs"
+                        onClick={() => sendEmailVerification()}
+                        disabled={sendingCode}
+                        variant="solid"
+                        color="success"
+                        css={{
+                          padding: "2px 8px",
+                          borderRadius: 16
+                        }}
+                        underline="none"
+                      >
+                        {t("account.verify")}
+                      </Link>
+                    )}
+                  </Stack>
                 </Stack>
-                <Stack spacing={1.25}>
-                  <Typography level="body-sm">
-                    {hideEmail && account.flags.has("Verified")
-                      ? maskedEmail
-                      : account.email}
-                  </Typography>
-                  {account.flags.has("Verified") && (
-                    <Link
-                      level="body-xs"
-                      onClick={toggleEmail}
-                      color="info"
-                      variant="plain"
-                    >
-                      {hideEmail ? t("account.show") : t("account.hide")}
-                    </Link>
-                  )}
-                  {!account.flags.has("Verified") && (
-                    <Link
-                      level="body-xs"
-                      onClick={() => sendEmailVerification()}
-                      disabled={sendingCode}
-                      variant="solid"
-                      color="success"
-                      css={{
-                        padding: "2px 8px",
-                        borderRadius: 16
-                      }}
-                      underline="none"
-                    >
-                      {t("account.verify")}
-                    </Link>
-                  )}
-                </Stack>
-              </Stack>
-              <Box>
-                <Button
-                  color="neutral"
-                  onClick={() => {
-                    sendConfirmEmail();
-                  }}
-                  disabled={confirmingEmail}
-                >
-                  {t("account.edit")}
-                </Button>
-              </Box>
-            </Stack>
+              }
+              actionLabel={t("account.edit")}
+              actionDisabled={confirmingEmail}
+              onClick={() => sendConfirmEmail()}
+            />
           </Paper>
         </Stack>
       </Paper>
-      <Stack direction="column" spacing={1.25}>
-        <Typography fontWeight="bold">{t("account.password")}</Typography>
-        <Box>
-          <Button
-            color="primary"
-            onClick={() => openModal("change-password", <ChangePassword />)}
-          >
-            {t("account.changePassword")}
-          </Button>
-        </Box>
-      </Stack>
+      <SettingsActionRow
+        title={t("account.password")}
+        actionLabel={t("account.changePassword")}
+        onClick={() => openModal("change-password", <ChangePassword />)}
+      />
       <Stack direction="column" spacing={1.25} mt={5}>
         <Typography fontWeight="bold" color="danger">
           {t("account.dangerZone")}

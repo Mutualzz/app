@@ -3,7 +3,8 @@ import { Paper } from "@components/Paper";
 import type { ProfileDraftState } from "@components/Profile/editor/profileEditor.utils";
 import type { APIProfileMusicSearchTrack } from "@mutualzz/types";
 import { useAppStore } from "@hooks/useStores";
-import { Input, Option, Select, Stack, Typography } from "@mutualzz/ui-web";
+import { formatColor } from "@mutualzz/ui-core";
+import { Input, Option, Select, Stack, Typography, useTheme } from "@mutualzz/ui-web";
 import {
   MagnifyingGlassIcon,
   MusicNotesIcon,
@@ -28,8 +29,14 @@ const TrackArtwork = ({
 }: {
   image?: string | null;
   size?: number;
-}) =>
-  image ? (
+}) => {
+  const { theme } = useTheme();
+  const neutralSoftBg = formatColor(theme.colors.neutral, {
+    alpha: 10,
+    format: "hexa"
+  });
+
+  return image ? (
     <img
       src={image}
       alt=""
@@ -50,13 +57,14 @@ const TrackArtwork = ({
       justifyContent="center"
       css={{
         borderRadius: 8,
-        background: "var(--mz-palette-neutral-softBg)",
+        background: neutralSoftBg,
         flexShrink: 0
       }}
     >
       <MusicNotesIcon size={size <= 40 ? 16 : 20} />
     </Stack>
   );
+};
 
 const TrackMeta = ({
   name,
@@ -107,6 +115,15 @@ export const ProfileMusicPicker = observer(
   ({ draft, onDraftChange }: Props) => {
     const { t } = useTranslation("common");
     const { t: tSettings } = useTranslation("settings");
+    const { theme } = useTheme();
+    const outlinedBorder = formatColor(theme.colors.neutral, {
+      alpha: 30,
+      format: "hexa"
+    });
+    const neutralSoftBg = formatColor(theme.colors.neutral, {
+      alpha: 10,
+      format: "hexa"
+    });
     const app = useAppStore();
     const [query, setQuery] = useState("");
     const [debouncedQuery, setDebouncedQuery] = useState("");
@@ -258,7 +275,7 @@ export const ProfileMusicPicker = observer(
                 css={{
                   maxHeight: 280,
                   overflow: "auto",
-                  border: "1px solid var(--mz-palette-neutral-outlinedBorder)"
+                  border: `1px solid ${outlinedBorder}`
                 }}
               >
                 {(isDebouncing || isFetching) && (
@@ -287,7 +304,7 @@ export const ProfileMusicPicker = observer(
                         opacity: track.previewUrl ? 1 : 0.45,
                         transition: "background 0.15s ease",
                         "&:hover": track.previewUrl
-                          ? { background: "var(--mz-palette-neutral-softBg)" }
+                          ? { background: neutralSoftBg }
                           : undefined
                       }}
                       onClick={() => selectTrack(track)}

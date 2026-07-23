@@ -160,6 +160,37 @@ export const InjectGlobal = observer(() => {
             opacity: 1;
           }
         }
+
+        [data-reduced-motion] *,
+        [data-reduced-motion] *::before,
+        [data-reduced-motion] *::after {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+          scroll-behavior: auto !important;
+        }
+
+        [data-high-contrast] {
+          --high-contrast-border: ${formatColor(theme.colors.neutral, {
+            lighten: 20,
+            format: "hexa"
+          })};
+        }
+
+        [data-high-contrast] button,
+        [data-high-contrast] input,
+        [data-high-contrast] textarea,
+        [data-high-contrast] select,
+        [data-high-contrast] [role="button"],
+        [data-high-contrast] [role="textbox"] {
+          outline: 1px solid var(--high-contrast-border) !important;
+          outline-offset: 0;
+        }
+
+        [data-high-contrast] a {
+          text-decoration: underline;
+          text-underline-offset: 2px;
+        }
       `}
     />
   );

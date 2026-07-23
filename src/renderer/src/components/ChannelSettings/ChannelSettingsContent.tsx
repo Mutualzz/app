@@ -7,7 +7,8 @@ import {
 } from "@components/ChannelSettings/ChannelSettings.context";
 import { useAppStore } from "@hooks/useStores";
 import { useEffect, useRef } from "react";
-import { IconButton, Stack, Typography } from "@mutualzz/ui-web";
+import { IconButton } from "@components/IconButton";
+import { Stack, Typography } from "@mutualzz/ui-web";
 import { Paper } from "@components/Paper";
 import { useModal } from "@contexts/Modal.context";
 import { channelPageTitleKeys } from "@mutualzz/i18n";
@@ -67,7 +68,6 @@ export const ChannelSettingsContent = observer(
             )}
           </Typography>
           <IconButton
-            color="neutral"
             css={{ marginRight: "0.5rem" }}
             variant="plain"
             size="sm"

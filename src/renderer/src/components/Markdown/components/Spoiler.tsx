@@ -5,7 +5,8 @@ import { observer } from "mobx-react-lite";
 
 export const Spoiler = observer(({ children }: PropsWithChildren) => {
   const app = useAppStore();
-  const [revealed, setRevealed] = useState(false);
+  const revealAll = app.settings?.extendedSettings.revealAllSpoilers ?? false;
+  const [revealed, setRevealed] = useState(revealAll);
   const [hovered, setHovered] = useState(false);
 
   const prefersEmbossed = app.settings?.preferEmbossed;

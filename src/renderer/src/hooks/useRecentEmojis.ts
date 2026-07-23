@@ -30,6 +30,12 @@ function saveRecent(recents: RecentEmoji[]) {
   } catch {}
 }
 
+export function clearRecentEmojisStorage() {
+  try {
+    localStorage.removeItem(STORAGE_KEY);
+  } catch {}
+}
+
 export function useRecentEmojis() {
   const [recents, setRecents] = useState<RecentEmoji[]>(loadRecent);
 
@@ -78,5 +84,10 @@ export function useRecentEmojis() {
     []
   );
 
-  return { recents, addRecentStandard, addRecentCustom };
+  const clearRecents = useCallback(() => {
+    clearRecentEmojisStorage();
+    setRecents([]);
+  }, []);
+
+  return { recents, addRecentStandard, addRecentCustom, clearRecents };
 }

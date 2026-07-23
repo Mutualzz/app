@@ -33,7 +33,7 @@ export const Element = ({
 
     case "codeBlock":
       // The fence line (```lang) and closing ``` are kept as editable text
-      // inside the block — Discord-style. No separate label needed.
+      // inside the block — no separate label needed.
       return (
         <pre
           {...attributes}

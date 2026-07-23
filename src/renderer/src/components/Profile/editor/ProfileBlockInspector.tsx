@@ -30,6 +30,7 @@ import type { ColorLike } from "@mutualzz/ui-core";
 import {
   isProfileImageCdnHash,
   isProfileImageVideoUrl,
+  formatColor,
   resolveProfileImageBlockUrl
 } from "@mutualzz/ui-core";
 import {
@@ -57,7 +58,7 @@ import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useAppStore } from "@hooks/useStores";
 import { toast } from "react-toastify";
-import { Divider, Input, Slider, Stack, Typography } from "@mutualzz/ui-web";
+import { Divider, Input, Slider, Stack, Typography, useTheme } from "@mutualzz/ui-web";
 
 interface Props {
   profile: UserProfile;
@@ -82,7 +83,18 @@ const InspectorSection = ({
   collapsed: boolean;
   onToggleCollapsed: () => void;
   children: ReactNode;
-}) => (
+}) => {
+  const { theme } = useTheme();
+  const primarySoftBg = formatColor(theme.colors.primary, {
+    alpha: 10,
+    format: "hexa"
+  });
+  const neutralSoftBg = formatColor(theme.colors.neutral, {
+    alpha: 10,
+    format: "hexa"
+  });
+
+  return (
   <Stack direction="column" spacing={1.25}>
     <Stack
       direction="row"
@@ -101,8 +113,8 @@ const InspectorSection = ({
         justifyContent="center"
         css={{
           borderRadius: 9,
-          background: "var(--mz-palette-primary-softBg)",
-          color: "var(--mz-palette-primary-plainColor)"
+          background: primarySoftBg,
+          color: theme.colors.primary
         }}
       >
         {icon}
@@ -118,8 +130,8 @@ const InspectorSection = ({
         justifyContent="center"
         css={{
           borderRadius: 8,
-          color: "var(--mz-palette-text-tertiary)",
-          "&:hover": { background: "var(--mz-palette-neutral-softBg)" }
+          color: theme.typography.colors.muted,
+          "&:hover": { background: neutralSoftBg }
         }}
       >
         {collapsed ? <CaretRightIcon size={16} /> : <CaretDownIcon size={16} />}
@@ -131,7 +143,8 @@ const InspectorSection = ({
       </Stack>
     )}
   </Stack>
-);
+  );
+};
 
 const SettingCard = ({ children }: { children: ReactNode }) => (
   <Paper
@@ -167,6 +180,11 @@ export const ProfileBlockInspector = observer(
     onSelectBlock
   }: Props) => {
     const { t } = useTranslation("settings");
+    const { theme } = useTheme();
+    const neutralSoftBg = formatColor(theme.colors.neutral, {
+      alpha: 10,
+      format: "hexa"
+    });
     const app = useAppStore();
     const { openModal } = useModal();
     const bannerInputRef = useRef<HTMLInputElement>(null);
@@ -808,7 +826,7 @@ export const ProfileBlockInspector = observer(
                               maxHeight: 120,
                               objectFit: "contain",
                               borderRadius: 8,
-                              background: "var(--mz-palette-neutral-softBg)"
+                              background: neutralSoftBg
                             }}
                           />
                         ) : (
@@ -820,7 +838,7 @@ export const ProfileBlockInspector = observer(
                               maxHeight: 120,
                               objectFit: "contain",
                               borderRadius: 8,
-                              background: "var(--mz-palette-neutral-softBg)"
+                              background: neutralSoftBg
                             }}
                           />
                         ))}
@@ -904,7 +922,7 @@ export const ProfileBlockInspector = observer(
                           borderRadius: 8,
                           background: stickerBlock.expressionId
                             ? "transparent"
-                            : "var(--mz-palette-neutral-softBg)",
+                            : neutralSoftBg,
                           overflow: "hidden"
                         }}
                       >

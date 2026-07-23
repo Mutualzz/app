@@ -92,7 +92,6 @@ const EmptyPane = styled(Stack)(({ theme }) => ({
 
 export interface StickerPickerProps {
   onSelectSticker?: (sticker: Expression) => void;
-  /** Profile editor: show the current user's stickers without channel context. */
   profileMode?: boolean;
 }
 
@@ -198,7 +197,6 @@ export const StickerPicker = observer(
             {search && (
               <IconButton
                 variant="plain"
-                color="neutral"
                 size={12}
                 padding="2px"
                 onClick={() => setSearch("")}

@@ -10,11 +10,11 @@ import {
 } from "react";
 import {
   Divider,
-  IconButton,
   Stack,
   Typography,
   useTheme
 } from "@mutualzz/ui-web";
+import { IconButton } from "@components/IconButton";
 import { Paper } from "@components/Paper";
 import { SpaceIcon } from "@components/Space/SpaceIcon";
 import { GifPicker } from "./GifPicker";
@@ -674,7 +674,6 @@ export const EmojiPicker = observer(
                   {search && (
                     <IconButton
                       variant="plain"
-                      color="neutral"
                       size={12}
                       padding="2px"
                       onClick={() => setSearch("")}
