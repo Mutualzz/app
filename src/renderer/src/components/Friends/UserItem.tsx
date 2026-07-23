@@ -1,6 +1,6 @@
 import { Stack, Typography, useTheme } from "@mutualzz/ui-web";
 import { useAppStore } from "@renderer/hooks/useStores";
-import { Relationship } from "@renderer/stores/objects/Relationship";
+import { Relationship } from "@stores/objects/Relationship";
 import { useNavigate } from "@tanstack/react-router";
 import { observer } from "mobx-react-lite";
 import { useTranslation } from "react-i18next";
@@ -54,7 +54,9 @@ export const UserItem = observer(
           <UserAvatar user={user} badge />
           <Stack direction="column" flex={1}>
             <Typography>{user.displayName}</Typography>
-            {presence && <SmallActivityStatus presence={presence} />}
+            {presence && (
+              <SmallActivityStatus userId={user.id} presence={presence} />
+            )}
           </Stack>
         </Stack>
         <Stack direction="row" alignItems="center" spacing={2.5}>

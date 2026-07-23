@@ -6,7 +6,8 @@ import {
 } from "@components/UserSettings/UserSettings.context";
 import { useAppStore } from "@hooks/useStores";
 import { settingsPageTitleKeys } from "@mutualzz/i18n";
-import { IconButton, Stack, Typography } from "@mutualzz/ui-web";
+import { IconButton } from "@components/IconButton";
+import { Stack, Typography } from "@mutualzz/ui-web";
 import { observer } from "mobx-react-lite";
 import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
@@ -17,7 +18,12 @@ import { AppVoiceVideoSettings } from "@components/UserSettings/pages/app/AppVoi
 import { AppNotificationsSettings } from "@components/UserSettings/pages/app/AppNotificationsSettings";
 import { AppRegisteredGamesSettings } from "@components/UserSettings/pages/app/AppRegisteredGamesSettings";
 import { AppConnectionsSettings } from "@components/UserSettings/pages/app/AppConnectionsSettings";
+import { AppMessagesSettings } from "@components/UserSettings/pages/app/AppMessagesSettings";
+import { AppPrivacySettings } from "@components/UserSettings/pages/app/AppPrivacySettings";
+import { AppDesktopSettings } from "@components/UserSettings/pages/app/AppDesktopSettings";
+import { AppKeybindsSettings } from "@components/UserSettings/pages/app/AppKeybindsSettings";
 import { UserExpressionsSettings } from "@components/UserSettings/pages/user/expressions/UserExpressionsSettings";
+import { UserSessionsSettings } from "@components/UserSettings/pages/user/UserSessionsSettings";
 import { XIcon } from "@phosphor-icons/react";
 
 interface UserSettingsContentProps {
@@ -77,7 +83,6 @@ export const UserSettingsContent = observer(
             {title}
           </Typography>
           <IconButton
-            color="neutral"
             css={{
               marginRight: "0.5rem"
             }}
@@ -105,10 +110,20 @@ export const UserSettingsContent = observer(
         >
           {currentPage === "profile" && <UserProfileSettings />}
           {currentPage === "my-account" && <UserAccountSettings />}
+          {currentPage === "sessions" && <UserSessionsSettings />}
           {currentPage === "appearance" && <AppAppearanceSettings />}
+          {(currentPage === "messages" ||
+            currentPage === "text_and_chat" ||
+            currentPage === "composer") && <AppMessagesSettings />}
+          {(currentPage === "layout" || currentPage === "accessibility") && (
+            <AppAppearanceSettings />
+          )}
+          {currentPage === "privacy" && <AppPrivacySettings />}
           {currentPage === "voice_and_video" && <AppVoiceVideoSettings />}
           {currentPage === "expressions" && <UserExpressionsSettings />}
           {currentPage === "notifications" && <AppNotificationsSettings />}
+          {currentPage === "desktop" && <AppDesktopSettings />}
+          {currentPage === "keybinds" && <AppKeybindsSettings />}
           {currentPage === "registered-games" && <AppRegisteredGamesSettings />}
           {currentPage === "connections" && <AppConnectionsSettings />}
         </Paper>

@@ -34,8 +34,6 @@ interface Pages {
 
 type ThemeCreatorPages = Record<ThemeCreatorCategory, Pages[]>;
 
-// TODO: Work on making adaptive mode change the available pages and inputs
-// TODO: and also work on new adaptive theme generation algorithm
 export const ThemeCreatorSidebarLeft = observer(
   ({ drawerOpen, setDrawerOpen }: ThemeCreatorSidebarProps) => {
     const { t } = useTranslation("settings");

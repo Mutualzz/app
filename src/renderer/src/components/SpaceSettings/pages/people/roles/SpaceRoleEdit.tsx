@@ -13,7 +13,7 @@ import { SpaceRoleEditDisplay } from "@components/SpaceSettings/pages/people/rol
 import type { APIRole } from "@mutualzz/types";
 import { useDraft } from "@hooks/useDraft";
 import { SpaceRoleEditPermissions } from "@components/SpaceSettings/pages/people/roles/SpaceRoleEditPermissions";
-import { normalizeJSON } from "@utils/JSON";
+import { normalizeJSON } from "@mutualzz/client";
 import { RoleActionConfirm } from "@components/Modals/RoleActionConfirm";
 import { useModal } from "@contexts/Modal.context";
 import { ArrowLeftIcon, PlusIcon, TrashIcon } from "@phosphor-icons/react";

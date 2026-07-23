@@ -204,6 +204,7 @@ export const MessageList = observer(({ channel: channelProp }: Props) => {
 
   const ackLatest = useCallback(() => {
     if (!channel?.id) return;
+    if (!isAtBottom.current) return;
 
     const lastMessage = channel.lastMessage;
     if (!lastMessage || "status" in lastMessage) return;
@@ -263,7 +264,13 @@ export const MessageList = observer(({ channel: channelProp }: Props) => {
         <Fragment
           key={`messageGroup-${group.messages[group.messages.length - 1].id}`}
         >
-          <MessageGroup group={group} />
+          <div
+            css={{
+              marginBottom: "var(--message-density-group-gap, 0.375rem)"
+            }}
+          >
+            <MessageGroup group={group} />
+          </div>
           {showDateSeparator && (
             <MessageDateSeparator date={group.createdAt} />
           )}

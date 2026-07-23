@@ -1,4 +1,7 @@
 import type { PresenceActivity } from "@mutualzz/types";
+import type { SpotifyConnectionDto } from "@mutualzz/client";
+
+export type { SpotifyConnectionDto };
 
 export type SpotifyCurrentlyPlayingDto = {
   name: "Spotify";
@@ -16,17 +19,6 @@ export type SpotifyCurrentlyPlayingDto = {
   trackUrl?: string;
   spotifyUri?: string;
 };
-
-export type SpotifyConnectionDto =
-  | { connected: false; available: boolean }
-  | {
-      connected: true;
-      displayName: string | null;
-      externalUrl: string | null;
-      shareSpotify: boolean;
-      available: boolean;
-      expired?: boolean;
-    };
 
 const CONNECTION_TTL_MS = 60_000;
 

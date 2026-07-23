@@ -1,7 +1,15 @@
 import { useAppStore } from "@hooks/useStores";
 import { reaction } from "mobx";
 import { observer } from "mobx-react-lite";
-import { KeyboardEvent, useEffect, useMemo, useRef, useState } from "react";
+import {
+  forwardRef,
+  KeyboardEvent,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState
+} from "react";
 import { Message } from "@stores/objects/Message";
 import type { Channel } from "@stores/objects/Channel";
 import {
@@ -16,20 +24,20 @@ import {
 } from "@mutualzz/types";
 import { useMutation } from "@tanstack/react-query";
 import { Editor } from "slate";
-import Snowflake from "@utils/Snowflake";
+import { Snowflake } from "@mutualzz/client";
 import { messageFlags } from "@mutualzz/bitfield";
 import { createSystemMessage } from "@utils/index";
-import { formatRestError } from "@utils/restError";
+import { formatRestError } from "@mutualzz/client";
 import { Stack, Typography, useTheme } from "@mutualzz/ui-web";
 import { Link } from "@components/Link";
 import { Paper } from "@components/Paper";
 import { TypingIndicator } from "@components/TypingIndicator";
 import { Expression } from "@renderer/stores/objects/Expression";
-import { FileIcon, PlusIcon, XIcon } from "@phosphor-icons/react";
+import { FileIcon, EyeSlashIcon, PlusIcon, XIcon } from "@phosphor-icons/react";
 import { IconButton } from "../IconButton";
 import { useTranslation } from "react-i18next";
 
-const ACCEPTED_MIME_TYPES = [
+const ACCEPTED_MIME_TYPE_LIST = [
   "image/jpeg",
   "image/png",
   "image/gif",
@@ -41,7 +49,10 @@ const ACCEPTED_MIME_TYPES = [
   "audio/wav",
   "application/pdf",
   "text/plain"
-].join(",");
+];
+
+const ACCEPTED_MIME_TYPES = ACCEPTED_MIME_TYPE_LIST.join(",");
+const ACCEPTED_MIME_TYPE_SET = new Set(ACCEPTED_MIME_TYPE_LIST);
 
 const MAX_FILE_SIZE = 100 * 1024 * 1024;
 const MAX_FILES = 10;
@@ -59,10 +70,17 @@ interface Props {
   onRequestEditLatest?: () => void;
 }
 
+export interface MessageInputHandle {
+  addFiles: (incoming: FileList | File[] | null | undefined) => void;
+}
+
 const MAX_STICKERS = 3;
 
 export const MessageInput = observer(
-  ({ channel, message, onStopEditing, onRequestEditLatest }: Props) => {
+  forwardRef<MessageInputHandle, Props>(function MessageInput(
+    { channel, message, onStopEditing, onRequestEditLatest },
+    ref
+  ) {
     const app = useAppStore();
     const { theme } = useTheme();
     const { t } = useTranslation("chat");
@@ -70,6 +88,7 @@ export const MessageInput = observer(
     const [content, setContent] = useState(message?.content ?? "");
     const [stickers, setStickers] = useState<Expression[]>([]);
     const [files, setFiles] = useState<File[]>([]);
+    const [fileSpoilers, setFileSpoilers] = useState<boolean[]>([]);
 
     const inputRef = useRef<MarkdownInputHandle>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -114,6 +133,10 @@ export const MessageInput = observer(
 
     useEffect(() => {
       app.setReplyingTo(null);
+      setContent("");
+      setStickers([]);
+      setFiles([]);
+      setFileSpoilers([]);
     }, [channel?.id]);
 
     useEffect(() => {
@@ -163,6 +186,7 @@ export const MessageInput = observer(
 
     const triggerTyping = () => {
       if (!channel || message?.editing) return;
+      if (app.settings?.extendedSettings.sendTypingIndicators === false) return;
       if (!typingCooldownRef.current) {
         app.rest.post(`/channels/${channel.id}/typing`).catch(() => {});
       }
@@ -220,6 +244,7 @@ export const MessageInput = observer(
         const repliedToId = replyingTo?.id;
         const mentionReply = app.replyMention;
         const pendingFiles = canAttachFiles ? files.slice() : [];
+        const pendingSpoilers = canAttachFiles ? fileSpoilers.slice() : [];
         const contentSnapshot = trimmed;
 
         const author = app.account.raw;
@@ -253,6 +278,7 @@ export const MessageInput = observer(
         setContent("");
         setStickers([]);
         setFiles([]);
+        setFileSpoilers([]);
 
         editor?.select({ anchor: editor.start([]), focus: editor.end([]) });
         editor?.removeNodes();
@@ -296,7 +322,13 @@ export const MessageInput = observer(
               formData.append("repliedToId", repliedToId);
               formData.append("mentionReply", String(mentionReply));
             }
-            pendingFiles.forEach((f) => formData.append("attachments", f));
+            pendingFiles.forEach((f, index) => {
+              formData.append("attachments", f);
+              formData.append(
+                "attachmentSpoilers[]",
+                String(pendingSpoilers[index] ?? false)
+              );
+            });
             return await channel.sendMessage(formData, msg);
           }
 
@@ -340,20 +372,49 @@ export const MessageInput = observer(
       setStickers((prev) => prev.filter((s) => s.id !== stickerId));
     };
 
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      const picked = Array.from(e.target.files ?? []);
-      e.target.value = "";
+    const addFiles = (incoming: FileList | File[] | null | undefined) => {
+      if (!incoming || message?.editing || denySendingMessages || !canAttachFiles)
+        return;
+
+      const picked = Array.from(incoming).filter(
+        (file) => !file.type || ACCEPTED_MIME_TYPE_SET.has(file.type)
+      );
+      if (picked.length === 0) return;
+
       setFiles((prev) => {
         const combined = [...prev, ...picked].slice(0, MAX_FILES);
-        const oversized = combined.filter((f) => f.size > MAX_FILE_SIZE);
-        if (oversized.length > 0) return prev;
+        if (combined.some((f) => f.size > MAX_FILE_SIZE)) return prev;
+        const added = combined.length - prev.length;
+        if (added > 0) {
+          setFileSpoilers((spoilers) =>
+            [...spoilers, ...Array(added).fill(false)].slice(0, combined.length)
+          );
+        }
         return combined;
       });
     };
 
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const picked = e.target.files;
+      e.target.value = "";
+      addFiles(picked);
+    };
+
     const handleRemoveFile = (index: number) => {
       setFiles((prev) => prev.filter((_, i) => i !== index));
+      setFileSpoilers((prev) => prev.filter((_, i) => i !== index));
     };
+
+    const toggleFileSpoiler = (index: number) => {
+      setFileSpoilers((prev) =>
+        prev.map((spoiler, i) => (i === index ? !spoiler : spoiler))
+      );
+    };
+
+    const canAcceptFileDrops =
+      !message?.editing && !denySendingMessages && canAttachFiles;
+
+    useImperativeHandle(ref, () => ({ addFiles }));
 
     const onStopEdit = (e?: KeyboardEvent) => {
       e?.preventDefault();
@@ -455,7 +516,10 @@ export const MessageInput = observer(
         >
           {files.map((file, index) => {
             const isImage = file.type.startsWith("image/");
+            const isVideo = file.type.startsWith("video/");
+            const isSpoiler = fileSpoilers[index] ?? false;
             const previewUrl = previewUrls[index];
+            const canMarkSpoiler = isImage || isVideo;
 
             return (
               <div key={index} css={{ position: "relative", flexShrink: 0 }}>
@@ -472,7 +536,8 @@ export const MessageInput = observer(
                       css={{
                         width: "100%",
                         height: "100%",
-                        objectFit: "cover"
+                        objectFit: "cover",
+                        filter: isSpoiler ? "blur(12px)" : undefined
                       }}
                     />
                   </Paper>
@@ -508,6 +573,26 @@ export const MessageInput = observer(
                       </Typography>
                     </Stack>
                   </Paper>
+                )}
+                {canMarkSpoiler && (
+                  <IconButton
+                    variant="solid"
+                    size="sm"
+                    color={isSpoiler ? "warning" : "neutral"}
+                    onClick={() => toggleFileSpoiler(index)}
+                    css={{
+                      position: "absolute",
+                      bottom: 0,
+                      left: 0,
+                      zIndex: 1,
+                      minWidth: 16,
+                      width: 16,
+                      height: 16
+                    }}
+                    title={t("composer.markAsSpoiler")}
+                  >
+                    <EyeSlashIcon size={8} weight="fill" />
+                  </IconButton>
                 )}
                 <IconButton
                   variant="solid"
@@ -632,6 +717,7 @@ export const MessageInput = observer(
           value={content}
           variant="plain"
           ref={inputRef}
+          emoticons={app.settings?.extended.convertEmoticons ?? true}
           onChange={onChange}
           placeholder={message?.editing ? message.content : placeholder}
           onKeyDown={onKeyDown}
@@ -641,11 +727,24 @@ export const MessageInput = observer(
               contentOverride: msg
             })
           }
+          onPasteFiles={canAcceptFileDrops ? addFiles : undefined}
           onSelectSticker={handleSelectSticker}
           disabled={denySendingMessages}
-          emojiPicker={!denySendingMessages}
-          gifPicker={!denySendingMessages && !message?.editing}
-          stickerPicker={!denySendingMessages && !message?.editing}
+          emojiPicker={
+            !denySendingMessages &&
+            (app.settings?.extendedSettings.showEmojiPicker ?? true)
+          }
+          gifPicker={
+            !denySendingMessages &&
+            !message?.editing &&
+            (app.settings?.extendedSettings.showGifPicker ?? true)
+          }
+          stickerPicker={
+            !denySendingMessages &&
+            !message?.editing &&
+            (app.settings?.extendedSettings.showStickerPicker ?? true)
+          }
+          hoverToolbar={app.settings?.extendedSettings.showMarkdownToolbar ?? true}
           startContent={
             !message?.editing && !denySendingMessages && canAttachFiles ? (
               <Stack alignItems="center" justifyContent="center" mr={2.5}>
@@ -673,7 +772,7 @@ export const MessageInput = observer(
     );
 
     return message?.editing ? (
-      <Stack direction="column" spacing={1.25}>
+      <Stack direction="column" spacing={1.25} css={{ fontSize: "calc(1em * var(--chat-font-scale, 1))" }}>
         {inputContent}
         <Typography level="body-xs" textColor="secondary">
           {t("composer.editHintEscapeTo")}{" "}
@@ -696,7 +795,10 @@ export const MessageInput = observer(
         ml={hasWallpaper ? 0 : 1.25}
         mr={hasWallpaper ? 0 : 1.75}
         mb={hasWallpaper ? 0 : 3.5}
-        css={{ flexShrink: 0 }}
+        css={{
+          flexShrink: 0,
+          fontSize: "calc(1em * var(--chat-font-scale, 1))"
+        }}
       >
         {typingIndicator}
         {uploadTray}
@@ -704,5 +806,5 @@ export const MessageInput = observer(
         {inputContent}
       </Stack>
     );
-  }
+  })
 );

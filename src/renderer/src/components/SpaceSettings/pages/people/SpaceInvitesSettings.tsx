@@ -8,11 +8,11 @@ import {
   Button,
   ButtonGroup,
   Divider,
-  IconButton,
   Stack,
   Typography,
   useTheme
 } from "@mutualzz/ui-web";
+import { IconButton } from "@components/IconButton";
 import { Invite } from "@stores/objects/Invite";
 import type { Space } from "@stores/objects/Space";
 import dayjs from "dayjs";
@@ -113,7 +113,6 @@ const InviteItem = observer(({ theme, invite, last, now }: InviteItemProps) => {
                 padding: 0,
                 marginLeft: "0.5rem"
               }}
-              color="neutral"
               onClick={copyInviteLink}
             >
               <ClipboardIcon weight="fill" />

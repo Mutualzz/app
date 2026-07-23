@@ -2,13 +2,13 @@ import { Paper } from "@components/Paper";
 import { Button } from "@components/Button";
 import { IconButton } from "@components/IconButton";
 import { DisconnectConnectionConfirm } from "@components/Modals/DisconnectConnectionConfirm";
+import { SettingsToggleRow } from "@components/UserSettings/SettingsField";
 import { useModal } from "@contexts/Modal.context";
 import { useAppStore } from "@hooks/useStores";
 import {
   Divider,
   Slider,
   Stack,
-  Switch,
   Typography,
   useTheme
 } from "@mutualzz/ui-web";
@@ -28,25 +28,23 @@ import { observer } from "mobx-react-lite";
 import { useEffect, useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
-import { isElectron } from "@utils/index";
+import { isElectron, openExternalLink } from "@utils/index";
+import {
+  CONNECTIONS_HEALTH_QUERY_KEY,
+  connectionErrorMessage,
+  FALLBACK_CONNECTION_PROVIDERS,
+  SPOTIFY_CONNECTION_QUERY_KEY,
+  SPOTIFY_CURRENTLY_PLAYING_QUERY_KEY,
+  USER_CONNECTIONS_QUERY_KEY,
+  type ConnectionProvider,
+  type ProviderConnectionDto,
+  type SpotifyConnectionDto,
+} from "@mutualzz/client";
 import {
   invalidateSpotifyConnectionCache,
   setSpotifyConnectionCache,
-  type SpotifyConnectionDto,
   type SpotifyCurrentlyPlayingDto
 } from "@renderer/presence/spotifyPresence";
-
-type ConnectionProvider = "github" | "twitch" | "steam";
-
-type ProviderConnectionDto = {
-  provider: ConnectionProvider;
-  available: boolean;
-  connected: boolean;
-  displayName: string | null;
-  externalUrl: string | null;
-  shareOnProfile: boolean;
-  expired?: boolean;
-};
 
 const PROVIDER_ICONS: Record<ConnectionProvider, ReactNode> = {
   github: <GithubLogoIcon size={28} weight="fill" />,
@@ -54,37 +52,7 @@ const PROVIDER_ICONS: Record<ConnectionProvider, ReactNode> = {
   steam: <SteamLogoIcon size={28} weight="fill" />
 };
 
-const FALLBACK_PROVIDERS: ConnectionProvider[] = ["github", "twitch", "steam"];
-
-function connectionErrorMessage(
-  err: { message?: string } | undefined,
-  fallback: string,
-  t: (key: string) => string
-) {
-  const message = err?.message?.toLowerCase() ?? "";
-  if (message.includes("steam") && message.includes("openid")) {
-    return t("connections.errors.steamOpenId");
-  }
-  if (message.includes("twitch") && message.includes("redirect")) {
-    return t("connections.errors.twitchRedirect");
-  }
-  if (
-    message.includes("revoked") ||
-    message.includes("invalid_grant") ||
-    message.includes("auth expired")
-  ) {
-    return t("connections.errors.revoked");
-  }
-  return err?.message || fallback;
-}
-
-async function openExternalUrl(url: string) {
-  if (isElectron && window.api?.shell?.openExternal) {
-    await window.api.shell.openExternal(url);
-    return;
-  }
-  window.open(url, "_blank", "noopener,noreferrer");
-}
+const FALLBACK_PROVIDERS = FALLBACK_CONNECTION_PROVIDERS;
 
 export const AppConnectionsSettings = observer(() => {
   const { t } = useTranslation("settings");
@@ -110,7 +78,7 @@ export const AppConnectionsSettings = observer(() => {
   }, []);
 
   const connectionQuery = useQuery({
-    queryKey: ["spotify-connection"],
+    queryKey: SPOTIFY_CONNECTION_QUERY_KEY,
     queryFn: async () => {
       const connection =
         await app.rest.get<SpotifyConnectionDto>("/@me/spotify");
@@ -127,14 +95,14 @@ export const AppConnectionsSettings = observer(() => {
   });
 
   const providersQuery = useQuery({
-    queryKey: ["user-connections"],
+    queryKey: USER_CONNECTIONS_QUERY_KEY,
     queryFn: () =>
       app.rest.get<{ providers: ProviderConnectionDto[] }>("/@me/connections"),
     staleTime: 30_000
   });
 
   const healthQuery = useQuery({
-    queryKey: ["connections-health"],
+    queryKey: CONNECTIONS_HEALTH_QUERY_KEY,
     queryFn: () =>
       app.rest.get<{
         github: boolean;
@@ -148,7 +116,7 @@ export const AppConnectionsSettings = observer(() => {
   const connected = connectionQuery.data?.connected === true;
 
   const playingQuery = useQuery({
-    queryKey: ["spotify-currently-playing"],
+    queryKey: SPOTIFY_CURRENTLY_PLAYING_QUERY_KEY,
     enabled: connected && !spotifyExpired,
     queryFn: async () => {
       try {
@@ -162,7 +130,7 @@ export const AppConnectionsSettings = observer(() => {
           setSpotifyExpired(true);
           invalidateSpotifyConnectionCache();
           await queryClient.invalidateQueries({
-            queryKey: ["spotify-connection"]
+            queryKey: SPOTIFY_CONNECTION_QUERY_KEY
           });
         }
         throw err;
@@ -195,7 +163,7 @@ export const AppConnectionsSettings = observer(() => {
       setSpotifyExpired(false);
       setSpotifyNeedsPremium(false);
       invalidateSpotifyConnectionCache();
-      await queryClient.invalidateQueries({ queryKey: ["spotify-connection"] });
+      await queryClient.invalidateQueries({ queryKey: SPOTIFY_CONNECTION_QUERY_KEY });
       app.gateway.refreshPresenceActivities();
     },
     onError: (err: { message?: string }) => {
@@ -211,9 +179,9 @@ export const AppConnectionsSettings = observer(() => {
       setSpotifyExpired(false);
       setSpotifyNeedsPremium(false);
       invalidateSpotifyConnectionCache();
-      await queryClient.invalidateQueries({ queryKey: ["spotify-connection"] });
+      await queryClient.invalidateQueries({ queryKey: SPOTIFY_CONNECTION_QUERY_KEY });
       await queryClient.invalidateQueries({
-        queryKey: ["spotify-currently-playing"]
+        queryKey: SPOTIFY_CURRENTLY_PLAYING_QUERY_KEY
       });
       app.gateway.refreshPresenceActivities();
     }
@@ -227,7 +195,7 @@ export const AppConnectionsSettings = observer(() => {
       ),
     onSuccess: async (data) => {
       setSpotifyConnectionCache(data);
-      await queryClient.invalidateQueries({ queryKey: ["spotify-connection"] });
+      await queryClient.invalidateQueries({ queryKey: SPOTIFY_CONNECTION_QUERY_KEY });
       app.gateway.refreshPresenceActivities();
     }
   });
@@ -239,7 +207,7 @@ export const AppConnectionsSettings = observer(() => {
     onSuccess: async () => {
       setSpotifyNeedsPremium(false);
       await queryClient.invalidateQueries({
-        queryKey: ["spotify-currently-playing"]
+        queryKey: SPOTIFY_CURRENTLY_PLAYING_QUERY_KEY
       });
       app.gateway.refreshPresenceActivities();
     },
@@ -264,7 +232,7 @@ export const AppConnectionsSettings = observer(() => {
     onSuccess: async () => {
       setSpotifyNeedsPremium(false);
       await queryClient.invalidateQueries({
-        queryKey: ["spotify-currently-playing"]
+        queryKey: SPOTIFY_CURRENTLY_PLAYING_QUERY_KEY
       });
     },
     onError: (err: { message?: string }) => {
@@ -304,7 +272,7 @@ export const AppConnectionsSettings = observer(() => {
     mutationFn: (provider: ConnectionProvider) =>
       app.rest.delete(`/@me/connections/${provider}`),
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["user-connections"] });
+      await queryClient.invalidateQueries({ queryKey: USER_CONNECTIONS_QUERY_KEY });
     }
   });
 
@@ -320,7 +288,7 @@ export const AppConnectionsSettings = observer(() => {
         }
       ),
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["user-connections"] });
+      await queryClient.invalidateQueries({ queryKey: USER_CONNECTIONS_QUERY_KEY });
     }
   });
 
@@ -409,7 +377,7 @@ export const AppConnectionsSettings = observer(() => {
                       size="sm"
                       startDecorator={<ArrowSquareOutIcon />}
                       onClick={() =>
-                        void openExternalUrl(
+                        void openExternalLink(
                           connectionQuery.data.connected
                             ? connectionQuery.data.externalUrl!
                             : ""
@@ -471,25 +439,13 @@ export const AppConnectionsSettings = observer(() => {
 
           {connected && !spotifyExpired && (
             <>
-              <Stack
-                direction="row"
-                alignItems="center"
-                justifyContent="space-between"
-              >
-                <Stack direction="column" spacing={0.5}>
-                  <Typography level="body-md" fontWeight="bold">
-                    {t("connections.spotify.showActivity")}
-                  </Typography>
-                  <Typography level="body-sm" textColor="muted">
-                    {t("connections.spotify.showActivityDescription")}
-                  </Typography>
-                </Stack>
-                <Switch
-                  checked={shareSpotify}
-                  disabled={shareMutation.isPending}
-                  onChange={(e) => shareMutation.mutate(e.target.checked)}
-                />
-              </Stack>
+              <SettingsToggleRow
+                title={t("connections.spotify.showActivity")}
+                description={t("connections.spotify.showActivityDescription")}
+                checked={shareSpotify}
+                disabled={shareMutation.isPending}
+                onChange={(checked) => shareMutation.mutate(checked)}
+              />
 
               {spotifyNeedsPremium && (
                 <Typography level="body-sm" textColor={theme.colors.warning}>
@@ -648,7 +604,7 @@ export const AppConnectionsSettings = observer(() => {
                           size="sm"
                           startDecorator={<ArrowSquareOutIcon />}
                           onClick={() =>
-                            void openExternalUrl(provider.externalUrl!)
+                            void openExternalLink(provider.externalUrl!)
                           }
                         >
                           {t("connections.openProfile")}
@@ -723,30 +679,18 @@ export const AppConnectionsSettings = observer(() => {
                 )}
 
                 {provider.connected && (
-                  <Stack
-                    direction="row"
-                    alignItems="center"
-                    justifyContent="space-between"
-                  >
-                    <Stack direction="column" spacing={0.5}>
-                      <Typography level="body-md" fontWeight="bold">
-                        {t("connections.showOnProfile")}
-                      </Typography>
-                      <Typography level="body-sm" textColor="muted">
-                        {t("connections.showOnProfileDescription")}
-                      </Typography>
-                    </Stack>
-                    <Switch
-                      checked={provider.shareOnProfile}
-                      disabled={shareProviderMutation.isPending}
-                      onChange={(e) =>
-                        shareProviderMutation.mutate({
-                          provider: provider.provider,
-                          shareOnProfile: e.target.checked
-                        })
-                      }
-                    />
-                  </Stack>
+                  <SettingsToggleRow
+                    title={t("connections.showOnProfile")}
+                    description={t("connections.showOnProfileDescription")}
+                    checked={provider.shareOnProfile}
+                    disabled={shareProviderMutation.isPending}
+                    onChange={(checked) =>
+                      shareProviderMutation.mutate({
+                        provider: provider.provider,
+                        shareOnProfile: checked
+                      })
+                    }
+                  />
                 )}
               </Paper>
             ))}

@@ -48,7 +48,7 @@ function buildPreviewChangelog(partial: {
       "## Highlights\n- Something shiny\n- Something fixed\n\nThanks for updating!",
     imageUrl: partial.imageUrl?.trim() || null,
     authorId: "0",
-    desktopVersion: partial.desktopVersion?.trim() || "6.25.0",
+    desktopVersion: partial.desktopVersion?.trim() || "6.26.0",
     mobileVersion: partial.mobileVersion?.trim() || null,
     publishedAt: partial.publishedAt ?? now,
     createdAt: now,

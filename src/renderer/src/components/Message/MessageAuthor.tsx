@@ -4,7 +4,7 @@ import type { Space } from "@stores/objects/Space";
 import { observer } from "mobx-react-lite";
 import type { ColorLike } from "@mutualzz/ui-core";
 import { useTranslation } from "react-i18next";
-import { isSystemMessageType, isSystemUser } from "@utils/systemUser";
+import { isSystemMessageType, isSystemUser } from "@mutualzz/client";
 import { UserProfilePopoutTrigger } from "../Profile/popout/UserProfilePopoutTrigger";
 
 interface Props {

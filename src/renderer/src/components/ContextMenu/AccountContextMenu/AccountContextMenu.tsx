@@ -18,7 +18,7 @@ import {
   UserIcon
 } from "@phosphor-icons/react";
 import { useNavigate } from "@tanstack/react-router";
-import { STATUS_DURATION_OPTIONS } from "@utils/statusDurations";
+import { STATUS_DURATION_OPTIONS } from "@mutualzz/client";
 import { AccountContextMenuHeader } from "@components/ContextMenu/AccountContextMenu/AccountContextMenuHeader";
 import { useTranslation } from "react-i18next";
 

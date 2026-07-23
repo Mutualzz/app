@@ -53,7 +53,6 @@ export const ProfileMusicBlockView = ({ block, profile }: Props) => {
   const [volume, setVolume] = useState(readProfileMusicVolumePercent);
   const [youtubeActive, setYoutubeActive] = useState(false);
 
-  // When audioHash is set, custom metadata takes priority over track search result
   const audioHash = block.audioHash ?? null;
   const musicFallback = tSettings("profile.blocks.music");
   const title = audioHash
@@ -68,7 +67,6 @@ export const ProfileMusicBlockView = ({ block, profile }: Props) => {
   const openUrl = block.track?.trackUrl ?? block.trackUrl ?? null;
   const source = audioHash ? null : (block.track?.source ?? null);
 
-  // Playback priority: uploaded audio > YouTube > 30s preview
   const initialAudioSrc = audioHash
     ? profile.constructProfileMusicAudioUrl(audioHash)
     : (block.track?.previewUrl ?? block.previewUrl ?? null);

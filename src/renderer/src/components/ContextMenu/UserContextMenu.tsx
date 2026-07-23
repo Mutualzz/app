@@ -7,6 +7,7 @@ import { ContextSubmenu } from "@components/ContextSubmenu";
 import type { Role } from "@stores/objects/Role";
 import { generateMenuIDs, useMenu } from "@contexts/ContextMenu.context";
 import { Checkbox, Divider, Slider, Stack, Typography } from "@mutualzz/ui-web";
+import { useEffect } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { Button } from "@components/Button";
 import { useModal } from "@contexts/Modal.context";
@@ -47,6 +48,13 @@ export const UserContextMenu = observer(
 
     const isSelf = app.account?.id === user.id;
     const isViewerStaff = app.account?.isStaff ?? false;
+
+    useEffect(() => {
+      if (isSelf) return;
+      void app.users.resolve(user.id);
+    }, [app.users, isSelf, user.id]);
+
+    const cannotDm = "viewerCanDm" in user && user.viewerCanDm === false;
 
     const activeChannel = app.channels.active;
     const isActiveGroupDM = activeChannel?.isGroupDM ?? false;
@@ -93,6 +101,7 @@ export const UserContextMenu = observer(
 
     const meId = app.account?.id;
     const iBlockedThem = isBlocked && relationship?.userId === meId;
+    const theyBlockedMe = isBlocked && relationship?.userId !== meId;
 
     const dmChannel = insideDMs
       ? app.channels.getDMChannel(meId!, user.id)
@@ -296,6 +305,13 @@ export const UserContextMenu = observer(
             >
               {t("contextMenu.markAsRead")}
             </ContextItem>
+            <ContextItem
+              onClick={() => void readState.setMuted(!readState.isMuted)}
+            >
+              {readState.isMuted
+                ? t("contextMenu.unmuteNotifications")
+                : t("contextMenu.muteNotifications")}
+            </ContextItem>
             <Divider css={{ opacity: 0.5 }} />
           </>
         )}
@@ -337,7 +353,7 @@ export const UserContextMenu = observer(
             {!insideDMs && (
               <ContextItem
                 onClick={() => openDm()}
-                disabled={openingDm || iBlockedThem}
+                disabled={openingDm || iBlockedThem || theyBlockedMe || cannotDm}
               >
                 {t("contextMenu.message")}
               </ContextItem>

@@ -9,7 +9,7 @@ import type { SkinTone } from "@utils/emojis/emojiSprite";
 import {
   expressionToReactionEmoji,
   pickerEmojiToReactionEmoji
-} from "@utils/reactions";
+} from "@mutualzz/client";
 import type { APIMessageReactionEmoji } from "@mutualzz/types";
 
 export type QuickReactionItem =
@@ -115,6 +115,16 @@ export const getQuickReactionItems = (
 ): QuickReactionItem[] => {
   const items: QuickReactionItem[] = [];
   const seen = new Set<string>();
+
+  for (const key of app.settings?.extendedSettings.quickReactionEmojis ?? []) {
+    if (items.length >= limit) break;
+
+    const item = resolveFavoriteKey(key, app);
+    if (!item || seen.has(item.key)) continue;
+
+    seen.add(item.key);
+    items.push(item);
+  }
 
   for (const key of app.settings?.favoriteEmojis ?? []) {
     if (items.length >= limit) break;

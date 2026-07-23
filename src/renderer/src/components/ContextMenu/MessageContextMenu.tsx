@@ -69,7 +69,9 @@ export const MessageContextMenu = observer(({ message }: Props) => {
     !!me?.hasPermission("ManageMessages", message.channel);
   const canReport = message.author?.id !== app.account?.id;
 
-  const canReact = me?.hasPermission("AddReactions", message.channel);
+  const canReact = !message.space
+    ? true
+    : !!me?.hasPermission("AddReactions", message.channel);
 
   const { mutate: deleteMessage } = useMutation({
     mutationKey: ["delete-message", message.id],

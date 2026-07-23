@@ -3,7 +3,7 @@ import { Divider, Stack, Typography, useTheme } from "@mutualzz/ui-web";
 import { Button } from "@components/Button";
 import { useAppStore } from "@hooks/useStores";
 import { type ChangeEvent, useRef, useState } from "react";
-import Snowflake from "@utils/Snowflake";
+import { Snowflake } from "@mutualzz/client";
 import { ExpressionType } from "@mutualzz/types";
 import { generateHash } from "@utils/index";
 import { useModal } from "@contexts/Modal.context";

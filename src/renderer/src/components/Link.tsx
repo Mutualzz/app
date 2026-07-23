@@ -3,6 +3,7 @@ import { useModal } from "@contexts/Modal.context";
 import { useAppStore } from "@hooks/useStores";
 import {
   Button,
+  Checkbox,
   Link as MLink,
   type LinkProps,
   Stack,
@@ -10,7 +11,7 @@ import {
 } from "@mutualzz/ui-web";
 import { useNavigate } from "@tanstack/react-router";
 import { isElectron, toSpotifyUri } from "@utils/index";
-import { type MouseEvent } from "react";
+import { type MouseEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { observer } from "mobx-react-lite";
 
@@ -19,20 +20,25 @@ interface Props {
   unsafe?: boolean;
 }
 
+async function openExternalUrl(url: URL) {
+  const urlStr = url.toString();
+  if (window.api) {
+    await window.api.shell.openExternal(toSpotifyUri(url) ?? urlStr);
+    return;
+  }
+
+  window.open(urlStr, "_blank", "noopener,noreferrer");
+}
+
 export const OpenLink = observer(({ url, unsafe }: Props) => {
   const { t } = useTranslation("common");
   const { closeModal } = useModal();
   const app = useAppStore();
+  const [skipWarning, setSkipWarning] = useState(false);
 
   const handleProceed = async () => {
-    const urlStr = url.toString();
-    if (window.api) {
-      await window.api.shell.openExternal(toSpotifyUri(url) ?? urlStr);
-      closeModal();
-      return;
-    }
-
-    window.open(urlStr, "_blank", "noopener,noreferrer");
+    if (skipWarning) app.setDontShowLinkWarning(true);
+    await openExternalUrl(url);
     closeModal();
   };
 
@@ -105,6 +111,11 @@ export const OpenLink = observer(({ url, unsafe }: Props) => {
       )}
 
       <Stack spacing={2.5} width="100%" mb={4} px={4}>
+        <Checkbox
+          label={t("externalLink.dontShowAgain")}
+          value={skipWarning}
+          onChange={() => setSkipWarning((prev) => !prev)}
+        />
         <Button expand onClick={handleProceed} variant="soft" color="success">
           {t("externalLink.proceed")}
         </Button>
@@ -123,6 +134,7 @@ export const OpenLink = observer(({ url, unsafe }: Props) => {
 export const Link = observer(({ href, onClick, ...props }: LinkProps) => {
   const { openModal } = useModal();
   const navigate = useNavigate();
+  const app = useAppStore();
   const url = URL.parse(href || "");
   const isUnsafe =
     !!url && (url.protocol === "http:" || url.host.startsWith("localhost"));
@@ -136,14 +148,20 @@ export const Link = observer(({ href, onClick, ...props }: LinkProps) => {
 
     e.preventDefault();
 
-    if (isUnsafe && !isInternal) {
-      openModal("open-link-unsafe", <OpenLink url={url} unsafe />);
-      return;
-    }
-
     if (isInternal) {
       const path = url.pathname + url.search + url.hash;
       navigate({ to: path });
+      return;
+    }
+
+    if (app.dontShowLinkWarning) {
+      void openExternalUrl(url);
+      onClick?.(e);
+      return;
+    }
+
+    if (isUnsafe && !isInternal) {
+      openModal("open-link-unsafe", <OpenLink url={url} unsafe />);
       return;
     }
 

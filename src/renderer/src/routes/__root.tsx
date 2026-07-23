@@ -29,14 +29,14 @@ import { DesktopShell } from "@components/Desktop/DesktopShell";
 import { InjectGlobal } from "@components/InjectGlobal";
 import Loader from "@components/Loader/Loader";
 import { invalidateSpotifyConnectionCache } from "@renderer/presence/spotifyPresence";
-import { ModeSwitcher } from "@components/ModeSwitcher";
 import WindowTitleBar from "@components/WindowTitleBar";
 import { AppTheme } from "@contexts/AppTheme.context";
 import { DesktopShellProvider } from "@contexts/DesktopShell.context";
 import { ModalProvider } from "@contexts/Modal.context";
-import { calendarStrings } from "@utils/i18n";
+import { calendarStrings } from "@mutualzz/client";
 import { NavigationTracker } from "@components/NavigationTracker";
 import { AppHotkeys } from "@components/AppHotkeys";
+import { GlobalKeyboardShortcuts } from "@components/GlobalKeyboardShortcuts";
 import { ContextMenuProvider } from "@contexts/ContextMenu.context";
 import { WindowTitleBarProvider } from "@contexts/WindowTitleBar.context";
 import { IncomingCallWatcher } from "@components/Call/IncomingCallWatcher";
@@ -223,11 +223,19 @@ function RootComponent() {
     return unsubscribe;
   }, [navigate, logger, app]);
 
+  const reducedMotion = app.settings?.extendedSettings.reducedMotion ?? false;
+  const highContrast = app.settings?.extendedSettings.highContrast ?? false;
+
   return (
     <QueryClientProvider client={app.queryClient}>
       <HotkeysProvider>
         <RootDocument>
           <AppTheme>
+            <div
+              data-reduced-motion={reducedMotion ? "" : undefined}
+              data-high-contrast={highContrast ? "" : undefined}
+              style={{ display: "contents" }}
+            >
             <ModalProvider>
               <CssBaseline adaptiveScrollbar />
               <DesktopShellProvider>
@@ -242,6 +250,7 @@ function RootComponent() {
                       <ScreenSharePicker />
                       <NavigationTracker />
                       <AppHotkeys />
+                      <GlobalKeyboardShortcuts />
                       <InjectGlobal />
                       <Loader>
                         <Stack
@@ -262,7 +271,6 @@ function RootComponent() {
                           >
                             <Outlet />
                           </Stack>
-                          {app.account && <ModeSwitcher />}
                         </Stack>
                       </Loader>
                     </ContextMenuProvider>
@@ -270,6 +278,7 @@ function RootComponent() {
                 </WindowTitleBarProvider>
               </DesktopShellProvider>
             </ModalProvider>
+            </div>
           </AppTheme>
         </RootDocument>
       </HotkeysProvider>

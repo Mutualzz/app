@@ -8,7 +8,7 @@ import {
 import { Stack, ThemeContext } from "@mutualzz/ui-web";
 import { Theme } from "@stores/objects/Theme";
 import { observer } from "mobx-react-lite";
-import type { PropsWithChildren } from "react";
+import { type PropsWithChildren, useMemo } from "react";
 
 export const SpaceThemeProvider = observer(
   ({ children }: PropsWithChildren) => {
@@ -21,19 +21,28 @@ export const SpaceThemeProvider = observer(
       !!themeCreator.spaceId &&
       themeCreator.spaceId === space?.id;
 
-    if (!space?.themeId && !previewingSpaceTheme) return children;
-
     const source =
       space?.theme ??
       (space?.themeId
         ? (app.themes.themes.get(space.themeId) ?? null)
         : null);
 
-    if (!source && !previewingSpaceTheme) return children;
+    const emotionTheme = useMemo(() => {
+      if (!space?.themeId && !previewingSpaceTheme) return null;
+      if (previewingSpaceTheme) return themeCreator.buildPreviewEmotion();
+      if (!source) return null;
+      return Theme.toEmotion(source);
+    }, [
+      previewingSpaceTheme,
+      source,
+      space?.themeId,
+      themeCreator.inPreview,
+      themeCreator.spaceId,
+      themeCreator.values
+    ]);
 
-    const emotionTheme = previewingSpaceTheme
-      ? themeCreator.buildPreviewEmotion()
-      : Theme.toEmotion(source!);
+    if (!emotionTheme) return children;
+
     const backgroundImageUrl = emotionTheme.backgroundImageUrl;
 
     return (

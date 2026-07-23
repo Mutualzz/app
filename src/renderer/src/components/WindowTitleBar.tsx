@@ -6,7 +6,6 @@ import { useAppStore } from "@hooks/useStores";
 import {
   Box,
   Divider,
-  IconSlot,
   Stack,
   Typography,
   useTheme
@@ -17,13 +16,9 @@ import { useEffect, useRef, useState } from "react";
 import {
   ArrowLeftIcon,
   ArrowRightIcon,
-  CompassIcon,
   DownloadIcon,
   MinusIcon,
-  PlanetIcon,
   SquareIcon,
-  StarIcon,
-  UsersThreeIcon,
   XIcon
 } from "@phosphor-icons/react";
 import { ThemeCreatorModal } from "./ThemeCreator/ThemeCreatorModal";
@@ -36,6 +31,7 @@ import { isElectron } from "@utils/index";
 import { Tooltip } from "@components/Tooltip";
 import { useWindowTitleBar } from "@contexts/WindowTitleBar.context";
 import { NotificationCenterButton } from "@components/NotificationCenter/NotificationCenterButton";
+import { TitleBarModeSwitcher } from "@components/Navigation/TitleBarModeSwitcher";
 
 interface WindowTitleBarProps {
   onHeightChange?: (height: number) => void;
@@ -44,8 +40,6 @@ interface WindowTitleBarProps {
 const WindowTitleBar = ({ onHeightChange }: WindowTitleBarProps) => {
   const { t } = useTranslation("settings");
   const { t: tCommon } = useTranslation("common");
-  const { t: tSpace } = useTranslation("space");
-  const { t: tChat } = useTranslation("chat");
   const app = useAppStore();
   const navigate = useNavigate();
   const { location } = useRouterState();
@@ -362,52 +356,7 @@ const WindowTitleBar = ({ onHeightChange }: WindowTitleBarProps) => {
           justifyContent="center"
           flex={1}
         >
-          {!pageTitleBar && (
-            <>
-              {app.mode === "@me" && (
-                <Stack direction="row" alignItems="center" spacing={1.25}>
-                  <IconSlot size={16}>
-                    <UsersThreeIcon weight="fill" />
-                  </IconSlot>
-                  <Typography level="label-sm" weight="bold">
-                    {location.href.includes("friends")
-                      ? tSpace("sidebar.friends")
-                      : tSpace("sidebar.directMessages")}
-                  </Typography>
-                </Stack>
-              )}
-              {app.mode === "spaces" && (
-                <Stack direction="row" alignItems="center" spacing={1.25}>
-                  <IconSlot size={16}>
-                    <PlanetIcon weight="fill" />
-                  </IconSlot>
-                  <Typography level="label-sm" weight="bold">
-                    {tSpace("sidebar.spaces")}
-                  </Typography>
-                </Stack>
-              )}
-              {app.mode === "feed" && (
-                <Stack direction="row" alignItems="center" spacing={1.25}>
-                  <IconSlot size={16}>
-                    {location.pathname === "/feed/friends" ? (
-                      <UsersThreeIcon weight="fill" />
-                    ) : location.pathname === "/feed/saved" ? (
-                      <StarIcon weight="fill" />
-                    ) : (
-                      <CompassIcon weight="fill" />
-                    )}
-                  </IconSlot>
-                  <Typography level="label-sm" weight="bold">
-                    {location.pathname === "/feed/friends"
-                      ? tChat("feed.sidebar.friends")
-                      : location.pathname === "/feed/saved"
-                        ? tChat("feed.sidebar.saves")
-                        : tChat("feed.sidebar.explore")}
-                  </Typography>
-                </Stack>
-              )}
-            </>
-          )}
+          {!pageTitleBar && <TitleBarModeSwitcher />}
         </Stack>
         <Stack
           flex={1}

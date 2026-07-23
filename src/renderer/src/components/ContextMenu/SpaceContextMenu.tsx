@@ -21,6 +21,7 @@ import {
   spacePageTitleKeys
 } from "@mutualzz/i18n";
 import { ArrowRightIcon, DoorOpenIcon, FlagIcon } from "@phosphor-icons/react";
+import { SpaceNotificationSettingsMenu } from "@components/Space/SpaceNotificationSettingsMenu";
 import { useTranslation } from "react-i18next";
 
 interface Props {
@@ -75,6 +76,8 @@ export const SpaceContextMenu = observer(
             <Divider css={{ opacity: 0.5 }} />
           </>
         )}
+        <SpaceNotificationSettingsMenu space={space} />
+        {!fromSidebar && <Divider css={{ opacity: 0.5 }} />}
         {spaceSettings && (
           <Stack direction="column" spacing={1.25}>
             {spaceSettings.map(([category, pages]) => (

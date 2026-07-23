@@ -3,19 +3,18 @@ import type { PresencePayload } from "@mutualzz/types";
 import { presenceStatusKeys } from "@mutualzz/i18n";
 import { Stack, Typography, useTheme } from "@mutualzz/ui-web";
 import { CustomStatusDisplay } from "@components/CustomStatus/CustomStatusDisplay";
+import { useAppStore } from "@hooks/useStores";
 import { useTranslation } from "react-i18next";
 import { ActivityIcon } from "./Presence/ActivityIcon";
 import {
   activityTypeLabelKey,
   formatActivityPrimary,
   formatActivitySecondary
-} from "@utils/activityDisplay";
-import {
-  getCustomActivity,
-  getNonCustomActivities
-} from "@utils/customStatus";
+} from "@mutualzz/client";
+import { getCustomActivity, getNonCustomActivities } from "@mutualzz/client";
 
 interface Props {
+  userId?: string;
   presence?: PresencePayload;
   vertical?: boolean;
   hideCustomStatus?: boolean;
@@ -25,20 +24,26 @@ interface Props {
 
 export const SmallActivityStatus = observer(
   ({
+    userId,
     presence,
     vertical,
     hideCustomStatus = false,
     showStatus = false,
     customOnly = false
   }: Props) => {
+    const app = useAppStore();
     const { theme } = useTheme();
     const { t } = useTranslation("common");
     const color = theme.colors.success;
+    const profileRestricted =
+      userId != null && app.profiles.isProfileRestricted(userId);
 
     if (!presence) return null;
 
     const customActivity = getCustomActivity(presence);
-    const otherActivities = getNonCustomActivities(presence);
+    const otherActivities = profileRestricted
+      ? []
+      : getNonCustomActivities(presence);
     const activity = otherActivities[0] ?? null;
 
     const statusKey =
@@ -51,13 +56,11 @@ export const SmallActivityStatus = observer(
 
     if (customOnly) {
       if (!customActivity || hideCustomStatus) return null;
-      return (
-        <CustomStatusDisplay activity={customActivity} fontSize={12} />
-      );
+      return <CustomStatusDisplay activity={customActivity} fontSize={12} />;
     }
 
     if (customActivity && !hideCustomStatus) {
-      const extraCount = otherActivities.length;
+      const extraCount = profileRestricted ? 0 : otherActivities.length;
       return (
         <Stack
           direction={vertical ? "column" : "row"}
@@ -66,7 +69,7 @@ export const SmallActivityStatus = observer(
           minWidth={0}
           width="100%"
         >
-          <Stack minWidth={0} flex={1}>
+          <Stack minWidth={0}>
             <CustomStatusDisplay activity={customActivity} fontSize={12} />
           </Stack>
           {!vertical && extraCount > 0 && (

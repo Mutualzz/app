@@ -5,7 +5,7 @@ import { MarkdownRenderer } from "@components/Markdown/MarkdownRenderer/Markdown
 import { useAppStore } from "@hooks/useStores";
 import type { APIAttachment, APIMessageEmbed } from "@mutualzz/types";
 import { Box, Stack, Typography, useTheme } from "@mutualzz/ui-web";
-import { calendarStrings } from "@utils/i18n";
+import { calendarStrings } from "@mutualzz/client";
 import { useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import dayjs from "dayjs";
@@ -20,6 +20,7 @@ import { useTranslation } from "react-i18next";
 
 interface Props {
   post: NonNullable<APIMessageEmbed["post"]>;
+  compact?: boolean;
 }
 
 const THUMB_SIZE = 64;
@@ -117,7 +118,7 @@ const AttachmentThumb = ({
   );
 };
 
-export const PostEmbedPreview = observer(({ post: postData }: Props) => {
+export const PostEmbedPreview = observer(({ post: postData, compact }: Props) => {
   const app = useAppStore();
   const { theme } = useTheme();
   const navigate = useNavigate();
@@ -130,13 +131,16 @@ export const PostEmbedPreview = observer(({ post: postData }: Props) => {
 
   const post = app.posts.get(postData.id);
 
+  const previewWidth = compact ? "100%" : "20rem";
+
   if (isError || (!isLoading && !post)) {
     return (
       <Paper
         direction="row"
         spacing={1.5}
         alignItems="center"
-        width="20rem"
+        width={previewWidth}
+        maxWidth="100%"
         borderRadius={8}
         p={2}
         border={`1px solid ${theme.colors.surface} !important`}
@@ -152,7 +156,8 @@ export const PostEmbedPreview = observer(({ post: postData }: Props) => {
   if (!post) {
     return (
       <Paper
-        width="20rem"
+        width={previewWidth}
+        maxWidth="100%"
         borderRadius={8}
         p={2}
         border={`1px solid ${theme.colors.surface} !important`}
@@ -171,7 +176,8 @@ export const PostEmbedPreview = observer(({ post: postData }: Props) => {
   return (
     <Paper
       direction="column"
-      width="20rem"
+      width={previewWidth}
+      maxWidth="100%"
       borderRadius={8}
       p={2}
       spacing={1.25}

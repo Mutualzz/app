@@ -1,5 +1,6 @@
 import { app, ipcMain } from "electron";
 import { createHash, type Hash } from "crypto";
+import { homedir } from "os";
 import { join, resolve, sep } from "path";
 import { spawn } from "child_process";
 import {
@@ -36,6 +37,10 @@ export function initUpdaterHandlers() {
     const updaterPath = getUpdaterPath();
     if (!existsSync(updaterPath)) return null;
     return hashFileSha256(updaterPath);
+  });
+
+  ipcMain.handle("updater:get-updater-version", () => {
+    return getInstalledUpdaterVersion();
   });
 
   ipcMain.handle(
@@ -376,6 +381,38 @@ function getUpdaterPath(): string {
     return join(process.execPath, "..", "updater.exe");
   }
   return join(process.execPath, "..", "updater");
+}
+
+function updaterDataDir(): string {
+  if (process.platform === "win32") {
+    return join(
+      process.env.LOCALAPPDATA || join(homedir(), "AppData", "Local"),
+      "Mutualzz"
+    );
+  }
+  if (process.platform === "darwin") {
+    return join(homedir(), "Library", "Application Support", "Mutualzz");
+  }
+  return join(homedir(), ".local", "share", "Mutualzz");
+}
+
+function getInstalledUpdaterVersion(): string | null {
+  const dataFile = join(updaterDataDir(), "updater-version.txt");
+  if (existsSync(dataFile)) {
+    const version = readFileSync(dataFile, "utf8").trim();
+    if (version) return version;
+  }
+
+  const bundled = join(
+    process.resourcesPath,
+    "updater-runtime-version.txt"
+  );
+  if (existsSync(bundled)) {
+    const version = readFileSync(bundled, "utf8").trim();
+    if (version) return version;
+  }
+
+  return null;
 }
 
 function detectLinuxPackage(): "appimage" | "debian" | "rpm" | "pacman" {

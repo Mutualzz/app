@@ -23,7 +23,7 @@ import { applyAdaptiveThemeValues } from "@utils/adaptation";
 import { sortThemes } from "@utils/index";
 import { observer } from "mobx-react-lite";
 import { useTranslation } from "react-i18next";
-import Snowflake from "@utils/Snowflake";
+import { Snowflake } from "@mutualzz/client";
 import { usePrefersDark } from "@hooks/usePrefersDark";
 import type {
   ThemeCreatorFilter,
@@ -94,7 +94,7 @@ export const ThemeCreatorSidebarRight = observer(() => {
       const formData = new FormData();
       formData.append(
         "backgroundImage",
-        app.themeCreator.pendingBackgroundFile
+        app.themeCreator.pendingBackgroundFile as File
       );
       const updated = await app.rest.putFormData<APITheme>(base, formData);
       app.themes.add(updated);

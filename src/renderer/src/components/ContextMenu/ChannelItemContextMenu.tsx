@@ -13,6 +13,7 @@ import { ChannelActionConfirm } from "@components/Modals/ChannelActionConfirm";
 import { ContextItem } from "@components/ContextItem";
 import { GearIcon, PaperPlaneTiltIcon, TrashIcon } from "@phosphor-icons/react";
 import { ChannelSettingsModal } from "@components/ChannelSettings/ChannelSettingsModal";
+import { ChannelNotificationSettingsMenu } from "@components/Channel/ChannelNotificationSettingsMenu";
 import { useTranslation } from "react-i18next";
 
 interface Props {
@@ -50,6 +51,7 @@ export const ChannelItemContextMenu = observer(({ space, channel }: Props) => {
           >
             {t("contextMenu.markAsRead")}
           </ContextItem>
+          <ChannelNotificationSettingsMenu channel={channel} />
           <Divider
             css={{
               opacity: 0.5

@@ -1,7 +1,8 @@
 import { Paper } from "@components/Paper";
 import { useModal } from "@contexts/Modal.context";
 import { useAppStore } from "@hooks/useStores";
-import { IconButton, Stack, Typography } from "@mutualzz/ui-web";
+import { IconButton } from "@components/IconButton";
+import { Stack, Typography } from "@mutualzz/ui-web";
 import { observer } from "mobx-react-lite";
 import { useTranslation } from "react-i18next";
 import { ThemeCreatorSidebarRight } from "./ThemeCreatorSidebar.right";
@@ -71,7 +72,6 @@ export const ThemeCreatorContent = observer(() => {
           </Typography>
         </Stack>
         <IconButton
-          color="neutral"
           css={{
             marginRight: "0.5rem"
           }}

@@ -2,7 +2,7 @@ import { Paper } from "@components/Paper";
 import { SpaceIcon } from "@components/Space/SpaceIcon";
 import { UserAvatar } from "@components/User/UserAvatar";
 import type { APIReportContent, APIUser } from "@mutualzz/types";
-import { Stack, Typography } from "@mutualzz/ui-web";
+import { Stack, Typography, useTheme } from "@mutualzz/ui-web";
 import dayjs from "dayjs";
 import { useTranslation } from "react-i18next";
 
@@ -13,6 +13,7 @@ interface Props {
 
 export function StaffReportContent({ content, reportedMessageId }: Props) {
   const { t } = useTranslation("staff");
+  const { theme } = useTheme();
 
   if (content.type === "unavailable") {
     return (
@@ -51,7 +52,7 @@ export function StaffReportContent({ content, reportedMessageId }: Props) {
               spacing={0.25}
               css={
                 isReported
-                  ? { border: "1px solid var(--joy-palette-danger-500)" }
+                  ? { border: `1px solid ${theme.colors.danger}` }
                   : undefined
               }
             >

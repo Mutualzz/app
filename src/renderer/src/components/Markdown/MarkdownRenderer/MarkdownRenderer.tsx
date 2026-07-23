@@ -27,7 +27,6 @@ import { RoleMention } from "@components/Markdown/components/mention/RoleMention
 import { DefaultMention } from "@components/Markdown/components/mention/DefaultMention";
 import { isEmojiOnlyMessage } from "@utils/emojis/isEmojiOnlyMessage";
 
-// TODO: add code blocks in the future
 export const MarkdownRenderer = ({
   textColor = "primary",
   enlargeEmojiOnly = true,

@@ -21,6 +21,8 @@ import {
   type APIUser,
   type APIUserProfile,
   type APIUserSettings,
+  type APIReadState,
+  type APISpaceNotificationSettings,
   ChannelType,
   GatewayCloseCodes,
   GatewayDispatchEvents,
@@ -35,12 +37,12 @@ import {
   APICall,
   type VoiceState as APIVoiceState
 } from "@mutualzz/types";
-import { type Codec, createCodec, type Encoding } from "@utils/codec";
+import { type Codec, createCodec, type Encoding } from "@mutualzz/client";
 import {
   type Compression,
   type Compressor,
   createCompressor
-} from "@utils/compressor";
+} from "@mutualzz/client";
 import { makeAutoObservable } from "mobx";
 import type { AppStore } from "./App.store";
 import {
@@ -50,7 +52,7 @@ import {
 } from "../presence/gamePresence";
 import { normalizeRpcActivities } from "../presence/rpcActivities";
 import { loadSpotifyActivity } from "../presence/spotifyPresence";
-import { normalizeJSON } from "@utils/JSON";
+import { normalizeJSON } from "@mutualzz/client";
 import { isElectron } from "@utils/index";
 import { toast } from "react-toastify";
 import { MessageToast } from "@renderer/components/Toast/MessageToast"; // We have to create our own GatewayStatus "enum" to avoid issues with SSR
@@ -413,6 +415,33 @@ export class GatewayStore {
     }
   }
 
+  refreshMemberList(spaceId: string, channelId: string) {
+    if (!spaceId || !channelId) return;
+
+    const key = `${spaceId}:${channelId}`;
+    this.memberListRanges.delete(key);
+    this.memberListFetching.delete(key);
+
+    const space = this.app.spaces.get(spaceId);
+    const channel = this.app.channels.get(channelId);
+    if (space && channel) {
+      space.memberLists.delete(channel.listId);
+    }
+
+    const initialRange: [number, number] = [0, 99];
+    this.memberListRanges.set(key, [initialRange]);
+
+    this.send({
+      op: GatewayOpcodes.LazyRequest,
+      d: {
+        spaceId,
+        channels: {
+          [channelId]: [initialRange]
+        }
+      }
+    });
+  }
+
   requestMemberListRange(spaceId: string, channelId: string, pageSize = 50) {
     if (!spaceId || !channelId) return;
 
@@ -489,7 +518,7 @@ export class GatewayStore {
     this.readyState = GatewayStatus.CONNECTING;
 
     const [codec, compressor] = await Promise.all([
-      createCodec(),
+      createCodec(this.encoding),
       createCompressor(this.compress)
     ]);
 
@@ -1009,6 +1038,14 @@ export class GatewayStore {
     this.dispatchHandlers.set(
       GatewayDispatchEvents.MessageAckBulk,
       this.onMessageAckBulk
+    );
+    this.dispatchHandlers.set(
+      GatewayDispatchEvents.ReadStateUpdate,
+      this.onReadStateUpdate
+    );
+    this.dispatchHandlers.set(
+      GatewayDispatchEvents.SpaceNotificationSettingsUpdate,
+      this.onSpaceNotificationSettingsUpdate
     );
     this.dispatchHandlers.set(
       GatewayDispatchEvents.MessageCreate,
@@ -1665,6 +1702,7 @@ export class GatewayStore {
       settings,
       expressions,
       readStates,
+      spaceNotificationSettings,
       mergedPresences,
       profile,
       presenceSchedule,
@@ -1686,6 +1724,9 @@ export class GatewayStore {
     this.app.channels.addAll(channels);
     this.app.relationships.addAll(relationships);
     this.app.readStates.addAll(readStates);
+    if (spaceNotificationSettings?.length) {
+      this.app.spaceNotifications.addAll(spaceNotificationSettings);
+    }
     this.app.expressions.addAll(expressions);
     this.app.calls.hydrate(calls);
     if (Array.isArray(voiceStates)) {
@@ -2057,8 +2098,7 @@ export class GatewayStore {
       if (this.isCallShapedPayload(channel)) continue;
 
       const isDM =
-        channel.type === ChannelType.DM ||
-        channel.type === ChannelType.GroupDM;
+        channel.type === ChannelType.DM || channel.type === ChannelType.GroupDM;
 
       if (isDM) {
         const existing = this.app.channels.get(channel.id);
@@ -2181,6 +2221,18 @@ export class GatewayStore {
     } else {
       this.app.readStates.updateLocal(payload.channelId, payload.lastMessageId);
     }
+  };
+
+  private onReadStateUpdate = (payload: APIReadState) => {
+    const existing = this.app.readStates.get(payload.id);
+    if (existing) existing.mergeFromServer(payload);
+    else this.app.readStates.addAll([payload]);
+  };
+
+  private onSpaceNotificationSettingsUpdate = (
+    payload: APISpaceNotificationSettings
+  ) => {
+    this.app.spaceNotifications.upsert(payload);
   };
 
   private onMessageAckBulk = (

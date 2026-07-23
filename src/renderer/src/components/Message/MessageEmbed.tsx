@@ -1,5 +1,6 @@
 import { Link } from "@components/Link";
 import { MessageEmbedSpoiler } from "@components/Message/MessageEmbedSpoiler";
+import { MessageGifEmbed } from "@components/Message/MessageGifEmbed";
 import { Paper } from "@components/Paper";
 import { PostEmbedPreview } from "@components/Post/PostEmbedPreview";
 import { UserAvatar } from "@components/User/UserAvatar";
@@ -7,42 +8,10 @@ import type { APIMessageEmbed } from "@mutualzz/types";
 import { Stack, Typography, useTheme } from "@mutualzz/ui-web";
 import { observer } from "mobx-react-lite";
 import { useAppStore } from "@hooks/useStores";
-import { MouseEvent } from "react";
-import styled from "@emotion/styled";
-import { StarIcon } from "@phosphor-icons/react";
 import { useTranslation } from "react-i18next";
 
-const GifWrapper = styled("div")({
-  position: "relative",
-  display: "inline-block",
-  "&:hover .embed-fav-btn": {
-    opacity: 1
-  }
-});
-
-const EmbedFavoriteBtn = styled("button")<{ favorited?: boolean }>(
-  ({ theme, favorited }) => ({
-    position: "absolute",
-    top: 6,
-    right: 6,
-    width: 28,
-    height: 28,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    background: "rgba(0,0,0,0.5)",
-    border: "none",
-    borderRadius: 6,
-    cursor: "pointer",
-    opacity: favorited ? 1 : 0,
-    transition: "opacity 0.15s ease",
-    color: favorited ? theme.colors.warning : "#fff",
-    "&:hover": { background: "rgba(0,0,0,0.75)" }
-  })
-);
-
 export const MessageEmbed = observer(
-  ({ embed }: { embed: APIMessageEmbed }) => {
+  ({ embed, compact }: { embed: APIMessageEmbed; compact?: boolean }) => {
     const { t } = useTranslation("chat");
     const { theme } = useTheme();
     const app = useAppStore();
@@ -52,8 +21,7 @@ export const MessageEmbed = observer(
     const isFavoritedGif =
       app.settings?.favoriteGifs?.some((f) => f.startsWith(gifUrl)) ?? false;
 
-    const handleToggleGifFavorite = (e: MouseEvent) => {
-      e.stopPropagation();
+    const handleToggleGifFavorite = () => {
       if (!gifUrl) return;
       const entry = gifPreview ? `${gifUrl}|${gifPreview}` : gifUrl;
       app.settings?.toggleFavoriteGif(entry);
@@ -62,7 +30,7 @@ export const MessageEmbed = observer(
     if (embed.spotify)
       return (
         <MessageEmbedSpoiler
-          width={400}
+          width={compact ? "100%" : 400}
           height={80}
           borderRadius={8}
           spoiler={embed.spoiler}
@@ -70,10 +38,12 @@ export const MessageEmbed = observer(
           <iframe
             css={{
               borderRadius: 8,
-              border: 0
+              border: 0,
+              width: "100%",
+              maxWidth: "100%"
             }}
             src={embed.spotify.embedUrl}
-            width={400}
+            width={compact ? "100%" : 400}
             height={80}
             allowFullScreen
             allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
@@ -85,19 +55,26 @@ export const MessageEmbed = observer(
     if (embed.youtube)
       return (
         <MessageEmbedSpoiler
-          width={560}
-          height={315}
+          width={compact ? "100%" : 560}
+          maxWidth={compact ? "100%" : undefined}
+          height={compact ? undefined : 315}
           borderRadius={8}
           spoiler={embed.spoiler}
         >
           <iframe
-            width={560}
-            height={315}
+            width={compact ? "100%" : 560}
+            height={compact ? "100%" : 315}
             src={embed.youtube.embedUrl}
             title={t("a11y.youtubePlayer")}
             css={{
               borderRadius: 8,
-              border: `1px solid ${embed.color ?? theme.colors.primary} !important`
+              border: `1px solid ${embed.color ?? theme.colors.primary} !important`,
+              maxWidth: "100%",
+              ...(compact && {
+                width: "100%",
+                aspectRatio: "16 / 9",
+                height: "auto"
+              })
             }}
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
             referrerPolicy="strict-origin-when-cross-origin"
@@ -119,7 +96,7 @@ export const MessageEmbed = observer(
         <MessageEmbedSpoiler
           width="100%"
           height={isSong ? 175 : 450}
-          maxWidth={660}
+          maxWidth={compact ? "100%" : 660}
           spoiler={embed.spoiler}
           borderRadius={10}
         >
@@ -128,7 +105,8 @@ export const MessageEmbed = observer(
             height={isSong ? 175 : 450}
             width="100%"
             css={{
-              maxWidth: 660,
+              maxWidth: compact ? "100%" : 660,
+              width: "100%",
               borderRadius: 10,
               border: 0,
               overflow: "hidden"
@@ -146,49 +124,35 @@ export const MessageEmbed = observer(
     }
 
     if (embed.type === "post" && embed.post)
-      return <PostEmbedPreview post={embed.post} />;
+      return <PostEmbedPreview post={embed.post} compact={compact} />;
 
-    if (embed.type === "gifv")
+    const gifAutoplay = app.settings?.extendedSettings.gifAutoplay ?? true;
+
+    if (embed.type === "gifv") {
+      const mediaUrl = embed.media || embed.image || embed.url || "";
+      if (!mediaUrl) return null;
+
       return (
         <MessageEmbedSpoiler spoiler={embed.spoiler}>
-          <GifWrapper>
-            <video
-              src={embed.media || embed.image || undefined}
-              poster={embed.image || undefined}
-              autoPlay
-              loop
-              muted
-              playsInline
-              css={{
-                display: "block",
-                maxWidth: 400,
-                maxHeight: 300,
-                borderRadius: 8,
-                objectFit: "contain"
-              }}
-            />
-            <EmbedFavoriteBtn
-              className="embed-fav-btn"
-              favorited={isFavoritedGif}
-              onClick={handleToggleGifFavorite}
-              title={
-                isFavoritedGif ? t("favorites.remove") : t("favorites.add")
-              }
-            >
-              <StarIcon
-                size={14}
-                weight={isFavoritedGif ? "fill" : undefined}
-              />
-            </EmbedFavoriteBtn>
-          </GifWrapper>
+          <MessageGifEmbed
+            mediaUrl={mediaUrl}
+            imageUrl={embed.image}
+            pageUrl={embed.url}
+            isFavorited={isFavoritedGif}
+            onToggleFavorite={handleToggleGifFavorite}
+            compact={compact}
+            autoplay={gifAutoplay}
+          />
         </MessageEmbedSpoiler>
       );
+    }
 
     return (
       <MessageEmbedSpoiler spoiler={embed.spoiler}>
         <Paper
           direction="column"
-          width="25rem"
+          width={compact ? "100%" : "25rem"}
+          maxWidth="100%"
           borderRadius={5}
           p={2}
           spacing={1.25}
@@ -222,7 +186,15 @@ export const MessageEmbed = observer(
               target="_blank"
               rel="noreferrer noopener"
             >
-              <img src={embed.image} alt={embed.title || t("a11y.embedTitle")} />
+              <img
+                src={embed.image}
+                alt={embed.title || t("a11y.embedTitle")}
+                css={{
+                  maxWidth: "100%",
+                  height: "auto",
+                  display: "block"
+                }}
+              />
             </Link>
           )}
         </Paper>

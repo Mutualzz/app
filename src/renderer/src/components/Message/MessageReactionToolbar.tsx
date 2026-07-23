@@ -6,7 +6,7 @@ import { Divider, Stack } from "@mutualzz/ui-web";
 import { styled } from "@mutualzz/ui-core";
 import { Message } from "@stores/objects/Message";
 import { getSpriteStyle } from "@utils/emojis/emojiSprite";
-import { pickerEmojiToReactionEmoji } from "@utils/reactions";
+import { pickerEmojiToReactionEmoji } from "@mutualzz/client";
 import { getQuickReactionItems } from "@utils/quickReactionEmojis";
 import { SmileyIcon } from "@phosphor-icons/react";
 import { observer } from "mobx-react-lite";

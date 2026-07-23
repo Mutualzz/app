@@ -1,5 +1,6 @@
 import type { ContextMenuPayload } from "@contexts/ContextMenu.context";
 import type { Space } from "@stores/objects/Space";
+import { getSpaceLockdownMessage as getSpaceLockdownMessageBase } from "@mutualzz/client";
 import i18n from "@renderer/i18n";
 import { toast } from "react-toastify";
 
@@ -13,9 +14,7 @@ const LOCKDOWN_ALLOWED_MODAL_IDS = new Set([
 ]);
 
 export function getSpaceLockdownMessage(_space: Space, isOwner: boolean) {
-  return isOwner
-    ? i18n.t("lockdown.ownerMessage", { ns: "space" })
-    : i18n.t("lockdown.memberMessage", { ns: "space" });
+  return getSpaceLockdownMessageBase(i18n.t.bind(i18n), isOwner);
 }
 
 export function notifySpaceLockdownBlocked(force = false) {

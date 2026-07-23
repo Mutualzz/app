@@ -3,9 +3,7 @@ import {
   Button,
   Divider,
   Stack,
-  Switch,
-  Typography,
-  useTheme
+  Typography
 } from "@mutualzz/ui-web";
 import {
   BitField,
@@ -14,15 +12,16 @@ import {
   permissionFlags
 } from "@mutualzz/bitfield";
 import { spacePermissionGroups } from "@mutualzz/i18n";
-import { type ReactNode, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { observer } from "mobx-react-lite";
 import { useTranslation } from "react-i18next";
 import { PermissionEditorControls } from "@components/Permissions/PermissionEditorControls";
 import {
   filterPermissionGroups,
-  scrollToPermissionCategory,
-  type PermissionGroupDef
-} from "@components/Permissions/permissionEditor.utils";
+  type PermissionGroupDef,
+} from "@mutualzz/client";
+import { scrollToPermissionCategory } from "@components/Permissions/permissionEditor.utils";
+import { SettingsToggleRow } from "@components/UserSettings/SettingsField";
 
 interface Props {
   changes: Partial<Omit<APIRole, "id">>;
@@ -32,56 +31,6 @@ interface Props {
       | ((prev: Partial<Omit<APIRole, "id">>) => Partial<Omit<APIRole, "id">>)
   ) => void;
 }
-
-const PermissionItem = ({
-  flag,
-  label,
-  description,
-  hasPermission,
-  togglePermission
-}: {
-  flag: PermissionFlag;
-  label: ReactNode;
-  description?: ReactNode;
-  hasPermission: boolean;
-  togglePermission: (flag: PermissionFlag) => void;
-}) => {
-  const { theme } = useTheme();
-
-  return (
-    <Stack
-      direction="row"
-      alignItems="center"
-      justifyContent="space-between"
-      mr={5}
-      flex={1}
-      p={1.25}
-      borderRadius={6}
-      css={{
-        cursor: "pointer",
-        ":hover": {
-          background: `${theme.colors.info}22`
-        }
-      }}
-      onClick={() => togglePermission(flag)}
-    >
-      <Stack direction="column" spacing={0.5}>
-        <Typography>{label}</Typography>
-        {description && (
-          <Typography level="body-sm" textColor="muted">
-            {description}
-          </Typography>
-        )}
-      </Stack>
-      <Switch
-        checked={hasPermission}
-        color="primary"
-        shape="circle"
-        onChange={() => togglePermission(flag)}
-      />
-    </Stack>
-  );
-};
 
 export const SpaceRoleEditPermissions = observer(
   ({ changes, setChanges }: Props) => {
@@ -206,12 +155,11 @@ export const SpaceRoleEditPermissions = observer(
               <Stack direction="column" spacing={2.5}>
                 {group.items.map((item, itemIndex) => (
                   <Stack key={item.flag} direction="column" spacing={2.5}>
-                    <PermissionItem
-                      flag={item.flag}
-                      label={item.label}
+                    <SettingsToggleRow
+                      title={String(item.label)}
                       description={item.description}
-                      hasPermission={permissions.has(item.flag)}
-                      togglePermission={togglePermission}
+                      checked={permissions.has(item.flag)}
+                      onChange={() => togglePermission(item.flag)}
                     />
                     {itemIndex < group.items.length - 1 && (
                       <Divider css={{ opacity: 0.5 }} />

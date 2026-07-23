@@ -1,11 +1,17 @@
+import { FileDropZone } from "@components/FileDropZone";
+import { FeedCommentsLayout } from "@components/Post/FeedCommentsLayout";
+import { FEED_COLUMN_MAX_WIDTH } from "@components/Post/feedLayout";
 import { PostCard } from "@components/Post/PostCard";
 import { MediaPostCard } from "@components/Post/MediaPostCard";
-import { PostComposer } from "@components/Post/PostComposer";
+import {
+  PostComposer,
+  type PostComposerHandle
+} from "@components/Post/PostComposer";
 import { useAppStore } from "@hooks/useStores";
 import { Stack } from "@mutualzz/ui-web";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { observer } from "mobx-react-lite";
-import { useCallback } from "react";
+import { useCallback, useRef } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { useTranslation } from "react-i18next";
 
@@ -19,6 +25,7 @@ const LIMIT = 25;
 export const PostList = observer(({ variant, showComposer }: Props) => {
   const app = useAppStore();
   const { t } = useTranslation("chat");
+  const composerRef = useRef<PostComposerHandle>(null);
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, refetch } =
     useInfiniteQuery({
@@ -68,7 +75,7 @@ export const PostList = observer(({ variant, showComposer }: Props) => {
     fetchNextPage().catch(() => {});
   }, [fetchNextPage]);
 
-  return (
+  const listBody = (
     <Stack
       id="post-list-scroll"
       direction="column"
@@ -77,33 +84,62 @@ export const PostList = observer(({ variant, showComposer }: Props) => {
       height="100%"
       overflowY="auto"
       flex={1}
+      alignItems="center"
+      css={{ minHeight: 0 }}
     >
-      {showComposer && <PostComposer onPosted={() => refetch()} />}
-
-      <InfiniteScroll
-        dataLength={posts.length}
-        next={fetchMore}
-        hasMore={!!hasNextPage}
-        loader={null}
-        scrollableTarget="post-list-scroll"
-        style={{ display: "flex", flexDirection: "column", gap: 12 }}
+      <Stack
+        direction="column"
+        spacing={2.5}
+        width="100%"
+        maxWidth={FEED_COLUMN_MAX_WIDTH}
       >
-        {posts.map((post) =>
-          post.attachments.length > 0 ? (
-            <MediaPostCard key={post.id} post={post} />
-          ) : (
-            <PostCard key={post.id} post={post} />
-          )
+        {showComposer && (
+          <PostComposer ref={composerRef} onPosted={() => refetch()} />
         )}
-      </InfiniteScroll>
 
-      {!isFetchingNextPage && posts.length === 0 && (
-        <Stack alignItems="center" justifyContent="center" p={6}>
-          {variant === "saved"
-            ? t("feed.empty.saved")
-            : t("feed.empty.posts")}
-        </Stack>
-      )}
+        <InfiniteScroll
+          dataLength={posts.length}
+          next={fetchMore}
+          hasMore={!!hasNextPage}
+          loader={null}
+          scrollableTarget="post-list-scroll"
+          style={{ display: "flex", flexDirection: "column", gap: 12 }}
+        >
+          {posts.map((post) =>
+            post.attachments.length > 0 ? (
+              <MediaPostCard key={post.id} post={post} />
+            ) : (
+              <PostCard key={post.id} post={post} />
+            )
+          )}
+        </InfiniteScroll>
+
+        {!isFetchingNextPage && posts.length === 0 && (
+          <Stack alignItems="center" justifyContent="center" p={6}>
+            {variant === "saved"
+              ? t("feed.empty.saved")
+              : t("feed.empty.posts")}
+          </Stack>
+        )}
+      </Stack>
     </Stack>
   );
+
+  if (showComposer) {
+    return (
+      <FeedCommentsLayout>
+        <FileDropZone
+          enabled
+          onDropFiles={(files) => composerRef.current?.addFiles(files)}
+          width="100%"
+          height="100%"
+          css={{ minHeight: 0, display: "flex", flexDirection: "column" }}
+        >
+          {listBody}
+        </FileDropZone>
+      </FeedCommentsLayout>
+    );
+  }
+
+  return <FeedCommentsLayout>{listBody}</FeedCommentsLayout>;
 });

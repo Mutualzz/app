@@ -78,7 +78,9 @@ export const DMGroupMemberListItem = observer(({ user, isOwner }: Props) => {
             </Tooltip>
           )}
         </Stack>
-        {presence && <SmallActivityStatus presence={presence} />}
+        {presence && (
+          <SmallActivityStatus userId={user.id} presence={presence} />
+        )}
       </Stack>
     </Paper>
   );

@@ -6,7 +6,8 @@ import {
 } from "@components/SpaceSettings/SpaceSettings.context";
 import { useAppStore } from "@hooks/useStores";
 import { spacePageTitleKeys } from "@mutualzz/i18n";
-import { IconButton, Stack, Typography } from "@mutualzz/ui-web";
+import { IconButton } from "@components/IconButton";
+import { Stack, Typography } from "@mutualzz/ui-web";
 import type { Space } from "@stores/objects/Space";
 import { observer } from "mobx-react-lite";
 import { useTranslation } from "react-i18next";
@@ -72,7 +73,6 @@ export const SpaceSettingsContent = observer(
             )}
           </Typography>
           <IconButton
-            color="neutral"
             css={{
               marginRight: "0.5rem"
             }}

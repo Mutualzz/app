@@ -1,5 +1,11 @@
-import { AnimatedLogo } from "@components/Animated/AnimatedLogo";
-import { Paper } from "@components/Paper";
+import {
+  SIDEBAR_RAIL_ITEM_SIZE,
+  SidebarRailDivider,
+  SidebarRailLogo,
+  SidebarRailPaper,
+  SidebarRailScroll,
+  SidebarRailSlot
+} from "@components/Navigation/SidebarRail";
 import { type PillType, SidebarPill } from "@components/SidebarPill";
 import { SpaceIcon } from "@components/Space/SpaceIcon";
 import { SpaceInviteModal } from "@components/Space/SpaceInviteModal";
@@ -33,6 +39,8 @@ import { useMenu } from "@contexts/ContextMenu.context";
 import { IconButton } from "@components/IconButton";
 import { PlusCircleIcon } from "@phosphor-icons/react";
 import { Tooltip } from "@components/Tooltip";
+import { useBridgeListSync } from "@hooks/useBridgeListSync";
+import { navigateToMode, navigateToSpace } from "@utils/index";
 
 const SortableSpace = observer(
   ({
@@ -59,10 +67,11 @@ const SortableSpace = observer(
     const [isHovered, setIsHovered] = useState(false);
 
     const pillType: PillType = (() => {
-      if (app.spaces.activeId === space.id) return "active";
+      if (selected) return "active";
       if (isHovered) return "hover";
       if (space.channels.some((ch) => app.readStates.get(ch.id)?.isUnread))
         return "unread";
+      if (app.bridgeChat.hasUnreadForSpace(space.id)) return "unread";
       return "none";
     })();
 
@@ -92,10 +101,13 @@ const SortableSpace = observer(
             typographyProps={{ level: "body-sm" }}
             placement="right"
           >
-            <Stack justifyContent="center" position="relative">
-              <SidebarPill type={pillType} />
+            <SidebarRailSlot
+              onMouseEnter={() => setIsHovered(true)}
+              onMouseLeave={() => setIsHovered(false)}
+              pill={<SidebarPill type={pillType} />}
+            >
               <SpaceIcon
-                size={40}
+                size={SIDEBAR_RAIL_ITEM_SIZE}
                 onContextMenu={(e) =>
                   openContextMenu(e, {
                     type: "space",
@@ -112,7 +124,7 @@ const SortableSpace = observer(
                   cursor: isDragging ? "grabbing" : "pointer"
                 }}
               />
-            </Stack>
+            </SidebarRailSlot>
           </Tooltip>
         </div>
         <Portal>
@@ -127,6 +139,7 @@ export const SpacesSidebar = observer(() => {
   const { t } = useTranslation("space");
   const navigate = useNavigate();
   const app = useAppStore();
+  useBridgeListSync();
   const { openModal } = useModal();
   const { theme } = useTheme();
 
@@ -154,113 +167,83 @@ export const SpacesSidebar = observer(() => {
     }
   };
 
-  const showUnreadDMsPill = app.mode !== "@me" && app.channels.hasUnreadDMs;
-  const dmMentionCount =
-    app.mode !== "@me" ? app.channels.dmMentionCount : 0;
+  const onDms = app.mode === "@me";
+  const showUnreadDMsPill = !onDms && app.channels.hasUnreadDMs;
+  const dmMentionCount = !onDms ? app.channels.dmMentionCount : 0;
 
   return (
-    <Paper
-      width="5rem"
-      direction="column"
-      pt={1}
-      spacing={2.5}
-      variant="plain"
-      boxShadow="none !important"
-      elevation={app.settings?.preferEmbossed ? 1 : 0}
-      alignItems="center"
-      height="100%"
-    >
-      <Stack width="100%" alignItems="center" justifyContent="center">
-        <Tooltip
-          content={
-            app.mode === "@me"
-              ? t("sidebar.switchToSpaces")
-              : t("sidebar.switchToDirectMessages")
-          }
-          placement="right"
-        >
-          <Stack justifyContent="center" position="relative">
-            <SidebarPill type={showUnreadDMsPill ? "unread" : "none"} />
-            <AnimatedLogo
+    <SidebarRailPaper>
+      <SidebarRailLogo
+        tooltip={t("sidebar.directMessages")}
+        active={onDms}
+        unread={showUnreadDMsPill}
+        onClick={() => {
+          if (onDms) return;
+          navigateToMode(app, navigate, "@me");
+        }}
+        badge={
+          dmMentionCount > 0 ? (
+            <Stack
+              alignItems="center"
+              justifyContent="center"
               css={{
-                width: 48,
-                cursor: "pointer",
-                marginBottom: 5
+                position: "absolute",
+                top: -2,
+                right: -2,
+                minWidth: 16,
+                height: 16,
+                borderRadius: 9999,
+                backgroundColor: theme.colors.danger,
+                padding: "0 4px",
+                border: `2px solid ${theme.colors.background}`
               }}
-              initial={{ scale: 1 }}
-              whileHover={{ scale: 1.1 }}
-              onClick={() => {
-                navigate({
-                  to:
-                    app.mode === "@me"
-                      ? `/${app.settings?.preferredMode ?? "spaces"}`
-                      : "/@me",
-                  replace: true
-                });
-              }}
-            />
-            {dmMentionCount > 0 && (
-              <Stack
-                alignItems="center"
-                justifyContent="center"
+            >
+              <Typography
+                level="label-xs"
                 css={{
-                  position: "absolute",
-                  top: -2,
-                  right: -2,
-                  minWidth: 16,
-                  height: 16,
-                  borderRadius: 9999,
-                  backgroundColor: theme.colors.danger,
-                  padding: "0 4px",
-                  border: `2px solid ${theme.colors.background}`
+                  color: "#fff",
+                  fontSize: 10
                 }}
               >
-                <Typography
-                  level="label-xs"
-                  css={{
-                    color: "#fff",
-                    fontSize: 10
-                  }}
-                >
-                  {dmMentionCount > 99 ? "99+" : dmMentionCount}
-                </Typography>
-              </Stack>
-            )}
-          </Stack>
-        </Tooltip>
-      </Stack>
+                {dmMentionCount > 99 ? "99+" : dmMentionCount}
+              </Typography>
+            </Stack>
+          ) : undefined
+        }
+      />
 
-      <DndContext
-        sensors={sensors}
-        collisionDetection={closestCenter}
-        onDragEnd={handleDragEnd}
-      >
-        <SortableContext
-          items={app.spaces.positioned.map((s) => s.id)}
-          strategy={verticalListSortingStrategy}
+      <SidebarRailDivider />
+
+      <SidebarRailScroll>
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
         >
-          {app.spaces.positioned.map((space) => (
-            <SortableSpace
-              onClick={() => {
-                if (app.spaces.activeId === space.id) return;
-                app.spaces.setActive(space.id);
-                app.spaces.setMostRecentSpace(space.id);
-                navigate({
-                  to: "/spaces/$spaceId",
-                  params: {
-                    spaceId: space.id
-                  }
-                });
-              }}
-              key={space.id}
-              space={space}
-              selected={app.spaces.activeId === space.id}
-            />
-          ))}
-        </SortableContext>
-      </DndContext>
-      <Stack>
-        <Tooltip content={t("sidebar.createSpace")} placement="right">
+          <SortableContext
+            items={app.spaces.positioned.map((s) => s.id)}
+            strategy={verticalListSortingStrategy}
+          >
+            {app.spaces.positioned.map((space) => (
+              <SortableSpace
+                onClick={() => {
+                  if (app.mode === "spaces" && app.spaces.activeId === space.id)
+                    return;
+                  navigateToSpace(app, navigate, space.id);
+                }}
+                key={space.id}
+                space={space}
+                selected={
+                  app.mode === "spaces" && app.spaces.activeId === space.id
+                }
+              />
+            ))}
+          </SortableContext>
+        </DndContext>
+      </SidebarRailScroll>
+
+      <Tooltip content={t("sidebar.createSpace")} placement="right">
+        <SidebarRailSlot>
           <IconButton
             size={36}
             css={{
@@ -269,15 +252,10 @@ export const SpacesSidebar = observer(() => {
             variant="soft"
             onClick={() => openModal("space-invite", <SpaceInviteModal />)}
           >
-            <PlusCircleIcon
-              weight="fill"
-              css={{
-                padding: 4
-              }}
-            />
+            <PlusCircleIcon weight="fill" />
           </IconButton>
-        </Tooltip>
-      </Stack>
-    </Paper>
+        </SidebarRailSlot>
+      </Tooltip>
+    </SidebarRailPaper>
   );
 });

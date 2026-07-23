@@ -14,11 +14,11 @@ import {
   Typography,
   useTheme
 } from "@mutualzz/ui-web";
-import { STATUS_DURATION_OPTIONS } from "@utils/statusDurations";
+import { STATUS_DURATION_OPTIONS } from "@mutualzz/client";
 import {
   formatCustomStatusClearLabel,
   hasCustomStatusContent
-} from "@utils/customStatus";
+} from "@mutualzz/client";
 import type { PresenceActivityEmoji } from "@mutualzz/types";
 import { CaretDownIcon, XIcon } from "@phosphor-icons/react";
 import { observer } from "mobx-react-lite";
@@ -101,7 +101,6 @@ export const CustomStatusModal = observer(() => {
         </Typography>
         <IconButton
           variant="plain"
-          color="neutral"
           size="sm"
           onClick={() => closeModal(CUSTOM_STATUS_MODAL_ID)}
           aria-label={t("close")}
@@ -187,7 +186,7 @@ export const CustomStatusModal = observer(() => {
               key={`${option.labelKey}:${option.count ?? "forever"}`}
               value={toDurationValue(option.durationMs)}
             >
-              {formatCustomStatusClearLabel(option.durationMs)}
+              {formatCustomStatusClearLabel(option.durationMs, t)}
             </Option>
           ))}
         </Select>

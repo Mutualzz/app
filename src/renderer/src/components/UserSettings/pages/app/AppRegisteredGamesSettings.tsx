@@ -582,7 +582,6 @@ export const AppRegisteredGamesSettings = observer(() => {
                   <IconButton
                     variant="plain"
                     size="sm"
-                    color="neutral"
                     aria-label={t("registeredGames.toggleShare")}
                     onClick={() => onToggleShare(game.id, false)}
                   >
@@ -729,7 +728,6 @@ export const AppRegisteredGamesSettings = observer(() => {
                     <IconButton
                       variant="plain"
                       size="sm"
-                      color="neutral"
                       aria-label={t("registeredGames.toggleShare")}
                       onClick={() => onToggleShare(game.id, !share)}
                     >

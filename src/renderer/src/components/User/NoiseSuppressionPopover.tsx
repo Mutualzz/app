@@ -12,9 +12,10 @@ export const NoiseSuppressionPopover = observer(() => {
   const { t } = useTranslation("chat");
   const settings = app.settings;
   const pending = app.voice.noiseSuppressionPending;
-  const enabled = settings?.noiseSuppression !== false;
 
   if (!settings) return null;
+
+  const enabled = settings.noiseSuppression !== false;
 
   return (
     <Popover

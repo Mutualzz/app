@@ -83,6 +83,13 @@ export type ContextMenuPayload =
       [key: string]: any;
     }
   | {
+      type: "comment";
+      post: import("@stores/objects/Post").Post;
+      comment: import("@stores/objects/PostComment").PostComment;
+      onReply: (comment: import("@stores/objects/PostComment").PostComment) => void;
+      [key: string]: any;
+    }
+  | {
       type: "editable";
       isEditable: boolean;
       selectionText: string;
@@ -141,6 +148,8 @@ export const generateMenuIDs = {
   account: (userId: string) => `context-account-${userId}`,
   message: (channelId: string, messageId: string) =>
     `context-message-${channelId}-${messageId}`,
+  comment: (postId: string, commentId: string) =>
+    `context-comment-${postId}-${commentId}`,
   emoji: (unified: string) => `emoji-${unified}`,
   editable: () => "context-editable"
 };
@@ -169,6 +178,8 @@ function getMenuId(menu: ContextMenuPayload): string {
       return `group-dm-${menu.channel.id}`;
     case "message":
       return generateMenuIDs.message(menu.message.channelId, menu.message.id);
+    case "comment":
+      return generateMenuIDs.comment(menu.post.id, menu.comment.id);
     case "editable":
       return generateMenuIDs.editable();
     case "custom":

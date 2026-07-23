@@ -21,12 +21,12 @@ import { useGoogleFont } from "@hooks/useGoogleFont";
 import { Box, Stack, Typography, useTheme } from "@mutualzz/ui-web";
 import { ProfileConnectionsChips } from "@components/Profile/shared/ProfileConnectionsChips";
 import { RecentActivitiesSection } from "@components/Profile/shared/RecentActivitiesSection";
-import { getNonCustomActivities } from "@utils/customStatus";
+import { getNonCustomActivities } from "@mutualzz/client";
 import { useTranslation } from "react-i18next";
-import Snowflake from "@utils/Snowflake";
+import { Snowflake } from "@mutualzz/client";
 import type { Editor } from "slate";
 import { toast } from "react-toastify";
-import { formatRestError } from "@utils/restError";
+import { formatRestError } from "@mutualzz/client";
 
 interface Props {
   user: User | AccountStore;
@@ -41,14 +41,24 @@ export const UserProfilePopout = observer(({ user, member }: Props) => {
   const inputRef = useRef<MarkdownInputHandle>(null);
   const [content, setContent] = useState("");
 
-  const isSelf = app.account?.id === user.id;
+  const isSelf =
+    app.account?.id != null &&
+    String(app.account.id) === String(user.id);
   const relationship = app.relationships.getForMe(user.id);
   const iBlockedThem =
     !!relationship?.isBlocked && relationship.userId === app.account?.id;
   const theyBlockedMe =
     !!relationship?.isBlocked && relationship.userId !== app.account?.id;
-  const denyMessaging = !!user.flags?.has("System") || iBlockedThem;
+  const denyMessaging =
+    !!user.flags?.has("System") ||
+    iBlockedThem ||
+    ("viewerCanDm" in user && user.viewerCanDm === false);
   const displayName = member?.displayName ?? user.displayName;
+
+  useEffect(() => {
+    if (isSelf) return;
+    void app.users.resolve(user.id);
+  }, [app.users, isSelf, user.id]);
 
   const { mutate: sendMessage, isPending: sending } = useMutation({
     mutationKey: ["profile-popout-dm", user.id],
@@ -81,25 +91,38 @@ export const UserProfilePopout = observer(({ user, member }: Props) => {
     }
   });
 
-  useEffect(() => {
-    app.gateway.subscribeUser(user.id);
-    return () => app.gateway.unsubscribeUser(user.id);
-  }, [app.gateway, user.id]);
-
-  const { data: fetchedProfile } = useQuery({
-    queryKey: ["profile-popout", user.id],
-    queryFn: () => app.profiles.resolve(user.id)
+  const { data: fetchedProfile, isFetched: profileFetchDone } = useQuery({
+    queryKey: ["profile-popout", user.id, app.account?.id],
+    enabled: !!user.id,
+    queryFn: () => app.profiles.resolve(user.id, true)
   });
 
-  const profile = app.profiles.get(user.id) ?? fetchedProfile;
-  void profile?.updatedAt;
-  const { fontFamily } = useGoogleFont(profile?.pageFontFamily, user.id);
+  const profileRestricted =
+    !isSelf && profileFetchDone && fetchedProfile === undefined;
+  const displayProfile = profileRestricted
+    ? undefined
+    : (fetchedProfile ?? app.profiles.get(user.id));
+  void displayProfile?.updatedAt;
 
-  const presence = app.presence.get(user.id);
-  const bannerUrl = profile?.constructBannerUrl();
+  useEffect(() => {
+    if (profileRestricted) return;
+    app.gateway.subscribeUser(user.id);
+    return () => app.gateway.unsubscribeUser(user.id);
+  }, [app.gateway, user.id, profileRestricted]);
+
+  const { fontFamily } = useGoogleFont(
+    displayProfile?.pageFontFamily,
+    user.id
+  );
+
+  const presence = profileRestricted ? undefined : app.presence.get(user.id);
+  const bannerUrl = profileRestricted
+    ? undefined
+    : displayProfile?.constructBannerUrl();
 
   const { data: spotifyConnection } = useQuery({
     queryKey: ["user-spotify", user.id],
+    enabled: !profileRestricted,
     queryFn: async () => {
       try {
         return await app.rest.get<{
@@ -115,6 +138,7 @@ export const UserProfilePopout = observer(({ user, member }: Props) => {
 
   const { data: userConnections } = useQuery({
     queryKey: ["user-connections-public", user.id],
+    enabled: !profileRestricted,
     queryFn: async () => {
       try {
         return await app.rest.get<{
@@ -131,12 +155,16 @@ export const UserProfilePopout = observer(({ user, member }: Props) => {
     staleTime: 60_000
   });
 
-  const backgroundImageUrl = profile?.constructBackgroundUrl() ?? null;
-  const profileBackground = buildProfileBackgroundCss({
-    backgroundColor: profile?.backgroundColor,
-    backgroundImageUrl,
-    fallback: theme.colors.surface
-  });
+  const backgroundImageUrl = profileRestricted
+    ? null
+    : (displayProfile?.constructBackgroundUrl() ?? null);
+  const profileBackground = profileRestricted
+    ? theme.colors.surface
+    : buildProfileBackgroundCss({
+        backgroundColor: displayProfile?.backgroundColor,
+        backgroundImageUrl,
+        fallback: theme.colors.surface
+      });
 
   const canSubmit = !!content.trim() && !denyMessaging && !sending;
 
@@ -208,9 +236,11 @@ export const UserProfilePopout = observer(({ user, member }: Props) => {
                 }
               }}
               onClick={() => {
-                navigate({
-                  to: "/users/$username",
-                  params: { username: user.username }
+                void app.profiles.resolve(user.id, true).finally(() => {
+                  navigate({
+                    to: "/users/$username",
+                    params: { username: user.username.toLowerCase() }
+                  });
                 });
               }}
             />
@@ -228,13 +258,13 @@ export const UserProfilePopout = observer(({ user, member }: Props) => {
                 flexWrap="wrap"
               >
                 <Typography level="title-md">{displayName}</Typography>
-                {(user.pronouns ?? profile?.pronouns) ? (
+                {!profileRestricted && (user.pronouns ?? displayProfile?.pronouns) ? (
                   <>
                     <Typography level="body-sm" textColor="muted">
                       ·
                     </Typography>
                     <Typography level="body-sm" textColor="muted">
-                      {user.pronouns ?? profile?.pronouns}
+                      {user.pronouns ?? displayProfile?.pronouns}
                     </Typography>
                   </>
                 ) : null}
@@ -242,49 +272,59 @@ export const UserProfilePopout = observer(({ user, member }: Props) => {
               <Typography level="body-sm" css={{ opacity: 0.7 }}>
                 @{user.username}
               </Typography>
-              {presence && (
-                <SmallActivityStatus presence={presence} customOnly />
+              {!profileRestricted && presence && (
+                <SmallActivityStatus
+                  userId={user.id}
+                  presence={presence}
+                  customOnly
+                />
               )}
             </Stack>
-            {profile?.bio && (
+            {!profileRestricted && displayProfile?.bio && (
               <ProfileMarkdownContent
-                value={profile.bio}
+                value={displayProfile.bio}
                 lineClamp={3}
                 css={{ marginTop: 8 }}
               />
             )}
           </ProfileScrim>
 
-          {presence && <UserPresenceCard presence={presence} />}
+          {!profileRestricted && presence && (
+            <UserPresenceCard presence={presence} />
+          )}
 
-          <RecentActivitiesSection
-            userId={user.id}
-            liveActivities={
-              presence &&
-              (presence.status === "online" ||
-                presence.status === "idle" ||
-                presence.status === "dnd")
-                ? getNonCustomActivities(presence)
-                : []
-            }
-            iconSize={28}
-            compact
-          />
+          {!profileRestricted && (
+            <RecentActivitiesSection
+              userId={user.id}
+              liveActivities={
+                presence &&
+                (presence.status === "online" ||
+                  presence.status === "idle" ||
+                  presence.status === "dnd")
+                  ? getNonCustomActivities(presence)
+                  : []
+              }
+              iconSize={28}
+              compact
+            />
+          )}
 
-          <ProfileConnectionsChips
-            connections={[
-              ...(spotifyConnection?.externalUrl
-                ? [
-                    {
-                      provider: "spotify",
-                      displayName: spotifyConnection.displayName,
-                      externalUrl: spotifyConnection.externalUrl
-                    }
-                  ]
-                : []),
-              ...(userConnections?.connections ?? [])
-            ]}
-          />
+          {!profileRestricted && (
+            <ProfileConnectionsChips
+              connections={[
+                ...(spotifyConnection?.externalUrl
+                  ? [
+                      {
+                        provider: "spotify",
+                        displayName: spotifyConnection.displayName,
+                        externalUrl: spotifyConnection.externalUrl
+                      }
+                    ]
+                  : []),
+                ...(userConnections?.connections ?? [])
+              ]}
+            />
+          )}
 
           {!isSelf && (
             <MarkdownInput

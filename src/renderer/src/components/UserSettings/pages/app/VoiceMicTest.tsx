@@ -51,12 +51,13 @@ export const VoiceMicTest = observer(() => {
   }, [settings?.microphoneVolume]);
 
   const start = async () => {
+    if (!settings) return;
     stop();
     testingRef.current = true;
     setTesting(true);
     voice.beginMicTestIsolation();
     try {
-      const wantNs = settings?.noiseSuppression !== false;
+      const wantNs = settings.noiseSuppression !== false;
       const constraints: MediaTrackConstraints = {
         echoCancellation: true,
         noiseSuppression: !wantNs,
@@ -82,7 +83,7 @@ export const VoiceMicTest = observer(() => {
       const audioContext = new AudioContext({ sampleRate: 48000 });
       const handle = await createMicProcessedTrack(audioContext, rawTrack, {
         useRnnoise: wantNs,
-        gain: voiceVolumeToGain(settings?.microphoneVolume ?? 100)
+        gain: voiceVolumeToGain(settings.microphoneVolume)
       });
 
       if (!testingRef.current) {

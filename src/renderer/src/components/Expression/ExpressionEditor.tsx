@@ -24,7 +24,6 @@ import {
 } from "@phosphor-icons/react";
 import { useTranslation } from "react-i18next";
 
-// File needs to be passed
 interface Props {
   expression: APIExpression;
   file: File;

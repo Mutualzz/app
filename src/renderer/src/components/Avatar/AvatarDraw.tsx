@@ -28,7 +28,6 @@ import {
 
 const EMBEDDED_CANVAS_PX = 360;
 
-// NOTE: Eventually fork ReactSketchCanvas to fit our usage case
 export const AvatarDraw = observer(
   ({ variant = "modal", onSuccess }: AvatarEditorContentProps) => {
     const { t } = useTranslation("settings");

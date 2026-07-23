@@ -10,12 +10,12 @@ import type { HttpException } from "@mutualzz/types";
 import {
   Button,
   ButtonGroup,
-  IconButton,
   Slider,
   Stack,
   Typography,
   useTheme
 } from "@mutualzz/ui-web";
+import { IconButton } from "@components/IconButton";
 import { useMutation } from "@tanstack/react-query";
 import { observer } from "mobx-react-lite";
 import { useCallback, useState } from "react";
@@ -189,7 +189,6 @@ export const AvatarUpload = observer(
               />
               <IconButton
                 onClick={() => setRotation((prev) => prev + 90)}
-                color={theme.typography.colors.primary}
                 variant="plain"
                 size="sm"
                 disabled={saving}

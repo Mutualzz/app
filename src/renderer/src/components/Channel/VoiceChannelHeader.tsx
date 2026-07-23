@@ -4,7 +4,7 @@ import { useElapsedClock } from "@hooks/useElapsedClock";
 import { useAppStore } from "@hooks/useStores";
 import { ButtonGroup, Divider, IconSlot, Stack, Typography } from "@mutualzz/ui-web";
 import type { Channel } from "@stores/objects/Channel";
-import { getChannelOccupiedAt } from "@utils/voiceElapsed";
+import { getChannelOccupiedAt } from "@mutualzz/client";
 import { observer } from "mobx-react-lite";
 import { useNavigate } from "@tanstack/react-router";
 import { ChatCircleIcon, XIcon } from "@phosphor-icons/react";

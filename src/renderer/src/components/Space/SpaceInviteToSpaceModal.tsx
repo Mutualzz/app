@@ -26,7 +26,7 @@ import { observer } from "mobx-react-lite";
 import { type ChangeEvent, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { isElectron } from "@utils/index";
-import Snowflake from "@utils/Snowflake";
+import { Snowflake } from "@mutualzz/client";
 import { CheckIcon, CopyIcon } from "@phosphor-icons/react";
 
 interface Props {

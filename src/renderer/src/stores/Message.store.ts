@@ -34,9 +34,7 @@ export class MessageStore {
     // Sort messages by timestamp in descending order (most recent first)
     const sortedMessages: MessageLike[] = [
       ...this.messages,
-      ...Array.from(this.app.queue.messages.values()).filter(
-        (x) => x.channelId === this.channelId
-      )
+      ...this.app.queue.get(this.channelId)
     ];
 
     return sortedMessages

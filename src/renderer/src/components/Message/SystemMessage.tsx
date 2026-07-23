@@ -11,7 +11,7 @@ import { MarkdownRenderer } from "@components/Markdown/MarkdownRenderer/Markdown
 import { IconSlot, Link, Stack, Typography } from "@mutualzz/ui-web";
 import { MessageEmbed } from "@components/Message/MessageEmbed";
 import { EyeIcon, PhoneSlashIcon } from "@phosphor-icons/react";
-import { isCallNoticeMessage } from "@utils/callNoticeMessage";
+import { isCallNoticeMessage } from "@mutualzz/client";
 import { useTranslation } from "react-i18next";
 
 interface Props {
