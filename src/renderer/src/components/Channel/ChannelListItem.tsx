@@ -32,7 +32,6 @@ import {
   LockIcon,
   PlusIcon,
   UserPlusIcon,
-  BellSlashIcon,
 } from "@phosphor-icons/react";
 import { ChannelSettingsModal } from "@components/ChannelSettings/ChannelSettingsModal";
 import { HoverRevealActions } from "../HoverRevealActions";
@@ -74,7 +73,8 @@ export const ChannelListItem = observer(
     const readState = app.readStates.get(channel.id);
     const isUnread = readState?.isUnread ?? false;
     const mentionCount = readState?.displayMentionCount ?? 0;
-    const isNotificationMuted = readState?.isNotificationMuted ?? false;
+    const isChannelNotificationMuted =
+      readState?.isChannelNotificationMuted ?? false;
 
     const canMoveMembers = space.members.me?.hasPermission("MoveMembers");
 
@@ -188,7 +188,10 @@ export const ChannelListItem = observer(
             active ? theme.typography.colors.primary : (props.color as any)
           }
           css={{
-            ...(channelDragHandle && { cursor: "grab" })
+            ...(channelDragHandle && { cursor: "grab" }),
+            ...(!isCategory &&
+              isChannelNotificationMuted &&
+              !active && { opacity: 0.4 })
           }}
           {...channelDragHandle?.attributes}
           {...channelDragHandle?.listeners}
@@ -299,11 +302,6 @@ export const ChannelListItem = observer(
                   >
                     {channelElapsed}
                   </Typography>
-                )}
-                {!wrapperHovered && isNotificationMuted && (
-                  <IconSlot size={14}>
-                    <BellSlashIcon weight="fill" />
-                  </IconSlot>
                 )}
                 {!wrapperHovered && mentionCount > 0 && (
                   <Stack
