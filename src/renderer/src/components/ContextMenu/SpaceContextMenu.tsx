@@ -77,7 +77,6 @@ export const SpaceContextMenu = observer(
           </>
         )}
         <SpaceNotificationSettingsMenu space={space} />
-        {!fromSidebar && <Divider css={{ opacity: 0.5 }} />}
         {spaceSettings && (
           <Stack direction="column" spacing={1.25}>
             {spaceSettings.map(([category, pages]) => (
