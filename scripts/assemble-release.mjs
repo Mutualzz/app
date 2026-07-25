@@ -12,7 +12,7 @@ import {
   statSync,
   writeFileSync
 } from "fs";
-import { dirname, join, resolve } from "path";
+import { basename, dirname, join, resolve } from "path";
 import { fileURLToPath } from "url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -31,11 +31,32 @@ function sha256(filePath) {
   });
 }
 
+function toMsysPath(filePath) {
+  const abs = resolve(filePath);
+  const match = /^([A-Za-z]):[\\/](.*)$/.exec(abs);
+  if (!match) return abs.replace(/\\/g, "/");
+  return `/${match[1].toLowerCase()}/${match[2].replace(/\\/g, "/")}`;
+}
+
 function zipDirectory(sourceDir, outPath) {
   mkdirSync(dirname(outPath), { recursive: true });
-  execSync(`tar -a -cf "${outPath}" -C "${sourceDir}" .`, {
-    stdio: "inherit",
-    shell: process.platform === "win32"
+  const absOut = resolve(outPath);
+  const absSrc = resolve(sourceDir);
+
+  if (process.platform === "win32") {
+    execSync(
+      `tar -a --force-local -cf "${basename(absOut)}" -C "${toMsysPath(absSrc)}" .`,
+      {
+        stdio: "inherit",
+        cwd: dirname(absOut),
+        shell: true
+      }
+    );
+    return;
+  }
+
+  execSync(`tar -a -cf "${absOut}" -C "${absSrc}" .`, {
+    stdio: "inherit"
   });
 }
 
