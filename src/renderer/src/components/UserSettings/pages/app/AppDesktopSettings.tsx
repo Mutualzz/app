@@ -35,7 +35,9 @@ export const AppDesktopSettings = observer(() => {
 
   const handleLaunchAtLogin = (checked: boolean) => {
     setLaunchAtLogin(checked);
-    void window.api?.desktop?.setAutostart?.(checked);
+    void window.api?.desktop?.setAutostart?.(checked).catch(() => {
+      setLaunchAtLogin(!checked);
+    });
   };
 
   const handleAutoCheckUpdates = (checked: boolean) => {
