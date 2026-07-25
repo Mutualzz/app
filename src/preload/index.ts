@@ -111,8 +111,8 @@ const api = {
     getLinuxPackage: (): Promise<
       "appimage" | "debian" | "rpm" | "pacman"
     > => ipcRenderer.invoke("updater:get-linux-package"),
-    getBinarySha256: (): Promise<string | null> =>
-      ipcRenderer.invoke("updater:get-binary-sha256"),
+    getElectronVersion: (): Promise<string | null> =>
+      ipcRenderer.invoke("updater:get-electron-version"),
     getUpdaterVersion: (): Promise<string | null> =>
       ipcRenderer.invoke("updater:get-updater-version"),
     getSavePath: (version: string, url: string): Promise<string> =>
@@ -123,14 +123,14 @@ const api = {
       sha256: string
     ): Promise<{ path: string }> =>
       ipcRenderer.invoke("updater:download", url, savePath, sha256),
-    apply: (
+    restartForUpdate: (
       updatePath: string,
       version: string,
       electronVersion?: string,
       updaterVersion?: string
     ): Promise<void> =>
       ipcRenderer.invoke(
-        "updater:apply",
+        "updater:restartForUpdate",
         updatePath,
         version,
         electronVersion,

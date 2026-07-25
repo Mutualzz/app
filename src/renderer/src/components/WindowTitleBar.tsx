@@ -57,7 +57,7 @@ const WindowTitleBar = ({ onHeightChange }: WindowTitleBarProps) => {
 
   const stage = app.updater?.stage;
 
-  const isUpdating = stage === "installing";
+  const isUpdating = stage === "restarting" || stage === "downloading";
 
   const isAuthPage =
     location.pathname === "/login" || location.pathname === "/register";
@@ -413,7 +413,7 @@ const WindowTitleBar = ({ onHeightChange }: WindowTitleBarProps) => {
               <IconButton
                 onClick={() => {
                   if (app.updater?.stage === "ready") {
-                    void app.updater.installUpdate();
+                    void app.updater.restartForUpdate();
                   }
                 }}
                 size={16}
@@ -423,7 +423,7 @@ const WindowTitleBar = ({ onHeightChange }: WindowTitleBarProps) => {
                 title={
                   app.updater.progressLabel ||
                   (app.updater.stage === "ready"
-                    ? tCommon("updater.installUpdate")
+                    ? tCommon("updater.restartToUpdate")
                     : undefined)
                 }
                 css={{

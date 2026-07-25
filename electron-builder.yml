@@ -2,7 +2,6 @@ appId: com.mutualzz.app
 productName: Mutualzz
 icon: resources/icons/icon.png
 afterPack: afterPack.js
-afterSign: afterSign.js
 directories:
   buildResources: resources
 files:
@@ -22,23 +21,10 @@ win:
   executableName: mutualzz
   icon: resources/icons/icon.ico
   extraFiles:
-    - from: resources/updater.exe
-      to: updater.exe
-
-nsis:
-  oneClick: true
-  perMachine: false
-  allowElevation: false
-  createDesktopShortcut: false
-  createStartMenuShortcut: false
-  runAfterFinish: false
-  artifactName: ${productName}Setup.${ext}
-  shortcutName: ${productName}
-  uninstallDisplayName: ${productName}
-  warningsAsErrors: false
-  include: "resources/installer.nsh"
-  installerIcon: "resources/icons/icon.ico"
-  deleteAppDataOnUninstall: false
+    - from: resources/Update.exe
+      to: Update.exe
+  target:
+    - dir
 
 mac:
   hardenedRuntime: true
@@ -55,8 +41,7 @@ mac:
     - CFBundleName: Mutualzz
   notarize: false
   target:
-    - target: dmg
-      arch: universal
+    - dir
   x64ArchFiles: "Contents/MacOS/Mutualzz"
 
 dmg:

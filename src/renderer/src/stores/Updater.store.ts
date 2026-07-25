@@ -7,15 +7,24 @@ type UpdaterStage =
   | "checking"
   | "downloading"
   | "ready"
-  | "installing"
+  | "restarting"
   | "error";
+
+interface AsarAsset {
+  url: string;
+  sha256: string;
+}
 
 interface PlatformAsset {
   url: string;
   sha256: string;
-  updaterSha256?: string;
+  packageUrl?: string;
+  packageSha256?: string;
+  setupUrl?: string;
+  setupSha256?: string;
   updaterVersion?: string;
   electronVersion?: string;
+  asar?: AsarAsset;
 }
 
 interface LatestJson {
@@ -82,8 +91,8 @@ export class UpdaterStore {
     if (this.stage === "ready" && this.updateVersion) {
       return i18n.t("updater.updateReady", { version: this.updateVersion });
     }
-    if (this.stage === "installing") {
-      return i18n.t("updater.installing");
+    if (this.stage === "restarting") {
+      return i18n.t("updater.restarting");
     }
     return "";
   }
@@ -172,9 +181,9 @@ export class UpdaterStore {
     }
   }
 
-  async installUpdate() {
+  async restartForUpdate() {
     if (!this.updateFilePath || !this.updateVersion) {
-      this.logger.error("No update file path or version, cannot install");
+      this.logger.error("No update file path or version, cannot restart");
       return;
     }
 
@@ -184,18 +193,18 @@ export class UpdaterStore {
       return;
     }
 
-    this.setStage("installing");
+    this.setStage("restarting");
     this.hasUpdate = false;
 
     try {
-      await window.api.updater.apply(
+      await window.api.updater.restartForUpdate(
         this.updateFilePath,
         this.updateVersion,
         this.pendingAsset?.electronVersion,
         this.pendingAsset?.updaterVersion
       );
     } catch (err: any) {
-      this.logger.error("Install failed:", err);
+      this.logger.error("Restart for update failed:", err);
       this.setStage("error");
       this.setError(err?.message ?? String(err));
     }
@@ -208,10 +217,54 @@ export class UpdaterStore {
     return local.trim() !== asset.updaterVersion.trim();
   }
 
-  private async downloadUpdate(asset: PlatformAsset, version: string) {
-    this.logger.info("Downloading update from:", asset.url);
+  private async resolveDownloadTarget(
+    asset: PlatformAsset,
+    platform: string,
+    linuxFlavor: string
+  ): Promise<{ url: string; sha256: string } | null> {
+    if (asset.packageUrl && asset.packageSha256) {
+      return { url: asset.packageUrl, sha256: asset.packageSha256 };
+    }
 
-    const savePath = await window.api.updater.getSavePath(version, asset.url);
+    if (platform === "darwin") {
+      return null;
+    }
+
+    const localElectron = await window.api.updater.getElectronVersion();
+    const canUseAsar =
+      asset.asar &&
+      asset.electronVersion &&
+      localElectron &&
+      localElectron.trim() === asset.electronVersion.trim() &&
+      linuxFlavor !== "appimage" &&
+      platform === "linux";
+
+    if (canUseAsar && asset.asar) {
+      return { url: asset.asar.url, sha256: asset.asar.sha256 };
+    }
+
+    if (platform !== "linux" || linuxFlavor === "appimage") {
+      return { url: asset.url, sha256: asset.sha256 };
+    }
+
+    return null;
+  }
+
+  private async downloadUpdate(asset: PlatformAsset, version: string) {
+    const platform = await window.api.updater.getPlatform();
+    const linuxFlavor =
+      platform === "linux" ? await window.api.updater.getLinuxPackage() : "";
+
+    const target = await this.resolveDownloadTarget(asset, platform, linuxFlavor);
+    if (!target) {
+      throw new Error(
+        "Full update requires the AppImage build. Download from mutualzz.com."
+      );
+    }
+
+    this.logger.info("Downloading update from:", target.url);
+
+    const savePath = await window.api.updater.getSavePath(version, target.url);
 
     const unsubscribe = window.api.events.onUpdaterDownloadProgress((data) => {
       runInAction(() => {
@@ -223,9 +276,9 @@ export class UpdaterStore {
 
     try {
       const result = await window.api.updater.download(
-        asset.url,
+        target.url,
         savePath,
-        asset.sha256
+        target.sha256
       );
 
       runInAction(() => {
