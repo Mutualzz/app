@@ -2,7 +2,6 @@
   "author": "Mutualzz",
   "dependencies": {
     "canvas": "^3.2.3",
-    "electron-updater": "^6.8.3",
     "i18next": "^26.3.6",
     "keytar": "^7.9.0",
     "react-i18next": "^17.0.9",

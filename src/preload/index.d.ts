@@ -109,7 +109,7 @@ export interface MutualzzAPI {
     getVersion(): Promise<string>;
     getPlatform(): Promise<string>;
     getLinuxPackage(): Promise<"appimage" | "debian" | "rpm" | "pacman">;
-    getBinarySha256(): Promise<string | null>;
+    getElectronVersion(): Promise<string | null>;
     getUpdaterVersion(): Promise<string | null>;
     getSavePath(version: string, url: string): Promise<string>;
     download(
@@ -117,7 +117,7 @@ export interface MutualzzAPI {
       savePath: string,
       sha256: string
     ): Promise<{ path: string }>;
-    apply(
+    restartForUpdate(
       updatePath: string,
       version: string,
       electronVersion?: string,

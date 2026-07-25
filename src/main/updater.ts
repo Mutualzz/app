@@ -1,7 +1,7 @@
 import { app, ipcMain } from "electron";
 import { createHash, type Hash } from "crypto";
 import { homedir } from "os";
-import { join, resolve, sep } from "path";
+import { basename, join, resolve, sep } from "path";
 import { spawn } from "child_process";
 import {
   createWriteStream,
@@ -11,7 +11,8 @@ import {
   unlinkSync,
   renameSync,
   readFileSync,
-  readdirSync
+  readdirSync,
+  writeFileSync
 } from "fs";
 import { get as httpsGet, RequestOptions } from "https";
 import { IncomingMessage } from "http";
@@ -33,14 +34,12 @@ export function initUpdaterHandlers() {
     return detectLinuxPackage();
   });
 
-  ipcMain.handle("updater:get-binary-sha256", async () => {
-    const updaterPath = getUpdaterPath();
-    if (!existsSync(updaterPath)) return null;
-    return hashFileSha256(updaterPath);
-  });
-
   ipcMain.handle("updater:get-updater-version", () => {
     return getInstalledUpdaterVersion();
+  });
+
+  ipcMain.handle("updater:get-electron-version", () => {
+    return getInstalledElectronVersion();
   });
 
   ipcMain.handle(
@@ -50,13 +49,7 @@ export function initUpdaterHandlers() {
       if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
 
       const fromUrl = extensionFromUrl(url);
-      const ext =
-        fromUrl ||
-        (process.platform === "darwin"
-          ? "dmg"
-          : process.platform === "win32"
-            ? "exe"
-            : "AppImage");
+      const ext = fromUrl || "zip";
 
       return join(dir, `Mutualzz-${version}.${ext}`);
     }
@@ -264,7 +257,7 @@ export function initUpdaterHandlers() {
   );
 
   ipcMain.handle(
-    "updater:apply",
+    "updater:restartForUpdate",
     async (
       _event,
       updatePath: string,
@@ -279,15 +272,19 @@ export function initUpdaterHandlers() {
         throw new Error(`Updater binary not found: ${updaterPath}`);
       }
 
-      const args = ["--apply", updatePath, "--version", version];
-      if (electronVersion) {
-        args.push("--electron-version", electronVersion);
-      }
-      if (updaterVersion) {
-        args.push("--updater-version", updaterVersion);
-      }
+      const pending = {
+        version,
+        artifact: basename(updatePath),
+        electron_version: electronVersion ?? null,
+        updater_version: updaterVersion ?? null
+      };
 
-      const child = spawn(updaterPath, args, {
+      writeFileSync(
+        join(updaterDataDir(), "pending-restart.json"),
+        JSON.stringify(pending)
+      );
+
+      const child = spawn(updaterPath, [], {
         detached: true,
         stdio: "ignore"
       });
@@ -308,7 +305,7 @@ export function initUpdaterHandlers() {
 }
 
 function updatesDir() {
-  return join(app.getPath("temp"), "mutualzz-updates");
+  return join(updaterDataDir(), "packages");
 }
 
 function cleanupUpdateDir(keepPath: string) {
@@ -339,19 +336,6 @@ function hashFile(path: string, hasher: Hash): Promise<number> {
       total += buf.length;
     });
     stream.on("end", () => resolve(total));
-    stream.on("error", reject);
-  });
-}
-
-function hashFileSha256(path: string): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const hasher = createHash("sha256");
-    const stream = createReadStream(path);
-    stream.on("data", (chunk) => {
-      const buf = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
-      hasher.update(buf);
-    });
-    stream.on("end", () => resolve(hasher.digest("hex")));
     stream.on("error", reject);
   });
 }
@@ -387,12 +371,20 @@ function extensionFromUrl(url: string): string | null {
 }
 
 function getUpdaterPath(): string {
+  if (process.platform === "win32") {
+    const dataRoot = join(updaterDataDir(), "Update.exe");
+    if (existsSync(dataRoot)) return dataRoot;
+
+    const dir = join(process.execPath, "..");
+    const updateExe = join(dir, "Update.exe");
+    if (existsSync(updateExe)) return updateExe;
+    return join(dir, "updater.exe");
+  }
+
   if (process.platform === "darwin") {
     return join(process.execPath, "..", "Mutualzz");
   }
-  if (process.platform === "win32") {
-    return join(process.execPath, "..", "updater.exe");
-  }
+
   return join(process.execPath, "..", "updater");
 }
 
@@ -407,6 +399,25 @@ function updaterDataDir(): string {
     return join(homedir(), "Library", "Application Support", "Mutualzz");
   }
   return join(homedir(), ".local", "share", "Mutualzz");
+}
+
+function getInstalledElectronVersion(): string | null {
+  const dataFile = join(updaterDataDir(), "electron-version.txt");
+  if (existsSync(dataFile)) {
+    const version = readFileSync(dataFile, "utf8").trim();
+    if (version) return version;
+  }
+
+  const bundled = join(
+    process.resourcesPath,
+    "electron-runtime-version.txt"
+  );
+  if (existsSync(bundled)) {
+    const version = readFileSync(bundled, "utf8").trim();
+    if (version) return version;
+  }
+
+  return null;
 }
 
 function getInstalledUpdaterVersion(): string | null {
