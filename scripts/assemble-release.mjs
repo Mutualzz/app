@@ -33,19 +33,9 @@ function sha256(filePath) {
 
 function zipDirectory(sourceDir, outPath) {
   mkdirSync(dirname(outPath), { recursive: true });
-  if (process.platform === "win32") {
-    const src = sourceDir.replace(/'/g, "''");
-    const dest = outPath.replace(/'/g, "''");
-    execSync(
-      `powershell -NoProfile -Command "Compress-Archive -Path '${src}\\*' -DestinationPath '${dest}' -Force"`,
-      { stdio: "inherit" }
-    );
-    return;
-  }
-
-  execSync(`cd "${sourceDir}" && zip -qr "${outPath}" .`, {
+  execSync(`tar -a -cf "${outPath}" -C "${sourceDir}" .`, {
     stdio: "inherit",
-    shell: true
+    shell: process.platform === "win32"
   });
 }
 
