@@ -1,9 +1,11 @@
 import { createHash } from "crypto";
 import { createRequire } from "module";
 import { execSync } from "child_process";
+import archiver from "archiver";
 import {
   cpSync,
   createReadStream,
+  createWriteStream,
   existsSync,
   mkdirSync,
   readdirSync,
@@ -12,7 +14,7 @@ import {
   statSync,
   writeFileSync
 } from "fs";
-import { basename, dirname, join, resolve } from "path";
+import { dirname, join, relative, resolve, sep } from "path";
 import { fileURLToPath } from "url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -31,33 +33,51 @@ function sha256(filePath) {
   });
 }
 
-function toMsysPath(filePath) {
-  const abs = resolve(filePath);
-  const match = /^([A-Za-z]):[\\/](.*)$/.exec(abs);
-  if (!match) return abs.replace(/\\/g, "/");
-  return `/${match[1].toLowerCase()}/${match[2].replace(/\\/g, "/")}`;
-}
-
 function zipDirectory(sourceDir, outPath) {
   mkdirSync(dirname(outPath), { recursive: true });
-  const absOut = resolve(outPath);
   const absSrc = resolve(sourceDir);
+  const absOut = resolve(outPath);
 
-  if (process.platform === "win32") {
-    execSync(
-      `tar -a --force-local -cf "${basename(absOut)}" -C "${toMsysPath(absSrc)}" .`,
-      {
-        stdio: "inherit",
-        cwd: dirname(absOut),
-        shell: true
+  return new Promise((resolvePromise, reject) => {
+    const output = createWriteStream(absOut);
+    const archive = archiver("zip", { zlib: { level: 9 } });
+
+    output.on("close", () => resolvePromise());
+    output.on("error", reject);
+    archive.on("error", reject);
+    archive.on("warning", (error) => {
+      if (error.code === "ENOENT") {
+        console.warn(error);
+        return;
       }
-    );
-    return;
+      reject(error);
+    });
+
+    archive.pipe(output);
+
+    for (const filePath of walkFiles(absSrc)) {
+      const entryName = relative(absSrc, filePath).split(sep).join("/");
+      archive.file(filePath, { name: entryName });
+    }
+
+    void archive.finalize();
+  });
+}
+
+function walkFiles(rootDir) {
+  const files = [];
+
+  for (const name of readdirSync(rootDir)) {
+    const fullPath = join(rootDir, name);
+    const stats = statSync(fullPath);
+    if (stats.isDirectory()) {
+      files.push(...walkFiles(fullPath));
+    } else {
+      files.push(fullPath);
+    }
   }
 
-  execSync(`tar -a -cf "${absOut}" -C "${absSrc}" .`, {
-    stdio: "inherit"
-  });
+  return files;
 }
 
 function zipMacApp(appPath, outPath) {
@@ -145,7 +165,7 @@ function findMacApp(unpackedDir) {
 
 async function assembleWindows(version, unpackedDir) {
   const packageZip = join(releaseDir, `Mutualzz-win-x64-${version}.zip`);
-  zipDirectory(unpackedDir, packageZip);
+  await zipDirectory(unpackedDir, packageZip);
 
   const updateExeSrc = join(appDir, "resources", "Update.exe");
   if (!existsSync(updateExeSrc)) {
@@ -218,7 +238,7 @@ async function assembleMac(version, unpackedDir) {
 
 async function assembleLinux(version, unpackedDir) {
   const packageZip = join(releaseDir, `Mutualzz-linux-x64-${version}.zip`);
-  zipDirectory(unpackedDir, packageZip);
+  await zipDirectory(unpackedDir, packageZip);
 
   const updaterSrc = join(appDir, "resources", "updater");
   if (existsSync(updaterSrc)) {
