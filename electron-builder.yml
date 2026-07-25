@@ -41,7 +41,8 @@ mac:
     - CFBundleName: Mutualzz
   notarize: false
   target:
-    - dir
+    - target: dir
+      arch: universal
   x64ArchFiles: "Contents/MacOS/Mutualzz"
 
 dmg:
