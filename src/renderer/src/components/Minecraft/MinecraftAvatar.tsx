@@ -3,6 +3,7 @@ import { CubeIcon } from "@phosphor-icons/react";
 import { minecraftAvatarUrl } from "@mutualzz/client";
 import { observer } from "mobx-react-lite";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   uuid?: string | null;
@@ -25,6 +26,7 @@ const resolvePixelSize = (size: Props["size"]) => {
 
 export const MinecraftAvatar = observer(
   ({ uuid, name, size = "md" }: Props) => {
+    const { t } = useTranslation("common");
     const [failed, setFailed] = useState(false);
     const pixelSize = resolvePixelSize(size);
 
@@ -49,7 +51,11 @@ export const MinecraftAvatar = observer(
       >
         <img
           src={minecraftAvatarUrl(uuid)}
-          alt={name ? `${name}'s Minecraft skin` : "Minecraft skin"}
+          alt={
+            name
+              ? t("minecraft.skinAltNamed", { name })
+              : t("minecraft.skinAlt")
+          }
           draggable={false}
           onError={() => setFailed(true)}
           css={{

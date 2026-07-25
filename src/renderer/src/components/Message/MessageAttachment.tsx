@@ -99,7 +99,7 @@ const ImageViewer = ({ attachment }: { attachment: APIAttachment }) => {
     <Stack direction="column" alignItems="center" spacing={1.5}>
       <img
         src={attachment.url}
-        alt={attachment.filename?.trim() || "Image attachment"}
+        alt={attachment.filename?.trim() || t("a11y.imageAttachment")}
         css={{
           maxWidth: "90vw",
           maxHeight: "80vh",
@@ -486,7 +486,7 @@ export const MessageAttachment = ({ attachment }: Props) => {
         >
           <img
             src={attachment.url}
-            alt={attachment.filename?.trim() || "Image attachment"}
+            alt={attachment.filename?.trim() || t("a11y.imageAttachment")}
             css={{
               maxWidth: 400,
               maxHeight: 300,

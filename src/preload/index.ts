@@ -123,8 +123,19 @@ const api = {
       sha256: string
     ): Promise<{ path: string }> =>
       ipcRenderer.invoke("updater:download", url, savePath, sha256),
-    apply: (updatePath: string, version: string): Promise<void> =>
-      ipcRenderer.invoke("updater:apply", updatePath, version)
+    apply: (
+      updatePath: string,
+      version: string,
+      electronVersion?: string,
+      updaterVersion?: string
+    ): Promise<void> =>
+      ipcRenderer.invoke(
+        "updater:apply",
+        updatePath,
+        version,
+        electronVersion,
+        updaterVersion
+      )
   },
   idle: {
     setThreshold: (ms: number) => ipcRenderer.send("idle:set-threshold", ms),

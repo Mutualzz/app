@@ -422,7 +422,9 @@ const WindowTitleBar = ({ onHeightChange }: WindowTitleBarProps) => {
                 padding={4}
                 title={
                   app.updater.progressLabel ||
-                  (app.updater.stage === "ready" ? "Install update" : undefined)
+                  (app.updater.stage === "ready"
+                    ? tCommon("updater.installUpdate")
+                    : undefined)
                 }
                 css={{
                   WebkitAppRegion: "no-drag",

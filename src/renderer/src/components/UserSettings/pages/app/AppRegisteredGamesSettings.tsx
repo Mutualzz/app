@@ -45,6 +45,7 @@ import {
   touchGamePlayed
 } from "@renderer/presence/gamePreferences";
 import { isElectron } from "@utils/index";
+import i18n from "@renderer/i18n";
 import { observer } from "mobx-react-lite";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -200,20 +201,31 @@ function suggestedDisplayName(proc: { name: string; title?: string }) {
   return displayNameFromExe(proc.name);
 }
 
-function formatLastPlayed(
-  at: number | null,
-  t: (key: string, opts?: Record<string, unknown>) => string,
-  now: number
-) {
-  if (!at) return t("registeredGames.neverPlayed");
+function formatLastPlayed(at: number | null, now: number) {
+  if (!at) return i18n.t("registeredGames.neverPlayed", { ns: "settings" });
   const diff = Math.max(0, now - at);
-  if (diff < 60_000) return t("registeredGames.nowPlaying");
+  if (diff < 60_000) {
+    return i18n.t("registeredGames.nowPlaying", { ns: "settings" });
+  }
   const mins = Math.floor(diff / 60_000);
-  if (mins < 60) return t("registeredGames.lastPlayedMinutes", { count: mins });
+  if (mins < 60) {
+    return i18n.t("registeredGames.lastPlayedMinutes", {
+      ns: "settings",
+      count: mins
+    });
+  }
   const hours = Math.floor(mins / 60);
-  if (hours < 24) return t("registeredGames.lastPlayedHours", { count: hours });
+  if (hours < 24) {
+    return i18n.t("registeredGames.lastPlayedHours", {
+      ns: "settings",
+      count: hours
+    });
+  }
   const days = Math.floor(hours / 24);
-  return t("registeredGames.lastPlayedDays", { count: days });
+  return i18n.t("registeredGames.lastPlayedDays", {
+    ns: "settings",
+    count: days
+  });
 }
 
 function GameNameLabel({
@@ -720,7 +732,7 @@ export const AppRegisteredGamesSettings = observer(() => {
                     <Typography level="body-xs" textColor="muted">
                       {game.playing
                         ? t("registeredGames.nowPlaying")
-                        : formatLastPlayed(game.lastPlayedAt, t, now)}
+                        : formatLastPlayed(game.lastPlayedAt, now)}
                     </Typography>
                   </Stack>
                   </Stack>

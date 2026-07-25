@@ -501,7 +501,7 @@ export class AccountSettingsStore {
         getPayload: () => this.getSyncPayload(),
         applyServerUpdate: (res) => this.update(res),
         applyLocalOverrides: (payload) => this.applyLocalOverrides(payload),
-        onSyncFailed: () => toast.error(i18n.t("settings.syncFailed")),
+        onSyncFailed: () => toast.error(i18n.t("settings:syncFailed")),
       },
       { account: this.app.account, rest: this.app.rest },
     );

@@ -23,7 +23,9 @@ export const Route = createFileRoute("/spotify/callback")({
   head: () => ({
     meta: [
       ...seo({
-        title: "Connecting Spotify"
+        title: i18n.t("connections.spotify.connectingPageTitle", {
+          ns: "settings"
+        })
       })
     ]
   })
@@ -65,7 +67,9 @@ function SpotifyCallback() {
         const returnTo = data.returnTo ?? "";
         const opensApp = returnTo.startsWith("mutualzz://");
         if (!opensApp) {
-          toast.success("Spotify connected");
+          toast.success(
+            i18n.t("connections.spotifyConnectedToast", { ns: "settings" })
+          );
         }
 
         if (opensApp) {
@@ -97,7 +101,9 @@ function SpotifyCallback() {
     >
       <Loading />
       <Typography level="body-md" textColor="muted">
-        {failed ? "Could not connect Spotify" : "Connecting Spotify…"}
+        {failed
+          ? i18n.t("connections.spotify.connectFailed", { ns: "settings" })
+          : i18n.t("connections.spotify.connecting", { ns: "settings" })}
       </Typography>
     </Stack>
   );

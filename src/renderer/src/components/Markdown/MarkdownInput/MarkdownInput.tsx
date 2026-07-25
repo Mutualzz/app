@@ -317,30 +317,18 @@ const MarkdownInput = forwardRef<MarkdownInputHandle, MarkdownInputProps>(
       (e: React.ClipboardEvent) => {
         if (!onPasteFiles) return;
 
-        const items = Array.from(e.clipboardData.items ?? []);
-        const files = [
-          ...Array.from(e.clipboardData.files ?? []),
-          ...items
+        let files = Array.from(e.clipboardData.files ?? []);
+        if (files.length === 0) {
+          files = Array.from(e.clipboardData.items ?? [])
             .filter((item) => item.kind === "file")
             .map((item) => item.getAsFile())
-            .filter((file): file is File => file != null)
-        ];
+            .filter((file): file is File => file != null);
+        }
 
-        const unique = files.filter(
-          (file, index, all) =>
-            all.findIndex(
-              (other) =>
-                other.name === file.name &&
-                other.size === file.size &&
-                other.type === file.type &&
-                other.lastModified === file.lastModified
-            ) === index
-        );
-
-        if (unique.length === 0) return;
+        if (files.length === 0) return;
 
         e.preventDefault();
-        onPasteFiles(unique);
+        onPasteFiles(files);
       },
       [onPasteFiles]
     );
