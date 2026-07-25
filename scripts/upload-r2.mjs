@@ -31,10 +31,24 @@ function contentType(filePath) {
   return MIME_TYPES[extname(filePath).toLowerCase()] ?? "application/octet-stream";
 }
 
+function getR2Credentials() {
+  const accountId = process.env.CLOUDFLARE_ACCOUNT_ID || process.env.CF_ACCOUNT_ID || "";
+  const accessKeyId =
+    process.env.R2_ACCESS_KEY_ID ||
+    process.env.AWS_ACCESS_KEY_ID ||
+    process.env.R2_ACCESS_KEY ||
+    "";
+  const secretAccessKey =
+    process.env.R2_SECRET_ACCESS_KEY ||
+    process.env.AWS_SECRET_ACCESS_KEY ||
+    process.env.R2_SECRET_KEY ||
+    "";
+
+  return { accountId, accessKeyId, secretAccessKey };
+}
+
 function createS3Client() {
-  const accountId = process.env.CLOUDFLARE_ACCOUNT_ID;
-  const accessKeyId = process.env.R2_ACCESS_KEY_ID;
-  const secretAccessKey = process.env.R2_SECRET_ACCESS_KEY;
+  const { accountId, accessKeyId, secretAccessKey } = getR2Credentials();
 
   if (!accountId || !accessKeyId || !secretAccessKey) {
     return null;
@@ -46,6 +60,17 @@ function createS3Client() {
     endpoint: `https://${accountId}.r2.cloudflarestorage.com`,
     credentials: { accessKeyId, secretAccessKey }
   });
+}
+
+function describeMissingR2Credentials() {
+  const { accountId, accessKeyId, secretAccessKey } = getR2Credentials();
+  const missing = [];
+
+  if (!accountId) missing.push("CF_ACCOUNT_ID (or CLOUDFLARE_ACCOUNT_ID)");
+  if (!accessKeyId) missing.push("R2_ACCESS_KEY_ID");
+  if (!secretAccessKey) missing.push("R2_SECRET_ACCESS_KEY");
+
+  return missing;
 }
 
 async function uploadWithS3(client, localPath, key) {
@@ -92,10 +117,13 @@ async function uploadFile(localPath, objectName, s3Client) {
 
   if (size > WRANGLER_LIMIT) {
     if (!s3Client) {
+      const missing = describeMissingR2Credentials();
       throw new Error(
         `${basename(localPath)} is ${Math.ceil(size / (1024 * 1024))} MiB. ` +
           "Wrangler supports uploads up to 300 MiB. " +
-          "Add R2_ACCESS_KEY_ID and R2_SECRET_ACCESS_KEY secrets for multipart upload."
+          "Create an R2 S3 API token in Cloudflare (R2 -> Manage R2 API Tokens) and add GitHub secrets: " +
+          `${missing.join(", ")}. ` +
+          "CF_API_TOKEN is for Wrangler only and cannot upload large files."
       );
     }
     await uploadWithS3(s3Client, localPath, key);
@@ -133,6 +161,23 @@ async function main() {
     [join(releaseDir, "Mutualzz-mac.asar"), "Mutualzz-mac.asar"],
     [join(releaseDir, "Mutualzz-linux.asar"), "Mutualzz-linux.asar"]
   ];
+
+  const largeUploads = uploads.filter(
+    ([localPath]) => existsSync(localPath) && statSync(localPath).size > WRANGLER_LIMIT
+  );
+
+  if (largeUploads.length > 0 && !s3Client) {
+    const missing = describeMissingR2Credentials();
+    throw new Error(
+      `Found ${largeUploads.length} release file(s) over 300 MiB but R2 multipart credentials are missing: ${missing.join(", ")}`
+    );
+  }
+
+  if (s3Client) {
+    console.log("Using R2 S3 multipart upload for release artifacts");
+  } else {
+    console.log("Using Wrangler upload (files must be under 300 MiB)");
+  }
 
   for (const [localPath, objectName] of uploads) {
     await uploadFile(localPath, objectName, s3Client);
