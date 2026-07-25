@@ -9,6 +9,7 @@ import {
   readdirSync,
   readFileSync,
   rmSync,
+  statSync,
   writeFileSync
 } from "fs";
 import { dirname, join, resolve } from "path";
@@ -75,24 +76,49 @@ function readUpdaterVersion() {
   return readFileSync(path, "utf8").trim();
 }
 
-function findUnpackedDir() {
-  const candidates = [
-    join(distDir, "win-unpacked"),
-    join(distDir, "linux-unpacked"),
-    join(distDir, "mac-unpacked"),
-    join(distDir, "mac-arm64-unpacked"),
-    join(distDir, "mac-universal-unpacked")
-  ];
+function findUnpackedDir(platform) {
+  if (!existsSync(distDir)) {
+    throw new Error(`Dist directory missing: ${distDir}`);
+  }
 
-  for (const dir of candidates) {
-    if (existsSync(dir)) return dir;
+  const byPlatform = {
+    mac: [
+      "mac-universal",
+      "mac-unpacked",
+      "mac-universal-unpacked",
+      "mac-arm64-unpacked",
+      "mac-x64-unpacked",
+      "mac"
+    ],
+    win: ["win-unpacked", "win-arm64-unpacked", "win-ia32-unpacked"],
+    linux: ["linux-unpacked", "linux-arm64-unpacked"]
+  };
+
+  for (const name of byPlatform[platform] ?? []) {
+    const dir = join(distDir, name);
+    if (existsSync(dir) && statSync(dir).isDirectory()) {
+      return dir;
+    }
   }
 
   for (const name of readdirSync(distDir)) {
-    if (name.endsWith("-unpacked")) return join(distDir, name);
+    const dir = join(distDir, name);
+    if (!statSync(dir).isDirectory()) continue;
+    if (name.endsWith("-unpacked")) return dir;
+    if (platform === "mac" && (name === "mac" || name.startsWith("mac-"))) {
+      return dir;
+    }
   }
 
-  throw new Error(`No unpacked build found under ${distDir}`);
+  if (platform === "mac") {
+    for (const name of readdirSync(distDir)) {
+      if (name.endsWith(".app")) return distDir;
+    }
+  }
+
+  throw new Error(
+    `No unpacked build found under ${distDir}. Contents: ${readdirSync(distDir).join(", ")}`
+  );
 }
 
 function findMacApp(unpackedDir) {
@@ -220,7 +246,7 @@ async function main() {
   mkdirSync(releaseDir, { recursive: true });
 
   const version = readVersion();
-  const unpackedDir = findUnpackedDir();
+  const unpackedDir = findUnpackedDir(platform);
   let artifacts;
 
   if (platform === "win") {
