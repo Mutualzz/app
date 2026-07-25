@@ -21,7 +21,7 @@ export const Route = createFileRoute("/connections/callback")({
   head: () => ({
     meta: [
       ...seo({
-        title: "Connecting account"
+        title: i18n.t("connections.connectingPageTitle", { ns: "settings" })
       })
     ]
   })
@@ -107,7 +107,7 @@ function ConnectionsCallback() {
                     ns: "settings",
                     defaultValue: data.provider
                   })
-                : "Account"
+                : i18n.t("connections.accountFallback", { ns: "settings" })
             })
           );
         }

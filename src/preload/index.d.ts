@@ -117,7 +117,12 @@ export interface MutualzzAPI {
       savePath: string,
       sha256: string
     ): Promise<{ path: string }>;
-    apply(updatePath: string, version: string): Promise<void>;
+    apply(
+      updatePath: string,
+      version: string,
+      electronVersion?: string,
+      updaterVersion?: string
+    ): Promise<void>;
   };
   idle: {
     setThreshold(ms: number): void;

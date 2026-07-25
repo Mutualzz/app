@@ -22,7 +22,7 @@ const MAX_REDIRECTS = 5;
 
 export function initUpdaterHandlers() {
   ipcMain.handle("updater:get-version", () => {
-    return app.getVersion();
+    return getInstalledAppVersion();
   });
 
   ipcMain.handle("updater:get-platform", () => {
@@ -265,7 +265,13 @@ export function initUpdaterHandlers() {
 
   ipcMain.handle(
     "updater:apply",
-    async (_event, updatePath: string, version: string) => {
+    async (
+      _event,
+      updatePath: string,
+      version: string,
+      electronVersion?: string,
+      updaterVersion?: string
+    ) => {
       assertAllowedSavePath(updatePath);
 
       const updaterPath = getUpdaterPath();
@@ -273,11 +279,18 @@ export function initUpdaterHandlers() {
         throw new Error(`Updater binary not found: ${updaterPath}`);
       }
 
-      const child = spawn(
-        updaterPath,
-        ["--apply", updatePath, "--version", version],
-        { detached: true, stdio: "ignore" }
-      );
+      const args = ["--apply", updatePath, "--version", version];
+      if (electronVersion) {
+        args.push("--electron-version", electronVersion);
+      }
+      if (updaterVersion) {
+        args.push("--updater-version", updaterVersion);
+      }
+
+      const child = spawn(updaterPath, args, {
+        detached: true,
+        stdio: "ignore"
+      });
 
       await new Promise<void>((resolvePromise, reject) => {
         child.on("spawn", () => {
@@ -413,6 +426,22 @@ function getInstalledUpdaterVersion(): string | null {
   }
 
   return null;
+}
+
+function getInstalledAppVersion(): string {
+  const dataFile = join(updaterDataDir(), "version.txt");
+  if (existsSync(dataFile)) {
+    const version = readFileSync(dataFile, "utf8").trim();
+    if (version) return version;
+  }
+
+  const bundled = join(process.resourcesPath, "app-version.txt");
+  if (existsSync(bundled)) {
+    const version = readFileSync(bundled, "utf8").trim();
+    if (version) return version;
+  }
+
+  return app.getVersion();
 }
 
 function detectLinuxPackage(): "appimage" | "debian" | "rpm" | "pacman" {

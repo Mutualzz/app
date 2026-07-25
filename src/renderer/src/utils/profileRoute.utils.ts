@@ -1,5 +1,6 @@
 import type { APIUser, APIUserProfile } from "@mutualzz/types";
 import { CDNRoutes, ImageFormat } from "@mutualzz/types";
+import i18n from "@renderer/i18n";
 import { REST } from "@stores/REST.store";
 
 async function fetchWithAuth(path: string) {
@@ -100,12 +101,22 @@ export const buildProfilePageUrl = (username: string) => {
 
 export const buildProfileSeo = (user: APIUser, profile: APIUserProfile) => {
   const displayName = getUserDisplayName(user);
-  const title = `${displayName} (@${user.username}) | Mutualzz`;
+  const title = i18n.t("profile.seo.title", {
+    ns: "settings",
+    name: displayName,
+    username: user.username
+  });
   const description =
     profile.bio?.trim() ||
     (profile.configured
-      ? `View ${displayName}'s customized profile on Mutualzz.`
-      : `${displayName} on Mutualzz — connect with people who share your interests.`);
+      ? i18n.t("profile.seo.configuredDescription", {
+          ns: "settings",
+          name: displayName
+        })
+      : i18n.t("profile.seo.defaultDescription", {
+          ns: "settings",
+          name: displayName
+        }));
 
   return {
     title,
@@ -115,9 +126,9 @@ export const buildProfileSeo = (user: APIUser, profile: APIUserProfile) => {
     keywords: [
       user.username,
       displayName,
-      "Mutualzz profile",
-      "user profile",
-      "social profile",
-    ],
+      i18n.t("profile.seo.keywords.mutualzzProfile", { ns: "settings" }),
+      i18n.t("profile.seo.keywords.userProfile", { ns: "settings" }),
+      i18n.t("profile.seo.keywords.socialProfile", { ns: "settings" })
+    ]
   };
 };

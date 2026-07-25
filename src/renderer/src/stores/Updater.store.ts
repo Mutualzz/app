@@ -1,4 +1,5 @@
 import { Logger } from "@mutualzz/logger";
+import i18n from "@renderer/i18n";
 import { makeAutoObservable, runInAction } from "mobx";
 
 type UpdaterStage =
@@ -14,6 +15,7 @@ interface PlatformAsset {
   sha256: string;
   updaterSha256?: string;
   updaterVersion?: string;
+  electronVersion?: string;
 }
 
 interface LatestJson {
@@ -42,6 +44,7 @@ export class UpdaterStore {
   updateVersion: string | null = null;
   updateFilePath: string | null = null;
 
+  private pendingAsset: PlatformAsset | null = null;
   private autoCheckTimer: ReturnType<typeof setInterval> | null = null;
   private readonly logger = new Logger({ tag: "UpdaterStore" });
 
@@ -65,15 +68,22 @@ export class UpdaterStore {
                 (this.totalBytes - this.downloadedBytes) / this.bytesPerSecond
               )
             : "";
-        return `${pct}% · ${mb(this.downloadedBytes)}/${mb(this.totalBytes)} MB${eta ? ` · ${eta}` : ""}`;
+        return i18n.t("updater.downloadProgress", {
+          pct,
+          downloaded: mb(this.downloadedBytes),
+          total: mb(this.totalBytes),
+          eta: eta ? ` · ${eta}` : ""
+        });
       }
-      return `${mb(this.downloadedBytes)} MB`;
+      return i18n.t("updater.downloadedOnly", {
+        downloaded: mb(this.downloadedBytes)
+      });
     }
     if (this.stage === "ready" && this.updateVersion) {
-      return `Update ${this.updateVersion} ready`;
+      return i18n.t("updater.updateReady", { version: this.updateVersion });
     }
     if (this.stage === "installing") {
-      return "Installing update…";
+      return i18n.t("updater.installing");
     }
     return "";
   }
@@ -114,19 +124,19 @@ export class UpdaterStore {
       if (!this.isNewerVersion(latest.version, currentVersion)) {
         if (asset && (await this.isUpdaterStale(asset))) {
           this.logger.info(
-            "App version current but updater binary outdated — forcing full package"
+            "App version current but updater version outdated — forcing full package"
           );
           runInAction(() => {
             this.hasUpdate = true;
             this.updateVersion = latest.version;
             this.updateFilePath = null;
+            this.pendingAsset = asset;
             this.downloadedBytes = 0;
             this.totalBytes = 0;
             this.bytesPerSecond = 0;
             this.setStage("downloading");
           });
           await this.downloadUpdate(asset, latest.version);
-          await this.installUpdate();
           return;
         }
 
@@ -142,6 +152,7 @@ export class UpdaterStore {
         this.hasUpdate = true;
         this.updateVersion = latest.version;
         this.updateFilePath = null;
+        this.pendingAsset = asset;
         this.downloadedBytes = 0;
         this.totalBytes = 0;
         this.bytesPerSecond = 0;
@@ -177,7 +188,12 @@ export class UpdaterStore {
     this.hasUpdate = false;
 
     try {
-      await window.api.updater.apply(this.updateFilePath, this.updateVersion);
+      await window.api.updater.apply(
+        this.updateFilePath,
+        this.updateVersion,
+        this.pendingAsset?.electronVersion,
+        this.pendingAsset?.updaterVersion
+      );
     } catch (err: any) {
       this.logger.error("Install failed:", err);
       this.setStage("error");
@@ -186,10 +202,10 @@ export class UpdaterStore {
   }
 
   private async isUpdaterStale(asset: PlatformAsset): Promise<boolean> {
-    if (!asset.updaterSha256) return false;
-    const local = await window.api.updater.getBinarySha256();
+    if (!asset.updaterVersion) return false;
+    const local = await window.api.updater.getUpdaterVersion();
     if (!local) return true;
-    return local.toLowerCase() !== asset.updaterSha256.toLowerCase();
+    return local.trim() !== asset.updaterVersion.trim();
   }
 
   private async downloadUpdate(asset: PlatformAsset, version: string) {
@@ -285,6 +301,7 @@ export class UpdaterStore {
     this.hasUpdate = false;
     this.updateVersion = null;
     this.updateFilePath = null;
+    this.pendingAsset = null;
     this.downloadedBytes = 0;
     this.totalBytes = 0;
     this.bytesPerSecond = 0;
@@ -293,7 +310,15 @@ export class UpdaterStore {
 
 function formatEta(secs: number) {
   const s = Math.max(0, Math.round(secs));
-  if (s < 60) return `${s}s left`;
-  if (s < 3600) return `${Math.floor(s / 60)}m ${s % 60}s left`;
-  return `${Math.floor(s / 3600)}h ${Math.floor((s % 3600) / 60)}m left`;
+  if (s < 60) return i18n.t("updater.etaSeconds", { seconds: s });
+  if (s < 3600) {
+    return i18n.t("updater.etaMinutesSeconds", {
+      minutes: Math.floor(s / 60),
+      seconds: s % 60
+    });
+  }
+  return i18n.t("updater.etaHoursMinutes", {
+    hours: Math.floor(s / 3600),
+    minutes: Math.floor((s % 3600) / 60)
+  });
 }

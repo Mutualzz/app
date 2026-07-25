@@ -35,7 +35,6 @@ export const AccountContextMenuHeader = observer(({ account }: Props) => {
           openModal(CUSTOM_STATUS_MODAL_ID, <CustomStatusModal />);
         }}
         onClear={() => {
-          app.gateway.clearScheduledCustomStatus();
           app.gateway.clearCustomStatus();
         }}
       />

@@ -664,7 +664,8 @@ export class GatewayStore {
 
   clearCustomStatus() {
     this.app.customStatus.clear();
-    this.pushCustomStatusPresenceUpdate();
+    this.clearScheduledCustomStatus();
+    this.pushCustomStatusPresenceUpdate({ persist: true });
   }
 
   scheduleCustomStatus(opts: {
@@ -694,7 +695,7 @@ export class GatewayStore {
     if (!userId) return;
 
     if (!isElectron) {
-      this.refreshPresenceActivities();
+      this.refreshPresenceActivities(opts);
       return;
     }
 
@@ -759,7 +760,7 @@ export class GatewayStore {
     });
   }
 
-  refreshPresenceActivities() {
+  refreshPresenceActivities(opts?: { persist?: boolean }) {
     this.lastPresenceHash = null;
     if (!this.socket || this.readyState !== GatewayStatus.OPEN) return;
     if (!this.app.account?.id) return;
@@ -792,7 +793,7 @@ export class GatewayStore {
           status: this.getEffectiveStatus()
         };
         this.lastPresenceHash = stableStringify(draft);
-        this.sendPresenceUpdate(draft);
+        this.sendPresenceUpdate(draft, opts);
         return;
       }
 
@@ -811,7 +812,7 @@ export class GatewayStore {
         })
       };
       this.lastPresenceHash = stableStringify(draft);
-      this.sendPresenceUpdate(draft);
+      this.sendPresenceUpdate(draft, opts);
     })();
   }
 
@@ -1878,8 +1879,6 @@ export class GatewayStore {
 
     this.app.customStatus.setScheduledCustomStatus(schedule);
     this.lastPresenceHash = null;
-
-    if (!schedule) this.pushCustomStatusPresenceUpdate();
   };
 
   private startPresenceLoop() {

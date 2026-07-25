@@ -140,9 +140,17 @@ export const QuickReactionEmojiSlots = observer(
     const slots = [0, 1, 2];
 
     const setSlot = (index: number, key: string) => {
-      const next = [...value];
-      next[index] = key;
-      onChange(next.slice(0, 3));
+      const next = [0, 1, 2]
+        .map((slotIndex) => {
+          if (slotIndex === index) return key;
+          const existing = value[slotIndex];
+          return typeof existing === "string" && existing.length > 0
+            ? existing
+            : null;
+        })
+        .filter((entry): entry is string => entry != null);
+
+      onChange(next);
     };
 
     return (

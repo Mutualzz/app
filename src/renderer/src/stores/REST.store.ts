@@ -2,6 +2,7 @@ import { Logger } from "@mutualzz/logger";
 import { HttpException, HttpStatusCode } from "@mutualzz/types";
 import { detectBrowser } from "@utils/detect";
 import { formatRestError, parseXhrJson } from "@mutualzz/client";
+import i18n from "@renderer/i18n";
 import EventEmitter from "events";
 
 const isElectron = !!window.api;
@@ -52,7 +53,9 @@ function toHttpException(data: unknown, status: number): HttpException {
     data && typeof data === "object" ? (data as Record<string, unknown>) : null;
   const message = formatRestError(
     data,
-    status ? `Request failed (${status})` : "Request failed"
+    status
+      ? i18n.t("errors.requestFailedWithStatus", { status })
+      : i18n.t("errors.requestFailed")
   );
   const errors = Array.isArray(record?.errors)
     ? (record.errors as { path: string; message: string }[])
