@@ -33,6 +33,7 @@ import {
   setRpcUpdatedListener,
   startRpc
 } from "./rpc";
+import { getAutostart, setAutostart } from "./autostart";
 
 const SERVICE = "mutualzz";
 const ACCOUNT = "default";
@@ -205,9 +206,7 @@ export function setupIPC(): void {
 
   ipcMain.handle("desktop:set-autostart", async (_, enabled: boolean) => {
     try {
-      app.setLoginItemSettings({
-        openAtLogin: enabled
-      });
+      setAutostart(enabled);
     } catch (err) {
       console.error("Failed to set autostart:", err);
       throw err;
@@ -216,7 +215,7 @@ export function setupIPC(): void {
 
   ipcMain.handle("desktop:get-autostart", async () => {
     try {
-      return app.getLoginItemSettings().openAtLogin;
+      return getAutostart();
     } catch (err) {
       console.error("Failed to get autostart:", err);
       return false;
