@@ -15,7 +15,7 @@ import { IconButton } from "@components/IconButton";
 import { TrashIcon } from "@phosphor-icons/react";
 import { Tooltip } from "@components/Tooltip";
 import { ExpressionEditor } from "@renderer/components/Expression/ExpressionEditor";
-import { Space } from "@renderer/stores/objects/Space";
+import { type Space } from "@renderer/stores/objects/Space";
 import { useTranslation } from "react-i18next";
 
 const StickerItem = observer(({ expression }: { expression: Expression }) => {
@@ -177,7 +177,7 @@ const SpaceStickersTab = observer(({ space }: Props) => {
           </Stack>
           <Stack direction="column">
             {staticStickers.map((expression) => (
-              <StickerItem expression={expression} />
+              <StickerItem key={expression.id} expression={expression} />
             ))}
           </Stack>
         </Paper>
@@ -209,7 +209,7 @@ const SpaceStickersTab = observer(({ space }: Props) => {
           </Stack>
           <Stack direction="column">
             {animatedStickers.map((expression) => (
-              <StickerItem expression={expression} />
+              <StickerItem key={expression.id} expression={expression} />
             ))}
           </Stack>
         </Paper>

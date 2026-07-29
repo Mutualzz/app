@@ -19,7 +19,7 @@ function toSolidHex(color: ColorLike): string {
     ? (extractColors(color)?.[0] ?? color)
     : color;
 
-  return formatColor(resolved, { format: "hex" }) as string;
+  return formatColor(resolved, { format: "hex" });
 }
 
 export const AdaptiveElements = observer(() => {

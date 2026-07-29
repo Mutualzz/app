@@ -9,11 +9,11 @@ import { Stack, Typography } from "@mutualzz/ui-web";
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 
-export type ProfileConnectionChip = {
+export interface ProfileConnectionChip {
   provider: string;
   displayName: string | null;
   externalUrl: string | null;
-};
+}
 
 const CONNECTION_NAME_KEYS = {
   github: "connections.github.name",

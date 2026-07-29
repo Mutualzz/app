@@ -7,7 +7,7 @@ import type { MarkdownItAsync } from "@components/Markdown/MarkdownItAsync";
 const emojiRegex = new RegExp(shortcodeRegex.source, "g");
 
 const UNICODE_EMOJI_BETWEEN_COLONS =
-  /:([\p{Extended_Pictographic}\u200d\ufe0f]+):/gu;
+  /:((?:\p{Extended_Pictographic}|\u200d|\ufe0f)+):/gu;
 
 const normalizeUnicodeEmojiColons = (content: string) =>
   content.replace(UNICODE_EMOJI_BETWEEN_COLONS, "$1");

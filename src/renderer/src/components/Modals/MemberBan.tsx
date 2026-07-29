@@ -9,13 +9,13 @@ import {
   Stack,
   Typography
 } from "@mutualzz/ui-web";
-import { SpaceMember } from "@stores/objects/SpaceMember";
-import { Space } from "@stores/objects/Space";
+import { type SpaceMember } from "@stores/objects/SpaceMember";
+import { type Space } from "@stores/objects/Space";
 import { useMemo, useState } from "react";
 import { InputWithLabel } from "@components/InputWithLabel";
 import { useMutation } from "@tanstack/react-query";
 import { useModal } from "@contexts/Modal.context";
-import { HttpException } from "@mutualzz/types";
+import { type HttpException } from "@mutualzz/types";
 import { useTranslation } from "react-i18next";
 
 interface Props {

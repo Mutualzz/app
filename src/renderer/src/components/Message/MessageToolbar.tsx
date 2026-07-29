@@ -14,7 +14,7 @@ import { useMutation } from "@tanstack/react-query";
 import { observer } from "mobx-react-lite";
 import type { PropsWithChildren, RefObject } from "react";
 import { useEffect, useRef, useState } from "react";
-import { QueuedMessage } from "@stores/objects/QueuedMessage";
+import { type QueuedMessage } from "@stores/objects/QueuedMessage";
 import {
   ArrowBendUpLeftIcon,
   PencilSimpleIcon,
@@ -91,9 +91,8 @@ const ToolbarContent = observer(
         onMouseLeave={showSwitcher}
         p={2}
         borderRadius={10}
-        surfaceRole={theme.backgroundImageUrl ? "popout" : undefined}
+        surfaceRole={theme.backgroundImageUrl ? "popout" : "toolbar"}
         elevation={app.settings?.preferEmbossed ? 5 : 2}
-        transparency={25}
       >
         <Stack direction="row" alignItems="center" spacing={1.25}>
           {isSent && canReact && (

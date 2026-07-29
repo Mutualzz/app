@@ -4,15 +4,18 @@ import {
   MessageContent,
   MessageInfo
 } from "@components/Message/MessageBase";
-import { Message, MessageLike } from "@stores/objects/Message";
+import { Message as MessageObject, type MessageLike } from "@stores/objects/Message";
 import { UserAvatar } from "@components/User/UserAvatar";
 import { MessageAuthor } from "@components/Message/MessageAuthor";
 import { MarkdownRenderer } from "@components/Markdown/MarkdownRenderer/MarkdownRenderer";
 import { IconSlot, Link, Stack, Typography } from "@mutualzz/ui-web";
 import { MessageEmbed } from "@components/Message/MessageEmbed";
-import { EyeIcon, PhoneSlashIcon } from "@phosphor-icons/react";
-import { isCallNoticeMessage } from "@mutualzz/client";
+import { EyeIcon, PhoneSlashIcon, PushPinIcon } from "@phosphor-icons/react";
+import { isCallNoticeMessage, isChannelPinnedMessage } from "@mutualzz/client";
 import { useTranslation } from "react-i18next";
+import { useMenu } from "@contexts/ContextMenu.context";
+import { useAppStore } from "@hooks/useStores";
+import type { MouseEvent } from "react";
 
 interface Props {
   message: MessageLike;
@@ -20,10 +23,28 @@ interface Props {
 
 export const SystemMessage = observer(({ message }: Props) => {
   const { t } = useTranslation("chat");
+  const app = useAppStore();
+  const { openContextMenu } = useMenu();
   let highlight = false;
   const isEphemeral =
-    message instanceof Message && message.flags.has("Ephemeral");
+    message instanceof MessageObject && message.flags.has("Ephemeral");
   if (isEphemeral) highlight = true;
+
+  const me = message.space?.members.me;
+  const canDeletePinnedNotice =
+    message instanceof MessageObject &&
+    isChannelPinnedMessage(message) &&
+    (message.author?.id === app.account?.id ||
+      !!me?.hasPermission("ManageMessages", message.channel));
+
+  const handleContextMenu = (event: MouseEvent) => {
+    if (!canDeletePinnedNotice || !(message instanceof MessageObject)) return;
+
+    openContextMenu(event, {
+      type: "message",
+      message
+    });
+  };
 
   if (isCallNoticeMessage(message)) {
     return (
@@ -36,6 +57,29 @@ export const SystemMessage = observer(({ message }: Props) => {
         <MessageContent>
           <Typography level="body-sm" textColor="secondary">
             {message.content}
+          </Typography>
+        </MessageContent>
+      </MessageBase>
+    );
+  }
+
+  if (isChannelPinnedMessage(message)) {
+    const name =
+      message.member?.displayName ??
+      message.author?.displayName ??
+      message.author?.username ??
+      t("unknown");
+
+    return (
+      <MessageBase header system onContextMenu={handleContextMenu}>
+        <MessageInfo>
+          <IconSlot size={20}>
+            <PushPinIcon weight="fill" />
+          </IconSlot>
+        </MessageInfo>
+        <MessageContent>
+          <Typography level="body-sm" textColor="secondary">
+            {t("system.pinnedMessage", { name })}
           </Typography>
         </MessageContent>
       </MessageBase>

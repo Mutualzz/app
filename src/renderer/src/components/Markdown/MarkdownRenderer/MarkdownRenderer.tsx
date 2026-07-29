@@ -21,7 +21,7 @@ import { MarkdownItAsync } from "@components/Markdown/MarkdownItAsync";
 import { customEmojiPlugin } from "@components/Markdown/MarkdownRenderer/plugins/customEmoji";
 import { emojiPlugin } from "@components/Markdown/MarkdownRenderer/plugins/emoji";
 import { mentionPlugin } from "@components/Markdown/MarkdownRenderer/plugins/mention";
-import { MentionType } from "@mutualzz/types";
+import { type MentionType } from "@mutualzz/types";
 import { UserMention } from "@components/Markdown/components/mention/UserMention";
 import { RoleMention } from "@components/Markdown/components/mention/RoleMention";
 import { DefaultMention } from "@components/Markdown/components/mention/DefaultMention";

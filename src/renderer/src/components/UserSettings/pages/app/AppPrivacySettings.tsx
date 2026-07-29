@@ -1,7 +1,7 @@
 import { Button } from "@components/Button";
 import { UserAvatar } from "@components/User/UserAvatar";
 import { useAppStore } from "@hooks/useStores";
-import { privacyLabelKey } from "@mutualzz/client";
+import { privacyLabelKey, type AccountSettingsPatch } from "@mutualzz/client";
 import {
   DM_PRIVACY_OPTIONS,
   PROFILE_VISIBILITY_OPTIONS,
@@ -36,10 +36,9 @@ export const AppPrivacySettings = observer(() => {
 
   if (!settings) return null;
 
-  const extended = settings.extendedSettings;
 
-  const patchExtended = (next: Partial<typeof extended>) => {
-    settings.patchExtendedSettings(next);
+  const patchExtended = (next: Partial<AccountSettingsPatch>) => {
+    settings.patchSettings(next);
   };
 
   const privacyLabel = (value: DmPrivacy | ProfileVisibility) =>
@@ -51,7 +50,7 @@ export const AppPrivacySettings = observer(() => {
         <SettingsSelectField
           title={t("privacy.whoCanDm")}
           description={t("privacy.whoCanDmDescription")}
-          value={extended.whoCanDm}
+          value={settings.whoCanDm}
           onChange={(value) => patchExtended({ whoCanDm: value as DmPrivacy })}
           options={DM_PRIVACY_OPTIONS.map((value) => ({
             value,
@@ -62,7 +61,7 @@ export const AppPrivacySettings = observer(() => {
         <SettingsSelectField
           title={t("privacy.profileVisibility")}
           description={t("privacy.profileVisibilityDescription")}
-          value={extended.profileVisibility}
+          value={settings.profileVisibility}
           onChange={(value) =>
             patchExtended({ profileVisibility: value as ProfileVisibility })
           }

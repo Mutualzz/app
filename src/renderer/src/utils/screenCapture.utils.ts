@@ -128,7 +128,9 @@ export async function acquireScreenCaptureStream(
     try {
       return await captureViaElectronDesktopCapturer(config, signal);
     } catch (err) {
-      if (signal.aborted) throw new Error("Voice disconnected");
+      if (signal.aborted) {
+        throw new Error("Voice disconnected", { cause: err });
+      }
       const message = err instanceof Error ? err.message : String(err);
       if (message === "Screen share cancelled") throw err;
       if (message === "SCREEN_CAPTURE_DENIED") throw err;

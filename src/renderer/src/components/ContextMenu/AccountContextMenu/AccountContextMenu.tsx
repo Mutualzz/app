@@ -149,7 +149,6 @@ export const AccountContextMenu = observer(({ account }: Props) => {
   return (
     <ContextMenu
       elevation={elevation}
-      transparency={0}
       id={generateMenuIDs.account(account.id)}
       key={account.id}
       width="16rem"
@@ -186,7 +185,6 @@ export const AccountContextMenu = observer(({ account }: Props) => {
                 borderRadius: 8
               }}
               elevation={elevation}
-              transparency={0}
               onClick={() => {
                 clearMenu();
                 app.gateway.clearScheduledStatus();

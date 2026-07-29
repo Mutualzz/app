@@ -19,7 +19,7 @@ export function resolveRpcActivityName(
 }
 
 export function normalizeRpcActivities(
-  raw: Array<{
+  raw: {
     type?: string;
     name?: string;
     applicationId?: string;
@@ -33,7 +33,7 @@ export function normalizeRpcActivities(
       smallImageUrl?: string;
       smallText?: string;
     };
-  }>
+  }[]
 ): PresenceActivity[] {
   const out: PresenceActivity[] = [];
 

@@ -2,14 +2,14 @@ import { action, makeAutoObservable, observable } from "mobx";
 
 export type BridgeFeedSource = "minecraft" | "discord" | "app";
 
-export type BridgeLinkedUser = {
+export interface BridgeLinkedUser {
   id: string;
   username: string;
   globalName?: string | null;
   avatar?: string | null;
-};
+}
 
-export type BridgeFeedEntry = {
+export interface BridgeFeedEntry {
   id: string;
   bridgeId: string;
   serverId: string;
@@ -24,27 +24,27 @@ export type BridgeFeedEntry = {
   at: string;
   pending?: boolean;
   failed?: boolean;
-};
+}
 
-export type BridgeOnlinePlayer = {
+export interface BridgeOnlinePlayer {
   uuid: string;
   name: string;
   serverId: string;
   linkedUser?: BridgeLinkedUser | null;
-};
+}
 
-export type BridgeUnreadState = {
+export interface BridgeUnreadState {
   lastMessageId: string | null;
   lastAckedId: string | null;
   unread: boolean;
-};
+}
 
-type QueuedSend = {
+interface QueuedSend {
   localId: string;
   bridgeId: string;
   content: string;
   attempts: number;
-};
+}
 
 const MAX_PER_BRIDGE = 200;
 const MAX_QUEUE_ATTEMPTS = 3;
@@ -251,7 +251,7 @@ export class BridgeChatStore {
 
   markAcked = action((bridgeId: string, lastAckedId: string) => {
     const prev = this.unreadByBridge.get(bridgeId);
-    if (prev?.lastAckedId === lastAckedId && prev.unread === false) return;
+    if (prev?.lastAckedId === lastAckedId && !prev.unread) return;
     this.unreadByBridge.set(bridgeId, {
       lastMessageId: prev?.lastMessageId ?? lastAckedId,
       lastAckedId,

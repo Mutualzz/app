@@ -56,6 +56,7 @@ void i18n.use(initReactI18next).init({
   resources,
   lng: initialLng,
   fallbackLng: "en",
+  returnEmptyString: false,
   defaultNS: "common",
   interpolation: { escapeValue: false },
   supportedLngs: Object.keys(resources)

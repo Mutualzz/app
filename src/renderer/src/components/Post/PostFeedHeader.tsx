@@ -55,7 +55,7 @@ export const PostFeedHeader = observer(({ post }: { post: Post }) => {
             size="sm"
             color="danger"
             onClick={() => {
-              post.delete().catch(() => {});
+              post.delete().catch(() => { return; });
             }}
           >
             <TrashIcon />

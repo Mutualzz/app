@@ -4,7 +4,7 @@ import { useModal } from "@contexts/Modal.context";
 import { useCallback, useEffect, useState } from "react";
 import { Slider, Stack, Typography, useTheme } from "@mutualzz/ui-web";
 import type { APIExpression } from "@mutualzz/types";
-import { ExpressionType, HttpException } from "@mutualzz/types";
+import { ExpressionType, type HttpException } from "@mutualzz/types";
 import { Button } from "@components/Button";
 import Cropper, { type Area, type Point } from "react-easy-crop";
 import { useMutation } from "@tanstack/react-query";
@@ -170,6 +170,7 @@ export const ExpressionEditor = observer(({ expression, file }: Props) => {
 
   return (
     <Paper
+          surfaceRole="modal"
       elevation={app.settings?.preferEmbossed ? 5 : 1}
       borderRadius={8}
       minWidth={{ xs: "90vw", sm: 150, md: 200, lg: 800 }}
@@ -178,7 +179,6 @@ export const ExpressionEditor = observer(({ expression, file }: Props) => {
       width="100%"
       px={5}
       py={2.5}
-      transparency={65}
       direction="row"
       spacing={2.5}
     >

@@ -1,7 +1,7 @@
 import { observer } from "mobx-react-lite";
-import { ReactNode } from "react";
-import { Snowflake } from "@mutualzz/types";
-import { RenderElementProps } from "slate-react";
+import { type ReactNode } from "react";
+import { type Snowflake } from "@mutualzz/types";
+import { type RenderElementProps } from "slate-react";
 import { Stack, Typography, useTheme } from "@mutualzz/ui-web";
 
 interface Props {

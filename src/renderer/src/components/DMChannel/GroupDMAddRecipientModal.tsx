@@ -57,6 +57,7 @@ export const GroupDMAddRecipientModal = observer(({ channel }: Props) => {
 
   return (
     <Paper
+          surfaceRole="modal"
       elevation={app.settings?.preferEmbossed ? 5 : 1}
       borderRadius={12}
       direction="column"

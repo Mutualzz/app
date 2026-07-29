@@ -1,5 +1,5 @@
 import { observer } from "mobx-react-lite";
-import { Role } from "@stores/objects/Role";
+import { type Role } from "@stores/objects/Role";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Box, ButtonGroup, Divider, Stack, Typography } from "@mutualzz/ui-web";

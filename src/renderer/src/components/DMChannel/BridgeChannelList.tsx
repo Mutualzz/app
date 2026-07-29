@@ -35,7 +35,7 @@ export const BridgeChannelList = observer(
     const { theme } = useTheme();
     const navigate = useNavigate();
     const { openModal } = useModal();
-    const params = useParams({ strict: false }) as { bridgeId?: string };
+    const params = useParams({ strict: false });
 
     const bridgesQuery = useQuery({
       queryKey: ["me", "bridges"],

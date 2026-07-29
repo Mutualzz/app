@@ -4,10 +4,10 @@ import { applyGameCatalogOverrides } from "./gameCatalogOverrides";
 
 const STORAGE_KEY = "mutualzz.remoteGameCatalog";
 
-type RemoteCatalogPayload = {
+interface RemoteCatalogPayload {
   updatedAt: number;
   games: GameCatalogEntry[];
-};
+}
 
 let memoryCatalog: GameCatalogEntry[] | null = null;
 let memoryUpdatedAt = 0;

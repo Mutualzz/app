@@ -32,6 +32,7 @@ export const SpaceSettingsModal = observer(
     return (
       <SpaceSettingsProvider>
         <AnimatedPaper
+          surfaceRole="modal"
           width="60vw"
           height="75vh"
           borderRadius={{
@@ -42,8 +43,7 @@ export const SpaceSettingsModal = observer(
           overflow="auto"
           justifyContent="center"
           alignItems="center"
-          elevation={app.settings?.preferEmbossed ? 0 : 1}
-          transparency={0}
+          elevation={app.settings?.preferEmbossed ? 3 : 1}
           initial={{ scale: 0.95 }}
           animate={{ scale: 1 }}
         >

@@ -87,7 +87,7 @@ export const KeyboardShortcutsSettings = observer(() => {
       return formatForDisplay(recorder.recordedHotkey);
     }
 
-    return formatForDisplay(hotkey as Hotkey);
+    return formatForDisplay(hotkey);
   };
 
   return (

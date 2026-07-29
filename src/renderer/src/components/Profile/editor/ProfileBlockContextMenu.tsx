@@ -33,7 +33,6 @@ export const ProfileBlockContextMenu = ({
       <ContextMenu
         id={PROFILE_BLOCK_MENU_ID}
         elevation={app.settings?.preferEmbossed ? 5 : 1}
-        transparency={0}
       >
         <ContextItem
           size="sm"

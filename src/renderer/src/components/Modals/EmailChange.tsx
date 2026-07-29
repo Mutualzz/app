@@ -5,7 +5,7 @@ import { InputWithLabel } from "@components/InputWithLabel";
 import { useModal } from "@contexts/Modal.context";
 import { useAppStore } from "@hooks/useStores";
 import { useMutation } from "@tanstack/react-query";
-import { HttpException } from "@mutualzz/types";
+import { type HttpException } from "@mutualzz/types";
 import { Paper } from "@components/Paper";
 import { useTranslation } from "react-i18next";
 

@@ -15,13 +15,13 @@ import { SpaceSettingsModal } from "@components/SpaceSettings/SpaceSettingsModal
 import { ContextItem } from "@components/ContextItem";
 import { useNavigate } from "@tanstack/react-router";
 import { ContextRoleItem } from "@components/ContextMenu/ContextRoleItem";
-import { User } from "@stores/objects/User";
+import { type User } from "@stores/objects/User";
 import { toast } from "react-toastify";
 import { MemberKick } from "@components/Modals/MemberKick";
 import { MemberBan } from "@components/Modals/MemberBan";
 import { ReportContentModal } from "@components/Modals/ReportContentModal";
 import { ArrowLeftIcon, FlagIcon, UserMinusIcon } from "@phosphor-icons/react";
-import { AccountStore } from "@stores/Account.store";
+import { type AccountStore } from "@stores/Account.store";
 import { useTranslation } from "react-i18next";
 import {
   canAssignRole,
@@ -294,7 +294,6 @@ export const UserContextMenu = observer(
       <ContextMenu
         id={id}
         elevation={app.settings?.preferEmbossed ? 5 : 1}
-        transparency={0}
         key={id}
       >
         {readState && (
@@ -459,7 +458,6 @@ export const UserContextMenu = observer(
         {space && member && (
           <ContextSubmenu
             elevation={app.settings?.preferEmbossed ? 5 : 1}
-            transparency={0}
             arrow={<ArrowLeftIcon />}
             label={t("contextMenu.roles")}
             style={{

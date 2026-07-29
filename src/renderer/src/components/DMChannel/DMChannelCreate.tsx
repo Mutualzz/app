@@ -14,7 +14,7 @@ import { Button } from "@components/Button";
 import { UserAvatar } from "@components/User/UserAvatar";
 import { useModal } from "@contexts/Modal.context";
 import { useMutation } from "@tanstack/react-query";
-import { Snowflake } from "@mutualzz/types";
+import { type Snowflake } from "@mutualzz/types";
 import { useNavigate } from "@tanstack/react-router";
 import type { Area, Point } from "react-easy-crop";
 import Cropper from "react-easy-crop";
@@ -29,7 +29,7 @@ import {
   XIcon
 } from "@phosphor-icons/react";
 import type { OpenGroupDMOptions } from "@stores/Channel.store";
-import { User } from "@stores/objects/User";
+import { type User } from "@stores/objects/User";
 import { useTranslation } from "react-i18next";
 
 interface GroupDMChannelInfoProps {

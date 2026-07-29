@@ -1,4 +1,4 @@
-import { HeadphonesIcon, IconProps } from "@phosphor-icons/react";
+import { HeadphonesIcon, type IconProps } from "@phosphor-icons/react";
 
 export const HeadphonesOffIcon = ({
   size = 16,

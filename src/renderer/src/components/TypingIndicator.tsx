@@ -10,7 +10,7 @@ export const TypingIndicator = observer(
     const app = useAppStore();
     const { t } = useTranslation("chat");
 
-    if (app.settings?.extendedSettings.showTypingIndicators === false) {
+    if (app.settings?.showTypingIndicators === false) {
       return null;
     }
 

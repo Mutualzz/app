@@ -10,7 +10,7 @@ async function getErlpack() {
       console.log("[Codec] Erlpack loaded successfully");
     } catch (err) {
       console.error("Failed to load erlpack:", err);
-      throw new Error("ETF codec unavailable");
+      throw new Error("ETF codec unavailable", { cause: err });
     }
   }
   return erlpack;

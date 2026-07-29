@@ -36,6 +36,7 @@ export const DMGroupMemberList = observer(() => {
       <Stack direction="column" flex="1 1 auto" overflowY="auto" spacing={0.25}>
         {sortedByStatus?.map((user) => (
           <DMGroupMemberListItem
+            key={user.id}
             user={user}
             isOwner={channel?.ownerId === user.id}
           />

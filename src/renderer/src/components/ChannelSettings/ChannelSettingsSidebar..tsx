@@ -1,7 +1,7 @@
 import { observer } from "mobx-react-lite";
-import { Channel } from "@stores/objects/Channel";
-import { JSX } from "react";
-import { ChannelSettingsPage, useChannelSettings } from "@components/ChannelSettings/ChannelSettings.context";
+import { type Channel } from "@stores/objects/Channel";
+import { type JSX } from "react";
+import { type ChannelSettingsPage, useChannelSettings } from "@components/ChannelSettings/ChannelSettings.context";
 import { GearSixIcon, PaintBrushIcon, PaperPlaneTiltIcon } from "@phosphor-icons/react";
 import { Paper } from "@components/Paper";
 import { useAppStore } from "@hooks/useStores";
@@ -9,8 +9,8 @@ import { Stack, Typography } from "@mutualzz/ui-web";
 import { Button } from "@components/Button";
 import { channelPageTitleKeys } from "@mutualzz/i18n";
 import { ChannelType } from "@mutualzz/types";
-import { PermissionFlag } from "@mutualzz/bitfield";
-import { Space } from "@stores/objects/Space";
+import { type PermissionFlag } from "@mutualzz/bitfield";
+import { type Space } from "@stores/objects/Space";
 import { useTranslation } from "react-i18next";
 
 interface Props {
@@ -94,7 +94,7 @@ export const ChannelSettingsSidebar = observer(({ space, channel }: Props) => {
                 >
                   {t(
                     channelPageTitleKeys[
-                      page.label as keyof typeof channelPageTitleKeys
+                      page.label
                     ]
                   )}
                 </Button>

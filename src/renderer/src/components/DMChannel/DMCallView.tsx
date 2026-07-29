@@ -328,7 +328,7 @@ const CallScreenShareTile = observer(
                 size="sm"
                 color="success"
                 onClick={() =>
-                  void app.voice.watchScreenShare(userId).catch(() => {})
+                  void app.voice.watchScreenShare(userId).catch(() => { return; })
                 }
               >
                 {t("voice.watchStream")}
@@ -858,7 +858,7 @@ export const DMCallView = observer(({ channel }: Props) => {
           const startY = e.clientY;
           const startHeight = app.dmCallViewHeight;
 
-          (e.currentTarget as HTMLDivElement).setPointerCapture(e.pointerId);
+          (e.currentTarget).setPointerCapture(e.pointerId);
 
           const onMove = (moveEvent: PointerEvent) => {
             app.setDmCallViewHeight(startHeight + (moveEvent.clientY - startY));

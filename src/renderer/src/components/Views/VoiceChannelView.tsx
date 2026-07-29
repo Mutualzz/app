@@ -12,7 +12,7 @@ import { VoiceMinecraftBadge } from "@components/Channel/VoiceChannelMemberRow";
 import { useAppStore } from "@hooks/useStores";
 import { observer } from "mobx-react-lite";
 import { motion } from "motion/react";
-import { clamp, ColorLike, dynamicElevation } from "@mutualzz/ui-core";
+import { clamp, type ColorLike, dynamicElevation } from "@mutualzz/ui-core";
 import { useEffect, useRef, useState } from "react";
 import { UserAvatar } from "@components/User/UserAvatar";
 import { Button } from "@components/Button";
@@ -625,7 +625,7 @@ export const VoiceChannelView = observer(
                 const startX = e.clientX;
                 const startWidth = app.voiceChatWidth;
 
-                (e.currentTarget as HTMLDivElement).setPointerCapture(
+                (e.currentTarget).setPointerCapture(
                   e.pointerId
                 );
 

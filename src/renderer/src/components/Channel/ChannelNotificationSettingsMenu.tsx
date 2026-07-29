@@ -26,7 +26,6 @@ export const ChannelNotificationSettingsMenu = observer(
         label={t("contextMenu.notificationSettings")}
         arrow={<ArrowRightIcon weight="fill" />}
         elevation={elevation}
-        transparency={0}
       >
         <ContextItem onClick={() => patch({ useSpaceDefault: true })}>
           {t("contextMenu.useSpaceDefault")}

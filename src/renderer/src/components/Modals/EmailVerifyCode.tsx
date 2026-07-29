@@ -5,7 +5,7 @@ import { Paper } from "@components/Paper";
 import { Button, Stack, Typography } from "@mutualzz/ui-web";
 import { useMutation } from "@tanstack/react-query";
 import { useModal } from "@contexts/Modal.context";
-import { HttpException } from "@mutualzz/types";
+import { type HttpException } from "@mutualzz/types";
 import { InputWithLabel } from "@components/InputWithLabel";
 import { useTranslation } from "react-i18next";
 

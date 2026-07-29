@@ -1,7 +1,7 @@
 import { type APISpaceMember, type Snowflake } from "@mutualzz/types";
 import type { AppStore } from "@stores/App.store";
-import { makeAutoObservable, observable, ObservableMap } from "mobx";
-import { Role } from "./Role";
+import { makeAutoObservable, observable, type ObservableMap } from "mobx";
+import { type Role } from "./Role";
 import type { Channel } from "./Channel";
 import {
   ALL_BITS,

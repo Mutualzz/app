@@ -1,7 +1,7 @@
 import type { MarkdownItAsync } from "@components/Markdown/MarkdownItAsync";
 import { processCustomEmojiTokens } from "@mutualzz/client";
 import { getCustomEmoji } from "@utils/emojis/emojis";
-import { Expression } from "@stores/objects/Expression";
+import { type Expression } from "@stores/objects/Expression";
 
 export const customEmojiPlugin = (md: MarkdownItAsync) => {
   md.core.ruler.after("emoji", "customEmoji", (state) => {
@@ -20,7 +20,9 @@ export const customEmojiPlugin = (md: MarkdownItAsync) => {
     let emoji: Expression | null = null;
     try {
       emoji = await getCustomEmoji(raw);
-    } catch {}
+    } catch {
+    // ignore
+}
 
     if (!emoji) return token.content;
 

@@ -152,7 +152,7 @@ export const MessageDetails = observer(
   }) => {
     const app = useAppStore();
     const timestampFormat =
-      app.settings?.extendedSettings.timestampFormat ?? "relative";
+      app.settings?.timestampFormat ?? "relative";
     const fullTimestamp = dayjs(message.createdAt).format(
       "dddd, MMMM D, YYYY h:mm A"
     );

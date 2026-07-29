@@ -1,9 +1,9 @@
 import {
-  FC,
+  type FC,
   type KeyboardEvent,
-  MouseEvent,
-  ReactNode,
-  RefObject,
+  type MouseEvent,
+  type ReactNode,
+  type RefObject,
   useCallback,
   useRef,
   useState
@@ -25,13 +25,13 @@ import styled from "@emotion/styled";
 import {
   ALL_EMOJIS,
   PICKER_CATEGORIES,
-  PickerEmoji,
+  type PickerEmoji,
   searchEmojis
 } from "@renderer/utils/emojis/emojiPickerData";
 import {
   getSpriteStyle,
   SKIN_TONE_MODIFIERS,
-  SkinTone
+  type SkinTone
 } from "@renderer/utils/emojis/emojiSprite";
 import { useRecentEmojis } from "@renderer/hooks/useRecentEmojis";
 import { ExpressionType } from "@mutualzz/types";
@@ -424,8 +424,7 @@ export const EmojiPicker = observer(
           animated: r.animated ?? false
         };
       })
-      .filter(Boolean) as Array<
-      | {
+      .filter(Boolean) as (| {
           kind: "standard";
           emoji: PickerEmoji;
           sheetX: number;
@@ -438,8 +437,7 @@ export const EmojiPicker = observer(
           name: string;
           url: string;
           animated: boolean;
-        }
-    >;
+        })[];
 
     const handleSelectEmoji = useCallback(
       (emoji: PickerEmoji, tone?: SkinTone) => {
@@ -549,8 +547,7 @@ export const EmojiPicker = observer(
           tone
         };
       })
-      .filter(Boolean) as Array<
-      | {
+      .filter(Boolean) as (| {
           kind: "standard";
           key: string;
           emoji: PickerEmoji;
@@ -564,8 +561,7 @@ export const EmojiPicker = observer(
           name: string;
           url: string;
           animated: boolean;
-        }
-    >;
+        })[];
 
     const clapCoords = CLAP_COORDS[skinTone ?? "default"];
 
@@ -624,7 +620,7 @@ export const EmojiPicker = observer(
 
     return (
       <Paper
-        ref={pickerRef as any}
+        ref={pickerRef}
         elevation={app.settings?.preferEmbossed ? 4 : 1}
         borderRadius={12}
         css={{ overflow: "hidden" }}

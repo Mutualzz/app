@@ -1,10 +1,11 @@
-import { Stack, Typography } from "@mutualzz/ui-web";
+import { Stack, Typography, useTheme } from "@mutualzz/ui-web";
 import type { MessageLike } from "@stores/objects/Message";
 import type { Space } from "@stores/objects/Space";
+import { getMessageAuthorColor, isSystemMessageType, isSystemUser } from "@mutualzz/client";
 import { observer } from "mobx-react-lite";
 import type { ColorLike } from "@mutualzz/ui-core";
 import { useTranslation } from "react-i18next";
-import { isSystemMessageType, isSystemUser } from "@mutualzz/client";
+import { useAppStore } from "@hooks/useStores";
 import { UserProfilePopoutTrigger } from "../Profile/popout/UserProfilePopoutTrigger";
 
 interface Props {
@@ -14,6 +15,8 @@ interface Props {
 
 export const MessageAuthor = observer(({ message, space }: Props) => {
   const { t } = useTranslation("chat");
+  const app = useAppStore();
+  const { theme } = useTheme();
   const author = message.author;
   if (!author) {
     return <Typography>{t("unknown")}</Typography>;
@@ -24,7 +27,13 @@ export const MessageAuthor = observer(({ message, space }: Props) => {
   }
 
   const member = space?.members.get(message.authorId) || null;
-  const nameColor = (member?.highestRole?.color ?? "#99958ed") as ColorLike;
+  const primaryTextColor = theme.typography.colors.primary || "#dbdee1";
+  const nameColor = getMessageAuthorColor({
+    showRoleColors: app.settings?.showRoleColorsInMessages ?? false,
+    primaryTextColor,
+    roleColor: member?.highestRole?.color,
+    accentColor: app.users.get(author.id)?.accentColor ?? author.accentColor,
+  }) as ColorLike;
   const displayName = member
     ? member.displayName
     : author.displayName;

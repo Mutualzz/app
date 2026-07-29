@@ -9,7 +9,7 @@ import { IconButton } from "@components/IconButton";
 import { formatColor } from "@mutualzz/ui-core";
 import { useAppStore } from "@hooks/useStores";
 import { observer } from "mobx-react-lite";
-import { Channel } from "@stores/objects/Channel";
+import { type Channel } from "@stores/objects/Channel";
 import { UserAvatar } from "@components/User/UserAvatar";
 import { DMGroupAvatar } from "@components/DMChannel/DMGroupAvatar";
 import {
@@ -22,16 +22,37 @@ import {
 import { Tooltip } from "@components/Tooltip";
 import { useModal } from "@contexts/Modal.context";
 import { GroupDMAddRecipientModal } from "@components/DMChannel/GroupDMAddRecipientModal";
+import { ChannelSearchPanel } from "@components/Channel/ChannelSearchPanel";
 import { useTranslation } from "react-i18next";
 
 interface Props {
   channel: Channel;
   callExpanded?: boolean;
   onToggleCallExpanded?: () => void;
+  searchExpanded: boolean;
+  searchDraft: string;
+  searchSubmitted: boolean;
+  searchScopeName: string;
+  onSearchExpand: () => void;
+  onSearchDraftChange: (value: string) => void;
+  onSearchSubmit: () => void;
+  onSearchClose: () => void;
 }
 
 export const DMChannelHeader = observer(
-  ({ channel, callExpanded, onToggleCallExpanded }: Props) => {
+  ({
+    channel,
+    callExpanded,
+    onToggleCallExpanded,
+    searchExpanded,
+    searchDraft,
+    searchSubmitted,
+    searchScopeName,
+    onSearchExpand,
+    onSearchDraftChange,
+    onSearchSubmit,
+    onSearchClose,
+  }: Props) => {
     const app = useAppStore();
     const { theme } = useTheme();
     const { openModal } = useModal();
@@ -197,6 +218,17 @@ export const DMChannelHeader = observer(
               </Tooltip>
             </>
           )}
+          <ChannelSearchPanel
+            spaceName={searchScopeName}
+            expanded={searchExpanded}
+            draft={searchDraft}
+            submitted={searchSubmitted}
+            channel={channel}
+            onExpand={onSearchExpand}
+            onDraftChange={onSearchDraftChange}
+            onSubmit={onSearchSubmit}
+            onClose={onSearchClose}
+          />
         </ButtonGroup>
       </Stack>
     );

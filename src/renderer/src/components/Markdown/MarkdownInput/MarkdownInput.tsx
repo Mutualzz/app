@@ -4,7 +4,8 @@ import { markdownToSlate } from "@utils/markdownToSlate";
 import { getActiveFormats } from "@utils/markdownUtils";
 import { slateToMarkdown } from "@utils/slateToMarkdown";
 import { wrapSelectionWith } from "@utils/wrapSelectionWith";
-import React, {
+import type React from "react";
+import {
   forwardRef,
   useCallback,
   useEffect,
@@ -93,7 +94,7 @@ const MarkdownInput = forwardRef<MarkdownInputHandle, MarkdownInputProps>(
   ) => {
     const app = useAppStore();
     const emoticons =
-      emoticonsProp ?? app.settings?.extended.convertEmoticons ?? true;
+      emoticonsProp ?? app.settings?.convertEmoticons ?? true;
 
     const { theme } = useTheme();
     const inputRef = useRef<HTMLInputElement | null>(null);

@@ -41,7 +41,7 @@ const ACCOUNT = "default";
 function setWindowsBadge(
   win: BrowserWindow,
   count: number,
-  color: string = "#e03131"
+  color = "#e03131"
 ) {
   if (count === 0) {
     win.setOverlayIcon(null, "");

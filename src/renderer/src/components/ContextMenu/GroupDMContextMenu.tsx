@@ -2,7 +2,7 @@ import { observer } from "mobx-react-lite";
 import { useAppStore } from "@hooks/useStores";
 import { useModal } from "@contexts/Modal.context";
 import { ContextMenu } from "@components/ContextMenu";
-import { Channel } from "@stores/objects/Channel";
+import { type Channel } from "@stores/objects/Channel";
 import { ContextItem } from "@components/ContextItem";
 import { Divider } from "@mutualzz/ui-web";
 import { NotePencilIcon, SignOutIcon, TrashIcon } from "@phosphor-icons/react";
@@ -46,7 +46,6 @@ export const GroupDMContextMenu = observer(({ channel }: Props) => {
 
   return (
     <ContextMenu
-      transparency={0}
       elevation={app.settings?.preferEmbossed ? 5 : 1}
       id={`group-dm-${channel.id}`}
       key={channel.id}

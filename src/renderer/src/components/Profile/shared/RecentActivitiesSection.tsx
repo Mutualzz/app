@@ -17,7 +17,7 @@ import { useTranslation } from "react-i18next";
 
 dayjs.extend(relativeTime);
 
-export type RecentActivityDto = {
+export interface RecentActivityDto {
   type: "playing" | "listening";
   name: string;
   applicationId?: string;
@@ -27,7 +27,7 @@ export type RecentActivityDto = {
   assets?: PresenceActivityAssets;
   startedAt: number | null;
   endedAt: number;
-};
+}
 
 function toPresenceActivity(row: RecentActivityDto): PresenceActivity {
   return {

@@ -10,19 +10,19 @@ import styled from "@emotion/styled";
 import { StarIcon } from "@phosphor-icons/react";
 import { useTranslation } from "react-i18next";
 
-type StandardProps = {
+interface StandardProps {
   kind: "standard";
   emoji: PickerEmoji;
   skinTone: SkinTone;
-};
+}
 
-type CustomProps = {
+interface CustomProps {
   kind: "custom";
   id: string;
   name: string;
   url: string;
   animated: boolean;
-};
+}
 
 type Props = StandardProps | CustomProps;
 

@@ -1,4 +1,4 @@
-import { Theme as EmotionTheme, ThemeProvider as EmotionThemeProvider } from "@emotion/react";
+import { type Theme as EmotionTheme, ThemeProvider as EmotionThemeProvider } from "@emotion/react";
 import { useAppStore } from "@hooks/useStores";
 import {
   resolveWallpaperDimOverlay,
@@ -49,11 +49,13 @@ export const SpaceThemeProvider = observer(
       <ThemeContext.Provider
         value={{
           theme: emotionTheme,
-          changeTheme: () => undefined,
+          changeTheme() {
+            return;
+          },
           type: emotionTheme.type
         }}
       >
-        <EmotionThemeProvider theme={emotionTheme as EmotionTheme}>
+        <EmotionThemeProvider theme={emotionTheme}>
           <Stack
             direction="column"
             flex={1}

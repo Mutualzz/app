@@ -755,7 +755,7 @@ export const ProfileBlockInspector = observer(
                     min={35}
                     max={75}
                     value={
-                      (selectedBlock as ProfileHeaderBlock).bannerHeight ?? 58
+                      (selectedBlock).bannerHeight ?? 58
                     }
                     onChange={(_, value) =>
                       updateSelectedBlock({
@@ -769,7 +769,7 @@ export const ProfileBlockInspector = observer(
                     min={0}
                     max={100}
                     value={
-                      (selectedBlock as ProfileHeaderBlock).bannerFocusY ?? 50
+                      (selectedBlock).bannerFocusY ?? 50
                     }
                     onChange={(_, value) =>
                       updateSelectedBlock({
@@ -784,7 +784,7 @@ export const ProfileBlockInspector = observer(
 
               {selectedBlock.type === "text" && (
                 <ProfileMarkdownField
-                  value={(selectedBlock as ProfileTextBlock).content}
+                  value={(selectedBlock).content}
                   maxLength={2000}
                   minHeight={120}
                   onChange={(content) => updateSelectedBlock({ content })}
@@ -794,7 +794,7 @@ export const ProfileBlockInspector = observer(
 
               {selectedBlock.type === "image" &&
                 (() => {
-                  const imageBlock = selectedBlock as ProfileImageBlock;
+                  const imageBlock = selectedBlock;
                   const previewUrl = imageBlock.src
                     ? resolveProfileImageBlockUrl(
                         imageBlock.src,
@@ -908,7 +908,7 @@ export const ProfileBlockInspector = observer(
 
               {selectedBlock.type === "sticker" &&
                 (() => {
-                  const stickerBlock = selectedBlock as ProfileStickerBlock;
+                  const stickerBlock = selectedBlock;
 
                   return (
                     <>
@@ -955,7 +955,7 @@ export const ProfileBlockInspector = observer(
 
               {selectedBlock.type === "music" &&
                 (() => {
-                  const block = selectedBlock as ProfileMusicBlock;
+                  const block = selectedBlock;
 
                   if (block.audioHash) {
                     return (
@@ -980,7 +980,7 @@ export const ProfileBlockInspector = observer(
                                 title: null,
                                 artists: null,
                                 image: null
-                              } as Partial<APIProfileBlock>)
+                              })
                             }
                           >
                             {t("profile.remove")}
@@ -992,7 +992,7 @@ export const ProfileBlockInspector = observer(
                           onChange={(e) =>
                             updateSelectedBlock({
                               title: e.target.value || null
-                            } as Partial<APIProfileBlock>)
+                            })
                           }
                           placeholder={t("profile.inspector.songTitle")}
                         />
@@ -1001,7 +1001,7 @@ export const ProfileBlockInspector = observer(
                           onChange={(e) =>
                             updateSelectedBlock({
                               artists: e.target.value || null
-                            } as Partial<APIProfileBlock>)
+                            })
                           }
                           placeholder={t("profile.inspector.artists")}
                         />
@@ -1010,7 +1010,7 @@ export const ProfileBlockInspector = observer(
                           onChange={(e) =>
                             updateSelectedBlock({
                               image: e.target.value || null
-                            } as Partial<APIProfileBlock>)
+                            })
                           }
                           placeholder={t("profile.inspector.coverImageUrlOptional")}
                         />
@@ -1039,7 +1039,7 @@ export const ProfileBlockInspector = observer(
                           onClick={() =>
                             updateSelectedBlock({
                               youtubeUrl: null
-                            } as Partial<APIProfileBlock>)
+                            })
                           }
                         >
                           {t("profile.remove")}
@@ -1064,7 +1064,7 @@ export const ProfileBlockInspector = observer(
                                 updateSelectedBlock({
                                   youtubeUrl: value,
                                   audioHash: null
-                                } as Partial<APIProfileBlock>);
+                                });
                             }}
                           />
                           <Stack direction="row" spacing={1}>
@@ -1095,7 +1095,7 @@ export const ProfileBlockInspector = observer(
                                     audioHash: hash,
                                     youtubeUrl: null,
                                     track: null
-                                  } as Partial<APIProfileBlock>),
+                                  }),
                                 setUploadingBlockMusic,
                                 "music"
                               );
@@ -1111,7 +1111,7 @@ export const ProfileBlockInspector = observer(
 
               {selectedBlock.type === "draw" &&
                 (() => {
-                  const drawBlock = selectedBlock as ProfileDrawBlock;
+                  const drawBlock = selectedBlock;
                   return (
                     <Stack direction="column" spacing={1.25}>
                       {drawBlock.svgData ? (

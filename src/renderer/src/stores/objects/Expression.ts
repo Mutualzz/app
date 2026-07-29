@@ -3,14 +3,14 @@ import {
   type APIExpression,
   CDNRoutes,
   type ExpressionFormat,
-  ExpressionType,
+  type ExpressionType,
   ImageFormat,
   type Sizes,
   type Snowflake
 } from "@mutualzz/types";
 import type { AppStore } from "@stores/App.store";
 import { REST } from "@stores/REST.store";
-import { BitField, ExpressionFlags, expressionFlags } from "@mutualzz/bitfield";
+import { BitField, type ExpressionFlags, expressionFlags } from "@mutualzz/bitfield";
 
 export class Expression {
   id: Snowflake;

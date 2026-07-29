@@ -68,7 +68,7 @@ export const createDraftFromProfile = (
     blocks: normalizeProfileBlocks(
       (profile.blocks ?? []).filter(
         (block) => (block as { type: string }).type !== "embed"
-      ) as APIProfileBlock[]
+      )
     )
   };
 };

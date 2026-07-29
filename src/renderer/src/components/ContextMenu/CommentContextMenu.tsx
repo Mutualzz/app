@@ -81,7 +81,7 @@ export const CommentContextMenu = observer(
           <ContextItem
             color="danger"
             onClick={() => {
-              comment.delete().catch(() => {});
+              comment.delete().catch(() => { return; });
               clearMenu();
             }}
             endDecorator={<TrashIcon weight="fill" />}

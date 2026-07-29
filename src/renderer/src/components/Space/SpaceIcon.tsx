@@ -45,7 +45,6 @@ export const SpaceIcon = observer(
     return (
       <Paper
         elevation={app.settings?.preferEmbossed ? 5 : 1}
-        transparency={50}
         css={{
           transition: "border-radius 0.2s ease-in-out",
           borderRadius: selected || hovered ? 15 : 10

@@ -1,4 +1,4 @@
-import { createContext, PropsWithChildren, useContext, useState } from "react";
+import { createContext, type PropsWithChildren, useContext, useState } from "react";
 import { observer } from "mobx-react-lite";
 
 export type ChannelSettingsPage = "overview" | "permissions" | "invites";

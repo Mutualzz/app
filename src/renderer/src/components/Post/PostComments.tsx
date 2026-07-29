@@ -34,7 +34,7 @@ import dayjs from "dayjs";
 import { observer } from "mobx-react-lite";
 import { useEffect, useRef, useState } from "react";
 import type { KeyboardEvent, MouseEvent } from "react";
-import { Editor } from "slate";
+import { type Editor } from "slate";
 import { ReactEditor } from "slate-react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import {
@@ -338,7 +338,7 @@ const CommentRow = ({
             onReply={onReply}
             onCopy={copyText}
             onDelete={() => {
-              comment.delete().catch(() => {});
+              comment.delete().catch(() => { return; });
             }}
             onReport={reportComment}
           />

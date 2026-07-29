@@ -3,7 +3,7 @@ import type { AppStore } from "@stores/App.store";
 import { Role } from "@stores/objects/Role";
 import type { Space } from "@stores/objects/Space";
 import { runInAction } from "mobx";
-import { makeAutoObservable, observable, ObservableMap } from "mobx";
+import { makeAutoObservable, observable, type ObservableMap } from "mobx";
 
 export const compareRolesByHierarchy = (a: Role, b: Role): number => {
   if (a.position !== b.position) return b.position - a.position;

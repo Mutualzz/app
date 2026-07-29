@@ -10,7 +10,7 @@ import {
 import { makeAutoObservable } from "mobx";
 import { REST } from "./REST.store";
 import type { AppStore } from "@stores/App.store";
-import { BitField, userFlags, UserFlags } from "@mutualzz/bitfield";
+import { BitField, userFlags, type UserFlags } from "@mutualzz/bitfield";
 
 export class AccountStore {
   id: Snowflake;
@@ -28,6 +28,7 @@ export class AccountStore {
   createdAt: Date;
   updatedAt: Date;
   flags: BitField<UserFlags>;
+  discordId?: string | null = null;
 
   raw: APIPrivateUser;
 
@@ -51,6 +52,7 @@ export class AccountStore {
     this.createdAt = new Date(user.createdAt);
     this.updatedAt = new Date(user.updatedAt);
     this.flags = BitField.fromString(userFlags, user.flags.toString());
+    this.discordId = user.discordId ?? null;
 
     this.raw = user;
 

@@ -4,7 +4,7 @@ import emojiRegex from "emojibase-regex";
 import baseEmoticonRegex from "emojibase-regex/emoticon";
 import shortcodeRegex from "emojibase-regex/shortcode";
 import { type Editor, Element, Path, Range, Text, type TextUnit } from "slate";
-import { useAppStore } from "@hooks/useStores";
+import { getAppStore } from "@hooks/useStores";
 import { canUseCustomEmoji } from "@utils/index";
 import { ExpressionType } from "@mutualzz/types";
 
@@ -18,7 +18,7 @@ const combinedPattern = `(?:${baseEmoticonRegex.source}|${escapedCustom})`;
 const emoticonRegex = new RegExp(`(${combinedPattern})(?=\\s)`, "g");
 
 export const withEmojis = (editor: Editor) => {
-  const app = useAppStore();
+  const app = getAppStore();
 
   const {
     deleteBackward,

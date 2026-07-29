@@ -57,7 +57,7 @@ export const VoiceMicTest = observer(() => {
     setTesting(true);
     voice.beginMicTestIsolation();
     try {
-      const wantNs = settings.noiseSuppression !== false;
+      const wantNs = settings.noiseSuppression;
       const constraints: MediaTrackConstraints = {
         echoCancellation: true,
         noiseSuppression: !wantNs,
@@ -89,7 +89,7 @@ export const VoiceMicTest = observer(() => {
       if (!testingRef.current) {
         handle.dispose();
         stream.getTracks().forEach((t) => t.stop());
-        void audioContext.close().catch(() => {});
+        void audioContext.close().catch(() => { return; });
         return;
       }
 
@@ -99,7 +99,9 @@ export const VoiceMicTest = observer(() => {
             noiseSuppression: true,
             autoGainControl: true
           });
-        } catch {}
+        } catch {
+    // ignore
+}
       }
 
       monitorGainRef.current = handle.micGainNode;
@@ -118,14 +120,16 @@ export const VoiceMicTest = observer(() => {
               setSinkId: (id: string) => Promise<void>;
             }
           ).setSinkId(voice.currentOutputDeviceId);
-        } catch {}
+        } catch {
+    // ignore
+}
       }
 
       const tick = () => {
         analyser.getByteTimeDomainData(data);
         let sum = 0;
         for (let i = 0; i < data.length; i++) {
-          const v = (data[i]! - 128) / 128;
+          const v = (data[i] - 128) / 128;
           sum += v * v;
         }
         const rms = Math.sqrt(sum / data.length);
@@ -137,10 +141,12 @@ export const VoiceMicTest = observer(() => {
       cleanupRef.current = () => {
         try {
           source.disconnect();
-        } catch {}
+        } catch {
+    // ignore
+}
         handle.dispose();
         stream.getTracks().forEach((t) => t.stop());
-        void audioContext.close().catch(() => {});
+        void audioContext.close().catch(() => { return; });
       };
     } catch {
       testingRef.current = false;

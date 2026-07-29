@@ -685,31 +685,14 @@ export const AppAppearanceSettings = observer(() => {
           )}
         </Paper>
       )}
-      <SettingsSection title={t("appearance.startupMode")}>
-        <SettingsSelectField
-          title={t("appearance.startupMode")}
-          description={t("appearance.startupModeDescription")}
-          value={app.settings?.preferredMode === "feed" ? "feed" : "spaces"}
-          onChange={(value) => {
-            if (value === "spaces" || value === "feed") {
-              app.settings?.setPreferredMode(value);
-              app.settings?.flush();
-            }
-          }}
-          options={[
-            { value: "spaces", label: t("appearance.startupModeSpaces") },
-            { value: "feed", label: t("appearance.startupModeFeed") }
-          ]}
-        />
-      </SettingsSection>
       <SettingsSection title={t("appearance.convertEmoticons")}>
         <SettingsToggleRow
           title={t("appearance.convertEmoticons")}
           description={t("appearance.convertEmoticonsDescription")}
-          checked={!!app.settings?.extendedSettings.convertEmoticons}
+          checked={!!app.settings?.convertEmoticons}
           onChange={(checked) => {
             if (!app.settings) return;
-            app.settings.patchExtendedSettings({ convertEmoticons: checked });
+            app.settings.patchSettings({ convertEmoticons: checked });
             app.settings.flush();
           }}
         />

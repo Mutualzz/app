@@ -21,6 +21,7 @@ import { Link } from "@components/Link";
 import i18n from "../i18n";
 import { useModal } from "@contexts/Modal.context";
 import { SuccessForgotSent } from "@components/Modals/SuccessForgotSent";
+import { isElectron, openExternalLink } from "@utils/index";
 
 export const Route = createFileRoute("/login")({
   component: observer(Login),
@@ -71,6 +72,7 @@ const InputWithLabel = ({
 
 function Login() {
   const { t } = useTranslation("auth");
+  const { t: ts } = useTranslation("settings");
   const navigate = useNavigate();
   const app = useAppStore();
   const { openModal } = useModal();
@@ -275,6 +277,20 @@ function Login() {
                 </Button>
               )}
             />
+            <Button
+              variant="soft"
+              size={{ xs: "md", sm: "lg", md: "lg" }}
+              onClick={() => {
+                const client = isElectron ? "desktop" : "web";
+                void app.rest
+                  .get<{ url: string }>(`auth/discord/url?client=${client}`)
+                  .then(({ url }) => {
+                    void openExternalLink(url);
+                  });
+              }}
+            >
+              {ts("discord.continueWithDiscord")}
+            </Button>
           </Stack>
         </form>
         <Typography

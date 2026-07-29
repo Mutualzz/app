@@ -60,7 +60,6 @@ export const SpaceContextMenu = observer(
     return (
       <ContextMenu
         elevation={app.settings?.preferEmbossed ? 5 : 1}
-        transparency={0}
         id={generateMenuIDs.space(space.id, fromSidebar)}
         onVisibilityChange={onVisibilityChange}
         key={space.id}
@@ -90,7 +89,6 @@ export const SpaceContextMenu = observer(
                     )}
                     arrow={<ArrowRightIcon weight="fill" />}
                     elevation={app.settings?.preferEmbossed ? 5 : 1}
-                    transparency={0}
                     onClick={() =>
                       openModal(
                         `space-settings-${pages[0].label}-${space.id}`,

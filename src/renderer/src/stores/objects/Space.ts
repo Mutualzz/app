@@ -25,7 +25,7 @@ import {
   makeAutoObservable,
   observable,
   ObservableMap,
-  ObservableSet
+  type ObservableSet
 } from "mobx";
 import type { Channel } from "./Channel";
 import { Invite } from "./Invite";
@@ -52,8 +52,8 @@ export class Space {
   members: SpaceMemberStore;
   roles: SpaceRoleStore;
   ownerId: Snowflake;
-  memberLists: ObservableMap<string, SpaceMemberListStore> =
-    new ObservableMap();
+  memberLists =
+    new ObservableMap<string, SpaceMemberListStore>();
   raw: APISpace;
   expressions = observable.map<Snowflake, Expression>();
   bansLoaded = false;

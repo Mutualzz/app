@@ -1,4 +1,3 @@
-import { formatColor } from "@mutualzz/ui-core";
 import { MarkdownRenderer } from "@components/Markdown/MarkdownRenderer/MarkdownRenderer";
 import { UserAvatar } from "@components/User/UserAvatar";
 import { useAppStore } from "@hooks/useStores";
@@ -45,6 +44,7 @@ import type { PendingAttachmentPreview } from "@stores/objects/QueuedMessage";
 import { UserProfilePopoutTrigger } from "../Profile/popout/UserProfilePopoutTrigger";
 import { shouldHideInviteUrlContent } from "@mutualzz/client";
 import { useTranslation } from "react-i18next";
+import { jumpToChannelMessage } from "@utils/jumpToChannelMessage";
 
 function formatBytes(bytes: number) {
   if (bytes < 1024) return `${bytes} B`;
@@ -212,7 +212,7 @@ export const Message = observer(
     const channel = app.channels.active;
     const space = message.spaceId ? app.spaces.get(message.spaceId) : null;
     const me = space?.members.me;
-    const showLinkEmbeds = app.settings?.extendedSettings.showLinkEmbeds ?? true;
+    const showLinkEmbeds = app.settings?.showLinkEmbeds ?? true;
 
     const isSent = message instanceof MessageObject;
 
@@ -230,34 +230,7 @@ export const Message = observer(
 
     const handleJumpToReplied = () => {
       if (!repliedMessage) return;
-      const messageId = repliedMessage.id;
-
-      const tryScroll = () => {
-        const el = document.getElementById(`message-${messageId}`);
-        if (!el) return false;
-        el.scrollIntoView({ behavior: "smooth", block: "nearest" });
-        el.animate(
-          [
-            {
-              backgroundColor: formatColor(theme.colors.info, {
-                alpha: 50,
-                format: "hexa"
-              })
-            },
-            { backgroundColor: "transparent" }
-          ],
-          { duration: 2000, easing: "ease-out" }
-        );
-        return true;
-      };
-
-      if (tryScroll()) return;
-
-      channel
-        ?.getMessages(false, 50, undefined, undefined, messageId)
-        .then(() => {
-          requestAnimationFrame(() => tryScroll());
-        });
+      void jumpToChannelMessage(channel, repliedMessage.id, theme);
     };
 
     const isFailed =

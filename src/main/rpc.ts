@@ -1,7 +1,7 @@
 import fs from "fs";
 import net from "net";
 
-export type RpcActivity = {
+export interface RpcActivity {
   type: "playing" | "listening";
   name: string;
   applicationId?: string;
@@ -15,7 +15,7 @@ export type RpcActivity = {
     smallImageUrl?: string;
     smallText?: string;
   };
-};
+}
 
 const OPCODE_HANDSHAKE = 0;
 const OPCODE_FRAME = 1;
@@ -27,7 +27,7 @@ const MAX_SLOTS = 10;
 const MAX_STR = 128;
 const MAX_PAYLOAD = 64 * 1024;
 
-type ConnectionState = {
+interface ConnectionState {
   id: string;
   socket: net.Socket;
   buffer: Buffer;
@@ -35,7 +35,7 @@ type ConnectionState = {
   clientId: string | null;
   pid: number | null;
   activity: RpcActivity | null;
-};
+}
 
 let server: net.Server | null = null;
 let boundPath: string | null = null;
@@ -237,7 +237,7 @@ function handlePayload(conn: ConnectionState, opcode: number, raw: string) {
     writeFrame(
       conn.socket,
       OPCODE_PONG,
-      parsed && typeof parsed === "object" ? (parsed as object) : {}
+      parsed && typeof parsed === "object" ? (parsed) : {}
     );
     return;
   }
@@ -362,14 +362,18 @@ export function stopRpc() {
   if (server) {
     try {
       server.close();
-    } catch {}
+    } catch {
+    // ignore
+}
     server = null;
   }
 
   if (boundPath && process.platform !== "win32") {
     try {
       if (fs.existsSync(boundPath)) fs.unlinkSync(boundPath);
-    } catch {}
+    } catch {
+    // ignore
+}
   }
 
   boundPath = null;

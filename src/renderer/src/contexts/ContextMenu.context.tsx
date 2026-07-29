@@ -23,9 +23,10 @@ import type { User } from "@stores/objects/User";
 import type { Role } from "@stores/objects/Role";
 import type { AccountStore } from "@stores/Account.store";
 import type { Message } from "@stores/objects/Message";
-import { SkinTone } from "@utils/emojis/emojiSprite";
-import { PickerEmoji } from "@utils/emojis/emojiPickerData";
-import { isElectron } from "@utils/index";
+import { type SkinTone } from "@utils/emojis/emojiSprite";
+import { type PickerEmoji } from "@utils/emojis/emojiPickerData";
+import type { Post } from "@stores/objects/Post";
+import type { PostComment } from "@stores/objects/PostComment";
 
 export type ContextMenuPayload =
   | {
@@ -84,9 +85,9 @@ export type ContextMenuPayload =
     }
   | {
       type: "comment";
-      post: import("@stores/objects/Post").Post;
-      comment: import("@stores/objects/PostComment").PostComment;
-      onReply: (comment: import("@stores/objects/PostComment").PostComment) => void;
+      post: Post;
+      comment: PostComment;
+      onReply: (comment: PostComment) => void;
       [key: string]: any;
     }
   | {
@@ -103,7 +104,7 @@ export type ContextMenuPayload =
     }
   | { type: "custom"; id: string; [key: string]: any };
 
-export type MenuPosition = { x: number; y: number };
+export interface MenuPosition { x: number; y: number }
 type AnyMouseEvent = MouseEvent | { nativeEvent: MouseEvent };
 
 interface ContextMenuContextProps {
@@ -120,11 +121,15 @@ interface ContextMenuContextProps {
   isOpen: boolean;
 }
 
+const missingContextMenuProvider = (): never => {
+  throw new Error("ContextMenuContext used outside ContextMenuProvider");
+};
+
 const ContextMenuContext = createContext<ContextMenuContextProps>({
   menu: null,
-  setMenu: () => {},
-  openContextMenu: () => {},
-  clearMenu: () => {},
+  setMenu: missingContextMenuProvider,
+  openContextMenu: missingContextMenuProvider,
+  clearMenu: missingContextMenuProvider,
   isOpen: false
 });
 
@@ -237,7 +242,7 @@ export const ContextMenuProvider = observer(
 
     useEffect(() => {
       const pending = pendingShowRef.current;
-      if (!pending || !menu) return () => {};
+      if (!pending || !menu) return;
 
       const id = getMenuId(menu);
 
@@ -280,7 +285,10 @@ export const ContextMenuProvider = observer(
             : null;
 
         openContextMenu(
-          { preventDefault() {}, stopPropagation() {} } as unknown as MouseEvent,
+          new MouseEvent("contextmenu", {
+            clientX: lastPointerPosRef.current.x,
+            clientY: lastPointerPosRef.current.y
+          }),
           { type: "editable", ...params, sourceElement },
           lastPointerPosRef.current
         );

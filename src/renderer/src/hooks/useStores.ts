@@ -8,3 +8,5 @@ export function useAppStore() {
   }
   return appStore;
 }
+
+export const getAppStore = useAppStore;

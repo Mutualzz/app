@@ -42,7 +42,7 @@ export const ProfileBlockTypeInspector = observer(
 
     switch (block.type) {
       case "links": {
-        const linksBlock = block as ProfileLinksBlock;
+        const linksBlock = block;
         const links = linksBlock.links.length
           ? linksBlock.links
           : [{ label: "", url: "" }];
@@ -140,7 +140,7 @@ export const ProfileBlockTypeInspector = observer(
             <FieldHint>{t("profile.inspector.activityHint")}</FieldHint>
             <Select
               value={
-                (block as ProfileActivityBlock).showCustomStatus === false
+                (block).showCustomStatus === false
                   ? "hide"
                   : "show"
               }
@@ -164,7 +164,7 @@ export const ProfileBlockTypeInspector = observer(
             <Slider
               min={1}
               max={12}
-              value={(block as ProfileRolesBlock).maxRoles ?? 6}
+              value={(block).maxRoles ?? 6}
               onChange={(_, value) =>
                 updateSelectedBlock({ maxRoles: value as number })
               }
@@ -187,7 +187,7 @@ export const ProfileBlockTypeInspector = observer(
           <Stack direction="column" spacing={1}>
             <FieldLabel>{t("profile.inspector.mutualCardType")}</FieldLabel>
             <Select
-              value={(block as ProfileMutualBlock).mode}
+              value={(block).mode}
               onValueChange={(value) =>
                 updateSelectedBlock({
                   mode: (value ?? "spaces") as "spaces" | "friends"
@@ -202,7 +202,7 @@ export const ProfileBlockTypeInspector = observer(
             <Slider
               min={1}
               max={12}
-              value={(block as ProfileMutualBlock).maxItems ?? 6}
+              value={(block).maxItems ?? 6}
               onChange={(_, value) =>
                 updateSelectedBlock({ maxItems: value as number })
               }
@@ -216,7 +216,7 @@ export const ProfileBlockTypeInspector = observer(
           <Stack direction="column" spacing={1}>
             <FieldLabel>{t("profile.inspector.dividerStyle")}</FieldLabel>
             <Select
-              value={(block as ProfileDividerBlock).style ?? "line"}
+              value={(block).style ?? "line"}
               onValueChange={(value) =>
                 updateSelectedBlock({
                   style: (value ?? "line") as ProfileDividerBlock["style"]
@@ -236,7 +236,7 @@ export const ProfileBlockTypeInspector = observer(
           <Stack direction="column" spacing={1}>
             <FieldLabel>{t("profile.blocks.quote")}</FieldLabel>
             <ProfileMarkdownField
-              value={(block as ProfileQuoteBlock).content}
+              value={(block).content}
               maxLength={1000}
               minHeight={100}
               onChange={(content) => updateSelectedBlock({ content })}
@@ -244,7 +244,7 @@ export const ProfileBlockTypeInspector = observer(
             />
             <FieldLabel>{t("profile.inspector.style")}</FieldLabel>
             <Select
-              value={(block as ProfileQuoteBlock).variant ?? "default"}
+              value={(block).variant ?? "default"}
               onValueChange={(value) =>
                 updateSelectedBlock({
                   variant: (value ?? "default") as ProfileQuoteBlock["variant"]
@@ -258,7 +258,7 @@ export const ProfileBlockTypeInspector = observer(
             </Select>
             <FieldLabel>{t("profile.inspector.attribution")}</FieldLabel>
             <Input
-              value={(block as ProfileQuoteBlock).attribution ?? ""}
+              value={(block).attribution ?? ""}
               onChange={(event) =>
                 updateSelectedBlock({
                   attribution: event.target.value || null

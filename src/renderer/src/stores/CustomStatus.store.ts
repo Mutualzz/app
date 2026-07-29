@@ -11,9 +11,9 @@ import { makePersistable } from "mobx-persist-store";
 export class CustomStatusStore {
   private static readonly LOCAL_CLEAR_GUARD_MS = 5000;
 
-  text: string = "";
+  text = "";
   emoji: PresenceActivityEmoji | null = null;
-  enabled: boolean = false;
+  enabled = false;
   scheduledCustomStatus: CustomStatusSchedule | null = null;
   onScheduledCustomStatusExpire?: (schedule: CustomStatusSchedule) => void;
 
@@ -138,8 +138,8 @@ export class CustomStatusStore {
     }
 
     this.setSnapshot({
-      text: activity!.state?.trim() || activity!.name?.trim() || null,
-      emoji: activity!.emoji ?? null,
+      text: activity.state?.trim() || activity.name?.trim() || null,
+      emoji: activity.emoji ?? null,
     });
   }
 

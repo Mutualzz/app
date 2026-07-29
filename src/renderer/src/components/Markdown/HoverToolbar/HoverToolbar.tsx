@@ -78,7 +78,7 @@ export const HoverToolbar = () => {
 
     if (hasSelection) {
       try {
-        const domRange = ReactEditor.toDOMRange(editor, selection!);
+        const domRange = ReactEditor.toDOMRange(editor, selection);
         rect = domRange.getBoundingClientRect();
         lastRectRef.current = rect;
       } catch {
@@ -154,14 +154,16 @@ export const HoverToolbar = () => {
     if (!keepPopoverOpen) setColorOpen(false);
     try {
       ReactEditor.focus(editor);
-    } catch {}
+    } catch {
+    // ignore
+}
   };
 
   return (
     <Portal>
       <Paper
+        surfaceRole="toolbar"
         elevation={app.settings?.preferEmbossed ? 3 : 2}
-        transparency={0}
         ref={ref}
         borderRadius={12}
         p={1}
@@ -260,7 +262,6 @@ export const HoverToolbar = () => {
               closeOnInteract={false}
               placement="top"
               elevation={app.settings?.preferEmbossed ? 3 : 2}
-              transparency={0}
               p={2}
               trigger={
                 <Button

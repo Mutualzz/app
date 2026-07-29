@@ -23,7 +23,8 @@ export type UserSettingsPage =
   | "text_and_chat"
   | "accessibility"
   | "layout"
-  | "composer";
+  | "composer"
+  | "discord-import";
 export type UserSettingsCategories = "user-settings" | "app-settings";
 
 interface UserSettingsContextProps {

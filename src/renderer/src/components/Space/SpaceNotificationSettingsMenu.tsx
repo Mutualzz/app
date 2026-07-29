@@ -4,18 +4,13 @@ import { useAppStore } from "@hooks/useStores";
 import {
   DEFAULT_NOTIFICATION_LEVEL,
   isNotificationMuteActive,
-  NotificationLevel,
+  NotificationLevel
 } from "@mutualzz/types";
 import type { PatchSpaceNotificationSettings } from "@mutualzz/validators";
 import { Divider, useTheme } from "@mutualzz/ui-web";
 import { formatColor } from "@mutualzz/ui-core";
 import type { Space } from "@stores/objects/Space";
-import {
-  ArrowRightIcon,
-  BellIcon,
-  BellSlashIcon,
-  CheckIcon,
-} from "@phosphor-icons/react";
+import { ArrowRightIcon, BellIcon, CheckIcon } from "@phosphor-icons/react";
 import { observer } from "mobx-react-lite";
 import { useTranslation } from "react-i18next";
 
@@ -24,11 +19,11 @@ const SPACE_MUTE_DURATIONS = [
   { duration: "8h", labelKey: "contextMenu.muteDuration8h" },
   { duration: "24h", labelKey: "contextMenu.muteDuration24h" },
   { duration: "1w", labelKey: "contextMenu.muteDuration1w" },
-  { duration: "forever", labelKey: "contextMenu.muteUntilTurnBackOn" },
-] as const satisfies ReadonlyArray<{
+  { duration: "forever", labelKey: "contextMenu.muteUntilTurnBackOn" }
+] as const satisfies readonly {
   duration: NonNullable<PatchSpaceNotificationSettings["muteDuration"]>;
   labelKey: string;
-}>;
+}[];
 
 interface Props {
   space: Space;
@@ -61,10 +56,8 @@ export const SpaceNotificationSettingsMenu = observer(({ space }: Props) => {
       ) : (
         <ContextSubmenu
           label={t("contextMenu.muteSpace")}
-          endDecorator={<BellSlashIcon weight="fill" />}
           arrow={<ArrowRightIcon weight="fill" />}
           elevation={elevation}
-          transparency={0}
           onClick={() => patch({ muteDuration: "forever" })}
         >
           {SPACE_MUTE_DURATIONS.map(({ duration, labelKey }) => (
@@ -82,7 +75,6 @@ export const SpaceNotificationSettingsMenu = observer(({ space }: Props) => {
         label={t("contextMenu.notificationSettings")}
         arrow={<ArrowRightIcon weight="fill" />}
         elevation={elevation}
-        transparency={0}
       >
         <ContextItem
           onClick={() => patch({ level: NotificationLevel.All })}
@@ -118,7 +110,7 @@ export const SpaceNotificationSettingsMenu = observer(({ space }: Props) => {
         <ContextItem
           onClick={() =>
             patch({
-              suppressEveryone: !(settings?.suppressEveryone ?? false),
+              suppressEveryone: !(settings?.suppressEveryone ?? false)
             })
           }
           endDecorator={

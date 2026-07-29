@@ -46,7 +46,7 @@ export const PostFeedActions = observer(
           icon={<HeartIcon weight={post.liked ? "fill" : "regular"} />}
           count={post.likeCount}
           onClick={() => {
-            post.toggleLike().catch(() => {});
+            post.toggleLike().catch(() => { return; });
           }}
         />
         <Action
@@ -68,7 +68,7 @@ export const PostFeedActions = observer(
             <BookmarkSimpleIcon weight={post.saved ? "fill" : "regular"} />
           }
           onClick={() => {
-            post.toggleSave().catch(() => {});
+            post.toggleSave().catch(() => { return; });
           }}
         />
       </Stack>

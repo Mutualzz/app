@@ -210,7 +210,9 @@ export const EmojiToolbar = () => {
         left: editorRect.left,
         width: editorRect.width
       });
-    } catch {}
+    } catch {
+    // ignore
+}
   }, [visible, suggestions]);
 
   const select = useCallback(

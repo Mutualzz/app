@@ -7,7 +7,7 @@ import shortcodesIamcal from "emojibase-data/en/shortcodes/iamcal.json";
 import shortcodesJoyPixels from "emojibase-data/en/shortcodes/joypixels.json";
 
 import { joinShortcodes } from "emojibase";
-import { useAppStore } from "@hooks/useStores";
+import { getAppStore } from "@hooks/useStores";
 import { type Editor, Range, Text } from "slate";
 import type { CustomEmojiElement, EmojiElement } from "@app-types/slate";
 import { TWEMOJI_URL } from "@utils/urls";
@@ -61,7 +61,7 @@ export async function getCustomEmoji(shortcode: string) {
   const [, , id] = parts;
   if (!id) return null;
 
-  const app = useAppStore();
+  const app = getAppStore();
 
   try {
     return (await app.expressions.resolve(id)) ?? null;
@@ -73,7 +73,7 @@ export async function getCustomEmoji(shortcode: string) {
 export function findCustomEmoji(shortcode: string) {
   if (!shortcode.startsWith("<") || !shortcode.endsWith(">")) return null;
 
-  const app = useAppStore();
+  const app = getAppStore();
   const inner = shortcode.slice(1, -1);
   const parts = inner.split(":");
 

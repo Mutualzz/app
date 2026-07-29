@@ -135,7 +135,6 @@ export const SpaceJoin = observer(({ setCreating }: Props) => {
       spacing={0}
       elevation={2}
       p={{ xs: "1rem", sm: "2rem" }}
-      transparency={10}
       onKeyDown={(e) => e.key === "Enter" && handleJoin()}
     >
       <Stack

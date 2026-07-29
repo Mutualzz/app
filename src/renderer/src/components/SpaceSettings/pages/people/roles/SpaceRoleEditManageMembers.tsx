@@ -1,5 +1,5 @@
 import { observer } from "mobx-react-lite";
-import { Role } from "@stores/objects/Role";
+import { type Role } from "@stores/objects/Role";
 import { Button, InputDefault, Stack, Typography } from "@mutualzz/ui-web";
 import { useState } from "react";
 import { MagnifyingGlassIcon, XIcon } from "@phosphor-icons/react";

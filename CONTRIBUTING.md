@@ -3,7 +3,7 @@
 Thanks for wanting to help with **Mutualzz App (desktop/web)**.
 
 Contributions are welcome. Redistributing unofficial builds or hosting a
-competing Mutualzz service is still not allowed — see [`LICENSE`](./LICENSE).
+competing Mutualzz service is still not allowed — see [`LICENSE`](https://github.com/Mutualzz/app/blob/master/LICENSE).
 
 
 ## Credit

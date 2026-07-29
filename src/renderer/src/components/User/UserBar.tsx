@@ -9,7 +9,7 @@ import { observer } from "mobx-react-lite";
 import { useState } from "react";
 import { IconButton } from "@components/IconButton";
 import { generateMenuIDs, useMenu } from "@contexts/ContextMenu.context";
-import { Color, formatColor } from "@mutualzz/ui-core";
+import { type Color, formatColor } from "@mutualzz/ui-core";
 import { SmallActivityStatus } from "@components/SmallActivityStatus";
 import { SpaceModerated } from "@components/Modals/SpaceModerated";
 import {

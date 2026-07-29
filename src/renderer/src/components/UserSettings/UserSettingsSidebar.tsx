@@ -73,6 +73,10 @@ const settingsPages: SettingsPages = {
     {
       label: "connections",
       icon: <LinkSimpleIcon weight="fill" />
+    },
+    {
+      label: "discord-import",
+      icon: <LinkSimpleIcon weight="fill" />
     }
   ],
   "app-settings": [

@@ -72,7 +72,7 @@ export const PostList = observer(({ variant, showComposer }: Props) => {
     .filter((post): post is NonNullable<typeof post> => !!post);
 
   const fetchMore = useCallback(() => {
-    fetchNextPage().catch(() => {});
+    fetchNextPage().catch(() => { return; });
   }, [fetchNextPage]);
 
   const listBody = (

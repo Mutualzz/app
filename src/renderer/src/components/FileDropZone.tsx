@@ -1,6 +1,6 @@
 import { Stack, Typography, useTheme } from "@mutualzz/ui-web";
 import type { ComponentProps } from "react";
-import { DragEvent, ReactNode, useRef, useState } from "react";
+import { type DragEvent, type ReactNode, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 type StackProps = ComponentProps<typeof Stack>;

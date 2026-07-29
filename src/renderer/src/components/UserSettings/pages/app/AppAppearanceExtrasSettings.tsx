@@ -5,7 +5,7 @@ import {
   SettingsToggleRow
 } from "@components/UserSettings/SettingsField";
 import { useAppStore } from "@hooks/useStores";
-import { uiDensityLabelKey } from "@mutualzz/client";
+import { uiDensityLabelKey, type AccountSettingsPatch } from "@mutualzz/client";
 import {
   UI_DENSITY_OPTIONS,
   type UiDensity
@@ -23,10 +23,9 @@ export const AppAppearanceExtrasSettings = observer(() => {
 
   if (!settings) return null;
 
-  const extended = settings.extendedSettings;
 
-  const patch = (next: Partial<typeof extended>) => {
-    settings.patchExtendedSettings(next);
+  const patch = (next: Partial<AccountSettingsPatch>) => {
+    settings.patchSettings(next);
   };
 
   const uiDensityLabel = (value: UiDensity) => t(uiDensityLabelKey(value));
@@ -37,12 +36,12 @@ export const AppAppearanceExtrasSettings = observer(() => {
         <SettingsSelectField
           title={t("appearance.uiDensity")}
           description={t("appearance.uiDensityDescription")}
-          value={extended.uiDensity}
+          value={settings.uiDensity}
           onChange={(value) => {
             const uiDensity = value as UiDensity;
             applyUiDensity(uiDensity);
             applyMessageLayout(
-              extended.messageDisplay ?? "default",
+              settings.messageDisplay ?? "default",
               uiDensity,
             );
             patch({ uiDensity });
@@ -58,7 +57,7 @@ export const AppAppearanceExtrasSettings = observer(() => {
         <SettingsToggleRow
           title={t("layout.defaultMemberListVisible")}
           description={t("layout.defaultMemberListVisibleDescription")}
-          checked={extended.defaultMemberListVisible}
+          checked={settings.defaultMemberListVisible}
           onChange={(checked) => {
             patch({ defaultMemberListVisible: checked });
             app.setMemberListVisible(checked);
@@ -105,14 +104,14 @@ export const AppAppearanceExtrasSettings = observer(() => {
         <SettingsToggleRow
           title={t("accessibility.reducedMotion")}
           description={t("accessibility.reducedMotionDescription")}
-          checked={extended.reducedMotion}
+          checked={settings.reducedMotion}
           onChange={(checked) => patch({ reducedMotion: checked })}
         />
 
         <SettingsToggleRow
           title={t("accessibility.highContrast")}
           description={t("accessibility.highContrastDescription")}
-          checked={extended.highContrast}
+          checked={settings.highContrast}
           onChange={(checked) => patch({ highContrast: checked })}
         />
       </SettingsSection>

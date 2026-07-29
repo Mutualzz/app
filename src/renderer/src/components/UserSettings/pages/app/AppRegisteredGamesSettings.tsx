@@ -64,12 +64,12 @@ const SHELL_PROCESS_DENYLIST = new Set(
   ].map((e) => e.toLowerCase())
 );
 
-type ProcessOption = {
+interface ProcessOption {
   exe: string;
   label: string;
   suggestedName: string;
   path?: string;
-};
+}
 
 type RegistryRow = GameCatalogEntry & {
   source: "builtin" | "custom";
@@ -82,10 +82,10 @@ type CurrentGameRow = GameCatalogEntry & {
   source: "builtin" | "custom";
 };
 
-type GameIconResponse = {
+interface GameIconResponse {
   iconImageId: string;
   iconUrl: string;
-};
+}
 
 function GameIconThumb({
   game,
@@ -440,7 +440,7 @@ export const AppRegisteredGamesSettings = observer(() => {
       .map((g) => ({
         ...g,
         source: "builtin" as const,
-        share: prefs[g.id]?.share !== false,
+        share: prefs[g.id]?.share,
         lastPlayedAt: prefs[g.id]?.lastPlayedAt ?? null,
         playing: playingIds.has(g.id)
       }));
@@ -450,7 +450,7 @@ export const AppRegisteredGamesSettings = observer(() => {
       name: g.name,
       exes: g.exes,
       source: "custom" as const,
-      share: prefs[g.id]?.share !== false,
+      share: prefs[g.id]?.share,
       lastPlayedAt: prefs[g.id]?.lastPlayedAt ?? g.createdAt,
       playing: playingIds.has(g.id)
     }));

@@ -5,7 +5,7 @@ import createCache from "@emotion/cache";
 import { CacheProvider } from "@emotion/react";
 import { useAppStore } from "@hooks/useStores";
 import { Logger } from "@mutualzz/logger";
-import { GatewayCloseCodes } from "@mutualzz/types";
+import { GatewayCloseCodes, type APIPrivateUser } from "@mutualzz/types";
 import { CssBaseline, Stack } from "@mutualzz/ui-web";
 import { GatewayStatus } from "@stores/Gateway.store";
 import { createRootRoute, Outlet, useNavigate } from "@tanstack/react-router";
@@ -41,12 +41,14 @@ import { ContextMenuProvider } from "@contexts/ContextMenu.context";
 import { WindowTitleBarProvider } from "@contexts/WindowTitleBar.context";
 import { IncomingCallWatcher } from "@components/Call/IncomingCallWatcher";
 import { ModalRoot } from "@components/Modals/ModalRoot";
+import { SettingsReturnHandler } from "@components/UserSettings/SettingsReturnHandler";
 import { ChangelogPrompt } from "@components/Changelog/ChangelogPrompt";
 import { ScreenSharePicker } from "@components/Voice/ScreenSharePicker";
 import { seo } from "@seo";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { HotkeysProvider } from "@tanstack/react-hotkeys";
-import { ToastContainer, toast } from "react-toastify";
+import { ToastHost } from "@components/Toast/ToastHost";
+import { toast } from "react-toastify";
 
 dayjs.extend(relativeTime);
 dayjs.extend(calendar, calendarStrings);
@@ -201,6 +203,42 @@ function RootComponent() {
           toast.success(i18n.t("settings:connections.spotifyConnectedToast"), {
             toastId: "spotify-connected"
           });
+        } else if (url.hostname === "auth") {
+          const authPath = url.pathname.replace(/^\/+/, "");
+
+          if (authPath === "discord") {
+            const token = url.searchParams.get("token");
+            const pending = url.searchParams.get("pending");
+            const linked = url.searchParams.get("linked");
+            const error = url.searchParams.get("error");
+
+            if (token) {
+              app.setToken(token);
+              await navigate({ to: "/", replace: true });
+            } else if (pending) {
+              await navigate({
+                to: "/register/discord",
+                replace: true,
+                search: { pending }
+              });
+            } else if (linked) {
+              sessionStorage.setItem("settings-return", "discord-import");
+              const user = await app.rest.get<APIPrivateUser>("/@me");
+              app.setUser(user);
+              void app.profiles.resolve(user.id, true);
+              window.dispatchEvent(new Event("settings-return"));
+            } else if (error) {
+              toast.error(i18n.t("settings:discordAuth.error"), {
+                toastId: "discord-auth-error"
+              });
+            }
+          } else {
+            const token = url.searchParams.get("token");
+            if (token) {
+              app.setToken(token);
+              await navigate({ to: "/", replace: true });
+            }
+          }
         } else if (url.hostname === "connections") {
           await app.queryClient.invalidateQueries({
             queryKey: ["user-connections"]
@@ -223,8 +261,8 @@ function RootComponent() {
     return unsubscribe;
   }, [navigate, logger, app]);
 
-  const reducedMotion = app.settings?.extendedSettings.reducedMotion ?? false;
-  const highContrast = app.settings?.extendedSettings.highContrast ?? false;
+  const reducedMotion = app.settings?.reducedMotion ?? false;
+  const highContrast = app.settings?.highContrast ?? false;
 
   return (
     <QueryClientProvider client={app.queryClient}>
@@ -243,8 +281,9 @@ function RootComponent() {
                   <WindowTitleBar onHeightChange={setTitleBarHeight} />
                   <DesktopShell>
                     <ContextMenuProvider>
-                      <ToastContainer position="top-center" />
                       <ModalRoot />
+                      <ToastHost />
+                      <SettingsReturnHandler />
                       <IncomingCallWatcher />
                       <ChangelogPrompt />
                       <ScreenSharePicker />

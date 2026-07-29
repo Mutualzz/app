@@ -8,6 +8,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -66,14 +67,21 @@ export function ProfileCanvasViewport({
     return () => observer.disconnect();
   }, []);
 
-  const mergedRef = useCallback(
-    (node: HTMLDivElement | null) => {
-      if (typeof canvasRef === "function") canvasRef(node);
-      else if (canvasRef)
-        (canvasRef as { current: HTMLDivElement | null }).current = node;
-    },
-    [canvasRef]
-  );
+  const forwardedRef = useRef(canvasRef);
+  useLayoutEffect(() => {
+    forwardedRef.current = canvasRef;
+  });
+
+  const mergedRef = useCallback((node: HTMLDivElement | null) => {
+    const ref = forwardedRef.current;
+    if (typeof ref === "function") {
+      ref(node);
+      return;
+    }
+    if (ref && typeof ref === "object") {
+      ref.current = node;
+    }
+  }, []);
 
   // Center the fixed-width canvas on wide viewports; clip on narrow ones.
   const leftOffset = containerSize

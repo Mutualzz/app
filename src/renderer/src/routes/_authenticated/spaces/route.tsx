@@ -88,7 +88,7 @@ function RouteComponent() {
                   const startX = e.clientX;
                   const startWidth = app.channelListWidth;
 
-                  (e.currentTarget as HTMLDivElement).setPointerCapture(
+                  (e.currentTarget).setPointerCapture(
                     e.pointerId
                   );
 

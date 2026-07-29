@@ -50,7 +50,7 @@ export const AppTheme = observer(({ children }: PropsWithChildren) => {
           primaryFont ?? selected.theme.typography.fontFamily,
           selected.authorId ?? app.account?.id,
         )
-          .catch(() => undefined)
+          .catch(() => { return; })
           .finally(() => {
             isUpdatingFromServer.current = true;
             themeProviderRef.current?.changeTheme(selected.theme);

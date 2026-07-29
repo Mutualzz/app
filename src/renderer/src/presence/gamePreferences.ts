@@ -1,11 +1,11 @@
-export type GamePreference = {
+export interface GamePreference {
   share: boolean;
   lastPlayedAt: number | null;
   displayName?: string | null;
   lastExePath?: string | null;
   coverImageId?: string | null;
   iconImageId?: string | null;
-};
+}
 
 const STORAGE_KEY = "mutualzz.gamePreferences";
 
@@ -22,7 +22,7 @@ function readAll(): Record<string, GamePreference> {
       if (!value || typeof value !== "object") continue;
       const row = value as GamePreference;
       out[id] = {
-        share: row.share !== false,
+        share: row.share,
         lastPlayedAt:
           typeof row.lastPlayedAt === "number" ? row.lastPlayedAt : null,
         displayName:
@@ -105,7 +105,7 @@ export function isFullExePath(value?: string | null): value is string {
 }
 
 export function touchGamePlayed(
-  updates: Array<{ id: string; exePath?: string | null }>,
+  updates: { id: string; exePath?: string | null }[],
   at = Date.now()
 ) {
   if (!updates.length) return;

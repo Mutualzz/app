@@ -40,7 +40,7 @@ export const ProfileBlockSizeInspector = observer(
         clampBlock({
           ...block,
           ...patch
-        } as APIProfileBlock)
+        })
       );
     };
 

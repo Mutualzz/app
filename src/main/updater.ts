@@ -14,8 +14,8 @@ import {
   readdirSync,
   writeFileSync
 } from "fs";
-import { get as httpsGet, RequestOptions } from "https";
-import { IncomingMessage } from "http";
+import { get as httpsGet, type RequestOptions } from "https";
+import { type IncomingMessage } from "http";
 import { URL } from "url";
 
 const ALLOWED_HOSTS = new Set(["proxy.mutualzz.com"]);
@@ -408,10 +408,7 @@ function getInstalledElectronVersion(): string | null {
     if (version) return version;
   }
 
-  const bundled = join(
-    process.resourcesPath,
-    "electron-runtime-version.txt"
-  );
+  const bundled = join(process.resourcesPath, "electron-runtime-version.txt");
   if (existsSync(bundled)) {
     const version = readFileSync(bundled, "utf8").trim();
     if (version) return version;
@@ -427,10 +424,7 @@ function getInstalledUpdaterVersion(): string | null {
     if (version) return version;
   }
 
-  const bundled = join(
-    process.resourcesPath,
-    "updater-runtime-version.txt"
-  );
+  const bundled = join(process.resourcesPath, "updater-runtime-version.txt");
   if (existsSync(bundled)) {
     const version = readFileSync(bundled, "utf8").trim();
     if (version) return version;
@@ -459,7 +453,7 @@ function detectLinuxPackage(): "appimage" | "debian" | "rpm" | "pacman" {
   if (process.platform !== "linux") return "appimage";
   if (process.env.APPIMAGE) return "appimage";
 
-  let osRelease = "";
+  let osRelease: string;
   try {
     osRelease = readFileSync("/etc/os-release", "utf8");
   } catch {
@@ -469,7 +463,8 @@ function detectLinuxPackage(): "appimage" | "debian" | "rpm" | "pacman" {
   let id = "";
   let idLike = "";
   for (const line of osRelease.split("\n")) {
-    if (line.startsWith("ID=")) id = line.slice(3).replace(/"/g, "").toLowerCase();
+    if (line.startsWith("ID="))
+      id = line.slice(3).replace(/"/g, "").toLowerCase();
     if (line.startsWith("ID_LIKE="))
       idLike = line.slice(8).replace(/"/g, "").toLowerCase();
   }
@@ -505,9 +500,9 @@ function detectLinuxPackage(): "appimage" | "debian" | "rpm" | "pacman" {
   ];
   if (
     rpmIds.includes(id) ||
-    haystack.split(/\s+/).some((token) =>
-      ["fedora", "rhel", "centos", "suse"].includes(token)
-    )
+    haystack
+      .split(/\s+/)
+      .some((token) => ["fedora", "rhel", "centos", "suse"].includes(token))
   ) {
     return "rpm";
   }

@@ -1,13 +1,13 @@
 import { execFile } from "child_process";
 import { promisify } from "util";
 
-export type ProcessInfo = {
+export interface ProcessInfo {
   name: string;
   pid: number;
   title?: string;
   commandLine?: string;
   path?: string;
-};
+}
 
 const execFileAsync = promisify(execFile);
 

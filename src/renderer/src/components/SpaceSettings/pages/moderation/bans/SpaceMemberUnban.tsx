@@ -1,5 +1,5 @@
 import { observer } from "mobx-react-lite";
-import { SpaceBan } from "@stores/objects/SpaceBan";
+import { type SpaceBan } from "@stores/objects/SpaceBan";
 import { Paper } from "@components/Paper";
 import { useAppStore } from "@hooks/useStores";
 import { Stack, Typography } from "@mutualzz/ui-web";

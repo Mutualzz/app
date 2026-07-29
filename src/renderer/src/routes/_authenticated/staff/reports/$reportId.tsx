@@ -166,7 +166,7 @@ function StaffReportDetailRoute() {
                   <Typography level="title-sm" fontWeight={700}>
                     {tCommon(
                       staffReportReasonKeys[
-                        report.reason as keyof typeof staffReportReasonKeys
+                        report.reason
                       ] ?? report.reason
                     )}
                   </Typography>

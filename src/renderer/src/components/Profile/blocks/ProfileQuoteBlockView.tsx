@@ -1,5 +1,5 @@
 import { ProfileMarkdownContent } from "@components/Profile/shared/ProfileMarkdownContent";
-import { Theme } from "@emotion/react";
+import { type Theme } from "@emotion/react";
 import type { ProfileQuoteBlock } from "@mutualzz/types";
 import {
   dynamicElevation,
@@ -10,7 +10,7 @@ import {
 import { Box, Stack, Typography, useTheme } from "@mutualzz/ui-web";
 import { QuotesIcon } from "@phosphor-icons/react";
 import { useAppStore } from "@renderer/hooks/useStores";
-import { AppStore } from "@renderer/stores/App.store";
+import { type AppStore } from "@renderer/stores/App.store";
 
 interface Props {
   block: ProfileQuoteBlock;

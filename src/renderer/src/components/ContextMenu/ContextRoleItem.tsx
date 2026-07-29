@@ -2,7 +2,7 @@ import { observer } from "mobx-react-lite";
 import { ContextItem } from "@components/ContextItem";
 import { Checkbox, Stack, Typography } from "@mutualzz/ui-web";
 import styled from "@emotion/styled";
-import { Role } from "@stores/objects/Role";
+import { type Role } from "@stores/objects/Role";
 import {
   RoleHierarchyLock,
   getRoleHierarchyAssignTooltip

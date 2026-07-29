@@ -25,7 +25,7 @@ import { observer } from "mobx-react-lite";
 import { useEffect, useRef, useState } from "react";
 import { useTheme } from "@mutualzz/ui-web";
 
-type DragState = {
+interface DragState {
   blockId: string;
   mode: "move" | "resize";
   handle?: string;
@@ -33,7 +33,7 @@ type DragState = {
   startY: number;
   origin: APIProfileBlock;
   active: boolean;
-};
+}
 
 const BLOCK_DRAG_THRESHOLD = 4;
 

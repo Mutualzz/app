@@ -11,7 +11,7 @@ import {
 } from "@mutualzz/types";
 import type { AppStore } from "@stores/App.store";
 import { MessageStore } from "@stores/Message.store";
-import { Message } from "@stores/objects/Message";
+import { type Message } from "@stores/objects/Message";
 import type { Space } from "@stores/objects/Space";
 import { makeAutoObservable, observable } from "mobx";
 import type { QueuedMessage } from "./QueuedMessage";
@@ -19,7 +19,7 @@ import { ChannelPermissionOverwrite } from "./ChannelPermissionOverwrite";
 import { BitField, channelFlags, type ChannelFlags } from "@mutualzz/bitfield";
 import { murmur } from "@utils/index";
 import { REST } from "@stores/REST.store";
-import { User } from "@stores/objects/User";
+import { type User } from "@stores/objects/User";
 
 function getOverwriteKey(ow: ChannelPermissionOverwrite): string {
   if (ow.roleId != null) return `r:${ow.roleId}`;
@@ -452,7 +452,7 @@ export class Channel {
           repliedToId?: string;
           mentionReply?: boolean;
           sharedPostId?: string;
-          codedLinks?: Array<{ type: 0 | 1; code: string }>;
+          codedLinks?: { type: 0 | 1; code: string }[];
         }
       | FormData,
     msg?: QueuedMessage
@@ -476,7 +476,7 @@ export class Channel {
                 repliedToId?: string;
                 mentionReply?: boolean;
                 sharedPostId?: string;
-                codedLinks?: Array<{ type: 0 | 1; code: string }>;
+                codedLinks?: { type: 0 | 1; code: string }[];
               }
             >(`/channels/${this.id}/messages`, data);
 

@@ -39,7 +39,6 @@ export const ChannelItemContextMenu = observer(({ space, channel }: Props) => {
   return (
     <ContextMenu
       elevation={app.settings?.preferEmbossed ? 5 : 1}
-      transparency={0}
       id={generateMenuIDs.channel(space.id, channel.id)}
       key={channel.id}
     >

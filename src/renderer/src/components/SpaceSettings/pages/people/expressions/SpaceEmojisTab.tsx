@@ -167,7 +167,7 @@ const SpaceEmojisTab = observer(({ space }: Props) => {
           </Stack>
           <Stack direction="column">
             {staticEmojis.map((expression) => (
-              <EmojiItem expression={expression} />
+              <EmojiItem key={expression.id} expression={expression} />
             ))}
           </Stack>
         </Paper>
@@ -199,7 +199,7 @@ const SpaceEmojisTab = observer(({ space }: Props) => {
           </Stack>
           <Stack direction="column">
             {animatedEmojis.map((expression) => (
-              <EmojiItem expression={expression} />
+              <EmojiItem key={expression.id} expression={expression} />
             ))}
           </Stack>
         </Paper>

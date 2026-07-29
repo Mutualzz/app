@@ -1,10 +1,10 @@
 import { observer } from "mobx-react-lite";
-import { ReactNode } from "react";
-import { Snowflake } from "@mutualzz/types";
+import { type ReactNode } from "react";
+import { type Snowflake } from "@mutualzz/types";
 import { useAppStore } from "@hooks/useStores";
 import { Stack, Typography, useTheme } from "@mutualzz/ui-web";
 import { UserAvatar } from "@components/User/UserAvatar";
-import { RenderElementProps } from "slate-react";
+import { type RenderElementProps } from "slate-react";
 import { useMenu } from "@contexts/ContextMenu.context";
 import { UserProfilePopoutTrigger } from "@renderer/components/Profile/popout/UserProfilePopoutTrigger";
 import { useTranslation } from "react-i18next";

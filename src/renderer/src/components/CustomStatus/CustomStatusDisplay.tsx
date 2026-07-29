@@ -5,7 +5,7 @@ import type { PresenceActivity, PresenceActivityEmoji } from "@mutualzz/types";
 import { hasStatusEmoji } from "@mutualzz/client";
 import { observer } from "mobx-react-lite";
 import { useEffect } from "react";
-import { TypographyColor, TypographyLevel } from "@mutualzz/ui-core";
+import { type TypographyColor, type TypographyLevel } from "@mutualzz/ui-core";
 
 interface Props {
   activity?: PresenceActivity | null;

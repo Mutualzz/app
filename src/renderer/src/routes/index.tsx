@@ -1,5 +1,6 @@
 import { useAppStore } from "@hooks/useStores";
 import { createFileRoute, Navigate } from "@tanstack/react-router";
+import { resolveResumePath } from "@mutualzz/client";
 import { observer } from "mobx-react-lite";
 import { useEffect } from "react";
 
@@ -29,13 +30,17 @@ function RouteComponent() {
 
   if (!app.token) return <Navigate to="/login" replace />;
 
-  const lastHref = app.navigation.current?.href;
-  if (
-    lastHref &&
-    (lastHref.startsWith("/spaces") || lastHref.startsWith("/feed"))
-  ) {
-    return <Navigate to={lastHref} replace />;
+  if (app.isGatewayReady && app.needsOnboarding) {
+    return <Navigate to="/onboarding" replace />;
   }
 
-  return <Navigate to={`/${app.targetMode as "feed" | "spaces"}`} replace />;
+  return (
+    <Navigate
+      to={resolveResumePath(
+        app as Parameters<typeof resolveResumePath>[0],
+        app.navigation.lastRoute,
+      )}
+      replace
+    />
+  );
 }

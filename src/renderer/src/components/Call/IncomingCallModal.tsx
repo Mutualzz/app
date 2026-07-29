@@ -47,6 +47,7 @@ export const IncomingCallModal = observer(({ channelId }: Props) => {
 
   return (
     <Paper
+          surfaceRole="modal"
       elevation={app.settings?.preferEmbossed ? 6 : 3}
       direction="column"
       alignItems="center"

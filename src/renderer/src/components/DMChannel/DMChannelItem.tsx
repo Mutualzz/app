@@ -1,8 +1,8 @@
 import { observer } from "mobx-react-lite";
 import { useNavigate } from "@tanstack/react-router";
-import { Channel } from "@stores/objects/Channel";
+import { type Channel } from "@stores/objects/Channel";
 import { useAppStore } from "@hooks/useStores";
-import { ChannelType, PresencePayload } from "@mutualzz/types";
+import { ChannelType, type PresencePayload } from "@mutualzz/types";
 import { Paper } from "@components/Paper";
 import {
   Avatar,

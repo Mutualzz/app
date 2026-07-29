@@ -91,7 +91,7 @@ export const ProfileDrawBlockEditor = ({
       svgData: processExportedSvg(svgRaw),
       paths: JSON.stringify(paths),
       backgroundColor
-    } as Partial<APIProfileBlock>);
+    });
     onApply?.();
   };
 

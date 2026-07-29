@@ -1,5 +1,5 @@
 import { observer } from "mobx-react-lite";
-import { Role } from "@stores/objects/Role";
+import { type Role } from "@stores/objects/Role";
 import { Paper } from "@components/Paper";
 import { useAppStore } from "@hooks/useStores";
 import {

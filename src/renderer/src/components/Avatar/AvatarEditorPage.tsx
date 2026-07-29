@@ -14,7 +14,7 @@ import { useMutation } from "@tanstack/react-query";
 import { observer } from "mobx-react-lite";
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
-import { navigateToPreferredMode } from "@utils/index";
+import { navigateToResumeRoute } from "@utils/index";
 
 export const AvatarEditorPage = observer(() => {
   const { t } = useTranslation("settings");
@@ -44,7 +44,7 @@ export const AvatarEditorPage = observer(() => {
       <Button
         color="neutral"
         size="sm"
-        onClick={() => navigateToPreferredMode(app, navigate, false)}
+        onClick={() => navigateToResumeRoute(app, navigate, false)}
       >
         {t("profile.done")}
       </Button>
@@ -65,7 +65,7 @@ export const AvatarEditorPage = observer(() => {
       title={t("account.editAvatar")}
       actions={titleBarActions}
       backLabel={t("profile.close")}
-      onBack={() => navigateToPreferredMode(app, navigate)}
+      onBack={() => navigateToResumeRoute(app, navigate)}
     >
       <Stack
         direction="row"

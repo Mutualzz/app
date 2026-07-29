@@ -1,7 +1,7 @@
 import { Paper } from "@components/Paper";
 import { useModal } from "@contexts/Modal.context";
 import { useAppStore } from "@hooks/useStores";
-import { ChannelType, HttpException } from "@mutualzz/types";
+import { ChannelType, type HttpException } from "@mutualzz/types";
 import { Button, Input, Stack, Typography } from "@mutualzz/ui-web";
 import type { Space } from "@stores/objects/Space";
 import { useMutation } from "@tanstack/react-query";
@@ -47,12 +47,12 @@ export const CategoryCreateModal = observer(({ space }: Props) => {
 
   return (
     <Paper
+          surfaceRole="modal"
       elevation={app.settings?.preferEmbossed ? 5 : 1}
       borderRadius={8}
       width="20vw"
       direction="column"
       minHeight={250}
-      transparency={65}
       justifyContent="space-between"
       onKeyDown={(e) => e.key === "Enter" && createCategory()}
       px={5}

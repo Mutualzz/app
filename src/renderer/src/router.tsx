@@ -1,5 +1,5 @@
 import { AppCrashFallback } from "@components/ErrorBoundary/AppCrashFallback";
-import { useAppStore } from "@hooks/useStores";
+import { getAppStore } from "@hooks/useStores";
 import { Logger } from "@mutualzz/logger";
 import {
   createBrowserHistory,
@@ -13,7 +13,7 @@ import { routeTree } from "./routeTree.gen";
 const errorLogger = new Logger({ tag: "ErrorBoundary" });
 
 export function createRouter() {
-  const app = useAppStore();
+  const app = getAppStore();
 
   return createTanStackRouter({
     routeTree,

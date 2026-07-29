@@ -32,7 +32,6 @@ export const ChannelListContextMenu = observer(({ space }: Props) => {
     <ContextMenu
       id={generateMenuIDs.channelList(space.id)}
       elevation={app.settings?.preferEmbossed ? 5 : 1}
-      transparency={0}
       key={space.id}
     >
       {canManageChannels && (

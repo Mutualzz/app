@@ -1,4 +1,4 @@
-import { app, BrowserWindow } from "electron";
+import { app, type BrowserWindow } from "electron";
 import { electronApp, optimizer } from "@electron-toolkit/utils";
 import path from "path";
 import { setupIPC, setPendingDeepLink } from "./ipc";

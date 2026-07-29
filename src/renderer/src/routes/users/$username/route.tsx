@@ -8,7 +8,7 @@ import {
   fetchUserByIdentifier,
   fetchUserProfileByIdentifier
 } from "@utils/profileRoute.utils";
-import { navigateToPreferredMode } from "@utils/index";
+import { navigateToResumeRoute } from "@utils/index";
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { observer } from "mobx-react-lite";
 import { useTranslation } from "react-i18next";
@@ -18,7 +18,7 @@ function ProfileNotFoundRoute() {
   const { t: tCommon } = useTranslation("common");
   const app = useAppStore();
   const navigate = useNavigate();
-  const goBack = () => navigateToPreferredMode(app, navigate);
+  const goBack = () => navigateToResumeRoute(app, navigate);
 
   return (
     <ProfileLayout

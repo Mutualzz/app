@@ -20,7 +20,7 @@ import { useState } from "react";
 import { useAppStore } from "@hooks/useStores";
 import { Paper } from "@components/Paper";
 import { StatusBadge } from "@components/StatusBadge";
-import { SpaceMember } from "@stores/objects/SpaceMember";
+import { type SpaceMember } from "@stores/objects/SpaceMember";
 import { UserIcon } from "@phosphor-icons/react";
 import { useMenu } from "@contexts/ContextMenu.context";
 
