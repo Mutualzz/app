@@ -8,12 +8,8 @@ import {
   shouldAutoUpdateLinkLabel
 } from "@components/Profile/shared/profileLink.utils";
 import type {
-  ProfileActivityBlock,
   ProfileDividerBlock,
-  ProfileLinksBlock,
-  ProfileMutualBlock,
   ProfileQuoteBlock,
-  ProfileRolesBlock
 } from "@mutualzz/types";
 import { PlusIcon, TrashIcon } from "@phosphor-icons/react";
 import { observer } from "mobx-react-lite";
