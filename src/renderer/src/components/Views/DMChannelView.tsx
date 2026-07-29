@@ -8,9 +8,7 @@ import {
   type MessageInputHandle
 } from "@components/Message/MessageInput";
 import { ChannelFileDropZone } from "@components/Channel/ChannelFileDropZone";
-import {
-  ChannelMessageSearchResults,
-} from "@components/Channel/ChannelMessageSearchResults";
+import { ChannelMessageSearchResults } from "@components/Channel/ChannelMessageSearchResults";
 import { commitSearchFilterChange } from "@components/Channel/messageSearch.utils";
 import { SEARCH_PANEL_WIDTH_PX } from "@components/Channel/ChannelSearchResults";
 import { useAppStore } from "@hooks/useStores";
@@ -50,6 +48,46 @@ export const DMChannelView = observer(() => {
     if (callActive || ringingForMe || outgoing) setCallExpanded(true);
   }, [callActive, ringingForMe, outgoing, channel?.id]);
 
+  const handleSearchSubmit = useCallback(() => {
+    const query = searchDraft.trim();
+    if (!isMessageSearchQueryReady(query)) return;
+    setSearchQuery(query);
+  }, [searchDraft]);
+
+  const handleSearchFilterChange = useCallback(
+    (value: string) =>
+      commitSearchFilterChange(value, setSearchDraft, setSearchQuery),
+    []
+  );
+
+  const handleSearchDraftChange = useCallback((value: string) => {
+    setSearchDraft(value);
+  }, []);
+
+  const handleSearchSelect = useCallback(
+    (messageId: string) => {
+      if (!channel) return;
+      resetSearch();
+      app.requestJumpToMessage(channel.id, messageId);
+    },
+    [app, channel, resetSearch]
+  );
+
+  const handleRequestEditLatest = useCallback(() => {
+    if (!app.account || !channel) return;
+
+    const latestMine = [...channel.messages.all]
+      .filter((m) => m.authorId === app.account!.id && !!m.content?.trim())
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())[0];
+
+    if (!latestMine) return;
+
+    channel.messages.all.forEach((m) => m.setEditing(false));
+    latestMine.setEditing(true);
+  }, [app.account, channel]);
+
+  const showSearchResults = isMessageSearchQueryReady(searchQuery.trim());
+
   if (!channel) return null;
 
   const searchScopeName = channel.isGroupDM
@@ -60,44 +98,6 @@ export const DMChannelView = observer(() => {
         .join(", ") ||
       t("groupDm.title")
     : (channel.dmRecipient?.displayName ?? t("deletedUser"));
-
-  const handleSearchSubmit = useCallback(() => {
-    const query = searchDraft.trim();
-    if (!isMessageSearchQueryReady(query)) return;
-    setSearchQuery(query);
-  }, [searchDraft]);
-
-  const handleSearchFilterChange = useCallback(
-    (value: string) => commitSearchFilterChange(value, setSearchDraft, setSearchQuery),
-    [],
-  );
-
-  const handleSearchDraftChange = useCallback((value: string) => {
-    setSearchDraft(value);
-  }, []);
-
-  const handleSearchSelect = useCallback(
-    (messageId: string) => {
-      resetSearch();
-      app.requestJumpToMessage(channel.id, messageId);
-    },
-    [app, channel.id, resetSearch],
-  );
-
-  const showSearchResults = isMessageSearchQueryReady(searchQuery.trim());
-
-  const handleRequestEditLatest = () => {
-    if (!app.account) return;
-
-    const latestMine = [...channel.messages.all]
-      .filter((m) => m.authorId === app.account!.id && !!m.content?.trim())
-      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())[0];
-
-    if (!latestMine) return;
-
-    channel.messages.all.forEach((m) => m.setEditing(false));
-    latestMine.setEditing(true);
-  };
 
   return (
     <Stack direction="column" width="100%" height="100%">
