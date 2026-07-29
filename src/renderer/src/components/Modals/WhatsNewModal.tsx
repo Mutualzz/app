@@ -15,7 +15,7 @@ export const WHATS_NEW_MODAL_ID = "whats-new";
 
 interface WhatsNewModalProps {
   changelog: APIChangelog;
-  onAck: () => Promise<void> | void;
+  onAck?: () => Promise<void> | void;
 }
 
 export const WhatsNewModal = observer(
@@ -26,7 +26,7 @@ export const WhatsNewModal = observer(
     const { closeModal } = useModal();
 
     const handleAck = async () => {
-      await onAck();
+      await onAck?.();
       closeModal(WHATS_NEW_MODAL_ID);
     };
 
@@ -58,6 +58,7 @@ export const WhatsNewModal = observer(
 
     return (
       <Paper
+          surfaceRole="modal"
         p={0}
         overflow="hidden"
         maxWidth={600}
@@ -66,7 +67,6 @@ export const WhatsNewModal = observer(
         borderRadius={20}
         elevation={app.settings?.preferEmbossed ? 5 : 3}
         color="neutral"
-        transparency={0}
       >
         {hasImage ? (
           <Stack

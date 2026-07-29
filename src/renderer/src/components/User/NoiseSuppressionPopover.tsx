@@ -15,7 +15,7 @@ export const NoiseSuppressionPopover = observer(() => {
 
   if (!settings) return null;
 
-  const enabled = settings.noiseSuppression !== false;
+  const enabled = settings.noiseSuppression;
 
   return (
     <Popover

@@ -1,5 +1,5 @@
 import type { CustomEmojiElement } from "@app-types/slate";
-import { ReactNode } from "react";
+import { type ReactNode } from "react";
 import { styled } from "@mutualzz/ui-core";
 import { ContextMenu } from "@components/ContextMenu";
 import { CustomEmojiPreviewPopup } from "@components/Preview/CustomEmojiPreviewPopup";
@@ -7,7 +7,7 @@ import { Portal } from "@mutualzz/ui-web";
 import { useMenu } from "@contexts/ContextMenu.context";
 import { useAppStore } from "@hooks/useStores";
 import { observer } from "mobx-react-lite";
-import { RenderElementProps } from "slate-react";
+import { type RenderElementProps } from "slate-react";
 
 interface CustomEmojiProps extends Omit<
   CustomEmojiElement,

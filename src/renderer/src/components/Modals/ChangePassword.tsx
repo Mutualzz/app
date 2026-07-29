@@ -5,16 +5,16 @@ import { Button, Stack, Typography } from "@mutualzz/ui-web";
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useModal } from "@contexts/Modal.context";
-import { HttpException } from "@mutualzz/types";
+import { type HttpException } from "@mutualzz/types";
 import { InputWithLabel } from "@components/InputWithLabel";
 import { toast } from "react-toastify";
 import { useTranslation } from "react-i18next";
 
-type ChangePasswordErrors = {
+interface ChangePasswordErrors {
   currentPassword: string | undefined;
   newPassword: string | undefined;
   confirmNewPassword: string | undefined;
-};
+}
 
 export const ChangePassword = observer(() => {
   const { t } = useTranslation("settings");

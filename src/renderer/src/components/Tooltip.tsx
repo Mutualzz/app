@@ -1,7 +1,7 @@
 import {
   type PaperProps,
   Tooltip as MzTooltip,
-  TooltipProps,
+  type TooltipProps,
   type TypographyProps
 } from "@mutualzz/ui-web";
 import { TooltipWrapper } from "@components/TooltipWrapper";

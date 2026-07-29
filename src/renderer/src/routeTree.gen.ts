@@ -20,8 +20,10 @@ import { Route as AppealRouteImport } from "./routes/appeal"
 import { Route as AuthenticatedRouteRouteImport } from "./routes/_authenticated/route"
 import { Route as IndexRouteImport } from "./routes/index"
 import { Route as SpotifyCallbackRouteImport } from "./routes/spotify/callback"
+import { Route as RegisterDiscordRouteImport } from "./routes/register/discord"
 import { Route as InviteCodeRouteImport } from "./routes/invite/$code"
 import { Route as ConnectionsCallbackRouteImport } from "./routes/connections/callback"
+import { Route as AuthenticatedOnboardingRouteImport } from "./routes/_authenticated/onboarding"
 import { Route as UsersUsernameRouteRouteImport } from "./routes/users/$username/route"
 import { Route as AuthenticatedStaffRouteRouteImport } from "./routes/_authenticated/staff/route"
 import { Route as AuthenticatedSpacesRouteRouteImport } from "./routes/_authenticated/spaces/route"
@@ -31,6 +33,7 @@ import { Route as AuthenticatedAvatarRouteRouteImport } from "./routes/_authenti
 import { Route as AuthenticatedAtmeRouteRouteImport } from "./routes/_authenticated/@me/route"
 import { Route as AuthenticatedStaffIndexRouteImport } from "./routes/_authenticated/staff/index"
 import { Route as AuthenticatedFeedIndexRouteImport } from "./routes/_authenticated/feed/index"
+import { Route as AuthDiscordCallbackRouteImport } from "./routes/auth/discord/callback"
 import { Route as AuthenticatedStaffSupportRouteImport } from "./routes/_authenticated/staff/support"
 import { Route as AuthenticatedStaffChangelogsRouteImport } from "./routes/_authenticated/staff/changelogs"
 import { Route as AuthenticatedStaffAppealsRouteImport } from "./routes/_authenticated/staff/appeals"
@@ -106,6 +109,11 @@ const SpotifyCallbackRoute = SpotifyCallbackRouteImport.update({
   path: "/spotify/callback",
   getParentRoute: () => rootRouteImport,
 } as any)
+const RegisterDiscordRoute = RegisterDiscordRouteImport.update({
+  id: "/discord",
+  path: "/discord",
+  getParentRoute: () => RegisterRoute,
+} as any)
 const InviteCodeRoute = InviteCodeRouteImport.update({
   id: "/invite/$code",
   path: "/invite/$code",
@@ -115,6 +123,11 @@ const ConnectionsCallbackRoute = ConnectionsCallbackRouteImport.update({
   id: "/connections/callback",
   path: "/connections/callback",
   getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedOnboardingRoute = AuthenticatedOnboardingRouteImport.update({
+  id: "/onboarding",
+  path: "/onboarding",
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const UsersUsernameRouteRoute = UsersUsernameRouteRouteImport.update({
   id: "/users/$username",
@@ -163,6 +176,11 @@ const AuthenticatedFeedIndexRoute = AuthenticatedFeedIndexRouteImport.update({
   id: "/",
   path: "/",
   getParentRoute: () => AuthenticatedFeedRouteRoute,
+} as any)
+const AuthDiscordCallbackRoute = AuthDiscordCallbackRouteImport.update({
+  id: "/auth/discord/callback",
+  path: "/auth/discord/callback",
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedStaffSupportRoute =
   AuthenticatedStaffSupportRouteImport.update({
@@ -290,7 +308,7 @@ export interface FileRoutesByFullPath {
   "/download": typeof DownloadRoute
   "/login": typeof LoginRoute
   "/privacy": typeof PrivacyRoute
-  "/register": typeof RegisterRoute
+  "/register": typeof RegisterRouteWithChildren
   "/reset": typeof ResetRoute
   "/support": typeof SupportRoute
   "/tos": typeof TosRoute
@@ -301,8 +319,10 @@ export interface FileRoutesByFullPath {
   "/spaces": typeof AuthenticatedSpacesRouteRouteWithChildren
   "/staff": typeof AuthenticatedStaffRouteRouteWithChildren
   "/users/$username": typeof UsersUsernameRouteRoute
+  "/onboarding": typeof AuthenticatedOnboardingRoute
   "/connections/callback": typeof ConnectionsCallbackRoute
   "/invite/$code": typeof InviteCodeRoute
+  "/register/discord": typeof RegisterDiscordRoute
   "/spotify/callback": typeof SpotifyCallbackRoute
   "/@me/$channelId": typeof AuthenticatedAtmeChannelIdRouteRoute
   "/spaces/$spaceId": typeof AuthenticatedSpacesSpaceIdRouteRouteWithChildren
@@ -314,6 +334,7 @@ export interface FileRoutesByFullPath {
   "/staff/appeals": typeof AuthenticatedStaffAppealsRoute
   "/staff/changelogs": typeof AuthenticatedStaffChangelogsRoute
   "/staff/support": typeof AuthenticatedStaffSupportRoute
+  "/auth/discord/callback": typeof AuthDiscordCallbackRoute
   "/feed/": typeof AuthenticatedFeedIndexRoute
   "/staff/": typeof AuthenticatedStaffIndexRoute
   "/spaces/$spaceId/$channelId": typeof AuthenticatedSpacesSpaceIdChannelIdRouteRoute
@@ -333,7 +354,7 @@ export interface FileRoutesByTo {
   "/download": typeof DownloadRoute
   "/login": typeof LoginRoute
   "/privacy": typeof PrivacyRoute
-  "/register": typeof RegisterRoute
+  "/register": typeof RegisterRouteWithChildren
   "/reset": typeof ResetRoute
   "/support": typeof SupportRoute
   "/tos": typeof TosRoute
@@ -342,8 +363,10 @@ export interface FileRoutesByTo {
   "/profile": typeof AuthenticatedProfileRouteRoute
   "/spaces": typeof AuthenticatedSpacesRouteRouteWithChildren
   "/users/$username": typeof UsersUsernameRouteRoute
+  "/onboarding": typeof AuthenticatedOnboardingRoute
   "/connections/callback": typeof ConnectionsCallbackRoute
   "/invite/$code": typeof InviteCodeRoute
+  "/register/discord": typeof RegisterDiscordRoute
   "/spotify/callback": typeof SpotifyCallbackRoute
   "/@me/$channelId": typeof AuthenticatedAtmeChannelIdRouteRoute
   "/spaces/$spaceId": typeof AuthenticatedSpacesSpaceIdRouteRouteWithChildren
@@ -355,6 +378,7 @@ export interface FileRoutesByTo {
   "/staff/appeals": typeof AuthenticatedStaffAppealsRoute
   "/staff/changelogs": typeof AuthenticatedStaffChangelogsRoute
   "/staff/support": typeof AuthenticatedStaffSupportRoute
+  "/auth/discord/callback": typeof AuthDiscordCallbackRoute
   "/feed": typeof AuthenticatedFeedIndexRoute
   "/staff": typeof AuthenticatedStaffIndexRoute
   "/spaces/$spaceId/$channelId": typeof AuthenticatedSpacesSpaceIdChannelIdRouteRoute
@@ -376,7 +400,7 @@ export interface FileRoutesById {
   "/download": typeof DownloadRoute
   "/login": typeof LoginRoute
   "/privacy": typeof PrivacyRoute
-  "/register": typeof RegisterRoute
+  "/register": typeof RegisterRouteWithChildren
   "/reset": typeof ResetRoute
   "/support": typeof SupportRoute
   "/tos": typeof TosRoute
@@ -387,8 +411,10 @@ export interface FileRoutesById {
   "/_authenticated/spaces": typeof AuthenticatedSpacesRouteRouteWithChildren
   "/_authenticated/staff": typeof AuthenticatedStaffRouteRouteWithChildren
   "/users/$username": typeof UsersUsernameRouteRoute
+  "/_authenticated/onboarding": typeof AuthenticatedOnboardingRoute
   "/connections/callback": typeof ConnectionsCallbackRoute
   "/invite/$code": typeof InviteCodeRoute
+  "/register/discord": typeof RegisterDiscordRoute
   "/spotify/callback": typeof SpotifyCallbackRoute
   "/_authenticated/@me/$channelId": typeof AuthenticatedAtmeChannelIdRouteRoute
   "/_authenticated/spaces/$spaceId": typeof AuthenticatedSpacesSpaceIdRouteRouteWithChildren
@@ -400,6 +426,7 @@ export interface FileRoutesById {
   "/_authenticated/staff/appeals": typeof AuthenticatedStaffAppealsRoute
   "/_authenticated/staff/changelogs": typeof AuthenticatedStaffChangelogsRoute
   "/_authenticated/staff/support": typeof AuthenticatedStaffSupportRoute
+  "/auth/discord/callback": typeof AuthDiscordCallbackRoute
   "/_authenticated/feed/": typeof AuthenticatedFeedIndexRoute
   "/_authenticated/staff/": typeof AuthenticatedStaffIndexRoute
   "/_authenticated/spaces/$spaceId/$channelId": typeof AuthenticatedSpacesSpaceIdChannelIdRouteRoute
@@ -432,8 +459,10 @@ export interface FileRouteTypes {
     | "/spaces"
     | "/staff"
     | "/users/$username"
+    | "/onboarding"
     | "/connections/callback"
     | "/invite/$code"
+    | "/register/discord"
     | "/spotify/callback"
     | "/@me/$channelId"
     | "/spaces/$spaceId"
@@ -445,6 +474,7 @@ export interface FileRouteTypes {
     | "/staff/appeals"
     | "/staff/changelogs"
     | "/staff/support"
+    | "/auth/discord/callback"
     | "/feed/"
     | "/staff/"
     | "/spaces/$spaceId/$channelId"
@@ -473,8 +503,10 @@ export interface FileRouteTypes {
     | "/profile"
     | "/spaces"
     | "/users/$username"
+    | "/onboarding"
     | "/connections/callback"
     | "/invite/$code"
+    | "/register/discord"
     | "/spotify/callback"
     | "/@me/$channelId"
     | "/spaces/$spaceId"
@@ -486,6 +518,7 @@ export interface FileRouteTypes {
     | "/staff/appeals"
     | "/staff/changelogs"
     | "/staff/support"
+    | "/auth/discord/callback"
     | "/feed"
     | "/staff"
     | "/spaces/$spaceId/$channelId"
@@ -517,8 +550,10 @@ export interface FileRouteTypes {
     | "/_authenticated/spaces"
     | "/_authenticated/staff"
     | "/users/$username"
+    | "/_authenticated/onboarding"
     | "/connections/callback"
     | "/invite/$code"
+    | "/register/discord"
     | "/spotify/callback"
     | "/_authenticated/@me/$channelId"
     | "/_authenticated/spaces/$spaceId"
@@ -530,6 +565,7 @@ export interface FileRouteTypes {
     | "/_authenticated/staff/appeals"
     | "/_authenticated/staff/changelogs"
     | "/_authenticated/staff/support"
+    | "/auth/discord/callback"
     | "/_authenticated/feed/"
     | "/_authenticated/staff/"
     | "/_authenticated/spaces/$spaceId/$channelId"
@@ -551,7 +587,7 @@ export interface RootRouteChildren {
   DownloadRoute: typeof DownloadRoute
   LoginRoute: typeof LoginRoute
   PrivacyRoute: typeof PrivacyRoute
-  RegisterRoute: typeof RegisterRoute
+  RegisterRoute: typeof RegisterRouteWithChildren
   ResetRoute: typeof ResetRoute
   SupportRoute: typeof SupportRoute
   TosRoute: typeof TosRoute
@@ -559,6 +595,7 @@ export interface RootRouteChildren {
   ConnectionsCallbackRoute: typeof ConnectionsCallbackRoute
   InviteCodeRoute: typeof InviteCodeRoute
   SpotifyCallbackRoute: typeof SpotifyCallbackRoute
+  AuthDiscordCallbackRoute: typeof AuthDiscordCallbackRoute
 }
 
 declare module "@tanstack/react-router" {
@@ -640,6 +677,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof SpotifyCallbackRouteImport
       parentRoute: typeof rootRouteImport
     }
+    "/register/discord": {
+      id: "/register/discord"
+      path: "/discord"
+      fullPath: "/register/discord"
+      preLoaderRoute: typeof RegisterDiscordRouteImport
+      parentRoute: typeof RegisterRoute
+    }
     "/invite/$code": {
       id: "/invite/$code"
       path: "/invite/$code"
@@ -653,6 +697,13 @@ declare module "@tanstack/react-router" {
       fullPath: "/connections/callback"
       preLoaderRoute: typeof ConnectionsCallbackRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    "/_authenticated/onboarding": {
+      id: "/_authenticated/onboarding"
+      path: "/onboarding"
+      fullPath: "/onboarding"
+      preLoaderRoute: typeof AuthenticatedOnboardingRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     "/users/$username": {
       id: "/users/$username"
@@ -716,6 +767,13 @@ declare module "@tanstack/react-router" {
       fullPath: "/feed/"
       preLoaderRoute: typeof AuthenticatedFeedIndexRouteImport
       parentRoute: typeof AuthenticatedFeedRouteRoute
+    }
+    "/auth/discord/callback": {
+      id: "/auth/discord/callback"
+      path: "/auth/discord/callback"
+      fullPath: "/auth/discord/callback"
+      preLoaderRoute: typeof AuthDiscordCallbackRouteImport
+      parentRoute: typeof rootRouteImport
     }
     "/_authenticated/staff/support": {
       id: "/_authenticated/staff/support"
@@ -973,6 +1031,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedProfileRouteRoute: typeof AuthenticatedProfileRouteRoute
   AuthenticatedSpacesRouteRoute: typeof AuthenticatedSpacesRouteRouteWithChildren
   AuthenticatedStaffRouteRoute: typeof AuthenticatedStaffRouteRouteWithChildren
+  AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
   AuthenticatedSupportTicketsTicketIdRoute: typeof AuthenticatedSupportTicketsTicketIdRoute
   AuthenticatedSupportTicketsIndexRoute: typeof AuthenticatedSupportTicketsIndexRoute
 }
@@ -984,6 +1043,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedProfileRouteRoute: AuthenticatedProfileRouteRoute,
   AuthenticatedSpacesRouteRoute: AuthenticatedSpacesRouteRouteWithChildren,
   AuthenticatedStaffRouteRoute: AuthenticatedStaffRouteRouteWithChildren,
+  AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
   AuthenticatedSupportTicketsTicketIdRoute:
     AuthenticatedSupportTicketsTicketIdRoute,
   AuthenticatedSupportTicketsIndexRoute: AuthenticatedSupportTicketsIndexRoute,
@@ -992,6 +1052,18 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
 const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
+interface RegisterRouteChildren {
+  RegisterDiscordRoute: typeof RegisterDiscordRoute
+}
+
+const RegisterRouteChildren: RegisterRouteChildren = {
+  RegisterDiscordRoute: RegisterDiscordRoute,
+}
+
+const RegisterRouteWithChildren = RegisterRoute._addFileChildren(
+  RegisterRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
@@ -999,7 +1071,7 @@ const rootRouteChildren: RootRouteChildren = {
   DownloadRoute: DownloadRoute,
   LoginRoute: LoginRoute,
   PrivacyRoute: PrivacyRoute,
-  RegisterRoute: RegisterRoute,
+  RegisterRoute: RegisterRouteWithChildren,
   ResetRoute: ResetRoute,
   SupportRoute: SupportRoute,
   TosRoute: TosRoute,
@@ -1007,6 +1079,7 @@ const rootRouteChildren: RootRouteChildren = {
   ConnectionsCallbackRoute: ConnectionsCallbackRoute,
   InviteCodeRoute: InviteCodeRoute,
   SpotifyCallbackRoute: SpotifyCallbackRoute,
+  AuthDiscordCallbackRoute: AuthDiscordCallbackRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

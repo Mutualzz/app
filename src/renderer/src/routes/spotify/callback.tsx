@@ -7,11 +7,11 @@ import { useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
 import i18n from "../../i18n";
 
-type SpotifyCallbackSearch = {
+interface SpotifyCallbackSearch {
   code?: string;
   state?: string;
   error?: string;
-};
+}
 
 export const Route = createFileRoute("/spotify/callback")({
   validateSearch: (search: Record<string, unknown>): SpotifyCallbackSearch => ({

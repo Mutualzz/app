@@ -19,9 +19,10 @@ export const TooltipWrapper = observer(
 
     return (
       <Paper
+        variant="plain"
+        surfaceRole="tooltip"
         elevation={app.settings?.preferEmbossed ? 5 : 2}
         p={2}
-        transparency={100}
         borderRadius={8}
         {...paperProps}
       >

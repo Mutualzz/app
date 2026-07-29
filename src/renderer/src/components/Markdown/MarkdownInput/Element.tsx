@@ -5,7 +5,7 @@ import { UserMention } from "@components/Markdown/components/mention/UserMention
 import { Emoji } from "@components/Markdown/components/emoji/Emoji";
 import { CustomEmoji } from "@components/Markdown/components/emoji/CustomEmoji";
 import { RoleMention } from "@components/Markdown/components/mention/RoleMention";
-import { MentionType } from "@mutualzz/types";
+import { type MentionType } from "@mutualzz/types";
 import { DefaultMention } from "@components/Markdown/components/mention/DefaultMention";
 
 export const Element = ({
@@ -54,7 +54,7 @@ export const Element = ({
         </pre>
       );
 
-    case "heading":
+    case "heading": {
       const level = `h${element.level + 2}` as TypographyHeadingKey;
       return (
         <Typography
@@ -66,6 +66,7 @@ export const Element = ({
           {children}
         </Typography>
       );
+    }
 
     case "emoji":
       return (
@@ -95,7 +96,7 @@ export const Element = ({
         </CustomEmoji>
       );
 
-    case "mention":
+    case "mention": {
       const mentionType = element.mentionType as MentionType;
       const mentionId = element.id;
 
@@ -119,7 +120,10 @@ export const Element = ({
               {children}
             </DefaultMention>
           );
+        default:
+          return <span {...attributes}>{children}</span>;
       }
+    }
     case "line":
     default:
       return <div {...attributes}>{children}</div>;

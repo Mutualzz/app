@@ -94,7 +94,7 @@ export const ThemeCreatorSidebarRight = observer(() => {
       const formData = new FormData();
       formData.append(
         "backgroundImage",
-        app.themeCreator.pendingBackgroundFile as File
+        app.themeCreator.pendingBackgroundFile
       );
       const updated = await app.rest.putFormData<APITheme>(base, formData);
       app.themes.add(updated);

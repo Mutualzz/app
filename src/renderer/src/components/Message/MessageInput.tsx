@@ -3,18 +3,18 @@ import { reaction } from "mobx";
 import { observer } from "mobx-react-lite";
 import {
   forwardRef,
-  KeyboardEvent,
+  type KeyboardEvent,
   useEffect,
   useImperativeHandle,
   useMemo,
   useRef,
   useState
 } from "react";
-import { Message } from "@stores/objects/Message";
+import { type Message } from "@stores/objects/Message";
 import type { Channel } from "@stores/objects/Channel";
 import {
   MarkdownInput,
-  MarkdownInputHandle
+  type MarkdownInputHandle
 } from "@components/Markdown/MarkdownInput/MarkdownInput";
 import {
   ChannelType,
@@ -23,7 +23,7 @@ import {
   MessageType
 } from "@mutualzz/types";
 import { useMutation } from "@tanstack/react-query";
-import { Editor } from "slate";
+import { type Editor } from "slate";
 import { Snowflake } from "@mutualzz/client";
 import { messageFlags } from "@mutualzz/bitfield";
 import { createSystemMessage } from "@utils/index";
@@ -32,7 +32,7 @@ import { Stack, Typography, useTheme } from "@mutualzz/ui-web";
 import { Link } from "@components/Link";
 import { Paper } from "@components/Paper";
 import { TypingIndicator } from "@components/TypingIndicator";
-import { Expression } from "@renderer/stores/objects/Expression";
+import { type Expression } from "@renderer/stores/objects/Expression";
 import { FileIcon, EyeSlashIcon, PlusIcon, XIcon } from "@phosphor-icons/react";
 import { IconButton } from "../IconButton";
 import { useTranslation } from "react-i18next";
@@ -186,9 +186,9 @@ export const MessageInput = observer(
 
     const triggerTyping = () => {
       if (!channel || message?.editing) return;
-      if (app.settings?.extendedSettings.sendTypingIndicators === false) return;
+      if (app.settings?.sendTypingIndicators === false) return;
       if (!typingCooldownRef.current) {
-        app.rest.post(`/channels/${channel.id}/typing`).catch(() => {});
+        app.rest.post(`/channels/${channel.id}/typing`).catch(() => { return; });
       }
       clearTimeout(typingCooldownRef.current!);
       typingCooldownRef.current = setTimeout(() => {
@@ -717,7 +717,7 @@ export const MessageInput = observer(
           value={content}
           variant="plain"
           ref={inputRef}
-          emoticons={app.settings?.extended.convertEmoticons ?? true}
+          emoticons={app.settings?.convertEmoticons ?? true}
           onChange={onChange}
           placeholder={message?.editing ? message.content : placeholder}
           onKeyDown={onKeyDown}
@@ -732,19 +732,19 @@ export const MessageInput = observer(
           disabled={denySendingMessages}
           emojiPicker={
             !denySendingMessages &&
-            (app.settings?.extendedSettings.showEmojiPicker ?? true)
+            (app.settings?.showEmojiPicker ?? true)
           }
           gifPicker={
             !denySendingMessages &&
             !message?.editing &&
-            (app.settings?.extendedSettings.showGifPicker ?? true)
+            (app.settings?.showGifPicker ?? true)
           }
           stickerPicker={
             !denySendingMessages &&
             !message?.editing &&
-            (app.settings?.extendedSettings.showStickerPicker ?? true)
+            (app.settings?.showStickerPicker ?? true)
           }
-          hoverToolbar={app.settings?.extendedSettings.showMarkdownToolbar ?? true}
+          hoverToolbar={app.settings?.showMarkdownToolbar ?? true}
           startContent={
             !message?.editing && !denySendingMessages && canAttachFiles ? (
               <Stack alignItems="center" justifyContent="center" mr={2.5}>

@@ -2,15 +2,15 @@ import { Logger } from "@mutualzz/logger";
 import type { PresencePayload, Snowflake } from "@mutualzz/types";
 import type { AppStore } from "@stores/App.store";
 import type { Space } from "@stores/objects/Space";
-import { SpaceMember } from "@stores/objects/SpaceMember";
+import { type SpaceMember } from "@stores/objects/SpaceMember";
 import { makeAutoObservable } from "mobx";
 import i18n from "@renderer/i18n";
 
-type SyncGroupData = {
+interface SyncGroupData {
   id: string;
   title: string;
   data: { member: SpaceMember; index: number }[];
-};
+}
 
 export class SpaceMemberListStore {
   id: Snowflake;

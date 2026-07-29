@@ -66,7 +66,7 @@ export const ProfileBlockCornerRadiusInspector = observer(
             onClick={() =>
               updateSelectedBlock({
                 cornerRadius: undefined,
-              } as Partial<APIProfileBlock>)
+              })
             }
           >
             {t("profile.inspector.cornerRadius.resetToDefault")}

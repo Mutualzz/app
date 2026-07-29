@@ -3,8 +3,8 @@ import { EmojiPicker } from "./EmojiPicker";
 import type { Expression } from "@stores/objects/Expression";
 import { ReactEditor, useSlate } from "slate-react";
 import { useExpressionPicker } from "@renderer/hooks/useExpressionPicker";
-import { PickerEmoji } from "@utils/emojis/emojiPickerData";
-import { SkinTone } from "@utils/emojis/emojiSprite";
+import { type PickerEmoji } from "@utils/emojis/emojiPickerData";
+import { type SkinTone } from "@utils/emojis/emojiSprite";
 import { getEmoji, insertCustomEmoji, insertEmoji } from "@utils/emojis/emojis";
 import { GifIcon, SmileyIcon, StickerIcon } from "@phosphor-icons/react";
 import { useMarkdownInputContext } from "@components/Markdown/MarkdownInput/MarkdownInput.context";
@@ -85,7 +85,7 @@ export const ExpressionPickerTrigger = ({
     <Stack spacing={0.75} alignItems="center" css={{ alignSelf: "center" }}>
       {stickerPicker && (
         <IconButton
-          ref={stickerTriggerRef as any}
+          ref={stickerTriggerRef}
           variant="plain"
           onClick={() => openToTab("stickers", stickerTriggerRef as any)}
           title={t("composer.stickerPicker")}
@@ -96,7 +96,7 @@ export const ExpressionPickerTrigger = ({
       )}
       {gifPicker && (
         <IconButton
-          ref={gifTriggerRef as any}
+          ref={gifTriggerRef}
           variant="plain"
           onClick={() => openToTab("gifs", gifTriggerRef as any)}
           title={t("composer.gifPicker")}
@@ -108,7 +108,7 @@ export const ExpressionPickerTrigger = ({
 
       {emojiPicker && (
         <IconButton
-          ref={triggerRef as any}
+          ref={triggerRef}
           variant="plain"
           onClick={() => openToTab("emoji")}
           title={t("composer.emojiPicker")}

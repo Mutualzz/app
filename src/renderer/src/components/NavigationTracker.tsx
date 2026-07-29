@@ -7,6 +7,9 @@ export const NavigationTracker = () => {
   const href = useRouterState({
     select: (state) => state.location.href
   });
+  const pathname = useRouterState({
+    select: (state) => state.location.pathname
+  });
 
   const lastHrefRef = useRef<string | null>(null);
 
@@ -14,7 +17,8 @@ export const NavigationTracker = () => {
     if (lastHrefRef.current === href) return;
     lastHrefRef.current = href;
     app.navigation.record(href);
-  }, [href, app]);
+    app.navigation.trackRoute(pathname);
+  }, [href, pathname, app]);
 
   return null;
 };

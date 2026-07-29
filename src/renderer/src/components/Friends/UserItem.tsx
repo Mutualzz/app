@@ -1,6 +1,6 @@
 import { Stack, Typography, useTheme } from "@mutualzz/ui-web";
 import { useAppStore } from "@renderer/hooks/useStores";
-import { Relationship } from "@stores/objects/Relationship";
+import { type Relationship } from "@stores/objects/Relationship";
 import { useNavigate } from "@tanstack/react-router";
 import { observer } from "mobx-react-lite";
 import { useTranslation } from "react-i18next";

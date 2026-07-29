@@ -19,7 +19,7 @@ import {
   PaletteIcon
 } from "@phosphor-icons/react";
 import { IconButton } from "@renderer/components/IconButton";
-import { Theme } from "@stores/objects/Theme";
+import { type Theme } from "@stores/objects/Theme";
 import type { Space } from "@stores/objects/Space";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { observer } from "mobx-react-lite";

@@ -27,6 +27,7 @@ export const CategoryDeleteModal = observer(({ channel }: Props) => {
 
   return (
     <AnimatedPaper
+      surfaceRole="modal"
       borderRadius={12}
       direction="column"
       initial={{ scale: 0.95 }}
@@ -36,7 +37,6 @@ export const CategoryDeleteModal = observer(({ channel }: Props) => {
       spacing={5}
       alignItems="center"
       p="1rem"
-      transparency={65}
       width="25vw"
     >
       <Stack

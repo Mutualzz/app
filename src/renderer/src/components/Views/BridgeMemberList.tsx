@@ -151,7 +151,6 @@ export const BridgeMemberList = observer(({ bridgeId }: Props) => {
                 closeOnClickOutside
                 variant="plain"
                 elevation={0}
-                transparency={100}
                 css={{
                   padding: 0,
                   background: "transparent",

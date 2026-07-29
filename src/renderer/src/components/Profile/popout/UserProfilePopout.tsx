@@ -142,11 +142,11 @@ export const UserProfilePopout = observer(({ user, member }: Props) => {
     queryFn: async () => {
       try {
         return await app.rest.get<{
-          connections: Array<{
+          connections: {
             provider: string;
             displayName: string | null;
             externalUrl: string | null;
-          }>;
+          }[];
         }>(`/users/${user.id}/connections`);
       } catch {
         return { connections: [] };

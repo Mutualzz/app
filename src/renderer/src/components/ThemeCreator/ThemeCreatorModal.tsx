@@ -18,6 +18,7 @@ export const ThemeCreatorModal = observer(() => {
 
   return (
     <AnimatedPaper
+      surfaceRole="modal"
       width="65vw"
       height="72.5vh"
       borderRadius={{
@@ -27,8 +28,7 @@ export const ThemeCreatorModal = observer(() => {
       }}
       justifyContent="center"
       alignItems="center"
-      elevation={app.settings?.preferEmbossed ? 0 : 1}
-      transparency={0}
+      elevation={app.settings?.preferEmbossed ? 3 : 1}
       initial={{ scale: 0.95 }}
       animate={{ scale: 1 }}
     >

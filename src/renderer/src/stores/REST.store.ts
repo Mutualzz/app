@@ -35,7 +35,13 @@ const AUTH_EXEMPT_PATHS = [
   "/auth/login",
   "/auth/register",
   "auth/login",
-  "auth/register"
+  "auth/register",
+  "/auth/discord/url",
+  "auth/discord/url",
+  "/auth/discord/exchange",
+  "auth/discord/exchange",
+  "/auth/discord/complete",
+  "auth/discord/complete",
 ];
 
 async function parseResponse<Data>(res: Response): Promise<Data> {

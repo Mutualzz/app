@@ -15,7 +15,7 @@ import {
   observable,
   type IObservableArray
 } from "mobx";
-import { Expression } from "@stores/objects/Expression";
+import { type Expression } from "@stores/objects/Expression";
 import { PostComment } from "./PostComment";
 
 export class PostCommentStore {

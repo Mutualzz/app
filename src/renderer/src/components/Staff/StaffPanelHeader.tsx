@@ -1,6 +1,7 @@
 import { Button } from "@components/Button";
 import { Paper } from "@components/Paper";
 import { useAppStore } from "@hooks/useStores";
+import { resolveResumePath } from "@mutualzz/client";
 import { Stack, Typography } from "@mutualzz/ui-web";
 import { ArrowLeftIcon } from "@phosphor-icons/react";
 import { useNavigate } from "@tanstack/react-router";
@@ -33,7 +34,10 @@ export const StaffPanelHeader = ({
   const handleBack = () => {
     if (backTo === "home") {
       navigate({
-        to: app.settings?.preferredMode === "feed" ? "/feed" : "/spaces"
+        to: resolveResumePath(
+          app as Parameters<typeof resolveResumePath>[0],
+          app.navigation.lastRoute,
+        ),
       });
       return;
     }

@@ -7,7 +7,7 @@ import type { ColorLike } from "@mutualzz/ui-core";
 import { useMenu } from "@contexts/ContextMenu.context";
 import { useAppStore } from "@hooks/useStores";
 import { SmallActivityStatus } from "@components/SmallActivityStatus";
-import { User } from "@stores/objects/User";
+import { type User } from "@stores/objects/User";
 import { CrownSimpleIcon } from "@phosphor-icons/react";
 import { Tooltip } from "@components/Tooltip";
 import { useTranslation } from "react-i18next";

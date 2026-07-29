@@ -5,7 +5,7 @@ import { useState } from "react";
 import { Button } from "@components/Button";
 import { useMutation } from "@tanstack/react-query";
 import { useAppStore } from "@hooks/useStores";
-import { HttpException } from "@mutualzz/types";
+import { type HttpException } from "@mutualzz/types";
 import { useTranslation } from "react-i18next";
 
 export const Route = createFileRoute("/appeal")({

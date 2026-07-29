@@ -1,5 +1,5 @@
 import { observer } from "mobx-react-lite";
-import { User } from "@stores/objects/User";
+import { type User } from "@stores/objects/User";
 import { UserAvatar } from "@components/User/UserAvatar";
 import { Stack } from "@mutualzz/ui-web";
 

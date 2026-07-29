@@ -172,6 +172,7 @@ export const ChannelCreateModal = observer(({ space, parent }: Props) => {
 
   return (
     <Paper
+          surfaceRole="modal"
       elevation={app.settings?.preferEmbossed ? 5 : 1}
       borderRadius={8}
       minWidth={{ xs: "90vw", sm: 150, md: 200, lg: 500 }}
@@ -182,7 +183,6 @@ export const ChannelCreateModal = observer(({ space, parent }: Props) => {
       width="100%"
       onKeyDown={(e) => e.key === "Enter" && handleCreate()}
       px={5}
-      transparency={65}
     >
       <Stack
         width="100%"

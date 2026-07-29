@@ -14,7 +14,7 @@ import { useAppStore } from "@hooks/useStores";
 import type { APIUser, APIUserProfile } from "@mutualzz/types";
 import { Paper, Stack, Typography } from "@mutualzz/ui-web";
 import { getUserDisplayName } from "@utils/profileRoute.utils";
-import { navigateToPreferredMode } from "@utils/index";
+import { navigateToResumeRoute } from "@utils/index";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { observer } from "mobx-react-lite";
@@ -53,7 +53,7 @@ export const ProfileViewerPage = observer(
       if (accountMatches && app.account) {
         const existing = app.users.get(app.account.id);
         if (existing) return existing;
-        return app.users.add(app.account.raw as APIUser);
+        return app.users.add(app.account.raw);
       }
       return undefined;
     })();
@@ -118,10 +118,10 @@ export const ProfileViewerPage = observer(
         <ProfileLayout
           title={t("profile.viewer.title")}
           backLabel={tCommon("close")}
-          onBack={() => navigateToPreferredMode(app, navigate)}
+          onBack={() => navigateToResumeRoute(app, navigate)}
         >
           <ProfileNotFoundState
-            onBack={() => navigateToPreferredMode(app, navigate)}
+            onBack={() => navigateToResumeRoute(app, navigate)}
           />
         </ProfileLayout>
       );
@@ -132,10 +132,10 @@ export const ProfileViewerPage = observer(
         <ProfileLayout
           title={t("profile.viewer.title")}
           backLabel={tCommon("close")}
-          onBack={() => navigateToPreferredMode(app, navigate)}
+          onBack={() => navigateToResumeRoute(app, navigate)}
         >
           <ProfileNotFoundState
-            onBack={() => navigateToPreferredMode(app, navigate)}
+            onBack={() => navigateToResumeRoute(app, navigate)}
           />
         </ProfileLayout>
       );
@@ -148,7 +148,7 @@ export const ProfileViewerPage = observer(
           <ProfileLayout
             title={t("profile.viewer.yourProfile")}
             backLabel={tCommon("close")}
-            onBack={() => navigateToPreferredMode(app, navigate)}
+            onBack={() => navigateToResumeRoute(app, navigate)}
             actions={
               <Button
                 color="primary"
@@ -231,7 +231,7 @@ export const ProfileViewerPage = observer(
         onBack={() =>
           isPreviewing
             ? navigate({ to: "/profile" })
-            : navigateToPreferredMode(app, navigate)
+            : navigateToResumeRoute(app, navigate)
         }
         backLabel={isPreviewing ? tCommon("back") : tCommon("close")}
         music={previewProfileMusic ?? profile.profileMusic}

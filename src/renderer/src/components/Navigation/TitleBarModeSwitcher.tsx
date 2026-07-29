@@ -4,7 +4,6 @@ import { useAppStore } from "@hooks/useStores";
 import {
   resolveActiveModeKey,
   shouldClearPendingMode,
-  shouldPersistPreferredMode,
 } from "@mutualzz/client";
 import { formatColor } from "@mutualzz/ui-core";
 import type { ModeKey } from "@mutualzz/types";
@@ -67,9 +66,6 @@ export const TitleBarModeSwitcher = observer(() => {
   const selectMode = (key: ModeKey) => {
     if (key === active && !pending) return;
     setPending(key);
-    if (shouldPersistPreferredMode(key)) {
-      app.settings?.setPreferredMode(key);
-    }
     requestAnimationFrame(() => {
       navigateToMode(app, navigate, key);
     });

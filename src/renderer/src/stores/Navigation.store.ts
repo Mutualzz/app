@@ -1,8 +1,9 @@
 import { makePersistable } from "mobx-persist-store";
 import { type IObservableArray, makeAutoObservable, observable } from "mobx";
+import { isResumeRoutePath } from "@mutualzz/client";
 import type { AppStore } from "./App.store";
 
-type Entry = { href: string; timestamp: number };
+interface Entry { href: string; timestamp: number }
 
 export type AppNavigate = (opts: {
   to: string;
@@ -13,6 +14,7 @@ export type AppNavigate = (opts: {
 export class NavigationStore {
   entries: IObservableArray<Entry> = observable.array([]);
   index = -1;
+  lastRoute: string | null = null;
   readonly max = 15;
 
   private suppressRecord = false;
@@ -22,9 +24,18 @@ export class NavigationStore {
 
     makePersistable(this, {
       name: "NavigationStore",
-      properties: ["entries", "index"],
+      properties: ["entries", "index", "lastRoute"],
       storage: localStorage
     });
+  }
+
+  trackRoute(pathname: string) {
+    if (!this.app.account) return;
+
+    const normalized = pathname.replace(/\/+/g, "/").replace(/\/$/, "") || "/";
+    if (!isResumeRoutePath(normalized)) return;
+
+    this.lastRoute = normalized;
   }
 
   get current() {
@@ -45,6 +56,7 @@ export class NavigationStore {
   clear() {
     this.entries = observable.array([]);
     this.index = -1;
+    this.lastRoute = null;
   }
 
   private hrefKey(href: string) {

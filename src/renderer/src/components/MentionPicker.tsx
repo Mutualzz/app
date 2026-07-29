@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { UserAvatar } from "@components/User/UserAvatar";
 import { dynamicElevation } from "@mutualzz/ui-core";
 import { ReactEditor, useSlate } from "slate-react";
-import { MentionType } from "@mutualzz/types";
+import { type MentionType } from "@mutualzz/types";
 import { useTranslation } from "react-i18next";
 
 interface Candidate {
@@ -64,7 +64,7 @@ export const MentionPicker = observer(
             .map((r) => ({
               id: r.id,
               displayName: `@${r.name}`,
-              type: "role" as MentionType
+              type: "role"
             }))
             .filter((r) => r.id !== space.id)
         : [];
@@ -121,7 +121,9 @@ export const MentionPicker = observer(
           left: editorRect.left,
           width: editorRect.width
         });
-      } catch {}
+      } catch {
+    // ignore
+}
     }, [editor, filtered]);
 
     useEffect(() => {

@@ -26,7 +26,6 @@ export const RoleContextMenu = observer(({ space, role }: Props) => {
     <ContextMenu
       id={generateMenuIDs.role(space.id, role.id)}
       elevation={app.settings?.preferEmbossed ? 5 : 1}
-      transparency={0}
       key={`${space.id}-${role.id}`}
     >
       <ContextItem

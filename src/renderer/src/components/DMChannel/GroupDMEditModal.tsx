@@ -113,6 +113,7 @@ export const GroupDMEditModal = observer(({ channel }: Props) => {
 
   return (
     <Paper
+          surfaceRole="modal"
       elevation={app.settings?.preferEmbossed ? 5 : 1}
       borderRadius={12}
       direction="column"
@@ -138,7 +139,7 @@ export const GroupDMEditModal = observer(({ channel }: Props) => {
                 }}
               >
                 <Cropper
-                  image={imageFile!}
+                  image={imageFile}
                   crop={crop}
                   zoom={zoom}
                   rotation={rotation}

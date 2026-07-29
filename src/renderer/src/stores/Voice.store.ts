@@ -72,7 +72,10 @@ const SPEAKING_OFF_DELAY_MS = 250;
 const SPEAKING_TICK_MS = 75;
 const VOICE_JOIN_TIMEOUT_MS = 30_000;
 
-type UserMix = { muted: boolean; volume: number };
+interface UserMix {
+  muted: boolean;
+  volume: number;
+}
 
 function serializeVolumeMap(value: unknown) {
   if (!(value instanceof Map)) return {};
@@ -252,8 +255,8 @@ class MediasoupSession {
   private withProduceLock<T>(fn: () => Promise<T>): Promise<T> {
     const run = this.produceChain.then(fn, fn);
     this.produceChain = run.then(
-      () => undefined,
-      () => undefined
+      () => null,
+      () => null
     );
     return run;
   }
@@ -373,14 +376,19 @@ class MediasoupSession {
 
     if (this.micProducer) {
       try {
-        shouldTransmit ? this.micProducer.resume() : this.micProducer.pause();
-      } catch {}
+        if (shouldTransmit) this.micProducer.resume();
+        else this.micProducer.pause();
+      } catch {
+        // ignore
+      }
     }
 
     if (this.micTrack) {
       try {
         this.micTrack.enabled = shouldTransmit;
-      } catch {}
+      } catch {
+        // ignore
+      }
     }
 
     if (!selfId || shouldTransmit) return;
@@ -414,7 +422,9 @@ class MediasoupSession {
       ) {
         try {
           meta.element.muted = deafened;
-        } catch {}
+        } catch {
+          // ignore
+        }
       }
     }
   }
@@ -448,9 +458,7 @@ class MediasoupSession {
   }
 
   private async applyOutputSink() {
-    const ctx = this.audioContext as
-      | (AudioContext & { setSinkId?: (id: string) => Promise<void> })
-      | null;
+    const ctx = this.audioContext;
     if (!ctx?.setSinkId || !this.currentOutputDeviceId) return;
     try {
       await ctx.setSinkId(this.currentOutputDeviceId);
@@ -463,11 +471,15 @@ class MediasoupSession {
     if (!this.audioContext || !this.masterOutputGain) return;
     try {
       this.masterOutputGain.disconnect();
-    } catch {}
+    } catch {
+      // ignore
+    }
     if (!this.isDeafened) {
       try {
         this.masterOutputGain.connect(this.audioContext.destination);
-      } catch {}
+      } catch {
+        // ignore
+      }
     }
   }
 
@@ -494,10 +506,14 @@ class MediasoupSession {
     if (!this.masterOutputGain || this.isDeafened) return;
     try {
       gainNode.disconnect();
-    } catch {}
+    } catch {
+      // ignore
+    }
     try {
       gainNode.connect(this.masterOutputGain);
-    } catch {}
+    } catch {
+      // ignore
+    }
   }
 
   getVideoStream(producerId: string): MediaStream | null {
@@ -556,7 +572,9 @@ class MediasoupSession {
     } catch (err) {
       try {
         videoTrack.stop();
-      } catch {}
+      } catch {
+        // ignore
+      }
       this.cameraTrack = null;
       this.localCameraStream = null;
       throw err;
@@ -635,7 +653,9 @@ class MediasoupSession {
             this.logger.warn("Screen share audio produce failed", audioErr);
             try {
               audioTrack.stop();
-            } catch {}
+            } catch {
+              // ignore
+            }
             this.screenAudioTrack = null;
             this.screenAudioProducer = null;
             return false;
@@ -650,7 +670,9 @@ class MediasoupSession {
         for (const track of media.getAudioTracks()) {
           try {
             track.stop();
-          } catch {}
+          } catch {
+            // ignore
+          }
         }
         return false;
       } catch (err) {
@@ -659,12 +681,16 @@ class MediasoupSession {
 
         try {
           this.screenAudioProducer?.close();
-        } catch {}
+        } catch {
+          // ignore
+        }
         this.screenAudioProducer = null;
 
         try {
           this.screenProducer?.close();
-        } catch {}
+        } catch {
+          // ignore
+        }
         this.screenProducer = null;
 
         if (audioProducerId) {
@@ -672,19 +698,25 @@ class MediasoupSession {
             await this.rpc(VoiceOpcodes.VoiceCloseProducer, {
               producerId: audioProducerId
             });
-          } catch {}
+          } catch {
+            // ignore
+          }
         }
         if (producerId) {
           try {
             await this.rpc(VoiceOpcodes.VoiceCloseProducer, { producerId });
-          } catch {}
+          } catch {
+            // ignore
+          }
           this.onVideoClosed(producerId);
         }
 
         media.getTracks().forEach((t) => {
           try {
             t.stop();
-          } catch {}
+          } catch {
+            // ignore
+          }
         });
         this.screenTrack = null;
         this.localScreenStream = null;
@@ -700,15 +732,18 @@ class MediasoupSession {
   setScreenShareAudioMuted(muted: boolean) {
     if (this.screenAudioProducer) {
       try {
-        muted
-          ? this.screenAudioProducer.pause()
-          : this.screenAudioProducer.resume();
-      } catch {}
+        if (muted) this.screenAudioProducer.pause();
+        else this.screenAudioProducer.resume();
+      } catch {
+        // ignore
+      }
     }
     if (this.screenAudioTrack) {
       try {
         this.screenAudioTrack.enabled = !muted;
-      } catch {}
+      } catch {
+        // ignore
+      }
     }
   }
 
@@ -721,24 +756,32 @@ class MediasoupSession {
 
     try {
       this.screenAudioProducer?.close();
-    } catch {}
+    } catch {
+      // ignore
+    }
     this.screenAudioProducer = null;
 
     if (this.screenAudioTrack) {
       try {
         this.screenAudioTrack.stop();
-      } catch {}
+      } catch {
+        // ignore
+      }
       this.screenAudioTrack = null;
     }
 
     try {
       this.screenProducer?.close();
-    } catch {}
+    } catch {
+      // ignore
+    }
     this.screenProducer = null;
     if (this.screenTrack) {
       try {
         this.screenTrack.stop();
-      } catch {}
+      } catch {
+        // ignore
+      }
       this.screenTrack = null;
       this.localScreenStream = null;
     }
@@ -747,12 +790,16 @@ class MediasoupSession {
         await this.rpc(VoiceOpcodes.VoiceCloseProducer, {
           producerId: audioProducerId
         });
-      } catch {}
+      } catch {
+        // ignore
+      }
     }
     if (producerId) {
       try {
         await this.rpc(VoiceOpcodes.VoiceCloseProducer, { producerId });
-      } catch {}
+      } catch {
+        // ignore
+      }
       this.onVideoClosed(producerId);
     }
     if (!this.screenShareInFlight) {
@@ -764,19 +811,25 @@ class MediasoupSession {
     const producerId = this.cameraProducer?.id ?? null;
     try {
       this.cameraProducer?.close();
-    } catch {}
+    } catch {
+      // ignore
+    }
     this.cameraProducer = null;
     if (this.cameraTrack) {
       try {
         this.cameraTrack.stop();
-      } catch {}
+      } catch {
+        // ignore
+      }
       this.cameraTrack = null;
       this.localCameraStream = null;
     }
     if (producerId) {
       try {
         await this.rpc(VoiceOpcodes.VoiceCloseProducer, { producerId });
-      } catch {}
+      } catch {
+        // ignore
+      }
       this.onVideoClosed(producerId);
     }
   }
@@ -784,8 +837,8 @@ class MediasoupSession {
   async restartMic(signal: AbortSignal) {
     if (this.screenShareInFlight) return;
     await this.produceChain.then(
-      () => undefined,
-      () => undefined
+      () => null,
+      () => null
     );
     if (this.screenShareInFlight || signal.aborted) return;
     this.disposeMicPipeline();
@@ -803,34 +856,46 @@ class MediasoupSession {
     const producerId = this.micProducer?.id ?? null;
     try {
       this.micProducer?.close();
-    } catch {}
+    } catch {
+      // ignore
+    }
     this.micProducer = null;
     if (producerId && this.socket) {
       void this.rpc(VoiceOpcodes.VoiceCloseProducer, { producerId }).catch(
-        () => {}
+        () => {
+          // ignore
+        }
       );
     }
     if (this.rnnoiseDispose) {
       try {
         this.rnnoiseDispose();
-      } catch {}
+      } catch {
+        // ignore
+      }
       this.rnnoiseDispose = null;
     }
     this.micGainNode = null;
     if (this.micTrack) {
       try {
         this.micTrack.stop();
-      } catch {}
+      } catch {
+        // ignore
+      }
       this.micTrack = null;
     }
     if (this.rawMicTrack) {
       try {
         this.rawMicTrack.stop();
-      } catch {}
+      } catch {
+        // ignore
+      }
       this.rawMicTrack = null;
     }
     if (this.micProcessContext) {
-      void this.micProcessContext.close().catch(() => {});
+      void this.micProcessContext.close().catch(() => {
+        // ignore
+      });
       this.micProcessContext = null;
     }
   }
@@ -842,7 +907,9 @@ class MediasoupSession {
       this.micProcessContext.sampleRate !== 48000
     ) {
       if (this.micProcessContext && this.micProcessContext.state !== "closed") {
-        void this.micProcessContext.close().catch(() => {});
+        void this.micProcessContext.close().catch(() => {
+        // ignore
+      });
       }
       this.micProcessContext = createMicAudioContext();
     }
@@ -882,11 +949,13 @@ class MediasoupSession {
     const device = await this.ensureDevice(rtpCapabilities, signal);
     if (!device || signal.aborted) return;
 
-    const [{ transportOptions: recvOptions }, { transportOptions: sendOptions }] =
-      await Promise.all([
-        this.rpc(VoiceOpcodes.VoiceCreateTransport, { direction: "receive" }),
-        this.rpc(VoiceOpcodes.VoiceCreateTransport, { direction: "send" }),
-      ]);
+    const [
+      { transportOptions: recvOptions },
+      { transportOptions: sendOptions }
+    ] = await Promise.all([
+      this.rpc(VoiceOpcodes.VoiceCreateTransport, { direction: "receive" }),
+      this.rpc(VoiceOpcodes.VoiceCreateTransport, { direction: "send" })
+    ]);
     if (signal.aborted) return;
 
     const recvTransport = device.createRecvTransport(recvOptions);
@@ -986,10 +1055,14 @@ class MediasoupSession {
     // Close transports
     try {
       this.sendTransport?.close();
-    } catch {}
+    } catch {
+      // ignore
+    }
     try {
       this.receiverTransport?.close();
-    } catch {}
+    } catch {
+      // ignore
+    }
     this.sendTransport = null;
     this.receiverTransport = null;
     this.produceChain = Promise.resolve();
@@ -1000,7 +1073,9 @@ class MediasoupSession {
       this.socket.onmessage = null;
       try {
         this.socket.close(1000, "teardown");
-      } catch {}
+      } catch {
+        // ignore
+      }
       this.socket = null;
     }
 
@@ -1009,35 +1084,47 @@ class MediasoupSession {
 
     try {
       this.cameraProducer?.close();
-    } catch {}
+    } catch {
+      // ignore
+    }
     this.cameraProducer = null;
     if (this.cameraTrack) {
       try {
         this.cameraTrack.stop();
-      } catch {}
+      } catch {
+        // ignore
+      }
       this.cameraTrack = null;
       this.localCameraStream = null;
     }
 
     try {
       this.screenAudioProducer?.close();
-    } catch {}
+    } catch {
+      // ignore
+    }
     this.screenAudioProducer = null;
     if (this.screenAudioTrack) {
       try {
         this.screenAudioTrack.stop();
-      } catch {}
+      } catch {
+        // ignore
+      }
       this.screenAudioTrack = null;
     }
 
     try {
       this.screenProducer?.close();
-    } catch {}
+    } catch {
+      // ignore
+    }
     this.screenProducer = null;
     if (this.screenTrack) {
       try {
         this.screenTrack.stop();
-      } catch {}
+      } catch {
+        // ignore
+      }
       this.screenTrack = null;
       this.localScreenStream = null;
     }
@@ -1046,7 +1133,9 @@ class MediasoupSession {
     for (const [, consumer] of this.consumersByProducerId) {
       try {
         consumer.close();
-      } catch {}
+      } catch {
+        // ignore
+      }
     }
     this.consumersByProducerId.clear();
 
@@ -1054,14 +1143,18 @@ class MediasoupSession {
     for (const [, sourceNode] of this.audioSourceNodes) {
       try {
         sourceNode.disconnect();
-      } catch {}
+      } catch {
+        // ignore
+      }
     }
     this.audioSourceNodes.clear();
 
     for (const [, gainNode] of this.audioGainNodes) {
       try {
         gainNode.disconnect();
-      } catch {}
+      } catch {
+        // ignore
+      }
     }
     this.audioGainNodes.clear();
 
@@ -1069,17 +1162,23 @@ class MediasoupSession {
       if (meta.element) {
         try {
           meta.element.pause();
-        } catch {}
+        } catch {
+          // ignore
+        }
         meta.element.srcObject = null;
 
         try {
           meta.element.remove();
-        } catch {}
+        } catch {
+          // ignore
+        }
       }
       for (const track of meta.stream.getTracks()) {
         try {
           track.stop();
-        } catch {}
+        } catch {
+          // ignore
+        }
       }
     }
     this.streamMetadata.clear();
@@ -1091,7 +1190,9 @@ class MediasoupSession {
 
     this.masterOutputGain = null;
     if (this.audioContext) {
-      void this.audioContext.close().catch(() => {});
+      void this.audioContext.close().catch(() => {
+        // ignore
+      });
       this.audioContext = null;
     }
   }
@@ -1151,7 +1252,9 @@ class MediasoupSession {
           noiseSuppression: true,
           autoGainControl: true
         });
-      } catch {}
+      } catch {
+        // ignore
+      }
     }
 
     this.micGainNode = processHandle.micGainNode;
@@ -1192,7 +1295,9 @@ class MediasoupSession {
       media.getTracks().forEach((t) => {
         try {
           t.stop();
-        } catch {}
+        } catch {
+          // ignore
+        }
       });
       this.rawMicTrack = null;
       this.micTrack = null;
@@ -1282,16 +1387,22 @@ class MediasoupSession {
 
     try {
       detector.sourceNode.disconnect();
-    } catch {}
+    } catch {
+      // ignore
+    }
 
     try {
       detector.analyser.disconnect();
-    } catch {}
+    } catch {
+      // ignore
+    }
 
     for (const track of detector.vadStream.getAudioTracks()) {
       try {
         track.stop();
-      } catch {}
+      } catch {
+        // ignore
+      }
     }
 
     if (detector.speaking) {
@@ -1409,7 +1520,9 @@ class MediasoupSession {
     if (consumer) {
       try {
         consumer.close();
-      } catch {}
+      } catch {
+        // ignore
+      }
       this.consumersByProducerId.delete(producerId);
     }
 
@@ -1417,7 +1530,9 @@ class MediasoupSession {
     if (sourceNode) {
       try {
         sourceNode.disconnect();
-      } catch {}
+      } catch {
+        // ignore
+      }
       this.audioSourceNodes.delete(producerId);
     }
 
@@ -1425,7 +1540,9 @@ class MediasoupSession {
     if (gainNode) {
       try {
         gainNode.disconnect();
-      } catch {}
+      } catch {
+        // ignore
+      }
       this.audioGainNodes.delete(producerId);
     }
 
@@ -1455,16 +1572,22 @@ class MediasoupSession {
       if (meta.element) {
         try {
           meta.element.pause();
-        } catch {}
+        } catch {
+          // ignore
+        }
         meta.element.srcObject = null;
         try {
           meta.element.remove();
-        } catch {}
+        } catch {
+          // ignore
+        }
       }
       for (const track of meta.stream.getTracks()) {
         try {
           track.stop();
-        } catch {}
+        } catch {
+          // ignore
+        }
       }
       this.streamMetadata.delete(producerId);
     }
@@ -1478,7 +1601,9 @@ class MediasoupSession {
       if (this.audioContext?.state === "suspended") {
         try {
           await this.audioContext.resume();
-        } catch {}
+        } catch {
+          // ignore
+        }
       }
       try {
         await element.play();
@@ -1509,7 +1634,9 @@ class MediasoupSession {
         ws.onclose = (ev: CloseEvent) => {
           try {
             this.onSocketClosed?.(ev);
-          } catch {}
+          } catch {
+            // ignore
+          }
         };
         resolve(ws);
       };
@@ -1521,7 +1648,9 @@ class MediasoupSession {
           ws.onerror = null;
           try {
             ws.close(1000, "superseded");
-          } catch {}
+          } catch {
+            // ignore
+          }
           reject(new Error("Voice disconnected"));
         },
         { once: true }
@@ -1556,7 +1685,9 @@ class MediasoupSession {
     if (signal.aborted) {
       try {
         consumer.close();
-      } catch {}
+      } catch {
+        // ignore
+      }
       return;
     }
 
@@ -1577,7 +1708,7 @@ class MediasoupSession {
       if (kind === "audio") this.startSpeakingDetection(stream, userId);
 
       if (consumer.kind === "video") {
-        const video = document.createElement("video") as HTMLVideoElement;
+        const video = document.createElement("video");
         video.autoplay = true;
         video.playsInline = true;
         video.style.display = "none";
@@ -1623,7 +1754,7 @@ class MediasoupSession {
           }
         }
 
-        const audio = document.createElement("audio") as HTMLAudioElement;
+        const audio = document.createElement("audio");
         audio.autoplay = true;
         audio.style.display = "none";
         document.body.appendChild(audio);
@@ -2011,7 +2142,9 @@ export class VoiceStore {
           try {
             this.abortAndTeardown();
             this.stopKeepAlive();
-          } catch {}
+          } catch {
+            // ignore
+          }
           return;
         }
 
@@ -2037,7 +2170,8 @@ export class VoiceStore {
           this.connectionStatus === "connected" &&
           !!target &&
           this.app.isGatewayReady &&
-          (target.spaceId != null || !!this.app.calls.getCall(target.channelId));
+          (target.spaceId != null ||
+            !!this.app.calls.getCall(target.channelId));
 
         runInAction(() => {
           this.connectionError = canAutoRejoin ? null : reason;
@@ -2076,7 +2210,9 @@ export class VoiceStore {
           if (!canAutoRejoin) {
             this.clearLocalVoiceStateForMe();
           }
-        } catch {}
+        } catch {
+          // ignore
+        }
 
         if (canAutoRejoin && target) {
           void this.reconnectVoice();
@@ -2512,8 +2648,8 @@ export class VoiceStore {
           channelId: null,
           selfMute: this.selfMute,
           selfDeaf: this.selfDeaf,
-          client: isElectron ? "desktop" : "web",
-        },
+          client: isElectron ? "desktop" : "web"
+        }
       });
       this.app.voiceStates.remove(selfId!);
       return;
@@ -2524,7 +2660,9 @@ export class VoiceStore {
     if (selfState?.client === "minecraft" && selfState.channelId) {
       try {
         this.abortAndTeardown();
-      } catch {}
+      } catch {
+        // ignore
+      }
       this.stopKeepAlive();
       this.clearJoinTimeout();
       runInAction(() => {
@@ -2623,7 +2761,7 @@ export class VoiceStore {
 
   private playRemoteVoiceMemberSound(
     userId: string,
-    nextChannelId: string | null,
+    nextChannelId: string | null
   ) {
     const accountId = this.app.account?.id;
     if (!accountId || userId === accountId) return;
@@ -2634,8 +2772,7 @@ export class VoiceStore {
 
     const existing = this.app.voiceStates.get(userId);
     const wasInMine =
-      !!existing?.channelId &&
-      String(existing.channelId) === String(myChannel);
+      !!existing?.channelId && String(existing.channelId) === String(myChannel);
     const nowInMine =
       !!nextChannelId && String(nextChannelId) === String(myChannel);
 
@@ -2952,7 +3089,7 @@ export class VoiceStore {
     this.session.unlockAudio();
     void warmRnnoiseAssets();
     this.joinPrepPromise = this.setupTracks(true)
-      .then(() => undefined)
+      .then(() => null)
       .catch((err) => {
         this.logger.warn("join device prep failed", err);
       });
@@ -3014,7 +3151,7 @@ export class VoiceStore {
       this.disconnectBanner = null;
       this.currentVoiceTarget = {
         spaceId: target.spaceId ?? null,
-        channelId: target.channelId,
+        channelId: target.channelId
       };
       this.connectionStatus = "connecting";
       this.connectionError = null;
@@ -3035,9 +3172,7 @@ export class VoiceStore {
     if (target != null && target.spaceId == null) {
       const channelId = target.channelId;
       const call = this.app.calls.getCall(channelId);
-      const selfId = this.app.account?.id
-        ? String(this.app.account.id)
-        : null;
+      const selfId = this.app.account?.id ? String(this.app.account.id) : null;
       const othersInVoice = this.app.voiceStates
         .getAllByChannel(channelId)
         .filter((state) => !selfId || String(state.userId) !== selfId);
@@ -3369,7 +3504,9 @@ export class VoiceStore {
       this.app.sounds.play("stream_start");
     } catch (err) {
       this.logger.warn("startScreenShare failed", err);
-      void this.session.stopScreenShare().catch(() => {});
+      void this.session.stopScreenShare().catch(() => {
+        // ignore
+      });
       runInAction(() => {
         this.screenShareEnabled = false;
         this.screenShareStarting = false;
@@ -3474,14 +3611,18 @@ export class VoiceStore {
       if (requestPermissions && !devices.some((d) => !!d.label)) {
         try {
           const tmp = await navigator.mediaDevices.getUserMedia({
-            audio: true,
+            audio: true
           });
           tmp.getTracks().forEach((t) => {
             try {
               t.stop();
-            } catch {}
+            } catch {
+              // ignore
+            }
           });
-        } catch {}
+        } catch {
+          // ignore
+        }
         devices = (await navigator.mediaDevices.enumerateDevices()).filter(
           (d) => d.deviceId !== ""
         );

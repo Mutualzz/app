@@ -16,8 +16,8 @@ import type { AppStore } from "@stores/App.store";
 import { action, makeObservable, observable } from "mobx";
 import { MessageBase } from "./MessageBase";
 import type { QueuedMessage, QueuedMessageData } from "./QueuedMessage";
-import { BitField, messageFlags, MessageFlags } from "@mutualzz/bitfield";
-import { Expression } from "@stores/objects/Expression";
+import { BitField, messageFlags, type MessageFlags } from "@mutualzz/bitfield";
+import { type Expression } from "@stores/objects/Expression";
 import {
   applyReactionAdd,
   applyReactionRemove,
@@ -44,6 +44,7 @@ export class Message extends MessageBase {
   reactions: APIMessageReaction[] = [];
 
   edited: boolean;
+  pinned: boolean;
 
   // We store this value to allow users edit their messages
   editing = false;
@@ -60,6 +61,7 @@ export class Message extends MessageBase {
     this.updatedAt = data.updatedAt ? new Date(data.updatedAt) : null;
     this.nonce = data.nonce;
     this.edited = data.edited ?? false;
+    this.pinned = data.pinned ?? false;
 
     this.mentions = data.mentions ?? [];
 
@@ -88,6 +90,7 @@ export class Message extends MessageBase {
       expressions: observable,
       reactions: observable.shallow,
       edited: observable,
+      pinned: observable,
       editing: observable,
       update: action.bound,
       setEditing: action.bound,
@@ -127,6 +130,8 @@ export class Message extends MessageBase {
     this.updatedAt = message.updatedAt ? new Date(message.updatedAt) : null;
 
     this.edited = message.edited ?? this.edited;
+    this.pinned = message.pinned ?? this.pinned;
+    this.type = message.type ?? this.type;
   }
 
   setEditing(value: boolean) {

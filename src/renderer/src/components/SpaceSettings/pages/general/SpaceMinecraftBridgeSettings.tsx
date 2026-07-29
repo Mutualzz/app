@@ -200,16 +200,16 @@ export const SpaceMinecraftBridgeSettings = observer(({ spaceId }: { spaceId: st
     Record<string, string>
   >({});
 
-  type DiscordStatus = {
+  interface DiscordStatus {
     botInviteUrl: string | null;
-  };
+  }
 
   const bridgesQuery = useQuery({
     queryKey: ["space", spaceId, "bridge", "list"],
     queryFn: async () => {
       try {
         const detail = await app.rest.get<BridgeDetail>(spaceBridgePath);
-        return [detail as BridgeSummary];
+        return [detail];
       } catch {
         return [] as BridgeSummary[];
       }

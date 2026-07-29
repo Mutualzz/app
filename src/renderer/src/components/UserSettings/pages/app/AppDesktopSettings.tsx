@@ -25,13 +25,12 @@ export const AppDesktopSettings = observer(() => {
     void window.api.desktop.getAutostart().then(setLaunchAtLogin);
   }, []);
 
+  useEffect(() => {
+    if (!settings?.autoCheckUpdates) return;
+    void app.updater?.startAutoChecker();
+  }, [app, settings?.autoCheckUpdates]);
+
   if (!settings || !isElectron) return null;
-
-  const extended = settings.extendedSettings;
-
-  const patch = (patch: Partial<typeof extended>) => {
-    settings.patchExtendedSettings(patch);
-  };
 
   const handleLaunchAtLogin = (checked: boolean) => {
     setLaunchAtLogin(checked);
@@ -41,7 +40,7 @@ export const AppDesktopSettings = observer(() => {
   };
 
   const handleAutoCheckUpdates = (checked: boolean) => {
-    patch({ autoCheckUpdates: checked });
+    settings.setAutoCheckUpdates(checked);
     if (checked) {
       void app.updater?.startAutoChecker();
     } else {
@@ -137,15 +136,15 @@ export const AppDesktopSettings = observer(() => {
         <SettingsToggleRow
           title={t("desktop.autoCheckUpdates")}
           description={t("desktop.autoCheckUpdatesDescription")}
-          checked={extended.autoCheckUpdates}
+          checked={settings.autoCheckUpdates}
           onChange={handleAutoCheckUpdates}
         />
 
         <SettingsToggleRow
           title={t("desktop.shareRpcPresence")}
           description={t("desktop.shareRpcPresenceDescription")}
-          checked={extended.shareRpcPresence}
-          onChange={(checked) => patch({ shareRpcPresence: checked })}
+          checked={settings.shareRpcPresence}
+          onChange={(checked) => settings.setShareRpcPresence(checked)}
         />
       </SettingsSection>
     </Stack>

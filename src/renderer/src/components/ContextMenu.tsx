@@ -4,7 +4,7 @@ import { forwardRef } from "react";
 import { useTheme } from "@mutualzz/ui-web";
 
 export const ContextMenu = forwardRef<HTMLDivElement, MenuProps>(
-  ({ textColor, ...props }, ref) => {
+  ({ textColor, surfaceRole = "menu", ...props }, ref) => {
     const app = useAppStore();
     const { theme } = useTheme();
 
@@ -12,7 +12,7 @@ export const ContextMenu = forwardRef<HTMLDivElement, MenuProps>(
       <Menu
         variant={app.settings?.preferEmbossed ? "elevation" : "outlined"}
         elevation={props.variant === "soft" ? 0 : props.elevation}
-        transparency={app.settings?.preferEmbossed ? 90 : props.transparency}
+        surfaceRole={surfaceRole}
         textColor={textColor ?? theme.typography.colors.primary}
         {...props}
         ref={ref}

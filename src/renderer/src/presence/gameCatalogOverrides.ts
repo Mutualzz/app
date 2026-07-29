@@ -1,11 +1,11 @@
 import type { GameArgMatcher, GameCatalogEntry } from "./gameCatalog.types";
 
-export type GameCatalogOverride = {
+export interface GameCatalogOverride {
   matchExes: string[];
   name?: string;
   exes?: string[];
   argMatchers?: GameArgMatcher[];
-};
+}
 
 export const GAME_CATALOG_OVERRIDES: GameCatalogOverride[] = [
   {

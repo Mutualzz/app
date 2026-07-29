@@ -17,7 +17,6 @@ const PaperComponent = forwardRef<HTMLDivElement, PaperProps>(
               : "outlined"
         }
         elevation={props.variant === "soft" ? 0 : props.elevation}
-        transparency={app.settings?.preferEmbossed ? 90 : props.transparency}
         color={color}
         {...props}
         ref={ref}

@@ -13,6 +13,7 @@ import {
 } from "@phosphor-icons/react";
 import { navigateToMode } from "@utils/index";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
+import { modeKeyFromPath } from "@mutualzz/types";
 import { observer } from "mobx-react-lite";
 import { useTranslation } from "react-i18next";
 
@@ -29,10 +30,8 @@ export const FeedSidebar = observer(() => {
   const onFeedFriends = pathname.startsWith("/feed/friends");
   const onFeedSaved = pathname.startsWith("/feed/saved");
 
-  const chatMode =
-    app.settings?.preferredMode === "feed" || !app.settings?.preferredMode
-      ? "@me"
-      : app.settings.preferredMode;
+  const lastMode = modeKeyFromPath(app.navigation.lastRoute ?? "");
+  const chatMode = lastMode === "spaces" ? "spaces" : "@me";
 
   const chatLabel =
     chatMode === "@me"

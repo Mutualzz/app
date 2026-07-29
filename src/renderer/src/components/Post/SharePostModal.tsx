@@ -82,7 +82,7 @@ export const SharePostModal = observer(({ post }: Props) => {
     try {
       await action();
       setSentTo((prev) => new Set(prev).add(key));
-      if (!post.shared) post.toggleShare().catch(() => {});
+      if (!post.shared) post.toggleShare().catch(() => { return; });
     } finally {
       sendingKeysRef.current.delete(key);
       setSendingTo(new Set(sendingKeysRef.current));
@@ -129,6 +129,7 @@ export const SharePostModal = observer(({ post }: Props) => {
 
   return (
     <Paper
+          surfaceRole="modal"
       direction="column"
       p={3}
       spacing={3}
@@ -166,7 +167,7 @@ export const SharePostModal = observer(({ post }: Props) => {
               sent={sentTo.has(channel.id)}
               sending={sendingTo.has(channel.id)}
               onSend={() => {
-                sendToChannel(channel, channel.id).catch(() => {});
+                sendToChannel(channel, channel.id).catch(() => { return; });
               }}
             />
           );
@@ -184,7 +185,7 @@ export const SharePostModal = observer(({ post }: Props) => {
             sent={sentTo.has(`friend:${friend.id}`)}
             sending={sendingTo.has(`friend:${friend.id}`)}
             onSend={() => {
-              sendToFriend(friend).catch(() => {});
+              sendToFriend(friend).catch(() => { return; });
             }}
           />
         ))}

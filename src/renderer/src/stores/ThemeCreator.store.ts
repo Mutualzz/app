@@ -255,7 +255,7 @@ export class ThemeCreatorStore {
       this.values.typography.fontFamily;
 
     void ensureAppFont(fontFamily, ownerUserId ?? this.values.authorId)
-      .catch(() => undefined)
+      .catch(() => { return; })
       .finally(() => {
         this.applyPreview();
       });

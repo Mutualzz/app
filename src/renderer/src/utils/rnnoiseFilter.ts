@@ -6,13 +6,13 @@ const RNNOISE_SAMPLE_RATE = 48000;
 const RNNOISE_WET = 0.82;
 const RNNOISE_DRY = 0.18;
 
-export type MicProcessHandle = {
+export interface MicProcessHandle {
   processedTrack: MediaStreamTrack;
   micGainNode: GainNode;
   audioContext: AudioContext;
   dispose: () => void;
   usedRnnoise: boolean;
-};
+}
 
 let assetsPromise: Promise<ReturnType<typeof rnnoise_loadAssets>> | null =
   null;
@@ -41,8 +41,8 @@ async function loadRnnoiseAssets() {
 export function warmRnnoiseAssets(): Promise<void> {
   try {
     return loadRnnoiseAssets().then(
-      () => undefined,
-      () => undefined
+      () => null,
+      () => null
     );
   } catch {
     return Promise.resolve();
@@ -114,19 +114,29 @@ export async function createMicProcessedTrack(
   if (!processedTrack) {
     try {
       source.disconnect();
-    } catch {}
+    } catch {
+    // ignore
+}
     try {
       rnnoise?.disconnect();
-    } catch {}
+    } catch {
+    // ignore
+}
     try {
       wetGain?.disconnect();
-    } catch {}
+    } catch {
+    // ignore
+}
     try {
       dryGain?.disconnect();
-    } catch {}
+    } catch {
+    // ignore
+}
     try {
       micGain.disconnect();
-    } catch {}
+    } catch {
+    // ignore
+}
     throw new Error("Mic processing destination produced no audio track");
   }
 
@@ -138,22 +148,34 @@ export async function createMicProcessedTrack(
     dispose: () => {
       try {
         source.disconnect();
-      } catch {}
+      } catch {
+    // ignore
+}
       try {
         rnnoise?.disconnect();
-      } catch {}
+      } catch {
+    // ignore
+}
       try {
         wetGain?.disconnect();
-      } catch {}
+      } catch {
+    // ignore
+}
       try {
         dryGain?.disconnect();
-      } catch {}
+      } catch {
+    // ignore
+}
       try {
         micGain.disconnect();
-      } catch {}
+      } catch {
+    // ignore
+}
       try {
         processedTrack.stop();
-      } catch {}
+      } catch {
+    // ignore
+}
     }
   };
 }
@@ -184,7 +206,9 @@ export async function createRnnoiseFilteredTrack(
     return {
       processedTrack: rawTrack,
       usedRnnoise: false,
-      dispose: () => {}
+      dispose() {
+        return;
+      },
     };
   }
 }

@@ -33,14 +33,14 @@ const UI_DENSITY_GROUP_GAP_CSS: Record<
   spacious: { groupGap: "0.875rem" },
 };
 
-export type MessageLayoutStyles = {
+export interface MessageLayoutStyles {
   paddingY: string;
   headerMarginTop: string;
   groupGap: string;
   paddingYNative: number;
   headerMarginTopNative: number;
   groupGapNative: number;
-};
+}
 
 export { getMessageGroupGapMs, shouldShowMessageAvatar };
 

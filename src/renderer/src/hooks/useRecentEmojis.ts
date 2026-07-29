@@ -27,13 +27,17 @@ function loadRecent(): RecentEmoji[] {
 function saveRecent(recents: RecentEmoji[]) {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(recents));
-  } catch {}
+  } catch {
+    // ignore
+}
 }
 
 export function clearRecentEmojisStorage() {
   try {
     localStorage.removeItem(STORAGE_KEY);
-  } catch {}
+  } catch {
+    // ignore
+}
 }
 
 export function useRecentEmojis() {

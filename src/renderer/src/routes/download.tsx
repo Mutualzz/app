@@ -15,23 +15,20 @@ function DownloadAndRedirect() {
   const fileUrl = detectDownloadURL();
 
   useEffect(() => {
-    if (fileUrl && !isElectron) {
-      const a = document.createElement("a");
-      a.href = fileUrl;
-      a.download = "";
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
+    if (!fileUrl || isElectron) return;
 
-      // Add a short delay before navigating
-      const timeout = setTimeout(() => {
-        navigate({ to: "/", replace: true });
-      }, 300);
+    const a = document.createElement("a");
+    a.href = fileUrl;
+    a.download = "";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
 
-      return () => clearTimeout(timeout);
-    }
+    const timeout = setTimeout(() => {
+      navigate({ to: "/", replace: true });
+    }, 300);
 
-    return () => {};
+    return () => clearTimeout(timeout);
   }, [fileUrl, navigate]);
 
   if (isElectron) return <Navigate to="/" replace />;

@@ -7,12 +7,12 @@ import styled from "@emotion/styled";
 import { StarIcon } from "@phosphor-icons/react";
 import { useTranslation } from "react-i18next";
 
-type Props = {
+interface Props {
   id: string;
   name: string;
   url: string;
   animated: boolean;
-};
+}
 
 const PreviewImg = styled("img")({
   width: 48,

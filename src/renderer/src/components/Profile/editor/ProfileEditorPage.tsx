@@ -46,7 +46,7 @@ import {
 } from "@dnd-kit/core";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useCanGoBack, useNavigate, useRouter } from "@tanstack/react-router";
-import { navigateToPreferredMode } from "@utils/index";
+import { navigateToResumeRoute } from "@utils/index";
 import { observer } from "mobx-react-lite";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -138,7 +138,7 @@ export const ProfileEditorPage = observer(() => {
 
   const leaveEditor = useCallback(() => {
     if (canGoBack) router.history.back();
-    else navigateToPreferredMode(app, navigate);
+    else navigateToResumeRoute(app, navigate);
   }, [canGoBack, router, app, navigate]);
 
   const handleBack = useCallback(() => {

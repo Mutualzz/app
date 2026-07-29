@@ -23,6 +23,7 @@ import { AppPrivacySettings } from "@components/UserSettings/pages/app/AppPrivac
 import { AppDesktopSettings } from "@components/UserSettings/pages/app/AppDesktopSettings";
 import { AppKeybindsSettings } from "@components/UserSettings/pages/app/AppKeybindsSettings";
 import { UserExpressionsSettings } from "@components/UserSettings/pages/user/expressions/UserExpressionsSettings";
+import { DiscordImportSettings } from "@components/UserSettings/pages/user/DiscordImportSettings";
 import { UserSessionsSettings } from "@components/UserSettings/pages/user/UserSessionsSettings";
 import { XIcon } from "@phosphor-icons/react";
 
@@ -126,6 +127,7 @@ export const UserSettingsContent = observer(
           {currentPage === "keybinds" && <AppKeybindsSettings />}
           {currentPage === "registered-games" && <AppRegisteredGamesSettings />}
           {currentPage === "connections" && <AppConnectionsSettings />}
+          {currentPage === "discord-import" && <DiscordImportSettings />}
         </Paper>
       </Stack>
     );

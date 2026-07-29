@@ -15,7 +15,7 @@ import { UsernameChange } from "@components/Modals/UsernameChange";
 import { DeleteAccount } from "@components/Modals/DeleteAccount";
 import { SettingsActionRow } from "@components/UserSettings/SettingsField";
 import { useNavigate } from "@tanstack/react-router";
-import { ColorLike } from "@mutualzz/ui-core";
+import { type ColorLike } from "@mutualzz/ui-core";
 import { useTranslation } from "react-i18next";
 
 export const UserAccountSettings = observer(() => {
@@ -65,7 +65,7 @@ export const UserAccountSettings = observer(() => {
   const maskedEmail = maskEmail(account.email ?? "");
 
   return (
-    <Stack mx={20} direction="column" flex={1}>
+    <Stack mx={20} direction="column" flex={1} spacing={2.5}>
       <Paper my={10} direction="column" borderRadius={8}>
         <Paper
           position="relative"
@@ -106,9 +106,7 @@ export const UserAccountSettings = observer(() => {
               title={t("account.username")}
               description={account.username}
               actionLabel={t("account.edit")}
-              onClick={() =>
-                openModal("change-username", <UsernameChange />)
-              }
+              onClick={() => openModal("change-username", <UsernameChange />)}
             />
             <SettingsActionRow
               title={t("account.email")}

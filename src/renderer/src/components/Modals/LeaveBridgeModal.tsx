@@ -25,7 +25,7 @@ export const LeaveBridgeModal = observer(
       mutationFn: () =>
         app.rest.delete(`/@me/bridges/${bridgeId}/members/@me`),
       onSuccess: () => {
-        queryClient.setQueryData<Array<{ id: string }>>(
+        queryClient.setQueryData<{ id: string }[]>(
           ["me", "bridges"],
           (prev) => (prev ?? []).filter((b) => b.id !== bridgeId),
         );
@@ -39,6 +39,7 @@ export const LeaveBridgeModal = observer(
 
     return (
       <Paper
+          surfaceRole="modal"
         elevation={app.settings?.preferEmbossed ? 5 : 1}
         p={5}
         borderRadius={12}

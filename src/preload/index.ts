@@ -108,9 +108,8 @@ const api = {
       ipcRenderer.invoke("updater:get-version"),
     getPlatform: (): Promise<string> =>
       ipcRenderer.invoke("updater:get-platform"),
-    getLinuxPackage: (): Promise<
-      "appimage" | "debian" | "rpm" | "pacman"
-    > => ipcRenderer.invoke("updater:get-linux-package"),
+    getLinuxPackage: (): Promise<"appimage" | "debian" | "rpm" | "pacman"> =>
+      ipcRenderer.invoke("updater:get-linux-package"),
     getElectronVersion: (): Promise<string | null> =>
       ipcRenderer.invoke("updater:get-electron-version"),
     getUpdaterVersion: (): Promise<string | null> =>
@@ -191,8 +190,8 @@ if (process.contextIsolated) {
     console.error(error);
   }
 } else {
-  // @ts-ignore
+  // @ts-expect-error preload fallback for non-isolated context
   window.electron = electronBridge;
-  // @ts-ignore
+  // @ts-expect-error preload fallback for non-isolated context
   window.api = api;
 }

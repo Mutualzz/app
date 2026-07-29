@@ -3,7 +3,7 @@ import type { SpotifyConnectionDto } from "@mutualzz/client";
 
 export type { SpotifyConnectionDto };
 
-export type SpotifyCurrentlyPlayingDto = {
+export interface SpotifyCurrentlyPlayingDto {
   name: "Spotify";
   details: string;
   state: string;
@@ -18,7 +18,7 @@ export type SpotifyCurrentlyPlayingDto = {
   durationMs: number;
   trackUrl?: string;
   spotifyUri?: string;
-};
+}
 
 const CONNECTION_TTL_MS = 60_000;
 
@@ -78,7 +78,7 @@ export async function loadSpotifyActivity(
   try {
     const connection = await getCachedConnection(rest);
     if (!connection.connected) return null;
-    if (connection.shareSpotify === false) return null;
+    if (!connection.shareSpotify) return null;
 
     const playing = await rest.get<SpotifyCurrentlyPlayingDto | null>(
       "/@me/spotify/currently-playing"

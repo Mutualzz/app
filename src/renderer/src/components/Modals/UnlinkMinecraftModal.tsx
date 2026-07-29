@@ -31,6 +31,7 @@ export const UnlinkMinecraftModal = observer(
 
     return (
       <Paper
+          surfaceRole="modal"
         elevation={app.settings?.preferEmbossed ? 5 : 1}
         p={5}
         borderRadius={12}

@@ -16,8 +16,7 @@ interface Props {
 export const MessageGroup = observer(({ group }: Props) => {
   const app = useAppStore();
   const { messages } = group;
-  const extended = app.settings?.extendedSettings;
-  const messageDisplay = extended?.messageDisplay ?? "default";
+  const messageDisplay = app.settings?.messageDisplay ?? "default";
   const compact = messageDisplay === "compact";
 
   return (

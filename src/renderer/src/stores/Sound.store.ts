@@ -108,7 +108,7 @@ export class SoundStore {
   unlockContext: AudioContext | null = null;
   private unlocked = false;
   private gestureBound = false;
-  readonly disposers: Array<() => void> = [];
+  readonly disposers: (() => void)[] = [];
 
   constructor(private readonly app: AppStore) {
     makeAutoObservable(
@@ -220,7 +220,7 @@ export class SoundStore {
   }
 
   isToggleEnabled(id: SoundToggleId) {
-    return this.toggles[id] !== false;
+    return this.toggles[id];
   }
 
   private canPlay(id: AppSound) {
@@ -323,7 +323,9 @@ export class SoundStore {
       this.activeOneShots.delete(audio);
       try {
         audio.pause();
-      } catch {}
+      } catch {
+    // ignore
+}
     };
 
     audio.addEventListener("ended", release, { once: true });
@@ -344,7 +346,9 @@ export class SoundStore {
         if (name !== "AbortError") {
           try {
             audio.pause();
-          } catch {}
+          } catch {
+    // ignore
+}
         }
         if (name === "NotAllowedError" && !this.unlocked) {
           this.unlock();
@@ -371,7 +375,9 @@ export class SoundStore {
     audio.loop = true;
     try {
       audio.currentTime = 0;
-    } catch {}
+    } catch {
+    // ignore
+}
 
     const playResult = audio.play();
     if (!playResult || typeof playResult.then !== "function") return;
@@ -382,7 +388,9 @@ export class SoundStore {
         if (this.loopGeneration !== generation || this.looping !== id) {
           try {
             audio.pause();
-          } catch {}
+          } catch {
+    // ignore
+}
           audio.loop = false;
         }
       },
@@ -408,7 +416,9 @@ export class SoundStore {
       audio.loop = false;
       try {
         audio.pause();
-      } catch {}
+      } catch {
+    // ignore
+}
     }
   }
 
@@ -417,7 +427,9 @@ export class SoundStore {
       this.activeOneShots.delete(audio);
       try {
         audio.pause();
-      } catch {}
+      } catch {
+    // ignore
+}
     }
   }
 
@@ -433,11 +445,13 @@ export class SoundStore {
     for (const audio of this.loopElements.values()) {
       try {
         audio.pause();
-      } catch {}
+      } catch {
+    // ignore
+}
     }
     this.loopElements.clear();
     if (this.unlockContext) {
-      void this.unlockContext.close().catch(() => undefined);
+      void this.unlockContext.close().catch(() => { return; });
       this.unlockContext = null;
     }
   }

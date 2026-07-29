@@ -13,10 +13,10 @@ import {
 import { findCustomGameById, findCustomGameByName } from "@renderer/presence/customGameCatalog";
 import { PresenceIcon } from "./PresenceIcon";
 
-type GameIconResponse = {
+interface GameIconResponse {
   iconImageId: string;
   iconUrl: string;
-};
+}
 
 export const ActivityIcon = observer(function ActivityIcon({
   activity,

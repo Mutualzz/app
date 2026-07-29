@@ -12,7 +12,7 @@ import {
   useTheme
 } from "@mutualzz/ui-web";
 import { IconButton } from "@components/IconButton";
-import { Invite } from "@stores/objects/Invite";
+import { type Invite } from "@stores/objects/Invite";
 import type { Space } from "@stores/objects/Space";
 import type { Channel } from "@stores/objects/Channel";
 import dayjs from "dayjs";

@@ -4,7 +4,7 @@ import { useAppStore } from "@hooks/useStores";
 import { Stack, Typography } from "@mutualzz/ui-web";
 import { ArrowLeftIcon, XIcon } from "@phosphor-icons/react";
 import { useNavigate } from "@tanstack/react-router";
-import { navigateToPreferredMode } from "@utils/index";
+import { navigateToResumeRoute } from "@utils/index";
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -31,7 +31,7 @@ export function SupportHeader({
 
   const handleExit = () => {
     if (app.token) {
-      navigateToPreferredMode(app, navigate);
+      navigateToResumeRoute(app, navigate);
       return;
     }
 

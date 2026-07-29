@@ -162,7 +162,7 @@ export const BridgeChatView = observer(({ bridgeId }: Props) => {
 
       void app.rest
         .post(`/@me/bridges/${bridgeId}/ack`, { lastAckedId: last.id })
-        .catch(() => undefined);
+        .catch(() => { return; });
     }, 750);
 
     return () => {

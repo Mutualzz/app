@@ -185,7 +185,7 @@ export const ChannelListItem = observer(
             active && theme.backgroundImageUrl ? "card" : undefined
           }
           color={
-            active ? theme.typography.colors.primary : (props.color as any)
+            active ? theme.typography.colors.primary : (props.color)
           }
           css={{
             ...(channelDragHandle && { cursor: "grab" }),

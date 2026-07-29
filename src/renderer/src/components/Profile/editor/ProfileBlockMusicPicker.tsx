@@ -129,7 +129,7 @@ export const ProfileBlockMusicPicker = observer(({ block, updateBlock }: Props) 
   });
 
   const clearTrack = () => {
-    updateBlock({ track: null } as Partial<APIProfileBlock>);
+    updateBlock({ track: null });
     setQuery("");
     setDebouncedQuery("");
   };
@@ -143,7 +143,7 @@ export const ProfileBlockMusicPicker = observer(({ block, updateBlock }: Props) 
       image: null,
       previewUrl: null,
       trackUrl: null
-    } as Partial<APIProfileBlock>);
+    });
     setQuery("");
     setDebouncedQuery("");
   };

@@ -13,7 +13,7 @@ import {
   useTheme
 } from "@mutualzz/ui-web";
 import { IconButton } from "@components/IconButton";
-import { Invite } from "@stores/objects/Invite";
+import { type Invite } from "@stores/objects/Invite";
 import type { Space } from "@stores/objects/Space";
 import dayjs from "dayjs";
 import { observer } from "mobx-react-lite";

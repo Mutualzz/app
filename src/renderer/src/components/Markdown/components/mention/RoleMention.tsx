@@ -1,10 +1,10 @@
 import { observer } from "mobx-react-lite";
-import { ReactNode } from "react";
-import { Snowflake } from "@mutualzz/types";
-import { RenderElementProps } from "slate-react";
+import { type ReactNode } from "react";
+import { type Snowflake } from "@mutualzz/types";
+import { type RenderElementProps } from "slate-react";
 import { Stack, Typography } from "@mutualzz/ui-web";
 import { useAppStore } from "@hooks/useStores";
-import { ColorLike } from "@mutualzz/ui-core";
+import { type ColorLike } from "@mutualzz/ui-core";
 
 interface Props {
   roleId: Snowflake;

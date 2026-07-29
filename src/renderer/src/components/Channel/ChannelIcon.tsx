@@ -1,7 +1,7 @@
 import { ChannelType } from "@mutualzz/types";
 import {
   HashIcon,
-  IconProps,
+  type IconProps,
   SpeakerSimpleHighIcon,
   WaveformIcon
 } from "@phosphor-icons/react";

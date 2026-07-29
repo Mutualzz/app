@@ -5,7 +5,7 @@ import { Button, Stack, Typography } from "@mutualzz/ui-web";
 import { InputWithLabel } from "@components/InputWithLabel";
 import { useState } from "react";
 import { useModal } from "@contexts/Modal.context";
-import { HttpException } from "@mutualzz/types";
+import { type HttpException } from "@mutualzz/types";
 import { useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 

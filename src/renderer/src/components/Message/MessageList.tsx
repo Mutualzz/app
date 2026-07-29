@@ -1,6 +1,6 @@
 import { Paper } from "@components/Paper";
 import { Logger } from "@mutualzz/logger";
-import { Avatar, Stack, Typography } from "@mutualzz/ui-web";
+import { Avatar, Stack, Typography, useTheme } from "@mutualzz/ui-web";
 import type { MessageGroup as MessageGroupType } from "@stores/Message.store";
 import type { Channel } from "@stores/objects/Channel";
 import { useInfiniteQuery, useMutation } from "@tanstack/react-query";
@@ -8,7 +8,7 @@ import { observer } from "mobx-react-lite";
 import {
   createContext,
   Fragment,
-  UIEvent,
+  type UIEvent,
   useCallback,
   useEffect,
   useRef
@@ -23,6 +23,7 @@ import { UserAvatar } from "@components/User/UserAvatar";
 import { DMGroupAvatar } from "@components/DMChannel/DMGroupAvatar";
 import { HashIcon } from "@phosphor-icons/react";
 import { useTranslation } from "react-i18next";
+import { jumpToChannelMessage } from "@utils/jumpToChannelMessage";
 
 interface Props {
   channel?: Channel | null;
@@ -120,6 +121,7 @@ const DMEndMessage = ({
 
 export const MessageList = observer(({ channel: channelProp }: Props) => {
   const app = useAppStore();
+  const { theme } = useTheme();
   const ref = useRef<HTMLDivElement>(null);
   const { width } = useResizeObserver<HTMLDivElement>({ ref: ref.current });
   const logger = new Logger({ tag: "MessageList" });
@@ -136,7 +138,7 @@ export const MessageList = observer(({ channel: channelProp }: Props) => {
     ? true
     : (() => {
         const me = channel?.space?.members.me;
-        return me?.hasPermission("ReadMessageHistory", channel!) ?? false;
+        return me?.hasPermission("ReadMessageHistory", channel) ?? false;
       })();
 
   const rawGroups = channel?.messages.groups;
@@ -220,6 +222,15 @@ export const MessageList = observer(({ channel: channelProp }: Props) => {
     if (!channel?.id) return;
     ackLatest();
   }, [channel?.id, channel?.messages.groups, ackLatest]);
+
+  useEffect(() => {
+    const request = app.jumpToMessage;
+    if (!request || request.channelId !== channel?.id) return;
+
+    void jumpToChannelMessage(channel, request.messageId, theme).then((success) => {
+      if (success) app.clearJumpToMessage();
+    });
+  }, [app, app.jumpToMessage, channel, theme]);
 
   const onScroll = useCallback((e: UIEvent<HTMLDivElement>) => {
     const el = e.currentTarget;

@@ -2,10 +2,10 @@ import { Logger } from "@mutualzz/logger";
 import { BitField, userFlags } from "@mutualzz/bitfield";
 import {
   type APIChannel,
-  APIExpression,
+  type APIExpression,
   type APIInvite,
-  APIMemberRole,
-  APIMessage,
+  type APIMemberRole,
+  type APIMessage,
   type APIMessageReactionEvent,
   type APIMessageReactionRemoveAllEvent,
   type APIMessageReactionRemoveEmojiEvent,
@@ -13,11 +13,11 @@ import {
   type APIPost,
   type APIPostComment,
   type APIPrivateUser,
-  APIRelationship,
-  APIRole,
+  type APIRelationship,
+  type APIRole,
   type APISpace,
-  APISpaceBan,
-  APISpaceMember,
+  type APISpaceBan,
+  type APISpaceMember,
   type APIUser,
   type APIUserProfile,
   type APIUserSettings,
@@ -27,14 +27,14 @@ import {
   GatewayCloseCodes,
   GatewayDispatchEvents,
   GatewayOpcodes,
-  GatewayReadyPayload,
-  PresenceActivity,
-  CustomStatusSchedule,
-  PresenceActivityEmoji,
-  PresenceSchedule,
-  PresenceStatus,
-  Snowflake,
-  APICall,
+  type GatewayReadyPayload,
+  type PresenceActivity,
+  type CustomStatusSchedule,
+  type PresenceActivityEmoji,
+  type PresenceSchedule,
+  type PresenceStatus,
+  type Snowflake,
+  type APICall,
   type VoiceState as APIVoiceState
 } from "@mutualzz/types";
 import { type Codec, createCodec, type Encoding } from "@mutualzz/client";
@@ -57,7 +57,7 @@ import { isElectron } from "@utils/index";
 import { toast } from "react-toastify";
 import { MessageToast } from "@renderer/components/Toast/MessageToast"; // We have to create our own GatewayStatus "enum" to avoid issues with SSR
 import i18n from "@renderer/i18n";
-import { Channel } from "./objects/Channel";
+import { type Channel } from "./objects/Channel";
 
 // We have to create our own GatewayStatus "enum" to avoid issues with SSR
 // since WebSocket is not available in the server environment.
@@ -243,7 +243,9 @@ export class GatewayStore {
           savedAt: Date.now()
         })
       );
-    } catch {}
+    } catch {
+    // ignore
+}
   }
 
   private clearResumeState() {
@@ -325,7 +327,9 @@ export class GatewayStore {
       ) {
         socket.close(4000, "reconnect");
       }
-    } catch {}
+    } catch {
+    // ignore
+}
 
     this.socket = null;
     this.readyState = GatewayStatus.CLOSED;
@@ -767,13 +771,16 @@ export class GatewayStore {
 
     void (async () => {
       const shareActivity = this.app.settings?.shareActivity !== false;
+      const shareRpcPresence = this.app.settings?.shareRpcPresence !== false;
       const previousActivities =
         this.app.presence.get(this.app.account!.id)?.activities ?? [];
 
       if (isElectron) {
         const [baseDraft, rpcActivities, spotifyActivity] = await Promise.all([
           buildDesktopPresenceFromProcesses(),
-          loadRpcActivities(),
+          shareActivity && shareRpcPresence
+            ? loadRpcActivities()
+            : Promise.resolve([]),
           shareActivity
             ? loadSpotifyActivity(this.app.rest)
             : Promise.resolve(null)
@@ -785,7 +792,8 @@ export class GatewayStore {
             processActivities: shareActivity
               ? (baseDraft.activities ?? [])
               : [],
-            rpcActivities: shareActivity ? rpcActivities : [],
+            rpcActivities:
+              shareActivity && shareRpcPresence ? rpcActivities : [],
             spotifyActivity: shareActivity ? spotifyActivity : null,
             customActivity: this.app.customStatus.activity,
             previousActivities: shareActivity ? previousActivities : []
@@ -1368,7 +1376,7 @@ export class GatewayStore {
       try {
         // Try the configured encoding first
         if (this.encoding === "etf") {
-          payload = await window.api!.codec.etfDecode(Array.from(bytes));
+          payload = await window.api.codec.etfDecode(Array.from(bytes));
         } else {
           payload = this.codec.decode(bytes);
         }
@@ -1891,13 +1899,16 @@ export class GatewayStore {
       if (!this.app.account?.id) return;
 
       const shareActivity = this.app.settings?.shareActivity !== false;
+      const shareRpcPresence = this.app.settings?.shareRpcPresence !== false;
       const previousActivities =
         this.app.presence.get(this.app.account.id)?.activities ?? [];
 
       if (isElectron) {
         const [baseDraft, rpcActivities, spotifyActivity] = await Promise.all([
           buildDesktopPresenceFromProcesses(),
-          loadRpcActivities(),
+          shareActivity && shareRpcPresence
+            ? loadRpcActivities()
+            : Promise.resolve([]),
           shareActivity
             ? loadSpotifyActivity(this.app.rest)
             : Promise.resolve(null)
@@ -1910,7 +1921,8 @@ export class GatewayStore {
             processActivities: shareActivity
               ? (baseDraft.activities ?? [])
               : [],
-            rpcActivities: shareActivity ? rpcActivities : [],
+            rpcActivities:
+              shareActivity && shareRpcPresence ? rpcActivities : [],
             spotifyActivity: shareActivity ? spotifyActivity : null,
             customActivity: this.app.customStatus.activity,
             previousActivities: shareActivity ? previousActivities : []
@@ -2235,12 +2247,12 @@ export class GatewayStore {
   };
 
   private onMessageAckBulk = (
-    payload: Array<{
+    payload: ({
       channelId: Snowflake;
       lastMessageId: Snowflake;
       lastAckedId?: Snowflake;
       mentionCount: number;
-    } | null>
+    } | null)[]
   ) => {
     for (const state of payload) {
       if (!state) continue;
@@ -2407,7 +2419,7 @@ export class GatewayStore {
   };
 
   private onUserUpdate = (payload: APIUser | APIPrivateUser) => {
-    this.app.users.update(payload as APIUser);
+    this.app.users.update(payload);
 
     if (payload.id === this.app.account?.id) {
       const flags = BitField.fromString(userFlags, payload.flags.toString());
@@ -2615,7 +2627,7 @@ export class GatewayStore {
   };
 
   private onBridgeMemberRemove = (payload: { bridgeId: string }) => {
-    this.app.queryClient.setQueryData<Array<{ id: string }>>(
+    this.app.queryClient.setQueryData<{ id: string }[]>(
       ["me", "bridges"],
       (prev) => (prev ?? []).filter((b) => b.id !== payload.bridgeId)
     );

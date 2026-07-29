@@ -46,7 +46,7 @@ export const InjectGlobal = observer(() => {
         }
 
         .Toastify__toast-container {
-          z-index: 9999;
+          z-index: ${theme.zIndex.tooltip};
           -webkit-app-region: no-drag;
         }
 

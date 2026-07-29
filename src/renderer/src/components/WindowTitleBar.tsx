@@ -189,7 +189,6 @@ const WindowTitleBar = ({ onHeightChange }: WindowTitleBarProps) => {
         alignItems="center"
         p={1.5}
         variant={app.settings?.preferEmbossed ? "elevation" : "plain"}
-        transparency={65}
         minHeight={44}
         zIndex={WINDOW_TITLEBAR_ZINDEX}
         top={0}

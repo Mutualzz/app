@@ -72,7 +72,7 @@ const MediaSlide = ({
 
     const video = videoRef.current;
     if (isVisible && !userPaused) {
-      video.play().catch(() => {});
+      video.play().catch(() => { return; });
     } else {
       video.pause();
     }

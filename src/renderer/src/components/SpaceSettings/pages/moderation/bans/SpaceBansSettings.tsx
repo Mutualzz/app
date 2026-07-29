@@ -1,10 +1,10 @@
 import { observer } from "mobx-react-lite";
-import { Space } from "@stores/objects/Space";
+import { type Space } from "@stores/objects/Space";
 import { Stack, Typography } from "@mutualzz/ui-web";
 import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { Paper } from "@components/Paper";
-import { SpaceBan } from "@stores/objects/SpaceBan";
+import { type SpaceBan } from "@stores/objects/SpaceBan";
 import { useState } from "react";
 import { UserAvatar } from "@components/User/UserAvatar";
 import { InputWithLabel } from "@components/InputWithLabel";

@@ -73,7 +73,7 @@ function StaffChangelogsRoute() {
   const previewChangelog = (changelog: APIChangelog) => {
     openModal(
       WHATS_NEW_MODAL_ID,
-      <WhatsNewModal changelog={changelog} onAck={() => {}} />
+      <WhatsNewModal changelog={changelog} />
     );
   };
 

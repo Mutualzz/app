@@ -79,6 +79,7 @@ export const CustomStatusModal = observer(() => {
 
   return (
     <Paper
+          surfaceRole="modal"
       elevation={app.settings?.preferEmbossed ? 5 : 2}
       width="27.5rem"
       maxWidth="calc(100vw - 2rem)"
@@ -86,7 +87,6 @@ export const CustomStatusModal = observer(() => {
       direction="column"
       overflow="hidden"
       color="neutral"
-      transparency={0}
     >
       <Stack
         direction="row"

@@ -10,7 +10,7 @@ import {
   type TypographyColor
 } from "@mutualzz/ui-core";
 import { resolveMarkdownTextColor } from "@mutualzz/validators";
-import { Node, type Range, Text } from "slate";
+import { type Node, type Range, Text } from "slate";
 
 const tokenDefs = [
   { symbol: "**", type: "bold" },
@@ -138,7 +138,7 @@ export const parseSpoilerRanges = ([node, path]: [
   const children = node.children as Node[];
   const ranges: DecoratedRange[] = [];
 
-  type Pos = { childIndex: number; offset: number };
+  interface Pos { childIndex: number; offset: number }
 
   const findNextToken = (from: Pos): Pos | null => {
     for (

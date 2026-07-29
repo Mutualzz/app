@@ -1,8 +1,8 @@
 import { makeAutoObservable, observable } from "mobx";
 import { makePersistable } from "mobx-persist-store";
-import { AppStore } from "@stores/App.store";
+import { type AppStore } from "@stores/App.store";
 import { Relationship } from "@stores/objects/Relationship";
-import { APIRelationship, APIInvite, Snowflake } from "@mutualzz/types";
+import { type APIRelationship, type APIInvite, type Snowflake } from "@mutualzz/types";
 
 function relationshipKey(userId: Snowflake, otherUserId: Snowflake) {
   return BigInt(userId) < BigInt(otherUserId)

@@ -21,7 +21,7 @@ interface Props {
   autoplay?: boolean;
 }
 
-type NaturalSize = { width: number; height: number };
+interface NaturalSize { width: number; height: number }
 
 const naturalSizeCache = new Map<string, NaturalSize>();
 
@@ -103,7 +103,6 @@ export function MessageGifEmbed({
 
     const img = new window.Image();
     img.onload = () => lockSize(img.naturalWidth, img.naturalHeight);
-    img.onerror = () => undefined;
     img.src = sizingUri;
   }, [sizingUri, lockSize]);
 

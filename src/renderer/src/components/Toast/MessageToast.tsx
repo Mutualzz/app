@@ -1,6 +1,6 @@
 import { observer } from "mobx-react-lite";
 import type { ToastContentProps } from "react-toastify";
-import { Message } from "@stores/objects/Message";
+import { type Message } from "@stores/objects/Message";
 import { Stack, Typography } from "@mutualzz/ui-web";
 import { UserAvatar } from "@components/User/UserAvatar";
 import { useNavigate } from "@tanstack/react-router";

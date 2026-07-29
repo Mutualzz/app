@@ -22,6 +22,7 @@ import { observer } from "mobx-react-lite";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import i18n from "../i18n";
+import { isElectron, openExternalLink } from "@utils/index";
 
 export const Route = createFileRoute("/register")({
   component: observer(Register),
@@ -84,6 +85,7 @@ const InputWithLabel = ({
 
 function Register() {
   const { t } = useTranslation("auth");
+  const { t: ts } = useTranslation("settings");
   const navigate = useNavigate();
   const app = useAppStore();
   const [passwordVisible, setPasswordVisible] = useState(false);
@@ -290,6 +292,20 @@ function Register() {
                 </Button>
               )}
             />
+            <Button
+              variant="soft"
+              size={{ xs: "md", sm: "lg" }}
+              onClick={() => {
+                const client = isElectron ? "desktop" : "web";
+                void app.rest
+                  .get<{ url: string }>(`auth/discord/url?client=${client}`)
+                  .then(({ url }) => {
+                    void openExternalLink(url);
+                  });
+              }}
+            >
+              {ts("discord.continueWithDiscord")}
+            </Button>
           </Stack>
         </form>
         <Typography

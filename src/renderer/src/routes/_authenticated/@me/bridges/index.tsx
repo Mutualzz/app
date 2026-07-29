@@ -48,7 +48,7 @@ function RouteComponent() {
       const bName = app.spaces.get(b)?.name ?? b;
       return aName.localeCompare(bName);
     });
-  }, [app.spaces, bridges]);
+  }, [app, bridges]);
 
   if (bridgesQuery.isLoading) {
     return null;

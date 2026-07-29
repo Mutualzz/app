@@ -1,5 +1,5 @@
 import emojiDataSource from "emoji-datasource-twitter/emoji.json";
-import { CSSProperties } from "react";
+import { type CSSProperties } from "react";
 
 export const SKIN_TONE_MODIFIERS = [
   "1F3FB", // light
@@ -77,7 +77,7 @@ export function getSpriteCoordsForEmojiValue(value: string): SpriteCoords | null
 export function getSpriteStyle(
   sheetX: number,
   sheetY: number,
-  renderSize: number = 32
+  renderSize = 32
 ): CSSProperties {
   const scale = renderSize / SHEET_CELL_SIZE;
   const sheetRenderSize = SHEET_COLS * SHEET_CELL_SIZE * scale;

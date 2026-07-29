@@ -1,6 +1,6 @@
 import { observer } from "mobx-react-lite";
-import { Channel } from "@stores/objects/Channel";
-import { Space } from "@stores/objects/Space";
+import { type Channel } from "@stores/objects/Channel";
+import { type Space } from "@stores/objects/Space";
 import { useAppStore } from "@hooks/useStores";
 import { useMutation } from "@tanstack/react-query";
 import { useModal } from "@contexts/Modal.context";
@@ -24,7 +24,7 @@ import {
 import { scrollToPermissionCategory } from "@components/Permissions/permissionEditor.utils";
 import { channelPermissionGroups } from "@mutualzz/i18n";
 import { type APIChannel, ChannelType } from "@mutualzz/types";
-import { Fragment, JSX, ReactNode, useEffect, useMemo, useRef, useState } from "react";
+import { Fragment, type JSX, type ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import {
   Box,
   ButtonGroup,

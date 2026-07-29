@@ -4,7 +4,7 @@ import { UserAvatar } from "@components/User/UserAvatar";
 import { DMGroupAvatar } from "@components/DMChannel/DMGroupAvatar";
 import { useAppStore } from "@hooks/useStores";
 import type { APIInvite } from "@mutualzz/types";
-import { ChannelType, HttpException, InviteType } from "@mutualzz/types";
+import { ChannelType, type HttpException, InviteType } from "@mutualzz/types";
 import {
   Button,
   ButtonGroup,
@@ -296,12 +296,12 @@ export const SpaceInviteToSpaceModal = observer(({ channel }: Props) => {
 
   return (
     <AnimatedPaper
+          surfaceRole="modal"
       elevation={app.settings?.preferEmbossed ? 5 : 1}
       borderRadius={12}
       minWidth={{ xs: "90vw", sm: 340, md: 420, lg: 500 }}
       maxWidth={500}
       direction="column"
-      transparency={65}
       minHeight={300}
       maxHeight="85vh"
       initial={{ scale: 0.95 }}

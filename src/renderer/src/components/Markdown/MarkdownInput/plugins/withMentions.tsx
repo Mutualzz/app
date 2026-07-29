@@ -1,5 +1,5 @@
-import { Editor, Element, Path, Range, TextUnit } from "slate";
-import { MentionType } from "@mutualzz/types";
+import { type Editor, Element, Path, Range, type TextUnit } from "slate";
+import { type MentionType } from "@mutualzz/types";
 
 export const withMentions = (editor: Editor) => {
   const { isInline, isVoid, markableVoid, deleteBackward } = editor;

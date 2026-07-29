@@ -1,4 +1,4 @@
-import { app, BrowserWindow, Menu, nativeImage, Tray } from "electron";
+import { app, type BrowserWindow, Menu, nativeImage, Tray } from "electron";
 import { EventEmitter } from "events";
 import iconPng from "../../resources/icons/base/icon.png?asset";
 import { setQuitting } from "./windows";

@@ -7,7 +7,7 @@ import { useAppStore } from "@hooks/useStores";
 import {
   dynamicElevation,
   formatColor,
-  TypographyLevel
+  type TypographyLevel
 } from "@mutualzz/ui-core";
 import { Box, Stack, Typography, useTheme } from "@mutualzz/ui-web";
 import { hasCustomStatusContent } from "@mutualzz/client";
@@ -76,7 +76,6 @@ export const CustomStatusCard = observer(
         elevation={0}
         variant="soft"
         color="neutral"
-        transparency={0}
       >
         <Box
           position="relative"

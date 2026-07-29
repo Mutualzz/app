@@ -18,6 +18,7 @@ export const ProfileImageGifPickerModal = ({ onSelect }: Props) => {
 
   return (
     <Paper
+          surfaceRole="modal"
       elevation={app.settings?.preferEmbossed ? 5 : 1}
       borderRadius={16}
       padding={3}

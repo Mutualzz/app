@@ -231,7 +231,7 @@ function StaffReportsRoute() {
                       <b>
                         {tCommon(
                           staffReportReasonKeys[
-                            report.reason as keyof typeof staffReportReasonKeys
+                            report.reason
                           ] ?? report.reason
                         )}
                       </b>{" "}

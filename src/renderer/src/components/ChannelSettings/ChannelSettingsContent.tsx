@@ -1,8 +1,8 @@
 import { observer } from "mobx-react-lite";
-import { Space } from "@stores/objects/Space";
-import { Channel } from "@stores/objects/Channel";
+import { type Space } from "@stores/objects/Space";
+import { type Channel } from "@stores/objects/Channel";
 import {
-  ChannelSettingsPage,
+  type ChannelSettingsPage,
   useChannelSettings
 } from "@components/ChannelSettings/ChannelSettings.context";
 import { useAppStore } from "@hooks/useStores";
@@ -63,7 +63,7 @@ export const ChannelSettingsContent = observer(
           <Typography level="h5" fontFamily="monospace">
             {t(
               channelPageTitleKeys[
-                currentPage as keyof typeof channelPageTitleKeys
+                currentPage
               ]
             )}
           </Typography>

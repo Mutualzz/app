@@ -7,21 +7,21 @@ import type {
 import type { AppStore } from "@stores/App.store";
 import { MessageBase } from "./MessageBase";
 import { action, makeObservable, observable } from "mobx";
-import { Expression } from "./Expression";
+import { type Expression } from "./Expression";
 
 export enum QueuedMessageStatus {
   Sending = "sending",
   Failed = "failed"
 }
 
-export type PendingAttachmentPreview = {
+export interface PendingAttachmentPreview {
   name: string;
   size: number;
   type: string;
   previewUrl?: string;
-};
+}
 
-export type QueuedMessageData = {
+export interface QueuedMessageData {
   id: Snowflake;
   channelId: Snowflake;
   spaceId?: Snowflake | null;
@@ -35,7 +35,7 @@ export type QueuedMessageData = {
   repliedToId?: Snowflake;
   repliedTo?: MessageBase;
   pendingAttachments?: PendingAttachmentPreview[];
-};
+}
 
 export class QueuedMessage extends MessageBase {
   progress = 0;

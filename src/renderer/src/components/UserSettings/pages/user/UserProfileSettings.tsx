@@ -15,7 +15,7 @@ import {
   PaletteIcon,
   UploadSimpleIcon
 } from "@phosphor-icons/react";
-import { ColorLike } from "@mutualzz/ui-core";
+import { type ColorLike } from "@mutualzz/ui-core";
 import { useTranslation } from "react-i18next";
 
 export const UserProfileSettings = observer(() => {

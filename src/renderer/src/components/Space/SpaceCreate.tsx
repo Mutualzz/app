@@ -149,7 +149,6 @@ export const SpaceCreate = observer(({ setCreating }: Props) => {
       alignItems="center"
       elevation={2}
       p={{ xs: "1rem", sm: "2rem" }}
-      transparency={10}
       onKeyDown={(e) => e.key === "Enter" && handleCreate()}
     >
       <Typography level="h5" fontWeight="bold" mb={10}>

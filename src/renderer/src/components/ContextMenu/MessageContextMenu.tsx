@@ -7,7 +7,7 @@ import { useRecentEmojis } from "@renderer/hooks/useRecentEmojis";
 import { useAppStore } from "@hooks/useStores";
 import { Divider, Stack } from "@mutualzz/ui-web";
 import { styled } from "@mutualzz/ui-core";
-import { Message } from "@stores/objects/Message";
+import { type Message } from "@stores/objects/Message";
 import { getSpriteStyle } from "@utils/emojis/emojiSprite";
 import { getQuickReactionItems } from "@utils/quickReactionEmojis";
 import {
@@ -15,12 +15,15 @@ import {
   CopyIcon,
   FlagIcon,
   PencilSimpleIcon,
+  PushPinIcon,
+  PushPinSlashIcon,
   TrashIcon
 } from "@phosphor-icons/react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { observer } from "mobx-react-lite";
 import { isElectron } from "@renderer/utils";
 import { useTranslation } from "react-i18next";
+import { isChannelPinnedMessage } from "@mutualzz/client";
 
 const EMOJI_SIZE = 24;
 
@@ -59,6 +62,7 @@ export const MessageContextMenu = observer(({ message }: Props) => {
   const { t } = useTranslation("chat");
   const { clearMenu } = useMenu();
   const { openModal } = useModal();
+  const queryClient = useQueryClient();
   const { recents, addRecentStandard, addRecentCustom } = useRecentEmojis();
   const quickItems = getQuickReactionItems(app, recents, 4);
 
@@ -68,6 +72,36 @@ export const MessageContextMenu = observer(({ message }: Props) => {
     message.author?.id === app.account?.id ||
     !!me?.hasPermission("ManageMessages", message.channel);
   const canReport = message.author?.id !== app.account?.id;
+  const canPin =
+    !message.space ||
+    !!me?.hasPermission("PinMessages", message.channel);
+
+  const { mutate: pinMessage } = useMutation({
+    mutationFn: () =>
+      app.rest.put(
+        `channels/${message.channelId}/messages/${message.id}/pin`,
+        {},
+      ),
+    onSuccess: () => {
+      message.pinned = true;
+      queryClient.invalidateQueries({
+        queryKey: ["channel-pins", message.channelId],
+      });
+    },
+  });
+
+  const { mutate: unpinMessage } = useMutation({
+    mutationFn: () =>
+      app.rest.delete(
+        `channels/${message.channelId}/messages/${message.id}/pin`,
+      ),
+    onSuccess: () => {
+      message.pinned = false;
+      queryClient.invalidateQueries({
+        queryKey: ["channel-pins", message.channelId],
+      });
+    },
+  });
 
   const canReact = !message.space
     ? true
@@ -93,6 +127,29 @@ export const MessageContextMenu = observer(({ message }: Props) => {
     message.toggleReaction(item.toReaction());
     clearMenu();
   };
+
+  if (isChannelPinnedMessage(message)) {
+    return (
+      <ContextMenu
+        elevation={app.settings?.preferEmbossed ? 5 : 1}
+        id={generateMenuIDs.message(message.channelId, message.id)}
+        key={message.id}
+      >
+        {canDelete && (
+          <ContextItem
+            color="danger"
+            onClick={() => {
+              deleteMessage();
+              clearMenu();
+            }}
+            endDecorator={<TrashIcon weight="fill" />}
+          >
+            {t("actions.deleteMessage")}
+          </ContextItem>
+        )}
+      </ContextMenu>
+    );
+  }
 
   return (
     <ContextMenu
@@ -177,6 +234,25 @@ export const MessageContextMenu = observer(({ message }: Props) => {
           endDecorator={<PencilSimpleIcon weight="fill" />}
         >
           {t("actions.editMessage")}
+        </ContextItem>
+      )}
+
+      {canPin && (
+        <ContextItem
+          onClick={() => {
+            if (message.pinned) unpinMessage();
+            else pinMessage();
+            clearMenu();
+          }}
+          endDecorator={
+            message.pinned ? (
+              <PushPinSlashIcon weight="fill" />
+            ) : (
+              <PushPinIcon weight="fill" />
+            )
+          }
+        >
+          {message.pinned ? t("actions.unpinMessage") : t("actions.pinMessage")}
         </ContextItem>
       )}
 

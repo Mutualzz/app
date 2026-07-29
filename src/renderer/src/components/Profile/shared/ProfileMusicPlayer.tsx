@@ -149,7 +149,7 @@ export const ProfileMusicPlayer = observer(
       setPlaying(false);
     };
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
     useEffect(() => {
       if (autoPlay && playable) void startPlayback(true);
     }, []);

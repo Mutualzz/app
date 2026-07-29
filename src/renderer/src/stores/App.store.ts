@@ -35,7 +35,7 @@ import type { TokenStorage } from "@renderer/types";
 import { electronTokenStorage } from "@storages/electronTokenStorage";
 import { RelationshipStore } from "@stores/Relationship.store";
 import { ProfileStore } from "@stores/Profile.store";
-import { usePrefersDark } from "@hooks/usePrefersDark";
+import { getPrefersDark } from "@hooks/usePrefersDark";
 import { ReadStateStore } from "@stores/ReadState.store";
 import { TypingStore } from "@stores/Typing.store";
 import type { Message } from "@stores/objects/Message";
@@ -46,13 +46,13 @@ import {
   DEFAULT_KEYBOARD_SHORTCUTS,
   mergeKeyboardShortcuts,
   normalizeKeyboardShortcut,
-  type KeyboardShortcutId,
+  type KeyboardShortcutId
 } from "@utils/keyboardShortcuts";
 import { applyChatFontScale } from "@utils/chatFontScale";
 import { applyMessageLayout } from "@utils/messageLayout";
 import { applyUiDensity } from "@mutualzz/ui-core";
 
-const prefersDark = usePrefersDark();
+const prefersDark = getPrefersDark();
 
 export class AppStore {
   isGatewayReady = false;
@@ -90,6 +90,7 @@ export class AppStore {
   memberListVisible = true;
   voiceChatVisible = false;
   dontShowLinkWarning = false;
+  onboardingCompleted = false;
 
   channelListWidth = 320;
   dmChannelListWidth = 320;
@@ -111,6 +112,7 @@ export class AppStore {
   composerCount = 0;
   replyingTo: Message | null = null;
   replyMention = true;
+  jumpToMessage: { channelId: string; messageId: string } | null = null;
   badgeColor = "#e03131";
   keyboardShortcuts = mergeKeyboardShortcuts();
   private badgeWatchDispose: (() => void) | null = null;
@@ -144,6 +146,7 @@ export class AppStore {
         "voiceChatWidth",
         "dmCallViewHeight",
         "keyboardShortcuts",
+        "onboardingCompleted"
       ],
       storage: localStorage
     });
@@ -151,22 +154,21 @@ export class AppStore {
     this.tokenStorage = isElectron ? electronTokenStorage : webTokenStorage;
 
     reaction(
-      () => this.settings?.extendedSettings.chatFontScale ?? 1,
+      () => this.settings?.chatFontScale ?? 1,
       (scale) => applyChatFontScale(scale),
-      { fireImmediately: true },
+      { fireImmediately: true }
     );
 
     reaction(
       () => ({
-        messageDisplay:
-          this.settings?.extendedSettings.messageDisplay ?? "default",
-        uiDensity: this.settings?.extendedSettings.uiDensity ?? "default",
+        messageDisplay: this.settings?.messageDisplay ?? "default",
+        uiDensity: this.settings?.uiDensity ?? "default"
       }),
       ({ messageDisplay, uiDensity }) => {
         applyMessageLayout(messageDisplay, uiDensity);
         applyUiDensity(uiDensity);
       },
-      { fireImmediately: true },
+      { fireImmediately: true }
     );
   }
 
@@ -175,11 +177,8 @@ export class AppStore {
   }
 
   get targetMode(): AppMode {
-    const preferredMode = this.settings?.preferredMode;
-
     if (this.mode === "feed") return "spaces";
     if (this.mode === "spaces") return "feed";
-    if (preferredMode) return preferredMode;
     return "spaces";
   }
 
@@ -189,6 +188,18 @@ export class AppStore {
     return this.hasBootstrapped || this.isGatewayReady;
   }
 
+  get needsOnboarding() {
+    if (!this.isGatewayReady || !this.account) return false;
+    if (this.onboardingCompleted) return false;
+    if (this.spaces.all.length > 0) return false;
+    if (this.relationships.friends.length > 0) return false;
+    return true;
+  }
+
+  completeOnboarding() {
+    this.onboardingCompleted = true;
+  }
+
   setBadgeColor(color: string) {
     this.badgeColor = color;
   }
@@ -196,14 +207,14 @@ export class AppStore {
   setKeyboardShortcut(id: KeyboardShortcutId, hotkey: string) {
     this.keyboardShortcuts = {
       ...this.keyboardShortcuts,
-      [id]: hotkey.trim() ? normalizeKeyboardShortcut(hotkey) : "",
+      [id]: hotkey.trim() ? normalizeKeyboardShortcut(hotkey) : ""
     };
   }
 
   resetKeyboardShortcut(id: KeyboardShortcutId) {
     this.keyboardShortcuts = {
       ...this.keyboardShortcuts,
-      [id]: DEFAULT_KEYBOARD_SHORTCUTS[id],
+      [id]: DEFAULT_KEYBOARD_SHORTCUTS[id]
     };
   }
 
@@ -272,13 +283,20 @@ export class AppStore {
   setReplyingTo(message: Message | null) {
     this.replyingTo = message;
     if (message) {
-      this.replyMention =
-        this.settings?.extendedSettings.replyWithMention ?? true;
+      this.replyMention = this.settings?.replyWithMention ?? true;
     }
   }
 
   setReplyMention(val: boolean) {
     this.replyMention = val;
+  }
+
+  requestJumpToMessage(channelId: string, messageId: string) {
+    this.jumpToMessage = { channelId, messageId };
+  }
+
+  clearJumpToMessage() {
+    this.jumpToMessage = null;
   }
 
   setDmChannelListWidth(value: number) {
@@ -351,9 +369,9 @@ export class AppStore {
       const next = new AccountSettingsStore(this, settings);
       if (pending) next.applyLocalOverrides(pending);
       this.settings = next;
-      this.replyMention = next.extendedSettings.replyWithMention;
+      this.replyMention = next.replyWithMention;
       if (isInitialSettings) {
-        this.memberListVisible = next.extendedSettings.defaultMemberListVisible;
+        this.memberListVisible = next.defaultMemberListVisible;
       }
     }
   }
@@ -477,10 +495,7 @@ export class AppStore {
   }
 
   async loadSettings() {
-    if (
-      this.updater &&
-      this.settings?.extendedSettings.autoCheckUpdates !== false
-    ) {
+    if (this.updater && this.settings?.autoCheckUpdates !== false) {
       void this.updater.startAutoChecker();
     }
     if (this.settings) this.settings.startSyncing();

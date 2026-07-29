@@ -48,7 +48,7 @@ export const withSyntax = (editor: Editor) => {
               editor.setNodes(
                 {
                   type: "heading",
-                  level: level as HeadingLevel
+                  level: level
                 },
                 {
                   match: (n) => Element.isElement(n) && editor.isBlock(n)

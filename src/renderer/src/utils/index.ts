@@ -1,23 +1,24 @@
 import type { Theme as MzTheme } from "@emotion/react";
 import type { AppStore } from "@stores/App.store";
-import { Theme } from "@stores/objects/Theme";
+import { type Theme } from "@stores/objects/Theme";
 import type { useNavigate } from "@tanstack/react-router";
 import mergeWith from "lodash-es/mergeWith";
 import { isValidElement, type ReactNode } from "react";
 import MurmurHash from "imurmurhash";
 import {
   ExpressionType,
-  PresenceStatus
+  type PresenceStatus
 } from "@mutualzz/types";
 import type { Expression } from "@stores/objects/Expression";
 import type { SpaceMember } from "@stores/objects/SpaceMember";
 import type { Channel } from "@stores/objects/Channel";
-import { Snowflake } from "@mutualzz/client";
+import { type Snowflake } from "@mutualzz/client";
 import i18n from "../i18n";
 import {
   createSystemMessage as createSystemMessageBase,
   preferredChannelForSpace,
   resolveModeRouteTarget,
+  resolveResumePath,
 } from "@mutualzz/client";
 
 export function mergeAppendAnything(
@@ -174,25 +175,16 @@ export const sortThemes = (themes: Theme[]): Theme[] => {
   return [...priorityThemes, ...otherThemes];
 };
 
-export const preferredModePath = (app: AppStore) => {
-  const mode = app.settings?.preferredMode ?? "spaces";
-
-  switch (mode) {
-    case "feed":
-      return "/feed";
-    case "@me":
-      return "/@me";
-    default:
-      return "/spaces";
-  }
-};
-
-export const navigateToPreferredMode = (
+export const navigateToResumeRoute = (
   app: AppStore,
   navigate: ReturnType<typeof useNavigate>,
   replace = true
 ) => {
-  navigateToMode(app, navigate, app.settings?.preferredMode ?? "spaces", replace);
+  const path = resolveResumePath(
+    app as Parameters<typeof resolveResumePath>[0],
+    app.navigation.lastRoute,
+  );
+  navigate({ to: path, replace });
 };
 
 type NavigateFn = ReturnType<typeof useNavigate>;
@@ -293,7 +285,7 @@ export const switchMode = (
   }
 
   if ((!app.mode || app.mode === "@me") && app.account) {
-    navigateToPreferredMode(app, navigate, true);
+    navigateToResumeRoute(app, navigate, true);
   }
 };
 

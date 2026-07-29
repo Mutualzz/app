@@ -154,6 +154,7 @@ export function createMainWindow(): BrowserWindow {
         shell.openExternal(details.url);
       }
     } catch {
+      // ignore
     }
     return { action: "deny" };
   });
@@ -188,7 +189,8 @@ export function setupWindowIPC(): void {
   ipcMain.handle("window:maximize", () => {
     const win = getMainWindow();
     if (!win) return;
-    win.isMaximized() ? win.unmaximize() : win.maximize();
+    if (win.isMaximized()) win.unmaximize();
+    else win.maximize();
   });
 
   ipcMain.handle("window:close", () => {
@@ -210,9 +212,7 @@ export function setupWindowIPC(): void {
   });
 
   ipcMain.handle("context-menu:add-to-dictionary", (_, word: string) => {
-    getMainWindow()?.webContents.session.addWordToSpellCheckerDictionary(
-      word
-    );
+    getMainWindow()?.webContents.session.addWordToSpellCheckerDictionary(word);
   });
 }
 

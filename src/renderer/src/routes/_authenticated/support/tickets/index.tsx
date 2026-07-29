@@ -255,7 +255,7 @@ function SupportTicketsRoute() {
                 </Typography>
               </Stack>
               <Typography level="body-sm" textColor="muted">
-                {t(`support.categories.${ticket.category as SupportTicketCategory}`)}{" "}
+                {t(`support.categories.${ticket.category}`)}{" "}
                 ·{" "}
                 {t("support.updatedAt", {
                   date: dayjs(ticket.lastMessageAt).format("MMM D, h:mm A")

@@ -1,6 +1,6 @@
 import { observer } from "mobx-react-lite";
-import { Channel } from "@stores/objects/Channel";
-import { Space } from "@stores/objects/Space";
+import { type Channel } from "@stores/objects/Channel";
+import { type Space } from "@stores/objects/Space";
 import { useMutation } from "@tanstack/react-query";
 import { useAppStore } from "@hooks/useStores";
 import { useDraft } from "@hooks/useDraft";
@@ -8,7 +8,7 @@ import { Box, ButtonGroup, Divider, Stack, Typography } from "@mutualzz/ui-web";
 import { Paper } from "@components/Paper";
 import { Button } from "@components/Button";
 import { InputWithLabel } from "@components/InputWithLabel";
-import { APIChannel, ChannelType } from "@mutualzz/types";
+import { type APIChannel, ChannelType } from "@mutualzz/types";
 import { normalizeJSON } from "@mutualzz/client";
 import { MarkdownInput } from "@components/Markdown/MarkdownInput/MarkdownInput";
 import { useTranslation } from "react-i18next";

@@ -1,7 +1,7 @@
 import { MessageReactionEmoji } from "@components/Message/MessageReactionEmoji";
 import { Stack, Typography } from "@mutualzz/ui-web";
 import { formatColor, styled } from "@mutualzz/ui-core";
-import { Message } from "@stores/objects/Message";
+import { type Message } from "@stores/objects/Message";
 import { observer } from "mobx-react-lite";
 import { useTranslation } from "react-i18next";
 
