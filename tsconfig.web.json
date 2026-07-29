@@ -26,8 +26,6 @@
       "@logger": ["./src/renderer/src/Logger.ts"],
       "@seo": ["./src/renderer/src/seo.ts"],
       "@stores/*": ["./src/renderer/src/stores/*"],
-      "@themes": ["./src/renderer/src/themes/index.ts"],
-      "@themes/*": ["./src/renderer/src/themes/*"],
       "@utils/*": ["./src/renderer/src/utils/*"],
       "@storages/*": ["./src/renderer/src/storages/*"]
     }
