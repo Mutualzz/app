@@ -99,7 +99,7 @@ function ActivityRow({
               color: "inherit"
             }}
           >
-            Open in Spotify
+            {t("activity.openInSpotify")}
           </a>
         )}
         {elapsed && (
