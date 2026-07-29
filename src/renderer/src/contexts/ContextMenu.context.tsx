@@ -27,6 +27,7 @@ import { type SkinTone } from "@utils/emojis/emojiSprite";
 import { type PickerEmoji } from "@utils/emojis/emojiPickerData";
 import type { Post } from "@stores/objects/Post";
 import type { PostComment } from "@stores/objects/PostComment";
+import { isElectron } from "@renderer/utils";
 
 export type ContextMenuPayload =
   | {
@@ -104,7 +105,10 @@ export type ContextMenuPayload =
     }
   | { type: "custom"; id: string; [key: string]: any };
 
-export interface MenuPosition { x: number; y: number }
+export interface MenuPosition {
+  x: number;
+  y: number;
+}
 type AnyMouseEvent = MouseEvent | { nativeEvent: MouseEvent };
 
 interface ContextMenuContextProps {
