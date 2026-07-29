@@ -4,7 +4,6 @@ import { Stack, Typography } from "@mutualzz/ui-web";
 import {
   formatForDisplay,
   useHotkeyRecorder,
-  type Hotkey
 } from "@tanstack/react-hotkeys";
 import { observer } from "mobx-react-lite";
 import { useRef, useState } from "react";

@@ -3089,7 +3089,7 @@ export class VoiceStore {
     this.session.unlockAudio();
     void warmRnnoiseAssets();
     this.joinPrepPromise = this.setupTracks(true)
-      .then(() => null)
+      .then(() => undefined)
       .catch((err) => {
         this.logger.warn("join device prep failed", err);
       });

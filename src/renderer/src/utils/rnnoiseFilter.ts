@@ -41,8 +41,8 @@ async function loadRnnoiseAssets() {
 export function warmRnnoiseAssets(): Promise<void> {
   try {
     return loadRnnoiseAssets().then(
-      () => null,
-      () => null
+      () => undefined,
+      () => undefined,
     );
   } catch {
     return Promise.resolve();

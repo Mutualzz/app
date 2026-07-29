@@ -9,7 +9,6 @@ import {
   parseMessageSearchQuery,
   setMessageSearchModifier,
   toggleMessageSearchHasFilter,
-  type MessageSearchHasFilter,
 } from "@mutualzz/validators";
 import { XIcon } from "@phosphor-icons/react";
 import { useTranslation } from "react-i18next";

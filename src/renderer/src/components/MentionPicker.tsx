@@ -64,7 +64,7 @@ export const MentionPicker = observer(
             .map((r) => ({
               id: r.id,
               displayName: `@${r.name}`,
-              type: "role"
+              type: "role" as const
             }))
             .filter((r) => r.id !== space.id)
         : [];

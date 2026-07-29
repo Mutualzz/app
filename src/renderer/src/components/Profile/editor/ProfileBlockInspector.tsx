@@ -3,12 +3,7 @@ import { Paper } from "@components/Paper";
 import { GoogleFontPicker } from "@components/FontPicker/GoogleFontPicker";
 import type {
   APIProfileBlock,
-  ProfileDrawBlock,
   ProfileHeaderBlock,
-  ProfileImageBlock,
-  ProfileMusicBlock,
-  ProfileStickerBlock,
-  ProfileTextBlock
 } from "@mutualzz/types";
 import { ImageFormat } from "@mutualzz/types";
 import type { ProfileDraftState } from "@components/Profile/editor/profileEditor.utils";
