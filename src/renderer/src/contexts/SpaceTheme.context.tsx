@@ -1,4 +1,4 @@
-import { type Theme as EmotionTheme, ThemeProvider as EmotionThemeProvider } from "@emotion/react";
+import { ThemeProvider as EmotionThemeProvider } from "@emotion/react";
 import { useAppStore } from "@hooks/useStores";
 import {
   resolveWallpaperDimOverlay,
