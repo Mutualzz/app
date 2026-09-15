@@ -9,4 +9,5 @@ export function useAppStore() {
   return appStore;
 }
 
+// This is a convenience function to get the app store without using the hook.
 export const getAppStore = useAppStore;
