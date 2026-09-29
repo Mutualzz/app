@@ -57,6 +57,7 @@ import { useAppStore } from "@hooks/useStores";
 
 export interface MarkdownInputHandle {
   focus: (opts?: { at?: "start" | "end" | "selectAll" }) => void;
+  setMarkdown: (value: string, options?: { focus?: boolean }) => void;
   editor: SlateEditor;
   sendMessage: () => void;
 }
@@ -93,8 +94,7 @@ const MarkdownInput = forwardRef<MarkdownInputHandle, MarkdownInputProps>(
     ref
   ) => {
     const app = useAppStore();
-    const emoticons =
-      emoticonsProp ?? app.settings?.convertEmoticons ?? true;
+    const emoticons = emoticonsProp ?? app.settings?.convertEmoticons ?? true;
 
     const { theme } = useTheme();
     const inputRef = useRef<HTMLInputElement | null>(null);
@@ -116,6 +116,28 @@ const MarkdownInput = forwardRef<MarkdownInputHandle, MarkdownInputProps>(
     const [mentionSearch, setMentionSearch] = useState<string | null>(null);
     const [mentionAnchor, setMentionAnchor] = useState<DOMRect | null>(null);
 
+    const setMarkdown = useCallback(
+      (markdown: string, options?: { focus?: boolean }) => {
+        const nextValue = markdownToSlate(markdown);
+        const currentValue = slateToMarkdown(editor.children);
+
+        if (currentValue !== markdown) {
+          editor.children = nextValue;
+          editor.selection = null;
+          setEditorValue(nextValue);
+          editor.onChange();
+        }
+
+        if (options?.focus) {
+          requestAnimationFrame(() => {
+            ReactEditor.focus(editor);
+            editor.select(editor.end([]));
+          });
+        }
+      },
+      [editor]
+    );
+
     useImperativeHandle(ref, () => ({
       focus: (opts) => {
         const at = opts?.at ?? "end";
@@ -135,6 +157,7 @@ const MarkdownInput = forwardRef<MarkdownInputHandle, MarkdownInputProps>(
 
         editor.select(point);
       },
+      setMarkdown,
       editor,
       sendMessage: () => onSendMessage?.()
     }));
@@ -144,8 +167,8 @@ const MarkdownInput = forwardRef<MarkdownInputHandle, MarkdownInputProps>(
     }, [editor, emoticons]);
 
     useEffect(() => {
-      setEditorValue(markdownToSlate(value ?? ""));
-    }, [value]);
+      setMarkdown(value ?? "");
+    }, [setMarkdown, value]);
 
     const renderElement = useCallback(
       (props: RenderElementProps) => <Element {...props} />,

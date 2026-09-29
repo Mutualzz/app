@@ -2,7 +2,7 @@ import { MarkdownRenderer } from "@components/Markdown/MarkdownRenderer/Markdown
 import { UserAvatar } from "@components/User/UserAvatar";
 import { useAppStore } from "@hooks/useStores";
 import { useMenu } from "@contexts/ContextMenu.context";
-import { Stack, Typography, useTheme } from "@mutualzz/ui-web";
+import { Box, Stack, Typography, useTheme } from "@mutualzz/ui-web";
 import {
   Message as MessageObject,
   Message as MessageInstance,
@@ -45,6 +45,7 @@ import { UserProfilePopoutTrigger } from "../Profile/popout/UserProfilePopoutTri
 import { shouldHideInviteUrlContent } from "@mutualzz/client";
 import { useTranslation } from "react-i18next";
 import { jumpToChannelMessage } from "@utils/jumpToChannelMessage";
+import { Paper } from "../Paper";
 
 function formatBytes(bytes: number) {
   if (bytes < 1024) return `${bytes} B`;
@@ -65,22 +66,25 @@ const PendingAttachments = observer(
   }) => {
     const { theme } = useTheme();
     return (
-      <Stack direction="row" flexWrap="wrap" spacing={1} pb={0.25}>
+      <Stack
+        direction="column"
+        alignContent="flex-start"
+        flexWrap="wrap"
+        spacing={1}
+        pb={0.25}
+      >
         {attachments.map((attachment, i) => {
           const isImage = attachment.type.startsWith("image/");
           return (
-            <div key={i} css={{ position: "relative" }}>
+            <Box key={i} position="relative">
               {isImage && attachment.previewUrl ? (
-                <div
-                  css={{
-                    position: "relative",
-                    lineHeight: 0,
-                    borderRadius: 6,
-                    overflow: "hidden",
-                    maxWidth: 300,
-                    maxHeight: 200,
-                    background: theme.colors.surface
-                  }}
+                <Paper
+                  position="relative"
+                  lineHeight={0}
+                  borderRadius={6}
+                  overflow="hidden"
+                  maxWidth={300}
+                  maxHeight={200}
                 >
                   <img
                     src={attachment.previewUrl}
@@ -113,7 +117,7 @@ const PendingAttachments = observer(
                       }}
                     />
                   </div>
-                </div>
+                </Paper>
               ) : (
                 <div
                   css={{
@@ -181,7 +185,7 @@ const PendingAttachments = observer(
                   </div>
                 </div>
               )}
-            </div>
+            </Box>
           );
         })}
       </Stack>
@@ -203,7 +207,7 @@ export const Message = observer(
     repliedMessage,
     header,
     showAvatar = !!header,
-    compact = false,
+    compact = false
   }: Props) => {
     const app = useAppStore();
     const { theme } = useTheme();
@@ -279,7 +283,7 @@ export const Message = observer(
         highlight={hasProperMention ? theme.colors.warning : null}
         css={{
           fontSize: "calc(1em * var(--chat-font-scale, 1))",
-          "&:hover time, &:hover .edited": { opacity: 1 },
+          "&:hover time, &:hover .edited": { opacity: 1 }
         }}
       >
         {header && message.type === MessageType.Reply && (
@@ -344,7 +348,7 @@ export const Message = observer(
                     member={message.member}
                     size="lg"
                     css={{
-                      cursor: "pointer",
+                      cursor: "pointer"
                     }}
                   />
                 </UserProfilePopoutTrigger>
@@ -375,7 +379,12 @@ export const Message = observer(
               }
             >
               {compact && header && (
-                <Stack flexShrink={0} direction="row" alignItems="baseline" pb={0.25}>
+                <Stack
+                  flexShrink={0}
+                  direction="row"
+                  alignItems="baseline"
+                  pb={0.25}
+                >
                   <MessageAuthor message={message} space={space} />
                 </Stack>
               )}
@@ -410,7 +419,7 @@ export const Message = observer(
                     "codedLinks" in message &&
                     shouldHideInviteUrlContent(
                       message.content,
-                      message.codedLinks?.length ?? 0,
+                      message.codedLinks?.length ?? 0
                     );
 
                   if (isOnlyGifUrl || hideInviteUrl) return null;
@@ -427,7 +436,7 @@ export const Message = observer(
                         <Tooltip
                           placement="right"
                           content={dayjs(message.updatedAt).format(
-                            "dddd, MMMM D, YYYY h:mm A",
+                            "dddd, MMMM D, YYYY h:mm A"
                           )}
                           offset={8}
                         >
@@ -447,7 +456,13 @@ export const Message = observer(
             </MessageContentText>
 
             {isSent && message.attachments.length > 0 && (
-              <Stack direction="row" flexWrap="wrap" spacing={1} pb={0.25}>
+              <Stack
+                direction="column"
+                alignContent="flex-start"
+                flexWrap="wrap"
+                spacing={1}
+                pb={0.25}
+              >
                 {message.attachments.map((attachment) => (
                   <MessageAttachment
                     key={attachment.id}
@@ -468,12 +483,12 @@ export const Message = observer(
             {"embeds" in message &&
               showLinkEmbeds &&
               message.embeds.length > 0 && (
-              <Stack pb={0.25}>
-                {message.embeds.map((embed, index) => (
-                  <MessageEmbed key={index} embed={embed} />
-                ))}
-              </Stack>
-            )}
+                <Stack pb={0.25}>
+                  {message.embeds.map((embed, index) => (
+                    <MessageEmbed key={index} embed={embed} />
+                  ))}
+                </Stack>
+              )}
 
             {"codedLinks" in message && message.codedLinks.length > 0 && (
               <Stack pb={0.25} spacing={1}>

@@ -15,21 +15,59 @@ interface ThemeDraft extends APITheme {
   id: string;
 }
 
+interface MessageDraft {
+  content: string;
+  stickerIds: string[];
+  attachmentIds: string[];
+}
+
+const getMessageDraftKey = (accountId: string, channelId: string) =>
+  `${accountId}:${channelId}`;
+
 export class DraftStore {
   themes = observable.map<string, ThemeDraft>();
   avatars = observable.map<string, AvatarDraft>();
+  messages = observable.map<string, MessageDraft>();
+  readonly ready: Promise<void>;
+
   private readonly logger = new Logger({
     tag: "DraftStore"
   });
 
   constructor() {
-    makeAutoObservable(this, {}, { autoBind: true });
+    makeAutoObservable(this, { ready: false }, { autoBind: true });
 
-    makePersistable(this, {
+    this.ready = makePersistable(this, {
       name: "DraftStore",
-      properties: ["avatars", "themes"],
+      properties: ["avatars", "themes", "messages"],
       storage: localStorage
-    });
+    }).then(() => undefined);
+  }
+
+  // Message Drafts
+  saveMessageDraft(accountId: string, channelId: string, draft: MessageDraft) {
+    const key = getMessageDraftKey(accountId, channelId);
+
+    if (
+      draft.content.trim() === "" &&
+      draft.stickerIds.length === 0 &&
+      draft.attachmentIds.length === 0
+    ) {
+      this.messages.delete(key);
+      return;
+    }
+
+    this.messages.set(key, draft);
+  }
+
+  getMessageDraft(accountId: string, channelId: string) {
+    const key = getMessageDraftKey(accountId, channelId);
+    return this.messages.get(key);
+  }
+
+  deleteMessageDraft(accountId: string, channelId: string) {
+    const key = getMessageDraftKey(accountId, channelId);
+    this.messages.delete(key);
   }
 
   // Avatar Drafts
@@ -112,5 +150,6 @@ export class DraftStore {
   clear() {
     this.themes.clear();
     this.avatars.clear();
+    this.messages.clear();
   }
 }

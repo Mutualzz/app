@@ -28,8 +28,7 @@ export const StaffPanelHeader = ({
   const { t } = useTranslation("staff");
   const embossed = app.settings?.preferEmbossed;
 
-  const label =
-    backLabel ?? (backTo === "home" ? t("exit") : t("title"));
+  const label = backLabel ?? (backTo === "home" ? t("exit") : t("title"));
 
   const handleBack = () => {
     if (backTo === "home") {
@@ -37,7 +36,9 @@ export const StaffPanelHeader = ({
         to: resolveResumePath(
           app as Parameters<typeof resolveResumePath>[0],
           app.navigation.lastRoute,
-        ),
+          null,
+          "desktop"
+        )
       });
       return;
     }

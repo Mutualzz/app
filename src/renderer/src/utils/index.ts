@@ -5,10 +5,7 @@ import type { useNavigate } from "@tanstack/react-router";
 import mergeWith from "lodash-es/mergeWith";
 import { isValidElement, type ReactNode } from "react";
 import MurmurHash from "imurmurhash";
-import {
-  ExpressionType,
-  type PresenceStatus
-} from "@mutualzz/types";
+import { ExpressionType, type PresenceStatus } from "@mutualzz/types";
 import type { Expression } from "@stores/objects/Expression";
 import type { SpaceMember } from "@stores/objects/SpaceMember";
 import type { Channel } from "@stores/objects/Channel";
@@ -18,7 +15,7 @@ import {
   createSystemMessage as createSystemMessageBase,
   preferredChannelForSpace,
   resolveModeRouteTarget,
-  resolveResumePath,
+  resolveResumePath
 } from "@mutualzz/client";
 
 export function mergeAppendAnything(
@@ -41,7 +38,13 @@ export const createSystemMessage = (
   channelId: string,
   content: string,
   flags?: bigint
-) => createSystemMessageBase(app.users as Parameters<typeof createSystemMessageBase>[0], channelId, content, flags);
+) =>
+  createSystemMessageBase(
+    app.users as Parameters<typeof createSystemMessageBase>[0],
+    channelId,
+    content,
+    flags
+  );
 
 export const canUseCustomEmoji = (
   meId: Snowflake,
@@ -183,6 +186,8 @@ export const navigateToResumeRoute = (
   const path = resolveResumePath(
     app as Parameters<typeof resolveResumePath>[0],
     app.navigation.lastRoute,
+    null,
+    "desktop"
   );
   navigate({ to: path, replace });
 };
@@ -197,7 +202,7 @@ export const navigateToMode = (
 ) => {
   const target = resolveModeRouteTarget(
     app as Parameters<typeof resolveModeRouteTarget>[0],
-    mode,
+    mode
   );
 
   if (target.type === "feed") {
@@ -249,7 +254,7 @@ export const navigateToSpace = (
 
   const channel = preferredChannelForSpace(
     app as Parameters<typeof preferredChannelForSpace>[0],
-    spaceId,
+    spaceId
   );
   if (channel) {
     navigate({

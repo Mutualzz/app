@@ -40,10 +40,7 @@ function formatTime(seconds: number) {
   return `${m}:${s.toString().padStart(2, "0")}`;
 }
 
-const getTypeColor = (
-  contentType: string,
-  theme: Theme
-) => {
+const getTypeColor = (contentType: string, theme: Theme) => {
   if (contentType.startsWith("audio/")) return theme.colors.warning;
   if (contentType.includes("pdf")) return theme.colors.danger;
   return theme.colors.info;
@@ -426,7 +423,7 @@ const VideoPlayer = ({ attachment }: { attachment: APIAttachment }) => {
             onClick={togglePlay}
             title={playing ? t("media.pause") : t("media.play")}
           >
-              {playing ? (
+            {playing ? (
               <PauseIcon size={14} weight="fill" />
             ) : (
               <PlayIcon size={14} weight="fill" />
@@ -514,7 +511,6 @@ export const MessageAttachment = ({ attachment }: Props) => {
       download={attachment.filename}
       target="_blank"
       rel="noopener noreferrer"
-      css={{ textDecoration: "none" }}
     >
       <Paper
         direction="row"

@@ -39,6 +39,8 @@ function RouteComponent() {
       to={resolveResumePath(
         app as Parameters<typeof resolveResumePath>[0],
         app.navigation.lastRoute,
+        null,
+        "desktop"
       )}
       replace
     />
