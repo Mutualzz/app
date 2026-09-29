@@ -31,7 +31,7 @@ import {
   GearIcon,
   LockIcon,
   PlusIcon,
-  UserPlusIcon,
+  UserPlusIcon
 } from "@phosphor-icons/react";
 import { ChannelSettingsModal } from "@components/ChannelSettings/ChannelSettingsModal";
 import { HoverRevealActions } from "../HoverRevealActions";
@@ -149,6 +149,7 @@ export const ChannelListItem = observer(
         onContextMenu={(e) =>
           openContextMenu(e, { type: "channel", space, channel })
         }
+        onClick={handleChannel}
         borderLeft={
           isActiveVoiceChannel && voiceStates.length > 0
             ? `2px solid ${theme.colors.success}`
@@ -181,12 +182,8 @@ export const ChannelListItem = observer(
           onMouseEnter={() => setWrapperHovered(true)}
           onMouseLeave={() => setWrapperHovered(false)}
           variant={active ? "soft" : "plain"}
-          surfaceRole={
-            active && theme.backgroundImageUrl ? "card" : undefined
-          }
-          color={
-            active ? theme.typography.colors.primary : (props.color)
-          }
+          surfaceRole={active && theme.backgroundImageUrl ? "card" : undefined}
+          color={active ? theme.typography.colors.primary : props.color}
           css={{
             ...(channelDragHandle && { cursor: "grab" }),
             ...(!isCategory &&
@@ -202,7 +199,6 @@ export const ChannelListItem = observer(
             alignItems="center"
             spacing={isCategory ? 1 : 1.5}
             flex={1}
-            onClick={handleChannel}
             minWidth={0}
           >
             {!isCategory && (
@@ -326,16 +322,19 @@ export const ChannelListItem = observer(
                     </Typography>
                   </Stack>
                 )}
-                {!wrapperHovered && isUnread && mentionCount === 0 && !active && (
-                  <Stack
-                    css={{
-                      width: 8,
-                      height: 8,
-                      borderRadius: "50%",
-                      backgroundColor: theme.typography.colors.primary
-                    }}
-                  />
-                )}
+                {!wrapperHovered &&
+                  isUnread &&
+                  mentionCount === 0 &&
+                  !active && (
+                    <Stack
+                      css={{
+                        width: 8,
+                        height: 8,
+                        borderRadius: "50%",
+                        backgroundColor: theme.typography.colors.primary
+                      }}
+                    />
+                  )}
                 {wrapperHovered && (
                   <HoverRevealActions visible={wrapperHovered}>
                     {channel.type === ChannelType.Voice && (
