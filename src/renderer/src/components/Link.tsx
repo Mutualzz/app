@@ -72,6 +72,9 @@ export const OpenLink = observer(({ url, unsafe }: Props) => {
       elevation={app.settings?.preferEmbossed ? 5 : 1}
       height="15rem"
       alignItems="center"
+      css={{
+        wordBreak: "break-word"
+      }}
     >
       {unsafe && !isElectron && (
         <>
@@ -110,22 +113,33 @@ export const OpenLink = observer(({ url, unsafe }: Props) => {
         </>
       )}
 
-      <Stack spacing={2.5} width="100%" mb={4} px={4}>
+      <Stack
+        direction="column"
+        alignItems="center"
+        spacing={2.5}
+        width="100%"
+        mb={4}
+        px={4}
+      >
         <Checkbox
           label={t("externalLink.dontShowAgain")}
           value={skipWarning}
           onChange={() => setSkipWarning((prev) => !prev)}
         />
-        <Button expand onClick={handleProceed} variant="soft" color="success">
-          {t("externalLink.proceed")}
-        </Button>
-        <Button
-          expand
-          color="danger"
-          onClick={() => closeModal(unsafe ? "open-link-unsafe" : "open-link")}
-        >
-          {t("cancel")}
-        </Button>
+        <Stack direction="row" spacing={2} width="100%">
+          <Button expand onClick={handleProceed} variant="soft" color="success">
+            {t("externalLink.proceed")}
+          </Button>
+          <Button
+            expand
+            color="danger"
+            onClick={() =>
+              closeModal(unsafe ? "open-link-unsafe" : "open-link")
+            }
+          >
+            {t("cancel")}
+          </Button>
+        </Stack>
       </Stack>
     </AnimatedPaper>
   );
@@ -138,7 +152,9 @@ export const Link = observer(({ href, onClick, ...props }: LinkProps) => {
   const url = URL.parse(href || "");
   const isUnsafe =
     !!url && (url.protocol === "http:" || url.host.startsWith("localhost"));
-  const isInternal = !!url && url.hostname.endsWith("mutualzz.com");
+  const isInternal = !!url && url.hostname.startsWith("mutualzz.com");
+  const isSafe =
+    !!url && url.hostname.endsWith("mutualzz.com") && url.protocol === "https:";
 
   const handleClick = (e: MouseEvent<HTMLAnchorElement>) => {
     if (!url) {
@@ -154,7 +170,7 @@ export const Link = observer(({ href, onClick, ...props }: LinkProps) => {
       return;
     }
 
-    if (app.dontShowLinkWarning) {
+    if (app.dontShowLinkWarning || isSafe) {
       void openExternalUrl(url);
       onClick?.(e);
       return;
