@@ -3,7 +3,6 @@ import { SpaceLockdownGuard } from "@components/Space/SpaceLockdownGuard";
 import { SpaceLockdownOverlay } from "@components/Space/SpaceLockdownOverlay";
 import { SpacesSidebar } from "@components/Space/SpacesSidebar";
 import { UserBar } from "@components/User/UserBar";
-import { SpaceThemeProvider } from "@contexts/SpaceTheme.context";
 import { useAppStore } from "@hooks/useStores";
 import { Stack, useTheme } from "@mutualzz/ui-web";
 import {
@@ -43,7 +42,7 @@ function RouteComponent() {
     return () => {
       if (app.mode === "spaces") app.resetMode();
     };
-  }, []);
+  }, [app]);
 
   useEffect(() => {
     if (params?.spaceId) return;
@@ -57,7 +56,7 @@ function RouteComponent() {
       params: { spaceId: space.id },
       replace: true
     });
-  }, [params?.spaceId, app.isGatewayReady]);
+  }, [params?.spaceId, app.isGatewayReady, app.spaces, navigate]);
 
   return (
     <Stack width="100%" height="100%" direction="row">
@@ -72,82 +71,76 @@ function RouteComponent() {
       >
         <Stack height="100%" direction="row">
           <SpacesSidebar />
-          <SpaceThemeProvider>
-            <Stack
-              position="relative"
-              flex={1}
-              minWidth={0}
-              height="100%"
-              direction="row"
-            >
-              <ChannelList />
-              <ResizeBar
-                onPointerDown={(e) => {
-                  if (isSpaceLockedDown) return;
+          <Stack
+            position="relative"
+            flex={1}
+            minWidth={0}
+            height="100%"
+            direction="row"
+          >
+            <ChannelList />
+            <ResizeBar
+              onPointerDown={(e) => {
+                if (isSpaceLockedDown) return;
 
-                  const startX = e.clientX;
-                  const startWidth = app.channelListWidth;
+                const startX = e.clientX;
+                const startWidth = app.channelListWidth;
 
-                  (e.currentTarget).setPointerCapture(
-                    e.pointerId
+                e.currentTarget.setPointerCapture(e.pointerId);
+
+                const onMove = (moveEvent: PointerEvent) => {
+                  app.setChannelListWidth(
+                    startWidth + (moveEvent.clientX - startX)
                   );
+                };
 
-                  const onMove = (moveEvent: PointerEvent) => {
-                    app.setChannelListWidth(
-                      startWidth + (moveEvent.clientX - startX)
-                    );
-                  };
+                const onUp = () => {
+                  window.removeEventListener("pointermove", onMove);
+                  window.removeEventListener("pointerup", onUp);
+                };
 
-                  const onUp = () => {
-                    window.removeEventListener("pointermove", onMove);
-                    window.removeEventListener("pointerup", onUp);
-                  };
-
-                  window.addEventListener("pointermove", onMove);
-                  window.addEventListener("pointerup", onUp);
-                }}
-                style={{
-                  width: 2,
-                  marginLeft: -1,
-                  marginRight: -1,
-                  cursor: isSpaceLockedDown ? "not-allowed" : "col-resize",
-                  flexShrink: 0,
-                  touchAction: "none",
-                  userSelect: "none",
-                  backgroundColor: app.settings?.preferEmbossed
-                    ? dynamicElevation(theme.colors.surface, 4)
-                    : "transparent"
-                }}
-                whileHover={
-                  isSpaceLockedDown
-                    ? undefined
-                    : {
-                        backgroundColor: app.settings?.preferEmbossed
-                          ? dynamicElevation(theme.colors.surface, 6)
-                          : dynamicElevation(theme.colors.surface, 2)
-                      }
-                }
+                window.addEventListener("pointermove", onMove);
+                window.addEventListener("pointerup", onUp);
+              }}
+              style={{
+                width: 2,
+                marginLeft: -1,
+                marginRight: -1,
+                cursor: isSpaceLockedDown ? "not-allowed" : "col-resize",
+                flexShrink: 0,
+                touchAction: "none",
+                userSelect: "none",
+                backgroundColor: app.settings?.preferEmbossed
+                  ? dynamicElevation(theme.colors.surface, 4)
+                  : "transparent"
+              }}
+              whileHover={
+                isSpaceLockedDown
+                  ? undefined
+                  : {
+                      backgroundColor: app.settings?.preferEmbossed
+                        ? dynamicElevation(theme.colors.surface, 6)
+                        : dynamicElevation(theme.colors.surface, 2)
+                    }
+              }
+            />
+            {activeSpace && (
+              <SpaceLockdownOverlay
+                space={activeSpace}
+                showMessage={false}
+                reserveBottom="4.5rem"
               />
-              {activeSpace && (
-                <SpaceLockdownOverlay
-                  space={activeSpace}
-                  showMessage={false}
-                  reserveBottom="4.5rem"
-                />
-              )}
-            </Stack>
-          </SpaceThemeProvider>
+            )}
+          </Stack>
         </Stack>
 
         <UserBar />
       </Stack>
 
-      <SpaceThemeProvider>
-        <Stack height="100%" width="100%" position="relative">
-          <Outlet />
-          {activeSpace && <SpaceLockdownOverlay space={activeSpace} />}
-        </Stack>
-      </SpaceThemeProvider>
+      <Stack height="100%" width="100%" position="relative">
+        <Outlet />
+        {activeSpace && <SpaceLockdownOverlay space={activeSpace} />}
+      </Stack>
       <SpaceLockdownGuard />
     </Stack>
   );

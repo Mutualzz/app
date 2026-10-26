@@ -13,33 +13,47 @@ export const AppTheme = observer(({ children }: PropsWithChildren) => {
   const app = useAppStore();
   const themeProviderRef = useRef<ThemeProviderRef>(null);
   const prefersDark = usePrefersDark();
-  const isUpdatingFromServer = useRef(false);
+  const isUpadingFromServer = useRef(false);
 
   useEffect(() => {
     void loadDefaultAppFonts();
   }, []);
 
   useEffect(() => {
+    let themeRequest = 0;
+
     const dispose = reaction(
       () => ({
-        userThemeRemote: app.settings?.currentTheme,
-        userIconRemote: app.settings?.currentIcon
+        userTheme: app.settings?.currentTheme,
+        userIcon: app.settings?.currentIcon,
+        spaceThemeId: app.spaces.active?.themeId
       }),
-      ({ userThemeRemote, userIconRemote }) => {
+      ({ userTheme, userIcon, spaceThemeId }) => {
+        const request = ++themeRequest;
         const themes = app.themes.all;
 
-        if (userIconRemote !== app.themes.currentIcon)
-          app.themes.setCurrentIcon(userIconRemote ?? null);
+        if (userIcon !== app.themes.currentIcon)
+          app.themes.setCurrentIcon(userIcon ?? null);
 
         const pick = (id?: string | null) => {
           const pickedTheme = themes.find((t) => t.id === id);
           if (!pickedTheme) return undefined;
-          return { theme: Theme.toEmotion(pickedTheme), authorId: pickedTheme.authorId };
+          return {
+            theme: Theme.toEmotion(pickedTheme),
+            authorId: pickedTheme.authorId
+          };
         };
 
-        const selected = pick(userThemeRemote) || pick(app.themes.currentTheme);
+        const selected = spaceThemeId
+          ? pick(spaceThemeId) || pick(userTheme)
+          : pick(userTheme);
 
-        if (!selected) return;
+        if (!selected) {
+          if (themeProviderRef.current?.type !== null) {
+            themeProviderRef.current?.changeTheme(null);
+          }
+          return;
+        }
 
         if (selected.theme.id === themeProviderRef.current?.theme.id) return;
 
@@ -48,21 +62,25 @@ export const AppTheme = observer(({ children }: PropsWithChildren) => {
         );
         void ensureAppFont(
           primaryFont ?? selected.theme.typography.fontFamily,
-          selected.authorId ?? app.account?.id,
+          selected.authorId ?? app.account?.id
         )
-          .catch(() => { return; })
+          .catch(() => {
+            return;
+          })
           .finally(() => {
-            isUpdatingFromServer.current = true;
+            if (request !== themeRequest) return;
+
             themeProviderRef.current?.changeTheme(selected.theme);
-            isUpdatingFromServer.current = false;
-            app.themes.setCurrentTheme(selected.theme.id);
           });
       },
       { fireImmediately: true }
     );
 
-    return dispose;
-  }, [prefersDark]);
+    return () => {
+      themeRequest++;
+      dispose();
+    };
+  }, [app, prefersDark]);
 
   return <ThemeProvider ref={themeProviderRef}>{children}</ThemeProvider>;
 });
