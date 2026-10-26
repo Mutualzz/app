@@ -13,7 +13,6 @@ export const AppTheme = observer(({ children }: PropsWithChildren) => {
   const app = useAppStore();
   const themeProviderRef = useRef<ThemeProviderRef>(null);
   const prefersDark = usePrefersDark();
-  const isUpadingFromServer = useRef(false);
 
   useEffect(() => {
     void loadDefaultAppFonts();
