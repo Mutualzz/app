@@ -82,7 +82,7 @@ function walkFiles(rootDir) {
 
 function zipMacApp(appPath, outPath) {
   mkdirSync(dirname(outPath), { recursive: true });
-  execSync(`ditto -c -k --keepParent "${appPath}" "${outPath}"`, {
+  execSync(`ditto -c -k --norsrc --noextattr --keepParent "${appPath}" "${outPath}"`, {
     stdio: "inherit"
   });
 }
