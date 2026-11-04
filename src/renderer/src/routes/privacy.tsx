@@ -87,6 +87,18 @@ function Privacy() {
                       channel bindings, and relay settings.
                     </Typography>
                     <Typography>
+                      • <b>Minecraft Inventories:</b> If a Minecraft server
+                      connected through the Mutualzz Bridge has inventory sync
+                      enabled, we store snapshots of the inventories and ender
+                      chests of players on that server (Minecraft UUID,
+                      username, items, and when the snapshot was taken),
+                      including players who do not have a Mutualzz account.
+                      Admins of the connected Space can view these snapshots;
+                      players who link their account can view their own.
+                      Snapshots are deleted when the bridge is deleted.
+                    </Typography>
+
+                    <Typography>
                       • <b>Preferences:</b> Custom themes, color settings,
                       notification preferences, and accessibility options.
                     </Typography>
@@ -227,12 +239,13 @@ function Privacy() {
                   or visible only to your connections.
                 </Typography>
                 <Typography>
-                  • <b>Moderation:</b> If you report content, authorized Mutualzz
-                  staff may review the reported item and a small amount of
-                  nearby context to investigate the report. Staff do not browse
-                  private conversations outside of reported content. Spaces may
-                  be locked down or removed for policy violations; locked Space
-                  owners can appeal by email where that process is available.
+                  • <b>Moderation:</b> If you report content, authorized
+                  Mutualzz staff may review the reported item and a small amount
+                  of nearby context to investigate the report. Staff do not
+                  browse private conversations outside of reported content.
+                  Spaces may be locked down or removed for policy violations;
+                  locked Space owners can appeal by email where that process is
+                  available.
                 </Typography>
                 <Typography>
                   • <b>Responsibility:</b> You are responsible for the content

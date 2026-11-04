@@ -58,6 +58,11 @@ import { toast } from "react-toastify";
 import { MessageToast } from "@renderer/components/Toast/MessageToast"; // We have to create our own GatewayStatus "enum" to avoid issues with SSR
 import i18n from "@renderer/i18n";
 import { type Channel } from "./objects/Channel";
+import {
+  inventoryQueryKey,
+  type BridgeInventory
+} from "@renderer/hooks/useBridgeInventory";
+import { type BridgeServerStatus } from "@renderer/components/Views/BridgeServerCard";
 
 // We have to create our own GatewayStatus "enum" to avoid issues with SSR
 // since WebSocket is not available in the server environment.
@@ -126,7 +131,7 @@ async function loadRpcActivities(): Promise<PresenceActivity[]> {
   if (!window.api?.presence?.getRpcActivities) return [];
   try {
     const raw = await window.api.presence.getRpcActivities();
-    return normalizeRpcActivities(raw ?? []);
+    return await normalizeRpcActivities(raw ?? []);
   } catch {
     return [];
   }
@@ -191,6 +196,8 @@ export class GatewayStore {
   private backgroundPresenceStatus: PresenceStatus | null = null;
   private sendChain: Promise<void> = Promise.resolve();
 
+  private inventorySubscriptionCounts = new Map<string, number>();
+
   constructor(private readonly app: AppStore) {
     makeAutoObservable(this, {}, { autoBind: true });
     this.app.presence.onScheduledStatusExpire =
@@ -244,8 +251,8 @@ export class GatewayStore {
         })
       );
     } catch {
-    // ignore
-}
+      // ignore
+    }
   }
 
   private clearResumeState() {
@@ -328,8 +335,8 @@ export class GatewayStore {
         socket.close(4000, "reconnect");
       }
     } catch {
-    // ignore
-}
+      // ignore
+    }
 
     this.socket = null;
     this.readyState = GatewayStatus.CLOSED;
@@ -881,6 +888,50 @@ export class GatewayStore {
     this.subscribedUserRefCounts.set(userId, current - 1);
   }
 
+  subscribeInventory(bridgeId: string, minecraftUuid: string) {
+    const key = `${bridgeId}:${minecraftUuid.toLowerCase()}`;
+    const next = (this.inventorySubscriptionCounts.get(key) ?? 0) + 1;
+    this.inventorySubscriptionCounts.set(key, next);
+    if (next > 1) return;
+    if (this.readyState !== GatewayStatus.OPEN) return;
+
+    this.send({
+      op: GatewayOpcodes.InventorySubscribe,
+      d: { bridgeId, minecraftUuid }
+    });
+  }
+
+  unsubscribeInventory(bridgeId: string, minecraftUuid: string) {
+    const key = `${bridgeId}:${minecraftUuid.toLowerCase()}`;
+    const current = this.inventorySubscriptionCounts.get(key) ?? 0;
+    if (current > 1) {
+      this.inventorySubscriptionCounts.set(key, current - 1);
+      return;
+    }
+
+    this.inventorySubscriptionCounts.delete(key);
+    if (this.readyState !== GatewayStatus.OPEN) return;
+    this.send({
+      op: GatewayOpcodes.InventoryUnsubscribe,
+      d: { bridgeId, minecraftUuid }
+    });
+  }
+
+  private resubscribeInventories() {
+    for (const key of this.inventorySubscriptionCounts.keys()) {
+      const [bridgeId, minecraftUuid] = key.split(":");
+      this.send({
+        op: GatewayOpcodes.InventorySubscribe,
+        d: { bridgeId, minecraftUuid }
+      });
+    }
+
+    void this.app.queryClient.invalidateQueries({
+      predicate: (query) =>
+        query.queryKey[0] === "bridges" && query.queryKey[2] === "inventories"
+    });
+  }
+
   private resubscribeUsers() {
     for (const userId of this.subscribedUserIds) {
       this.send({
@@ -1228,6 +1279,18 @@ export class GatewayStore {
     this.dispatchHandlers.set(
       GatewayDispatchEvents.BridgeMemberRemove,
       this.onBridgeMemberRemove
+    );
+    this.dispatchHandlers.set(
+      GatewayDispatchEvents.BridgeInventoryUpdate,
+      this.onBridgeInventoryUpdate
+    );
+    this.dispatchHandlers.set(
+      GatewayDispatchEvents.BridgeGameEvent,
+      this.onBridgeGameEvent
+    );
+    this.dispatchHandlers.set(
+      GatewayDispatchEvents.BridgeServerStatus,
+      this.onBridgeServerStatus
     );
 
     // Space Bans
@@ -1692,6 +1755,7 @@ export class GatewayStore {
     }
 
     this.resubscribeUsers();
+    this.resubscribeInventories();
     this.resubscribeLazyChannels();
     this.app.setGatewayReady(true);
     this.startPresenceLoop();
@@ -1769,6 +1833,7 @@ export class GatewayStore {
     this.reconnectTimeout = 0;
     this.clearReconnect();
     this.resubscribeUsers();
+    this.resubscribeInventories();
     this.app.setGatewayReady(true);
     this.app.startBadgeWatch();
 
@@ -2704,6 +2769,10 @@ export class GatewayStore {
   }) => {
     this.markBridgeHubConnected(payload.bridgeId, true);
     this.app.bridgeChat.add({ ...payload, kind: "leave" });
+
+    void this.app.queryClient.invalidateQueries({
+      queryKey: ["bridges", payload.bridgeId, "inventories", "known"]
+    });
   };
 
   private onBridgeVoiceJoin = (payload: {
@@ -2744,6 +2813,42 @@ export class GatewayStore {
     });
   };
 
+  private onBridgeGameEvent = (payload: {
+    id: string;
+    bridgeId: string;
+    serverId: string;
+    source: "minecraft" | "discord" | "app";
+    name: string;
+    uuid?: string;
+    userId?: string;
+    kind: "death" | "advancement";
+    content: string;
+    at: string;
+  }) => {
+    this.markBridgeHubConnected(payload.bridgeId, true);
+    this.app.bridgeChat.add(payload);
+  };
+
+  private onBridgeServerStatus = (payload: {
+    bridgeId: string;
+    serverId: string;
+    status: BridgeServerStatus | null;
+  }) => {
+    this.app.queryClient.setQueryData(
+      ["me", "bridges", payload.bridgeId],
+      (old: { serverStatuses?: BridgeServerStatus[] } | undefined) => {
+        if (!old) return old;
+        const others = (old.serverStatuses ?? []).filter(
+          (status) => status.serverId !== payload.serverId
+        );
+        return {
+          ...old,
+          serverStatuses: payload.status ? [...others, payload.status] : others
+        };
+      }
+    );
+  };
+
   private onBridgePresence = (payload: {
     bridgeId: string;
     players: { uuid: string; name: string; serverId: string }[];
@@ -2761,6 +2866,21 @@ export class GatewayStore {
             ? { ...b, onlineCount: payload.players.length }
             : b
         )
+    );
+  };
+
+  private onBridgeInventoryUpdate = (
+    payload: BridgeInventory & { bridgeId: string }
+  ) => {
+    const { bridgeId, ...inventory } = payload;
+    this.app.queryClient.setQueryData<BridgeInventory[]>(
+      inventoryQueryKey(bridgeId, inventory.minecraftUuid),
+      (prev) => [
+        ...(prev ?? []).filter(
+          (entry) => entry.serverId !== inventory.serverId
+        ),
+        inventory
+      ]
     );
   };
 

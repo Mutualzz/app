@@ -5,7 +5,7 @@ import {
   MessageContent,
   MessageContentText,
   MessageInfo,
-  MessageRow,
+  MessageRow
 } from "@components/Message/MessageBase";
 import { MinecraftAvatar } from "@components/Minecraft/MinecraftAvatar";
 import { RemoteAvatar } from "@components/Minecraft/RemoteAvatar";
@@ -25,6 +25,17 @@ interface Props {
   header?: boolean;
 }
 
+const SOURCE_LABEL_KEYS = {
+  minecraft: "minecraftBridge.liveSourceMinecraft",
+  discord: "minecraftBridge.liveSourceDiscord",
+  app: "minecraftBridge.liveSourceApp"
+} as const;
+
+const GAME_EVENT_EMOJI = {
+  death: "💀",
+  advancement: "🏆"
+} as const;
+
 export const bridgeAuthorKey = (entry: BridgeFeedEntry) =>
   entry.uuid ??
   entry.userId ??
@@ -33,7 +44,7 @@ export const bridgeAuthorKey = (entry: BridgeFeedEntry) =>
 
 export const shouldStartBridgeGroup = (
   prev: BridgeFeedEntry | undefined,
-  entry: BridgeFeedEntry,
+  entry: BridgeFeedEntry
 ) => {
   if (!prev) return true;
   if (entry.kind !== "chat" || prev.kind !== "chat") return true;
@@ -52,7 +63,11 @@ const BridgeAvatar = observer(
 
     if (entry.avatarUrl) {
       return (
-        <RemoteAvatar src={entry.avatarUrl} name={entry.name} size={pixelSize} />
+        <RemoteAvatar
+          src={entry.avatarUrl}
+          name={entry.name}
+          size={pixelSize}
+        />
       );
     }
 
@@ -75,12 +90,12 @@ const BridgeAvatar = observer(
         <CubeIcon weight="fill" />
       </Avatar>
     );
-  },
+  }
 );
 
 const BridgeTimestamp = ({
   at,
-  position,
+  position
 }: {
   at: string;
   position: "left" | "top";
@@ -117,32 +132,38 @@ export const BridgeMessage = observer(({ entry, header }: Props) => {
   const { theme } = useTheme();
   const app = useAppStore();
 
-  const sourceLabel =
-    entry.source === "minecraft"
-      ? t("minecraftBridge.liveSourceMinecraft")
-      : entry.source === "discord"
-        ? t("minecraftBridge.liveSourceDiscord")
-        : t("minecraftBridge.liveSourceApp");
+  const sourceLabel = t(SOURCE_LABEL_KEYS[entry.source]);
+
+  const eventLabel = () => {
+    const voiceChannel = entry.content
+      ? `#${entry.content}`
+      : t("minecraftBridge.liveVoiceFallback");
+
+    switch (entry.kind) {
+      case "death":
+      case "advancement":
+        return `${GAME_EVENT_EMOJI[entry.kind]} ${entry.content ?? entry.name}`;
+      case "join":
+        return t("minecraftBridge.liveJoined", { name: entry.name });
+      case "leave":
+        return t("minecraftBridge.liveLeft", { name: entry.name });
+      case "voice_join":
+        return t("minecraftBridge.liveVoiceJoined", {
+          name: entry.name,
+          channel: voiceChannel
+        });
+      case "voice_leave":
+        return t("minecraftBridge.liveVoiceLeft", {
+          name: entry.name,
+          channel: voiceChannel
+        });
+      case "chat":
+        return entry.content ?? "";
+    }
+  };
 
   if (entry.kind !== "chat") {
-    const label =
-      entry.kind === "join"
-        ? t("minecraftBridge.liveJoined", { name: entry.name })
-        : entry.kind === "leave"
-          ? t("minecraftBridge.liveLeft", { name: entry.name })
-          : entry.kind === "voice_join"
-            ? t("minecraftBridge.liveVoiceJoined", {
-                name: entry.name,
-                channel: entry.content
-                  ? `#${entry.content}`
-                  : t("minecraftBridge.liveVoiceFallback"),
-              })
-            : t("minecraftBridge.liveVoiceLeft", {
-                name: entry.name,
-                channel: entry.content
-                  ? `#${entry.content}`
-                  : t("minecraftBridge.liveVoiceFallback"),
-              });
+    const label = eventLabel();
 
     return (
       <Stack
@@ -157,11 +178,11 @@ export const BridgeMessage = observer(({ entry, header }: Props) => {
         css={{
           flex: "0 0 auto",
           boxSizing: "border-box",
-          overflow: "hidden",
+          overflow: "hidden"
         }}
       >
         {entry.uuid ? (
-          <MinecraftAvatar uuid={entry.uuid} name={entry.name} size={22} />
+          <MinecraftAvatar uuid={entry.uuid} name={entry.name} size={28} />
         ) : (
           <Avatar size={22} color="neutral" variant="soft" shape="circle">
             <CubeIcon weight="fill" size={12} />
@@ -173,7 +194,7 @@ export const BridgeMessage = observer(({ entry, header }: Props) => {
           css={{
             flex: "1 1 auto",
             minWidth: 0,
-            overflowWrap: "anywhere",
+            overflowWrap: "anywhere"
           }}
         >
           {label}
@@ -197,7 +218,7 @@ export const BridgeMessage = observer(({ entry, header }: Props) => {
       css={{
         flex: "0 0 auto",
         maxWidth: "100%",
-        "&:hover time": { opacity: 1 },
+        "&:hover time": { opacity: 1 }
       }}
     >
       <MessageRow header={header}>
@@ -243,9 +264,7 @@ export const BridgeMessage = observer(({ entry, header }: Props) => {
           <MessageContentText sending={Boolean(entry.pending)}>
             {entry.content && (
               <MarkdownRenderer
-                textColor={
-                  entry.failed ? theme.colors.danger : "primary"
-                }
+                textColor={entry.failed ? theme.colors.danger : "primary"}
                 value={entry.content}
               />
             )}

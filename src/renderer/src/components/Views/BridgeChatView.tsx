@@ -11,12 +11,19 @@ import { BridgeChatHeader } from "./BridgeChatHeader";
 import { BridgeDateSeparator } from "./BridgeDateSeparator";
 import { BridgeMemberList } from "./BridgeMemberList";
 import { BridgeMessage, shouldStartBridgeGroup } from "./BridgeMessage";
+import {
+  type BridgeServerInfo,
+  type BridgeServerStatus
+} from "./BridgeServerCard";
 
 interface BridgeDetail {
   id: string;
+  spaceId: string;
   name: string;
-  role?: "owner" | "member";
+  role?: "admin" | "member";
   hubConnected?: boolean;
+  serverStatuses?: BridgeServerStatus[];
+  servers?: BridgeServerInfo[];
   lastMessageId?: string | null;
   lastAckedId?: string | null;
   unread?: boolean;
@@ -58,14 +65,14 @@ function buildFeedRows(entries: BridgeFeedEntry[]): FeedRow[] {
       rows.push({
         type: "date",
         key: `date:${day.toDateString()}:${entry.id}`,
-        date: day,
+        date: day
       });
     }
     rows.push({
       type: "message",
       key: entry.id,
       entry,
-      header: shouldStartBridgeGroup(prev, entry),
+      header: shouldStartBridgeGroup(prev, entry)
     });
   }
   return rows;
@@ -88,15 +95,15 @@ export const BridgeChatView = observer(({ bridgeId }: Props) => {
     queryFn: () => app.rest.get<BridgeDetail>(`/@me/bridges/${bridgeId}`),
     // Gateway covers live chat/players; slow poll only for hubConnected.
     staleTime: 30_000,
-    refetchInterval: 60_000,
+    refetchInterval: 60_000
   });
 
   const historyQuery = useQuery({
     queryKey: ["me", "bridges", bridgeId, "messages"],
     queryFn: () =>
       app.rest.get<BridgeFeedEntry[]>(
-        `/@me/bridges/${bridgeId}/messages?limit=100`,
-      ),
+        `/@me/bridges/${bridgeId}/messages?limit=100`
+      )
   });
 
   const bridge = bridgesQuery.data;
@@ -125,7 +132,7 @@ export const BridgeChatView = observer(({ bridgeId }: Props) => {
     app.bridgeChat.setUnread(bridgeId, {
       lastMessageId: bridge.lastMessageId ?? null,
       lastAckedId: bridge.lastAckedId ?? null,
-      unread: Boolean(bridge.unread),
+      unread: Boolean(bridge.unread)
     });
   }, [bridge, bridgeId, app.bridgeChat]);
 
@@ -143,8 +150,10 @@ export const BridgeChatView = observer(({ bridgeId }: Props) => {
       lastAckedRef.current = last.id;
       app.bridgeChat.markAcked(bridgeId, last.id);
 
-      const patchUnread = <T extends { lastAckedId?: string | null; unread?: boolean }>(
-        old: T | undefined,
+      const patchUnread = <
+        T extends { lastAckedId?: string | null; unread?: boolean }
+      >(
+        old: T | undefined
       ): T | undefined => {
         if (!old) return old;
         return { ...old, lastAckedId: last.id, unread: false };
@@ -152,17 +161,21 @@ export const BridgeChatView = observer(({ bridgeId }: Props) => {
 
       queryClient.setQueryData<BridgeDetail>(
         ["me", "bridges", bridgeId],
-        (old) => patchUnread(old),
+        (old) => patchUnread(old)
       );
       queryClient.setQueryData<
         { id: string; lastAckedId?: string | null; unread?: boolean }[]
       >(["me", "bridges"], (old) =>
-        old?.map((b) => (b.id === bridgeId ? { ...b, lastAckedId: last.id, unread: false } : b)),
+        old?.map((b) =>
+          b.id === bridgeId ? { ...b, lastAckedId: last.id, unread: false } : b
+        )
       );
 
       void app.rest
         .post(`/@me/bridges/${bridgeId}/ack`, { lastAckedId: last.id })
-        .catch(() => { return; });
+        .catch(() => {
+          return;
+        });
     }, 750);
 
     return () => {
@@ -173,8 +186,8 @@ export const BridgeChatView = observer(({ bridgeId }: Props) => {
   const sendMutation = useMutation({
     mutationFn: (content: string) =>
       app.rest.post<BridgeFeedEntry>(`/@me/bridges/${bridgeId}/chat`, {
-        content,
-      }),
+        content
+      })
   });
 
   const flushQueue = useCallback(async () => {
@@ -184,11 +197,11 @@ export const BridgeChatView = observer(({ bridgeId }: Props) => {
       try {
         const payload = await app.rest.post<BridgeFeedEntry>(
           `/@me/bridges/${bridgeId}/chat`,
-          { content: item.content },
+          { content: item.content }
         );
         app.bridgeChat.resolvePending(item.localId, bridgeId, {
           ...payload,
-          kind: "chat",
+          kind: "chat"
         });
       } catch {
         app.bridgeChat.requeue(item);
@@ -207,7 +220,7 @@ export const BridgeChatView = observer(({ bridgeId }: Props) => {
     loadingOlderRef.current = true;
     try {
       const older = await app.rest.get<BridgeFeedEntry[]>(
-        `/@me/bridges/${bridgeId}/messages?limit=50&before=${encodeURIComponent(oldest.id)}`,
+        `/@me/bridges/${bridgeId}/messages?limit=50&before=${encodeURIComponent(oldest.id)}`
       );
       app.bridgeChat.prepend(bridgeId, older);
     } catch {
@@ -239,7 +252,7 @@ export const BridgeChatView = observer(({ bridgeId }: Props) => {
       },
       onSettled: () => {
         sendingRef.current = false;
-      },
+      }
     });
   };
 
@@ -262,6 +275,7 @@ export const BridgeChatView = observer(({ bridgeId }: Props) => {
       minWidth={0}
     >
       <BridgeChatHeader
+        bridgeId={bridgeId}
         name={bridge?.name ?? t("minecraftBridge.liveTitle")}
         onlineCount={players.length}
         hubConnected={hubConnected}
@@ -294,7 +308,7 @@ export const BridgeChatView = observer(({ bridgeId }: Props) => {
             <Stack p={2.5} direction="column" spacing={1} flex={1}>
               <Typography level="title-md" fontWeight="bold">
                 {t("minecraftBridge.liveWelcomeTitle", {
-                  name: bridge?.name ?? "",
+                  name: bridge?.name ?? ""
                 })}
               </Typography>
               <Typography level="body-sm" textColor="muted">
@@ -318,6 +332,7 @@ export const BridgeChatView = observer(({ bridgeId }: Props) => {
                 void loadOlder();
               }}
               increaseViewportBy={{ top: 400, bottom: 200 }}
+              components={{ Header: () => <div style={{ height: 12 }} /> }}
               itemContent={(_, row) =>
                 row.type === "date" ? (
                   <BridgeDateSeparator date={row.date} />
@@ -328,7 +343,7 @@ export const BridgeChatView = observer(({ bridgeId }: Props) => {
             />
           )}
 
-          <Stack px={1.25} pb={1.25} flexShrink={0} minWidth={0}>
+          <Stack px={1.25} pt={1.25} pb={1.25} flexShrink={0} minWidth={0}>
             <Paper
               elevation={app.settings?.preferEmbossed ? 5 : 1}
               px={1.5}
@@ -340,7 +355,7 @@ export const BridgeChatView = observer(({ bridgeId }: Props) => {
               width="100%"
               css={{
                 minWidth: 0,
-                boxSizing: "border-box",
+                boxSizing: "border-box"
               }}
             >
               <Input
@@ -362,13 +377,21 @@ export const BridgeChatView = observer(({ bridgeId }: Props) => {
                   flex: 1,
                   minWidth: 0,
                   border: "none",
-                  background: "transparent",
+                  background: "transparent"
                 }}
               />
             </Paper>
           </Stack>
         </Stack>
-        {app.memberListVisible && <BridgeMemberList bridgeId={bridgeId} />}
+        {app.memberListVisible && (
+          <BridgeMemberList
+            bridgeId={bridgeId}
+            spaceId={bridge?.spaceId}
+            canViewInventories={bridge?.role === "admin"}
+            serverStatuses={bridge?.serverStatuses}
+            servers={bridge?.servers}
+          />
+        )}
       </Stack>
     </Stack>
   );

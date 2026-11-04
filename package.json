@@ -5,7 +5,8 @@
     "i18next": "^26.3.6",
     "keytar": "^7.9.0",
     "react-i18next": "^17.0.9",
-    "simple-rnnoise-wasm": "1.1.0"
+    "simple-rnnoise-wasm": "1.1.0",
+    "skinview3d": "3.4.2"
   },
   "description": "Mutualzz",
   "devDependencies": {

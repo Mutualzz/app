@@ -43,10 +43,7 @@ export const MinecraftAvatar = observer(
         css={{
           width: pixelSize,
           height: pixelSize,
-          borderRadius: "50%",
-          overflow: "hidden",
-          flexShrink: 0,
-          backgroundColor: "rgba(0,0,0,0.2)",
+          flexShrink: 0
         }}
       >
         <img
@@ -63,10 +60,10 @@ export const MinecraftAvatar = observer(
             height: "100%",
             objectFit: "contain",
             objectPosition: "center",
-            display: "block",
+            display: "block"
           }}
         />
       </div>
     );
-  },
+  }
 );

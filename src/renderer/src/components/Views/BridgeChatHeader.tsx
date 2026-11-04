@@ -3,21 +3,25 @@ import { IconButton } from "@components/IconButton";
 import { Tooltip } from "@components/Tooltip";
 import { useAppStore } from "@hooks/useStores";
 import { ButtonGroup, Stack, Typography } from "@mutualzz/ui-web";
-import { CubeIcon, UsersIcon } from "@phosphor-icons/react";
+import { BackpackIcon, CubeIcon, UsersIcon } from "@phosphor-icons/react";
 import { observer } from "mobx-react-lite";
 import { useTranslation } from "react-i18next";
+import { useModal } from "@renderer/contexts/Modal.context";
+import { BridgeInventoryModal } from "../Modals/BridgeInventoryModal";
 
 interface Props {
+  bridgeId: string;
   name: string;
   onlineCount: number;
   hubConnected: boolean;
-  role?: "owner" | "member";
+  role?: "admin" | "member";
 }
 
 export const BridgeChatHeader = observer(
-  ({ name, onlineCount, hubConnected, role }: Props) => {
+  ({ bridgeId, name, onlineCount, hubConnected, role }: Props) => {
     const app = useAppStore();
     const { t } = useTranslation("settings");
+    const { openModal } = useModal();
 
     const subtitle = !hubConnected
       ? t("minecraftBridge.hubDisconnected")
@@ -28,7 +32,7 @@ export const BridgeChatHeader = observer(
     const roleLabel =
       role === "member"
         ? t("minecraftBridge.roleMember")
-        : role === "owner"
+        : role === "admin"
           ? t("minecraftBridge.roleOwner")
           : null;
 
@@ -67,7 +71,7 @@ export const BridgeChatHeader = observer(
               css={{
                 overflow: "hidden",
                 textOverflow: "ellipsis",
-                whiteSpace: "nowrap",
+                whiteSpace: "nowrap"
               }}
             >
               {name}
@@ -88,7 +92,7 @@ export const BridgeChatHeader = observer(
                 overflow: "hidden",
                 textOverflow: "ellipsis",
                 whiteSpace: "nowrap",
-                flexShrink: 1,
+                flexShrink: 1
               }}
             >
               {subtitle}
@@ -96,6 +100,21 @@ export const BridgeChatHeader = observer(
           </Stack>
         </Stack>
         <ButtonGroup variant="plain" spacing={10}>
+          <Tooltip
+            content={t("minecraftBridge.inventoryButton")}
+            placement="bottom"
+          >
+            <IconButton
+              onClick={() =>
+                openModal(
+                  "bridge-inventory",
+                  <BridgeInventoryModal bridgeId={bridgeId} />
+                )
+              }
+            >
+              <BackpackIcon size={20} weight="fill" />
+            </IconButton>
+          </Tooltip>
           <Tooltip
             content={t("minecraftBridge.toggleMembers")}
             placement="bottom"
@@ -110,5 +129,5 @@ export const BridgeChatHeader = observer(
         </ButtonGroup>
       </Paper>
     );
-  },
+  }
 );
