@@ -8,3 +8,5 @@ out
 .env.development
 .env.production
 .env*
+
+*.tsbuildinfo
