@@ -122,8 +122,8 @@ export const MentionPicker = observer(
           width: editorRect.width
         });
       } catch {
-    // ignore
-}
+        // ignore
+      }
     }, [editor, filtered]);
 
     useEffect(() => {

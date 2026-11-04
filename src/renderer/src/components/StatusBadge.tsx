@@ -1,11 +1,19 @@
 import { observer } from "mobx-react-lite";
 import type { PresenceStatus } from "@mutualzz/types";
 import { Stack, useTheme } from "@mutualzz/ui-web";
-import { type ColorLike, dynamicElevation } from "@mutualzz/ui-core";
+import {
+  type ColorLike,
+  dynamicElevation,
+  extractColors
+} from "@mutualzz/ui-core";
 import { badgePillAnimation, typingDotAnimation } from "@components/keyframes";
 
 function roundPx(value: number) {
   return Math.max(1, Math.round(value));
+}
+
+function toSolidColor(color: ColorLike): ColorLike {
+  return extractColors(color)?.[0] ?? color;
 }
 
 function getStatusMetrics(avatarSize: number) {
@@ -180,6 +188,10 @@ export const StatusBadge = observer(
     const hollow =
       status === "invisible" || (status === "offline" && showOffline);
 
+    const surface = toSolidColor(
+      (cutColor as ColorLike) ?? theme.colors.surface
+    );
+
     const fillColor = (() => {
       switch (status) {
         case "online":
@@ -190,7 +202,7 @@ export const StatusBadge = observer(
           return theme.colors.danger;
         case "invisible":
         case "offline":
-          return hollow ? theme.colors.surface : null;
+          return hollow ? toSolidColor(theme.colors.surface) : null;
         default:
           return null;
       }
@@ -199,10 +211,7 @@ export const StatusBadge = observer(
     if (!showInvisible && status === "invisible") return null;
     if (fillColor == null) return null;
 
-    const effectiveCutColor = dynamicElevation(
-      (cutColor as ColorLike) ?? theme.colors.surface,
-      elevation
-    );
+    const effectiveCutColor = dynamicElevation(surface, elevation);
 
     const { badgeDiameter, ringThickness, xNudgePx, yNudgePx } =
       getStatusMetrics(size);

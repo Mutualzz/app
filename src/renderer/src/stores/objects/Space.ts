@@ -311,11 +311,12 @@ export class Space {
   }
 
   createInvite(channelId?: string | null) {
+    const active = this.app.channels.active;
+    const activeInSpace = active?.spaceId === this.id ? active.id : null;
+
     return this.app.rest.post<APIInvite>(`/spaces/${this.id}/invites`, {
       channelId:
-        channelId ||
-        this.app.channels.activeId ||
-        this.firstNavigableChannel?.id
+        channelId || activeInSpace || this.firstNavigableChannel?.id
     });
   }
 
