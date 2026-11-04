@@ -61,7 +61,7 @@ export const AppMessagesSettings = observer(() => {
 
   return (
     <Stack spacing={7.5} pt={2.5} pb={5} direction="column">
-      <SettingsSection title={t("textAndChat.title")}>
+      <SettingsSection title={t("textAndChat.displayTitle")}>
         <SettingsSelectField
           title={t("textAndChat.messageDisplay")}
           description={t("textAndChat.messageDisplayDescription")}
@@ -111,6 +111,15 @@ export const AppMessagesSettings = observer(() => {
         />
 
         <SettingsToggleRow
+          title={t("textAndChat.showTypingIndicators")}
+          description={t("textAndChat.showTypingIndicatorsDescription")}
+          checked={settings.showTypingIndicators}
+          onChange={(checked) => patch({ showTypingIndicators: checked })}
+        />
+      </SettingsSection>
+
+      <SettingsSection title={t("textAndChat.mediaTitle")}>
+        <SettingsToggleRow
           title={t("textAndChat.showLinkEmbeds")}
           description={t("textAndChat.showLinkEmbedsDescription")}
           checked={settings.showLinkEmbeds}
@@ -129,20 +138,6 @@ export const AppMessagesSettings = observer(() => {
           description={t("textAndChat.revealAllSpoilersDescription")}
           checked={settings.revealAllSpoilers}
           onChange={(checked) => patch({ revealAllSpoilers: checked })}
-        />
-
-        <SettingsToggleRow
-          title={t("textAndChat.showTypingIndicators")}
-          description={t("textAndChat.showTypingIndicatorsDescription")}
-          checked={settings.showTypingIndicators}
-          onChange={(checked) => patch({ showTypingIndicators: checked })}
-        />
-
-        <SettingsToggleRow
-          title={t("textAndChat.sendTypingIndicators")}
-          description={t("textAndChat.sendTypingIndicatorsDescription")}
-          checked={settings.sendTypingIndicators}
-          onChange={(checked) => patch({ sendTypingIndicators: checked })}
         />
       </SettingsSection>
 

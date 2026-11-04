@@ -36,7 +36,7 @@ export const UserSettingsModal = observer(
             sm: "1.25rem",
             md: "1.5rem"
           }}
-          overflow="auto"
+          overflow="hidden"
           justifyContent="center"
           alignItems="center"
           elevation={app.settings?.preferEmbossed ? 3 : 1}

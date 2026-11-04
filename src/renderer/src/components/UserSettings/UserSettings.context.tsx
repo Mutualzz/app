@@ -11,6 +11,7 @@ export type UserSettingsPage =
   | "sessions"
   | "profile"
   | "appearance"
+  | "language"
   | "messages"
   | "voice_and_video"
   | "expressions"
@@ -24,8 +25,12 @@ export type UserSettingsPage =
   | "accessibility"
   | "layout"
   | "composer"
-  | "discord-import";
-export type UserSettingsCategories = "user-settings" | "app-settings";
+  | "discord-import"
+  | "applications";
+export type UserSettingsCategories =
+  | "user-settings"
+  | "app-settings"
+  | "desktop-settings";
 
 interface UserSettingsContextProps {
   currentPage: UserSettingsPage;

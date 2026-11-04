@@ -1,6 +1,7 @@
 import type { PresenceActivity } from "@mutualzz/types";
 import { findOfficialGameById } from "./remoteGameCatalog";
 import { isGameShared } from "./gamePreferences";
+import { resolveRpcApplication } from "./rpcApplications";
 
 export function resolveRpcActivityName(
   applicationId?: string | null,
@@ -18,7 +19,7 @@ export function resolveRpcActivityName(
   return named || "Unknown Game";
 }
 
-export function normalizeRpcActivities(
+export async function normalizeRpcActivities(
   raw: {
     type?: string;
     name?: string;
@@ -34,7 +35,7 @@ export function normalizeRpcActivities(
       smallText?: string;
     };
   }[]
-): PresenceActivity[] {
+): Promise<PresenceActivity[]> {
   const out: PresenceActivity[] = [];
 
   for (const entry of raw) {
@@ -43,7 +44,12 @@ export function normalizeRpcActivities(
     const applicationId = entry.applicationId?.trim() || undefined;
     if (applicationId && !isGameShared(applicationId)) continue;
 
-    const name = resolveRpcActivityName(applicationId, entry.name);
+    // A registered application owns its name, so a game can't pose as another
+    const registered = applicationId
+      ? await resolveRpcApplication(applicationId)
+      : null;
+    const name =
+      registered?.name ?? resolveRpcActivityName(applicationId, entry.name);
     if (!name) continue;
 
     out.push({

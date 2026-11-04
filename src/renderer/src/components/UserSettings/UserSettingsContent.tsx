@@ -12,6 +12,7 @@ import { observer } from "mobx-react-lite";
 import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { AppAppearanceSettings } from "./pages/app/AppAppearanceSettings";
+import { AppLanguageSettings } from "./pages/app/AppLanguageSettings";
 import { UserAccountSettings } from "./pages/user/UserAccountSettings";
 import { UserProfileSettings } from "./pages/user/UserProfileSettings";
 import { AppVoiceVideoSettings } from "@components/UserSettings/pages/app/AppVoiceVideoSettings";
@@ -25,6 +26,7 @@ import { AppKeybindsSettings } from "@components/UserSettings/pages/app/AppKeybi
 import { UserExpressionsSettings } from "@components/UserSettings/pages/user/expressions/UserExpressionsSettings";
 import { DiscordImportSettings } from "@components/UserSettings/pages/user/DiscordImportSettings";
 import { UserSessionsSettings } from "@components/UserSettings/pages/user/UserSessionsSettings";
+import { UserApplicationsSettings } from "@components/UserSettings/pages/user/UserApplicationsSettings";
 import { XIcon } from "@phosphor-icons/react";
 
 interface UserSettingsContentProps {
@@ -62,7 +64,8 @@ export const UserSettingsContent = observer(
       <Stack
         flex={1}
         height="100%"
-        overflow="auto"
+        minWidth={0}
+        overflow="hidden"
         width="100%"
         direction="column"
       >
@@ -97,7 +100,7 @@ export const UserSettingsContent = observer(
 
         <Paper
           flex={1}
-          height="100%"
+          minHeight={0}
           overflow="auto"
           width="100%"
           spacing={1.25}
@@ -109,25 +112,31 @@ export const UserSettingsContent = observer(
           borderBottom="0 !important"
           py={{ xs: "0.5rem", sm: 3 }}
         >
-          {currentPage === "profile" && <UserProfileSettings />}
-          {currentPage === "my-account" && <UserAccountSettings />}
-          {currentPage === "sessions" && <UserSessionsSettings />}
-          {currentPage === "appearance" && <AppAppearanceSettings />}
-          {(currentPage === "messages" ||
-            currentPage === "text_and_chat" ||
-            currentPage === "composer") && <AppMessagesSettings />}
-          {(currentPage === "layout" || currentPage === "accessibility") && (
-            <AppAppearanceSettings />
-          )}
-          {currentPage === "privacy" && <AppPrivacySettings />}
-          {currentPage === "voice_and_video" && <AppVoiceVideoSettings />}
-          {currentPage === "expressions" && <UserExpressionsSettings />}
-          {currentPage === "notifications" && <AppNotificationsSettings />}
-          {currentPage === "desktop" && <AppDesktopSettings />}
-          {currentPage === "keybinds" && <AppKeybindsSettings />}
-          {currentPage === "registered-games" && <AppRegisteredGamesSettings />}
-          {currentPage === "connections" && <AppConnectionsSettings />}
-          {currentPage === "discord-import" && <DiscordImportSettings />}
+          <Stack direction="column" width="100%" maxWidth={760}>
+            {currentPage === "profile" && <UserProfileSettings />}
+            {currentPage === "my-account" && <UserAccountSettings />}
+            {currentPage === "sessions" && <UserSessionsSettings />}
+            {currentPage === "appearance" && <AppAppearanceSettings />}
+            {currentPage === "language" && <AppLanguageSettings />}
+            {(currentPage === "messages" ||
+              currentPage === "text_and_chat" ||
+              currentPage === "composer") && <AppMessagesSettings />}
+            {(currentPage === "layout" || currentPage === "accessibility") && (
+              <AppAppearanceSettings />
+            )}
+            {currentPage === "privacy" && <AppPrivacySettings />}
+            {currentPage === "voice_and_video" && <AppVoiceVideoSettings />}
+            {currentPage === "expressions" && <UserExpressionsSettings />}
+            {currentPage === "notifications" && <AppNotificationsSettings />}
+            {currentPage === "desktop" && <AppDesktopSettings />}
+            {currentPage === "keybinds" && <AppKeybindsSettings />}
+            {currentPage === "registered-games" && (
+              <AppRegisteredGamesSettings />
+            )}
+            {currentPage === "connections" && <AppConnectionsSettings />}
+            {currentPage === "discord-import" && <DiscordImportSettings />}
+            {currentPage === "applications" && <UserApplicationsSettings />}
+          </Stack>
         </Paper>
       </Stack>
     );

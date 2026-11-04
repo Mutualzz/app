@@ -3,11 +3,6 @@ import { useModal } from "@contexts/Modal.context";
 import type { Theme as MzTheme } from "@emotion/react";
 import { usePrefersDark } from "@hooks/usePrefersDark";
 import { useAppStore } from "@hooks/useStores";
-import {
-  type AppLocale,
-  localeNativeNames,
-  supportedLocales
-} from "@mutualzz/i18n";
 import type { ThemeType } from "@mutualzz/types";
 import {
   baseDarkTheme,
@@ -33,11 +28,9 @@ import {
   TrashIcon
 } from "@phosphor-icons/react";
 import { IconButton } from "@renderer/components/IconButton";
-import { getPreferredLocale, setPreferredLocale } from "@renderer/i18n";
 import { Theme } from "@stores/objects/Theme";
 import { useMutation } from "@tanstack/react-query";
 import { getAdaptiveIcon } from "@utils/icons";
-import { isElectron } from "@utils/index";
 import { observer } from "mobx-react-lite";
 import {
   type CSSProperties,
@@ -50,11 +43,7 @@ import { useTranslation } from "react-i18next";
 import { VirtuosoGrid } from "react-virtuoso";
 import { Tooltip } from "@components/Tooltip";
 import { AppAppearanceExtrasSettings } from "@components/UserSettings/pages/app/AppAppearanceExtrasSettings";
-import {
-  SettingsSection,
-  SettingsSelectField,
-  SettingsToggleRow
-} from "@components/UserSettings/SettingsField";
+import { SettingsToggleRow } from "@components/UserSettings/SettingsField";
 
 const ImageBlob = styled("img")<{
   current: boolean;
@@ -123,14 +112,10 @@ const VirtuosoGridItem = (props: BoxProps) => <Box {...props} py={1} />;
 
 export const AppAppearanceSettings = observer(() => {
   const { t } = useTranslation("settings");
-  const { t: tCommon } = useTranslation("common");
   const app = useAppStore();
   const { openModal } = useModal();
   const { theme: currentTheme, changeTheme, type: currentType } = useTheme();
   const prefersDark = usePrefersDark();
-  const [preferredLocale, setPreferredLocaleState] = useState<
-    AppLocale | "system"
-  >(() => getPreferredLocale() ?? "system");
 
   const iconsRef = useRef<Map<string, ThemeWithIcon<Theme>>>(new Map());
   const [_iconsVersion, setIconsVersion] = useState(0);
@@ -373,25 +358,6 @@ export const AppAppearanceSettings = observer(() => {
 
   return (
     <Stack direction="column" pt={2.5} pb={5} spacing={7.5}>
-      <SettingsSection title={tCommon("language.title")}>
-        <SettingsSelectField
-          title={tCommon("language.title")}
-          description={tCommon("language.description")}
-          value={preferredLocale}
-          onChange={(value) => {
-            const next = value as AppLocale | "system";
-            setPreferredLocaleState(next);
-            setPreferredLocale(next);
-          }}
-          options={[
-            { value: "system", label: tCommon("language.systemDefault") },
-            ...supportedLocales.map((locale) => ({
-              value: locale,
-              label: localeNativeNames[locale]
-            }))
-          ]}
-        />
-      </SettingsSection>
       <Paper
         direction="column"
         py={2.5}
@@ -685,28 +651,6 @@ export const AppAppearanceSettings = observer(() => {
           )}
         </Paper>
       )}
-      <SettingsSection title={t("appearance.convertEmoticons")}>
-        <SettingsToggleRow
-          title={t("appearance.convertEmoticons")}
-          description={t("appearance.convertEmoticonsDescription")}
-          checked={!!app.settings?.convertEmoticons}
-          onChange={(checked) => {
-            if (!app.settings) return;
-            app.settings.patchSettings({ convertEmoticons: checked });
-            app.settings.flush();
-          }}
-        />
-      </SettingsSection>
-      {isElectron ? (
-        <SettingsSection title={t("appearance.spellcheck")}>
-          <SettingsToggleRow
-            title={t("appearance.spellcheck")}
-            description={t("appearance.spellcheckDescription")}
-            checked={!!app.settings?.spellcheckEnabled}
-            onChange={() => app.settings?.toggleSpellcheckEnabled()}
-          />
-        </SettingsSection>
-      ) : null}
       <AppAppearanceExtrasSettings />
     </Stack>
   );

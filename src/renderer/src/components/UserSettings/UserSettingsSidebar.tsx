@@ -28,8 +28,10 @@ import { useNavigate } from "@tanstack/react-router";
 import {
   BellIcon,
   ChatTextIcon,
+  CodeIcon,
   DesktopIcon,
   DevicesIcon,
+  DownloadSimpleIcon,
   GameControllerIcon,
   KeyboardIcon,
   LifebuoyIcon,
@@ -40,6 +42,7 @@ import {
   ShieldIcon,
   SignOutIcon,
   SmileyIcon,
+  TranslateIcon,
   UserGearIcon
 } from "@phosphor-icons/react";
 
@@ -76,13 +79,21 @@ const settingsPages: SettingsPages = {
     },
     {
       label: "discord-import",
-      icon: <LinkSimpleIcon weight="fill" />
+      icon: <DownloadSimpleIcon weight="fill" />
+    },
+    {
+      label: "applications",
+      icon: <CodeIcon weight="fill" />
     }
   ],
   "app-settings": [
     {
       label: "appearance",
       icon: <PaletteIcon weight="fill" />
+    },
+    {
+      label: "language",
+      icon: <TranslateIcon weight="fill" />
     },
     {
       label: "messages",
@@ -100,24 +111,24 @@ const settingsPages: SettingsPages = {
       label: "voice_and_video",
       titleKey: "pages.voiceAndVideo",
       icon: <MicrophoneIcon weight="fill" />
-    },
-    ...(isElectron
-      ? [
-          {
-            label: "keybinds" as const,
-            icon: <KeyboardIcon weight="fill" />
-          },
-          {
-            label: "desktop" as const,
-            icon: <DesktopIcon weight="fill" />
-          },
-          {
-            label: "registered-games" as const,
-            icon: <GameControllerIcon weight="fill" />
-          }
-        ]
-      : [])
-  ]
+    }
+  ],
+  "desktop-settings": isElectron
+    ? [
+        {
+          label: "keybinds",
+          icon: <KeyboardIcon weight="fill" />
+        },
+        {
+          label: "registered-games",
+          icon: <GameControllerIcon weight="fill" />
+        },
+        {
+          label: "desktop",
+          icon: <DesktopIcon weight="fill" />
+        }
+      ]
+    : []
 };
 
 export const UserSettingsSidebar = observer(
@@ -158,7 +169,9 @@ export const UserSettingsSidebar = observer(
 
     if (!app.account) return null;
 
-    const categories = Object.entries(settingsPages);
+    const categories = Object.entries(settingsPages).filter(
+      ([, pages]) => pages.length > 0
+    );
 
     const pageLabel = (page: Pages) => {
       if (page.titleKey) return t(page.titleKey);
@@ -176,10 +189,11 @@ export const UserSettingsSidebar = observer(
         borderTop="0 !important"
         borderLeft="0 !important"
         borderBottom="0 !important"
-        justifyContent="space-between"
+        flexShrink={0}
+        overflow="auto"
         px={2.5}
       >
-        <Stack direction="column" height="100%" spacing={2.5}>
+        <Stack direction="column" flex={1} spacing={2.5} pb={2.5}>
           <Stack pt="1rem">
             <Button
               fullWidth
@@ -271,7 +285,8 @@ export const UserSettingsSidebar = observer(
             </Fragment>
           ))}
         </Stack>
-        <Stack direction="column" mb="1rem">
+        <Divider css={{ opacity: 0.25 }} lineColor="muted" />
+        <Stack direction="column" spacing={1} py={2.5}>
           <Button
             color="info"
             variant="plain"
@@ -292,8 +307,8 @@ export const UserSettingsSidebar = observer(
           </Button>
         </Stack>
 
-        <Box mb={5} fontFamily="monospace">
-          <Stack direction="column" mb={2}>
+        <Box pb={4} fontFamily="monospace">
+          <Stack direction="column" mb={2.5}>
             <Typography level="body-xs" textColor="muted">
               Mutualzz v{app.versions.app}
             </Typography>
@@ -307,7 +322,7 @@ export const UserSettingsSidebar = observer(
             fontFamily="monospace"
             direction="column"
             alignItems="flex-start"
-            spacing={0.5}
+            spacing={1}
           >
             <Link
               href={!isElectron ? "https://mutualzz.com/privacy" : undefined}

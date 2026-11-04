@@ -1,6 +1,7 @@
 import { Button } from "@components/Button";
 import { Paper } from "@components/Paper";
 import {
+  Divider,
   Option,
   Select,
   Slider,
@@ -8,7 +9,15 @@ import {
   Switch,
   Typography
 } from "@mutualzz/ui-web";
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import {
+  Children,
+  Fragment,
+  isValidElement,
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode
+} from "react";
 
 const SLIDER_COMMIT_DEBOUNCE_MS = 300;
 
@@ -29,9 +38,9 @@ export function SettingsSection({
       <Paper
         variant="outlined"
         borderRadius={10}
-        py={2.5}
+        py={3}
         px={4}
-        spacing={2.5}
+        spacing={3}
         direction="column"
       >
         {description ? (
@@ -39,7 +48,14 @@ export function SettingsSection({
             {description}
           </Typography>
         ) : null}
-        {children}
+        {Children.toArray(children).map((child, index) => (
+          <Fragment key={isValidElement(child) ? child.key : index}>
+            {index > 0 && (
+              <Divider lineColor="muted" css={{ opacity: 0.25 }} />
+            )}
+            {child}
+          </Fragment>
+        ))}
       </Paper>
     </Stack>
   );

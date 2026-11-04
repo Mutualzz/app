@@ -14,7 +14,8 @@ import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import {
   SettingsSection,
-  SettingsSelectField
+  SettingsSelectField,
+  SettingsToggleRow
 } from "@components/UserSettings/SettingsField";
 
 export const AppPrivacySettings = observer(() => {
@@ -71,6 +72,14 @@ export const AppPrivacySettings = observer(() => {
           }))}
         />
 
+        <SettingsToggleRow
+          title={t("textAndChat.sendTypingIndicators")}
+          description={t("textAndChat.sendTypingIndicatorsDescription")}
+          checked={settings.sendTypingIndicators}
+          onChange={(checked) =>
+            patchExtended({ sendTypingIndicators: checked })
+          }
+        />
       </SettingsSection>
 
       <SettingsSection title={t("privacy.blockedUsers")}>
