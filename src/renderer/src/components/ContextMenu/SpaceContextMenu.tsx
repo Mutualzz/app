@@ -20,8 +20,14 @@ import {
   spaceCategoryTitleKeys,
   spacePageTitleKeys
 } from "@mutualzz/i18n";
-import { ArrowRightIcon, DoorOpenIcon, FlagIcon } from "@phosphor-icons/react";
+import {
+  ArrowRightIcon,
+  DoorOpenIcon,
+  FlagIcon,
+  PaperPlaneTiltIcon
+} from "@phosphor-icons/react";
 import { SpaceNotificationSettingsMenu } from "@components/Space/SpaceNotificationSettingsMenu";
+import { SpaceInviteToSpaceModal } from "@components/Space/SpaceInviteToSpaceModal";
 import { useTranslation } from "react-i18next";
 
 interface Props {
@@ -44,6 +50,7 @@ export const SpaceContextMenu = observer(
     };
 
     const isOwner = space.ownerId === app.account?.id;
+    const canInvite = space.members.me?.hasPermission("CreateInvites");
 
     const shouldShowCategory = (category: SpaceSettingsCategories) => {
       return settingsPages[category].some((page) =>
@@ -74,6 +81,19 @@ export const SpaceContextMenu = observer(
             </ContextItem>
             <Divider css={{ opacity: 0.5 }} />
           </>
+        )}
+        {canInvite && (
+          <ContextItem
+            onClick={() =>
+              openModal(
+                `invite-to-space-${space.id}`,
+                <SpaceInviteToSpaceModal space={space} />
+              )
+            }
+            endDecorator={<PaperPlaneTiltIcon weight="fill" />}
+          >
+            {t("contextMenu.inviteToSpace")}
+          </ContextItem>
         )}
         <SpaceNotificationSettingsMenu space={space} />
         {spaceSettings && (

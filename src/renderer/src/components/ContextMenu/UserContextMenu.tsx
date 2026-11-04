@@ -22,6 +22,8 @@ import { MemberBan } from "@components/Modals/MemberBan";
 import { ReportContentModal } from "@components/Modals/ReportContentModal";
 import { ArrowLeftIcon, FlagIcon, UserMinusIcon } from "@phosphor-icons/react";
 import { type AccountStore } from "@stores/Account.store";
+import { Snowflake } from "@mutualzz/client";
+import { InviteType } from "@mutualzz/types";
 import { useTranslation } from "react-i18next";
 import {
   canAssignRole,
@@ -263,6 +265,36 @@ export const UserContextMenu = observer(
       }
     });
 
+    const { mutate: inviteToSpace, isPending: invitingToSpace } = useMutation({
+      mutationKey: ["invite-user-to-space", user.id],
+      mutationFn: async (target: Space) => {
+        const invite = await target.createInvite();
+        const channel = await app.channels.openDM(user.id);
+        await channel.sendMessage({
+          content: "",
+          nonce: Snowflake.generate(),
+          codedLinks: [{ type: InviteType.Space, code: invite.code }]
+        });
+      },
+      onSuccess: () => {
+        toast.success(
+          t("contextMenu.inviteSent", { displayName: user.displayName })
+        );
+        clearMenu();
+      },
+      onError: () => {
+        toast.error(t("contextMenu.inviteSendFailed"));
+      }
+    });
+
+    const invitableSpaces = isSelf
+      ? []
+      : app.spaces.positioned.filter(
+          (s) =>
+            s.members.me?.hasPermission("CreateInvites") &&
+            !s.members.get(user.id)
+        );
+
     const hierarchyContext =
       space && me ? getHierarchyContext(space, me) : null;
 
@@ -357,6 +389,30 @@ export const UserContextMenu = observer(
                 {t("contextMenu.message")}
               </ContextItem>
             )}
+
+            <ContextSubmenu
+              elevation={app.settings?.preferEmbossed ? 5 : 1}
+              arrow={<ArrowLeftIcon />}
+              label={t("contextMenu.inviteToSpace")}
+              disabled={iBlockedThem || theyBlockedMe || cannotDm}
+              style={{ maxHeight: "15rem", overflowY: "auto" }}
+            >
+              {invitableSpaces.length === 0 ? (
+                <Typography level="body-sm" px={2} py={1}>
+                  {t("contextMenu.noSpacesToInvite")}
+                </Typography>
+              ) : (
+                invitableSpaces.map((s) => (
+                  <ContextItem
+                    key={s.id}
+                    onClick={() => inviteToSpace(s)}
+                    disabled={invitingToSpace}
+                  >
+                    {s.name}
+                  </ContextItem>
+                ))
+              )}
+            </ContextSubmenu>
 
             {insideDMs && (
               <ContextItem onClick={() => closeDm()} disabled={closingDm}>

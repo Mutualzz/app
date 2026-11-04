@@ -31,6 +31,7 @@ import { CheckIcon, CopyIcon } from "@phosphor-icons/react";
 
 interface Props {
   channel?: Channel | null;
+  space?: Space | null;
 }
 
 const expirationOptions = [
@@ -105,11 +106,12 @@ const InviteSendRow = observer(
   }
 );
 
-export const SpaceInviteToSpaceModal = observer(({ channel }: Props) => {
+export const SpaceInviteToSpaceModal = observer(({ channel, space }: Props) => {
   const { t } = useTranslation("space");
   const { t: tCommon } = useTranslation("common");
   const { t: tChat } = useTranslation("chat");
   const app = useAppStore();
+  const targetSpace = space ?? app.spaces.active;
   const [editing, setEditing] = useState(false);
   const [expiresAfter, setExpiresAfter] = useState<number | null>(
     expirationOptions[5].value
@@ -129,9 +131,9 @@ export const SpaceInviteToSpaceModal = observer(({ channel }: Props) => {
     CreateInviteResponse | undefined,
     HttpException
   >({
-    queryKey: ["createInvite", invite?.code],
-    queryFn: () => app.spaces.active?.createInvite(channel?.id),
-    enabled: !!app.spaces.active,
+    queryKey: ["createInvite", targetSpace?.id, invite?.code],
+    queryFn: () => targetSpace?.createInvite(channel?.id),
+    enabled: !!targetSpace,
     refetchOnWindowFocus: false,
     refetchInterval: 0,
     refetchIntervalInBackground: false
@@ -163,7 +165,7 @@ export const SpaceInviteToSpaceModal = observer(({ channel }: Props) => {
   const { mutateAsync: keepAlive } = useMutation({
     mutationKey: ["inviteKeepAlive", invite?.code],
     mutationFn: async () => {
-      const spaceId = app.spaces.active?.id;
+      const spaceId = targetSpace?.id;
       if (!spaceId || !invite?.code || !editSessionId) return;
 
       await app.rest.post(
@@ -179,14 +181,14 @@ export const SpaceInviteToSpaceModal = observer(({ channel }: Props) => {
     if (!editing) return;
     if (!editSessionId) return;
     if (!invite?.code) return;
-    if (!app.spaces.active?.id) return;
+    if (!targetSpace?.id) return;
 
     const id = setInterval(() => {
       keepAlive().catch(() => null);
     }, 12000);
 
     return () => clearInterval(id);
-  }, [editing, editSessionId, invite?.code, app.spaces.active?.id]);
+  }, [editing, editSessionId, invite?.code, targetSpace?.id]);
 
   useEffect(() => {
     if (!isLoading && data) {
@@ -195,7 +197,7 @@ export const SpaceInviteToSpaceModal = observer(({ channel }: Props) => {
     }
   }, [data, isLoading]);
 
-  const channelToUse = channel ?? app.spaces.active?.firstNavigableChannel;
+  const channelToUse = channel ?? targetSpace?.firstNavigableChannel;
 
   const inviteUrl = Invite.constructUrl(invite?.code || "");
 
@@ -250,7 +252,7 @@ export const SpaceInviteToSpaceModal = observer(({ channel }: Props) => {
   };
 
   const spaceMemberIds = new Set(
-    app.spaces.active?.members.all.map((member) => member.userId) ?? []
+    targetSpace?.members.all.map((member) => member.userId) ?? []
   );
 
   const matchesSearch = (user: User) =>
@@ -374,7 +376,7 @@ export const SpaceInviteToSpaceModal = observer(({ channel }: Props) => {
                   {tCommon("cancel")}
                 </Button>
                 <Button
-                  onClick={() => updateInvite(app.spaces.active!)}
+                  onClick={() => updateInvite(targetSpace!)}
                   variant="solid"
                   color="success"
                 >
@@ -397,7 +399,7 @@ export const SpaceInviteToSpaceModal = observer(({ channel }: Props) => {
           <Stack direction="column" spacing={1}>
             <Typography level="h5" fontWeight="bold">
               {t("invites.modal.title", {
-                spaceName: app.spaces.active?.name || tChat("unknownSpace")
+                spaceName: targetSpace?.name || tChat("unknownSpace")
               })}
             </Typography>
             <Typography level="body-sm">
