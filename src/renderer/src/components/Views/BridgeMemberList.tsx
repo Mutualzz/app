@@ -4,25 +4,26 @@ import { MinecraftAvatar } from "@components/Minecraft/MinecraftAvatar";
 import { UserAvatar } from "@components/User/UserAvatar";
 import { useModal } from "@contexts/Modal.context";
 import { useAppStore } from "@hooks/useStores";
-import { Button, Popover, Stack, Typography } from "@mutualzz/ui-web";
-import { useQuery } from "@tanstack/react-query";
+import { Button, Input, Popover, Stack, Typography } from "@mutualzz/ui-web";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { isElectron } from "@utils/index";
 import { observer } from "mobx-react-lite";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useTranslation } from "react-i18next";
+import { Virtuoso } from "react-virtuoso";
 import type { BridgeOnlinePlayer } from "@stores/BridgeChat.store";
-import {
-  BridgeServerCard,
-  type BridgeServerInfo,
-  type BridgeServerStatus
-} from "./BridgeServerCard";
+import { BridgeServerCard, type BridgeServerStatus } from "./BridgeServerCard";
+import { PlayerModerationModal } from "../Modals/PlayerModerationModal";
+import { MagnifyingGlassIcon } from "@phosphor-icons/react";
+
+const KNOWN_PAGE_SIZE = 50;
 
 interface Props {
   bridgeId: string;
   spaceId?: string;
   canViewInventories?: boolean;
   serverStatuses?: BridgeServerStatus[];
-  servers?: BridgeServerInfo[];
+  moderationServers?: string[];
 }
 
 interface BridgeKnownPlayer {
@@ -33,19 +34,29 @@ interface BridgeKnownPlayer {
   online: boolean;
 }
 
+type MemberListRow =
+  | { type: "heading"; key: string; label: string }
+  | { type: "empty"; key: string; label: string }
+  | { type: "player"; key: string; player: BridgeOnlinePlayer }
+  | { type: "offline"; key: string; known: BridgeKnownPlayer };
+
 const PlayerPopout = observer(
   ({
     player,
     onCopied,
     copied,
     lastSeenAt,
-    onViewInventory
+    onViewInventory,
+    onKick,
+    onBan
   }: {
     player: BridgeOnlinePlayer;
     copied: "name" | "uuid" | null;
     onCopied: (kind: "name" | "uuid") => void;
     lastSeenAt?: string;
     onViewInventory?: () => void;
+    onKick?: () => void;
+    onBan?: () => void;
   }) => {
     const { t } = useTranslation("settings");
     const app = useAppStore();
@@ -144,6 +155,20 @@ const PlayerPopout = observer(
             {t("minecraftBridge.inventoryView")}
           </Button>
         )}
+        {(onKick || onBan) && (
+          <Stack direction="row" spacing={0.75}>
+            {onKick && (
+              <Button size="sm" variant="soft" color="warning" onClick={onKick}>
+                {t("minecraftBridge.kickFromServer")}
+              </Button>
+            )}
+            {onBan && (
+              <Button size="sm" variant="soft" color="danger" onClick={onBan}>
+                {t("minecraftBridge.ban")}
+              </Button>
+            )}
+          </Stack>
+        )}
       </Paper>
     );
   }
@@ -156,7 +181,9 @@ const PlayerRow = observer(
     lastSeenAt,
     copied,
     onCopied,
-    onViewInventory
+    onViewInventory,
+    onKick,
+    onBan
   }: {
     player: BridgeOnlinePlayer;
     dimmed?: boolean;
@@ -164,6 +191,8 @@ const PlayerRow = observer(
     copied: "name" | "uuid" | null;
     onCopied: (kind: "name" | "uuid") => void;
     onViewInventory?: () => void;
+    onKick?: () => void;
+    onBan?: () => void;
   }) => {
     const app = useAppStore();
     const linked =
@@ -226,6 +255,8 @@ const PlayerRow = observer(
           onCopied={onCopied}
           lastSeenAt={lastSeenAt}
           onViewInventory={onViewInventory}
+          onKick={onKick}
+          onBan={onBan}
         />
       </Popover>
     );
@@ -238,34 +269,112 @@ export const BridgeMemberList = observer(
     spaceId,
     canViewInventories,
     serverStatuses,
-    servers
+    moderationServers
   }: Props) => {
     const { t } = useTranslation("settings");
     const app = useAppStore();
     const { openModal } = useModal();
     const [copied, setCopied] = useState<"name" | "uuid" | null>(null);
+    const [searchInput, setSearchInput] = useState("");
+    const [search, setSearch] = useState("");
     const rawPlayers = app.bridgeChat.playersFor(bridgeId);
     const players = useMemo(
       () => [...rawPlayers].sort((a, b) => a.name.localeCompare(b.name)),
       [rawPlayers]
     );
 
+    const visiblePlayers = useMemo(() => {
+      const needle = search.toLowerCase();
+      return needle
+        ? players.filter((player) => player.name.toLowerCase().includes(needle))
+        : players;
+    }, [players, search]);
+
+    useEffect(() => {
+      const timer = setTimeout(() => setSearch(searchInput.trim()), 300);
+
+      return () => clearTimeout(timer);
+    }, [searchInput]);
+
     const canSeeAll = Boolean(canViewInventories && spaceId);
-    const knownQuery = useQuery({
-      queryKey: ["bridges", bridgeId, "inventories", "known"],
-      queryFn: () =>
-        app.rest.get<BridgeKnownPlayer[]>(
-          `/spaces/${spaceId}/bridge/inventories`
-        ),
+    const knownQuery = useInfiniteQuery({
+      queryKey: ["bridges", bridgeId, "inventories", "known", search],
+      queryFn: ({ pageParam }) =>
+        app.rest.get<{
+          players: BridgeKnownPlayer[];
+          hasMore: boolean;
+          total: number;
+        }>(`/spaces/${spaceId}/bridge/inventories`, {
+          offline: "true",
+          limit: KNOWN_PAGE_SIZE,
+          offset: pageParam,
+          ...(search ? { q: search } : {})
+        }),
+      initialPageParam: 0,
+      getNextPageParam: (lastPage, pages) =>
+        lastPage.hasMore ? pages.length * KNOWN_PAGE_SIZE : undefined,
       enabled: canSeeAll
     });
 
+    const offlineTotal = knownQuery.data?.pages[0]?.total ?? 0;
+
     const offlinePlayers = useMemo(() => {
       const onlineUuids = new Set(players.map((p) => p.uuid.toLowerCase()));
-      return (knownQuery.data ?? [])
-        .filter((p) => !onlineUuids.has(p.minecraftUuid.toLowerCase()))
-        .sort((a, b) => a.minecraftName.localeCompare(b.minecraftName));
+      return (knownQuery.data?.pages ?? [])
+        .flatMap((page) => page.players)
+        .filter((p) => !onlineUuids.has(p.minecraftUuid.toLowerCase()));
     }, [knownQuery.data, players]);
+
+    const rows = useMemo<MemberListRow[]>(() => {
+      const list: MemberListRow[] = [
+        {
+          type: "heading",
+          key: "online-heading",
+          label: t("minecraftBridge.onlineCount", {
+            count: visiblePlayers.length
+          })
+        }
+      ];
+      if (visiblePlayers.length === 0) {
+        list.push({
+          type: "empty",
+          key: "online-empty",
+          label: search
+            ? t("minecraftBridge.playersNoResults")
+            : t("minecraftBridge.onlineNone")
+        });
+      }
+      for (const player of visiblePlayers) {
+        list.push({ type: "player", key: player.uuid, player });
+      }
+      if (offlinePlayers.length > 0) {
+        list.push({
+          type: "heading",
+          key: "offline-heading",
+          label: t("minecraftBridge.offlineCount", { count: offlineTotal })
+        });
+        for (const known of offlinePlayers) {
+          list.push({
+            type: "offline",
+            key: `offline:${known.minecraftUuid}`,
+            known
+          });
+        }
+      }
+      return list;
+    }, [t, visiblePlayers, offlinePlayers, search, offlineTotal]);
+
+    const listComponents = useMemo(
+      () => ({
+        Header: () => (
+          <BridgeServerCard
+            bridgeId={bridgeId}
+            statuses={serverStatuses ?? []}
+          />
+        )
+      }),
+      [bridgeId, serverStatuses]
+    );
 
     const handleCopied = (kind: "name" | "uuid") => {
       setCopied(kind);
@@ -286,6 +395,87 @@ export const BridgeMemberList = observer(
             )
         : undefined;
 
+    const moderationAction = (
+      action: "kick" | "ban",
+      uuid: string,
+      name: string
+    ) =>
+      canSeeAll && spaceId
+        ? () =>
+            openModal(
+              "player-moderation",
+              <PlayerModerationModal
+                spaceId={spaceId}
+                bridgeId={bridgeId}
+                action={action}
+                minecraftUuid={uuid}
+                minecraftName={name}
+              />
+            )
+        : undefined;
+
+    const renderRow = (row: MemberListRow) => {
+      switch (row.type) {
+        case "heading":
+          return (
+            <Typography
+              textColor="muted"
+              mt={row.key === "offline-heading" ? 2 : 0}
+            >
+              {row.label}
+            </Typography>
+          );
+        case "empty":
+          return (
+            <Typography level="body-sm" textColor="muted" mt={1}>
+              {row.label}
+            </Typography>
+          );
+        case "player":
+          return (
+            <PlayerRow
+              player={row.player}
+              copied={copied}
+              onCopied={handleCopied}
+              onViewInventory={inventoryAction(
+                row.player.uuid,
+                row.player.name
+              )}
+              onKick={
+                moderationServers?.includes(row.player.serverId)
+                  ? moderationAction("kick", row.player.uuid, row.player.name)
+                  : undefined
+              }
+              onBan={moderationAction("ban", row.player.uuid, row.player.name)}
+            />
+          );
+        case "offline":
+          return (
+            <PlayerRow
+              player={{
+                uuid: row.known.minecraftUuid,
+                name: row.known.minecraftName,
+                serverId: row.known.servers[0] ?? "",
+                linkedUser: null
+              }}
+              dimmed
+              lastSeenAt={row.known.lastSeenAt}
+              copied={copied}
+              onCopied={handleCopied}
+              onViewInventory={inventoryAction(
+                row.known.minecraftUuid,
+                row.known.minecraftName
+              )}
+              onBan={moderationAction(
+                "ban",
+                row.known.minecraftUuid,
+                row.known.minecraftName
+              )}
+            />
+          );
+      }
+    };
+
     return (
       <Paper
         elevation={app.settings?.preferEmbossed ? 5 : 0}
@@ -298,66 +488,36 @@ export const BridgeMemberList = observer(
         px={1.75}
         py={1.25}
       >
-        <Stack
-          direction="column"
-          flex="1 1 auto"
-          overflowY="auto"
-          spacing={0.25}
+        <div
+          css={{
+            marginBottom: 8
+          }}
         >
-          <BridgeServerCard
-            bridgeId={bridgeId}
-            statuses={serverStatuses ?? []}
-            servers={servers ?? []}
+          <Input
+            size="sm"
+            fullWidth
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            placeholder={t("minecraftBridge.playersSearch")}
+            startDecorator={<MagnifyingGlassIcon />}
+            type="text"
           />
-
-          <Typography textColor="muted">
-            {t("minecraftBridge.onlineCount", { count: players.length })}
-          </Typography>
-          {players.length === 0 ? (
-            <Typography level="body-sm" textColor="muted" mt={1}>
-              {t("minecraftBridge.onlineNone")}
-            </Typography>
-          ) : (
-            players.map((player) => (
-              <PlayerRow
-                key={player.uuid}
-                player={player}
-                copied={copied}
-                onCopied={handleCopied}
-                onViewInventory={inventoryAction(player.uuid, player.name)}
-              />
-            ))
+        </div>
+        <Virtuoso
+          style={{ flex: 1, minHeight: 0 }}
+          data={rows}
+          computeItemKey={(_, row) => row.key}
+          increaseViewportBy={200}
+          components={listComponents}
+          endReached={() => {
+            if (knownQuery.hasNextPage && !knownQuery.isFetchingNextPage) {
+              void knownQuery.fetchNextPage();
+            }
+          }}
+          itemContent={(_, row) => (
+            <div style={{ paddingBottom: 2 }}>{renderRow(row)}</div>
           )}
-
-          {offlinePlayers.length > 0 && (
-            <>
-              <Typography textColor="muted" mt={2}>
-                {t("minecraftBridge.offlineCount", {
-                  count: offlinePlayers.length
-                })}
-              </Typography>
-              {offlinePlayers.map((known) => (
-                <PlayerRow
-                  key={known.minecraftUuid}
-                  player={{
-                    uuid: known.minecraftUuid,
-                    name: known.minecraftName,
-                    serverId: known.servers[0] ?? "",
-                    linkedUser: null
-                  }}
-                  dimmed
-                  lastSeenAt={known.lastSeenAt}
-                  copied={copied}
-                  onCopied={handleCopied}
-                  onViewInventory={inventoryAction(
-                    known.minecraftUuid,
-                    known.minecraftName
-                  )}
-                />
-              ))}
-            </>
-          )}
-        </Stack>
+        />
       </Paper>
     );
   }

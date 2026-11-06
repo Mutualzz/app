@@ -11,10 +11,7 @@ import { BridgeChatHeader } from "./BridgeChatHeader";
 import { BridgeDateSeparator } from "./BridgeDateSeparator";
 import { BridgeMemberList } from "./BridgeMemberList";
 import { BridgeMessage, shouldStartBridgeGroup } from "./BridgeMessage";
-import {
-  type BridgeServerInfo,
-  type BridgeServerStatus
-} from "./BridgeServerCard";
+import { type BridgeServerStatus } from "./BridgeServerCard";
 
 interface BridgeDetail {
   id: string;
@@ -23,7 +20,7 @@ interface BridgeDetail {
   role?: "admin" | "member";
   hubConnected?: boolean;
   serverStatuses?: BridgeServerStatus[];
-  servers?: BridgeServerInfo[];
+  moderationServers?: string[];
   lastMessageId?: string | null;
   lastAckedId?: string | null;
   unread?: boolean;
@@ -389,7 +386,7 @@ export const BridgeChatView = observer(({ bridgeId }: Props) => {
             spaceId={bridge?.spaceId}
             canViewInventories={bridge?.role === "admin"}
             serverStatuses={bridge?.serverStatuses}
-            servers={bridge?.servers}
+            moderationServers={bridge?.moderationServers}
           />
         )}
       </Stack>

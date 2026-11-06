@@ -6,6 +6,9 @@ export interface InventorySlot {
   slot: number;
   type: string;
   amount: number;
+  enchanted?: boolean;
+  color?: number;
+  trim?: { pattern: string; material: string };
 }
 
 export interface BridgeInventory {

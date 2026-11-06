@@ -1,10 +1,10 @@
 import { Paper } from "@components/Paper";
 import { useAppStore } from "@hooks/useStores";
-import { minecraftServerLabel } from "@mutualzz/client";
 import { Stack, Typography } from "@mutualzz/ui-web";
 import { observer } from "mobx-react-lite";
 import { useTranslation } from "react-i18next";
 import { Tooltip } from "../Tooltip";
+import { useBridgeServerLabel } from "@renderer/hooks/useBridgeServerLabel";
 
 export interface BridgeServerStatus {
   serverId: string;
@@ -58,23 +58,17 @@ const Stat = ({
 export const BridgeServerCard = observer(
   ({
     bridgeId,
-    statuses,
-    servers
+    statuses
   }: {
     bridgeId: string;
     statuses: BridgeServerStatus[];
-    servers: BridgeServerInfo[];
   }) => {
     const app = useAppStore();
     const { t } = useTranslation("settings");
+    const labelFor = useBridgeServerLabel(bridgeId);
     const players = app.bridgeChat.playersFor(bridgeId);
 
     if (statuses.length === 0) return null;
-
-    const labelFor = (serverId: string) =>
-      minecraftServerLabel(
-        servers.find((server) => server.serverId === serverId) ?? { serverId }
-      );
 
     const sorted = [...statuses].sort((a, b) =>
       labelFor(a.serverId).localeCompare(labelFor(b.serverId))

@@ -6,7 +6,8 @@
     "keytar": "^7.9.0",
     "react-i18next": "^17.0.9",
     "simple-rnnoise-wasm": "1.1.0",
-    "skinview3d": "3.4.2"
+    "skinview3d": "3.4.2",
+    "three": "0.156.1"
   },
   "description": "Mutualzz",
   "devDependencies": {
@@ -64,6 +65,7 @@
     "@types/react-dom": "^19.2.3",
     "@types/react-virtualized": "^9.22.3",
     "@types/slate": "^0.47.16",
+    "@types/three": "0.156.0",
     "@types/unist": "^3.0.3",
     "@vitejs/plugin-react": "^6.0.2",
     "archiver": "^7.0.1",

@@ -63,6 +63,16 @@ import {
   type BridgeInventory
 } from "@renderer/hooks/useBridgeInventory";
 import { type BridgeServerStatus } from "@renderer/components/Views/BridgeServerCard";
+import {
+  applyEditUpdates,
+  type InventoryEditAck,
+  type InventoryEdit,
+  inventoryEditsQueryKey,
+  EMPTY_EDITS,
+  type InventoryEditsState
+} from "@renderer/hooks/useInventoryEdits";
+import type { InventoryEditOp } from "@mutualzz/validators";
+import { notifyManager } from "@tanstack/react-query";
 
 // We have to create our own GatewayStatus "enum" to avoid issues with SSR
 // since WebSocket is not available in the server environment.
@@ -197,6 +207,13 @@ export class GatewayStore {
   private sendChain: Promise<void> = Promise.resolve();
 
   private inventorySubscriptionCounts = new Map<string, number>();
+  private inventoryEditAcks = new Map<
+    string,
+    {
+      resolve: (ack: InventoryEditAck) => void;
+      timer: ReturnType<typeof setTimeout>;
+    }
+  >();
 
   constructor(private readonly app: AppStore) {
     makeAutoObservable(this, {}, { autoBind: true });
@@ -932,6 +949,61 @@ export class GatewayStore {
     });
   }
 
+  private requestInventoryEdit(opcode: number, d: Record<string, unknown>) {
+    return new Promise<InventoryEditAck>((resolve) => {
+      if (this.readyState !== GatewayStatus.OPEN) {
+        resolve({ ok: false, message: "Not connected" });
+        return;
+      }
+      const nonce = crypto.randomUUID();
+      const timer = setTimeout(() => {
+        this.inventoryEditAcks.delete(nonce);
+        resolve({ ok: false, message: "No response from the server" });
+      }, 10_000);
+      this.inventoryEditAcks.set(nonce, { resolve, timer });
+      void this.send({ op: opcode, d: { ...d, nonce } });
+    });
+  }
+
+  private updateInventoryEdits(
+    bridgeId: string,
+    minecraftUuid: string,
+    update: (state: InventoryEditsState) => InventoryEditsState
+  ) {
+    this.app.queryClient.setQueryData<InventoryEditsState>(
+      inventoryEditsQueryKey(bridgeId, minecraftUuid),
+      (prev) => update(prev ?? EMPTY_EDITS)
+    );
+  }
+
+  async editInventory(
+    bridgeId: string,
+    minecraftUuid: string,
+    serverId: string,
+    op: InventoryEditOp
+  ) {
+    const ack = await this.requestInventoryEdit(GatewayOpcodes.InventoryEdit, {
+      bridgeId,
+      minecraftUuid,
+      serverId,
+      op
+    });
+    if (ack.ok && ack.edit) {
+      const { edit } = ack;
+      this.updateInventoryEdits(bridgeId, minecraftUuid, (prev) =>
+        applyEditUpdates(prev, [edit])
+      );
+    }
+    return ack;
+  }
+
+  cancelInventoryEdit(bridgeId: string, editId: string) {
+    return this.requestInventoryEdit(GatewayOpcodes.InventoryEditCancel, {
+      bridgeId,
+      editId
+    });
+  }
+
   private resubscribeUsers() {
     for (const userId of this.subscribedUserIds) {
       this.send({
@@ -1291,6 +1363,26 @@ export class GatewayStore {
     this.dispatchHandlers.set(
       GatewayDispatchEvents.BridgeServerStatus,
       this.onBridgeServerStatus
+    );
+    this.dispatchHandlers.set(
+      GatewayDispatchEvents.BridgeUpdate,
+      this.onBridgeUpdate
+    );
+    this.dispatchHandlers.set(
+      GatewayDispatchEvents.BridgeInventoryUpdate,
+      this.onBridgeInventoryUpdate
+    );
+    this.dispatchHandlers.set(
+      GatewayDispatchEvents.BridgeInventoryEditAck,
+      this.onBridgeInventoryEditAck
+    );
+    this.dispatchHandlers.set(
+      GatewayDispatchEvents.BridgeInventoryEdits,
+      this.onBridgeInventoryEdits
+    );
+    this.dispatchHandlers.set(
+      GatewayDispatchEvents.BridgeInventoryEditUpdate,
+      this.onBridgeInventoryEditUpdate
     );
 
     // Space Bans
@@ -2849,6 +2941,26 @@ export class GatewayStore {
     );
   };
 
+  private onBridgeUpdate = (payload: {
+    id: string;
+    name: string;
+    status: number;
+  }) => {
+    const apply = <T extends { id: string }>(bridge: T) =>
+      bridge.id === payload.id
+        ? { ...bridge, name: payload.name, status: payload.status }
+        : bridge;
+
+    this.app.queryClient.setQueryData(
+      ["me", "bridges"],
+      (old: { id: string }[] | undefined) => old?.map(apply)
+    );
+    this.app.queryClient.setQueryData(
+      ["me", "bridges", payload.id],
+      (old: { id: string } | undefined) => (old ? apply(old) : old)
+    );
+  };
+
   private onBridgePresence = (payload: {
     bridgeId: string;
     players: { uuid: string; name: string; serverId: string }[];
@@ -2882,6 +2994,54 @@ export class GatewayStore {
         inventory
       ]
     );
+  };
+
+  private onBridgeInventoryEditAck = (
+    payload: InventoryEditAck & { nonce: string }
+  ) => {
+    const entry = this.inventoryEditAcks.get(payload.nonce);
+    if (!entry) return;
+    clearTimeout(entry.timer);
+    this.inventoryEditAcks.delete(payload.nonce);
+    entry.resolve(payload);
+  };
+
+  private onBridgeInventoryEdits = (payload: {
+    bridgeId: string;
+    minecraftUuid: string;
+    edits: InventoryEdit[];
+    editableServers: string[];
+  }) => {
+    this.updateInventoryEdits(
+      payload.bridgeId,
+      payload.minecraftUuid,
+      (prev) => ({
+        ...prev,
+        edits: payload.edits ?? [],
+        editableServers: payload.editableServers ?? []
+      })
+    );
+  };
+
+  private onBridgeInventoryEditUpdate = ({
+    bridgeId,
+    minecraftUuid,
+    edits,
+    inventory
+  }: {
+    bridgeId: string;
+    minecraftUuid: string;
+    edits: InventoryEdit[];
+    inventory?: BridgeInventory & { bridgeId: string };
+  }) => {
+    notifyManager.batch(() => {
+      if (inventory) this.onBridgeInventoryUpdate(inventory);
+      if (edits.length > 0) {
+        this.updateInventoryEdits(bridgeId, minecraftUuid, (prev) =>
+          applyEditUpdates(prev, edits)
+        );
+      }
+    });
   };
 
   private onSpaceBanAdd = (payload: APISpaceBan) => {

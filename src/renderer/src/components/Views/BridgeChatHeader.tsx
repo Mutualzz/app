@@ -36,6 +36,8 @@ export const BridgeChatHeader = observer(
           ? t("minecraftBridge.roleOwner")
           : null;
 
+    const details = [roleLabel, subtitle].filter(Boolean).join(" · ");
+
     return (
       <Paper
         elevation={app.settings?.preferEmbossed ? 5 : 0}
@@ -76,15 +78,6 @@ export const BridgeChatHeader = observer(
             >
               {name}
             </Typography>
-            {roleLabel && (
-              <Typography
-                level="body-xs"
-                textColor="muted"
-                css={{ flexShrink: 0 }}
-              >
-                · {roleLabel}
-              </Typography>
-            )}
             <Typography
               level="body-xs"
               textColor="muted"
@@ -95,7 +88,7 @@ export const BridgeChatHeader = observer(
                 flexShrink: 1
               }}
             >
-              {subtitle}
+              · {details}
             </Typography>
           </Stack>
         </Stack>
