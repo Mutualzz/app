@@ -90,6 +90,7 @@ const RECONNECT_MAX_TIMEOUT = 30_000;
 const RESUME_STORAGE_KEY = "mutualzz:gateway:resume";
 const RESUME_MAX_AGE_MS = 110_000;
 const FOREGROUND_DEBOUNCE_MS = 1000;
+const FOREGROUND_FRESH_MS = 15_000;
 
 function mergeActivities(opts: {
   processActivities: PresenceActivity[];
@@ -202,6 +203,7 @@ export class GatewayStore {
   private foregroundProbeResolve: ((acked: boolean) => void) | null = null;
   private foregroundHandling = false;
   private lastForegroundAt = 0;
+  private lastInboundAt = 0;
   private connectionGeneration = 0;
   private backgroundPresenceStatus: PresenceStatus | null = null;
   private sendChain: Promise<void> = Promise.resolve();
@@ -329,7 +331,7 @@ export class GatewayStore {
     done?.(false);
   }
 
-  private teardownSocket() {
+  private teardownSocket(reason = "reconnect") {
     this.stopHeartbeat();
     this.clearForegroundProbe();
 
@@ -349,7 +351,7 @@ export class GatewayStore {
         socket.readyState === WebSocket.OPEN ||
         socket.readyState === WebSocket.CONNECTING
       ) {
-        socket.close(4000, "reconnect");
+        socket.close(4000, reason);
       }
     } catch {
       // ignore
@@ -367,14 +369,14 @@ export class GatewayStore {
     this.reconnecting = false;
   };
 
-  private forceReconnect() {
+  private forceReconnect(reason: string) {
     if (!this.app.token) return;
 
-    this.logger.debug("[Foreground] Forcing gateway reconnect");
+    this.logger.debug(`[Foreground] Forcing gateway reconnect (${reason})`);
     this.markGatewayUnavailable();
     this.clearReconnect();
     this.reconnectTimeout = RECONNECT_TIMEOUT;
-    this.teardownSocket();
+    this.teardownSocket(reason);
     void this.connect(this.url).catch((error) => {
       this.logger.error("Foreground reconnect failed", error);
       this.readyState = GatewayStatus.CLOSED;
@@ -396,13 +398,14 @@ export class GatewayStore {
       this.clearForegroundProbe();
       this.foregroundProbeResolve = resolve;
       this.heartbeatAck = false;
+      const startedAt = Date.now();
       this.sendHeartbeat();
 
       this.foregroundProbeTimer = setTimeout(() => {
         this.foregroundProbeTimer = null;
         const done = this.foregroundProbeResolve;
         this.foregroundProbeResolve = null;
-        done?.(this.heartbeatAck);
+        done?.(this.heartbeatAck || this.lastInboundAt >= startedAt);
       }, timeoutMs);
     });
   }
@@ -417,22 +420,26 @@ export class GatewayStore {
 
     this.foregroundHandling = true;
     try {
+      if (this.readyState === GatewayStatus.CONNECTING) return;
+
       const socketOpen =
         !!this.socket &&
         this.socket.readyState === WebSocket.OPEN &&
         this.readyState === GatewayStatus.OPEN;
 
       if (!socketOpen) {
-        this.forceReconnect();
+        this.forceReconnect("foreground:not-open");
         return;
       }
+
+      if (Date.now() - this.lastInboundAt < FOREGROUND_FRESH_MS) return;
 
       this.stopHeartbeat();
       const probeTimeout = Math.min(this.heartbeatInterval ?? 30_000, 10_000);
       const acked = await this.probeConnection(probeTimeout);
 
       if (!acked) {
-        this.forceReconnect();
+        this.forceReconnect("foreground:no-ack");
         return;
       }
 
@@ -1507,6 +1514,7 @@ export class GatewayStore {
   }
 
   private onMessage = async (event: MessageEvent) => {
+    this.lastInboundAt = Date.now();
     try {
       let rawBytes: Uint8Array;
 
@@ -1635,7 +1643,7 @@ export class GatewayStore {
   private handleReconnect() {
     this.markGatewayUnavailable();
     this.logger.debug(`[Gateway] -> Reconnect`);
-    this.teardownSocket();
+    this.teardownSocket("server-reconnect");
     this.startReconnect();
   }
 
@@ -1772,7 +1780,7 @@ export class GatewayStore {
 
     this.reconnectTimeout = RECONNECT_TIMEOUT;
     this.markGatewayUnavailable();
-    this.teardownSocket();
+    this.teardownSocket("heartbeat-timeout");
     this.startReconnect();
   };
 
