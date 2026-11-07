@@ -13,12 +13,28 @@ import { Tooltip } from "@components/Tooltip";
 import { UserAvatar } from "@components/User/UserAvatar";
 import { useAppStore } from "@hooks/useStores";
 import { Avatar, Stack, Typography, useTheme } from "@mutualzz/ui-web";
-import { CubeIcon } from "@phosphor-icons/react";
-import type { BridgeFeedEntry } from "@stores/BridgeChat.store";
+import {
+  CaretDownIcon,
+  CubeIcon,
+  DiscordLogoIcon,
+  SignInIcon,
+  SignOutIcon,
+  SkullIcon,
+  SpeakerHighIcon,
+  SpeakerSlashIcon,
+  TrophyIcon,
+  UsersThreeIcon
+} from "@phosphor-icons/react";
+import type {
+  BridgeAdvancementDetails,
+  BridgeFeedEntry
+} from "@stores/BridgeChat.store";
+import { SlotIcon } from "@components/Minecraft/inventory/ItemIcons";
 import { calendarStrings } from "@mutualzz/client";
 import dayjs from "dayjs";
 import { observer } from "mobx-react-lite";
 import { useTranslation } from "react-i18next";
+import { themeColorVar, typographyColorVar } from "@mutualzz/ui-core";
 
 interface Props {
   entry: BridgeFeedEntry;
@@ -31,10 +47,57 @@ const SOURCE_LABEL_KEYS = {
   app: "minecraftBridge.liveSourceApp"
 } as const;
 
-const GAME_EVENT_EMOJI = {
-  death: "💀",
-  advancement: "🏆"
-} as const;
+const SOURCE_COLORS = {
+  minecraft: "#62B246",
+  discord: "#5865F2",
+  app: themeColorVar("primary")
+} satisfies Record<BridgeFeedEntry["source"], string>;
+
+const SourceBadge = ({
+  source,
+  label
+}: {
+  source: BridgeFeedEntry["source"];
+  label: string;
+}) => {
+  const color = SOURCE_COLORS[source];
+
+  return (
+    <Tooltip content={label} placement="top">
+      <Stack
+        alignItems="center"
+        justifyContent="center"
+        alignSelf="center"
+        css={{
+          margin: "0 6px",
+          width: 18,
+          height: 18,
+          borderRadius: 4,
+          flexShrink: 0,
+          color,
+          backgroundColor: `color-mix(in srgb, ${color} 18%, transparent)`
+        }}
+      >
+        {source === "minecraft" && <CubeIcon weight="fill" size={12} />}
+        {source === "discord" && <DiscordLogoIcon weight="fill" size={12} />}
+        {source === "app" && (
+          <img alt="" src="/icon.png" width={12} height={12} />
+        )}
+      </Stack>
+    </Tooltip>
+  );
+};
+
+type BridgeEventKind = Exclude<BridgeFeedEntry["kind"], "chat">;
+
+const EVENT_STYLE = {
+  join: { Icon: SignInIcon, color: themeColorVar("success") },
+  leave: { Icon: SignOutIcon, color: typographyColorVar("muted") },
+  voice_join: { Icon: SpeakerHighIcon, color: themeColorVar("success") },
+  voice_leave: { Icon: SpeakerSlashIcon, color: typographyColorVar("muted") },
+  death: { Icon: SkullIcon, color: themeColorVar("danger") },
+  advancement: { Icon: TrophyIcon, color: themeColorVar("warning") }
+} satisfies Record<BridgeEventKind, { Icon: typeof CubeIcon; color: string }>;
 
 export const bridgeAuthorKey = (entry: BridgeFeedEntry) =>
   entry.uuid ??
@@ -95,17 +158,19 @@ const BridgeAvatar = observer(
 
 const BridgeTimestamp = ({
   at,
-  position
+  position,
+  tooltipPlacement = "left"
 }: {
   at: string;
   position: "left" | "top";
+  tooltipPlacement?: "left" | "right";
 }) => {
   const date = dayjs(at);
 
   if (position === "left") {
     return (
       <Tooltip
-        placement="left"
+        placement={tooltipPlacement}
         content={date.format("dddd, MMMM D, YYYY h:mm A")}
       >
         <time dateTime={date.toISOString()}>{date.format("h:mm A")}</time>
@@ -127,6 +192,143 @@ const BridgeTimestamp = ({
   );
 };
 
+const EventText = ({
+  label,
+  name,
+  accentColor
+}: {
+  label: string;
+  name: string;
+  accentColor: string;
+}) => {
+  const nameIndex = name ? label.indexOf(name) : -1;
+  const before = nameIndex >= 0 ? label.slice(0, nameIndex) : "";
+  const after = nameIndex >= 0 ? label.slice(nameIndex + name.length) : label;
+  const parts = after.split(/(\[[^\]]+\])/);
+
+  return (
+    <>
+      {before}
+      {nameIndex >= 0 && (
+        <span css={{ color: typographyColorVar("primary"), fontWeight: 600 }}>
+          {name}
+        </span>
+      )}
+      {parts.map((part, index) =>
+        part.startsWith("[") && part.endsWith("]") ? (
+          <span key={index} css={{ color: accentColor, fontWeight: 600 }}>
+            {part}
+          </span>
+        ) : (
+          part
+        )
+      )}
+    </>
+  );
+};
+
+const ADVANCEMENT_FRAME_STYLE = {
+  task: {
+    color: themeColorVar("warning"),
+    labelKey: "minecraftBridge.advancementFrameTask"
+  },
+  goal: {
+    color: themeColorVar("warning"),
+    labelKey: "minecraftBridge.advancementFrameGoal"
+  },
+  challenge: {
+    color: "#A855F7",
+    labelKey: "minecraftBridge.advancementFrameChallenge"
+  }
+} as const satisfies Record<BridgeAdvancementDetails["frame"], unknown>;
+
+const AdvancementCard = ({
+  entry,
+  details
+}: {
+  entry: BridgeFeedEntry;
+  details: BridgeAdvancementDetails;
+}) => {
+  const { t } = useTranslation("settings");
+  const { color, labelKey } = ADVANCEMENT_FRAME_STYLE[details.frame];
+
+  return (
+    <MessageBase system css={{ flex: "0 0 auto", maxWidth: "100%" }}>
+      <MessageInfo css={{ paddingTop: 2 }}>
+        <TrophyIcon weight="fill" size={18} css={{ color }} />
+      </MessageInfo>
+      <Stack direction="column" spacing={1} flex={1} minWidth={0}>
+        <Stack direction="row" alignItems="center" spacing={1} minWidth={0}>
+          {entry.uuid && (
+            <MinecraftAvatar uuid={entry.uuid} name={entry.name} size={20} />
+          )}
+          <Typography
+            level="body-sm"
+            textColor="secondary"
+            css={{ minWidth: 0, overflowWrap: "anywhere" }}
+          >
+            <span
+              css={{ color: typographyColorVar("primary"), fontWeight: 600 }}
+            >
+              {entry.name}
+            </span>{" "}
+            {t(labelKey)}
+          </Typography>
+          <Typography level="body-xs" textColor="muted" css={{ flexShrink: 0 }}>
+            <BridgeTimestamp
+              at={entry.at}
+              position="left"
+              tooltipPlacement="right"
+            />
+          </Typography>
+        </Stack>
+        <Stack
+          direction="row"
+          alignItems="center"
+          spacing={1.5}
+          css={{
+            maxWidth: 420,
+            padding: "8px 12px",
+            borderRadius: 6,
+            borderLeft: `3px solid ${color}`,
+            backgroundColor: `color-mix(in srgb, ${color} 8%, transparent)`
+          }}
+        >
+          {details.icon && (
+            <Stack
+              alignItems="center"
+              justifyContent="center"
+              flexShrink={0}
+              css={{
+                width: 40,
+                height: 40,
+                borderRadius: 4,
+                backgroundColor: `color-mix(in srgb, ${typographyColorVar("primary")} 6%, transparent)`
+              }}
+            >
+              <SlotIcon type={details.icon} />
+            </Stack>
+          )}
+          <Stack direction="column" minWidth={0}>
+            <Typography level="body-sm" css={{ color, fontWeight: 700 }}>
+              {details.title}
+            </Typography>
+            {details.description && (
+              <Typography
+                level="body-xs"
+                textColor="secondary"
+                css={{ overflowWrap: "anywhere" }}
+              >
+                {details.description}
+              </Typography>
+            )}
+          </Stack>
+        </Stack>
+      </Stack>
+    </MessageBase>
+  );
+};
+
 export const BridgeMessage = observer(({ entry, header }: Props) => {
   const { t } = useTranslation("settings");
   const { theme } = useTheme();
@@ -142,7 +344,7 @@ export const BridgeMessage = observer(({ entry, header }: Props) => {
     switch (entry.kind) {
       case "death":
       case "advancement":
-        return `${GAME_EVENT_EMOJI[entry.kind]} ${entry.content ?? entry.name}`;
+        return entry.content ?? entry.name;
       case "join":
         return t("minecraftBridge.liveJoined", { name: entry.name });
       case "leave":
@@ -162,44 +364,51 @@ export const BridgeMessage = observer(({ entry, header }: Props) => {
     }
   };
 
+  if (entry.kind === "advancement" && entry.advancement) {
+    return <AdvancementCard entry={entry} details={entry.advancement} />;
+  }
+
   if (entry.kind !== "chat") {
-    const label = eventLabel();
+    const { Icon, color } = EVENT_STYLE[entry.kind];
 
     return (
-      <Stack
-        direction="row"
-        alignItems="center"
-        spacing={1}
-        px={1}
-        py={0.5}
-        width="100%"
-        maxWidth="100%"
-        minWidth={0}
-        css={{
-          flex: "0 0 auto",
-          boxSizing: "border-box",
-          overflow: "hidden"
-        }}
+      <MessageBase
+        system
+        css={{ flex: "0 0 auto", maxWidth: "100%", alignItems: "center" }}
       >
-        {entry.uuid ? (
-          <MinecraftAvatar uuid={entry.uuid} name={entry.name} size={28} />
-        ) : (
-          <Avatar size={22} color="neutral" variant="soft" shape="circle">
-            <CubeIcon weight="fill" size={12} />
-          </Avatar>
-        )}
-        <Typography
-          level="body-sm"
-          textColor="muted"
-          css={{
-            flex: "1 1 auto",
-            minWidth: 0,
-            overflowWrap: "anywhere"
-          }}
+        <MessageInfo css={{ paddingTop: 0 }}>
+          <Icon weight="fill" size={18} css={{ color }} />
+        </MessageInfo>
+        <Stack
+          direction="row"
+          alignItems="center"
+          spacing={1}
+          flex={1}
+          minWidth={0}
         >
-          {label}
-        </Typography>
-      </Stack>
+          {entry.uuid && (
+            <MinecraftAvatar uuid={entry.uuid} name={entry.name} size={20} />
+          )}
+          <Typography
+            level="body-sm"
+            textColor="secondary"
+            css={{ minWidth: 0, overflowWrap: "anywhere" }}
+          >
+            <EventText
+              label={eventLabel()}
+              name={entry.name}
+              accentColor={color}
+            />
+          </Typography>
+          <Typography level="body-xs" textColor="muted" css={{ flexShrink: 0 }}>
+            <BridgeTimestamp
+              at={entry.at}
+              position="left"
+              tooltipPlacement="right"
+            />
+          </Typography>
+        </Stack>
+      </MessageBase>
     );
   }
 
@@ -233,13 +442,7 @@ export const BridgeMessage = observer(({ entry, header }: Props) => {
           {header && (
             <Stack flexShrink={0} direction="row" alignItems="baseline">
               <Typography>{entry.name}</Typography>
-              <Typography
-                level="body-xs"
-                textColor="muted"
-                css={{ paddingLeft: 6 }}
-              >
-                {sourceLabel}
-              </Typography>
+              <SourceBadge source={entry.source} label={sourceLabel} />
               <BridgeTimestamp at={entry.at} position="top" />
               {entry.pending && (
                 <Typography
@@ -274,3 +477,140 @@ export const BridgeMessage = observer(({ entry, header }: Props) => {
     </MessageBase>
   );
 });
+
+const COLLAPSE_THRESHOLD = 3;
+const SUMMARY_NAME_LIMIT = 3;
+
+export type ActivityFamily = "server" | "voice";
+
+const ACTIVITY_STYLE = {
+  server: {
+    Icon: UsersThreeIcon,
+    summaryKey: "minecraftBridge.activitySummary"
+  },
+  voice: {
+    Icon: SpeakerHighIcon,
+    summaryKey: "minecraftBridge.activityVoiceSummary"
+  }
+} as const;
+
+export const BridgeActivityGroup = observer(
+  ({
+    family,
+    entries,
+    expanded,
+    onToggle
+  }: {
+    family: ActivityFamily;
+    entries: BridgeFeedEntry[];
+    expanded: boolean;
+    onToggle: () => void;
+  }) => {
+    const { t } = useTranslation("settings");
+
+    if (entries.length < COLLAPSE_THRESHOLD) {
+      return (
+        <Stack direction="column">
+          {entries.map((entry) => (
+            <BridgeMessage key={entry.id} entry={entry} />
+          ))}
+        </Stack>
+      );
+    }
+
+    const players = [
+      ...new Map(
+        entries.map((entry) => [bridgeAuthorKey(entry), entry])
+      ).values()
+    ];
+    const shownPlayers = players.slice(0, SUMMARY_NAME_LIMIT);
+    const hiddenCount = players.length - shownPlayers.length;
+    const firstAt = dayjs(entries[0].at).format("h:mm A");
+    const lastAt = dayjs(entries[entries.length - 1].at).format("h:mm A");
+    const { Icon: GroupIcon, summaryKey } = ACTIVITY_STYLE[family];
+
+    return (
+      <Stack direction="column">
+        <MessageBase
+          system
+          onClick={onToggle}
+          css={{
+            flex: "0 0 auto",
+            maxWidth: "100%",
+            alignItems: "center",
+            cursor: "pointer",
+            borderRadius: 6,
+            "&:hover": {
+              backgroundColor: `color-mix(in srgb, ${typographyColorVar("primary")} 4%, transparent)`
+            }
+          }}
+        >
+          <MessageInfo css={{ paddingTop: 0 }}>
+            <GroupIcon
+              weight="fill"
+              size={18}
+              css={{ color: typographyColorVar("muted") }}
+            />
+          </MessageInfo>
+          <Stack
+            direction="row"
+            alignItems="center"
+            spacing={1}
+            flex={1}
+            minWidth={0}
+          >
+            <Stack
+              direction="row"
+              flexShrink={0}
+              css={{ "& > * + *": { marginLeft: -6 } }}
+            >
+              {shownPlayers.map((player) =>
+                player.uuid ? (
+                  <MinecraftAvatar
+                    key={bridgeAuthorKey(player)}
+                    uuid={player.uuid}
+                    name={player.name}
+                    size={20}
+                  />
+                ) : null
+              )}
+            </Stack>
+            <Typography
+              level="body-sm"
+              textColor="secondary"
+              css={{ minWidth: 0, overflowWrap: "anywhere" }}
+            >
+              <span
+                css={{ color: typographyColorVar("primary"), fontWeight: 600 }}
+              >
+                {shownPlayers.map((player) => player.name).join(", ")}
+                {hiddenCount > 0 && ` +${hiddenCount}`}
+              </span>{" "}
+              {t(summaryKey, { count: entries.length })}
+            </Typography>
+            <Typography
+              level="body-xs"
+              textColor="muted"
+              css={{ flexShrink: 0 }}
+            >
+              {firstAt} – {lastAt}
+            </Typography>
+            <CaretDownIcon
+              size={12}
+              css={{
+                color: typographyColorVar("muted"),
+                flexShrink: 0,
+                transition: "transform 0.15s ease",
+                ...(expanded && { transform: "rotate(180deg)" })
+              }}
+            />
+          </Stack>
+        </MessageBase>
+        {expanded &&
+          entries.map((entry) => (
+            <BridgeMessage key={entry.id} entry={entry} />
+          ))}
+      </Stack>
+    );
+  }
+);

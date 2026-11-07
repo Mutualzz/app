@@ -10,7 +10,12 @@ import { Virtuoso, type VirtuosoHandle } from "react-virtuoso";
 import { BridgeChatHeader } from "./BridgeChatHeader";
 import { BridgeDateSeparator } from "./BridgeDateSeparator";
 import { BridgeMemberList } from "./BridgeMemberList";
-import { BridgeMessage, shouldStartBridgeGroup } from "./BridgeMessage";
+import {
+  type ActivityFamily,
+  BridgeActivityGroup,
+  BridgeMessage,
+  shouldStartBridgeGroup
+} from "./BridgeMessage";
 import { type BridgeServerStatus } from "./BridgeServerCard";
 
 interface BridgeDetail {
@@ -43,7 +48,20 @@ interface Props {
 
 type FeedRow =
   | { type: "date"; key: string; date: Date }
-  | { type: "message"; key: string; entry: BridgeFeedEntry; header: boolean };
+  | { type: "message"; key: string; entry: BridgeFeedEntry; header: boolean }
+  | {
+      type: "activity";
+      key: string;
+      family: ActivityFamily;
+      entries: BridgeFeedEntry[];
+    };
+
+const activityFamilyOf = (entry: BridgeFeedEntry): ActivityFamily | null => {
+  if (entry.kind === "join" || entry.kind === "leave") return "server";
+  if (entry.kind === "voice_join" || entry.kind === "voice_leave")
+    return "voice";
+  return null;
+};
 
 function buildFeedRows(entries: BridgeFeedEntry[]): FeedRow[] {
   const rows: FeedRow[] = [];
@@ -65,6 +83,27 @@ function buildFeedRows(entries: BridgeFeedEntry[]): FeedRow[] {
         date: day
       });
     }
+
+    const family = activityFamilyOf(entry);
+    if (family) {
+      const lastRow = rows[rows.length - 1];
+      if (
+        lastRow?.type === "activity" &&
+        lastRow.family === family &&
+        !showDate
+      ) {
+        lastRow.entries.push(entry);
+      } else {
+        rows.push({
+          type: "activity",
+          key: `activity:${entry.id}`,
+          family,
+          entries: [entry]
+        });
+      }
+      continue;
+    }
+
     rows.push({
       type: "message",
       key: entry.id,
@@ -80,6 +119,17 @@ export const BridgeChatView = observer(({ bridgeId }: Props) => {
   const app = useAppStore();
   const queryClient = useQueryClient();
   const [message, setMessage] = useState("");
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(
+    () => new Set()
+  );
+
+  const toggleGroup = (groupKey: string) =>
+    setExpandedGroups((current) => {
+      const next = new Set(current);
+      if (next.has(groupKey)) next.delete(groupKey);
+      else next.add(groupKey);
+      return next;
+    });
   const virtuosoRef = useRef<VirtuosoHandle | null>(null);
   const sendingRef = useRef(false);
   const loadingOlderRef = useRef(false);
@@ -333,6 +383,13 @@ export const BridgeChatView = observer(({ bridgeId }: Props) => {
               itemContent={(_, row) =>
                 row.type === "date" ? (
                   <BridgeDateSeparator date={row.date} />
+                ) : row.type === "activity" ? (
+                  <BridgeActivityGroup
+                    family={row.family}
+                    entries={row.entries}
+                    expanded={expandedGroups.has(row.key)}
+                    onToggle={() => toggleGroup(row.key)}
+                  />
                 ) : (
                   <BridgeMessage entry={row.entry} header={row.header} />
                 )

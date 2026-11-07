@@ -50,6 +50,7 @@ import {
 } from "@mutualzz/client";
 import { makeAutoObservable } from "mobx";
 import type { AppStore } from "./App.store";
+import type { BridgeAdvancementDetails } from "./BridgeChat.store";
 import {
   buildDesktopPresenceFromProcesses,
   ensureRemoteGameCatalog,
@@ -3119,6 +3120,7 @@ export class GatewayStore {
     userId?: string;
     kind: "death" | "advancement";
     content: string;
+    advancement?: BridgeAdvancementDetails;
     at: string;
   }) => {
     this.markBridgeHubConnected(payload.bridgeId, true);
