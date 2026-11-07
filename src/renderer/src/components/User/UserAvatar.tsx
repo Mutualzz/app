@@ -10,7 +10,8 @@ import {
 import {
   Avatar as MAvatar,
   type AvatarProps,
-  useTheme
+  useTheme,
+  Stack
 } from "@mutualzz/ui-web";
 import type { APIUser } from "@mutualzz/types";
 import type { AccountStore } from "@stores/Account.store";
@@ -19,7 +20,11 @@ import { observer } from "mobx-react-lite";
 import { useState } from "react";
 import { useAppStore } from "@hooks/useStores";
 import { Paper } from "@components/Paper";
-import { StatusBadge } from "@components/StatusBadge";
+import {
+  getStatusBadgeMask,
+  isStatusBadgeVisible,
+  StatusBadge
+} from "@components/StatusBadge";
 import { type SpaceMember } from "@stores/objects/SpaceMember";
 import { UserIcon } from "@phosphor-icons/react";
 import { useMenu } from "@contexts/ContextMenu.context";
@@ -27,7 +32,10 @@ import { useMenu } from "@contexts/ContextMenu.context";
 type UserLike = AccountStore | User | APIUser;
 
 function isStoreUser(user: UserLike): user is AccountStore | User {
-  return "constructAvatarUrl" in user && typeof user.constructAvatarUrl === "function";
+  return (
+    "constructAvatarUrl" in user &&
+    typeof user.constructAvatarUrl === "function"
+  );
 }
 
 interface UserAvatarProps extends AvatarProps {
@@ -120,53 +128,67 @@ export const UserAvatar = observer(
 
     const status = app.presence.get(resolvedUser.id)?.status ?? "offline";
     const hasAvatar = !!resolvedUser.avatar;
+    const showBadge =
+      !!badge && isStatusBadgeVisible(status, showInvisible, showOffline);
 
-    const avatar = (
-      <Paper
+    return (
+      <Stack
         position="relative"
         width={size}
         height={size}
-        variant={
-          hasAvatar
-            ? "plain"
-            : resolvedUser.defaultAvatar.color
-              ? "solid"
-              : "elevation"
-        }
-        borderRadius={radius}
-        elevation={hasAvatar ? 0 : 5}
+        flexShrink={0}
         style={{
           borderRadius: radius,
           outline: speaking ? `2px solid ${theme.colors.success}` : "none",
           ...style
         }}
-        draggable={false}
-        onContextMenu={(e) => {
+        onContextMenu={(event) => {
           if (disableContextMenu) return;
-          openContextMenu(e, {
+          openContextMenu(event, {
             type: "user",
             user: resolvedUser,
             member
           });
         }}
       >
-        <MAvatar
-          size={size}
-          onMouseEnter={() => setFocused(true)}
-          onMouseLeave={() => setFocused(false)}
-          src={
-            focused
-              ? resolvedUser.constructAvatarUrl(
-                  !!resolvedUser.avatar?.startsWith("a_"),
-                  version,
-                  size
-                )
-              : resolvedUser.constructAvatarUrl(false, version, size)
+        <Paper
+          width={size}
+          height={size}
+          variant={
+            hasAvatar
+              ? "plain"
+              : resolvedUser.defaultAvatar.color
+                ? "solid"
+                : "elevation"
           }
-          shape={shape}
-          {...restProps}
-        />
-        {status && badge && (
+          borderRadius={radius}
+          elevation={hasAvatar ? 0 : 5}
+          style={{
+            borderRadius: radius,
+            ...(showBadge && {
+              maskImage: getStatusBadgeMask(size, !!typing)
+            })
+          }}
+          draggable={false}
+        >
+          <MAvatar
+            size={size}
+            onMouseEnter={() => setFocused(true)}
+            onMouseLeave={() => setFocused(false)}
+            src={
+              focused
+                ? resolvedUser.constructAvatarUrl(
+                    !!resolvedUser.avatar?.startsWith("a_"),
+                    version,
+                    size
+                  )
+                : resolvedUser.constructAvatarUrl(false, version, size)
+            }
+            shape={shape}
+            {...restProps}
+          />
+        </Paper>
+        {showBadge && (
           <StatusBadge
             status={status}
             size={size}
@@ -174,11 +196,10 @@ export const UserAvatar = observer(
             showInvisible={showInvisible}
             showOffline={showOffline}
             typing={typing}
+            cutout
           />
         )}
-      </Paper>
+      </Stack>
     );
-
-    return avatar;
   }
 );

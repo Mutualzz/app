@@ -109,13 +109,15 @@ function RouteComponent() {
         <Stack height="100%" direction="row" minWidth={0}>
           <SpacesSidebar />
           <Paper
+            surfaceRole="chrome"
             position="relative"
             flex={1}
             minWidth={0}
-            borderLeft="0 !important"
-            elevation={app.settings?.preferEmbossed ? 4 : 0}
+            borderTopLeftRadius="0.75rem"
+            borderBottom="0 !important"
+            elevation={0}
           >
-            <Stack width="100%" height="100%" direction="column">
+            <Stack width="100%" height="100%" minHeight={0} direction="column">
               <Stack direction="column" p={1.75} spacing={1.25}>
                 <Button
                   fullWidth
@@ -134,9 +136,7 @@ function RouteComponent() {
                 const startX = e.clientX;
                 const startWidth = app.dmChannelListWidth;
 
-                (e.currentTarget).setPointerCapture(
-                  e.pointerId
-                );
+                e.currentTarget.setPointerCapture(e.pointerId);
 
                 const onMove = (moveEvent: PointerEvent) => {
                   app.setDmChannelListWidth(

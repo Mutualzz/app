@@ -1,5 +1,4 @@
 import { observer } from "mobx-react-lite";
-import { Paper } from "@components/Paper";
 import { useAppStore } from "@hooks/useStores";
 import { DMChannelItem } from "@components/DMChannel/DMChannelItem";
 import { Stack, Typography } from "@mutualzz/ui-web";
@@ -18,18 +17,15 @@ export const DMChannelList = observer(() => {
   const { openModal } = useModal();
 
   return (
-    <Paper
-      elevation={app.settings?.preferEmbossed ? 4 : 0}
-      direction="column"
-      width="100%"
-      spacing={1.25}
-      borderBottom="0 !important"
-      borderRight="0 !important"
-      borderLeft="0 !important"
-      position="relative"
-      p={2.5}
-    >
-      <Stack direction="row" alignItems="center" justifyContent="space-between">
+    <Stack direction="column" flex={1} minHeight={0}>
+      <Stack
+        direction="row"
+        alignItems="center"
+        justifyContent="space-between"
+        px={2.5}
+        pt={1.5}
+        pb={1}
+      >
         <Typography level="label-xs">{t("dm.title")}</Typography>
         <Tooltip content={t("dm.newMessage")} placement="top">
           <IconButton
@@ -40,19 +36,29 @@ export const DMChannelList = observer(() => {
           </IconButton>
         </Tooltip>
       </Stack>
-      {dms.length === 0 && (
-        <Typography
-          level="body-sm"
-          textColor="secondary"
-          textAlign="center"
-          mt={2}
-        >
-          {t("dm.empty")}
-        </Typography>
-      )}
-      {dms.map((dm) => (
-        <DMChannelItem key={dm.id} channel={dm} />
-      ))}
-    </Paper>
+      <Stack
+        direction="column"
+        flex={1}
+        minHeight={0}
+        spacing={0.5}
+        px={1.5}
+        pb={2}
+        css={{ overflowY: "auto", overflowX: "hidden" }}
+      >
+        {dms.length === 0 && (
+          <Typography
+            level="body-sm"
+            textColor="secondary"
+            textAlign="center"
+            mt={2}
+          >
+            {t("dm.empty")}
+          </Typography>
+        )}
+        {dms.map((dm) => (
+          <DMChannelItem key={dm.id} channel={dm} />
+        ))}
+      </Stack>
+    </Stack>
   );
 });

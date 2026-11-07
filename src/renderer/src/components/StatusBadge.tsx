@@ -12,18 +12,80 @@ function roundPx(value: number) {
   return Math.max(1, Math.round(value));
 }
 
+function roundEven(value: number) {
+  return Math.max(2, Math.round(value / 2) * 2);
+}
+
 function toSolidColor(color: ColorLike): ColorLike {
   return extractColors(color)?.[0] ?? color;
 }
 
 function getStatusMetrics(avatarSize: number) {
-  const badgeDiameter = roundPx(avatarSize * 0.3);
-  const ringThickness = roundPx(badgeDiameter * 0.16);
+  const badgeDiameter = Math.max(12, roundEven(avatarSize * 0.35));
+  const ringThickness = Math.max(2, roundPx(badgeDiameter * 0.2));
 
   const xNudgePx = roundPx(badgeDiameter * 0.65);
   const yNudgePx = roundPx(badgeDiameter * 0.45);
 
   return { badgeDiameter, ringThickness, xNudgePx, yNudgePx };
+}
+
+export function getStatusBadgeLayout(avatarSize: number, typing: boolean) {
+  const { badgeDiameter, ringThickness, xNudgePx, yNudgePx } =
+    getStatusMetrics(avatarSize);
+
+  const pillWidth = roundEven(badgeDiameter * 2.2);
+  const width = typing ? pillWidth : badgeDiameter;
+  const xNudge = typing ? roundPx(pillWidth * 0.6) : xNudgePx;
+
+  return {
+    badgeDiameter,
+    ringThickness,
+    pillWidth,
+    width,
+    xNudge,
+    yNudge: yNudgePx,
+    centerX: avatarSize - xNudge,
+    centerY: avatarSize - yNudgePx
+  };
+}
+
+function holeMaskImage(width: number, height: number, holeShape: string) {
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}"><mask id="hole"><rect width="100%" height="100%" fill="white"/>${holeShape}</mask><rect width="100%" height="100%" mask="url(#hole)"/></svg>`;
+
+  return `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
+}
+
+function pillShape(
+  centerX: number,
+  centerY: number,
+  width: number,
+  height: number
+) {
+  return `<rect x="${centerX - width / 2}" y="${centerY - height / 2}" width="${width}" height="${height}" rx="${height / 2}" fill="black"/>`;
+}
+
+export function getStatusBadgeMask(avatarSize: number, typing: boolean) {
+  const { badgeDiameter, width, centerX, centerY } = getStatusBadgeLayout(
+    avatarSize,
+    typing
+  );
+
+  return holeMaskImage(
+    avatarSize,
+    avatarSize,
+    pillShape(centerX, centerY, width, badgeDiameter)
+  );
+}
+
+export function isStatusBadgeVisible(
+  status: PresenceStatus,
+  showInvisible = false,
+  showOffline = false
+) {
+  if (status === "invisible") return showInvisible;
+  if (status === "offline") return showOffline;
+  return status === "online" || status === "idle" || status === "dnd";
 }
 
 interface StatusBadgeProps {
@@ -35,6 +97,7 @@ interface StatusBadgeProps {
   showInvisible?: boolean;
   showOffline?: boolean;
   typing?: boolean;
+  cutout?: boolean;
 }
 
 interface BadgeVisualProps {
@@ -42,11 +105,13 @@ interface BadgeVisualProps {
   diameter: number;
   pillWidth: number;
   ringThickness: number;
+  ringColor: ColorLike | "transparent";
   cutColor: ColorLike;
   fillColor: string;
   drawOuterRing: boolean;
   hollow?: boolean;
   typing?: boolean;
+  cutout?: boolean;
   overlay?: {
     xNudgePx: number;
     yNudgePx: number;
@@ -59,18 +124,20 @@ const BadgeVisual = observer(
     diameter,
     pillWidth,
     ringThickness,
+    ringColor,
     cutColor,
     fillColor,
     drawOuterRing,
     hollow,
+    cutout,
     typing,
     overlay
   }: BadgeVisualProps) => {
     const geometryInset = drawOuterRing ? ringThickness : 0;
     const innerDiameter = Math.max(1, diameter - geometryInset * 2);
 
-    const dndBarHeight = roundPx(innerDiameter * 0.28);
-    const dndBarWidth = roundPx(innerDiameter * 0.76);
+    const dndBarHeight = roundEven(innerDiameter * 0.28);
+    const dndBarWidth = roundEven(innerDiameter * 0.76);
 
     const idleCutoutDiameter = roundPx(innerDiameter * 0.78);
     const idleCutoutOffset = roundPx(innerDiameter * 0.18);
@@ -81,6 +148,32 @@ const BadgeVisual = observer(
     const dotGap = Math.max(2, roundPx(innerDiameter * 0.2));
 
     const width = typing ? pillWidth : diameter;
+
+    const center = diameter / 2;
+    const hollowHoleDiameter = innerDiameter - invisibleRingThickness * 2;
+
+    const innerHole = (() => {
+      if (status === "idle")
+        return pillShape(
+          center - idleCutoutOffset,
+          center - idleCutoutOffset,
+          idleCutoutDiameter,
+          idleCutoutDiameter
+        );
+      if (status === "dnd")
+        return pillShape(center, center, dndBarWidth, dndBarHeight);
+      if (hollow)
+        return pillShape(
+          center,
+          center,
+          hollowHoleDiameter,
+          hollowHoleDiameter
+        );
+      return null;
+    })();
+
+    const maskedHole = cutout && !typing ? innerHole : null;
+    const hollowRingColor = dynamicElevation(cutColor, 10);
 
     return (
       <Stack
@@ -96,10 +189,13 @@ const BadgeVisual = observer(
           }),
           boxSizing: "border-box",
           ...(drawOuterRing && {
-            border: `${ringThickness}px solid ${cutColor}`
+            border: `${ringThickness}px solid ${ringColor}`
           }),
           backgroundClip: "padding-box",
-          backgroundColor: fillColor,
+          backgroundColor: maskedHole && hollow ? hollowRingColor : fillColor,
+          ...(maskedHole && {
+            maskImage: holeMaskImage(width, diameter, maskedHole)
+          }),
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -127,7 +223,7 @@ const BadgeVisual = observer(
               />
             ))}
           </>
-        ) : (
+        ) : maskedHole ? null : (
           <>
             {status === "dnd" && (
               <Stack
@@ -181,7 +277,8 @@ export const StatusBadge = observer(
     inPicker = false,
     showInvisible = false,
     showOffline = false,
-    typing = false
+    typing = false,
+    cutout = false
   }: StatusBadgeProps) => {
     const { theme } = useTheme();
 
@@ -213,14 +310,8 @@ export const StatusBadge = observer(
 
     const effectiveCutColor = dynamicElevation(surface, elevation);
 
-    const { badgeDiameter, ringThickness, xNudgePx, yNudgePx } =
-      getStatusMetrics(size);
-
-    const pillWidth = roundPx(badgeDiameter * 2.2);
-
-    // nudge accounts for pill width so it stays anchored bottom-right
-    const effectiveXNudge = typing ? roundPx(pillWidth * 0.6) : xNudgePx;
-    const effectiveYNudge = typing ? roundPx(badgeDiameter * 0.45) : yNudgePx;
+    const { badgeDiameter, ringThickness, pillWidth, xNudge, yNudge } =
+      getStatusBadgeLayout(size, typing);
 
     if (inPicker) {
       const pickerBoxSize = roundPx(size * 0.6);
@@ -244,6 +335,7 @@ export const StatusBadge = observer(
             diameter={pickerDotSize}
             pillWidth={roundPx(pickerDotSize * 2.2)}
             ringThickness={pickerRingThickness}
+            ringColor={effectiveCutColor}
             cutColor={effectiveCutColor}
             fillColor={fillColor}
             drawOuterRing={false}
@@ -260,14 +352,16 @@ export const StatusBadge = observer(
         diameter={badgeDiameter}
         pillWidth={pillWidth}
         ringThickness={ringThickness}
+        ringColor={cutout ? "transparent" : effectiveCutColor}
         cutColor={effectiveCutColor}
         fillColor={fillColor}
         drawOuterRing={true}
         hollow={hollow}
         typing={typing}
+        cutout={cutout}
         overlay={{
-          xNudgePx: effectiveXNudge,
-          yNudgePx: effectiveYNudge
+          xNudgePx: xNudge,
+          yNudgePx: yNudge
         }}
       />
     );

@@ -35,6 +35,7 @@ import {
 } from "@phosphor-icons/react";
 import { ChannelSettingsModal } from "@components/ChannelSettings/ChannelSettingsModal";
 import { HoverRevealActions } from "../HoverRevealActions";
+import { UnreadIndicator } from "@components/UnreadIndicator";
 import { useTranslation } from "react-i18next";
 
 interface Props extends PaperProps {
@@ -299,42 +300,12 @@ export const ChannelListItem = observer(
                     {channelElapsed}
                   </Typography>
                 )}
-                {!wrapperHovered && mentionCount > 0 && (
-                  <Stack
-                    alignItems="center"
-                    justifyContent="center"
-                    css={{
-                      minWidth: 16,
-                      height: 16,
-                      borderRadius: 9999,
-                      backgroundColor: theme.colors.danger,
-                      padding: "0 4px"
-                    }}
-                  >
-                    <Typography
-                      level="label-xs"
-                      css={{
-                        color: "#fff",
-                        fontSize: 10
-                      }}
-                    >
-                      {mentionCount > 99 ? "99+" : mentionCount}
-                    </Typography>
-                  </Stack>
+                {!wrapperHovered && (
+                  <UnreadIndicator
+                    mentionCount={mentionCount}
+                    unread={isUnread && !active}
+                  />
                 )}
-                {!wrapperHovered &&
-                  isUnread &&
-                  mentionCount === 0 &&
-                  !active && (
-                    <Stack
-                      css={{
-                        width: 8,
-                        height: 8,
-                        borderRadius: "50%",
-                        backgroundColor: theme.typography.colors.primary
-                      }}
-                    />
-                  )}
                 {wrapperHovered && (
                   <HoverRevealActions visible={wrapperHovered}>
                     {channel.type === ChannelType.Voice && (

@@ -3,13 +3,15 @@ import { useNavigate, useParams } from "@tanstack/react-router";
 import { useAppStore } from "@hooks/useStores";
 import { Paper } from "@components/Paper";
 import { Button } from "@components/Button";
-import { Stack, Typography, useTheme } from "@mutualzz/ui-web";
+import { IconSlot, Stack, Typography, useTheme } from "@mutualzz/ui-web";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { CubeIcon } from "@phosphor-icons/react";
 import { useEffect, useMemo } from "react";
 import { useModal } from "@contexts/Modal.context";
 import { SpaceSettingsModal } from "@components/SpaceSettings/SpaceSettingsModal";
+import { UnreadIndicator } from "../UnreadIndicator";
+import { Tooltip } from "../Tooltip";
 
 interface BridgeSummary {
   id: string;
@@ -106,52 +108,76 @@ export const BridgeChannelList = observer(
           ? t("minecraftBridge.onlineNone")
           : t("minecraftBridge.onlineCount", { count: onlineCount });
 
+      const tooltipLabel =
+        bridge.role === "member"
+          ? `${statusLabel} · ${t("minecraftBridge.roleMember")}`
+          : statusLabel;
+
       return (
-        <Paper
-          key={bridge.id}
-          variant={active ? "soft" : "plain"}
-          width="100%"
-          direction="row"
-          borderRadius={10}
-          px={1}
-          py={0.75}
-          alignItems="center"
-          spacing={1.25}
-          css={{ cursor: "pointer" }}
-          onClick={() => openBridge(bridge)}
-        >
-          <CubeIcon size={22} weight={active ? "fill" : "regular"} />
-          <Stack direction="column" spacing={0} minWidth={0} flex={1}>
-            <Typography
-              level="body-sm"
-              fontWeight={active || unread ? "bold" : undefined}
-              css={{
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                whiteSpace: "nowrap"
-              }}
+        <Tooltip key={bridge.id} content={tooltipLabel} placement="right">
+          <Stack
+            ml={1.5}
+            mr={2.5}
+            px={1.5}
+            direction="column"
+            css={{
+              cursor: "pointer",
+              ...(!bridge.hubConnected && !active && { opacity: 0.5 })
+            }}
+            onClick={() => openBridge(bridge)}
+          >
+            <Paper
+              width="100%"
+              direction="row"
+              alignItems="center"
+              justifyContent="space-between"
+              borderRadius={6}
+              px={1.5}
+              py={1}
+              minHeight={28}
+              variant={active ? "soft" : "plain"}
+              surfaceRole={
+                active && theme.backgroundImageUrl ? "card" : undefined
+              }
+              color={active ? theme.typography.colors.primary : undefined}
             >
-              {bridge.name}
-              {bridge.role === "member"
-                ? ` · ${t("minecraftBridge.roleMember")}`
-                : ""}
-            </Typography>
-            <Typography level="body-xs" textColor="muted">
-              {statusLabel}
-            </Typography>
+              <Stack
+                direction="row"
+                alignItems="center"
+                spacing={1.5}
+                flex={1}
+                minWidth={0}
+              >
+                <IconSlot size={16}>
+                  <CubeIcon weight={active ? "fill" : "regular"} />
+                </IconSlot>
+                <Typography
+                  level="label-sm"
+                  textColor="secondary"
+                  weight={unread || active ? 700 : 600}
+                  whiteSpace="nowrap"
+                  overflow="hidden"
+                  textOverflow="ellipsis"
+                  css={{ minWidth: 0 }}
+                >
+                  {bridge.name}
+                </Typography>
+              </Stack>
+              <Stack direction="row" alignItems="center" spacing={1}>
+                {bridge.hubConnected && onlineCount > 0 && (
+                  <Typography
+                    level="label-xs"
+                    textColor="muted"
+                    css={{ fontVariantNumeric: "tabular-nums" }}
+                  >
+                    {onlineCount}
+                  </Typography>
+                )}
+                <UnreadIndicator mentionCount={0} unread={unread && !active} />
+              </Stack>
+            </Paper>
           </Stack>
-          {unread && !active && (
-            <Stack
-              css={{
-                width: 8,
-                height: 8,
-                borderRadius: 999,
-                backgroundColor: theme.colors.primary,
-                flexShrink: 0
-              }}
-            />
-          )}
-        </Paper>
+        </Tooltip>
       );
     };
 
@@ -159,12 +185,8 @@ export const BridgeChannelList = observer(
       <Stack
         direction="column"
         width="100%"
-        spacing={1.25}
-        borderBottom="0 !important"
-        borderRight="0 !important"
-        borderLeft="0 !important"
         position="relative"
-        p={2.5}
+        pt="1rem"
         flex={1}
         overflow="auto"
       >
@@ -174,7 +196,13 @@ export const BridgeChannelList = observer(
           </Typography>
         )}
         {bridges.length === 0 ? (
-          <Stack direction="column" spacing={1.5} alignItems="center" mt={2}>
+          <Stack
+            direction="column"
+            spacing={1.5}
+            alignItems="center"
+            mt={2}
+            px={2.5}
+          >
             <Typography
               level="body-sm"
               textColor="secondary"

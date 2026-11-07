@@ -18,6 +18,7 @@ import { Tooltip } from "@components/Tooltip";
 import { ChatCircleSlashIcon, BellSlashIcon } from "@phosphor-icons/react";
 import { SmallActivityStatus } from "../SmallActivityStatus";
 import { useTranslation } from "react-i18next";
+import { UnreadIndicator } from "../UnreadIndicator";
 
 interface Props {
   channel: Channel;
@@ -83,18 +84,19 @@ export const DMChannelItem = observer(({ channel }: Props) => {
   return (
     <Paper
       variant={active ? "soft" : "plain"}
+      surfaceRole={active && theme.backgroundImageUrl ? "card" : undefined}
+      color={active ? theme.typography.colors.primary : undefined}
       width="100%"
       direction="row"
-      borderRadius={10}
-      px={1}
+      borderRadius={6}
+      px={1.5}
       py={0.75}
       alignItems="center"
       spacing={1.25}
       css={{
         cursor: "pointer",
-        opacity: iBlockedThem ? 0.6 : active ? 1 : 0.94,
-        transition: "background-color 120ms ease, opacity 120ms ease",
-        "&:hover": active ? {} : { opacity: 1 }
+        opacity: iBlockedThem ? 0.6 : isNotificationMuted && !active ? 0.6 : 1,
+        transition: "background-color 120ms ease, opacity 120ms ease"
       }}
       onContextMenu={(e) => {
         if (recipient && channel.type === ChannelType.DM) {
@@ -155,8 +157,8 @@ export const DMChannelItem = observer(({ channel }: Props) => {
         <Stack direction="column" minWidth={0} flex={1}>
           <Typography
             level="label-sm"
-            weight={active ? "bold" : "medium"}
-            textColor={active ? "primary" : "inherit"}
+            textColor="secondary"
+            weight={isUnread || active ? 700 : 600}
             whiteSpace="nowrap"
             overflow="hidden"
             textOverflow="ellipsis"
@@ -186,53 +188,14 @@ export const DMChannelItem = observer(({ channel }: Props) => {
             ))}
         </Stack>
       </Stack>
-      {!active && (
-        <Stack
-          direction="row"
-          alignItems="center"
-          justifyContent="center"
-          minWidth={16}
-        >
-          {isNotificationMuted ? (
-            <IconSlot size={14}>
-              <BellSlashIcon weight="fill" />
-            </IconSlot>
-          ) : mentionCount > 0 ? (
-            <Stack
-              alignItems="center"
-              justifyContent="center"
-              css={{
-                minWidth: 16,
-                height: 16,
-                borderRadius: 9999,
-                backgroundColor: theme.colors.danger,
-                padding: "0 4px"
-              }}
-            >
-              <Typography
-                level="label-xs"
-                css={{
-                  color: "#fff",
-                  fontSize: 10
-                }}
-              >
-                {mentionCount > 99 ? "99+" : mentionCount}
-              </Typography>
-            </Stack>
-          ) : (
-            isUnread && (
-              <Stack
-                css={{
-                  width: 8,
-                  height: 8,
-                  borderRadius: "50%",
-                  backgroundColor: theme.typography.colors.primary
-                }}
-              />
-            )
-          )}
-        </Stack>
-      )}
+      {!active &&
+        (isNotificationMuted ? (
+          <IconSlot size={14}>
+            <BellSlashIcon weight="fill" />
+          </IconSlot>
+        ) : (
+          <UnreadIndicator mentionCount={mentionCount} unread={isUnread} />
+        ))}
       {iBlockedThem && (
         <Tooltip content={t("blocked")}>
           <IconSlot size={16}>
