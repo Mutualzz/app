@@ -42,8 +42,7 @@ export const UserProfilePopout = observer(({ user, member }: Props) => {
   const [content, setContent] = useState("");
 
   const isSelf =
-    app.account?.id != null &&
-    String(app.account.id) === String(user.id);
+    app.account?.id != null && String(app.account.id) === String(user.id);
   const relationship = app.relationships.getForMe(user.id);
   const iBlockedThem =
     !!relationship?.isBlocked && relationship.userId === app.account?.id;
@@ -110,31 +109,12 @@ export const UserProfilePopout = observer(({ user, member }: Props) => {
     return () => app.gateway.unsubscribeUser(user.id);
   }, [app.gateway, user.id, profileRestricted]);
 
-  const { fontFamily } = useGoogleFont(
-    displayProfile?.pageFontFamily,
-    user.id
-  );
+  const { fontFamily } = useGoogleFont(displayProfile?.pageFontFamily, user.id);
 
   const presence = profileRestricted ? undefined : app.presence.get(user.id);
   const bannerUrl = profileRestricted
     ? undefined
     : displayProfile?.constructBannerUrl();
-
-  const { data: spotifyConnection } = useQuery({
-    queryKey: ["user-spotify", user.id],
-    enabled: !profileRestricted,
-    queryFn: async () => {
-      try {
-        return await app.rest.get<{
-          displayName: string | null;
-          externalUrl: string | null;
-        }>(`/users/${user.id}/spotify`);
-      } catch {
-        return null;
-      }
-    },
-    staleTime: 60_000
-  });
 
   const { data: userConnections } = useQuery({
     queryKey: ["user-connections-public", user.id],
@@ -258,7 +238,8 @@ export const UserProfilePopout = observer(({ user, member }: Props) => {
                 flexWrap="wrap"
               >
                 <Typography level="title-md">{displayName}</Typography>
-                {!profileRestricted && (user.pronouns ?? displayProfile?.pronouns) ? (
+                {!profileRestricted &&
+                (user.pronouns ?? displayProfile?.pronouns) ? (
                   <>
                     <Typography level="body-sm" textColor="muted">
                       ·
@@ -311,18 +292,7 @@ export const UserProfilePopout = observer(({ user, member }: Props) => {
 
           {!profileRestricted && (
             <ProfileConnectionsChips
-              connections={[
-                ...(spotifyConnection?.externalUrl
-                  ? [
-                      {
-                        provider: "spotify",
-                        displayName: spotifyConnection.displayName,
-                        externalUrl: spotifyConnection.externalUrl
-                      }
-                    ]
-                  : []),
-                ...(userConnections?.connections ?? [])
-              ]}
+              connections={userConnections?.connections ?? []}
             />
           )}
 

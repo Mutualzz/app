@@ -19,7 +19,6 @@ import { Route as DownloadRouteImport } from "./routes/download"
 import { Route as AppealRouteImport } from "./routes/appeal"
 import { Route as AuthenticatedRouteRouteImport } from "./routes/_authenticated/route"
 import { Route as IndexRouteImport } from "./routes/index"
-import { Route as SpotifyCallbackRouteImport } from "./routes/spotify/callback"
 import { Route as RegisterDiscordRouteImport } from "./routes/register/discord"
 import { Route as InviteCodeRouteImport } from "./routes/invite/$code"
 import { Route as ConnectionsCallbackRouteImport } from "./routes/connections/callback"
@@ -102,11 +101,6 @@ const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: "/",
   path: "/",
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SpotifyCallbackRoute = SpotifyCallbackRouteImport.update({
-  id: "/spotify/callback",
-  path: "/spotify/callback",
   getParentRoute: () => rootRouteImport,
 } as any)
 const RegisterDiscordRoute = RegisterDiscordRouteImport.update({
@@ -323,7 +317,6 @@ export interface FileRoutesByFullPath {
   "/connections/callback": typeof ConnectionsCallbackRoute
   "/invite/$code": typeof InviteCodeRoute
   "/register/discord": typeof RegisterDiscordRoute
-  "/spotify/callback": typeof SpotifyCallbackRoute
   "/@me/$channelId": typeof AuthenticatedAtmeChannelIdRouteRoute
   "/spaces/$spaceId": typeof AuthenticatedSpacesSpaceIdRouteRouteWithChildren
   "/@me/friends": typeof AuthenticatedAtmeFriendsRoute
@@ -367,7 +360,6 @@ export interface FileRoutesByTo {
   "/connections/callback": typeof ConnectionsCallbackRoute
   "/invite/$code": typeof InviteCodeRoute
   "/register/discord": typeof RegisterDiscordRoute
-  "/spotify/callback": typeof SpotifyCallbackRoute
   "/@me/$channelId": typeof AuthenticatedAtmeChannelIdRouteRoute
   "/spaces/$spaceId": typeof AuthenticatedSpacesSpaceIdRouteRouteWithChildren
   "/@me/friends": typeof AuthenticatedAtmeFriendsRoute
@@ -415,7 +407,6 @@ export interface FileRoutesById {
   "/connections/callback": typeof ConnectionsCallbackRoute
   "/invite/$code": typeof InviteCodeRoute
   "/register/discord": typeof RegisterDiscordRoute
-  "/spotify/callback": typeof SpotifyCallbackRoute
   "/_authenticated/@me/$channelId": typeof AuthenticatedAtmeChannelIdRouteRoute
   "/_authenticated/spaces/$spaceId": typeof AuthenticatedSpacesSpaceIdRouteRouteWithChildren
   "/_authenticated/@me/friends": typeof AuthenticatedAtmeFriendsRoute
@@ -463,7 +454,6 @@ export interface FileRouteTypes {
     | "/connections/callback"
     | "/invite/$code"
     | "/register/discord"
-    | "/spotify/callback"
     | "/@me/$channelId"
     | "/spaces/$spaceId"
     | "/@me/friends"
@@ -507,7 +497,6 @@ export interface FileRouteTypes {
     | "/connections/callback"
     | "/invite/$code"
     | "/register/discord"
-    | "/spotify/callback"
     | "/@me/$channelId"
     | "/spaces/$spaceId"
     | "/@me/friends"
@@ -554,7 +543,6 @@ export interface FileRouteTypes {
     | "/connections/callback"
     | "/invite/$code"
     | "/register/discord"
-    | "/spotify/callback"
     | "/_authenticated/@me/$channelId"
     | "/_authenticated/spaces/$spaceId"
     | "/_authenticated/@me/friends"
@@ -594,7 +582,6 @@ export interface RootRouteChildren {
   UsersUsernameRouteRoute: typeof UsersUsernameRouteRoute
   ConnectionsCallbackRoute: typeof ConnectionsCallbackRoute
   InviteCodeRoute: typeof InviteCodeRoute
-  SpotifyCallbackRoute: typeof SpotifyCallbackRoute
   AuthDiscordCallbackRoute: typeof AuthDiscordCallbackRoute
 }
 
@@ -668,13 +655,6 @@ declare module "@tanstack/react-router" {
       path: "/"
       fullPath: "/"
       preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    "/spotify/callback": {
-      id: "/spotify/callback"
-      path: "/spotify/callback"
-      fullPath: "/spotify/callback"
-      preLoaderRoute: typeof SpotifyCallbackRouteImport
       parentRoute: typeof rootRouteImport
     }
     "/register/discord": {
@@ -1078,7 +1058,6 @@ const rootRouteChildren: RootRouteChildren = {
   UsersUsernameRouteRoute: UsersUsernameRouteRoute,
   ConnectionsCallbackRoute: ConnectionsCallbackRoute,
   InviteCodeRoute: InviteCodeRoute,
-  SpotifyCallbackRoute: SpotifyCallbackRoute,
   AuthDiscordCallbackRoute: AuthDiscordCallbackRoute,
 }
 export const routeTree = rootRouteImport

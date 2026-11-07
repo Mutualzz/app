@@ -5,7 +5,7 @@ import {
   ipcMain,
   nativeImage,
   powerMonitor,
-  shell,
+  shell
 } from "electron";
 import { trayManager } from "./tray";
 import { getMainWindow } from "./windows";
@@ -28,21 +28,19 @@ import {
   refreshProcessCache,
   startProcessCache
 } from "./processCache";
-import {
-  getRpcActivities,
-  setRpcUpdatedListener,
-  startRpc
-} from "./rpc";
+import { getRpcActivities, setRpcUpdatedListener, startRpc } from "./rpc";
 import { getAutostart, setAutostart } from "./autostart";
+import {
+  getLatestMedia,
+  getLatestMediaThumbnail,
+  setMediaUpdatedListener,
+  startMediaWatcher
+} from "./media";
 
 const SERVICE = "mutualzz";
 const ACCOUNT = "default";
 
-function setWindowsBadge(
-  win: BrowserWindow,
-  count: number,
-  color = "#e03131"
-) {
+function setWindowsBadge(win: BrowserWindow, count: number, color = "#e03131") {
   if (count === 0) {
     win.setOverlayIcon(null, "");
     return;
@@ -75,7 +73,13 @@ export function setupIPC(): void {
       if (!win.isDestroyed()) win.webContents.send("presence:rpc-updated");
     }
   });
+  setMediaUpdatedListener(() => {
+    for (const win of BrowserWindow.getAllWindows()) {
+      if (!win.isDestroyed()) win.webContents.send("presence:media-updated");
+    }
+  });
   void startRpc();
+  startMediaWatcher();
 
   ipcMain.handle("app:get-startup-deep-link", () => {
     const url = pendingStartupDeepLink;
@@ -163,6 +167,14 @@ export function setupIPC(): void {
 
   ipcMain.handle("presence:get-rpc-activities", () => {
     return getRpcActivities();
+  });
+
+  ipcMain.handle("presence:get-media", () => {
+    return getLatestMedia();
+  });
+
+  ipcMain.handle("presence:get-media-thumbnail", () => {
+    return getLatestMediaThumbnail();
   });
 
   // Shell/External

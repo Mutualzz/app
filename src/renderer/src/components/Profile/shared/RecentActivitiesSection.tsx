@@ -14,6 +14,7 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useProfileScrimCss } from "./ProfileScrim";
 
 dayjs.extend(relativeTime);
 
@@ -125,10 +126,7 @@ export const RecentActivitiesSection = ({
   const visible = canCollapse && !expanded ? recent.slice(0, 1) : recent;
   const hiddenCount = recent.length - 1;
 
-  const cardCss = {
-    backgroundColor: `${theme.colors.surface}cc`,
-    border: `1px solid ${theme.colors.neutral}22`
-  } as const;
+  const cardCss = useProfileScrimCss();
 
   if (isPending) {
     if (compact) return null;
@@ -236,9 +234,7 @@ export const RecentActivitiesSection = ({
       {visible.map((row) => {
         const activity = toPresenceActivity(row);
         const typeKey =
-          row.type === "listening"
-            ? "activity.listened"
-            : "activity.played";
+          row.type === "listening" ? "activity.listened" : "activity.played";
         const secondary = formatActivitySecondary(activity);
         const duration = formatActivityDuration(row.startedAt, row.endedAt);
         const durationKey =

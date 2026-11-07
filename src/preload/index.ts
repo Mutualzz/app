@@ -45,7 +45,12 @@ const api = {
   },
   presence: {
     getRpcActivities: () => ipcRenderer.invoke("presence:get-rpc-activities"),
-    onRpcUpdated: (callback: () => void) => on("presence:rpc-updated", callback)
+    onRpcUpdated: (callback: () => void) =>
+      on("presence:rpc-updated", callback),
+    getMedia: () => ipcRenderer.invoke("presence:get-media"),
+    getMediaThumbnail: () => ipcRenderer.invoke("presence:get-media-thumbnail"),
+    onMediaUpdated: (callback: () => void) =>
+      on("presence:media-updated", callback)
   },
   badge: {
     set: (count: number, color?: string) =>

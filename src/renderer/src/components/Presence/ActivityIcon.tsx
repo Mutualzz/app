@@ -10,13 +10,30 @@ import {
   getCachedCustomIconImageId,
   resolvePlayingActivityIconUrl
 } from "@renderer/presence/gameIcon";
-import { findCustomGameById, findCustomGameByName } from "@renderer/presence/customGameCatalog";
+import {
+  findCustomGameById,
+  findCustomGameByName
+} from "@renderer/presence/customGameCatalog";
 import { PresenceIcon } from "./PresenceIcon";
+import {
+  AmazonLogoIcon,
+  AppleLogoIcon,
+  type Icon,
+  SpotifyLogoIcon,
+  YoutubeLogoIcon
+} from "@phosphor-icons/react";
 
 interface GameIconResponse {
   iconImageId: string;
   iconUrl: string;
 }
+
+const MEDIA_APP_ICONS: Record<string, { icon: Icon; color: string }> = {
+  spotify: { icon: SpotifyLogoIcon, color: "#1DB954" },
+  "apple-music": { icon: AppleLogoIcon, color: "#FA2D48" },
+  "amazon-music": { icon: AmazonLogoIcon, color: "#25D1DA" },
+  "youtube-music": { icon: YoutubeLogoIcon, color: "#FF0033" }
+};
 
 export const ActivityIcon = observer(function ActivityIcon({
   activity,
@@ -103,17 +120,15 @@ export const ActivityIcon = observer(function ActivityIcon({
     if (catalogUrl) return catalogUrl;
     if (cachedId) return buildIgdbIconUrl(cachedId);
     return data?.iconUrl ?? null;
-  }, [
-    activity.type,
-    assetUrl,
-    broken,
-    catalogUrl,
-    cachedId,
-    data?.iconUrl
-  ]);
+  }, [activity.type, assetUrl, broken, catalogUrl, cachedId, data?.iconUrl]);
+
+  const mediaApp =
+    activity.type === "listening" && activity.applicationId
+      ? MEDIA_APP_ICONS[activity.applicationId]
+      : undefined;
 
   if (url) {
-    return (
+    const image = (
       <img
         src={url}
         alt=""
@@ -128,6 +143,48 @@ export const ActivityIcon = observer(function ActivityIcon({
           flexShrink: 0,
           display: "block"
         }}
+      />
+    );
+
+    if (!mediaApp || size < 32) return image;
+
+    const BadgeIcon = mediaApp.icon;
+    const badgeSize = Math.round(size * 0.36);
+    return (
+      <div css={{ position: "relative", flexShrink: 0, lineHeight: 0 }}>
+        {image}
+        <div
+          css={{
+            position: "absolute",
+            right: -3,
+            bottom: -3,
+            width: badgeSize,
+            height: badgeSize,
+            borderRadius: "50%",
+            backgroundColor: "#000",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center"
+          }}
+        >
+          <BadgeIcon
+            size={Math.round(badgeSize * 0.9)}
+            weight="fill"
+            color={mediaApp.color}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  if (mediaApp) {
+    const BrandIcon = mediaApp.icon;
+    return (
+      <BrandIcon
+        size={size}
+        weight="fill"
+        color={mediaApp.color}
+        css={{ flexShrink: 0 }}
       />
     );
   }

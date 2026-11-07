@@ -28,7 +28,6 @@ import { AppCrashFallback } from "@components/ErrorBoundary/AppCrashFallback";
 import { DesktopShell } from "@components/Desktop/DesktopShell";
 import { InjectGlobal } from "@components/InjectGlobal";
 import Loader from "@components/Loader/Loader";
-import { invalidateSpotifyConnectionCache } from "@renderer/presence/spotifyPresence";
 import WindowTitleBar from "@components/WindowTitleBar";
 import { AppTheme } from "@contexts/AppTheme.context";
 import { DesktopShellProvider } from "@contexts/DesktopShell.context";
@@ -194,15 +193,6 @@ function RootComponent() {
               deepLink: true
             }
           });
-        } else if (url.hostname === "spotify") {
-          invalidateSpotifyConnectionCache();
-          await app.queryClient.invalidateQueries({
-            queryKey: ["spotify-connection"]
-          });
-          app.gateway.refreshPresenceActivities();
-          toast.success(i18n.t("settings:connections.spotifyConnectedToast"), {
-            toastId: "spotify-connected"
-          });
         } else if (url.hostname === "auth") {
           const authPath = url.pathname.replace(/^\/+/, "");
 
@@ -274,49 +264,49 @@ function RootComponent() {
               data-high-contrast={highContrast ? "" : undefined}
               style={{ display: "contents" }}
             >
-            <ModalProvider>
-              <CssBaseline adaptiveScrollbar />
-              <DesktopShellProvider>
-                <WindowTitleBarProvider>
-                  <WindowTitleBar onHeightChange={setTitleBarHeight} />
-                  <DesktopShell>
-                    <ContextMenuProvider>
-                      <ModalRoot />
-                      <ToastHost />
-                      <SettingsReturnHandler />
-                      <IncomingCallWatcher />
-                      <ChangelogPrompt />
-                      <ScreenSharePicker />
-                      <NavigationTracker />
-                      <AppHotkeys />
-                      <GlobalKeyboardShortcuts />
-                      <InjectGlobal />
-                      <Loader>
-                        <Stack
-                          direction="column"
-                          height="100%"
-                          width="100%"
-                          flex={1}
-                          minHeight={0}
-                          css={{
-                            paddingTop: titleBarHeight
-                          }}
-                        >
+              <ModalProvider>
+                <CssBaseline adaptiveScrollbar />
+                <DesktopShellProvider>
+                  <WindowTitleBarProvider>
+                    <WindowTitleBar onHeightChange={setTitleBarHeight} />
+                    <DesktopShell>
+                      <ContextMenuProvider>
+                        <ModalRoot />
+                        <ToastHost />
+                        <SettingsReturnHandler />
+                        <IncomingCallWatcher />
+                        <ChangelogPrompt />
+                        <ScreenSharePicker />
+                        <NavigationTracker />
+                        <AppHotkeys />
+                        <GlobalKeyboardShortcuts />
+                        <InjectGlobal />
+                        <Loader>
                           <Stack
+                            direction="column"
+                            height="100%"
                             width="100%"
                             flex={1}
                             minHeight={0}
-                            overflow="hidden"
+                            css={{
+                              paddingTop: titleBarHeight
+                            }}
                           >
-                            <Outlet />
+                            <Stack
+                              width="100%"
+                              flex={1}
+                              minHeight={0}
+                              overflow="hidden"
+                            >
+                              <Outlet />
+                            </Stack>
                           </Stack>
-                        </Stack>
-                      </Loader>
-                    </ContextMenuProvider>
-                  </DesktopShell>
-                </WindowTitleBarProvider>
-              </DesktopShellProvider>
-            </ModalProvider>
+                        </Loader>
+                      </ContextMenuProvider>
+                    </DesktopShell>
+                  </WindowTitleBarProvider>
+                </DesktopShellProvider>
+              </ModalProvider>
             </div>
           </AppTheme>
         </RootDocument>

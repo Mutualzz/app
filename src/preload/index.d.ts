@@ -14,31 +14,33 @@ export interface MutualzzAPI {
       locale: string;
       family?: string;
     }>;
-    listProcesses(
-      filterExes?: string[]
-    ): Promise<{
-      name: string;
-      pid: number;
-      title?: string;
-      commandLine?: string;
-      path?: string;
-    }[]>;
-    getCachedProcesses(
-      filterExes?: string[]
-    ): Promise<{
-      name: string;
-      pid: number;
-      title?: string;
-      commandLine?: string;
-      path?: string;
-    }[]>;
-    refreshProcesses(): Promise<{
-      name: string;
-      pid: number;
-      title?: string;
-      commandLine?: string;
-      path?: string;
-    }[]>;
+    listProcesses(filterExes?: string[]): Promise<
+      {
+        name: string;
+        pid: number;
+        title?: string;
+        commandLine?: string;
+        path?: string;
+      }[]
+    >;
+    getCachedProcesses(filterExes?: string[]): Promise<
+      {
+        name: string;
+        pid: number;
+        title?: string;
+        commandLine?: string;
+        path?: string;
+      }[]
+    >;
+    refreshProcesses(): Promise<
+      {
+        name: string;
+        pid: number;
+        title?: string;
+        commandLine?: string;
+        path?: string;
+      }[]
+    >;
   };
   presence: {
     getRpcActivities(): Promise<
@@ -52,6 +54,22 @@ export interface MutualzzAPI {
       }[]
     >;
     onRpcUpdated(callback: () => void): () => void;
+    getMedia(): Promise<{
+      trackKey: string;
+      sourceAppId: string;
+      title: string;
+      artist: string;
+      album: string;
+      positionMs: number;
+      durationMs: number;
+      isPlaying: boolean;
+      startedAt: number | null;
+    } | null>;
+    getMediaThumbnail(): Promise<{
+      trackKey: string;
+      bytes: Uint8Array;
+    } | null>;
+    onMediaUpdated(callback: () => void): () => void;
   };
   badge: {
     set(count: number, color?: string): void;

@@ -8,10 +8,13 @@ import { useTranslation } from "react-i18next";
 import { ActivityIcon } from "./Presence/ActivityIcon";
 import {
   activityTypeLabelKey,
+  findLyricsActivity,
   formatActivityPrimary,
   formatActivitySecondary
 } from "@mutualzz/client";
 import { getCustomActivity, getNonCustomActivities } from "@mutualzz/client";
+import { useLyricLine } from "@renderer/hooks/useLyricLine";
+import { MusicNotesIcon } from "@phosphor-icons/react";
 
 interface Props {
   userId?: string;
@@ -37,8 +40,43 @@ export const SmallActivityStatus = observer(
     const color = theme.colors.success;
     const profileRestricted =
       userId != null && app.profiles.isProfileRestricted(userId);
+    const lyricLine = useLyricLine(
+      profileRestricted ? null : findLyricsActivity(presence)
+    );
 
     if (!presence) return null;
+
+    if (lyricLine && !hideCustomStatus) {
+      return (
+        <Stack
+          direction="row"
+          alignItems="center"
+          spacing={0.75}
+          minWidth={0}
+          width="100%"
+        >
+          <MusicNotesIcon
+            size={14}
+            weight="fill"
+            color={color}
+            css={{ flexShrink: 0 }}
+          />
+          <Typography
+            level="label-xs"
+            textColor={color}
+            css={{
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+              minWidth: 0,
+              flex: 1
+            }}
+          >
+            {lyricLine}
+          </Typography>
+        </Stack>
+      );
+    }
 
     const customActivity = getCustomActivity(presence);
     const otherActivities = profileRestricted

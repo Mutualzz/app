@@ -7,6 +7,7 @@ import { useAppStore } from "@hooks/useStores";
 import { formatColor } from "@mutualzz/ui-core";
 import {
   Button,
+  Checkbox,
   Input,
   Option,
   Select,
@@ -24,6 +25,7 @@ import { CaretDownIcon, XIcon } from "@phosphor-icons/react";
 import { observer } from "mobx-react-lite";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { isElectron } from "@renderer/utils";
 
 export const CUSTOM_STATUS_MODAL_ID = "custom-status";
 
@@ -79,7 +81,7 @@ export const CustomStatusModal = observer(() => {
 
   return (
     <Paper
-          surfaceRole="modal"
+      surfaceRole="modal"
       elevation={app.settings?.preferEmbossed ? 5 : 2}
       width="27.5rem"
       maxWidth="calc(100vw - 2rem)"
@@ -150,6 +152,17 @@ export const CustomStatusModal = observer(() => {
             />
           </Stack>
         </Stack>
+
+        {isElectron && (
+          <Checkbox
+            checked={app.customStatus.syncLyrics}
+            onChange={() => {
+              app.customStatus.setSyncLyrics(!app.customStatus.syncLyrics);
+              app.gateway.refreshPresenceActivities();
+            }}
+            label={t("customStatus.syncLyrics")}
+          />
+        )}
       </Stack>
 
       <Stack

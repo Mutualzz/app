@@ -14,6 +14,7 @@ export class CustomStatusStore {
   text = "";
   emoji: PresenceActivityEmoji | null = null;
   enabled = false;
+  syncLyrics = false;
   scheduledCustomStatus: CustomStatusSchedule | null = null;
   onScheduledCustomStatusExpire?: (schedule: CustomStatusSchedule) => void;
 
@@ -25,7 +26,13 @@ export class CustomStatusStore {
 
     void makePersistable(this, {
       name: "CustomStatusStore",
-      properties: ["text", "emoji", "enabled", "scheduledCustomStatus"],
+      properties: [
+        "text",
+        "emoji",
+        "enabled",
+        "syncLyrics",
+        "scheduledCustomStatus"
+      ],
       storage: localStorage
     }).then(() => {
       this.rearmScheduledCustomStatusTimer();
@@ -65,6 +72,10 @@ export class CustomStatusStore {
     this.text = text.trim();
     if (emoji !== undefined) this.emoji = emoji;
     this.enabled = hasCustomStatusContent(this.text, this.emoji);
+  }
+
+  setSyncLyrics(sync: boolean) {
+    this.syncLyrics = sync;
   }
 
   setSnapshot(snapshot: CustomStatusSnapshot) {
@@ -112,7 +123,10 @@ export class CustomStatusStore {
   }
 
   syncFromPresenceActivity(activity: PresenceActivity | null) {
-    if (this.scheduledCustomStatus && this.scheduledCustomStatus.until > Date.now())
+    if (
+      this.scheduledCustomStatus &&
+      this.scheduledCustomStatus.until > Date.now()
+    )
       return;
 
     const hasIncomingCustom =
@@ -139,7 +153,7 @@ export class CustomStatusStore {
 
     this.setSnapshot({
       text: activity.state?.trim() || activity.name?.trim() || null,
-      emoji: activity.emoji ?? null,
+      emoji: activity.emoji ?? null
     });
   }
 

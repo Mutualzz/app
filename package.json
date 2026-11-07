@@ -1,6 +1,7 @@
 {
   "author": "Mutualzz",
   "dependencies": {
+    "@coooookies/windows-smtc-monitor": "1.0.12",
     "canvas": "^3.2.3",
     "i18next": "^26.3.6",
     "keytar": "^7.9.0",
@@ -135,5 +136,5 @@
     "typecheck:node": "tsc --noEmit -p tsconfig.node.json --composite false",
     "typecheck:web": "tsc --noEmit -p tsconfig.web.json --composite false"
   },
-  "version": "6.29.0"
+  "version": "6.30.0"
 }

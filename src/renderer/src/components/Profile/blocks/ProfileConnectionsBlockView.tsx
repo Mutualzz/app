@@ -11,7 +11,6 @@ import { Stack, Typography } from "@mutualzz/ui-web";
 import { LinkSimpleIcon } from "@phosphor-icons/react";
 import { useQuery } from "@tanstack/react-query";
 import { observer } from "mobx-react-lite";
-import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
 interface Props {
@@ -24,21 +23,6 @@ export const ProfileConnectionsBlockView = observer(
     const { t } = useTranslation("settings");
     const app = useAppStore();
     const cornerRadius = resolveProfileBlockCornerRadius(block, "desktop");
-
-    const { data: spotifyConnection } = useQuery({
-      queryKey: ["user-spotify", userId],
-      queryFn: async () => {
-        try {
-          return await app.rest.get<{
-            displayName: string | null;
-            externalUrl: string | null;
-          }>(`/users/${userId}/spotify`);
-        } catch {
-          return null;
-        }
-      },
-      staleTime: 60_000
-    });
 
     const { data: userConnections } = useQuery({
       queryKey: ["user-connections-public", userId],
@@ -58,21 +42,7 @@ export const ProfileConnectionsBlockView = observer(
       staleTime: 60_000
     });
 
-    const connections = useMemo(
-      () => [
-        ...(spotifyConnection?.externalUrl
-          ? [
-              {
-                provider: "spotify",
-                displayName: spotifyConnection.displayName,
-                externalUrl: spotifyConnection.externalUrl
-              }
-            ]
-          : []),
-        ...(userConnections?.connections ?? [])
-      ],
-      [spotifyConnection, userConnections]
-    );
+    const connections = userConnections?.connections ?? [];
 
     return (
       <Paper

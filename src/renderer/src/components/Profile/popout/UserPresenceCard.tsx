@@ -5,6 +5,7 @@ import { useTheme } from "@mutualzz/ui-web";
 import { observer } from "mobx-react-lite";
 import { useMemo } from "react";
 import { getNonCustomActivities } from "@mutualzz/client";
+import { useProfileScrimCss } from "../shared/ProfileScrim";
 
 interface Props {
   presence: PresencePayload;
@@ -12,6 +13,7 @@ interface Props {
 
 export const UserPresenceCard = observer(({ presence }: Props) => {
   const { theme } = useTheme();
+  const scrimCss = useProfileScrimCss();
 
   const otherActivities = useMemo(
     () => getNonCustomActivities(presence),
@@ -36,8 +38,7 @@ export const UserPresenceCard = observer(({ presence }: Props) => {
       borderRadius={8}
       elevation={1}
       css={{
-        backgroundColor: `${theme.colors.surface}cc`,
-        border: `1px solid ${theme.colors.neutral}22`,
+        ...scrimCss,
         ...(collapsible && {
           "&:hover": {
             borderColor: `${theme.colors.neutral}44`

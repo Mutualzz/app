@@ -4,7 +4,7 @@ import type { ProfileStickerBlock } from "@mutualzz/types";
 import { ImageFormat, type Sizes } from "@mutualzz/types";
 import {
   resolveProfileBackgroundFill,
-  resolveProfileBlockCornerRadius,
+  resolveProfileBlockCornerRadius
 } from "@mutualzz/ui-core";
 import { Stack, Typography } from "@mutualzz/ui-web";
 import { StickerIcon } from "@phosphor-icons/react";
@@ -70,10 +70,10 @@ export const ProfileStickerBlockView = observer(
         ? {
             background: resolveProfileBackgroundFill(
               customBackground,
-              "transparent",
-            ),
+              "transparent"
+            )
           }
-        : {}),
+        : {})
     };
 
     const placeholder = (
@@ -81,7 +81,12 @@ export const ProfileStickerBlockView = observer(
         alignItems="center"
         justifyContent="center"
         spacing={0.75}
-        css={{ opacity: 0.45, padding: 12, textAlign: "center", position: "relative" }}
+        css={{
+          opacity: 0.45,
+          padding: 12,
+          textAlign: "center",
+          position: "relative"
+        }}
       >
         <StickerIcon size={28} weight="fill" />
         <Typography level="body-xs">
@@ -104,7 +109,7 @@ export const ProfileStickerBlockView = observer(
               height: "100%",
               objectFit: "contain",
               display: "block",
-              position: "relative",
+              position: "relative"
             }}
           />
         </div>
@@ -119,7 +124,10 @@ export const ProfileStickerBlockView = observer(
         elevation={app.settings?.preferEmbossed ? 5 : 1}
         css={shellStyle}
       >
-        <ProfileBlockBackgroundFill backgroundColor={block.backgroundColor} />
+        <ProfileBlockBackgroundFill
+          backgroundColor={block.backgroundColor}
+          scrimWhenEmpty={false}
+        />
         {placeholder}
       </Paper>
     );

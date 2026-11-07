@@ -10,6 +10,7 @@ import { initUpdaterHandlers } from "./updater";
 import { setupDisplayMedia } from "./displayMedia";
 import { stopProcessCache } from "./processCache";
 import { stopRpc } from "./rpc";
+import { stopMediaWatcher } from "./media";
 
 app.setName("Mutualzz");
 
@@ -82,5 +83,6 @@ app.on("before-quit", () => {
   setQuitting(true);
   stopProcessCache();
   stopRpc();
+  stopMediaWatcher();
   trayManager.destroy();
 });

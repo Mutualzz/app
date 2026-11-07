@@ -37,7 +37,12 @@ import {
   type APICall,
   type VoiceState as APIVoiceState
 } from "@mutualzz/types";
-import { type Codec, createCodec, type Encoding } from "@mutualzz/client";
+import {
+  type Codec,
+  createCodec,
+  type Encoding,
+  type LyricsResult
+} from "@mutualzz/client";
 import {
   type Compression,
   type Compressor,
@@ -51,7 +56,6 @@ import {
   type PresenceUpdateDraft
 } from "../presence/gamePresence";
 import { normalizeRpcActivities } from "../presence/rpcActivities";
-import { loadSpotifyActivity } from "../presence/spotifyPresence";
 import { normalizeJSON } from "@mutualzz/client";
 import { isElectron } from "@utils/index";
 import { toast } from "react-toastify";
@@ -73,6 +77,7 @@ import {
 } from "@renderer/hooks/useInventoryEdits";
 import type { InventoryEditOp } from "@mutualzz/validators";
 import { notifyManager } from "@tanstack/react-query";
+import { resolveMediaArtworkUrl } from "@renderer/presence/mediaArtwork";
 
 // We have to create our own GatewayStatus "enum" to avoid issues with SSR
 // since WebSocket is not available in the server environment.
@@ -92,10 +97,67 @@ const RESUME_MAX_AGE_MS = 110_000;
 const FOREGROUND_DEBOUNCE_MS = 1000;
 const FOREGROUND_FRESH_MS = 15_000;
 
+interface MediaApp {
+  name: string;
+  applicationId: string;
+  sourcePatterns: string[];
+}
+
+const MEDIA_APPS: MediaApp[] = [
+  { name: "Spotify", applicationId: "spotify", sourcePatterns: ["spotify"] },
+  {
+    name: "Apple Music",
+    applicationId: "apple-music",
+    sourcePatterns: ["applemusic"]
+  },
+  { name: "TIDAL", applicationId: "tidal", sourcePatterns: ["tidal"] },
+  { name: "Deezer", applicationId: "deezer", sourcePatterns: ["deezer"] },
+  {
+    name: "Amazon Music",
+    applicationId: "amazon-music",
+    sourcePatterns: ["amazonmusic", "amazon music"]
+  },
+  {
+    name: "YouTube Music",
+    applicationId: "youtube-music",
+    sourcePatterns: ["youtube-music", "youtube music", "youtubemusic"]
+  },
+  {
+    name: "foobar2000",
+    applicationId: "foobar2000",
+    sourcePatterns: ["foobar2000"]
+  },
+  { name: "MusicBee", applicationId: "musicbee", sourcePatterns: ["musicbee"] },
+  { name: "AIMP", applicationId: "aimp", sourcePatterns: ["aimp"] }
+];
+
+const loggedUnknownMediaSources = new Set<string>();
+
+function findMediaApp(sourceAppId: string) {
+  const normalizedSource = sourceAppId.toLowerCase();
+  const mediaApp = MEDIA_APPS.find((candidate) =>
+    candidate.sourcePatterns.some((pattern) =>
+      normalizedSource.includes(pattern)
+    )
+  );
+
+  if (!mediaApp && !loggedUnknownMediaSources.has(sourceAppId)) {
+    loggedUnknownMediaSources.add(sourceAppId);
+    console.debug("[Media] ignoring unknown source", sourceAppId);
+  }
+
+  return mediaApp ?? null;
+}
+
+const ACTIVITY_TYPE_ORDER: Record<string, number> = {
+  playing: 0,
+  listening: 1
+};
+
 function mergeActivities(opts: {
   processActivities: PresenceActivity[];
   rpcActivities: PresenceActivity[];
-  spotifyActivity: PresenceActivity | null;
+  mediaActivity: PresenceActivity | null;
   customActivity: PresenceActivity | null;
   previousActivities: PresenceActivity[];
 }): PresenceActivity[] {
@@ -126,10 +188,12 @@ function mergeActivities(opts: {
 
   for (const act of opts.processActivities) upsert(act);
   for (const act of opts.rpcActivities) upsert(act);
-  if (opts.spotifyActivity) upsert(opts.spotifyActivity);
-
+  if (opts.mediaActivity) upsert(opts.mediaActivity);
   const sortedGames = [...games.values()].sort(
-    (a, b) => (b.timestamps?.start ?? 0) - (a.timestamps?.start ?? 0)
+    (first, second) =>
+      (ACTIVITY_TYPE_ORDER[first.type] ?? 99) -
+        (ACTIVITY_TYPE_ORDER[second.type] ?? 99) ||
+      (second.timestamps?.start ?? 0) - (first.timestamps?.start ?? 0)
   );
 
   const out: PresenceActivity[] = [];
@@ -145,6 +209,39 @@ async function loadRpcActivities(): Promise<PresenceActivity[]> {
     return await normalizeRpcActivities(raw ?? []);
   } catch {
     return [];
+  }
+}
+
+async function loadMediaActivity(
+  syncLyrics: boolean,
+  resolveArtwork: (trackKey: string) => string | null
+): Promise<PresenceActivity | null> {
+  if (!window.api?.presence?.getMedia) return null;
+
+  try {
+    const media = await window.api.presence.getMedia();
+    if (!media || !media.isPlaying || media.startedAt === null) return null;
+
+    const knownApp = findMediaApp(media.sourceAppId);
+    if (!knownApp) return null;
+
+    const artworkUrl = resolveArtwork(media.trackKey);
+
+    return {
+      type: "listening",
+      name: knownApp.name,
+      applicationId: knownApp.applicationId,
+      details: media.title,
+      state: media.artist,
+      assets: artworkUrl ? { largeImageUrl: artworkUrl } : {},
+      ...(syncLyrics ? { syncLyrics: true } : {}),
+      timestamps:
+        media.durationMs > 0
+          ? { start: media.startedAt, end: media.startedAt + media.durationMs }
+          : { start: media.startedAt }
+    };
+  } catch {
+    return null;
   }
 }
 
@@ -183,7 +280,9 @@ export class GatewayStore {
     (...args: any[]) => any
   >();
   private presenceLoopInterval: number | null = null;
+  private presenceBuildSequence = 0;
   private rpcUpdatedUnsub: (() => void) | null = null;
+  private mediaUpdatedUnsub: (() => void) | null = null;
   private lastPresenceHash: string | null = null;
   private lazyRequestChannels = new Map<string, string[]>(); // spaceId -> channelIds
 
@@ -213,6 +312,20 @@ export class GatewayStore {
     string,
     {
       resolve: (ack: InventoryEditAck) => void;
+      timer: ReturnType<typeof setTimeout>;
+    }
+  >();
+  private lyricsRequests = new Map<
+    string,
+    {
+      resolve: (lyrics: LyricsResult | null) => void;
+      timer: ReturnType<typeof setTimeout>;
+    }
+  >();
+  private activityArtRequests = new Map<
+    string,
+    {
+      resolve: (url: string | null) => void;
       timer: ReturnType<typeof setTimeout>;
     }
   >();
@@ -801,21 +914,26 @@ export class GatewayStore {
     if (!this.app.account?.id) return;
 
     void (async () => {
+      const buildId = ++this.presenceBuildSequence;
       const shareActivity = this.app.settings?.shareActivity !== false;
       const shareRpcPresence = this.app.settings?.shareRpcPresence !== false;
       const previousActivities =
         this.app.presence.get(this.app.account!.id)?.activities ?? [];
 
       if (isElectron) {
-        const [baseDraft, rpcActivities, spotifyActivity] = await Promise.all([
+        const [baseDraft, rpcActivities, mediaActivity] = await Promise.all([
           buildDesktopPresenceFromProcesses(),
           shareActivity && shareRpcPresence
             ? loadRpcActivities()
             : Promise.resolve([]),
           shareActivity
-            ? loadSpotifyActivity(this.app.rest)
+            ? loadMediaActivity(
+                this.app.customStatus.syncLyrics,
+                this.resolveMediaArtwork
+              )
             : Promise.resolve(null)
         ]);
+        if (buildId !== this.presenceBuildSequence) return;
         const draft: PresenceUpdateDraft = {
           ...baseDraft,
           device: "desktop",
@@ -825,7 +943,7 @@ export class GatewayStore {
               : [],
             rpcActivities:
               shareActivity && shareRpcPresence ? rpcActivities : [],
-            spotifyActivity: shareActivity ? spotifyActivity : null,
+            mediaActivity: shareActivity ? mediaActivity : null,
             customActivity: this.app.customStatus.activity,
             previousActivities: shareActivity ? previousActivities : []
           }),
@@ -836,16 +954,13 @@ export class GatewayStore {
         return;
       }
 
-      const spotifyActivity = shareActivity
-        ? await loadSpotifyActivity(this.app.rest)
-        : null;
       const draft: PresenceUpdateDraft = {
         status: this.getEffectiveStatus(),
         device: "web",
         activities: mergeActivities({
           processActivities: [],
           rpcActivities: [],
-          spotifyActivity,
+          mediaActivity: null,
           customActivity: this.app.customStatus.activity,
           previousActivities: shareActivity ? previousActivities : []
         })
@@ -1010,6 +1125,57 @@ export class GatewayStore {
       editId
     });
   }
+
+  requestLyrics(trackName: string, artistName: string, durationMs: number) {
+    return new Promise<LyricsResult | null>((resolve) => {
+      if (this.readyState !== GatewayStatus.OPEN) {
+        resolve(null);
+        return;
+      }
+
+      const nonce = crypto.randomUUID();
+      const timer = setTimeout(() => {
+        this.lyricsRequests.delete(nonce);
+        resolve(null);
+      }, 10_000);
+
+      this.lyricsRequests.set(nonce, { resolve, timer });
+
+      void this.send({
+        op: GatewayOpcodes.LyricsRequest,
+        d: { nonce, trackName, artistName, durationMs }
+      });
+    });
+  }
+
+  uploadActivityArt(image: string) {
+    return new Promise<string | null>((resolve) => {
+      if (this.readyState !== GatewayStatus.OPEN) {
+        resolve(null);
+        return;
+      }
+
+      const nonce = crypto.randomUUID();
+      const timer = setTimeout(() => {
+        this.activityArtRequests.delete(nonce);
+        resolve(null);
+      }, 10_000);
+
+      this.activityArtRequests.set(nonce, { resolve, timer });
+
+      void this.send({
+        op: GatewayOpcodes.ActivityArtUpload,
+        d: { nonce, image }
+      });
+    });
+  }
+
+  private resolveMediaArtwork = (trackKey: string) =>
+    resolveMediaArtworkUrl(
+      trackKey,
+      (image) => this.uploadActivityArt(image),
+      () => this.refreshPresenceActivities()
+    );
 
   private resubscribeUsers() {
     for (const userId of this.subscribedUserIds) {
@@ -1452,6 +1618,18 @@ export class GatewayStore {
     this.dispatchHandlers.set(
       GatewayDispatchEvents.PostShareRemove,
       this.onPostShareRemove
+    );
+
+    // Lyrics
+    this.dispatchHandlers.set(
+      GatewayDispatchEvents.LyricsResult,
+      this.onLyricsResult
+    );
+
+    // Activity art
+    this.dispatchHandlers.set(
+      GatewayDispatchEvents.ActivityArtResult,
+      this.onActivityArtResult
     );
   }
 
@@ -2065,6 +2243,7 @@ export class GatewayStore {
     const tick = async () => {
       if (!this.socket || this.readyState !== GatewayStatus.OPEN) return;
       if (!this.app.account?.id) return;
+      const buildId = ++this.presenceBuildSequence;
 
       const shareActivity = this.app.settings?.shareActivity !== false;
       const shareRpcPresence = this.app.settings?.shareRpcPresence !== false;
@@ -2072,15 +2251,20 @@ export class GatewayStore {
         this.app.presence.get(this.app.account.id)?.activities ?? [];
 
       if (isElectron) {
-        const [baseDraft, rpcActivities, spotifyActivity] = await Promise.all([
+        const [baseDraft, rpcActivities, mediaActivity] = await Promise.all([
           buildDesktopPresenceFromProcesses(),
           shareActivity && shareRpcPresence
             ? loadRpcActivities()
             : Promise.resolve([]),
           shareActivity
-            ? loadSpotifyActivity(this.app.rest)
+            ? loadMediaActivity(
+                this.app.customStatus.syncLyrics,
+                this.resolveMediaArtwork
+              )
             : Promise.resolve(null)
         ]);
+
+        if (buildId !== this.presenceBuildSequence) return;
 
         const mergedDraft: PresenceUpdateDraft = {
           ...baseDraft,
@@ -2091,7 +2275,7 @@ export class GatewayStore {
               : [],
             rpcActivities:
               shareActivity && shareRpcPresence ? rpcActivities : [],
-            spotifyActivity: shareActivity ? spotifyActivity : null,
+            mediaActivity: shareActivity ? mediaActivity : null,
             customActivity: this.app.customStatus.activity,
             previousActivities: shareActivity ? previousActivities : []
           }),
@@ -2106,17 +2290,13 @@ export class GatewayStore {
         return;
       }
 
-      const spotifyActivity = shareActivity
-        ? await loadSpotifyActivity(this.app.rest)
-        : null;
-
       const webDraft: PresenceUpdateDraft = {
         status: this.getEffectiveStatus(),
         device: "web",
         activities: mergeActivities({
           processActivities: [],
           rpcActivities: [],
-          spotifyActivity,
+          mediaActivity: null,
           customActivity: this.app.customStatus.activity,
           previousActivities: shareActivity ? previousActivities : []
         })
@@ -2141,6 +2321,16 @@ export class GatewayStore {
         this.refreshPresenceActivities();
       });
     }
+
+    if (
+      isElectron &&
+      window.api?.presence?.onMediaUpdated &&
+      !this.mediaUpdatedUnsub
+    ) {
+      this.mediaUpdatedUnsub = window.api.presence.onMediaUpdated(() => {
+        this.refreshPresenceActivities();
+      });
+    }
   }
 
   private stopPresenceLoop() {
@@ -2152,6 +2342,12 @@ export class GatewayStore {
       this.rpcUpdatedUnsub();
       this.rpcUpdatedUnsub = null;
     }
+
+    if (this.mediaUpdatedUnsub) {
+      this.mediaUpdatedUnsub();
+      this.mediaUpdatedUnsub = null;
+    }
+
     this.lastPresenceHash = null;
   }
 
@@ -3140,5 +3336,32 @@ export class GatewayStore {
     if (!post) return;
 
     post.bumpShareCount(-1);
+  };
+
+  private onLyricsResult = (payload: {
+    nonce: string;
+    ok: boolean;
+    lyrics?: LyricsResult | null;
+  }) => {
+    const entry = this.lyricsRequests.get(payload.nonce);
+    if (!entry) return;
+
+    clearTimeout(entry.timer);
+
+    this.lyricsRequests.delete(payload.nonce);
+    entry.resolve(payload.ok ? (payload.lyrics ?? null) : null);
+  };
+
+  private onActivityArtResult = (payload: {
+    nonce: string;
+    ok: boolean;
+    url?: string;
+  }) => {
+    const entry = this.activityArtRequests.get(payload.nonce);
+    if (!entry) return;
+
+    clearTimeout(entry.timer);
+    this.activityArtRequests.delete(payload.nonce);
+    entry.resolve(payload.ok ? (payload.url ?? null) : null);
   };
 }

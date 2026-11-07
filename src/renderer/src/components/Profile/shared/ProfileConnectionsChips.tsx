@@ -1,13 +1,13 @@
 import { Tooltip } from "@components/Tooltip";
 import {
   GithubLogoIcon,
-  SpotifyLogoIcon,
   SteamLogoIcon,
   TwitchLogoIcon
 } from "@phosphor-icons/react";
 import { Stack, Typography } from "@mutualzz/ui-web";
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
+import { useProfileScrimCss } from "./ProfileScrim";
 
 export interface ProfileConnectionChip {
   provider: string;
@@ -18,15 +18,13 @@ export interface ProfileConnectionChip {
 const CONNECTION_NAME_KEYS = {
   github: "connections.github.name",
   twitch: "connections.twitch.name",
-  steam: "connections.steam.name",
-  spotify: "connections.spotify.name"
+  steam: "connections.steam.name"
 } as const;
 
 const PROVIDER_ICONS: Record<string, ReactNode> = {
   github: <GithubLogoIcon size={14} weight="fill" />,
   twitch: <TwitchLogoIcon size={14} weight="fill" />,
-  steam: <SteamLogoIcon size={14} weight="fill" />,
-  spotify: <SpotifyLogoIcon size={14} weight="fill" />
+  steam: <SteamLogoIcon size={14} weight="fill" />
 };
 
 interface Props {
@@ -35,6 +33,7 @@ interface Props {
 
 export const ProfileConnectionsChips = ({ connections }: Props) => {
   const { t } = useTranslation("settings");
+  const scrimCss = useProfileScrimCss();
   const items = connections.filter((c) => c.externalUrl);
   if (items.length === 0) return null;
 
@@ -57,13 +56,12 @@ export const ProfileConnectionsChips = ({ connections }: Props) => {
               target="_blank"
               rel="noreferrer"
               css={{
+                ...scrimCss,
                 display: "inline-flex",
                 alignItems: "center",
                 gap: 6,
-                padding: "4px 8px",
+                padding: "4px 10px",
                 borderRadius: 999,
-                border: "1px solid rgba(255,255,255,0.12)",
-                background: "rgba(0,0,0,0.18)",
                 color: "inherit",
                 textDecoration: "none",
                 fontSize: "0.75rem",
