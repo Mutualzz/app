@@ -1,44 +1,39 @@
 import type { MarkdownItAsync } from "@components/Markdown/MarkdownItAsync";
 
 export const brOnEmpty = (md: MarkdownItAsync) => {
+  md.renderer.rules.blank_line = () => "<br>";
+
   md.core.ruler.after("inline", "br-on-empty-lines", (state) => {
-    const tokens = state.tokens;
+    const sourceLines = state.src.split("\n");
+    const withBlankLines: typeof state.tokens = [];
+    let previousBlockEnd: number | null = null;
 
-    for (let i = 0; i < tokens.length; i++) {
-      const nextOpen = tokens[i];
+    for (const token of state.tokens) {
+      const startsTopLevelBlock =
+        token.level === 0 && token.nesting !== -1 && token.map;
 
-      if (nextOpen?.type !== "paragraph_open") continue;
+      if (startsTopLevelBlock && token.map) {
+        const [blockStart, blockEnd] = token.map;
 
-      const prevClose = tokens[i - 1];
-      const prevInline = tokens[i - 2];
-      const prevOpen = tokens[i - 3];
+        if (previousBlockEnd !== null) {
+          const emptyLines = blockStart - previousBlockEnd;
+          for (let i = 0; i < emptyLines; i++)
+            withBlankLines.push(new state.Token("blank_line", "br", 0));
+        }
 
-      if (
-        !prevClose ||
-        !prevInline ||
-        !prevOpen ||
-        prevClose.type !== "paragraph_close" ||
-        prevInline.type !== "inline" ||
-        prevOpen.type !== "paragraph_open"
-      )
-        continue;
+        let contentEnd = blockEnd;
+        while (
+          contentEnd > blockStart &&
+          sourceLines[contentEnd - 1]?.trim() === ""
+        )
+          contentEnd--;
 
-      const prevMap = prevOpen.map;
-      const nextMap = nextOpen.map;
-
-      if (!prevMap || !nextMap) continue;
-
-      const emptyLines = nextMap[0] - prevMap[1];
-
-      if (emptyLines <= 0) continue;
-
-      const children = prevInline.children || (prevInline.children = []);
-
-      for (let k = 0; k < emptyLines; k++) {
-        const br = new state.Token("hardbreak", "br", 0);
-
-        children.push(br);
+        previousBlockEnd = contentEnd;
       }
+
+      withBlankLines.push(token);
     }
+
+    state.tokens = withBlankLines;
   });
 };
