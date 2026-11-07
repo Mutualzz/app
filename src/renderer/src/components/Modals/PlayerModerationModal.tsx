@@ -9,19 +9,9 @@ import { observer } from "mobx-react-lite";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
-export interface ModerationResult {
-  serverId: string;
-  ok: boolean;
-  message: string;
-}
+import type { ModerationResult } from "@mutualzz/client";
 
-interface Props {
-  spaceId: string;
-  bridgeId: string;
-  action: "kick" | "ban";
-  minecraftUuid: string;
-  minecraftName: string;
-}
+export type { ModerationResult } from "@mutualzz/client";
 
 const ModerationResultList = ({
   results,

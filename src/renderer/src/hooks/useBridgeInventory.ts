@@ -1,32 +1,18 @@
 import { useAppStore } from "@hooks/useStores";
+import { type BridgeInventory, inventoryQueryKey } from "@mutualzz/client";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
 
-export interface InventorySlot {
-  slot: number;
-  type: string;
-  amount: number;
-  enchanted?: boolean;
-  color?: number;
-  trim?: { pattern: string; material: string };
-}
-
-export interface BridgeInventory {
-  serverId: string;
-  minecraftUuid: string;
-  minecraftName: string;
-  inventory: InventorySlot[];
-  enderChest: InventorySlot[];
-  capturedAt: string;
-}
+export {
+  inventoryQueryKey,
+  type BridgeInventory,
+  type InventorySlot
+} from "@mutualzz/client";
 
 interface MinecraftLink {
   minecraftUuid: string;
   minecraftName: string;
 }
-
-export const inventoryQueryKey = (bridgeId: string, minecraftUuid: string) =>
-  ["bridges", bridgeId, "inventories", minecraftUuid.toLowerCase()] as const;
 
 const useInventorySubscription = (
   bridgeId: string,

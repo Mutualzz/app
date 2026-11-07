@@ -6,26 +6,14 @@ import { useTranslation } from "react-i18next";
 import { Tooltip } from "../Tooltip";
 import { useBridgeServerLabel } from "@renderer/hooks/useBridgeServerLabel";
 
-export interface BridgeServerStatus {
-  serverId: string;
-  tps: number;
-  mspt: number;
-  maxPlayers: number;
-  version: string;
-  motd: string;
-  updatedAt: string;
-}
+import { type BridgeServerStatus, tpsColor } from "@mutualzz/client";
+
+export type { BridgeServerStatus } from "@mutualzz/client";
 
 export interface BridgeServerInfo {
   serverId: string;
   displayName: string;
 }
-
-const tpsColor = (tps: number): "success" | "warning" | "danger" => {
-  if (tps >= 19) return "success";
-  if (tps >= 15) return "warning";
-  return "danger";
-};
 
 const Stat = ({
   value,
