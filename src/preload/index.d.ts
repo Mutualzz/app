@@ -115,6 +115,7 @@ export interface MutualzzAPI {
     maximize(): Promise<void>;
     close(): Promise<void>;
     isMaximized(): Promise<boolean>;
+    focus(): Promise<void>;
   };
   contextMenu: {
     replaceMisspelling(word: string): Promise<void>;

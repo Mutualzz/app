@@ -1,6 +1,7 @@
 import { ContextMenu } from "@components/ContextMenu";
 import { ContextItem } from "@components/ContextItem";
 import { ReportContentModal } from "@components/Modals/ReportContentModal";
+import { ReminderSubmenu } from "./ReminderSubmenu";
 import { generateMenuIDs, useMenu } from "@contexts/ContextMenu.context";
 import { useModal } from "@contexts/Modal.context";
 import { useRecentEmojis } from "@renderer/hooks/useRecentEmojis";
@@ -12,6 +13,7 @@ import { getSpriteStyle } from "@utils/emojis/emojiSprite";
 import { getQuickReactionItems } from "@utils/quickReactionEmojis";
 import {
   ArrowBendUpLeftIcon,
+  BookmarkSimpleIcon,
   CopyIcon,
   FlagIcon,
   PencilSimpleIcon,
@@ -72,35 +74,35 @@ export const MessageContextMenu = observer(({ message }: Props) => {
     message.author?.id === app.account?.id ||
     !!me?.hasPermission("ManageMessages", message.channel);
   const canReport = message.author?.id !== app.account?.id;
+  const isBookmarked = app.bookmarks.has(message.id);
   const canPin =
-    !message.space ||
-    !!me?.hasPermission("PinMessages", message.channel);
+    !message.space || !!me?.hasPermission("PinMessages", message.channel);
 
   const { mutate: pinMessage } = useMutation({
     mutationFn: () =>
       app.rest.put(
         `channels/${message.channelId}/messages/${message.id}/pin`,
-        {},
+        {}
       ),
     onSuccess: () => {
       message.pinned = true;
       queryClient.invalidateQueries({
-        queryKey: ["channel-pins", message.channelId],
+        queryKey: ["channel-pins", message.channelId]
       });
-    },
+    }
   });
 
   const { mutate: unpinMessage } = useMutation({
     mutationFn: () =>
       app.rest.delete(
-        `channels/${message.channelId}/messages/${message.id}/pin`,
+        `channels/${message.channelId}/messages/${message.id}/pin`
       ),
     onSuccess: () => {
       message.pinned = false;
       queryClient.invalidateQueries({
-        queryKey: ["channel-pins", message.channelId],
+        queryKey: ["channel-pins", message.channelId]
       });
-    },
+    }
   });
 
   const canReact = !message.space
@@ -255,6 +257,20 @@ export const MessageContextMenu = observer(({ message }: Props) => {
           {message.pinned ? t("actions.unpinMessage") : t("actions.pinMessage")}
         </ContextItem>
       )}
+
+      <ContextItem
+        onClick={() => {
+          void app.bookmarks.toggle(message.id);
+          clearMenu();
+        }}
+        endDecorator={
+          <BookmarkSimpleIcon weight={isBookmarked ? "fill" : "regular"} />
+        }
+      >
+        {isBookmarked ? t("actions.removeBookmark") : t("actions.bookmark")}
+      </ContextItem>
+
+      <ReminderSubmenu messageId={message.id} />
 
       {canDelete && (
         <ContextItem

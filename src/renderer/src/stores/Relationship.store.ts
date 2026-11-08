@@ -1,8 +1,11 @@
 import { makeAutoObservable, observable } from "mobx";
-import { makePersistable } from "mobx-persist-store";
 import { type AppStore } from "@stores/App.store";
 import { Relationship } from "@stores/objects/Relationship";
-import { type APIRelationship, type APIInvite, type Snowflake } from "@mutualzz/types";
+import {
+  type APIRelationship,
+  type APIInvite,
+  type Snowflake
+} from "@mutualzz/types";
 
 function relationshipKey(userId: Snowflake, otherUserId: Snowflake) {
   return BigInt(userId) < BigInt(otherUserId)
@@ -10,27 +13,19 @@ function relationshipKey(userId: Snowflake, otherUserId: Snowflake) {
     : `${otherUserId}:${userId}`;
 }
 
-export interface AcceptedFriendNotification {
-  id: string;
-  userId: Snowflake;
-  createdAt: number;
-}
-
-const MAX_ACCEPTED_NOTIFICATIONS = 20;
+const LEGACY_ACCEPTED_STORAGE_KEY = "RelationshipStore";
 
 export class RelationshipStore {
   private readonly relationships = observable.map<string, Relationship>();
 
-  acceptedNotifications = observable.array<AcceptedFriendNotification>([]);
-
   constructor(private readonly app: AppStore) {
     makeAutoObservable(this, {}, { autoBind: true });
 
-    makePersistable(this, {
-      name: "RelationshipStore",
-      properties: ["acceptedNotifications"],
-      storage: localStorage
-    });
+    try {
+      localStorage.removeItem(LEGACY_ACCEPTED_STORAGE_KEY);
+    } catch {
+      return;
+    }
   }
 
   get all() {
@@ -64,34 +59,7 @@ export class RelationshipStore {
     const existing = this.relationships.get(key);
     if (!existing) return this.add(data);
 
-    const wasOutgoing = existing.isOutgoingRequest;
-    const updated = existing.update(data);
-
-    if (wasOutgoing && updated.isFriend) {
-      this.recordAccepted(updated);
-    }
-
-    return updated;
-  }
-
-  private recordAccepted(relationship: Relationship) {
-    const userId = relationship.otherUserIdForMe;
-    if (!userId) return;
-    if (this.acceptedNotifications.some((n) => n.userId === userId)) return;
-
-    this.acceptedNotifications.unshift({
-      id: relationship.id,
-      userId,
-      createdAt: Date.now()
-    });
-
-    if (this.acceptedNotifications.length > MAX_ACCEPTED_NOTIFICATIONS)
-      this.acceptedNotifications.length = MAX_ACCEPTED_NOTIFICATIONS;
-  }
-
-  dismissAcceptedNotification(id: string) {
-    const idx = this.acceptedNotifications.findIndex((n) => n.id === id);
-    if (idx !== -1) this.acceptedNotifications.splice(idx, 1);
+    return existing.update(data);
   }
 
   remove(userId: Snowflake, otherUserId: Snowflake) {

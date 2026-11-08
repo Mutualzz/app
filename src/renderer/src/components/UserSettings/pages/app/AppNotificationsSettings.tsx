@@ -47,6 +47,19 @@ export const AppNotificationsSettings = observer(() => {
 
   return (
     <Stack spacing={7.5} pt={2.5} pb={5} direction="column">
+      {app.desktopNotifications.supported && (
+        <SettingsSection
+          title={t("notifications.desktopTitle")}
+          description={t("notifications.desktopDescription")}
+        >
+          <SettingsToggleRow
+            title={t("notifications.desktopEnable")}
+            checked={app.desktopNotifications.enabled}
+            onChange={(checked) => app.desktopNotifications.setEnabled(checked)}
+          />
+        </SettingsSection>
+      )}
+
       <SettingsSection
         title={t("notifications.pushTitle")}
         description={t("notifications.pushDescriptionDesktop")}

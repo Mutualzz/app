@@ -51,6 +51,16 @@ import {
 import { applyChatFontScale } from "@utils/chatFontScale";
 import { applyMessageLayout } from "@utils/messageLayout";
 import { applyUiDensity } from "@mutualzz/ui-core";
+import {
+  BookmarkStore,
+  type InboxStoreDeps,
+  NotificationStore,
+  ReminderStore,
+  ScheduledMessageStore
+} from "@mutualzz/client";
+import { toast } from "react-toastify";
+import type { InboxTab } from "@components/NotificationCenter/InboxParts";
+import { DesktopNotificationStore } from "./DesktopNotification.store";
 
 const prefersDark = getPrefersDark();
 
@@ -78,6 +88,15 @@ export class AppStore {
   users = new UserStore(this);
   profiles = new ProfileStore(this);
   posts = new PostStore(this);
+  private readonly inboxDeps: InboxStoreDeps = {
+    gateway: () => this.gateway,
+    showError: (message) => toast.error(message)
+  };
+  bookmarks = new BookmarkStore(this.inboxDeps);
+  reminders = new ReminderStore(this.inboxDeps);
+  scheduledMessages = new ScheduledMessageStore(this.inboxDeps);
+  notifications = new NotificationStore(this.inboxDeps);
+  desktopNotifications = new DesktopNotificationStore(this);
   bridgeChat = new BridgeChatStore();
   updater: UpdaterStore | null = null;
   settings: AccountSettingsStore | null = null;
@@ -291,6 +310,16 @@ export class AppStore {
     this.replyMention = val;
   }
 
+  inboxRequestedTab: InboxTab | null = null;
+
+  openInbox(tab: InboxTab) {
+    this.inboxRequestedTab = tab;
+  }
+
+  clearInboxRequest() {
+    this.inboxRequestedTab = null;
+  }
+
   requestJumpToMessage(channelId: string, messageId: string) {
     this.jumpToMessage = { channelId, messageId };
   }
@@ -467,6 +496,10 @@ export class AppStore {
       this.navigation.clear();
       this.spaces.clear();
       this.spaceNotifications.clear();
+      this.bookmarks.clear();
+      this.reminders.clear();
+      this.scheduledMessages.clear();
+      this.notifications.clear();
       this.relationships.clear();
       this.queue.clear();
       this.themes.clear();

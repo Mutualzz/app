@@ -34,6 +34,16 @@ import { Paper } from "@components/Paper";
 import { TypingIndicator } from "@components/TypingIndicator";
 import { type Expression } from "@renderer/stores/objects/Expression";
 import { FileIcon, EyeSlashIcon, PlusIcon, XIcon } from "@phosphor-icons/react";
+import { useMenu } from "@contexts/ContextMenu.context";
+import {
+  ComposerPlusMenu,
+  composerPlusMenuId
+} from "@components/Message/ComposerPlusMenu";
+import dayjs from "dayjs";
+import { useModal } from "@contexts/Modal.context";
+import { PickTimeModal } from "@components/Modals/PickTimeModal";
+import { toast } from "react-toastify";
+import { createScheduledMessage } from "@utils/createScheduledMessage";
 import { IconButton } from "../IconButton";
 import { useTranslation } from "react-i18next";
 import {
@@ -88,10 +98,18 @@ export const MessageInput = observer(
       const { theme } = useTheme();
       const { t } = useTranslation("chat");
       const { t: tCommon } = useTranslation("common");
+      const { openModal } = useModal();
+      const { openContextMenu } = useMenu();
       const [content, setContent] = useState(message?.content ?? "");
       const [stickers, setStickers] = useState<Expression[]>([]);
       const [files, setFiles] = useState<File[]>([]);
       const [fileSpoilers, setFileSpoilers] = useState<boolean[]>([]);
+      const [pendingScheduleTime, setPendingScheduleTime] =
+        useState<Date | null>(null);
+
+      useEffect(() => {
+        setPendingScheduleTime(null);
+      }, [channel?.id]);
 
       const inputRef = useRef<MarkdownInputHandle>(null);
       const fileInputRef = useRef<HTMLInputElement>(null);
@@ -367,6 +385,11 @@ export const MessageInput = observer(
             onStopEditing?.();
             const updated = await message.edit(trimmed);
             return updated;
+          }
+
+          if (pendingScheduleTime) {
+            await scheduleAt(pendingScheduleTime, trimmed, editor ?? null);
+            return null;
           }
 
           const nonce = Snowflake.generate();
@@ -773,6 +796,136 @@ export const MessageInput = observer(
         </Paper>
       );
 
+      const scheduledHereCount = channel
+        ? app.scheduledMessages.forChannel(channel.id).length
+        : 0;
+
+      const scheduledNotice = scheduledHereCount > 0 && !message?.editing && (
+        <Typography level="body-xs" textColor="muted" px={2} pb={0.75}>
+          {t("scheduledMessages.channelNotice", { count: scheduledHereCount })}
+        </Typography>
+      );
+
+      const resetComposer = (editor: Editor | null) => {
+        if (!app.account || !channel) return;
+
+        app.setReplyingTo(null);
+        setContent("");
+        setStickers([]);
+        setFiles([]);
+        setFileSpoilers([]);
+
+        editor?.select({ anchor: editor.start([]), focus: editor.end([]) });
+        editor?.removeNodes();
+        editor?.delete();
+        editor?.insertNode({ type: "line", children: [{ text: "" }] });
+
+        app.drafts.deleteMessageDraft(String(app.account.id), channel.id);
+        void deleteMessageAttachments(String(app.account.id), channel.id);
+      };
+
+      const scheduleAt = async (
+        time: Date,
+        messageContent: string,
+        editor: Editor | null
+      ) => {
+        if (!channel) return false;
+
+        try {
+          await createScheduledMessage(app, channel.id, {
+            content: messageContent,
+            stickerIds: stickers.map((sticker) => sticker.id),
+            files: canAttachFiles ? files.slice() : [],
+            spoilers: canAttachFiles ? fileSpoilers.slice() : [],
+            repliedToId: app.replyingTo?.id,
+            mentionReply: app.replyMention,
+            scheduledFor: time
+          });
+          resetComposer(editor);
+          setPendingScheduleTime(null);
+          toast.success(
+            t("scheduledMessages.scheduledToast", {
+              time: dayjs(time).format("ddd, MMM D · h:mm A")
+            })
+          );
+          return true;
+        } catch (error) {
+          toast.error(formatRestError(error, t("unknownError")));
+          return false;
+        }
+      };
+
+      const openCustomSchedule = () => {
+        if (!channel) return;
+
+        const modalId = `schedule-message-${channel.id}`;
+        openModal(
+          modalId,
+          <PickTimeModal
+            modalId={modalId}
+            title={t("scheduledMessages.pickTitle")}
+            confirmLabel={t("scheduledMessages.setTime")}
+            showPresets={false}
+            initial={pendingScheduleTime ?? undefined}
+            onConfirm={async (time) => {
+              setPendingScheduleTime(time);
+              requestAnimationFrame(() => inputRef.current?.focus());
+              return true;
+            }}
+          />
+        );
+      };
+
+      const scheduleBanner = pendingScheduleTime && !message?.editing && (
+        <Paper
+          surfaceRole={hasWallpaper ? "card" : undefined}
+          direction="row"
+          alignItems="center"
+          spacing={1}
+          px={1.5}
+          py={0.75}
+          borderTopLeftRadius={areTyping || hasUploadTray || replyingTo ? 0 : 6}
+          borderTopRightRadius={
+            areTyping || hasUploadTray || replyingTo ? 0 : 6
+          }
+          borderBottomLeftRadius={0}
+          borderBottomRightRadius={0}
+          elevation={hasWallpaper ? 0 : composerElevation}
+        >
+          <Typography
+            level="body-xs"
+            textColor="secondary"
+            flex="1 1 auto"
+            onClick={openCustomSchedule}
+            css={{ cursor: "pointer" }}
+          >
+            {t("scheduledMessages.schedulingBanner", {
+              time: dayjs(pendingScheduleTime).format("MMMM D [at] h:mm A")
+            })}
+          </Typography>
+          <IconButton
+            variant="plain"
+            size="sm"
+            onClick={() => setPendingScheduleTime(null)}
+            title={t("scheduledMessages.cancelScheduling")}
+          >
+            <XIcon size={14} />
+          </IconButton>
+        </Paper>
+      );
+
+      const openPlusMenu = (event: React.MouseEvent<HTMLElement>) => {
+        if (!channel) return;
+
+        const rect = event.currentTarget.getBoundingClientRect();
+        openContextMenu(
+          event,
+          { type: "custom", id: composerPlusMenuId(channel.id) },
+          null,
+          { x: Math.round(rect.left), y: Math.round(rect.top - 8) }
+        );
+      };
+
       const replyBanner = replyingTo && (
         <Paper
           surfaceRole={hasWallpaper ? "card" : undefined}
@@ -825,9 +978,11 @@ export const MessageInput = observer(
           surfaceRole={hasWallpaper ? "composer" : undefined}
           p={1.75}
           elevation={hasWallpaper ? 0 : composerElevation}
-          borderTopLeftRadius={replyingTo || areTyping || hasUploadTray ? 0 : 6}
+          borderTopLeftRadius={
+            replyingTo || scheduleBanner || areTyping || hasUploadTray ? 0 : 6
+          }
           borderTopRightRadius={
-            replyingTo || areTyping || hasUploadTray ? 0 : 6
+            replyingTo || scheduleBanner || areTyping || hasUploadTray ? 0 : 6
           }
           borderBottomLeftRadius={6}
           borderBottomRightRadius={6}
@@ -901,24 +1056,33 @@ export const MessageInput = observer(
             }
             hoverToolbar={app.settings?.showMarkdownToolbar ?? true}
             startContent={
-              !message?.editing && !denySendingMessages && canAttachFiles ? (
+              !message?.editing && !denySendingMessages && channel ? (
                 <Stack alignItems="center" justifyContent="center" mr={2.5}>
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    multiple
-                    accept={ACCEPTED_MIME_TYPES}
-                    onChange={handleFileChange}
-                    css={{ display: "none" }}
-                  />
+                  {canAttachFiles && (
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      multiple
+                      accept={ACCEPTED_MIME_TYPES}
+                      onChange={handleFileChange}
+                      css={{ display: "none" }}
+                    />
+                  )}
                   <IconButton
                     variant="plain"
-                    onClick={() => fileInputRef.current?.click()}
-                    title={t("composer.attachFiles")}
+                    onClick={openPlusMenu}
+                    title={t("scheduledMessages.plusMenu")}
                     shape="rounded"
                   >
                     <PlusIcon />
                   </IconButton>
+                  <ComposerPlusMenu
+                    channelId={channel.id}
+                    canAttachFiles={canAttachFiles}
+                    onUploadFile={() => fileInputRef.current?.click()}
+                    onSchedule={(time) => setPendingScheduleTime(time)}
+                    onScheduleCustom={openCustomSchedule}
+                  />
                 </Stack>
               ) : undefined
             }
@@ -961,7 +1125,9 @@ export const MessageInput = observer(
         >
           {typingIndicator}
           {uploadTray}
+          {scheduledNotice}
           {replyBanner}
+          {scheduleBanner}
           {inputContent}
         </Stack>
       );

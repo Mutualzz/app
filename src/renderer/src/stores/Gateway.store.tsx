@@ -35,7 +35,13 @@ import {
   type PresenceStatus,
   type Snowflake,
   type APICall,
-  type VoiceState as APIVoiceState
+  type VoiceState as APIVoiceState,
+  type APIMessageBookmark,
+  type APIMessageBookmarkWithMessage,
+  type APIMessageReminder,
+  type APIMessageReminderWithMessage,
+  type APIScheduledMessage,
+  type APINotification
 } from "@mutualzz/types";
 import {
   type Codec,
@@ -62,6 +68,13 @@ import { isElectron } from "@utils/index";
 import { toast } from "react-toastify";
 import { MessageToast } from "@renderer/components/Toast/MessageToast"; // We have to create our own GatewayStatus "enum" to avoid issues with SSR
 import i18n from "@renderer/i18n";
+import type { Message } from "@stores/objects/Message";
+import { channelLocationLabel } from "@utils/channelLocationLabel";
+import {
+  type MentionsData,
+  type MentionsPage,
+  removeMentionFromCache
+} from "@components/NotificationCenter/mentionsCache";
 import { type Channel } from "./objects/Channel";
 import {
   inventoryQueryKey,
@@ -88,6 +101,10 @@ export const GatewayStatus = {
   CLOSING: 2,
   CLOSED: 3
 } as const;
+
+type GatewayAck<Data = object> =
+  | ({ ok: true } & Data)
+  | { ok: false; message?: string };
 
 export type GatewayStatus = (typeof GatewayStatus)[keyof typeof GatewayStatus];
 
@@ -309,24 +326,10 @@ export class GatewayStore {
   private sendChain: Promise<void> = Promise.resolve();
 
   private inventorySubscriptionCounts = new Map<string, number>();
-  private inventoryEditAcks = new Map<
+  private pendingRequests = new Map<
     string,
     {
-      resolve: (ack: InventoryEditAck) => void;
-      timer: ReturnType<typeof setTimeout>;
-    }
-  >();
-  private lyricsRequests = new Map<
-    string,
-    {
-      resolve: (lyrics: LyricsResult | null) => void;
-      timer: ReturnType<typeof setTimeout>;
-    }
-  >();
-  private activityArtRequests = new Map<
-    string,
-    {
-      resolve: (url: string | null) => void;
+      resolve: (ack: GatewayAck) => void;
       timer: ReturnType<typeof setTimeout>;
     }
   >();
@@ -1072,21 +1075,41 @@ export class GatewayStore {
     });
   }
 
-  private requestInventoryEdit(opcode: number, d: Record<string, unknown>) {
-    return new Promise<InventoryEditAck>((resolve) => {
+  private request<Data = object>(
+    opcode: number,
+    data: Record<string, unknown>,
+    timeoutMs = 10_000
+  ) {
+    return new Promise<GatewayAck<Data>>((resolve) => {
       if (this.readyState !== GatewayStatus.OPEN) {
         resolve({ ok: false, message: "Not connected" });
         return;
       }
+
       const nonce = crypto.randomUUID();
       const timer = setTimeout(() => {
-        this.inventoryEditAcks.delete(nonce);
+        this.pendingRequests.delete(nonce);
         resolve({ ok: false, message: "No response from the server" });
-      }, 10_000);
-      this.inventoryEditAcks.set(nonce, { resolve, timer });
-      void this.send({ op: opcode, d: { ...d, nonce } });
+      }, timeoutMs);
+
+      this.pendingRequests.set(nonce, {
+        resolve: resolve as (ack: GatewayAck) => void,
+        timer
+      });
+      void this.send({ op: opcode, d: { ...data, nonce } });
     });
   }
+
+  private resolveRequest = (payload: { nonce: string } & GatewayAck) => {
+    const entry = this.pendingRequests.get(payload.nonce);
+    if (!entry) return;
+
+    clearTimeout(entry.timer);
+    this.pendingRequests.delete(payload.nonce);
+
+    const { nonce: _nonce, ...ack } = payload;
+    entry.resolve(ack);
+  };
 
   private updateInventoryEdits(
     bridgeId: string,
@@ -1127,48 +1150,123 @@ export class GatewayStore {
     });
   }
 
-  requestLyrics(trackName: string, artistName: string, durationMs: number) {
-    return new Promise<LyricsResult | null>((resolve) => {
-      if (this.readyState !== GatewayStatus.OPEN) {
-        resolve(null);
-        return;
-      }
-
-      const nonce = crypto.randomUUID();
-      const timer = setTimeout(() => {
-        this.lyricsRequests.delete(nonce);
-        resolve(null);
-      }, 10_000);
-
-      this.lyricsRequests.set(nonce, { resolve, timer });
-
-      void this.send({
-        op: GatewayOpcodes.LyricsRequest,
-        d: { nonce, trackName, artistName, durationMs }
-      });
-    });
+  private requestInventoryEdit(opcode: number, data: Record<string, unknown>) {
+    return this.request(opcode, data) as Promise<InventoryEditAck>;
   }
 
-  uploadActivityArt(image: string) {
-    return new Promise<string | null>((resolve) => {
-      if (this.readyState !== GatewayStatus.OPEN) {
-        resolve(null);
-        return;
-      }
+  async requestLyrics(
+    trackName: string,
+    artistName: string,
+    durationMs: number
+  ) {
+    const ack = await this.request<{ lyrics?: LyricsResult | null }>(
+      GatewayOpcodes.LyricsRequest,
+      { trackName, artistName, durationMs }
+    );
+    return ack.ok ? (ack.lyrics ?? null) : null;
+  }
 
-      const nonce = crypto.randomUUID();
-      const timer = setTimeout(() => {
-        this.activityArtRequests.delete(nonce);
-        resolve(null);
-      }, 10_000);
+  async uploadActivityArt(image: string) {
+    const ack = await this.request<{ url?: string }>(
+      GatewayOpcodes.ActivityArtUpload,
+      { image }
+    );
+    return ack.ok ? (ack.url ?? null) : null;
+  }
 
-      this.activityArtRequests.set(nonce, { resolve, timer });
+  sendBookmark(action: "add" | "remove", messageId: string) {
+    return this.request(
+      action === "add"
+        ? GatewayOpcodes.BookmarkAdd
+        : GatewayOpcodes.BookmarkRemove,
+      { messageId }
+    );
+  }
 
-      void this.send({
-        op: GatewayOpcodes.ActivityArtUpload,
-        d: { nonce, image }
-      });
-    });
+  async listBookmarks() {
+    const ack = await this.request<{
+      bookmarks: APIMessageBookmarkWithMessage[];
+    }>(GatewayOpcodes.BookmarkList, {});
+    if (!ack.ok) throw new Error(ack.message ?? "Failed to load bookmarks");
+    return ack.bookmarks;
+  }
+
+  setReminder(messageId: string, remindAt: string) {
+    return this.request<{ reminder: APIMessageReminder }>(
+      GatewayOpcodes.ReminderSet,
+      { messageId, remindAt }
+    );
+  }
+
+  deleteReminder(messageId: string) {
+    return this.request(GatewayOpcodes.ReminderDelete, { messageId });
+  }
+
+  async listReminders() {
+    const ack = await this.request<{
+      reminders: APIMessageReminderWithMessage[];
+    }>(GatewayOpcodes.ReminderList, {});
+    if (!ack.ok) throw new Error(ack.message ?? "Failed to load reminders");
+    return ack.reminders;
+  }
+
+  editScheduledMessage(
+    id: string,
+    changes: { content?: string; scheduledFor?: string }
+  ) {
+    return this.request<{ scheduledMessage: APIScheduledMessage }>(
+      GatewayOpcodes.ScheduledMessageEdit,
+      { id, ...changes }
+    );
+  }
+
+  deleteScheduledMessage(id: string) {
+    return this.request(GatewayOpcodes.ScheduledMessageDelete, { id });
+  }
+
+  async listNotifications(before?: string) {
+    const ack = await this.request<{
+      notifications: APINotification[];
+      hasMore: boolean;
+    }>(GatewayOpcodes.NotificationList, before ? { before } : {});
+    return ack.ok
+      ? { notifications: ack.notifications, hasMore: ack.hasMore }
+      : null;
+  }
+
+  markNotificationsRead(ids?: string[]) {
+    return this.request(
+      GatewayOpcodes.NotificationMarkRead,
+      ids ? { ids } : { all: true }
+    );
+  }
+
+  deleteNotification(id: string) {
+    return this.request(GatewayOpcodes.NotificationDelete, { id });
+  }
+
+  async listMentions(filters: {
+    before?: string;
+    includeEveryone: boolean;
+    includeRoles: boolean;
+    spaceId?: string;
+  }) {
+    const ack = await this.request<MentionsPage>(
+      GatewayOpcodes.MentionList,
+      Object.fromEntries(
+        Object.entries(filters).filter(([, value]) => value !== undefined)
+      )
+    );
+    if (!ack.ok) throw new Error(ack.message ?? "Failed to load mentions");
+    return {
+      messages: ack.messages,
+      hasMore: ack.hasMore,
+      nextBefore: ack.nextBefore
+    };
+  }
+
+  dismissMention(messageId: string) {
+    return this.request(GatewayOpcodes.MentionDismiss, { messageId });
   }
 
   private resolveMediaArtwork = (trackKey: string) =>
@@ -1547,10 +1645,6 @@ export class GatewayStore {
       this.onBridgeInventoryUpdate
     );
     this.dispatchHandlers.set(
-      GatewayDispatchEvents.BridgeInventoryEditAck,
-      this.onBridgeInventoryEditAck
-    );
-    this.dispatchHandlers.set(
       GatewayDispatchEvents.BridgeInventoryEdits,
       this.onBridgeInventoryEdits
     );
@@ -1621,16 +1715,60 @@ export class GatewayStore {
       this.onPostShareRemove
     );
 
-    // Lyrics
+    // Bookmarks
     this.dispatchHandlers.set(
-      GatewayDispatchEvents.LyricsResult,
-      this.onLyricsResult
+      GatewayDispatchEvents.MessageBookmarkCreate,
+      this.onMessageBookmarkCreate
+    );
+    this.dispatchHandlers.set(
+      GatewayDispatchEvents.MessageBookmarkDelete,
+      this.onMessageBookmarkDelete
     );
 
-    // Activity art
-    this.dispatchHandlers.set(
+    for (const ackEvent of [
+      GatewayDispatchEvents.BridgeInventoryEditAck,
+      GatewayDispatchEvents.LyricsResult,
       GatewayDispatchEvents.ActivityArtResult,
-      this.onActivityArtResult
+      GatewayDispatchEvents.MessageBookmarkAck,
+      GatewayDispatchEvents.MessageReminderAck,
+      GatewayDispatchEvents.ScheduledMessageAck,
+      GatewayDispatchEvents.NotificationAck,
+      GatewayDispatchEvents.MentionAck
+    ]) {
+      this.dispatchHandlers.set(ackEvent, this.resolveRequest);
+    }
+
+    this.dispatchHandlers.set(
+      GatewayDispatchEvents.MessageReminderUpdate,
+      this.onMessageReminderUpdate
+    );
+    this.dispatchHandlers.set(
+      GatewayDispatchEvents.MessageReminderDelete,
+      this.onMessageReminderDelete
+    );
+    this.dispatchHandlers.set(
+      GatewayDispatchEvents.ScheduledMessageUpdate,
+      this.onScheduledMessageUpdate
+    );
+    this.dispatchHandlers.set(
+      GatewayDispatchEvents.ScheduledMessageDelete,
+      this.onScheduledMessageDelete
+    );
+    this.dispatchHandlers.set(
+      GatewayDispatchEvents.NotificationCreate,
+      this.onNotificationCreate
+    );
+    this.dispatchHandlers.set(
+      GatewayDispatchEvents.NotificationRead,
+      this.onNotificationRead
+    );
+    this.dispatchHandlers.set(
+      GatewayDispatchEvents.NotificationDelete,
+      this.onNotificationDelete
+    );
+    this.dispatchHandlers.set(
+      GatewayDispatchEvents.MentionDismiss,
+      this.onMentionDismiss
     );
   }
 
@@ -2065,7 +2203,11 @@ export class GatewayStore {
       calls,
       voiceStates,
       users,
-      minecraftLink
+      minecraftLink,
+      bookmarkedMessageIds,
+      reminders,
+      scheduledMessages,
+      unreadNotificationCount
     } = payload;
 
     this.sessionId = sessionId;
@@ -2078,6 +2220,10 @@ export class GatewayStore {
     this.app.spaces.addAll(spaces);
     this.app.channels.addAll(channels);
     this.app.relationships.addAll(relationships);
+    this.app.bookmarks.replaceAll(bookmarkedMessageIds ?? []);
+    this.app.reminders.replaceAll(reminders ?? []);
+    this.app.scheduledMessages.replaceAll(scheduledMessages ?? []);
+    this.app.notifications.resetFromReady(unreadNotificationCount ?? 0);
     this.app.readStates.addAll(readStates);
     if (spaceNotificationSettings?.length) {
       this.app.spaceNotifications.addAll(spaceNotificationSettings);
@@ -2692,6 +2838,9 @@ export class GatewayStore {
     const isDnd = myStatus === "dnd";
 
     // Every DM/GroupDM message is notification-worthy, same as an explicit mention in a space
+    if (isMentioned)
+      void this.app.queryClient.invalidateQueries({ queryKey: ["mentions"] });
+
     if (isDM || isMentioned) {
       const readState = this.app.readStates.get(payload.channelId);
       if (readState) {
@@ -2699,6 +2848,7 @@ export class GatewayStore {
         if (isMentioned) channel.setLastMentionMessage(message);
         if (!isDnd) {
           this.app.sounds.play("message");
+          this.showMessageDesktopNotification(message, channel, isDM);
           toast(
             (toastProps) => <MessageToast {...toastProps} data={message} />,
             {
@@ -3202,16 +3352,6 @@ export class GatewayStore {
     );
   };
 
-  private onBridgeInventoryEditAck = (
-    payload: InventoryEditAck & { nonce: string }
-  ) => {
-    const entry = this.inventoryEditAcks.get(payload.nonce);
-    if (!entry) return;
-    clearTimeout(entry.timer);
-    this.inventoryEditAcks.delete(payload.nonce);
-    entry.resolve(payload);
-  };
-
   private onBridgeInventoryEdits = (payload: {
     bridgeId: string;
     minecraftUuid: string;
@@ -3340,30 +3480,150 @@ export class GatewayStore {
     post.bumpShareCount(-1);
   };
 
-  private onLyricsResult = (payload: {
-    nonce: string;
-    ok: boolean;
-    lyrics?: LyricsResult | null;
-  }) => {
-    const entry = this.lyricsRequests.get(payload.nonce);
-    if (!entry) return;
-
-    clearTimeout(entry.timer);
-
-    this.lyricsRequests.delete(payload.nonce);
-    entry.resolve(payload.ok ? (payload.lyrics ?? null) : null);
+  private onMessageBookmarkDelete = (payload: { messageId: string }) => {
+    this.app.bookmarks.markRemoved(payload.messageId);
   };
 
-  private onActivityArtResult = (payload: {
-    nonce: string;
-    ok: boolean;
-    url?: string;
-  }) => {
-    const entry = this.activityArtRequests.get(payload.nonce);
-    if (!entry) return;
-
-    clearTimeout(entry.timer);
-    this.activityArtRequests.delete(payload.nonce);
-    entry.resolve(payload.ok ? (payload.url ?? null) : null);
+  private onMessageBookmarkCreate = (payload: APIMessageBookmark) => {
+    this.app.bookmarks.markAdded(payload.messageId);
+    void this.app.queryClient.invalidateQueries({ queryKey: ["bookmarks"] });
   };
+
+  private onMessageReminderUpdate = (payload: APIMessageReminder) => {
+    const previous = this.app.reminders.get(payload.messageId);
+    this.app.reminders.upsert(payload);
+    void this.app.queryClient.invalidateQueries({ queryKey: ["reminders"] });
+
+    const justFired = payload.firedAt !== null && !previous?.firedAt;
+    if (justFired) this.announceReminder();
+  };
+
+  private onMessageReminderDelete = (payload: { messageId: string }) => {
+    this.app.reminders.remove(payload.messageId);
+  };
+
+  private onScheduledMessageUpdate = (payload: APIScheduledMessage) => {
+    const previous = this.app.scheduledMessages.get(payload.id);
+    this.app.scheduledMessages.upsert(payload);
+
+    const justFailed =
+      payload.status === "failed" && previous?.status !== "failed";
+    if (justFailed)
+      toast.error(
+        i18n.t("common:notifications.scheduledFailed", {
+          reason: payload.failureReason ?? ""
+        })
+      );
+  };
+
+  private onScheduledMessageDelete = (payload: { id: string }) => {
+    this.app.scheduledMessages.remove(payload.id);
+  };
+
+  private onNotificationCreate = (payload: APINotification) => {
+    this.app.notifications.handleCreate(payload);
+    this.showInboxDesktopNotification(payload);
+  };
+
+  private showMessageDesktopNotification(
+    message: Message,
+    channel: Channel,
+    isDirect: boolean
+  ) {
+    const authorName =
+      message.member?.displayName ||
+      message.author?.displayName ||
+      i18n.t("chat:unknownUser");
+    const location = isDirect
+      ? channel.name
+      : `#${channel.name}${channel.space ? `, ${channel.space.name}` : ""}`;
+    const plainContent = (message.content ?? "")
+      .replace(/<@!?(\d+)>|<@&(\d+)>/g, "")
+      .trim();
+
+    this.app.desktopNotifications.show({
+      title: location ? `${authorName} (${location})` : authorName,
+      body: plainContent || i18n.t("common:notifications.sentAttachment"),
+      tag: channel.id,
+      channelId: channel.id,
+      messageId: message.id
+    });
+  }
+
+  private showInboxDesktopNotification(notification: APINotification) {
+    const location = notification.channelId
+      ? channelLocationLabel(
+          this.app.channels.get(notification.channelId),
+          i18n.t
+        )
+      : "";
+
+    const content = (() => {
+      switch (notification.type) {
+        case "reminder":
+          return {
+            title: i18n.t("common:notifications.reminders"),
+            body: i18n.t("common:notifications.reminderEntry", { location })
+          };
+        case "scheduled_failed":
+          return {
+            title: i18n.t("common:notifications.scheduled"),
+            body: i18n.t("common:notifications.scheduledFailedEntry", {
+              location,
+              reason: notification.data.reason ?? ""
+            })
+          };
+        case "friend_accepted": {
+          const actor = notification.actorId
+            ? this.app.users.get(notification.actorId)
+            : undefined;
+          if (!actor) return null;
+          return {
+            title: i18n.t("common:notifications.forYou"),
+            body: i18n.t("common:notifications.acceptedFriend", {
+              name: actor.displayName
+            })
+          };
+        }
+        case "scheduled_sent":
+          return null;
+      }
+    })();
+
+    if (!content) return;
+
+    this.app.desktopNotifications.show({
+      ...content,
+      tag: `inbox-${notification.id}`,
+      channelId: notification.channelId,
+      messageId: notification.messageId
+    });
+  }
+
+  private onNotificationRead = (payload: { ids: string[]; readAt: string }) => {
+    this.app.notifications.handleRead(payload.ids, payload.readAt);
+  };
+
+  private onNotificationDelete = (payload: { id: string }) => {
+    this.app.notifications.handleDelete(payload.id);
+  };
+
+  private onMentionDismiss = (payload: { messageId: string }) => {
+    this.app.queryClient.setQueriesData<MentionsData>(
+      { queryKey: ["mentions"] },
+      (current) => removeMentionFromCache(current, payload.messageId)
+    );
+  };
+
+  private announceReminder() {
+    const myStatus = this.app.account
+      ? (this.app.presence.get(this.app.account.id)?.status ?? "online")
+      : "online";
+    if (myStatus === "dnd") return;
+
+    this.app.sounds.play("message");
+    toast.info(i18n.t("common:notifications.reminderDue"), {
+      position: "top-right"
+    });
+  }
 }

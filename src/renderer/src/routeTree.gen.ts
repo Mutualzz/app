@@ -37,7 +37,6 @@ import { Route as AuthenticatedStaffSupportRouteImport } from "./routes/_authent
 import { Route as AuthenticatedStaffChangelogsRouteImport } from "./routes/_authenticated/staff/changelogs"
 import { Route as AuthenticatedStaffAppealsRouteImport } from "./routes/_authenticated/staff/appeals"
 import { Route as AuthenticatedStaffActivityRouteImport } from "./routes/_authenticated/staff/activity"
-import { Route as AuthenticatedFeedScheduledRouteImport } from "./routes/_authenticated/feed/scheduled"
 import { Route as AuthenticatedFeedSavedRouteImport } from "./routes/_authenticated/feed/saved"
 import { Route as AuthenticatedFeedFriendsRouteImport } from "./routes/_authenticated/feed/friends"
 import { Route as AuthenticatedAtmeFriendsRouteImport } from "./routes/_authenticated/@me/friends"
@@ -200,12 +199,6 @@ const AuthenticatedStaffActivityRoute =
     path: "/activity",
     getParentRoute: () => AuthenticatedStaffRouteRoute,
   } as any)
-const AuthenticatedFeedScheduledRoute =
-  AuthenticatedFeedScheduledRouteImport.update({
-    id: "/scheduled",
-    path: "/scheduled",
-    getParentRoute: () => AuthenticatedFeedRouteRoute,
-  } as any)
 const AuthenticatedFeedSavedRoute = AuthenticatedFeedSavedRouteImport.update({
   id: "/saved",
   path: "/saved",
@@ -322,7 +315,6 @@ export interface FileRoutesByFullPath {
   "/@me/friends": typeof AuthenticatedAtmeFriendsRoute
   "/feed/friends": typeof AuthenticatedFeedFriendsRoute
   "/feed/saved": typeof AuthenticatedFeedSavedRoute
-  "/feed/scheduled": typeof AuthenticatedFeedScheduledRoute
   "/staff/activity": typeof AuthenticatedStaffActivityRoute
   "/staff/appeals": typeof AuthenticatedStaffAppealsRoute
   "/staff/changelogs": typeof AuthenticatedStaffChangelogsRoute
@@ -365,7 +357,6 @@ export interface FileRoutesByTo {
   "/@me/friends": typeof AuthenticatedAtmeFriendsRoute
   "/feed/friends": typeof AuthenticatedFeedFriendsRoute
   "/feed/saved": typeof AuthenticatedFeedSavedRoute
-  "/feed/scheduled": typeof AuthenticatedFeedScheduledRoute
   "/staff/activity": typeof AuthenticatedStaffActivityRoute
   "/staff/appeals": typeof AuthenticatedStaffAppealsRoute
   "/staff/changelogs": typeof AuthenticatedStaffChangelogsRoute
@@ -412,7 +403,6 @@ export interface FileRoutesById {
   "/_authenticated/@me/friends": typeof AuthenticatedAtmeFriendsRoute
   "/_authenticated/feed/friends": typeof AuthenticatedFeedFriendsRoute
   "/_authenticated/feed/saved": typeof AuthenticatedFeedSavedRoute
-  "/_authenticated/feed/scheduled": typeof AuthenticatedFeedScheduledRoute
   "/_authenticated/staff/activity": typeof AuthenticatedStaffActivityRoute
   "/_authenticated/staff/appeals": typeof AuthenticatedStaffAppealsRoute
   "/_authenticated/staff/changelogs": typeof AuthenticatedStaffChangelogsRoute
@@ -459,7 +449,6 @@ export interface FileRouteTypes {
     | "/@me/friends"
     | "/feed/friends"
     | "/feed/saved"
-    | "/feed/scheduled"
     | "/staff/activity"
     | "/staff/appeals"
     | "/staff/changelogs"
@@ -502,7 +491,6 @@ export interface FileRouteTypes {
     | "/@me/friends"
     | "/feed/friends"
     | "/feed/saved"
-    | "/feed/scheduled"
     | "/staff/activity"
     | "/staff/appeals"
     | "/staff/changelogs"
@@ -548,7 +536,6 @@ export interface FileRouteTypes {
     | "/_authenticated/@me/friends"
     | "/_authenticated/feed/friends"
     | "/_authenticated/feed/saved"
-    | "/_authenticated/feed/scheduled"
     | "/_authenticated/staff/activity"
     | "/_authenticated/staff/appeals"
     | "/_authenticated/staff/changelogs"
@@ -783,13 +770,6 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof AuthenticatedStaffActivityRouteImport
       parentRoute: typeof AuthenticatedStaffRouteRoute
     }
-    "/_authenticated/feed/scheduled": {
-      id: "/_authenticated/feed/scheduled"
-      path: "/scheduled"
-      fullPath: "/feed/scheduled"
-      preLoaderRoute: typeof AuthenticatedFeedScheduledRouteImport
-      parentRoute: typeof AuthenticatedFeedRouteRoute
-    }
     "/_authenticated/feed/saved": {
       id: "/_authenticated/feed/saved"
       path: "/saved"
@@ -922,7 +902,6 @@ const AuthenticatedAtmeRouteRouteWithChildren =
 interface AuthenticatedFeedRouteRouteChildren {
   AuthenticatedFeedFriendsRoute: typeof AuthenticatedFeedFriendsRoute
   AuthenticatedFeedSavedRoute: typeof AuthenticatedFeedSavedRoute
-  AuthenticatedFeedScheduledRoute: typeof AuthenticatedFeedScheduledRoute
   AuthenticatedFeedIndexRoute: typeof AuthenticatedFeedIndexRoute
   AuthenticatedFeedPostsPostIdRoute: typeof AuthenticatedFeedPostsPostIdRoute
 }
@@ -931,7 +910,6 @@ const AuthenticatedFeedRouteRouteChildren: AuthenticatedFeedRouteRouteChildren =
   {
     AuthenticatedFeedFriendsRoute: AuthenticatedFeedFriendsRoute,
     AuthenticatedFeedSavedRoute: AuthenticatedFeedSavedRoute,
-    AuthenticatedFeedScheduledRoute: AuthenticatedFeedScheduledRoute,
     AuthenticatedFeedIndexRoute: AuthenticatedFeedIndexRoute,
     AuthenticatedFeedPostsPostIdRoute: AuthenticatedFeedPostsPostIdRoute,
   }

@@ -8,7 +8,6 @@ import {
   type MarkdownInputHandle
 } from "@components/Markdown/MarkdownInput/MarkdownInput";
 import { useMutation } from "@tanstack/react-query";
-import { useNavigate } from "@tanstack/react-router";
 import { observer } from "mobx-react-lite";
 import {
   forwardRef,
@@ -78,7 +77,6 @@ export const PostComposer = observer(
     const app = useAppStore();
     const { theme } = useTheme();
     const { t } = useTranslation("chat");
-    const navigate = useNavigate();
     const [content, setContent] = useState("");
     const [files, setFiles] = useState<File[]>([]);
     const [stickers, setStickers] = useState<Expression[]>([]);
@@ -399,7 +397,7 @@ export const PostComposer = observer(
               content={t("feed.composer.viewScheduled")}
               placement="bottom"
             >
-              <IconButton onClick={() => navigate({ to: "/feed/scheduled" })}>
+              <IconButton onClick={() => app.openInbox("scheduled")}>
                 <CalendarIcon />
               </IconButton>
             </Tooltip>
@@ -411,17 +409,14 @@ export const PostComposer = observer(
                 files.length === 0 &&
                 stickers.length === 0) ||
               isPending ||
-              (!!scheduledFor &&
-                new Date(scheduledFor).getTime() <= Date.now())
+              (!!scheduledFor && new Date(scheduledFor).getTime() <= Date.now())
             }
             color="success"
             onClick={() =>
               submit({
                 content: content.trim(),
                 files,
-                scheduledFor: scheduledFor
-                  ? new Date(scheduledFor)
-                  : undefined,
+                scheduledFor: scheduledFor ? new Date(scheduledFor) : undefined,
                 expressionIds: stickers.map((s) => s.id),
                 editor: inputRef.current?.editor ?? null
               })

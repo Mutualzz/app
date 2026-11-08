@@ -182,6 +182,14 @@ export function createMainWindow(): BrowserWindow {
 }
 
 export function setupWindowIPC(): void {
+  ipcMain.handle("window:focus", () => {
+    const win = getMainWindow();
+    if (!win) return;
+    if (win.isMinimized()) win.restore();
+    win.show();
+    win.focus();
+  });
+
   ipcMain.handle("window:minimize", () => {
     getMainWindow()?.minimize();
   });

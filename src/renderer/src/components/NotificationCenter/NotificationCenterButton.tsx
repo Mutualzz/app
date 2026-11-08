@@ -1,387 +1,98 @@
-import { Button } from "@components/Button";
 import { IconButton } from "@components/IconButton";
-import { Paper } from "@components/Paper";
-import { ChannelIcon } from "@components/Channel/ChannelIcon";
-import { DMGroupAvatar } from "@components/DMChannel/DMGroupAvatar";
-import { UserItem } from "@components/Friends/UserItem";
-import { UserAvatar } from "@components/User/UserAvatar";
 import { useAppStore } from "@hooks/useStores";
-import { Avatar, Popover, Stack, Typography, useTheme } from "@mutualzz/ui-web";
-import { ChannelType, ReadStateType } from "@mutualzz/types";
-import type { Channel } from "@stores/objects/Channel";
-import type { AcceptedFriendNotification } from "@stores/Relationship.store";
-import type { AppStore } from "@stores/App.store";
-import { useNavigate } from "@tanstack/react-router";
-import { CheckIcon, TrayIcon, XIcon } from "@phosphor-icons/react";
+import {
+  Divider,
+  Popover,
+  Stack,
+  Typography,
+  useTheme
+} from "@mutualzz/ui-web";
+import { TrayIcon } from "@phosphor-icons/react";
 import { observer } from "mobx-react-lite";
-import { useState } from "react";
+import type { MouseEvent } from "react";
+import { useEffect, useState } from "react";
+import { useNavigate } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
-
-type NotificationTab = "unreads" | "requests" | "mentions";
-
-async function markChannelsAsRead(app: AppStore, channels: Channel[]) {
-  const payload = channels
-    .map((channel) => {
-      const lastMessage = channel.lastMessage;
-      if (!lastMessage || "status" in lastMessage) return null;
-
-      return {
-        channelId: channel.id,
-        lastMessageId: lastMessage.id,
-        type: ReadStateType.Messages
-      };
-    })
-    .filter((entry) => entry !== null);
-
-  if (!payload.length) return;
-
-  for (const { channelId, lastMessageId } of payload) {
-    app.readStates.updateLocal(channelId, lastMessageId);
-  }
-
-  await app.readStates.ackBulk(payload);
-}
-
-const MarkAsReadButton = ({
-  onClick,
-  disabled
-}: {
-  onClick: (e: React.MouseEvent) => void;
-  disabled?: boolean;
-}) => {
-  const { t } = useTranslation("chat");
-  return (
-    <IconButton
-      size={14}
-      padding={4}
-      variant="plain"
-      disabled={disabled}
-      onClick={onClick}
-      title={t("contextMenu.markAsRead")}
-    >
-      <CheckIcon />
-    </IconButton>
-  );
-};
-
-const NotificationBadge = ({ count }: { count: number }) => {
-  const { theme } = useTheme();
-  if (count <= 0) return null;
-
-  return (
-    <Stack
-      alignItems="center"
-      justifyContent="center"
-      css={{
-        minWidth: 16,
-        height: 16,
-        borderRadius: 9999,
-        backgroundColor: theme.colors.danger,
-        padding: "0 4px"
-      }}
-    >
-      <Typography level="label-xs" css={{ color: "#fff", fontSize: 10 }}>
-        {count > 99 ? "99+" : count}
-      </Typography>
-    </Stack>
-  );
-};
-
-const AcceptedNotificationRow = observer(
-  ({ notification }: { notification: AcceptedFriendNotification }) => {
-    const { t } = useTranslation("common");
-    const app = useAppStore();
-    const user = app.users.get(notification.userId);
-    if (!user) return null;
-
-    return (
-      <Paper
-        p={2}
-        borderRadius={6}
-        direction="row"
-        alignItems="center"
-        justifyContent="space-between"
-        spacing={2}
-      >
-        <Stack direction="row" alignItems="center" spacing={2} minWidth={0}>
-          <UserAvatar user={user} size={32} />
-          <Typography
-            level="body-sm"
-            css={{ overflow: "hidden", textOverflow: "ellipsis" }}
-          >
-            {t("notifications.acceptedFriend", { name: user.displayName })}
-          </Typography>
-        </Stack>
-        <IconButton
-          size={14}
-          padding={4}
-          variant="plain"
-          onClick={(e) => {
-            e.stopPropagation();
-            app.relationships.dismissAcceptedNotification(notification.id);
-          }}
-        >
-          <XIcon />
-        </IconButton>
-      </Paper>
-    );
-  }
-);
-
-const MENTION_REGEX = /<@!?(\d+)>|<@&(\d+)>|@everyone|@here/g;
-const PREVIEW_MAX_CHARS = 80;
-
-const UnreadDMChannelItem = observer(({ channel }: { channel: Channel }) => {
-  const { t } = useTranslation("common");
-  const { t: tChat } = useTranslation("chat");
-  const app = useAppStore();
-  const navigate = useNavigate();
-  const readState = app.readStates.get(channel.id);
-  const mentionCount = readState?.mentionCount ?? 0;
-  const message = channel.lastMessage;
-
-  const recipient = channel.dmRecipient;
-  const recipients = channel.dmRecipientsList;
-
-  const title = (() => {
-    if (channel.type === ChannelType.DM)
-      return recipient?.displayName ?? tChat("deletedUser");
-
-    if (channel.name) return channel.name;
-
-    const names = recipients.map((u) => u.displayName).filter(Boolean);
-
-    if (!names.length) return t("notifications.groupDmChannel");
-    if (names.length <= 2) return names.join(", ");
-    return `${names.slice(0, 2).join(", ")}, +${names.length - 2}`;
-  })();
-
-  const plainContent = message?.content?.replace(MENTION_REGEX, "").trim();
-  const preview =
-    plainContent && plainContent.length > PREVIEW_MAX_CHARS
-      ? `${plainContent.slice(0, PREVIEW_MAX_CHARS)}…`
-      : plainContent;
-  const authorName = channel.isGroupDM
-    ? message?.member?.displayName || message?.author?.displayName
-    : undefined;
-
-  return (
-    <Paper
-      p={2}
-      borderRadius={6}
-      direction="row"
-      alignItems="center"
-      justifyContent="space-between"
-      spacing={2}
-      css={{ cursor: "pointer" }}
-      onClick={() => {
-        navigate({
-          to: "/@me/$channelId",
-          params: { channelId: channel.id }
-        });
-      }}
-    >
-      <Stack direction="row" alignItems="center" spacing={2} minWidth={0}>
-        {channel.type === ChannelType.DM ? (
-          <UserAvatar
-            user={recipient}
-            size={32}
-            badge
-            showInvisible
-            showOffline
-          />
-        ) : channel.iconUrl ? (
-          <Avatar
-            src={channel.iconUrl}
-            size={32}
-            shape={channel.flags.has("RoundedIcon") ? "circle" : "square"}
-          />
-        ) : (
-          <DMGroupAvatar users={recipients} />
-        )}
-        <Stack direction="column" minWidth={0} flex={1}>
-          <Typography
-            level="label-sm"
-            weight="medium"
-            css={{
-              whiteSpace: "nowrap",
-              overflow: "hidden",
-              textOverflow: "ellipsis"
-            }}
-          >
-            {title}
-          </Typography>
-          <Typography
-            level="body-sm"
-            textColor={preview ? undefined : "muted"}
-            css={{
-              whiteSpace: "nowrap",
-              overflow: "hidden",
-              textOverflow: "ellipsis"
-            }}
-          >
-            {authorName && <b>{authorName}: </b>}
-            {preview ||
-              (message
-                ? t("notifications.sentAttachment")
-                : t("notifications.noMessagesYet"))}
-          </Typography>
-        </Stack>
-      </Stack>
-      <Stack direction="row" alignItems="center" spacing={1} flexShrink={0}>
-        <MarkAsReadButton
-          disabled={!readState?.isUnread}
-          onClick={(e) => {
-            e.stopPropagation();
-            void readState?.ack();
-          }}
-        />
-        <NotificationBadge count={mentionCount} />
-      </Stack>
-    </Paper>
-  );
-});
-
-const MentionedChannelItem = observer(({ channel }: { channel: Channel }) => {
-  const { t } = useTranslation("common");
-  const app = useAppStore();
-  const navigate = useNavigate();
-  const space = channel.space;
-  const readState = app.readStates.get(channel.id);
-  const mentionCount = readState?.mentionCount ?? 0;
-  const message = channel.lastMentionMessage;
-
-  if (!space) return null;
-
-  const plainContent = message?.content?.replace(MENTION_REGEX, "").trim();
-  const preview =
-    plainContent && plainContent.length > PREVIEW_MAX_CHARS
-      ? `${plainContent.slice(0, PREVIEW_MAX_CHARS)}…`
-      : plainContent;
-  const authorName =
-    message?.member?.displayName || message?.author?.displayName;
-
-  return (
-    <Paper
-      p={2}
-      borderRadius={6}
-      direction="row"
-      alignItems="center"
-      justifyContent="space-between"
-      spacing={2}
-      css={{ cursor: "pointer" }}
-      onClick={() => {
-        navigate({
-          to: "/spaces/$spaceId/$channelId",
-          params: { spaceId: space.id, channelId: channel.id }
-        });
-      }}
-    >
-      <Stack direction="row" alignItems="center" spacing={2} minWidth={0}>
-        <ChannelIcon type={channel.type} />
-        <Stack direction="column" minWidth={0} flex={1}>
-          <Stack direction="row" alignItems="baseline" spacing={1}>
-            <Typography
-              level="label-xs"
-              textColor="muted"
-              css={{
-                whiteSpace: "nowrap",
-                overflow: "hidden",
-                textOverflow: "ellipsis"
-              }}
-            >
-              {space.name}
-            </Typography>
-            <Typography
-              level="label-xs"
-              textColor="muted"
-              css={{ whiteSpace: "nowrap", flexShrink: 0 }}
-            >
-              #{channel.name}
-            </Typography>
-          </Stack>
-          {message ? (
-            <Typography
-              level="body-sm"
-              css={{
-                whiteSpace: "nowrap",
-                overflow: "hidden",
-                textOverflow: "ellipsis"
-              }}
-            >
-              {authorName && <b>{authorName}: </b>}
-              {preview || t("notifications.sentAttachment")}
-            </Typography>
-          ) : (
-            <Typography
-              level="body-sm"
-              textColor="muted"
-              css={{
-                whiteSpace: "nowrap",
-                overflow: "hidden",
-                textOverflow: "ellipsis"
-              }}
-            >
-              {t("notifications.youWereMentioned")}
-            </Typography>
-          )}
-        </Stack>
-      </Stack>
-      <Stack direction="row" alignItems="center" spacing={1} flexShrink={0}>
-        <MarkAsReadButton
-          disabled={mentionCount <= 0}
-          onClick={(e) => {
-            e.stopPropagation();
-            void readState?.ack();
-          }}
-        />
-        <NotificationBadge count={mentionCount} />
-      </Stack>
-    </Paper>
-  );
-});
+import { BookmarksTab } from "./BookmarksTab";
+import {
+  markChannelsAsRead,
+  MentionedChannelItem,
+  UnreadDMChannelItem
+} from "./ChannelInboxItems";
+import { ForYouTab } from "./ForYouTab";
+import {
+  CountBadge,
+  INBOX_WIDTH_PX,
+  InboxEmptyState,
+  type InboxTab,
+  InboxTabButton,
+  MarkAsReadButton
+} from "./InboxParts";
+import { MentionsTab } from "./MentionsTab";
+import { RemindersTab } from "./RemindersTab";
+import { ScheduledTab } from "./ScheduledTab";
 
 export const NotificationCenterButton = observer(() => {
   const { t } = useTranslation("common");
-  const { t: tChat } = useTranslation("chat");
   const app = useAppStore();
   const { theme } = useTheme();
-  const [tab, setTab] = useState<NotificationTab>("unreads");
+  const [tab, setTab] = useState<InboxTab>("forYou");
+  const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    app.desktopNotifications.setNavigator(navigate);
+    return () => app.desktopNotifications.setNavigator(null);
+  }, [app.desktopNotifications, navigate]);
+
+  useEffect(() => {
+    const requested = app.inboxRequestedTab;
+    if (!requested) return;
+    setTab(requested);
+    setOpen(true);
+    app.clearInboxRequest();
+  }, [app, app.inboxRequestedTab]);
 
   const incoming = app.relationships.incoming;
-  const accepted = app.relationships.acceptedNotifications;
   const unreadDMs = app.channels.unreadDMs;
   const mentionedChannels = app.channels.mentionedChannels;
 
-  const hasRequests = incoming.length > 0 || accepted.length > 0;
-  const activeTab = tab === "requests" && !hasRequests ? "unreads" : tab;
+  const forYouCount = incoming.length + app.notifications.unreadCount;
 
-  const totalCount =
-    unreadDMs.length +
-    incoming.length +
-    accepted.length +
-    mentionedChannels.length;
+  const totalCount = unreadDMs.length + mentionedChannels.length + forYouCount;
 
-  const selectTab = (next: NotificationTab) => (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setTab(next);
-  };
-
-  const canMarkAllAsRead =
-    (activeTab === "unreads" && unreadDMs.length > 0) ||
-    (activeTab === "mentions" && mentionedChannels.length > 0);
-
-  const markAllAsRead = (e: React.MouseEvent) => {
-    e.stopPropagation();
-
-    if (activeTab === "unreads") {
-      void markChannelsAsRead(app, unreadDMs);
-      return;
+  const tabs: { key: InboxTab; label: string; count: number }[] = [
+    { key: "forYou", label: t("notifications.forYou"), count: forYouCount },
+    {
+      key: "unreads",
+      label: t("notifications.unreads"),
+      count: unreadDMs.length + mentionedChannels.length
+    },
+    {
+      key: "mentions",
+      label: t("notifications.mentions"),
+      count: 0
+    },
+    { key: "bookmarks", label: t("notifications.bookmarks"), count: 0 },
+    {
+      key: "reminders",
+      label: t("notifications.reminders"),
+      count: app.reminders.dueCount
+    },
+    {
+      key: "scheduled",
+      label: t("notifications.scheduled"),
+      count: app.scheduledMessages.failedCount
     }
+  ];
 
-    if (activeTab === "mentions") {
-      void markChannelsAsRead(app, mentionedChannels);
-    }
+  const markableChannels =
+    tab === "unreads" ? [...unreadDMs, ...mentionedChannels] : [];
+  const showMarkAll = tab === "unreads";
+
+  const markAllAsRead = (event: MouseEvent) => {
+    event.stopPropagation();
+    void markChannelsAsRead(app, markableChannels);
   };
 
   return (
@@ -413,10 +124,7 @@ export const NotificationCenterButton = observer(() => {
             >
               <Typography
                 level="label-xs"
-                css={{
-                  color: "#fff",
-                  fontSize: 10
-                }}
+                css={{ color: "#fff", fontSize: 10 }}
               >
                 {totalCount > 99 ? "99+" : totalCount}
               </Typography>
@@ -425,131 +133,119 @@ export const NotificationCenterButton = observer(() => {
         </Stack>
       }
       triggerCss={{ WebkitAppRegion: "no-drag" }}
+      isOpen={open}
+      onOpenChange={setOpen}
       placement="bottom"
       closeOnClickOutside
       closeOnInteract
+      align="end"
       variant="elevation"
       elevation={3}
       css={{
         padding: 0,
-        width: 340,
-        overflow: "hidden"
+        width: `min(${INBOX_WIDTH_PX}px, calc(100vw - 16px))`,
+        maxHeight: "min(80vh, 760px)",
+        display: "flex",
+        flexDirection: "column",
+        overflow: "hidden",
+        whiteSpace: "normal",
+        borderRadius: 12
       }}
     >
-      <Stack direction="column" width="100%">
+      <Stack direction="column" width="100%" flex={1} minHeight={0}>
         <Stack
           direction="row"
           alignItems="center"
           justifyContent="space-between"
           spacing={1}
-          p={2.5}
+          px={3}
+          pt={2.5}
           pb={1.5}
+          flexShrink={0}
         >
-          <Stack direction="row" alignItems="center" spacing={1} minWidth={0}>
-            <Button
-              size="sm"
-              variant={activeTab === "unreads" ? "soft" : "plain"}
-              onClick={selectTab("unreads")}
-            >
-              {t("notifications.unreads")}
-            </Button>
-
-            <Button
-              size="sm"
-              variant={activeTab === "mentions" ? "soft" : "plain"}
-              onClick={selectTab("mentions")}
-            >
-              {t("notifications.mentions")}
-            </Button>
-            {hasRequests && (
-              <Button
-                size="sm"
-                variant={activeTab === "requests" ? "soft" : "plain"}
-                onClick={selectTab("requests")}
-              >
-                {t("notifications.requests")}
-              </Button>
-            )}
+          <Stack direction="row" alignItems="center" spacing={1.25}>
+            <TrayIcon size={22} weight="fill" />
+            <Typography level="h6" fontWeight="bold">
+              {t("notifications.inbox")}
+            </Typography>
           </Stack>
-          <Button
-            size="sm"
-            variant="solid"
-            color="success"
-            disabled={!canMarkAllAsRead}
-            onClick={markAllAsRead}
-          >
-            {t("notifications.markAllAsRead")}
-          </Button>
+          {showMarkAll && (
+            <MarkAsReadButton
+              title={t("notifications.markAllAsRead")}
+              disabled={markableChannels.length === 0}
+              onClick={markAllAsRead}
+            />
+          )}
         </Stack>
+
+        <Stack direction="row" px={1.5} flexShrink={0}>
+          {tabs.map((entry) => {
+            const isActive = tab === entry.key;
+            return (
+              <InboxTabButton
+                key={entry.key}
+                type="button"
+                data-active={isActive ? "true" : "false"}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  setTab(entry.key);
+                }}
+              >
+                <Typography
+                  level="label-sm"
+                  textColor={isActive ? undefined : "muted"}
+                  weight={isActive ? "bold" : "medium"}
+                  css={{
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    color: isActive ? theme.colors.primary : undefined
+                  }}
+                >
+                  {entry.label}
+                </Typography>
+                <CountBadge count={entry.count} />
+              </InboxTabButton>
+            );
+          })}
+        </Stack>
+        <Divider css={{ opacity: 0.5, flexShrink: 0 }} />
 
         <Stack
           direction="column"
           width="100%"
           px={2.5}
-          pb={2.5}
-          spacing={1}
-          css={{ maxHeight: 420, overflowY: "auto" }}
+          py={2}
+          spacing={1.25}
+          flex={1}
+          minHeight={0}
+          css={{ overflowY: "auto", overflowX: "hidden" }}
         >
-          {activeTab === "unreads" &&
-            (unreadDMs.length > 0 ? (
-              unreadDMs.map((channel) => (
-                <UnreadDMChannelItem key={channel.id} channel={channel} />
-              ))
+          {tab === "forYou" && <ForYouTab onSelectTab={setTab} />}
+
+          {tab === "unreads" &&
+            (unreadDMs.length + mentionedChannels.length > 0 ? (
+              <>
+                {unreadDMs.map((channel) => (
+                  <UnreadDMChannelItem key={channel.id} channel={channel} />
+                ))}
+                {mentionedChannels.map((channel) => (
+                  <MentionedChannelItem key={channel.id} channel={channel} />
+                ))}
+              </>
             ) : (
-              <Typography
-                textColor="muted"
-                level="body-sm"
-                css={{ textAlign: "center", padding: "24px 0" }}
-              >
-                {t("notifications.noUnreads")}
-              </Typography>
+              <InboxEmptyState
+                icon={<TrayIcon weight="duotone" />}
+                title={t("notifications.emptyUnreadsTitle")}
+                description={t("notifications.emptyUnreadsDescription")}
+              />
             ))}
 
-          {activeTab === "requests" && (
-            <>
-              {incoming.length > 0 && (
-                <Stack direction="column" spacing={1} mb={1}>
-                  <Typography level="label-sm" textColor="muted">
-                    {tChat("friends.receivedCount", { count: incoming.length })}
-                  </Typography>
-                  {incoming.map((relationship) => (
-                    <UserItem
-                      key={relationship.id}
-                      relationship={relationship}
-                    />
-                  ))}
-                </Stack>
-              )}
-              {accepted.length > 0 && (
-                <Stack direction="column" spacing={1}>
-                  <Typography level="label-sm" textColor="muted">
-                    {t("notifications.recentlyAccepted")}
-                  </Typography>
-                  {accepted.map((notification) => (
-                    <AcceptedNotificationRow
-                      key={notification.id}
-                      notification={notification}
-                    />
-                  ))}
-                </Stack>
-              )}
-            </>
-          )}
+          {tab === "mentions" && <MentionsTab />}
 
-          {activeTab === "mentions" &&
-            (mentionedChannels.length > 0 ? (
-              mentionedChannels.map((channel) => (
-                <MentionedChannelItem key={channel.id} channel={channel} />
-              ))
-            ) : (
-              <Typography
-                textColor="muted"
-                level="body-sm"
-                css={{ textAlign: "center", padding: "24px 0" }}
-              >
-                {t("notifications.noMentions")}
-              </Typography>
-            ))}
+          {tab === "bookmarks" && <BookmarksTab />}
+          {tab === "reminders" && <RemindersTab />}
+          {tab === "scheduled" && <ScheduledTab />}
         </Stack>
       </Stack>
     </Popover>
