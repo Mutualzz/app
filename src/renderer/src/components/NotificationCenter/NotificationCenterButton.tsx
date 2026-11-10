@@ -7,10 +7,10 @@ import {
   Typography,
   useTheme
 } from "@mutualzz/ui-web";
-import { TrayIcon } from "@phosphor-icons/react";
+import { SlidersHorizontalIcon, TrayIcon } from "@phosphor-icons/react";
 import { observer } from "mobx-react-lite";
 import type { MouseEvent } from "react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import { BookmarksTab } from "./BookmarksTab";
@@ -28,7 +28,15 @@ import {
   InboxTabButton,
   MarkAsReadButton
 } from "./InboxParts";
+import { MentionFilterMenu } from "./MentionFilterMenu";
 import { MentionsTab } from "./MentionsTab";
+import { clearMentionCaches } from "./mentionsCache";
+import {
+  isDefaultMentionFilters,
+  type MentionFilters,
+  readMentionFilters,
+  writeMentionFilters
+} from "./mentionFilters";
 import { RemindersTab } from "./RemindersTab";
 import { ScheduledTab } from "./ScheduledTab";
 
@@ -38,6 +46,15 @@ export const NotificationCenterButton = observer(() => {
   const { theme } = useTheme();
   const [tab, setTab] = useState<InboxTab>("forYou");
   const [open, setOpen] = useState(false);
+  const [mentionFilters, setMentionFilters] = useState(readMentionFilters);
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const filterAnchorRef = useRef<HTMLDivElement>(null);
+
+  const updateMentionFilters = (changes: Partial<MentionFilters>) => {
+    const next = { ...mentionFilters, ...changes };
+    setMentionFilters(next);
+    writeMentionFilters(next);
+  };
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -88,10 +105,15 @@ export const NotificationCenterButton = observer(() => {
 
   const markableChannels =
     tab === "unreads" ? [...unreadDMs, ...mentionedChannels] : [];
-  const showMarkAll = tab === "unreads";
+  const showMarkAll = tab === "unreads" || tab === "mentions";
 
   const markAllAsRead = (event: MouseEvent) => {
     event.stopPropagation();
+    if (tab === "mentions") {
+      clearMentionCaches(app.queryClient);
+      void app.gateway.clearAllMentions();
+      return;
+    }
     void markChannelsAsRead(app, markableChannels);
   };
 
@@ -169,13 +191,52 @@ export const NotificationCenterButton = observer(() => {
               {t("notifications.inbox")}
             </Typography>
           </Stack>
-          {showMarkAll && (
-            <MarkAsReadButton
-              title={t("notifications.markAllAsRead")}
-              disabled={markableChannels.length === 0}
-              onClick={markAllAsRead}
-            />
-          )}
+          <Stack direction="row" alignItems="center" spacing={0.75}>
+            {tab === "mentions" && (
+              <div ref={filterAnchorRef} css={{ position: "relative" }}>
+                <IconButton
+                  size={14}
+                  padding={6}
+                  variant={
+                    filtersOpen || !isDefaultMentionFilters(mentionFilters)
+                      ? "solid"
+                      : "soft"
+                  }
+                  color={
+                    filtersOpen || !isDefaultMentionFilters(mentionFilters)
+                      ? "primary"
+                      : "neutral"
+                  }
+                  title={t("notifications.filterTitle")}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    setFiltersOpen(!filtersOpen);
+                  }}
+                >
+                  <SlidersHorizontalIcon weight="bold" />
+                </IconButton>
+                {filtersOpen && (
+                  <MentionFilterMenu
+                    filters={mentionFilters}
+                    anchorRef={filterAnchorRef}
+                    onChange={updateMentionFilters}
+                    onClose={() => setFiltersOpen(false)}
+                  />
+                )}
+              </div>
+            )}
+            {showMarkAll && (
+              <MarkAsReadButton
+                title={
+                  tab === "mentions"
+                    ? t("notifications.clearAllMentions")
+                    : t("notifications.markAllAsRead")
+                }
+                disabled={tab === "unreads" && markableChannels.length === 0}
+                onClick={markAllAsRead}
+              />
+            )}
+          </Stack>
         </Stack>
 
         <Stack direction="row" px={1.5} flexShrink={0}>
@@ -194,11 +255,9 @@ export const NotificationCenterButton = observer(() => {
                 <Typography
                   level="label-sm"
                   textColor={isActive ? undefined : "muted"}
-                  weight={isActive ? "bold" : "medium"}
+                  weight="medium"
                   css={{
                     whiteSpace: "nowrap",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
                     color: isActive ? theme.colors.primary : undefined
                   }}
                 >
@@ -241,7 +300,7 @@ export const NotificationCenterButton = observer(() => {
               />
             ))}
 
-          {tab === "mentions" && <MentionsTab />}
+          {tab === "mentions" && <MentionsTab filters={mentionFilters} />}
 
           {tab === "bookmarks" && <BookmarksTab />}
           {tab === "reminders" && <RemindersTab />}

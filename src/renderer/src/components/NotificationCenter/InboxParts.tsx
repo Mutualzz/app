@@ -100,8 +100,7 @@ export const MarkAsReadButton = ({
 };
 
 export const InboxTabButton = styled("button")(({ theme }) => ({
-  flex: "1 1 0",
-  minWidth: 0,
+  flex: "1 0 auto",
   display: "flex",
   alignItems: "center",
   justifyContent: "center",

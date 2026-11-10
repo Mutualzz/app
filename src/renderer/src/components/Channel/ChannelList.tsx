@@ -424,7 +424,8 @@ export const ChannelList = observer(() => {
             flex={1}
             height="100%"
             direction="column"
-            pt="1rem"
+            pt="2.5rem"
+            pb="2.5rem"
             css={{
               overflowX: "hidden"
             }}

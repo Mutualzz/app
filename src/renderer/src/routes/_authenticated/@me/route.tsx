@@ -106,7 +106,7 @@ function RouteComponent() {
         flexShrink={0}
         height="100%"
       >
-        <Stack height="100%" direction="row" minWidth={0}>
+        <Stack flex={1} minHeight={0} direction="row" minWidth={0}>
           <SpacesSidebar />
           <Paper
             surfaceRole="chrome"

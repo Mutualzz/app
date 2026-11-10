@@ -69,7 +69,7 @@ function RouteComponent() {
         flexShrink={0}
         height="100%"
       >
-        <Stack height="100%" direction="row">
+        <Stack flex={1} minHeight={0} direction="row">
           <SpacesSidebar />
           <Stack
             position="relative"
@@ -125,11 +125,7 @@ function RouteComponent() {
               }
             />
             {activeSpace && (
-              <SpaceLockdownOverlay
-                space={activeSpace}
-                showMessage={false}
-                reserveBottom="4.5rem"
-              />
+              <SpaceLockdownOverlay space={activeSpace} showMessage={false} />
             )}
           </Stack>
         </Stack>

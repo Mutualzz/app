@@ -105,9 +105,8 @@ export const UserBar = observer(() => {
     <Stack
       mb={2}
       ml={1}
-      position="absolute"
-      bottom={0}
       width="97.5%"
+      flexShrink={0}
       direction="column"
     >
       {showVoicePill && (

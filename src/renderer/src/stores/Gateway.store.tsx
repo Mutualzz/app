@@ -41,7 +41,8 @@ import {
   type APIMessageReminder,
   type APIMessageReminderWithMessage,
   type APIScheduledMessage,
-  type APINotification
+  type APINotification,
+  type DiscordImportProgressPayload
 } from "@mutualzz/types";
 import {
   type Codec,
@@ -71,9 +72,11 @@ import i18n from "@renderer/i18n";
 import type { Message } from "@stores/objects/Message";
 import { channelLocationLabel } from "@utils/channelLocationLabel";
 import {
-  type MentionsData,
+  clearMentionCaches,
+  insertMentionIntoCaches,
+  type MentionKind,
   type MentionsPage,
-  removeMentionFromCache
+  removeMentionFromCaches
 } from "@components/NotificationCenter/mentionsCache";
 import { type Channel } from "./objects/Channel";
 import {
@@ -107,6 +110,13 @@ type GatewayAck<Data = object> =
   | { ok: false; message?: string };
 
 export type GatewayStatus = (typeof GatewayStatus)[keyof typeof GatewayStatus];
+
+export interface DiscordImportResult {
+  space: APISpace;
+  inviteCode: string;
+  importedEmojiCount: number;
+  skippedEmojiCount: number;
+}
 
 const RECONNECT_TIMEOUT = 5000;
 const RECONNECT_MAX_TIMEOUT = 30_000;
@@ -332,6 +342,11 @@ export class GatewayStore {
       resolve: (ack: GatewayAck) => void;
       timer: ReturnType<typeof setTimeout>;
     }
+  >();
+
+  private discordImportProgressListeners = new Map<
+    string,
+    (progress: DiscordImportProgressPayload) => void
   >();
 
   constructor(private readonly app: AppStore) {
@@ -1078,7 +1093,8 @@ export class GatewayStore {
   private request<Data = object>(
     opcode: number,
     data: Record<string, unknown>,
-    timeoutMs = 10_000
+    timeoutMs = 10_000,
+    nonce: string = crypto.randomUUID()
   ) {
     return new Promise<GatewayAck<Data>>((resolve) => {
       if (this.readyState !== GatewayStatus.OPEN) {
@@ -1086,7 +1102,6 @@ export class GatewayStore {
         return;
       }
 
-      const nonce = crypto.randomUUID();
       const timer = setTimeout(() => {
         this.pendingRequests.delete(nonce);
         resolve({ ok: false, message: "No response from the server" });
@@ -1165,6 +1180,30 @@ export class GatewayStore {
     );
     return ack.ok ? (ack.lyrics ?? null) : null;
   }
+
+  async importDiscordServer(
+    guildId: string,
+    spaceName: string,
+    onProgress: (progress: DiscordImportProgressPayload) => void
+  ) {
+    const nonce = crypto.randomUUID();
+    this.discordImportProgressListeners.set(nonce, onProgress);
+
+    try {
+      return await this.request<DiscordImportResult>(
+        GatewayOpcodes.DiscordImportExecute,
+        { guildId, spaceName },
+        5 * 60_000,
+        nonce
+      );
+    } finally {
+      this.discordImportProgressListeners.delete(nonce);
+    }
+  }
+
+  private onDiscordImportProgress = (payload: DiscordImportProgressPayload) => {
+    this.discordImportProgressListeners.get(payload.nonce)?.(payload);
+  };
 
   async uploadActivityArt(image: string) {
     const ack = await this.request<{ url?: string }>(
@@ -1267,6 +1306,10 @@ export class GatewayStore {
 
   dismissMention(messageId: string) {
     return this.request(GatewayOpcodes.MentionDismiss, { messageId });
+  }
+
+  clearAllMentions() {
+    return this.request(GatewayOpcodes.MentionClearAll, {});
   }
 
   private resolveMediaArtwork = (trackKey: string) =>
@@ -1733,10 +1776,16 @@ export class GatewayStore {
       GatewayDispatchEvents.MessageReminderAck,
       GatewayDispatchEvents.ScheduledMessageAck,
       GatewayDispatchEvents.NotificationAck,
-      GatewayDispatchEvents.MentionAck
+      GatewayDispatchEvents.MentionAck,
+      GatewayDispatchEvents.DiscordImportAck
     ]) {
       this.dispatchHandlers.set(ackEvent, this.resolveRequest);
     }
+
+    this.dispatchHandlers.set(
+      GatewayDispatchEvents.DiscordImportProgress,
+      this.onDiscordImportProgress
+    );
 
     this.dispatchHandlers.set(
       GatewayDispatchEvents.MessageReminderUpdate,
@@ -1769,6 +1818,10 @@ export class GatewayStore {
     this.dispatchHandlers.set(
       GatewayDispatchEvents.MentionDismiss,
       this.onMentionDismiss
+    );
+    this.dispatchHandlers.set(
+      GatewayDispatchEvents.MentionsCleared,
+      this.onMentionsCleared
     );
   }
 
@@ -2224,6 +2277,7 @@ export class GatewayStore {
     this.app.reminders.replaceAll(reminders ?? []);
     this.app.scheduledMessages.replaceAll(scheduledMessages ?? []);
     this.app.notifications.resetFromReady(unreadNotificationCount ?? 0);
+    this.app.queryClient.removeQueries({ queryKey: ["mentions"] });
     this.app.readStates.addAll(readStates);
     if (spaceNotificationSettings?.length) {
       this.app.spaceNotifications.addAll(spaceNotificationSettings);
@@ -2481,6 +2535,7 @@ export class GatewayStore {
   }
 
   private stopPresenceLoop() {
+    this.lastPresenceHash = null;
     if (this.presenceLoopInterval) {
       window.clearInterval(this.presenceLoopInterval);
       this.presenceLoopInterval = null;
@@ -2504,6 +2559,9 @@ export class GatewayStore {
     space.members.addAll(payload.members ?? []);
     for (const channel of payload.channels ?? []) {
       space.addChannel(channel);
+    }
+    for (const expression of payload.expressions ?? []) {
+      space.addExpression(expression);
     }
 
     this.app.spaces.setActive(space.id);
@@ -2793,6 +2851,38 @@ export class GatewayStore {
     this.app.typing.startedTyping(payload.channelId, payload.userId);
   };
 
+  private mentionKindFor(
+    payload: APIMessage,
+    channel: Channel
+  ): MentionKind | null {
+    const accountId = this.app.account?.id;
+    const mentions = payload.mentions ?? [];
+    if (!accountId || mentions.length === 0) return null;
+
+    if (
+      mentions.some(
+        (mention) => mention.type === "user" && mention.id === accountId
+      )
+    )
+      return "user";
+
+    const member = this.app.spaces
+      .get(channel.spaceId ?? "")
+      ?.members.get(accountId);
+    if (
+      mentions.some(
+        (mention) =>
+          mention.type === "role" && (member?.roles?.has(mention.id) ?? false)
+      )
+    )
+      return "role";
+
+    if (mentions.some((mention) => mention.type === "everyone"))
+      return "everyone";
+
+    return null;
+  }
+
   private onMessageCreate = async (payload: APIMessage) => {
     let channel = this.app.channels.get(payload.channelId);
 
@@ -2813,6 +2903,15 @@ export class GatewayStore {
       void this.app.readStates.ack(payload.channelId, payload.id);
       return;
     }
+
+    const mentionKind = this.mentionKindFor(payload, channel);
+    if (mentionKind)
+      insertMentionIntoCaches(
+        this.app.queryClient,
+        payload,
+        mentionKind,
+        channel.spaceId ?? null
+      );
 
     if (this.app.channels.activeId === payload.channelId) {
       void this.app.readStates.ack(payload.channelId, payload.id);
@@ -2838,9 +2937,6 @@ export class GatewayStore {
     const isDnd = myStatus === "dnd";
 
     // Every DM/GroupDM message is notification-worthy, same as an explicit mention in a space
-    if (isMentioned)
-      void this.app.queryClient.invalidateQueries({ queryKey: ["mentions"] });
-
     if (isDM || isMentioned) {
       const readState = this.app.readStates.get(payload.channelId);
       if (readState) {
@@ -2876,6 +2972,8 @@ export class GatewayStore {
   private onMessageDeleteBulk = (
     payload: Pick<APIMessage, "id" | "channelId">[]
   ) => {
+    for (const deleted of payload)
+      removeMentionFromCaches(this.app.queryClient, deleted.id);
     const sortMessagesByChannel = payload.reduce(
       (acc, message) => {
         if (!acc[message.channelId]) acc[message.channelId] = [];
@@ -2895,6 +2993,7 @@ export class GatewayStore {
   };
 
   private onMessageDelete = (payload: Pick<APIMessage, "id" | "channelId">) => {
+    removeMentionFromCaches(this.app.queryClient, payload.id);
     const channel = this.app.channels.get(payload.channelId);
     if (!channel) return;
 
@@ -3609,10 +3708,11 @@ export class GatewayStore {
   };
 
   private onMentionDismiss = (payload: { messageId: string }) => {
-    this.app.queryClient.setQueriesData<MentionsData>(
-      { queryKey: ["mentions"] },
-      (current) => removeMentionFromCache(current, payload.messageId)
-    );
+    removeMentionFromCaches(this.app.queryClient, payload.messageId);
+  };
+
+  private onMentionsCleared = () => {
+    clearMentionCaches(this.app.queryClient);
   };
 
   private announceReminder() {
