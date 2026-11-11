@@ -31,7 +31,7 @@ function DownloadAndRedirect() {
     return () => clearTimeout(timeout);
   }, [fileUrl, navigate]);
 
-  if (isElectron) return <Navigate to="/" replace />;
+  if (isElectron) return <Navigate to="/app" replace />;
 
   return (
     <Stack

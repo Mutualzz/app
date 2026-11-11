@@ -3,6 +3,8 @@ import { join } from "path";
 import { is } from "@electron-toolkit/utils";
 import iconPng from "../../resources/icons/base/icon.png?asset";
 import iconIco from "../../resources/icons/base/icon.ico?asset";
+import { isWebUrl, openExternalUrl } from "./openExternal";
+import { setupZoom } from "./zoom";
 
 let mainWindow: BrowserWindow | null = null;
 let closeBlocked = false;
@@ -40,6 +42,8 @@ export function createMainWindow(): BrowserWindow {
       autoplayPolicy: "no-user-gesture-required"
     }
   });
+
+  setupZoom(mainWindow);
 
   const availableSpellCheckerLanguages =
     mainWindow.webContents.session.availableSpellCheckerLanguages;
@@ -147,15 +151,7 @@ export function createMainWindow(): BrowserWindow {
   });
 
   mainWindow.webContents.setWindowOpenHandler((details) => {
-    const { shell } = require("electron");
-    try {
-      const parsed = new URL(details.url);
-      if (parsed.protocol === "http:" || parsed.protocol === "https:") {
-        shell.openExternal(details.url);
-      }
-    } catch {
-      // ignore
-    }
+    if (isWebUrl(details.url)) void openExternalUrl(details.url);
     return { action: "deny" };
   });
 

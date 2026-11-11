@@ -100,26 +100,25 @@ export const MarkAsReadButton = ({
 };
 
 export const InboxTabButton = styled("button")(({ theme }) => ({
-  flex: "1 0 auto",
+  flex: "0 0 auto",
   display: "flex",
   alignItems: "center",
-  justifyContent: "center",
   gap: 6,
-  padding: "10px 6px",
+  padding: "4px 10px",
   border: "none",
-  borderBottom: "2px solid transparent",
+  borderRadius: 6,
   background: "transparent",
   color: "inherit",
   font: "inherit",
   cursor: "pointer",
-  transition: "border-color 120ms ease",
+  transition: "background-color 120ms ease",
 
   "&[data-active='true']": {
-    borderBottomColor: theme.colors.primary
+    background: theme.colors.surface
   },
 
   "&:hover:not([data-active='true'])": {
-    borderBottomColor: theme.colors.surface
+    background: `${theme.colors.surface}99`
   }
 }));
 

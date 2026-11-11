@@ -239,7 +239,15 @@ export const NotificationCenterButton = observer(() => {
           </Stack>
         </Stack>
 
-        <Stack direction="row" px={1.5} flexShrink={0}>
+        <Stack
+          direction="row"
+          alignItems="center"
+          spacing={0.5}
+          px={2}
+          pb={1.25}
+          flexShrink={0}
+          css={{ overflowX: "auto", scrollbarWidth: "none" }}
+        >
           {tabs.map((entry) => {
             const isActive = tab === entry.key;
             return (
@@ -256,10 +264,7 @@ export const NotificationCenterButton = observer(() => {
                   level="label-sm"
                   textColor={isActive ? undefined : "muted"}
                   weight="medium"
-                  css={{
-                    whiteSpace: "nowrap",
-                    color: isActive ? theme.colors.primary : undefined
-                  }}
+                  css={{ whiteSpace: "nowrap" }}
                 >
                   {entry.label}
                 </Typography>

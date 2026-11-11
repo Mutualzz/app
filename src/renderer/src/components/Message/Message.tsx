@@ -40,6 +40,7 @@ import { Tooltip } from "@components/Tooltip";
 import { ExpressionType, MessageType } from "@mutualzz/types";
 import { MessageAttachment } from "./MessageAttachment";
 import { FileIcon } from "@phosphor-icons/react";
+import { useEffect, useRef } from "react";
 import type { PendingAttachmentPreview } from "@stores/objects/QueuedMessage";
 import { UserProfilePopoutTrigger } from "../Profile/popout/UserProfilePopoutTrigger";
 import { shouldHideInviteUrlContent } from "@mutualzz/client";
@@ -219,6 +220,24 @@ export const Message = observer(
     const showLinkEmbeds = app.settings?.showLinkEmbeds ?? true;
 
     const isSent = message instanceof MessageObject;
+    const isEditing = isSent && message.editing;
+    const wasEditingRef = useRef(isEditing);
+
+    useEffect(() => {
+      const editingJustEnded = wasEditingRef.current && !isEditing;
+      wasEditingRef.current = isEditing;
+      if (!editingJustEnded) return;
+
+      const wrapper = document.getElementById(`message-${message.id}`);
+      if (!wrapper) return;
+
+      const activeElement = document.activeElement;
+      const focusWasLost =
+        !activeElement ||
+        activeElement === document.body ||
+        wrapper.contains(activeElement);
+      if (focusWasLost) wrapper.focus({ preventScroll: true });
+    }, [isEditing, message.id]);
 
     const hideSwitcher = () => {
       if (!app.memberListVisible) {

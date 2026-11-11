@@ -99,7 +99,8 @@ export class Message extends MessageBase {
       handleReactionRemove: action.bound,
       handleReactionRemoveEmoji: action.bound,
       handleReactionRemoveAll: action.bound,
-      toggleReaction: action.bound
+      toggleReaction: action.bound,
+      setPinned: action.bound
     });
   }
 
@@ -142,6 +143,48 @@ export class Message extends MessageBase {
       });
     }
     this.editing = value;
+  }
+
+  get isMine() {
+    return this.authorId === this.app.account?.id;
+  }
+
+  get canDelete() {
+    return (
+      this.isMine ||
+      !!this.space?.members.me?.hasPermission("ManageMessages", this.channel)
+    );
+  }
+
+  get canReact() {
+    return (
+      !this.space ||
+      !!this.space.members.me?.hasPermission("AddReactions", this.channel)
+    );
+  }
+
+  get canPin() {
+    return (
+      !this.space ||
+      !!this.space.members.me?.hasPermission("PinMessages", this.channel)
+    );
+  }
+
+  setPinned(pinned: boolean) {
+    this.pinned = pinned;
+  }
+
+  async togglePinned() {
+    const route = `channels/${this.channelId}/messages/${this.id}/pin`;
+    const nextPinned = !this.pinned;
+
+    if (nextPinned) await this.app.rest.put(route, {});
+    else await this.app.rest.delete(route);
+
+    this.setPinned(nextPinned);
+    void this.app.queryClient.invalidateQueries({
+      queryKey: ["channel-pins", this.channelId]
+    });
   }
 
   setReactions(reactions: APIMessageReaction[]) {

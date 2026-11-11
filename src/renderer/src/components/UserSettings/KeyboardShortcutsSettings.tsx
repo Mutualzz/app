@@ -1,15 +1,13 @@
 import { Button } from "@components/Button";
 import { useAppStore } from "@hooks/useStores";
 import { Stack, Typography } from "@mutualzz/ui-web";
-import {
-  formatForDisplay,
-  useHotkeyRecorder,
-} from "@tanstack/react-hotkeys";
+import { formatForDisplay, useHotkeyRecorder } from "@tanstack/react-hotkeys";
 import { observer } from "mobx-react-lite";
 import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   findKeyboardShortcutConflict,
+  getSystemShortcutWarning,
   isKeyboardShortcutCustomized,
   KEYBOARD_SHORTCUT_IDS,
   mergeKeyboardShortcuts,
@@ -94,6 +92,10 @@ export const KeyboardShortcutsSettings = observer(() => {
       {KEYBOARD_SHORTCUT_IDS.map((id) => {
         const isRecording = recordingId === id && recorder.isRecording;
         const isCustomized = isKeyboardShortcutCustomized(id, shortcuts);
+        const systemWarning = getSystemShortcutWarning(shortcuts[id]);
+        const isTakenGlobally =
+          app.voiceShortcutsWorkEverywhere &&
+          app.globalShortcutFailures.includes(id);
 
         return (
           <Stack
@@ -112,6 +114,16 @@ export const KeyboardShortcutsSettings = observer(() => {
                   {t("keybinds.conflict", {
                     action: t(`keybinds.shortcuts.${conflict.conflictId}`)
                   })}
+                </Typography>
+              )}
+              {systemWarning && !isRecording && (
+                <Typography level="body-xs" color="warning">
+                  {t(`keybinds.systemWarning.${systemWarning}`)}
+                </Typography>
+              )}
+              {isTakenGlobally && !isRecording && (
+                <Typography level="body-xs" color="danger">
+                  {t("keybinds.globalTaken")}
                 </Typography>
               )}
             </Stack>

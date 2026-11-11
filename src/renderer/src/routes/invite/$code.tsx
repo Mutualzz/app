@@ -192,9 +192,9 @@ function RouteComponent() {
   if (!app.token && mounted && !deepLink)
     return <Navigate to="/login" replace />;
 
-  const handleContinue = () => navigate({ to: "/", replace: true });
+  const handleContinue = () => navigate({ to: "/app", replace: true });
 
-  if (!invite && error) return <Navigate to="/" replace />;
+  if (!invite && error) return <Navigate to="/app" replace />;
 
   if (deepLink && invite && !isFriendInvite) {
     return (

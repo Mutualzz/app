@@ -24,7 +24,7 @@ export const SpaceActionConfirm = observer(({ space, action }: Props) => {
     mutationKey: ["delete-space", space.id],
     mutationFn: async () => space.delete(),
     onSuccess: () => {
-      navigate({ to: "/" });
+      navigate({ to: "/app" });
       closeAllModals();
     }
   });
@@ -33,7 +33,7 @@ export const SpaceActionConfirm = observer(({ space, action }: Props) => {
     mutationKey: ["leave-space", space.id],
     mutationFn: async () => space.leave(),
     onSuccess: () => {
-      navigate({ to: "/" });
+      navigate({ to: "/app" });
       closeAllModals();
     }
   });

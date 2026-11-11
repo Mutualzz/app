@@ -11,7 +11,7 @@ function StaffRoute() {
   const app = useAppStore();
 
   if (app.isAppLoading) return <Loading />;
-  if (!app.account?.isStaff) return <Navigate to="/" replace />;
+  if (!app.account?.isStaff) return <Navigate to="/app" replace />;
 
   return <Outlet />;
 }

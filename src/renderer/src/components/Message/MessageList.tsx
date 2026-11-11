@@ -11,7 +11,8 @@ import {
   type UIEvent,
   useCallback,
   useEffect,
-  useRef
+  useRef,
+  type KeyboardEvent
 } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import useResizeObserver from "use-resize-observer";
@@ -24,6 +25,7 @@ import { DMGroupAvatar } from "@components/DMChannel/DMGroupAvatar";
 import { HashIcon } from "@phosphor-icons/react";
 import { useTranslation } from "react-i18next";
 import { jumpToChannelMessage } from "@utils/jumpToChannelMessage";
+import { useMenu } from "@renderer/contexts/ContextMenu.context";
 
 interface Props {
   channel?: Channel | null;
@@ -44,35 +46,35 @@ const SpaceEndMessage = ({
   const { t } = useTranslation("chat");
 
   return (
-  <Stack direction="column" spacing={1} margin="16px 16px 0 16px">
-    <Paper
-      width={64}
-      height={64}
-      elevation={10}
-      padding={3}
-      borderRadius="50%"
-      alignItems="center"
-      justifyContent="center"
-      display="flex"
-      boxShadow="none"
-    >
-      <HashIcon size={48} />
-    </Paper>
+    <Stack direction="column" spacing={1} margin="16px 16px 0 16px">
+      <Paper
+        width={64}
+        height={64}
+        elevation={10}
+        padding={3}
+        borderRadius="50%"
+        alignItems="center"
+        justifyContent="center"
+        display="flex"
+        boxShadow="none"
+      >
+        <HashIcon size={48} />
+      </Paper>
 
-    <Typography level="h1" fontWeight={700} margin="8px 0">
-      {t("empty.channel.welcome", { channel: channel?.name })}
-    </Typography>
+      <Typography level="h1" fontWeight={700} margin="8px 0">
+        {t("empty.channel.welcome", { channel: channel?.name })}
+      </Typography>
 
-    {canReadHistory ? (
-      <Typography textColor="secondary">
-        {t("empty.channel.start", { channel: channel?.name })}
-      </Typography>
-    ) : (
-      <Typography textColor="secondary">
-        {t("empty.channel.noHistory")}
-      </Typography>
-    )}
-  </Stack>
+      {canReadHistory ? (
+        <Typography textColor="secondary">
+          {t("empty.channel.start", { channel: channel?.name })}
+        </Typography>
+      ) : (
+        <Typography textColor="secondary">
+          {t("empty.channel.noHistory")}
+        </Typography>
+      )}
+    </Stack>
   );
 };
 
@@ -89,33 +91,33 @@ const DMEndMessage = ({
     channel?.dmRecipients?.map((r) => r.displayName).join(", ");
 
   return (
-  <Stack direction="column" spacing={1} margin="16px 16px 0 16px">
-    {isGroupDM ? (
-      channel.iconUrl ? (
-        <Avatar
-          src={channel.iconUrl}
-          size={96}
-          shape={channel.flags.has("RoundedIcon") ? "circle" : "square"}
-        />
+    <Stack direction="column" spacing={1} margin="16px 16px 0 16px">
+      {isGroupDM ? (
+        channel.iconUrl ? (
+          <Avatar
+            src={channel.iconUrl}
+            size={96}
+            shape={channel.flags.has("RoundedIcon") ? "circle" : "square"}
+          />
+        ) : (
+          <DMGroupAvatar users={channel?.dmRecipientsList || []} size={96} />
+        )
       ) : (
-        <DMGroupAvatar users={channel?.dmRecipientsList || []} size={96} />
-      )
-    ) : (
-      <UserAvatar user={channel?.dmRecipient} size={64} />
-    )}
+        <UserAvatar user={channel?.dmRecipient} size={64} />
+      )}
 
-    <Typography level="h1" fontWeight={700} margin="8px 0">
-      {isGroupDM
-        ? conversation
-        : t("empty.dm.firstMessage", {
-            name: channel?.dmRecipient?.displayName
-          })}
-    </Typography>
+      <Typography level="h1" fontWeight={700} margin="8px 0">
+        {isGroupDM
+          ? conversation
+          : t("empty.dm.firstMessage", {
+              name: channel?.dmRecipient?.displayName
+            })}
+      </Typography>
 
-    <Typography textColor="secondary">
-      {t("empty.dm.beginning", { conversation })}
-    </Typography>
-  </Stack>
+      <Typography textColor="secondary">
+        {t("empty.dm.beginning", { conversation })}
+      </Typography>
+    </Stack>
   );
 };
 
@@ -124,6 +126,8 @@ export const MessageList = observer(({ channel: channelProp }: Props) => {
   const { theme } = useTheme();
   const ref = useRef<HTMLDivElement>(null);
   const { width } = useResizeObserver<HTMLDivElement>({ ref: ref.current });
+  const { t } = useTranslation("chat");
+  const { openContextMenu } = useMenu();
   const logger = new Logger({ tag: "MessageList" });
 
   const channel = channelProp ?? app.channels.active;
@@ -216,7 +220,13 @@ export const MessageList = observer(({ channel: channelProp }: Props) => {
 
     app.readStates.updateLocal(channel.id, lastMessage.id);
     sendAck(lastMessage.id);
-  }, [channel?.id, channel?.lastMessage?.id, channel?.messages.groups, sendAck, app.readStates]);
+  }, [
+    channel?.id,
+    channel?.lastMessage?.id,
+    channel?.messages.groups,
+    sendAck,
+    app.readStates
+  ]);
 
   useEffect(() => {
     if (!channel?.id) return;
@@ -227,9 +237,11 @@ export const MessageList = observer(({ channel: channelProp }: Props) => {
     const request = app.jumpToMessage;
     if (!request || request.channelId !== channel?.id) return;
 
-    void jumpToChannelMessage(channel, request.messageId, theme).then((success) => {
-      if (success) app.clearJumpToMessage();
-    });
+    void jumpToChannelMessage(channel, request.messageId, theme).then(
+      (success) => {
+        if (success) app.clearJumpToMessage();
+      }
+    );
   }, [app, app.jumpToMessage, channel, theme]);
 
   const onScroll = useCallback((e: UIEvent<HTMLDivElement>) => {
@@ -264,6 +276,156 @@ export const MessageList = observer(({ channel: channelProp }: Props) => {
     });
   }, [messageGroups, hasNextPage, fetchNextPage]);
 
+  const runMessageAction = (
+    event: KeyboardEvent<HTMLDivElement>,
+    element: HTMLElement
+  ) => {
+    const messageId = element.dataset.messageId;
+    const message = messageId ? channel?.messages.get(messageId) : undefined;
+    if (!message || message.editing) return false;
+
+    if (
+      event.key === "ContextMenu" ||
+      (event.shiftKey && event.key === "F10")
+    ) {
+      const rect = element.getBoundingClientRect();
+      openContextMenu(
+        new MouseEvent("contextmenu", {
+          clientX: rect.left + 48,
+          clientY: rect.top + rect.height / 2
+        }),
+        { type: "message", message }
+      );
+      return true;
+    }
+
+    if (event.key === "+" || event.code === "NumpadAdd") {
+      if (!message.canReact) return false;
+      app.requestReactionPicker(message.id);
+      return true;
+    }
+
+    switch (event.code) {
+      case "KeyR":
+        app.setReplyingTo(message);
+        app.announcer.announce(
+          t("announce.replyingTo", {
+            name: message.author?.displayName ?? ""
+          })
+        );
+        return true;
+      case "KeyE":
+        if (!message.isMine) return false;
+        message.setEditing(true);
+        return true;
+      case "KeyB": {
+        const wasBookmarked = app.bookmarks.has(message.id);
+        void app.bookmarks.toggle(message.id).then(() => {
+          const isBookmarked = app.bookmarks.has(message.id);
+          if (isBookmarked === wasBookmarked) return;
+          app.announcer.announce(
+            t(isBookmarked ? "announce.bookmarked" : "announce.bookmarkRemoved")
+          );
+        });
+        return true;
+      }
+      case "KeyP":
+        if (!message.canPin) return false;
+        void message
+          .togglePinned()
+          .then(() =>
+            app.announcer.announce(
+              t(message.pinned ? "announce.pinned" : "announce.unpinned")
+            )
+          );
+        return true;
+      default:
+        return false;
+    }
+  };
+
+  const focusMessage = (element: HTMLElement | undefined) => {
+    if (!element) return;
+    element.focus({ preventScroll: true });
+    element.scrollIntoView({ block: "nearest" });
+  };
+
+  const handleListKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    if (event.altKey || event.ctrlKey || event.metaKey) return;
+
+    const target = event.target as HTMLElement;
+    if (
+      target.tagName === "INPUT" ||
+      target.tagName === "TEXTAREA" ||
+      target.isContentEditable
+    )
+      return;
+
+    const messageElements = Array.from(
+      ref.current?.querySelectorAll<HTMLElement>("[data-message-id]") ?? []
+    );
+    if (messageElements.length === 0) return;
+
+    const focusedMessage = target.closest<HTMLElement>("[data-message-id]");
+    const currentIndex = focusedMessage
+      ? messageElements.indexOf(focusedMessage)
+      : -1;
+    const newestIndex = 0;
+    const oldestIndex = messageElements.length - 1;
+
+    if (focusedMessage) {
+      if (event.shiftKey && event.key === "Delete") {
+        const messageId = focusedMessage.dataset.messageId;
+        const message = messageId
+          ? channel?.messages.get(messageId)
+          : undefined;
+        if (!message?.canDelete) return;
+
+        event.preventDefault();
+        focusMessage(
+          messageElements[currentIndex + 1] ?? messageElements[currentIndex - 1]
+        );
+        void message
+          .delete()
+          .then(() => app.announcer.announce(t("announce.deleted")));
+        return;
+      }
+
+      if (runMessageAction(event, focusedMessage)) {
+        event.preventDefault();
+        return;
+      }
+    }
+
+    let nextIndex: number;
+
+    switch (event.key) {
+      case "ArrowUp":
+        nextIndex =
+          currentIndex === -1
+            ? newestIndex
+            : Math.min(currentIndex + 1, oldestIndex);
+        break;
+      case "ArrowDown":
+        nextIndex =
+          currentIndex === -1
+            ? newestIndex
+            : Math.max(currentIndex - 1, newestIndex);
+        break;
+      case "Home":
+        nextIndex = oldestIndex;
+        break;
+      case "End":
+        nextIndex = newestIndex;
+        break;
+      default:
+        return;
+    }
+
+    event.preventDefault();
+    focusMessage(messageElements[nextIndex]);
+  };
+
   const renderGroup = useCallback(
     (group: MessageGroupType, index: number) => {
       const olderGroup = messageGroups?.[index + 1];
@@ -282,9 +444,7 @@ export const MessageList = observer(({ channel: channelProp }: Props) => {
           >
             <MessageGroup group={group} />
           </div>
-          {showDateSeparator && (
-            <MessageDateSeparator date={group.createdAt} />
-          )}
+          {showDateSeparator && <MessageDateSeparator date={group.createdAt} />}
         </Fragment>
       );
     },
@@ -308,6 +468,21 @@ export const MessageList = observer(({ channel: channelProp }: Props) => {
         ref={ref}
         id="scrollable-div"
         onScroll={onScroll}
+        onKeyDown={handleListKeyDown}
+        tabIndex={0}
+        role="region"
+        aria-label={t("messageList.label", { name: channel?.name ?? "" })}
+        css={{
+          outline: "none",
+          "& [data-message-id]": { outline: "none" },
+          "& [data-message-id]:focus-visible": {
+            boxShadow: `inset 0 0 0 2px ${theme.colors.primary}`,
+            borderRadius: 6
+          },
+          "&:focus-visible": {
+            boxShadow: `inset 0 0 0 2px ${theme.colors.primary}`
+          }
+        }}
       >
         <InfiniteScroll
           dataLength={totalMessages}

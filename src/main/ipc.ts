@@ -30,12 +30,15 @@ import {
 } from "./processCache";
 import { getRpcActivities, setRpcUpdatedListener, startRpc } from "./rpc";
 import { getAutostart, setAutostart } from "./autostart";
+import { setGlobalShortcuts } from "./globalShortcuts";
 import {
   getLatestMedia,
   getLatestMediaThumbnail,
   setMediaUpdatedListener,
   startMediaWatcher
 } from "./media";
+import { spawn } from "child_process";
+import { isWebUrl, openExternalUrl } from "./openExternal";
 
 const SERVICE = "mutualzz";
 const ACCOUNT = "default";
@@ -179,12 +182,11 @@ export function setupIPC(): void {
 
   // Shell/External
   ipcMain.handle("shell:open-external", async (_, url: string) => {
+    if (!isWebUrl(url))
+      throw new Error("Only http: and https: URLs are allowed");
+
     try {
-      const parsed = new URL(url);
-      if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
-        throw new Error("Only http: and https: URLs are allowed");
-      }
-      await shell.openExternal(url);
+      await openExternalUrl(url);
     } catch (err) {
       console.error("Failed to open external URL:", err);
       throw err;
@@ -215,6 +217,10 @@ export function setupIPC(): void {
     app.relaunch();
     app.exit(0);
   });
+
+  ipcMain.handle("global-shortcuts:set", (_, bindings: unknown) =>
+    setGlobalShortcuts(bindings)
+  );
 
   ipcMain.handle("desktop:set-autostart", async (_, enabled: boolean) => {
     try {

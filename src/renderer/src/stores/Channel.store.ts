@@ -129,6 +129,96 @@ export class ChannelStore {
     return this.unreadDMs.length > 0;
   }
 
+  getNavigableSpaceChannels(spaceId: Snowflake): Channel[] {
+    const space = this.app.spaces.get(spaceId);
+    const me = space?.members.me;
+    if (!space || !me) return [];
+
+    return space.channels.filter(
+      (channel) => channel.isTextChannel && me.canViewChannel(channel)
+    );
+  }
+
+  get navigableChannelsForActiveContext(): Channel[] {
+    const spaceId = this.active?.spaceId;
+    if (!spaceId) return this.dms;
+
+    const space = this.app.spaces.get(spaceId);
+    const me = space?.members.me;
+    if (!space || !me) return [];
+
+    return space.channels.filter(
+      (channel) => channel.isTextChannel && me.canViewChannel(channel)
+    );
+  }
+
+  get quickSwitcherChannels(): Channel[] {
+    return [
+      ...this.dms,
+      ...this.app.spaces.all.flatMap((space) =>
+        this.getNavigableSpaceChannels(space.id)
+      )
+    ];
+  }
+
+  getAdjacentUnreadChannel(direction: 1 | -1): Channel | null {
+    const candidates = this.navigableChannelsForActiveContext;
+    const total = candidates.length;
+    if (total === 0) return null;
+
+    const currentIndex = candidates.findIndex(
+      (channel) => channel.id === this.activeId
+    );
+    const startIndex =
+      currentIndex !== -1 ? currentIndex : direction === 1 ? -1 : total;
+
+    for (let step = 1; step <= total; step++) {
+      const index = (((startIndex + direction * step) % total) + total) % total;
+      const candidate = candidates[index];
+      if (candidate.id === this.activeId) continue;
+
+      const readState = this.app.readStates.get(candidate.id);
+      if (readState?.isUnread && !readState.isMuted) return candidate;
+    }
+
+    return null;
+  }
+
+  searchQuickSwitcher(rawQuery: string, limit = 20): Channel[] {
+    let query = rawQuery.trim().toLowerCase();
+    let candidates = this.quickSwitcherChannels;
+
+    if (query.startsWith("#")) {
+      candidates = candidates.filter((channel) => channel.spaceId);
+      query = query.slice(1);
+    } else if (query.startsWith("@")) {
+      candidates = candidates.filter((channel) => !channel.spaceId);
+      query = query.slice(1);
+    }
+
+    if (!query) return candidates.slice(0, limit);
+
+    const matches = candidates.flatMap((channel) => {
+      const name = channel.searchableName?.toLowerCase();
+      if (!name) return [];
+
+      const score = name.startsWith(query) ? 2 : name.includes(query) ? 1 : 0;
+      if (score === 0) return [];
+
+      const isUnread = !!this.app.readStates.get(channel.id)?.isUnread;
+      return [{ channel, score, isUnread }];
+    });
+
+    return matches
+      .sort(
+        (first, second) =>
+          second.score - first.score ||
+          Number(second.isUnread) - Number(first.isUnread)
+      )
+      .slice(0, limit)
+      .map((match) => match.channel);
+  }
+
   get dmMentionCount() {
     return this.dms.reduce(
       (acc, ch) => acc + (this.app.readStates.get(ch.id)?.mentionCount ?? 0),
@@ -345,7 +435,7 @@ export class ChannelStore {
           flags: 0n,
           type: ReadStateType.Messages,
           notificationLevel: null,
-          mutedUntil: null,
+          mutedUntil: null
         }
       ]);
     }

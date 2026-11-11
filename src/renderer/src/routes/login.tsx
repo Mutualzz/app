@@ -129,7 +129,7 @@ function Login() {
     }
   });
 
-  if (app.token) return <Navigate to="/" replace />;
+  if (app.token) return <Navigate to="/app" replace />;
 
   const space = app.joiningSpace;
 

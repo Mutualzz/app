@@ -157,18 +157,52 @@ export const MessageToolbar = observer(
     const pickerRef = useRef<HTMLDivElement>(null);
     const toolbarRef = useRef<HTMLDivElement>(null);
     const { addRecentStandard, addRecentCustom } = useRecentEmojis();
+    const openedFromKeyboardRef = useRef(false);
 
     const isSent = message instanceof Message;
+    const pickerRequested = app.reactionPickerMessageId === message.id;
 
     useEffect(() => {
-      if (!pickerOpen || !triggerRef.current) return;
+      if (!pickerRequested || !isSent) return;
 
-      const rect = triggerRef.current.getBoundingClientRect();
+      app.clearReactionPickerRequest();
+      openedFromKeyboardRef.current = true;
+      setPickerOpen(true);
+    }, [app, pickerRequested, isSent]);
+
+    useEffect(() => {
+      if (!pickerOpen || !openedFromKeyboardRef.current) return;
+
+      const frame = requestAnimationFrame(() => {
+        pickerRef.current?.querySelector<HTMLInputElement>("input")?.focus();
+      });
+      return () => cancelAnimationFrame(frame);
+    }, [pickerOpen]);
+
+    const closePicker = () => {
+      setPickerOpen(false);
+      if (!openedFromKeyboardRef.current) return;
+
+      openedFromKeyboardRef.current = false;
+      document
+        .getElementById(`message-${message.id}`)
+        ?.focus({ preventScroll: true });
+    };
+
+    useEffect(() => {
+      if (!pickerOpen) return;
+
+      const anchor =
+        triggerRef.current ?? document.getElementById(`message-${message.id}`);
+      if (!anchor) return;
+
+      const rect = anchor.getBoundingClientRect();
       const pickerHeight = 500;
       const pickerWidth = 500;
+      const anchorRight = triggerRef.current ? rect.left + 28 : rect.right - 16;
 
       let top = rect.top - pickerHeight - 8;
-      let left = rect.left - pickerWidth + 28;
+      let left = anchorRight - pickerWidth;
 
       if (top < 8) top = rect.bottom + 8;
       if (left < 8) left = 8;
@@ -177,7 +211,7 @@ export const MessageToolbar = observer(
       }
 
       setPosition({ top, left });
-    }, [pickerOpen]);
+    }, [pickerOpen, message.id]);
 
     useEffect(() => {
       if (!pickerOpen) return;
@@ -192,6 +226,7 @@ export const MessageToolbar = observer(
           return;
         }
 
+        openedFromKeyboardRef.current = false;
         setPickerOpen(false);
       };
 
@@ -204,7 +239,7 @@ export const MessageToolbar = observer(
 
       addRecentStandard(emoji.unified, skinTone);
       void message.toggleReaction(pickerEmojiToReactionEmoji(emoji, skinTone));
-      setPickerOpen(false);
+      closePicker();
     };
 
     const handleSelectCustomEmoji = (emoji: Expression) => {
@@ -212,7 +247,7 @@ export const MessageToolbar = observer(
 
       addRecentCustom(emoji.id, emoji.name, emoji.url, emoji.animated);
       void message.toggleReaction(expressionToReactionEmoji(emoji));
-      setPickerOpen(false);
+      closePicker();
     };
 
     if (message instanceof Message && message.editing) return children;
@@ -246,6 +281,11 @@ export const MessageToolbar = observer(
           <Portal>
             <div
               ref={pickerRef}
+              onKeyDown={(event) => {
+                if (event.key !== "Escape") return;
+                event.stopPropagation();
+                closePicker();
+              }}
               style={{
                 position: "fixed",
                 top: position.top,
@@ -257,8 +297,8 @@ export const MessageToolbar = observer(
                 pickerRef={pickerRef as any}
                 onSelectEmoji={handleSelectEmoji}
                 onSelectCustomEmoji={handleSelectCustomEmoji}
-                onSelectGif={() => setPickerOpen(false)}
-                onSelectSticker={() => setPickerOpen(false)}
+                onSelectGif={closePicker}
+                onSelectSticker={closePicker}
                 activeTab={activeTab}
                 onTabChange={setActiveTab}
               />

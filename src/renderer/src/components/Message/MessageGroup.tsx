@@ -5,9 +5,7 @@ import { observer } from "mobx-react-lite";
 import { Message } from "./Message";
 import { SystemMessage } from "@components/Message/SystemMessage";
 import { useAppStore } from "@hooks/useStores";
-import {
-  shouldShowMessageAvatar,
-} from "@utils/messageLayout";
+import { shouldShowMessageAvatar } from "@utils/messageLayout";
 
 interface Props {
   group: MessageGroupType;
@@ -29,7 +27,13 @@ export const MessageGroup = observer(({ group }: Props) => {
           const showAvatar = shouldShowMessageAvatar(messageDisplay, header);
 
           return (
-            <div key={message.id} id={`message-${message.id}`}>
+            <div
+              key={message.id}
+              id={`message-${message.id}`}
+              data-message-id={message.id}
+              tabIndex={-1}
+              role="article"
+            >
               <Message
                 message={message}
                 header={header}
@@ -42,7 +46,13 @@ export const MessageGroup = observer(({ group }: Props) => {
 
         if (message.type === MessageType.Reply)
           return (
-            <div key={message.id} id={`message-${message.id}`}>
+            <div
+              key={message.id}
+              id={`message-${message.id}`}
+              data-message-id={message.id}
+              tabIndex={-1}
+              role="article"
+            >
               <Message
                 message={message}
                 header

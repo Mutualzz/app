@@ -7,6 +7,7 @@ import { useAppStore } from "@hooks/useStores";
 import { Divider, Stack, Typography, useTheme } from "@mutualzz/ui-web";
 import {
   ArrowSquareOutIcon,
+  DiscordLogoIcon,
   GithubLogoIcon,
   SteamLogoIcon,
   TwitchLogoIcon
@@ -122,6 +123,21 @@ export const AppConnectionsSettings = observer(() => {
     );
   };
 
+  const isDiscordLinked = Boolean(app.account?.discordId);
+
+  const linkDiscord = async () => {
+    sessionStorage.setItem("settings-return", "connections");
+    const { url } = await app.rest.get<{ url: string }>(
+      `/@me/discord/link?client=${isElectron ? "desktop" : "web"}`
+    );
+    await openExternalLink(url);
+  };
+
+  const unlinkDiscord = async () => {
+    await app.rest.delete("/@me/discord");
+    if (app.account) app.account.discordId = null;
+  };
+
   const providers =
     providersQuery.data?.providers ??
     FALLBACK_PROVIDERS.map((provider) => ({
@@ -142,6 +158,43 @@ export const AppConnectionsSettings = observer(() => {
       <Stack spacing={2.5} direction="column">
         <Typography fontSize={20}>{t("connections.title")}</Typography>
         <Divider textColor="muted" css={{ opacity: 0.5 }} />
+
+        <Paper
+          variant="outlined"
+          borderRadius={10}
+          py={2.5}
+          px={4}
+          direction="row"
+          alignItems="center"
+          justifyContent="space-between"
+        >
+          <Stack direction="row" spacing={2} alignItems="center" minWidth={0}>
+            <DiscordLogoIcon size={28} weight="fill" />
+            <Stack direction="column" spacing={0.5} minWidth={0}>
+              <Typography level="body-md" fontWeight="bold">
+                Discord
+              </Typography>
+              <Typography level="body-sm" textColor="muted">
+                {isDiscordLinked
+                  ? t("connections.discord.linked")
+                  : t("connections.discord.unlinked")}
+              </Typography>
+            </Stack>
+          </Stack>
+          {isDiscordLinked ? (
+            <Button
+              variant="outlined"
+              color="danger"
+              onClick={() => confirmDisconnect("Discord", unlinkDiscord)}
+            >
+              {t("discord.unlinkDiscord")}
+            </Button>
+          ) : (
+            <Button variant="solid" onClick={() => void linkDiscord()}>
+              {t("discord.linkDiscord")}
+            </Button>
+          )}
+        </Paper>
 
         {showProvidersSkeleton
           ? FALLBACK_PROVIDERS.map((provider) => (

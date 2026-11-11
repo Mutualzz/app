@@ -6,6 +6,7 @@ import i18n from "../../i18n";
 import { observer } from "mobx-react-lite";
 import { useEffect } from "react";
 import { toast } from "react-toastify";
+import { hasPendingDiscordImportGuild } from "@renderer/utils/discordImportReturn";
 
 export const SettingsReturnHandler = observer(() => {
   const app = useAppStore();
@@ -19,6 +20,7 @@ export const SettingsReturnHandler = observer(() => {
       if (!page) return;
 
       sessionStorage.removeItem("settings-return");
+      const isImportReturn = hasPendingDiscordImportGuild();
 
       if (!isModalOpen("user-settings")) {
         openModal(
@@ -27,9 +29,10 @@ export const SettingsReturnHandler = observer(() => {
         );
       }
 
-      toast.success(i18n.t("settings:discord.linkedToast"), {
-        toastId: "discord-linked"
-      });
+      if (!isImportReturn)
+        toast.success(i18n.t("settings:discord.linkedToast"), {
+          toastId: "discord-linked"
+        });
     };
 
     openReturn();

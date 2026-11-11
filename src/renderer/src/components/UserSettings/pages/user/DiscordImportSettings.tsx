@@ -9,6 +9,7 @@ import type {
 } from "@mutualzz/types";
 import { ChannelType } from "@mutualzz/types";
 import {
+  Checkbox,
   CircularProgress,
   Divider,
   Input,
@@ -18,41 +19,68 @@ import {
 } from "@mutualzz/ui-web";
 import {
   ArrowSquareOutIcon,
-  CaretDownIcon,
   CheckCircleIcon,
   CircleIcon,
   CopyIcon,
   DiscordLogoIcon,
   HashIcon,
-  RobotIcon,
+  LockSimpleIcon,
+  ShieldCheckIcon,
   SmileyIcon,
   SpeakerHighIcon,
+  StickerIcon,
   UsersThreeIcon,
   WarningCircleIcon
 } from "@phosphor-icons/react";
+import {
+  DISCORD_IMPORT_GUILD_EVENT,
+  takePendingDiscordImportGuild
+} from "@renderer/utils/discordImportReturn";
 import type { DiscordImportResult } from "@stores/Gateway.store";
 import { Invite } from "@stores/objects/Invite";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { isElectron, openExternalLink } from "@utils/index";
 import { observer } from "mobx-react-lite";
 import type { ReactNode } from "react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-interface ImportPreview {
-  guild: { name: string; iconUrl: string | null };
-  channels: {
-    id: string;
-    name: string;
-    type: number | null;
-    parentId: string | null;
-  }[];
-  roles: { id: string; name: string; color: string | null }[];
-  emojis: { id: string; name: string; url: string }[];
-  skippedChannelCount: number;
-  skippedEmojiCount: number;
+interface PreviewChannel {
+  id: string;
+  name: string;
+  type: number | null;
+  topic: string | null;
+  nsfw: boolean;
+  isPrivate: boolean;
+  parentId: string | null;
 }
+
+interface PreviewImage {
+  id: string;
+  name: string;
+  url: string;
+}
+
+interface ImportPreview {
+  guild: { name: string; iconUrl: string | null; description: string | null };
+  channels: PreviewChannel[];
+  roles: { id: string; name: string; color: string | null }[];
+  emojis: PreviewImage[];
+  stickers: PreviewImage[];
+  maxExpressions: number;
+  skippedChannelCount: number;
+  skippedStickerCount: number;
+}
+
+interface ImportSelectionState {
+  channels: Set<string>;
+  roles: Set<string>;
+  emojis: Set<string>;
+  stickers: Set<string>;
+}
+
+type SelectionKey = keyof ImportSelectionState;
 
 type ImportProgressState = Record<
   DiscordImportStage,
@@ -63,8 +91,8 @@ const IMPORT_STAGES: { stage: DiscordImportStage; weight: number }[] = [
   { stage: "fetching", weight: 5 },
   { stage: "emojis", weight: 35 },
   { stage: "space", weight: 5 },
-  { stage: "channels", weight: 25 },
-  { stage: "roles", weight: 20 },
+  { stage: "roles", weight: 15 },
+  { stage: "channels", weight: 30 },
   { stage: "finishing", weight: 10 }
 ];
 
@@ -72,10 +100,19 @@ const EMPTY_PROGRESS: ImportProgressState = {
   fetching: undefined,
   emojis: undefined,
   space: undefined,
-  channels: undefined,
   roles: undefined,
+  channels: undefined,
   finishing: undefined
 };
+
+const SUCCESS_COLOR = "#3ba55d";
+
+const selectEverything = (preview: ImportPreview): ImportSelectionState => ({
+  channels: new Set(preview.channels.map((channel) => channel.id)),
+  roles: new Set(preview.roles.map((role) => role.id)),
+  emojis: new Set(preview.emojis.map((emoji) => emoji.id)),
+  stickers: new Set(preview.stickers.map((sticker) => sticker.id))
+});
 
 const isStageDone = (stageProgress?: { completed: number; total: number }) =>
   Boolean(stageProgress && stageProgress.completed >= stageProgress.total);
@@ -128,7 +165,7 @@ function StepCard({
       >
         <Stack direction="row" spacing={2} alignItems="center" minWidth={0}>
           {done ? (
-            <CheckCircleIcon size={28} weight="fill" color="#3ba55d" />
+            <CheckCircleIcon size={28} weight="fill" color={SUCCESS_COLOR} />
           ) : (
             <Stack
               width={28}
@@ -166,21 +203,23 @@ function StepCard({
 
 function PreviewStat({
   icon,
-  value,
+  selected,
+  total,
   label
 }: {
   icon: ReactNode;
-  value: number;
+  selected: number;
+  total: number;
   label: string;
 }) {
   return (
     <Paper
       variant="soft"
       borderRadius={8}
-      px={2.5}
+      px={2}
       py={1.5}
       flex={1}
-      minWidth={110}
+      minWidth={100}
       direction="column"
       alignItems="center"
       spacing={0.5}
@@ -188,8 +227,13 @@ function PreviewStat({
       <Stack direction="row" spacing={1} alignItems="center">
         {icon}
         <Typography level="title-md" fontWeight="bold">
-          {value}
+          {selected}
         </Typography>
+        {selected !== total ? (
+          <Typography level="body-xs" textColor="muted">
+            / {total}
+          </Typography>
+        ) : null}
       </Stack>
       <Typography level="body-xs" textColor="muted">
         {label}
@@ -198,40 +242,100 @@ function PreviewStat({
   );
 }
 
-function ChannelTreePreview({
-  channels
+function SelectionPanel({
+  title,
+  selected,
+  total,
+  onSelectAll,
+  onSelectNone,
+  children
 }: {
-  channels: ImportPreview["channels"];
+  title: string;
+  selected: number;
+  total: number;
+  onSelectAll: () => void;
+  onSelectNone: () => void;
+  children: ReactNode;
 }) {
+  const { t } = useTranslation("settings");
+
+  return (
+    <Paper
+      variant="soft"
+      borderRadius={10}
+      px={2}
+      py={1.5}
+      direction="column"
+      spacing={1}
+    >
+      <Stack direction="row" alignItems="center" spacing={1}>
+        <Typography level="body-sm" fontWeight="bold" flex={1}>
+          {title}
+        </Typography>
+        <Typography level="body-xs" textColor="muted">
+          {t("discordImport.selectedCount", { selected, total })}
+        </Typography>
+        <Button
+          variant="plain"
+          size="sm"
+          onClick={selected === total ? onSelectNone : onSelectAll}
+        >
+          {selected === total
+            ? t("discordImport.selectNone")
+            : t("discordImport.selectAll")}
+        </Button>
+      </Stack>
+      {children}
+    </Paper>
+  );
+}
+
+function ChannelBadge({ icon, label }: { icon: ReactNode; label: string }) {
+  return (
+    <Stack
+      direction="row"
+      alignItems="center"
+      spacing={0.25}
+      px={0.75}
+      css={{ borderRadius: 4, opacity: 0.75, fontSize: 11 }}
+    >
+      {icon}
+      <Typography level="body-xs">{label}</Typography>
+    </Stack>
+  );
+}
+
+function ChannelSelectionTree({
+  channels,
+  selected,
+  onToggle
+}: {
+  channels: PreviewChannel[];
+  selected: Set<string>;
+  onToggle: (channel: PreviewChannel) => void;
+}) {
+  const { t } = useTranslation("settings");
+
   return (
     <Stack
       direction="column"
       spacing={0.25}
-      maxHeight={260}
+      maxHeight={320}
       css={{ overflowY: "auto" }}
       pr={1}
     >
       {channels.map((channel) => {
-        if (channel.type === ChannelType.Category)
-          return (
-            <Stack
-              key={channel.id}
-              direction="row"
-              alignItems="center"
-              spacing={0.5}
-              pt={1}
-            >
-              <CaretDownIcon size={12} />
-              <Typography
-                level="body-xs"
-                fontWeight="bold"
-                textColor="muted"
-                css={{ textTransform: "uppercase", letterSpacing: 0.4 }}
-              >
-                {channel.name}
-              </Typography>
-            </Stack>
-          );
+        const isCategory = channel.type === ChannelType.Category;
+        const isChecked = selected.has(channel.id);
+        const childIds = isCategory
+          ? channels
+              .filter((child) => child.parentId === channel.id)
+              .map((child) => child.id)
+          : [];
+        const isPartial =
+          isCategory &&
+          childIds.some((childId) => selected.has(childId)) !==
+            childIds.every((childId) => selected.has(childId));
 
         return (
           <Stack
@@ -239,15 +343,101 @@ function ChannelTreePreview({
             direction="row"
             alignItems="center"
             spacing={1}
-            pl={channel.parentId ? 2 : 0}
+            pl={channel.parentId ? 3 : 0}
+            pt={isCategory ? 1 : 0}
+            title={channel.topic ?? undefined}
+            css={{ opacity: isChecked ? 1 : 0.5 }}
           >
-            {channel.type === ChannelType.Voice ? (
+            <Checkbox
+              size="sm"
+              checked={isChecked}
+              indeterminate={isPartial}
+              onChange={() => onToggle(channel)}
+            />
+            {isCategory ? null : channel.type === ChannelType.Voice ? (
               <SpeakerHighIcon size={16} />
             ) : (
               <HashIcon size={16} />
             )}
-            <Typography level="body-sm">{channel.name}</Typography>
+            <Typography
+              level={isCategory ? "body-xs" : "body-sm"}
+              fontWeight={isCategory ? "bold" : undefined}
+              textColor={isCategory ? "muted" : undefined}
+              css={
+                isCategory
+                  ? { textTransform: "uppercase", letterSpacing: 0.4 }
+                  : undefined
+              }
+            >
+              {channel.name}
+            </Typography>
+            {channel.isPrivate ? (
+              <ChannelBadge
+                icon={<LockSimpleIcon size={11} />}
+                label={t("discordImport.private")}
+              />
+            ) : null}
+            {channel.nsfw ? (
+              <ChannelBadge
+                icon={<WarningCircleIcon size={11} />}
+                label={t("discordImport.nsfw")}
+              />
+            ) : null}
           </Stack>
+        );
+      })}
+    </Stack>
+  );
+}
+
+function ImageSelectionGrid({
+  images,
+  selected,
+  onToggle,
+  imageSize
+}: {
+  images: PreviewImage[];
+  selected: Set<string>;
+  onToggle: (imageId: string) => void;
+  imageSize: number;
+}) {
+  return (
+    <Stack
+      direction="row"
+      flexWrap="wrap"
+      gap={0.5}
+      maxHeight={160}
+      css={{ overflowY: "auto" }}
+    >
+      {images.map((image) => {
+        const isChecked = selected.has(image.id);
+        return (
+          <button
+            key={image.id}
+            type="button"
+            title={`:${image.name}:`}
+            onClick={() => onToggle(image.id)}
+            css={{
+              padding: 4,
+              border: "none",
+              borderRadius: 8,
+              background: "transparent",
+              cursor: "pointer",
+              opacity: isChecked ? 1 : 0.25,
+              filter: isChecked ? "none" : "grayscale(1)",
+              transition: "opacity 120ms, filter 120ms",
+              "&:hover": { background: "rgba(127, 127, 127, 0.15)" }
+            }}
+          >
+            <img
+              src={image.url}
+              alt={image.name}
+              width={imageSize}
+              height={imageSize}
+              loading="lazy"
+              css={{ objectFit: "contain", display: "block" }}
+            />
+          </button>
         );
       })}
     </Stack>
@@ -296,7 +486,11 @@ function ImportProgressPanel({ progress }: { progress: ImportProgressState }) {
               spacing={1.5}
             >
               {done ? (
-                <CheckCircleIcon size={18} weight="fill" color="#3ba55d" />
+                <CheckCircleIcon
+                  size={18}
+                  weight="fill"
+                  color={SUCCESS_COLOR}
+                />
               ) : active ? (
                 <CircularProgress size={18} />
               ) : (
@@ -328,10 +522,10 @@ export const DiscordImportSettings = observer(() => {
   const navigate = useNavigate();
   const { closeAllModals } = useModal();
   const { t } = useTranslation("settings");
-  const { t: tCommon } = useTranslation("common");
   const [guildId, setGuildId] = useState("");
   const [spaceName, setSpaceName] = useState("");
   const [preview, setPreview] = useState<ImportPreview | null>(null);
+  const [selection, setSelection] = useState<ImportSelectionState | null>(null);
   const [previewError, setPreviewError] = useState<string | null>(null);
   const [importError, setImportError] = useState<string | null>(null);
   const [importResult, setImportResult] = useState<DiscordImportResult | null>(
@@ -340,23 +534,27 @@ export const DiscordImportSettings = observer(() => {
   const [progress, setProgress] = useState<ImportProgressState>(EMPTY_PROGRESS);
   const [inviteCopied, setInviteCopied] = useState(false);
 
-  const isLinked = Boolean(account?.discordId);
-
-  const botInviteQuery = useQuery({
-    queryKey: ["discord-bot-invite"],
-    queryFn: () =>
-      app.rest.get<{ url: string }>("/@me/discord-import/bot-invite"),
-    staleTime: Infinity,
-    enabled: isLinked
-  });
+  const { mutate: startDiscordAuthorization, isPending: authorizing } =
+    useMutation({
+      mutationFn: async () => {
+        setPreviewError(null);
+        const { url } = await app.rest.get<{ url: string }>(
+          `/@me/discord/import?client=${isElectron ? "desktop" : "web"}`
+        );
+        if (isElectron) await openExternalLink(url);
+        else window.location.href = url;
+      },
+      onError: (error: HttpException) => setPreviewError(error.message)
+    });
 
   const { mutate: loadPreview, isPending: previewing } = useMutation({
-    mutationFn: () =>
+    mutationFn: (targetGuildId: string) =>
       app.rest.post<ImportPreview>("/@me/discord-import/preview", {
-        guildId: guildId.trim()
+        guildId: targetGuildId
       }),
     onSuccess: (data) => {
       setPreview(data);
+      setSelection(selectEverything(data));
       setPreviewError(null);
       setImportError(null);
       setImportResult(null);
@@ -364,16 +562,24 @@ export const DiscordImportSettings = observer(() => {
     },
     onError: (error: HttpException) => {
       setPreview(null);
+      setSelection(null);
       setPreviewError(error.message);
     }
   });
 
   const { mutate: runImport, isPending: importing } = useMutation({
     mutationFn: async () => {
+      if (!selection) throw new Error(t("discordImport.failed"));
       setProgress(EMPTY_PROGRESS);
       const ack = await app.gateway.importDiscordServer(
         guildId.trim(),
         spaceName.trim(),
+        {
+          channelIds: [...selection.channels],
+          roleIds: [...selection.roles],
+          emojiIds: [...selection.emojis],
+          stickerIds: [...selection.stickers]
+        },
         (update: DiscordImportProgressPayload) =>
           setProgress((previous) => ({
             ...previous,
@@ -393,30 +599,62 @@ export const DiscordImportSettings = observer(() => {
     onError: (error: Error) => setImportError(error.message)
   });
 
-  const handleLinkDiscord = () => {
-    sessionStorage.setItem("settings-return", "discord-import");
-    void app.rest
-      .get<{
-        url: string;
-      }>(`/@me/discord/link?client=${isElectron ? "desktop" : "web"}`)
-      .then(({ url }) => {
-        void openExternalLink(url);
-      });
-  };
+  useEffect(() => {
+    const loadPendingGuild = () => {
+      const pendingGuildId = takePendingDiscordImportGuild();
+      if (!pendingGuildId) return;
 
-  const handleUnlinkDiscord = () => {
-    void app.rest.delete("/@me/discord").then(() => {
-      if (account) account.discordId = null;
-      resetImport();
-    });
-  };
+      setGuildId(pendingGuildId);
+      setSpaceName("");
+      setImportResult(null);
+      loadPreview(pendingGuildId);
+    };
+
+    loadPendingGuild();
+    window.addEventListener(DISCORD_IMPORT_GUILD_EVENT, loadPendingGuild);
+    return () => {
+      window.removeEventListener(DISCORD_IMPORT_GUILD_EVENT, loadPendingGuild);
+    };
+  }, [loadPreview]);
 
   const resetImport = () => {
     setPreview(null);
+    setSelection(null);
     setPreviewError(null);
     setImportError(null);
     setImportResult(null);
     setProgress(EMPTY_PROGRESS);
+  };
+
+  const setSelectedIds = (key: SelectionKey, ids: Iterable<string>) =>
+    setSelection((previous) =>
+      previous ? { ...previous, [key]: new Set(ids) } : previous
+    );
+
+  const toggleIds = (key: SelectionKey, ids: string[], include: boolean) =>
+    setSelection((previous) => {
+      if (!previous) return previous;
+      const next = new Set(previous[key]);
+      for (const id of ids) {
+        if (include) next.add(id);
+        else next.delete(id);
+      }
+      return { ...previous, [key]: next };
+    });
+
+  const toggleId = (key: SelectionKey, id: string) =>
+    toggleIds(key, [id], !selection?.[key].has(id));
+
+  const toggleChannel = (channel: PreviewChannel) => {
+    if (!preview) return;
+    const include = !selection?.channels.has(channel.id);
+    const childIds =
+      channel.type === ChannelType.Category
+        ? preview.channels
+            .filter((child) => child.parentId === channel.id)
+            .map((child) => child.id)
+        : [];
+    toggleIds("channels", [channel.id, ...childIds], include);
   };
 
   const copyInviteLink = async () => {
@@ -450,15 +688,36 @@ export const DiscordImportSettings = observer(() => {
       });
   };
 
-  const botInviteUrl = botInviteQuery.data?.url;
-  const canPreview = Boolean(guildId.trim()) && !importing;
-  const canImport = Boolean(preview) && Boolean(spaceName.trim()) && !importing;
+  const selectedChannelCount =
+    preview && selection
+      ? preview.channels.filter(
+          (channel) =>
+            channel.type !== ChannelType.Category &&
+            selection.channels.has(channel.id)
+        ).length
+      : 0;
+  const totalChannelCount =
+    preview?.channels.filter((channel) => channel.type !== ChannelType.Category)
+      .length ?? 0;
+  const selectedExpressionCount =
+    (selection?.emojis.size ?? 0) + (selection?.stickers.size ?? 0);
+  const maxExpressions = preview?.maxExpressions ?? 100;
+  const isOverExpressionLimit = selectedExpressionCount > maxExpressions;
+  const hasAnythingSelected =
+    selection !== null &&
+    (selection.channels.size > 0 ||
+      selection.roles.size > 0 ||
+      selectedExpressionCount > 0);
+
+  const canImport =
+    Boolean(preview) &&
+    Boolean(spaceName.trim()) &&
+    hasAnythingSelected &&
+    !isOverExpressionLimit &&
+    !importing;
   const showProgress =
     importing || Boolean(importResult) || Boolean(importError);
-  const importableChannels =
-    preview?.channels.filter(
-      (channel) => channel.type !== ChannelType.Category
-    ) ?? [];
+  const isSelectionLocked = importing || Boolean(importResult);
 
   if (!account) return null;
 
@@ -470,88 +729,27 @@ export const DiscordImportSettings = observer(() => {
 
       <StepCard
         step={1}
-        title={t("discord.linkDiscord")}
-        description={
-          isLinked
-            ? t("discordImport.linkedStatus")
-            : t("discordImport.linkHint")
-        }
-        done={isLinked}
-        action={
-          <Button
-            variant={isLinked ? "outlined" : "solid"}
-            size="sm"
-            color={isLinked ? "neutral" : "primary"}
-            disabled={importing}
-            startDecorator={
-              isLinked ? undefined : <DiscordLogoIcon weight="fill" />
-            }
-            onClick={() => {
-              if (isLinked) handleUnlinkDiscord();
-              else handleLinkDiscord();
-            }}
-          >
-            {isLinked ? t("discord.unlinkDiscord") : t("discord.linkDiscord")}
-          </Button>
-        }
-      />
-
-      <StepCard
-        step={2}
-        title={t("discordImport.botInvite")}
-        description={t("discordImport.botInviteHint")}
-        done={Boolean(preview)}
-        disabled={!isLinked}
-        action={
-          <Button
-            variant="outlined"
-            size="sm"
-            disabled={!isLinked || !botInviteUrl}
-            loading={isLinked && botInviteQuery.isPending}
-            startDecorator={<RobotIcon />}
-            endDecorator={<ArrowSquareOutIcon />}
-            onClick={() => {
-              if (botInviteUrl) void openExternalLink(botInviteUrl);
-            }}
-          >
-            {tCommon("open")}
-          </Button>
-        }
-      />
-
-      <StepCard
-        step={3}
         title={t("discordImport.chooseServer")}
-        description={t("discordImport.guildIdHint")}
+        description={t("discordImport.authorizeHint")}
         done={Boolean(preview)}
-        disabled={!isLinked}
+        action={
+          <Button
+            variant={preview ? "outlined" : "solid"}
+            size="sm"
+            disabled={importing || previewing}
+            loading={authorizing || previewing}
+            startDecorator={<DiscordLogoIcon weight="fill" />}
+            endDecorator={isElectron ? <ArrowSquareOutIcon /> : undefined}
+            onClick={() => startDiscordAuthorization()}
+          >
+            {preview
+              ? t("discordImport.chooseDifferentServer")
+              : t("discordImport.importFromDiscord")}
+          </Button>
+        }
       >
-        {isLinked ? (
+        {previewError || preview ? (
           <Stack direction="column" spacing={2}>
-            <Stack direction="row" spacing={1.5} alignItems="center">
-              <Input
-                fullWidth
-                placeholder={t("discordImport.guildIdPlaceholder")}
-                value={guildId}
-                disabled={importing}
-                onChange={(event) => {
-                  setGuildId(event.target.value.replace(/\D/g, ""));
-                  resetImport();
-                }}
-                onKeyDown={(event) => {
-                  if (event.key === "Enter" && canPreview) loadPreview();
-                }}
-              />
-              <Button
-                variant="solid"
-                disabled={!canPreview}
-                loading={previewing}
-                onClick={() => loadPreview()}
-              >
-                {t("discordImport.preview")}
-              </Button>
-            </Stack>
-
             {previewError ? (
               <Paper
                 variant="soft"
@@ -573,162 +771,248 @@ export const DiscordImportSettings = observer(() => {
               </Paper>
             ) : null}
 
-            {preview ? (
-              <Stack direction="column" spacing={2}>
+            {preview && selection ? (
+              <Stack
+                direction="column"
+                spacing={2}
+                css={{
+                  pointerEvents: isSelectionLocked ? "none" : undefined,
+                  opacity: isSelectionLocked ? 0.6 : 1
+                }}
+              >
                 <Stack direction="row" spacing={1.5} alignItems="center">
                   {preview.guild.iconUrl ? (
                     <img
                       src={preview.guild.iconUrl}
                       alt=""
-                      width={40}
-                      height={40}
-                      css={{ borderRadius: 12 }}
+                      width={44}
+                      height={44}
+                      css={{ borderRadius: 14, flexShrink: 0 }}
                     />
                   ) : (
                     <Paper
                       variant="soft"
-                      width={40}
-                      height={40}
-                      borderRadius={12}
+                      width={44}
+                      height={44}
+                      borderRadius={14}
                       alignItems="center"
                       justifyContent="center"
+                      css={{ flexShrink: 0 }}
                     >
                       <Typography level="body-md" fontWeight="bold">
                         {preview.guild.name.charAt(0).toUpperCase()}
                       </Typography>
                     </Paper>
                   )}
-                  <Typography level="title-md" fontWeight="bold">
-                    {preview.guild.name}
-                  </Typography>
+                  <Stack direction="column" spacing={0.25} minWidth={0}>
+                    <Typography level="title-md" fontWeight="bold">
+                      {preview.guild.name}
+                    </Typography>
+                    {preview.guild.description ? (
+                      <Typography level="body-xs" textColor="muted">
+                        {preview.guild.description}
+                      </Typography>
+                    ) : null}
+                  </Stack>
                 </Stack>
 
                 <Stack direction="row" spacing={1.5} flexWrap="wrap">
                   <PreviewStat
                     icon={<HashIcon size={18} />}
-                    value={importableChannels.length}
+                    selected={selectedChannelCount}
+                    total={totalChannelCount}
                     label={t("discordImport.channels")}
                   />
                   <PreviewStat
                     icon={<UsersThreeIcon size={18} />}
-                    value={preview.roles.length}
+                    selected={selection.roles.size}
+                    total={preview.roles.length}
                     label={t("discordImport.roles")}
                   />
                   <PreviewStat
                     icon={<SmileyIcon size={18} />}
-                    value={preview.emojis.length}
+                    selected={selection.emojis.size}
+                    total={preview.emojis.length}
                     label={t("discordImport.emojis")}
+                  />
+                  <PreviewStat
+                    icon={<StickerIcon size={18} />}
+                    selected={selection.stickers.size}
+                    total={preview.stickers.length}
+                    label={t("discordImport.stickers")}
                   />
                 </Stack>
 
-                {preview.skippedChannelCount > 0 ||
-                preview.skippedEmojiCount > 0 ? (
-                  <Typography level="body-xs" textColor="muted">
-                    {t("discordImport.skippedSummary", {
-                      channels: preview.skippedChannelCount,
-                      emojis: preview.skippedEmojiCount
-                    })}
-                  </Typography>
-                ) : null}
+                <Stack direction="column" spacing={0.5}>
+                  <Stack direction="row" spacing={0.75} alignItems="center">
+                    <ShieldCheckIcon size={14} />
+                    <Typography level="body-xs" textColor="muted">
+                      {t("discordImport.permissionsNote")}
+                    </Typography>
+                  </Stack>
+                  {preview.skippedChannelCount > 0 ? (
+                    <Typography level="body-xs" textColor="muted">
+                      {t("discordImport.skippedChannels", {
+                        count: preview.skippedChannelCount
+                      })}
+                    </Typography>
+                  ) : null}
+                  {preview.skippedStickerCount > 0 ? (
+                    <Typography level="body-xs" textColor="muted">
+                      {t("discordImport.skippedStickers", {
+                        count: preview.skippedStickerCount
+                      })}
+                    </Typography>
+                  ) : null}
+                </Stack>
 
                 <Stack direction="row" spacing={2} flexWrap="wrap">
-                  <Paper
-                    variant="soft"
-                    borderRadius={10}
-                    px={2}
-                    py={1.5}
-                    flex={1}
-                    minWidth={220}
-                    direction="column"
-                    spacing={1}
-                  >
-                    <Typography level="body-sm" fontWeight="bold">
-                      {t("discordImport.channels")}
-                    </Typography>
-                    <ChannelTreePreview channels={preview.channels} />
-                  </Paper>
-
-                  <Stack direction="column" spacing={2} flex={1} minWidth={220}>
-                    <Paper
-                      variant="soft"
-                      borderRadius={10}
-                      px={2}
-                      py={1.5}
-                      direction="column"
-                      spacing={1}
+                  <Stack direction="column" flex={1} minWidth={260}>
+                    <SelectionPanel
+                      title={t("discordImport.channels")}
+                      selected={selection.channels.size}
+                      total={preview.channels.length}
+                      onSelectAll={() =>
+                        setSelectedIds(
+                          "channels",
+                          preview.channels.map((channel) => channel.id)
+                        )
+                      }
+                      onSelectNone={() => setSelectedIds("channels", [])}
                     >
-                      <Typography level="body-sm" fontWeight="bold">
-                        {t("discordImport.roles")}
-                      </Typography>
+                      <ChannelSelectionTree
+                        channels={preview.channels}
+                        selected={selection.channels}
+                        onToggle={toggleChannel}
+                      />
+                    </SelectionPanel>
+                  </Stack>
+
+                  <Stack direction="column" spacing={2} flex={1} minWidth={260}>
+                    <SelectionPanel
+                      title={t("discordImport.roles")}
+                      selected={selection.roles.size}
+                      total={preview.roles.length}
+                      onSelectAll={() =>
+                        setSelectedIds(
+                          "roles",
+                          preview.roles.map((role) => role.id)
+                        )
+                      }
+                      onSelectNone={() => setSelectedIds("roles", [])}
+                    >
                       <Stack
                         direction="row"
                         flexWrap="wrap"
                         gap={0.75}
-                        maxHeight={120}
+                        maxHeight={140}
                         css={{ overflowY: "auto" }}
                       >
-                        {preview.roles.map((role) => (
-                          <Paper
-                            key={role.id}
-                            variant="outlined"
-                            borderRadius={999}
-                            px={1.25}
-                            py={0.25}
-                            direction="row"
-                            alignItems="center"
-                            spacing={0.75}
-                          >
-                            <span
+                        {preview.roles.map((role) => {
+                          const isChecked = selection.roles.has(role.id);
+                          return (
+                            <button
+                              key={role.id}
+                              type="button"
+                              onClick={() => toggleId("roles", role.id)}
                               css={{
-                                width: 10,
-                                height: 10,
-                                borderRadius: "50%",
-                                background: role.color ?? "#99aab5",
-                                flexShrink: 0
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 6,
+                                padding: "2px 10px",
+                                borderRadius: 999,
+                                border: "1px solid rgba(127, 127, 127, 0.35)",
+                                background: "transparent",
+                                color: "inherit",
+                                cursor: "pointer",
+                                opacity: isChecked ? 1 : 0.4,
+                                textDecoration: isChecked
+                                  ? "none"
+                                  : "line-through",
+                                transition: "opacity 120ms"
                               }}
-                            />
-                            <Typography level="body-xs">{role.name}</Typography>
-                          </Paper>
-                        ))}
+                            >
+                              <span
+                                css={{
+                                  width: 10,
+                                  height: 10,
+                                  borderRadius: "50%",
+                                  background: role.color ?? "#99aab5",
+                                  flexShrink: 0
+                                }}
+                              />
+                              <Typography level="body-xs">
+                                {role.name}
+                              </Typography>
+                            </button>
+                          );
+                        })}
                       </Stack>
-                    </Paper>
+                    </SelectionPanel>
 
                     {preview.emojis.length ? (
-                      <Paper
-                        variant="soft"
-                        borderRadius={10}
-                        px={2}
-                        py={1.5}
-                        direction="column"
-                        spacing={1}
+                      <SelectionPanel
+                        title={t("discordImport.emojis")}
+                        selected={selection.emojis.size}
+                        total={preview.emojis.length}
+                        onSelectAll={() =>
+                          setSelectedIds(
+                            "emojis",
+                            preview.emojis.map((emoji) => emoji.id)
+                          )
+                        }
+                        onSelectNone={() => setSelectedIds("emojis", [])}
                       >
-                        <Typography level="body-sm" fontWeight="bold">
-                          {t("discordImport.emojis")}
-                        </Typography>
-                        <Stack
-                          direction="row"
-                          flexWrap="wrap"
-                          gap={0.5}
-                          maxHeight={120}
-                          css={{ overflowY: "auto" }}
-                        >
-                          {preview.emojis.map((emoji) => (
-                            <img
-                              key={emoji.id}
-                              src={emoji.url}
-                              alt={emoji.name}
-                              title={`:${emoji.name}:`}
-                              width={28}
-                              height={28}
-                              loading="lazy"
-                              css={{ objectFit: "contain" }}
-                            />
-                          ))}
-                        </Stack>
-                      </Paper>
+                        <ImageSelectionGrid
+                          images={preview.emojis}
+                          selected={selection.emojis}
+                          onToggle={(emojiId) => toggleId("emojis", emojiId)}
+                          imageSize={28}
+                        />
+                      </SelectionPanel>
+                    ) : null}
+
+                    {preview.stickers.length ? (
+                      <SelectionPanel
+                        title={t("discordImport.stickers")}
+                        selected={selection.stickers.size}
+                        total={preview.stickers.length}
+                        onSelectAll={() =>
+                          setSelectedIds(
+                            "stickers",
+                            preview.stickers.map((sticker) => sticker.id)
+                          )
+                        }
+                        onSelectNone={() => setSelectedIds("stickers", [])}
+                      >
+                        <ImageSelectionGrid
+                          images={preview.stickers}
+                          selected={selection.stickers}
+                          onToggle={(stickerId) =>
+                            toggleId("stickers", stickerId)
+                          }
+                          imageSize={56}
+                        />
+                      </SelectionPanel>
                     ) : null}
                   </Stack>
                 </Stack>
+
+                <Typography
+                  level="body-xs"
+                  textColor={isOverExpressionLimit ? undefined : "muted"}
+                  color={isOverExpressionLimit ? "danger" : undefined}
+                >
+                  {isOverExpressionLimit
+                    ? t("discordImport.expressionLimit", {
+                        max: maxExpressions,
+                        over: selectedExpressionCount - maxExpressions
+                      })
+                    : t("discordImport.expressionCount", {
+                        selected: selectedExpressionCount,
+                        max: maxExpressions
+                      })}
+                </Typography>
               </Stack>
             ) : null}
           </Stack>
@@ -736,7 +1020,7 @@ export const DiscordImportSettings = observer(() => {
       </StepCard>
 
       <StepCard
-        step={4}
+        step={2}
         title={t("discordImport.importStep")}
         description={t("discordImport.importStepHint")}
         done={Boolean(importResult)}
@@ -745,34 +1029,45 @@ export const DiscordImportSettings = observer(() => {
         {preview ? (
           <Stack direction="column" spacing={2}>
             {!importResult ? (
-              <Stack direction="row" spacing={1.5} alignItems="flex-end">
-                <Stack direction="column" spacing={0.75} flex={1}>
-                  <Typography level="body-sm" fontWeight="bold">
-                    {t("discordImport.spaceName")}
-                  </Typography>
-                  <Input
-                    fullWidth
-                    placeholder={t("discordImport.spaceNamePlaceholder")}
-                    value={spaceName}
-                    disabled={importing}
-                    maxLength={100}
-                    onChange={(event) => {
-                      setSpaceName(event.target.value);
-                      setImportError(null);
-                    }}
-                  />
+              <>
+                <Stack direction="row" spacing={1.5} alignItems="flex-end">
+                  <Stack direction="column" spacing={0.75} flex={1}>
+                    <Typography level="body-sm" fontWeight="bold">
+                      {t("discordImport.spaceName")}
+                    </Typography>
+                    <Input
+                      fullWidth
+                      placeholder={t("discordImport.spaceNamePlaceholder")}
+                      value={spaceName}
+                      disabled={importing}
+                      maxLength={100}
+                      onChange={(event) => {
+                        setSpaceName(event.target.value);
+                        setImportError(null);
+                      }}
+                    />
+                  </Stack>
+                  <Button
+                    variant="solid"
+                    disabled={!canImport}
+                    loading={importing}
+                    onClick={() => runImport()}
+                  >
+                    {importError
+                      ? t("discordImport.retry")
+                      : t("discordImport.import")}
+                  </Button>
                 </Stack>
-                <Button
-                  variant="solid"
-                  disabled={!canImport}
-                  loading={importing}
-                  onClick={() => runImport()}
-                >
-                  {importError
-                    ? t("discordImport.retry")
-                    : t("discordImport.import")}
-                </Button>
-              </Stack>
+                <Typography level="body-xs" textColor="muted">
+                  {hasAnythingSelected
+                    ? t("discordImport.importSummary", {
+                        channels: selectedChannelCount,
+                        roles: selection?.roles.size ?? 0,
+                        expressions: selectedExpressionCount
+                      })
+                    : t("discordImport.nothingSelected")}
+                </Typography>
+              </>
             ) : null}
 
             {showProgress ? (
@@ -821,10 +1116,10 @@ export const DiscordImportSettings = observer(() => {
                         code: importResult.inviteCode
                       })}
                     </Typography>
-                    {importResult.skippedEmojiCount > 0 ? (
+                    {importResult.skippedExpressionCount > 0 ? (
                       <Typography level="body-xs">
-                        {t("discordImport.emojisSkipped", {
-                          count: importResult.skippedEmojiCount
+                        {t("discordImport.expressionsSkipped", {
+                          count: importResult.skippedExpressionCount
                         })}
                       </Typography>
                     ) : null}

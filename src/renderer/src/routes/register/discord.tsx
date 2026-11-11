@@ -36,7 +36,7 @@ function RegisterDiscordPage() {
       }),
     onSuccess: ({ token }) => {
       app.setToken(token);
-      navigate({ to: "/", replace: true });
+      navigate({ to: "/app", replace: true });
     },
     onError: (err: HttpException) => setError(err.message),
   });

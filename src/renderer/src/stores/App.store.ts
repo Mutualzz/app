@@ -38,14 +38,14 @@ import { ProfileStore } from "@stores/Profile.store";
 import { getPrefersDark } from "@hooks/usePrefersDark";
 import { ReadStateStore } from "@stores/ReadState.store";
 import { TypingStore } from "@stores/Typing.store";
+import { AnnouncerStore } from "@stores/Announcer.store";
 import type { Message } from "@stores/objects/Message";
 import { PostStore } from "@stores/Post.store";
 import { SpaceNotificationSettingsStore } from "@stores/SpaceNotificationSettings.store";
 import { BridgeChatStore } from "@stores/BridgeChat.store";
 import {
-  DEFAULT_KEYBOARD_SHORTCUTS,
-  mergeKeyboardShortcuts,
   normalizeKeyboardShortcut,
+  pruneKeyboardShortcutOverrides,
   type KeyboardShortcutId
 } from "@utils/keyboardShortcuts";
 import { applyChatFontScale } from "@utils/chatFontScale";
@@ -93,6 +93,7 @@ export class AppStore {
     showError: (message) => toast.error(message)
   };
   bookmarks = new BookmarkStore(this.inboxDeps);
+  announcer = new AnnouncerStore();
   reminders = new ReminderStore(this.inboxDeps);
   scheduledMessages = new ScheduledMessageStore(this.inboxDeps);
   notifications = new NotificationStore(this.inboxDeps);
@@ -130,10 +131,13 @@ export class AppStore {
   readonly tokenStorage: TokenStorage;
   composerCount = 0;
   replyingTo: Message | null = null;
+  reactionPickerMessageId: string | null = null;
   replyMention = true;
   jumpToMessage: { channelId: string; messageId: string } | null = null;
   badgeColor = "#e03131";
-  keyboardShortcuts = mergeKeyboardShortcuts();
+  keyboardShortcuts: Partial<Record<KeyboardShortcutId, string>> = {};
+  globalShortcutFailures: KeyboardShortcutId[] = [];
+  voiceShortcutsWorkEverywhere = false;
   private badgeWatchDispose: (() => void) | null = null;
   private readonly logger = new Logger({
     tag: "AppStore"
@@ -165,10 +169,11 @@ export class AppStore {
         "voiceChatWidth",
         "dmCallViewHeight",
         "keyboardShortcuts",
+        "voiceShortcutsWorkEverywhere",
         "onboardingCompleted"
       ],
       storage: localStorage
-    });
+    }).then(this.cleanUpKeyboardShortcuts);
 
     this.tokenStorage = isElectron ? electronTokenStorage : webTokenStorage;
 
@@ -224,21 +229,35 @@ export class AppStore {
   }
 
   setKeyboardShortcut(id: KeyboardShortcutId, hotkey: string) {
-    this.keyboardShortcuts = {
+    this.keyboardShortcuts = pruneKeyboardShortcutOverrides({
       ...this.keyboardShortcuts,
       [id]: hotkey.trim() ? normalizeKeyboardShortcut(hotkey) : ""
-    };
+    });
   }
 
   resetKeyboardShortcut(id: KeyboardShortcutId) {
-    this.keyboardShortcuts = {
+    this.keyboardShortcuts = pruneKeyboardShortcutOverrides({
       ...this.keyboardShortcuts,
-      [id]: DEFAULT_KEYBOARD_SHORTCUTS[id]
-    };
+      [id]: undefined
+    });
   }
 
   resetKeyboardShortcuts() {
-    this.keyboardShortcuts = mergeKeyboardShortcuts();
+    this.keyboardShortcuts = {};
+  }
+
+  setGlobalShortcutFailures(ids: KeyboardShortcutId[]) {
+    this.globalShortcutFailures = ids;
+  }
+
+  setVoiceShortcutsWorkEverywhere(enabled: boolean) {
+    this.voiceShortcutsWorkEverywhere = enabled;
+  }
+
+  cleanUpKeyboardShortcuts() {
+    this.keyboardShortcuts = pruneKeyboardShortcutOverrides(
+      this.keyboardShortcuts
+    );
   }
 
   public startBadgeWatch() {
@@ -297,6 +316,14 @@ export class AppStore {
 
   pushComposer() {
     this.composerCount = Math.max(0, this.composerCount) + 1;
+  }
+
+  requestReactionPicker(messageId: string) {
+    this.reactionPickerMessageId = messageId;
+  }
+
+  clearReactionPickerRequest() {
+    this.reactionPickerMessageId = null;
   }
 
   setReplyingTo(message: Message | null) {
@@ -465,7 +492,8 @@ export class AppStore {
       this.hasBootstrapped = false;
       this.account = null;
       this.mode = null;
-      this.keyboardShortcuts = mergeKeyboardShortcuts();
+      this.keyboardShortcuts = {};
+      this.voiceShortcutsWorkEverywhere = false;
       this.badgeColor = "#e03131";
       this.memberListVisible = true;
 

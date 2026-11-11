@@ -148,6 +148,12 @@ const api = {
       callback: (state: "active" | "idle" | "locked" | "unknown") => void
     ) => on("idle:change", callback)
   },
+  globalShortcuts: {
+    set: (bindings: Record<string, string>): Promise<string[]> =>
+      ipcRenderer.invoke("global-shortcuts:set", bindings),
+    onTriggered: (callback: (id: string) => void) =>
+      on("global-shortcut:triggered", callback)
+  },
   events: {
     onDeepLink: (callback: (url: string) => void) => on("deep-link", callback),
     onContextMenuEditable: (

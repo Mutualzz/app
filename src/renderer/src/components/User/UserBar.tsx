@@ -11,7 +11,6 @@ import { IconButton } from "@components/IconButton";
 import { generateMenuIDs, useMenu } from "@contexts/ContextMenu.context";
 import { type Color, formatColor } from "@mutualzz/ui-core";
 import { SmallActivityStatus } from "@components/SmallActivityStatus";
-import { SpaceModerated } from "@components/Modals/SpaceModerated";
 import {
   GearIcon,
   HeadphonesIcon,
@@ -29,6 +28,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { Tooltip } from "@components/Tooltip";
 import { useTranslation } from "react-i18next";
 import { NoiseSuppressionPopover } from "@components/User/NoiseSuppressionPopover";
+import { useVoiceControls } from "@renderer/hooks/useVoiceControls";
 
 export const UserBar = observer(() => {
   const app = useAppStore();
@@ -38,6 +38,7 @@ export const UserBar = observer(() => {
   const { openContextMenu } = useMenu();
   const [hovered, setHovered] = useState(false);
   const { t } = useTranslation("chat");
+  const { toggleMute, toggleDeafen } = useVoiceControls();
 
   const voiceChannel = app.voice.channel;
 
@@ -102,13 +103,7 @@ export const UserBar = observer(() => {
   if (!account) return null;
 
   return (
-    <Stack
-      mb={2}
-      ml={1}
-      width="97.5%"
-      flexShrink={0}
-      direction="column"
-    >
+    <Stack mb={2} ml={1} width="97.5%" flexShrink={0} direction="column">
       {showVoicePill && (
         <Paper
           borderTopRightRadius={15}
@@ -452,17 +447,7 @@ export const UserBar = observer(() => {
                   : t("voice.controls.mute")
             }
           >
-            <IconButton
-              variant="plain"
-              onClick={() => {
-                if (app.voice.spaceMute) {
-                  openModal("space-muted", <SpaceModerated type="muted" />);
-                  return;
-                }
-
-                app.voice.setMute(!app.voice.selfMute);
-              }}
-            >
+            <IconButton variant="plain" onClick={toggleMute}>
               {app.voice.effectiveSelfMute ? (
                 <MicrophoneSlashIcon
                   weight="fill"
@@ -483,19 +468,7 @@ export const UserBar = observer(() => {
                   : t("voice.controls.deafen")
             }
           >
-            <IconButton
-              variant="plain"
-              onClick={() => {
-                if (app.voice.spaceDeaf) {
-                  openModal(
-                    "space-deafened",
-                    <SpaceModerated type="deafened" />
-                  );
-                  return;
-                }
-                app.voice.setDeaf(!app.voice.selfDeaf);
-              }}
-            >
+            <IconButton variant="plain" onClick={toggleDeafen}>
               {app.voice.effectiveSelfDeaf ? (
                 <HeadphonesOffIcon
                   weight="fill"

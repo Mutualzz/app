@@ -149,6 +149,10 @@ export interface MutualzzAPI {
       callback: (state: "active" | "idle" | "locked" | "unknown") => void
     ): () => void;
   };
+  globalShortcuts: {
+    set(bindings: Record<string, string>): Promise<string[]>;
+    onTriggered(callback: (id: string) => void): () => void;
+  };
   events: {
     onDeepLink(callback: (url: string) => void): () => void;
     onContextMenuEditable(

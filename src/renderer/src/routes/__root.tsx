@@ -10,6 +10,7 @@ import { CssBaseline, Stack } from "@mutualzz/ui-web";
 import { GatewayStatus } from "@stores/Gateway.store";
 import { createRootRoute, Outlet, useNavigate } from "@tanstack/react-router";
 import { isElectron } from "@utils/index";
+import { returnToDiscordImport } from "@renderer/utils/discordImportReturn";
 import dayjs from "dayjs";
 import calendar from "dayjs/plugin/calendar";
 import duration from "dayjs/plugin/duration";
@@ -36,6 +37,7 @@ import { calendarStrings } from "@mutualzz/client";
 import { NavigationTracker } from "@components/NavigationTracker";
 import { AppHotkeys } from "@components/AppHotkeys";
 import { GlobalKeyboardShortcuts } from "@components/GlobalKeyboardShortcuts";
+import { LiveAnnouncer } from "@components/LiveAnnouncer";
 import { ContextMenuProvider } from "@contexts/ContextMenu.context";
 import { WindowTitleBarProvider } from "@contexts/WindowTitleBar.context";
 import { IncomingCallWatcher } from "@components/Call/IncomingCallWatcher";
@@ -200,11 +202,12 @@ function RootComponent() {
             const token = url.searchParams.get("token");
             const pending = url.searchParams.get("pending");
             const linked = url.searchParams.get("linked");
+            const importGuildId = url.searchParams.get("import");
             const error = url.searchParams.get("error");
 
             if (token) {
               app.setToken(token);
-              await navigate({ to: "/", replace: true });
+              await navigate({ to: "/app", replace: true });
             } else if (pending) {
               await navigate({
                 to: "/register/discord",
@@ -212,11 +215,13 @@ function RootComponent() {
                 search: { pending }
               });
             } else if (linked) {
-              sessionStorage.setItem("settings-return", "discord-import");
+              sessionStorage.setItem("settings-return", "connections");
               const user = await app.rest.get<APIPrivateUser>("/@me");
               app.setUser(user);
               void app.profiles.resolve(user.id, true);
               window.dispatchEvent(new Event("settings-return"));
+            } else if (importGuildId) {
+              returnToDiscordImport(importGuildId);
             } else if (error) {
               toast.error(i18n.t("settings:discordAuth.error"), {
                 toastId: "discord-auth-error"
@@ -226,7 +231,7 @@ function RootComponent() {
             const token = url.searchParams.get("token");
             if (token) {
               app.setToken(token);
-              await navigate({ to: "/", replace: true });
+              await navigate({ to: "/app", replace: true });
             }
           }
         } else if (url.hostname === "connections") {
@@ -280,6 +285,7 @@ function RootComponent() {
                         <NavigationTracker />
                         <AppHotkeys />
                         <GlobalKeyboardShortcuts />
+                        <LiveAnnouncer />
                         <InjectGlobal />
                         <Loader>
                           <Stack

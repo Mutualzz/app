@@ -17,6 +17,7 @@ import { Route as PrivacyRouteImport } from "./routes/privacy"
 import { Route as LoginRouteImport } from "./routes/login"
 import { Route as DownloadRouteImport } from "./routes/download"
 import { Route as AppealRouteImport } from "./routes/appeal"
+import { Route as AppRouteImport } from "./routes/app"
 import { Route as AuthenticatedRouteRouteImport } from "./routes/_authenticated/route"
 import { Route as IndexRouteImport } from "./routes/index"
 import { Route as RegisterDiscordRouteImport } from "./routes/register/discord"
@@ -91,6 +92,11 @@ const DownloadRoute = DownloadRouteImport.update({
 const AppealRoute = AppealRouteImport.update({
   id: "/appeal",
   path: "/appeal",
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppRoute = AppRouteImport.update({
+  id: "/app",
+  path: "/app",
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
@@ -291,6 +297,7 @@ const AuthenticatedSpacesSpaceIdBridgesBridgeIdRoute =
 
 export interface FileRoutesByFullPath {
   "/": typeof IndexRoute
+  "/app": typeof AppRoute
   "/appeal": typeof AppealRoute
   "/download": typeof DownloadRoute
   "/login": typeof LoginRoute
@@ -335,6 +342,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   "/": typeof IndexRoute
+  "/app": typeof AppRoute
   "/appeal": typeof AppealRoute
   "/download": typeof DownloadRoute
   "/login": typeof LoginRoute
@@ -379,6 +387,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   "/": typeof IndexRoute
   "/_authenticated": typeof AuthenticatedRouteRouteWithChildren
+  "/app": typeof AppRoute
   "/appeal": typeof AppealRoute
   "/download": typeof DownloadRoute
   "/login": typeof LoginRoute
@@ -425,6 +434,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | "/"
+    | "/app"
     | "/appeal"
     | "/download"
     | "/login"
@@ -469,6 +479,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | "/"
+    | "/app"
     | "/appeal"
     | "/download"
     | "/login"
@@ -512,6 +523,7 @@ export interface FileRouteTypes {
     | "__root__"
     | "/"
     | "/_authenticated"
+    | "/app"
     | "/appeal"
     | "/download"
     | "/login"
@@ -558,6 +570,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  AppRoute: typeof AppRoute
   AppealRoute: typeof AppealRoute
   DownloadRoute: typeof DownloadRoute
   LoginRoute: typeof LoginRoute
@@ -628,6 +641,13 @@ declare module "@tanstack/react-router" {
       path: "/appeal"
       fullPath: "/appeal"
       preLoaderRoute: typeof AppealRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    "/app": {
+      id: "/app"
+      path: "/app"
+      fullPath: "/app"
+      preLoaderRoute: typeof AppRouteImport
       parentRoute: typeof rootRouteImport
     }
     "/_authenticated": {
@@ -1025,6 +1045,7 @@ const RegisterRouteWithChildren = RegisterRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  AppRoute: AppRoute,
   AppealRoute: AppealRoute,
   DownloadRoute: DownloadRoute,
   LoginRoute: LoginRoute,

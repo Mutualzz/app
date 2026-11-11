@@ -272,6 +272,17 @@ export class Channel {
     return this.type === ChannelType.DM ? this.dmRecipients[0] : undefined;
   }
 
+  get searchableName(): string | null {
+    if (this.type === ChannelType.DM)
+      return this.dmRecipient?.displayName ?? null;
+    if (this.name) return this.name;
+
+    const names = this.dmRecipientsList
+      .map((user) => user.displayName)
+      .filter(Boolean);
+    return names.length ? names.join(", ") : null;
+  }
+
   get canRedirect() {
     return !this.isCategory;
   }

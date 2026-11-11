@@ -114,8 +114,15 @@ export type GatewayStatus = (typeof GatewayStatus)[keyof typeof GatewayStatus];
 export interface DiscordImportResult {
   space: APISpace;
   inviteCode: string;
-  importedEmojiCount: number;
-  skippedEmojiCount: number;
+  importedExpressionCount: number;
+  skippedExpressionCount: number;
+}
+
+export interface DiscordImportSelection {
+  channelIds: string[];
+  roleIds: string[];
+  emojiIds: string[];
+  stickerIds: string[];
 }
 
 const RECONNECT_TIMEOUT = 5000;
@@ -1184,6 +1191,7 @@ export class GatewayStore {
   async importDiscordServer(
     guildId: string,
     spaceName: string,
+    selection: DiscordImportSelection,
     onProgress: (progress: DiscordImportProgressPayload) => void
   ) {
     const nonce = crypto.randomUUID();
@@ -1192,7 +1200,7 @@ export class GatewayStore {
     try {
       return await this.request<DiscordImportResult>(
         GatewayOpcodes.DiscordImportExecute,
-        { guildId, spaceName },
+        { guildId, spaceName, ...selection },
         5 * 60_000,
         nonce
       );

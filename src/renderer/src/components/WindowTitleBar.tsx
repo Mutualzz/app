@@ -3,13 +3,7 @@ import { Paper } from "@components/Paper";
 import { useDesktopShell } from "@contexts/DesktopShell.context";
 import { useModal } from "@contexts/Modal.context";
 import { useAppStore } from "@hooks/useStores";
-import {
-  Box,
-  Divider,
-  Stack,
-  Typography,
-  useTheme
-} from "@mutualzz/ui-web";
+import { Box, Divider, Stack, Typography, useTheme } from "@mutualzz/ui-web";
 import { observer } from "mobx-react-lite";
 import { useTranslation } from "react-i18next";
 import { useEffect, useRef, useState } from "react";
@@ -60,7 +54,11 @@ const WindowTitleBar = ({ onHeightChange }: WindowTitleBarProps) => {
   const isUpdating = stage === "restarting" || stage === "downloading";
 
   const isAuthPage =
-    location.pathname === "/login" || location.pathname === "/register";
+    location.pathname === "/" ||
+    location.pathname === "/login" ||
+    location.pathname === "/register";
+
+  const isLandingPage = !isElectron && location.pathname === "/";
 
   useEffect(() => {
     if (isUpdating) return;
@@ -247,7 +245,7 @@ const WindowTitleBar = ({ onHeightChange }: WindowTitleBarProps) => {
           }}
           flex={1}
         >
-          {app.account && (
+          {app.account && !isLandingPage && (
             <Stack
               css={{
                 WebkitAppRegion: "drag",
@@ -381,7 +379,7 @@ const WindowTitleBar = ({ onHeightChange }: WindowTitleBarProps) => {
               {pageTitleBar.end}
             </Stack>
           )}
-          {app.account && (
+          {app.account && !isLandingPage && (
             <Stack
               alignItems="center"
               css={{ WebkitAppRegion: "no-drag", userSelect: "auto" }}
@@ -428,8 +426,7 @@ const WindowTitleBar = ({ onHeightChange }: WindowTitleBarProps) => {
                 css={{
                   WebkitAppRegion: "no-drag",
                   opacity: app.updater.stage === "ready" ? 1 : 0.75,
-                  pointerEvents:
-                    app.updater.stage === "ready" ? "auto" : "none"
+                  pointerEvents: app.updater.stage === "ready" ? "auto" : "none"
                 }}
               >
                 <DownloadIcon weight="fill" />
@@ -479,9 +476,7 @@ const WindowTitleBar = ({ onHeightChange }: WindowTitleBarProps) => {
                 variant={closeDanger ? "solid" : "plain"}
                 onClick={handleClose}
                 title={
-                  isUpdating
-                    ? tCommon("updater.pleaseWait")
-                    : tCommon("close")
+                  isUpdating ? tCommon("updater.pleaseWait") : tCommon("close")
                 }
               >
                 <XIcon />
