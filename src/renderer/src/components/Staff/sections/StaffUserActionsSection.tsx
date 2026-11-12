@@ -12,6 +12,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useAppStore } from "@hooks/useStores";
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
+import { StaffUserSetPasswordConfirm } from "@renderer/components/Modals/StaffUserSetPasswordConfirm";
 
 interface Props {
   user: APIPrivateUser;
@@ -186,6 +187,23 @@ export const StaffUserActionsSection = ({
               }
             >
               {t("user.actions.hardDeleteAccount")}
+            </Button>
+          )}
+          {app.account?.isFounder && (
+            <Button
+              color="danger"
+              variant="soft"
+              onClick={() =>
+                openModal(
+                  `staff-set-password-${user.id}`,
+                  <StaffUserSetPasswordConfirm
+                    userId={user.id}
+                    username={user.username}
+                  />
+                )
+              }
+            >
+              {t("user.actions.setPassword")}
             </Button>
           )}
         </Stack>

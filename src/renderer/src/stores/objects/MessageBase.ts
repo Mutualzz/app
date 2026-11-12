@@ -28,6 +28,8 @@ export class MessageBase {
 
     this.authorId = data.authorId;
     if (data.author) this._author = this.app.users.add(data.author);
+    if ("member" in data && data.member && data.spaceId)
+      this.app.spaces.get(data.spaceId)?.members.add(data.member);
 
     makeObservable<this, "_author" | "_space" | "_channel" | "_repliedTo">(
       this,

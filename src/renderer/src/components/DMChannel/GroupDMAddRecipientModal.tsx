@@ -2,7 +2,7 @@ import { observer } from "mobx-react-lite";
 import { Paper } from "@components/Paper";
 import { useAppStore } from "@hooks/useStores";
 import { Checkbox, InputDefault, Stack, Typography } from "@mutualzz/ui-web";
-import { type ChangeEvent, useState } from "react";
+import { type ChangeEvent, useEffect, useState } from "react";
 import { Button } from "@components/Button";
 import { UserAvatar } from "@components/User/UserAvatar";
 import { useModal } from "@contexts/Modal.context";
@@ -24,6 +24,10 @@ export const GroupDMAddRecipientModal = observer(({ channel }: Props) => {
 
   const [search, setSearch] = useState<string | null>(null);
   const [selected, setSelected] = useState<Snowflake | null>(null);
+
+  useEffect(() => {
+    app.searchMutualMembers(search ?? "");
+  }, [app, search]);
   const [hovered, setHovered] = useState<Snowflake | null>(null);
 
   const { mutate: addRecipient, isPending } = useMutation({

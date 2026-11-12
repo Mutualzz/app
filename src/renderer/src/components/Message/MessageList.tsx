@@ -1,4 +1,5 @@
 import { Paper } from "@components/Paper";
+import { MessageListSkeleton } from "@components/Skeletons";
 import { Logger } from "@mutualzz/logger";
 import { Avatar, Stack, Typography, useTheme } from "@mutualzz/ui-web";
 import type { MessageGroup as MessageGroupType } from "@stores/Message.store";
@@ -7,14 +8,12 @@ import { useInfiniteQuery, useMutation } from "@tanstack/react-query";
 import { observer } from "mobx-react-lite";
 import {
   createContext,
-  Fragment,
-  type UIEvent,
   useCallback,
   useEffect,
   useRef,
-  type KeyboardEvent
+  type KeyboardEvent,
+  useMemo
 } from "react";
-import InfiniteScroll from "react-infinite-scroll-component";
 import useResizeObserver from "use-resize-observer";
 import { MessageDateSeparator } from "@components/Message/MessageDateSeparator";
 import { MessageGroup } from "@components/Message/MessageGroup";
@@ -26,6 +25,7 @@ import { HashIcon } from "@phosphor-icons/react";
 import { useTranslation } from "react-i18next";
 import { jumpToChannelMessage } from "@utils/jumpToChannelMessage";
 import { useMenu } from "@renderer/contexts/ContextMenu.context";
+import { Virtuoso, type VirtuosoHandle } from "react-virtuoso";
 
 interface Props {
   channel?: Channel | null;
@@ -35,6 +35,35 @@ export const MessageAreaWidthContext = createContext(0);
 export const MESSAGE_AREA_PADDING = 82;
 
 const LIMIT = 50;
+
+// Arbitrary large number for infinite scroll to start from the bottom of the list
+const START_INDEX = 1_000_000;
+
+const RETAINED_MESSAGE_COUNT = 100;
+const MAX_SAVED_SCROLL_ANCHORS = 10;
+
+interface ScrollAnchor {
+  rowKey: string;
+  hiddenPixels: number;
+}
+
+interface MessageRow {
+  key: string;
+  group: MessageGroupType;
+  showDateSeparator: boolean;
+}
+
+interface MessageListContext {
+  channel?: Channel | null;
+  isDM: boolean;
+  isGroupDM: boolean;
+  canReadHistory: boolean;
+  hasMore: boolean;
+  isLoading: boolean;
+  loadingLabel: string;
+}
+
+const savedScrollAnchors = new Map<string, ScrollAnchor>();
 
 const SpaceEndMessage = ({
   channel,
@@ -121,6 +150,29 @@ const DMEndMessage = ({
   );
 };
 
+const MessageListHeader = ({ context }: { context: MessageListContext }) => {
+  if (context.isLoading || context.hasMore)
+    return (
+      <MessageListSkeleton
+        label={context.loadingLabel}
+        count={context.isLoading ? 8 : 3}
+      />
+    );
+
+  if (!context.channel) return null;
+
+  return context.isDM ? (
+    <DMEndMessage channel={context.channel} isGroupDM={context.isGroupDM} />
+  ) : (
+    <SpaceEndMessage
+      channel={context.channel}
+      canReadHistory={context.canReadHistory}
+    />
+  );
+};
+
+const MessageListFooter = () => <div style={{ height: 30 }} />;
+
 export const MessageList = observer(({ channel: channelProp }: Props) => {
   const app = useAppStore();
   const { theme } = useTheme();
@@ -130,13 +182,19 @@ export const MessageList = observer(({ channel: channelProp }: Props) => {
   const { openContextMenu } = useMenu();
   const logger = new Logger({ tag: "MessageList" });
 
+  const isAtBottom = useRef(true);
+  const virtuosoRef = useRef<VirtuosoHandle | null>(null);
+  const scrollerRef = useRef<HTMLElement | null>(null);
+  const rowsRef = useRef<MessageRow[]>([]);
+
+  const firstItemIndexRef = useRef(START_INDEX);
+  const oldestMessageIdRef = useRef<string | null>(null);
+
   const channel = channelProp ?? app.channels.active;
 
   const isDM =
     channel?.type === ChannelType.DM || channel?.type === ChannelType.GroupDM;
   const isGroupDM = channel?.type === ChannelType.GroupDM;
-
-  const isAtBottom = useRef(true);
 
   const canReadHistory = isDM
     ? true
@@ -147,31 +205,138 @@ export const MessageList = observer(({ channel: channelProp }: Props) => {
 
   const rawGroups = channel?.messages.groups;
 
-  const messageGroups = (() => {
+  const messageGroups = useMemo(() => {
     if (!rawGroups) return undefined;
 
     if (isDM || canReadHistory) return rawGroups;
 
-    const getLastMessageId = () => {
-      if (!rawGroups || rawGroups.length === 0) return undefined;
-      const lastGroup = rawGroups[rawGroups.length - 1];
-      if (!lastGroup.messages || lastGroup.messages.length === 0)
-        return undefined;
-      return lastGroup.messages[lastGroup.messages.length - 1]?.id;
-    };
-
-    const lastId = getLastMessageId();
+    const lastGroup = rawGroups[rawGroups.length - 1];
+    const lastId = lastGroup?.messages[lastGroup.messages.length - 1]?.id;
     if (!lastId) return rawGroups;
 
     return rawGroups
-      .map((g) => ({
-        ...g,
-        messages: g.messages.filter((m) => m.id !== lastId)
+      .map((group) => ({
+        ...group,
+        messages: group.messages.filter((message) => message.id !== lastId)
       }))
-      .filter((g) => (g.messages?.length ?? 0) > 0);
-  })();
+      .filter((group) => group.messages.length > 0);
+  }, [rawGroups, isDM, canReadHistory]);
 
-  const { fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery({
+  const rows = useMemo<MessageRow[]>(() => {
+    if (!messageGroups) return [];
+
+    return [...messageGroups].reverse().map((group, index, groups) => {
+      const olderGroup = groups[index - 1];
+      return {
+        key: `messageGroup-${group.messages[group.messages.length - 1].id}`,
+        group,
+        showDateSeparator:
+          !olderGroup ||
+          group.createdAt.toDateString() !== olderGroup.createdAt.toDateString()
+      };
+    });
+  }, [messageGroups]);
+
+  const initialLocationRef = useRef<{
+    channelId: string | undefined;
+    location: {
+      index: number | "LAST";
+      align: "start" | "end";
+      offset?: number;
+    };
+  } | null>(null);
+
+  if (initialLocationRef.current?.channelId !== channel?.id) {
+    const anchor = channel ? savedScrollAnchors.get(channel.id) : undefined;
+    const anchorIndex = anchor
+      ? rows.findIndex((row) => row.key === anchor.rowKey)
+      : -1;
+
+    initialLocationRef.current = {
+      channelId: channel?.id,
+      location:
+        anchor && anchorIndex !== -1
+          ? { index: anchorIndex, align: "start", offset: anchor.hiddenPixels }
+          : { index: "LAST", align: "end" }
+    };
+  }
+
+  const firstItemIndex = useMemo(() => {
+    const previousOldestId = oldestMessageIdRef.current;
+    if (previousOldestId) {
+      const prependedCount = rows.findIndex((row) =>
+        row.group.messages.some((message) => message.id === previousOldestId)
+      );
+      if (prependedCount > 0) firstItemIndexRef.current -= prependedCount;
+    }
+
+    const oldestGroup = rows[0]?.group;
+    oldestMessageIdRef.current =
+      oldestGroup?.messages[oldestGroup.messages.length - 1]?.id ?? null;
+
+    return firstItemIndexRef.current;
+  }, [rows]);
+
+  useEffect(() => {
+    rowsRef.current = rows;
+  }, [rows]);
+
+  const revealMessage = useCallback((messageId: string) => {
+    const rowIndex = rowsRef.current.findIndex((row) =>
+      row.group.messages.some((message) => message.id === messageId)
+    );
+    if (rowIndex === -1) return;
+
+    virtuosoRef.current?.scrollToIndex({ index: rowIndex, align: "center" });
+  }, []);
+
+  const readScrollAnchor = useCallback((): ScrollAnchor | null => {
+    const scroller = scrollerRef.current;
+    if (!scroller) return null;
+
+    const scrollerTop = scroller.getBoundingClientRect().top;
+    const rowElements =
+      scroller.querySelectorAll<HTMLElement>("[data-row-key]");
+
+    for (const rowElement of rowElements) {
+      const rowRect = rowElement.getBoundingClientRect();
+      if (rowRect.bottom > scrollerTop && rowElement.dataset.rowKey) {
+        return {
+          rowKey: rowElement.dataset.rowKey,
+          hiddenPixels: scrollerTop - rowRect.top
+        };
+      }
+    }
+
+    return null;
+  }, []);
+
+  const saveScrollAnchor = useCallback(() => {
+    if (!channel) return;
+
+    if (isAtBottom.current) {
+      savedScrollAnchors.delete(channel.id);
+      return;
+    }
+
+    const anchor = readScrollAnchor();
+    if (!anchor) return;
+
+    savedScrollAnchors.delete(channel.id);
+    savedScrollAnchors.set(channel.id, anchor);
+
+    if (savedScrollAnchors.size > MAX_SAVED_SCROLL_ANCHORS) {
+      const oldestChannelId = savedScrollAnchors.keys().next().value;
+      if (oldestChannelId) {
+        savedScrollAnchors.delete(oldestChannelId);
+        app.channels
+          .get(oldestChannelId)
+          ?.messages.prune(RETAINED_MESSAGE_COUNT);
+      }
+    }
+  }, [app, channel, readScrollAnchor]);
+
+  const { fetchNextPage, hasNextPage, isLoading } = useInfiniteQuery({
     initialPageParam: undefined,
     queryKey: ["messages", channel?.id],
     queryFn: async ({ pageParam }: any) => {
@@ -197,7 +362,8 @@ export const MessageList = observer(({ channel: channelProp }: Props) => {
       return lastPage.earliestId;
     },
     // Space channels respect history permission; DMs always fetch
-    enabled: !!channel?.id && (isDM || canReadHistory)
+    enabled: !!channel?.id && (isDM || canReadHistory),
+    gcTime: 0
   });
 
   const { mutate: sendAck } = useMutation({
@@ -234,20 +400,43 @@ export const MessageList = observer(({ channel: channelProp }: Props) => {
   }, [channel?.id, channel?.messages.groups, ackLatest]);
 
   useEffect(() => {
+    if (!channel) return;
+    return () => {
+      if (!savedScrollAnchors.has(channel.id)) {
+        channel.messages.prune(RETAINED_MESSAGE_COUNT);
+      }
+    };
+  }, [channel]);
+
+  useEffect(() => {
     const request = app.jumpToMessage;
     if (!request || request.channelId !== channel?.id) return;
 
-    void jumpToChannelMessage(channel, request.messageId, theme).then(
-      (success) => {
-        if (success) app.clearJumpToMessage();
-      }
-    );
-  }, [app, app.jumpToMessage, channel, theme]);
+    void jumpToChannelMessage(
+      channel,
+      request.messageId,
+      theme,
+      revealMessage
+    ).then((success) => {
+      if (success) app.clearJumpToMessage();
+    });
+  }, [app, app.jumpToMessage, channel, theme, revealMessage]);
 
-  const onScroll = useCallback((e: UIEvent<HTMLDivElement>) => {
-    const el = e.currentTarget;
-    isAtBottom.current = el.scrollTop >= -50;
-  }, []);
+  const handleAtBottomChange = useCallback(
+    (atBottom: boolean) => {
+      isAtBottom.current = atBottom;
+      if (atBottom) ackLatest();
+      saveScrollAnchor();
+    },
+    [ackLatest, saveScrollAnchor]
+  );
+
+  const handleScrollingChange = useCallback(
+    (scrolling: boolean) => {
+      if (!scrolling) saveScrollAnchor();
+    },
+    [saveScrollAnchor]
+  );
 
   const fetchMore = useCallback(() => {
     if (!channel?.messages.count) {
@@ -363,6 +552,9 @@ export const MessageList = observer(({ channel: channelProp }: Props) => {
 
     const messageElements = Array.from(
       ref.current?.querySelectorAll<HTMLElement>("[data-message-id]") ?? []
+    ).sort(
+      (first, second) =>
+        second.getBoundingClientRect().top - first.getBoundingClientRect().top
     );
     if (messageElements.length === 0) return;
 
@@ -426,53 +618,20 @@ export const MessageList = observer(({ channel: channelProp }: Props) => {
     focusMessage(messageElements[nextIndex]);
   };
 
-  const renderGroup = useCallback(
-    (group: MessageGroupType, index: number) => {
-      const olderGroup = messageGroups?.[index + 1];
-      const showDateSeparator =
-        !olderGroup ||
-        group.createdAt.toDateString() !== olderGroup.createdAt.toDateString();
-
-      return (
-        <Fragment
-          key={`messageGroup-${group.messages[group.messages.length - 1].id}`}
-        >
-          <div
-            css={{
-              marginBottom: "var(--message-density-group-gap, 0.375rem)"
-            }}
-          >
-            <MessageGroup group={group} />
-          </div>
-          {showDateSeparator && <MessageDateSeparator date={group.createdAt} />}
-        </Fragment>
-      );
-    },
-    [messageGroups]
-  );
-
-  const loader = isFetchingNextPage ? <></> : null;
-
-  const totalMessages =
-    messageGroups?.reduce((acc, g) => acc + (g.messages?.length ?? 0), 0) ?? 0;
-
   return (
     <MessageAreaWidthContext.Provider
       value={(width ?? 0) - MESSAGE_AREA_PADDING}
     >
       <Stack
-        overflowY="auto"
-        overflowX="hidden"
-        direction="column-reverse"
+        direction="column"
         flex="1 1 auto"
         ref={ref}
-        id="scrollable-div"
-        onScroll={onScroll}
         onKeyDown={handleListKeyDown}
         tabIndex={0}
         role="region"
         aria-label={t("messageList.label", { name: channel?.name ?? "" })}
         css={{
+          minHeight: 0,
           outline: "none",
           "& [data-message-id]": { outline: "none" },
           "& [data-message-id]:focus-visible": {
@@ -484,33 +643,49 @@ export const MessageList = observer(({ channel: channelProp }: Props) => {
           }
         }}
       >
-        <InfiniteScroll
-          dataLength={totalMessages}
-          next={fetchMore}
-          style={{
-            display: "flex",
-            flexDirection: "column-reverse",
-            marginBottom: 30,
-            overflow: "hidden"
+        <Virtuoso
+          key={channel?.id}
+          ref={virtuosoRef}
+          scrollerRef={(element) => {
+            scrollerRef.current =
+              element instanceof HTMLElement ? element : null;
           }}
-          hasMore={hasNextPage}
-          inverse={true}
-          loader={loader}
-          scrollThreshold={0.5}
-          scrollableTarget="scrollable-div"
-          endMessage={
-            isDM ? (
-              <DMEndMessage channel={channel} isGroupDM={isGroupDM ?? false} />
-            ) : (
-              <SpaceEndMessage
-                channel={channel}
-                canReadHistory={canReadHistory}
-              />
-            )
-          }
-        >
-          {messageGroups?.map(renderGroup)}
-        </InfiniteScroll>
+          style={{ flex: 1 }}
+          data={rows}
+          firstItemIndex={firstItemIndex}
+          initialTopMostItemIndex={initialLocationRef.current?.location}
+          computeItemKey={(_, row) => row.key}
+          alignToBottom
+          followOutput={(atBottom) => (atBottom ? "auto" : false)}
+          atBottomThreshold={50}
+          atBottomStateChange={handleAtBottomChange}
+          isScrolling={handleScrollingChange}
+          startReached={fetchMore}
+          context={{
+            channel,
+            isDM,
+            isGroupDM: isGroupDM ?? false,
+            canReadHistory,
+            hasMore: hasNextPage,
+            isLoading,
+            loadingLabel: t("loading")
+          }}
+          components={{ Header: MessageListHeader, Footer: MessageListFooter }}
+          itemContent={(_, row) => (
+            <div data-row-key={row.key}>
+              {row.showDateSeparator && (
+                <MessageDateSeparator date={row.group.createdAt} />
+              )}
+              <div
+                css={{
+                  paddingBottom: "var(--message-density-group-gap, 0.375rem)"
+                }}
+              >
+                <MessageGroup group={row.group} />
+              </div>
+            </div>
+          )}
+        />
       </Stack>
     </MessageAreaWidthContext.Provider>
   );

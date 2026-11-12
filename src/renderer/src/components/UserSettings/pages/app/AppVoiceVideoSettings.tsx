@@ -6,13 +6,13 @@ import {
   RadioGroup,
   Select,
   Stack,
-  Tooltip,
   Typography
 } from "@mutualzz/ui-web";
+import { Tooltip } from "@components/Tooltip";
 import {
   SettingsSelectField,
   SettingsSliderField,
-  SettingsToggleRow,
+  SettingsToggleRow
 } from "@components/UserSettings/SettingsField";
 import { IconButton } from "@components/IconButton";
 import { useAppStore } from "@hooks/useStores";
@@ -140,7 +140,7 @@ export const AppVoiceVideoSettings = observer(() => {
               onChange={(value) => voice.setInputDeviceId(value)}
               options={inputs.map((input) => ({
                 value: input.deviceId,
-                label: input.label || t("voice.unknownMicrophone"),
+                label: input.label || t("voice.unknownMicrophone")
               }))}
             />
           </Stack>
@@ -151,7 +151,7 @@ export const AppVoiceVideoSettings = observer(() => {
               onChange={(value) => voice.setOutputDeviceId(value)}
               options={outputs.map((output) => ({
                 value: output.deviceId,
-                label: output.label || t("voice.unknownSpeaker"),
+                label: output.label || t("voice.unknownSpeaker")
               }))}
             />
           </Stack>
@@ -265,9 +265,7 @@ export const AppVoiceVideoSettings = observer(() => {
           title={t("voice.autoSensitivity")}
           description={t("voice.autoSensitivityDescription")}
           checked={settings.voiceInputSensitivityAuto}
-          onChange={(checked) =>
-            settings.setVoiceInputSensitivityAuto(checked)
-          }
+          onChange={(checked) => settings.setVoiceInputSensitivityAuto(checked)}
         />
 
         {!settings.voiceInputSensitivityAuto && (

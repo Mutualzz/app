@@ -47,6 +47,7 @@ export function getSearchDisplayName({
       (entry) => entry.user?.username.toLowerCase() === username.toLowerCase(),
     );
     if (spaceMember) return spaceMember.displayName;
+    space?.members.lookup(username);
 
     const dmUser = channel?.dmRecipientsList.find(
       (entry) => entry.username.toLowerCase() === username.toLowerCase(),

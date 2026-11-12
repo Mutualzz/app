@@ -1,8 +1,8 @@
 import { Paper } from "@components/Paper";
+import { ChannelViewSkeleton } from "@components/Skeletons";
 import { TextChannelView } from "@components/Views/TextChannelView";
 import { VoiceChannelView } from "@components/Views/VoiceChannelView";
 import { useAppStore } from "@hooks/useStores";
-import { Stack, Typography } from "@mutualzz/ui-web";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { observer } from "mobx-react-lite";
 import { useEffect } from "react";
@@ -54,21 +54,8 @@ function RouteComponent() {
     app.gateway.onChannelOpen(spaceId, channelId);
   }, [app, navigate, space, activeChannel, spaceId, channelId]);
 
-  if (!activeChannel) {
-    return (
-      <Paper
-        surfaceRole="content"
-        elevation={0}
-        direction="column"
-        flex="1 1 auto"
-        overflow="hidden"
-      >
-        <Stack alignItems="center" justifyContent="center" flex="1">
-          <Typography level="h5">{t("loadingChannel")}</Typography>
-        </Stack>
-      </Paper>
-    );
-  }
+  if (!activeChannel)
+    return <ChannelViewSkeleton label={t("loadingChannel")} />;
 
   return (
     <>

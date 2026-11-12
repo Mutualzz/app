@@ -25,27 +25,28 @@ const shortcodes = [
 
 export const defaultEmojis = joinShortcodes(emojiData, shortcodes);
 
-export function getEmoji(shortcodeOrUnicodeOrEmoticon: string) {
-  const emoji = defaultEmojis.find(
-    (e) =>
-      e.shortcodes?.includes(shortcodeOrUnicodeOrEmoticon) ||
-      e.emoji === shortcodeOrUnicodeOrEmoticon ||
-      e.skins?.some(
-        (skin) =>
-          skin.shortcodes?.includes(shortcodeOrUnicodeOrEmoticon) ||
-          skin.emoji === shortcodeOrUnicodeOrEmoticon
-      ) ||
-      e.emoticon === shortcodeOrUnicodeOrEmoticon
-  );
+type DefaultEmoji = (typeof defaultEmojis)[number];
 
-  return (
-    emoji?.skins?.find(
-      (skin) =>
-        skin.shortcodes?.includes(shortcodeOrUnicodeOrEmoticon) ||
-        skin.emoji === shortcodeOrUnicodeOrEmoticon ||
-        skin.emoticon === shortcodeOrUnicodeOrEmoticon
-    ) ?? emoji
-  );
+const emojiLookup = new Map<string, DefaultEmoji>();
+
+function lookupKeysOf(emoji: DefaultEmoji) {
+  const emoticons = emoji.emoticon === undefined ? [] : [emoji.emoticon].flat();
+  return [...(emoji.shortcodes ?? []), emoji.emoji, ...emoticons];
+}
+
+function registerEmoji(emoji: DefaultEmoji) {
+  for (const key of lookupKeysOf(emoji)) {
+    if (!emojiLookup.has(key)) emojiLookup.set(key, emoji);
+  }
+}
+
+for (const emoji of defaultEmojis) {
+  for (const skin of emoji.skins ?? []) registerEmoji(skin);
+  registerEmoji(emoji);
+}
+
+export function getEmoji(shortcodeOrUnicodeOrEmoticon: string) {
+  return emojiLookup.get(shortcodeOrUnicodeOrEmoticon);
 }
 
 export async function getCustomEmoji(shortcode: string) {

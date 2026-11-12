@@ -1,6 +1,7 @@
 import { Button } from "@components/Button";
 import { IconButton } from "@components/IconButton";
 import { UserItem } from "@components/Friends/UserItem";
+import { NotificationListSkeleton } from "@components/Skeletons";
 import { UserAvatar } from "@components/User/UserAvatar";
 import { useAppStore } from "@hooks/useStores";
 import type { APINotification } from "@mutualzz/types";
@@ -272,14 +273,7 @@ export const ForYouTab = observer(
           </Stack>
         )}
         {!app.notifications.loaded && (
-          <Typography
-            level="body-sm"
-            textColor="muted"
-            textAlign="center"
-            py={3}
-          >
-            {t("notifications.loading")}
-          </Typography>
+          <NotificationListSkeleton label={t("notifications.loading")} />
         )}
         {todayNotifications.length > 0 && (
           <Stack direction="column" spacing={0.25}>

@@ -12,12 +12,12 @@ function highlightMessage(el: HTMLElement, theme: Theme) {
       {
         backgroundColor: formatColor(theme.colors.info, {
           alpha: 50,
-          format: "hexa",
-        }),
+          format: "hexa"
+        })
       },
-      { backgroundColor: "transparent" },
+      { backgroundColor: "transparent" }
     ],
-    { duration: 2000, easing: "ease-out" },
+    { duration: 2000, easing: "ease-out" }
   );
 }
 
@@ -29,9 +29,14 @@ function tryScrollToMessage(messageId: string, theme: Theme) {
   return true;
 }
 
-async function waitForScroll(messageId: string, theme: Theme) {
+async function waitForScroll(
+  messageId: string,
+  theme: Theme,
+  revealMessage?: (messageId: string) => void
+) {
   for (let attempt = 0; attempt < SCROLL_RETRY_ATTEMPTS; attempt++) {
     if (tryScrollToMessage(messageId, theme)) return true;
+    revealMessage?.(messageId);
     await new Promise((resolve) => setTimeout(resolve, SCROLL_RETRY_MS));
   }
 
@@ -42,6 +47,7 @@ export async function jumpToChannelMessage(
   channel: Channel | null | undefined,
   messageId: string,
   theme: Theme,
+  revealMessage?: (messageId: string) => void
 ) {
   if (!channel) return false;
 
@@ -51,5 +57,5 @@ export async function jumpToChannelMessage(
     await channel.getMessages(false, 50, undefined, undefined, messageId);
   }
 
-  return waitForScroll(messageId, theme);
+  return waitForScroll(messageId, theme, revealMessage);
 }

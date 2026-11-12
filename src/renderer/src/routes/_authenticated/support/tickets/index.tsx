@@ -1,5 +1,6 @@
 import { Button } from "@components/Button";
 import { Paper } from "@components/Paper";
+import { ListSkeleton } from "@components/Skeletons";
 import { SupportHeader } from "@components/Support/SupportHeader";
 import { useAppStore } from "@hooks/useStores";
 import type {
@@ -98,8 +99,7 @@ function SupportTicketsRoute() {
     PENDING_TICKET_STATUSES.has(ticket.status)
   );
   const canCreateTicket = !hasPendingTicket;
-  const showCreateForm =
-    canCreateTicket && (showNew || tickets.length === 0);
+  const showCreateForm = canCreateTicket && (showNew || tickets.length === 0);
 
   const { mutate: createTicket, isPending: creating } = useMutation({
     mutationKey: ["support-create-ticket"],
@@ -127,7 +127,13 @@ function SupportTicketsRoute() {
   });
 
   return (
-    <Stack flex={1} height="100%" overflow="hidden" width="100%" direction="column">
+    <Stack
+      flex={1}
+      height="100%"
+      overflow="hidden"
+      width="100%"
+      direction="column"
+    >
       <SupportHeader
         title={t("support.myTickets")}
         icon={<LifebuoyIcon size={22} weight="fill" />}
@@ -211,10 +217,8 @@ function SupportTicketsRoute() {
             </Button>
           )}
 
-          {isFetching && !isFetchingNextPage && (
-            <Typography level="body-sm" textColor="muted" textAlign="center">
-              {t("support.loadingTickets")}
-            </Typography>
+          {isFetching && !isFetchingNextPage && tickets.length === 0 && (
+            <ListSkeleton label={t("support.loadingTickets")} count={4} />
           )}
 
           {!isFetching && tickets.length === 0 && !showNew && (
@@ -255,8 +259,7 @@ function SupportTicketsRoute() {
                 </Typography>
               </Stack>
               <Typography level="body-sm" textColor="muted">
-                {t(`support.categories.${ticket.category}`)}{" "}
-                ·{" "}
+                {t(`support.categories.${ticket.category}`)} ·{" "}
                 {t("support.updatedAt", {
                   date: dayjs(ticket.lastMessageAt).format("MMM D, h:mm A")
                 })}

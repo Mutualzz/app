@@ -1,6 +1,7 @@
 import { Button } from "@components/Button";
 import { LogoutOtherSessionsConfirm } from "@components/Modals/LogoutOtherSessionsConfirm";
 import { Paper } from "@components/Paper";
+import { ListSkeleton } from "@components/Skeletons";
 import { useModal } from "@contexts/Modal.context";
 import { useAppStore } from "@hooks/useStores";
 import {
@@ -8,7 +9,7 @@ import {
   formatRestError,
   ME_SESSIONS_QUERY_KEY,
   revokeMeSession,
-  revokeOtherMeSessions,
+  revokeOtherMeSessions
 } from "@mutualzz/client";
 import { Stack, Typography } from "@mutualzz/ui-web";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -25,7 +26,7 @@ export const ActiveSessionsSettings = observer(() => {
 
   const { data: sessions = [], isLoading } = useQuery({
     queryKey: ME_SESSIONS_QUERY_KEY,
-    queryFn: () => fetchMeSessions(app),
+    queryFn: () => fetchMeSessions(app)
   });
 
   const { mutate: revokeSession, isPending: revokingSession } = useMutation({
@@ -36,7 +37,7 @@ export const ActiveSessionsSettings = observer(() => {
     },
     onError: (error) => {
       toast.error(formatRestError(error, t("account.sessionRevokeError")));
-    },
+    }
   });
 
   const { mutateAsync: revokeOthers, isPending: revokingOthers } = useMutation({
@@ -46,8 +47,10 @@ export const ActiveSessionsSettings = observer(() => {
       toast.success(t("account.otherSessionsRevoked"));
     },
     onError: (error) => {
-      toast.error(formatRestError(error, t("account.otherSessionsRevokeError")));
-    },
+      toast.error(
+        formatRestError(error, t("account.otherSessionsRevokeError"))
+      );
+    }
   });
 
   const otherSessions = sessions.filter((session) => !session.current);
@@ -67,9 +70,7 @@ export const ActiveSessionsSettings = observer(() => {
   return (
     <>
       {isLoading ? (
-        <Typography level="body-sm" textColor="muted">
-          {t("account.loadingSessions")}
-        </Typography>
+        <ListSkeleton label={t("account.loadingSessions")} count={3} action />
       ) : sessions.length === 0 ? (
         <Typography level="body-sm" textColor="muted">
           {t("account.noSessions")}
@@ -108,7 +109,7 @@ export const ActiveSessionsSettings = observer(() => {
                 </Typography>
                 <Typography level="body-xs" textColor="muted">
                   {t("account.sessionLastActive", {
-                    time: dayjs(session.lastUsedAt).fromNow(),
+                    time: dayjs(session.lastUsedAt).fromNow()
                   })}
                 </Typography>
               </Stack>

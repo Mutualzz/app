@@ -1,4 +1,5 @@
 import { InputWithLabel } from "@components/InputWithLabel";
+import { ListSkeleton } from "@components/Skeletons";
 import { useModal } from "@contexts/Modal.context";
 import { useAppStore } from "@hooks/useStores";
 import { Stack, Typography } from "@mutualzz/ui-web";
@@ -89,6 +90,7 @@ export const MembersSection = observer(
     enabled: boolean;
   }) => {
     const { t } = useTranslation("settings");
+    const { t: tChat } = useTranslation("chat");
     const app = useAppStore();
     const [searchInput, setSearchInput] = useState("");
     const [search, setSearch] = useState("");
@@ -131,7 +133,9 @@ export const MembersSection = observer(
           onChange={(e) => setSearchInput(e.target.value)}
           placeholder={t("minecraftBridge.membersSearch")}
         />
-        {!membersQuery.isLoading && members.length === 0 ? (
+        {membersQuery.isLoading ? (
+          <ListSkeleton label={tChat("loading")} count={4} leading="avatar" />
+        ) : members.length === 0 ? (
           <Typography level="body-xs" textColor="muted">
             {search
               ? t("minecraftBridge.membersNoResults")

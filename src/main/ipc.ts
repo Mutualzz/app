@@ -37,10 +37,9 @@ import {
   setMediaUpdatedListener,
   startMediaWatcher
 } from "./media";
-import { spawn } from "child_process";
 import { isWebUrl, openExternalUrl } from "./openExternal";
 
-const SERVICE = "mutualzz";
+const SERVICE = app.isPackaged ? "mutualzz" : "mutualzz-dev";
 const ACCOUNT = "default";
 
 function setWindowsBadge(win: BrowserWindow, count: number, color = "#e03131") {

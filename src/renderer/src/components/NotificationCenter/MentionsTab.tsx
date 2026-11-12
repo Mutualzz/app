@@ -1,6 +1,7 @@
 import { PinnedMessageCard } from "@components/Channel/PinnedMessageCard";
+import { InboxCardSkeleton, InboxListSkeleton } from "@components/Skeletons";
 import { useAppStore } from "@hooks/useStores";
-import { Stack, Typography, useTheme } from "@mutualzz/ui-web";
+import { Stack, useTheme } from "@mutualzz/ui-web";
 import { AtIcon } from "@phosphor-icons/react";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { observer } from "mobx-react-lite";
@@ -89,16 +90,7 @@ export const MentionsTab = observer(
 
     return (
       <Stack direction="column" spacing={1.25}>
-        {isLoading && (
-          <Typography
-            level="body-sm"
-            textColor="muted"
-            textAlign="center"
-            py={3}
-          >
-            {t("notifications.loading")}
-          </Typography>
-        )}
+        {isLoading && <InboxListSkeleton label={t("notifications.loading")} />}
 
         {!isLoading && messages.length === 0 && (
           <InboxEmptyState
@@ -142,14 +134,7 @@ export const MentionsTab = observer(
 
         {hasNextPage && (
           <div ref={loadMoreRef}>
-            <Typography
-              level="body-xs"
-              textColor="muted"
-              textAlign="center"
-              py={2}
-            >
-              {t("notifications.loading")}
-            </Typography>
+            <InboxCardSkeleton index={1} />
           </div>
         )}
       </Stack>

@@ -2,6 +2,7 @@ import { Button } from "@components/Button";
 import { EditScheduledMessageModal } from "@components/Modals/EditScheduledMessageModal";
 import { PickTimeModal } from "@components/Modals/PickTimeModal";
 import { ScheduledPostCard } from "@components/Post/ScheduledPostCard";
+import { InboxListSkeleton } from "@components/Skeletons";
 import { useModal } from "@contexts/Modal.context";
 import { useAppStore } from "@hooks/useStores";
 import type { APIScheduledMessage } from "@mutualzz/types";
@@ -185,10 +186,13 @@ export const ScheduledTab = observer(() => {
         (second.scheduledFor?.getTime() ?? 0)
     );
 
-  const isEmpty =
-    scheduledMessages.length === 0 &&
-    scheduledPosts.length === 0 &&
-    !postsLoading;
+  const hasNothing =
+    scheduledMessages.length === 0 && scheduledPosts.length === 0;
+
+  if (hasNothing && postsLoading)
+    return <InboxListSkeleton label={tCommon("notifications.loading")} />;
+
+  const isEmpty = hasNothing && !postsLoading;
 
   if (isEmpty)
     return (

@@ -259,61 +259,61 @@ function RootComponent() {
   const reducedMotion = app.settings?.reducedMotion ?? false;
   const highContrast = app.settings?.highContrast ?? false;
 
+  useEffect(() => {
+    const rootElement = document.documentElement;
+    rootElement.toggleAttribute("data-reduced-motion", reducedMotion);
+    rootElement.toggleAttribute("data-high-contrast", highContrast);
+  }, [reducedMotion, highContrast]);
+
   return (
     <QueryClientProvider client={app.queryClient}>
       <HotkeysProvider>
         <RootDocument>
           <AppTheme>
-            <div
-              data-reduced-motion={reducedMotion ? "" : undefined}
-              data-high-contrast={highContrast ? "" : undefined}
-              style={{ display: "contents" }}
-            >
-              <ModalProvider>
-                <CssBaseline adaptiveScrollbar />
-                <DesktopShellProvider>
-                  <WindowTitleBarProvider>
-                    <WindowTitleBar onHeightChange={setTitleBarHeight} />
-                    <DesktopShell>
-                      <ContextMenuProvider>
-                        <ModalRoot />
-                        <ToastHost />
-                        <SettingsReturnHandler />
-                        <IncomingCallWatcher />
-                        <ChangelogPrompt />
-                        <ScreenSharePicker />
-                        <NavigationTracker />
-                        <AppHotkeys />
-                        <GlobalKeyboardShortcuts />
-                        <LiveAnnouncer />
-                        <InjectGlobal />
-                        <Loader>
+            <ModalProvider>
+              <CssBaseline adaptiveScrollbar />
+              <DesktopShellProvider>
+                <WindowTitleBarProvider>
+                  <WindowTitleBar onHeightChange={setTitleBarHeight} />
+                  <DesktopShell>
+                    <ContextMenuProvider>
+                      <ModalRoot />
+                      <ToastHost />
+                      <SettingsReturnHandler />
+                      <IncomingCallWatcher />
+                      <ChangelogPrompt />
+                      <ScreenSharePicker />
+                      <NavigationTracker />
+                      <AppHotkeys />
+                      <GlobalKeyboardShortcuts />
+                      <LiveAnnouncer />
+                      <InjectGlobal />
+                      <Loader>
+                        <Stack
+                          direction="column"
+                          height="100%"
+                          width="100%"
+                          flex={1}
+                          minHeight={0}
+                          css={{
+                            paddingTop: titleBarHeight
+                          }}
+                        >
                           <Stack
-                            direction="column"
-                            height="100%"
                             width="100%"
                             flex={1}
                             minHeight={0}
-                            css={{
-                              paddingTop: titleBarHeight
-                            }}
+                            overflow="hidden"
                           >
-                            <Stack
-                              width="100%"
-                              flex={1}
-                              minHeight={0}
-                              overflow="hidden"
-                            >
-                              <Outlet />
-                            </Stack>
+                            <Outlet />
                           </Stack>
-                        </Loader>
-                      </ContextMenuProvider>
-                    </DesktopShell>
-                  </WindowTitleBarProvider>
-                </DesktopShellProvider>
-              </ModalProvider>
-            </div>
+                        </Stack>
+                      </Loader>
+                    </ContextMenuProvider>
+                  </DesktopShell>
+                </WindowTitleBarProvider>
+              </DesktopShellProvider>
+            </ModalProvider>
           </AppTheme>
         </RootDocument>
       </HotkeysProvider>

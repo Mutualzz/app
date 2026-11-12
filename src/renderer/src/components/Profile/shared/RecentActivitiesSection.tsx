@@ -2,7 +2,7 @@ import { ActivityIcon } from "@components/Presence/ActivityIcon";
 import { Paper } from "@components/Paper";
 import { useAppStore } from "@hooks/useStores";
 import type { PresenceActivity, PresenceActivityAssets } from "@mutualzz/types";
-import { Box, Stack, Typography, useTheme } from "@mutualzz/ui-web";
+import { Skeleton, Stack, Typography, useTheme } from "@mutualzz/ui-web";
 import { CaretDownIcon, CaretUpIcon } from "@phosphor-icons/react";
 import {
   formatActivityDuration,
@@ -141,44 +141,19 @@ export const RecentActivitiesSection = ({
         css={cardCss}
         minWidth={0}
       >
-        {[0, 1].map((i) => (
+        {[0, 1].map((index) => (
           <Stack
-            key={i}
+            key={index}
             direction="row"
             spacing={1}
             alignItems="center"
             minWidth={0}
-            css={{
-              "@keyframes recentActivityPulse": {
-                "0%, 100%": { opacity: 0.2 },
-                "50%": { opacity: 0.4 }
-              },
-              animation: "recentActivityPulse 1.2s ease-in-out infinite",
-              animationDelay: `${i * 0.15}s`
-            }}
+            aria-hidden="true"
           >
-            <Box
-              width={iconSize}
-              height={iconSize}
-              borderRadius={8}
-              css={{
-                backgroundColor: theme.colors.surface,
-                flexShrink: 0
-              }}
-            />
-            <Stack direction="column" spacing={0.5} minWidth={0} flex={1}>
-              <Box
-                height={10}
-                width="55%"
-                borderRadius={4}
-                css={{ backgroundColor: theme.colors.surface }}
-              />
-              <Box
-                height={8}
-                width="35%"
-                borderRadius={4}
-                css={{ backgroundColor: theme.colors.surface }}
-              />
+            <Skeleton variant="rounded" size={iconSize} />
+            <Stack direction="column" minWidth={0} flex={1}>
+              <Skeleton width={index === 0 ? "55%" : "45%"} fontSize={13} />
+              <Skeleton width="35%" fontSize={11} />
             </Stack>
           </Stack>
         ))}

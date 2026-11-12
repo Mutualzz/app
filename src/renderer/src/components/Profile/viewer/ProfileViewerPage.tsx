@@ -9,7 +9,7 @@ import { hasProfileDraftContent } from "@components/Profile/editor/profileEditor
 import { sortBlocksByZIndex } from "@components/Profile/viewer/profileLayout.utils";
 import { ProfileCanvasBlocksLayer } from "@components/Profile/shared/ProfileCanvasBlocksLayer";
 import { ProfileCanvasViewport } from "@components/Profile/shared/ProfileCanvasViewport";
-import Loading from "@components/Loader/Loading";
+import { ProfilePageSkeleton } from "@components/Skeletons";
 import { useAppStore } from "@hooks/useStores";
 import type { APIUser, APIUserProfile } from "@mutualzz/types";
 import { Paper, Stack, Typography } from "@mutualzz/ui-web";
@@ -31,6 +31,7 @@ export const ProfileViewerPage = observer(
   ({ username, initialUser, initialProfile }: Props) => {
     const { t } = useTranslation("settings");
     const { t: tCommon } = useTranslation("common");
+    const { t: tChat } = useTranslation("chat");
     const app = useAppStore();
     const navigate = useNavigate();
     const isPreviewMode = useRouterState({
@@ -40,8 +41,7 @@ export const ProfileViewerPage = observer(
     });
     const identifier = username.trim().toLowerCase();
 
-    const accountMatches =
-      app.account?.username.toLowerCase() === identifier;
+    const accountMatches = app.account?.username.toLowerCase() === identifier;
 
     const viewerUser = (() => {
       const cached = app.users.all.find(
@@ -111,7 +111,17 @@ export const ProfileViewerPage = observer(
         ? getDraftProfileMusic(previewDraft, profile)
         : null;
 
-    if ((userLoading || profileLoading) && !viewerUser) return <Loading />;
+    const loadingView = (
+      <ProfileLayout
+        title={t("profile.viewer.title")}
+        backLabel={tCommon("close")}
+        onBack={() => navigateToResumeRoute(app, navigate)}
+      >
+        <ProfilePageSkeleton label={tChat("loading")} />
+      </ProfileLayout>
+    );
+
+    if ((userLoading || profileLoading) && !viewerUser) return loadingView;
 
     if (userError || !viewerUser) {
       return (
@@ -142,7 +152,7 @@ export const ProfileViewerPage = observer(
     }
 
     if (!profile) {
-      if (profileLoading) return <Loading />;
+      if (profileLoading) return loadingView;
       if (isSelf) {
         return (
           <ProfileLayout
@@ -163,7 +173,7 @@ export const ProfileViewerPage = observer(
           </ProfileLayout>
         );
       }
-      return <Loading />;
+      return loadingView;
     }
 
     if (isPreviewMode && isSelf && !previewDraft) {
@@ -179,7 +189,9 @@ export const ProfileViewerPage = observer(
             justifyContent="center"
             p={4}
           >
-            <Typography level="title-md">{t("profile.viewer.previewExpired")}</Typography>
+            <Typography level="title-md">
+              {t("profile.viewer.previewExpired")}
+            </Typography>
             <Typography level="body-sm" css={{ opacity: 0.75 }}>
               {t("profile.viewer.previewExpiredHint")}
             </Typography>

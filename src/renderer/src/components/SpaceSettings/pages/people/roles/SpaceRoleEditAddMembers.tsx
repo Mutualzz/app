@@ -9,7 +9,7 @@ import {
   Typography,
   useTheme
 } from "@mutualzz/ui-web";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { UserAvatar } from "@components/User/UserAvatar";
 import { dynamicElevation } from "@mutualzz/ui-core";
 import { Button } from "@components/Button";
@@ -37,6 +37,14 @@ export const SpaceRoleEditAddMembers = observer(({ role }: Props) => {
 
   const space = role.space;
   const me = space?.members.me;
+
+  useEffect(() => {
+    space?.members.requestRole(space.id);
+  }, [space]);
+
+  useEffect(() => {
+    space?.members.search(search);
+  }, [space, search]);
 
   const eligibleMembers =
     space?.members.all.filter(

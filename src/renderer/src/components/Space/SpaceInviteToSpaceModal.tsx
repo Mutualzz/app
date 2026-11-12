@@ -73,35 +73,41 @@ const InviteSendRow = observer(
     const { t: tChat } = useTranslation("chat");
 
     return (
-    <Stack
-      direction="row"
-      spacing={2}
-      alignItems="center"
-      justifyContent="space-between"
-      width="100%"
-    >
-      <Stack direction="row" spacing={2} alignItems="center" minWidth={0}>
-        {avatar}
-        <Typography
-          css={{
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            whiteSpace: "nowrap"
-          }}
-        >
-          {name}
-        </Typography>
-      </Stack>
-
-      <Button
-        size="sm"
-        variant={sent ? "soft" : "solid"}
-        disabled={sent || sending}
-        onClick={onSend}
+      <Stack
+        direction="row"
+        spacing={2}
+        alignItems="center"
+        justifyContent="space-between"
+        width="100%"
       >
-        {sent ? <CheckIcon /> : sending ? tChat("feed.share.sending") : tChat("feed.share.send")}
-      </Button>
-    </Stack>
+        <Stack direction="row" spacing={2} alignItems="center" minWidth={0}>
+          {avatar}
+          <Typography
+            css={{
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap"
+            }}
+          >
+            {name}
+          </Typography>
+        </Stack>
+
+        <Button
+          size="sm"
+          variant={sent ? "soft" : "solid"}
+          disabled={sent || sending}
+          onClick={onSend}
+        >
+          {sent ? (
+            <CheckIcon />
+          ) : sending ? (
+            tChat("feed.share.sending")
+          ) : (
+            tChat("feed.share.send")
+          )}
+        </Button>
+      </Stack>
     );
   }
 );
@@ -251,9 +257,7 @@ export const SpaceInviteToSpaceModal = observer(({ channel, space }: Props) => {
     setSearch(e.target.value.trim().length === 0 ? null : e.target.value);
   };
 
-  const spaceMemberIds = new Set(
-    targetSpace?.members.all.map((member) => member.userId) ?? []
-  );
+  const isSpaceMember = (userId: string) => !!targetSpace?.members.get(userId);
 
   const matchesSearch = (user: User) =>
     !search ||
@@ -270,13 +274,13 @@ export const SpaceInviteToSpaceModal = observer(({ channel, space }: Props) => {
   const filteredDms = app.channels.dms.filter((ch) => {
     if (ch.type === ChannelType.DM) {
       const recipient = ch.dmRecipient;
-      if (!recipient || spaceMemberIds.has(recipient.id)) return false;
+      if (!recipient || isSpaceMember(recipient.id)) return false;
       return matchesSearch(recipient);
     }
 
     const recipients =
       ch.recipients?.filter(
-        (user) => user.id !== app.account?.id && !spaceMemberIds.has(user.id)
+        (user) => user.id !== app.account?.id && !isSpaceMember(user.id)
       ) ?? [];
 
     if (recipients.length === 0) return false;
@@ -290,7 +294,7 @@ export const SpaceInviteToSpaceModal = observer(({ channel, space }: Props) => {
     .map((relationship) => relationship.otherUser)
     .filter((user): user is User => !!user)
     .filter((user) => !dmUserIds.has(user.id))
-    .filter((user) => !spaceMemberIds.has(user.id))
+    .filter((user) => !isSpaceMember(user.id))
     .filter(matchesSearch);
 
   const hasSuggestedUsers =
@@ -298,7 +302,7 @@ export const SpaceInviteToSpaceModal = observer(({ channel, space }: Props) => {
 
   return (
     <AnimatedPaper
-          surfaceRole="modal"
+      surfaceRole="modal"
       elevation={app.settings?.preferEmbossed ? 5 : 1}
       borderRadius={12}
       minWidth={{ xs: "90vw", sm: 340, md: 420, lg: 500 }}
@@ -334,7 +338,9 @@ export const SpaceInviteToSpaceModal = observer(({ channel, space }: Props) => {
           </Stack>
           <Stack width="100%" direction="column" spacing={5} py={2}>
             <Stack direction="column" spacing={1}>
-              <Typography level="body-sm">{t("invites.modal.expireAfter")}</Typography>
+              <Typography level="body-sm">
+                {t("invites.modal.expireAfter")}
+              </Typography>
               <Select
                 color="neutral"
                 value={expiresAfter as number}
@@ -350,7 +356,9 @@ export const SpaceInviteToSpaceModal = observer(({ channel, space }: Props) => {
               </Select>
             </Stack>
             <Stack direction="column" spacing={1}>
-              <Typography level="body-sm">{t("invites.modal.maxUses")}</Typography>
+              <Typography level="body-sm">
+                {t("invites.modal.maxUses")}
+              </Typography>
               <Select
                 onValueChange={(val) => setMaxUsesAfter(val as number)}
                 color="neutral"
@@ -493,7 +501,9 @@ export const SpaceInviteToSpaceModal = observer(({ channel, space }: Props) => {
           <Divider />
 
           <Stack direction="column" width="100%" spacing={1}>
-            <Typography level="body-sm">{t("invites.modal.inviteLink")}</Typography>
+            <Typography level="body-sm">
+              {t("invites.modal.inviteLink")}
+            </Typography>
             <Input
               type="text"
               readOnly
@@ -510,7 +520,9 @@ export const SpaceInviteToSpaceModal = observer(({ channel, space }: Props) => {
                   disabled={isLoading || !!error || !invite || copied}
                   size="sm"
                 >
-                  {copied ? t("invites.copiedToClipboard") : t("invites.copyInviteUrl")}
+                  {copied
+                    ? t("invites.copiedToClipboard")
+                    : t("invites.copyInviteUrl")}
                 </Button>
               }
             />

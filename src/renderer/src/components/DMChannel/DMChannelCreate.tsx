@@ -9,7 +9,7 @@ import {
   Typography,
   useTheme
 } from "@mutualzz/ui-web";
-import { type ChangeEvent, useCallback, useState } from "react";
+import { type ChangeEvent, useCallback, useEffect, useState } from "react";
 import { Button } from "@components/Button";
 import { UserAvatar } from "@components/User/UserAvatar";
 import { useModal } from "@contexts/Modal.context";
@@ -215,6 +215,10 @@ export const DMChannelCreate = observer(() => {
   const app = useAppStore();
   const [search, setSearch] = useState<string | null>(null);
   const [recipients, setRecipients] = useState<Snowflake[]>([]);
+
+  useEffect(() => {
+    app.searchMutualMembers(search ?? "");
+  }, [app, search]);
   const [recipientNames, setRecipientNames] = useState<string[]>([]);
   const [hovered, setHovered] = useState<string | null>(null);
 

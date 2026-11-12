@@ -1,5 +1,6 @@
 import { Button } from "@components/Button";
 import { Paper } from "@components/Paper";
+import { ListSkeleton } from "@components/Skeletons";
 import { StaffPanelHeader } from "@components/Staff/StaffPanelHeader";
 import { useAppStore } from "@hooks/useStores";
 import type {
@@ -28,12 +29,7 @@ export const Route = createFileRoute("/_authenticated/staff/support")({
 const PAGE_LIMIT = 50;
 const ANY = "any";
 
-const statusValues = [
-  "open",
-  "awaiting_reply",
-  "resolved",
-  "closed"
-] as const;
+const statusValues = ["open", "awaiting_reply", "resolved", "closed"] as const;
 
 const statusColors: Record<string, "warning" | "success" | "neutral" | "info"> =
   {
@@ -155,10 +151,8 @@ function StaffSupportRoute() {
           borderTop="0 !important"
           borderLeft="0 !important"
         >
-          {isFetching && !isFetchingNextPage && (
-            <Typography level="body-sm" textColor="muted" textAlign="center">
-              {t("home.loading")}
-            </Typography>
+          {isFetching && !isFetchingNextPage && tickets.length === 0 && (
+            <ListSkeleton label={t("home.loading")} count={6} />
           )}
 
           {!isFetching && tickets.length === 0 && (
@@ -223,9 +217,12 @@ function StaffSupportRoute() {
           )}
 
           {activeId && loadingTicket && (
-            <Typography level="body-sm" textColor="muted">
-              {t("support.loadingTicket")}
-            </Typography>
+            <ListSkeleton
+              label={t("support.loadingTicket")}
+              count={4}
+              lines={3}
+              leading="avatar"
+            />
           )}
 
           {activeTicket && (

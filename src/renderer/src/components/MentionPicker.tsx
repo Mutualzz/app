@@ -38,6 +38,10 @@ export const MentionPicker = observer(
     const channel = app.channels.active;
     const space = channel?.spaceId ? app.spaces.get(channel.spaceId) : null;
 
+    useEffect(() => {
+      if (space && search) space.members.search(search);
+    }, [space, search]);
+
     const canMentionEveryone =
       space?.members.me?.hasPermission("MentionEveryone", channel) ?? false;
 

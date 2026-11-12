@@ -1,5 +1,6 @@
 import { Button } from "@components/Button";
 import { Paper } from "@components/Paper";
+import { ListSkeleton } from "@components/Skeletons";
 import {
   getStaffReportLockdownKey,
   getStaffReportTakedownKey,
@@ -197,10 +198,8 @@ function StaffReportsRoute() {
             </Select>
           </Stack>
 
-          {isFetching && (
-            <Typography level="body-sm" textColor="muted" textAlign="center">
-              {t("home.loading")}
-            </Typography>
+          {isFetching && reports.length === 0 && (
+            <ListSkeleton label={t("home.loading")} count={5} action />
           )}
 
           {!isFetching && reports.length === 0 && (
@@ -230,9 +229,7 @@ function StaffReportsRoute() {
                     <Typography level="body-sm">
                       <b>
                         {tCommon(
-                          staffReportReasonKeys[
-                            report.reason
-                          ] ?? report.reason
+                          staffReportReasonKeys[report.reason] ?? report.reason
                         )}
                       </b>{" "}
                       · {report.targetType} {report.targetId}
@@ -240,8 +237,7 @@ function StaffReportsRoute() {
                     <Typography level="body-xs" textColor="muted">
                       {t("report.reportedBy", {
                         name:
-                          report.reporter.globalName ||
-                          report.reporter.username
+                          report.reporter.globalName || report.reporter.username
                       })}
                       {" · "}
                       {dayjs(report.createdAt).format("MMM D, YYYY h:mm A")}
@@ -253,7 +249,9 @@ function StaffReportsRoute() {
                     color={staffReportStatusColors[report.status] ?? "neutral"}
                     css={{ textTransform: "uppercase" }}
                   >
-                    {t(`report.status.${report.status}` as "report.status.pending")}
+                    {t(
+                      `report.status.${report.status}` as "report.status.pending"
+                    )}
                   </Typography>
                 </Stack>
 

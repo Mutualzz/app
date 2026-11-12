@@ -1,4 +1,5 @@
 import { Paper } from "@components/Paper";
+import { InviteCardSkeleton } from "@components/Skeletons";
 import { SpaceIcon } from "@components/Space/SpaceIcon";
 import { UserAvatar } from "@components/User/UserAvatar";
 import { useAppStore } from "@hooks/useStores";
@@ -88,15 +89,17 @@ function RouteComponent() {
     }
   });
 
-  const { mutate: acceptFriendInvite, isPending: isAddingFriend } = useMutation({
-    mutationKey: ["accept-friend-invite", code],
-    mutationFn: () => app.relationships.acceptFriendInvite(code),
-    onSuccess: (relationship) => {
-      app.relationships.update(relationship);
-      app.setJoining(null, null);
-      navigate({ to: "/@me/friends", replace: true });
+  const { mutate: acceptFriendInvite, isPending: isAddingFriend } = useMutation(
+    {
+      mutationKey: ["accept-friend-invite", code],
+      mutationFn: () => app.relationships.acceptFriendInvite(code),
+      onSuccess: (relationship) => {
+        app.relationships.update(relationship);
+        app.setJoining(null, null);
+        navigate({ to: "/@me/friends", replace: true });
+      }
     }
-  });
+  );
 
   const friendActionLabel = relationship?.isFriend
     ? t("invite.friends")
@@ -187,7 +190,15 @@ function RouteComponent() {
       }
       acceptInvite();
     }
-  }, [invite, deepLink, mounted, app.token, isInSpace, acceptInvite, isFriendInvite]);
+  }, [
+    invite,
+    deepLink,
+    mounted,
+    app.token,
+    isInSpace,
+    acceptInvite,
+    isFriendInvite
+  ]);
 
   if (!app.token && mounted && !deepLink)
     return <Navigate to="/login" replace />;
@@ -215,7 +226,13 @@ function RouteComponent() {
           borderRadius={10}
           elevation={3}
         >
-          <Stack justifyContent="center" alignItems="center" flex={1} spacing={2} direction="column">
+          <Stack
+            justifyContent="center"
+            alignItems="center"
+            flex={1}
+            spacing={2}
+            direction="column"
+          >
             {invite?.space && <SpaceIcon space={invite.space} size={48} />}
             <Typography level="h5" fontWeight="bold">
               {invite?.space?.name
@@ -246,13 +263,7 @@ function RouteComponent() {
         borderRadius={10}
         elevation={3}
       >
-        {isLoading && (
-          <Stack justifyContent="center" alignItems="center" flex={1}>
-            <Typography level="h5" fontWeight="bold">
-              {t("invite.loading")}
-            </Typography>
-          </Stack>
-        )}
+        {isLoading && <InviteCardSkeleton label={t("invite.loading")} />}
 
         {!isLoading && invite && isFriendInvite && (
           <>
@@ -270,7 +281,11 @@ function RouteComponent() {
                     {t("invite.friendInvite")}
                   </Typography>
                 )}
-                <Typography level="body-sm" textColor="secondary" textAlign="center">
+                <Typography
+                  level="body-sm"
+                  textColor="secondary"
+                  textAlign="center"
+                >
                   {t("invite.wantsToBeFriend")}
                 </Typography>
               </Stack>
@@ -301,7 +316,9 @@ function RouteComponent() {
                 <Typography>
                   {t("invite.invitedYouToJoin", {
                     name:
-                      invite.inviter?.globalName ?? invite.inviter?.username ?? ""
+                      invite.inviter?.globalName ??
+                      invite.inviter?.username ??
+                      ""
                   })}
                 </Typography>
                 <Typography level="h2" fontWeight="bold">
@@ -324,7 +341,9 @@ function RouteComponent() {
                 onClick={isInSpace ? handleGoToSpace : () => acceptInvite()}
                 disabled={isJoining}
               >
-                {isInSpace ? t("invite.goToSpace") : t("invite.acceptInBrowser")}
+                {isInSpace
+                  ? t("invite.goToSpace")
+                  : t("invite.acceptInBrowser")}
               </Button>
 
               {!isElectron && (

@@ -61,6 +61,10 @@ import {
 import { toast } from "react-toastify";
 import type { InboxTab } from "@components/NotificationCenter/InboxParts";
 import { DesktopNotificationStore } from "./DesktopNotification.store";
+import type { FetchedSpaceMember } from "./SpaceMember.store";
+
+const MEMBER_SWEEP_INTERVAL_MS = 5 * 60_000;
+const MUTUAL_SEARCH_DEBOUNCE_MS = 250;
 
 const prefersDark = getPrefersDark();
 
@@ -139,6 +143,9 @@ export class AppStore {
   globalShortcutFailures: KeyboardShortcutId[] = [];
   voiceShortcutsWorkEverywhere = false;
   private badgeWatchDispose: (() => void) | null = null;
+  private memberSweepTimer: ReturnType<typeof setInterval> | null = null;
+  private mutualSearchTimer: ReturnType<typeof setTimeout> | null = null;
+  mutualMemberSearchVersion = 0;
   private readonly logger = new Logger({
     tag: "AppStore"
   });
@@ -280,6 +287,45 @@ export class AppStore {
   public stopBadgeWatch() {
     this.badgeWatchDispose?.();
     this.badgeWatchDispose = null;
+  }
+
+  public startMemberSweep() {
+    this.stopMemberSweep();
+    this.memberSweepTimer = setInterval(() => {
+      for (const space of this.spaces.all) space.sweepMembers();
+    }, MEMBER_SWEEP_INTERVAL_MS);
+  }
+
+  public stopMemberSweep() {
+    if (this.memberSweepTimer) clearInterval(this.memberSweepTimer);
+    this.memberSweepTimer = null;
+  }
+
+  searchMutualMembers(query: string) {
+    const normalizedQuery = query.trim().toLowerCase().slice(0, 32);
+    if (this.mutualSearchTimer) clearTimeout(this.mutualSearchTimer);
+    this.mutualSearchTimer = null;
+    if (!normalizedQuery) return;
+
+    this.mutualSearchTimer = setTimeout(() => {
+      this.mutualSearchTimer = null;
+      void this.gateway
+        .requestSpaceMembers(null, { query: normalizedQuery })
+        .then((ack) => {
+          if (!ack.ok) return;
+          runInAction(() => {
+            const membersBySpace = new Map<string, FetchedSpaceMember[]>();
+            for (const member of ack.members) {
+              const spaceMembers = membersBySpace.get(member.spaceId) ?? [];
+              spaceMembers.push(member);
+              membersBySpace.set(member.spaceId, spaceMembers);
+            }
+            for (const [spaceId, members] of membersBySpace)
+              this.spaces.get(spaceId)?.members.receive(members);
+            this.mutualMemberSearchVersion++;
+          });
+        });
+    }, MUTUAL_SEARCH_DEBOUNCE_MS);
   }
 
   getSuggestedGroupDMRecipients() {
@@ -483,6 +529,7 @@ export class AppStore {
     }
 
     this.stopBadgeWatch();
+    this.stopMemberSweep();
     await this.tokenStorage.delete();
 
     runInAction(() => {

@@ -38,7 +38,7 @@ import {
   FilmStripIcon,
 } from "@phosphor-icons/react";
 import { observer } from "mobx-react-lite";
-import { useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 
 interface PanelProps {
@@ -220,6 +220,8 @@ function EmptyHint({ children }: { children: ReactNode }) {
   );
 }
 
+const SEARCH_PEOPLE_PAGE_SIZE = 50;
+
 const MessageSearchFilterContent = observer(
   ({ query, onQueryChange, space, channel, popoverAttr, onPopoverBlur }: PanelProps) => {
     const app = useAppStore();
@@ -238,6 +240,12 @@ const MessageSearchFilterContent = observer(
       return space.visibleChannels.filter(
         (item) => item.type === ChannelType.Text,
       );
+    }, [space]);
+
+    const loadedMemberCount = space?.members.size ?? 0;
+
+    useEffect(() => {
+      space?.members.requestSome(SEARCH_PEOPLE_PAGE_SIZE);
     }, [space]);
 
     const people = useMemo(() => {
@@ -278,7 +286,7 @@ const MessageSearchFilterContent = observer(
       }
 
       return [];
-    }, [space, channel, app.account]);
+    }, [space, channel, app.account, loadedMemberCount]);
 
     const tabs = useMemo(() => {
       const items: { id: FilterTab; label: string }[] = [

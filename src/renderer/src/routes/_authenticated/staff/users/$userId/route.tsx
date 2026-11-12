@@ -1,4 +1,5 @@
 import { Paper } from "@components/Paper";
+import { StaffUserSkeleton } from "@components/Skeletons";
 import { StaffPanelHeader } from "@components/Staff/StaffPanelHeader";
 import { StaffUserActionsSection } from "@components/Staff/sections/StaffUserActionsSection";
 import { StaffUserAuditSection } from "@components/Staff/sections/StaffUserAuditSection";
@@ -67,19 +68,7 @@ function StaffUserRoute() {
     navigate({ to: "/staff" });
   };
 
-  if (isLoading) {
-    return (
-      <Stack
-        flex={1}
-        height="100%"
-        width="100%"
-        justifyContent="center"
-        alignItems="center"
-      >
-        <Typography textColor="secondary">{tChat("loading")}</Typography>
-      </Stack>
-    );
-  }
+  if (isLoading) return <StaffUserSkeleton label={tChat("loading")} />;
 
   if (!user || error) {
     return (

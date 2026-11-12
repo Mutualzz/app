@@ -1,5 +1,6 @@
 import { Button } from "@components/Button";
 import { Paper } from "@components/Paper";
+import { ListSkeleton } from "@components/Skeletons";
 import { StaffPanelHeader } from "@components/Staff/StaffPanelHeader";
 import { useAppStore } from "@hooks/useStores";
 import type { APIStaffAction } from "@mutualzz/types";
@@ -50,10 +51,7 @@ const formatStaffActionTarget = (
   return t("activity.removedUser");
 };
 
-const describeGlobalAction = (
-  entry: APIStaffAction,
-  t: TFunction<"staff">
-) => {
+const describeGlobalAction = (entry: APIStaffAction, t: TFunction<"staff">) => {
   const actor = entry.actor.globalName || entry.actor.username;
   const target = formatStaffActionTarget(entry, t);
 
@@ -144,10 +142,12 @@ function StaffActivityRoute() {
         borderBottom="0 !important"
       >
         <Stack direction="column" spacing={0.75} width="100%" maxWidth={640}>
-          {isFetching && !isFetchingNextPage && (
-            <Typography level="body-sm" textColor="muted" textAlign="center">
-              {t("home.loading")}
-            </Typography>
+          {isFetching && !isFetchingNextPage && actions.length === 0 && (
+            <ListSkeleton
+              label={t("home.loading")}
+              count={6}
+              leading="avatar"
+            />
           )}
 
           {!isFetching && actions.length === 0 && (

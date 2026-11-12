@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useAppStore } from "@hooks/useStores";
 import { Paper } from "@components/Paper";
+import { ListSkeleton } from "@components/Skeletons";
 import { Stack, Typography, useTheme } from "@mutualzz/ui-web";
 import { CubeIcon } from "@phosphor-icons/react";
 import { useQuery } from "@tanstack/react-query";
@@ -24,6 +25,7 @@ export const Route = createFileRoute("/_authenticated/@me/bridges/")({
 
 function RouteComponent() {
   const { t } = useTranslation("settings");
+  const { t: tChat } = useTranslation("chat");
   const app = useAppStore();
   const { theme } = useTheme();
   const navigate = useNavigate();
@@ -51,7 +53,24 @@ function RouteComponent() {
   }, [app, bridges]);
 
   if (bridgesQuery.isLoading) {
-    return null;
+    return (
+      <Paper
+        elevation={app.settings?.preferEmbossed ? 3 : 0}
+        direction="column"
+        flex="1 1 auto"
+        overflow="hidden"
+        borderLeft="0 !important"
+        borderRight="0 !important"
+        borderBottom="0 !important"
+        spacing={2}
+        p={4}
+      >
+        <Typography level="title-md" fontWeight="bold">
+          {t("minecraftBridge.yourBridges")}
+        </Typography>
+        <ListSkeleton label={tChat("loading")} count={3} leading="icon" />
+      </Paper>
+    );
   }
 
   if (bridges.length === 0) {

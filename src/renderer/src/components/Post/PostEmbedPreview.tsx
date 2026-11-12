@@ -1,5 +1,6 @@
 import { Paper } from "@components/Paper";
 import { IconButton } from "@components/IconButton";
+import { PostEmbedSkeleton } from "@components/Skeletons";
 import { UserAvatar } from "@components/User/UserAvatar";
 import { MarkdownRenderer } from "@components/Markdown/MarkdownRenderer/MarkdownRenderer";
 import { useAppStore } from "@hooks/useStores";
@@ -118,152 +119,158 @@ const AttachmentThumb = ({
   );
 };
 
-export const PostEmbedPreview = observer(({ post: postData, compact }: Props) => {
-  const app = useAppStore();
-  const { theme } = useTheme();
-  const navigate = useNavigate();
-  const { t } = useTranslation("chat");
+export const PostEmbedPreview = observer(
+  ({ post: postData, compact }: Props) => {
+    const app = useAppStore();
+    const { theme } = useTheme();
+    const navigate = useNavigate();
+    const { t } = useTranslation("chat");
 
-  const { isLoading, isError } = useQuery({
-    queryKey: ["post-embed", postData.id],
-    queryFn: () => app.posts.resolve(postData.id)
-  });
+    const { isLoading, isError } = useQuery({
+      queryKey: ["post-embed", postData.id],
+      queryFn: () => app.posts.resolve(postData.id)
+    });
 
-  const post = app.posts.get(postData.id);
+    const post = app.posts.get(postData.id);
 
-  const previewWidth = compact ? "100%" : "20rem";
+    const previewWidth = compact ? "100%" : "20rem";
 
-  if (isError || (!isLoading && !post)) {
+    if (isError || (!isLoading && !post)) {
+      return (
+        <Paper
+          direction="row"
+          spacing={1.5}
+          alignItems="center"
+          width={previewWidth}
+          maxWidth="100%"
+          borderRadius={8}
+          p={2}
+          border={`1px solid ${theme.colors.surface} !important`}
+        >
+          <ProhibitIcon />
+          <Typography level="body-sm" textColor="secondary">
+            {t("feed.empty.postUnavailable")}
+          </Typography>
+        </Paper>
+      );
+    }
+
+    if (!post) {
+      return (
+        <Paper
+          width={previewWidth}
+          maxWidth="100%"
+          borderRadius={8}
+          p={2}
+          border={`1px solid ${theme.colors.surface} !important`}
+          role="status"
+          aria-busy="true"
+          aria-label={t("feed.embed.loadingPost")}
+        >
+          <PostEmbedSkeleton />
+        </Paper>
+      );
+    }
+
+    const visibleAttachments = post.attachments.slice(
+      0,
+      MAX_VISIBLE_ATTACHMENTS
+    );
+    const hiddenAttachmentCount =
+      post.attachments.length - visibleAttachments.length;
+
     return (
       <Paper
-        direction="row"
-        spacing={1.5}
-        alignItems="center"
+        direction="column"
         width={previewWidth}
         maxWidth="100%"
         borderRadius={8}
         p={2}
-        border={`1px solid ${theme.colors.surface} !important`}
+        spacing={1.25}
+        border={`1px solid ${theme.colors.primary} !important`}
       >
-        <ProhibitIcon />
-        <Typography level="body-sm" textColor="secondary">
-          {t("feed.empty.postUnavailable")}
-        </Typography>
-      </Paper>
-    );
-  }
-
-  if (!post) {
-    return (
-      <Paper
-        width={previewWidth}
-        maxWidth="100%"
-        borderRadius={8}
-        p={2}
-        border={`1px solid ${theme.colors.surface} !important`}
-      >
-        <Typography level="body-sm" textColor="secondary">
-          {t("feed.embed.loadingPost")}
-        </Typography>
-      </Paper>
-    );
-  }
-
-  const visibleAttachments = post.attachments.slice(0, MAX_VISIBLE_ATTACHMENTS);
-  const hiddenAttachmentCount =
-    post.attachments.length - visibleAttachments.length;
-
-  return (
-    <Paper
-      direction="column"
-      width={previewWidth}
-      maxWidth="100%"
-      borderRadius={8}
-      p={2}
-      spacing={1.25}
-      border={`1px solid ${theme.colors.primary} !important`}
-    >
-      <Stack
-        direction="row"
-        spacing={1.5}
-        alignItems="center"
-        justifyContent="space-between"
-      >
-        <Stack direction="row" spacing={1.5} alignItems="center">
-          <UserAvatar user={post.author} size="sm" />
-          <Stack direction="column" spacing={0}>
-            <Typography level="body-sm" fontWeight={600}>
-              {post.author?.displayName ?? t("unknownUser")}
-            </Typography>
-            <Typography level="body-sm" textColor="secondary">
-              {dayjs(post.createdAt).calendar(undefined, calendarStrings)}
-            </Typography>
+        <Stack
+          direction="row"
+          spacing={1.5}
+          alignItems="center"
+          justifyContent="space-between"
+        >
+          <Stack direction="row" spacing={1.5} alignItems="center">
+            <UserAvatar user={post.author} size="sm" />
+            <Stack direction="column" spacing={0}>
+              <Typography level="body-sm" fontWeight={600}>
+                {post.author?.displayName ?? t("unknownUser")}
+              </Typography>
+              <Typography level="body-sm" textColor="secondary">
+                {dayjs(post.createdAt).calendar(undefined, calendarStrings)}
+              </Typography>
+            </Stack>
           </Stack>
+
+          <IconButton
+            size="sm"
+            title={t("feed.actions.openPost")}
+            onClick={() =>
+              navigate({
+                to: "/feed/posts/$postId",
+                params: { postId: post.id }
+              })
+            }
+          >
+            <ArrowSquareOutIcon />
+          </IconButton>
         </Stack>
 
-        <IconButton
-          size="sm"
-          title={t("feed.actions.openPost")}
-          onClick={() =>
-            navigate({
-              to: "/feed/posts/$postId",
-              params: { postId: post.id }
-            })
-          }
-        >
-          <ArrowSquareOutIcon />
-        </IconButton>
-      </Stack>
+        {post.content ? (
+          <MarkdownRenderer
+            value={post.content}
+            level="body-sm"
+            css={{
+              display: "-webkit-box",
+              WebkitLineClamp: 4,
+              WebkitBoxOrient: "vertical",
+              overflow: "hidden"
+            }}
+          />
+        ) : (
+          post.attachments.length > 0 && (
+            <Stack direction="row" spacing={1}>
+              {visibleAttachments.map((attachment, index) => (
+                <AttachmentThumb
+                  key={attachment.id}
+                  attachment={attachment}
+                  overlayCount={
+                    index === visibleAttachments.length - 1 &&
+                    hiddenAttachmentCount > 0
+                      ? hiddenAttachmentCount
+                      : undefined
+                  }
+                />
+              ))}
+            </Stack>
+          )
+        )}
 
-      {post.content ? (
-        <MarkdownRenderer
-          value={post.content}
-          level="body-sm"
-          css={{
-            display: "-webkit-box",
-            WebkitLineClamp: 4,
-            WebkitBoxOrient: "vertical",
-            overflow: "hidden"
-          }}
-        />
-      ) : (
-        post.attachments.length > 0 && (
-          <Stack direction="row" spacing={1}>
-            {visibleAttachments.map((attachment, index) => (
-              <AttachmentThumb
-                key={attachment.id}
-                attachment={attachment}
-                overlayCount={
-                  index === visibleAttachments.length - 1 &&
-                  hiddenAttachmentCount > 0
-                    ? hiddenAttachmentCount
-                    : undefined
-                }
-              />
+        {post.content && post.attachments.length > 0 && (
+          <Typography level="body-xs" textColor="secondary">
+            {t("feed.embed.attachments", { count: post.attachments.length })}
+          </Typography>
+        )}
+
+        {post.hashtags.length > 0 && (
+          <Stack direction="row" spacing={1} flexWrap="wrap">
+            {post.hashtags.map((hashtag) => (
+              <Typography
+                key={hashtag.id}
+                level="body-sm"
+                textColor={theme.colors.info}
+              >
+                #{hashtag.tag}
+              </Typography>
             ))}
           </Stack>
-        )
-      )}
-
-      {post.content && post.attachments.length > 0 && (
-        <Typography level="body-xs" textColor="secondary">
-          {t("feed.embed.attachments", { count: post.attachments.length })}
-        </Typography>
-      )}
-
-      {post.hashtags.length > 0 && (
-        <Stack direction="row" spacing={1} flexWrap="wrap">
-          {post.hashtags.map((hashtag) => (
-            <Typography
-              key={hashtag.id}
-              level="body-sm"
-              textColor={theme.colors.info}
-            >
-              #{hashtag.tag}
-            </Typography>
-          ))}
-        </Stack>
-      )}
-    </Paper>
-  );
-});
+        )}
+      </Paper>
+    );
+  }
+);

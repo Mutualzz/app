@@ -1,5 +1,6 @@
 import { IconButton } from "@components/IconButton";
 import { PinnedMessageCard } from "@components/Channel/PinnedMessageCard";
+import { InboxListSkeleton } from "@components/Skeletons";
 import { useAppStore } from "@hooks/useStores";
 import { Stack, Typography } from "@mutualzz/ui-web";
 import { MAX_BOOKMARKS } from "@mutualzz/validators";
@@ -47,11 +48,7 @@ export const BookmarksTab = observer(() => {
     );
 
   if (isLoading)
-    return (
-      <Typography level="body-sm" textColor="muted" textAlign="center" py={3}>
-        {t("notifications.loading")}
-      </Typography>
-    );
+    return <InboxListSkeleton label={t("notifications.loading")} />;
 
   return (
     <Stack direction="column" spacing={1.25}>

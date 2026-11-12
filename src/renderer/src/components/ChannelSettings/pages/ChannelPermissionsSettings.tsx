@@ -14,17 +14,25 @@ import {
   parseKey,
   toggleOverwriteState,
   type OverwriteDraft,
-  type OverwriteState,
+  type OverwriteState
 } from "@mutualzz/client";
 import { type PermissionFlag } from "@mutualzz/bitfield";
 import {
   filterPermissionGroups,
-  type PermissionGroupDef,
+  type PermissionGroupDef
 } from "@mutualzz/client";
 import { scrollToPermissionCategory } from "@components/Permissions/permissionEditor.utils";
 import { channelPermissionGroups } from "@mutualzz/i18n";
 import { type APIChannel, ChannelType } from "@mutualzz/types";
-import { Fragment, type JSX, type ReactNode, useEffect, useMemo, useRef, useState } from "react";
+import {
+  Fragment,
+  type JSX,
+  type ReactNode,
+  useEffect,
+  useMemo,
+  useRef,
+  useState
+} from "react";
 import {
   Box,
   ButtonGroup,
@@ -284,6 +292,8 @@ const TargetItem = ({
   );
 };
 
+const MEMBER_PICKER_PAGE_SIZE = 50;
+
 const AddOverwritePicker = observer(
   ({
     space,
@@ -299,6 +309,14 @@ const AddOverwritePicker = observer(
     const { t } = useTranslation("space");
     const [search, setSearch] = useState("");
     const q = search.toLowerCase();
+
+    useEffect(() => {
+      space.members.requestSome(MEMBER_PICKER_PAGE_SIZE);
+    }, [space]);
+
+    useEffect(() => {
+      space.members.search(search);
+    }, [space, search]);
 
     const roles = space.roles.assignable.filter(
       (r) =>
@@ -446,7 +464,8 @@ export const ChannelPermissionsSettings = observer(
     const { t } = useTranslation("space");
     const { t: tCommon } = useTranslation("common");
 
-    const buildDrafts = (): DraftMap => buildOverwriteDraftMap(channel.overwrites);
+    const buildDrafts = (): DraftMap =>
+      buildOverwriteDraftMap(channel.overwrites);
 
     const [drafts, setDrafts] = useState<DraftMap>(buildDrafts);
     const [bases, setBases] = useState<DraftMap>(buildDrafts);
@@ -518,12 +537,7 @@ export const ChannelPermissionsSettings = observer(
       onSuccess: (data) => {
         if (!data || !selectedKey) return;
 
-        const prevListId = channel.listId;
         space.updateChannel(data);
-
-        if (app.channels.get(channel.id)?.listId !== prevListId) {
-          app.gateway.refreshMemberList(space.id, channel.id);
-        }
 
         const draft = drafts.get(selectedKey)!;
         setBases((prev) => {
@@ -549,12 +563,7 @@ export const ChannelPermissionsSettings = observer(
       },
       onSuccess: (data, key) => {
         if (data) {
-          const prevListId = channel.listId;
           space.updateChannel(data);
-
-          if (app.channels.get(channel.id)?.listId !== prevListId) {
-            app.gateway.refreshMemberList(space.id, channel.id);
-          }
         }
 
         setDrafts((prev) => {

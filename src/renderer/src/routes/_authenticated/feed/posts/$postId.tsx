@@ -2,6 +2,7 @@ import { FeedCommentsLayout } from "@components/Post/FeedCommentsLayout";
 import { FEED_COLUMN_MAX_WIDTH } from "@components/Post/feedLayout";
 import { PostCard } from "@components/Post/PostCard";
 import { MediaPostCard } from "@components/Post/MediaPostCard";
+import { PostListSkeleton } from "@components/Skeletons";
 import { useAppStore } from "@hooks/useStores";
 import { Stack, Typography } from "@mutualzz/ui-web";
 import { useQuery } from "@tanstack/react-query";
@@ -42,7 +43,11 @@ function RouteComponent() {
         alignItems="center"
         css={{ minHeight: 0 }}
       >
-        {isLoading && <Typography level="body-sm">{t("loading")}</Typography>}
+        {isLoading && !post && (
+          <Stack width="100%" maxWidth={FEED_COLUMN_MAX_WIDTH}>
+            <PostListSkeleton label={t("loading")} count={1} />
+          </Stack>
+        )}
 
         {isError && !post && (
           <Typography level="body-sm" textColor="secondary">

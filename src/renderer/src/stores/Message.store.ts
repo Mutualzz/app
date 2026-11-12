@@ -107,6 +107,20 @@ export class MessageStore {
     ids.forEach((id) => this.remove(id));
   }
 
+  prune(keepCount: number) {
+    if (this.messages.length <= keepCount) return;
+
+    const newestMessages = this.messages
+      .slice()
+      .sort(
+        (first, second) =>
+          second.createdAt.getTime() - first.createdAt.getTime()
+      )
+      .slice(0, keepCount);
+
+    this.messages.replace(newestMessages);
+  }
+
   update(message: APIMessage) {
     const oldMessage = this.get(message.id);
     if (!oldMessage) return;

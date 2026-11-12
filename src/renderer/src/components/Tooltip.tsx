@@ -1,35 +1,11 @@
-import {
-  type PaperProps,
-  Tooltip as MzTooltip,
-  type TooltipProps,
-  type TypographyProps
-} from "@mutualzz/ui-web";
-import { TooltipWrapper } from "@components/TooltipWrapper";
+import { useAppStore } from "@hooks/useStores";
+import { Tooltip as MzTooltip, type TooltipProps } from "@mutualzz/ui-web";
 import { observer } from "mobx-react-lite";
 
-interface Props extends TooltipProps {
-  paperProps?: Omit<PaperProps, "color">;
-  typographyProps?: TypographyProps;
-}
+export const Tooltip = observer((props: TooltipProps) => {
+  const app = useAppStore();
 
-export const Tooltip = observer(
-  ({ content, title, paperProps, typographyProps, ...props }: Props) => {
-    const label = content ?? title;
-
-    return (
-      <MzTooltip
-        {...props}
-        content={
-          label != null ? (
-            <TooltipWrapper
-              paperProps={paperProps}
-              typographyProps={typographyProps}
-            >
-              {label}
-            </TooltipWrapper>
-          ) : undefined
-        }
-      />
-    );
-  }
-);
+  return (
+    <MzTooltip elevation={app.settings?.preferEmbossed ? 5 : 2} {...props} />
+  );
+});

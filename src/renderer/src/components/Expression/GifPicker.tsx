@@ -1,5 +1,10 @@
-import { type MouseEvent, useEffect, useRef, useState } from "react";
-import InfiniteScroll from "react-infinite-scroll-component";
+import {
+  type MouseEvent,
+  useCallback,
+  useEffect,
+  useRef,
+  useState
+} from "react";
 import {
   ArrowLeftIcon,
   MagnifyingGlassIcon,
@@ -7,12 +12,14 @@ import {
   XIcon
 } from "@phosphor-icons/react";
 import { Stack, Typography, useTheme } from "@mutualzz/ui-web";
+import { TileGridSkeleton } from "@components/Skeletons";
 import { useAppStore } from "@hooks/useStores";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import styled from "@emotion/styled";
 import { observer } from "mobx-react-lite";
 import { useTranslation } from "react-i18next";
 import { IconButton } from "../IconButton";
+import { VirtuosoGrid } from "react-virtuoso";
 
 interface GifResult {
   id: string;
@@ -31,6 +38,11 @@ interface GifsResponse {
 
 interface TagsResponse {
   tags: { name: string; preview: string }[];
+}
+
+interface GifResultsContext {
+  isFetchingNextPage: boolean;
+  loadingLabel: string;
 }
 
 export interface GifPickerProps {
@@ -181,6 +193,18 @@ const SectionLabel = styled(Typography)({
   letterSpacing: "0.05em"
 });
 
+const GifResultsFooter = ({ context }: { context: GifResultsContext }) => {
+  if (!context.isFetchingNextPage) return null;
+
+  return (
+    <Stack alignItems="center" justifyContent="center" padding="16px 0">
+      <Typography level="body-sm" textColor="muted">
+        {context.loadingLabel}
+      </Typography>
+    </Stack>
+  );
+};
+
 const TagItem = ({
   tag,
   onClick
@@ -276,21 +300,29 @@ export const GifPicker = observer(({ onSelectGif }: GifPickerProps) => {
     staleTime: Infinity
   });
 
-  const { data, fetchNextPage, hasNextPage, isLoading } = useInfiniteQuery({
-    queryKey: ["gifs", "search", debouncedSearch],
-    queryFn: ({ pageParam }) =>
-      app.rest.get<GifsResponse>("/gifs/search", {
-        q: debouncedSearch.trim(),
-        ...(pageParam ? { next: pageParam } : {})
-      }),
-    initialPageParam: null as string | null,
-    getNextPageParam: (lastPage) => lastPage.next ?? undefined,
-    staleTime: 1000 * 60 * 5,
-    enabled: !!debouncedSearch.trim()
-  });
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
+    useInfiniteQuery({
+      queryKey: ["gifs", "search", debouncedSearch],
+      queryFn: ({ pageParam }) =>
+        app.rest.get<GifsResponse>("/gifs/search", {
+          q: debouncedSearch.trim(),
+          ...(pageParam ? { next: pageParam } : {})
+        }),
+      initialPageParam: null as string | null,
+      getNextPageParam: (lastPage) => lastPage.next ?? undefined,
+      staleTime: 1000 * 60 * 5,
+      enabled: !!debouncedSearch.trim()
+    });
 
-  const gifs = data?.pages.flatMap((p) => p.results) ?? [];
+  const gifs = data?.pages.flatMap((page) => page.results) ?? [];
   const showTags = !debouncedSearch.trim() && !!tagsData?.tags.length;
+
+  const [scrollParent, setScrollParent] = useState<HTMLDivElement | null>(null);
+
+  const handleEndReached = useCallback(() => {
+    if (!hasNextPage || isFetchingNextPage) return;
+    void fetchNextPage();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   return (
     <Stack direction="column" flex={1} minHeight={0} overflow="hidden">
@@ -341,13 +373,9 @@ export const GifPicker = observer(({ onSelectGif }: GifPickerProps) => {
         </SearchWrapper>
       </Stack>
 
-      <ScrollArea id="gif-picker-scroll">
+      <ScrollArea ref={setScrollParent}>
         {isLoading ? (
-          <Stack alignItems="center" justifyContent="center" padding="40px 0">
-            <Typography level="body-sm" textColor="muted">
-              {t("loading")}
-            </Typography>
-          </Stack>
+          <TileGridSkeleton label={t("loading")} />
         ) : (
           <>
             {showTags && tagsData && !viewingFavorites && (
@@ -411,53 +439,48 @@ export const GifPicker = observer(({ onSelectGif }: GifPickerProps) => {
               </>
             )}
 
-            {!viewingFavorites && debouncedSearch.trim() && gifs.length > 0 ? (
-              <InfiniteScroll
-                dataLength={gifs.length}
-                next={fetchNextPage}
-                hasMore={hasNextPage}
-                loader={
+            {!viewingFavorites && debouncedSearch.trim() && gifs.length > 0
+              ? scrollParent && (
+                  <VirtuosoGrid
+                    customScrollParent={scrollParent}
+                    data={gifs}
+                    computeItemKey={(_, gif) => gif.id}
+                    endReached={handleEndReached}
+                    increaseViewportBy={300}
+                    context={{
+                      isFetchingNextPage,
+                      loadingLabel: t("picker.loadingMore")
+                    }}
+                    components={{ List: GifGrid, Footer: GifResultsFooter }}
+                    itemContent={(_, gif) => (
+                      <GifItem
+                        gif={gif}
+                        onClick={() => onSelectGif?.(gif)}
+                        onToggleFavorite={(event) =>
+                          handleToggleFavorite(event, gif)
+                        }
+                        isFavorited={favoriteGifs.some((favorite) =>
+                          favorite.startsWith(
+                            `https://klipy.com/gifs/${gif.slug}`
+                          )
+                        )}
+                      />
+                    )}
+                  />
+                )
+              : !isLoading &&
+                debouncedSearch &&
+                !viewingFavorites && (
                   <Stack
                     alignItems="center"
                     justifyContent="center"
-                    padding="16px 0"
+                    padding="40px 0"
                   >
                     <Typography level="body-sm" textColor="muted">
-                      {t("picker.loadingMore")}
+                      {t("picker.noGifsFor", { query: debouncedSearch })}
                     </Typography>
                   </Stack>
-                }
-                scrollableTarget="gif-picker-scroll"
-              >
-                <GifGrid>
-                  {gifs.map((gif) => (
-                    <GifItem
-                      key={gif.id}
-                      gif={gif}
-                      onClick={() => onSelectGif?.(gif)}
-                      onToggleFavorite={(e) => handleToggleFavorite(e, gif)}
-                      isFavorited={favoriteGifs.some((f) =>
-                        f.startsWith(`https://klipy.com/gifs/${gif.slug}`)
-                      )}
-                    />
-                  ))}
-                </GifGrid>
-              </InfiniteScroll>
-            ) : (
-              !isLoading &&
-              debouncedSearch &&
-              !viewingFavorites && (
-                <Stack
-                  alignItems="center"
-                  justifyContent="center"
-                  padding="40px 0"
-                >
-                  <Typography level="body-sm" textColor="muted">
-                    {t("picker.noGifsFor", { query: debouncedSearch })}
-                  </Typography>
-                </Stack>
-              )
-            )}
+                )}
           </>
         )}
       </ScrollArea>

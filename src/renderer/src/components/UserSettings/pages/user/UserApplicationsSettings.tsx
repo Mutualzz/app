@@ -2,6 +2,7 @@ import { Button } from "@components/Button";
 import { InputWithLabel } from "@components/InputWithLabel";
 import { DeleteApplicationConfirm } from "@components/Modals/DeleteApplicationConfirm";
 import { Paper } from "@components/Paper";
+import { ListSkeleton } from "@components/Skeletons";
 import { SettingsSection } from "@components/UserSettings/SettingsField";
 import { useModal } from "@contexts/Modal.context";
 import { useAppStore } from "@hooks/useStores";
@@ -59,8 +60,9 @@ const ApplicationCard = observer(
     );
 
     const replaceInCache = (updated: APIApplication) =>
-      queryClient.setQueryData<APIApplication[]>(APPLICATIONS_QUERY_KEY, (prev) =>
-        prev?.map((a) => (a.id === updated.id ? updated : a))
+      queryClient.setQueryData<APIApplication[]>(
+        APPLICATIONS_QUERY_KEY,
+        (prev) => prev?.map((a) => (a.id === updated.id ? updated : a))
       );
 
     const { mutate: save, isPending: saving } = useMutation({
@@ -73,7 +75,8 @@ const ApplicationCard = observer(
         replaceInCache(updated);
         toast.success(t("applications.saved"));
       },
-      onError: (error) => toast.error(formatRestError(error, t("applications.error")))
+      onError: (error) =>
+        toast.error(formatRestError(error, t("applications.error")))
     });
 
     const { mutate: uploadIcon, isPending: uploading } = useMutation({
@@ -86,14 +89,16 @@ const ApplicationCard = observer(
         );
       },
       onSuccess: replaceInCache,
-      onError: (error) => toast.error(formatRestError(error, t("applications.error")))
+      onError: (error) =>
+        toast.error(formatRestError(error, t("applications.error")))
     });
 
     const { mutate: removeIcon, isPending: removingIcon } = useMutation({
       mutationFn: () =>
         app.rest.delete<APIApplication>(`/applications/${application.id}/icon`),
       onSuccess: replaceInCache,
-      onError: (error) => toast.error(formatRestError(error, t("applications.error")))
+      onError: (error) =>
+        toast.error(formatRestError(error, t("applications.error")))
     });
 
     const handleFile = (e: ChangeEvent<HTMLInputElement>) => {
@@ -243,6 +248,7 @@ const ApplicationCard = observer(
 
 export const UserApplicationsSettings = observer(() => {
   const { t } = useTranslation("settings");
+  const { t: tChat } = useTranslation("chat");
   const app = useAppStore();
   const queryClient = useQueryClient();
   const [newName, setNewName] = useState("");
@@ -263,7 +269,8 @@ export const UserApplicationsSettings = observer(() => {
       setNewName("");
       toast.success(t("applications.created"));
     },
-    onError: (error) => toast.error(formatRestError(error, t("applications.error")))
+    onError: (error) =>
+      toast.error(formatRestError(error, t("applications.error")))
   });
 
   const atLimit = applications.length >= MAX_APPLICATIONS_PER_USER;
@@ -303,6 +310,10 @@ export const UserApplicationsSettings = observer(() => {
           {t("applications.applicationIdDescription")}
         </Typography>
       </SettingsSection>
+
+      {isLoading && (
+        <ListSkeleton label={tChat("loading")} count={2} leading="icon" />
+      )}
 
       {!isLoading && applications.length === 0 && (
         <Typography textAlign="center" textColor="muted" py="2rem">

@@ -161,9 +161,9 @@ export const InjectGlobal = observer(() => {
           }
         }
 
-        [data-reduced-motion] *,
-        [data-reduced-motion] *::before,
-        [data-reduced-motion] *::after {
+        [data-reduced-motion] *:not([data-motion="essential"]),
+        [data-reduced-motion] *:not([data-motion="essential"])::before,
+        [data-reduced-motion] *:not([data-motion="essential"])::after {
           animation-duration: 0.01ms !important;
           animation-iteration-count: 1 !important;
           transition-duration: 0.01ms !important;

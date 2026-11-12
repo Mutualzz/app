@@ -3,6 +3,7 @@ import { Tooltip } from "@components/Tooltip";
 import { Link } from "@components/Link";
 import { IconButton } from "@components/IconButton";
 import { Paper } from "@components/Paper";
+import { CommentListSkeleton } from "@components/Skeletons";
 import { MessageEmbed } from "@components/Message/MessageEmbed";
 import { MessageSticker } from "@components/Message/MessageSticker";
 import {
@@ -338,7 +339,9 @@ const CommentRow = ({
             onReply={onReply}
             onCopy={copyText}
             onDelete={() => {
-              comment.delete().catch(() => { return; });
+              comment.delete().catch(() => {
+                return;
+              });
             }}
             onReport={reportComment}
           />
@@ -790,9 +793,7 @@ export const PostComments = observer(
         />
 
         {isLoading && (
-          <Typography level="body-sm" textColor="secondary">
-            {t("feed.comments.loading")}
-          </Typography>
+          <CommentListSkeleton label={t("feed.comments.loading")} />
         )}
 
         {!isLoading && post.comments.count === 0 && (

@@ -1,5 +1,6 @@
 import { Button } from "@components/Button";
 import { Paper } from "@components/Paper";
+import { ListSkeleton } from "@components/Skeletons";
 import { SupportHeader } from "@components/Support/SupportHeader";
 import { useAppStore } from "@hooks/useStores";
 import type { APISupportTicketDetail } from "@mutualzz/types";
@@ -31,8 +32,7 @@ function SupportTicketDetailRoute() {
 
   const { data: ticket, isLoading } = useQuery({
     queryKey,
-    queryFn: () =>
-      app.rest.get<APISupportTicketDetail>(`/support/${ticketId}`)
+    queryFn: () => app.rest.get<APISupportTicketDetail>(`/support/${ticketId}`)
   });
 
   const { mutate: sendReply, isPending: sending } = useMutation({
@@ -53,11 +53,16 @@ function SupportTicketDetailRoute() {
     }
   });
 
-  const isClosed =
-    ticket?.status === "closed" || ticket?.status === "resolved";
+  const isClosed = ticket?.status === "closed" || ticket?.status === "resolved";
 
   return (
-    <Stack flex={1} height="100%" overflow="hidden" width="100%" direction="column">
+    <Stack
+      flex={1}
+      height="100%"
+      overflow="hidden"
+      width="100%"
+      direction="column"
+    >
       <SupportHeader
         title={ticket?.subject ?? t("support.myTickets")}
         onBack={() => navigate({ to: "/support/tickets" })}
@@ -78,16 +83,19 @@ function SupportTicketDetailRoute() {
         alignItems="center"
       >
         {ticket && (
-          <Typography level="body-xs" textColor="muted" width="100%" maxWidth={640}>
+          <Typography
+            level="body-xs"
+            textColor="muted"
+            width="100%"
+            maxWidth={640}
+          >
             {ticket.category} · {ticket.status.replace("_", " ")}
           </Typography>
         )}
 
         <Stack direction="column" spacing={1} width="100%" maxWidth={640}>
           {isLoading && (
-            <Typography level="body-sm" textColor="muted">
-              {t("support.loading")}
-            </Typography>
+            <ListSkeleton label={t("support.loading")} count={3} lines={3} />
           )}
 
           {ticket?.messages.map((message) => (

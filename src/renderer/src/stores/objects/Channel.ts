@@ -17,16 +17,8 @@ import { makeAutoObservable, observable } from "mobx";
 import type { QueuedMessage } from "./QueuedMessage";
 import { ChannelPermissionOverwrite } from "./ChannelPermissionOverwrite";
 import { BitField, channelFlags, type ChannelFlags } from "@mutualzz/bitfield";
-import { murmur } from "@utils/index";
 import { REST } from "@stores/REST.store";
 import { type User } from "@stores/objects/User";
-
-function getOverwriteKey(ow: ChannelPermissionOverwrite): string {
-  if (ow.roleId != null) return `r:${ow.roleId}`;
-  if (ow.userId != null) return `u:${ow.userId}`;
-
-  return "x";
-}
 
 export class Channel {
   id: Snowflake;
@@ -171,34 +163,6 @@ export class Channel {
 
   get recipients() {
     return this._recipients;
-  }
-
-  get listId() {
-    const parts: string[] = [];
-
-    // p = parent
-    // c = channel
-    const add = (
-      prefix: "p" | "c",
-      overwrites?: ChannelPermissionOverwrite[] | null
-    ) => {
-      if (!overwrites?.length) return;
-
-      for (const ow of overwrites) {
-        const key = getOverwriteKey(ow);
-
-        if (ow.allow.has("ViewChannel")) parts.push(`${prefix}:a:${key}`);
-        if (ow.deny.has("ViewChannel")) parts.push(`${prefix}:d:${key}`);
-      }
-    };
-
-    add("p", this.parent?.overwrites);
-    add("c", this.overwrites);
-
-    const sorted = Array.from(new Set(parts)).sort();
-    if (!sorted.length) return "everyone";
-
-    return murmur(sorted.join(","));
   }
 
   get iconUrl() {

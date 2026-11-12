@@ -4,7 +4,6 @@ import { type Theme } from "@stores/objects/Theme";
 import type { useNavigate } from "@tanstack/react-router";
 import mergeWith from "lodash-es/mergeWith";
 import { isValidElement, type ReactNode } from "react";
-import MurmurHash from "imurmurhash";
 import { ExpressionType, type PresenceStatus } from "@mutualzz/types";
 import type { Expression } from "@stores/objects/Expression";
 import type { SpaceMember } from "@stores/objects/SpaceMember";
@@ -112,9 +111,6 @@ export const formatPresenceStatus = (status: PresenceStatus) => {
       return i18n.t("status.offline");
   }
 };
-
-export const murmur = (input: string): string =>
-  MurmurHash(input).result().toString();
 
 export const toSpotifyUri = (u: URL): string | null => {
   if (u.hostname !== "open.spotify.com") return null;

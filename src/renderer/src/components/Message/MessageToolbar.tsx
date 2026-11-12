@@ -3,12 +3,7 @@ import { IconButton } from "@components/IconButton";
 import { Paper } from "@components/Paper";
 import { useAppStore } from "@hooks/useStores";
 import { useRecentEmojis } from "@renderer/hooks/useRecentEmojis";
-import {
-  Portal,
-  Stack,
-  Tooltip as MzTooltip,
-  useTheme
-} from "@mutualzz/ui-web";
+import { Portal, Stack, useTheme } from "@mutualzz/ui-web";
 import { Message } from "@stores/objects/Message";
 import { useMutation } from "@tanstack/react-query";
 import { observer } from "mobx-react-lite";
@@ -254,7 +249,8 @@ export const MessageToolbar = observer(
 
     return (
       <>
-        <MzTooltip
+        <Tooltip
+          unstyled
           placement="top-end"
           content={
             <ToolbarContent
@@ -264,7 +260,7 @@ export const MessageToolbar = observer(
               onPickerOpenChange={setPickerOpen}
               triggerRef={triggerRef}
               toolbarRef={toolbarRef}
-              onReplyClick={(msg) => app.setReplyingTo(msg)}
+              onReplyClick={(replyTarget) => app.setReplyingTo(replyTarget)}
             />
           }
           offset={{ mainAxis: header ? -4 : -24, crossAxis: -20 }}
@@ -275,7 +271,7 @@ export const MessageToolbar = observer(
           leaveDelay={pickerOpen ? 0 : 100}
         >
           {children}
-        </MzTooltip>
+        </Tooltip>
 
         {pickerOpen && isSent && (
           <Portal>

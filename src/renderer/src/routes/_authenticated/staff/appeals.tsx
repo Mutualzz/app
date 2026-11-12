@@ -1,5 +1,6 @@
 import { Button } from "@components/Button";
 import { Paper } from "@components/Paper";
+import { ListSkeleton } from "@components/Skeletons";
 import { StaffPanelHeader } from "@components/Staff/StaffPanelHeader";
 import { useAppStore } from "@hooks/useStores";
 import type { APIAppeal } from "@mutualzz/types";
@@ -130,10 +131,8 @@ function StaffAppealsRoute() {
             ))}
           </Select>
 
-          {isFetching && (
-            <Typography level="body-sm" textColor="muted" textAlign="center">
-              {t("home.loading")}
-            </Typography>
+          {isFetching && appeals.length === 0 && (
+            <ListSkeleton label={t("home.loading")} count={4} lines={3} />
           )}
 
           {!isFetching && appeals.length === 0 && (
@@ -161,9 +160,7 @@ function StaffAppealsRoute() {
                 >
                   <Stack direction="column" spacing={0.1}>
                     <Typography level="body-sm">
-                      <b>
-                        {appeal.user.globalName || appeal.user.username}
-                      </b>
+                      <b>{appeal.user.globalName || appeal.user.username}</b>
                       {appeal.space ? ` · ${appeal.space.name}` : ""}
                     </Typography>
                     <Typography level="body-xs" textColor="muted">

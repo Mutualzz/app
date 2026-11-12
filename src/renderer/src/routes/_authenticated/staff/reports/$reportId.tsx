@@ -1,5 +1,6 @@
 import { Button } from "@components/Button";
 import { Paper } from "@components/Paper";
+import { ListSkeleton } from "@components/Skeletons";
 import { StaffReportContent } from "@components/Staff/StaffReportContent";
 import {
   getStaffReportLockdownKey,
@@ -18,9 +19,11 @@ import dayjs from "dayjs";
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
 
-export const Route = createFileRoute("/_authenticated/staff/reports/$reportId")({
-  component: StaffReportDetailRoute
-});
+export const Route = createFileRoute("/_authenticated/staff/reports/$reportId")(
+  {
+    component: StaffReportDetailRoute
+  }
+);
 
 function StaffReportDetailRoute() {
   const { reportId } = Route.useParams();
@@ -33,7 +36,11 @@ function StaffReportDetailRoute() {
 
   const queryKey = ["staff-report", reportId];
 
-  const { data: report, isLoading, error } = useQuery({
+  const {
+    data: report,
+    isLoading,
+    error
+  } = useQuery({
     queryKey,
     queryFn: () => app.rest.get<APIReportDetail>(`/staff/reports/${reportId}`)
   });
@@ -136,9 +143,12 @@ function StaffReportDetailRoute() {
           </Button>
 
           {isLoading && (
-            <Typography level="body-sm" textColor="muted">
-              {t("report.loadingReport")}
-            </Typography>
+            <ListSkeleton
+              label={t("report.loadingReport")}
+              count={3}
+              lines={3}
+              leading="avatar"
+            />
           )}
 
           {error && (
@@ -165,9 +175,7 @@ function StaffReportDetailRoute() {
                 <Stack direction="column" spacing={0.25}>
                   <Typography level="title-sm" fontWeight={700}>
                     {tCommon(
-                      staffReportReasonKeys[
-                        report.reason
-                      ] ?? report.reason
+                      staffReportReasonKeys[report.reason] ?? report.reason
                     )}
                   </Typography>
                   <Typography level="body-xs" textColor="muted">
@@ -187,7 +195,9 @@ function StaffReportDetailRoute() {
                   color={staffReportStatusColors[report.status] ?? "neutral"}
                   css={{ textTransform: "uppercase" }}
                 >
-                  {t(`report.status.${report.status}` as "report.status.pending")}
+                  {t(
+                    `report.status.${report.status}` as "report.status.pending"
+                  )}
                 </Typography>
               </Stack>
 
@@ -214,7 +224,9 @@ function StaffReportDetailRoute() {
                 <StaffReportContent
                   content={report.content}
                   reportedMessageId={
-                    report.targetType === "message" ? report.targetId : undefined
+                    report.targetType === "message"
+                      ? report.targetId
+                      : undefined
                   }
                 />
               </Stack>
@@ -301,8 +313,7 @@ function StaffReportDetailRoute() {
                       `report.status.${report.status}` as "report.status.pending"
                     ),
                     name:
-                      report.reviewedBy.globalName ||
-                      report.reviewedBy.username
+                      report.reviewedBy.globalName || report.reviewedBy.username
                   })}
                   {report.reviewedAt &&
                     ` · ${dayjs(report.reviewedAt).format("MMM D, YYYY h:mm A")}`}

@@ -1,7 +1,7 @@
 import { observer } from "mobx-react-lite";
 import { type Role } from "@stores/objects/Role";
 import { Button, InputDefault, Stack, Typography } from "@mutualzz/ui-web";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { MagnifyingGlassIcon, XIcon } from "@phosphor-icons/react";
 import { UserAvatar } from "@renderer/components/User/UserAvatar";
 import { IconButton } from "@components/IconButton";
@@ -18,6 +18,10 @@ export const SpaceRoleEditManageMembers = observer(({ role }: Props) => {
   const { openModal } = useModal();
 
   const [search, setSearch] = useState("");
+
+  useEffect(() => {
+    role.space?.members.requestRole(role.id);
+  }, [role]);
 
   const members = search
     ? role.members?.filter(

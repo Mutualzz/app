@@ -16,17 +16,15 @@ import {
   type Sizes
 } from "@mutualzz/types";
 import type { AppStore } from "@stores/App.store";
-import { SpaceMemberListStore } from "@stores/SpaceMemberList.store";
+import {
+  type MemberListWindowPayload,
+  SpaceMemberWindowStore
+} from "@stores/SpaceMemberWindow.store";
 import type { User } from "@stores/objects/User";
 import { REST } from "@stores/REST.store";
 import { SpaceMemberStore } from "@stores/SpaceMember.store";
 import { asAcronym } from "@utils/index";
-import {
-  makeAutoObservable,
-  observable,
-  ObservableMap,
-  type ObservableSet
-} from "mobx";
+import { makeAutoObservable, observable, type ObservableSet } from "mobx";
 import type { Channel } from "./Channel";
 import { Invite } from "./Invite";
 import { SpaceRoleStore } from "@stores/SpaceRole.store";
@@ -52,8 +50,7 @@ export class Space {
   members: SpaceMemberStore;
   roles: SpaceRoleStore;
   ownerId: Snowflake;
-  memberLists =
-    new ObservableMap<string, SpaceMemberListStore>();
+  memberListWindow: SpaceMemberWindowStore | null = null;
   raw: APISpace;
   expressions = observable.map<Snowflake, Expression>();
   bansLoaded = false;
@@ -254,20 +251,29 @@ export class Space {
     return this.bans.has(userId);
   }
 
-  updateMemberList(data: any) {
-    const store = this.memberLists.get(data.id);
-    if (store) {
-      store.update(data);
-    } else {
-      this.memberLists.set(
-        data.id,
-        new SpaceMemberListStore(this.app, this, data)
-      );
-    }
+  applyMemberListWindow(payload: MemberListWindowPayload) {
+    this.memberListWindow ??= new SpaceMemberWindowStore(this.app, this);
+    this.memberListWindow.apply(payload);
   }
 
-  getMemberList(id: string): SpaceMemberListStore | undefined {
-    return this.memberLists.get(id);
+  clearMemberListWindow() {
+    this.memberListWindow = null;
+  }
+
+  sweepMembers() {
+    const keepUserIds = new Set<Snowflake>([this.ownerId]);
+
+    for (const row of this.memberListWindow?.rows ?? [])
+      if (row?.type === "member") keepUserIds.add(row.member.userId);
+
+    for (const channel of this.channels)
+      for (const message of channel.messages.all)
+        keepUserIds.add(message.authorId);
+
+    for (const voiceState of this.app.voiceStates.all)
+      if (voiceState.spaceId === this.id) keepUserIds.add(voiceState.userId);
+
+    this.members.sweep(keepUserIds);
   }
 
   leave() {
@@ -315,8 +321,7 @@ export class Space {
     const activeInSpace = active?.spaceId === this.id ? active.id : null;
 
     return this.app.rest.post<APIInvite>(`/spaces/${this.id}/invites`, {
-      channelId:
-        channelId || activeInSpace || this.firstNavigableChannel?.id
+      channelId: channelId || activeInSpace || this.firstNavigableChannel?.id
     });
   }
 

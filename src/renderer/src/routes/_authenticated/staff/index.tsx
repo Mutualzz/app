@@ -18,6 +18,7 @@ import {
 } from "@mutualzz/ui-web";
 import {
   ClockCounterClockwiseIcon,
+  FlaskIcon,
   GavelIcon,
   LifebuoyIcon,
   MagnifyingGlassIcon,
@@ -192,6 +193,14 @@ function StaffIndexRoute() {
                 {t("nav.changelogs")}
               </Button>
             ) : null}
+            <Button
+              size="sm"
+              variant="soft"
+              startDecorator={<FlaskIcon />}
+              onClick={() => navigate({ to: "/staff/playground" })}
+            >
+              {t("nav.playground")}
+            </Button>
           </Stack>
         }
       />

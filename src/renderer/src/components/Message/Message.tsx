@@ -45,7 +45,6 @@ import type { PendingAttachmentPreview } from "@stores/objects/QueuedMessage";
 import { UserProfilePopoutTrigger } from "../Profile/popout/UserProfilePopoutTrigger";
 import { shouldHideInviteUrlContent } from "@mutualzz/client";
 import { useTranslation } from "react-i18next";
-import { jumpToChannelMessage } from "@utils/jumpToChannelMessage";
 import { Paper } from "../Paper";
 
 function formatBytes(bytes: number) {
@@ -252,8 +251,8 @@ export const Message = observer(
     };
 
     const handleJumpToReplied = () => {
-      if (!repliedMessage) return;
-      void jumpToChannelMessage(channel, repliedMessage.id, theme);
+      if (!repliedMessage || !channel) return;
+      app.requestJumpToMessage(channel.id, repliedMessage.id);
     };
 
     const isFailed =

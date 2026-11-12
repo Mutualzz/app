@@ -18,7 +18,7 @@ import type { AccountStore } from "@stores/Account.store";
 import { UserPresenceCard } from "@components/Profile/popout/UserPresenceCard";
 import { SmallActivityStatus } from "@components/SmallActivityStatus";
 import { useGoogleFont } from "@hooks/useGoogleFont";
-import { Box, Stack, Typography, useTheme } from "@mutualzz/ui-web";
+import { Box, Skeleton, Stack, Typography, useTheme } from "@mutualzz/ui-web";
 import { ProfileConnectionsChips } from "@components/Profile/shared/ProfileConnectionsChips";
 import { RecentActivitiesSection } from "@components/Profile/shared/RecentActivitiesSection";
 import { getNonCustomActivities } from "@mutualzz/client";
@@ -261,6 +261,9 @@ export const UserProfilePopout = observer(({ user, member }: Props) => {
                 />
               )}
             </Stack>
+            {!profileFetchDone && !displayProfile && (
+              <Skeleton lines={2} fontSize={13} css={{ marginTop: 8 }} />
+            )}
             {!profileRestricted && displayProfile?.bio && (
               <ProfileMarkdownContent
                 value={displayProfile.bio}
