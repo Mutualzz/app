@@ -84,6 +84,7 @@ export const ChannelMemberItem = observer(({ space, state }: Props) => {
       user={user}
       member={member}
       placement="right"
+      fullWidth
     >
       {row}
     </UserProfilePopoutTrigger>

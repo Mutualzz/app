@@ -13,6 +13,7 @@ interface Props extends PropsWithChildren {
   disabled?: boolean;
   placement?: PopoverPlacement;
   triggerCss?: CSSObject;
+  fullWidth?: boolean;
 }
 
 export const UserProfilePopoutTrigger = observer(
@@ -22,6 +23,7 @@ export const UserProfilePopoutTrigger = observer(
     disabled,
     placement = "bottom",
     triggerCss,
+    fullWidth,
     children
   }: Props) => {
     if (disabled) return <>{children}</>;
@@ -31,6 +33,7 @@ export const UserProfilePopoutTrigger = observer(
         trigger={children}
         triggerCss={triggerCss}
         placement={placement}
+        fullWidth={fullWidth}
         closeOnClickOutside
         variant="plain"
         elevation={0}

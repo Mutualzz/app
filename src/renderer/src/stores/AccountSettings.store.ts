@@ -11,7 +11,7 @@ import {
   resetSpaceOrder as buildDefaultSpaceOrder,
   toggleFavoriteEmoji,
   toggleFavoriteGif,
-  type AccountSettingsPatch,
+  type AccountSettingsPatch
 } from "@mutualzz/client";
 import { isElectron } from "@utils/index";
 import { comparer, makeAutoObservable, observable, reaction } from "mobx";
@@ -27,8 +27,9 @@ import {
   DEFAULT_SPEAKER_VOLUME,
   clampVoiceVolume,
   type ScreenShareQuality,
-  type VoiceInputMode,
+  type VoiceInputMode
 } from "@utils/voiceSettings.utils";
+import { MEDIA_APPS } from "@renderer/presence/mediaApps";
 
 const SYNC_DEBOUNCE_MS = 2_000;
 const VOICE_APPLY_DEBOUNCE_MS = 150;
@@ -62,7 +63,7 @@ export class AccountSettingsStore {
   sendTypingIndicators = DEFAULT_CLIENT_PREFERENCES.sendTypingIndicators;
   replyWithMention = DEFAULT_CLIENT_PREFERENCES.replyWithMention;
   quickReactionEmojis = observable.array<string>(
-    DEFAULT_CLIENT_PREFERENCES.quickReactionEmojis,
+    DEFAULT_CLIENT_PREFERENCES.quickReactionEmojis
   );
   showEmojiPicker = DEFAULT_CLIENT_PREFERENCES.showEmojiPicker;
   showGifPicker = DEFAULT_CLIENT_PREFERENCES.showGifPicker;
@@ -70,8 +71,10 @@ export class AccountSettingsStore {
   showMarkdownToolbar = DEFAULT_CLIENT_PREFERENCES.showMarkdownToolbar;
   reducedMotion = DEFAULT_CLIENT_PREFERENCES.reducedMotion;
   highContrast = DEFAULT_CLIENT_PREFERENCES.highContrast;
-  defaultMemberListVisible = DEFAULT_CLIENT_PREFERENCES.defaultMemberListVisible;
-  showRoleColorsInMessages = DEFAULT_CLIENT_PREFERENCES.showRoleColorsInMessages;
+  defaultMemberListVisible =
+    DEFAULT_CLIENT_PREFERENCES.defaultMemberListVisible;
+  showRoleColorsInMessages =
+    DEFAULT_CLIENT_PREFERENCES.showRoleColorsInMessages;
   updatedAt: Date;
 
   spellcheckEnabled = true;
@@ -86,6 +89,8 @@ export class AccountSettingsStore {
   screenShareQuality: ScreenShareQuality = DEFAULT_SCREEN_SHARE_QUALITY;
   idleThresholdMs = 5 * 60_000;
   shareRpcPresence = true;
+  shareMusicActivity = true;
+  disabledMusicApps: string[] = [];
   autoCheckUpdates = true;
 
   private syncEngine: AccountSettingsSyncEngine;
@@ -96,22 +101,22 @@ export class AccountSettingsStore {
 
   constructor(
     private readonly app: AppStore,
-    settings: APIUserSettings,
+    settings: APIUserSettings
   ) {
     this.spacePositions = new ObservableOrderedSet(
-      settings.spacePositions.map(String),
+      settings.spacePositions.map(String)
     );
     this.applySyncedSettings(settings);
     this.updatedAt = new Date(settings.updatedAt);
 
     this.syncEngine = new AccountSettingsSyncEngine(
-      buildAccountSettingsPatch(this),
+      buildAccountSettingsPatch(this)
     );
 
     this.disposeReaction = reaction(
       () => this.getSyncPayload(),
       () => this.scheduleSync(),
-      { equals: comparer.structural },
+      { equals: comparer.structural }
     );
 
     makeAutoObservable(this, {}, { autoBind: true });
@@ -131,16 +136,18 @@ export class AccountSettingsStore {
         "screenShareQuality",
         "idleThresholdMs",
         "shareRpcPresence",
-        "autoCheckUpdates",
+        "shareMusicActivity",
+        "disabledMusicApps",
+        "autoCheckUpdates"
       ],
-      storage: localStorage,
+      storage: localStorage
     });
 
     if (isElectron) {
       reaction(
         () => this.spellcheckEnabled,
         (enabled) => window.api.spellcheck.setEnabled(enabled),
-        { fireImmediately: true },
+        { fireImmediately: true }
       );
     }
 
@@ -195,6 +202,29 @@ export class AccountSettingsStore {
     if (document.visibilityState === "hidden") this.flush();
   }
 
+  setShareMusicActivity(value: boolean) {
+    if (this.shareMusicActivity === value) return;
+    this.shareMusicActivity = value;
+    this.app.gateway?.refreshPresenceActivities?.();
+  }
+
+  setMusicAppEnabled(applicationId: string, enabled: boolean) {
+    const otherDisabledApps = this.disabledMusicApps.filter(
+      (disabledId) => disabledId !== applicationId
+    );
+    this.disabledMusicApps = enabled
+      ? otherDisabledApps
+      : [...otherDisabledApps, applicationId];
+    this.app.gateway?.refreshPresenceActivities?.();
+  }
+
+  setAllMusicAppsEnabled(enabled: boolean) {
+    this.disabledMusicApps = enabled
+      ? []
+      : MEDIA_APPS.map((mediaApp) => mediaApp.applicationId);
+    this.app.gateway?.refreshPresenceActivities?.();
+  }
+
   flush() {
     if (this.debounceTimerId) clearTimeout(this.debounceTimerId);
     void this.sync();
@@ -206,7 +236,7 @@ export class AccountSettingsStore {
     window.removeEventListener("beforeunload", this.flush);
     document.removeEventListener(
       "visibilitychange",
-      this.handleVisibilityChange,
+      this.handleVisibilityChange
     );
   }
 
@@ -245,7 +275,7 @@ export class AccountSettingsStore {
 
   patchSettings(
     patch: Partial<AccountSettingsPatch>,
-    options?: { sync?: "debounced" | "immediate" },
+    options?: { sync?: "debounced" | "immediate" }
   ) {
     if (patch.favoriteEmojis != undefined) {
       this.favoriteEmojis.replace(patch.favoriteEmojis);
@@ -279,7 +309,7 @@ export class AccountSettingsStore {
 
   patchExtendedSettings(
     patch: Partial<AccountSettingsPatch>,
-    options?: { sync?: "debounced" | "immediate" },
+    options?: { sync?: "debounced" | "immediate" }
   ) {
     this.patchSettings(patch, options);
   }
@@ -333,7 +363,7 @@ export class AccountSettingsStore {
 
   toggleFavoriteEmoji(unified: string, skinTone: string | null = null) {
     this.favoriteEmojis.replace(
-      toggleFavoriteEmoji(this.favoriteEmojis, unified, skinTone),
+      toggleFavoriteEmoji(this.favoriteEmojis, unified, skinTone)
     );
   }
 
@@ -367,7 +397,7 @@ export class AccountSettingsStore {
     const patch = mergeRemoteSettings(
       this.getSyncPayload(),
       this.syncEngine.syncedSnapshot,
-      remote,
+      remote
     );
     if (!patch) return;
 
@@ -452,7 +482,7 @@ export class AccountSettingsStore {
       () => {
         this.sync();
       },
-      10 * 60 * 1000,
+      10 * 60 * 1000
     );
   }
 
@@ -476,7 +506,7 @@ export class AccountSettingsStore {
 
   resetSpaceOrder() {
     this.reorderSpaces(
-      buildDefaultSpaceOrder(this.app.spaces.all.map((space) => space.id)),
+      buildDefaultSpaceOrder(this.app.spaces.all.map((space) => space.id))
     );
     this.flush();
   }
@@ -494,9 +524,9 @@ export class AccountSettingsStore {
         getPayload: () => this.getSyncPayload(),
         applyServerUpdate: (res) => this.update(res),
         applyLocalOverrides: (payload) => this.applyLocalOverrides(payload),
-        onSyncFailed: () => toast.error(i18n.t("settings:syncFailed")),
+        onSyncFailed: () => toast.error(i18n.t("settings:syncFailed"))
       },
-      { account: this.app.account, rest: this.app.rest },
+      { account: this.app.account, rest: this.app.rest }
     );
   }
 

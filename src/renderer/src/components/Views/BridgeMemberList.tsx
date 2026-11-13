@@ -207,6 +207,7 @@ const PlayerRow = observer(
         closeOnInteract
         variant="plain"
         elevation={0}
+        fullWidth
         css={{
           padding: 0,
           background: "transparent",

@@ -1,7 +1,7 @@
 import { useAppStore } from "@hooks/useStores";
 import { BADGE_COLOR_PRESETS } from "@mutualzz/types";
 import { formatColor } from "@mutualzz/ui-core";
-import { Stack, Typography, useTheme } from "@mutualzz/ui-web";
+import { Checkbox, Stack, Typography, useTheme } from "@mutualzz/ui-web";
 import { SCREEN_SHARE_QUALITY_OPTIONS } from "@utils/voiceSettings.utils";
 import { isElectron } from "@utils/index";
 import { observer } from "mobx-react-lite";
@@ -12,6 +12,8 @@ import {
   SettingsSelectField,
   SettingsToggleRow
 } from "@components/UserSettings/SettingsField";
+import { MEDIA_APPS } from "@renderer/presence/mediaApps";
+import { Button } from "@renderer/components/Button";
 
 export const AppDesktopSettings = observer(() => {
   const { t } = useTranslation("settings");
@@ -31,6 +33,11 @@ export const AppDesktopSettings = observer(() => {
   }, [app, settings?.autoCheckUpdates]);
 
   if (!settings || !isElectron) return null;
+
+  const enabledMusicAppCount = MEDIA_APPS.filter(
+    (mediaApp) => !settings.disabledMusicApps.includes(mediaApp.applicationId)
+  ).length;
+  const allMusicAppsEnabled = enabledMusicAppCount === MEDIA_APPS.length;
 
   const handleLaunchAtLogin = (checked: boolean) => {
     setLaunchAtLogin(checked);
@@ -146,6 +153,69 @@ export const AppDesktopSettings = observer(() => {
           checked={settings.shareRpcPresence}
           onChange={(checked) => settings.setShareRpcPresence(checked)}
         />
+
+        <Stack direction="column" spacing={2}>
+          <SettingsToggleRow
+            title={t("desktop.shareMusicActivity")}
+            description={t("desktop.shareMusicActivityDescription")}
+            checked={settings.shareMusicActivity}
+            onChange={(checked) => settings.setShareMusicActivity(checked)}
+          />
+          {settings.shareMusicActivity && (
+            <Stack direction="column" spacing={1}>
+              <Stack
+                direction="row"
+                alignItems="center"
+                justifyContent="space-between"
+              >
+                <Typography level="body-sm" textColor="muted">
+                  {t("desktop.musicAppsSelected", {
+                    selected: enabledMusicAppCount,
+                    total: MEDIA_APPS.length
+                  })}
+                </Typography>
+                <Button
+                  variant="plain"
+                  size="sm"
+                  onClick={() =>
+                    settings.setAllMusicAppsEnabled(!allMusicAppsEnabled)
+                  }
+                >
+                  {allMusicAppsEnabled
+                    ? t("desktop.selectNone")
+                    : t("desktop.selectAll")}
+                </Button>
+              </Stack>
+              <Stack
+                css={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))",
+                  gap: 8
+                }}
+              >
+                {MEDIA_APPS.map((mediaApp) => {
+                  const isEnabled = !settings.disabledMusicApps.includes(
+                    mediaApp.applicationId
+                  );
+                  return (
+                    <Checkbox
+                      key={mediaApp.applicationId}
+                      size="sm"
+                      label={mediaApp.name}
+                      checked={isEnabled}
+                      onChange={() =>
+                        settings.setMusicAppEnabled(
+                          mediaApp.applicationId,
+                          !isEnabled
+                        )
+                      }
+                    />
+                  );
+                })}
+              </Stack>
+            </Stack>
+          )}
+        </Stack>
       </SettingsSection>
     </Stack>
   );

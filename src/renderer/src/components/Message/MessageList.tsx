@@ -183,6 +183,7 @@ export const MessageList = observer(({ channel: channelProp }: Props) => {
   const logger = new Logger({ tag: "MessageList" });
 
   const isAtBottom = useRef(true);
+  const stickToBottomRef = useRef(true);
   const virtuosoRef = useRef<VirtuosoHandle | null>(null);
   const scrollerRef = useRef<HTMLElement | null>(null);
   const rowsRef = useRef<MessageRow[]>([]);
@@ -280,6 +281,43 @@ export const MessageList = observer(({ channel: channelProp }: Props) => {
   useEffect(() => {
     rowsRef.current = rows;
   }, [rows]);
+
+  useEffect(() => {
+    const scroller = scrollerRef.current;
+    if (!scroller) return;
+
+    stickToBottomRef.current =
+      initialLocationRef.current?.location.index === "LAST";
+
+    let lastScrollTop = scroller.scrollTop;
+    const handleScroll = () => {
+      const distanceFromBottom =
+        scroller.scrollHeight - scroller.scrollTop - scroller.clientHeight;
+      if (distanceFromBottom <= 50) stickToBottomRef.current = true;
+      else if (scroller.scrollTop < lastScrollTop)
+        stickToBottomRef.current = false;
+      lastScrollTop = scroller.scrollTop;
+    };
+
+    scroller.addEventListener("scroll", handleScroll, { passive: true });
+    return () => scroller.removeEventListener("scroll", handleScroll);
+  }, [channel?.id]);
+
+  const keepPinnedToBottom = useCallback(() => {
+    const scroller = scrollerRef.current;
+    if (!scroller || !stickToBottomRef.current) return;
+    scroller.scrollTop = scroller.scrollHeight;
+  }, []);
+
+  const newestMessage = rows[rows.length - 1]?.group.messages[0];
+  const newestIsMine =
+    !!newestMessage && ("status" in newestMessage || newestMessage.isMine);
+
+  useEffect(() => {
+    if (!newestIsMine) return;
+    stickToBottomRef.current = true;
+    keepPinnedToBottom();
+  }, [newestMessage?.id, newestIsMine, keepPinnedToBottom]);
 
   const revealMessage = useCallback((messageId: string) => {
     const rowIndex = rowsRef.current.findIndex((row) =>
@@ -425,10 +463,13 @@ export const MessageList = observer(({ channel: channelProp }: Props) => {
   const handleAtBottomChange = useCallback(
     (atBottom: boolean) => {
       isAtBottom.current = atBottom;
-      if (atBottom) ackLatest();
+      if (atBottom) {
+        keepPinnedToBottom();
+        ackLatest();
+      }
       saveScrollAnchor();
     },
-    [ackLatest, saveScrollAnchor]
+    [ackLatest, saveScrollAnchor, keepPinnedToBottom]
   );
 
   const handleScrollingChange = useCallback(
@@ -659,6 +700,7 @@ export const MessageList = observer(({ channel: channelProp }: Props) => {
           followOutput={(atBottom) => (atBottom ? "auto" : false)}
           atBottomThreshold={50}
           atBottomStateChange={handleAtBottomChange}
+          totalListHeightChanged={keepPinnedToBottom}
           isScrolling={handleScrollingChange}
           startReached={fetchMore}
           context={{

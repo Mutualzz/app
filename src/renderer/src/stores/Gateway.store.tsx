@@ -100,6 +100,7 @@ import type { MemberListWindowPayload } from "@stores/SpaceMemberWindow.store";
 import type { FetchedSpaceMember } from "@stores/SpaceMember.store";
 import { notifyManager } from "@tanstack/react-query";
 import { resolveMediaArtworkUrl } from "@renderer/presence/mediaArtwork";
+import { findMediaApp } from "@renderer/presence/mediaApps";
 
 // We have to create our own GatewayStatus "enum" to avoid issues with SSR
 // since WebSocket is not available in the server environment.
@@ -136,58 +137,6 @@ const RESUME_STORAGE_KEY = "mutualzz:gateway:resume";
 const RESUME_MAX_AGE_MS = 110_000;
 const FOREGROUND_DEBOUNCE_MS = 1000;
 const FOREGROUND_FRESH_MS = 15_000;
-
-interface MediaApp {
-  name: string;
-  applicationId: string;
-  sourcePatterns: string[];
-}
-
-const MEDIA_APPS: MediaApp[] = [
-  { name: "Spotify", applicationId: "spotify", sourcePatterns: ["spotify"] },
-  {
-    name: "Apple Music",
-    applicationId: "apple-music",
-    sourcePatterns: ["applemusic"]
-  },
-  { name: "TIDAL", applicationId: "tidal", sourcePatterns: ["tidal"] },
-  { name: "Deezer", applicationId: "deezer", sourcePatterns: ["deezer"] },
-  {
-    name: "Amazon Music",
-    applicationId: "amazon-music",
-    sourcePatterns: ["amazonmusic", "amazon music"]
-  },
-  {
-    name: "YouTube Music",
-    applicationId: "youtube-music",
-    sourcePatterns: ["youtube-music", "youtube music", "youtubemusic"]
-  },
-  {
-    name: "foobar2000",
-    applicationId: "foobar2000",
-    sourcePatterns: ["foobar2000"]
-  },
-  { name: "MusicBee", applicationId: "musicbee", sourcePatterns: ["musicbee"] },
-  { name: "AIMP", applicationId: "aimp", sourcePatterns: ["aimp"] }
-];
-
-const loggedUnknownMediaSources = new Set<string>();
-
-function findMediaApp(sourceAppId: string) {
-  const normalizedSource = sourceAppId.toLowerCase();
-  const mediaApp = MEDIA_APPS.find((candidate) =>
-    candidate.sourcePatterns.some((pattern) =>
-      normalizedSource.includes(pattern)
-    )
-  );
-
-  if (!mediaApp && !loggedUnknownMediaSources.has(sourceAppId)) {
-    loggedUnknownMediaSources.add(sourceAppId);
-    console.debug("[Media] ignoring unknown source", sourceAppId);
-  }
-
-  return mediaApp ?? null;
-}
 
 const ACTIVITY_TYPE_ORDER: Record<string, number> = {
   playing: 0,
@@ -253,6 +202,7 @@ async function loadRpcActivities(): Promise<PresenceActivity[]> {
 }
 
 async function loadMediaActivity(
+  disabledMusicApps: string[],
   syncLyrics: boolean,
   resolveArtwork: (trackKey: string) => string | null
 ): Promise<PresenceActivity | null> {
@@ -263,7 +213,9 @@ async function loadMediaActivity(
     if (!media || !media.isPlaying || media.startedAt === null) return null;
 
     const knownApp = findMediaApp(media.sourceAppId);
-    if (!knownApp) return null;
+    if (!knownApp || disabledMusicApps.includes(knownApp.applicationId)) {
+      return null;
+    }
 
     const artworkUrl = resolveArtwork(media.trackKey);
 
@@ -361,7 +313,11 @@ export class GatewayStore {
   >();
 
   constructor(private readonly app: AppStore) {
-    makeAutoObservable(this, {}, { autoBind: true });
+    makeAutoObservable<GatewayStore, "memberListWindows">(
+      this,
+      { memberListWindows: false },
+      { autoBind: true }
+    );
     this.app.presence.onScheduledStatusExpire =
       this.handleScheduledStatusExpired;
     this.app.customStatus.onScheduledCustomStatusExpire =
@@ -904,8 +860,9 @@ export class GatewayStore {
           shareActivity && shareRpcPresence
             ? loadRpcActivities()
             : Promise.resolve([]),
-          shareActivity
+          shareActivity && this.app.settings?.shareMusicActivity !== false
             ? loadMediaActivity(
+                this.app.settings?.disabledMusicApps ?? [],
                 this.app.customStatus.syncLyrics,
                 this.resolveMediaArtwork
               )
@@ -1322,7 +1279,8 @@ export class GatewayStore {
           return;
         }
 
-        const encoded = await window.api.codec.etfEncode(payload);
+        const plainPayload = JSON.parse(JSON.stringify(payload));
+        const encoded = await window.api.codec.etfEncode(plainPayload);
 
         encodedBytes = Uint8Array.from(encoded);
       } else {
@@ -2418,8 +2376,9 @@ export class GatewayStore {
           shareActivity && shareRpcPresence
             ? loadRpcActivities()
             : Promise.resolve([]),
-          shareActivity
+          shareActivity && this.app.settings?.shareMusicActivity !== false
             ? loadMediaActivity(
+                this.app.settings?.disabledMusicApps ?? [],
                 this.app.customStatus.syncLyrics,
                 this.resolveMediaArtwork
               )

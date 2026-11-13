@@ -14,13 +14,14 @@ interface Props {
 export const MessageGroup = observer(({ group }: Props) => {
   const app = useAppStore();
   const { messages } = group;
+  const orderedMessages = [...messages].reverse();
   const messageDisplay = app.settings?.messageDisplay ?? "default";
   const compact = messageDisplay === "compact";
 
   return (
-    <Stack direction="column-reverse">
-      {messages.map((message, index) => {
-        const isGroupStart = index === messages.length - 1;
+    <Stack direction="column">
+      {orderedMessages.map((message, index) => {
+        const isGroupStart = index === 0;
 
         if (message.type === MessageType.Default) {
           const header = isGroupStart;

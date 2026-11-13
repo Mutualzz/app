@@ -38,6 +38,7 @@ export const MemberListItem = observer(({ member, isOwner }: Props) => {
       user={member.user!}
       member={member}
       placement="left"
+      fullWidth
     >
       <Paper
         maxWidth={224}
@@ -48,6 +49,7 @@ export const MemberListItem = observer(({ member, isOwner }: Props) => {
         direction="row"
         alignItems="center"
         spacing={1.75}
+        width="100%"
         p={1}
         onContextMenu={(e) =>
           openContextMenu(e, {
@@ -59,7 +61,6 @@ export const MemberListItem = observer(({ member, isOwner }: Props) => {
         }
         css={{
           cursor: "pointer",
-          width: "100%",
           ...(presence &&
             presence.status === "offline" &&
             !hovered && {
