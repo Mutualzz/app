@@ -38,7 +38,7 @@ export const ChannelSearchPanel = observer(
     onExpand,
     onDraftChange,
     onSubmit,
-    onClose,
+    onClose
   }: Props) => {
     const { t } = useTranslation("chat");
     const { theme } = useTheme();
@@ -89,7 +89,7 @@ export const ChannelSearchPanel = observer(
     const activeSearchStyles =
       expanded && !submitted
         ? {
-            boxShadow: `0 0 0 1px ${formatColor(theme.colors.primary, { alpha: 0.45, format: "hexa" })}`,
+            boxShadow: `0 0 0 1px ${formatColor(theme.colors.primary, { alpha: 45, format: "hexa" })}`
           }
         : undefined;
 
@@ -161,5 +161,5 @@ export const ChannelSearchPanel = observer(
         trigger={searchInput}
       />
     );
-  },
+  }
 );

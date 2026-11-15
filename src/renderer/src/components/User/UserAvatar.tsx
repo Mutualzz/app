@@ -13,7 +13,7 @@ import {
   useTheme,
   Stack
 } from "@mutualzz/ui-web";
-import type { APIUser } from "@mutualzz/types";
+import type { APIUser, Sizes } from "@mutualzz/types";
 import type { AccountStore } from "@stores/Account.store";
 import type { User } from "@stores/objects/User";
 import { observer } from "mobx-react-lite";
@@ -127,7 +127,10 @@ export const UserAvatar = observer(
     }
 
     const status = app.presence.get(resolvedUser.id)?.status ?? "offline";
-    const hasAvatar = !!resolvedUser.avatar;
+    const memberAvatarUrl = member?.avatar
+      ? member.constructAvatarUrl(focused, size as Sizes)
+      : null;
+    const hasAvatar = !!memberAvatarUrl || !!resolvedUser.avatar;
     const showBadge =
       !!badge && isStatusBadgeVisible(status, showInvisible, showOffline);
 
@@ -176,13 +179,14 @@ export const UserAvatar = observer(
             onMouseEnter={() => setFocused(true)}
             onMouseLeave={() => setFocused(false)}
             src={
-              focused
+              memberAvatarUrl ??
+              (focused
                 ? resolvedUser.constructAvatarUrl(
                     !!resolvedUser.avatar?.startsWith("a_"),
                     version,
                     size
                   )
-                : resolvedUser.constructAvatarUrl(false, version, size)
+                : resolvedUser.constructAvatarUrl(false, version, size))
             }
             shape={shape}
             {...restProps}

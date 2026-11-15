@@ -1,4 +1,5 @@
 import { ProfileMarkdownContent } from "@components/Profile/shared/ProfileMarkdownContent";
+import { getDisplayNameCss } from "@components/Profile/shared/ProfileDisplayName";
 import { type Theme } from "@emotion/react";
 import type { ProfileQuoteBlock } from "@mutualzz/types";
 import {
@@ -53,6 +54,15 @@ export const ProfileQuoteBlockView = ({ block }: Props) => {
   const styles = variantStyles(app, theme)[variant];
   const cornerRadius = resolveProfileBlockCornerRadius(block, "desktop");
   const customBackground = block.backgroundColor?.trim() || null;
+  const textEffectCss = block.appearance?.textEffect
+    ? getDisplayNameCss(
+        {
+          effect: block.appearance.textEffect,
+          effectColor: block.appearance.textEffectColor ?? null
+        },
+        theme
+      )
+    : undefined;
 
   return (
     <Stack
@@ -72,7 +82,14 @@ export const ProfileQuoteBlockView = ({ block }: Props) => {
       }}
     >
       <QuotesIcon size={20} weight="fill" color={styles.accent} />
-      <Box css={{ flex: 1, minHeight: 0, fontSize: "var(--pcf-md)" }}>
+      <Box
+        css={{
+          flex: 1,
+          minHeight: 0,
+          fontSize: "var(--pcf-md)",
+          ...textEffectCss
+        }}
+      >
         <ProfileMarkdownContent value={block.content} />
       </Box>
       {block.attribution && (

@@ -1,4 +1,11 @@
-import { type APISpaceMember, type Snowflake } from "@mutualzz/types";
+import {
+  type APISpaceMember,
+  type Sizes,
+  type Snowflake,
+  CDNRoutes,
+  ImageFormat
+} from "@mutualzz/types";
+import { REST } from "@stores/REST.store";
 import type { AppStore } from "@stores/App.store";
 import { makeAutoObservable, observable, type ObservableMap } from "mobx";
 import { type Role } from "./Role";
@@ -27,6 +34,8 @@ export class SpaceMember {
   nickname?: string | null;
   avatar?: string | null;
   banner?: string | null;
+  bio?: string | null;
+  pronouns?: string | null;
   roles = observable.set<string>();
   joinedAt: Date;
   updatedAt: Date;
@@ -52,6 +61,8 @@ export class SpaceMember {
     this.nickname = member.nickname;
     this.avatar = member.avatar;
     this.banner = member.banner;
+    this.bio = member.bio ?? null;
+    this.pronouns = member.pronouns ?? null;
 
     this.joinedAt = new Date(member.joinedAt);
     this.updatedAt = new Date(member.updatedAt);
@@ -70,6 +81,34 @@ export class SpaceMember {
 
   get user() {
     return this.app.users.get(this.userId) ?? this._user;
+  }
+
+  constructAvatarUrl(animated = false, size: Sizes = 128) {
+    if (!this.avatar) return null;
+    const isAnimated = animated && this.avatar.startsWith("a_");
+    return REST.makeCDNUrl(
+      CDNRoutes.profileImage(
+        this.userId,
+        this.avatar,
+        isAnimated ? ImageFormat.GIF : ImageFormat.WebP,
+        size,
+        isAnimated
+      )
+    );
+  }
+
+  constructBannerUrl(animated = true) {
+    if (!this.banner) return null;
+    const isAnimated = animated && this.banner.startsWith("a_");
+    return REST.makeCDNUrl(
+      CDNRoutes.profileBanner(
+        this.userId,
+        this.banner,
+        isAnimated ? ImageFormat.GIF : ImageFormat.WebP,
+        512,
+        isAnimated
+      )
+    );
   }
 
   get displayName() {
@@ -168,6 +207,8 @@ export class SpaceMember {
     this.nickname = member.nickname ?? null;
     this.avatar = member.avatar ?? null;
     this.banner = member.banner ?? null;
+    this.bio = member.bio ?? null;
+    this.pronouns = member.pronouns ?? null;
 
     this.flags = BitField.fromString(memberFlags, member.flags.toString());
 

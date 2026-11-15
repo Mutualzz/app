@@ -172,7 +172,8 @@ const RoleItem = observer(
           p={2.5}
           whileHover={{
             background: formatColor(dynamicElevation(theme.colors.surface, 5), {
-              alpha: 50
+              alpha: 50,
+              format: "hexa"
             })
           }}
           onClick={onClick}
@@ -235,7 +236,10 @@ const RoleItem = observer(
                     <PencilIcon weight="fill" />
                   </IconButton>
                 </Tooltip>
-                <Tooltip content={tSettings("expressions.delete")} placement="top">
+                <Tooltip
+                  content={tSettings("expressions.delete")}
+                  placement="top"
+                >
                   <IconButton
                     onClick={(e) => {
                       e.stopPropagation();
@@ -549,9 +553,7 @@ export const SpaceRolesSettings = observer(({ space }: Props) => {
         {visibleRoles.length === 0 && (
           <Stack justifyContent="center" alignItems="center" py="4rem">
             <Typography textAlign="center" textColor="muted">
-              {isSearching
-                ? t("roles.emptySearch")
-                : t("roles.empty")}
+              {isSearching ? t("roles.emptySearch") : t("roles.empty")}
             </Typography>
           </Stack>
         )}

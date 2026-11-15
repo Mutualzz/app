@@ -1,113 +1,141 @@
-import { Paper } from "@components/Paper";
-import type { JSX } from "@emotion/react/jsx-runtime";
-import { type ColorLike } from "@mutualzz/ui-core";
-import { Box, Typography, useTheme } from "@mutualzz/ui-web";
-import { reactNodeToHtml } from "@utils/index";
-import { loadHighlighter } from "@utils/loadHighlighter";
-import { useEffect, useState, type PropsWithChildren } from "react";
-import { type BundledLanguage } from "shiki";
+import { IconButton } from "@components/IconButton";
+import { Tooltip } from "@components/Tooltip";
+import { formatColor } from "@mutualzz/ui-core";
+import { Typography, useTheme } from "@mutualzz/ui-web";
+import { CheckIcon, CopyIcon } from "@phosphor-icons/react";
+import {
+  resolveCodeLanguage,
+  tokenizeCode,
+  tokenizeCodeSync
+} from "@utils/loadHighlighter";
+import { Fragment, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import type { ThemedToken } from "shiki";
 
-const KNOWN_LANGUAGES = [
-  "javascript",
-  "js",
-  "typescript",
-  "ts",
-  "python",
-  "py",
-  "java",
-  "csharp",
-  "go",
-  "rust",
-  "cpp",
-  "html",
-  "css",
-  "json",
-  "plaintext"
-];
+const COPIED_RESET_MS = 1500;
 
-interface CodeBlockProps extends PropsWithChildren {
-  className?: string;
-  inline?: boolean;
+interface Props {
+  code: string;
+  language: string | null;
 }
 
-export const CodeBlock = ({ children, className, inline }: CodeBlockProps) => {
+export const CodeBlock = ({ code, language }: Props) => {
+  const { t } = useTranslation("chat");
   const { theme } = useTheme();
-  const [tokens, setTokens] = useState<JSX.Element[] | null>(null);
-  const [code, setCode] = useState<string>("");
-  const [language, setLanguage] = useState<BundledLanguage | "plaintext">(
-    "plaintext"
+  const themeType = theme.type === "light" ? "light" : "dark";
+  const resolvedLanguage = resolveCodeLanguage(language);
+  const [tokens, setTokens] = useState<ThemedToken[][] | null>(() =>
+    resolvedLanguage
+      ? tokenizeCodeSync(code, resolvedLanguage, themeType)
+      : null
   );
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
-    if (!children && !className) return;
-
-    if (!children && className) {
-      const langOrText = className.replace(/language-/, "") as BundledLanguage;
-      if (!langOrText) return;
-
-      if (KNOWN_LANGUAGES.includes(langOrText)) setLanguage(langOrText);
-      else setCode(langOrText.replaceAll("```", ""));
-
+    if (!resolvedLanguage) {
+      setTokens(null);
       return;
     }
 
-    if (children && !className) {
-      const text = reactNodeToHtml(children).replaceAll("```", "");
-
-      setCode(text);
-      return;
-    }
-
-    const lang = className?.replace(/language-/, "") as BundledLanguage;
-    if (KNOWN_LANGUAGES.includes(lang)) setLanguage(lang);
-
-    setCode(reactNodeToHtml(children).replaceAll("```", ""));
-  }, [children, className]);
+    let cancelled = false;
+    void tokenizeCode(code, resolvedLanguage, themeType).then((nextTokens) => {
+      if (!cancelled) setTokens(nextTokens);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [code, resolvedLanguage, themeType]);
 
   useEffect(() => {
-    (async () => {
-      const highlighter = await loadHighlighter();
-      const lines = highlighter.codeToTokens(code, {
-        lang: language,
-        theme: "github-dark"
-      });
-
-      const jsxLines = lines.tokens.map((line, i) => (
-        <Box key={i}>
-          {line.map((token, j) => (
-            <Typography
-              key={j}
-              color={
-                (token.color as ColorLike) ?? theme.typography.colors.primary
-              }
-              variant="plain"
-            >
-              {token.content}
-            </Typography>
-          ))}
-        </Box>
-      ));
-
-      setTokens(jsxLines);
-    })();
-  }, [code, language]);
-
-  if (inline)
-    return (
-      <Paper px="0.25em" display="inline" elevation={3} variant="elevation">
-        {code}
-      </Paper>
+    if (!copied) return;
+    const timeoutId = window.setTimeout(
+      () => setCopied(false),
+      COPIED_RESET_MS
     );
+    return () => window.clearTimeout(timeoutId);
+  }, [copied]);
+
+  const copyCode = async () => {
+    await navigator.clipboard.writeText(code);
+    setCopied(true);
+  };
+
+  const copyLabel = copied ? t("codeBlock.copied") : t("codeBlock.copy");
 
   return (
-    <Paper
-      px="0.5rem"
-      variant="elevation"
-      color="primary"
-      elevation={3}
-      fontFamily="monospace"
+    <div
+      css={{
+        margin: "0.4em 0",
+        borderRadius: 6,
+        overflow: "hidden",
+        border: `1px solid ${formatColor(theme.colors.neutral, {
+          alpha: 35,
+          format: "hexa"
+        })}`,
+        background: formatColor(theme.colors.surface, {
+          darken: themeType === "dark" ? 8 : 0,
+          format: "hexa"
+        })
+      }}
     >
-      <code>{tokens ?? code}</code>
-    </Paper>
+      <div
+        css={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 8,
+          padding: "2px 4px 2px 10px",
+          borderBottom: `1px solid ${formatColor(theme.colors.neutral, {
+            alpha: 20,
+            format: "hexa"
+          })}`
+        }}
+      >
+        <Typography
+          level="body-xs"
+          textColor="muted"
+          css={{ fontFamily: "monospace" }}
+        >
+          {language?.toLowerCase() ?? ""}
+        </Typography>
+        <Tooltip content={copyLabel}>
+          <IconButton
+            size="sm"
+            variant="plain"
+            aria-label={copyLabel}
+            onClick={() => void copyCode()}
+          >
+            {copied ? <CheckIcon weight="bold" /> : <CopyIcon />}
+          </IconButton>
+        </Tooltip>
+      </div>
+      <pre
+        css={{
+          margin: 0,
+          padding: "0.6em 0.75em",
+          overflowX: "auto",
+          fontFamily: "monospace",
+          fontSize: "0.875em",
+          lineHeight: 1.45,
+          whiteSpace: "pre",
+          color: theme.typography.colors.primary
+        }}
+      >
+        <code>
+          {tokens
+            ? tokens.map((line, lineIndex) => (
+                <Fragment key={lineIndex}>
+                  {line.map((token, tokenIndex) => (
+                    <span key={tokenIndex} style={{ color: token.color }}>
+                      {token.content}
+                    </span>
+                  ))}
+                  {lineIndex < tokens.length - 1 && "\n"}
+                </Fragment>
+              ))
+            : code}
+        </code>
+      </pre>
+    </div>
   );
 };

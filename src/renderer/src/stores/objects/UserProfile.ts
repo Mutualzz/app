@@ -2,8 +2,11 @@ import type {
   APIMobileProfileBlock,
   APIProfileBlock,
   APIProfileMusic,
+  APIProfileTheme,
+  APIDisplayNameStyle,
   APIUserProfile,
   AvatarFormat,
+  ProfileBackgroundImageFit,
   Sizes
 } from "@mutualzz/types";
 import { CDNRoutes, ImageFormat } from "@mutualzz/types";
@@ -15,10 +18,13 @@ export class UserProfile {
   configured: boolean;
   backgroundColor?: string | null;
   backgroundImage?: string | null;
+  backgroundImageFit?: ProfileBackgroundImageFit | null;
   banner?: string | null;
   bio?: string | null;
   pronouns?: string | null;
   pageFontFamily?: string | null;
+  theme?: APIProfileTheme | null;
+  displayNameStyle?: APIDisplayNameStyle | null;
   profileMusic?: APIProfileMusic | null;
   blocks: APIProfileBlock[];
   mobileBlocks: APIMobileProfileBlock[];
@@ -29,10 +35,13 @@ export class UserProfile {
     this.configured = profile.configured;
     this.backgroundColor = profile.backgroundColor ?? null;
     this.backgroundImage = profile.backgroundImage ?? null;
+    this.backgroundImageFit = profile.backgroundImageFit ?? null;
     this.banner = profile.banner ?? null;
     this.bio = profile.bio ?? null;
     this.pronouns = profile.pronouns ?? null;
     this.pageFontFamily = profile.pageFontFamily ?? null;
+    this.theme = profile.theme ?? null;
+    this.displayNameStyle = profile.displayNameStyle ?? null;
     this.profileMusic = profile.profileMusic ?? null;
     this.blocks = profile.blocks ?? [];
     this.mobileBlocks = profile.mobileBlocks ?? [];
@@ -45,10 +54,13 @@ export class UserProfile {
     this.configured = profile.configured;
     this.backgroundColor = profile.backgroundColor ?? null;
     this.backgroundImage = profile.backgroundImage ?? null;
+    this.backgroundImageFit = profile.backgroundImageFit ?? null;
     this.banner = profile.banner ?? null;
     this.bio = profile.bio ?? null;
     this.pronouns = profile.pronouns ?? null;
     this.pageFontFamily = profile.pageFontFamily ?? null;
+    this.theme = profile.theme ?? null;
+    this.displayNameStyle = profile.displayNameStyle ?? null;
     this.profileMusic = profile.profileMusic ?? null;
     this.blocks = profile.blocks ?? [];
     this.mobileBlocks = profile.mobileBlocks ?? [];

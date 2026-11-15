@@ -6,7 +6,8 @@ import {
 import { ProfileMarkdownContent } from "@components/Profile/shared/ProfileMarkdownContent";
 import type { ProfileTextBlock } from "@mutualzz/types";
 import { resolveProfileBlockCornerRadius } from "@mutualzz/ui-core";
-import { Box, Typography } from "@mutualzz/ui-web";
+import { Box, Typography, useTheme } from "@mutualzz/ui-web";
+import { getDisplayNameCss } from "@components/Profile/shared/ProfileDisplayName";
 import { useAppStore } from "@renderer/hooks/useStores";
 import { useTranslation } from "react-i18next";
 
@@ -18,6 +19,16 @@ export const ProfileTextBlockView = ({
   const { t } = useTranslation("settings");
   const app = useAppStore();
   const cornerRadius = resolveProfileBlockCornerRadius(block, "desktop");
+  const { theme } = useTheme();
+  const textEffectCss = block.appearance?.textEffect
+    ? getDisplayNameCss(
+        {
+          effect: block.appearance.textEffect,
+          effectColor: block.appearance.textEffectColor ?? null
+        },
+        theme
+      )
+    : undefined;
 
   return (
     <Paper
@@ -30,7 +41,7 @@ export const ProfileTextBlockView = ({
     >
       <ProfileBlockBackgroundFill backgroundColor={block.backgroundColor} />
       {block.content ? (
-        <Box css={{ fontSize: "var(--pcf-md)" }}>
+        <Box css={{ fontSize: "var(--pcf-md)", ...textEffectCss }}>
           <ProfileMarkdownContent value={block.content} />
         </Box>
       ) : (

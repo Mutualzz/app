@@ -1,4 +1,7 @@
-import { getSearchAuthorColor, getSearchDisplayName } from "@components/Channel/messageSearch.utils";
+import {
+  getSearchAuthorColor,
+  getSearchDisplayName
+} from "@components/Channel/messageSearch.utils";
 import { MessagePreviewContent } from "@components/Message/MessagePreviewContent";
 import { Paper } from "@components/Paper";
 import { UserAvatar } from "@components/User/UserAvatar";
@@ -24,12 +27,12 @@ const ResultCard = styled(Paper)({
   overflow: "hidden",
 
   "&:hover .search-jump-hint": {
-    opacity: 1,
+    opacity: 1
   },
 
   "& img, & video, & iframe": {
-    maxWidth: "100%",
-  },
+    maxWidth: "100%"
+  }
 });
 
 const JumpHint = styled(Stack)(({ theme }) => ({
@@ -40,7 +43,7 @@ const JumpHint = styled(Stack)(({ theme }) => ({
   color: theme.typography.colors.muted,
   pointerEvents: "none",
   transition: "opacity 120ms ease",
-  flexShrink: 0,
+  flexShrink: 0
 }));
 
 function formatMessageTime(date: Date) {
@@ -87,7 +90,12 @@ export const MessageSearchResultRow = observer(
             justifyContent="space-between"
             spacing={1}
           >
-            <Stack direction="row" alignItems="center" spacing={0.5} minWidth={0}>
+            <Stack
+              direction="row"
+              alignItems="center"
+              spacing={0.5}
+              minWidth={0}
+            >
               <Typography
                 level="label-sm"
                 weight="bold"
@@ -96,14 +104,14 @@ export const MessageSearchResultRow = observer(
                     ? getSearchAuthorColor(app, author, space, {
                         showRoleColors:
                           app.settings?.showRoleColorsInMessages ?? false,
-                        primaryTextColor,
+                        primaryTextColor
                       })
                     : "inherit"
                 }
                 css={{
                   overflow: "hidden",
                   textOverflow: "ellipsis",
-                  whiteSpace: "nowrap",
+                  whiteSpace: "nowrap"
                 }}
               >
                 {author
@@ -116,15 +124,29 @@ export const MessageSearchResultRow = observer(
                 </IconSlot>
               ) : null}
             </Stack>
-            <Stack direction="row" alignItems="center" spacing={0.75} flexShrink={0}>
+            <Stack
+              direction="row"
+              alignItems="center"
+              spacing={0.75}
+              flexShrink={0}
+            >
               <Typography level="body-xs" textColor="muted">
                 {formatMessageTime(new Date(message.createdAt))}
               </Typography>
-              <JumpHint className="search-jump-hint" direction="row" alignItems="center" spacing={0.25}>
+              <JumpHint
+                className="search-jump-hint"
+                direction="row"
+                alignItems="center"
+                spacing={0.25}
+              >
                 <IconSlot size={13}>
                   <ArrowBendUpLeftIcon weight="bold" />
                 </IconSlot>
-                <Typography level="body-xs" weight={600} css={{ color: "inherit" }}>
+                <Typography
+                  level="body-xs"
+                  weight={600}
+                  css={{ color: "inherit" }}
+                >
                   {t("pins.jump")}
                 </Typography>
               </JumpHint>
@@ -135,7 +157,7 @@ export const MessageSearchResultRow = observer(
         </Stack>
       </ResultCard>
     );
-  },
+  }
 );
 
 export const SearchChannelGroupHeader = styled(Stack)(({ theme }) => ({
@@ -146,7 +168,7 @@ export const SearchChannelGroupHeader = styled(Stack)(({ theme }) => ({
   padding: "6px 10px",
   borderRadius: 6,
   backgroundColor: "rgba(255, 255, 255, 0.04)",
-  border: `1px solid ${formatColor(theme.colors.neutral, { alpha: 0.08, format: "hexa" })}`,
+  border: `1px solid ${formatColor(theme.colors.neutral, { alpha: 8, format: "hexa" })}`
 }));
 
 export const SearchResultsList = styled(Stack)({
@@ -155,11 +177,11 @@ export const SearchResultsList = styled(Stack)({
   overflowY: "auto",
   overflowX: "hidden",
   padding: "8px 14px 16px",
-  gap: 10,
+  gap: 10
 });
 
 export const SearchResultsHeaderBar = styled(Stack)({
   flexShrink: 0,
   padding: "14px 12px 10px",
-  borderBottom: "1px solid rgba(255, 255, 255, 0.06)",
+  borderBottom: "1px solid rgba(255, 255, 255, 0.06)"
 });

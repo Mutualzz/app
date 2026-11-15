@@ -46,14 +46,14 @@ const NavItem = styled("button")<{ active: boolean }>(({ theme, active }) => ({
     ? theme.typography.colors.primary
     : theme.typography.colors.muted,
   backgroundColor: active
-    ? formatColor(theme.colors.primary, { alpha: 0.14, format: "hexa" })
+    ? formatColor(theme.colors.primary, { alpha: 14, format: "hexa" })
     : "transparent",
   boxShadow: active ? `inset 2px 0 0 ${theme.colors.primary}` : "none",
   transition: "background-color 0.12s ease, color 0.12s ease",
   "&:hover": {
     color: theme.typography.colors.primary,
     backgroundColor: active
-      ? formatColor(theme.colors.primary, { alpha: 0.18, format: "hexa" })
+      ? formatColor(theme.colors.primary, { alpha: 18, format: "hexa" })
       : subtleTextColor(theme, 0.05)
   },
   "&:focus-visible": {

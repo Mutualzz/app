@@ -1,324 +1,43 @@
 import type { APIProfileBlock, ProfileBlockType } from "@mutualzz/types";
+import {
+  type CanvasRect,
+  canvasUnit,
+  clampBlock,
+  getProfileBlockSizeLimits,
+  PROFILE_COUNTDOWN_DEFAULT_DAYS,
+  roundPercent
+} from "@mutualzz/ui-core";
 import i18n from "@renderer/i18n";
+import dayjs from "dayjs";
 
-export interface CanvasRect {
-  width: number;
-  height: number;
-}
-
-export const PROFILE_CANVAS_REF_WIDTH = 1600;
-
-export const canvasUnit = (canvas: CanvasRect) => canvas.width;
-
-export interface PixelRect {
-  left: number;
-  top: number;
-  width: number;
-  height: number;
-}
-
-export interface ProfileBlockSizeLimits {
-  minWidth: number;
-  maxWidth: number;
-  minHeight: number;
-  maxHeight: number;
-  recommendedWidth: number;
-  recommendedHeight: number;
-}
-
-export const PROFILE_BLOCK_SIZE_LIMITS: Record<
-  ProfileBlockType,
-  ProfileBlockSizeLimits
-> = {
-  header: {
-    minWidth: 25,
-    maxWidth: 100,
-    minHeight: 8,
-    maxHeight: 45,
-    recommendedWidth: 48,
-    recommendedHeight: 18
-  },
-  text: {
-    minWidth: 10,
-    maxWidth: 100,
-    minHeight: 4,
-    maxHeight: 55,
-    recommendedWidth: 24,
-    recommendedHeight: 10
-  },
-  image: {
-    minWidth: 8,
-    maxWidth: 80,
-    minHeight: 8,
-    maxHeight: 80,
-    recommendedWidth: 18,
-    recommendedHeight: 18
-  },
-  music: {
-    minWidth: 14,
-    maxWidth: 60,
-    minHeight: 8,
-    maxHeight: 36,
-    recommendedWidth: 26,
-    recommendedHeight: 10
-  },
-  links: {
-    minWidth: 10,
-    maxWidth: 72,
-    minHeight: 6,
-    maxHeight: 40,
-    recommendedWidth: 22,
-    recommendedHeight: 12
-  },
-  activity: {
-    minWidth: 12,
-    maxWidth: 64,
-    minHeight: 4,
-    maxHeight: 22,
-    recommendedWidth: 22,
-    recommendedHeight: 8
-  },
-  roles: {
-    minWidth: 10,
-    maxWidth: 72,
-    minHeight: 6,
-    maxHeight: 30,
-    recommendedWidth: 22,
-    recommendedHeight: 10
-  },
-  connections: {
-    minWidth: 12,
-    maxWidth: 72,
-    minHeight: 6,
-    maxHeight: 28,
-    recommendedWidth: 24,
-    recommendedHeight: 10
-  },
-  mutual: {
-    minWidth: 10,
-    maxWidth: 72,
-    minHeight: 6,
-    maxHeight: 30,
-    recommendedWidth: 22,
-    recommendedHeight: 10
-  },
-  divider: {
-    minWidth: 10,
-    maxWidth: 100,
-    minHeight: 1,
-    maxHeight: 8,
-    recommendedWidth: 36,
-    recommendedHeight: 2
-  },
-  quote: {
-    minWidth: 12,
-    maxWidth: 80,
-    minHeight: 6,
-    maxHeight: 40,
-    recommendedWidth: 24,
-    recommendedHeight: 12
-  },
-  draw: {
-    minWidth: 10,
-    maxWidth: 80,
-    minHeight: 10,
-    maxHeight: 80,
-    recommendedWidth: 28,
-    recommendedHeight: 28
-  },
-  sticker: {
-    minWidth: 6,
-    maxWidth: 36,
-    minHeight: 6,
-    maxHeight: 36,
-    recommendedWidth: 12,
-    recommendedHeight: 12
-  }
-};
-
-export const getProfileBlockSizeLimits = (type: ProfileBlockType) =>
-  PROFILE_BLOCK_SIZE_LIMITS[type];
-
-export const applyRecommendedBlockSize = (
-  block: APIProfileBlock
-): APIProfileBlock => {
-  const limits = getProfileBlockSizeLimits(block.type);
-  return clampBlock({
-    ...block,
-    width: limits.recommendedWidth,
-    height: limits.recommendedHeight
-  });
-};
-
-export const normalizeProfileBlocks = (blocks: APIProfileBlock[]) =>
-  blocks.map((block) => clampBlock(block));
-
-export const MIN_BLOCK_PERCENT = 4;
-export const PROFILE_GRID_STEP = 4;
-
-export const roundPercent = (value: number) =>
-  Math.round(Math.min(100, Math.max(0, value)) * 100) / 100;
-
-export const snapPercent = (value: number, step = PROFILE_GRID_STEP) =>
-  roundPercent(Math.round(value / step) * step);
-
-export const snapRectToGrid = (
-  rect: Pick<APIProfileBlock, "x" | "y" | "width" | "height">,
-  step = PROFILE_GRID_STEP
-) => ({
-  x: snapPercent(rect.x, step),
-  y: snapPercent(rect.y, step),
-  width: snapPercent(rect.width, step),
-  height: snapPercent(rect.height, step)
-});
-
-export const snapBlockToGrid = (
-  block: APIProfileBlock,
-  step = PROFILE_GRID_STEP
-) => clampBlock({ ...block, ...snapRectToGrid(block, step) });
-
-export const alignBlockHorizontally = (block: APIProfileBlock) =>
-  clampBlock({ ...block, x: roundPercent((100 - block.width) / 2) });
-
-export const alignBlockVertically = (
-  block: APIProfileBlock,
-  canvas?: CanvasRect
-) => {
-  const canvasHeightUnits =
-    canvas && canvas.width > 0 ? (canvas.height / canvas.width) * 100 : 100;
-  return clampBlock({
-    ...block,
-    y: roundPercent((canvasHeightUnits - block.height) / 2)
-  });
-};
-
-export const percentToPixels = (
-  block: Pick<APIProfileBlock, "x" | "y" | "width" | "height">,
-  canvas: CanvasRect
-): PixelRect => {
-  const unit = canvasUnit(canvas);
-  return {
-    left: (block.x / 100) * unit,
-    top: (block.y / 100) * unit,
-    width: (block.width / 100) * unit,
-    height: (block.height / 100) * unit
-  };
-};
-
-export const pixelsToPercent = (
-  rect: PixelRect,
-  canvas: CanvasRect,
-  blockType?: ProfileBlockType
-): Pick<APIProfileBlock, "x" | "y" | "width" | "height"> => {
-  const unit = canvasUnit(canvas);
-  const limits = blockType ? getProfileBlockSizeLimits(blockType) : null;
-  const minWidth = limits?.minWidth ?? MIN_BLOCK_PERCENT;
-  const maxWidth = limits?.maxWidth ?? 100;
-  const minHeight = limits?.minHeight ?? MIN_BLOCK_PERCENT;
-  const maxHeight = limits?.maxHeight ?? 100;
-
-  if (unit <= 0 || canvas.height <= 0) {
-    return {
-      x: 0,
-      y: 0,
-      width: minWidth,
-      height: minHeight
-    };
-  }
-
-  return {
-    x: roundPercent(clamp((rect.left / unit) * 100, 0, 100)),
-    y: roundPercent(clamp((rect.top / unit) * 100, 0, 100)),
-    width: roundPercent(clamp((rect.width / unit) * 100, minWidth, maxWidth)),
-    height: roundPercent(
-      clamp((rect.height / unit) * 100, minHeight, maxHeight)
-    )
-  };
-};
-
-export const clampBlock = (block: APIProfileBlock): APIProfileBlock => {
-  const limits = getProfileBlockSizeLimits(block.type);
-  const width = roundPercent(
-    clamp(block.width, limits.minWidth, limits.maxWidth)
-  );
-  const height = roundPercent(
-    clamp(block.height, limits.minHeight, limits.maxHeight)
-  );
-  const maxX = Math.max(0, 100 - width);
-  const maxY = Math.max(0, 100 - height);
-  const x = roundPercent(clamp(block.x, 0, maxX));
-  const y = roundPercent(clamp(block.y, 0, maxY));
-
-  return {
-    ...block,
-    x,
-    y,
-    width: roundPercent(Math.min(width, 100 - x)),
-    height: roundPercent(Math.min(height, 100 - y))
-  };
-};
-
-export const clampPixelRect = (
-  rect: PixelRect,
-  canvas: CanvasRect,
-  blockType?: ProfileBlockType
-): PixelRect => {
-  const unit = canvasUnit(canvas);
-  if (unit <= 0 || canvas.height <= 0) {
-    return rect;
-  }
-
-  const limits = blockType ? getProfileBlockSizeLimits(blockType) : null;
-  const minWidth = ((limits?.minWidth ?? MIN_BLOCK_PERCENT) / 100) * unit;
-  const minHeight = ((limits?.minHeight ?? MIN_BLOCK_PERCENT) / 100) * unit;
-  const maxWidth = ((limits?.maxWidth ?? 100) / 100) * unit;
-  const maxHeight = ((limits?.maxHeight ?? 100) / 100) * unit;
-
-  let { left, top, width, height } = rect;
-
-  width = clamp(width, minWidth, maxWidth);
-  height = clamp(height, minHeight, maxHeight);
-
-  if (left < 0) {
-    width += left;
-    left = 0;
-  }
-  if (top < 0) {
-    height += top;
-    top = 0;
-  }
-
-  if (left + width > canvas.width) {
-    width = canvas.width - left;
-  }
-  if (top + height > canvas.height) {
-    height = canvas.height - top;
-  }
-
-  width = clamp(width, minWidth, Math.min(maxWidth, canvas.width - left));
-  height = clamp(height, minHeight, Math.min(maxHeight, canvas.height - top));
-
-  if (left + width > canvas.width) {
-    left = Math.max(0, canvas.width - width);
-  }
-  if (top + height > canvas.height) {
-    top = Math.max(0, canvas.height - height);
-  }
-
-  width = clamp(width, minWidth, Math.min(maxWidth, canvas.width - left));
-  height = clamp(height, minHeight, Math.min(maxHeight, canvas.height - top));
-
-  return { left, top, width, height };
-};
+export {
+  type CanvasRect,
+  type PixelRect,
+  type ProfileBlockSizeLimits,
+  PROFILE_CANVAS_REF_WIDTH,
+  canvasUnit,
+  percentToPixels,
+  pixelsToPercent,
+  PROFILE_BLOCK_SIZE_LIMITS,
+  getProfileBlockSizeLimits,
+  MIN_BLOCK_PERCENT,
+  PROFILE_GRID_STEP,
+  roundPercent,
+  snapPercent,
+  snapRectToGrid,
+  clampBlock,
+  snapBlockToGrid,
+  alignBlockHorizontally,
+  alignBlockVertically,
+  applyRecommendedBlockSize,
+  normalizeProfileBlocks,
+  clampPixelRect,
+  sortBlocksByZIndex,
+  nextZIndex
+} from "@mutualzz/ui-core";
 
 const clamp = (value: number, min: number, max: number) =>
   Math.min(max, Math.max(min, value));
-
-export const sortBlocksByZIndex = (blocks: APIProfileBlock[]) =>
-  [...blocks].sort((a, b) => a.zIndex - b.zIndex);
-
-export const nextZIndex = (blocks: APIProfileBlock[]) =>
-  blocks.reduce((max, block) => Math.max(max, block.zIndex), 0) + 1;
 
 export const createDefaultBlock = (
   type: ProfileBlockType,
@@ -387,7 +106,9 @@ export const createDefaultBlock = (
       return clampBlock({
         ...base,
         type: "music",
-        title: i18n.t("profile.widgets.defaults.musicTitle", { ns: "settings" }),
+        title: i18n.t("profile.widgets.defaults.musicTitle", {
+          ns: "settings"
+        }),
         artists: null,
         image: null,
         previewUrl: null,
@@ -445,6 +166,27 @@ export const createDefaultBlock = (
         ...base,
         type: "sticker",
         expressionId: ""
+      });
+    case "nowPlaying":
+      return clampBlock({ ...base, type: "nowPlaying" });
+    case "embed":
+      return clampBlock({ ...base, type: "embed", kind: "youtube", url: null });
+    case "gallery":
+      return clampBlock({
+        ...base,
+        type: "gallery",
+        images: [],
+        layout: "grid"
+      });
+    case "countdown":
+      return clampBlock({
+        ...base,
+        type: "countdown",
+        targetAt: dayjs()
+          .add(PROFILE_COUNTDOWN_DEFAULT_DAYS, "day")
+          .startOf("hour")
+          .toISOString(),
+        title: null
       });
   }
 };

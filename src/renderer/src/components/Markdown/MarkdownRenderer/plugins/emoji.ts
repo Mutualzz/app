@@ -1,4 +1,5 @@
 import { getEmoji } from "@utils/emojis/emojis";
+import { collapseRepeatedShortcodeColons } from "@utils/markdownToSlate";
 import { TWEMOJI_URL } from "@utils/urls";
 import shortcodeRegex from "emojibase-regex/shortcode";
 import Token from "markdown-it/lib/token.mjs";
@@ -10,7 +11,9 @@ const UNICODE_EMOJI_BETWEEN_COLONS =
   /:((?:\p{Extended_Pictographic}|\u200d|\ufe0f)+):/gu;
 
 const normalizeUnicodeEmojiColons = (content: string) =>
-  content.replace(UNICODE_EMOJI_BETWEEN_COLONS, "$1");
+  collapseRepeatedShortcodeColons(
+    content.replace(UNICODE_EMOJI_BETWEEN_COLONS, "$1")
+  );
 
 function processEmojiTokens(tokens: Token[]) {
   for (let i = 0; i < tokens.length; i++) {

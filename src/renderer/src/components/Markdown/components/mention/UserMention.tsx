@@ -1,3 +1,4 @@
+import { UserDisplayName } from "@components/User/UserDisplayName";
 import { observer } from "mobx-react-lite";
 import { type ReactNode } from "react";
 import { type Snowflake } from "@mutualzz/types";
@@ -68,7 +69,10 @@ export const UserMention = observer(
               ":hover": { textDecoration: "underline" }
             }}
           >
-            @{member?.displayName || user?.displayName || t("deletedUser")}
+            @
+            <UserDisplayName userId={user.id} nameStyle={user.displayNameStyle}>
+              {member?.displayName || user?.displayName || t("deletedUser")}
+            </UserDisplayName>
           </Typography>
         </Stack>
       </UserProfilePopoutTrigger>

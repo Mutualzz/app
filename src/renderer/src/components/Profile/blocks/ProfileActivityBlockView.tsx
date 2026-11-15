@@ -32,7 +32,13 @@ export const ProfileActivityBlockView = observer(({ block, userId }: Props) => {
     presence?.status === "dnd";
 
   const customActivity = presence ? getCustomActivity(presence) : null;
-  const otherActivities = presence ? getNonCustomActivities(presence) : [];
+  const hiddenTypes = [
+    ...(block.showPlaying === false ? ["playing"] : []),
+    ...(block.showListening === false ? ["listening"] : [])
+  ];
+  const otherActivities = (
+    presence ? getNonCustomActivities(presence) : []
+  ).filter((activity) => !hiddenTypes.includes(activity.type));
 
   const showCustom =
     Boolean(customActivity) && block.showCustomStatus !== false;
@@ -97,6 +103,7 @@ export const ProfileActivityBlockView = observer(({ block, userId }: Props) => {
           liveActivities={isActive ? otherActivities : []}
           iconSize={36}
           showEmpty={!hasLiveContent}
+          hiddenTypes={hiddenTypes}
         />
       </Stack>
     </Paper>

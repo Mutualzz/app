@@ -1,6 +1,6 @@
 import { Button } from "@components/Button";
 import { Paper } from "@components/Paper";
-import type { ProfileDraftState } from "@components/Profile/editor/profileEditor.utils";
+import type { ProfileDraftState } from "@components/Profile/editor/utils/profileEditor.utils";
 import type { APIProfileMusicSearchTrack } from "@mutualzz/types";
 import { useAppStore } from "@hooks/useStores";
 import { formatColor } from "@mutualzz/ui-core";

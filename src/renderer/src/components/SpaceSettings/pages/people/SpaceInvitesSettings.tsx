@@ -75,7 +75,8 @@ const InviteItem = observer(({ theme, invite, last, now }: InviteItemProps) => {
         p="1rem"
         whileHover={{
           background: formatColor(dynamicElevation(theme.colors.surface, 5), {
-            alpha: 0.5
+            alpha: 50,
+            format: "hexa"
           })
         }}
         onMouseOver={() => setHover(true)}
@@ -103,7 +104,9 @@ const InviteItem = observer(({ theme, invite, last, now }: InviteItemProps) => {
           <Typography fontFamily="monospace">{invite.code}</Typography>
           <Tooltip
             content={
-              copied ? t("invites.copiedToClipboard") : t("invites.copyInviteUrl")
+              copied
+                ? t("invites.copiedToClipboard")
+                : t("invites.copyInviteUrl")
             }
           >
             <IconButton
@@ -177,7 +180,9 @@ export const SpaceInvitesSettings = observer(({ space }: Props) => {
   return (
     <Stack direction="column" spacing={4} mt={1}>
       <Stack alignItems="center" justifyContent="space-between">
-        <Typography fontFamily="monospace">{t("invites.activeLinks")}</Typography>
+        <Typography fontFamily="monospace">
+          {t("invites.activeLinks")}
+        </Typography>
         <ButtonGroup spacing={10}>
           <Button
             onClick={() => space.deleteAll()}
@@ -210,7 +215,9 @@ export const SpaceInvitesSettings = observer(({ space }: Props) => {
               px="1rem"
             >
               <Typography flex={1}>{t("invites.columns.inviter")}</Typography>
-              <Typography flex={1}>{t("invites.columns.inviteCode")}</Typography>
+              <Typography flex={1}>
+                {t("invites.columns.inviteCode")}
+              </Typography>
               <Typography flex={1}>{t("invites.columns.uses")}</Typography>
               <Typography flex={1}>{t("invites.columns.expires")}</Typography>
             </Stack>

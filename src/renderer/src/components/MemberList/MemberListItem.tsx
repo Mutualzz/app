@@ -1,3 +1,4 @@
+import { UserDisplayName } from "@components/User/UserDisplayName";
 import { Paper } from "@components/Paper";
 import { UserProfilePopoutTrigger } from "@components/Profile/popout/UserProfilePopoutTrigger";
 import { UserAvatar } from "@components/User/UserAvatar";
@@ -93,7 +94,13 @@ export const MemberListItem = observer(({ member, isOwner }: Props) => {
               level="label-sm"
               textColor={nameColor}
             >
-              {member.displayName}
+              <UserDisplayName
+                userId={member.userId}
+                nameStyle={member.user?.displayNameStyle}
+                fallbackColor={String(nameColor)}
+              >
+                {member.displayName}
+              </UserDisplayName>
             </Typography>
             {isOwner && (
               <Tooltip content={t("owner")}>

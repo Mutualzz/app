@@ -1,5 +1,5 @@
 import type { APIProfileMusic } from "@mutualzz/types";
-import type { ProfileDraftState } from "@components/Profile/editor/profileEditor.utils";
+import type { ProfileDraftState } from "@components/Profile/editor/utils/profileEditor.utils";
 import type { UserProfile } from "@stores/objects/UserProfile";
 import i18n from "@renderer/i18n";
 import type { AppStore } from "@stores/App.store";

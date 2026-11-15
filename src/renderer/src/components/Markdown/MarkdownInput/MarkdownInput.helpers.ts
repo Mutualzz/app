@@ -1,5 +1,10 @@
 import type { CSSObject, Theme } from "@emotion/react";
 import {
+  EFFECT_CLOSE,
+  EFFECT_RE,
+  resolveMarkdownTextEffect
+} from "@mutualzz/client";
+import {
   type Color,
   type ColorLike,
   createColor,
@@ -82,6 +87,7 @@ type DecoratedRange = Range & {
   spoiler?: boolean;
   isMarker?: boolean;
   color?: string;
+  effect?: string;
 };
 
 const COLOR_RANGE_RE = /\[color=([^\]]+)\]([\s\S]*?)\[\/color\]/gi;
@@ -129,6 +135,48 @@ export const parseColorRanges = (
   return ranges;
 };
 
+export const parseEffectRanges = (
+  text: string,
+  path: number[]
+): DecoratedRange[] => {
+  const ranges: DecoratedRange[] = [];
+  const effectRegex = new RegExp(EFFECT_RE.source, "gi");
+  let match: RegExpExecArray | null;
+
+  while ((match = effectRegex.exec(text))) {
+    const effect = resolveMarkdownTextEffect(match[1]);
+    if (!effect) continue;
+
+    const start = match.index;
+    const openLength = match[0].length - match[2].length - EFFECT_CLOSE.length;
+    const contentStart = start + openLength;
+    const contentEnd = contentStart + match[2].length;
+    const end = contentEnd + EFFECT_CLOSE.length;
+
+    ranges.push({
+      isMarker: true,
+      anchor: { path, offset: start },
+      focus: { path, offset: contentStart }
+    });
+
+    if (contentEnd > contentStart) {
+      ranges.push({
+        effect,
+        anchor: { path, offset: contentStart },
+        focus: { path, offset: contentEnd }
+      });
+    }
+
+    ranges.push({
+      isMarker: true,
+      anchor: { path, offset: contentEnd },
+      focus: { path, offset: end }
+    });
+  }
+
+  return ranges;
+};
+
 export const parseSpoilerRanges = ([node, path]: [
   Node,
   number[]
@@ -138,7 +186,10 @@ export const parseSpoilerRanges = ([node, path]: [
   const children = node.children as Node[];
   const ranges: DecoratedRange[] = [];
 
-  interface Pos { childIndex: number; offset: number }
+  interface Pos {
+    childIndex: number;
+    offset: number;
+  }
 
   const findNextToken = (from: Pos): Pos | null => {
     for (

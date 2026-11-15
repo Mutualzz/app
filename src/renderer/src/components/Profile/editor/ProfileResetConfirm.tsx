@@ -3,7 +3,7 @@ import { Paper } from "@components/Paper";
 import {
   EMPTY_PROFILE_SAVE_PAYLOAD,
   getApiErrorMessage
-} from "@components/Profile/editor/profileEditor.utils";
+} from "@components/Profile/editor/utils/profileEditor.utils";
 import { useModal } from "@contexts/Modal.context";
 import { useAppStore } from "@hooks/useStores";
 import { Stack, Typography } from "@mutualzz/ui-web";

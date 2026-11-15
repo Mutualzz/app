@@ -98,8 +98,11 @@ function slimEmojiDatasource(): Plugin {
 
 const rendererSource = resolve(__dirname, "src/renderer/src");
 
+const i18nLocalesSource = resolve(__dirname, "../../packages/i18n/src/locales");
+
 const rendererAliases = [
   { find: /^@renderer\//, replacement: `${rendererSource}/` },
+  { find: /^@i18n-locales\//, replacement: `${i18nLocalesSource}/` },
   { find: /^@assets$/, replacement: `${rendererSource}/assets` },
   { find: /^@assets\//, replacement: `${rendererSource}/assets/` },
   { find: /^@app-types$/, replacement: `${rendererSource}/types/index.d.ts` },

@@ -1,3 +1,5 @@
+import { interpolateNodes, nameToken } from "@utils/interpolateNodes";
+import { UserDisplayName } from "@components/User/UserDisplayName";
 import { CallCameraVideo } from "@components/Voice/CallCameraVideo";
 import type { Channel } from "@stores/objects/Channel";
 import { Paper, Stack, Typography, useTheme } from "@mutualzz/ui-web";
@@ -538,16 +540,26 @@ export const VoiceChannelView = observer(
                           borderRadius={8}
                         >
                           <Typography>
-                            {isScreen
-                              ? t("voice.screenLabel", {
-                                  name:
-                                    state.member?.displayName ??
+                            {(() => {
+                              const participantName = (
+                                <UserDisplayName
+                                  userId={state.user?.id}
+                                  nameStyle={state.user?.displayNameStyle}
+                                >
+                                  {state.member?.displayName ??
                                     state.user?.displayName ??
-                                    t("deletedUser")
-                                })
-                              : state.member
-                                ? state.member.displayName
-                                : (state.user?.displayName ?? t("deletedUser"))}
+                                    t("deletedUser")}
+                                </UserDisplayName>
+                              );
+                              return isScreen
+                                ? interpolateNodes(
+                                    t("voice.screenLabel", {
+                                      name: nameToken(0)
+                                    }),
+                                    [participantName]
+                                  )
+                                : participantName;
+                            })()}
                           </Typography>
                         </Paper>
                       )}
@@ -625,9 +637,7 @@ export const VoiceChannelView = observer(
                 const startX = e.clientX;
                 const startWidth = app.voiceChatWidth;
 
-                (e.currentTarget).setPointerCapture(
-                  e.pointerId
-                );
+                e.currentTarget.setPointerCapture(e.pointerId);
 
                 const onMove = (moveEvent: PointerEvent) => {
                   const deltaX = moveEvent.clientX - startX;
@@ -678,7 +688,9 @@ export const VoiceChannelView = observer(
               <VoiceChannelHeader channel={channel} />
               <ChannelFileDropZone
                 channel={channel}
-                onDropFiles={(files) => messageInputRef.current?.addFiles(files)}
+                onDropFiles={(files) =>
+                  messageInputRef.current?.addFiles(files)
+                }
               >
                 <MessageList channel={channel} />
                 <MessageInput

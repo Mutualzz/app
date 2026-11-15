@@ -1,4 +1,4 @@
-import type { Snowflake } from "@mutualzz/types";
+import type { APIDisplayNameStyle, Snowflake } from "@mutualzz/types";
 import {
   type APIUser,
   type AvatarFormat,
@@ -20,6 +20,7 @@ export class User {
   avatar?: string | null = null;
   globalName?: string | null = null;
   pronouns?: string | null = null;
+  displayNameStyle?: APIDisplayNameStyle | null = null;
   accentColor: string;
   createdAt: Date;
   updatedAt: Date;
@@ -35,6 +36,7 @@ export class User {
     this.avatar = user.avatar ?? null;
     this.globalName = user.globalName ?? null;
     this.pronouns = user.pronouns ?? null;
+    this.displayNameStyle = user.displayNameStyle ?? null;
     this.accentColor = user.accentColor;
     this.createdAt = new Date(user.createdAt);
     this.updatedAt = new Date(user.updatedAt);
@@ -63,6 +65,7 @@ export class User {
     this.avatar = user.avatar ?? null;
     this.globalName = user.globalName ?? null;
     this.pronouns = user.pronouns ?? null;
+    this.displayNameStyle = user.displayNameStyle ?? null;
 
     this.accentColor = user.accentColor;
 

@@ -1,3 +1,5 @@
+import { MemberNicknameModal } from "@components/Modals/MemberNicknameModal";
+import { SpaceProfileModal } from "@components/Modals/SpaceProfileModal";
 import { observer } from "mobx-react-lite";
 import type { Space } from "@stores/objects/Space";
 import type { SpaceMember } from "@stores/objects/SpaceMember";
@@ -68,6 +70,9 @@ export const UserContextMenu = observer(
 
     const canManageRoles = member
       ? (me?.canManageMember(member, "ManageRoles") ?? false)
+      : false;
+    const canManageNickname = member
+      ? (me?.canManageMember(member, "ManageNicknames") ?? false)
       : false;
     const canKickMember = member
       ? (me?.canManageMember(member, "KickMembers") ?? false)
@@ -367,6 +372,19 @@ export const UserContextMenu = observer(
             >
               {t("contextMenu.editProfile")}
             </ContextItem>
+            {space && member && (
+              <ContextItem
+                onClick={() => {
+                  clearMenu();
+                  openModal(
+                    `space-profile-${space.id}`,
+                    <SpaceProfileModal space={space} />
+                  );
+                }}
+              >
+                {tSpace("spaceProfile.menuEdit")}
+              </ContextItem>
+            )}
           </>
         ) : (
           <>
@@ -381,6 +399,19 @@ export const UserContextMenu = observer(
             >
               {t("contextMenu.viewProfile")}
             </ContextItem>
+            {space && member && canManageNickname && (
+              <ContextItem
+                onClick={() => {
+                  clearMenu();
+                  openModal(
+                    `member-nickname-${space.id}-${member.userId}`,
+                    <MemberNicknameModal space={space} member={member} />
+                  );
+                }}
+              >
+                {tSpace("spaceProfile.changeNickname")}
+              </ContextItem>
+            )}
             {!insideDMs && (
               <ContextItem
                 onClick={() => openDm()}

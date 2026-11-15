@@ -34,12 +34,14 @@ export function useProfileCanvasScale() {
 interface Props extends PropsWithChildren {
   zoom?: number;
   canvasRef?: Ref<HTMLDivElement>;
+  contentHeight?: number;
 }
 
 export function ProfileCanvasViewport({
   children,
-  zoom = 1,
-  canvasRef
+  zoom,
+  canvasRef,
+  contentHeight = 0
 }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerSize, setContainerSize] = useState<{
@@ -52,7 +54,8 @@ export function ProfileCanvasViewport({
     if (!node) return;
 
     const measure = () => {
-      const { width, height } = node.getBoundingClientRect();
+      const width = node.clientWidth;
+      const height = node.clientHeight;
       if (width <= 0 || height <= 0) return;
       setContainerSize((prev) =>
         prev?.width === width && prev?.height === height
@@ -83,18 +86,29 @@ export function ProfileCanvasViewport({
     }
   }, []);
 
-  // Center the fixed-width canvas on wide viewports; clip on narrow ones.
+  const effectiveZoom =
+    zoom ??
+    (containerSize
+      ? Math.min(1, containerSize.width / PROFILE_CANVAS_REF_WIDTH)
+      : 1);
+  const screenHeight = containerSize
+    ? Math.floor(containerSize.height / effectiveZoom)
+    : 0;
+  const canvasHeight = Math.max(
+    screenHeight,
+    (contentHeight / 100) * PROFILE_CANVAS_REF_WIDTH
+  );
+  const scaledWidth = PROFILE_CANVAS_REF_WIDTH * effectiveZoom;
   const leftOffset = containerSize
-    ? Math.max(0, (containerSize.width - PROFILE_CANVAS_REF_WIDTH) / 2)
+    ? Math.max(0, (containerSize.width - scaledWidth) / 2)
     : 0;
 
-  // Canvas is always the reference width — no fitScale, no responsive scaling.
   const canvasRect = useMemo<CanvasRect | null>(
     () =>
       containerSize
-        ? { width: PROFILE_CANVAS_REF_WIDTH, height: containerSize.height }
+        ? { width: PROFILE_CANVAS_REF_WIDTH, height: screenHeight }
         : null,
-    [containerSize?.width, containerSize?.height]
+    [containerSize, screenHeight]
   );
 
   return (
@@ -106,26 +120,35 @@ export function ProfileCanvasViewport({
       width="100%"
       height="100%"
       position="relative"
-      overflow="hidden"
+      css={{ overflow: "auto", scrollbarGutter: "stable" }}
     >
-      <Box
-        ref={mergedRef}
+      <div
         css={{
-          position: "absolute",
-          top: 0,
-          left: `${leftOffset}px`,
-          width: `${PROFILE_CANVAS_REF_WIDTH}px`,
-          height: "100%",
-          transform: zoom !== 1 ? `scale(${zoom})` : undefined,
-          transformOrigin: "center center"
+          position: "relative",
+          width: leftOffset + scaledWidth,
+          height: Math.floor(canvasHeight * effectiveZoom)
         }}
       >
-        <ProfileCanvasScaleContext.Provider value={zoom}>
-          <ProfileCanvasRectContext.Provider value={canvasRect}>
-            {children}
-          </ProfileCanvasRectContext.Provider>
-        </ProfileCanvasScaleContext.Provider>
-      </Box>
+        <Box
+          ref={mergedRef}
+          css={{
+            position: "absolute",
+            top: 0,
+            left: `${leftOffset}px`,
+            width: `${PROFILE_CANVAS_REF_WIDTH}px`,
+            height: `${canvasHeight}px`,
+            transform:
+              effectiveZoom !== 1 ? `scale(${effectiveZoom})` : undefined,
+            transformOrigin: "top left"
+          }}
+        >
+          <ProfileCanvasScaleContext.Provider value={effectiveZoom}>
+            <ProfileCanvasRectContext.Provider value={canvasRect}>
+              {children}
+            </ProfileCanvasRectContext.Provider>
+          </ProfileCanvasScaleContext.Provider>
+        </Box>
+      </div>
     </Box>
   );
 }

@@ -1,12 +1,10 @@
-import { Button } from "@components/Button";
+import { ProfileInspectorField } from "@components/Profile/editor/ProfileInspectorField";
 import {
-  applyRecommendedBlockSize,
   clampBlock,
   getProfileBlockSizeLimits
 } from "@components/Profile/viewer/profileLayout.utils";
 import type { APIProfileBlock } from "@mutualzz/types";
-import { Slider, Stack, Typography } from "@mutualzz/ui-web";
-import { ArrowsInIcon } from "@phosphor-icons/react";
+import { Slider, Stack } from "@mutualzz/ui-web";
 import { observer } from "mobx-react-lite";
 import { useTranslation } from "react-i18next";
 
@@ -15,27 +13,14 @@ interface Props {
   updateSelectedBlock: (patch: Partial<APIProfileBlock>) => void;
 }
 
-const FieldLabel = ({ children }: { children: React.ReactNode }) => (
-  <Typography level="body-xs" fontWeight={700} css={{ opacity: 0.65 }}>
-    {children}
-  </Typography>
-);
-
-const FieldHint = ({ children }: { children: React.ReactNode }) => (
-  <Typography level="body-xs" css={{ opacity: 0.55 }}>
-    {children}
-  </Typography>
-);
-
 export const ProfileBlockSizeInspector = observer(
   ({ block, updateSelectedBlock }: Props) => {
     const { t } = useTranslation("settings");
     const limits = getProfileBlockSizeLimits(block.type);
-    const isRecommended =
-      block.width === limits.recommendedWidth &&
-      block.height === limits.recommendedHeight;
 
-    const setSize = (patch: Partial<Pick<APIProfileBlock, "width" | "height">>) => {
+    const setSize = (
+      patch: Partial<Pick<APIProfileBlock, "width" | "height">>
+    ) => {
       updateSelectedBlock(
         clampBlock({
           ...block,
@@ -45,61 +30,58 @@ export const ProfileBlockSizeInspector = observer(
     };
 
     return (
-      <Stack direction="column" spacing={1}>
-        <FieldLabel>{t("profile.inspector.size.title")}</FieldLabel>
-        <FieldHint>
-          {t("profile.inspector.size.recommendedHint", {
-            recommendedWidth: limits.recommendedWidth,
-            recommendedHeight: limits.recommendedHeight,
-            minWidth: limits.minWidth,
-            maxWidth: limits.maxWidth,
-            minHeight: limits.minHeight,
-            maxHeight: limits.maxHeight
+      <Stack direction="column" spacing={2}>
+        <ProfileInspectorField
+          label={t("profile.inspector.fields.width")}
+          value={`${Math.round(block.width)}%`}
+          hint={t("profile.inspector.fields.widthHint", {
+            recommended: limits.recommendedWidth,
+            min: limits.minWidth,
+            max: limits.maxWidth
           })}
-        </FieldHint>
+          onReset={
+            block.width !== limits.recommendedWidth
+              ? () => setSize({ width: limits.recommendedWidth })
+              : undefined
+          }
+          resetLabel={t("profile.inspector.fields.useRecommended")}
+        >
+          <Slider
+            min={limits.minWidth}
+            max={limits.maxWidth}
+            step={1}
+            value={block.width}
+            onChange={(_, value) => setSize({ width: value as number })}
+            valueLabelDisplay="auto"
+            valueLabelFormat={(value) => `${value}%`}
+          />
+        </ProfileInspectorField>
 
-        <FieldLabel>
-          {t("profile.inspector.size.width", {
-            value: Math.round(block.width)
+        <ProfileInspectorField
+          label={t("profile.inspector.fields.height")}
+          value={`${Math.round(block.height)}%`}
+          hint={t("profile.inspector.fields.heightHint", {
+            recommended: limits.recommendedHeight,
+            min: limits.minHeight,
+            max: limits.maxHeight
           })}
-        </FieldLabel>
-        <Slider
-          min={limits.minWidth}
-          max={limits.maxWidth}
-          step={1}
-          value={block.width}
-          onChange={(_, value) => setSize({ width: value as number })}
-          valueLabelDisplay="auto"
-          valueLabelFormat={(value) => `${value}%`}
-        />
-
-        <FieldLabel>
-          {t("profile.inspector.size.height", {
-            value: Math.round(block.height)
-          })}
-        </FieldLabel>
-        <Slider
-          min={limits.minHeight}
-          max={limits.maxHeight}
-          step={1}
-          value={block.height}
-          onChange={(_, value) => setSize({ height: value as number })}
-          valueLabelDisplay="auto"
-          valueLabelFormat={(value) => `${value}%`}
-        />
-
-        {!isRecommended && (
-          <Button
-            size="sm"
-            color="neutral"
-            startDecorator={<ArrowsInIcon />}
-            onClick={() =>
-              updateSelectedBlock(applyRecommendedBlockSize(block))
-            }
-          >
-            {t("profile.inspector.size.useRecommended")}
-          </Button>
-        )}
+          onReset={
+            block.height !== limits.recommendedHeight
+              ? () => setSize({ height: limits.recommendedHeight })
+              : undefined
+          }
+          resetLabel={t("profile.inspector.fields.useRecommended")}
+        >
+          <Slider
+            min={limits.minHeight}
+            max={limits.maxHeight}
+            step={1}
+            value={block.height}
+            onChange={(_, value) => setSize({ height: value as number })}
+            valueLabelDisplay="auto"
+            valueLabelFormat={(value) => `${value}%`}
+          />
+        </ProfileInspectorField>
       </Stack>
     );
   }

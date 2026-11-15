@@ -5,7 +5,7 @@ import { ProfileEmptyState } from "@components/Profile/viewer/ProfileEmptyState"
 import { ProfileNotFoundState } from "@components/Profile/viewer/ProfileNotFoundState";
 import { ProfileLayout } from "@components/Profile/viewer/ProfileLayout";
 import { getDraftProfileMusic } from "@components/Profile/shared/profileMusicPlayer.utils";
-import { hasProfileDraftContent } from "@components/Profile/editor/profileEditor.utils";
+import { hasProfileDraftContent } from "@components/Profile/editor/utils/profileEditor.utils";
 import { sortBlocksByZIndex } from "@components/Profile/viewer/profileLayout.utils";
 import { ProfileCanvasBlocksLayer } from "@components/Profile/shared/ProfileCanvasBlocksLayer";
 import { ProfileCanvasViewport } from "@components/Profile/shared/ProfileCanvasViewport";
@@ -17,6 +17,7 @@ import { getUserDisplayName } from "@utils/profileRoute.utils";
 import { navigateToResumeRoute } from "@utils/index";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
+import { getProfilePageHeight, isProfileBlockOnlyMe } from "@mutualzz/ui-core";
 import { observer } from "mobx-react-lite";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
@@ -105,6 +106,9 @@ export const ProfileViewerPage = observer(
 
     const displayBlocks =
       previewDraft?.blocks ?? (profile ? profile.blocks : []);
+    const pageHeight = getProfilePageHeight(
+      displayBlocks.filter((block) => !isProfileBlockOnlyMe(block))
+    );
 
     const previewProfileMusic =
       previewDraft && profile
@@ -285,16 +289,23 @@ export const ProfileViewerPage = observer(
                 </Typography>
               </Paper>
             )}
-            <ProfileCanvasViewport>
+            <ProfileCanvasViewport contentHeight={pageHeight}>
               <ProfileCanvas
                 profile={profile}
                 backgroundColorOverride={previewDraft?.backgroundColor}
                 backgroundImageOverride={previewDraft?.backgroundImage}
+                backgroundImageFitOverride={previewDraft?.backgroundImageFit}
                 pageFontFamilyOverride={previewDraft?.pageFontFamily}
+                themeOverride={previewDraft?.theme}
+                displayNameStyleOverride={previewDraft?.displayNameStyle}
               >
                 <ProfileCanvasBlocksLayer>
                   {({ canvasRect }) =>
-                    sortBlocksByZIndex(displayBlocks).map((block) => (
+                    sortBlocksByZIndex(
+                      displayBlocks.filter(
+                        (block) => !isProfileBlockOnlyMe(block)
+                      )
+                    ).map((block) => (
                       <ProfileBlockRenderer
                         key={block.id}
                         block={block}

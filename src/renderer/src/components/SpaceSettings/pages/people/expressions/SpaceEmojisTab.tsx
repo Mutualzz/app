@@ -34,7 +34,8 @@ const EmojiItem = observer(({ expression }: { expression: Expression }) => {
       alignItems="center"
       whileHover={{
         background: formatColor(dynamicElevation(theme.colors.surface, 5), {
-          alpha: 0.5
+          alpha: 50,
+          format: "hexa"
         })
       }}
       onMouseOver={() => setHover(true)}

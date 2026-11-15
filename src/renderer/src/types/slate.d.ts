@@ -62,6 +62,9 @@ export interface Text {
   strikethrough?: boolean;
   spoiler?: boolean;
   color?: string;
+  effect?: string;
+  codeBlock?: boolean;
+  codeColor?: string;
   isMarker?: boolean;
   text: string;
 }
@@ -70,7 +73,9 @@ export interface EmptyText {
   text: string;
 }
 
-export type FormatKey = keyof Omit<Text, "text" | "isMarker"> | "blockquote";
+export type FormatKey =
+  | keyof Omit<Text, "text" | "isMarker" | "effect" | "codeBlock" | "codeColor">
+  | "blockquote";
 
 export type Element =
   | BlockQuoteElement

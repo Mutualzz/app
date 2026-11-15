@@ -1,11 +1,15 @@
-import type { ProfileDraftState } from "@components/Profile/editor/profileEditor.utils";
-import type { APIUserProfile, Snowflake } from "@mutualzz/types";
+import type { ProfileDraftState } from "@components/Profile/editor/utils/profileEditor.utils";
+import type {
+  APIUserProfile,
+  APIUserProfileVersion,
+  Snowflake
+} from "@mutualzz/types";
 import { HttpStatusCode } from "@mutualzz/types";
 import {
   makeAutoObservable,
   observable,
   type ObservableMap,
-  type ObservableSet,
+  type ObservableSet
 } from "mobx";
 import type { AppStore } from "./App.store";
 import { UserProfile } from "./objects/UserProfile";
@@ -13,7 +17,10 @@ import { UserProfile } from "./objects/UserProfile";
 export class ProfileStore {
   readonly profiles: ObservableMap<string, UserProfile>;
   private readonly restrictedUserIds: ObservableSet<string> = observable.set();
-  private readonly pending = new Map<string, Promise<UserProfile | undefined>>();
+  private readonly pending = new Map<
+    string,
+    Promise<UserProfile | undefined>
+  >();
   private previewDraft: ProfileDraftState | null = null;
   private previewUserId: Snowflake | null = null;
 
@@ -90,17 +97,33 @@ export class ProfileStore {
     return request;
   }
 
-  async save(payload: Omit<APIUserProfile, "userId" | "configured" | "updatedAt"> & {
-    profileMusicUrl?: string | null;
-    profileMusicTrackId?: string | null;
-    profileMusicTrackSource?: "itunes" | "deezer" | null;
-    profileMusicTitle?: string | null;
-    profileMusicAuthorName?: string | null;
-  }) {
-    const result = await this.app.rest.put<APIUserProfile>("/@me/profile", payload);
+  async save(
+    payload: Omit<APIUserProfile, "userId" | "configured" | "updatedAt"> & {
+      profileMusicUrl?: string | null;
+      profileMusicTrackId?: string | null;
+      profileMusicTrackSource?: "itunes" | "deezer" | null;
+      profileMusicTitle?: string | null;
+      profileMusicAuthorName?: string | null;
+    }
+  ) {
+    const result = await this.app.rest.put<APIUserProfile>(
+      "/@me/profile",
+      payload
+    );
     if (!result) return undefined;
     this.clearPreviewDraft();
     return this.add(result);
+  }
+
+  async getVersions() {
+    const versions = await this.app.rest.get<APIUserProfileVersion[]>(
+      "/@me/profile/versions"
+    );
+    return versions ?? [];
+  }
+
+  async deleteVersion(versionId: string) {
+    await this.app.rest.delete(`/@me/profile/versions/${versionId}`);
   }
 
   setPreviewDraft(userId: Snowflake, draft: ProfileDraftState) {

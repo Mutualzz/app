@@ -34,13 +34,20 @@ import {
 } from "slate-react";
 import { HoverToolbar } from "../HoverToolbar/HoverToolbar";
 import { Element } from "./Element";
+import {
+  getCodeBlockRanges,
+  getInputCodeBlocks,
+  isLineInsideCodeBlock
+} from "./codeBlockDecorations";
+import { loadCodeLanguage } from "@utils/loadHighlighter";
 import { Leaf } from "./Leaf";
 import { MarkdownInputContext } from "./MarkdownInput.context";
 import {
   parseMarkdownToRanges,
   parseColorRanges,
   parseSpoilerRanges,
-  resolveMarkdownStyles
+  resolveMarkdownStyles,
+  parseEffectRanges
 } from "./MarkdownInput.helpers";
 import type { MarkdownInputProps } from "./MarkdownInput.types";
 import { withEmojis } from "./plugins/withEmojis";
@@ -97,6 +104,9 @@ const MarkdownInput = forwardRef<MarkdownInputHandle, MarkdownInputProps>(
     const emoticons = emoticonsProp ?? app.settings?.convertEmoticons ?? true;
 
     const { theme } = useTheme();
+    const codeThemeType = theme.type === "light" ? "light" : "dark";
+    const [codeHighlightVersion, setCodeHighlightVersion] = useState(0);
+    const requestedCodeLanguagesRef = useRef(new Set<string>());
     const inputRef = useRef<HTMLInputElement | null>(null);
 
     const [editorValue, setEditorValue] = useState(
@@ -181,15 +191,34 @@ const MarkdownInput = forwardRef<MarkdownInputHandle, MarkdownInputProps>(
     );
 
     const decorate = useCallback(([node, path]: [Node, number[]]): Range[] => {
+      if (path.length === 0) {
+        return getCodeBlockRanges(editor.children, codeThemeType, (language) => {
+          if (requestedCodeLanguagesRef.current.has(language)) return;
+          requestedCodeLanguagesRef.current.add(language);
+          void loadCodeLanguage(language).then(() =>
+            setCodeHighlightVersion((version) => version + 1)
+          );
+        });
+      }
+
+      if (
+        Text.isText(node) &&
+        getInputCodeBlocks(editor.children).lineKinds.has(path[0])
+      ) {
+        return [];
+      }
+
       if (Text.isText(node)) {
         return [
           ...parseMarkdownToRanges(node.text, path),
-          ...parseColorRanges(node.text, path)
+          ...parseColorRanges(node.text, path),
+          ...parseEffectRanges(node.text, path)
         ];
       }
 
       return parseSpoilerRanges([node, path]);
-    }, []);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [editor, codeThemeType, codeHighlightVersion]);
 
     const handleShiftEnter = (e: KeyboardEvent) => {
       const { selection } = editor;
@@ -332,6 +361,21 @@ const MarkdownInput = forwardRef<MarkdownInputHandle, MarkdownInputProps>(
 
     const onKeyDown = useCallback(
       (e: React.KeyboardEvent) => {
+        if (
+          e.key === "Enter" &&
+          !e.shiftKey &&
+          editor.selection &&
+          Range.isCollapsed(editor.selection) &&
+          isLineInsideCodeBlock(
+            editor.children,
+            editor.selection.anchor.path[0]
+          )
+        ) {
+          e.preventDefault();
+          editor.splitNodes({ always: true });
+          return;
+        }
+
         onKeyDownProp?.(e, editor);
       },
       [editor, onKeyDownProp]

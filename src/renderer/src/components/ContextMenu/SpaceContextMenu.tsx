@@ -1,3 +1,4 @@
+import { SpaceProfileModal } from "@components/Modals/SpaceProfileModal";
 import { ContextMenu } from "@components/ContextMenu";
 import { ContextSubmenu } from "@components/ContextSubmenu";
 import { SpaceSettingsModal } from "@components/SpaceSettings/SpaceSettingsModal";
@@ -93,6 +94,18 @@ export const SpaceContextMenu = observer(
             endDecorator={<PaperPlaneTiltIcon weight="fill" />}
           >
             {t("contextMenu.inviteToSpace")}
+          </ContextItem>
+        )}
+        {space.members.me && (
+          <ContextItem
+            onClick={() =>
+              openModal(
+                `space-profile-${space.id}`,
+                <SpaceProfileModal space={space} />
+              )
+            }
+          >
+            {tSpace("spaceProfile.menuEdit")}
           </ContextItem>
         )}
         <SpaceNotificationSettingsMenu space={space} />

@@ -1,10 +1,15 @@
 import type {
   APIProfileBlock,
-  APIProfileMusicSearchTrack
+  APIProfileMusicSearchTrack,
+  APIProfileTheme,
+  APIDisplayNameStyle,
+  APIUserProfileSnapshot,
+  ProfileBackgroundImageFit
 } from "@mutualzz/types";
-import type { UserProfile } from "@stores/objects/UserProfile";
 import { normalizeProfileBlocks } from "@components/Profile/viewer/profileLayout.utils";
-import i18n from "../../../i18n";
+import { removeSingleMemberGroups } from "@components/Profile/editor/utils/profileBlockGroups.utils";
+import i18n from "@renderer/i18n";
+import { type Theme } from "@stores/objects/Theme";
 
 export interface ProfileDraftState {
   bio: string;
@@ -12,7 +17,10 @@ export interface ProfileDraftState {
   banner: string | null;
   backgroundColor: string | null;
   backgroundImage: string | null;
+  backgroundImageFit: ProfileBackgroundImageFit | null;
   pageFontFamily: string | null;
+  theme: APIProfileTheme | null;
+  displayNameStyle: APIDisplayNameStyle | null;
   profileMusicUrl: string | null;
   profileMusicTrackId: string | null;
   profileMusicTrackSource: "itunes" | "deezer" | null;
@@ -22,8 +30,13 @@ export interface ProfileDraftState {
   blocks: APIProfileBlock[];
 }
 
+export type ProfileDraftSource = Omit<APIUserProfileSnapshot, "mobileBlocks">;
+
+const migrateLegacyHiddenBlock = (block: APIProfileBlock): APIProfileBlock =>
+  block.hidden ? { ...block, hidden: undefined, visibility: "nobody" } : block;
+
 export const createDraftFromProfile = (
-  profile: UserProfile
+  profile: ProfileDraftSource
 ): ProfileDraftState => {
   const musicTrackId =
     profile.profileMusic?.musicTrack?.id ??
@@ -39,15 +52,22 @@ export const createDraftFromProfile = (
     banner: profile.banner ?? null,
     backgroundColor: profile.backgroundColor ?? null,
     backgroundImage: profile.backgroundImage ?? null,
+    backgroundImageFit: profile.backgroundImageFit ?? null,
     pageFontFamily: profile.pageFontFamily ?? null,
+    theme: profile.theme ?? null,
+    displayNameStyle: profile.displayNameStyle ?? null,
     profileMusicTrackId: musicTrackId,
-    profileMusicTrackSource: musicTrackId ? (musicTrackSource ?? "itunes") : null,
+    profileMusicTrackSource: musicTrackId
+      ? (musicTrackSource ?? "itunes")
+      : null,
     profileMusicTrackSelection:
       musicTrackId && profile.profileMusic
         ? {
             source: musicTrackSource ?? "itunes",
             id: musicTrackId,
-            name: profile.profileMusic.title ?? i18n.t("profile.inspector.profileMusic", { ns: "settings" }),
+            name:
+              profile.profileMusic.title ??
+              i18n.t("profile.inspector.profileMusic", { ns: "settings" }),
             artists: profile.profileMusic.authorName ?? "",
             image: profile.profileMusic.image ?? null,
             previewUrl: profile.profileMusic.previewUrl ?? null,
@@ -67,9 +87,11 @@ export const createDraftFromProfile = (
       : null,
     blocks: normalizeProfileBlocks(
       (profile.blocks ?? []).filter(
-        (block) => (block as { type: string }).type !== "embed"
+        (block) =>
+          (block as { type: string }).type !== "embed" ||
+          !!(block as { kind?: string }).kind
       )
-    )
+    ).map(migrateLegacyHiddenBlock)
   };
 };
 
@@ -79,7 +101,10 @@ export const createEmptyDraft = (): ProfileDraftState => ({
   banner: null,
   backgroundColor: null,
   backgroundImage: null,
+  backgroundImageFit: null,
   pageFontFamily: null,
+  theme: null,
+  displayNameStyle: null,
   profileMusicUrl: null,
   profileMusicTrackId: null,
   profileMusicTrackSource: null,
@@ -89,6 +114,15 @@ export const createEmptyDraft = (): ProfileDraftState => ({
   blocks: []
 });
 
+export const createProfileThemeSnapshot = (theme: Theme): APIProfileTheme => ({
+  sourceId: theme.id,
+  name: theme.name,
+  type: theme.type,
+  style: theme.style,
+  colors: JSON.parse(JSON.stringify(theme.colors)),
+  typographyColors: JSON.parse(JSON.stringify(theme.typography.colors))
+});
+
 export const hasProfileDraftContent = (draft: ProfileDraftState) =>
   draft.blocks.length > 0 ||
   !!draft.bio.trim() ||
@@ -96,6 +130,8 @@ export const hasProfileDraftContent = (draft: ProfileDraftState) =>
   !!draft.banner ||
   !!draft.backgroundColor ||
   !!draft.backgroundImage ||
+  !!draft.theme ||
+  !!draft.displayNameStyle ||
   !!draft.profileMusicUrl ||
   !!draft.profileMusicTrackId;
 
@@ -105,6 +141,9 @@ export const EMPTY_PROFILE_SAVE_PAYLOAD = {
   banner: null,
   backgroundColor: null,
   backgroundImage: null,
+  backgroundImageFit: null,
+  theme: null,
+  displayNameStyle: null,
   profileMusicUrl: null,
   profileMusicTrackId: null,
   profileMusicTrackSource: null,
@@ -112,15 +151,20 @@ export const EMPTY_PROFILE_SAVE_PAYLOAD = {
 };
 
 export const prepareBlocksForSave = (blocks: APIProfileBlock[]) =>
-  normalizeProfileBlocks(blocks).filter((block) => {
-    if ((block as { type: string }).type === "embed") return false;
-    if (block.type === "image" && !block.src.trim()) return false;
-    if (block.type === "sticker" && !block.expressionId.trim()) return false;
-    if (block.type === "links" && block.links.every((l) => !l.url.trim())) {
-      return false;
-    }
-    return true;
-  });
+  removeSingleMemberGroups(
+    normalizeProfileBlocks(blocks).filter((block) => {
+      if ((block as { type: string }).type === "embed") return false;
+      if (block.type === "image" && !block.src.trim()) return false;
+      if (block.type === "sticker" && !block.expressionId.trim()) return false;
+      if (
+        block.type === "links" &&
+        block.links.every((link) => !link.url.trim())
+      ) {
+        return false;
+      }
+      return true;
+    })
+  );
 
 export const validateDraftForSave = (
   draft: ProfileDraftState
@@ -159,7 +203,9 @@ export const validateDraftForSave = (
   }
 
   if (draft.bio.length > 512) {
-    return i18n.t("profile.inspector.validation.bioTooLong", { ns: "settings" });
+    return i18n.t("profile.inspector.validation.bioTooLong", {
+      ns: "settings"
+    });
   }
 
   if (draft.pronouns.length > 32) {
@@ -201,6 +247,44 @@ export const isEditableInputFocused = () => {
   );
 };
 
+const isPrimaryModifier = (event: KeyboardEvent) =>
+  (event.ctrlKey || event.metaKey) && !event.altKey;
+
+export const isProfileUndoKey = (event: KeyboardEvent) =>
+  isPrimaryModifier(event) && !event.shiftKey && event.code === "KeyZ";
+
+export const isProfileRedoKey = (event: KeyboardEvent) =>
+  isPrimaryModifier(event) &&
+  ((event.shiftKey && event.code === "KeyZ") ||
+    (!event.shiftKey && event.code === "KeyY"));
+
+export const isProfileCopyKey = (event: KeyboardEvent) =>
+  isPrimaryModifier(event) && !event.shiftKey && event.code === "KeyC";
+
+export const isProfilePasteKey = (event: KeyboardEvent) =>
+  isPrimaryModifier(event) && !event.shiftKey && event.code === "KeyV";
+
+export const isProfileDuplicateKey = (event: KeyboardEvent) =>
+  isPrimaryModifier(event) && !event.shiftKey && event.code === "KeyD";
+
+export const isProfileGroupKey = (event: KeyboardEvent) =>
+  isPrimaryModifier(event) && !event.shiftKey && event.code === "KeyG";
+
+export const isProfileUngroupKey = (event: KeyboardEvent) =>
+  isPrimaryModifier(event) && event.shiftKey && event.code === "KeyG";
+
+const NUDGE_DIRECTIONS: Record<string, { x: number; y: number }> = {
+  ArrowLeft: { x: -1, y: 0 },
+  ArrowRight: { x: 1, y: 0 },
+  ArrowUp: { x: 0, y: -1 },
+  ArrowDown: { x: 0, y: 1 }
+};
+
+export const getNudgeDirection = (event: KeyboardEvent) =>
+  event.ctrlKey || event.metaKey || event.altKey
+    ? null
+    : (NUDGE_DIRECTIONS[event.key] ?? null);
+
 export const isProfileBlockDeleteKey = (event: KeyboardEvent) =>
   (event.key === "Delete" || event.key === "Backspace") &&
   !event.metaKey &&
@@ -212,7 +296,6 @@ export const getDropPoint = (
   canvasRect: { left: number; top: number },
   scale = 1
 ) => ({
-  x:
-    (translatedRect.left - canvasRect.left + translatedRect.width / 2) / scale,
+  x: (translatedRect.left - canvasRect.left + translatedRect.width / 2) / scale,
   y: (translatedRect.top - canvasRect.top + translatedRect.height / 2) / scale
 });

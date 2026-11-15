@@ -1,3 +1,4 @@
+import { UserDisplayName } from "@components/User/UserDisplayName";
 import { MarkdownRenderer } from "@components/Markdown/MarkdownRenderer/MarkdownRenderer";
 import { UserAvatar } from "@components/User/UserAvatar";
 import { useAppStore } from "@hooks/useStores";
@@ -325,9 +326,16 @@ export const Message = observer(
                   <ReplyAuthorName>
                     <Typography textColor="muted" level="body-xs">
                       {isSystemUser(repliedMessage.author) &&
-                      !isSystemMessageType(repliedMessage.type)
-                        ? t("unknown")
-                        : (repliedMessage.author?.displayName ?? t("unknown"))}
+                      !isSystemMessageType(repliedMessage.type) ? (
+                        t("unknown")
+                      ) : (
+                        <UserDisplayName
+                          userId={repliedMessage.author?.id}
+                          nameStyle={repliedMessage.author?.displayNameStyle}
+                        >
+                          {repliedMessage.author?.displayName ?? t("unknown")}
+                        </UserDisplayName>
+                      )}
                     </Typography>
                   </ReplyAuthorName>
                   <ReplyContentText>

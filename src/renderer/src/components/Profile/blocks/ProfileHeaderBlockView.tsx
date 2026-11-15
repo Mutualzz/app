@@ -8,12 +8,15 @@ import type { UserProfile } from "@stores/objects/UserProfile";
 import { ImageFormat, type ProfileHeaderBlock } from "@mutualzz/types";
 import {
   resolveProfileBackgroundFill,
-  resolveProfileBlockCornerRadius,
+  resolveProfileBlockCornerRadius
 } from "@mutualzz/ui-core";
 import { Box, Stack, Typography } from "@mutualzz/ui-web";
 import { observer } from "mobx-react-lite";
 import { Paper } from "@renderer/components/Paper";
 import { useAppStore } from "@renderer/hooks/useStores";
+import { useContext } from "react";
+import { ProfileNameStyleContext } from "../shared/profileTheme.utils";
+import { ProfileDisplayName } from "../shared/ProfileDisplayName";
 
 const AVATAR_SIZE = 72;
 const AVATAR_OVERLAP = AVATAR_SIZE / 2;
@@ -38,6 +41,7 @@ export const ProfileHeaderBlockView = observer(
     pronounsOverride,
     bannerOverride
   }: Props) => {
+    const displayNameStyle = useContext(ProfileNameStyleContext);
     const app = useAppStore();
 
     const bannerSource =
@@ -59,7 +63,7 @@ export const ProfileHeaderBlockView = observer(
     const headerBackground = block?.backgroundColor?.trim() || null;
     const cornerRadius = resolveProfileBlockCornerRadius(
       block ?? { type: "header" },
-      "desktop",
+      "desktop"
     );
 
     return (
@@ -71,7 +75,7 @@ export const ProfileHeaderBlockView = observer(
         borderRadius={cornerRadius}
         elevation={app.settings?.preferEmbossed ? 5 : 1}
         css={{
-          ...profileBlockSurfaceCss,
+          ...profileBlockSurfaceCss
         }}
       >
         {headerBackground ? (
@@ -82,9 +86,9 @@ export const ProfileHeaderBlockView = observer(
               zIndex: -1,
               background: resolveProfileBackgroundFill(
                 headerBackground,
-                "transparent",
+                "transparent"
               ),
-              pointerEvents: "none",
+              pointerEvents: "none"
             }}
           />
         ) : null}
@@ -97,7 +101,7 @@ export const ProfileHeaderBlockView = observer(
             overflow: "hidden",
             backgroundColor: bannerUrl ? undefined : user.accentColor,
             position: "relative",
-            zIndex: 0,
+            zIndex: 0
           }}
         >
           {bannerUrl ? (
@@ -153,9 +157,17 @@ export const ProfileHeaderBlockView = observer(
               >
                 <Typography
                   level="title-md"
-                  css={{ lineHeight: 1.25, fontSize: "var(--pcf-title)" }}
+                  css={{
+                    lineHeight: 1.25,
+                    fontSize: "var(--pcf-title)"
+                  }}
                 >
-                  {user.displayName}
+                  <ProfileDisplayName
+                    nameStyle={displayNameStyle}
+                    ownerUserId={user.id}
+                  >
+                    {user.displayName}
+                  </ProfileDisplayName>
                 </Typography>
                 {pronouns ? (
                   <>

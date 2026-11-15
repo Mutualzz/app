@@ -1,3 +1,4 @@
+import { UserDisplayName } from "@components/User/UserDisplayName";
 import { Paper } from "@components/Paper";
 import { UserAvatar } from "@components/User/UserAvatar";
 import { Tooltip } from "@components/Tooltip";
@@ -6,7 +7,11 @@ import type { ColorLike } from "@mutualzz/ui-core";
 import { IconSlot, Stack, Typography, useTheme } from "@mutualzz/ui-web";
 import type { Space } from "@stores/objects/Space";
 import type { VoiceState } from "@stores/objects/VoiceState.ts";
-import { MicrophoneSlashIcon, VideoCameraIcon, CubeIcon } from "@phosphor-icons/react";
+import {
+  MicrophoneSlashIcon,
+  VideoCameraIcon,
+  CubeIcon
+} from "@phosphor-icons/react";
 import { HeadphonesOffIcon } from "../icons/HeadphonesOffIcon";
 import { useTranslation } from "react-i18next";
 import { observer } from "mobx-react-lite";
@@ -103,7 +108,13 @@ export const VoiceChannelMemberRow = observer(
             level="label-sm"
             textColor={nameColor}
           >
-            {displayName}
+            <UserDisplayName
+              userId={user?.id}
+              nameStyle={isSubtle ? null : user?.displayNameStyle}
+              fallbackColor={String(nameColor)}
+            >
+              {displayName}
+            </UserDisplayName>
           </Typography>
         </Stack>
         <Stack direction="row" alignItems="center" spacing={1.75}>
@@ -117,10 +128,7 @@ export const VoiceChannelMemberRow = observer(
               borderRadius={4}
               css={{ flexShrink: 0 }}
             >
-              <Typography
-                level="label-xs"
-                css={{ letterSpacing: "0.04em" }}
-              >
+              <Typography level="label-xs" css={{ letterSpacing: "0.04em" }}>
                 {t("voice.controls.live")}
               </Typography>
             </Paper>
@@ -159,10 +167,7 @@ export const VoiceChannelMemberRow = observer(
           {state.spaceDeaf && (
             <Tooltip content={t("voice.controls.spaceDeafened")}>
               <IconSlot size={STATUS_ICON_SIZE}>
-                <HeadphonesOffIcon
-                  weight="fill"
-                  color={theme.colors.danger}
-                />
+                <HeadphonesOffIcon weight="fill" color={theme.colors.danger} />
               </IconSlot>
             </Tooltip>
           )}

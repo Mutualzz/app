@@ -3,8 +3,15 @@ import { getEmoji } from "./emojis/emojis";
 import { TWEMOJI_URL } from "./urls";
 import { getAppStore } from "@hooks/useStores";
 
+const REPEATED_SHORTCODE_COLONS = /:{2,}([a-zA-Z0-9_+-]+):{2,}/g;
+
+export const collapseRepeatedShortcodeColons = (markdown: string) =>
+  markdown.replace(REPEATED_SHORTCODE_COLONS, (match, shortcode: string) =>
+    getEmoji(shortcode.toLowerCase()) ? `:${shortcode}:` : match
+  );
+
 export function markdownToSlate(markdown: string): Descendant[] {
-  const lines = markdown.split(/\r?\n/);
+  const lines = collapseRepeatedShortcodeColons(markdown).split(/\r?\n/);
   const result: Descendant[] = [];
 
   for (const line of lines) {
@@ -126,8 +133,8 @@ function parseInlineMarkdown(input: string): Descendant[] {
       if (emoji) {
         nodes.push({
           type: "emoji",
-          name: `:${emoji.shortcodes?.[0]}:`,
-          url: `${TWEMOJI_URL}/${emoji.hexcode.toLowerCase()}.png`,
+          name: emoji.shortcodes?.[0] ?? shortcode,
+          url: `${TWEMOJI_URL}/${emoji.hexcode.toLowerCase()}.svg`,
           unicode: emoji.emoji,
           children: [{ text: "" }]
         });

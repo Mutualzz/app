@@ -1,11 +1,13 @@
 import { Paper } from "@components/Paper";
 import { Tooltip } from "@components/Tooltip";
-import { useAppStore } from "@hooks/useStores";
 import type { ProfileBlockType } from "@mutualzz/types";
-import { Stack, Typography } from "@mutualzz/ui-web";
+import { Typography } from "@mutualzz/ui-web";
 import { useDraggable } from "@dnd-kit/core";
 import {
   ImageIcon,
+  HeadphonesIcon,
+  PlayCircleIcon,
+  ImagesIcon,
   LinkIcon,
   LinkSimpleIcon,
   MinusIcon,
@@ -15,6 +17,7 @@ import {
   QuotesIcon,
   ShieldCheckIcon,
   StickerIcon,
+  TimerIcon,
   TextAaIcon,
   UserCircleIcon,
   UsersThreeIcon
@@ -22,7 +25,7 @@ import {
 import { observer } from "mobx-react-lite";
 import { useTranslation } from "react-i18next";
 
-const ITEMS: {
+export const PROFILE_BLOCK_ITEMS: {
   type: ProfileBlockType;
   icon: React.ReactNode;
 }[] = [
@@ -30,8 +33,12 @@ const ITEMS: {
   { type: "text", icon: <TextAaIcon weight="fill" /> },
   { type: "quote", icon: <QuotesIcon weight="fill" /> },
   { type: "image", icon: <ImageIcon weight="fill" /> },
+  { type: "gallery", icon: <ImagesIcon weight="fill" /> },
   { type: "sticker", icon: <StickerIcon weight="fill" /> },
+  { type: "countdown", icon: <TimerIcon weight="fill" /> },
   { type: "music", icon: <MusicNotesIcon weight="fill" /> },
+  { type: "nowPlaying", icon: <HeadphonesIcon weight="fill" /> },
+  { type: "embed", icon: <PlayCircleIcon weight="fill" /> },
   { type: "links", icon: <LinkIcon weight="fill" /> },
   { type: "connections", icon: <LinkSimpleIcon weight="fill" /> },
   { type: "activity", icon: <PulseIcon weight="fill" /> },
@@ -70,10 +77,10 @@ const PaletteItem = observer(
           {...attributes}
           variant="soft"
           borderRadius={10}
-          p={1.25}
+          p={1}
           direction="column"
           alignItems="center"
-          spacing={0.75}
+          spacing={0.5}
           onDoubleClick={() => onDoubleClick(type)}
           css={{
             cursor: "grab",
@@ -85,7 +92,17 @@ const PaletteItem = observer(
           }}
         >
           {icon}
-          <Typography level="body-xs">{label}</Typography>
+          <Typography
+            level="body-xs"
+            css={{
+              maxWidth: "100%",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap"
+            }}
+          >
+            {label}
+          </Typography>
         </Paper>
       </Tooltip>
     );
@@ -98,48 +115,24 @@ interface Props {
 
 export const ProfileBlockPalette = observer(({ onDoubleClickAdd }: Props) => {
   const { t } = useTranslation("settings");
-  const app = useAppStore();
-  const embossed = app.settings?.preferEmbossed;
 
   return (
-    <Paper
-      width={120}
-      minWidth={120}
-      direction="column"
-      spacing={1}
-      p={1.25}
-      borderRadius={12}
-      variant="elevation"
-      elevation={embossed ? 5 : 1}
+    <div
       css={{
-        overflowY: "auto",
-        maxHeight: "100%"
+        display: "grid",
+        gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+        gap: 6
       }}
     >
-      <Typography
-        level="body-xs"
-        fontWeight={700}
-        css={{
-          textTransform: "uppercase",
-          letterSpacing: "0.06em",
-          opacity: 1,
-          textAlign: "center"
-        }}
-        textColor="muted"
-      >
-        {t("profile.blocks.paletteTitle")}
-      </Typography>
-      <Stack direction="column" spacing={1}>
-        {ITEMS.map((item) => (
-          <PaletteItem
-            key={item.type}
-            type={item.type}
-            label={t(`profile.blocks.${item.type}`)}
-            icon={item.icon}
-            onDoubleClick={onDoubleClickAdd}
-          />
-        ))}
-      </Stack>
-    </Paper>
+      {PROFILE_BLOCK_ITEMS.map((item) => (
+        <PaletteItem
+          key={item.type}
+          type={item.type}
+          label={t(`profile.blocks.${item.type}`)}
+          icon={item.icon}
+          onDoubleClick={onDoubleClickAdd}
+        />
+      ))}
+    </div>
   );
 });

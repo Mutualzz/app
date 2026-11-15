@@ -1,6 +1,12 @@
 import { type TypographyHeadingKey } from "@mutualzz/ui-core";
 import { Typography, useTheme } from "@mutualzz/ui-web";
-import type { RenderElementProps } from "slate-react";
+import {
+  ReactEditor,
+  type RenderElementProps,
+  useSlateStatic
+} from "slate-react";
+import { formatColor } from "@mutualzz/ui-core";
+import { getInputCodeBlocks } from "./codeBlockDecorations";
 import { UserMention } from "@components/Markdown/components/mention/UserMention";
 import { Emoji } from "@components/Markdown/components/emoji/Emoji";
 import { CustomEmoji } from "@components/Markdown/components/emoji/CustomEmoji";
@@ -14,6 +20,11 @@ export const Element = ({
   element
 }: RenderElementProps) => {
   const { theme } = useTheme();
+  const editor = useSlateStatic();
+  const codeBorder = formatColor(theme.colors.neutral, {
+    alpha: 35,
+    format: "hexa"
+  });
   switch (element.type) {
     case "blockquote":
       return (
@@ -125,7 +136,45 @@ export const Element = ({
       }
     }
     case "line":
-    default:
-      return <div {...attributes}>{children}</div>;
+    default: {
+      const lineIndex = ReactEditor.findPath(editor, element)[0];
+      const codeLineKind =
+        lineIndex !== undefined
+          ? getInputCodeBlocks(editor.children).lineKinds.get(lineIndex)
+          : undefined;
+
+      if (!codeLineKind) return <div {...attributes}>{children}</div>;
+
+      return (
+        <div
+          {...attributes}
+          css={{
+            fontFamily: "monospace",
+            fontSize: "0.92em",
+            padding: "0 0.6em",
+            background: formatColor(theme.colors.surface, {
+              darken: theme.type === "dark" ? 8 : 0,
+              format: "hexa"
+            }),
+            borderLeft: `1px solid ${codeBorder}`,
+            borderRight: `1px solid ${codeBorder}`,
+            ...(codeLineKind === "fenceOpen" && {
+              borderTop: `1px solid ${codeBorder}`,
+              borderTopLeftRadius: 6,
+              borderTopRightRadius: 6,
+              paddingTop: "0.2em"
+            }),
+            ...(codeLineKind === "fenceClose" && {
+              borderBottom: `1px solid ${codeBorder}`,
+              borderBottomLeftRadius: 6,
+              borderBottomRightRadius: 6,
+              paddingBottom: "0.2em"
+            })
+          }}
+        >
+          {children}
+        </div>
+      );
+    }
   }
 };

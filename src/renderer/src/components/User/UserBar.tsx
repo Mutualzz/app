@@ -369,7 +369,10 @@ export const UserBar = observer(() => {
           minWidth={0}
           borderRadius={6}
           variant={hovered ? "soft" : "plain"}
-          color={formatColor(theme.colors.neutral, { alpha: 90 })}
+          color={formatColor(theme.colors.neutral, {
+            alpha: 90,
+            format: "hexa"
+          })}
           onMouseEnter={() => setHovered(true)}
           onMouseLeave={() => setHovered(false)}
           onClick={(event) => {

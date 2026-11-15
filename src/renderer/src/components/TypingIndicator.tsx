@@ -1,3 +1,5 @@
+import { interpolateNodes, nameToken } from "@utils/interpolateNodes";
+import { UserDisplayName } from "@components/User/UserDisplayName";
 import { observer } from "mobx-react-lite";
 import { useAppStore } from "@hooks/useStores";
 import { Stack, Typography } from "@mutualzz/ui-web";
@@ -18,18 +20,24 @@ export const TypingIndicator = observer(
 
     if (users.length === 0) return null;
 
-    const text =
+    const styledNames = users.slice(0, 2).map((user) => (
+      <UserDisplayName
+        key={user.id}
+        userId={user.id}
+        nameStyle={user.displayNameStyle}
+      >
+        {user.displayName}
+      </UserDisplayName>
+    ));
+
+    const template =
       users.length === 1
-        ? t("typing.one", { name: users[0].displayName })
+        ? t("typing.one", { name: nameToken(0) })
         : users.length === 2
-          ? t("typing.two", {
-              name1: users[0].displayName,
-              name2: users[1].displayName
-            })
-          : t("typing.many", {
-              name1: users[0].displayName,
-              name2: users[1].displayName
-            });
+          ? t("typing.two", { name1: nameToken(0), name2: nameToken(1) })
+          : t("typing.many", { name1: nameToken(0), name2: nameToken(1) });
+
+    const text = interpolateNodes(template, styledNames);
 
     return (
       <Paper
@@ -51,7 +59,10 @@ export const TypingIndicator = observer(
             />
           ))}
         </Stack>
-        <Typography textColor="secondary" css={{ fontSize: "calc(1em * var(--chat-font-scale, 1))" }}>
+        <Typography
+          textColor="secondary"
+          css={{ fontSize: "calc(1em * var(--chat-font-scale, 1))" }}
+        >
           {text}
         </Typography>
       </Paper>

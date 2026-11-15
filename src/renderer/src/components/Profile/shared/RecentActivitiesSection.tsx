@@ -68,6 +68,7 @@ interface Props {
   iconSize?: number;
   showEmpty?: boolean;
   compact?: boolean;
+  hiddenTypes?: string[];
 }
 
 export const RecentActivitiesSection = ({
@@ -75,7 +76,8 @@ export const RecentActivitiesSection = ({
   liveActivities = [],
   iconSize = 36,
   showEmpty = false,
-  compact = false
+  compact = false,
+  hiddenTypes
 }: Props) => {
   const { t } = useTranslation("settings");
   const { t: tCommon } = useTranslation("common");
@@ -107,10 +109,12 @@ export const RecentActivitiesSection = ({
     () =>
       dedupeRecent(
         (data?.activities ?? []).filter(
-          (row) => !liveKeys.has(activityIdentity(row))
+          (row) =>
+            !liveKeys.has(activityIdentity(row)) &&
+            !hiddenTypes?.includes(row.type)
         )
       ),
-    [data?.activities, liveKeys]
+    [data?.activities, liveKeys, hiddenTypes]
   );
 
   const activitiesSignature = useMemo(

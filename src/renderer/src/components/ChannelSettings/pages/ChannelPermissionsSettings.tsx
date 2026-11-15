@@ -157,7 +157,8 @@ const PermissionRow = ({
       css={{
         "&:hover": {
           background: formatColor(dynamicElevation(theme.colors.surface, 4), {
-            alpha: 60
+            alpha: 60,
+            format: "hexa"
           })
         }
       }}
@@ -229,13 +230,14 @@ const TargetItem = ({
         cursor: "pointer",
         background: selected
           ? formatColor(dynamicElevation(theme.colors.surface, 6), {
-              alpha: 80
+              alpha: 80,
+              format: "hexa"
             })
           : "transparent",
         "&:hover": {
           background: formatColor(
             dynamicElevation(theme.colors.surface, selected ? 6 : 4),
-            { alpha: selected ? 80 : 60 }
+            { alpha: selected ? 80 : 60, format: "hexa" }
           )
         }
       }}
@@ -388,7 +390,7 @@ const AddOverwritePicker = observer(
                     "&:hover": {
                       background: formatColor(
                         dynamicElevation(theme.colors.surface, 5),
-                        { alpha: 60 }
+                        { alpha: 60, format: "hexa" }
                       )
                     }
                   }}
@@ -425,7 +427,7 @@ const AddOverwritePicker = observer(
                     "&:hover": {
                       background: formatColor(
                         dynamicElevation(theme.colors.surface, 5),
-                        { alpha: 60 }
+                        { alpha: 60, format: "hexa" }
                       )
                     }
                   }}

@@ -3,7 +3,7 @@ import {
   ButtonGroup,
   Stack,
   Typography,
-  useTheme,
+  useTheme
 } from "@mutualzz/ui-web";
 import { IconButton } from "@components/IconButton";
 import { formatColor } from "@mutualzz/ui-core";
@@ -17,7 +17,7 @@ import {
   CaretUpIcon,
   UserPlusIcon,
   UsersIcon,
-  PhoneIcon,
+  PhoneIcon
 } from "@phosphor-icons/react";
 import { Tooltip } from "@components/Tooltip";
 import { useModal } from "@contexts/Modal.context";
@@ -51,7 +51,7 @@ export const DMChannelHeader = observer(
     onSearchExpand,
     onSearchDraftChange,
     onSearchSubmit,
-    onSearchClose,
+    onSearchClose
   }: Props) => {
     const app = useAppStore();
     const { theme } = useTheme();
@@ -101,10 +101,10 @@ export const DMChannelHeader = observer(
           flexShrink: 0,
           borderBottom: callActive
             ? `1px solid ${formatColor(theme.colors.neutral, {
-                alpha: 0.28,
-                format: "hexa",
+                alpha: 28,
+                format: "hexa"
               })}`
-            : undefined,
+            : undefined
         }}
       >
         <Stack
@@ -167,12 +167,12 @@ export const DMChannelHeader = observer(
                 if (callActive) {
                   void app.voice.join({
                     spaceId: null,
-                    channelId: channel.id,
+                    channelId: channel.id
                   });
                   return;
                 }
                 void app.calls.startCall(channel.id, {
-                  silent: e.shiftKey,
+                  silent: e.shiftKey
                 });
               }}
             >
@@ -183,9 +183,7 @@ export const DMChannelHeader = observer(
             <>
               <Tooltip
                 content={
-                  isFull
-                    ? t("header.dm.groupFull")
-                    : t("header.dm.addToGroup")
+                  isFull ? t("header.dm.groupFull") : t("header.dm.addToGroup")
                 }
                 placement="bottom"
               >
@@ -194,7 +192,7 @@ export const DMChannelHeader = observer(
                   onClick={() =>
                     openModal(
                       `add-recipient-${channel.id}`,
-                      <GroupDMAddRecipientModal channel={channel} />,
+                      <GroupDMAddRecipientModal channel={channel} />
                     )
                   }
                 >
@@ -232,5 +230,5 @@ export const DMChannelHeader = observer(
         </ButtonGroup>
       </Stack>
     );
-  },
+  }
 );

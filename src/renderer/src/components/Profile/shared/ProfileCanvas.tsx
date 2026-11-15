@@ -1,9 +1,22 @@
 import type { UserProfile } from "@stores/objects/UserProfile";
 import { useGoogleFont } from "@hooks/useGoogleFont";
-import { buildProfileBackgroundCss } from "@mutualzz/ui-core";
+import {
+  getProfileBackgroundImageLayer,
+  resolveProfileBackgroundFill
+} from "@mutualzz/ui-core";
 import { Box, useTheme } from "@mutualzz/ui-web";
 import { observer } from "mobx-react-lite";
 import { forwardRef, type PropsWithChildren, type Ref } from "react";
+import type {
+  APIDisplayNameStyle,
+  APIProfileTheme,
+  ProfileBackgroundImageFit
+} from "@mutualzz/types";
+import {
+  getScopedThemeCss,
+  ProfileThemeScope,
+  useProfileScopedTheme
+} from "./ProfileThemeScope";
 
 interface Props extends PropsWithChildren {
   profile: UserProfile;
@@ -11,7 +24,10 @@ interface Props extends PropsWithChildren {
   onCanvasClick?: () => void;
   backgroundColorOverride?: string | null;
   backgroundImageOverride?: string | null;
+  backgroundImageFitOverride?: ProfileBackgroundImageFit | null;
   pageFontFamilyOverride?: string | null;
+  themeOverride?: APIProfileTheme | null;
+  displayNameStyleOverride?: APIDisplayNameStyle | null;
 }
 
 export const ProfileCanvas = observer(
@@ -23,11 +39,23 @@ export const ProfileCanvas = observer(
       children,
       backgroundColorOverride,
       backgroundImageOverride,
-      pageFontFamilyOverride
+      backgroundImageFitOverride,
+      pageFontFamilyOverride,
+      themeOverride,
+      displayNameStyleOverride
     }: Props,
     ref: Ref<HTMLDivElement>
   ) {
     const { theme } = useTheme();
+
+    const profileTheme =
+      themeOverride !== undefined ? themeOverride : profile.theme;
+    const displayNameStyle =
+      displayNameStyleOverride !== undefined
+        ? displayNameStyleOverride
+        : profile.displayNameStyle;
+
+    const scopedTheme = useProfileScopedTheme(profileTheme);
 
     const pageFontFamily =
       pageFontFamilyOverride !== undefined
@@ -50,11 +78,23 @@ export const ProfileCanvas = observer(
       backgroundImageSource
     );
 
-    const background = buildProfileBackgroundCss({
+    const backgroundFallback = scopedTheme
+      ? String(scopedTheme.colors.background)
+      : String(theme.colors.surface);
+
+    const backgroundImageFit =
+      backgroundImageFitOverride !== undefined
+        ? backgroundImageFitOverride
+        : profile.backgroundImageFit;
+
+    const imageLayer = backgroundImageUrl
+      ? getProfileBackgroundImageLayer(backgroundImageUrl, backgroundImageFit)
+      : null;
+
+    const canvasFill = resolveProfileBackgroundFill(
       backgroundColor,
-      backgroundImageUrl,
-      fallback: theme.colors.surface
-    });
+      backgroundFallback
+    );
 
     return (
       <Box
@@ -66,8 +106,10 @@ export const ProfileCanvas = observer(
         overflow="hidden"
         onClick={interactive ? onCanvasClick : undefined}
         css={{
-          background,
+          ...getScopedThemeCss(scopedTheme),
+          background: canvasFill,
           cursor: interactive ? "default" : undefined,
+          userSelect: interactive ? "none" : undefined,
           fontFamily: fontFamily ?? "inherit",
           containerType: "inline-size",
           "--pcf-xs": "clamp(10px, 0.75cqw, 14px)",
@@ -76,7 +118,44 @@ export const ProfileCanvas = observer(
           "--pcf-title": "clamp(16px, 1.25cqw, 22px)"
         }}
       >
-        {children}
+        {imageLayer?.kind === "css" && (
+          <div
+            aria-hidden
+            css={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              height: imageLayer.square ? "100cqw" : "100%",
+              background: imageLayer.background,
+              pointerEvents: "none"
+            }}
+          />
+        )}
+        {imageLayer?.kind === "image" && backgroundImageUrl && (
+          <img
+            aria-hidden
+            alt=""
+            src={backgroundImageUrl}
+            draggable={false}
+            css={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              width: "100%",
+              height: "auto",
+              pointerEvents: "none",
+              maskImage: `linear-gradient(to bottom, black ${imageLayer.fadeStart}%, transparent)`,
+              WebkitMaskImage: `linear-gradient(to bottom, black ${imageLayer.fadeStart}%, transparent)`
+            }}
+          />
+        )}
+        <ProfileThemeScope
+          scopedTheme={scopedTheme}
+          displayNameStyle={displayNameStyle}
+        >
+          {children}
+        </ProfileThemeScope>
       </Box>
     );
   })

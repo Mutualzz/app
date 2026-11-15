@@ -9,6 +9,16 @@ import { Blockquote } from "../components/Blockquote";
 import { Emoji } from "../components/emoji/Emoji";
 import { CustomEmoji } from "../components/emoji/CustomEmoji";
 import { Spoiler } from "../components/Spoiler";
+import { CodeBlock } from "../components/CodeBlock";
+
+const collectNodeText = (nodes: any[]): string =>
+  nodes
+    .map((node) =>
+      node.type === "text"
+        ? (node.data ?? "")
+        : collectNodeText(node.children ?? [])
+    )
+    .join("");
 import type { MarkdownRendererProps } from "./MarkdownRenderer.types";
 import { emphasisPlugin } from "./plugins/emphasis";
 import { spoilerPlugin } from "./plugins/spoiler";
@@ -21,11 +31,13 @@ import { MarkdownItAsync } from "@components/Markdown/MarkdownItAsync";
 import { customEmojiPlugin } from "@components/Markdown/MarkdownRenderer/plugins/customEmoji";
 import { emojiPlugin } from "@components/Markdown/MarkdownRenderer/plugins/emoji";
 import { mentionPlugin } from "@components/Markdown/MarkdownRenderer/plugins/mention";
-import { type MentionType } from "@mutualzz/types";
+import { type DisplayNameEffect, type MentionType } from "@mutualzz/types";
 import { UserMention } from "@components/Markdown/components/mention/UserMention";
 import { RoleMention } from "@components/Markdown/components/mention/RoleMention";
 import { DefaultMention } from "@components/Markdown/components/mention/DefaultMention";
 import { isEmojiOnlyMessage } from "@utils/emojis/isEmojiOnlyMessage";
+import { effectPlugin } from "./plugins/effect";
+import { TextEffect } from "../components/TextEffect";
 
 export const MarkdownRenderer = ({
   textColor = "primary",
@@ -59,6 +71,7 @@ export const MarkdownRenderer = ({
     instance.use(brOnEmpty);
     instance.use(spoilerPlugin);
     instance.use(colorPlugin);
+    instance.use(effectPlugin);
     instance.use(mentionPlugin);
     instance.use(strikethroughPlugin);
     instance.use(emphasisPlugin);
@@ -234,6 +247,19 @@ export const MarkdownRenderer = ({
               return <Spoiler>{children}</Spoiler>;
             }
             case "span": {
+              const effect = domNode.attribs?.["data-markdown-effect"];
+              if (effect) {
+                const effectChildren = domToReact(
+                  (domNode.children ?? []) as any,
+                  options
+                );
+                return (
+                  <TextEffect effect={effect as DisplayNameEffect}>
+                    {effectChildren}
+                  </TextEffect>
+                );
+              }
+
               const hex = domNode.attribs?.["data-markdown-color"];
               if (!hex) return undefined;
 
@@ -377,6 +403,19 @@ export const MarkdownRenderer = ({
                   </Typography>
                 </li>
               );
+            }
+            case "pre": {
+              const codeNode = (domNode.children ?? []).find(
+                (child: any) => child.type === "tag" && child.name === "code"
+              ) as any;
+              const className: string = codeNode?.attribs?.class ?? "";
+              const language = className.startsWith("language-")
+                ? className.slice("language-".length)
+                : null;
+              const code = collectNodeText(
+                codeNode?.children ?? domNode.children ?? []
+              ).replace(/\n$/, "");
+              return <CodeBlock code={code} language={language} />;
             }
             case "br":
               return <br />;

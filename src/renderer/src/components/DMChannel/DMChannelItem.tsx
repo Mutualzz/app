@@ -1,3 +1,4 @@
+import { UserDisplayName } from "@components/User/UserDisplayName";
 import { observer } from "mobx-react-lite";
 import { useNavigate } from "@tanstack/react-router";
 import { type Channel } from "@stores/objects/Channel";
@@ -163,7 +164,16 @@ export const DMChannelItem = observer(({ channel }: Props) => {
             overflow="hidden"
             textOverflow="ellipsis"
           >
-            {title}
+            {channel.type === ChannelType.DM && recipient ? (
+              <UserDisplayName
+                userId={recipient.id}
+                nameStyle={recipient.displayNameStyle}
+              >
+                {title}
+              </UserDisplayName>
+            ) : (
+              title
+            )}
           </Typography>
 
           {preview &&

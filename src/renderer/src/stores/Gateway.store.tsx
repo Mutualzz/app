@@ -1147,6 +1147,27 @@ export class GatewayStore {
     return ack.bookmarks;
   }
 
+  async updateSpaceMemberProfile(
+    spaceId: string,
+    fields: {
+      nickname?: string;
+      pronouns?: string;
+      bio?: string;
+      avatar?: string | null;
+      banner?: string | null;
+    },
+    userId?: string
+  ) {
+    const ack = await this.request<{ member: APISpaceMember | null }>(
+      GatewayOpcodes.SpaceMemberProfileUpdate,
+      { spaceId, ...(userId ? { userId } : {}), ...fields }
+    );
+    if (ack.ok && ack.member) {
+      this.app.spaces.get(spaceId)?.members.update(ack.member);
+    }
+    return ack;
+  }
+
   setReminder(messageId: string, remindAt: string) {
     return this.request<{ reminder: APIMessageReminder }>(
       GatewayOpcodes.ReminderSet,
@@ -1469,6 +1490,10 @@ export class GatewayStore {
       this.onSpaceMemberRemove
     );
     this.dispatchHandlers.set(
+      GatewayDispatchEvents.SpaceMemberUpdate,
+      this.onSpaceMemberUpdate
+    );
+    this.dispatchHandlers.set(
       GatewayDispatchEvents.SpaceMemberListUpdate,
       this.onSpaceMemberListUpdate
     );
@@ -1692,6 +1717,7 @@ export class GatewayStore {
       GatewayDispatchEvents.ActivityArtResult,
       GatewayDispatchEvents.MessageBookmarkAck,
       GatewayDispatchEvents.MessageReminderAck,
+      GatewayDispatchEvents.SpaceMemberProfileAck,
       GatewayDispatchEvents.ScheduledMessageAck,
       GatewayDispatchEvents.NotificationAck,
       GatewayDispatchEvents.MentionAck,
@@ -3022,6 +3048,10 @@ export class GatewayStore {
 
     if (payload.user) space.members.add(payload);
     else space.members.forgetNonMember(payload.userId);
+  };
+
+  private onSpaceMemberUpdate = (payload: APISpaceMember) => {
+    this.app.spaces.get(payload.spaceId)?.members.update(payload);
   };
 
   private onSpaceMemberRemove = (

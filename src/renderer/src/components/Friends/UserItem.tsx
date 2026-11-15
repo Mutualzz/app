@@ -1,3 +1,4 @@
+import { UserDisplayName } from "@components/User/UserDisplayName";
 import { Stack, Typography, useTheme } from "@mutualzz/ui-web";
 import { useAppStore } from "@renderer/hooks/useStores";
 import { type Relationship } from "@stores/objects/Relationship";
@@ -53,7 +54,14 @@ export const UserItem = observer(
         <Stack direction="row" alignItems="center" spacing={2.5}>
           <UserAvatar user={user} badge />
           <Stack direction="column" flex={1}>
-            <Typography>{user.displayName}</Typography>
+            <Typography>
+              <UserDisplayName
+                userId={user.id}
+                nameStyle={user.displayNameStyle}
+              >
+                {user.displayName}
+              </UserDisplayName>
+            </Typography>
             {presence && (
               <SmallActivityStatus userId={user.id} presence={presence} />
             )}

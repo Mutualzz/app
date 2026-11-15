@@ -138,7 +138,8 @@ export const CustomStatusCard = observer(
                   border: `1px solid ${formatColor(
                     theme.typography.colors.muted,
                     {
-                      alpha: 0.18
+                      alpha: 18,
+                      format: "hexa"
                     }
                   )}`,
                   transition: "background 0.15s ease"
@@ -188,11 +189,13 @@ export const CustomStatusCard = observer(
                     border: `1px solid ${formatColor(
                       theme.typography.colors.muted,
                       {
-                        alpha: 0.22
+                        alpha: 22,
+                        format: "hexa"
                       }
                     )}`,
                     boxShadow: `0 1px 6px ${formatColor(theme.colors.neutral, {
-                      alpha: 30
+                      alpha: 30,
+                      format: "hexa"
                     })}`
                   }}
                 >

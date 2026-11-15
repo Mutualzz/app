@@ -19,7 +19,7 @@ function serializeNode(node: Descendant): string {
         .map((line) => `> ${line}`)
         .join("\n");
     case "emoji":
-      return `:${element.name.toLowerCase()}:`;
+      return `:${element.name.replace(/^:+|:+$/g, "").toLowerCase()}:`;
     case "customEmoji":
       return `<${element.animated ? "a" : ""}:${element.name}:${element.id}>`;
     case "mention": {

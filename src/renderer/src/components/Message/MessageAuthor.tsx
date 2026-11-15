@@ -1,7 +1,12 @@
+import { UserDisplayName } from "@components/User/UserDisplayName";
 import { Stack, Typography, useTheme } from "@mutualzz/ui-web";
 import type { MessageLike } from "@stores/objects/Message";
 import type { Space } from "@stores/objects/Space";
-import { getMessageAuthorColor, isSystemMessageType, isSystemUser } from "@mutualzz/client";
+import {
+  getMessageAuthorColor,
+  isSystemMessageType,
+  isSystemUser
+} from "@mutualzz/client";
 import { observer } from "mobx-react-lite";
 import type { ColorLike } from "@mutualzz/ui-core";
 import { useTranslation } from "react-i18next";
@@ -32,11 +37,9 @@ export const MessageAuthor = observer(({ message, space }: Props) => {
     showRoleColors: app.settings?.showRoleColorsInMessages ?? false,
     primaryTextColor,
     roleColor: member?.highestRole?.color,
-    accentColor: app.users.get(author.id)?.accentColor ?? author.accentColor,
+    accentColor: app.users.get(author.id)?.accentColor ?? author.accentColor
   }) as ColorLike;
-  const displayName = member
-    ? member.displayName
-    : author.displayName;
+  const displayName = member ? member.displayName : author.displayName;
   const pronouns = author.pronouns;
 
   return (
@@ -51,7 +54,16 @@ export const MessageAuthor = observer(({ message, space }: Props) => {
           }}
           textColor={nameColor}
         >
-          {displayName}
+          <UserDisplayName
+            userId={author.id}
+            nameStyle={
+              app.users.get(author.id)?.displayNameStyle ??
+              author.displayNameStyle
+            }
+            fallbackColor={String(nameColor)}
+          >
+            {displayName}
+          </UserDisplayName>
         </Typography>
         {pronouns ? (
           <>

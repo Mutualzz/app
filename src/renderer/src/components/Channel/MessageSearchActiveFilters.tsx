@@ -8,7 +8,7 @@ import type { Space } from "@stores/objects/Space";
 import {
   parseMessageSearchQuery,
   setMessageSearchModifier,
-  toggleMessageSearchHasFilter,
+  toggleMessageSearchHasFilter
 } from "@mutualzz/validators";
 import { XIcon } from "@phosphor-icons/react";
 import { useTranslation } from "react-i18next";
@@ -30,7 +30,7 @@ export const MessageSearchActiveFilters = ({
   query,
   onQueryChange,
   space,
-  channel,
+  channel
 }: Props) => {
   const app = useAppStore();
   const { t } = useTranslation("chat");
@@ -49,10 +49,11 @@ export const MessageSearchActiveFilters = ({
                 app,
                 space,
                 channel,
-                username: parsed.from,
-              }),
+                username: parsed.from
+              })
             }),
-      remove: () => onQueryChange(setMessageSearchModifier(query, "from", undefined)),
+      remove: () =>
+        onQueryChange(setMessageSearchModifier(query, "from", undefined))
     });
   }
 
@@ -60,7 +61,8 @@ export const MessageSearchActiveFilters = ({
     pills.push({
       key: "in",
       label: t("search.activeInChannel", { channel: parsed.in }),
-      remove: () => onQueryChange(setMessageSearchModifier(query, "in", undefined)),
+      remove: () =>
+        onQueryChange(setMessageSearchModifier(query, "in", undefined))
     });
   }
 
@@ -75,11 +77,11 @@ export const MessageSearchActiveFilters = ({
                 app,
                 space,
                 channel,
-                username: parsed.mentions,
-              }),
+                username: parsed.mentions
+              })
             }),
       remove: () =>
-        onQueryChange(setMessageSearchModifier(query, "mentions", undefined)),
+        onQueryChange(setMessageSearchModifier(query, "mentions", undefined))
     });
   }
 
@@ -87,8 +89,7 @@ export const MessageSearchActiveFilters = ({
     pills.push({
       key: `has-${filter}`,
       label: t(`search.has.${filter}`),
-      remove: () =>
-        onQueryChange(toggleMessageSearchHasFilter(query, filter)),
+      remove: () => onQueryChange(toggleMessageSearchHasFilter(query, filter))
     });
   }
 
@@ -96,7 +97,8 @@ export const MessageSearchActiveFilters = ({
     pills.push({
       key: "pinned",
       label: t("search.filterPinned"),
-      remove: () => onQueryChange(setMessageSearchModifier(query, "pinned", undefined)),
+      remove: () =>
+        onQueryChange(setMessageSearchModifier(query, "pinned", undefined))
     });
   }
 
@@ -104,7 +106,8 @@ export const MessageSearchActiveFilters = ({
     pills.push({
       key: "before",
       label: t("search.activeBefore", { date: parsed.before }),
-      remove: () => onQueryChange(setMessageSearchModifier(query, "before", undefined)),
+      remove: () =>
+        onQueryChange(setMessageSearchModifier(query, "before", undefined))
     });
   }
 
@@ -112,24 +115,25 @@ export const MessageSearchActiveFilters = ({
     pills.push({
       key: "after",
       label: t("search.activeAfter", { date: parsed.after }),
-      remove: () => onQueryChange(setMessageSearchModifier(query, "after", undefined)),
+      remove: () =>
+        onQueryChange(setMessageSearchModifier(query, "after", undefined))
     });
   }
 
   if (pills.length === 0) return null;
 
-  const accentBg = formatColor(theme.colors.primary, { alpha: 0.14, format: "hexa" });
-  const accentBorder = formatColor(theme.colors.primary, { alpha: 0.32, format: "hexa" });
+  const accentBg = formatColor(theme.colors.primary, {
+    alpha: 14,
+    format: "hexa"
+  });
+  const accentBorder = formatColor(theme.colors.primary, {
+    alpha: 32,
+    format: "hexa"
+  });
   const accentText = formatColor(theme.colors.primary);
 
   return (
-    <Stack
-      direction="row"
-      flexWrap="wrap"
-      px={2}
-      pb={1.25}
-      css={{ gap: 6 }}
-    >
+    <Stack direction="row" flexWrap="wrap" px={2} pb={1.25} css={{ gap: 6 }}>
       {pills.map((pill) => (
         <Stack
           key={pill.key}
@@ -143,7 +147,7 @@ export const MessageSearchActiveFilters = ({
             borderRadius: 13,
             backgroundColor: accentBg,
             border: `1px solid ${accentBorder}`,
-            flexShrink: 0,
+            flexShrink: 0
           }}
         >
           <Typography
@@ -166,8 +170,8 @@ export const MessageSearchActiveFilters = ({
               color: theme.typography.colors.muted,
               "&:hover": {
                 color: theme.typography.colors.primary,
-                backgroundColor: "rgba(255, 255, 255, 0.08)",
-              },
+                backgroundColor: "rgba(255, 255, 255, 0.08)"
+              }
             }}
           >
             <IconSlot size={11}>

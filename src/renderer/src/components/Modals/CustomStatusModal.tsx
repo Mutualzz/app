@@ -54,7 +54,8 @@ export const CustomStatusModal = observer(() => {
     trimmedText.length <= MAX_CUSTOM_STATUS_LENGTH;
 
   const inputBorder = formatColor(theme.typography.colors.muted, {
-    alpha: 0.28
+    alpha: 28,
+    format: "hexa"
   });
   const inputFocusBorder = formatColor(theme.colors.primary);
 

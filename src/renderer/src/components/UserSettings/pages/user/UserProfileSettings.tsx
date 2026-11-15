@@ -1,3 +1,4 @@
+import { SpaceProfilesSettings } from "@components/UserSettings/pages/user/SpaceProfilesSettings";
 import { AvatarDraw } from "@components/Avatar/AvatarDraw";
 import type { AvatarEditorMethod } from "@components/Avatar/avatarEditor.types";
 import { AvatarUpload } from "@components/Avatar/AvatarUpload";
@@ -243,6 +244,8 @@ export const UserProfileSettings = observer(() => {
           {t("profile.customizeProfile")}
         </Button>
       </Paper>
+
+      <SpaceProfilesSettings />
     </Stack>
   );
 });

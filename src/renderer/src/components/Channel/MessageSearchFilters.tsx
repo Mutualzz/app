@@ -9,7 +9,7 @@ import {
   Stack,
   Switch,
   Typography,
-  useTheme,
+  useTheme
 } from "@mutualzz/ui-web";
 import { formatColor, styled } from "@mutualzz/ui-core";
 import type { AppStore } from "@stores/App.store";
@@ -23,7 +23,7 @@ import {
   parseMessageSearchQuery,
   setMessageSearchModifier,
   toggleMessageSearchHasFilter,
-  type MessageSearchHasFilter,
+  type MessageSearchHasFilter
 } from "@mutualzz/validators";
 import {
   ArticleIcon,
@@ -35,7 +35,7 @@ import {
   PushPinIcon,
   SmileyStickerIcon,
   ImageIcon,
-  FilmStripIcon,
+  FilmStripIcon
 } from "@phosphor-icons/react";
 import { observer } from "mobx-react-lite";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
@@ -67,7 +67,7 @@ const FilterPanel = styled(Stack)({
   maxWidth: PANEL_WIDTH,
   maxHeight: "min(440px, 72vh)",
   overflow: "hidden",
-  borderRadius: 8,
+  borderRadius: 8
 });
 
 const TabBar = styled(Stack)({
@@ -76,11 +76,11 @@ const TabBar = styled(Stack)({
   padding: "10px 10px 8px",
   borderBottom: "1px solid rgba(255, 255, 255, 0.06)",
   overflowX: "auto",
-  flexShrink: 0,
+  flexShrink: 0
 });
 
 const TabButton = styled("button", {
-  shouldForwardProp: (prop) => prop !== "active",
+  shouldForwardProp: (prop) => prop !== "active"
 })<{ active?: boolean }>(({ active, theme }) => ({
   appearance: "none",
   border: "none",
@@ -94,12 +94,16 @@ const TabButton = styled("button", {
   whiteSpace: "nowrap",
   flexShrink: 0,
   color: active ? "#fff" : theme.typography.colors.muted,
-  backgroundColor: active ? "rgba(255, 255, 255, 0.14)" : "rgba(255, 255, 255, 0.05)",
+  backgroundColor: active
+    ? "rgba(255, 255, 255, 0.14)"
+    : "rgba(255, 255, 255, 0.05)",
   transition: "background-color 0.15s ease, color 0.15s ease",
   "&:hover": {
-    backgroundColor: active ? "rgba(255, 255, 255, 0.18)" : "rgba(255, 255, 255, 0.09)",
-    color: active ? "#fff" : theme.typography.colors.primary,
-  },
+    backgroundColor: active
+      ? "rgba(255, 255, 255, 0.18)"
+      : "rgba(255, 255, 255, 0.09)",
+    color: active ? "#fff" : theme.typography.colors.primary
+  }
 }));
 
 const ScrollBody = styled(Stack)({
@@ -108,11 +112,11 @@ const ScrollBody = styled(Stack)({
   overflowY: "auto",
   overflowX: "hidden",
   padding: "10px 8px 12px",
-  gap: 2,
+  gap: 2
 });
 
 const SelectRow = styled("button", {
-  shouldForwardProp: (prop) => prop !== "active",
+  shouldForwardProp: (prop) => prop !== "active"
 })<{ active?: boolean }>(({ active, theme }) => ({
   appearance: "none",
   border: "none",
@@ -130,15 +134,17 @@ const SelectRow = styled("button", {
   backgroundColor: active ? "rgba(255, 255, 255, 0.08)" : "transparent",
   transition: "background-color 0.12s ease",
   "&:hover": {
-    backgroundColor: active ? "rgba(255, 255, 255, 0.1)" : "rgba(255, 255, 255, 0.05)",
-  },
+    backgroundColor: active
+      ? "rgba(255, 255, 255, 0.1)"
+      : "rgba(255, 255, 255, 0.05)"
+  }
 }));
 
 const OptionsCard = styled(Stack)({
   borderRadius: 8,
   padding: "10px 12px",
   gap: 10,
-  backgroundColor: "rgba(0, 0, 0, 0.18)",
+  backgroundColor: "rgba(0, 0, 0, 0.18)"
 });
 
 const HAS_ICONS: Record<MessageSearchHasFilter, typeof LinkIcon> = {
@@ -147,7 +153,7 @@ const HAS_ICONS: Record<MessageSearchHasFilter, typeof LinkIcon> = {
   file: PaperclipIcon,
   image: ImageIcon,
   video: FilmStripIcon,
-  sticker: SmileyStickerIcon,
+  sticker: SmileyStickerIcon
 };
 
 interface SearchPerson {
@@ -163,7 +169,7 @@ function UserSelectRow({
   active,
   onClick,
   prefix,
-  accentColor,
+  accentColor
 }: {
   app: AppStore;
   space?: Space | null;
@@ -175,7 +181,13 @@ function UserSelectRow({
   accentColor: string;
 }) {
   const { user, member } = person;
-  const displayName = getSearchDisplayName({ app, space, channel, member, user });
+  const displayName = getSearchDisplayName({
+    app,
+    space,
+    channel,
+    member,
+    user
+  });
   const showUsername =
     displayName.toLowerCase() !== user.username.toLowerCase();
 
@@ -189,7 +201,7 @@ function UserSelectRow({
           css={{
             overflow: "hidden",
             textOverflow: "ellipsis",
-            whiteSpace: "nowrap",
+            whiteSpace: "nowrap"
           }}
         >
           {prefix}
@@ -223,7 +235,14 @@ function EmptyHint({ children }: { children: ReactNode }) {
 const SEARCH_PEOPLE_PAGE_SIZE = 50;
 
 const MessageSearchFilterContent = observer(
-  ({ query, onQueryChange, space, channel, popoverAttr, onPopoverBlur }: PanelProps) => {
+  ({
+    query,
+    onQueryChange,
+    space,
+    channel,
+    popoverAttr,
+    onPopoverBlur
+  }: PanelProps) => {
     const app = useAppStore();
     const { t } = useTranslation("chat");
     const { theme } = useTheme();
@@ -238,7 +257,7 @@ const MessageSearchFilterContent = observer(
     const textChannels = useMemo(() => {
       if (!space) return [];
       return space.visibleChannels.filter(
-        (item) => item.type === ChannelType.Text,
+        (item) => item.type === ChannelType.Text
       );
     }, [space]);
 
@@ -256,23 +275,25 @@ const MessageSearchFilterContent = observer(
             space,
             channel,
             member: a.member,
-            user: a.user,
+            user: a.user
           }).localeCompare(
             getSearchDisplayName({
               app,
               space,
               channel,
               member: b.member,
-              user: b.user,
-            }),
-          ),
+              user: b.user
+            })
+          )
         );
 
       if (space) {
         return sortPeople(
           space.members.all
-            .filter((member): member is SpaceMember & { user: User } => !!member.user)
-            .map((member) => ({ user: member.user, member })),
+            .filter(
+              (member): member is SpaceMember & { user: User } => !!member.user
+            )
+            .map((member) => ({ user: member.user, member }))
         );
       }
 
@@ -293,7 +314,7 @@ const MessageSearchFilterContent = observer(
         { id: "from", label: t("search.filterFrom") },
         { id: "mentions", label: t("search.filterMentions") },
         { id: "has", label: t("search.filterHas") },
-        { id: "options", label: t("search.filterOptions") },
+        { id: "options", label: t("search.filterOptions") }
       ];
       if (space) {
         items.splice(1, 0, { id: "in", label: t("search.filterIn") });
@@ -302,7 +323,11 @@ const MessageSearchFilterContent = observer(
     }, [space, t]);
 
     const applyDateFilters = () => {
-      let next = setMessageSearchModifier(query, "before", beforeDraft || undefined);
+      let next = setMessageSearchModifier(
+        query,
+        "before",
+        beforeDraft || undefined
+      );
       next = setMessageSearchModifier(next, "after", afterDraft || undefined);
       onQueryChange(next);
     };
@@ -313,7 +338,7 @@ const MessageSearchFilterContent = observer(
         (parsed.from === "me" &&
           app.account?.username.toLowerCase() === username.toLowerCase());
       onQueryChange(
-        setMessageSearchModifier(query, "from", active ? undefined : username),
+        setMessageSearchModifier(query, "from", active ? undefined : username)
       );
     };
 
@@ -326,19 +351,22 @@ const MessageSearchFilterContent = observer(
         setMessageSearchModifier(
           query,
           "mentions",
-          active ? undefined : username,
-        ),
+          active ? undefined : username
+        )
       );
     };
 
     const toggleIn = (channelName: string) => {
       const active = parsed.in?.toLowerCase() === channelName.toLowerCase();
       onQueryChange(
-        setMessageSearchModifier(query, "in", active ? undefined : channelName),
+        setMessageSearchModifier(query, "in", active ? undefined : channelName)
       );
     };
 
-    const activeTabBg = formatColor(theme.colors.primary, { alpha: 0.85, format: "hexa" });
+    const activeTabBg = formatColor(theme.colors.primary, {
+      alpha: 85,
+      format: "hexa"
+    });
 
     return (
       <FilterPanel
@@ -374,33 +402,38 @@ const MessageSearchFilterContent = observer(
             people.length === 0 ? (
               <EmptyHint>{t("search.empty")}</EmptyHint>
             ) : (
-              people.slice(0, 24).map((person) => (
-                <UserSelectRow
-                  key={person.user.id}
-                  app={app}
-                  space={space}
-                  channel={channel}
-                  person={person}
-                  accentColor={accentColor}
-                  active={
-                    parsed.from?.toLowerCase() === person.user.username.toLowerCase() ||
-                    (parsed.from === "me" && person.user.id === app.account?.id)
-                  }
-                  onClick={() => toggleFrom(person.user.username)}
-                />
-              ))
+              people
+                .slice(0, 24)
+                .map((person) => (
+                  <UserSelectRow
+                    key={person.user.id}
+                    app={app}
+                    space={space}
+                    channel={channel}
+                    person={person}
+                    accentColor={accentColor}
+                    active={
+                      parsed.from?.toLowerCase() ===
+                        person.user.username.toLowerCase() ||
+                      (parsed.from === "me" &&
+                        person.user.id === app.account?.id)
+                    }
+                    onClick={() => toggleFrom(person.user.username)}
+                  />
+                ))
             )
           ) : null}
 
           {tab === "in" ? (
-            textChannels.filter((item): item is typeof item & { name: string } =>
-              Boolean(item.name?.trim()),
+            textChannels.filter(
+              (item): item is typeof item & { name: string } =>
+                Boolean(item.name?.trim())
             ).length === 0 ? (
               <EmptyHint>{t("search.empty")}</EmptyHint>
             ) : (
               textChannels
                 .filter((item): item is typeof item & { name: string } =>
-                  Boolean(item.name?.trim()),
+                  Boolean(item.name?.trim())
                 )
                 .slice(0, 24)
                 .map((item) => {
@@ -413,7 +446,10 @@ const MessageSearchFilterContent = observer(
                       onClick={() => toggleIn(item.name)}
                       type="button"
                     >
-                      <IconSlot size={16} css={{ color: mutedIconColor, flexShrink: 0 }}>
+                      <IconSlot
+                        size={16}
+                        css={{ color: mutedIconColor, flexShrink: 0 }}
+                      >
                         <HashIcon weight="bold" />
                       </IconSlot>
                       <Typography
@@ -424,13 +460,16 @@ const MessageSearchFilterContent = observer(
                           minWidth: 0,
                           overflow: "hidden",
                           textOverflow: "ellipsis",
-                          whiteSpace: "nowrap",
+                          whiteSpace: "nowrap"
                         }}
                       >
                         {item.name}
                       </Typography>
                       {active ? (
-                        <IconSlot size={14} css={{ color: accentColor, flexShrink: 0 }}>
+                        <IconSlot
+                          size={14}
+                          css={{ color: accentColor, flexShrink: 0 }}
+                        >
                           <CheckIcon weight="bold" />
                         </IconSlot>
                       ) : null}
@@ -444,22 +483,26 @@ const MessageSearchFilterContent = observer(
             people.length === 0 ? (
               <EmptyHint>{t("search.empty")}</EmptyHint>
             ) : (
-              people.slice(0, 20).map((person) => (
-                <UserSelectRow
-                  key={`mention-${person.user.id}`}
-                  app={app}
-                  space={space}
-                  channel={channel}
-                  person={person}
-                  prefix="@"
-                  accentColor={accentColor}
-                  active={
-                    parsed.mentions?.toLowerCase() === person.user.username.toLowerCase() ||
-                    (parsed.mentions === "me" && person.user.id === app.account?.id)
-                  }
-                  onClick={() => toggleMentions(person.user.username)}
-                />
-              ))
+              people
+                .slice(0, 20)
+                .map((person) => (
+                  <UserSelectRow
+                    key={`mention-${person.user.id}`}
+                    app={app}
+                    space={space}
+                    channel={channel}
+                    person={person}
+                    prefix="@"
+                    accentColor={accentColor}
+                    active={
+                      parsed.mentions?.toLowerCase() ===
+                        person.user.username.toLowerCase() ||
+                      (parsed.mentions === "me" &&
+                        person.user.id === app.account?.id)
+                    }
+                    onClick={() => toggleMentions(person.user.username)}
+                  />
+                ))
             )
           ) : null}
 
@@ -480,7 +523,7 @@ const MessageSearchFilterContent = observer(
                       size={16}
                       css={{
                         color: active ? accentColor : mutedIconColor,
-                        flexShrink: 0,
+                        flexShrink: 0
                       }}
                     >
                       <Icon weight={active ? "fill" : "bold"} />
@@ -493,7 +536,10 @@ const MessageSearchFilterContent = observer(
                       {t(`search.has.${filter}`)}
                     </Typography>
                     {active ? (
-                      <IconSlot size={14} css={{ color: accentColor, flexShrink: 0 }}>
+                      <IconSlot
+                        size={14}
+                        css={{ color: accentColor, flexShrink: 0 }}
+                      >
                         <CheckIcon weight="bold" />
                       </IconSlot>
                     ) : null}
@@ -526,8 +572,8 @@ const MessageSearchFilterContent = observer(
                         setMessageSearchModifier(
                           query,
                           "pinned",
-                          event.target.checked ? true : undefined,
-                        ),
+                          event.target.checked ? true : undefined
+                        )
                       )
                     }
                   />
@@ -569,7 +615,7 @@ const MessageSearchFilterContent = observer(
         </ScrollBody>
       </FilterPanel>
     );
-  },
+  }
 );
 
 export const MessageSearchFilters = observer(
@@ -582,7 +628,7 @@ export const MessageSearchFilters = observer(
     closeOnClickOutside = true,
     popoverAttr,
     onPopoverBlur,
-    trigger,
+    trigger
   }: Props) => {
     return (
       <Popover
@@ -606,5 +652,5 @@ export const MessageSearchFilters = observer(
         />
       </Popover>
     );
-  },
+  }
 );

@@ -4,13 +4,7 @@ import { UserAvatar } from "@components/User/UserAvatar";
 import { useModal } from "@contexts/Modal.context";
 import type { Theme } from "@emotion/react";
 import { dynamicElevation, formatColor } from "@mutualzz/ui-core";
-import {
-  Button,
-  Divider,
-  Stack,
-  Typography,
-  useTheme
-} from "@mutualzz/ui-web";
+import { Button, Divider, Stack, Typography, useTheme } from "@mutualzz/ui-web";
 import { IconButton } from "@components/IconButton";
 import { type Invite } from "@stores/objects/Invite";
 import type { Space } from "@stores/objects/Space";
@@ -76,7 +70,8 @@ const InviteItem = observer(({ theme, invite, last, now }: InviteItemProps) => {
         p="1rem"
         whileHover={{
           background: formatColor(dynamicElevation(theme.colors.surface, 5), {
-            alpha: 0.5
+            alpha: 50,
+            format: "hexa"
           })
         }}
         onMouseOver={() => setHover(true)}
@@ -99,7 +94,9 @@ const InviteItem = observer(({ theme, invite, last, now }: InviteItemProps) => {
           <Typography fontFamily="monospace">{invite.code}</Typography>
           <Tooltip
             content={
-              copied ? t("invites.copiedToClipboard") : t("invites.copyInviteUrl")
+              copied
+                ? t("invites.copiedToClipboard")
+                : t("invites.copyInviteUrl")
             }
           >
             <IconButton
@@ -176,7 +173,9 @@ export const ChannelInvitesSettings = observer(({ space, channel }: Props) => {
   return (
     <Stack direction="column" spacing={4} mt={1}>
       <Stack alignItems="center" justifyContent="space-between">
-        <Typography fontFamily="monospace">{t("invites.activeLinks")}</Typography>
+        <Typography fontFamily="monospace">
+          {t("invites.activeLinks")}
+        </Typography>
         <Button
           onClick={() =>
             openModal(
@@ -200,7 +199,9 @@ export const ChannelInvitesSettings = observer(({ space, channel }: Props) => {
               px="1rem"
             >
               <Typography flex={1}>{t("invites.columns.inviter")}</Typography>
-              <Typography flex={1}>{t("invites.columns.inviteCode")}</Typography>
+              <Typography flex={1}>
+                {t("invites.columns.inviteCode")}
+              </Typography>
               <Typography flex={1}>{t("invites.columns.uses")}</Typography>
               <Typography flex={1}>{t("invites.columns.expires")}</Typography>
             </Stack>

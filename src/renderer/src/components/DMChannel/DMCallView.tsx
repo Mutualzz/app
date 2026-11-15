@@ -6,12 +6,7 @@ import { CallCameraVideo } from "@components/Voice/CallCameraVideo";
 import { useAppStore } from "@hooks/useStores";
 import { useElapsedClock } from "@hooks/useElapsedClock";
 import { dynamicElevation, formatColor } from "@mutualzz/ui-core";
-import {
-  Button,
-  Stack,
-  Typography,
-  useTheme
-} from "@mutualzz/ui-web";
+import { Button, Stack, Typography, useTheme } from "@mutualzz/ui-web";
 import { IconButton } from "@components/IconButton";
 import type { Channel } from "@stores/objects/Channel";
 import {
@@ -55,7 +50,7 @@ const NameBadge = ({ children }: { children: string }) => {
         zIndex: 2,
         fontWeight: 600,
         background: formatColor(theme.colors.background, {
-          alpha: 0.65,
+          alpha: 65,
           format: "hexa"
         })
       }}
@@ -80,11 +75,11 @@ const MuteBadge = () => {
         borderRadius: 999,
         zIndex: 2,
         background: formatColor(theme.colors.danger, {
-          alpha: 0.92,
+          alpha: 92,
           format: "hexa"
         }),
         boxShadow: `0 1px 4px ${formatColor(theme.colors.background, {
-          alpha: 0.45,
+          alpha: 45,
           format: "hexa"
         })}`
       }}
@@ -141,9 +136,7 @@ const CallParticipantTile = observer(
           aspectRatio: fill ? undefined : "1 / 1",
           alignSelf: fill ? "stretch" : "center",
           background: tileBg,
-          outline: speaking
-            ? `3px solid ${theme.colors.success}`
-            : "none",
+          outline: speaking ? `3px solid ${theme.colors.success}` : "none",
           outlineOffset: -3,
           transition: "outline-color 120ms ease"
         }}
@@ -217,12 +210,7 @@ const CallRingingParticipantTile = observer(
           minHeight={0}
           css={{ paddingBottom: 36 }}
         >
-          <CallRingingAvatar
-            user={user}
-            size={fill ? 96 : 80}
-            pulsing
-            dimmed
-          />
+          <CallRingingAvatar user={user} size={fill ? 96 : 80} pulsing dimmed />
         </Stack>
         <Stack
           position="absolute"
@@ -236,7 +224,7 @@ const CallRingingParticipantTile = observer(
             borderRadius: 4,
             zIndex: 2,
             background: formatColor(theme.colors.background, {
-              alpha: 0.65,
+              alpha: 65,
               format: "hexa"
             })
           }}
@@ -328,7 +316,9 @@ const CallScreenShareTile = observer(
                 size="sm"
                 color="success"
                 onClick={() =>
-                  void app.voice.watchScreenShare(userId).catch(() => { return; })
+                  void app.voice.watchScreenShare(userId).catch(() => {
+                    return;
+                  })
                 }
               >
                 {t("voice.watchStream")}
@@ -381,20 +371,22 @@ export const DMCallView = observer(({ channel }: Props) => {
       (ringingPeerId ? app.users.get(String(ringingPeerId)) : null) ??
       null)
     : outgoing
-      ? (channel.isDM
-          ? (channel.dmRecipient ??
-            (ringingPeerId ? app.users.get(String(ringingPeerId)) : null) ??
-            null)
-          : (channel.dmRecipients[0] ??
-            (ringingPeerId ? app.users.get(String(ringingPeerId)) : null) ??
-            null))
+      ? channel.isDM
+        ? (channel.dmRecipient ??
+          (ringingPeerId ? app.users.get(String(ringingPeerId)) : null) ??
+          null)
+        : (channel.dmRecipients[0] ??
+          (ringingPeerId ? app.users.get(String(ringingPeerId)) : null) ??
+          null)
       : (initiator ?? null);
   const stageName =
     stageUser?.displayName ??
     (channel.isGroupDM ? (channel.name ?? t("deletedUser")) : t("deletedUser"));
 
   const voiceStates = Array.from(channel.voiceStates.values());
-  const voiceUserIds = new Set(voiceStates.map((state) => String(state.userId)));
+  const voiceUserIds = new Set(
+    voiceStates.map((state) => String(state.userId))
+  );
   const ringingTargets = call.ringing
     .map(String)
     .filter((id) => id !== selfId && !voiceUserIds.has(id));
@@ -403,8 +395,7 @@ export const DMCallView = observer(({ channel }: Props) => {
   const screenSharers = voiceStates.filter((state) =>
     app.voice.isUserScreenSharing(state.userId)
   );
-  const connecting =
-    inThisCall && app.voice.connectionStatus === "connecting";
+  const connecting = inThisCall && app.voice.connectionStatus === "connecting";
   const participantCount =
     (pendingSelf ? 1 : 0) + voiceStates.length + ringingTargets.length;
   const fillPair =
@@ -558,7 +549,7 @@ export const DMCallView = observer(({ channel }: Props) => {
                   pointerEvents: "none",
                   background: `linear-gradient(transparent, ${formatColor(
                     theme.colors.background,
-                    { alpha: 0.72, format: "hexa" }
+                    { alpha: 72, format: "hexa" }
                   )})`
                 }}
               >
@@ -703,154 +694,161 @@ export const DMCallView = observer(({ channel }: Props) => {
           spacing={1.25}
           width="100%"
         >
-        {ringingForMe ? (
-          <>
-            <Stack direction="column" alignItems="center" spacing={compactStage ? 0 : 0.75}>
-              <Tooltip content={t("call.decline")}>
-                <IconButton
-                  color="danger"
-                  variant="solid"
-                  onClick={() => void app.calls.decline(channel.id)}
-                  css={{
-                    width: compactStage ? 44 : 56,
-                    height: compactStage ? 44 : 56,
-                    borderRadius: 999
-                  }}
-                >
-                  <PhoneSlashIcon size={compactStage ? 20 : 24} weight="fill" />
-                </IconButton>
-              </Tooltip>
-              {!compactStage && (
-                <Typography level="label-xs" textColor="secondary">
-                  {t("call.decline")}
-                </Typography>
-              )}
-            </Stack>
-            <Stack
-              direction="column"
-              alignItems="center"
-              spacing={compactStage ? 0 : 0.75}
-              css={{ marginLeft: compactStage ? 20 : 32 }}
-            >
-              <Tooltip content={t("call.accept")}>
-                <IconButton
-                  color="success"
-                  variant="solid"
-                  onClick={() => void app.calls.accept(channel.id)}
-                  css={{
-                    width: compactStage ? 44 : 56,
-                    height: compactStage ? 44 : 56,
-                    borderRadius: 999
-                  }}
-                >
-                  <PhoneIcon size={compactStage ? 20 : 24} weight="fill" />
-                </IconButton>
-              </Tooltip>
-              {!compactStage && (
-                <Typography level="label-xs" textColor="secondary">
-                  {t("call.accept")}
-                </Typography>
-              )}
-            </Stack>
-          </>
-        ) : (
-          <>
-            {(inThisCall || outgoing) && (
-              <>
-                <Tooltip content={t("voice.controls.mute")}>
-                  <IconButton
-                    variant="soft"
-                    color={selfMute ? "danger" : undefined}
-                    onClick={() => app.voice.setMute(!app.voice.selfMute)}
-                    css={circleBtn}
-                  >
-                    {selfMute ? (
-                      <MicrophoneSlashIcon weight="fill" size={20} />
-                    ) : (
-                      <MicrophoneIcon weight="fill" size={20} />
-                    )}
-                  </IconButton>
-                </Tooltip>
-                <Tooltip
-                  content={
-                    cameraEnabled
-                      ? t("voice.controls.disableCamera")
-                      : t("voice.controls.enableCamera")
-                  }
-                >
-                  <IconButton
-                    variant="soft"
-                    color={cameraEnabled ? undefined : "danger"}
-                    onClick={() => app.voice.toggleCamera()}
-                    css={circleBtn}
-                  >
-                    {cameraEnabled ? (
-                      <VideoCameraIcon weight="fill" size={20} />
-                    ) : (
-                      <VideoCameraSlashIcon weight="fill" size={20} />
-                    )}
-                  </IconButton>
-                </Tooltip>
-                <Tooltip
-                  content={
-                    screenShareEnabled
-                      ? t("voice.controls.stopSharing")
-                      : t("voice.controls.shareScreen")
-                  }
-                >
-                  <IconButton
-                    variant="soft"
-                    onClick={() => app.voice.toggleScreenShare()}
-                    color={screenShareEnabled ? "success" : undefined}
-                    css={circleBtn}
-                  >
-                    <MonitorArrowUpIcon weight="fill" size={20} />
-                  </IconButton>
-                </Tooltip>
-              </>
-            )}
-
-            {!inThisCall && !outgoing && !ringingForMe && (
-              <Button
-                color="success"
-                css={{ borderRadius: 999, paddingInline: 20 }}
-                onClick={() =>
-                  void app.voice.join({
-                    spaceId: null,
-                    channelId: channel.id
-                  })
-                }
+          {ringingForMe ? (
+            <>
+              <Stack
+                direction="column"
+                alignItems="center"
+                spacing={compactStage ? 0 : 0.75}
               >
-                <PhoneIcon weight="fill" />
-                {t("call.join")}
-              </Button>
-            )}
-
-            {showHangup && (
-              <Tooltip content={t("voice.connection.disconnect")}>
-                <IconButton
-                  color="danger"
-                  variant="solid"
-                  onClick={hangup}
-                  css={{
-                    width: 56,
-                    height: 40,
-                    borderRadius: 999,
-                    marginLeft: 4
-                  }}
-                >
-                  <PhoneIcon
-                    weight="fill"
-                    size={20}
+                <Tooltip content={t("call.decline")}>
+                  <IconButton
+                    color="danger"
+                    variant="solid"
+                    onClick={() => void app.calls.decline(channel.id)}
                     css={{
-                      transform: "rotate(135deg)"
+                      width: compactStage ? 44 : 56,
+                      height: compactStage ? 44 : 56,
+                      borderRadius: 999
                     }}
-                  />
-                </IconButton>
-              </Tooltip>
-            )}
-          </>
-        )}
+                  >
+                    <PhoneSlashIcon
+                      size={compactStage ? 20 : 24}
+                      weight="fill"
+                    />
+                  </IconButton>
+                </Tooltip>
+                {!compactStage && (
+                  <Typography level="label-xs" textColor="secondary">
+                    {t("call.decline")}
+                  </Typography>
+                )}
+              </Stack>
+              <Stack
+                direction="column"
+                alignItems="center"
+                spacing={compactStage ? 0 : 0.75}
+                css={{ marginLeft: compactStage ? 20 : 32 }}
+              >
+                <Tooltip content={t("call.accept")}>
+                  <IconButton
+                    color="success"
+                    variant="solid"
+                    onClick={() => void app.calls.accept(channel.id)}
+                    css={{
+                      width: compactStage ? 44 : 56,
+                      height: compactStage ? 44 : 56,
+                      borderRadius: 999
+                    }}
+                  >
+                    <PhoneIcon size={compactStage ? 20 : 24} weight="fill" />
+                  </IconButton>
+                </Tooltip>
+                {!compactStage && (
+                  <Typography level="label-xs" textColor="secondary">
+                    {t("call.accept")}
+                  </Typography>
+                )}
+              </Stack>
+            </>
+          ) : (
+            <>
+              {(inThisCall || outgoing) && (
+                <>
+                  <Tooltip content={t("voice.controls.mute")}>
+                    <IconButton
+                      variant="soft"
+                      color={selfMute ? "danger" : undefined}
+                      onClick={() => app.voice.setMute(!app.voice.selfMute)}
+                      css={circleBtn}
+                    >
+                      {selfMute ? (
+                        <MicrophoneSlashIcon weight="fill" size={20} />
+                      ) : (
+                        <MicrophoneIcon weight="fill" size={20} />
+                      )}
+                    </IconButton>
+                  </Tooltip>
+                  <Tooltip
+                    content={
+                      cameraEnabled
+                        ? t("voice.controls.disableCamera")
+                        : t("voice.controls.enableCamera")
+                    }
+                  >
+                    <IconButton
+                      variant="soft"
+                      color={cameraEnabled ? undefined : "danger"}
+                      onClick={() => app.voice.toggleCamera()}
+                      css={circleBtn}
+                    >
+                      {cameraEnabled ? (
+                        <VideoCameraIcon weight="fill" size={20} />
+                      ) : (
+                        <VideoCameraSlashIcon weight="fill" size={20} />
+                      )}
+                    </IconButton>
+                  </Tooltip>
+                  <Tooltip
+                    content={
+                      screenShareEnabled
+                        ? t("voice.controls.stopSharing")
+                        : t("voice.controls.shareScreen")
+                    }
+                  >
+                    <IconButton
+                      variant="soft"
+                      onClick={() => app.voice.toggleScreenShare()}
+                      color={screenShareEnabled ? "success" : undefined}
+                      css={circleBtn}
+                    >
+                      <MonitorArrowUpIcon weight="fill" size={20} />
+                    </IconButton>
+                  </Tooltip>
+                </>
+              )}
+
+              {!inThisCall && !outgoing && !ringingForMe && (
+                <Button
+                  color="success"
+                  css={{ borderRadius: 999, paddingInline: 20 }}
+                  onClick={() =>
+                    void app.voice.join({
+                      spaceId: null,
+                      channelId: channel.id
+                    })
+                  }
+                >
+                  <PhoneIcon weight="fill" />
+                  {t("call.join")}
+                </Button>
+              )}
+
+              {showHangup && (
+                <Tooltip content={t("voice.connection.disconnect")}>
+                  <IconButton
+                    color="danger"
+                    variant="solid"
+                    onClick={hangup}
+                    css={{
+                      width: 56,
+                      height: 40,
+                      borderRadius: 999,
+                      marginLeft: 4
+                    }}
+                  >
+                    <PhoneIcon
+                      weight="fill"
+                      size={20}
+                      css={{
+                        transform: "rotate(135deg)"
+                      }}
+                    />
+                  </IconButton>
+                </Tooltip>
+              )}
+            </>
+          )}
         </Stack>
       </Stack>
       <ResizeBar
@@ -858,7 +856,7 @@ export const DMCallView = observer(({ channel }: Props) => {
           const startY = e.clientY;
           const startHeight = app.dmCallViewHeight;
 
-          (e.currentTarget).setPointerCapture(e.pointerId);
+          e.currentTarget.setPointerCapture(e.pointerId);
 
           const onMove = (moveEvent: PointerEvent) => {
             app.setDmCallViewHeight(startHeight + (moveEvent.clientY - startY));

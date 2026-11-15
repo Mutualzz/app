@@ -1,11 +1,14 @@
-import i18n from "i18next";
+import i18n, {
+  type Resource,
+  type ResourceKey,
+  type ResourceLanguage
+} from "i18next";
 import { initReactI18next } from "react-i18next";
 import {
   type AppLocale,
   dayjsLocaleIds,
   LOCALE_STORAGE_KEY,
   resolveLocale,
-  resources,
   supportedLocales
 } from "@mutualzz/i18n";
 import "@mutualzz/i18n/types";
@@ -27,6 +30,60 @@ import "dayjs/locale/uk";
 import "dayjs/locale/zh-cn";
 import "dayjs/locale/zh-tw";
 import { calendarStrings } from "@mutualzz/client";
+
+const englishFiles = import.meta.glob<ResourceKey>("@i18n-locales/en/*.json", {
+  eager: true,
+  import: "default"
+});
+
+const localeFileLoaders = import.meta.glob<ResourceKey>(
+  ["@i18n-locales/*/*.json", "!@i18n-locales/en/*.json"],
+  { import: "default" }
+);
+
+function namespaceOf(filePath: string) {
+  return filePath.slice(filePath.lastIndexOf("/") + 1, -".json".length);
+}
+
+function localeOf(filePath: string) {
+  const parts = filePath.split("/");
+  return parts[parts.length - 2];
+}
+
+const englishResources: ResourceLanguage = Object.fromEntries(
+  Object.entries(englishFiles).map(([filePath, content]) => [
+    namespaceOf(filePath),
+    content
+  ])
+);
+
+if (!englishResources.common) {
+  throw new Error(
+    "English translations not found: check the @i18n-locales alias"
+  );
+}
+
+async function fetchLocaleResources(
+  locale: AppLocale
+): Promise<ResourceLanguage> {
+  const entries = await Promise.all(
+    Object.entries(localeFileLoaders)
+      .filter(([filePath]) => localeOf(filePath) === locale)
+      .map(
+        async ([filePath, load]) =>
+          [namespaceOf(filePath), await load()] as const
+      )
+  );
+  return Object.fromEntries(entries);
+}
+
+async function ensureLocaleLoaded(locale: AppLocale) {
+  if (locale === "en" || i18n.hasResourceBundle(locale, "common")) return;
+  const localeResources = await fetchLocaleResources(locale);
+  for (const [namespace, content] of Object.entries(localeResources)) {
+    i18n.addResourceBundle(locale, namespace, content, true, true);
+  }
+}
 
 function readStoredLocale(): AppLocale | null {
   try {
@@ -52,14 +109,19 @@ function syncDayjsLocale(lng: string) {
 const storedLocale = readStoredLocale();
 const initialLng = storedLocale ?? resolveLocale(navigator.language);
 
-void i18n.use(initReactI18next).init({
-  resources,
+const initialResources: Resource = { en: englishResources };
+if (initialLng !== "en") {
+  initialResources[initialLng] = await fetchLocaleResources(initialLng);
+}
+
+await i18n.use(initReactI18next).init({
+  resources: initialResources,
   lng: initialLng,
   fallbackLng: "en",
   returnEmptyString: false,
   defaultNS: "common",
   interpolation: { escapeValue: false },
-  supportedLngs: Object.keys(resources)
+  supportedLngs: supportedLocales
 });
 
 syncDayjsLocale(initialLng);
@@ -71,15 +133,17 @@ export function getPreferredLocale(): AppLocale | null {
 }
 
 export function setPreferredLocale(locale: AppLocale | "system") {
-  if (locale === "system") {
-    localStorage.removeItem(LOCALE_STORAGE_KEY);
-    void i18n.changeLanguage(resolveLocale(navigator.language));
-    return;
-  }
+  if (locale !== "system" && !supportedLocales.includes(locale)) return;
 
-  if (!supportedLocales.includes(locale)) return;
-  localStorage.setItem(LOCALE_STORAGE_KEY, locale);
-  void i18n.changeLanguage(locale);
+  const nextLocale =
+    locale === "system" ? resolveLocale(navigator.language) : locale;
+
+  if (locale === "system") localStorage.removeItem(LOCALE_STORAGE_KEY);
+  else localStorage.setItem(LOCALE_STORAGE_KEY, locale);
+
+  void ensureLocaleLoaded(nextLocale).then(() =>
+    i18n.changeLanguage(nextLocale)
+  );
 }
 
 export default i18n;
