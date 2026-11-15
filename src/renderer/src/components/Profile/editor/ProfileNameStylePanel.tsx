@@ -1,6 +1,5 @@
-import { Button } from "@components/Button";
-import { GoogleFontPicker } from "@components/FontPicker/GoogleFontPicker";
-import { InputWithLabel } from "@components/InputWithLabel";
+import { CompactFontPicker } from "@components/Profile/editor/CompactFontPicker";
+import { ProfileInspectorField } from "@components/Profile/editor/ProfileInspectorField";
 import { Paper } from "@components/Paper";
 import {
   getDisplayNameCss,
@@ -13,7 +12,7 @@ import {
   type DisplayNameEffect
 } from "@mutualzz/types";
 import type { ColorLike } from "@mutualzz/ui-core";
-import { Stack, Typography, useTheme } from "@mutualzz/ui-web";
+import { Input, Stack, Typography, useTheme } from "@mutualzz/ui-web";
 import { observer } from "mobx-react-lite";
 import { useTranslation } from "react-i18next";
 
@@ -108,7 +107,7 @@ export const ProfileNameStylePanel = observer(({ value, onChange }: Props) => {
         </Typography>
       </Paper>
 
-      <GoogleFontPicker
+      <CompactFontPicker
         label={t("profile.inspector.appearance.nameFont")}
         description={t("profile.inspector.appearance.nameFontDescription")}
         fontOwnerId={app.account?.id}
@@ -117,12 +116,16 @@ export const ProfileNameStylePanel = observer(({ value, onChange }: Props) => {
         onChange={(font) => update({ font })}
       />
 
-      <Stack direction="column" spacing={1}>
-        <InputWithLabel
+      <ProfileInspectorField
+        label={t("profile.inspector.appearance.nameColor")}
+        hint={t("profile.inspector.appearance.nameColorDescription")}
+        onReset={value?.color ? () => update({ color: null }) : undefined}
+      >
+        <Input
           type="color"
-          label={t("profile.inspector.appearance.nameColor")}
           name="displayNameStyleColor"
-          description={t("profile.inspector.appearance.nameColorDescription")}
+          textColor="primary"
+          size="sm"
           value={(value?.color as ColorLike) ?? "#ffffff"}
           allowGradient
           onChange={(color: ColorLike) => {
@@ -131,26 +134,17 @@ export const ProfileNameStylePanel = observer(({ value, onChange }: Props) => {
           }}
           fullWidth
         />
-        {value?.color && (
-          <Button
-            size="sm"
-            color="neutral"
-            onClick={() => update({ color: null })}
-          >
-            {t("profile.inspector.appearance.resetNameColor")}
-          </Button>
-        )}
-      </Stack>
+      </ProfileInspectorField>
 
-      <Stack direction="column" spacing={1}>
-        <Typography level="body-xs" fontWeight={600}>
-          {t("profile.inspector.appearance.nameEffect")}
-        </Typography>
+      <ProfileInspectorField
+        label={t("profile.inspector.appearance.nameEffect")}
+        onReset={effect ? () => update({ effect: null }) : undefined}
+      >
         <div
           css={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(72px, 1fr))",
-            gap: 6
+            gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
+            gap: 4
           }}
         >
           <EffectButton
@@ -169,17 +163,21 @@ export const ProfileNameStylePanel = observer(({ value, onChange }: Props) => {
             />
           ))}
         </div>
-      </Stack>
+      </ProfileInspectorField>
 
       {showEffectColor && (
-        <Stack direction="column" spacing={1}>
-          <InputWithLabel
+        <ProfileInspectorField
+          label={t("profile.inspector.appearance.effectColor")}
+          hint={t("profile.inspector.appearance.effectColorDescription")}
+          onReset={
+            value?.effectColor ? () => update({ effectColor: null }) : undefined
+          }
+        >
+          <Input
             type="color"
-            label={t("profile.inspector.appearance.effectColor")}
             name="displayNameEffectColor"
-            description={t(
-              "profile.inspector.appearance.effectColorDescription"
-            )}
+            textColor="primary"
+            size="sm"
             value={(value?.effectColor as ColorLike) ?? "#ffffff"}
             onChange={(effectColor: ColorLike) => {
               if (typeof effectColor !== "string" || !effectColor) return;
@@ -187,16 +185,7 @@ export const ProfileNameStylePanel = observer(({ value, onChange }: Props) => {
             }}
             fullWidth
           />
-          {value?.effectColor && (
-            <Button
-              size="sm"
-              color="neutral"
-              onClick={() => update({ effectColor: null })}
-            >
-              {t("profile.inspector.appearance.resetEffectColor")}
-            </Button>
-          )}
-        </Stack>
+        </ProfileInspectorField>
       )}
     </Stack>
   );

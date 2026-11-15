@@ -1,5 +1,5 @@
 import { Button } from "@components/Button";
-import { GoogleFontPicker } from "@components/FontPicker/GoogleFontPicker";
+import { CompactFontPicker } from "@components/Profile/editor/CompactFontPicker";
 import { ProfileInspectorField } from "@components/Profile/editor/ProfileInspectorField";
 import { useAppStore } from "@hooks/useStores";
 import {
@@ -235,7 +235,7 @@ export const ProfileBlockAppearanceInspector = observer(
         {sections.includes("text") && (
           <>
             {showFont && (
-              <GoogleFontPicker
+              <CompactFontPicker
                 label={t("profile.inspector.blockStyle.font")}
                 fontOwnerId={app.account?.id}
                 value={current.font ?? null}

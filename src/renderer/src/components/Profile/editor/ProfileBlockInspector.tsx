@@ -1,6 +1,5 @@
 import { Button } from "@components/Button";
 import { Paper } from "@components/Paper";
-import { GoogleFontPicker } from "@components/FontPicker/GoogleFontPicker";
 import {
   PROFILE_BACKGROUND_IMAGE_FITS,
   PROFILE_VISIBILITY_OPTIONS,
@@ -27,6 +26,7 @@ import { ProfileBlockBackgroundColorInspector } from "@components/Profile/editor
 import { ProfileBlockCornerRadiusInspector } from "@components/Profile/editor/ProfileBlockCornerRadiusInspector";
 import { ProfileBlockRotationInspector } from "@components/Profile/editor/ProfileBlockRotationInspector";
 import { ProfileGalleryInspector } from "@components/Profile/editor/ProfileGalleryInspector";
+import { CompactFontPicker } from "@components/Profile/editor/CompactFontPicker";
 import { ProfileEmbedInspector } from "@components/Profile/editor/ProfileEmbedInspector";
 import { ProfileBlockAppearanceInspector } from "@components/Profile/editor/ProfileBlockAppearanceInspector";
 import {
@@ -56,18 +56,10 @@ import {
 import {
   ArrowDownIcon,
   ArrowUpIcon,
-  CaretDownIcon,
-  CaretRightIcon,
   CursorClickIcon,
   GifIcon,
-  ImageIcon,
-  MusicNotesIcon,
-  PaintBrushBroadIcon,
-  PaletteIcon,
   PencilSimpleIcon,
   StickerIcon,
-  TextAaIcon,
-  TextAlignLeftIcon,
   TrashIcon,
   UploadIcon
 } from "@phosphor-icons/react";
@@ -111,88 +103,13 @@ interface Props {
 
 const HASH_PATTERN = /^[a-f0-9_]+$/i;
 
+const PAGE_PANEL_TABS = ["profile", "background", "style", "music"] as const;
+
+type PagePanelTab = (typeof PAGE_PANEL_TABS)[number];
+
 const BLOCK_PANEL_TABS = ["content", "layout", "style", "motion"] as const;
 
 type BlockPanelTab = (typeof BLOCK_PANEL_TABS)[number];
-
-const InspectorSection = ({
-  icon,
-  title,
-  collapsed,
-  onToggleCollapsed,
-  children
-}: {
-  icon: ReactNode;
-  title: string;
-  collapsed: boolean;
-  onToggleCollapsed: () => void;
-  children: ReactNode;
-}) => {
-  const { theme } = useTheme();
-  const primarySoftBg = formatColor(theme.colors.primary, {
-    alpha: 10,
-    format: "hexa"
-  });
-  const neutralSoftBg = formatColor(theme.colors.neutral, {
-    alpha: 10,
-    format: "hexa"
-  });
-
-  return (
-    <Stack direction="column" spacing={1.25}>
-      <Stack
-        direction="row"
-        spacing={1}
-        alignItems="center"
-        onClick={onToggleCollapsed}
-        css={{
-          cursor: "pointer",
-          userSelect: "none"
-        }}
-      >
-        <Stack
-          width={30}
-          height={30}
-          alignItems="center"
-          justifyContent="center"
-          css={{
-            borderRadius: 9,
-            background: primarySoftBg,
-            color: theme.colors.primary
-          }}
-        >
-          {icon}
-        </Stack>
-        <Typography level="title-sm" fontWeight={600}>
-          {title}
-        </Typography>
-        <Stack
-          ml="auto"
-          width={28}
-          height={28}
-          alignItems="center"
-          justifyContent="center"
-          css={{
-            borderRadius: 8,
-            color: theme.typography.colors.muted,
-            "&:hover": { background: neutralSoftBg }
-          }}
-        >
-          {collapsed ? (
-            <CaretRightIcon size={16} />
-          ) : (
-            <CaretDownIcon size={16} />
-          )}
-        </Stack>
-      </Stack>
-      {!collapsed && (
-        <Stack direction="column" spacing={1.25}>
-          {children}
-        </Stack>
-      )}
-    </Stack>
-  );
-};
 
 const SettingCard = ({ children }: { children: ReactNode }) => (
   <Paper
@@ -253,14 +170,7 @@ export const ProfileBlockInspector = observer(
     const [uploadingBlockImage, setUploadingBlockImage] = useState(false);
     const [uploadingBlockMusic, setUploadingBlockMusic] = useState(false);
 
-    const [collapsed, setCollapsed] = useState({
-      font: true,
-      bio: false,
-      banner: true,
-      background: true,
-      music: true,
-      appearance: true
-    });
+    const [pageTab, setPageTab] = useState<PagePanelTab>("profile");
 
     const bannerPreview = profile.constructBannerUrlFrom(
       draft.banner,
@@ -379,470 +289,443 @@ export const ProfileBlockInspector = observer(
       <Stack direction="column" spacing={2.5}>
         {mode === "page" && (
           <>
-            <InspectorSection
-              icon={<TextAaIcon size={16} weight="fill" />}
-              title={t("profile.inspector.font")}
-              collapsed={collapsed.font}
-              onToggleCollapsed={() =>
-                setCollapsed((prev) => ({ ...prev, font: !prev.font }))
-              }
+            <ButtonGroup
+              toggleable
+              exclusive
+              size="sm"
+              color="neutral"
+              fullWidth
+              expand
+              value={pageTab}
+              onChange={(tab: PagePanelTab) => setPageTab(tab)}
             >
-              <SettingCard>
-                <GoogleFontPicker
-                  label={t("profile.editor.pageFont")}
-                  description={t("profile.inspector.pageFontDescription")}
-                  fontOwnerId={app.account?.id}
-                  value={draft.pageFontFamily}
-                  onChange={(pageFontFamily) =>
-                    onDraftChange({ pageFontFamily })
-                  }
-                />
-              </SettingCard>
-            </InspectorSection>
-
-            {!collapsed.font && <Divider lineColor="muted" />}
-
-            <InspectorSection
-              icon={<TextAlignLeftIcon size={16} weight="fill" />}
-              title={t("profile.editor.bio")}
-              collapsed={collapsed.bio}
-              onToggleCollapsed={() =>
-                setCollapsed((prev) => ({ ...prev, bio: !prev.bio }))
-              }
-            >
-              <SettingCard>
-                <FieldLabel>{t("profile.editor.pronouns")}</FieldLabel>
-                <Input
-                  value={draft.pronouns}
-                  maxLength={32}
-                  onChange={(e) =>
-                    onDraftChange({ pronouns: e.target.value.slice(0, 32) })
-                  }
-                  placeholder={t("profile.editor.pronounsPlaceholder")}
-                />
-                <FieldLabel>{t("profile.editor.bio")}</FieldLabel>
-                <ProfileMarkdownField
-                  value={draft.bio}
-                  maxLength={512}
-                  minHeight={88}
-                  onChange={(bio) => onDraftChange({ bio })}
-                  placeholder={t("profile.editor.bioPlaceholder")}
-                />
-              </SettingCard>
-            </InspectorSection>
-
-            {!collapsed.bio && <Divider lineColor="muted" />}
-
-            <InspectorSection
-              icon={<ImageIcon size={16} weight="fill" />}
-              title={t("profile.editor.banner")}
-              collapsed={collapsed.banner}
-              onToggleCollapsed={() =>
-                setCollapsed((prev) => ({ ...prev, banner: !prev.banner }))
-              }
-            >
-              <SettingCard>
-                <FieldLabel>{t("profile.inspector.bannerImage")}</FieldLabel>
-                {bannerPreview && (
-                  <img
-                    src={bannerPreview}
-                    alt=""
-                    css={{
-                      width: "100%",
-                      height: 112,
-                      objectFit: "cover",
-                      objectPosition: `center ${headerBlock?.bannerFocusY ?? 50}%`,
-                      borderRadius: 8
-                    }}
+              {PAGE_PANEL_TABS.map((tab) => (
+                <Button key={tab} value={tab}>
+                  {t(`profile.inspector.pageTabs.${tab}`)}
+                </Button>
+              ))}
+            </ButtonGroup>
+            {pageTab === "style" && (
+              <>
+                <SettingCard>
+                  <CompactFontPicker
+                    label={t("profile.editor.pageFont")}
+                    description={t("profile.inspector.pageFontDescription")}
+                    fontOwnerId={app.account?.id}
+                    value={draft.pageFontFamily}
+                    allowClear
+                    onChange={(pageFontFamily) =>
+                      onDraftChange({ pageFontFamily })
+                    }
                   />
-                )}
-                <Input
-                  value={
-                    draft.banner && !HASH_PATTERN.test(draft.banner)
-                      ? draft.banner
-                      : ""
-                  }
-                  onChange={(event) =>
-                    onDraftChange({ banner: event.target.value || null })
-                  }
-                  placeholder={
-                    draft.banner
-                      ? t("profile.inspector.imageUploaded")
-                      : t("profile.inspector.pasteImageUrl")
-                  }
-                  type="text"
-                />
-                <Stack direction="row" spacing={1}>
-                  <Button
-                    size="sm"
-                    color="neutral"
-                    loading={uploadingBanner}
-                    onClick={() => bannerInputRef.current?.click()}
-                  >
-                    {t("expressions.upload")}
-                  </Button>
-                  {draft.banner && (
+                </SettingCard>
+              </>
+            )}
+
+            {pageTab === "profile" && (
+              <>
+                <SettingCard>
+                  <FieldLabel>{t("profile.editor.pronouns")}</FieldLabel>
+                  <Input
+                    value={draft.pronouns}
+                    maxLength={32}
+                    onChange={(e) =>
+                      onDraftChange({ pronouns: e.target.value.slice(0, 32) })
+                    }
+                    placeholder={t("profile.editor.pronounsPlaceholder")}
+                  />
+                  <FieldLabel>{t("profile.editor.bio")}</FieldLabel>
+                  <ProfileMarkdownField
+                    value={draft.bio}
+                    maxLength={512}
+                    minHeight={88}
+                    onChange={(bio) => onDraftChange({ bio })}
+                    placeholder={t("profile.editor.bioPlaceholder")}
+                  />
+                </SettingCard>
+              </>
+            )}
+
+            {pageTab === "profile" && (
+              <>
+                <SettingCard>
+                  <FieldLabel>{t("profile.inspector.bannerImage")}</FieldLabel>
+                  {bannerPreview && (
+                    <img
+                      src={bannerPreview}
+                      alt=""
+                      css={{
+                        width: "100%",
+                        height: 112,
+                        objectFit: "cover",
+                        objectPosition: `center ${headerBlock?.bannerFocusY ?? 50}%`,
+                        borderRadius: 8
+                      }}
+                    />
+                  )}
+                  <Input
+                    value={
+                      draft.banner && !HASH_PATTERN.test(draft.banner)
+                        ? draft.banner
+                        : ""
+                    }
+                    onChange={(event) =>
+                      onDraftChange({ banner: event.target.value || null })
+                    }
+                    placeholder={
+                      draft.banner
+                        ? t("profile.inspector.imageUploaded")
+                        : t("profile.inspector.pasteImageUrl")
+                    }
+                    type="text"
+                  />
+                  <Stack direction="row" spacing={1}>
                     <Button
                       size="sm"
                       color="neutral"
-                      onClick={() => onDraftChange({ banner: null })}
+                      loading={uploadingBanner}
+                      onClick={() => bannerInputRef.current?.click()}
                     >
-                      {t("profile.remove")}
+                      {t("expressions.upload")}
                     </Button>
-                  )}
-                </Stack>
-                <input
-                  ref={bannerInputRef}
-                  type="file"
-                  accept="image/*"
-                  hidden
-                  onChange={async (event) => {
-                    const file = event.target.files?.[0];
-                    if (!file) return;
-                    await handleAssetUpload(
-                      file,
-                      "banner",
-                      (hash) => onDraftChange({ banner: hash }),
-                      setUploadingBanner,
-                      "banner"
-                    );
-                    event.target.value = "";
-                  }}
-                />
-                <FieldHint>{t("profile.inspector.bannerHint")}</FieldHint>
-              </SettingCard>
-            </InspectorSection>
-
-            {!collapsed.banner && <Divider lineColor="muted" />}
-
-            <InspectorSection
-              icon={<PaintBrushBroadIcon size={16} weight="fill" />}
-              title={t("profile.editor.background")}
-              collapsed={collapsed.background}
-              onToggleCollapsed={() =>
-                setCollapsed((prev) => ({
-                  ...prev,
-                  background: !prev.background
-                }))
-              }
-            >
-              <SettingCard>
-                <InputWithLabel
-                  type="color"
-                  label={t("profile.inspector.backgroundColor")}
-                  name="backgroundColor"
-                  description={t(
-                    "profile.inspector.backgroundColorDescription"
-                  )}
-                  value={(draft.backgroundColor as ColorLike) ?? "#1a1a2e"}
-                  allowGradient
-                  onChange={(color: ColorLike) => {
-                    if (typeof color !== "string" || !color) return;
-                    onDraftChange({ backgroundColor: color });
-                  }}
-                  fullWidth
-                />
-                {draft.backgroundColor && (
-                  <Button
-                    size="sm"
-                    color="neutral"
-                    onClick={() => onDraftChange({ backgroundColor: null })}
-                  >
-                    {t("profile.inspector.resetBackgroundColor")}
-                  </Button>
-                )}
-                <FieldLabel>
-                  {t("profile.inspector.backgroundImage")}
-                </FieldLabel>
-                {backgroundPreview && (
-                  <img
-                    src={backgroundPreview}
-                    alt=""
-                    css={{
-                      width: "100%",
-                      height: 72,
-                      objectFit: "cover",
-                      borderRadius: 8
-                    }}
-                  />
-                )}
-                <Input
-                  value={
-                    draft.backgroundImage &&
-                    !HASH_PATTERN.test(draft.backgroundImage)
-                      ? draft.backgroundImage
-                      : ""
-                  }
-                  onChange={(event) =>
-                    onDraftChange({
-                      backgroundImage: event.target.value || null
-                    })
-                  }
-                  placeholder={
-                    draft.backgroundImage
-                      ? t("profile.inspector.imageUploaded")
-                      : t("profile.inspector.backgroundImageUrl")
-                  }
-                />
-                <Stack direction="row" spacing={1}>
-                  <Button
-                    size="sm"
-                    color="neutral"
-                    loading={uploadingBackground}
-                    onClick={() => backgroundInputRef.current?.click()}
-                  >
-                    {t("profile.inspector.uploadImage")}
-                  </Button>
-                  {draft.backgroundImage && (
-                    <Button
-                      size="sm"
-                      color="neutral"
-                      onClick={() => onDraftChange({ backgroundImage: null })}
-                    >
-                      {t("profile.remove")}
-                    </Button>
-                  )}
-                </Stack>
-                <input
-                  ref={backgroundInputRef}
-                  type="file"
-                  accept="image/*"
-                  hidden
-                  onChange={async (event) => {
-                    const file = event.target.files?.[0];
-                    if (!file) return;
-                    await handleAssetUpload(
-                      file,
-                      "background",
-                      (hash) => onDraftChange({ backgroundImage: hash }),
-                      setUploadingBackground,
-                      "background"
-                    );
-                    event.target.value = "";
-                  }}
-                />
-                {draft.backgroundImage && (
-                  <Stack direction="column" spacing={0.75} pt={0.5}>
-                    <Typography
-                      level="body-xs"
-                      fontWeight={700}
-                      css={{ opacity: 0.65 }}
-                    >
-                      {t("profile.inspector.backgroundImageFit.title")}
-                    </Typography>
-                    <ButtonGroup
-                      toggleable
-                      exclusive
-                      size="sm"
-                      color="neutral"
-                      value={draft.backgroundImageFit ?? "fill"}
-                      onChange={(fit: ProfileBackgroundImageFit) =>
-                        onDraftChange({
-                          backgroundImageFit: fit === "fill" ? null : fit
-                        })
-                      }
-                    >
-                      {PROFILE_BACKGROUND_IMAGE_FITS.map((fit) => (
-                        <Button key={fit} value={fit}>
-                          {t(`profile.inspector.backgroundImageFit.${fit}`)}
-                        </Button>
-                      ))}
-                    </ButtonGroup>
-                    <Typography
-                      level="body-xs"
-                      css={{ opacity: 0.55, lineHeight: 1.4 }}
-                    >
-                      {t(
-                        `profile.inspector.backgroundImageFit.${draft.backgroundImageFit ?? "fill"}Hint`
-                      )}
-                    </Typography>
-                  </Stack>
-                )}
-              </SettingCard>
-            </InspectorSection>
-
-            {!collapsed.background && <Divider lineColor="muted" />}
-
-            <InspectorSection
-              icon={<PaletteIcon size={16} weight="fill" />}
-              title={t("profile.inspector.appearance.title")}
-              collapsed={collapsed.appearance}
-              onToggleCollapsed={() =>
-                setCollapsed((prev) => ({
-                  ...prev,
-                  appearance: !prev.appearance
-                }))
-              }
-            >
-              <SettingCard>
-                <FieldLabel>
-                  {t("profile.inspector.appearance.theme")}
-                </FieldLabel>
-                <FieldHint>
-                  {t("profile.inspector.appearance.themeHint")}
-                </FieldHint>
-                <ProfileThemePicker
-                  value={draft.theme}
-                  onChange={(theme) => onDraftChange({ theme })}
-                />
-              </SettingCard>
-              <SettingCard>
-                <FieldLabel>
-                  {t("profile.inspector.appearance.nameStyle")}
-                </FieldLabel>
-                <ProfileNameStylePanel
-                  value={draft.displayNameStyle}
-                  onChange={(displayNameStyle) =>
-                    onDraftChange({ displayNameStyle })
-                  }
-                />
-              </SettingCard>
-            </InspectorSection>
-
-            {!collapsed.appearance && <Divider lineColor="muted" />}
-
-            <InspectorSection
-              icon={<MusicNotesIcon size={16} weight="fill" />}
-              title={t("profile.inspector.profileMusic")}
-              collapsed={collapsed.music}
-              onToggleCollapsed={() =>
-                setCollapsed((prev) => ({ ...prev, music: !prev.music }))
-              }
-            >
-              <SettingCard>
-                {!draft.profileMusicTrackId &&
-                draft.profileMusicUrl &&
-                HASH_PATTERN.test(draft.profileMusicUrl) ? (
-                  <>
-                    <Stack direction="row" alignItems="center" spacing={0.75}>
-                      <Typography
-                        level="body-xs"
-                        css={{ flex: 1, opacity: 0.8 }}
-                      >
-                        {t("profile.inspector.mp3Uploaded")}
-                      </Typography>
+                    {draft.banner && (
                       <Button
                         size="sm"
                         color="neutral"
-                        onClick={() =>
-                          onDraftChange({
-                            profileMusicUrl: null,
-                            profileMusicTitle: null,
-                            profileMusicAuthorName: null
-                          })
-                        }
+                        onClick={() => onDraftChange({ banner: null })}
                       >
                         {t("profile.remove")}
                       </Button>
+                    )}
+                  </Stack>
+                  <input
+                    ref={bannerInputRef}
+                    type="file"
+                    accept="image/*"
+                    hidden
+                    onChange={async (event) => {
+                      const file = event.target.files?.[0];
+                      if (!file) return;
+                      await handleAssetUpload(
+                        file,
+                        "banner",
+                        (hash) => onDraftChange({ banner: hash }),
+                        setUploadingBanner,
+                        "banner"
+                      );
+                      event.target.value = "";
+                    }}
+                  />
+                  <FieldHint>{t("profile.inspector.bannerHint")}</FieldHint>
+                </SettingCard>
+              </>
+            )}
+
+            {pageTab === "background" && (
+              <>
+                <SettingCard>
+                  <InputWithLabel
+                    type="color"
+                    label={t("profile.inspector.backgroundColor")}
+                    name="backgroundColor"
+                    description={t(
+                      "profile.inspector.backgroundColorDescription"
+                    )}
+                    value={(draft.backgroundColor as ColorLike) ?? "#1a1a2e"}
+                    allowGradient
+                    onChange={(color: ColorLike) => {
+                      if (typeof color !== "string" || !color) return;
+                      onDraftChange({ backgroundColor: color });
+                    }}
+                    fullWidth
+                  />
+                  {draft.backgroundColor && (
+                    <Button
+                      size="sm"
+                      color="neutral"
+                      onClick={() => onDraftChange({ backgroundColor: null })}
+                    >
+                      {t("profile.inspector.resetBackgroundColor")}
+                    </Button>
+                  )}
+                  <FieldLabel>
+                    {t("profile.inspector.backgroundImage")}
+                  </FieldLabel>
+                  {backgroundPreview && (
+                    <img
+                      src={backgroundPreview}
+                      alt=""
+                      css={{
+                        width: "100%",
+                        height: 72,
+                        objectFit: "cover",
+                        borderRadius: 8
+                      }}
+                    />
+                  )}
+                  <Input
+                    value={
+                      draft.backgroundImage &&
+                      !HASH_PATTERN.test(draft.backgroundImage)
+                        ? draft.backgroundImage
+                        : ""
+                    }
+                    onChange={(event) =>
+                      onDraftChange({
+                        backgroundImage: event.target.value || null
+                      })
+                    }
+                    placeholder={
+                      draft.backgroundImage
+                        ? t("profile.inspector.imageUploaded")
+                        : t("profile.inspector.backgroundImageUrl")
+                    }
+                  />
+                  <Stack direction="row" spacing={1}>
+                    <Button
+                      size="sm"
+                      color="neutral"
+                      loading={uploadingBackground}
+                      onClick={() => backgroundInputRef.current?.click()}
+                    >
+                      {t("profile.inspector.uploadImage")}
+                    </Button>
+                    {draft.backgroundImage && (
+                      <Button
+                        size="sm"
+                        color="neutral"
+                        onClick={() => onDraftChange({ backgroundImage: null })}
+                      >
+                        {t("profile.remove")}
+                      </Button>
+                    )}
+                  </Stack>
+                  <input
+                    ref={backgroundInputRef}
+                    type="file"
+                    accept="image/*"
+                    hidden
+                    onChange={async (event) => {
+                      const file = event.target.files?.[0];
+                      if (!file) return;
+                      await handleAssetUpload(
+                        file,
+                        "background",
+                        (hash) => onDraftChange({ backgroundImage: hash }),
+                        setUploadingBackground,
+                        "background"
+                      );
+                      event.target.value = "";
+                    }}
+                  />
+                  {draft.backgroundImage && (
+                    <Stack direction="column" spacing={0.75} pt={0.5}>
+                      <Typography
+                        level="body-xs"
+                        fontWeight={700}
+                        css={{ opacity: 0.65 }}
+                      >
+                        {t("profile.inspector.backgroundImageFit.title")}
+                      </Typography>
+                      <ButtonGroup
+                        toggleable
+                        exclusive
+                        size="sm"
+                        color="neutral"
+                        value={draft.backgroundImageFit ?? "fill"}
+                        onChange={(fit: ProfileBackgroundImageFit) =>
+                          onDraftChange({
+                            backgroundImageFit: fit === "fill" ? null : fit
+                          })
+                        }
+                      >
+                        {PROFILE_BACKGROUND_IMAGE_FITS.map((fit) => (
+                          <Button key={fit} value={fit}>
+                            {t(`profile.inspector.backgroundImageFit.${fit}`)}
+                          </Button>
+                        ))}
+                      </ButtonGroup>
+                      <Typography
+                        level="body-xs"
+                        css={{ opacity: 0.55, lineHeight: 1.4 }}
+                      >
+                        {t(
+                          `profile.inspector.backgroundImageFit.${draft.backgroundImageFit ?? "fill"}Hint`
+                        )}
+                      </Typography>
                     </Stack>
-                    <FieldLabel>{t("profile.inspector.trackInfo")}</FieldLabel>
-                    <Input
-                      value={draft.profileMusicTitle ?? ""}
-                      onChange={(event) =>
-                        onDraftChange({
-                          profileMusicTitle: event.target.value || null
-                        })
-                      }
-                      placeholder={t("profile.inspector.songTitle")}
-                    />
-                    <Input
-                      value={draft.profileMusicAuthorName ?? ""}
-                      onChange={(event) =>
-                        onDraftChange({
-                          profileMusicAuthorName: event.target.value || null
-                        })
-                      }
-                      placeholder={t("profile.inspector.artists")}
-                    />
-                  </>
-                ) : (
-                  <>
-                    <ProfileMusicPicker
-                      draft={draft}
-                      onDraftChange={onDraftChange}
-                    />
-                    {!draft.profileMusicTrackId && (
-                      <>
-                        <Input
-                          value={
-                            draft.profileMusicUrl &&
-                            !HASH_PATTERN.test(draft.profileMusicUrl)
-                              ? draft.profileMusicUrl
-                              : ""
-                          }
-                          onChange={(event) =>
+                  )}
+                </SettingCard>
+              </>
+            )}
+
+            {pageTab === "style" && (
+              <>
+                <SettingCard>
+                  <FieldLabel>
+                    {t("profile.inspector.appearance.theme")}
+                  </FieldLabel>
+                  <FieldHint>
+                    {t("profile.inspector.appearance.themeHint")}
+                  </FieldHint>
+                  <ProfileThemePicker
+                    value={draft.theme}
+                    onChange={(theme) => onDraftChange({ theme })}
+                  />
+                </SettingCard>
+                <SettingCard>
+                  <FieldLabel>
+                    {t("profile.inspector.appearance.nameStyle")}
+                  </FieldLabel>
+                  <ProfileNameStylePanel
+                    value={draft.displayNameStyle}
+                    onChange={(displayNameStyle) =>
+                      onDraftChange({ displayNameStyle })
+                    }
+                  />
+                </SettingCard>
+              </>
+            )}
+
+            {pageTab === "music" && (
+              <>
+                <SettingCard>
+                  {!draft.profileMusicTrackId &&
+                  draft.profileMusicUrl &&
+                  HASH_PATTERN.test(draft.profileMusicUrl) ? (
+                    <>
+                      <Stack direction="row" alignItems="center" spacing={0.75}>
+                        <Typography
+                          level="body-xs"
+                          css={{ flex: 1, opacity: 0.8 }}
+                        >
+                          {t("profile.inspector.mp3Uploaded")}
+                        </Typography>
+                        <Button
+                          size="sm"
+                          color="neutral"
+                          onClick={() =>
                             onDraftChange({
-                              profileMusicUrl: event.target.value || null,
-                              profileMusicTrackId: null,
-                              profileMusicTrackSelection: null
+                              profileMusicUrl: null,
+                              profileMusicTitle: null,
+                              profileMusicAuthorName: null
                             })
                           }
-                          placeholder={t(
-                            "profile.inspector.youtubeOrAppleMusicLink"
-                          )}
-                        />
-                        <Stack direction="row" spacing={1}>
-                          <Button
-                            size="sm"
-                            color="neutral"
-                            loading={uploadingMusic}
-                            onClick={() => musicInputRef.current?.click()}
-                          >
-                            {t("profile.inspector.uploadMp3")}
-                          </Button>
-                          {draft.profileMusicUrl && (
+                        >
+                          {t("profile.remove")}
+                        </Button>
+                      </Stack>
+                      <FieldLabel>
+                        {t("profile.inspector.trackInfo")}
+                      </FieldLabel>
+                      <Input
+                        value={draft.profileMusicTitle ?? ""}
+                        onChange={(event) =>
+                          onDraftChange({
+                            profileMusicTitle: event.target.value || null
+                          })
+                        }
+                        placeholder={t("profile.inspector.songTitle")}
+                      />
+                      <Input
+                        value={draft.profileMusicAuthorName ?? ""}
+                        onChange={(event) =>
+                          onDraftChange({
+                            profileMusicAuthorName: event.target.value || null
+                          })
+                        }
+                        placeholder={t("profile.inspector.artists")}
+                      />
+                    </>
+                  ) : (
+                    <>
+                      <ProfileMusicPicker
+                        draft={draft}
+                        onDraftChange={onDraftChange}
+                      />
+                      {!draft.profileMusicTrackId && (
+                        <>
+                          <Input
+                            value={
+                              draft.profileMusicUrl &&
+                              !HASH_PATTERN.test(draft.profileMusicUrl)
+                                ? draft.profileMusicUrl
+                                : ""
+                            }
+                            onChange={(event) =>
+                              onDraftChange({
+                                profileMusicUrl: event.target.value || null,
+                                profileMusicTrackId: null,
+                                profileMusicTrackSelection: null
+                              })
+                            }
+                            placeholder={t(
+                              "profile.inspector.youtubeOrAppleMusicLink"
+                            )}
+                          />
+                          <Stack direction="row" spacing={1}>
                             <Button
                               size="sm"
                               color="neutral"
-                              onClick={() =>
-                                onDraftChange({
-                                  profileMusicUrl: null,
-                                  profileMusicTrackId: null,
-                                  profileMusicTrackSelection: null
-                                })
-                              }
+                              loading={uploadingMusic}
+                              onClick={() => musicInputRef.current?.click()}
                             >
-                              {t("profile.inspector.clear")}
+                              {t("profile.inspector.uploadMp3")}
                             </Button>
-                          )}
-                        </Stack>
-                        <FieldHint>
-                          {t("profile.inspector.profileMusicHint")}
-                        </FieldHint>
-                      </>
-                    )}
-                  </>
-                )}
-                <input
-                  ref={musicInputRef}
-                  type="file"
-                  accept="audio/mpeg,.mp3"
-                  hidden
-                  onChange={async (event) => {
-                    const file = event.target.files?.[0];
-                    if (!file) return;
-                    if (/\.wav$/i.test(file.name)) {
-                      toast.error(t("profile.inspector.wavNotSupported"));
+                            {draft.profileMusicUrl && (
+                              <Button
+                                size="sm"
+                                color="neutral"
+                                onClick={() =>
+                                  onDraftChange({
+                                    profileMusicUrl: null,
+                                    profileMusicTrackId: null,
+                                    profileMusicTrackSelection: null
+                                  })
+                                }
+                              >
+                                {t("profile.inspector.clear")}
+                              </Button>
+                            )}
+                          </Stack>
+                          <FieldHint>
+                            {t("profile.inspector.profileMusicHint")}
+                          </FieldHint>
+                        </>
+                      )}
+                    </>
+                  )}
+                  <input
+                    ref={musicInputRef}
+                    type="file"
+                    accept="audio/mpeg,.mp3"
+                    hidden
+                    onChange={async (event) => {
+                      const file = event.target.files?.[0];
+                      if (!file) return;
+                      if (/\.wav$/i.test(file.name)) {
+                        toast.error(t("profile.inspector.wavNotSupported"));
+                        event.target.value = "";
+                        return;
+                      }
+                      await handleAssetUpload(
+                        file,
+                        "music",
+                        (hash) =>
+                          onDraftChange({
+                            profileMusicUrl: hash,
+                            profileMusicTrackId: null,
+                            profileMusicTrackSelection: null
+                          }),
+                        setUploadingMusic,
+                        "profileMusic"
+                      );
                       event.target.value = "";
-                      return;
-                    }
-                    await handleAssetUpload(
-                      file,
-                      "music",
-                      (hash) =>
-                        onDraftChange({
-                          profileMusicUrl: hash,
-                          profileMusicTrackId: null,
-                          profileMusicTrackSelection: null
-                        }),
-                      setUploadingMusic,
-                      "profileMusic"
-                    );
-                    event.target.value = "";
-                  }}
-                />
-              </SettingCard>
-            </InspectorSection>
+                    }}
+                  />
+                </SettingCard>
+              </>
+            )}
           </>
         )}
 
