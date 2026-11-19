@@ -96,6 +96,16 @@ function slimEmojiDatasource(): Plugin {
   };
 }
 
+function webAbsoluteBase(): Plugin {
+  return {
+    name: "mutualzz:web-absolute-base",
+    config() {
+      if (process.env.NETLIFY === "true") return { base: "/" };
+      return undefined;
+    }
+  };
+}
+
 const rendererSource = resolve(__dirname, "src/renderer/src");
 
 const i18nLocalesSource = resolve(__dirname, "../../packages/i18n/src/locales");
@@ -136,6 +146,7 @@ export default defineConfig({
       __APP_VERSION__: JSON.stringify(getVersion())
     },
     plugins: [
+      webAbsoluteBase(),
       slimEmojiDatasource(),
       svgr(),
       tanstackRouter({
